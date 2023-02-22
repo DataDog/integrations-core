@@ -4,7 +4,6 @@
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.kafka_consumer.client.kafka_python_client import KafkaPythonClient
 
 from ..common import KAFKA_CONNECT_STR, assert_check_kafka
 
@@ -15,7 +14,7 @@ def test_check_kafka(aggregator, check, kafka_instance, dd_run_check):
     """
     Testing Kafka_consumer check.
     """
-    dd_run_check(check(kafka_instance, client=KafkaPythonClient))
+    dd_run_check(check(kafka_instance))
     assert_check_kafka(aggregator, kafka_instance['consumer_groups'])
 
 
@@ -23,7 +22,7 @@ def test_can_send_event(aggregator, check, kafka_instance, dd_run_check):
     """
     Testing Kafka_consumer check.
     """
-    kafka_consumer_check = check(kafka_instance, client=KafkaPythonClient)
+    kafka_consumer_check = check(kafka_instance)
     kafka_consumer_check.send_event("test", "test", [], "test", "test")
     aggregator.assert_event("test", exact_match=False, count=1)
 
@@ -32,14 +31,14 @@ def test_check_kafka_metrics_limit(aggregator, check, kafka_instance, dd_run_che
     """
     Testing Kafka_consumer check.
     """
-    dd_run_check(check(kafka_instance, {'max_partition_contexts': 1}, client=KafkaPythonClient))
+    dd_run_check(check(kafka_instance, {'max_partition_contexts': 1}))
 
     assert len(aggregator._metrics) == 1
 
 
 def test_consumer_config_error(caplog, check, dd_run_check):
     instance = {'kafka_connect_str': KAFKA_CONNECT_STR, 'tags': ['optional:tag1']}
-    kafka_consumer_check = check(instance, client=KafkaPythonClient)
+    kafka_consumer_check = check(instance)
 
     dd_run_check(kafka_consumer_check, extract_message=True)
     assert 'monitor_unlisted_consumer_groups is False' in caplog.text
@@ -47,20 +46,20 @@ def test_consumer_config_error(caplog, check, dd_run_check):
 
 def test_no_topics(aggregator, check, kafka_instance, dd_run_check):
     kafka_instance['consumer_groups'] = {'my_consumer': {}}
-    dd_run_check(check(kafka_instance, client=KafkaPythonClient))
+    dd_run_check(check(kafka_instance))
 
     assert_check_kafka(aggregator, {'my_consumer': {'marvel': [0]}})
 
 
 def test_no_partitions(aggregator, check, kafka_instance, dd_run_check):
     kafka_instance['consumer_groups'] = {'my_consumer': {'marvel': []}}
-    dd_run_check(check(kafka_instance, client=KafkaPythonClient))
+    dd_run_check(check(kafka_instance))
 
     assert_check_kafka(aggregator, {'my_consumer': {'marvel': [0]}})
 
 
 def test_version_metadata(datadog_agent, check, kafka_instance, dd_run_check):
-    kafka_consumer_check = check(kafka_instance, client=KafkaPythonClient)
+    kafka_consumer_check = check(kafka_instance)
     kafka_consumer_check.check_id = 'test:123'
 
     kafka_client = kafka_consumer_check.client.create_kafka_admin_client()
@@ -87,7 +86,7 @@ def test_monitor_broker_highwatermarks(dd_run_check, check, aggregator, is_enabl
         'consumer_groups': {'my_consumer': {'marvel': None}},
         'monitor_all_broker_highwatermarks': is_enabled,
     }
-    dd_run_check(check(instance, client=KafkaPythonClient))
+    dd_run_check(check(instance))
 
     # After refactor and library migration, write unit tests to assert expected metric values
     aggregator.assert_metric('kafka.broker_offset', count=metric_count)

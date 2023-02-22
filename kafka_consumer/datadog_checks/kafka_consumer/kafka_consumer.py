@@ -5,7 +5,6 @@ from time import time
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.kafka_consumer.client.kafka_client_factory import make_client
-from datadog_checks.kafka_consumer.client.kafka_python_client import KafkaPythonClient
 from datadog_checks.kafka_consumer.config import KafkaConfig
 
 
@@ -22,12 +21,12 @@ class KafkaCheck(AgentCheck):
         'ssl_password': {'name': 'tls_private_key_password'},
     }
 
-    def __init__(self, name, init_config, instances, client=KafkaPythonClient):
+    def __init__(self, name, init_config, instances):
         super(KafkaCheck, self).__init__(name, init_config, instances)
         self.config = KafkaConfig(self.init_config, self.instance)
         self._context_limit = self.config._context_limit
         tls_context = self.get_tls_context()
-        self.client = make_client(client, self.config, tls_context, self.log)
+        self.client = make_client(self.config, tls_context, self.log)
         self.check_initializations.append(self.config.validate_config)
 
     def check(self, _):

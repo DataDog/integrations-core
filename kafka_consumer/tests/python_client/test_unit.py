@@ -10,7 +10,7 @@ import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.kafka_consumer.client.kafka_python_client import KafkaPythonClient, OAuthTokenProvider
+from datadog_checks.kafka_consumer.client.kafka_python_client import OAuthTokenProvider
 
 from ..common import KAFKA_CONNECT_STR, metrics
 
@@ -25,7 +25,7 @@ def test_gssapi(kafka_instance, dd_run_check, check):
     # assert the check doesn't fail with:
     # Exception: Could not find main GSSAPI shared library.
     with pytest.raises(Exception, match='check_version'):
-        dd_run_check(check(instance, client=KafkaPythonClient))
+        dd_run_check(check(instance))
 
 
 def test_tls_config_ok(check, kafka_instance_tls):
@@ -34,7 +34,7 @@ def test_tls_config_ok(check, kafka_instance_tls):
         tls_context = mock.MagicMock()
         ssl.SSLContext.return_value = tls_context
 
-        kafka_consumer_check = check(kafka_instance_tls, client=KafkaPythonClient)
+        kafka_consumer_check = check(kafka_instance_tls)
         with mock.patch('datadog_checks.kafka_consumer.KafkaCheck.get_tls_context', return_value=tls_context):
             assert kafka_consumer_check.client._tls_context == tls_context
             assert kafka_consumer_check.client._tls_context.check_hostname is True
@@ -81,7 +81,7 @@ def test_oauth_config(sasl_oauth_token_provider, check, expected_exception):
     instance.update(sasl_oauth_token_provider)
 
     with expected_exception:
-        check(instance, client=KafkaPythonClient).check(instance)
+        check(instance).check(instance)
 
 
 def test_oauth_token_client_config(check, kafka_instance):
@@ -95,7 +95,7 @@ def test_oauth_token_client_config(check, kafka_instance):
     }
 
     with mock.patch('kafka.KafkaAdminClient') as kafka_admin_client:
-        kafka_consumer_check = check(kafka_instance, client=KafkaPythonClient)
+        kafka_consumer_check = check(kafka_instance)
         kafka_consumer_check.client._create_kafka_client(clazz=kafka_admin_client)
         params = kafka_admin_client.call_args_list[0].kwargs
 
@@ -119,7 +119,7 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, check, kafka_inst
     instance = kafka_instance
     instance.update(extra_config)
 
-    kafka_consumer_check = check(instance, client=KafkaPythonClient)
+    kafka_consumer_check = check(instance)
     kafka_consumer_check.get_tls_context()
     actual_options = {
         k: v for k, v in kafka_consumer_check._tls_context_wrapper.config.items() if k in expected_http_kwargs
@@ -217,7 +217,7 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, check, kafka_inst
 def test_config(dd_run_check, check, instance, aggregator, expected_exception, exception_msg, metric_count, caplog):
     caplog.set_level(logging.DEBUG)
     with expected_exception:
-        dd_run_check(check(instance, client=KafkaPythonClient))
+        dd_run_check(check(instance))
 
     for m in metrics:
         aggregator.assert_metric(m, count=metric_count)

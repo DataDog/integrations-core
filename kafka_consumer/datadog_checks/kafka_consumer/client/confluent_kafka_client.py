@@ -4,10 +4,8 @@
 
 
 class ConfluentKafkaClient:
-    def __init__(self, config, tls_context, log) -> None:
-        self.config = config
-        self.log = log
-        self._tls_context = tls_context
+    def __init__(self) -> None:
+        pass
 
     def get_consumer_offsets(self):
         pass
