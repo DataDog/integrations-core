@@ -11,7 +11,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import ENVOY_VERSION, FLAVOR, HOST, INSTANCES
+from .common import ENVOY_VERSION, FLAVOR, HOST, INSTANCES, EXT_METRICS
 
 CHECK_NAME = 'envoy'
 
@@ -275,17 +275,11 @@ def test_metadata_integration(datadog_agent, check):
 
 @pytest.mark.unit
 def test_stats_prefix_ext_auth(aggregator, fixture_path, mock_http_response, check, dd_run_check):
-    metrics = [
-        "envoy.cluster.ext_authz.denied",
-        "envoy.cluster.ext_authz.error",
-        "envoy.cluster.ext_authz.ok",
-    ]
     instance = INSTANCES['main']
     c = check(instance)
 
     mock_http_response(file_path=fixture_path('stat_prefix')).return_value
     dd_run_check(c)
-
-    for metric in metrics:
-        aggregator.assert_metric_has_tag_prefix(metric, "stat_prefix", at_least=1)
-        aggregator.assert_metric(metric, count=2)
+    for metric in EXT_METRICS:
+        aggregator.assert_metric(metric, value=EXT_METRICS.index(metric)+5, tags=['cluster_name:foo', 'envoy_cluster:foo', 'stat_prefix:bar'])
+        aggregator.assert_metric(metric, value=EXT_METRICS.index(metric), tags=['cluster_name:foo', 'envoy_cluster:foo'])

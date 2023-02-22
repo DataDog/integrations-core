@@ -818,7 +818,7 @@ METRICS = {
     'cluster.ext_authz.failure_mode_allowed': {
         'tags': (
             ('envoy_cluster', ),
-            ('stat_prefix', ),
+            (),
             (),
         ),
         'method': 'monotonic_count',
