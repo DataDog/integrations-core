@@ -179,7 +179,10 @@ def check_replication_slots(aggregator, expected_tags, count=1):
             'postgresql.replication_slot.confirmed_flush_delay_bytes',
         ]:
             continue
-        if 'slot_type:logical' in expected_tags and column['name'] in ['postgresql.replication_slot.restart_delay_bytes', 'postgresql.replication_slot.xmin_age']:
+        if 'slot_type:logical' in expected_tags and column['name'] in [
+            'postgresql.replication_slot.restart_delay_bytes',
+            'postgresql.replication_slot.xmin_age',
+        ]:
             continue
         aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
 

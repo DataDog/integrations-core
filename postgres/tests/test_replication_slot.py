@@ -95,8 +95,16 @@ def test_logical_replication_slots(aggregator, integration_check, pg_instance):
     ]
     # Both should be in the past
     assert_metric_at_least(
-        aggregator, 'postgresql.replication_slot.confirmed_flush_delay_bytes', count=1, lower_bound=50, tags=expected_tags
+        aggregator,
+        'postgresql.replication_slot.confirmed_flush_delay_bytes',
+        count=1,
+        lower_bound=50,
+        tags=expected_tags,
     )
     assert_metric_at_least(
-        aggregator, 'postgresql.replication_slot.restart_delay_bytes', count=1, lower_bound=restart_age, tags=expected_tags
+        aggregator,
+        'postgresql.replication_slot.restart_delay_bytes',
+        count=1,
+        lower_bound=restart_age,
+        tags=expected_tags,
     )
