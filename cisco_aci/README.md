@@ -101,7 +101,7 @@ Modify the `apic_url`, `apic_username`, and `apic_password` to your configuratio
 
 Verify that the output you get from cURLing the endpoint matches any of the metrics collected in `datadog_checks/cisco_aci/aci_metrics.py`. If none of the statistics match, this means that the endpoint is not emitting any statistics that the integration can collect.
 
-### Long Execution Times
+### Long execution times
 
 Because this check queries all the tenants, apps, and endpoints listed before returning metrics, there may be high execution times coming from this integration.
 
