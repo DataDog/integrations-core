@@ -214,7 +214,7 @@ def test_config(check, instance, aggregator, expected_exception, metric_count):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-# TODO: After these tests are finished and the revamp is complete, the tests should be refactored
+# TODO: After these tests are finished and the revamp is complete, the tests should be refactored to be parameters instead of separate tests
 @mock.patch("datadog_checks.kafka_consumer.kafka_consumer.make_client")
 def test_when_consumer_lag_less_than_zero_then_emit_event(
     mock_make_client, check, kafka_instance, dd_run_check, aggregator
@@ -301,7 +301,6 @@ def test_when_partition_is_none_then_emit_warning_log(
     assert expected_warning in caplog.text
 
 
-# if partition is not in partitions, then a warning log should be emitted
 @mock.patch("datadog_checks.kafka_consumer.kafka_consumer.make_client")
 def test_when_partition_not_in_partitions_then_emit_warning_log(
     mock_make_client, check, kafka_instance, dd_run_check, aggregator, caplog
