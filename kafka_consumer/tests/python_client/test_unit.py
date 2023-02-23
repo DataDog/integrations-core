@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import logging
 from contextlib import nullcontext as does_not_raise
 
 import mock
@@ -9,6 +10,7 @@ import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client.kafka_python_client import OAuthTokenProvider
 
 from ..common import KAFKA_CONNECT_STR, metrics
@@ -212,12 +214,194 @@ def test_config(check, instance, aggregator, expected_exception, metric_count):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-# if consumer lag is less than 0, then there should be a event emitted
+# TODO: After these tests are finished and the revamp is complete, the tests should be refactored
+@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.make_client")
+def test_when_consumer_lag_less_than_zero_then_emit_event(
+    mock_make_client, check, kafka_instance, dd_run_check, aggregator
+):
+    # Given
+    # consumer_offset = {(consumer_group, topic, partition): offset}
+    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
+    # highwater_offset = {(topic, partition): offset}
+    highwater_offset = {("topic1", "partition1"): 1}
+    mock_client = mock.MagicMock()
+    mock_client.get_consumer_offsets_dict.return_value = consumer_offset
+    mock_client.get_highwater_offsets_dict.return_value = highwater_offset
+    mock_client.get_partitions_for_topic.return_value = ['partition1']
+    mock_make_client.return_value = mock_client
 
-# if partition is none, then a warning log should be emitted
+    # When
+    kafka_consumer_check = check(kafka_instance)
+    dd_run_check(kafka_consumer_check)
+
+    # Then
+    aggregator.assert_metric(
+        "kafka.broker_offset", count=1, tags=['optional:tag1', 'partition:partition1', 'topic:topic1']
+    )
+    aggregator.assert_metric(
+        "kafka.consumer_offset",
+        count=1,
+        tags=['consumer_group:consumer_group1', 'optional:tag1', 'partition:partition1', 'topic:topic1'],
+    )
+    aggregator.assert_metric(
+        "kafka.consumer_lag",
+        count=1,
+        tags=['consumer_group:consumer_group1', 'optional:tag1', 'partition:partition1', 'topic:topic1'],
+    )
+    aggregator.assert_event(
+        "Consumer group: consumer_group1, "
+        "topic: topic1, partition: partition1 has negative consumer lag. "
+        "This should never happen and will result in the consumer skipping new messages "
+        "until the lag turns positive.",
+        count=1,
+        tags=['consumer_group:consumer_group1', 'optional:tag1', 'partition:partition1', 'topic:topic1'],
+    )
+
+
+@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.make_client")
+def test_when_partition_is_none_then_emit_warning_log(
+    mock_make_client, check, kafka_instance, dd_run_check, aggregator, caplog
+):
+    # Given
+    # consumer_offset = {(consumer_group, topic, partition): offset}
+    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
+    # highwater_offset = {(topic, partition): offset}
+    highwater_offset = {("topic1", "partition1"): 1}
+    mock_client = mock.MagicMock()
+    mock_client.get_consumer_offsets_dict.return_value = consumer_offset
+    mock_client.get_highwater_offsets_dict.return_value = highwater_offset
+    mock_client.get_partitions_for_topic.return_value = None
+    mock_make_client.return_value = mock_client
+    caplog.set_level(logging.WARNING)
+
+    # When
+    kafka_consumer_check = check(kafka_instance)
+    dd_run_check(kafka_consumer_check)
+
+    # Then
+    aggregator.assert_metric(
+        "kafka.broker_offset", count=1, tags=['optional:tag1', 'partition:partition1', 'topic:topic1']
+    )
+    aggregator.assert_metric("kafka.consumer_offset", count=0)
+    aggregator.assert_metric("kafka.consumer_lag", count=0)
+    aggregator.assert_event(
+        "Consumer group: consumer_group1, "
+        "topic: topic1, partition: partition1 has negative consumer lag. "
+        "This should never happen and will result in the consumer skipping new messages "
+        "until the lag turns positive.",
+        count=0,
+    )
+
+    expected_warning = (
+        "Consumer group: consumer_group1 has offsets for topic: topic1, "
+        "partition: partition1, but that topic has no partitions "
+        "in the cluster, so skipping reporting these offsets"
+    )
+
+    assert expected_warning in caplog.text
+
 
 # if partition is not in partitions, then a warning log should be emitted
+@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.make_client")
+def test_when_partition_not_in_partitions_then_emit_warning_log(
+    mock_make_client, check, kafka_instance, dd_run_check, aggregator, caplog
+):
+    # Given
+    # consumer_offset = {(consumer_group, topic, partition): offset}
+    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
+    # highwater_offset = {(topic, partition): offset}
+    highwater_offset = {("topic1", "partition1"): 1}
+    mock_client = mock.MagicMock()
+    mock_client.get_consumer_offsets_dict.return_value = consumer_offset
+    mock_client.get_highwater_offsets_dict.return_value = highwater_offset
+    mock_client.get_partitions_for_topic.return_value = ['partition2']
+    mock_make_client.return_value = mock_client
+    caplog.set_level(logging.WARNING)
 
-# if highwater metric count hits the context limit, then no metrics more than context limit should be reported
+    # When
+    kafka_consumer_check = check(kafka_instance)
+    dd_run_check(kafka_consumer_check)
 
-# if consumer metric count hits the context limit, then no metrics more than context limit should be reported
+    # Then
+    aggregator.assert_metric(
+        "kafka.broker_offset", count=1, tags=['optional:tag1', 'partition:partition1', 'topic:topic1']
+    )
+    aggregator.assert_metric("kafka.consumer_offset", count=0)
+    aggregator.assert_metric("kafka.consumer_lag", count=0)
+    aggregator.assert_event(
+        "Consumer group: consumer_group1, "
+        "topic: topic1, partition: partition1 has negative consumer lag. "
+        "This should never happen and will result in the consumer skipping new messages "
+        "until the lag turns positive.",
+        count=0,
+    )
+
+    expected_warning = (
+        "Consumer group: consumer_group1 has offsets for topic: topic1, partition: partition1, "
+        "but that topic partition isn't included in the cluster partitions, "
+        "so skipping reporting these offsets"
+    )
+
+    assert expected_warning in caplog.text
+
+
+@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.make_client")
+def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_metrics(
+    mock_make_client, kafka_instance, dd_run_check, aggregator, caplog
+):
+    # Given
+    # consumer_offset = {(consumer_group, topic, partition): offset}
+    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
+    # highwater_offset = {(topic, partition): offset}
+    highwater_offset = {("topic1", "partition1"): 3, ("topic2", "partition2"): 3}
+    mock_client = mock.MagicMock()
+    mock_client.get_consumer_offsets_dict.return_value = consumer_offset
+    mock_client.get_highwater_offsets_dict.return_value = highwater_offset
+    mock_client.get_partitions_for_topic.return_value = ['partition1']
+    mock_make_client.return_value = mock_client
+    caplog.set_level(logging.WARNING)
+
+    # When
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {'max_partition_contexts': 1}, [kafka_instance])
+    dd_run_check(kafka_consumer_check)
+
+    # Then
+    aggregator.assert_metric("kafka.broker_offset", count=1)
+    aggregator.assert_metric("kafka.consumer_offset", count=0)
+    aggregator.assert_metric("kafka.consumer_lag", count=0)
+
+    expected_warning = "Discovered 3 metric contexts"
+
+    assert expected_warning in caplog.text
+
+
+@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.make_client")
+def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metrics(
+    mock_make_client, kafka_instance, dd_run_check, aggregator, caplog
+):
+    # Given
+    # consumer_offset = {(consumer_group, topic, partition): offset}
+    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2, ("consumer_group1", "topic2", "partition2"): 2}
+    # highwater_offset = {(topic, partition): offset}
+    highwater_offset = {("topic1", "partition1"): 3, ("topic2", "partition2"): 3}
+    mock_client = mock.MagicMock()
+    mock_client.get_consumer_offsets_dict.return_value = consumer_offset
+    mock_client.get_highwater_offsets_dict.return_value = highwater_offset
+    mock_client.get_partitions_for_topic.return_value = ['partition1']
+    mock_make_client.return_value = mock_client
+    caplog.set_level(logging.DEBUG)
+
+    # When
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {'max_partition_contexts': 3}, [kafka_instance])
+    dd_run_check(kafka_consumer_check)
+
+    # Then
+    aggregator.assert_metric("kafka.broker_offset", count=2)
+    aggregator.assert_metric("kafka.consumer_offset", count=1)
+    aggregator.assert_metric("kafka.consumer_lag", count=0)
+
+    expected_warning = "Discovered 4 metric contexts"
+    assert expected_warning in caplog.text
+
+    expected_debug = "Reported contexts number 1 greater than or equal to contexts limit of 1"
+    assert expected_debug in caplog.text
