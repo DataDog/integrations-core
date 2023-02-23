@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from six import string_types
 
-from datadog_checks.base import is_affirmative
+from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.kafka_consumer.constants import (
     BROKER_REQUESTS_BATCH_SIZE,
     CONTEXT_UPPER_BOUND,
@@ -37,3 +38,13 @@ class KafkaConfig:
         self._sasl_kerberos_service_name = instance.get('sasl_kerberos_service_name', 'kafka')
         self._sasl_kerberos_domain_name = instance.get('sasl_kerberos_domain_name')
         self._sasl_oauth_token_provider = instance.get('sasl_oauth_token_provider')
+
+    def validate_config(self):
+        if not self._kafka_connect_str:
+            raise ConfigurationError('`kafka_connect_str` is required')
+
+        if not isinstance(self._kafka_connect_str, (string_types, list)):
+            raise ConfigurationError('`kafka_connect_str` should be string or list of strings')
+
+        if isinstance(self._kafka_version, str):
+            self._kafka_version = tuple(map(int, self._kafka_version.split(".")))
