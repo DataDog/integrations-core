@@ -103,7 +103,7 @@ Verify that the output you get from cURLing the endpoint matches any of the metr
 
 ### Long Execution Times
 
-Because this check queries all the tenants, apps and endpoints listed before returning metrics, it isn't unnatural that there may be high execution times coming from this integration.
+Because this check queries all the tenants, apps and endpoints listed before returning metrics, there may be high execution times coming from this integration.
 
   ```yaml
     cisco_aci (2.2.0)
