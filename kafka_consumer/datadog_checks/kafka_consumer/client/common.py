@@ -10,7 +10,7 @@ def validate_consumer_groups(consumer_groups):
     for consumer_group, topics in consumer_groups.items():
         assert isinstance(consumer_group, string_types)
         assert isinstance(topics, dict) or topics is None  # topics are optional
-        if topics is not None:
+        if topics:
             for topic, partitions in topics.items():
                 assert isinstance(topic, string_types)
                 assert isinstance(partitions, (list, tuple)) or partitions is None  # partitions are optional
