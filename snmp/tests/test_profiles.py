@@ -2781,6 +2781,7 @@ def _check_bgp4(aggregator, common_tags):
     for metric in PEER_RATES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags)
 
+
 @pytest.mark.usefixtures("dd_environment")
 def test_cisco_asr_1001x(aggregator):
     run_profile_check(recording_name='cisco-asr-1001x', profile_name='cisco-asr')
@@ -2789,7 +2790,11 @@ def test_cisco_asr_1001x(aggregator):
         'device_vendor:cisco',
     ]
     common.assert_common_metrics(aggregator, common_tags)
-    _check_common_asr(aggregator, common_tags)
+
+    aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags)
+
+    _check_common_asr(aggregator, common_tags + ['interface:eth/0'])
 
     for metric in TCP_COUNTS + ['udpInErrors', 'udpNoPorts']:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
@@ -2811,7 +2816,12 @@ def test_cisco_asr_9001(aggregator):
         'device_vendor:cisco',
     ]
     common.assert_common_metrics(aggregator, common_tags)
-    _check_common_asr(aggregator, common_tags)
+
+    aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags)
+
+    _check_common_asr(aggregator, tags=common_tags+ ['interface:eth/0'])
+    
 
     for metric in TCP_COUNTS + ['udpInErrors', 'udpNoPorts']:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
@@ -2840,14 +2850,19 @@ def test_cisco_asr_9901(aggregator):
         'device_vendor:cisco',
     ]
     common.assert_common_metrics(aggregator, common_tags)
-    _check_common_asr(aggregator, common_tags)
+
+    aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags)
+
+    _check_common_asr(aggregator, common_tags+ ['interface:eth0'])
+    
     aggregator.assert_all_metrics_covered()
 
 def _check_common_asr(aggregator, tags):
     """
     Shared testing function for cisco ASR profiles.
     """
-    GAUGE_METRICS = ['ifAdminStatus', 'ifNumber', 'ifOperStatus', 'ifSpeed', 'sysUpTimeInstance']
+    GAUGE_METRICS = ['ifAdminStatus', 'ifOperStatus', 'ifSpeed', ]
     COUNTS_METRICS = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards',]
     RATE_METRICS = [ 'ifInErrors.rate', 'ifInDiscards.rate', 'ifOutErrors.rate', 'ifOutDiscards.rate']
 
