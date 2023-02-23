@@ -2865,7 +2865,7 @@ def _check_common_asr(aggregator, tags):
     Shared testing function for cisco ASR profiles.
     """
     GAUGE_METRICS = ['ifAdminStatus', 'ifOperStatus', 'ifSpeed', ]
-    COUNTS_METRICS = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards',]
+    COUNTS_METRICS = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards', ]
     RATE_METRICS = ['ifInErrors.rate', 'ifInDiscards.rate', 'ifOutErrors.rate', 'ifOutDiscards.rate']
 
     for metric in GAUGE_METRICS:
