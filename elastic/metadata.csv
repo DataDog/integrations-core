@@ -335,7 +335,7 @@ jvm.gc.concurrent_mark_sweep.count,gauge,,garbage collection,,"The total count o
 jvm.gc.par_new.collection_time,gauge,,second,,"The total time spent on ""parallel new"" GCs in the JVM [v<0.9.10].",0,elasticsearch,jvm parnew gc time,
 jvm.gc.par_new.count,gauge,,garbage collection,,"The total count of ""parallel new"" GCs in the JVM [v<0.9.10].",0,elasticsearch,jvm parnew gc count,
 jvm.mem.heap_committed,gauge,,byte,,The amount of memory guaranteed to be available to the JVM heap.,0,elasticsearch,jvm heap committed,
-jvm.mem.heap_in_use,gauge,,,,The amount of memory currently used by the JVM heap as a value between 0 and 1.,0,elasticsearch,jvm heap in use,
+jvm.mem.heap_in_use,gauge,,percent,,The percentage of memory currently used by the JVM heap as a value between 0 and 100.,0,elasticsearch,jvm heap in use,
 jvm.mem.heap_max,gauge,,byte,,The maximum amount of memory that can be used by the JVM heap.,0,elasticsearch,jvm heap max,
 jvm.mem.heap_used,gauge,,byte,,The amount of memory in bytes currently used by the JVM heap.,0,elasticsearch,jvm heap used,
 jvm.mem.non_heap_committed,gauge,,byte,,The amount of memory guaranteed to be available to JVM non-heap.,0,elasticsearch,jvm non-heap committed,
