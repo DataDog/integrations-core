@@ -101,6 +101,23 @@ Modify the `apic_url`, `apic_username`, and `apic_password` to your configuratio
 
 Verify that the output you get from cURLing the endpoint matches any of the metrics collected in `datadog_checks/cisco_aci/aci_metrics.py`. If none of the statistics match, this means that the endpoint is not emitting any statistics that the integration can collect.
 
+### Long Execution Times
+
+Because this check queries all the tenants, apps and endpoints listed before returning metrics, it isn't unnatural that there may be high execution times coming from this integration.
+
+  ```yaml
+    cisco_aci (2.2.0)
+  -----------------
+    Instance ID: cisco_aci:d3a2958f66f46212 [OK]
+    Configuration Source: file:/etc/datadog-agent/conf.d/cisco_aci.d/conf.yaml
+    Total Runs: 1
+    Metric Samples: Last Run: 678, Total: 678
+    Events: Last Run: 0, Total: 0
+    Service Checks: Last Run: 1, Total: 1
+    Average Execution Time : 28m20.95s
+    Last Execution Date : 2023-01-04 15:58:04 CST / 2023-01-04 21:58:04 UTC (1672869484000)
+    Last Successful Execution Date : 2023-01-04 15:58:04 CST / 2023-01-04 21:58:04 UTC (1672869484000)
+  ```
 
 Need help? Contact [Datadog support][9].
 
