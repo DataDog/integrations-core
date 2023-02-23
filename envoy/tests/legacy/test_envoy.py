@@ -287,10 +287,10 @@ def test_stats_prefix_ext_auth(aggregator, fixture_path, mock_http_response, che
     # To ensure that this change didn't break the old behavior, both the value and the tags are asserted.
     # The fixture is created with a specific value and the EXT_METRICS list is done in alphabetical order
     # allowing for value to also be asserted
-    for metric in EXT_METRICS:
+    for index, metric in enumerate(EXT_METRICS):
         aggregator.assert_metric(
             metric,
-            value=EXT_METRICS.index(metric) + 5,
+            value=index + 5,
             tags=tags_prefix,
         )
-        aggregator.assert_metric(metric, value=EXT_METRICS.index(metric), tags=tags)
+        aggregator.assert_metric(metric, value=index, tags=tags)
