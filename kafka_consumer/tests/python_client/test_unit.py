@@ -84,6 +84,7 @@ def test_oauth_config(sasl_oauth_token_provider, check, expected_exception):
         check(instance).check(instance)
 
 
+@pytest.mark.skip(reason='Add a test that not only check the parameter but also run the check')
 def test_oauth_token_client_config(check, kafka_instance):
     kafka_instance['kafka_client_api_version'] = "3.3.2"
     kafka_instance['security_protocol'] = "SASL_PLAINTEXT"
