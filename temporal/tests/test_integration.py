@@ -25,3 +25,17 @@ def test_check(dd_run_check, aggregator, check):
 def test_service_checks(dd_run_check, aggregator, check):
     dd_run_check(check)
     aggregator.assert_service_check('temporal.server.openmetrics.health', TemporalCheck.OK, tags=TAGS)
+
+
+def test_metadata(dd_run_check, datadog_agent, check):
+    dd_run_check(check)
+
+    expected_version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': '1',
+        'version.minor': '19',
+        'version.patch': '1',
+        'version.raw': '1.19.1',
+    }
+
+    datadog_agent.assert_metadata(check.check_id, expected_version_metadata)
