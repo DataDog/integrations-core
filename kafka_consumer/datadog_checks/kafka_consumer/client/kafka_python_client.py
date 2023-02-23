@@ -169,26 +169,19 @@ class KafkaPythonClient(KafkaClient):
         return kafka_admin_client
 
     def _create_kafka_client(self, clazz):
-        kafka_connect_str = self.config._kafka_connect_str
-        if not isinstance(kafka_connect_str, (string_types, list)):
-            raise ConfigurationError('kafka_connect_str should be string or list of strings')
-        kafka_version = self.config._kafka_version
-        if isinstance(kafka_version, str):
-            kafka_version = tuple(map(int, kafka_version.split(".")))
-
         crlfile = self.config._crlfile
         if crlfile:
             self._tls_context.load_verify_locations(crlfile)
             self._tls_context.verify_flags |= ssl.VERIFY_CRL_CHECK_LEAF
 
         return clazz(
-            bootstrap_servers=kafka_connect_str,
+            bootstrap_servers=self.config._kafka_connect_str,
             client_id='dd-agent',
             request_timeout_ms=self.config._request_timeout_ms,
             # if `kafka_client_api_version` is not set, then kafka-python automatically probes the cluster for
             # broker version during the bootstrapping process. Note that this returns the first version found, so in
             # a mixed-version cluster this will be a non-deterministic result.
-            api_version=kafka_version,
+            api_version=self.config._kafka_version,
             # While we check for SASL/SSL params, if not present they will default to the kafka-python values for
             # plaintext connections
             security_protocol=self.config._security_protocol,

@@ -48,42 +48,25 @@ You can explore examples of existing API integrations in the `integrations-extra
 
    {{< code-block lang="shell" >}}git clone git@github.com:DataDog/integrations-extras.git{{< /code-block >}}
 
-## Install and configure the Datadog Development Toolkit
+## Install and configure the Datadog development toolkit
 
-The Datadog Development Toolkit (`ddev`) allows you to generate the directory structure, assets, and metadata needed for your integration.
+The Agent Integration Developer Tool allows you to create scaffolding when you are developing an integration by generating a skeleton of your integration tile's assets and metadata. For instructions on installing the tool, see [Install the Datadog Agent Integration Developer Tool][23].
 
-Before you begin, make sure you meet the following prerequisites:
+After you install the Developer tool, configure it for the `integrations-extras` repo:
 
-- [Python v3.8 or later][18]
-- A Python virtual environment is recommended to avoid potential environment conflicts. The instructions below use `venv`, which comes packaged with Python v3.3 and later on most operating systems.
+Set `integrations-extras` as the default working repository:
 
-Install and configure the development toolkit:
+{{< code-block lang="shell" >}}
+ddev config set extras $HOME/dd/integrations-extras
+ddev config set repo extras
+{{< /code-block >}}
 
-1. Make sure you're inside the `integrations-extras` directory:
-   {{< code-block lang="shell" >}}cd $HOME/dd/integrations-extras{{< /code-block >}}
+If you used a directory other than `$HOME/dd` to clone the integrations-extras directory, use the following command to set your working repository:
 
-2. Set up a Python virtual environment:
-   {{< code-block lang="shell" >}}
-   python3 -m venv venv
-   . venv/bin/activate{{< /code-block >}}
-
-   You can exit the virtual environment at any time by running `deactivate`.
-
-3. Install the [Developer Toolkit][19]:
-   {{< code-block lang="shell" >}}pip3 install "datadog-checks-dev[cli]"{{< /code-block >}}
-
-   If you are using the Z Shell, you may need to use escaped characters by running `pip3 install datadog-checks-dev\[cli\]`.
-
-4. Set `integrations-extras` as the default working repository:
-   {{< code-block lang="shell" >}}
-   ddev config set integrations-extras $HOME/dd/integrations-extras
-   ddev config set repo integrations-extras{{< /code-block >}}
-
-   If you used a directory other than `$HOME/dd` to clone the `integrations-extras` directory, use the following command to set your working repository:
-
-   {{< code-block lang="shell" >}}
-   ddev config set integrations-extras <PATH/TO/INTEGRATIONS-EXTRAS>
-   ddev config set repo integrations-extras{{< /code-block >}}
+{{< code-block lang="shell" >}}
+ddev config set extras <PATH/TO/INTEGRATIONS_EXTRAS>
+ddev config set repo extras
+{{< /code-block >}}
 
 ## Populate the integration tile scaffolding
 
@@ -203,3 +186,4 @@ Additional helpful documentation, links, and articles:
 [20]: https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
 [21]: https://github.com/DataDog/integrations-extras/
 [22]: https://app.datadoghq.com/integrations
+[23]: /developers/integrations/python

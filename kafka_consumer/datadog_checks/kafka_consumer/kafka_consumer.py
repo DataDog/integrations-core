@@ -27,6 +27,7 @@ class KafkaCheck(AgentCheck):
         self._context_limit = self.config._context_limit
         tls_context = self.get_tls_context()
         self.client = make_client(self.config, tls_context, self.log)
+        self.check_initializations.append(self.config.validate_config)
 
     def check(self, _):
         """The main entrypoint of the check."""
