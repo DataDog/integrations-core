@@ -19,6 +19,7 @@ check-postgres,"https://github.com/bucardo/",BSD-2-Clause,Copyright 2007 - 2023 
 clickhouse-cityhash,PyPI,MIT,"Copyright (c) 2011, Alexander Marshalov <alone.amper@gmail.com>"
 clickhouse-driver,PyPI,MIT,Copyright (c) 2017 by Konstantin Lebedev.
 cm-client,PyPI,Apache-2.0,
+confluent-kafka,PyPI,Apache-2.0,Copyright (C) 1995-1998 Jean-loup Gailly and Mark Adler
 contextlib2,PyPI,PSF,Copyright (c) 2016 Nick Coghlan
 cryptography,PyPI,Apache-2.0,Copyright (c) Individual contributors.
 cryptography,PyPI,BSD-3-Clause,Copyright (c) Individual contributors.
