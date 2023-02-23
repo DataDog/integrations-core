@@ -34,7 +34,7 @@ class KafkaCheck(AgentCheck):
         self.client.reset_offsets()
 
         try:
-            self.client.get_consumer_offsets()
+            self.client.get_consumer_offsets(self.config._monitor_unlisted_consumer_groups, self.config._consumer_groups)
         except Exception:
             self.log.exception("There was a problem collecting consumer offsets from Kafka.")
             # don't raise because we might get valid broker offsets
@@ -46,7 +46,7 @@ class KafkaCheck(AgentCheck):
         # Fetch the broker highwater offsets
         try:
             if len(consumer_offsets) < self._context_limit:
-                self.client.get_highwater_offsets()
+                self.client.get_highwater_offsets(self.config._monitor_all_broker_highwatermarks, self.config._consumer_groups)
             else:
                 self.warning("Context limit reached. Skipping highwater offset collection.")
         except Exception:
@@ -79,6 +79,7 @@ class KafkaCheck(AgentCheck):
         """Report the broker highwater offsets."""
         reported_contexts = 0
         self.log.debug("Reporting broker offset metric")
+        self.log.debug("HIGHWATER OFFSETS: {}".format(highwater_offsets.items()))
         for (topic, partition), highwater_offset in highwater_offsets.items():
             broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
             broker_tags.extend(self.config._custom_tags)
@@ -91,6 +92,7 @@ class KafkaCheck(AgentCheck):
         """Report the consumer offsets and consumer lag."""
         reported_contexts = 0
         self.log.debug("Reporting consumer offsets and lag metrics")
+        self.log.debug("CONSUMER OFFSETS: {}".format(consumer_offsets.items()))
         for (consumer_group, topic, partition), consumer_offset in consumer_offsets.items():
             if reported_contexts >= contexts_limit:
                 self.log.debug(
@@ -150,14 +152,14 @@ class KafkaCheck(AgentCheck):
                 self.log.warning(msg, consumer_group, topic, partition)
                 self.client.request_metadata_update()  # force metadata update on next poll()
 
-    @AgentCheck.metadata_entrypoint
-    def collect_broker_metadata(self):
-        version_data = [str(part) for part in self.client.collect_broker_version()]
-        version_parts = {name: part for name, part in zip(('major', 'minor', 'patch'), version_data)}
-
-        self.set_metadata(
-            'version', '.'.join(version_data), scheme='parts', final_scheme='semver', part_map=version_parts
-        )
+    # @AgentCheck.metadata_entrypoint
+    # def collect_broker_metadata(self):
+    #     version_data = [str(part) for part in self.client.collect_broker_version()]
+    #     version_parts = {name: part for name, part in zip(('major', 'minor', 'patch'), version_data)}
+    #
+    #     self.set_metadata(
+    #         'version', '.'.join(version_data), scheme='parts', final_scheme='semver', part_map=version_parts
+    #     )
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""

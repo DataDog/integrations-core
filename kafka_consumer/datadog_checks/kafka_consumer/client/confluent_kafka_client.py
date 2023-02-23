@@ -19,20 +19,27 @@ class ConfluentKafkaClient:
         self._highwater_offsets = {}
         self._consumer_offsets = {}
         self._tls_context = tls_context
+        self._kafka_connect_str = self.config._kafka_connect_str
+        if isinstance(self._kafka_connect_str, list):
+            self._kafka_connect_str = ','.join(self._kafka_connect_str)
 
     @property
     def kafka_client(self):
         if self._kafka_client is None:
             # self.conf is just the config options from librdkafka
-            self._kafka_client = AdminClient({"bootstrap.servers": self.config._kafka_connect_str})
+            self._kafka_client = AdminClient({"bootstrap.servers": self._kafka_connect_str})
 
         return self._kafka_client
 
-    def get_highwater_offsets(self):
+    def get_highwater_offsets(self, monitor_all_broker_highwatermarks, consumer_groups):
         # {(topic, partition): offset}
-        for consumer_group in self.config._consumer_groups:
+        topics_with_consumer_offset = {}
+        if not monitor_all_broker_highwatermarks:
+            topics_with_consumer_offset = {(topic, partition) for (_, topic, partition) in self._consumer_offsets}
+
+        for consumer_group in consumer_groups:
             config = {
-                "bootstrap.servers": self.config._kafka_connect_str,
+                "bootstrap.servers": self._kafka_connect_str,
                 "group.id": consumer_group,
             }
             consumer = Consumer(config)
@@ -41,22 +48,23 @@ class ConfluentKafkaClient:
             topics = consumer.list_topics()
 
             for topic in topics.topics:
-                # TODO: See if there's an internal function to automatically exclude internal topics
-                if topic not in EXCLUDED_TOPICS:
-                    topic_partitions = [
-                        TopicPartition(topic, partition) for partition in list(topics.topics[topic].partitions.keys())
-                    ]
+                topic_partitions = [
+                    TopicPartition(topic, partition) for partition in list(topics.topics[topic].partitions.keys())
+                ]
 
-                    for topic_partition in topic_partitions:
+                for topic_partition in topic_partitions:
+                    if topic not in EXCLUDED_TOPICS and (
+                            monitor_all_broker_highwatermarks or (topic, topic_partition) in topics_with_consumer_offset
+                    ):
                         _, high_offset = consumer.get_watermark_offsets(topic_partition)
 
                         self._highwater_offsets[(topic, topic_partition.partition)] = high_offset
 
-    def get_consumer_offsets(self):
+    def get_consumer_offsets(self, monitor_unlisted_consumer_groups, consumer_groups):
         # {(consumer_group, topic, partition): offset}
         offset_futures = {}
 
-        if self.config._monitor_unlisted_consumer_groups:
+        if monitor_unlisted_consumer_groups:
             consumer_groups_future = self.kafka_client.list_consumer_groups()
             try:
                 list_consumer_groups_result = consumer_groups_future.result()
@@ -66,9 +74,9 @@ class ConfluentKafkaClient:
                     )
             except Exception as e:
                 self.log.error("Failed to collect consumer offsets %s", e)
-        elif self.config._consumer_groups:
-            validate_consumer_groups(self.config._consumer_groups)
-            for consumer_group in self.config._consumer_groups:
+        elif consumer_groups:
+            validate_consumer_groups(consumer_groups)
+            for consumer_group in consumer_groups:
                 offset_futures = self.kafka_client.list_consumer_group_offsets(
                     [ConsumerGroupTopicPartitions(consumer_group)]
                 )
@@ -76,7 +84,7 @@ class ConfluentKafkaClient:
         else:
             raise ConfigurationError(
                 "Cannot fetch consumer offsets because no consumer_groups are specified and "
-                "monitor_unlisted_consumer_groups is %s." % self.config._monitor_unlisted_consumer_groups
+                "monitor_unlisted_consumer_groups is %s." % monitor_unlisted_consumer_groups
             )
 
         for group_id, future in offset_futures.items():
