@@ -13,7 +13,7 @@ from packaging.version import parse as parse_version
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.kafka_consumer import KafkaCheck
 
-from .common import DOCKER_IMAGE_PATH, HOST_IP, KAFKA_CONNECT_STR, KAFKA_VERSION, TOPICS
+from .common import DOCKER_IMAGE_PATH, HERE, HOST_IP, KAFKA_CONNECT_STR, KAFKA_VERSION, LEGACY_CLIENT, TOPICS
 from .runners import KConsumer, Producer
 
 # Dummy TLS certs
@@ -21,19 +21,28 @@ CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
 cert = os.path.join(CERTIFICATE_DIR, 'cert.cert')
 private_key = os.path.join(CERTIFICATE_DIR, 'server.pem')
 
-E2E_METADATA = {
-    'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
-    'start_commands': [
-        'apt-get update',
-        'apt-get install -y build-essential',
-    ],
-}
+
+if LEGACY_CLIENT:
+    E2E_METADATA = {
+        'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
+        'start_commands': [
+            'apt-get update',
+            'apt-get install -y build-essential',
+        ],
+    }
+else:
+    E2E_METADATA = {
+        'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
+        'docker_volumes': [f'{HERE}/scripts/start_commands.sh:/tmp/start_commands.sh'],
+        'start_commands': ['bash /tmp/start_commands.sh'],
+    }
 
 INSTANCE = {
     'kafka_connect_str': KAFKA_CONNECT_STR,
     'tags': ['optional:tag1'],
     'consumer_groups': {'my_consumer': {'marvel': [0]}},
     'broker_requests_batch_size': 1,
+    'use_legacy_client': LEGACY_CLIENT,
 }
 
 
@@ -81,6 +90,7 @@ def kafka_instance_tls():
         'tls_cert': cert,
         'tls_private_key': private_key,
         'tls_ca_cert': CERTIFICATE_DIR,
+        'use_legacy_client': LEGACY_CLIENT,
     }
 
 
