@@ -8,6 +8,12 @@ files:
   - template: instances
     options:
     - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.description: |
+          The URL exposing metrics in the OpenMetrics format.
+
+          Set this to <listenAddress>/<handlerPath> as configured in your temporal server
+          (see https://docs.temporal.io/references/configuration#prometheus).
   - template: logs
     example:
     - type: file

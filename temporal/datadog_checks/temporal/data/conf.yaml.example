@@ -47,6 +47,9 @@ instances:
 
     ## @param openmetrics_endpoint - string - required
     ## The URL exposing metrics in the OpenMetrics format.
+    ##
+    ## Set this to <listenAddress>/<handlerPath> as configured in your temporal server
+    ## (see https://docs.temporal.io/references/configuration#prometheus).
     #
   - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
 
