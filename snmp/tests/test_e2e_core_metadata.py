@@ -983,8 +983,8 @@ def test_e2e_core_metadata_cisco_asr_1001x(dd_agent_check):
 
     device = {
         u'description': u'Cisco IOS Software [Bengaluru], ASR1000 Software '
-                 '(X86_64_LINUX_IOSD-UNIVERSALK9-M), Version 17.6.4, RELEASE '
-                 'SOFTWARE (fc1)',
+                        '(X86_64_LINUX_IOSD-UNIVERSALK9-M), Version 17.6.4, RELEASE '
+                        'SOFTWARE (fc1)',
         u'id': u'default:' + device_ip,
         u'id_tags': [
             u'device_namespace:default',
@@ -1024,7 +1024,7 @@ def test_e2e_core_metadata_cisco_asr_9001(dd_agent_check):
 
     device = {
         u'description': u'Cisco IOS XR Software (Cisco ASR9K Series),  Version '
-                 '6.4.2[Default]',
+                        '6.4.2[Default]',
         u'id': u'default:' + device_ip,
         u'id_tags': [
             u'device_namespace:default',
@@ -1063,7 +1063,7 @@ def test_e2e_core_metadata_cisco_asr_9901(dd_agent_check):
 
     device = {
         u'description': u'Cisco IOS XR Software (ASR9K), Version 7.1.3  Copyright (c) '
-                 '2013-2020 by Cisco Systems, Inc.',
+                        '2013-2020 by Cisco Systems, Inc.',
         u'id': u'default:' + device_ip,
         u'id_tags': [
             u'device_namespace:default',
