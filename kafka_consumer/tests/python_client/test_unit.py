@@ -214,7 +214,8 @@ def test_config(check, instance, aggregator, expected_exception, metric_count):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-# TODO: After these tests are finished and the revamp is complete, the tests should be refactored to be parameters instead of separate tests
+# TODO: After these tests are finished and the revamp is complete,
+# the tests should be refactored to be parameters instead of separate tests
 @mock.patch("datadog_checks.kafka_consumer.kafka_consumer.make_client")
 def test_when_consumer_lag_less_than_zero_then_emit_event(
     mock_make_client, check, kafka_instance, dd_run_check, aggregator
