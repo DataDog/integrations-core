@@ -17,7 +17,7 @@ matrix.version.env-vars = [
 dependencies = [
   "datadog_checks_tests_helper @ {root:uri}/../datadog_checks_tests_helper",
 ]
-e2e-env = false
+#e2e-env = false
 
 [envs.latest.env-vars]
 KAFKA_VERSION = "latest"

@@ -19,15 +19,21 @@ class ConfluentKafkaClient:
         self._highwater_offsets = {}
         self._consumer_offsets = {}
         self._tls_context = tls_context
-        self._kafka_connect_str = self.config._kafka_connect_str
-        if isinstance(self._kafka_connect_str, list):
-            self._kafka_connect_str = ','.join(self._kafka_connect_str)
+        if isinstance(self.config._kafka_connect_str, list):
+            self.config._kafka_connect_str = ','.join(self.config._kafka_connect_str)
 
     @property
     def kafka_client(self):
         if self._kafka_client is None:
             # self.conf is just the config options from librdkafka
-            self._kafka_client = AdminClient({"bootstrap.servers": self._kafka_connect_str})
+            self._kafka_client = AdminClient(
+                {
+                    "bootstrap.servers": self.config._kafka_connect_str,
+                    "socket.timeout.ms": self.config._request_timeout_ms,
+                    "broker.version.fallback": self.config._kafka_version,
+                    "client.id": "dd-agent",
+                }
+            )
 
         return self._kafka_client
 
@@ -39,7 +45,7 @@ class ConfluentKafkaClient:
 
         for consumer_group in self._consumer_offsets.items():
             config = {
-                "bootstrap.servers": self._kafka_connect_str,
+                "bootstrap.servers": self.config._kafka_connect_str,
                 "group.id": consumer_group,
             }
             consumer = Consumer(config)
