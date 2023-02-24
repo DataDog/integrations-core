@@ -77,9 +77,10 @@ class ConfluentKafkaClient:
             try:
                 list_consumer_groups_result = consumer_groups_future.result()
                 for valid_consumer_group in list_consumer_groups_result.valid:
+                    consumer_group = valid_consumer_group.group_id
                     offset_futures.update(
                         self.kafka_client.list_consumer_group_offsets(
-                            [ConsumerGroupTopicPartitions(valid_consumer_group.group_id)]
+                            [ConsumerGroupTopicPartitions(consumer_group)]
                         )
                     )
             except Exception as e:
