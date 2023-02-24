@@ -369,8 +369,6 @@ PROMETHEUS_METRICS = [
     "http.downstream_rq_http3.count",
     "http.rq.count",
     "vhost.vcluster.upstream_rq.count",
-    "access_logs.grpc_access_log.logs_written.count",
-    "access_logs.grpc_access_log.logs_dropped.count",
 ]
 
 
@@ -382,4 +380,6 @@ FLAKY_METRICS = {
     "cluster.internal.upstream_rq_xx.count",
     "cluster.http2.keepalive_timeout.count",
     "cluster.upstream_rq_xx.count",
+    "access_logs.grpc_access_log.logs_written.count",
+    "access_logs.grpc_access_log.logs_dropped.count",
 }
