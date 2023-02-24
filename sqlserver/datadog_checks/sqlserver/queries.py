@@ -22,6 +22,14 @@ QUERY_SERVER_STATIC_INFO = {
     ],
 }
 
+QUERY_DM_EXEC_REQUESTS_COUNT = {
+    'name': 'sys.dm_exec_query_stats count',
+    'query': """SELECT COUNT(*) FROM sys.dm_exec_query_stats""".strip(),
+    'columns': [
+        {'name': 'query_plan_cache.rows', 'type': 'gauge'},
+    ],
+}
+
 QUERY_AO_FAILOVER_CLUSTER = {
     'name': 'sys.dm_hadr_cluster',
     'query': """
