@@ -260,7 +260,7 @@ files:
             for *every* check instance. Running different instances with different collection intervals is not supported.
           value:
             type: number
-            example: 10
+            example: 60
         - name: dm_exec_query_stats_row_limit
           description: |
             Set the maximum number of query stats rows that can be retrieved in a single check run.
