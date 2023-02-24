@@ -11,7 +11,9 @@ class GenericKafkaClient(KafkaClient):
     def __init__(self, config, tls_context, log) -> None:
         super().__init__(config, tls_context, log)
         self.use_legacy_client = config.use_legacy_client
-        self.confluent_kafka_client = ConfluentKafkaClient(config, tls_context, log) if not self.use_legacy_client else None
+        self.confluent_kafka_client = (
+            ConfluentKafkaClient(config, tls_context, log) if not self.use_legacy_client else None
+        )
         self.python_kafka_client = KafkaPythonClient(config, tls_context, log)
 
     def get_consumer_offsets(self):
