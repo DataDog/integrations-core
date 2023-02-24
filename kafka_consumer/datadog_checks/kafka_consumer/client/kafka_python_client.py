@@ -29,14 +29,6 @@ class OAuthTokenProvider(AbstractTokenProvider):
 
 
 class KafkaPythonClient(KafkaClient):
-    def __init__(self, config, tls_context, log) -> None:
-        self.config = config
-        self.log = log
-        self._kafka_client = None
-        self._highwater_offsets = {}
-        self._consumer_offsets = {}
-        self._tls_context = tls_context
-
     def get_consumer_offsets(self):
         """Fetch Consumer Group offsets from Kafka.
 
@@ -153,40 +145,19 @@ class KafkaPythonClient(KafkaClient):
             self.kafka_client._wait_for_futures(highwater_futures)
 
     def create_kafka_admin_client(self):
-        return self._create_kafka_client(clazz=KafkaAdminClient)
-
-    def _create_kafka_admin_client(self, api_version):
-        """Return a KafkaAdminClient."""
-        # TODO accept None (which inherits kafka-python default of localhost:9092)
-        kafka_admin_client = self.create_kafka_admin_client()
-        self.log.debug("KafkaAdminClient api_version: %s", kafka_admin_client.config['api_version'])
-        # Force initial population of the local cluster metadata cache
-        kafka_admin_client._client.poll(future=kafka_admin_client._client.cluster.request_update())
-        if kafka_admin_client._client.cluster.topics(exclude_internal_topics=False) is None:
-            raise RuntimeError("Local cluster metadata cache did not populate.")
-        return kafka_admin_client
-
-    def _create_kafka_client(self, clazz):
-        kafka_connect_str = self.config._kafka_connect_str
-        if not isinstance(kafka_connect_str, (string_types, list)):
-            raise ConfigurationError('kafka_connect_str should be string or list of strings')
-        kafka_version = self.config._kafka_version
-        if isinstance(kafka_version, str):
-            kafka_version = tuple(map(int, kafka_version.split(".")))
-
         crlfile = self.config._crlfile
         if crlfile:
             self._tls_context.load_verify_locations(crlfile)
             self._tls_context.verify_flags |= ssl.VERIFY_CRL_CHECK_LEAF
 
-        return clazz(
-            bootstrap_servers=kafka_connect_str,
+        return KafkaAdminClient(
+            bootstrap_servers=self.config._kafka_connect_str,
             client_id='dd-agent',
             request_timeout_ms=self.config._request_timeout_ms,
             # if `kafka_client_api_version` is not set, then kafka-python automatically probes the cluster for
             # broker version during the bootstrapping process. Note that this returns the first version found, so in
             # a mixed-version cluster this will be a non-deterministic result.
-            api_version=kafka_version,
+            api_version=self.config._kafka_version,
             # While we check for SASL/SSL params, if not present they will default to the kafka-python values for
             # plaintext connections
             security_protocol=self.config._security_protocol,
@@ -202,6 +173,17 @@ class KafkaPythonClient(KafkaClient):
             ),
             ssl_context=self._tls_context,
         )
+
+    def _create_kafka_admin_client(self, api_version):
+        """Return a KafkaAdminClient."""
+        # TODO accept None (which inherits kafka-python default of localhost:9092)
+        kafka_admin_client = self.create_kafka_admin_client()
+        self.log.debug("KafkaAdminClient api_version: %s", kafka_admin_client.config['api_version'])
+        # Force initial population of the local cluster metadata cache
+        kafka_admin_client._client.poll(future=kafka_admin_client._client.cluster.request_update())
+        if kafka_admin_client._client.cluster.topics(exclude_internal_topics=False) is None:
+            raise RuntimeError("Local cluster metadata cache did not populate.")
+        return kafka_admin_client
 
     @property
     def kafka_client(self):

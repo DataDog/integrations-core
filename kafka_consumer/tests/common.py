@@ -4,6 +4,7 @@
 import os
 import socket
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -17,6 +18,7 @@ DOCKER_IMAGE_PATH = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 KAFKA_VERSION = os.environ.get('KAFKA_VERSION')
 BROKER_METRICS = ['kafka.broker_offset']
 CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
+LEGACY_CLIENT = is_affirmative(os.environ.get('LEGACY_CLIENT', 'false'))
 
 metrics = BROKER_METRICS + CONSUMER_METRICS
 

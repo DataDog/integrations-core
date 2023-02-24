@@ -786,7 +786,7 @@ METRICS = {
     'cluster.ext_authz.ok': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -794,7 +794,7 @@ METRICS = {
     'cluster.ext_authz.error': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -802,7 +802,7 @@ METRICS = {
     'cluster.ext_authz.denied': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -810,7 +810,7 @@ METRICS = {
     'cluster.ext_authz.disabled': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',

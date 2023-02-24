@@ -6,6 +6,7 @@ from six import PY2
 
 from datadog_checks.amazon_msk import AmazonMskCheck
 from datadog_checks.amazon_msk.metrics import JMX_METRICS_MAP, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import assert_jmx_metrics
 
@@ -73,6 +74,7 @@ def test_node_check(dd_agent_check, instance, mock_e2e_client):
                 )
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def assert_node_metrics_legacy(aggregator, tags):

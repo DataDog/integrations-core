@@ -5,7 +5,16 @@ from abc import ABC, abstractmethod
 
 
 class KafkaClient(ABC):
-    def __init__(self) -> None:
+    def __init__(self, config, tls_context, log) -> None:
+        self.config = config
+        self.log = log
+        self._kafka_client = None
+        self._highwater_offsets = {}
+        self._consumer_offsets = {}
+        self._tls_context = tls_context
+
+    @abstractmethod
+    def create_kafka_admin_client(self):
         pass
 
     @abstractmethod
@@ -13,5 +22,29 @@ class KafkaClient(ABC):
         pass
 
     @abstractmethod
+    def get_consumer_offsets_dict(self):
+        pass
+
+    @abstractmethod
     def get_highwater_offsets(self):
+        pass
+
+    @abstractmethod
+    def get_highwater_offsets_dict(self):
+        pass
+
+    @abstractmethod
+    def reset_offsets(self):
+        pass
+
+    @abstractmethod
+    def get_partitions_for_topic(self, topic):
+        pass
+
+    @abstractmethod
+    def request_metadata_update(self):
+        pass
+
+    @abstractmethod
+    def collect_broker_version(self):
         pass
