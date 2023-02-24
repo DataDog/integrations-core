@@ -153,26 +153,12 @@ class KafkaPythonClient(KafkaClient):
             self.kafka_client._wait_for_futures(highwater_futures)
 
     def create_kafka_admin_client(self):
-        return self._create_kafka_client(clazz=KafkaAdminClient)
-
-    def _create_kafka_admin_client(self, api_version):
-        """Return a KafkaAdminClient."""
-        # TODO accept None (which inherits kafka-python default of localhost:9092)
-        kafka_admin_client = self.create_kafka_admin_client()
-        self.log.debug("KafkaAdminClient api_version: %s", kafka_admin_client.config['api_version'])
-        # Force initial population of the local cluster metadata cache
-        kafka_admin_client._client.poll(future=kafka_admin_client._client.cluster.request_update())
-        if kafka_admin_client._client.cluster.topics(exclude_internal_topics=False) is None:
-            raise RuntimeError("Local cluster metadata cache did not populate.")
-        return kafka_admin_client
-
-    def _create_kafka_client(self, clazz):
         crlfile = self.config._crlfile
         if crlfile:
             self._tls_context.load_verify_locations(crlfile)
             self._tls_context.verify_flags |= ssl.VERIFY_CRL_CHECK_LEAF
 
-        return clazz(
+        return KafkaAdminClient(
             bootstrap_servers=self.config._kafka_connect_str,
             client_id='dd-agent',
             request_timeout_ms=self.config._request_timeout_ms,
@@ -195,6 +181,17 @@ class KafkaPythonClient(KafkaClient):
             ),
             ssl_context=self._tls_context,
         )
+
+    def _create_kafka_admin_client(self, api_version):
+        """Return a KafkaAdminClient."""
+        # TODO accept None (which inherits kafka-python default of localhost:9092)
+        kafka_admin_client = self.create_kafka_admin_client()
+        self.log.debug("KafkaAdminClient api_version: %s", kafka_admin_client.config['api_version'])
+        # Force initial population of the local cluster metadata cache
+        kafka_admin_client._client.poll(future=kafka_admin_client._client.cluster.request_update())
+        if kafka_admin_client._client.cluster.topics(exclude_internal_topics=False) is None:
+            raise RuntimeError("Local cluster metadata cache did not populate.")
+        return kafka_admin_client
 
     @property
     def kafka_client(self):
