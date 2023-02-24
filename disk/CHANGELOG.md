@@ -1,6 +1,6 @@
 # CHANGELOG - disk
 
-## 4.9.0 / 2023-01-20
+## 4.9.0 / 2023-01-20 / Agent 7.43.0
 
 * [Added] Exclude tracefs by default from disk checks. See [#13530](https://github.com/DataDog/integrations-core/pull/13530). Thanks [DaveWK](https://github.com/DaveWK).
 
