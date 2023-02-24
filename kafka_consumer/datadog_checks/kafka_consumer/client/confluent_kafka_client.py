@@ -30,7 +30,6 @@ class ConfluentKafkaClient:
                 {
                     "bootstrap.servers": self.config._kafka_connect_str,
                     "socket.timeout.ms": self.config._request_timeout_ms,
-                    "broker.version.fallback": self.config._kafka_version,
                     "client.id": "dd-agent",
                 }
             )
