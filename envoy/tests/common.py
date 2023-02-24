@@ -369,6 +369,8 @@ PROMETHEUS_METRICS = [
     "http.downstream_rq_http3.count",
     "http.rq.count",
     "vhost.vcluster.upstream_rq.count",
+    "access_logs.grpc_access_log.logs_written.count",
+    "access_logs.grpc_access_log.logs_dropped.count",
 ]
 
 
