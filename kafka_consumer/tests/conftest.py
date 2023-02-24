@@ -24,7 +24,8 @@ private_key = os.path.join(CERTIFICATE_DIR, 'server.pem')
 E2E_METADATA = {
     'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
     'docker_volumes': ['{}/start_commands.sh:/tmp/start_commands.sh'.format(HERE)],
-    'start_commands': ['bash /tmp/start_commands.sh'],}
+    'start_commands': ['bash /tmp/start_commands.sh'],
+}
 
 INSTANCE = {
     'kafka_connect_str': KAFKA_CONNECT_STR,
