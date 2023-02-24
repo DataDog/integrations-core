@@ -66,6 +66,12 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
     def pip_install_command(*args):
         return f'python -m pip install --disable-pip-version-check {{verbosity:flag:-1}} {" ".join(args)}'
 
+    def finalize_environments(self, config):
+        for env_config in config.values():
+            if env_config.get('python') == '2.7':
+                env_config['dev-mode'] = False
+        return config
+
     def finalize_config(self, config):
         for env_name, env_config in config.items():
             is_template_env = env_name == 'default'
