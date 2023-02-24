@@ -63,6 +63,8 @@ def get_expected_file_stats_metrics():
 
 EXPECTED_FILE_STATS_METRICS = get_expected_file_stats_metrics()
 
+EXPECTED_QUERY_PLAN_CACHE_METRICS = ["sqlserver.query_plan_cache.rows"]
+
 EXPECTED_DEFAULT_METRICS = (
     [
         m[0]
@@ -75,6 +77,7 @@ EXPECTED_DEFAULT_METRICS = (
     ]
     + SERVER_METRICS
     + EXPECTED_FILE_STATS_METRICS
+    + EXPECTED_QUERY_PLAN_CACHE_METRICS
 )
 EXPECTED_METRICS = (
     EXPECTED_DEFAULT_METRICS
@@ -125,27 +128,6 @@ UNEXPECTED_FCI_METRICS = [
 EXPECTED_AO_METRICS_PRIMARY = [m[0] for m in AO_METRICS_PRIMARY]
 EXPECTED_AO_METRICS_SECONDARY = [m[0] for m in AO_METRICS_SECONDARY]
 EXPECTED_AO_METRICS_COMMON = [m[0] for m in AO_METRICS]
-
-INSTANCE_SQL_DEFAULTS = {
-    'host': DOCKER_SERVER,
-    'username': 'sa',
-    'password': 'Password12!',
-    'disable_generic_tags': True,
-}
-INSTANCE_SQL = INSTANCE_SQL_DEFAULTS.copy()
-INSTANCE_SQL.update(
-    {
-        'connector': 'odbc',
-        'driver': '{ODBC Driver 17 for SQL Server}',
-        'include_task_scheduler_metrics': True,
-        'include_db_fragmentation_metrics': True,
-        'include_fci_metrics': True,
-        'include_ao_metrics': False,
-        'include_master_files_metrics': True,
-        'include_query_plan_cache_metrics': True,
-        'disable_generic_tags': True,
-    }
-)
 
 INIT_CONFIG = {
     'custom_metrics': [
