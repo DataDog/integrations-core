@@ -71,16 +71,18 @@ class ConfluentKafkaClient:
             try:
                 list_consumer_groups_result = consumer_groups_future.result()
                 for valid_consumer_group in list_consumer_groups_result.valid:
-                    offset_futures = self.kafka_client.list_consumer_group_offsets(
-                        [ConsumerGroupTopicPartitions(valid_consumer_group.group_id)]
+                    offset_futures.update(
+                        self.kafka_client.list_consumer_group_offsets(
+                            [ConsumerGroupTopicPartitions(valid_consumer_group.group_id)]
+                        )
                     )
             except Exception as e:
                 self.log.error("Failed to collect consumer offsets %s", e)
         elif self.config._consumer_groups:
             validate_consumer_groups(self.config._consumer_groups)
             for consumer_group in self.config._consumer_groups:
-                offset_futures = self.kafka_client.list_consumer_group_offsets(
-                    [ConsumerGroupTopicPartitions(consumer_group)]
+                offset_futures.update(
+                    self.kafka_client.list_consumer_group_offsets([ConsumerGroupTopicPartitions(consumer_group)])
                 )
         else:
             raise ConfigurationError(
