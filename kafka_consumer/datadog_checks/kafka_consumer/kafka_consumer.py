@@ -35,7 +35,7 @@ class KafkaCheck(AgentCheck):
         self.client.reset_offsets()
 
         try:
-            self.client.get_consumer_offsets(self.config._monitor_unlisted_consumer_groups, self.config._consumer_groups)
+            self.client.get_consumer_offsets()
         except Exception:
             self.log.exception("There was a problem collecting consumer offsets from Kafka.")
             # don't raise because we might get valid broker offsets
@@ -47,7 +47,7 @@ class KafkaCheck(AgentCheck):
         # Fetch the broker highwater offsets
         try:
             if len(consumer_offsets) < self._context_limit:
-                self.client.get_highwater_offsets(self.config._monitor_all_broker_highwatermarks, self.config._consumer_groups)
+                self.client.get_highwater_offsets()
             else:
                 self.warning("Context limit reached. Skipping highwater offset collection.")
         except Exception:
@@ -80,7 +80,6 @@ class KafkaCheck(AgentCheck):
         """Report the broker highwater offsets."""
         reported_contexts = 0
         self.log.debug("Reporting broker offset metric")
-        self.log.debug("HIGHWATER OFFSETS: {}".format(highwater_offsets.items()))
         for (topic, partition), highwater_offset in highwater_offsets.items():
             broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
             broker_tags.extend(self.config._custom_tags)
@@ -93,7 +92,6 @@ class KafkaCheck(AgentCheck):
         """Report the consumer offsets and consumer lag."""
         reported_contexts = 0
         self.log.debug("Reporting consumer offsets and lag metrics")
-        self.log.debug("CONSUMER OFFSETS: {}".format(consumer_offsets.items()))
         for (consumer_group, topic, partition), consumer_offset in consumer_offsets.items():
             if reported_contexts >= contexts_limit:
                 self.log.debug(

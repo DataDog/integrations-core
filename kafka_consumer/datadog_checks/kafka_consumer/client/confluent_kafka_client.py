@@ -31,13 +31,13 @@ class ConfluentKafkaClient:
 
         return self._kafka_client
 
-    def get_highwater_offsets(self, monitor_all_broker_highwatermarks, consumer_groups):
+    def get_highwater_offsets(self):
         # {(topic, partition): offset}
         topics_with_consumer_offset = {}
-        if not monitor_all_broker_highwatermarks:
+        if not self.config._monitor_all_broker_highwatermarks:
             topics_with_consumer_offset = {(topic, partition) for (_, topic, partition) in self._consumer_offsets}
 
-        for consumer_group in consumer_groups:
+        for consumer_group in self._consumer_offsets.items():
             config = {
                 "bootstrap.servers": self._kafka_connect_str,
                 "group.id": consumer_group,
@@ -53,18 +53,20 @@ class ConfluentKafkaClient:
                 ]
 
                 for topic_partition in topic_partitions:
+                    partition = topic_partition.partition
                     if topic not in EXCLUDED_TOPICS and (
-                            monitor_all_broker_highwatermarks or (topic, topic_partition) in topics_with_consumer_offset
+                        self.config._monitor_all_broker_highwatermarks
+                        or (topic, partition) in topics_with_consumer_offset
                     ):
                         _, high_offset = consumer.get_watermark_offsets(topic_partition)
 
-                        self._highwater_offsets[(topic, topic_partition.partition)] = high_offset
+                        self._highwater_offsets[(topic, partition)] = high_offset
 
-    def get_consumer_offsets(self, monitor_unlisted_consumer_groups, consumer_groups):
+    def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
         offset_futures = {}
 
-        if monitor_unlisted_consumer_groups:
+        if self.config._monitor_unlisted_consumer_groups:
             consumer_groups_future = self.kafka_client.list_consumer_groups()
             try:
                 list_consumer_groups_result = consumer_groups_future.result()
@@ -74,24 +76,28 @@ class ConfluentKafkaClient:
                     )
             except Exception as e:
                 self.log.error("Failed to collect consumer offsets %s", e)
-        elif consumer_groups:
-            validate_consumer_groups(consumer_groups)
-            for consumer_group in consumer_groups:
+        elif self.config._consumer_groups:
+            validate_consumer_groups(self.config._consumer_groups)
+            for consumer_group in self.config._consumer_groups:
                 offset_futures = self.kafka_client.list_consumer_group_offsets(
                     [ConsumerGroupTopicPartitions(consumer_group)]
                 )
-
         else:
             raise ConfigurationError(
                 "Cannot fetch consumer offsets because no consumer_groups are specified and "
-                "monitor_unlisted_consumer_groups is %s." % monitor_unlisted_consumer_groups
+                "monitor_unlisted_consumer_groups is %s." % self.config._monitor_unlisted_consumer_groups
             )
 
         for group_id, future in offset_futures.items():
             try:
                 response_offset_info = future.result()
                 consumer_group = response_offset_info.group_id
-                for topic_partition in response_offset_info.topic_partitions:
+                topic_partitions = response_offset_info.topic_partitions
+                for topic_partition in topic_partitions:
+                    topic = topic_partition.topic
+                    partition = topic_partition.partition
+                    offset = topic_partition.offset
+
                     if topic_partition.error:
                         self.log.debug(
                             "Encountered error: %s. Occurred with topic: %s; partition: [%s]",
@@ -99,9 +105,22 @@ class ConfluentKafkaClient:
                             topic_partition.topic,
                             str(topic_partition.partition),
                         )
-                    self._consumer_offsets[
-                        (consumer_group, topic_partition.topic, topic_partition.partition)
-                    ] = topic_partition.offset
+                    if not self.config._monitor_unlisted_consumer_groups and self.config._consumer_groups.get(
+                        consumer_group
+                    ):
+                        # if topics is None => collect all topics and partitions for the consumer group
+                        # if partitions is None => collect all partitions from the consumer group's topic
+                        if (
+                            self.config._consumer_groups[consumer_group]
+                            and topic not in self.config._consumer_groups[consumer_group]
+                        ):
+                            continue
+                        if (
+                            self.config._consumer_groups[consumer_group].get(topic)
+                            and partition not in self.config._consumer_groups[consumer_group][topic]
+                        ):
+                            continue
+                    self._consumer_offsets[(consumer_group, topic, partition)] = offset
             except KafkaException as e:
                 self.log.debug("Failed to read consumer offsets for %s: %s", group_id, e)
 
