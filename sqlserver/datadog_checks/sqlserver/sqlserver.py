@@ -61,6 +61,7 @@ from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TA
 from datadog_checks.sqlserver.queries import (
     QUERY_AO_FAILOVER_CLUSTER,
     QUERY_AO_FAILOVER_CLUSTER_MEMBER,
+    QUERY_DM_EXEC_QUERY_STATS_COUNT,
     QUERY_FAILOVER_CLUSTER_INSTANCE,
     QUERY_SERVER_STATIC_INFO,
     get_query_ao_availability_groups,
@@ -708,6 +709,9 @@ class SQLServer(AgentCheck):
                 queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
             else:
                 self.log.warning('Failover Cluster Instance metrics are not supported on version 2012')
+
+        if is_affirmative(self.instance.get('include_query_plan_cache_metrics', False)):
+            queries.extend([QUERY_DM_EXEC_QUERY_STATS_COUNT])
 
         self._dynamic_queries = self._new_query_executor(queries)
         self._dynamic_queries.compile_queries()

@@ -188,6 +188,16 @@ files:
         type: array
         items:
           type: string
+    - name: include_query_plan_cache_metrics
+      hidden: true
+      description: |
+        Set to `true` to emit metrics for tracking the query plan cache. This metric is useful when
+        debugging performance problems related to reading out data from the plan cache. This metric and
+        configuration should be considered unstable and is subject to change without notice.
+      value:
+        type: boolean
+        example: false
+        display_default: false
     - name: adoprovider
       description: |
         Choose the ADO provider.  Note that the (default) provider
@@ -302,7 +312,6 @@ files:
           value:
             type: number
             example: 10
-
     - name: aws
       description: |
         This block defines the configuration for AWS RDS and Aurora instances. 

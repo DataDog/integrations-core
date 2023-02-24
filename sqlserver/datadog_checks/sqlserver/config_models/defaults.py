@@ -134,6 +134,10 @@ def instance_include_master_files_metrics(field, value):
     return False
 
 
+def instance_include_query_plan_cache_metrics(field, value):
+    return False
+
+
 def instance_include_task_scheduler_metrics(field, value):
     return False
 

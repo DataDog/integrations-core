@@ -22,7 +22,7 @@ QUERY_SERVER_STATIC_INFO = {
     ],
 }
 
-QUERY_DM_EXEC_REQUESTS_COUNT = {
+QUERY_DM_EXEC_QUERY_STATS_COUNT = {
     'name': 'sys.dm_exec_query_stats count',
     'query': """SELECT COUNT(*) FROM sys.dm_exec_query_stats""".strip(),
     'columns': [

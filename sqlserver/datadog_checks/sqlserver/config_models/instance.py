@@ -124,6 +124,7 @@ class InstanceConfig(BaseModel):
     include_fci_metrics: Optional[bool]
     include_instance_metrics: Optional[bool]
     include_master_files_metrics: Optional[bool]
+    include_query_plan_cache_metrics: Optional[bool]
     include_task_scheduler_metrics: Optional[bool]
     log_unobfuscated_plans: Optional[bool]
     log_unobfuscated_queries: Optional[bool]

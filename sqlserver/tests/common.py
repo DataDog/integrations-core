@@ -142,6 +142,7 @@ INSTANCE_SQL.update(
         'include_fci_metrics': True,
         'include_ao_metrics': False,
         'include_master_files_metrics': True,
+        'include_query_plan_cache_metrics': True,
         'disable_generic_tags': True,
     }
 )
