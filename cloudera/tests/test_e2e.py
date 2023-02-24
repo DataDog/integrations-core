@@ -12,10 +12,7 @@ from .common import CAN_CONNECT_TAGS, CLUSTER_1_HEALTH_TAGS, METRICS
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, config):
-    # Given
-    # When
     aggregator = dd_agent_check(config)
-    # Then
     for category, metrics in METRICS.items():
         for metric in metrics:
             aggregator.assert_metric(f'cloudera.{category}.{metric}', at_least=1)

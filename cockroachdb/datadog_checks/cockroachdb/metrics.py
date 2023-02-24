@@ -337,6 +337,7 @@ METRIC_MAP = {
     'jobs_backup_resume_failed': 'jobs.backup.resume_failed',
     'jobs_backup_resume_retry_error': 'jobs.backup.resume_retry_error',
     'jobs_backup_resume_completed ': 'jobs.backup.resume_completed',
+    'schedules_BACKUP_last_completed_time': 'schedules.backup.last_completed_time',
 }
 
 

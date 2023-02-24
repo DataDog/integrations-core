@@ -6,7 +6,6 @@ PyMySQL,PyPI,MIT,"Copyright (c) 2010, 2013 PyMySQL contributors"
 PySocks,PyPI,BSD-3-Clause,Copyright 2006 Dan-Haim. All rights reserved.
 PyYAML,PyPI,MIT,Copyright (c) 2017-2021 Ingy döt Net
 Pyro4,PyPI,MIT,Copyright (c) 2016 Irmen de Jong
-adodbapi,PyPI,LGPL-2.1-only,"Copyright (C) Henrik Ekelund, Vernon Cole, et.al."
 aerospike,PyPI,Apache-2.0,"Copyright Aerospike, Inc."
 aws-requests-auth,PyPI,BSD-3-Clause,Copyright (c) David Muller.
 beautifulsoup4,PyPI,MIT,Copyright (c) Leonard Richardson
@@ -23,6 +22,7 @@ cm-client,PyPI,Apache-2.0,
 contextlib2,PyPI,PSF,Copyright (c) 2016 Nick Coghlan
 cryptography,PyPI,Apache-2.0,Copyright (c) Individual contributors.
 cryptography,PyPI,BSD-3-Clause,Copyright (c) Individual contributors.
+cryptography,PyPI,PSF,Copyright (c) Individual contributors.
 ddtrace,PyPI,BSD-3-Clause,"Copyright 2016 Datadog, Inc."
 dnspython,PyPI,ISC,Copyright (C) Dnspython Contributors
 enum34,PyPI,BSD-3-Clause,Copyright Ethan Furman
@@ -33,6 +33,7 @@ futures,PyPI,PSF,Copyright (c) 2015 Brian Quinlan
 gearman,PyPI,Apache-2.0,Copyright 2010 Yelp <python-gearman@yelp.com>
 gssapi,PyPI,ISC,"Copyright (c) 2014, The Python GSSAPI Team"
 immutables,PyPI,Apache-2.0,Copyright 2018-present Contributors to the immutables project.
+importlib-metadata,PyPI,Apache-2.0,Copyright Jason R. Coombs
 in-toto,PyPI,Apache-2.0,Copyright 2018 New York University
 ipaddress,PyPI,PSF,Copyright (c) 2013 Philipp Hagemeister
 jellyfish,PyPI,BSD-3-Clause,"Copyright (c) 2015, James Turk"
@@ -77,11 +78,11 @@ pywin32,PyPI,PSF,Copyright (c) 2017 Mark Hammond (et al)
 redis,PyPI,MIT,"Copyright (c) 2022, Redis, inc."
 requests,PyPI,Apache-2.0,Copyright 2019 Kenneth Reitz
 requests-kerberos,PyPI,ISC,Copyright (c) 2012 Kenneth Reitz
+requests-ntlm,PyPI,ISC,Copyright (c) 2013 Ben Toews
 requests-oauthlib,PyPI,BSD-3-Clause,Copyright (c) 2014 Kenneth Reitz.
 requests-oauthlib,PyPI,ISC,Copyright (c) 2014 Kenneth Reitz.
 requests-toolbelt,PyPI,Apache-2.0,"Copyright 2014 Ian Cordasco, Cory Benfield"
 requests-unixsocket,PyPI,Apache-2.0,Copyright 2014 Marc Abramowitz
-requests_ntlm,PyPI,ISC,Copyright (c) 2013 Ben Toews
 rethinkdb,PyPI,Apache-2.0,Copyright 2018 RethinkDB.
 scandir,PyPI,BSD-3-Clause,"Copyright (c) 2012, Ben Hoyt"
 securesystemslib,PyPI,MIT,Copyright (c) 2016 Santiago Torres

@@ -1,4 +1,3 @@
-adodbapi==2.6.2.0; sys_platform == 'win32'
 aerospike==4.0.0; sys_platform != 'win32' and sys_platform != 'darwin' and python_version < '3.0'
 aerospike==7.1.1; sys_platform != 'win32' and sys_platform != 'darwin' and python_version > '3.0'
 aws-requests-auth==0.4.3
@@ -19,17 +18,18 @@ clickhouse-driver==0.2.3; python_version > '3.0'
 cm-client==45.0.4
 contextlib2==0.6.0.post1; python_version < '3.0'
 cryptography==3.3.2; python_version < '3.0'
-cryptography==38.0.3; python_version > '3.0'
+cryptography==39.0.1; python_version > '3.0'
 ddtrace==0.32.2; sys_platform == 'win32' and python_version < '3.0'
-ddtrace==0.53.2; sys_platform != 'win32' or python_version > '3.0'
+ddtrace==0.53.2; (sys_platform != 'win32' and (sys_platform != 'darwin' or platform_machine != 'arm64' and python_version > '3.0')) or python_version > '3.0'
 dnspython==1.16.0
 enum34==1.1.10; python_version < '3.0'
 foundationdb==6.3.24; python_version > '3.0'
 futures==3.4.0; python_version < '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
-gssapi==1.6.1; python_version < '3.0'
+gssapi==1.6.1; python_version < '3.0' and (sys_platform != 'darwin' or platform_machine != 'arm64')
 gssapi==1.8.2; python_version > '3.0'
 immutables==0.19; python_version > '3.0'
+importlib-metadata==2.1.3; python_version < '3.8'
 in-toto==1.0.1; python_version > '3.0'
 ipaddress==1.0.23; python_version < '3.0'
 jaydebeapi==1.2.3
@@ -104,7 +104,7 @@ serpent==1.41; sys_platform == 'win32' and python_version > '3.0'
 service-identity[idna]==21.1.0
 simplejson==3.17.6
 six==1.16.0
-snowflake-connector-python==2.8.3; python_version > '3.0'
+snowflake-connector-python==3.0.0; python_version > '3.0'
 supervisor==4.2.4
 tuf==2.0.0; python_version > '3.0'
 typing==3.10.0.0; python_version < '3.0'

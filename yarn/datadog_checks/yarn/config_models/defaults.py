@@ -15,7 +15,7 @@ def shared_collect_apps_all_states(field, value):
 
 
 def shared_collect_apps_states_list(field, value):
-    return get_default_field_value(field, value)
+    return ['RUNNING']
 
 
 def shared_proxy(field, value):
@@ -79,7 +79,7 @@ def instance_collect_apps_all_states(field, value):
 
 
 def instance_collect_apps_states_list(field, value):
-    return get_default_field_value(field, value)
+    return ['RUNNING']
 
 
 def instance_collect_node_metrics(field, value):

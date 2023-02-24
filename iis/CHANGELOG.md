@@ -1,5 +1,9 @@
 # CHANGELOG - iis
 
+## 2.18.1 / 2023-02-08 / Agent 7.42.2
+
+* [Fixed] Fix IIS Check memory leaked due to a bug in win32pdh.GetFormattedCounterArray(). See [#13897](https://github.com/DataDog/integrations-core/pull/13897).
+
 ## 2.18.0 / 2022-12-09 / Agent 7.42.0
 
 * [Added] Implement multi-instance counters without Windows PdhEnumObjects API. See [#13243](https://github.com/DataDog/integrations-core/pull/13243).

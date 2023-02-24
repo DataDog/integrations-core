@@ -4,13 +4,13 @@
 
 ## Overview
 
-The SQL Server check tracks the performance of your SQL Server instances. It collects metrics for number of user connections, rate of SQL compilations, and more.
+The SQL Server integration tracks the performance of your SQL Server instances. It collects metrics for number of user connections, rate of SQL compilations, and more.
 
-You can also create your own metrics by having the check run custom queries.
+Enable [Database Monitoring](https://docs.datadoghq.com/database_monitoring/) (DBM) for enhanced insight into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
 
 ## Setup
 
-<div class="alert alert-info">This page describes the SQL Server Agent integration. If you are looking for the Database Monitoring product for SQL Server, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
+<div class="alert alert-info">This page describes the SQL Server Agent standard integration. If you are looking for the Database Monitoring product for SQL Server, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
 
 ### Installation
 
@@ -21,6 +21,10 @@ Make sure that your SQL Server instance supports SQL Server authentication by en
 _Server Properties_ -> _Security_ -> _SQL Server and Windows Authentication mode_
 
 ### Prerequisite
+
+**Note**: To install Database Monitoring for SQL Server, select your hosting solution on the [documentation site](https://docs.datadoghq.com/database_monitoring/#sqlserver) for instructions.
+
+Proceed with the following steps in this guide only if you are installing the standard integration alone.
 
 1. Create a read-only login to connect to your server:
 

@@ -23,6 +23,7 @@ from .util import (
     CONNECTION_METRICS,
     FUNCTION_METRICS,
     QUERY_PG_STAT_DATABASE,
+    QUERY_PG_STAT_WAL_RECEIVER,
     REPLICATION_METRICS,
     SLRU_METRICS,
     DatabaseConfigurationError,
@@ -109,6 +110,9 @@ class PostgreSql(AgentCheck):
                 q_pg_stat_database["query"] += " AND datname in('{}')".format(self._config.dbname)
 
             queries.extend([q_pg_stat_database])
+
+        if self.version >= V10:
+            queries.append(QUERY_PG_STAT_WAL_RECEIVER)
 
         if not queries:
             self.log.debug("no dynamic queries defined")

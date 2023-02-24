@@ -372,3 +372,18 @@ kubernetes_apiserver_emitted_events{kind="ConfigMap",type="Normal"} 7
 # HELP kubernetes_apiserver_kube_events Number of Kubernetes events received by the check.
 # TYPE kubernetes_apiserver_kube_events counter
 kubernetes_apiserver_kube_events{component="",kind="Pod",reason="FailedScheduling",type="Warning"} 10424
+# HELP admission_webhooks_patcher_attempts Number of patch attempts.
+# TYPE admission_webhooks_patcher_attempts counter
+admission_webhooks_patcher_attempts 6
+# HELP admission_webhooks_patcher_completed Number of completed patch attempts.
+# TYPE admission_webhooks_patcher_completed counter
+admission_webhooks_patcher_completed 1
+# HELP admission_webhooks_patcher_errors Number of patch errors.
+# TYPE admission_webhooks_patcher_errors counter
+admission_webhooks_patcher_errors 2
+# HELP admission_webhooks_rc_provider_configs Number of valid remote configurations.
+# TYPE admission_webhooks_rc_provider_configs gauge
+admission_webhooks_rc_provider_configs 2
+# HELP admission_webhooks_rc_provider_configs_invalid Number of invalid remote configurations.
+# TYPE admission_webhooks_rc_provider_configs_invalid gauge
+admission_webhooks_rc_provider_configs_invalid 1

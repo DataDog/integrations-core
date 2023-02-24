@@ -13,7 +13,7 @@ The module is expected to live here.
 """
 import os.path
 
-from pkg_resources import safe_name
+from packaging.utils import canonicalize_name
 
 from .exceptions import NonDatadogPackage
 
@@ -28,7 +28,7 @@ def substitute(target_relpath):
     if not wheel_distribution_name.startswith('datadog_'):
         raise NonDatadogPackage(wheel_distribution_name)
 
-    standard_distribution_name = safe_name(wheel_distribution_name)
+    standard_distribution_name = canonicalize_name(wheel_distribution_name)
 
     # These names are the exceptions. In this case, the wheel distribution name
     # matches exactly the directory name of the check on GitHub.

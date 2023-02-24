@@ -47,7 +47,7 @@ def test_check(aggregator, dd_run_check, check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_metadata_integration(aggregator, dd_run_check, datadog_agent, check):
+def test_metadata_integration(dd_run_check, datadog_agent, check):
     c = check(DEFAULT_INSTANCE)
     c.check_id = 'test:123'
     dd_run_check(c)

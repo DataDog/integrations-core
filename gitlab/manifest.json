@@ -18,8 +18,7 @@
       "Category::Collaboration",
       "Category::Source Control",
       "Category::Issue Tracking",
-      "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Log Collection"
     ]
   },
   "author": {

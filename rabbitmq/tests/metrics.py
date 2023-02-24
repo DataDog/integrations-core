@@ -106,7 +106,7 @@ if RABBITMQ_VERSION >= version.parse('3.8'):
         ]
     )
 
-DEFAULT_OPENMETRICS = [
+DEFAULT_OPENMETRICS = {
     'rabbitmq.alarms.file_descriptor_limit',
     'rabbitmq.alarms.free_disk_space.watermark',
     'rabbitmq.alarms.memory_used_watermark',
@@ -304,9 +304,18 @@ DEFAULT_OPENMETRICS = [
     'rabbitmq.telemetry.scrape.encoded_size_bytes.sum',
     'rabbitmq.telemetry.scrape.size_bytes.count',
     'rabbitmq.telemetry.scrape.size_bytes.sum',
-]
+}
 
-MISSING_OPENMETRICS = [
+SUMMARY_METRICS = {
+    'rabbitmq.telemetry.scrape.duration_seconds.count',
+    'rabbitmq.telemetry.scrape.duration_seconds.sum',
+    'rabbitmq.telemetry.scrape.encoded_size_bytes.count',
+    'rabbitmq.telemetry.scrape.encoded_size_bytes.sum',
+    'rabbitmq.telemetry.scrape.size_bytes.count',
+    'rabbitmq.telemetry.scrape.size_bytes.sum',
+}
+
+MISSING_OPENMETRICS = {
     'rabbitmq.erlang.vm.dist.node_queue_size_bytes',
     'rabbitmq.erlang.vm.dist.node_state',
     'rabbitmq.erlang.vm.dist.port_input_bytes',
@@ -334,15 +343,15 @@ MISSING_OPENMETRICS = [
     'rabbitmq.erlang.vm.dist.send_bytes',
     'rabbitmq.queue.consumer_capacity',
     'rabbitmq.queue.messages.persistent_bytes',
-]
+}
 
 # Metrics only present in the aggregated endpoint.
-AGGREGATED_ONLY_METRICS = [
+AGGREGATED_ONLY_METRICS = {
     "rabbitmq.process_start_time_seconds",
     "rabbitmq.alarms.file_descriptor_limit",
     "rabbitmq.alarms.free_disk_space.watermark",
     "rabbitmq.alarms.memory_used_watermark",
-]
+}
 
 FLAKY_E2E_METRICS = [
     'rabbitmq.erlang.vm.statistics.run_queues_length',
