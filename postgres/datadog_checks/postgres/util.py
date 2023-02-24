@@ -108,17 +108,20 @@ LOCK_METRICS = {
             pn.nspname,
             pd.datname,
             pc.relname,
-            count(*) AS {metrics_columns}
+            count(*)
         FROM pg_locks l
         JOIN pg_database pd ON (l.database = pd.oid)
         JOIN pg_class pc ON (l.relation = pc.oid)
         LEFT JOIN pg_namespace pn ON (pn.oid = pc.relnamespace)
-        WHERE {relations}
-        AND l.mode IS NOT NULL
+        WHERE l.mode IS NOT NULL
         AND pc.relname NOT LIKE 'pg^_%%' ESCAPE '^'
         GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode""",
     'columns': [
+        {'name': 'mode', 'type': 'tag'},
+        {'name': 'locktype', 'type': 'tag'},
+        {'name': 'namespace', 'type': 'tag'},
         {'name': 'db', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
         {'name': 'postgresql.locks', 'type': 'gauge'},
     ],
 }
