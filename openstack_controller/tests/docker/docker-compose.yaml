@@ -25,3 +25,11 @@ services:
       - ./etc/caddy/neutron:/etc/caddy/
     ports:
       - "9696:80"
+  openstack-ironic:
+    image: caddy:2.6.2-alpine
+    container_name: openstack-ironic
+    volumes:
+      - ./fixtures/ironic:/usr/share/caddy
+      - ./etc/caddy/ironic:/etc/caddy/
+    ports:
+      - "6385:80"
