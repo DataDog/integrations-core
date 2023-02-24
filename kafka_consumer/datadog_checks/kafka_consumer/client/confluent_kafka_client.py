@@ -19,6 +19,7 @@ class ConfluentKafkaClient:
         self._highwater_offsets = {}
         self._consumer_offsets = {}
         self._tls_context = tls_context
+
         if isinstance(self.config._kafka_connect_str, list):
             self.config._kafka_connect_str = ','.join(self.config._kafka_connect_str)
 
@@ -48,8 +49,6 @@ class ConfluentKafkaClient:
                 "group.id": consumer_group,
             }
             consumer = Consumer(config)
-
-            # TODO: AdminClient also has a list_topics(), see if Consumer.list_topics() is the same
             topics = consumer.list_topics()
 
             for topic in topics.topics:
@@ -66,6 +65,8 @@ class ConfluentKafkaClient:
                         _, high_offset = consumer.get_watermark_offsets(topic_partition)
 
                         self._highwater_offsets[(topic, partition)] = high_offset
+
+        return self._highwater_offsets
 
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
@@ -130,6 +131,8 @@ class ConfluentKafkaClient:
                     self._consumer_offsets[(consumer_group, topic, partition)] = offset
             except KafkaException as e:
                 self.log.debug("Failed to read consumer offsets for %s: %s", group_id, e)
+
+        return self._consumer_offsets
 
     def get_consumer_offsets_dict(self):
         return self._consumer_offsets
