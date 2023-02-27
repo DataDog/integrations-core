@@ -9,6 +9,7 @@ import pytest
 import requests
 from tests.common import EXCHANGE_MESSAGE_STATS
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 from datadog_checks.rabbitmq.rabbitmq import (
     EXCHANGE_TYPE,
@@ -222,3 +223,4 @@ def test_queues_regexes_exclude_with_negative_lookahead(aggregator, dd_run_check
             "rabbitmq_queue:config/foo.updated-configs.2023-01-18",
             count=0,
         )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
