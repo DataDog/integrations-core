@@ -189,7 +189,7 @@ def test_queues_regexes_exclude_with_negative_lookahead(aggregator, dd_run_check
     """
     data = {}
     for ep in ("queues", "overview"):
-        with open(f"tests/fixtures/mgmt/{ep}.json") as fh:
+        with open("tests/fixtures/mgmt/{}.json".format(ep)) as fh:
             data[common.URL + ep] = json.load(fh)
 
     def mock_get_data(_self, url):
