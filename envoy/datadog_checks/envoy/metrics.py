@@ -20,7 +20,7 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_external_upstream_rq': 'cluster.external.upstream_rq',
     'envoy_cluster_external_upstream_rq_completed': 'cluster.external.upstream_rq_completed',
     'envoy_cluster_external_upstream_rq_xx': 'cluster.external.upstream_rq_xx',
-    'envoy_cluster_external_upstream_rq_time': 'cluster.external_upstream_rq_time',
+    'envoy_cluster_external_upstream_rq_time': 'cluster.external.upstream_rq_time',
     'envoy_cluster_http2_dropped_headers_with_underscores': 'cluster.http2.dropped_headers_with_underscores',
     'envoy_cluster_http2_header_overflow': 'cluster.http2.header_overflow',
     'envoy_cluster_http2_headers_cb_no_stream': 'cluster.http2.headers_cb_no_stream',
