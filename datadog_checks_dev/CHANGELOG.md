@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.8.2 / 2023-02-27
+
+* [Fixed] Update cryptography to 39.0.1. See [#13913](https://github.com/DataDog/integrations-core/pull/13913).
+* [Fixed] Remove autodiscovery category from the SNMP template. See [#13924](https://github.com/DataDog/integrations-core/pull/13924).
+* [Fixed] Remove py2 from the default template. See [#13838](https://github.com/DataDog/integrations-core/pull/13838).
+
 ## 17.8.1 / 2023-01-25
 
 * [Fixed] Call hatch from `sys.executable`. See [#13769](https://github.com/DataDog/integrations-core/pull/13769).
