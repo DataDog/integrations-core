@@ -211,7 +211,6 @@ def test_queues_regexes_exclude_with_negative_lookahead(aggregator, dd_run_check
     with mock.patch.object(RabbitMQManagement, "_get_data", new_callable=lambda: mock_get_data):
         dd_run_check(check)
 
-    print(list(aggregator._metrics))
     for m in metrics.Q_METRICS:
         # Make sure we did collect the metric.
         aggregator.assert_metric(m, at_least=1)
