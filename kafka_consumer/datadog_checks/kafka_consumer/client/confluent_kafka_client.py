@@ -70,7 +70,7 @@ class ConfluentKafkaClient:
 
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
-        offset_futures = {}
+        offset_futures = []
 
         if self.config._monitor_unlisted_consumer_groups:
             consumer_groups_future = self.kafka_client.list_consumer_groups()
@@ -94,7 +94,7 @@ class ConfluentKafkaClient:
                             for partition in list(topics.topics[topic].partitions.keys())
                         ]
                         for topic_partition in topic_partitions:
-                            offset_futures.update(
+                            offset_futures.append(
                                 self.kafka_client.list_consumer_group_offsets(
                                     [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
                                 )
@@ -109,15 +109,15 @@ class ConfluentKafkaClient:
                 for topic in topics.topics:
                     if topic in EXCLUDED_TOPICS:
                         continue
-                    self.log.debug('CONFIGURED TOPICS: %s', topic)
+                    self.log.error('CONFIGURED TOPICS: %s', topic)
                     topic_partitions = [
                         TopicPartition(topic, partition) for partition in list(topics.topics[topic].partitions.keys())
                     ]
                     for topic_partition in topic_partitions:
-                        offset_futures.update(
+                        offset_futures.append(
                             self.kafka_client.list_consumer_group_offsets(
                                 [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
-                            )
+                            )[consumer_group]
                         )
         else:
             raise ConfigurationError(
@@ -125,7 +125,7 @@ class ConfluentKafkaClient:
                 "monitor_unlisted_consumer_groups is %s." % self.config._monitor_unlisted_consumer_groups
             )
 
-        for group_id, future in offset_futures.items():
+        for future in offset_futures:
             try:
                 response_offset_info = future.result()
                 self.log.debug('FUTURE RESULT: %s', response_offset_info)
@@ -165,7 +165,7 @@ class ConfluentKafkaClient:
                             continue
                     self._consumer_offsets[(consumer_group, topic, partition)] = offset
             except KafkaException as e:
-                self.log.debug("Failed to read consumer offsets for %s: %s", group_id, e)
+                self.log.debug("Failed to read consumer offsets for %s: %s", consumer_group, e)
 
         return self._consumer_offsets
 
