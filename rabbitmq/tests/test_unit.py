@@ -199,13 +199,15 @@ def test_queues_regexes_exclude_with_negative_lookahead(aggregator, dd_run_check
         "rabbitmq_api_url": common.URL,
         "rabbitmq_user": "guest",
         "rabbitmq_pass": "guest",
-        "queues_regexes": [r"""(?x) # Enable verbose flag to split expression into commented parts.
+        "queues_regexes": [
+            r"""(?x) # Enable verbose flag to split expression into commented parts.
         ^ # We have to anchor at beginning of string to enforce checking for the prefix.
         (?!
         (?://)? # Match vhost part if it's present.
         config/foo\.updated-configs\.) # Prefix we want to exclude.
         .+ # Match everything else as long as it's NOT preceded by prefix.
-        """],
+        """
+        ],
     }
     check = RabbitMQ("rabbitmq", {}, instances=[instance])
     with mock.patch.object(RabbitMQManagement, "_get_data", new_callable=lambda: mock_get_data):
