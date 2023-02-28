@@ -35,20 +35,21 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
     def mypy_deps(self):
         return self.config.get('mypy-deps', [])
 
-    @cached_property
-    def test_package_install_command(self):
-        if not self.in_core_repo:
+    def dev_package_install_command(self, env_config):
+        if not self.in_core_repo or env_config.get('python') == '2.7':
             return self.pip_install_command('datadog-checks-dev')
         elif not (self.is_test_package or self.is_dev_package):
             return self.pip_install_command('-e', '../datadog_checks_dev')
+        return ""
 
-    def base_package_install_command(self, features):
-        if not self.in_core_repo or os.environ.get('BASE_PACKAGE_FORCE_UNPINNED'):
+    def base_package_install_command(self, features, env_config):
+        if not self.in_core_repo or os.environ.get('BASE_PACKAGE_FORCE_UNPINNED') or env_config.get('python') == '2.7':
             return self.pip_install_command(self.format_base_package(features))
         elif base_package_version := os.environ.get('BASE_PACKAGE_FORCE_VERSION'):
             return self.pip_install_command(self.format_base_package(features, version=base_package_version))
         elif not (self.is_base_package or self.is_dev_package):
             return self.pip_install_command('-e', f'../{self.format_base_package(features, local=True)}')
+        return ""
 
     @staticmethod
     def format_base_package(features, version='', local=False):
@@ -85,11 +86,11 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
             install_commands = []
             if install_command := self.base_package_install_command(
-                config.get('base-package-features', self.config.get('base-package-features'))
+                    config.get('base-package-features', self.config.get('base-package-features')), env_config
             ):
                 install_commands.append(install_command)
-            if self.test_package_install_command:
-                install_commands.append(self.test_package_install_command)
+            if dev_install_command := self.dev_package_install_command(env_config):
+                install_commands.append(dev_install_command)
 
             scripts = env_config.setdefault('scripts', {})
             scripts['_dd-install-packages'] = install_commands
