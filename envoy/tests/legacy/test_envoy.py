@@ -74,6 +74,18 @@ def test_retrocompatible_config(check):
 
 
 @pytest.mark.unit
+def test_retrocompatible_config2(check):
+    instance = deepcopy(INSTANCES['main'])
+    instance['metric_whitelist'] = deepcopy(INSTANCES['include_exclude_metrics']['include_metrics'])
+    instance['metric_blacklist'] = deepcopy(INSTANCES['include_exclude_metrics']['exclude_metrics'])
+
+    c1 = check(instance)
+    c2 = check(INSTANCES['included_excluded_metrics'])
+    assert c1.config_included_metrics == c2.config_included_metrics
+    assert c1.config_excluded_metrics == c2.config_excluded_metrics
+
+
+@pytest.mark.unit
 def test_success_fixture_included_metrics(aggregator, fixture_path, mock_http_response, check, dd_run_check):
     instance = INSTANCES['included_metrics']
     c = check(instance)
