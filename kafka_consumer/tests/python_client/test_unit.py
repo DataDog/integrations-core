@@ -178,7 +178,7 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, check, kafka_inst
         ),
         pytest.param(
             {'kafka_connect_str': 'invalid'},
-            does_not_raise(),  # pytest.raises(Exception) why is this different from kafka-python?
+            pytest.raises(Exception),
             'ConfigurationError: Cannot fetch consumer offsets because no consumer_groups are specified and '
             'monitor_unlisted_consumer_groups is False',
             0,
