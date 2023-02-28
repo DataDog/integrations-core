@@ -86,7 +86,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
             install_commands = []
             if install_command := self.base_package_install_command(
-                    config.get('base-package-features', self.config.get('base-package-features')), env_config
+                config.get('base-package-features', self.config.get('base-package-features')), env_config
             ):
                 install_commands.append(install_command)
             if dev_install_command := self.dev_package_install_command(env_config):
