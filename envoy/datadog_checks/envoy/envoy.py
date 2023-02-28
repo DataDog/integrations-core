@@ -55,13 +55,13 @@ class Envoy(AgentCheck):
 
         included_metrics = set(
             re.sub(r'^envoy\\?\.', '', s, 1)
-            for s in self.instance.get('included_metrics', self.instance.get('metric_whitelist', []))
+            for s in self.instance.get('included_metrics', self.instance.get('metric_whitelist', self.instance.get('include_metrics', [])))
         )
         self.config_included_metrics = [re.compile(pattern) for pattern in included_metrics]
 
         excluded_metrics = set(
             re.sub(r'^envoy\\?\.', '', s, 1)
-            for s in self.instance.get('excluded_metrics', self.instance.get('metric_blacklist', []))
+            for s in self.instance.get('excluded_metrics', self.instance.get('metric_blacklist', self.instance.get('exclude_metrics', [])))
         )
         self.config_excluded_metrics = [re.compile(pattern) for pattern in excluded_metrics]
 
