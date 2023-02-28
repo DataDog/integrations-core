@@ -12,7 +12,7 @@ from aiomultiprocess import Pool
 from packaging.markers import Marker
 from packaging.requirements import Requirement
 from packaging.specifiers import SpecifierSet
-from packaging.version import parse as parse_version
+from packaging.version import InvalidVersion, Version
 
 from ..constants import get_agent_requirements
 from ..dependencies import (
@@ -148,7 +148,11 @@ def sync():
 def filter_releases(releases):
     filtered_releases = []
     for version, artifacts in releases.items():
-        parsed_version = parse_version(version)
+        try:
+            parsed_version = Version(version)
+        except InvalidVersion:
+            continue
+
         if not parsed_version.is_prerelease:
             filtered_releases.append((parsed_version, artifacts))
 
