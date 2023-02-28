@@ -674,7 +674,7 @@ instances:
     ## Use the `nodes_regexes` parameters to specify which nodes you would like to
     ## collect using one or multiple Python regular expressions. The same limit applies as
     ## for the `nodes` field.
-    ## For any named groups in your pattern the names of the groups will be added as tag keys
+    ## For any named groups in your pattern the names of the groups are added as tag keys
     ## paired with the matched contents of the groups as tag values.
     #
     # nodes_regexes:
