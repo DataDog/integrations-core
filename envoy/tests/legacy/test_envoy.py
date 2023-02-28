@@ -80,7 +80,7 @@ def test_retrocompatible_config2(check):
     instance['metric_blacklist'] = deepcopy(INSTANCES['include_exclude_metrics']['exclude_metrics'])
 
     c1 = check(instance)
-    c2 = check(INSTANCES['included_excluded_metrics'])
+    c2 = check(INSTANCES['include_exclude_metrics'])
     assert c1.config_included_metrics == c2.config_included_metrics
     assert c1.config_excluded_metrics == c2.config_excluded_metrics
 
