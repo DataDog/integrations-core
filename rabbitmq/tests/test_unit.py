@@ -186,7 +186,7 @@ def test_disable_nodes(aggregator, check):
 def test_queues_regexes_exclude_with_negative_lookahead(aggregator, dd_run_check):
     """Based on a support case where a customer was confused why their regular expression didn't work.
 
-    The key piece optionally matching the vhost part.
+    The key piece is optionally matching the vhost part.
     """
     data = {}
     for ep in ("queues", "overview"):
