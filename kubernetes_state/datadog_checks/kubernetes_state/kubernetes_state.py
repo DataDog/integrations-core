@@ -246,6 +246,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'kube_hpa_status_desired_replicas': 'hpa.desired_replicas',
                         'kube_hpa_status_current_replicas': 'hpa.current_replicas',
                         'kube_hpa_status_condition': 'hpa.condition',
+                        'kube_hpa_status_target_metric' : 'hpa.status_target_metric',
                         'kube_node_info': 'node.count',
                         'kube_pod_info': 'pod.count',
                         'kube_node_status_allocatable_cpu_cores': 'node.cpu_allocatable',
