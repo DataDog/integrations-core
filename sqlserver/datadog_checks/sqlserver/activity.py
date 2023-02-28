@@ -40,6 +40,11 @@ ACTIVITY_QUERY = re.sub(
     r'\s+',
     ' ',
     """\
+WITH cteBlocking (blocking_session_id) AS (
+    SELECT DISTINCT isnull(er.blocking_session_id, 0) FROM sys.dm_exec_requests AS er
+    WHERE er.blocking_session_id <> 0
+    AND er.blocking_session_id IS NOT NULL
+)
 SELECT
     CONVERT(
         NVARCHAR, TODATETIMEOFFSET(CURRENT_TIMESTAMP, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
@@ -70,7 +75,8 @@ FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_requests req
         ON c.connection_id = req.connection_id
     CROSS APPLY sys.dm_exec_sql_text(req.sql_handle) qt
-WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
+WHERE sess.session_id != @@spid
+    AND (sess.status != 'sleeping' OR sess.session_id IN (SELECT blocking_session_id FROM cteBlocking) OR isnull(req.blocking_session_id, 0) <> 0)
 """,
 ).strip()
 
