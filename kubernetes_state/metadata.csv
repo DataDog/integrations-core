@@ -61,7 +61,7 @@ kubernetes_state.hpa.min_replicas,gauge,,,,Lower limit for the number of pods th
 kubernetes_state.hpa.max_replicas,gauge,,,,Upper limit for the number of pods that can be set by the autoscaler,0,kubernetes,k8s_state.hpa.max_replicas,
 kubernetes_state.hpa.desired_replicas,gauge,,,,Desired number of replicas of pods managed by this autoscaler,0,kubernetes,k8s_state.hpa.desired_replicas,
 kubernetes_state.hpa.condition,gauge,,,,Observed condition of autoscalers to sum by condition and status,0,kubernetes,k8s_state.hpa.status,
-kubernetes_state.hpa.status_target_metric,gauge,,,,The current metric status used by this autoscaler when calculating the desired replica count,
+kubernetes_state.hpa.status_target_metric,gauge,,,,The current metric status used by this autoscaler when calculating the desired replica count,0,kubernetes,k8s_state.hpa.status_target_metric,
 kubernetes_state.pdb.pods_desired,gauge,,,,Minimum desired number of healthy pods,0,kubernetes,k8s_state.pdb.pods_desired,
 kubernetes_state.pdb.disruptions_allowed,gauge,,,,Number of pod disruptions that are currently allowed,0,kubernetes,k8s_state.pdb.disruptions_allowed,
 kubernetes_state.pdb.pods_healthy,gauge,,,,Current number of healthy pods,1,kubernetes,k8s_state.pdb.pods_healthy,
