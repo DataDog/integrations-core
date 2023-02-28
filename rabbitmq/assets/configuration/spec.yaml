@@ -86,7 +86,7 @@ files:
           Use the `nodes_regexes` parameters to specify which nodes you would like to
           collect using one or multiple Python regular expressions. The same limit applies as
           for the `nodes` field.
-          For any named groups in your pattern the names of the groups will be added as tag keys
+          For any named groups in your pattern the names of the groups are added as tag keys
           paired with the matched contents of the groups as tag values.
         value:
           type: array
@@ -112,12 +112,12 @@ files:
           If you have `tag_families` enabled, the first captured group in the pattern is used
           as the `queue_family` tag.
           Named groups in your pattern behave like in `nodes_regexes`.
-          Your pattern will be compared to queue names and queue names prefixed by vhost.
+          Your pattern is compared to queue names and queue names prefixed by vhost.
           For example, if you have a vhost named "myvhost" and a queue named "myqueue", your
-          pattern will be compared to:
+          pattern is compared to:
             - myqueue
             - /myvhost/myqueue
-          If you have no vhost defined in this example, your pattern will be compared to "//myqueue".
+          If you have no vhost defined in this example, your pattern is compared to "//myqueue".
         value:
           type: array
           items:
@@ -142,12 +142,12 @@ files:
           If you have `tag_families` enabled, the first captured group in the pattern is used
           as the `exchange_family` tag.
           Named groups in your pattern behave like in `nodes_regexes`.
-          Your pattern will be compared to exchange names and exchange names prefixed by vhost.
+          Your pattern is compared to exchange names and exchange names prefixed by vhost.
           For example, if you have a vhost named "myvhost" and a exchange named "myexchange", your
-          pattern will be compared to:
+          pattern is compared to:
             - myexchange
             - /myvhost/myexchange
-          If you have no vhost defined in this example, your pattern will be compared to "//myexchange".
+          If you have no vhost defined in this example, your pattern is compared to "//myexchange".
         value:
           type: array
           items:
