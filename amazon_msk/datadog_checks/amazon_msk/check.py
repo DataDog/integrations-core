@@ -136,7 +136,7 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
 
     def _submit_both_gauge_and_count(self, name, value, tags, hostname):
         self.gauge(name, value, tags=tags, hostname=hostname)
-        self.count(name + ".count", value, tags=tags, hostname=hostname)
+        self.monotonic_count(name + ".count", value, tags=tags, hostname=hostname)
 
     def configure_additional_transformers(self, transformer_data):
         for metric, data in METRICS_WITH_NAME_AS_LABEL.items():

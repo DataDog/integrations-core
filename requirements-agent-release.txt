@@ -67,7 +67,7 @@ datadog-hivemq==1.6.1
 datadog-http-check==8.2.0
 datadog-hudi==2.1.1
 datadog-hyperv==1.8.0; sys_platform == 'win32'
-datadog-ibm-ace==1.0.3
+datadog-ibm-ace==1.0.4
 datadog-ibm-db2==1.11.2
 datadog-ibm-i==1.5.0; sys_platform != 'win32'
 datadog-ibm-mq==4.0.3
@@ -114,7 +114,7 @@ datadog-openstack==1.13.1
 datadog-oracle==4.0.1
 datadog-pan-firewall==1.1.0
 datadog-pdh-check==1.16.1; sys_platform == 'win32'
-datadog-pgbouncer==4.3.1; sys_platform != 'win32'
+datadog-pgbouncer==4.4.1; sys_platform != 'win32'
 datadog-php-fpm==2.2.0
 datadog-postfix==1.12.0; sys_platform != 'win32'
 datadog-postgres==13.3.0
@@ -139,7 +139,7 @@ datadog-snowflake==4.5.0
 datadog-solr==1.11.1
 datadog-sonarqube==2.2.3
 datadog-spark==3.1.3
-datadog-sqlserver==10.1.2
+datadog-sqlserver==10.1.3
 datadog-squid==2.2.0
 datadog-ssh-check==2.3.3
 datadog-statsd==1.10.0

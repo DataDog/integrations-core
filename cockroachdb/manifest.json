@@ -45,7 +45,7 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures":[
-        "/cockroach/cockroach"
+        "cockroach"
       ]
     },
     "dashboards": {

@@ -1,6 +1,6 @@
 # CHANGELOG - oracle
 
-## 4.0.1 / 2023-01-20
+## 4.0.1 / 2023-01-20 / Agent 7.43.0
 
 * [Fixed] Do not add `can_use_jdbc` to `check_initializations`. See [#13521](https://github.com/DataDog/integrations-core/pull/13521).
 

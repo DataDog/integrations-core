@@ -18,6 +18,7 @@ from tests.metrics import (
 )
 
 from . import common, metrics
+from .conftest import EXPECTED_AUTODISCOVERY_CHECKS
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only]
 
@@ -45,7 +46,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         dd_agent_check,
         {'init_config': {}, 'instances': []},
         rate=True,
-        discovery_min_instances=5,
+        discovery_min_instances=EXPECTED_AUTODISCOVERY_CHECKS,
         discovery_timeout=10,
     )
 
@@ -115,20 +116,21 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=common_tags)
 
     # ==== test snmp v3 ===
-    common_tags = [
-        'snmp_device:{}'.format(snmp_device),
-        'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
-        'snmp_host:41ba948911b9',
-        'snmp_profile:generic-router',
-        'device_namespace:default',
-    ]
+    for auth_proto in ['sha', 'sha256']:
+        common_tags = [
+            'snmp_device:{}'.format(snmp_device),
+            'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
+            'snmp_host:41ba948911b9',
+            'snmp_profile:generic-router',
+            'device_namespace:test-auth-proto-{}'.format(auth_proto),
+        ]
 
-    common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
-    aggregator.assert_metric('snmp.sysUpTimeInstance', tags=common_tags)
-    for metric in IF_SCALAR_GAUGE:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
+        common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
+        aggregator.assert_metric('snmp.sysUpTimeInstance', tags=common_tags)
+        for metric in IF_SCALAR_GAUGE:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
 
-    # test ignored IPs
+    # ==== test ignored IPs ====
     tags = [
         'snmp_device:{}'.format(_build_device_ip(container_ip, '2')),
         'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),

@@ -1,6 +1,6 @@
 # CHANGELOG - Envoy
 
-## 2.4.1 / 2023-01-20
+## 2.4.1 / 2023-01-20 / Agent 7.43.0
 
 * [Fixed] Fix metric mapping of counter metrics in the Openmetrics V2 version of the check. See [#13573](https://github.com/DataDog/integrations-core/pull/13573).
 

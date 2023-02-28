@@ -1,6 +1,6 @@
 # CHANGELOG - Cloudera
 
-## 1.0.1 / 2023-01-27
+## 1.0.1 / 2023-01-27 / Agent 7.43.0
 
 * [Fixed] Make debug logging less verbose. See [#13814](https://github.com/DataDog/integrations-core/pull/13814).
 

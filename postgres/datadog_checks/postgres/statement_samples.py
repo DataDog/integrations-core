@@ -90,7 +90,7 @@ PG_STAT_ACTIVITY_QUERY = re.sub(
     SELECT {current_time_func} {pg_stat_activity_cols} {pg_blocking_func} FROM {pg_stat_activity_view}
     WHERE
         {backend_type_predicate}
-        (coalesce(TRIM(query), '') != '' AND query_start IS NOT NULL {extra_filters})
+        (coalesce(TRIM(query), '') != '' AND pid != pg_backend_pid() AND query_start IS NOT NULL {extra_filters})
 """,
 ).strip()
 
@@ -100,7 +100,7 @@ PG_ACTIVE_CONNECTIONS_QUERY = re.sub(
     """
     SELECT application_name, state, usename, datname, count(*) as connections
     FROM {pg_stat_activity_view}
-    WHERE client_port IS NOT NULL
+    WHERE pid != pg_backend_pid() AND client_port IS NOT NULL
     {extra_filters}
     GROUP BY application_name, state, usename, datname
 """,
