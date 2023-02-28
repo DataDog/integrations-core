@@ -13,6 +13,9 @@ kube_hpa_status_current_replicas{hpa="hpa1",namespace="ns1"} 2
 # HELP kube_hpa_status_desired_replicas Desired number of replicas of pods managed by this autoscaler.
 # TYPE kube_hpa_status_desired_replicas gauge
 kube_hpa_status_desired_replicas{hpa="hpa1",namespace="ns1"} 2
+# HELP kube_hpa_status_target_metric The current metric status used by this autoscaler when calculating the desired replica count.
+# TYPE kube_hpa_status_target_metric gauge
+kube_hpa_status_target_metric{hpa="hpa1", namespace="ns1", metric_name="cpu", metric_target_type="utilization"} 50
 # HELP kube_cronjob_created Unix creation timestamp
 # TYPE kube_cronjob_created gauge
 kube_cronjob_created{cronjob="hello",namespace="default"} 1.509978394e+09
