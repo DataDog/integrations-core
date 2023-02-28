@@ -1,6 +1,18 @@
 #!/bin/bash
 set -e
 
+if [[ !("$PG_MAJOR" == 9.* ) ]]; then
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
+    CREATE TABLE personspart (personid SERIAL, lastname VARCHAR(255), firstname VARCHAR(255), address VARCHAR(255), city VARCHAR(255)) PARTITION BY RANGE (personid);
+    CREATE TABLE personspart_1 PARTITION OF personspart FOR VALUES FROM (MINVALUE) TO (100);
+    CREATE TABLE personspart_2 PARTITION OF personspart FOR VALUES FROM (100) TO (MAXVALUE);
+    INSERT INTO personspart (lastname, firstname, address, city) VALUES ('Cavaille', 'Leo', 'Midtown', 'New York'), ('Someveryveryveryveryveryveryveryveryveryverylongname', 'something', 'Avenue des Champs Elysees', 'Beautiful city of lights');
+    SELECT * FROM personspart;
+    SELECT * FROM personspart;
+    SELECT * FROM personspart;
+EOSQL
+fi
+
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     CREATE TABLE persons (personid SERIAL, lastname VARCHAR(255), firstname VARCHAR(255), address VARCHAR(255), city VARCHAR(255));
     INSERT INTO persons (lastname, firstname, address, city) VALUES ('Cavaille', 'Leo', 'Midtown', 'New York'), ('Someveryveryveryveryveryveryveryveryveryverylongname', 'something', 'Avenue des Champs Elysees', 'Beautiful city of lights');

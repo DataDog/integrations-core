@@ -64,7 +64,7 @@ REL_METRICS = {
     'query': """
 SELECT relname,schemaname,{metrics_columns}
   FROM pg_stat_user_tables
- WHERE {relations}""",
+  WHERE {relations}""",
     'relation': True,
 }
 
@@ -91,26 +91,59 @@ SELECT relname,
 
 
 # The catalog pg_class catalogs tables and most everything else that has columns or is otherwise similar to a table.
-# For this integration we are restricting the query to ordinary tables.
+# For this integration we are restricting the query to ordinary tables and partitioned tables.
+# Partitioned tables sizes are calculated as the sum of sizes of their child partitions.
 SIZE_METRICS = {
     'descriptors': [('nspname', 'schema'), ('relname', 'table')],
     'metrics': {
-        'pg_table_size(C.oid) as table_size': ('postgresql.table_size', AgentCheck.gauge),
-        'pg_indexes_size(C.oid) as index_size': ('postgresql.index_size', AgentCheck.gauge),
-        'pg_total_relation_size(C.oid) as total_size': ('postgresql.total_size', AgentCheck.gauge),
+        'table_size': ('postgresql.table_size', AgentCheck.gauge),
+        'index_size': ('postgresql.index_size', AgentCheck.gauge),
+        'total_size': ('postgresql.total_size', AgentCheck.gauge),
     },
     'relation': True,
     'query': """
 SELECT
-  N.nspname,
+  nspname,
   relname,
   {metrics_columns}
-FROM pg_class C
-LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
-WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
-  nspname !~ '^pg_toast' AND
-  relkind = 'r' AND
-  {relations}""",
+FROM (
+    SELECT
+        N.nspname,
+        relname,
+        pg_table_size(C.oid) as table_size,
+        pg_indexes_size(C.oid) as index_size,
+        pg_total_relation_size(C.oid) as total_size
+    FROM pg_class C
+    LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
+    WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
+      nspname !~ '^pg_toast' AND relkind = 'r'
+    UNION
+    SELECT
+        nspname,
+        relname,
+        table_size,
+        index_size,
+        total_size
+    FROM (
+        SELECT
+            N.nspname,
+            I.inhparent,
+            sum(pg_table_size(C.oid)) as table_size,
+            sum(pg_indexes_size(C.oid)) AS index_size,
+            sum(pg_total_relation_size(C.oid)) as total_size
+        FROM pg_class C
+        JOIN pg_namespace N ON (N.oid = C.relnamespace)
+        JOIN pg_catalog.pg_statio_user_tables P ON (P.relname = C.relname)
+        JOIN pg_database D ON (C.relowner = D.datdba)
+        JOIN pg_inherits I ON (I.inhrelid = C.oid)
+        WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
+            nspname !~ '^pg_toast' AND relkind = 'r'
+        GROUP BY N.nspname, I.inhparent
+    ) AS partitioned_table_sizes
+    JOIN pg_class ON (oid = inhparent)
+) AS all_table_sizes
+WHERE {relations}
+""",
 }
 
 # The pg_statio_all_tables view will contain one row for each table in the current database,

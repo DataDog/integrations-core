@@ -105,8 +105,19 @@ def check_common_metrics(aggregator, expected_tags, count=1):
 
 
 def check_db_count(aggregator, expected_tags, count=1):
+    # Partitioned table is not loaded for testing PG version < 10
+    if float(POSTGRES_VERSION) < 10:
+        expected_tables = 5
+    # Partitioned table (parent) do not count until PG 14
+    elif float(POSTGRES_VERSION) < 14:
+        expected_tables = 7
+    else:
+        expected_tables = 8
     aggregator.assert_metric(
-        'postgresql.table.count', value=5, count=count, tags=expected_tags + ['db:{}'.format(DB_NAME), 'schema:public']
+        'postgresql.table.count',
+        value=expected_tables,
+        count=count,
+        tags=expected_tags + ['db:{}'.format(DB_NAME), 'schema:public'],
     )
     aggregator.assert_metric('postgresql.db.count', value=5, count=1)
 

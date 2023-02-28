@@ -7,7 +7,7 @@ import pytest
 from datadog_checks.base import ConfigurationError
 from datadog_checks.postgres.relationsmanager import RelationsManager
 
-from .common import DB_NAME, HOST, PORT
+from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
 
 RELATION_METRICS = [
     'postgresql.seq_scans',
@@ -45,8 +45,25 @@ IDX_METRICS = ['postgresql.index_scans', 'postgresql.index_rows_read', 'postgres
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_relations_metrics(aggregator, integration_check, pg_instance):
-    pg_instance['relations'] = ['persons']
+@pytest.mark.parametrize(
+    'relation, not_expected_relation_metrics',
+    [
+        pytest.param('persons', [], id='regular table'),
+        pytest.param(
+            'personspart',
+            RELATION_METRICS
+            if POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 14
+            else [metric for metric in RELATION_METRICS if 'blocks' in metric],
+            id='partitioned parent table',
+        ),
+        pytest.param('personspart_1', [], id='partition child table'),
+    ],
+)
+def test_relations_metrics(aggregator, integration_check, pg_instance, relation, not_expected_relation_metrics):
+    if relation != 'persons' and (POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 10):
+        pytest.skip("partitioned tables only tested for PG version 10+")
+
+    pg_instance['relations'] = [relation]
 
     posgres_check = integration_check(pg_instance)
     posgres_check.check(pg_instance)
@@ -54,21 +71,26 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
     expected_tags = pg_instance['tags'] + [
         'port:{}'.format(pg_instance['port']),
         'db:%s' % pg_instance['dbname'],
-        'table:persons',
+        'table:{}'.format(relation),
         'schema:public',
     ]
 
     expected_size_tags = pg_instance['tags'] + [
         'port:{}'.format(pg_instance['port']),
         'db:%s' % pg_instance['dbname'],
-        'table:persons',
+        'table:{}'.format(relation),
         'schema:public',
     ]
 
-    for name in RELATION_METRICS:
+    expected_relation_metrics = list(set(RELATION_METRICS) - set(not_expected_relation_metrics))
+
+    for name in expected_relation_metrics:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
 
-    # 'persons' db don't have any indexes
+    for name in not_expected_relation_metrics:
+        aggregator.assert_metric(name, count=0, tags=expected_tags)
+
+    # 'persons' and 'personspart' tables don't have any indexes
     for name in RELATION_INDEX_METRICS:
         aggregator.assert_metric(name, count=0, tags=expected_tags)
 
