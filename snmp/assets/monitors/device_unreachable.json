@@ -8,7 +8,7 @@
   ],
   "options": {
     "thresholds": {
-      "critical": 1
+      "critical": 0.8
     },
     "notify_audit": false,
     "require_full_window": false,
