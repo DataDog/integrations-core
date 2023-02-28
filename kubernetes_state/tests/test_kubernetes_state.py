@@ -50,6 +50,7 @@ METRICS = [
     NAMESPACE + '.hpa.desired_replicas',
     NAMESPACE + '.hpa.current_replicas',
     NAMESPACE + '.hpa.condition',
+    NAMESPACE + '.hpa.status_target_metric',
     # pdb
     NAMESPACE + '.pdb.disruptions_allowed',
     NAMESPACE + '.pdb.pods_desired',
