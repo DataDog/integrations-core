@@ -1,0 +1,17 @@
+# Profile for cisco Wireless LAN Controllers
+
+extends:
+  - _base.yaml
+  - _cisco-generic.yaml
+
+device:
+  vendor: "cisco"
+
+sysobjectid: #TODO
+  - 1.3.6.1.4.1.9.1.
+
+
+metadata:
+
+
+metrics:
