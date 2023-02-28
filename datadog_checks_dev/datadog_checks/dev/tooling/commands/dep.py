@@ -11,7 +11,7 @@ from aiohttp import request
 from aiomultiprocess import Pool
 from packaging.markers import Marker
 from packaging.requirements import Requirement
-from packaging.specifiers import SpecifierSet
+from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from packaging.version import InvalidVersion, Version
 
 from ..constants import get_agent_requirements
@@ -162,7 +162,12 @@ def filter_releases(releases):
 def artifact_compatible_with_python(artifact, major_version):
     requires_python = artifact['requires_python']
     if requires_python is not None:
-        return SpecifierSet(requires_python).contains(SUPPORTED_PYTHON_MINOR_VERSIONS[major_version])
+        try:
+            specifiers = SpecifierSet(requires_python)
+        except InvalidSpecifier:
+            return False
+
+        return specifiers.contains(SUPPORTED_PYTHON_MINOR_VERSIONS[major_version])
 
     python_version = artifact['python_version']
     return f'py{major_version}' in python_version or f'cp{major_version}' in python_version
