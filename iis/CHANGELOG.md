@@ -1,6 +1,6 @@
 # CHANGELOG - iis
 
-## 2.18.1 / 2023-02-08
+## 2.18.1 / 2023-02-08 / Agent 7.42.2
 
 * [Fixed] Fix IIS Check memory leaked due to a bug in win32pdh.GetFormattedCounterArray(). See [#13897](https://github.com/DataDog/integrations-core/pull/13897).
 

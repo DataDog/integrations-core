@@ -1,6 +1,6 @@
 # CHANGELOG - IBM MQ
 
-## 4.0.3 / 2023-01-25
+## 4.0.3 / 2023-01-25 / Agent 7.43.0
 
 * [Fixed] Allow setting the try basic auth value from config in all cases. See [#13781](https://github.com/DataDog/integrations-core/pull/13781).
 

@@ -1,5 +1,9 @@
 # CHANGELOG - IBM ACE
 
+## 1.0.4 / 2023-02-15
+
+* [Fixed] Use `count` instead of `monotonic_count` for counters. See [#13959](https://github.com/DataDog/integrations-core/pull/13959).
+
 ## 1.0.3 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).

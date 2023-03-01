@@ -1,6 +1,6 @@
 # CHANGELOG - ECS Fargate
 
-## 3.3.0 / 2023-01-20
+## 3.3.0 / 2023-01-20 / Agent 7.43.0
 
 * [Added] Add task CPU Limit to ECS Fargate integration and use nanocore as CPU unit. See [#13551](https://github.com/DataDog/integrations-core/pull/13551).
 

@@ -19,12 +19,16 @@ from .common import (
     HOST,
     PORT,
     POSTGRES_VERSION,
+    assert_metric_at_least,
     check_activity_metrics,
     check_bgw_metrics,
     check_common_metrics,
     check_connection_metrics,
     check_db_count,
+    check_replication_slots,
     check_slru_metrics,
+    check_stat_replication,
+    check_wal_receiver_metrics,
     requires_static_version,
 )
 from .utils import requires_over_10
@@ -44,6 +48,24 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check_connection_metrics(aggregator, expected_tags=expected_tags)
     check_db_count(aggregator, expected_tags=expected_tags)
     check_slru_metrics(aggregator, expected_tags=expected_tags)
+    check_stat_replication(aggregator, expected_tags=expected_tags)
+    check_wal_receiver_metrics(aggregator, expected_tags=expected_tags, connected=0)
+
+    replication_slot_tags = expected_tags + [
+        'slot_name:replication_slot',
+        'slot_persistence:permanent',
+        'slot_state:active',
+        'slot_type:physical',
+    ]
+    check_replication_slots(aggregator, expected_tags=replication_slot_tags)
+
+    logical_replication_slot_tags = expected_tags + [
+        'slot_name:logical_slot',
+        'slot_persistence:permanent',
+        'slot_state:inactive',
+        'slot_type:logical',
+    ]
+    check_replication_slots(aggregator, expected_tags=logical_replication_slot_tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -178,15 +200,6 @@ def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_inst
     check_activity_metrics(aggregator, expected_tags)
 
 
-def assert_metric_at_least(aggregator, metric_name, expected_tag, count, lower_bound):
-    found_values = 0
-    for metric in aggregator.metrics(metric_name):
-        if expected_tag in metric.tags:
-            assert metric.value >= lower_bound
-            found_values += 1
-    assert found_values == count
-
-
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
@@ -256,7 +269,13 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
 
     # Check that xact_start_age has a value greater than the trasaction_age lower bound
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=test_tags)
-    assert_metric_at_least(aggregator, 'postgresql.activity.xact_start_age', 'app:test', 1, transaction_age_lower_bound)
+    assert_metric_at_least(
+        aggregator,
+        'postgresql.activity.xact_start_age',
+        tags=test_tags,
+        count=1,
+        lower_bound=transaction_age_lower_bound,
+    )
 
 
 @requires_over_10
@@ -343,6 +362,9 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
 def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, aggregator, pg_instance):
     pg_instance['dbm'] = dbm_enabled
     pg_instance['collect_activity_metrics'] = True
+    pg_instance['query_samples'] = {'enabled': False}
+    pg_instance['query_metrics'] = {'enabled': False}
+
     pg_instance['disable_generic_tags'] = False  # This flag also affects the hostname
     pg_instance['reported_hostname'] = reported_hostname
     check = PostgreSql('test_instance', {}, [pg_instance])

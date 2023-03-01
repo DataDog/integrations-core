@@ -92,3 +92,8 @@ done
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" dogs_nofunc <<-'EOSQL'
     DROP FUNCTION datadog.explain_statement(l_query text, out explain JSON)
 EOSQL
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-'EOSQL'
+    SELECT * FROM pg_create_physical_replication_slot('replication_slot');
+    SELECT * FROM pg_create_logical_replication_slot('logical_slot', 'test_decoding');
+EOSQL

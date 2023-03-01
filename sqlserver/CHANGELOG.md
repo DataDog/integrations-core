@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 10.1.3 / 2023-02-01 / Agent 7.43.0
+
+* [Fixed] Fix sqlserver.database.state not being sent for all databases. See [#13735](https://github.com/DataDog/integrations-core/pull/13735).
+
 ## 10.1.2 / 2023-01-26
 
 * [Fixed] Bug Fix: Azure SQL DB database name tags properly applied on perf metrics. See [#13757](https://github.com/DataDog/integrations-core/pull/13757).

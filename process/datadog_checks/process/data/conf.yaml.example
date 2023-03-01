@@ -72,8 +72,8 @@ instances:
     # pid_file: <PID_FILE>
 
     ## @param exact_match - boolean - optional - default: true
-    ## Matches your search_string on proc.name().
-    ## If you want to match on a substring within proc.cmdline(), set this to false
+    ## If you want to match on a substring within `ps -e`, a non full-format CMD, set this to true.
+    ## If you want to match on a substring within `ps -ef`, a full-format CMD, set this to false.
     ## Regex is also supported when this flag is set to `false`.
     ##
     ## Note: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that does not have access to the full

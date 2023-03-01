@@ -38,7 +38,10 @@
       },
       "metrics": {
         "prefix": "kafka.",
-        "check": "kafka.net.bytes_out.rate",
+        "check": [
+          "kafka.net.bytes_out",
+          "kafka.net.bytes_out.rate"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {

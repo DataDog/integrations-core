@@ -1,6 +1,6 @@
 # CHANGELOG - SonarQube
 
-## 2.2.3 / 2023-01-16
+## 2.2.3 / 2023-01-16 / Agent 7.43.0
 
 * [Fixed] Support components from paginated endpoint. See [#13699](https://github.com/DataDog/integrations-core/pull/13699).
 

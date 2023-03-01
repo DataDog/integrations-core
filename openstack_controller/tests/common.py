@@ -8,6 +8,8 @@ CHECK_NAME = 'openstack'
 
 FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
 
+USE_OPENSTACK_SANDBOX = os.environ.get('USE_OPENSTACK_SANDBOX')
+
 ALL_IDS = ['server-1', 'server-2', 'other-1', 'other-2']
 EXCLUDED_NETWORK_IDS = ['server-1', 'other-.*']
 EXCLUDED_SERVER_IDS = ['server-2', 'other-.*']
