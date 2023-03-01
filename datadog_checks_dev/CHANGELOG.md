@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 17.9.0 / 2023-03-01
+
+* [Added] Add process and runtime to allowed prefixes. See [#14058](https://github.com/DataDog/integrations-core/pull/14058).
+* [Fixed] Fix dependency update logic for latest versions of `packaging`. See [#14055](https://github.com/DataDog/integrations-core/pull/14055).
+
 ## 17.8.2 / 2023-02-27
 
 * [Fixed] Update cryptography to 39.0.1. See [#13913](https://github.com/DataDog/integrations-core/pull/13913).
