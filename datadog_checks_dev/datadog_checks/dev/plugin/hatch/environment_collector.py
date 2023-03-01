@@ -35,15 +35,15 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
     def mypy_deps(self):
         return self.config.get('mypy-deps', [])
 
-    def dev_package_install_command(self, env_config):
-        if not self.in_core_repo or env_config.get('python') == '2.7':
+    def dev_package_install_command(self, in_py2_env):
+        if not self.in_core_repo or in_py2_env:
             return self.pip_install_command('datadog-checks-dev')
         elif not (self.is_test_package or self.is_dev_package):
             return self.pip_install_command('-e', '../datadog_checks_dev')
         return ""
 
-    def base_package_install_command(self, features, env_config):
-        if not self.in_core_repo or os.environ.get('BASE_PACKAGE_FORCE_UNPINNED') or env_config.get('python') == '2.7':
+    def base_package_install_command(self, features, in_py2_env):
+        if not self.in_core_repo or os.environ.get('BASE_PACKAGE_FORCE_UNPINNED') or in_py2_env:
             return self.pip_install_command(self.format_base_package(features))
         elif base_package_version := os.environ.get('BASE_PACKAGE_FORCE_VERSION'):
             return self.pip_install_command(self.format_base_package(features, version=base_package_version))
@@ -69,8 +69,18 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
     def finalize_environments(self, config):
         for env_config in config.values():
-            if env_config.get('python') == '2.7':
-                env_config['dev-mode'] = False
+            in_py2_env = env_config.get('python') == '2.7'
+            env_config['dev-mode'] = not in_py2_env
+            install_commands = []
+            if install_command := self.base_package_install_command(
+                config.get('base-package-features', self.config.get('base-package-features')), in_py2_env
+            ):
+                install_commands.append(install_command)
+            if dev_install_command := self.dev_package_install_command(in_py2_env):
+                install_commands.append(dev_install_command)
+            env_config['scripts']['_dd-install-packages'] = install_commands
+            env_config.setdefault('post-install-commands', []).insert(0, '_dd-install-packages')
+
         return config
 
     def finalize_config(self, config):
@@ -84,18 +94,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             if not (self.is_test_package or self.is_dev_package):
                 env_config.setdefault('features', ['deps'])
 
-            install_commands = []
-            if install_command := self.base_package_install_command(
-                config.get('base-package-features', self.config.get('base-package-features')), env_config
-            ):
-                install_commands.append(install_command)
-            if dev_install_command := self.dev_package_install_command(env_config):
-                install_commands.append(dev_install_command)
-
             scripts = env_config.setdefault('scripts', {})
-            scripts['_dd-install-packages'] = install_commands
-            env_config.setdefault('post-install-commands', []).insert(0, '_dd-install-packages')
-
             scripts['_dd-test'] = ['pytest -v --benchmark-skip {args:tests}']
             scripts['_dd-benchmark'] = ['pytest -v --benchmark-only --benchmark-cprofile=tottime {args:tests}']
 
