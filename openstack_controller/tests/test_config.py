@@ -24,6 +24,19 @@ from .common import CHECK_NAME, TEST_OPENSTACK_NO_AUTH_CONFIG_PATH
             'Missing name',
             id='no name, keystone_server_url, cfg path',
         ),
+    ],
+)
+def test_config_invalid(instance, exception_msg):
+
+    check = OpenStackControllerCheck(CHECK_NAME, {}, [instance])
+
+    with pytest.raises(Exception, match=exception_msg):
+        check.check(instance)
+
+
+@pytest.mark.parametrize(
+    'instance, exception_msg',
+    [
         pytest.param(
             {
                 'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}},
@@ -41,7 +54,7 @@ from .common import CHECK_NAME, TEST_OPENSTACK_NO_AUTH_CONFIG_PATH
                 'name': 'test',
             },
             'Auth plugin requires parameters which were not given: auth_url',
-            id='bad openstack_cloud_name',
+            id='openstack_config_file_path doesn\' exist',
         ),
         pytest.param(
             {
@@ -51,11 +64,11 @@ from .common import CHECK_NAME, TEST_OPENSTACK_NO_AUTH_CONFIG_PATH
                 'openstack_config_file_path': TEST_OPENSTACK_NO_AUTH_CONFIG_PATH,
             },
             re.escape('__init__() got an unexpected keyword argument \'auth_type\''),
-            id='bad config file',
+            id='invalid openstack_config_file',
         ),
     ],
 )
-def test_config_invalid(instance, exception_msg):
+def test_config_invalid_openstack_auth(instance, exception_msg):
 
     check = OpenStackControllerCheck(CHECK_NAME, {}, [instance])
 
