@@ -38,6 +38,8 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
+    # confluent-kafka is in fact built in omnibus, so bumping it here will have no effect
+    "confluent-kafka==2.0.2; python_version > '3.0'", 
     "gssapi==1.8.2; python_version > '3.0'",
     "kafka-python==2.0.2",
     "kazoo==2.9.0",
