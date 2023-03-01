@@ -35,6 +35,8 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.device.reachable',
     'snmp.device.unreachable',
     'snmp.interface.status',
+    'snmp.ifInSpeed',
+    'snmp.ifOutSpeed',
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
