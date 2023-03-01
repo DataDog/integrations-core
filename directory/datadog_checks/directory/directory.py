@@ -116,7 +116,9 @@ class DirectoryCheck(AgentCheck):
                     self.log.debug('File entries in matched files: %s', str(file_entry))
                     file_stat = file_entry.stat(follow_symlinks=self._config.stat_follow_symlinks)
                 except OSError as ose:
-                    self.warning('DirectoryCheck: could not stat file %s - %s', join(root, file_entry.name), ose)
+                    self.log.debug(
+                        'DirectoryCheck: could not stat file %s - %s, skipping it.', join(root, file_entry.name), ose
+                    )
                 else:
                     # file specific metrics
                     directory_bytes += file_stat.st_size
