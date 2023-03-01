@@ -35,7 +35,10 @@ class ConfluentKafkaClient(KafkaClient):
         raise NotImplementedError
 
     def get_partitions_for_topic(self, topic):
-        raise NotImplementedError
+        cluster_metadata = self.kafka_client.list_topics(topic)
+        topics = cluster_metadata.topics
+        partitions = list(topics[topic].partitions.keys())
+        return partitions or []
 
     def request_metadata_update(self):
         raise NotImplementedError
