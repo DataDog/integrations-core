@@ -1,0 +1,45 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "d50aeab6-c26b-49df-aeb1-910d5d1a3e48",
+  "app_id": "snmp-netapp",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect SNMP metrics from your NetApp network devices.",
+    "title": "NetApp",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Monitoring",
+      "Category::Notification",
+      "Category::Network",
+      "Category::SNMP"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "NetApp",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {}
+}

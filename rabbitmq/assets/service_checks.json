@@ -27,5 +27,20 @@
         ],
         "name": "Status",
         "description": "Returns the status of the RabbitMQ server. Returns `OK` if the agent was able to contact the API and `CRITICAL` otherwise."
+    },
+    {
+        "agent_version": "7.44.0",
+        "integration": "RabbitMQ",
+        "check": "rabbitmq.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`."
     }
 ]

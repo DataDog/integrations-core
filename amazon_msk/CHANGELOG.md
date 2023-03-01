@@ -1,6 +1,6 @@
 # CHANGELOG - Amazon MSK
 
-## 3.2.3 / 2023-01-20
+## 3.2.3 / 2023-01-20 / Agent 7.43.0
 
 * [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).
 

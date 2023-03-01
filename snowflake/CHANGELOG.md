@@ -1,6 +1,6 @@
 # CHANGELOG - Snowflake
 
-## 4.5.0 / 2023-01-20
+## 4.5.0 / 2023-01-20 / Agent 7.43.0
 
 * [Added] Bump snowflake to 2.8.3. See [#13756](https://github.com/DataDog/integrations-core/pull/13756).
 * [Fixed] Bump the base check dependency. See [#13641](https://github.com/DataDog/integrations-core/pull/13641).
