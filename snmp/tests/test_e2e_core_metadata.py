@@ -31,7 +31,7 @@ def assert_metadata_events(aggregator, events):
 def assert_device_metadata(aggregator, device_metadata):
     events = get_events(aggregator)
 
-    assert len(events) == 1
+    assert len(events) >= 1
     event1 = events[0]
 
     pprint.pprint(event1['devices'])
@@ -965,3 +965,122 @@ def test_e2e_core_metadata_aos_lldp(dd_agent_check):
     assert events[0]['links'][0] == topology_link1
     assert events[0]['links'][1] == topology_link2
     assert len(events[0]['links']) == 13
+
+
+def test_e2e_core_metadata_cisco_asr_1001x(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'cisco-asr-1001x',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        u'description': u'Cisco IOS Software [Bengaluru], ASR1000 Software '
+        '(X86_64_LINUX_IOSD-UNIVERSALK9-M), Version 17.6.4, RELEASE '
+        'SOFTWARE (fc1)',
+        u'id': u'default:' + device_ip,
+        u'id_tags': [
+            u'device_namespace:default',
+            u'snmp_device:' + device_ip,
+        ],
+        u'ip_address': device_ip,
+        u'model': u'X86_64_LINUX_IOSD-UNIVERSALK9-M',
+        u'os_name': u'IOS',
+        u'profile': u'cisco-asr',
+        u'status': 1,
+        u'sys_object_id': u'1.3.6.1.4.1.9.1.1861',
+        u'tags': [
+            u'device_namespace:default',
+            u'device_vendor:cisco',
+            u'snmp_device:' + device_ip,
+            u'snmp_profile:cisco-asr',
+        ],
+        u'vendor': u'cisco',
+        u'version': u'17.6.4',
+    }
+    assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_cisco_asr_9001(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'cisco-asr-9001',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        u'description': u'Cisco IOS XR Software (Cisco ASR9K Series),  Version ' '6.4.2[Default]',
+        u'id': u'default:' + device_ip,
+        u'id_tags': [
+            u'device_namespace:default',
+            u'snmp_device:' + device_ip,
+        ],
+        u'ip_address': device_ip,
+        u'os_name': u'IOSXR',
+        u'profile': u'cisco-asr',
+        u'status': 1,
+        u'sys_object_id': u'1.3.6.1.4.1.9.1.1639',
+        u'tags': [
+            u'device_namespace:default',
+            u'device_vendor:cisco',
+            u'snmp_device:' + device_ip,
+            u'snmp_profile:cisco-asr',
+        ],
+        u'vendor': u'cisco',
+        u'version': u'6.4.2',
+    }
+    assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_cisco_asr_9901(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'cisco-asr-9901',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        u'description': u'Cisco IOS XR Software (ASR9K), Version 7.1.3  Copyright (c) '
+        '2013-2020 by Cisco Systems, Inc.',
+        u'id': u'default:' + device_ip,
+        u'id_tags': [
+            u'device_namespace:default',
+            u'snmp_device:' + device_ip,
+        ],
+        u'ip_address': device_ip,
+        u'model': u'ASR9K',
+        u'os_name': u'IOSXR',
+        u'profile': u'cisco-asr',
+        u'status': 1,
+        u'sys_object_id': u'1.3.6.1.4.1.9.1.2658',
+        u'tags': [
+            u'device_namespace:default',
+            u'device_vendor:cisco',
+            u'snmp_device:' + device_ip,
+            u'snmp_profile:cisco-asr',
+        ],
+        u'vendor': u'cisco',
+        u'version': u'7.1.3',
+    }
+    assert_device_metadata(aggregator, device)

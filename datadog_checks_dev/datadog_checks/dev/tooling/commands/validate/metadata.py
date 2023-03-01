@@ -227,7 +227,7 @@ VALID_UNIT_NAMES = {
     'hop',
 }
 
-ALLOWED_PREFIXES = ['system', 'jvm', 'http', 'datadog', 'sftp']
+ALLOWED_PREFIXES = ['system', 'jvm', 'http', 'datadog', 'sftp', 'process', 'runtime']
 PROVIDER_INTEGRATIONS = {'openmetrics', 'prometheus'}
 
 MAX_DESCRIPTION_LENGTH = 400

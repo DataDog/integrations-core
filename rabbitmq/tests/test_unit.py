@@ -2,14 +2,22 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
+
 import mock
 import pytest
 import requests
 from tests.common import EXCHANGE_MESSAGE_STATS
 
-import datadog_checks.base
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
-from datadog_checks.rabbitmq.rabbitmq import EXCHANGE_TYPE, NODE_TYPE, OVERVIEW_TYPE, RabbitMQException
+from datadog_checks.rabbitmq.rabbitmq import (
+    EXCHANGE_TYPE,
+    NODE_TYPE,
+    OVERVIEW_TYPE,
+    RabbitMQException,
+    RabbitMQManagement,
+)
 
 from . import common, metrics
 
@@ -97,7 +105,7 @@ def test__get_metrics_3_1(check, aggregator):
     assert metrics == 0
 
 
-@mock.patch.object(datadog_checks.rabbitmq.rabbitmq.RabbitMQManagement, '_get_object_data')
+@mock.patch.object(RabbitMQManagement, '_get_object_data')
 def test_get_stats_empty_exchanges(mock__get_object_data, instance, check, aggregator):
     data = [
         {'name': 'ex1', 'message_stats': EXCHANGE_MESSAGE_STATS},
@@ -173,3 +181,46 @@ def test_disable_nodes(aggregator, check):
     # check to ensure other metrics are being collected
     for m in metrics.Q_METRICS:
         aggregator.assert_metric(m, count=1)
+
+
+def test_queues_regexes_exclude_with_negative_lookahead(aggregator, dd_run_check):
+    """Based on a support case where a customer was confused why their regular expression didn't work.
+
+    The key piece is optionally matching the vhost part.
+    """
+    data = {}
+    for ep in ("queues", "overview"):
+        with open("tests/fixtures/mgmt/{}.json".format(ep)) as fh:
+            data[common.URL + ep] = json.load(fh)
+
+    def mock_get_data(_self, url):
+        return data.get(url, [])
+
+    instance = {
+        "rabbitmq_api_url": common.URL,
+        "rabbitmq_user": "guest",
+        "rabbitmq_pass": "guest",
+        "queues_regexes": [
+            r"""(?x) # Enable verbose flag to split expression into commented parts.
+        ^ # We have to anchor at beginning of string to enforce checking for the prefix.
+        (?!
+        (?://)? # Match vhost part if it's present.
+        config/foo\.updated-configs\.) # Prefix we want to exclude.
+        .+ # Match everything else as long as it's NOT preceded by prefix.
+        """
+        ],
+    }
+    check = RabbitMQ("rabbitmq", {}, instances=[instance])
+    with mock.patch.object(RabbitMQManagement, "_get_data", new_callable=lambda: mock_get_data):
+        dd_run_check(check)
+
+    for m in metrics.Q_METRICS:
+        # Make sure we did collect the metric.
+        aggregator.assert_metric(m, at_least=1)
+        # Make sure we didn't collect it for the excluded queue.
+        aggregator.assert_metric_has_tag(
+            m,
+            "rabbitmq_queue:config/foo.updated-configs.2023-01-18",
+            count=0,
+        )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

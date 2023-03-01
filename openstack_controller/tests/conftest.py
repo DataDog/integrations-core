@@ -40,6 +40,7 @@ def dd_environment():
             CheckDockerLogs(identifier='openstack-keystone', patterns=['server running']),
             CheckDockerLogs(identifier='openstack-nova', patterns=['server running']),
             CheckDockerLogs(identifier='openstack-neutron', patterns=['server running']),
+            CheckDockerLogs(identifier='openstack-ironic', patterns=['server running']),
         ]
         with docker_run(compose_file, conditions=conditions):
             instance = {

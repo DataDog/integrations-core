@@ -144,7 +144,8 @@ LIMIT {table_count_limit}
 }
 
 q1 = (
-    'CASE WHEN pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN 0 ELSE GREATEST '
+    'CASE WHEN pg_last_wal_receive_lsn() IS NULL OR '
+    'pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN 0 ELSE GREATEST '
     '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
 )
 q2 = 'abs(pg_wal_lsn_diff(pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn()))'
@@ -154,7 +155,8 @@ REPLICATION_METRICS_10 = {
 }
 
 q = (
-    'CASE WHEN pg_last_xlog_receive_location() = pg_last_xlog_replay_location() THEN 0 ELSE GREATEST '
+    'CASE WHEN pg_last_xlog_receive_location() IS NULL OR '
+    'pg_last_xlog_receive_location() = pg_last_xlog_replay_location() THEN 0 ELSE GREATEST '
     '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
 )
 REPLICATION_METRICS_9_1 = {q: ('postgresql.replication_delay', AgentCheck.gauge)}
@@ -237,6 +239,30 @@ QUERY_PG_STAT_WAL_RECEIVER = {
         {'name': 'postgresql.wal_receiver.last_msg_send_age', 'type': 'gauge'},
         {'name': 'postgresql.wal_receiver.last_msg_receipt_age', 'type': 'gauge'},
         {'name': 'postgresql.wal_receiver.latest_end_age', 'type': 'gauge'},
+    ],
+}
+
+QUERY_PG_REPLICATION_SLOTS = {
+    'name': 'pg_replication_slots',
+    'query': """
+    SELECT
+        slot_name,
+        slot_type,
+        CASE WHEN temporary THEN 'temporary' ELSE 'permanent' END,
+        CASE WHEN active THEN 'active' ELSE 'inactive' END,
+        CASE WHEN xmin IS NULL THEN NULL ELSE age(xmin) END,
+        pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn),
+        pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn)
+    FROM pg_replication_slots;
+    """.strip(),
+    'columns': [
+        {'name': 'slot_name', 'type': 'tag'},
+        {'name': 'slot_type', 'type': 'tag'},
+        {'name': 'slot_persistence', 'type': 'tag'},
+        {'name': 'slot_state', 'type': 'tag'},
+        {'name': 'postgresql.replication_slot.xmin_age', 'type': 'gauge'},
+        {'name': 'postgresql.replication_slot.restart_delay_bytes', 'type': 'gauge'},
+        {'name': 'postgresql.replication_slot.confirmed_flush_delay_bytes', 'type': 'gauge'},
     ],
 }
 

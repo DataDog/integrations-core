@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 import pytest
 
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.types import ServiceCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
@@ -33,6 +34,12 @@ IDENTITY_INFO_TAGS = [
 
 def _rmq_om_check(prom_plugin_settings):
     return RabbitMQ("rabbitmq", {}, [{'prometheus_plugin': prom_plugin_settings}])
+
+
+def _common_assertions(aggregator):
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_service_check('rabbitmq.openmetrics.health', status=ServiceCheck.OK)
 
 
 @pytest.mark.parametrize(
@@ -62,8 +69,7 @@ def test_aggregated_endpoint(aggregated_setting, aggregator, dd_run_check, mock_
 
     aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG] + BUILD_INFO_TAGS + IDENTITY_INFO_TAGS)
     aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG] + IDENTITY_INFO_TAGS)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    aggregator.assert_all_metrics_covered()
+    _common_assertions(aggregator)
 
 
 def test_aggregated_endpoint_as_per_object(aggregator, dd_run_check, mock_http_response):
@@ -86,8 +92,7 @@ def test_aggregated_endpoint_as_per_object(aggregator, dd_run_check, mock_http_r
 
     aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG] + BUILD_INFO_TAGS + IDENTITY_INFO_TAGS)
     aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG] + IDENTITY_INFO_TAGS)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    aggregator.assert_all_metrics_covered()
+    _common_assertions(aggregator)
 
 
 @pytest.mark.parametrize(
@@ -134,8 +139,7 @@ def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggrega
         'rabbitmq.build_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + BUILD_INFO_TAGS + IDENTITY_INFO_TAGS
     )
     aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + IDENTITY_INFO_TAGS)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    aggregator.assert_all_metrics_covered()
+    _common_assertions(aggregator)
 
 
 def mock_http_responses(url, **_params):
@@ -218,8 +222,7 @@ def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd
         ],
     ):
         aggregator.assert_metric_has_tag(m, tag, count=1)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    aggregator.assert_all_metrics_covered()
+    _common_assertions(aggregator)
 
 
 @pytest.mark.parametrize(
@@ -268,3 +271,11 @@ def test_config(prom_plugin_settings, err):
     check = _rmq_om_check(prom_plugin_settings)
     with pytest.raises(ConfigurationError, match=err):
         check.load_configuration_models()
+
+
+def test_service_check_critical(aggregator, dd_run_check, mock_http_response):
+    mock_http_response(status_code=404)
+    check = _rmq_om_check({'url': 'http://fail'})
+    with pytest.raises(Exception, match="requests.exceptions.HTTPError"):
+        dd_run_check(check)
+    aggregator.assert_service_check('rabbitmq.openmetrics.health', status=check.CRITICAL)

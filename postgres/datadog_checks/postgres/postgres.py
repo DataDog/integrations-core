@@ -22,6 +22,7 @@ from .config import PostgresConfig
 from .util import (
     CONNECTION_METRICS,
     FUNCTION_METRICS,
+    QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_STAT_DATABASE,
     QUERY_PG_STAT_WAL_RECEIVER,
     REPLICATION_METRICS,
@@ -113,6 +114,7 @@ class PostgreSql(AgentCheck):
 
         if self.version >= V10:
             queries.append(QUERY_PG_STAT_WAL_RECEIVER)
+            queries.append(QUERY_PG_REPLICATION_SLOTS)
 
         if not queries:
             self.log.debug("no dynamic queries defined")
