@@ -28,7 +28,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
 ]
 dependencies = [
-    "datadog-checks-dev[cli]==17.8.2",
+    "datadog-checks-dev[cli]==17.9.0",
     "hatch>=1.6.3",
     "httpx",
     "jsonpointer",
