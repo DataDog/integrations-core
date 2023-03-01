@@ -20,6 +20,7 @@ class ConfluentKafkaClient(KafkaClient):
                     "client.id": "dd-agent",
                 }
             )
+        return self._kafka_client
 
     def create_kafka_admin_client(self):
         raise NotImplementedError
