@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import copy
 import logging
 import re
 
@@ -9,11 +8,11 @@ import pytest
 
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
-from .common import CHECK_NAME, CONFIG_FILE_INSTANCE, TEST_OPENSTACK_NO_AUTH_CONFIG_PATH
+from .common import CHECK_NAME, TEST_OPENSTACK_NO_AUTH_CONFIG_PATH
 
 
 @pytest.mark.parametrize(
-    'options, exception_msg',
+    'instance, exception_msg',
     [
         pytest.param({'user': {'domain': {'id': 'test_id'}}}, 'Missing name', id='empty'),
         pytest.param({'user': {'domain': {'id': 'test_id'}}}, 'Missing name', id='empty name'),
@@ -56,14 +55,7 @@ from .common import CHECK_NAME, CONFIG_FILE_INSTANCE, TEST_OPENSTACK_NO_AUTH_CON
         ),
     ],
 )
-def test_config_invalid(options, exception_msg):
-    instance = copy.deepcopy(CONFIG_FILE_INSTANCE)
-    del instance['openstack_config_file_path']
-    del instance['name']
-    del instance['openstack_cloud_name']
-    del instance['user']
-
-    instance.update(options)
+def test_config_invalid(instance, exception_msg):
 
     check = OpenStackControllerCheck(CHECK_NAME, {}, [instance])
 
@@ -72,7 +64,7 @@ def test_config_invalid(options, exception_msg):
 
 
 @pytest.mark.parametrize(
-    'options, warning_msg',
+    'instance, warning_msg',
     [
         pytest.param(
             {'name': 'test'},
@@ -81,7 +73,7 @@ def test_config_invalid(options, exception_msg):
         ),
         pytest.param(
             {'name': 'test', 'keystone_server_url': 'http://localhost'},
-            'The agent could not contact the specified identity server',
+            'Please specify the user via the `user` variable in your init_config.',
             id='no user',
         ),
         pytest.param(
@@ -109,17 +101,10 @@ def test_config_invalid(options, exception_msg):
         ),
     ],
 )
-def test_config_warning(options, warning_msg, caplog):
-    instance = copy.deepcopy(CONFIG_FILE_INSTANCE)
-    del instance['openstack_config_file_path']
-    del instance['name']
-    del instance['openstack_cloud_name']
-
-    instance.update(options)
+def test_config_warning(instance, warning_msg, caplog):
     caplog.set_level(logging.WARN)
 
     check = OpenStackControllerCheck(CHECK_NAME, {}, [instance])
 
-    # try:
     check.check(instance)
     assert warning_msg in caplog.text
