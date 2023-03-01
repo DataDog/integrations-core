@@ -1,6 +1,6 @@
 # CHANGELOG - mysql
 
-## 10.0.0 / 2023-01-20
+## 10.0.0 / 2023-01-20 / Agent 7.43.0
 
 * [Added] Add deprecation notice for `extra_performance_metrics` option. See [#13273](https://github.com/DataDog/integrations-core/pull/13273).
 * [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).
