@@ -1,5 +1,9 @@
 # CHANGELOG - ddev
 
+## 1.4.3 / 2023-03-01
+
+* [Fixed] Bump datadog_checks_dev dependency version. See [#14064](https://github.com/DataDog/integrations-core/pull/14064).
+
 ## 1.4.2 / 2023-02-27
 
 * [Fixed] Bump datadog_checks_dev dependency version. See [#14040](https://github.com/DataDog/integrations-core/pull/14040).
