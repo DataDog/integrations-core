@@ -43,7 +43,8 @@ text = "BSD-3-Clause"
 deps = [
     "cryptography==3.3.2; python_version < '3.0'",
     "cryptography==39.0.1; python_version > '3.0'",
-    "requests-ntlm==1.1.0",
+    "requests-ntlm==1.1.0; python_version < '3.0'",
+    "requests-ntlm==1.2.0; python_version > '3.0'",
 ]
 
 [project.urls]

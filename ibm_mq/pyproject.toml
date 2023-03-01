@@ -42,7 +42,7 @@ text = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "psutil==5.9.0",
-    "pymqi==1.12.8; sys_platform != 'darwin' or platform_machine != 'arm64'",
+    "pymqi==1.12.10; sys_platform != 'darwin' or platform_machine != 'arm64'",
 ]
 
 [project.urls]

@@ -10,7 +10,6 @@ build-backend = "hatchling.build"
 name = "datadog-mcache"
 description = "The Memcached check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -37,10 +36,13 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
     "python-binary-memcached==0.26.1; sys_platform != 'win32' and python_version < '3.0'",
-    "python-binary-memcached==0.31.1; sys_platform != 'win32' and python_version > '3.0'",
+    "python-binary-memcached==0.31.2; sys_platform != 'win32' and python_version > '3.0'",
 ]
 
 [project.urls]

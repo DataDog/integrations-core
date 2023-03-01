@@ -42,7 +42,8 @@ text = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "futures==3.4.0; python_version < '3.0'",
-    "pyvmomi==7.0.3",
+    "pyvmomi==8.0.0.1.2; python_version > '3.0'",
+    "pyvmomi==8.0.0.1; python_version < '3.0'",
 ]
 
 [project.urls]

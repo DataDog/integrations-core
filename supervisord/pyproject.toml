@@ -10,7 +10,6 @@ build-backend = "hatchling.build"
 name = "datadog-supervisord"
 description = "The Supervisord check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -37,9 +36,12 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
-    "supervisor==4.2.4",
+    "supervisor==4.2.5",
 ]
 
 [project.urls]
