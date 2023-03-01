@@ -77,7 +77,7 @@ class KafkaPythonClient(KafkaClient):
         self.kafka_client._wait_for_futures(self._consumer_futures)
         del self._consumer_futures  # since it's reset on every check run, no sense holding the reference between runs
 
-    def get_highwater_offsets(self):
+    def get_highwater_offsets(self, consumer_offsets):
         """Fetch highwater offsets for topic_partitions in the Kafka cluster.
 
         Do this for all partitions in the cluster because even if it has no consumers, we may want to measure whether
@@ -104,7 +104,7 @@ class KafkaPythonClient(KafkaClient):
         # which this run of the check has at least once saved consumer offset. This is later used as a filter for
         # excluding partitions.
         if not self.config._monitor_all_broker_highwatermarks:
-            tps_with_consumer_offset = {(topic, partition) for (_, topic, partition) in self._consumer_offsets}
+            tps_with_consumer_offset = {(topic, partition) for (_, topic, partition) in consumer_offsets}
 
         for batch in self.batchify(
             self.kafka_client._client.cluster.brokers(), self.config._broker_requests_batch_size
