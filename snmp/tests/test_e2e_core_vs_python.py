@@ -30,10 +30,10 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.memory.used',
     'snmp.memory.free',
     'snmp.memory.usage',
+    'snmp.cpu.usage',
     'snmp.device.reachable',
     'snmp.device.unreachable',
     'snmp.interface.status',
-    'snmp.cpu.usage',
     'snmp.ifInSpeed',
     'snmp.ifOutSpeed',
 ]
