@@ -14,7 +14,6 @@ from .common import CHECK_NAME, TEST_OPENSTACK_NO_AUTH_CONFIG_PATH
 @pytest.mark.parametrize(
     'instance, exception_msg',
     [
-        pytest.param({'user': {'domain': {'id': 'test_id'}}}, 'Missing name', id='empty'),
         pytest.param({'user': {'domain': {'id': 'test_id'}}}, 'Missing name', id='empty name'),
         pytest.param(
             {
