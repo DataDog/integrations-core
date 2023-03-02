@@ -57,7 +57,10 @@
                 "tags": [
                     "$cluster",
                     "$host"
-                ]
+                ],
+                "time": {
+                    "live_span": "10m"
+                }
             },
             "layout": {
                 "x": 0,
@@ -79,7 +82,10 @@
                 "tags": [
                     "$cluster",
                     "$host"
-                ]
+                ],
+                "time": {
+                    "live_span": "10m"
+                }
             },
             "layout": {
                 "x": 20,
