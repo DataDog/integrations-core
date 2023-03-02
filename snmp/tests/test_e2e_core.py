@@ -302,7 +302,7 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
     for metric in metrics.IF_BANDWIDTH_USAGE:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
-    custom_speed_tags = if_tags + ['speed_source:snmp']
+    custom_speed_tags = if_tags + ['speed_source:device']
     for metric in metrics.IF_CUSTOM_SPEED_GAUGES:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=custom_speed_tags, count=2
