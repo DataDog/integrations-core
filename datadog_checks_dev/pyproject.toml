@@ -110,7 +110,6 @@ path = "datadog_checks/dev/__about__.py"
 [tool.hatch.build.targets.sdist]
 include = [
     "/datadog_checks",
-    "/tests",
 ]
 
 [tool.hatch.build.targets.wheel]

@@ -51,7 +51,6 @@ path = "datadog_checks/snowflake/__about__.py"
 [tool.hatch.build.targets.sdist]
 include = [
     "/datadog_checks",
-    "/tests",
     "/manifest.json",
 ]
 

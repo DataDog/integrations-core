@@ -1,6 +1,8 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
+    "setuptools>=66; python_version > '3.0'",
+    "setuptools; python_version < '3.0'",
 ]
 build-backend = "hatchling.build"
 
@@ -58,7 +60,6 @@ path = "datadog_checks/sqlserver/__about__.py"
 [tool.hatch.build.targets.sdist]
 include = [
     "/datadog_checks",
-    "/tests",
     "/manifest.json",
 ]
 

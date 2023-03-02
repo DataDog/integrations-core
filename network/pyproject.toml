@@ -51,7 +51,6 @@ path = "datadog_checks/network/__about__.py"
 [tool.hatch.build.targets.sdist]
 include = [
     "/datadog_checks",
-    "/tests",
     "/manifest.json",
 ]
 

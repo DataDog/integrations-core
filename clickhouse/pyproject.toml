@@ -56,7 +56,6 @@ path = "datadog_checks/clickhouse/__about__.py"
 [tool.hatch.build.targets.sdist]
 include = [
     "/datadog_checks",
-    "/tests",
     "/manifest.json",
 ]
 

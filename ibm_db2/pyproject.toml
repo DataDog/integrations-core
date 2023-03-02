@@ -47,7 +47,6 @@ path = "datadog_checks/ibm_db2/__about__.py"
 [tool.hatch.build.targets.sdist]
 include = [
     "/datadog_checks",
-    "/tests",
     "/manifest.json",
 ]
 

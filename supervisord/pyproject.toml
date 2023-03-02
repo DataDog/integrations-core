@@ -49,7 +49,6 @@ path = "datadog_checks/supervisord/__about__.py"
 [tool.hatch.build.targets.sdist]
 include = [
     "/datadog_checks",
-    "/tests",
     "/manifest.json",
 ]
 

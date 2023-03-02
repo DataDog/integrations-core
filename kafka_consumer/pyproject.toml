@@ -54,7 +54,6 @@ path = "datadog_checks/kafka_consumer/__about__.py"
 [tool.hatch.build.targets.sdist]
 include = [
     "/datadog_checks",
-    "/tests",
     "/manifest.json",
 ]
 
