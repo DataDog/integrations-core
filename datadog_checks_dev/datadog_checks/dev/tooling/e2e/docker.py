@@ -270,14 +270,21 @@ class DockerInterface(object):
     def update_check(self):
         command = ['docker', 'exec', self.container_name]
         command.extend(get_pip_exe(self.python_version, platform=self.container_platform))
-        command.extend(('install', '-e', f'{self.check_mount_dir}[deps]'))
+        command.extend(self.install_command(f'{self.check_mount_dir}[deps]'))
         run_command(command, capture=True, check=True)
 
     def update_base_package(self):
         command = ['docker', 'exec', self.container_name]
         command.extend(get_pip_exe(self.python_version, platform=self.container_platform))
-        command.extend(('install', '-e', f'{self.base_mount_dir}[db,deps,http,json,kube]'))
+        command.extend(self.install_command(f'{self.base_mount_dir}[db,deps,http,json,kube]'))
         run_command(command, capture=True, check=True)
+
+    def install_command(self, package_spec):
+        cmd = ['install']
+        if self.python_version == 3:
+            cmd.append('-e')
+        cmd.append(package_spec)
+        return cmd
 
     def update_agent(self):
         if self.agent_build and '/' in self.agent_build:

@@ -199,13 +199,20 @@ class LocalAgentInterface(object):
     def update_check(self):
         command = get_pip_exe(self.python_version, self.platform)
         path = path_join(get_root(), self.check)
-        command.extend(('install', '-e', f'{path}[deps]'))
+        command.extend(self.install_command(f'{path}[deps]'))
         return run_command(command, capture=True, check=True)
 
     def update_base_package(self):
         command = get_pip_exe(self.python_version, self.platform)
-        command.extend(('install', '-e', f'{self.base_package}[db,deps,http,json,kube]'))
+        command.extend(self.install_command(f'{self.base_package}[db,deps,http,json,kube]'))
         return run_command(command, capture=True, check=True)
+
+    def install_command(self, package_spec):
+        cmd = ['install']
+        if self.python_version == 3:
+            cmd.append('-e')
+        cmd.append(package_spec)
+        return cmd
 
     def update_agent(self):
         # The Local E2E assumes an Agent is already installed on the machine
