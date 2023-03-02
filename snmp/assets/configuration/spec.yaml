@@ -403,11 +403,11 @@ files:
         value:
           type: boolean
           example: true
-      - name: interface_config
+      - name: interface_configs
         description: |
           This option is used to override interface inbound/outbound speed.
           Example:
-          interface_config
+          interface_configs:
             - match_field: "name"  # the field to match, can be `name` (interface name) or `index` (ifIndex)
               match_value: "eth0"  # the value to match
               in_speed: 50         # inbound speed value in bits per sec
