@@ -206,6 +206,14 @@ def test_activity_nested_blocking_transactions(aggregator,
     dd_run_check,
     dbm_instance,
 ):
+    """
+    Test to ensure the check captures a scenario where a blocking idle transaction
+    is collected through activity. An open transaction which completes its current
+    request but has not committed can still hold a row-level lock preventing subsequent
+    sessions from updating. It is important that the Agent captures these cases to show
+    the complete picture and the last executed query responsible for the lock.
+    """
+
     TABLE_NAME = "##LockTest{}".format(str(int(time.time()*1000)))
 
     QUERIES_SETUP = ("""
@@ -226,12 +234,11 @@ def test_activity_nested_blocking_transactions(aggregator,
     QUERY3 = """UPDATE {} SET [city] = 'blow' WHERE [id] = 1001""".format(TABLE_NAME)
 
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    conn1 = _get_conn_for_user(instance_docker, "lisa", _autocommit=False)
+    conn1 = _get_conn_for_user(instance_docker, "fred", _autocommit=False)
     conn2 = _get_conn_for_user(instance_docker, "bob", _autocommit=False)
-    conn3 = _get_conn_for_user(instance_docker, "lisa", _autocommit=False)
+    conn3 = _get_conn_for_user(instance_docker, "fred", _autocommit=False)
 
-    close_conns = threading.Lock()
-    close_conns.acquire()
+    close_conns = threading.Event()
 
     def run_queries(conn, queries):
         cur = conn.cursor()
@@ -240,9 +247,9 @@ def test_activity_nested_blocking_transactions(aggregator,
         for q in queries:
             cur.execute(q)
         # Do not allow the conn to be garbage collected and closed until the global lock is released
-        close_conns.acquire()
+        while not close_conns.is_set():
+            time.sleep(0.1)
         cur.execute("COMMIT")
-        close_conns.release()
     
     # Setup
     cur = conn1.cursor()
@@ -259,19 +266,36 @@ def test_activity_nested_blocking_transactions(aggregator,
     for t in [t1, t2, t3]:
         t.start()
 
-    time.sleep(0.4)  # Small sleep to allow transaction 1 to execute and reach idle
+    time.sleep(0.3)  # Small sleep to allow transaction 1 to execute and reach idle state
     try:
         dd_run_check(check)
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
-        # import pdb; pdb.set_trace()
     finally:
-        close_conns.release()
-        for t in [t1, t2, t3]:
-            t.join()
+        close_conns.set()  # Release the threads
 
-    # 3 connections are expected
-    assert len(dbm_activity['sqlserver_activity']) == 3
-    # TODO: more assertions on contents
+    # All 3 connections are expected
+    assert dbm_activity and 'sqlserver_activity' in dbm_activity[0]
+    assert len(dbm_activity[0]['sqlserver_activity']) == 3
+
+    activity = dbm_activity[0]['sqlserver_activity']
+    activity = sorted(activity, key=lambda a: a.get('blocking_session_id', 0))
+    
+    root_blocker = activity[0]
+    tx2 = activity[1]
+    tx3 = activity[2]
+
+    # Expect to capture the root blocker, which would have a sleeping transaction but no
+    # associated sys.dm_exec_requests. 
+    assert root_blocker["text"] == QUERY1
+    assert root_blocker["session_status"] == "sleeping"
+    assert len(root_blocker["query_signature"]) == 16
+
+    # TX2 should be blocked by the root blocker TX1, TX3 should be blocked by TX2
+    assert tx2["blocking_session_id"] == root_blocker["id"]
+    assert tx3["blocking_session_id"] == tx2["id"]
+
+    for t in [t1, t2, t3]:
+        t.join()
 
 
 @pytest.mark.integration
