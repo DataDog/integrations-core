@@ -199,6 +199,64 @@ def test_collect_load_activity(
         + _expected_dbm_instance_tags(dbm_instance),
     )
 
+def test_activity_nested_blocking_transactions(aggregator,
+    instance_docker,
+    dd_run_check,
+    dbm_instance,
+):
+    #  -- TX1
+    # BEGIN TRANSACTION;
+    # UPDATE [dbo].[devops.locktest] SET [city] = &#39;milano&#39; WHERE id = 4
+    # COMMIT;
+    # -- TX2
+    # BEGIN TRANSACTION;
+    # UPDATE [dbo].[devops.locktest] SET [name] = &#39;superluca&#39; WHERE id = 2
+    # UPDATE [dbo].[devops.locktest] SET [age] = 33 WHERE id = 4
+    # COMMIT;
+    # -- TX3
+    # BEGIN TRANSACTION;
+    # UPDATE [dbo].[devops.locktest] SET age = 28, city = &#39;cremona&#39; WHERE id = 2
+    # COMMIT;
+
+    QUERY_SETUP = """INSERT INTO datadog_test.dbo.ϑings VALUES (1001, 'foo'), (1002, 'bar'), (1003, 'baz')"""
+    QUERY1 = """UPDATE datadog_test.dbo.ϑings SET [name] = 'tire' WHERE id = 1003"""
+    QUERY2 = """UPDATE datadog_test.dbo.ϑings SET [name] = 'algo' WHERE id = 1002"""
+    QUERY3 = """UPDATE datadog_test.dbo.ϑings SET [name] = 'west' WHERE id = 1003"""
+    QUERY4 = """UPDATE datadog_test.dbo.ϑings SET [name] = 'alpha' WHERE id = 1002"""
+
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    conn1 = _get_conn_for_user(instance_docker, "lisa", _autocommit=False)
+    conn2 = _get_conn_for_user(instance_docker, "bob", _autocommit=False)
+    conn3 = _get_conn_for_user(instance_docker, "lisa", _autocommit=False)
+
+    def run_test_queries_async(conn, queries):
+        def _run_test_query(conn, queries):
+            cur = conn.cursor()
+            cur.execute("USE {}".format("datadog_test"))
+            for q in queries:
+                cur.execute(q)
+        executor = concurrent.futures.ThreadPoolExecutor(1)
+        f_q = executor.submit(_run_test_query, conn, queries)
+        while not f_q.running():
+            if f_q.done():
+                break
+            time.sleep(0.1)
+        
+    # Transaction 1
+    run_test_queries_async(conn1, ["BEGIN TRANSACTION", QUERY1, "WAITFOR DELAY '00:05' "])
+
+    # Transaction 2
+    run_test_queries_async(conn2, ["BEGIN TRANSACTION", QUERY2, QUERY3])
+
+    # Transaction 3
+    run_test_queries_async(conn3, ["BEGIN TRANSACTION", QUERY4])
+
+    # Run the check
+    dd_run_check(check)
+
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    import pdb; pdb.set_trace()
+    
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
