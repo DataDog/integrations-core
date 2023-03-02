@@ -10,6 +10,7 @@ import json
 import os
 import re
 import time
+import threading
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
 
@@ -199,64 +200,79 @@ def test_collect_load_activity(
         + _expected_dbm_instance_tags(dbm_instance),
     )
 
+
 def test_activity_nested_blocking_transactions(aggregator,
     instance_docker,
     dd_run_check,
     dbm_instance,
 ):
-    #  -- TX1
-    # BEGIN TRANSACTION;
-    # UPDATE [dbo].[devops.locktest] SET [city] = &#39;milano&#39; WHERE id = 4
-    # COMMIT;
-    # -- TX2
-    # BEGIN TRANSACTION;
-    # UPDATE [dbo].[devops.locktest] SET [name] = &#39;superluca&#39; WHERE id = 2
-    # UPDATE [dbo].[devops.locktest] SET [age] = 33 WHERE id = 4
-    # COMMIT;
-    # -- TX3
-    # BEGIN TRANSACTION;
-    # UPDATE [dbo].[devops.locktest] SET age = 28, city = &#39;cremona&#39; WHERE id = 2
-    # COMMIT;
+    TABLE_NAME = "##LockTest{}".format(str(int(time.time()*1000)))
 
-    QUERY_SETUP = """INSERT INTO datadog_test.dbo.ϑings VALUES (1001, 'foo'), (1002, 'bar'), (1003, 'baz')"""
-    QUERY1 = """UPDATE datadog_test.dbo.ϑings SET [name] = 'tire' WHERE id = 1003"""
-    QUERY2 = """UPDATE datadog_test.dbo.ϑings SET [name] = 'algo' WHERE id = 1002"""
-    QUERY3 = """UPDATE datadog_test.dbo.ϑings SET [name] = 'west' WHERE id = 1003"""
-    QUERY4 = """UPDATE datadog_test.dbo.ϑings SET [name] = 'alpha' WHERE id = 1002"""
+    QUERIES_SETUP = ("""
+        CREATE TABLE {}
+        (
+            id int,
+            name varchar(10),
+            city varchar(20)
+        )""".format(TABLE_NAME),
+        "INSERT INTO {} VALUES (1001, 'tire', 'sfo')".format(TABLE_NAME),
+        "INSERT INTO {} VALUES (1002, 'wisth', 'nyc')".format(TABLE_NAME),
+        "INSERT INTO {} VALUES (1003, 'tire', 'aus')".format(TABLE_NAME),
+        "COMMIT",
+    )
+
+    QUERY1 = """UPDATE {} SET [name] = 'west' WHERE [id] = 1001""".format(TABLE_NAME)
+    QUERY2 = """UPDATE {} SET [name] = 'fast' WHERE [id] = 1001""".format(TABLE_NAME)
+    QUERY3 = """UPDATE {} SET [city] = 'blow' WHERE [id] = 1001""".format(TABLE_NAME)
 
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     conn1 = _get_conn_for_user(instance_docker, "lisa", _autocommit=False)
     conn2 = _get_conn_for_user(instance_docker, "bob", _autocommit=False)
     conn3 = _get_conn_for_user(instance_docker, "lisa", _autocommit=False)
 
-    def run_test_queries_async(conn, queries):
-        def _run_test_query(conn, queries):
-            cur = conn.cursor()
-            cur.execute("USE {}".format("datadog_test"))
-            for q in queries:
-                cur.execute(q)
-        executor = concurrent.futures.ThreadPoolExecutor(1)
-        f_q = executor.submit(_run_test_query, conn, queries)
-        while not f_q.running():
-            if f_q.done():
-                break
-            time.sleep(0.1)
-        
-    # Transaction 1
-    run_test_queries_async(conn1, ["BEGIN TRANSACTION", QUERY1, "WAITFOR DELAY '00:05' "])
+    close_conns = threading.Lock()
+    close_conns.acquire()
 
-    # Transaction 2
-    run_test_queries_async(conn2, ["BEGIN TRANSACTION", QUERY2, QUERY3])
-
-    # Transaction 3
-    run_test_queries_async(conn3, ["BEGIN TRANSACTION", QUERY4])
-
-    # Run the check
-    dd_run_check(check)
-
-    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
-    import pdb; pdb.set_trace()
+    def run_queries(conn, queries):
+        cur = conn.cursor()
+        cur.execute("USE {}".format("datadog_test"))
+        cur.execute("BEGIN TRANSACTION")
+        for q in queries:
+            cur.execute(q)
+        # Do not allow the conn to be garbage collected and closed until the global lock is released
+        close_conns.acquire()
+        cur.execute("COMMIT")
+        close_conns.release()
     
+    # Setup
+    cur = conn1.cursor()
+    for q in QUERIES_SETUP:
+        cur.execute(q)
+
+    # Transaction 1
+    t1 = threading.Thread(target=run_queries, args=(conn1, [QUERY1]))
+    # Transaction 2
+    t2 = threading.Thread(target=run_queries, args=(conn2, [QUERY2]))
+    # Transaction 3
+    t3 = threading.Thread(target=run_queries, args=(conn3, [QUERY3]))
+
+    for t in [t1, t2, t3]:
+        t.start()
+
+    time.sleep(0.4)  # Small sleep to allow transaction 1 to execute and reach idle
+    try:
+        dd_run_check(check)
+        dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+        # import pdb; pdb.set_trace()
+    finally:
+        close_conns.release()
+        for t in [t1, t2, t3]:
+            t.join()
+
+    # 3 connections are expected
+    assert len(dbm_activity['sqlserver_activity']) == 3
+    # TODO: more assertions on contents
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
