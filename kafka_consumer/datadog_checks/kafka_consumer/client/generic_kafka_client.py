@@ -39,11 +39,9 @@ class GenericKafkaClient(KafkaClient):
         return self.python_kafka_client.get_highwater_offsets_dict()
 
     def reset_offsets(self):
-        # TODO when this method is implemented in ConfluentKafkaClient, replace this with:
-        # if self.use_legacy_client:
-        #     return self.python_kafka_client.reset_offsets()
-        # return self.confluent_kafka_client.reset_offsets()
-        return self.python_kafka_client.reset_offsets()
+        if self.use_legacy_client:
+            return self.python_kafka_client.reset_offsets()
+        return self.confluent_kafka_client.reset_offsets()
 
     def get_partitions_for_topic(self, topic):
         # TODO when this method is implemented in ConfluentKafkaClient, replace this with:

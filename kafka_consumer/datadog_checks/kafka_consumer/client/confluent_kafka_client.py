@@ -32,7 +32,8 @@ class ConfluentKafkaClient(KafkaClient):
         raise NotImplementedError
 
     def reset_offsets(self):
-        raise NotImplementedError
+        self._consumer_offsets = {}
+        self._highwater_offsets = {}
 
     def get_partitions_for_topic(self, topic):
         raise NotImplementedError
