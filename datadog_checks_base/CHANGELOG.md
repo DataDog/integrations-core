@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+# 30.0.2 / 2023-03-02
+
+* [Fixed] Bump dependency `snowflake-connector-python` to 3.0.1. See [#14073](https://github.com/DataDog/integrations-core/pull/14073).
+
 ## 30.0.1 / 2023-02-28
 
 * [Fixed] Update cryptography to 39.0.1. See [#13913](https://github.com/DataDog/integrations-core/pull/13913).

@@ -25,6 +25,11 @@ INSTANCES = {
         'included_metrics': [r'envoy\.cluster\.'],
         'excluded_metrics': [r'envoy\.cluster\.out\.'],
     },
+    'include_exclude_metrics': {
+        'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
+        'include_metrics': [r'envoy\.cluster\.'],
+        'exclude_metrics': [r'envoy\.cluster\.out\.'],
+    },
     'collect_server_info': {
         'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
         'collect_server_info': 'false',
