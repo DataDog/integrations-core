@@ -146,10 +146,11 @@ def test_collect_load_activity(
     assert set(event['ddtags']) == expected_instance_tags, "wrong instance tags activity"
     assert type(event['collection_interval']) in (float, int), "invalid collection_interval"
 
-    assert len(event['sqlserver_activity']) == 1, "should have collected exactly one activity row"
+    assert len(event['sqlserver_activity']) == 2, "should have collected exactly two activity rows"
+    event['sqlserver_activity'].sort(key=lambda r: r.get('blocking_session_id', 0))
     # the second query should be fred's, which is currently blocked on
     # bob who is holding a table lock
-    blocked_row = event['sqlserver_activity'][0]
+    blocked_row = event['sqlserver_activity'][1]
     # assert the data that was collected is correct
     assert blocked_row['user_name'] == "fred", "incorrect user_name"
     assert blocked_row['session_status'] == "running", "incorrect session_status"
