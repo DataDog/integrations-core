@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import binascii
-import datetime
 import re
 import time
 
@@ -79,7 +78,10 @@ FROM sys.dm_exec_sessions sess
     OUTER APPLY sys.dm_exec_sql_text(req.sql_handle) qt
     OUTER APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) lqt
 WHERE sess.session_id != @@spid
-    AND (sess.status != 'sleeping' OR sess.session_id IN (SELECT blocking_session_id FROM cteBlocking) OR isnull(req.blocking_session_id, 0) <> 0)
+    AND (sess.status != 'sleeping'
+         OR sess.session_id IN (SELECT blocking_session_id FROM cteBlocking)
+         OR isnull(req.blocking_session_id, 0) <> 0
+        )
 """,
 ).strip()
 

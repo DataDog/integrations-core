@@ -9,8 +9,8 @@ import datetime
 import json
 import os
 import re
-import time
 import threading
+import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
 
@@ -201,7 +201,8 @@ def test_collect_load_activity(
     )
 
 
-def test_activity_nested_blocking_transactions(aggregator,
+def test_activity_nested_blocking_transactions(
+    aggregator,
     instance_docker,
     dd_run_check,
     dbm_instance,
@@ -214,15 +215,18 @@ def test_activity_nested_blocking_transactions(aggregator,
     the complete picture and the last executed query responsible for the lock.
     """
 
-    TABLE_NAME = "##LockTest{}".format(str(int(time.time()*1000)))
+    TABLE_NAME = "##LockTest{}".format(str(int(time.time() * 1000)))
 
-    QUERIES_SETUP = ("""
+    QUERIES_SETUP = (
+        """
         CREATE TABLE {}
         (
             id int,
             name varchar(10),
             city varchar(20)
-        )""".format(TABLE_NAME),
+        )""".format(
+            TABLE_NAME
+        ),
         "INSERT INTO {} VALUES (1001, 'tire', 'sfo')".format(TABLE_NAME),
         "INSERT INTO {} VALUES (1002, 'wisth', 'nyc')".format(TABLE_NAME),
         "INSERT INTO {} VALUES (1003, 'tire', 'aus')".format(TABLE_NAME),
@@ -250,7 +254,7 @@ def test_activity_nested_blocking_transactions(aggregator,
         while not close_conns.is_set():
             time.sleep(0.1)
         cur.execute("COMMIT")
-    
+
     # Setup
     cur = conn1.cursor()
     for q in QUERIES_SETUP:
@@ -279,13 +283,13 @@ def test_activity_nested_blocking_transactions(aggregator,
 
     activity = dbm_activity[0]['sqlserver_activity']
     activity = sorted(activity, key=lambda a: a.get('blocking_session_id', 0))
-    
+
     root_blocker = activity[0]
     tx2 = activity[1]
     tx3 = activity[2]
 
     # Expect to capture the root blocker, which would have a sleeping transaction but no
-    # associated sys.dm_exec_requests. 
+    # associated sys.dm_exec_requests.
     assert root_blocker["text"] == QUERY1
     assert root_blocker["session_status"] == "sleeping"
     assert len(root_blocker["query_signature"]) == 16
