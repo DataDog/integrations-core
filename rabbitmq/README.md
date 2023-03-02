@@ -26,8 +26,6 @@ Rabbitmq exposes metrics in two ways: the [RabbitMQ Management Plugin][4] and th
 
 ##### [RabbitMQ Prometheus Plugin][19].
 
-_Note: The Prometheus Plugin collection method requires Python 3._
-
 _Starting with RabbitMQ v3.8, the [Rabbitmq Prometheus Plugin][19] is enabled by default and the integration communicates with it over HTTP API using OpenMetricsV2._
 
 Configure the `prometheus_plugin` section in your instance configuration. When using the `prometheus_plugin` option, settings related to the Management Plugin are ignored.
@@ -38,7 +36,10 @@ Configure the `prometheus_plugin` section in your instance configuration. When u
        url: http://<HOST>:15692
  ```
 
- This enables scraping of the [`/metrics` endpoint][20] on one rabbitmq node.
+ This enables scraping of the [`/metrics` endpoint][20] on one rabbitmq node. We can also collect data from the [`/metrics/detailed` endpoint][22].
+
+ The metrics collected from this plugin will have the label `[OpenMetricsV2]` in their description. You can find them in the second half of [Metrics Collected][23] section.
+
 
 ##### [RabbitMQ Management Plugin][4].
 
@@ -277,3 +278,5 @@ The following Management plugin metrics to our knowledge have no equivalent in t
 [19]: https://www.rabbitmq.com/prometheus.html
 [20]: https://www.rabbitmq.com/prometheus.html#default-endpoint
 [21]: https://docs.datadoghq.com/containers/docker/integrations/?tab=dockeradv2
+[22]: https://www.rabbitmq.com/prometheus.html#detailed-endpoint
+[23]: https://docs.datadoghq.com/integrations/rabbitmq/?tab=host#metrics
