@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import binascii
+import datetime
 import re
 import time
 
@@ -221,7 +222,7 @@ class SqlserverActivity(DBMAsyncJob):
 
     @staticmethod
     def _get_sort_key(r):
-        return r.get("query_start") or ''
+        return r.get("query_start") or datetime.datetime.now().isoformat()
 
     def _obfuscate_and_sanitize_row(self, row):
         row = self._remove_null_vals(row)

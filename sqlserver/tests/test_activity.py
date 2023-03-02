@@ -409,15 +409,15 @@ def test_activity_reported_hostname(
 
 
 def new_time():
-    return datetime.datetime(2021, 9, 23, 23, 21, 21, 669330)
+    return datetime.datetime(2021, 9, 23, 23, 21, 21, 669330).isoformat()
 
 
 def old_time():
-    return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330)
+    return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330).isoformat()
 
 
 def very_old_time():
-    return datetime.datetime(2021, 9, 20, 23, 21, 21, 669330)
+    return datetime.datetime(2021, 9, 20, 23, 21, 21, 669330).isoformat()
 
 
 @pytest.mark.parametrize(
