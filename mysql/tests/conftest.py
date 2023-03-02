@@ -275,6 +275,7 @@ def version_metadata():
         'version.raw': mock.ANY,
         'version.build': mock.ANY,
         'flavor': flavor,
+        'resolved_hostname': 'forced_hostname',
     }
 
 
