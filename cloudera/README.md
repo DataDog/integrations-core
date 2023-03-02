@@ -151,7 +151,14 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The Cloudera integration does not include any events.
+The Cloudera integration collects events that are emitted from the `/events` endpoint from the Cloudera Manager API. The event levels are mapped as the following:
+
+| Cloudera                  | Datadog                        |
+|---------------------------|--------------------------------|
+| `UNKNOWN`                 | `error`                        |
+| `INFORMATIONAL`           | `info`                         |
+| `IMPORTANT`               | `info`                         |
+| `CRITICAL`                | `error`                        |
 
 ### Service Checks
 
@@ -207,4 +214,4 @@ Need help? Contact [Datadog support][9].
 [11]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cloudera/images/create_machine_user.png
 [12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cloudera/images/set_workload_password.png
 [13]: https://docs.cloudera.com/data-hub/cloud/access-clusters/topics/mc-accessing-cluster-via-ssh.html
-[14]: https://docs.cloudera.com/documentation/enterprise/6/6.3/topics/cm_dg_tsquery.html
+[14]: https://docs.cloudera.com/cloudera-manager/7.9.0/monitoring-and-diagnostics/topics/cm-tsquery-syntax.html
