@@ -22,18 +22,14 @@ class GenericKafkaClient(KafkaClient):
         return self.confluent_kafka_client.get_consumer_offsets()
 
     def get_highwater_offsets(self, consumer_offsets):
-        # TODO when this method is implemented in ConfluentKafkaClient, replace this with:
-        # if self.use_legacy_client:
-        #     return self.python_kafka_client.get_highwater_offsets(consumer_offsets)
-        # return self.confluent_kafka_client.get_highwater_offsets(consumer_offsets)
-        return self.python_kafka_client.get_highwater_offsets(consumer_offsets)
+        if self.use_legacy_client:
+            return self.python_kafka_client.get_highwater_offsets(consumer_offsets)
+        return self.confluent_kafka_client.get_highwater_offsets(consumer_offsets)
 
     def get_highwater_offsets_dict(self):
-        # TODO when this method is implemented in ConfluentKafkaClient, replace this with:
-        # if self.use_legacy_client:
-        #     return self.python_kafka_client.get_highwater_offsets_dict()
-        # return self.confluent_kafka_client.get_highwater_offsets_dict()
-        return self.python_kafka_client.get_highwater_offsets_dict()
+        if self.use_legacy_client:
+            return self.python_kafka_client.get_highwater_offsets_dict()
+        return self.confluent_kafka_client.get_highwater_offsets_dict()
 
     def reset_offsets(self):
         if self.use_legacy_client:
