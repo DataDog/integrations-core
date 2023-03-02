@@ -198,8 +198,8 @@ class KafkaPythonClient(KafkaClient):
             self._kafka_client = self._create_kafka_admin_client(api_version=kafka_version)
         return self._kafka_client
 
-    def collect_broker_version(self):
-        return self.kafka_client._client.check_version()
+    # def collect_broker_version(self):
+    #     return self.kafka_client._client.check_version()
 
     def _highwater_offsets_callback(self, response):
         """Callback that parses an OffsetFetchResponse and saves it to the highwater_offsets dict."""
