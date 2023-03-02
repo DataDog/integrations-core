@@ -83,6 +83,9 @@ def assert_apc_ups_metrics(dd_agent_check, config):
     tags = profile_tags + ["snmp_device:{}".format(instance['ip_address'])]
 
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
+    aggregator.assert_metric(
+        'datadog.snmp.submitted_metrics', metric_type=aggregator.GAUGE, tags=tags + ['loader:core'], value=31
+    )
 
     for metric in metrics.APC_UPS_METRICS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
