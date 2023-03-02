@@ -36,20 +36,26 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
         return self.config.get('mypy-deps', [])
 
     def dev_package_install_command(self, in_py2_env):
-        if not self.in_core_repo or in_py2_env:
+        if not self.in_core_repo:
             return self.pip_install_command('datadog-checks-dev')
         elif not (self.is_test_package or self.is_dev_package):
-            return self.pip_install_command('-e', '../datadog_checks_dev')
-        return ""
+            if in_py2_env:
+                return self.pip_install_command('../datadog_checks_dev')
+            else:
+                return self.pip_install_command('-e', '../datadog_checks_dev')
+        return ''
 
     def base_package_install_command(self, features, in_py2_env):
-        if not self.in_core_repo or os.environ.get('BASE_PACKAGE_FORCE_UNPINNED') or in_py2_env:
+        if not self.in_core_repo or os.environ.get('BASE_PACKAGE_FORCE_UNPINNED'):
             return self.pip_install_command(self.format_base_package(features))
         elif base_package_version := os.environ.get('BASE_PACKAGE_FORCE_VERSION'):
             return self.pip_install_command(self.format_base_package(features, version=base_package_version))
         elif not (self.is_base_package or self.is_dev_package):
-            return self.pip_install_command('-e', f'../{self.format_base_package(features, local=True)}')
-        return ""
+            if in_py2_env:
+                return self.pip_install_command(f'../{self.format_base_package(features, local=True)}')
+            else:
+                return self.pip_install_command('-e', f'../{self.format_base_package(features, local=True)}')
+        return ''
 
     @staticmethod
     def format_base_package(features, version='', local=False):
