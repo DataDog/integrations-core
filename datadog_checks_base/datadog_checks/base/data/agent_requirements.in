@@ -103,7 +103,7 @@ serpent==1.41; sys_platform == 'win32' and python_version > '3.0'
 service-identity[idna]==21.1.0
 simplejson==3.17.6
 six==1.16.0
-snowflake-connector-python==2.8.3; python_version > '3.0'
+snowflake-connector-python==3.0.1; python_version > '3.0'
 supervisor==4.2.4
 tuf==2.0.0; python_version > '3.0'
 typing==3.10.0.0; python_version < '3.0'
