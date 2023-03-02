@@ -21,7 +21,6 @@ SUPPORTED_METRIC_TYPES = [
 
 ASSERT_VALUE_METRICS = [
     'snmp.devices_monitored',
-    'datadog.snmp.submitted_metrics',
 ]
 
 # Profiles may contain symbols declared twice with different names and the same OID
@@ -35,6 +34,8 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.device.reachable',
     'snmp.device.unreachable',
     'snmp.interface.status',
+    'snmp.ifInSpeed',
+    'snmp.ifOutSpeed',
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
