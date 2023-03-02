@@ -58,12 +58,14 @@ SELECT
     DB_NAME(sess.database_id) as database_name,
     sess.status as session_status,
     req.status as request_status,
-    SUBSTRING(qt.text, (req.statement_start_offset / 2) + 1,
-    ((CASE req.statement_end_offset
-        WHEN -1 THEN DATALENGTH(qt.text)
-        ELSE req.statement_end_offset END
-            - req.statement_start_offset) / 2) + 1) AS statement_text,
-    qt.text,
+    isnull(
+        SUBSTRING(qt.text, (req.statement_start_offset / 2) + 1,
+        ((CASE req.statement_end_offset
+            WHEN -1 THEN DATALENGTH(qt.text)
+            ELSE req.statement_end_offset END
+                - req.statement_start_offset) / 2) + 1)
+        , lqt.text) AS statement_text,
+    isnull(qt.text, lqt.text) AS text,
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
@@ -75,6 +77,7 @@ FROM sys.dm_exec_sessions sess
     FULL OUTER JOIN sys.dm_exec_requests req
         ON c.connection_id = req.connection_id
     OUTER APPLY sys.dm_exec_sql_text(req.sql_handle) qt
+    OUTER APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) lqt
 WHERE sess.session_id != @@spid
     AND (sess.status != 'sleeping' OR sess.session_id IN (SELECT blocking_session_id FROM cteBlocking) OR isnull(req.blocking_session_id, 0) <> 0)
 """,
