@@ -7,6 +7,7 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.base.stubs.common import MetricStub
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 
@@ -606,6 +607,7 @@ def assert_python_vs_core(
             aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=count)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     for (name, status, tags, message), stubs in python_service_checks.items():
         count = len(stubs) if assert_count else None

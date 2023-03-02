@@ -5,6 +5,7 @@ import pytest
 from tests.common import SNMP_CONTAINER_NAME
 
 from datadog_checks.dev.docker import get_container_ip
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common, metrics
 
@@ -95,6 +96,7 @@ def assert_apc_ups_metrics(dd_agent_check, config):
         aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=tags)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
