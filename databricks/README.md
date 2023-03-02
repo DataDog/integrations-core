@@ -330,7 +330,7 @@ The Databricks integration does not include any events.
 ### Failed to bind port 6062
 
 [`ipywidgets`][14] are available in Databricks Runtime 11.0 and above. By default, `ipywidgets` occupies port `6062`, 
-which is also the default Datadog agent port for [the debug endpoint][13]. Because of that, you can run into this issue:
+which is also the default Datadog Agent port for [the debug endpoint][13]. Because of that, you can run into this issue:
 
 ```
 23/02/28 17:07:31 ERROR DriverDaemon$: XXX Fatal uncaught exception. Terminating driver.
