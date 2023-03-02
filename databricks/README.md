@@ -339,7 +339,7 @@ java.io.IOException: Failed to bind to 0.0.0.0/0.0.0.0:6062
 
 To fix this issue, you have several options: 
 
-1. With Databricks Runtime 11.2 and above, you can change the port using the Spark `spark.databricks.driver.ipykernel.commChannelPort` option. You can find more information in [the databricks documentation][12].
+1. With Databricks Runtime 11.2 and above, you can change the port using the Spark `spark.databricks.driver.ipykernel.commChannelPort` option. Find more information in [the Databricks documentation][12].
 2. You can configure the port used by the Datadog agent with the `process_config.expvar_port` in your [`datadog.yaml`][13] configuration file. 
 3. Alternatively, you can set the `DD_PROCESS_CONFIG_EXPVAR_PORT` environment variable to configure the port used by the Datadog agent.
 
