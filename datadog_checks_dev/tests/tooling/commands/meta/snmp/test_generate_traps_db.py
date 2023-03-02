@@ -11,12 +11,25 @@ from datadog_checks.dev import run_command
 
 TEST_MIB = "A3COM-HUAWEI-LswTRAP-MIB"
 
+
 def test__traps_db_generation_expanded():
     with CliRunner().isolated_filesystem():
         shutil.copytree(f"{os.path.dirname(os.path.realpath(__file__))}/data", "./data")
 
         result = run_command(
-            [sys.executable, "-m", "datadog_checks.dev", "meta", "snmp", "generate-traps-db", "-o", "./data/", f"./data/{TEST_MIB}", "--output-format", "json"],
+            [
+                sys.executable,
+                "-m",
+                "datadog_checks.dev",
+                "meta",
+                "snmp",
+                "generate-traps-db",
+                "-o",
+                "./data/",
+                f"./data/{TEST_MIB}",
+                "--output-format",
+                "json",
+            ],
             capture=True,
         )
 
@@ -31,20 +44,32 @@ def test__traps_db_generation_expanded():
 
         assert trap_db == expected
 
+
 def test__traps_db_generation_compact():
     with CliRunner().isolated_filesystem():
         shutil.copytree(f"{os.path.dirname(os.path.realpath(__file__))}/data", "./data")
 
         result = run_command(
-            [sys.executable, "-m", "datadog_checks.dev", "meta", "snmp", "generate-traps-db", "--output-file", "./data/output.json",
-             f"./data/{TEST_MIB}", "--output-format", "json"],
+            [
+                sys.executable,
+                "-m",
+                "datadog_checks.dev",
+                "meta",
+                "snmp",
+                "generate-traps-db",
+                "--output-file",
+                "./data/output.json",
+                f"./data/{TEST_MIB}",
+                "--output-format",
+                "json",
+            ],
             capture=True,
         )
 
         assert 0 == result.code
         assert "Wrote trap data to" in result.stdout
 
-        with open(f"./data/output.json", "r") as trap_db_file:
+        with open("./data/output.json", "r") as trap_db_file:
             trap_db = json.load(trap_db_file)
 
         with open("./data/expected_compact.json", "r") as expected_file:
