@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from confluent_kafka import ConsumerGroupTopicPartitions, KafkaException, TopicPartition
+from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
 from confluent_kafka.admin import AdminClient
 from six import string_types
 
@@ -29,11 +29,37 @@ class ConfluentKafkaClient(KafkaClient):
     def get_consumer_offsets_dict(self):
         return self._consumer_offsets
 
-    def get_highwater_offsets(self):
-        raise NotImplementedError
+    def get_highwater_offsets(self, consumer_offsets):
+        # TODO: Remove broker_requests_batch_size as config after kafka-python is removed
+        topics_with_consumer_offset = {}
+        if not self.config._monitor_all_broker_highwatermarks:
+            topics_with_consumer_offset = {(topic, partition) for (_, topic, partition) in consumer_offsets}
+
+        for consumer_group in consumer_offsets.items():
+            consumer_config = {
+                "bootstrap.servers": self.config._kafka_connect_str,
+                "group.id": consumer_group,
+            }
+            consumer = Consumer(consumer_config)
+            topics = consumer.list_topics()
+
+            for topic in topics.topics:
+                topic_partitions = [
+                    TopicPartition(topic, partition) for partition in list(topics.topics[topic].partitions.keys())
+                ]
+
+                for topic_partition in topic_partitions:
+                    partition = topic_partition.partition
+                    if topic not in KAFKA_INTERNAL_TOPICS and (
+                        self.config._monitor_all_broker_highwatermarks
+                        or (topic, partition) in topics_with_consumer_offset
+                    ):
+                        _, high_offset = consumer.get_watermark_offsets(topic_partition)
+
+                        self._highwater_offsets[(topic, partition)] = high_offset
 
     def get_highwater_offsets_dict(self):
-        raise NotImplementedError
+        return self._highwater_offsets
 
     def reset_offsets(self):
         self._consumer_offsets = {}
