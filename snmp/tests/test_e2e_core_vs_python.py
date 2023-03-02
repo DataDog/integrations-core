@@ -26,13 +26,13 @@ ASSERT_VALUE_METRICS = [
 # Profiles may contain symbols declared twice with different names and the same OID
 # Python check does handles one single metric name per OID symbol
 SKIPPED_CORE_ONLY_METRICS = [
-    'snmp.device.reachable',
-    'snmp.device.unreachable',
-    'snmp.interface.status',
     'snmp.memory.total',
     'snmp.memory.used',
     'snmp.memory.free',
     'snmp.memory.usage',
+    'snmp.device.reachable',
+    'snmp.device.unreachable',
+    'snmp.interface.status',
     'snmp.cpu.usage',
     'snmp.ifInSpeed',
     'snmp.ifOutSpeed',
