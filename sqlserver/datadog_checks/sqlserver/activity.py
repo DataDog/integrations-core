@@ -72,9 +72,9 @@ SELECT
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
-    INNER JOIN sys.dm_exec_requests req
+    FULL OUTER JOIN sys.dm_exec_requests req
         ON c.connection_id = req.connection_id
-    CROSS APPLY sys.dm_exec_sql_text(req.sql_handle) qt
+    OUTER APPLY sys.dm_exec_sql_text(req.sql_handle) qt
 WHERE sess.session_id != @@spid
     AND (sess.status != 'sleeping' OR sess.session_id IN (SELECT blocking_session_id FROM cteBlocking) OR isnull(req.blocking_session_id, 0) <> 0)
 """,
@@ -216,7 +216,7 @@ class SqlserverActivity(DBMAsyncJob):
 
     @staticmethod
     def _get_sort_key(r):
-        return r.get("query_start") or datetime.datetime.now()
+        return r.get("query_start") or ''
 
     def _obfuscate_and_sanitize_row(self, row):
         row = self._remove_null_vals(row)
