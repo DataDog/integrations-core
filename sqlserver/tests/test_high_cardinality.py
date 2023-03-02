@@ -81,7 +81,7 @@ def test_complete_metrics_run(dd_run_check, dbm_instance, high_cardinality_insta
     second_run_elapsed = _run_queries_and_time_check()
 
     total_elapsed_time = first_run_elapsed + second_run_elapsed
-    assert total_elapsed_time <= 15
+    assert total_elapsed_time <= 60
 
 
 @high_cardinality_only

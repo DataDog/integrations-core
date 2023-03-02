@@ -30,7 +30,7 @@ except ImportError:
 
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 
-DEFAULT_COLLECTION_INTERVAL = 10
+DEFAULT_COLLECTION_INTERVAL = 60
 
 SQL_SERVER_QUERY_METRICS_COLUMNS = [
     "execution_count",
