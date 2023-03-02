@@ -12,8 +12,6 @@ from . import common
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
-SUBMITTED_METRICS_NAME = 'datadog.snmp.submitted_metrics'
-
 SUPPORTED_METRIC_TYPES = [
     {'MIB': 'ABC', 'symbol': {'OID': "1.3.6.1.2.1.7.1.0", 'name': "IAmACounter32"}},  # Counter32
     {'MIB': 'ABC', 'symbol': {'OID': "1.3.6.1.2.1.4.31.1.1.6.1", 'name': "IAmACounter64"}},  # Counter64
@@ -23,12 +21,14 @@ SUPPORTED_METRIC_TYPES = [
 
 ASSERT_VALUE_METRICS = [
     'snmp.devices_monitored',
-    'datadog.snmp.submitted_metrics',
 ]
 
 # Profiles may contain symbols declared twice with different names and the same OID
 # Python check does handles one single metric name per OID symbol
-SKIPPED_CORE_ONLY_COUNTED_AS_SUBMITTED_METRICS = [
+SKIPPED_CORE_ONLY_METRICS = [
+    'snmp.device.reachable',
+    'snmp.device.unreachable',
+    'snmp.interface.status',
     'snmp.memory.total',
     'snmp.memory.used',
     'snmp.memory.free',
@@ -37,11 +37,6 @@ SKIPPED_CORE_ONLY_COUNTED_AS_SUBMITTED_METRICS = [
     'snmp.ifInSpeed',
     'snmp.ifOutSpeed',
 ]
-SKIPPED_CORE_ONLY_METRICS = [
-    'snmp.device.reachable',
-    'snmp.device.unreachable',
-    'snmp.interface.status',
-] + SKIPPED_CORE_ONLY_COUNTED_AS_SUBMITTED_METRICS
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
 
@@ -585,18 +580,6 @@ def assert_python_vs_core(
     for metric_name in aggregator_metrics:
         for stub in aggregator_metrics[metric_name]:
             if stub.name in metrics_to_skip:
-                if stub.name in SKIPPED_CORE_ONLY_COUNTED_AS_SUBMITTED_METRICS:
-                    aggregator._metrics[SUBMITTED_METRICS_NAME] = [
-                        MetricStub(
-                            submittedMetricStub.name,
-                            submittedMetricStub.type,
-                            submittedMetricStub.value - 1,
-                            submittedMetricStub.tags,
-                            submittedMetricStub.hostname,
-                            submittedMetricStub.device,
-                        )
-                        for submittedMetricStub in aggregator._metrics[SUBMITTED_METRICS_NAME]
-                    ]
                 continue
             aggregator._metrics[metric_name].append(normalize_stub_metric(stub, tags_to_skip))
 
