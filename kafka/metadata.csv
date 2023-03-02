@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+kafka.net.bytes_out,gauge,,byte,second,Outgoing byte total.,0,kafka,bytes out total,
 kafka.net.bytes_out.rate,gauge,10,byte,second,Outgoing byte rate.,0,kafka,bytes out,
 kafka.net.bytes_in.rate,gauge,10,byte,second,Incoming byte rate.,0,kafka,bytes in,cpu
 kafka.net.bytes_rejected.rate,gauge,10,byte,second,Rejected byte rate.,-1,kafka,bytes rejected,

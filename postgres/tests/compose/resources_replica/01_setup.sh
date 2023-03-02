@@ -12,7 +12,7 @@ done
 
 echo "Running pg basebackup"
 export PGPASSWORD='replicator'
-pg_basebackup -h postgres -U replicator -X stream -v -R -D /var/lib/postgresql/data/
+pg_basebackup -h postgres -U replicator -S replication_slot -X stream -v -R -D /var/lib/postgresql/data/
 echo "pg basebackup executed"
 
 pg_ctl -D /var/lib/postgresql/data -w start
