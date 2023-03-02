@@ -10,7 +10,6 @@ class ConfluentKafkaClient(KafkaClient):
     @property
     def kafka_client(self):
         if self._kafka_client is None:
-            # self.conf is just the config options from librdkafka
             self._kafka_client = AdminClient(
                 {
                     "bootstrap.servers": self.config._kafka_connect_str,

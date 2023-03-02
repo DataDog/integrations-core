@@ -47,5 +47,8 @@ class KafkaConfig:
         if not isinstance(self._kafka_connect_str, (string_types, list)):
             raise ConfigurationError('`kafka_connect_str` should be string or list of strings')
 
+        if isinstance(self._kafka_connect_str, list):
+            self._kafka_connect_str = ",".join(str(connect_str) for connect_str in self._kafka_connect_str)
+
         if isinstance(self._kafka_version, str):
             self._kafka_version = tuple(map(int, self._kafka_version.split(".")))
