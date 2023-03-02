@@ -268,10 +268,12 @@ def test_activity_nested_blocking_transactions(
     # Transaction 3
     t3 = threading.Thread(target=run_queries, args=(conn3, [QUERY3]))
 
-    for t in [t1, t2, t3]:
-        t.start()
+    t1.start()
+    time.sleep(0.3)
+    t2.start()
+    time.sleep(0.3)
+    t3.start()
 
-    time.sleep(0.3)  # Small sleep to allow transaction 1 to execute and reach idle state
     try:
         dd_run_check(check)
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
