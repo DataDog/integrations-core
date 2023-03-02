@@ -17,10 +17,7 @@
                 "custom_links": [],
                 "title": "Most memory-intensive pods",
                 "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                }
+                "title_align": "left"
             },
             "layout": {
                 "x": 151,
@@ -44,10 +41,7 @@
                 "custom_links": [],
                 "title": "Most CPU-intensive pods",
                 "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                }
+                "title_align": "left"
             },
             "layout": {
                 "x": 107,
@@ -145,9 +139,6 @@
                 "title": "Pods available",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -212,9 +203,6 @@
                 "title": "Pods desired",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -283,9 +271,6 @@
                 "title": "Pods unavailable",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -453,9 +438,6 @@
                 "title": "Network errors per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -483,9 +465,6 @@
                 "title": "Sum Kubernetes CPU requests per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -513,9 +492,6 @@
                 "title": "Sum Kubernetes memory requests per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -562,9 +538,6 @@
                 "title": "Network in per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -592,9 +565,6 @@
                 "title": "Network out per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -631,10 +601,7 @@
                 "query": "source:kubernetes $node",
                 "title": "Number of Kubernetes events per node",
                 "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1d"
-                }
+                "title_align": "left"
             },
             "layout": {
                 "x": 0,
@@ -750,9 +717,6 @@
                 "title": "Pods desired",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -877,9 +841,6 @@
                 "title": "Container states",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -909,9 +870,6 @@
                 "title": "Ready",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "1h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -941,9 +899,6 @@
                 "title": "Not ready",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "1h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -973,9 +928,6 @@
                 "title": "Disk reads per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -1005,9 +957,6 @@
                 "title": "Disk writes per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -1183,9 +1132,6 @@
                 "title": "Pods ready",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -1613,9 +1559,6 @@
                 "title": "Network errors per pod",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
