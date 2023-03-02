@@ -3,3 +3,6 @@ steps:
 # See: https://github.com/giampaolo/psutil/issues/351
 - script: diskperf -y
   displayName: 'Enable disk performance counters'
+# https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=powershell
+- script: powershell New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+  displayName: 'Increase max file path length'
