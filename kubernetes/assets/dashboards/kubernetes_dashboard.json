@@ -601,7 +601,10 @@
                 "query": "source:kubernetes $node",
                 "title": "Number of Kubernetes events per node",
                 "title_size": "16",
-                "title_align": "left"
+                "title_align": "left",
+                "time": {
+                    "live_span": "1d"
+                }
             },
             "layout": {
                 "x": 0,
