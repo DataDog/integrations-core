@@ -101,7 +101,7 @@ datadog-mcache==3.3.1; sys_platform != 'win32'
 datadog-mesos-master==3.1.0; sys_platform != 'win32'
 datadog-mesos-slave==3.1.0; sys_platform != 'win32'
 datadog-mongo==5.0.0
-datadog-mysql==10.0.0
+datadog-mysql==10.1.0
 datadog-nagios==1.11.0
 datadog-network==2.9.3
 datadog-nfsstat==1.11.0; sys_platform == 'linux2'
