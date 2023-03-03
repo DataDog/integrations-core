@@ -28,7 +28,7 @@ datadog-citrix-hypervisor==2.2.0
 datadog-clickhouse==2.8.2
 datadog-cloud-foundry-api==2.2.1
 datadog-cloudera==1.1.0
-datadog-cockroachdb==2.5.0
+datadog-cockroachdb==2.6.0
 datadog-confluent-platform==1.8.1
 datadog-consul==2.2.0
 datadog-coredns==2.3.0; sys_platform == 'linux2'
