@@ -22,6 +22,19 @@ QUERY_SERVER_STATIC_INFO = {
     ],
 }
 
+# This query will use the narrowest index available on the "table." While MSFT does not
+# document the sys.dm_exec_query_stats view (a table-valued function), there appears to
+# be an index on the column `plan_handle` based on empirical testing of latency by
+# querying different columns.
+#
+# The following queries had mean latency 400-500ms on a 50K-row plan cache:
+# - select * from sys.dm_exec_query_stats where query_hash = ?
+# - select * from sys.dm_exec_query_stats where sql_handle = ?
+# - select * from sys.dm_exec_query_stats where plan_generation_num = ?
+# - select * from sys.dm_exec_query_stats where statement_end_offset = ?
+#
+# This query had mean latency 406μs:
+# - select * from sys.dm_exec_query_stats where plan_handle = ?
 QUERY_DM_EXEC_QUERY_STATS_COUNT = {
     'name': 'sys.dm_exec_query_stats count',
     'query': """SELECT COUNT(*) FROM sys.dm_exec_query_stats""".strip(),
