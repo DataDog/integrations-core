@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
@@ -34,7 +33,7 @@ QUERY_SERVER_STATIC_INFO = {
 # - select * from sys.dm_exec_query_stats where plan_generation_num = ?
 # - select * from sys.dm_exec_query_stats where statement_end_offset = ?
 #
-# This query had mean latency 406μs:
+# This query had mean latency 406us:
 # - select * from sys.dm_exec_query_stats where plan_handle = ?
 QUERY_DM_EXEC_QUERY_STATS_COUNT = {
     'name': 'sys.dm_exec_query_stats count',
