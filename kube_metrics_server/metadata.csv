@@ -15,5 +15,3 @@ kube_metrics_server.scraper_last_time,gauge,,,second,"Last time metrics-server p
 kube_metrics_server.process.cpu_seconds_total,count,,,second,"Total user and system CPU time spent",0,kube_metrics_server,process.cpu_seconds_total,
 kube_metrics_server.process.max_fds,gauge,,,,"Maximum number of open file descriptors",0,kube_metrics_server,process.max_fds,
 kube_metrics_server.process.open_fds,gauge,,,,"Number of open file descriptors",0,kube_metrics_server,process.open_fds,
-apiserver_envelope_encryption_dek_cache_fill_percent,gauge,,,,"Percent of the cache slots currently occupied by cached DEKs.",0,kubernetes_api_server_metrics,envelope encryption dek cache fill percent,
-aggregator_unavailable_apiservice,gauge,,,,"Percent of the cache slots currently occupied by cached DEKs.",0,kubernetes_api_server_metrics,envelope encryption dek cache fill percent,
