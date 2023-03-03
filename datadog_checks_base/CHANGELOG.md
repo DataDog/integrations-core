@@ -3,7 +3,6 @@
 ## 30.1.0 / 2023-03-03
 
 * [Added] Update kubernetes and supervisor dependencies. See [#14093](https://github.com/DataDog/integrations-core/pull/14093).
-* [Fixed] Update snowflake-connector-python to 3.0.0. See [#13926](https://github.com/DataDog/integrations-core/pull/13926).
 * [Fixed] Do not install gssapi and dtrace on py2 on arm macs. See [#13749](https://github.com/DataDog/integrations-core/pull/13749).
 * [Fixed] Remove the use of the deprecated `pkg_resources` package. See [#13842](https://github.com/DataDog/integrations-core/pull/13842).
 

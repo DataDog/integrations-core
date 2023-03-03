@@ -3,8 +3,7 @@
 ## 2.5.0 / 2023-03-03
 
 * [Added] Parse and add the tag `stat_prefix` to `ext_authz` metrics if possible. See [#13930](https://github.com/DataDog/integrations-core/pull/13930).
-* [Fixed] Add missing metrics. See [#14088](https://github.com/DataDog/integrations-core/pull/14088).
-* [Fixed] Add missing metrics. See [#14036](https://github.com/DataDog/integrations-core/pull/14036).
+* [Fixed] Add missing metrics. See [#14036](https://github.com/DataDog/integrations-core/pull/14036) and [#14088](https://github.com/DataDog/integrations-core/pull/14088).
 
 ## 2.4.1 / 2023-01-20 / Agent 7.43.0
 

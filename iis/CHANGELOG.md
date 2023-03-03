@@ -2,8 +2,8 @@
 
 ## 2.18.2 / 2023-03-03
 
-* [Fixed] Fix IIS Check memory leaked due to a bug in win32pdh.GetFormattedCouterArray(). See [#13901](https://github.com/DataDog/integrations-core/pull/13901).
-* [Fixed] Change the performance counter used by the iis.app_pool_up service check so it can tell when the app pool is down. See [#13734](https://github.com/DataDog/integrations-core/pull/13734).
+* [Fixed] Fix leak due to a bug in `win32pdh.GetFormattedCouterArray()`. See [#13901](https://github.com/DataDog/integrations-core/pull/13901).
+* [Fixed] Change the performance counter used by the `iis.app_pool_up` service check so it can tell when the app pool is down. See [#13734](https://github.com/DataDog/integrations-core/pull/13734).
 
 ## 2.18.1 / 2023-02-08 / Agent 7.42.2
 

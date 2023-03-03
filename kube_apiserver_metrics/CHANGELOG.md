@@ -2,7 +2,7 @@
 
 ## 3.4.0 / 2023-03-03
 
-* [Added] Add Kube API Server metric - apiserver_admission_webhook_fail_open_count. See [#13750](https://github.com/DataDog/integrations-core/pull/13750).
+* [Added] Add metric `apiserver_admission_webhook_fail_open_count`. See [#13750](https://github.com/DataDog/integrations-core/pull/13750).
 
 ## 3.3.0 / 2022-09-16 / Agent 7.40.0
 

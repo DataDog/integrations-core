@@ -2,7 +2,7 @@
 
 ## 10.1.0 / 2023-03-03
 
-* [Added] [DBM-1862] add resolved_hostname to metadata to mysql, postgres. See [#14092](https://github.com/DataDog/integrations-core/pull/14092).
+* [Added] Add resolved_hostname to metadata. See [#14092](https://github.com/DataDog/integrations-core/pull/14092).
 
 ## 10.0.0 / 2023-01-20 / Agent 7.43.0
 
