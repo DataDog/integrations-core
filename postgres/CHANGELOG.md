@@ -1,5 +1,12 @@
 # CHANGELOG - postgres
 
+## 13.4.0 / 2023-03-03
+
+* [Added] [DBM-1862] add resolved_hostname to metadata to mysql, postgres. See [#14092](https://github.com/DataDog/integrations-core/pull/14092).
+* [Added] Add `postgresql.replication_slot.*` metrics. See [#14013](https://github.com/DataDog/integrations-core/pull/14013).
+* [Added] Add `postgresql.wal_receiver.*` metrics. See [#13852](https://github.com/DataDog/integrations-core/pull/13852).
+* [Fixed] Avoid brief postgresql.replication_delay spikes after Postgres restart/reload. See [#13796](https://github.com/DataDog/integrations-core/pull/13796).
+
 ## 13.3.0 / 2023-01-20 / Agent 7.43.0
 
 * [Added] Add `application_name` to activity metrics and report oldest `backend_xmin`, `backend_xid` and `xact_start`. See [#13523](https://github.com/DataDog/integrations-core/pull/13523).
