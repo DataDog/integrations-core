@@ -399,7 +399,9 @@ def test_no_recursive_symlink_loop(aggregator):
 @pytest.mark.parametrize(
     'stat_follow_symlinks, expected_dir_size, expected_file_sizes',
     [
-        pytest.param(True, 250, [('file50', 50), ('file100', 100), ('file100sym', 100)], id='follow_sym'),
+        # du --apparent-size /path/ -L
+        # aka follow symlinks - dedups total directory size
+        pytest.param(True, 150, [('file50', 50), ('file100', 100), ('file100sym', 100)], id='follow_sym'),
         # file100sym = 8 + len(dir): that's the length of the symlink file
         pytest.param(
             False,
