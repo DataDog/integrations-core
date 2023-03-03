@@ -44,7 +44,7 @@ datadog-druid==2.2.0
 datadog-ecs-fargate==3.3.0
 datadog-eks-fargate==3.2.0
 datadog-elastic==5.3.0
-datadog-envoy==2.4.1
+datadog-envoy==2.5.0
 datadog-etcd==3.3.0
 datadog-exchange-server==1.15.0; sys_platform == 'win32'
 datadog-external-dns==2.3.0
