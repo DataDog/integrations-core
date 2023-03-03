@@ -119,7 +119,7 @@ logs:
 
 ##### Filter journal messages
 
-You can filter arbitrary messages using key-value pairs with these parameters:
+In Datadog Agent version `7.39.0`+, you can filter arbitrary messages using key-value pairs with these parameters:
 
 - `include_matches`: Includes messages matching `key=value`
 - `exclude_matches`: Excludes messages matching `key=value`
