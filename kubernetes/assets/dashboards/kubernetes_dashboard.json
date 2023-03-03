@@ -324,10 +324,7 @@
             "definition": {
                 "type": "event_stream",
                 "query": "source:kubernetes $node",
-                "event_size": "s",
-                "time": {
-                    "live_span": "1w"
-                }
+                "event_size": "s"
             },
             "layout": {
                 "x": 0,
@@ -601,10 +598,7 @@
                 "query": "source:kubernetes $node",
                 "title": "Number of Kubernetes events per node",
                 "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "1d"
-                }
+                "title_align": "left"
             },
             "layout": {
                 "x": 0,
