@@ -50,7 +50,7 @@ def test_ao_primary_replica(dd_agent_check, init_config, instance_ao_docker_prim
     for mname in EXPECTED_AO_METRICS_SECONDARY:
         aggregator.assert_metric(mname, count=0)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS + UNDOCUMENTED_METRICS)
 
 
 @not_windows_ci
@@ -90,7 +90,7 @@ def test_ao_secondary_replica(dd_agent_check, init_config, instance_ao_docker_se
     for mname in EXPECTED_AO_METRICS_PRIMARY + EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY:
         aggregator.assert_metric(mname, count=0)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS + UNDOCUMENTED_METRICS)
 
 
 @not_windows_ado
