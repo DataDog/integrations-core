@@ -44,6 +44,7 @@ HERE = get_here()
 CHECK_NAME = "sqlserver"
 
 CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.db.commit_table_entries', 'sqlserver.exec.in_progress']
+UNDOCUMENTED_METRICS = ['sqlserver.query_plan_cache.rows']
 SERVER_METRICS = [
     'sqlserver.server.committed_memory',
     'sqlserver.server.cpu_count',

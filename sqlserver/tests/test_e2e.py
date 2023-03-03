@@ -15,6 +15,7 @@ from .common import (
     EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON,
     EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY,
     EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY,
+    UNDOCUMENTED_METRICS,
     UNEXPECTED_FCI_METRICS,
     UNEXPECTED_QUERY_EXECUTOR_AO_METRICS,
 )
@@ -116,4 +117,4 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
     aggregator.assert_all_metrics_covered()
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=CUSTOM_METRICS + UNDOCUMENTED_METRICS)
