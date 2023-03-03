@@ -14,13 +14,50 @@ class ConfluentKafkaClient(KafkaClient):
     @property
     def kafka_client(self):
         if self._kafka_client is None:
-            self._kafka_client = AdminClient(
-                {
-                    "bootstrap.servers": self.config._kafka_connect_str,
-                    "socket.timeout.ms": self.config._request_timeout_ms,
-                    "client.id": "dd-agent",
+            config = {
+                "bootstrap.servers": self.config._kafka_connect_str,
+                "socket.timeout.ms": self.config._request_timeout_ms,
+                "client.id": "dd-agent",
+                "security.protocol": self.config._security_protocol,
+            }
+
+            if self.config._sasl_mechanism == "OAUTHBEARER":
+                assert (
+                    self.config._sasl_oauth_token_provider is not None
+                ), "sasl_oauth_token_provider required for OAUTHBEARER sasl"
+
+                if self.config._sasl_oauth_token_provider.get("url") is None:
+                    raise ConfigurationError("The `url` setting of `auth_token` reader is required")
+
+                elif self.config._sasl_oauth_token_provider.get("client_id") is None:
+                    raise ConfigurationError("The `client_id` setting of `auth_token` reader is required")
+
+                elif self.config._sasl_oauth_token_provider.get("client_secret") is None:
+                    raise ConfigurationError("The `client_secret` setting of `auth_token` reader is required")
+
+                oauth_config = {
+                    "sasl.mechanism": self.config._sasl_mechanism,
+                    "sasl.oauthbearer.method": "oidc",
+                    "sasl.oauthbearer.client.id": self.config._sasl_oauth_token_provider.get("client_id"),
+                    "sasl.oauthbearer.token.endpoint.url": self.config._sasl_oauth_token_provider.get("url"),
+                    "sasl.oauthbearer.client.secret": self.config._sasl_oauth_token_provider.get("client_secret"),
                 }
-            )
+
+                config.update(oauth_config)
+
+            if self.config._sasl_mechanism == "GSSAPI":
+                kerb_config = {
+                    "sasl.mechanism": self.config._sasl_mechanism,
+                    "sasl.username": self.config._sasl_plain_username,
+                    "sasl.password": self.config._sasl_plain_password,
+                    "sasl.kerberos.service.name": self.config._sasl_kerberos_service_name,
+                    # TODO: _sasl_kerberos_domain_name doesn't seem to be used?
+                    # "TBD": self.config._sasl_kerberos_domain_name,
+                    "sasl.kerberos.keytab": "test",
+                }
+                config.update(kerb_config)
+
+            self._kafka_client = AdminClient(config)
         return self._kafka_client
 
     def create_kafka_admin_client(self):
