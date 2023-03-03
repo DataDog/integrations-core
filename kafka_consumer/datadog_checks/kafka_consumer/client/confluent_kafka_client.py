@@ -37,7 +37,7 @@ class ConfluentKafkaClient(KafkaClient):
 
         # kafka-python raises an exception around here when trying to get brokers for the admin client
         # TODO: Remove this logic once kafka-python implementation is deprecated, this is only to keep the same functionality 
-        if not consumer_offsets and not self.kafka_client.list_topics(timeout=1).brokers:
+        if not self.kafka_client.list_topics(timeout=1).brokers:
             raise Exception()
 
         # Still failing test_oauth_config tests since we haven't implemented OAuth support yet, so it's not failing when it's supposed to
