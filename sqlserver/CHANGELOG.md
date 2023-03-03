@@ -1,5 +1,12 @@
 # CHANGELOG - sqlserver
 
+## 11.0.0 / 2023-03-03
+
+* [Added] Collect program_name for SQL Server activity. See [#13953](https://github.com/DataDog/integrations-core/pull/13953).
+* [Fixed] sqlserver.database.state not sent for all databases. See [#13735](https://github.com/DataDog/integrations-core/pull/13735).
+* [Fixed] Bug Fix: Azure SQL DB database name tags properly applied on perf metrics. See [#13757](https://github.com/DataDog/integrations-core/pull/13757).
+* [Changed] Lower the frequency of query metrics collection. See [#14033](https://github.com/DataDog/integrations-core/pull/14033).
+
 ## 10.1.3 / 2023-02-01 / Agent 7.43.0
 
 * [Fixed] Fix sqlserver.database.state not being sent for all databases. See [#13735](https://github.com/DataDog/integrations-core/pull/13735).
