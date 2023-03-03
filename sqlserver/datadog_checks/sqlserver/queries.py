@@ -57,7 +57,7 @@ QUERY_PLAN_CACHE_SIZE_BYTES = {
     'columns': [
         {'name': 'clerk_type', 'type': 'tag'},
         {'name': 'query_plan_cache.bytes', 'type': 'gauge'},
-    ]
+    ],
 }
 
 QUERY_AO_FAILOVER_CLUSTER = {
