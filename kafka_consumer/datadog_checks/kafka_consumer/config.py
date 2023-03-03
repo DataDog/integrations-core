@@ -52,6 +52,3 @@ class KafkaConfig:
 
         if isinstance(self._kafka_version, str):
             self._kafka_version = tuple(map(int, self._kafka_version.split(".")))
-
-        if self._sasl_mechanism == "OAUTHBEARER":
-            assert self._sasl_oauth_token_provider is not None
