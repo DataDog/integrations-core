@@ -43,6 +43,23 @@ QUERY_DM_EXEC_QUERY_STATS_COUNT = {
     ],
 }
 
+# Retrieves the plan cache size from the memory clerk. From the documentation:
+# "This cache store is used for caching ad hoc queries, prepared statements,
+# and server-side cursors in plan cache"
+QUERY_PLAN_CACHE_SIZE_BYTES = {
+    'name': 'plan cache memory size',
+    'query': """
+        SELECT [type] AS [ClerkType],
+        SUM(pages_kb) * 1024 AS [SizeInBytes]
+        FROM sys.dm_os_memory_clerks WITH (NOLOCK)
+        WHERE [ClerkType] = "CACHESTORE_SQLCP"
+        """,
+    'columns': [
+        {'name': 'clerk_type', 'type': 'tag'},
+        {'name': 'query_plan_cache.bytes', 'type': 'gauge'},
+    ]
+}
+
 QUERY_AO_FAILOVER_CLUSTER = {
     'name': 'sys.dm_hadr_cluster',
     'query': """
