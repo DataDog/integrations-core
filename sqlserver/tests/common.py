@@ -44,7 +44,7 @@ HERE = get_here()
 CHECK_NAME = "sqlserver"
 
 CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.db.commit_table_entries', 'sqlserver.exec.in_progress']
-UNDOCUMENTED_METRICS = ['sqlserver.query_plan_cache.rows']
+UNDOCUMENTED_METRICS = ['sqlserver.query_plan_cache.rows', 'sqlserver.query_plan_cache.bytes']
 SERVER_METRICS = [
     'sqlserver.server.committed_memory',
     'sqlserver.server.cpu_count',
@@ -64,7 +64,7 @@ def get_expected_file_stats_metrics():
 
 EXPECTED_FILE_STATS_METRICS = get_expected_file_stats_metrics()
 
-EXPECTED_QUERY_PLAN_CACHE_METRICS = ["sqlserver.query_plan_cache.rows"]
+EXPECTED_QUERY_PLAN_CACHE_METRICS = ["sqlserver.query_plan_cache.rows", "sqlserver.query_plan_cache.bytes"]
 
 EXPECTED_DEFAULT_METRICS = (
     [

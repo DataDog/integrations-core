@@ -52,7 +52,8 @@ QUERY_PLAN_CACHE_SIZE_BYTES = {
         SELECT [type] AS [ClerkType],
         SUM(pages_kb) * 1024 AS [SizeInBytes]
         FROM sys.dm_os_memory_clerks WITH (NOLOCK)
-        WHERE [ClerkType] = "CACHESTORE_SQLCP"
+        WHERE [type] = 'CACHESTORE_SQLCP'
+        GROUP BY [type]
         """,
     'columns': [
         {'name': 'clerk_type', 'type': 'tag'},
