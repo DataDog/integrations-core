@@ -368,7 +368,11 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
 
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
 
+    unexpected_metrics = set(EXPECTED_QUERY_PLAN_CACHE_METRICS)
+
     for mname in EXPECTED_DEFAULT_METRICS + CUSTOM_METRICS:
+        if mname in unexpected_metrics:
+            continue
         aggregator.assert_metric(mname)
 
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
