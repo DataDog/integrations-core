@@ -123,7 +123,7 @@ For container environments such as Kubernetes, see the [Autodiscovery Integratio
 | -------------------- | -------------------------------------------- |
 | `<INTEGRATION_NAME>` | `rabbitmq`                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                |
-| `<INSTANCE_CONFIG>`  | `{"prometheus_plugin": {"url": "%%host%%:15692"}}` |
+| `<INSTANCE_CONFIG>`  | `{"prometheus_plugin": {"url": "http://%%host%%:15692"}}` |
 
 ##### Log collection
 
