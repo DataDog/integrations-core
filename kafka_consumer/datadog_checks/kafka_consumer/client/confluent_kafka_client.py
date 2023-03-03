@@ -35,6 +35,13 @@ class ConfluentKafkaClient(KafkaClient):
         if not self.config._monitor_all_broker_highwatermarks:
             topics_with_consumer_offset = {(topic, partition) for (_, topic, partition) in consumer_offsets}
 
+        # kafka-python raises an exception around here when trying to get brokers for the admin client
+        # TODO: Remove this logic once kafka-python implementation is deprecated, this is only to keep the same functionality 
+        if not consumer_offsets and not self.kafka_client.list_topics(timeout=1).brokers:
+            raise Exception()
+
+        # Still failing test_oauth_config tests since we haven't implemented OAuth support yet, so it's not failing when it's supposed to
+        
         for consumer_group in consumer_offsets.items():
             consumer_config = {
                 "bootstrap.servers": self.config._kafka_connect_str,
