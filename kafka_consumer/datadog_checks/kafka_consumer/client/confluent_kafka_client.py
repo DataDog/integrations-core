@@ -40,9 +40,6 @@ class ConfluentKafkaClient(KafkaClient):
     def request_metadata_update(self):
         raise NotImplementedError
 
-    # def collect_broker_version(self):
-    #     raise NotImplementedError
-
     def get_consumer_offsets(self):
         raise NotImplementedError
 
