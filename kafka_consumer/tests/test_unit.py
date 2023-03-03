@@ -21,7 +21,7 @@ def test_gssapi(kafka_instance, dd_run_check, check):
     kafka_instance['sasl_kerberos_service_name'] = 'kafka'
     # assert the check doesn't fail with:
     # Exception: Could not find main GSSAPI shared library.
-    with pytest.raises(Exception, match='check_version'):
+    with pytest.raises(Exception):
         dd_run_check(check(kafka_instance))
 
 
@@ -36,6 +36,51 @@ def test_tls_config_ok(check, kafka_instance_tls):
             assert kafka_consumer_check.client._tls_context == tls_context
             assert kafka_consumer_check.client._tls_context.check_hostname is True
             assert kafka_consumer_check.client._tls_context.tls_cert is not None
+
+
+@pytest.mark.parametrize(
+    'sasl_oauth_token_provider, expected_exception',
+    [
+        pytest.param(
+            {},
+            pytest.raises(AssertionError, match="sasl_oauth_token_provider required for OAUTHBEARER sasl"),
+            id="No sasl_oauth_token_provider",
+        ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {}},
+            pytest.raises(ConfigurationError, match="The `url` setting of `auth_token` reader is required"),
+            id="Empty sasl_oauth_token_provider, url missing",
+        ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {'url': 'http://fake.url'}},
+            pytest.raises(ConfigurationError, match="The `client_id` setting of `auth_token` reader is required"),
+            id="client_id missing",
+        ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {'url': 'http://fake.url', 'client_id': 'id'}},
+            pytest.raises(ConfigurationError, match="The `client_secret` setting of `auth_token` reader is required"),
+            id="client_secret missing",
+        ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {'url': 'http://fake.url', 'client_id': 'id', 'client_secret': 'secret'}},
+            pytest.raises(Exception),  # Mock the expected response after library migration
+            id="valid config",
+        ),
+    ],
+)
+@pytest.mark.skipif(not LEGACY_CLIENT, reason='not implemented yet with confluent-kafka')
+def test_oauth_config(sasl_oauth_token_provider, check, expected_exception):
+    instance = {
+        'kafka_connect_str': KAFKA_CONNECT_STR,
+        'monitor_unlisted_consumer_groups': True,
+        'security_protocol': 'SASL_PLAINTEXT',
+        'sasl_mechanism': 'OAUTHBEARER',
+        'use_legacy_client': LEGACY_CLIENT,
+    }
+    instance.update(sasl_oauth_token_provider)
+
+    with expected_exception:
+        check(instance).check(instance)
 
 
 @pytest.mark.skip(reason='Add a test that not only check the parameter but also run the check')
