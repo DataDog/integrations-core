@@ -39,7 +39,7 @@ kafka-python==2.0.2
 kazoo==2.9.0
 keystoneauth1==5.0.0; python_version < '3.0'
 kubernetes==18.20.0; python_version < '3.0'
-kubernetes==25.3.0; python_version > '3.0'
+kubernetes==26.1.0; python_version > '3.0'
 ldap3==2.9.1
 lxml==4.9.2
 lz4==2.2.1; python_version < '3.0'
@@ -105,7 +105,7 @@ service-identity[idna]==21.1.0
 simplejson==3.17.6
 six==1.16.0
 snowflake-connector-python==3.0.1; python_version > '3.0'
-supervisor==4.2.4
+supervisor==4.2.5
 tuf==2.0.0; python_version > '3.0'
 typing==3.10.0.0; python_version < '3.0'
 uptime==3.0.1

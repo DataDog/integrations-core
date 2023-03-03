@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 2.16.4 / 2023-03-03
+
+* [Fixed] Do not install gssapi and dtrace on py2 on arm macs. See [#13749](https://github.com/DataDog/integrations-core/pull/13749).
+
 ## 2.16.3 / 2023-01-20 / Agent 7.43.0
 
 * [Fixed] Add kafka consumer logs for more visibility. See [#13679](https://github.com/DataDog/integrations-core/pull/13679).
