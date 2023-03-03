@@ -59,13 +59,6 @@ class GenericKafkaClient(KafkaClient):
         # return self.confluent_kafka_client.request_metadata_update()
         return self.python_kafka_client.request_metadata_update()
 
-    def collect_broker_version(self):
-        # TODO when this method is implemented in ConfluentKafkaClient, replace this with:
-        # if self.use_legacy_client:
-        #     return self.python_kafka_client.collect_broker_version()
-        # return self.confluent_kafka_client.collect_broker_version()
-        return self.python_kafka_client.collect_broker_version()
-
     def get_consumer_offsets_dict(self):
         # TODO when this method is implemented in ConfluentKafkaClient, replace this with:
         # if self.use_legacy_client:

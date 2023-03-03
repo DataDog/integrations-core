@@ -73,8 +73,6 @@ class KafkaCheck(AgentCheck):
             consumer_offsets, highwater_offsets, self._context_limit - len(highwater_offsets)
         )
 
-        self.collect_broker_metadata()
-
     def report_highwater_offsets(self, highwater_offsets, contexts_limit):
         """Report the broker highwater offsets."""
         reported_contexts = 0
@@ -149,15 +147,6 @@ class KafkaCheck(AgentCheck):
                     )
                 self.log.warning(msg, consumer_group, topic, partition)
                 self.client.request_metadata_update()  # force metadata update on next poll()
-
-    @AgentCheck.metadata_entrypoint
-    def collect_broker_metadata(self):
-        version_data = [str(part) for part in self.client.collect_broker_version()]
-        version_parts = {name: part for name, part in zip(('major', 'minor', 'patch'), version_data)}
-
-        self.set_metadata(
-            'version', '.'.join(version_data), scheme='parts', final_scheme='semver', part_map=version_parts
-        )
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""

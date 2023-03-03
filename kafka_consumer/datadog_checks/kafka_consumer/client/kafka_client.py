@@ -44,7 +44,3 @@ class KafkaClient(ABC):
     @abstractmethod
     def request_metadata_update(self):
         pass
-
-    @abstractmethod
-    def collect_broker_version(self):
-        pass
