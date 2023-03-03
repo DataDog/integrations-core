@@ -17,12 +17,12 @@ redis.clients.recent_max_input_buffer,gauge,,,,The biggest input buffer among re
 redis.clients.blocked,gauge,,connection,,The number of connections waiting on a blocking call.,0,redis,clients blocked,memory
 redis.clients.longest_output_list,gauge,,,,The longest output list among current client connections [v3 & v4].,0,redis,long output list,
 redis.clients.recent_max_output_buffer,gauge,,,,The longest output buffer among recent client connections [v5+].,0,redis,long output list,
-redis.cpu.sys,gauge,,,,System CPU consumed by the Redis server.,-1,redis,cpu sys,cpu
-redis.cpu.sys_children,gauge,,,,System CPU consumed by the background processes.,-1,redis,cpu sys children,
-redis.cpu.user,gauge,,,,User CPU consumed by the Redis server.,-1,redis,cpu user,
-redis.cpu.user_children,gauge,,,,User CPU consumed by the background processes.,-1,redis,cpu user children,
-redis.cpu.sys_main_thread,gauge,,,,System CPU consumed by the Redis server main thread. [v7+].,-1,redis,cpu sys main thread,
-redis.cpu.user_main_thread,gauge,,,,User CPU consumed by the Redis server main thread. [v7+].,-1,redis,cpu sys main thread,
+redis.cpu.sys,rate,,,,System CPU consumed by the Redis server.,-1,redis,cpu sys,cpu
+redis.cpu.sys_children,rate,,,,System CPU consumed by the background processes.,-1,redis,cpu sys children,
+redis.cpu.user,rate,,,,User CPU consumed by the Redis server.,-1,redis,cpu user,
+redis.cpu.user_children,rate,,,,User CPU consumed by the background processes.,-1,redis,cpu user children,
+redis.cpu.sys_main_thread,rate,,,,System CPU consumed by the Redis server main thread. [v7+].,-1,redis,cpu sys main thread,
+redis.cpu.user_main_thread,rate,,,,User CPU consumed by the Redis server main thread. [v7+].,-1,redis,cpu sys main thread,
 redis.expires,gauge,,key,,The number of keys with an expiration.,0,redis,expires,
 redis.expires.percent,gauge,,percent,,Percentage of total keys with an expiration.,0,redis,expires pct,
 redis.info.latency_ms,gauge,,millisecond,,The latency of the redis INFO command.,0,redis,info latency,cpu
@@ -39,7 +39,7 @@ redis.mem.used,gauge,,byte,,Amount of memory allocated by Redis.,-1,redis,mem us
 redis.mem.startup,gauge,,byte,,Amount of memory consumed by Redis at startup.,-1,redis,mem startup,
 redis.mem.overhead,gauge,,byte,,Sum of all overheads allocated by Redis for managing its internal datastructures [v4+].,-1,redis,mem overhead,
 redis.net.clients,gauge,,connection,,The number of connected clients (excluding slaves).,0,redis,clients,cpu
-redis.net.commands,gauge,,command,,The number of commands processed by the server.,0,redis,net commands,
+redis.net.commands,rate,,command,,The number of commands processed by the server.,0,redis,net commands,
 redis.net.commands.instantaneous_ops_per_sec,gauge,,command,second,The number of commands processed by the server per second.,0,redis,net commands,cpu
 redis.net.connections,gauge,,connection,,The number of connections tagged by client name.,0,redis,connections,
 redis.net.instantaneous_ops_per_sec,gauge,,operation,second,Number of commands processed per second.,0,redis,ops per sec,
@@ -67,10 +67,10 @@ redis.slowlog.micros.avg,gauge,,microsecond,,The average duration of queries rep
 redis.slowlog.micros.count,rate,,query,second,The rate of queries reported in the slow log.,0,redis,slowlog count,
 redis.slowlog.micros.max,gauge,,microsecond,,The maximum duration of queries reported in the slow log.,0,redis,slowlog max,
 redis.slowlog.micros.median,gauge,,microsecond,,The median duration of queries reported in the slow log.,0,redis,slowlog median,
-redis.stats.keyspace_hits,gauge,,key,second,The rate of successful lookups in the main db.,0,redis,keyspace hits,cpu
-redis.stats.keyspace_misses,gauge,,key,second,The rate of missed lookups in the main db.,0,redis,keyspace misses,cpu
-redis.stats.io_threaded_reads_processed,gauge,,,,Number of read events processed by the main and I/O threads. This metric is only provided by redis >=6.x.,0,redis,io threaded reads processed,
-redis.stats.io_threaded_writes_processed,gauge,,,,Number of write events processed by the main and I/O threads. This metric is only provided by redis >=6.x.,0,redis,io threaded writes processed,
+redis.stats.keyspace_hits,rate,,key,second,The rate of successful lookups in the main db.,0,redis,keyspace hits,cpu
+redis.stats.keyspace_misses,rate,,key,second,The rate of missed lookups in the main db.,0,redis,keyspace misses,cpu
+redis.stats.io_threaded_reads_processed,rate,,,,Number of read events processed by the main and I/O threads. This metric is only provided by redis >=6.x.,0,redis,io threaded reads processed,
+redis.stats.io_threaded_writes_processed,rate,,,,Number of write events processed by the main and I/O threads. This metric is only provided by redis >=6.x.,0,redis,io threaded writes processed,
 redis.server.io_threads_active,gauge,,,,Flag indicating if I/O threads are active. This metric is only provided by redis >=6.x.,0,redis,server io threads active,
 redis.command.calls,gauge,,,,"The number of times a redis command has been called, tagged by 'command', e.g. 'command:append'. Enable in Agent's redisdb.yaml with the command_stats option.",0,redis,cmd calls,
 redis.command.usec_per_call,gauge,,,,"The CPU time consumed per redis command call, tagged by 'command', e.g. 'command:append'. Enable in Agent's redisdb.yaml with the command_stats option.",0,redis,usec per cmd,

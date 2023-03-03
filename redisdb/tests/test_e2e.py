@@ -76,6 +76,7 @@ def assert_common_metrics(aggregator):
     aggregator.assert_metric('redis.key.length', count=2, tags=(['key:test_key3', 'key_type:list'] + tags_with_db))
 
     aggregator.assert_metric('redis.replication.delay', count=2)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_e2e(dd_agent_check, master_instance):
@@ -102,6 +103,7 @@ def assert_non_cloud_metrics(aggregator, tags):
     """Certain metrics cannot be collected in cloud environments due to disabled commands"""
     aggregator.assert_metric('redis.net.connections', count=2, tags=tags + ['source:unknown'])
     aggregator.assert_metric('redis.net.maxclients', count=2, tags=tags)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def assert_optional_slowlog_metrics(aggregator):

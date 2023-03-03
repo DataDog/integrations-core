@@ -4,6 +4,8 @@
 import mock
 from six import iteritems
 
+from datadog_checks.dev.utils import get_metadata_metrics
+
 
 def test_init(check, redis_instance):
     check = check(redis_instance)
@@ -57,3 +59,4 @@ def test__check_command_stats_host(check, aggregator, redis_instance):
     expected_tags = ['foo:bar', 'command:lpush']
     aggregator.assert_metric('redis.command.calls', value=4, count=1, tags=expected_tags)
     aggregator.assert_metric('redis.command.usec_per_call', value=14.00, count=1, tags=expected_tags)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
