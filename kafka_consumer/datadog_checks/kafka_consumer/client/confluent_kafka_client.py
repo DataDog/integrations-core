@@ -40,7 +40,8 @@ class ConfluentKafkaClient(KafkaClient):
         if not self.kafka_client.list_topics(timeout=1).brokers:
             raise Exception()
 
-        # Still failing test_oauth_config tests since we haven't implemented OAuth support yet, so it's not failing when it's supposed to
+        # TODO: Still failing test_oauth_config tests since we haven't implemented OAuth support yet, 
+        # so it's not failing when it's supposed to
         
         for consumer_group in consumer_offsets.items():
             consumer_config = {
