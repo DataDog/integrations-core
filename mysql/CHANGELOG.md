@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 10.1.0 / 2023-03-03
+
+* [Added] Add resolved_hostname to metadata. See [#14092](https://github.com/DataDog/integrations-core/pull/14092).
+
 ## 10.0.0 / 2023-01-20 / Agent 7.43.0
 
 * [Added] Add deprecation notice for `extra_performance_metrics` option. See [#13273](https://github.com/DataDog/integrations-core/pull/13273).
