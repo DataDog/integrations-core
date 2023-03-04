@@ -9,7 +9,13 @@ import pytest
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import SQLConnectionError
 
-from .common import CHECK_NAME, CUSTOM_METRICS, EXPECTED_DEFAULT_METRICS, assert_metrics
+from .common import (
+    CHECK_NAME,
+    CUSTOM_METRICS,
+    EXPECTED_DEFAULT_METRICS,
+    EXPECTED_QUERY_PLAN_CACHE_METRICS,
+    assert_metrics,
+)
 from .utils import not_windows_ci, windows_ci
 
 try:
