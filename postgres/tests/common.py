@@ -10,13 +10,13 @@ from datadog_checks.base.stubs.aggregator import normalize_tags
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.postgres.util import (
+    NEWER_14_METRICS,
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_STAT_WAL_RECEIVER,
     REPLICATION_STATS_METRICS,
     SLRU_METRICS,
 )
 from datadog_checks.postgres.version_utils import VersionUtils
-from datadog_checks.postgres.util import NEWER_14_METRICS, SLRU_METRICS
 
 HOST = get_docker_hostname()
 PORT = '5432'

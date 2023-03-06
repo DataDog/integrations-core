@@ -145,13 +145,19 @@ def test_session_idle_and_killed(aggregator, integration_check, pg_instance):
         cur.execute("SELECT pg_terminate_backend({})".format(pid))
         cur.fetchall()
 
+    # Abandon session
+    sock = socket.fromfd(postgres_conn.fileno(), socket.AF_INET, socket.SOCK_STREAM)
+    sock.shutdown(socket.SHUT_RDWR)
+
     aggregator.reset()
     check.check(pg_instance)
 
-    assert_metric_at_least(aggregator, 'postgresql.sessions.idle_in_transaction_time', 'db:{}'.format(DB_NAME), 1, 0.5)
+    assert_metric_at_least(
+        aggregator, 'postgresql.sessions.idle_in_transaction_time', count=1, lower_bound=0.5, tags=expected_tags
+    )
     aggregator.assert_metric('postgresql.sessions.killed', value=1, count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.sessions.fatal', value=0, count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.sessions.abandoned', value=0, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.sessions.abandoned', value=1, count=1, tags=expected_tags)
 
 
 def test_unsupported_replication(aggregator, integration_check, pg_instance):
