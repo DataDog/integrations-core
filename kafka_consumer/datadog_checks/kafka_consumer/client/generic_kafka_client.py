@@ -44,11 +44,9 @@ class GenericKafkaClient(KafkaClient):
         return self.confluent_kafka_client.reset_offsets()
 
     def get_partitions_for_topic(self, topic):
-        # TODO when this method is implemented in ConfluentKafkaClient, replace this with:
-        # if self.use_legacy_client:
-        #     return self.python_kafka_client.get_partitions_for_topic(topic)
-        # return self.confluent_kafka_client.get_partitions_for_topic(topic)
-        return self.python_kafka_client.get_partitions_for_topic(topic)
+        if self.use_legacy_client:
+            return self.python_kafka_client.get_partitions_for_topic(topic)
+        return self.confluent_kafka_client.get_partitions_for_topic(topic)
 
     def request_metadata_update(self):
         # TODO when this method is implemented in ConfluentKafkaClient, replace this with:
