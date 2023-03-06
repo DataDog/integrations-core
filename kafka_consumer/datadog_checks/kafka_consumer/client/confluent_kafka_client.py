@@ -22,19 +22,6 @@ class ConfluentKafkaClient(KafkaClient):
             }
 
             if self.config._sasl_mechanism == "OAUTHBEARER":
-                assert (
-                    self.config._sasl_oauth_token_provider is not None
-                ), "sasl_oauth_token_provider required for OAUTHBEARER sasl"
-
-                if self.config._sasl_oauth_token_provider.get("url") is None:
-                    raise ConfigurationError("The `url` setting of `auth_token` reader is required")
-
-                elif self.config._sasl_oauth_token_provider.get("client_id") is None:
-                    raise ConfigurationError("The `client_id` setting of `auth_token` reader is required")
-
-                elif self.config._sasl_oauth_token_provider.get("client_secret") is None:
-                    raise ConfigurationError("The `client_secret` setting of `auth_token` reader is required")
-
                 oauth_config = {
                     "sasl.mechanism": self.config._sasl_mechanism,
                     "sasl.oauthbearer.method": "oidc",

@@ -52,3 +52,16 @@ class KafkaConfig:
 
         if isinstance(self._kafka_version, str):
             self._kafka_version = tuple(map(int, self._kafka_version.split(".")))
+        
+        if self._sasl_mechanism == "OAUTHBEARER":
+            if self._sasl_oauth_token_provider is None:
+                raise ConfigurationError("sasl_oauth_token_provider required for OAUTHBEARER sasl")
+
+            if self._sasl_oauth_token_provider.get("url") is None:
+                raise ConfigurationError("The `url` setting of `auth_token` reader is required")
+
+            elif self._sasl_oauth_token_provider.get("client_id") is None:
+                raise ConfigurationError("The `client_id` setting of `auth_token` reader is required")
+
+            elif self._sasl_oauth_token_provider.get("client_secret") is None:
+                raise ConfigurationError("The `client_secret` setting of `auth_token` reader is required")

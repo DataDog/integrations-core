@@ -47,22 +47,22 @@ def test_tls_config_ok(check, kafka_instance_tls):
     [
         pytest.param(
             {},
-            pytest.raises(AssertionError, match="sasl_oauth_token_provider required for OAUTHBEARER sasl"),
+            pytest.raises(Exception, match="sasl_oauth_token_provider required for OAUTHBEARER sasl"),
             id="No sasl_oauth_token_provider",
         ),
         pytest.param(
             {'sasl_oauth_token_provider': {}},
-            pytest.raises(ConfigurationError, match="The `url` setting of `auth_token` reader is required"),
+            pytest.raises(Exception, match="The `url` setting of `auth_token` reader is required"),
             id="Empty sasl_oauth_token_provider, url missing",
         ),
         pytest.param(
             {'sasl_oauth_token_provider': {'url': 'http://fake.url'}},
-            pytest.raises(ConfigurationError, match="The `client_id` setting of `auth_token` reader is required"),
+            pytest.raises(Exception, match="The `client_id` setting of `auth_token` reader is required"),
             id="client_id missing",
         ),
         pytest.param(
             {'sasl_oauth_token_provider': {'url': 'http://fake.url', 'client_id': 'id'}},
-            pytest.raises(ConfigurationError, match="The `client_secret` setting of `auth_token` reader is required"),
+            pytest.raises(Exception, match="The `client_secret` setting of `auth_token` reader is required"),
             id="client_secret missing",
         ),
         pytest.param(
@@ -72,7 +72,7 @@ def test_tls_config_ok(check, kafka_instance_tls):
         ),
     ],
 )
-def test_oauth_config(sasl_oauth_token_provider, check, expected_exception):
+def test_oauth_config(sasl_oauth_token_provider, expected_exception, check, dd_run_check):
     instance = {
         'kafka_connect_str': KAFKA_CONNECT_STR,
         'monitor_unlisted_consumer_groups': True,
@@ -82,7 +82,7 @@ def test_oauth_config(sasl_oauth_token_provider, check, expected_exception):
     instance.update(sasl_oauth_token_provider)
 
     with expected_exception:
-        check(instance).check(instance)
+        dd_run_check(check(instance))
 
 
 @pytest.mark.skip(reason='Add a test that not only check the parameter but also run the check')
