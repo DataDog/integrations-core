@@ -41,7 +41,8 @@ init_config:
     #
     # service: <SERVICE>
 
-## Every instance is scheduled independently of the others.
+## There are two versions of RabbitMQ (Prometheus plugin and Management plugin).
+## Please do not edit sections pertaining to the version of RabbitMQ that you are not using.
 #
 instances:
 

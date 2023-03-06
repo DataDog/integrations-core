@@ -20,15 +20,15 @@ The RabbitMQ check is included in the [Datadog Agent][3] package. No additional 
 
 ### Configuration
 
-Rabbitmq exposes metrics in two ways: the [RabbitMQ Management Plugin][4] and the [Rabbitmq Prometheus Plugin][19]. The RabbitMQ integration supports both of these plugins.
+RabbitMQ exposes metrics in two ways: the [RabbitMQ Management Plugin][4] and the [Rabbitmq Prometheus Plugin][19]. The Datadog integration supports both versions. Please follow the configuration instruction in this file that pertain to the version you intend to use. The metrics accessible via the Prometheus plugin version of the integration are marked with [OpenMetricsV2] in their `metadata.csv` descriptions. The Datadog integration also comes with an out-of-the-box dashboard and monitors for each version, as labelled by the Dashboard and Monitor titles.
 
 #### Prepare RabbitMQ
 
 ##### [RabbitMQ Prometheus Plugin][19].
 
-_Note: The Prometheus Plugin collection method requires Python 3._
+*Starting with RabbitMQ v3.8, the [RabbitMQ Prometheus Plugin][19] is enabled by default and the integration communicates with it over HTTP API using OpenMetricsV2.*
 
-_Starting with RabbitMQ v3.8, the [Rabbitmq Prometheus Plugin][19] is enabled by default and the integration communicates with it over HTTP API using OpenMetricsV2._
+*The Prometheus plugin version of RabbitMQ requires Python 3 support by the Datadog agent, and so can only be supported by Agent V6 onwards. Please ensure your agent is updated before configuring the Prometheus plugin version of the integration.*
 
 Configure the `prometheus_plugin` section in your instance configuration. When using the `prometheus_plugin` option, settings related to the Management Plugin are ignored.
 
@@ -38,7 +38,8 @@ Configure the `prometheus_plugin` section in your instance configuration. When u
        url: http://<HOST>:15692
  ```
 
- This enables scraping of the [`/metrics` endpoint][20] on one rabbitmq node.
+ This enables scraping of the [`/metrics` endpoint][20] on one RabbitMQ node. We can also collect data from the [`/metrics/detailed` endpoint][22].
+
 
 ##### [RabbitMQ Management Plugin][4].
 
@@ -277,3 +278,5 @@ The following Management plugin metrics to our knowledge have no equivalent in t
 [19]: https://www.rabbitmq.com/prometheus.html
 [20]: https://www.rabbitmq.com/prometheus.html#default-endpoint
 [21]: https://docs.datadoghq.com/containers/docker/integrations/?tab=dockeradv2
+[22]: https://www.rabbitmq.com/prometheus.html#detailed-endpoint
+[23]: https://docs.datadoghq.com/integrations/rabbitmq/?tab=host#metrics
