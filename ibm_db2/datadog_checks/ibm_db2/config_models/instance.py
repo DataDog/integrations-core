@@ -51,6 +51,7 @@ class InstanceConfig(BaseModel):
     db: str
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    extra_connection_parametters: Optional[tuple[str, ...]] = None
     host: Optional[str] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
