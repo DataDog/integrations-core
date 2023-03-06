@@ -52,7 +52,7 @@ class KafkaConfig:
 
         if isinstance(self._kafka_version, str):
             self._kafka_version = tuple(map(int, self._kafka_version.split(".")))
-        
+
         if self._sasl_mechanism == "OAUTHBEARER":
             if self._sasl_oauth_token_provider is None:
                 raise ConfigurationError("sasl_oauth_token_provider required for OAUTHBEARER sasl")

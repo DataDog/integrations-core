@@ -5,7 +5,6 @@ from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaExcepti
 from confluent_kafka.admin import AdminClient
 from six import string_types
 
-from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_consumer.client.kafka_client import KafkaClient
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 

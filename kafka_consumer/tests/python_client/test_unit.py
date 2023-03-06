@@ -8,7 +8,6 @@ from contextlib import nullcontext as does_not_raise
 import mock
 import pytest
 
-from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client.kafka_python_client import OAuthTokenProvider
