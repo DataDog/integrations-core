@@ -7,6 +7,9 @@ files:
     - template: init_config/http
     - template: init_config/default
   - template: instances
+    description: |
+      There are two versions of RabbitMQ (Prometheus plugin and Management plugin).
+      Please do not edit sections pertaining to the version of RabbitMQ that you are not using.
     multiple_instances_defined: true
     options:
     - name: OpenMetrics
