@@ -56,6 +56,16 @@ files:
           has to be accessible and readable by the agent user.
         value:
           type: string
+      - name: extra_connection_parametters
+        description: |
+          Additional connection parameters, that will be passed to the connection string
+        value:
+          type: array
+          items:
+            type: string
+          example: 
+           - connecttimeout=1
+
       - template: instances/db
         overrides:
           custom_queries.description: |

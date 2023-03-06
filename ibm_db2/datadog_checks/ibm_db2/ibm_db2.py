@@ -32,6 +32,7 @@ class IbmDb2Check(AgentCheck):
         self._tags = self.instance.get('tags', [])
         self._security = self.instance.get('security', 'none')
         self._tls_cert = self.instance.get('tls_cert')
+        self._extra_connection_parametters = self.instance.get('extra_connection_parametters', [])
 
         # Add global database tag
         self._tags.append('db:{}'.format(self._db))
@@ -547,7 +548,7 @@ class IbmDb2Check(AgentCheck):
 
     def get_connection(self):
         target, username, password = self.get_connection_data(
-            self._db, self._username, self._password, self._host, self._port, self._security, self._tls_cert
+            self._db, self._username, self._password, self._host, self._port, self._security, self._tls_cert, self._extra_connection_parametters
         )
 
         # Get column names in lower case
@@ -576,7 +577,7 @@ class IbmDb2Check(AgentCheck):
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
 
     @classmethod
-    def get_connection_data(cls, db, username, password, host, port, security, tls_cert):
+    def get_connection_data(cls, db, username, password, host, port, security, tls_cert, extra_parametters):
         if host:
             target = 'database={};hostname={};port={};protocol=tcpip;uid={};pwd={}'.format(
                 db, host, port, username, password
@@ -587,6 +588,9 @@ class IbmDb2Check(AgentCheck):
                 target = '{};security=ssl;'.format(target)
             if tls_cert:
                 target = '{};security=ssl;sslservercertificate={}'.format(target, tls_cert)
+            if extra_parametters:
+                extras = ";".join(extra_parametters)
+                target = '{};{}'.format(target,extras)
         else:  # no cov
             target = db
 

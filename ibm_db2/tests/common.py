@@ -22,6 +22,7 @@ CONFIG = {
     'host': HOST,
     'port': PORT,
     'tags': ['foo:bar'],
+    'extra_connection_parametters': ['connecttimeout=1']
 }
 
 E2E_METADATA = {
