@@ -43,7 +43,7 @@ from datadog_checks.sqlserver.const import (
     DEFAULT_AUTODISCOVERY_INTERVAL,
     ENGINE_EDITION_SQL_DATABASE,
     INSTANCE_METRICS,
-    INSTANCE_METRICS_TOTAL,
+    INSTANCE_METRICS_DATABASE,
     PERF_AVERAGE_BULK,
     PERF_COUNTER_BULK_COUNT,
     PERF_COUNTER_LARGE_RAWCOUNT,
@@ -425,16 +425,19 @@ class SQLServer(AgentCheck):
             common_metrics = INSTANCE_METRICS
             if not self.dbm_enabled:
                 common_metrics = common_metrics + DBM_MIGRATED_METRICS
-
+            if not self.databases:
+                # if autodiscovery is enabled, we report metrics from the
+                # INSTANCE_METRICS_DATABASE struct below, so do not double report here
+                common_metrics = common_metrics + INSTANCE_METRICS_DATABASE
             self._add_performance_counters(
-                chain(common_metrics, INSTANCE_METRICS_TOTAL), metrics_to_collect, tags, db=None
+                common_metrics, metrics_to_collect, tags, db=None
             )
 
         # populated through autodiscovery
         if self.databases:
             for db in self.databases:
                 self._add_performance_counters(
-                    INSTANCE_METRICS_TOTAL,
+                    INSTANCE_METRICS_DATABASE,
                     metrics_to_collect,
                     tags,
                     db=db.name,
