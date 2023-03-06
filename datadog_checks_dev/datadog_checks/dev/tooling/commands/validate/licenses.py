@@ -156,7 +156,6 @@ PACKAGE_REPO_OVERRIDES = {
     'foundationdb': 'https://github.com/apple/foundationdb',
     'in-toto': 'https://github.com/in-toto/in-toto',
     'kazoo': 'https://github.com/python-zk/kazoo',
-    'keystoneauth1': 'https://github.com/openstack/keystoneauth',
     'lxml': 'https://github.com/lxml/lxml',
     'oracledb': 'https://github.com/oracle/python-oracledb',
     'packaging': 'https://github.com/pypa/packaging',
