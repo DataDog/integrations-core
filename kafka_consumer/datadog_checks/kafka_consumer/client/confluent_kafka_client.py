@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from confluent_kafka.admin import AdminClient
 from confluent_kafka import KafkaException
+from confluent_kafka.admin import AdminClient
+
 from datadog_checks.kafka_consumer.client.kafka_client import KafkaClient
 
 
@@ -35,15 +36,15 @@ class ConfluentKafkaClient(KafkaClient):
         raise NotImplementedError
 
     def get_partitions_for_topic(self, topic):
+
         try:
             cluster_metadata = self.kafka_client.list_topics(topic)
             topic_metadata = cluster_metadata.topics[topic]
             partitions = list(topic_metadata.partitions.keys())
             return partitions
         except KafkaException as e:
-            self.log.error("Received exception when getting partitions for topic %s: %s" % topic, e)
+            self.log.error("Received exception when getting partitions for topic %s: %s", topic, e)
             return None
-
 
     def request_metadata_update(self):
         raise NotImplementedError
