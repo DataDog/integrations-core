@@ -14,31 +14,37 @@ init_config:
 #
 instances:
 
-    ## Settings for talking to the Prometheus plugin of RabbitMQ.
-    ## Specify this section to trigger metric collection from the Prometheus plugin endpoints.
+  -
+    ## RabbitMQ Prometheus Plugin Example
+    ## Please leave this key commented out, it is only here for informational purposes.
     #
-    prometheus_plugin:
+    # OpenMetrics:
 
-        ## @param url - string - required
-        ## Base URL for OpenMetrics endpoints.
+        ## Settings for talking to the Prometheus plugin of RabbitMQ.
+        ## Specify this section to trigger metric collection from the Prometheus plugin endpoints.
         #
-        url: http://%%host%%:15692
+        prometheus_plugin:
 
-        ## @param include_aggregated_endpoint - boolean - optional - default: true
-        ## Whether or not to include metrics from the aggregated endpoint (/metrics).
-        ##
-        ## Note: This option must be set to true when 'unaggregated_endpoint' is unspecified.
-        #
-        # include_aggregated_endpoint: true
+            ## @param url - string - required
+            ## Base URL for OpenMetrics endpoints.
+            #
+            url: http://%%host%%:15692
 
-        ## @param unaggregated_endpoint - string - optional - default: detailed
-        ## Which  unaggregated endpoint to use.
-        ## The choices are:
-        ##   - If the field is left unspecified, no endpoint is used.
-        ##   - "detailed" means the /metrics/detailed endpoint is used.
-        ##     You can also provide a query for this option, exactly as if you were making an HTTP request
-        ##     to this endpoint. For example, `detailed?family=queue_consumer_count`.
-        ##     You can specify this and the aggregated endpoint. In that case any duplicate metrics will
-        ##     be taken from this endpoint and the corresponding aggregated ones dropped.
-        #
-        # unaggregated_endpoint: detailed
+            ## @param include_aggregated_endpoint - boolean - optional - default: true
+            ## Whether or not to include metrics from the aggregated endpoint (/metrics).
+            ##
+            ## Note: This option must be set to true when 'unaggregated_endpoint' is unspecified.
+            #
+            # include_aggregated_endpoint: true
+
+            ## @param unaggregated_endpoint - string - optional - default: detailed
+            ## Which  unaggregated endpoint to use.
+            ## The choices are:
+            ##   - If the field is left unspecified, no endpoint is used.
+            ##   - "detailed" means the /metrics/detailed endpoint is used.
+            ##     You can also provide a query for this option, exactly as if you were making an HTTP request
+            ##     to this endpoint. For example, `detailed?family=queue_consumer_count`.
+            ##     You can specify this and the aggregated endpoint. In that case any duplicate metrics will
+            ##     be taken from this endpoint and the corresponding aggregated ones dropped.
+            #
+            # unaggregated_endpoint: detailed
