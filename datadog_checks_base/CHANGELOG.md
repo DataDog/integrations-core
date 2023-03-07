@@ -1,8 +1,8 @@
 # CHANGELOG - datadog_checks_base
 
-## 31.0.0 / 2023-03-07
+## 30.2.0 / 2023-03-07
 
-* [Changed] Upgrade openstacksdk dependency and drop py2. See [#14109](https://github.com/DataDog/integrations-core/pull/14109).
+* [Added] Upgrade openstacksdk dependency. See [#14109](https://github.com/DataDog/integrations-core/pull/14109).
 
 ## 30.1.0 / 2023-03-03
 
