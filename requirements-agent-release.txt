@@ -124,7 +124,7 @@ datadog-process==2.3.2
 datadog-prometheus==3.4.0
 datadog-proxysql==4.0.0
 datadog-pulsar==1.2.0
-datadog-rabbitmq==4.0.0
+datadog-rabbitmq==4.0.1
 datadog-redisdb==4.5.3
 datadog-rethinkdb==2.3.1
 datadog-riak==3.2.0
