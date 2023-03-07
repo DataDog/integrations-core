@@ -2,8 +2,6 @@
 
 [envs.default]
 dependencies = [
-  "setuptools>=66; python_version > '3.0'",
-  "setuptools; python_version < '3.0'",
   "confluent_kafka==1.4.1",
 ]
 

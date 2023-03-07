@@ -13,6 +13,7 @@ E2E_METADATA = {
     'post_install_commands': [
         'apt-get update',
         'apt-get install -y gcc librdkafka-dev',
+        'pip install setuptools',
         'pip install --global-option=build_ext --global-option="--library-dirs=/opt/mapr/lib"'
         ' --global-option="--include-dirs=/opt/mapr/include/" mapr-streams-python',
     ]
