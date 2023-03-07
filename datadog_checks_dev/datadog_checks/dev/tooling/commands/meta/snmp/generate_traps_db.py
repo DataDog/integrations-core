@@ -130,7 +130,7 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
 
         mib_sources = (
             sorted(
-                set([pathlib.Path(os.path.abspath(os.path.dirname(x))).as_uri() for x in mib_files if os.path.sep in x])
+                set([pathlib.Path(x).parent.as_uri() for x in mib_files if os.path.sep in x])
             )
             + mib_sources
         )
