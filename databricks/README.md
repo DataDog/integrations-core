@@ -201,7 +201,11 @@ else
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
   DD_INSTALL_ONLY=true DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
-
+  
+  # CONFIGURE HOSTNAME EXPLICITLY IN datadog.yaml TO PREVENT AGENT FROM FAILING ON VERSION 7.40+
+  # SEE https://github.com/DataDog/datadog-agent/issues/14152 FOR CHANGE
+  hostname=\$(hostname | xargs)
+  echo "hostname: \$hostname" >> /etc/datadog-agent/datadog.yaml
 fi
 
   # RESTARTING AGENT
