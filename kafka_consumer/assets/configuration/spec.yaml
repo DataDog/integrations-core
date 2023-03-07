@@ -121,6 +121,21 @@ files:
         value:
           type: string
           example: <PASSWORD>
+      - name: sasl_kerberos_keytab
+        description: |
+          Path to Kerberos keytab file.
+          Note: If this config option is not used, the check will attempt to find
+          the keytab file using the environment variable KRB5_CLIENT_KTNAME.
+          Using `sasl_kerberos_keytab` will eventually be required and using the
+          environment variable directly will be deprecated.
+        value:
+          type: string
+      - name: sasl_kerberos_principal
+        description: |
+          Kerberos principal to use.
+        value:
+          type: string
+          example: kafkaclient
       - name: sasl_kerberos_service_name
         description: Service name to include in GSSAPI sasl mechanism handshake.
         value:

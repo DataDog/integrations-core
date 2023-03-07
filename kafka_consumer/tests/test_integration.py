@@ -79,9 +79,14 @@ def test_monitor_broker_highwatermarks(
     aggregator.assert_metric('kafka.broker_offset', count=metric_count)
 
     for tag in topic_tags:
-        aggregator.assert_metric_has_tag('kafka.broker_offset', tag, count=2)
+        for partition in range(2):
+            aggregator.assert_metric(
+                'kafka.broker_offset',
+                metric_type=aggregator.GAUGE,
+                tags=[tag, f"partition:{partition}", "optional:tag1"],
+                count=1,
+            )
 
-    aggregator.assert_metric_has_tag_prefix('kafka.broker_offset', 'partition', count=metric_count)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 

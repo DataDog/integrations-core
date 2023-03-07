@@ -50,6 +50,9 @@ class ConfluentKafkaClient(KafkaClient):
             "sasl.mechanism": self.config._sasl_mechanism,
             "sasl.username": self.config._sasl_plain_username,
             "sasl.password": self.config._sasl_plain_password,
+            "sasl.kerberos.keytab": self.config._sasl_kerberos_keytab,
+            "sasl.kerberos.principal": self.config._sasl_kerberos_principal,
+            "sasl.kerberos.service.name": self.config._sasl_kerberos_service_name,
         }
 
         for key, value in extras_parameters.items():

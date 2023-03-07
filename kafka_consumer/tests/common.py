@@ -40,3 +40,36 @@ def assert_check_kafka(aggregator, consumer_groups):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def get_authentication_configuration(instance):
+    config = {}
+
+    if AUTHENTICATION != "noauth":
+        config.update(
+            {
+                "security.protocol": instance.get("security_protocol").lower(),
+            }
+        )
+
+        if AUTHENTICATION == "ssl":
+            config.update(
+                {
+                    "ssl.ca.location": instance.get("tls_ca_cert"),
+                    "ssl.certificate.location": instance.get("tls_cert"),
+                    "ssl.key.location": instance.get("tls_private_key"),
+                    "ssl.key.password": instance.get("tls_private_key_password"),
+                }
+            )
+
+        if AUTHENTICATION == "kerberos":
+            config.update(
+                {
+                    "sasl.mechanism": instance.get("sasl_mechanism"),
+                    "sasl.kerberos.service.name": instance.get("sasl_kerberos_service_name"),
+                    "sasl.kerberos.keytab": instance.get("sasl_kerberos_keytab"),
+                    "sasl.kerberos.principal": instance.get("sasl_kerberos_principal"),
+                }
+            )
+
+    return config

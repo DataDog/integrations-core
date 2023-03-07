@@ -33,7 +33,7 @@ auth = ["ssl"]
 [[envs.default.matrix]]
 python = ["3.8"]
 version = ["3.3"]
-auth = ["ssl"]
+auth = ["ssl", "kerberos"]
 
 [envs.default.overrides]
 matrix.version.e2e-env = { value = true, if = ["3.3"] }
@@ -46,6 +46,8 @@ matrix.impl.env-vars = [
   { key = "LEGACY_CLIENT", value = "true", if = ["legacy"] },
 ]
 matrix.auth.env-vars = "AUTHENTICATION"
+# We can allow kerberos once the agent image contains confluent-kafka built from source
+matrix.auth.e2e-env = { value = false, if = ["kerberos"] }
 
 [envs.latest.env-vars]
 KAFKA_VERSION = "latest"

@@ -113,6 +113,20 @@ instances:
     #
     # sasl_plain_password: <PASSWORD>
 
+    ## @param sasl_kerberos_keytab - string - optional
+    ## Path to Kerberos keytab file.
+    ## Note: If this config option is not used, the check will attempt to find
+    ## the keytab file using the environment variable KRB5_CLIENT_KTNAME.
+    ## Using `sasl_kerberos_keytab` will eventually be required and using the
+    ## environment variable directly will be deprecated.
+    #
+    # sasl_kerberos_keytab: <SASL_KERBEROS_KEYTAB>
+
+    ## @param sasl_kerberos_principal - string - optional - default: kafkaclient
+    ## Kerberos principal to use.
+    #
+    # sasl_kerberos_principal: kafkaclient
+
     ## @param sasl_kerberos_service_name - string - optional - default: kafka
     ## Service name to include in GSSAPI sasl mechanism handshake.
     #
