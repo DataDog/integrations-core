@@ -4,6 +4,7 @@
 
 import json
 import os
+import pathlib
 from collections import namedtuple
 from enum import Enum
 from functools import lru_cache
@@ -128,7 +129,10 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
             os.mkdir(mibs_sources_dir)
 
         mib_sources = (
-            sorted(set([os.path.abspath(os.path.dirname(x)) for x in mib_files if os.path.sep in x])) + mib_sources
+            sorted(
+                set([pathlib.Path(os.path.abspath(os.path.dirname(x))).as_uri() for x in mib_files if os.path.sep in x])
+            )
+            + mib_sources
         )
 
         mib_files = [os.path.basename(x) for x in mib_files]
