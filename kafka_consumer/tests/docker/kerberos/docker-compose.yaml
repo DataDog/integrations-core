@@ -1,0 +1,134 @@
+version: '3.9'
+
+services:
+  kdc:
+    hostname: kdc.kerberos-demo.local
+    build: ./kdc
+    container_name: kdc
+    volumes:
+      - ./secret:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/kdc/krb5.conf
+    healthcheck:
+      test: bash -c "[ -f /var/lib/secret/zookeeper-client.key ]"
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  zookeeper:
+    hostname: zookeeper.kerberos-demo.local
+    container_name: zookeeper
+    image: confluentinc/cp-zookeeper:7.3.0
+    ports:
+      - "2181:2181"
+    depends_on:
+      kdc:
+        condition: service_healthy
+    healthcheck:
+      test: nc -vz localhost 2181 || exit -1
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - ./secret:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/krb5.conf
+      - ./zookeeper/zookeeper.sasl.jaas.config:/etc/kafka/zookeeper.sasl.jaas.config
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/zookeeper.sasl.jaas.config
+        -Djava.security.krb5.conf=/etc/krb5.conf
+        -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+        -Dsun.security.krb5.debug=true
+        -Dzookeeper.allowSaslFailedClients=false
+        -Dzookeeper.requireClientAuthScheme=sasl
+
+  broker:
+    image: confluentinc/cp-server:7.3.0
+    hostname: broker.kerberos-demo.local
+    container_name: broker
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+      - "10000:10000"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    volumes:
+      - ./secret:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/krb5.conf
+      - ./kafka/broker.sasl.jaas.config:/etc/kafka/broker.sasl.jaas.config
+      - ./client/command.properties:/etc/kafka/command.properties
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper.kerberos-demo.local:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: SASL_PLAINTEXT:SASL_PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: SASL_PLAINTEXT://broker.kerberos-demo.local:9092
+      KAFKA_LISTENERS: SASL_PLAINTEXT://:9092
+      # Kerberos / GSSAPI Authentication mechanism
+      KAFKA_SASL_ENABLED_MECHANISMS: GSSAPI
+      KAFKA_SASL_KERBEROS_SERVICE_NAME: kafka
+      # Configure replication to require Kerberos:
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: GSSAPI
+      KAFKA_INTER_BROKER_LISTENER_NAME: SASL_PLAINTEXT
+      # Authorization config:
+      KAFKA_AUTHORIZER_CLASS_NAME: "kafka.security.authorizer.AclAuthorizer"
+      KAFKA_ZOOKEEPER_SET_ACL: "true"
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
+      KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=INFO"
+      KAFKA_SUPER_USERS: User:admin;User:kafka;User:schemaregistry;User:connect;User:controlcenter;User:ksqldb;User:conduktor
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/broker.sasl.jaas.config
+      # for 5.4.x:
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      # for 6.0.0
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  broker2:
+    image: confluentinc/cp-server:7.3.0
+    hostname: broker2.kerberos-demo.local
+    container_name: broker2
+    ports:
+      - "9292:9292"
+      - "29292:29292"
+      - "12000:12000"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    volumes:
+      - ./secret:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/krb5.conf
+      - ./kafka/broker2.sasl.jaas.config:/etc/kafka/broker2.sasl.jaas.config
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper.kerberos-demo.local:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: SASL_PLAINTEXT:SASL_PLAINTEXT
+      KAFKA_LISTENERS: SASL_PLAINTEXT://:9292
+      KAFKA_ADVERTISED_LISTENERS: SASL_PLAINTEXT://broker2.kerberos-demo.local:9292
+      # Kerberos / GSSAPI Authentication mechanism
+      KAFKA_SASL_ENABLED_MECHANISMS: GSSAPI
+      KAFKA_SASL_KERBEROS_SERVICE_NAME: kafka
+      # Configure replication to require Kerberos:
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: GSSAPI
+      KAFKA_INTER_BROKER_LISTENER_NAME: SASL_PLAINTEXT
+      # Authorization config:
+      KAFKA_AUTHORIZER_CLASS_NAME: "kafka.security.authorizer.AclAuthorizer"
+      KAFKA_ZOOKEEPER_SET_ACL: "true"
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
+      KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=INFO"
+      KAFKA_SUPER_USERS: User:admin;User:kafka;User:schemaregistry;User:connect;User:controlcenter;User:ksqldb;User:conduktor
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/broker2.sasl.jaas.config
+      # for 5.4.x:
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      # for 6.0.0
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+networks:
+  default:
+    name: kerberos-demo.local
