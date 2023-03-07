@@ -190,11 +190,10 @@ files:
   - template: init_config
     options: []
   - template: instances
+    multiple_instances_defined: true
     options:
     - name: OpenMetrics
-      description: |
-        RabbitMQ Prometheus Plugin Example
-        Please leave this key commented out, it is only here for informational purposes.
+      description: RabbitMQ Prometheus Plugin Example
       options:
         - name: prometheus_plugin
           description: |
