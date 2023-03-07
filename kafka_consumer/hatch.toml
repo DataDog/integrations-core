@@ -9,6 +9,7 @@ e2e-env = false
 [envs.default.env-vars]
 ZK_VERSION = "3.6.4"
 LEGACY_CLIENT = "false"
+AUTHENTICATION = "noauth"
 
 [[envs.default.matrix]]
 python = ["3.8"]
