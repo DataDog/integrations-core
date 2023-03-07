@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 30.2.0 / 2023-03-07
+
+* [Added] Upgrade openstacksdk dependency. See [#14109](https://github.com/DataDog/integrations-core/pull/14109).
+
 ## 30.1.0 / 2023-03-03
 
 * [Added] Update kubernetes and supervisor dependencies. See [#14093](https://github.com/DataDog/integrations-core/pull/14093).
