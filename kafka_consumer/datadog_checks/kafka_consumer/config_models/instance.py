@@ -46,6 +46,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     kafka_client_api_version: Optional[str]
     kafka_connect_str: Union[str, Sequence[str]]
+    kerberos_keytab: Optional[str]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     monitor_all_broker_highwatermarks: Optional[bool]

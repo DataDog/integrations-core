@@ -121,6 +121,11 @@ files:
         value:
           type: string
           example: <PASSWORD>
+      - name: kerberos_keytab
+        description: |
+          Path to Kerberos keytab file.
+        value: 
+          type: string
       - name: sasl_kerberos_service_name
         description: Service name to include in GSSAPI sasl mechanism handshake.
         value:

@@ -23,12 +23,11 @@ class ConfluentKafkaClient(KafkaClient):
             if self.config._sasl_mechanism == "OAUTHBEARER":
                 oauth_config = {
                     "sasl.mechanism": self.config._sasl_mechanism,
-                    "sasl.oauthbearer.method": "oidc",
+                    "sasl.oauthbearer.method": "oidc",  # required to be `oidc` for OAUTHBEARER token login
                     "sasl.oauthbearer.client.id": self.config._sasl_oauth_token_provider.get("client_id"),
                     "sasl.oauthbearer.token.endpoint.url": self.config._sasl_oauth_token_provider.get("url"),
                     "sasl.oauthbearer.client.secret": self.config._sasl_oauth_token_provider.get("client_secret"),
                 }
-
                 config.update(oauth_config)
 
             if self.config._sasl_mechanism == "GSSAPI":
@@ -38,8 +37,13 @@ class ConfluentKafkaClient(KafkaClient):
                     "sasl.password": self.config._sasl_plain_password,
                     "sasl.kerberos.service.name": self.config._sasl_kerberos_service_name,
                     # TODO: _sasl_kerberos_domain_name doesn't seem to be used?
-                    # "TBD": self.config._sasl_kerberos_domain_name,
-                    "sasl.kerberos.keytab": "test",
+                    # looks like in kafka-python, sasl_kerberos_domain name can also be the host address:
+                    # https://github.com/dpkp/kafka-python/blob/7ac6c6e29099ccba4d50f5b842972dd7332d0e58/kafka/conn.py#L712
+                    # TODO: If `sasl.kerberos.keytab` is not configured, does it automatically
+                    # use `KRB5_CLIENT_KTNAME` env var?
+                    # TODO: Test if Kerberos works on Windows before merging
+                    # See: https://github.com/confluentinc/librdkafka/issues/1259
+                    "sasl.kerberos.keytab": self.config._kerberos_keytab,
                 }
                 config.update(kerb_config)
 
