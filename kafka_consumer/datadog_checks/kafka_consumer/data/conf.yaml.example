@@ -113,6 +113,11 @@ instances:
     #
     # sasl_plain_password: <PASSWORD>
 
+    ## @param kerberos_keytab - string - optional
+    ## Path to Kerberos keytab file.
+    #
+    # kerberos_keytab: <KERBEROS_KEYTAB>
+
     ## @param sasl_kerberos_service_name - string - optional - default: kafka
     ## Service name to include in GSSAPI sasl mechanism handshake.
     #
