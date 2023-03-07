@@ -38,9 +38,7 @@ dynamic = [
 ]
 
 [project.optional-dependencies]
-deps = [
-    "mapr-streams-python==0.11.0"
-]
+deps = []
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
