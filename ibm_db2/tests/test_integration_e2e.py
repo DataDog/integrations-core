@@ -37,7 +37,7 @@ def test_disconnection(dd_agent_check, instance):
     aggregator.assert_service_check('ibm_db2.can_connect', AgentCheck.CRITICAL)
     
     # Reconnect the database
-    run_command('docker exec ibm_db2 su - db2inst1 -c "db2start force"', check=True)
+    run_command('docker exec ibm_db2 su - db2inst1 -c "db2start"', check=True)
     aggregator = dd_agent_check(instance, rate=True)
 
     _assert_standard(aggregator)
