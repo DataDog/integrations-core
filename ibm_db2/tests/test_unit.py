@@ -143,7 +143,11 @@ def test_get_connection_data(instance):
         'database=db1;hostname=host1;port=1000;protocol=tcpip;uid=user1;pwd=pass1;'
         'security=ssl;sslservercertificate=/path/cert'
     )
-    assert (expected, '', '') == check.get_connection_data('db1', 'user1', 'pass1', 'host1', 1000, 'none', '/path/cert', None)
-    
+    assert (expected, '', '') == check.get_connection_data(
+        'db1', 'user1', 'pass1', 'host1', 1000, 'none', '/path/cert', None
+    )
+
     expected = 'database=db1;hostname=host1;port=1000;protocol=tcpip;uid=user1;pwd=pass1;connecttimeout=1'
-    assert (expected, '', '') == check.get_connection_data('db1', 'user1', 'pass1', 'host1', 1000, 'none', None, ['connecttimeout=1'])
+    assert (expected, '', '') == check.get_connection_data(
+        'db1', 'user1', 'pass1', 'host1', 1000, 'none', None, ['connecttimeout=1']
+    )

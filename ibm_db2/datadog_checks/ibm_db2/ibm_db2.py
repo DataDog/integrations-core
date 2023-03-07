@@ -548,7 +548,14 @@ class IbmDb2Check(AgentCheck):
 
     def get_connection(self):
         target, username, password = self.get_connection_data(
-            self._db, self._username, self._password, self._host, self._port, self._security, self._tls_cert, self._extra_connection_parametters
+            self._db,
+            self._username,
+            self._password,
+            self._host,
+            self._port,
+            self._security,
+            self._tls_cert,
+            self._extra_connection_parametters,
         )
 
         # Get column names in lower case
@@ -590,7 +597,7 @@ class IbmDb2Check(AgentCheck):
                 target = '{};security=ssl;sslservercertificate={}'.format(target, tls_cert)
             if extra_parametters:
                 extras = ";".join(extra_parametters)
-                target = '{};{}'.format(target,extras)
+                target = '{};{}'.format(target, extras)
         else:  # no cov
             target = db
 

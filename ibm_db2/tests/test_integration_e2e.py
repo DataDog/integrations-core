@@ -4,8 +4,8 @@
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.ibm_db2 import IbmDb2Check
 from datadog_checks.dev import run_command
+from datadog_checks.ibm_db2 import IbmDb2Check
 
 from . import metrics
 
@@ -25,17 +25,18 @@ def test_e2e(dd_agent_check, instance):
 
     _assert_standard(aggregator)
 
+
 @pytest.mark.e2e
 def test_disconnection(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
 
     _assert_standard(aggregator)
-    
+
     # Disconnect the database
     run_command('docker exec ibm_db2 su - db2inst1 -c "db2stop force"', check=True)
     aggregator = dd_agent_check(instance, rate=True)
     aggregator.assert_service_check('ibm_db2.can_connect', AgentCheck.CRITICAL)
-    
+
     # Reconnect the database
     run_command('docker exec ibm_db2 su - db2inst1 -c "db2start"', check=True)
     aggregator = dd_agent_check(instance, rate=True)
