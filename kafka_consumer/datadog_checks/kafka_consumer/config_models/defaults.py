@@ -38,10 +38,6 @@ def instance_kafka_client_api_version(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_kerberos_keytab(field, value):
-    return get_default_field_value(field, value)
-
-
 def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
@@ -59,6 +55,10 @@ def instance_monitor_unlisted_consumer_groups(field, value):
 
 
 def instance_sasl_kerberos_domain_name(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_sasl_kerberos_keytab(field, value):
     return get_default_field_value(field, value)
 
 
