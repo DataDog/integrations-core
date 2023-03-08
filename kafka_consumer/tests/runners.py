@@ -4,7 +4,8 @@
 import threading
 import time
 
-from kafka import KafkaConsumer, KafkaProducer
+from confluent_kafka import Consumer as KafkaConsumer
+from confluent_kafka import Producer as KafkaProducer
 
 from .common import KAFKA_CONNECT_STR, PARTITIONS
 
@@ -31,22 +32,22 @@ class StoppableThread(threading.Thread):
 
 class Producer(StoppableThread):
     def run(self):
-        producer = KafkaProducer(bootstrap_servers=KAFKA_CONNECT_STR)
+        producer = KafkaProducer({'bootstrap.servers': KAFKA_CONNECT_STR})
 
         iteration = 0
         while not self._shutdown_event.is_set():
             for partition in PARTITIONS:
                 try:
-                    producer.send('marvel', b"Peter Parker", partition=partition)
-                    producer.send('marvel', b"Bruce Banner", partition=partition)
-                    producer.send('marvel', b"Tony Stark", partition=partition)
-                    producer.send('marvel', b"Johhny Blaze", partition=partition)
-                    producer.send('marvel', b"\xc2BoomShakalaka", partition=partition)
-                    producer.send('dc', b"Diana Prince", partition=partition)
-                    producer.send('dc', b"Bruce Wayne", partition=partition)
-                    producer.send('dc', b"Clark Kent", partition=partition)
-                    producer.send('dc', b"Arthur Curry", partition=partition)
-                    producer.send('dc', b"\xc2ShakalakaBoom", partition=partition)
+                    producer.produce('marvel', b"Peter Parker", partition=partition)
+                    producer.produce('marvel', b"Bruce Banner", partition=partition)
+                    producer.produce('marvel', b"Tony Stark", partition=partition)
+                    producer.produce('marvel', b"Johhny Blaze", partition=partition)
+                    producer.produce('marvel', b"\xc2BoomShakalaka", partition=partition)
+                    producer.produce('dc', b"Diana Prince", partition=partition)
+                    producer.produce('dc', b"Bruce Wayne", partition=partition)
+                    producer.produce('dc', b"Clark Kent", partition=partition)
+                    producer.produce('dc', b"Arthur Curry", partition=partition)
+                    producer.produce('dc', b"\xc2ShakalakaBoom", partition=partition)
                 except Exception:
                     pass
 
@@ -62,11 +63,11 @@ class KConsumer(StoppableThread):
 
     def run(self):
         consumer = KafkaConsumer(
-            bootstrap_servers=self.kafka_connect_str, group_id="my_consumer", auto_offset_reset='earliest'
+            {'bootstrap.servers': self.kafka_connect_str, 'group.id': 'my_consumer', 'auto.offset.reset': 'earliest'}
         )
         consumer.subscribe(self.topics)
 
         iteration = 0
         while not self._shutdown_event.is_set():
-            consumer.poll(timeout_ms=500, max_records=10)
+            consumer.poll(timeout=500)
             iteration += 1
