@@ -428,9 +428,7 @@ class SQLServer(AgentCheck):
                 # if autodiscovery is enabled, we report metrics from the
                 # INSTANCE_METRICS_DATABASE struct below, so do not double report here
                 common_metrics.extend(INSTANCE_METRICS_DATABASE)
-            self._add_performance_counters(
-                common_metrics, metrics_to_collect, tags, db=None
-            )
+            self._add_performance_counters(common_metrics, metrics_to_collect, tags, db=None)
 
             # populated through autodiscovery
             if self.databases:

@@ -209,13 +209,7 @@ INIT_CONFIG_ALT_TABLES = {
 
 
 def assert_metrics(
-        aggregator,
-        check_tags,
-        service_tags,
-        dbm_enabled=False,
-        hostname=None,
-        database_autodiscovery=False,
-        dbs=None
+    aggregator, check_tags, service_tags, dbm_enabled=False, hostname=None, database_autodiscovery=False, dbs=None
 ):
     """
     Boilerplate asserting all the expected metrics and service checks.
