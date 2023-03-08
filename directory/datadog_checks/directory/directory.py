@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections import defaultdict
 from fnmatch import fnmatch
 from os.path import exists, join, realpath, relpath
 from time import time
@@ -79,7 +80,7 @@ class DirectoryCheck(AgentCheck):
         get_length = len
 
         # Avoid duplicate files for directory bytes
-        seen_files = {}
+        seen_files = defaultdict(lambda: defaultdict(int))
 
         for root, dirs, files in self._walk():
             matched_files = []
@@ -125,23 +126,16 @@ class DirectoryCheck(AgentCheck):
                     )
                 else:
                     # Directory bytes metric
-                    if real_path in seen_files.keys():
-                        if file_entry.is_symlink():
-                            # If realpath has been seen before, associate the symlink to target file.
-                            seen_files.setdefault(real_path, []).append(file_entry.path)
-                    else:
-                        # Only calculate actual/target files not seen before.
+                    if real_path not in seen_files.keys():
                         directory_bytes += file_stat.st_size
-
-                        # Add to seen_files
-                        if file_entry.is_symlink():
-                            if self._config.stat_follow_symlinks:
-                                # If stat_follow_symlinks=False, do not add symlink files to seen
-                                #   as is unlikely that target file size were collected.
-                                seen_files.setdefault(real_path, []).append(file_entry.path)
+                        if self._config.stat_follow_symlinks:
+                            seen_files[real_path].setdefault('lnks', []).append(file_entry.path)
+                            seen_files[real_path]['size'] += file_stat.st_size
                         else:
-                            # If an actual file, add to seen w/o symlinks
-                            seen_files.setdefault(real_path, [])
+                            seen_files[file_entry.name]['size'] += file_stat.st_size
+
+                    elif file_entry.is_symlink() and self._config.stat_follow_symlinks:
+                        seen_files[real_path].setdefault('lnks', []).append(file_entry.path)
 
                     # file specific metrics
                     if self._config.filegauges and matched_files_length <= max_filegauge_balance:
