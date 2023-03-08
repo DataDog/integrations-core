@@ -1,13 +1,14 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
 from confluent_kafka.admin import AdminClient
 from six import string_types
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_consumer.client.kafka_client import KafkaClient
-from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
+from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, KRB5_CLIENT_KTNAME
 
 
 class ConfluentKafkaClient(KafkaClient):
@@ -32,19 +33,33 @@ class ConfluentKafkaClient(KafkaClient):
                 config.update(oauth_config)
 
             if self.config._sasl_mechanism == "GSSAPI":
+                # TODO: Eventually remove sasl_kerberos_domain_name since unused in confluent-kafka
+                if self.config._sasl_kerberos_domain_name:
+                    self.log.warning(
+                        "Configuration option `sasl_kerberos_domain_name` has been " \
+                        "deprecated in Agent 7.46+ for the `kafka_consumer` check, " \
+                        "as the confluent-kafka-python library does not distinguish " \
+                        "between Kerberos domain name and host name"
+                    )
+                
+                keytab = self.config._sasl_kerberos_keytab
+                if os.environ[KRB5_CLIENT_KTNAME] and not self.config._sasl_kerberos_keytab:
+                    self.warning(
+                        "Detected that environment variable `KRB5_CLIENT_KTNAME` is " \
+                        "set but not config option `sasl_kerberos_keytab`. " \
+                        "Make sure to set `sasl_kerberos_keytab` to the value of " \
+                        "`KRB5_CLIENT_KTNAME` in future configurations, as " \
+                        "`sasl_kerberos_keytab` will be required " \
+                        "for connecting to Kafka via Kerberos."
+                    )
+                    keytab = os.environ[KRB5_CLIENT_KTNAME]
+
                 kerb_config = {
                     "sasl.mechanism": self.config._sasl_mechanism,
                     "sasl.username": self.config._sasl_plain_username,
                     "sasl.password": self.config._sasl_plain_password,
                     "sasl.kerberos.service.name": self.config._sasl_kerberos_service_name,
-                    # TODO: _sasl_kerberos_domain_name doesn't seem to be used?
-                    # looks like in kafka-python, sasl_kerberos_domain name can also be the host address:
-                    # https://github.com/dpkp/kafka-python/blob/7ac6c6e29099ccba4d50f5b842972dd7332d0e58/kafka/conn.py#L712
-                    # TODO: If `sasl.kerberos.keytab` is not configured, does it automatically
-                    # use `KRB5_CLIENT_KTNAME` env var?
-                    # TODO: Test if Kerberos works on Windows before merging
-                    # See: https://github.com/confluentinc/librdkafka/issues/1259
-                    "sasl.kerberos.keytab": self.config._kerberos_keytab,
+                    "sasl.kerberos.keytab": keytab,
                 }
                 config.update(kerb_config)
 

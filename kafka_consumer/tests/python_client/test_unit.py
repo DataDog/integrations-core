@@ -28,6 +28,20 @@ def test_gssapi(kafka_instance, dd_run_check, check):
         dd_run_check(check(instance))
 
 
+def test_gssapi_config(kafka_instance, dd_run_check, check, caplog):
+    instance = copy.deepcopy(kafka_instance)
+    instance['sasl_mechanism'] = 'GSSAPI'
+    instance['security_protocol'] = 'SASL_PLAINTEXT'
+    instance['sasl_kerberos_service_name'] = 'kafka'
+    instance['sasl_kerberos_domain_name'] = "Not none"
+
+    # TODO: Mock GSSAPI here instead of expecting fail
+    with pytest.raises(Exception):
+        dd_run_check(check(instance))
+
+    expected_warning = "Configuration option `sasl_kerberos_domain_name` has been deprecated"
+    assert expected_warning in caplog.text
+
 def test_tls_config_ok(check, kafka_instance_tls):
     with mock.patch('datadog_checks.base.utils.tls.ssl') as ssl:
         # mock TLS context

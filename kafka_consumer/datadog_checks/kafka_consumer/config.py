@@ -38,7 +38,7 @@ class KafkaConfig:
         self._sasl_kerberos_service_name = instance.get('sasl_kerberos_service_name', 'kafka')
         self._sasl_kerberos_domain_name = instance.get('sasl_kerberos_domain_name')
         self._sasl_oauth_token_provider = instance.get('sasl_oauth_token_provider')
-        self._kerberos_keytab = instance.get('kerberos_keytab')
+        self._sasl_kerberos_keytab = instance.get('sasl_kerberos_keytab')
         self.use_legacy_client = is_affirmative(instance.get('use_legacy_client', False))
 
     def validate_config(self):
