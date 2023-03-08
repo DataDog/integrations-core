@@ -6,7 +6,6 @@ from __future__ import division
 import re
 import time
 from collections import defaultdict
-from itertools import chain
 
 import six
 from cachetools import TTLCache
