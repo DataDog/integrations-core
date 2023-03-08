@@ -1,0 +1,40 @@
+global_config_source = "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0RhdGFEb2cvZ2l0aHViLW1ldGFkYXRhL21hc3Rlci9qaXJhLnRvbWw="
+jira_statuses = [
+  "TODO",
+  "Testing",
+  "Done",
+]
+ignored_labels = [
+  "changelog/no-changelog",
+  "qa/skip-qa",
+]
+
+[teams."Agent Integrations"]
+jira_project = "AI"
+jira_issue_type = "Task"
+github_team = "agent-integrations"
+
+[teams."Platform Integrations"]
+jira_project = "PINT"
+jira_issue_type = "Task"
+github_team = "platform-integrations"
+
+[teams."Container Integrations"]
+jira_project = "CONT"
+jira_issue_type = "Task"
+github_team = "container-integrations"
+
+[teams."Database Monitoring"]
+jira_project = "DBM"
+jira_issue_type = "Task"
+github_team = "database-monitoring"
+
+[teams."Network Device Monitoring"]
+jira_project = "NDM"
+jira_issue_type = "Task"
+github_team = "network-device-monitoring"
+
+[teams."Windows Agent"]
+jira_project = "WA"
+jira_issue_type = "QA Task"
+github_team = "windows-agent"
