@@ -421,27 +421,27 @@ class SQLServer(AgentCheck):
         # If several check instances are querying the same server host, it can be wise to turn these off
         # to avoid sending duplicate metrics
         if is_affirmative(self.instance.get('include_instance_metrics', True)):
-            common_metrics = INSTANCE_METRICS
+            common_metrics = list(INSTANCE_METRICS)
             if not self.dbm_enabled:
-                common_metrics = common_metrics + DBM_MIGRATED_METRICS
+                common_metrics.extend(DBM_MIGRATED_METRICS)
             if not self.databases:
                 # if autodiscovery is enabled, we report metrics from the
                 # INSTANCE_METRICS_DATABASE struct below, so do not double report here
-                common_metrics = common_metrics + INSTANCE_METRICS_DATABASE
+                common_metrics.extend(INSTANCE_METRICS_DATABASE)
             self._add_performance_counters(
                 common_metrics, metrics_to_collect, tags, db=None
             )
 
-        # populated through autodiscovery
-        if self.databases:
-            for db in self.databases:
-                self._add_performance_counters(
-                    INSTANCE_METRICS_DATABASE,
-                    metrics_to_collect,
-                    tags,
-                    db=db.name,
-                    physical_database_name=db.physical_db_name,
-                )
+            # populated through autodiscovery
+            if self.databases:
+                for db in self.databases:
+                    self._add_performance_counters(
+                        INSTANCE_METRICS_DATABASE,
+                        metrics_to_collect,
+                        tags,
+                        db=db.name,
+                        physical_database_name=db.physical_db_name,
+                    )
 
         # Load database statistics
         for name, table, column in DATABASE_METRICS:
