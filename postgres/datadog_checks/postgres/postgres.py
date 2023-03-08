@@ -429,7 +429,14 @@ class PostgreSql(AgentCheck):
                 self._config.application_name,
             )
             if self._config.query_timeout:
-                connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
+                conn_options = (
+                    "-c statement_timeout={}".format(self._config.query_timeout)
+                    + " -c idle_session_timeout={}".format(self._config.idle_session_timeout)
+                    + " -c idle_in_transaction_session_timeout={}".format(
+                        self._config.idle_in_transaction_session_timeout
+                    )
+                )
+                connection_string += " options='{}'".format(conn_options)
             conn = psycopg2.connect(connection_string)
         else:
             args = {

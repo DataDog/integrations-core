@@ -136,6 +136,22 @@ files:
       value:
         type: integer
         example: 5000
+    - name: idle_session_timeout
+      hidden: true
+      description: |
+        Sets the idle_session_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-IDLE-SESSION-TIMEOUT
+        on the connection used by the Agent. This prevents long-running idle connections being pooled forever per-database.
+      value:
+        type: integer
+        example: 180000
+    - name: idle_in_transaction_session_timeout
+      hidden: true
+      description: |
+        Sets the idle_in_transaction_session_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-IDLE-IN-TRANSACTION-SESSION-TIMEOUT
+        on the connection used by the Agent. This is a safety measure to prevent long running transactions.
+      value:
+        type: integer
+        example: 180000
     - name: relations
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.

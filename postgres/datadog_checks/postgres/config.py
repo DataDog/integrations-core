@@ -44,6 +44,8 @@ class PostgresConfig:
             raise ConfigurationError("Application name can include only ASCII characters: %s", self.application_name)
 
         self.query_timeout = int(instance.get('query_timeout', 5000))
+        self.idle_session_timeout = int(instance.get('idle_session_timeout', 180000))
+        self.idle_in_transaction_session_timeout = int(instance.get('idle_in_transaction_session_timeout', 180000))
         self.relations = instance.get('relations', [])
         if self.relations and not self.dbname:
             raise ConfigurationError('"dbname" parameter must be set when using the "relations" parameter.')

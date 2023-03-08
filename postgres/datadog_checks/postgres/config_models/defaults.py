@@ -90,6 +90,14 @@ def instance_gcp(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_idle_in_transaction_session_timeout(field, value):
+    return 180000
+
+
+def instance_idle_session_timeout(field, value):
+    return 180000
+
+
 def instance_ignore_databases(field, value):
     return ['template%', 'rdsadmin', 'azure_maintenance']
 
