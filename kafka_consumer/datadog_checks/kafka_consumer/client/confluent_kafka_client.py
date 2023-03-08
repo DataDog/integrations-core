@@ -14,13 +14,24 @@ class ConfluentKafkaClient(KafkaClient):
     @property
     def kafka_client(self):
         if self._kafka_client is None:
-            self._kafka_client = AdminClient(
-                {
-                    "bootstrap.servers": self.config._kafka_connect_str,
-                    "socket.timeout.ms": self.config._request_timeout_ms,
-                    "client.id": "dd-agent",
-                }
-            )
+            config = {
+                "bootstrap.servers": self.config._kafka_connect_str,
+                "socket.timeout.ms": self.config._request_timeout_ms,
+            }
+
+            if self.config._use_tls:
+                config.update(
+                    {
+                        "security.protocol": "ssl",
+                        "ssl.ca.location": self.config._tls_ca_cert,
+                        "ssl.certificate.location": self.config._tls_cert,
+                        "ssl.key.location": self.config._tls_private_key,
+                        "ssl.key.password": self.config._tls_private_key_password,
+                    }
+                )
+
+            self._kafka_client = AdminClient(config)
+
         return self._kafka_client
 
     def create_kafka_admin_client(self):

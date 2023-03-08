@@ -29,19 +29,6 @@ def test_gssapi(kafka_instance, dd_run_check, check):
         dd_run_check(check(instance))
 
 
-def test_tls_config_ok(check, kafka_instance_tls):
-    with mock.patch('datadog_checks.base.utils.tls.ssl') as ssl:
-        # mock TLS context
-        tls_context = mock.MagicMock()
-        ssl.SSLContext.return_value = tls_context
-
-        kafka_consumer_check = check(kafka_instance_tls)
-        with mock.patch('datadog_checks.kafka_consumer.KafkaCheck.get_tls_context', return_value=tls_context):
-            assert kafka_consumer_check.client._tls_context == tls_context
-            assert kafka_consumer_check.client._tls_context.check_hostname is True
-            assert kafka_consumer_check.client._tls_context.tls_cert is not None
-
-
 @pytest.mark.parametrize(
     'sasl_oauth_token_provider, expected_exception',
     [

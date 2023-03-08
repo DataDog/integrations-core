@@ -13,14 +13,14 @@ from datadog_test_libs.utils.mock_dns import mock_local
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.kafka_consumer import KafkaCheck
 
-from .common import DOCKER_IMAGE_PATH, HERE, HOST_IP, KAFKA_CONNECT_STR, LEGACY_CLIENT, TOPICS
+from .common import AUTHENTICATION, DOCKER_IMAGE_PATH, HERE, HOST_IP, KAFKA_CONNECT_STR, LEGACY_CLIENT, TOPICS
 from .runners import KConsumer, Producer
 
-# Dummy TLS certs
-CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
-cert = os.path.join(CERTIFICATE_DIR, 'cert.cert')
-private_key = os.path.join(CERTIFICATE_DIR, 'server.pem')
-
+CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'docker', 'ssl', 'certificate')
+ROOT_CERTIFICATE = os.path.join(CERTIFICATE_DIR, 'caroot.pem')
+CERTIFICATE = os.path.join(CERTIFICATE_DIR, 'cert.pem')
+PRIVATE_KEY = os.path.join(CERTIFICATE_DIR, 'key.pem')
+PRIVATE_KEY_PASSWORD = 'secret'
 
 if LEGACY_CLIENT:
     E2E_METADATA = {
@@ -37,13 +37,28 @@ else:
         'start_commands': ['bash /tmp/start_commands.sh'],
     }
 
-INSTANCE = {
-    'kafka_connect_str': KAFKA_CONNECT_STR,
-    'tags': ['optional:tag1'],
-    'consumer_groups': {'my_consumer': {'marvel': [0]}},
-    'broker_requests_batch_size': 1,
-    'use_legacy_client': LEGACY_CLIENT,
-}
+if AUTHENTICATION == "ssl":
+    INSTANCE = {
+        'kafka_connect_str': "kafka1:9092",
+        'tags': ['optional:tag1'],
+        'consumer_groups': {'my_consumer': {'marvel': [0]}},
+        'broker_requests_batch_size': 1,
+        'use_tls': True,
+        'tls_validate_hostname': True,
+        'tls_cert': CERTIFICATE,
+        'tls_private_key': PRIVATE_KEY,
+        'tls_private_key_password': PRIVATE_KEY_PASSWORD,
+        'tls_ca_cert': ROOT_CERTIFICATE,
+        'use_legacy_client': LEGACY_CLIENT,
+    }
+else:
+    INSTANCE = {
+        'kafka_connect_str': KAFKA_CONNECT_STR,
+        'tags': ['optional:tag1'],
+        'consumer_groups': {'my_consumer': {'marvel': [0]}},
+        'broker_requests_batch_size': 1,
+        'use_legacy_client': LEGACY_CLIENT,
+    }
 
 
 @pytest.fixture(scope='session')
@@ -80,22 +95,6 @@ def kafka_instance():
     return copy.deepcopy(INSTANCE)
 
 
-@pytest.fixture
-def kafka_instance_tls():
-    return {
-        'kafka_connect_str': KAFKA_CONNECT_STR,
-        'tags': ['optional:tag1'],
-        'consumer_groups': {'my_consumer': {'marvel': [0]}},
-        'broker_requests_batch_size': 1,
-        'use_tls': True,
-        'tls_validate_hostname': True,
-        'tls_cert': cert,
-        'tls_private_key': private_key,
-        'tls_ca_cert': CERTIFICATE_DIR,
-        'use_legacy_client': LEGACY_CLIENT,
-    }
-
-
 def create_topics():
     client = _create_admin_client()
 
@@ -106,10 +105,8 @@ def create_topics():
 
 
 def initialize_topics():
-    consumer = KConsumer(TOPICS)
-
-    with Producer():
-        with consumer:
+    with Producer(INSTANCE):
+        with KConsumer(INSTANCE, TOPICS):
             time.sleep(5)
 
 
@@ -121,9 +118,20 @@ def mock_local_kafka_hosts_dns():
 
 
 def _create_admin_client():
-    return AdminClient(
-        {
-            "bootstrap.servers": KAFKA_CONNECT_STR,
-            "socket.timeout.ms": 1000,
-        }
-    )
+    config = {
+        "bootstrap.servers": INSTANCE['kafka_connect_str'],
+        "socket.timeout.ms": 1000,
+    }
+
+    if INSTANCE.get('use_tls', False):
+        config.update(
+            {
+                "security.protocol": "ssl",
+                "ssl.ca.location": INSTANCE.get("tls_ca_cert"),
+                "ssl.certificate.location": INSTANCE.get("tls_cert"),
+                "ssl.key.location": INSTANCE.get("tls_private_key"),
+                "ssl.key.password": INSTANCE.get("tls_private_key_password"),
+            }
+        )
+
+    return AdminClient(config)
