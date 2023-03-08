@@ -399,14 +399,31 @@ def test_no_recursive_symlink_loop(aggregator):
 @pytest.mark.parametrize(
     'stat_follow_symlinks, expected_dir_size, expected_file_sizes',
     [
-        # du --apparent-size /path/ -L
+        # du --apparent-size /path/ -abc -L
         # aka follow symlinks - dedups total directory size
-        pytest.param(True, 150, [('file50', 50), ('file100', 100), ('file100sym', 100)], id='follow_sym'),
-        # file100sym = 8 + len(dir): that's the length of the symlink file
+        pytest.param(
+            True,
+            2500,
+            [
+                ('file500', 500),
+                ('file1000', 1000),
+                ('file1000sym', 1000),  # Should not count; target file lives under same directory
+                ('otherfile1000sym', 1000),
+            ],
+            id='follow_sym',
+        ),
+        # du --apparent-size /path/ -abc -P
+        # len(tdir + '/main') = 21 = target_dir
+        # file1000sym = 7 + len(target_dir): length of the symlink file
         pytest.param(
             False,
-            lambda tdir: 150 + 8 + len(tdir),
-            [('file50', 50), ('file100', 100), ('file100sym', lambda tdir: 8 + len(tdir))],
+            1500 + 28 + 28,
+            [
+                ('file500', 500),
+                ('file1000', 1000),
+                ('file1000sym', lambda tdir: 7 + len(tdir + '/main')),
+                ('otherfile1000sym', lambda tdir: 7 + len(tdir + '/othr')),
+            ],
             id='not_follow_sym',
         ),
     ],
@@ -420,20 +437,30 @@ def test_stat_follow_symlinks(aggregator, stat_follow_symlinks, expected_dir_siz
     with temp_directory() as tdir:
 
         # Setup dir and files
-        file50 = os.path.join(tdir, 'file50')
-        file100 = os.path.join(tdir, 'file100')
-        file100sym = os.path.join(tdir, 'file100sym')
+        os.makedirs(str(tdir) + "/main")
+        os.makedirs(str(tdir) + "/othr")
 
-        with open(file50, 'w') as f:
-            f.write('0' * 50)
-        with open(file100, 'w') as f:
-            f.write('0' * 100)
+        # Setup files
+        file500 = os.path.join(tdir + '/main', 'file500')
+        file1000 = os.path.join(tdir + '/main', 'file1000')
+        file1000sym = os.path.join(tdir + '/main', 'file1000sym')
+        otherfile1000 = os.path.join(tdir + '/othr', 'file1000')
+        otherfile1000sym = os.path.join(tdir + '/main', 'otherfile1000sym')
 
-        os.symlink(file100, file100sym)
+        with open(file500, 'w') as f:
+            f.write('0' * 500)
+        with open(file1000, 'w') as f:
+            f.write('0' * 1000)
+        with open(otherfile1000, 'w') as f:
+            f.write('0' * 1000)
+
+        os.symlink(file1000, file1000sym)
+        os.symlink(otherfile1000, otherfile1000sym)
 
         # Run Check
+        target_dir = tdir + '/main'
         instance = {
-            'directory': tdir,
+            'directory': target_dir,
             'recursive': True,
             'filegauges': True,
             'stat_follow_symlinks': stat_follow_symlinks,
@@ -441,10 +468,10 @@ def test_stat_follow_symlinks(aggregator, stat_follow_symlinks, expected_dir_siz
         check = DirectoryCheck('directory', {}, [instance])
         check.check(instance)
 
-        common_tags = ['name:{}'.format(tdir)]
+        common_tags = ['name:{}'.format(target_dir)]
         aggregator.assert_metric(
             'system.disk.directory.bytes', value=flatten_value(expected_dir_size), tags=common_tags
         )
         for filename, size in expected_file_sizes:
-            tags = common_tags + ['filename:{}'.format(os.path.join(tdir, filename))]
+            tags = common_tags + ['filename:{}'.format(os.path.join(target_dir, filename))]
             aggregator.assert_metric('system.disk.directory.file.bytes', value=flatten_value(size), tags=tags)
