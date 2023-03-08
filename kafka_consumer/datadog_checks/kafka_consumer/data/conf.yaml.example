@@ -131,7 +131,7 @@ instances:
     ## @param sasl_kerberos_domain_name - string - optional
     ## Kerberos domain name to use in GSSAPI sasl mechanism handshake.
     ##
-    ## Note: On Agent 7.46 and up, this configuration option is deprecated
+    ## Note: On Agent 7.45 and up, this configuration option is deprecated
     ## since the confluent-kafka-python library does not distinguish the 
     ## Kerberos domain name with the host name.
     #
