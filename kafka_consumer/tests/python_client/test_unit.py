@@ -42,36 +42,41 @@ def test_tls_config_ok(check, kafka_instance_tls):
 
 
 @pytest.mark.parametrize(
-    'sasl_oauth_token_provider, expected_exception',
+    'sasl_oauth_token_provider, expected_exception, mocked_admin_client',
     [
         pytest.param(
             {},
             pytest.raises(Exception, match="sasl_oauth_token_provider required for OAUTHBEARER sasl"),
+            None,
             id="No sasl_oauth_token_provider",
         ),
         pytest.param(
             {'sasl_oauth_token_provider': {}},
             pytest.raises(Exception, match="The `url` setting of `auth_token` reader is required"),
+            None,
             id="Empty sasl_oauth_token_provider, url missing",
         ),
         pytest.param(
             {'sasl_oauth_token_provider': {'url': 'http://fake.url'}},
             pytest.raises(Exception, match="The `client_id` setting of `auth_token` reader is required"),
+            None,
             id="client_id missing",
         ),
         pytest.param(
             {'sasl_oauth_token_provider': {'url': 'http://fake.url', 'client_id': 'id'}},
             pytest.raises(Exception, match="The `client_secret` setting of `auth_token` reader is required"),
+            None,
             id="client_secret missing",
         ),
         pytest.param(
             {'sasl_oauth_token_provider': {'url': 'http://fake.url', 'client_id': 'id', 'client_secret': 'secret'}},
-            pytest.raises(Exception),  # Mock the expected response after library migration
+            does_not_raise(),
+            mock.MagicMock(),
             id="valid config",
         ),
     ],
 )
-def test_oauth_config(sasl_oauth_token_provider, expected_exception, check, dd_run_check):
+def test_oauth_config(sasl_oauth_token_provider, expected_exception, mocked_admin_client, check, dd_run_check):
     instance = {
         'kafka_connect_str': KAFKA_CONNECT_STR,
         'monitor_unlisted_consumer_groups': True,
@@ -81,7 +86,11 @@ def test_oauth_config(sasl_oauth_token_provider, expected_exception, check, dd_r
     instance.update(sasl_oauth_token_provider)
 
     with expected_exception:
-        dd_run_check(check(instance))
+        with mock.patch(
+            'datadog_checks.kafka_consumer.client.confluent_kafka_client.AdminClient',
+            return_value=mocked_admin_client,
+        ):
+            dd_run_check(check(instance))
 
 
 @pytest.mark.skip(reason='Add a test that not only check the parameter but also run the check')
