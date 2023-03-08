@@ -1,5 +1,9 @@
 # CHANGELOG - rabbitmq
 
+## 4.0.1 / 2023-03-07
+
+* [Fixed] Fix autodiscovery config instances. See [#14112](https://github.com/DataDog/integrations-core/pull/14112).
+
 ## 4.0.0 / 2023-03-03
 
 * [Added] Add autodiscovery for docker containers. See [#13960](https://github.com/DataDog/integrations-core/pull/13960).
