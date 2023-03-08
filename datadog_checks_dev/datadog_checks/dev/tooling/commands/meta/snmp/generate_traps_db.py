@@ -80,7 +80,7 @@ VarMetadata = namedtuple('VarMetadata', ['oid', 'description', 'enum', 'bits'])
     'mib-files',
     nargs=-1,
     required=True,
-    type=click.Path(exists=True, dir_okay=False, resolve_path=True, path_type=pathlib.Path),
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
 )
 def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_descr, debug, mib_files):
     """Generate yaml or json formatted documents containing various information about traps. These files can be used by
@@ -133,9 +133,11 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
         if not os.path.isdir(mibs_sources_dir):
             os.mkdir(mibs_sources_dir)
 
-        mib_sources = sorted(set([x.parent.as_uri() for x in mib_files if os.path.sep in x])) + mib_sources
+        mib_sources = (
+            sorted(set([pathlib.Path(x).parent.as_uri() for x in mib_files if os.path.sep in x])) + mib_sources
+        )
 
-        mib_files = [x.name for x in mib_files]
+        mib_files = [os.path.basename(x) for x in mib_files]
         searchers = [AnyFileSearcher(compiled_mibs_sources).setOptions(exts=['.json'])]
         code_generator = JsonCodeGen()
         file_writer = FileWriter(compiled_mibs_sources).setOptions(suffix='.json')
