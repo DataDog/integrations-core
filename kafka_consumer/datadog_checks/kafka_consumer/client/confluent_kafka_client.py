@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+
 from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
 from confluent_kafka.admin import AdminClient
 from six import string_types
@@ -36,20 +37,20 @@ class ConfluentKafkaClient(KafkaClient):
                 # TODO: Eventually remove sasl_kerberos_domain_name since unused in confluent-kafka
                 if self.config._sasl_kerberos_domain_name:
                     self.log.warning(
-                        "Configuration option `sasl_kerberos_domain_name` has been " \
-                        "deprecated in Agent 7.46+ for the `kafka_consumer` check, " \
-                        "as the confluent-kafka-python library does not distinguish " \
+                        "Configuration option `sasl_kerberos_domain_name` has been "
+                        "deprecated in Agent 7.46+ for the `kafka_consumer` check, "
+                        "as the confluent-kafka-python library does not distinguish "
                         "between Kerberos domain name and host name"
                     )
-                
+
                 keytab = self.config._sasl_kerberos_keytab
                 if os.environ[KRB5_CLIENT_KTNAME] and not self.config._sasl_kerberos_keytab:
                     self.warning(
-                        "Detected that environment variable `KRB5_CLIENT_KTNAME` is " \
-                        "set but not config option `sasl_kerberos_keytab`. " \
-                        "Make sure to set `sasl_kerberos_keytab` to the value of " \
-                        "`KRB5_CLIENT_KTNAME` in future configurations, as " \
-                        "`sasl_kerberos_keytab` will be required " \
+                        "Detected that environment variable `KRB5_CLIENT_KTNAME` is "
+                        "set but not config option `sasl_kerberos_keytab`. "
+                        "Make sure to set `sasl_kerberos_keytab` to the value of "
+                        "`KRB5_CLIENT_KTNAME` in future configurations, as "
+                        "`sasl_kerberos_keytab` will be required "
                         "for connecting to Kafka via Kerberos."
                     )
                     keytab = os.environ[KRB5_CLIENT_KTNAME]
