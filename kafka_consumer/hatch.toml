@@ -24,10 +24,16 @@ impl = ["legacy"]
 python = ["3.8"]
 version = ["1.1", "2.3", "3.3"]
 
-#[[envs.default.matrix]]
-#python = ["3.8"]
-#version = ["3.3"]
-#auth = ["ssl"]
+[[envs.default.matrix]]
+python = ["3.8"]
+version = ["3.3"]
+impl = ["legacy"]
+auth = ["ssl"]
+
+[[envs.default.matrix]]
+python = ["3.8"]
+version = ["3.3"]
+auth = ["ssl"]
 
 [envs.default.overrides]
 matrix.version.e2e-env = { value = true, if = ["3.3"] }
