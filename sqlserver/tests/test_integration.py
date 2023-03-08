@@ -8,12 +8,10 @@ import pytest
 
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import SQLConnectionError
+from datadog_checks.sqlserver.const import INSTANCE_METRICS_DATABASE
 
 from .common import CHECK_NAME, CUSTOM_METRICS, EXPECTED_DEFAULT_METRICS, assert_metrics
 from .utils import not_windows_ci, windows_ci
-from datadog_checks.sqlserver.const import (
-    INSTANCE_METRICS_DATABASE,
-)
 
 try:
     import pyodbc
