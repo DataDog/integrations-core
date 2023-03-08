@@ -78,17 +78,17 @@ INSTANCE_METRICS = [
     ('sqlserver.stats.batch_requests', 'Batch Requests/sec', ''),  # BULK_COUNT
     ('sqlserver.stats.sql_compilations', 'SQL Compilations/sec', ''),  # BULK_COUNT
     ('sqlserver.stats.sql_recompilations', 'SQL Re-Compilations/sec', ''),  # BULK_COUNT
-]
-
-# Performance table metrics, initially configured to track at instance-level only
-# With auto-discovery enabled, these metrics will be extended accordingly
-# datadog metric name, counter name, instance name
-INSTANCE_METRICS_TOTAL = [
     # SQLServer:Locks
     ('sqlserver.stats.lock_waits', 'Lock Waits/sec', '_Total'),  # BULK_COUNT
     # SQLServer:Plan Cache
     ('sqlserver.cache.object_counts', 'Cache Object Counts', '_Total'),
     ('sqlserver.cache.pages', 'Cache Pages', '_Total'),
+]
+
+# Performance table metrics, initially configured to track at instance-level only
+# With auto-discovery enabled, these metrics will be extended accordingly
+# datadog metric name, counter name, instance name
+INSTANCE_METRICS_DATABASE = [
     # SQLServer:Databases
     ('sqlserver.database.backup_restore_throughput', 'Backup/Restore Throughput/sec', '_Total'),
     ('sqlserver.database.log_bytes_flushed', 'Log Bytes Flushed/sec', '_Total'),

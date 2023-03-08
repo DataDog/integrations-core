@@ -17,7 +17,7 @@ from datadog_checks.sqlserver.const import (
     DATABASE_METRICS,
     DBM_MIGRATED_METRICS,
     INSTANCE_METRICS,
-    INSTANCE_METRICS_TOTAL,
+    INSTANCE_METRICS_DATABASE,
     TASK_SCHEDULER_METRICS,
 )
 from datadog_checks.sqlserver.queries import get_query_file_stats
@@ -69,7 +69,7 @@ EXPECTED_DEFAULT_METRICS = (
         for m in chain(
             INSTANCE_METRICS,
             DBM_MIGRATED_METRICS,
-            INSTANCE_METRICS_TOTAL,
+            INSTANCE_METRICS_DATABASE,
             DATABASE_METRICS,
         )
     ]
@@ -90,8 +90,8 @@ EXPECTED_METRICS = (
 )
 
 DBM_MIGRATED_METRICS_NAMES = set(m[0] for m in DBM_MIGRATED_METRICS)
-
 EXPECTED_METRICS_DBM_ENABLED = [m for m in EXPECTED_METRICS if m not in DBM_MIGRATED_METRICS_NAMES]
+DB_PERF_COUNT_METRICS_NAMES = set(m[0] for m in INSTANCE_METRICS_DATABASE)
 
 # These AO metrics are collected using the new QueryExecutor API instead of BaseSqlServerMetric.
 EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY = [
@@ -208,21 +208,30 @@ INIT_CONFIG_ALT_TABLES = {
 }
 
 
-def assert_metrics(aggregator, expected_tags, dbm_enabled=False, hostname=None, database_autodiscovery=False):
+def assert_metrics(
+    aggregator, check_tags, service_tags, dbm_enabled=False, hostname=None, database_autodiscovery=False, dbs=None
+):
     """
     Boilerplate asserting all the expected metrics and service checks.
     Make sure ALL custom metric is tagged by database.
     """
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
     expected_metrics = EXPECTED_METRICS
+    # if dbm is enabled, the integration does not emit certain metrics
+    # as they are emitted from the DBM backend
     if dbm_enabled:
-        dbm_excluded_metrics = [m[0] for m in DBM_MIGRATED_METRICS]
-        expected_metrics = [m for m in EXPECTED_METRICS if m not in dbm_excluded_metrics]
+        expected_metrics = [m for m in expected_metrics if m not in DBM_MIGRATED_METRICS_NAMES]
+    if database_autodiscovery:
+        # when autodiscovery is enabled, we should not double emit metrics,
+        # so we should assert for these separately with the proper tags
+        expected_metrics = [m for m in expected_metrics if m not in DB_PERF_COUNT_METRICS_NAMES]
+        for dbname in dbs:
+            tags = check_tags + ['database:{}'.format(dbname)]
+            for mname in DB_PERF_COUNT_METRICS_NAMES:
+                aggregator.assert_metric(mname, hostname=hostname, tags=tags)
     for mname in expected_metrics:
         assert hostname is not None, "hostname must be explicitly specified for all metrics"
         aggregator.assert_metric(mname, hostname=hostname)
-    aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=expected_tags)
+    aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=service_tags)
     aggregator.assert_all_metrics_covered()
-    if not database_autodiscovery:
-        # if we're autodiscovering other databases then there will be duplicate metrics, one per database
-        aggregator.assert_no_duplicate_metrics()
+    aggregator.assert_no_duplicate_metrics()
