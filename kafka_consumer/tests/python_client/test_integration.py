@@ -74,10 +74,13 @@ def test_monitor_broker_highwatermarks(dd_run_check, check, aggregator, is_enabl
     dd_run_check(check(instance))
 
     # After refactor and library migration, write unit tests to assert expected metric values
-    aggregator.assert_metric('kafka.broker_offset', count=metric_count)
+    aggregator.assert_metric('kafka.broker_offset', value=80, count=metric_count)
+    aggregator.assert_metric('kafka.consumer_offset', value=75, count=2)
+    aggregator.assert_metric('kafka.consumer_lag', value=5, count=2)
 
     for tag in topic_tags:
         aggregator.assert_metric_has_tag('kafka.broker_offset', tag, count=2)
 
     aggregator.assert_metric_has_tag_prefix('kafka.broker_offset', 'partition', count=metric_count)
+    aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
