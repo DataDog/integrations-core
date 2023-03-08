@@ -413,16 +413,17 @@ def test_no_recursive_symlink_loop(aggregator):
             id='follow_sym',
         ),
         # du --apparent-size /path/ -abc -P
-        # len(tdir + '/main') = 21 = target_dir
-        # file1000sym = 7 + len(target_dir): length of the symlink file
+        # https://docs.python.org/3/library/os.html#os.stat_result.st_size
+        # len(tdir + '/path') = 21 = target_dir
+        # len('/file1000') = 9 = target file
         pytest.param(
             False,
-            1500 + 28 + 28,
+            lambda tdir: 1500 + len(tdir + '/file1000') * 2,
             [
                 ('file500', 500),
                 ('file1000', 1000),
-                ('file1000sym', lambda tdir: 7 + len(tdir + '/main')),
-                ('otherfile1000sym', lambda tdir: 7 + len(tdir + '/othr')),
+                ('file1000sym', lambda tdir: len(tdir + '/file1000')),
+                ('otherfile1000sym', lambda tdir: len(tdir + '/file1000')),
             ],
             id='not_follow_sym',
         ),
@@ -431,7 +432,7 @@ def test_no_recursive_symlink_loop(aggregator):
 def test_stat_follow_symlinks(aggregator, stat_follow_symlinks, expected_dir_size, expected_file_sizes):
     def flatten_value(value):
         if callable(value):
-            return value(tdir)
+            return value(target_dir)
         return value
 
     with temp_directory() as tdir:
