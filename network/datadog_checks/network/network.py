@@ -6,7 +6,7 @@
 Collects network metrics.
 """
 
-import distutils.spawn
+import shutil
 import re
 import socket
 
@@ -294,7 +294,7 @@ class Network(AgentCheck):
 
         if proc_location != "/proc":
             # If we have `ss`, we're fine with a non-standard `/proc` location
-            if distutils.spawn.find_executable("ss") is None:
+            if shutil.which("ss") is None:
                 self.warning(
                     "Cannot collect connection state: `ss` cannot be found and "
                     "currently with a custom /proc path: %s",
