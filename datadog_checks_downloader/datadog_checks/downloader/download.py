@@ -19,7 +19,7 @@ from packaging.version import parse as parse_version
 from securesystemslib import interface
 from tuf.ngclient import Updater
 
-from .exceptions import (
+from exceptions import (
     DuplicatePackage,
     InconsistentSimpleIndex,
     IncorrectRootLayoutType,
@@ -32,7 +32,7 @@ from .exceptions import (
     RevokedDeveloperOrMachine,
     TargetNotFoundError,
 )
-from .parameters import substitute
+from parameters import substitute
 
 # After we import everything we need, shut off all existing loggers.
 logging.config.dictConfig({'disable_existing_loggers': True, 'version': 1})

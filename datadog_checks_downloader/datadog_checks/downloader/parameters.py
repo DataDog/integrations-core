@@ -15,7 +15,7 @@ import os.path
 
 from packaging.utils import canonicalize_name
 
-from .exceptions import NonDatadogPackage
+from exceptions import NonDatadogPackage
 
 EXCEPTIONS = {'datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader'}
 

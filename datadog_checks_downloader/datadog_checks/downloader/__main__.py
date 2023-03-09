@@ -4,6 +4,6 @@
 
 import sys
 
-from .cli import download
+from cli import download
 
 sys.exit(download())

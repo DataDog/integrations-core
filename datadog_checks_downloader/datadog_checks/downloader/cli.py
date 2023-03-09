@@ -10,8 +10,8 @@ import re
 import sys
 
 # 2nd party.
-from .download import DEFAULT_ROOT_LAYOUT_TYPE, REPOSITORY_URL_PREFIX, ROOT_LAYOUTS, TUFDownloader
-from .exceptions import NonCanonicalVersion, NonDatadogPackage
+from download import DEFAULT_ROOT_LAYOUT_TYPE, REPOSITORY_URL_PREFIX, ROOT_LAYOUTS, TUFDownloader
+from exceptions import NonCanonicalVersion, NonDatadogPackage
 
 # Private module functions.
 
