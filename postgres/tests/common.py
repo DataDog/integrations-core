@@ -21,6 +21,7 @@ from datadog_checks.postgres.version_utils import VersionUtils
 HOST = get_docker_hostname()
 PORT = '5432'
 PORT_REPLICA = '5433'
+PORT_REPLICA2 = '5434'
 USER = 'datadog'
 USER_ADMIN = 'dd_admin'
 PASSWORD = 'datadog'
@@ -156,7 +157,6 @@ def check_activity_metrics(aggregator, tags, hostname=None, count=1):
         aggregator.assert_metric(name, count=1, tags=tags, hostname=hostname)
 
 
-<<<<<<< HEAD
 def check_stat_replication(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 10:
         return
