@@ -421,6 +421,10 @@ class PostgreSql(AgentCheck):
         cursor.close()
 
     def _new_connection(self, dbname):
+        conn_options = (
+            "-c statement_timeout={}".format(self._config.query_timeout)
+            + " -c idle_in_transaction_session_timeout={}".format(self._config.idle_in_transaction_session_timeout)
+        )
         if self._config.host == 'localhost' and self._config.password == '':
             # Use ident method
             connection_string = "user=%s dbname=%s application_name=%s" % (
@@ -428,15 +432,7 @@ class PostgreSql(AgentCheck):
                 dbname,
                 self._config.application_name,
             )
-            if self._config.query_timeout:
-                conn_options = (
-                    "-c statement_timeout={}".format(self._config.query_timeout)
-                    + " -c idle_session_timeout={}".format(self._config.idle_session_timeout)
-                    + " -c idle_in_transaction_session_timeout={}".format(
-                        self._config.idle_in_transaction_session_timeout
-                    )
-                )
-                connection_string += " options='{}'".format(conn_options)
+            connection_string += " options='{}'".format(conn_options)
             conn = psycopg2.connect(connection_string)
         else:
             args = {
@@ -450,7 +446,7 @@ class PostgreSql(AgentCheck):
             if self._config.port:
                 args['port'] = self._config.port
             if self._config.query_timeout:
-                args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
+                args['options'] = conn_options
             if self._config.ssl_cert:
                 args['sslcert'] = self._config.ssl_cert
             if self._config.ssl_root_cert:
