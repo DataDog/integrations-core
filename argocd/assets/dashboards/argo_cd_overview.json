@@ -169,7 +169,7 @@
                                             "aggregator": "max",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:argocd.api_server.go.goroutines{$host,$kube_cluster_name,$kube_namespace}"
+                                            "query": "count:argocd.app_controller.go.goroutines{$host,$kube_cluster_name,$kube_namespace}"
                                         }
                                     ],
                                     "response_format": "scalar"
