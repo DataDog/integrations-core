@@ -51,16 +51,3 @@ services:
     depends_on:
       zookeeper:
         condition: service_healthy
-
-  kafka-init:
-    image: docker.io/bitnami/kafka:${KAFKA_VERSION}
-    container_name: kafka-init
-    hostname: kafka-init
-    command: >
-      sh -c "sleep 10 &&./opt/bitnami/kafka/bin/kafka-topics.sh ${BOOTSTRAP_SERVER_FLAG} --create --topic marvel --if-not-exists --partitions 2 --replication-factor 1 &&
-            ./opt/bitnami/kafka/bin/kafka-topics.sh ${BOOTSTRAP_SERVER_FLAG} --create --topic dc --if-not-exists --partitions 2 --replication-factor 1"
-    depends_on:
-      kafka1:
-        condition: service_started
-      kafka2:
-        condition: service_started
