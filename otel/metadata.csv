@@ -79,3 +79,43 @@ otel.process.runtime.go.mem.lookups,count,15,unit,,Number of pointer lookups per
 otel.process.runtime.go.mem.live_objects,gauge,15,unit,,Number of live objects is the number of cumulative Mallocs - Frees,0,otel,otel runtime go mem live objects,
 otel.process.runtime.go.gc.count,count,15,unit,,Number of completed garbage collection cycles,0,otel,otel runtime go gc count,
 otel.process.runtime.go.gc.pause_total_ns,count,15,nanosecond,,Cumulative nanoseconds in GC stop-the-world pauses since the program started,0,otel,otel runtime go gc pause total ns,
+process.runtime.jvm.memory.usage_after_last_gc,gauge,10,byte,,Measure of memory used as measured after the most recent garbage collection event on this pool,0,otel,usage after last gc
+process.runtime.jvm.classes.loaded,count,10,class,,Number of classes loaded since JVM start,0,otel,classes loaded
+process.runtime.jvm.classes.unloaded,count,10,class,,Number of classes unloaded since JVM start,0,otel,classes unloaded
+process.runtime.jvm.classes.current_loaded,gauge,10,class,,Number of classes currently loaded,0,otel,classes current loaded
+process.runtime.jvm.cpu.utilization,gauge,10,unit,,Recent CPU utilization for the process,0,otel,cpu utilization
+process.runtime.jvm.system.cpu.utilization,gauge,10,unit,,Recent CPU utilization for the whole system,0,otel,system cpu utilization
+process.runtime.jvm.system.cpu.load_1m,gauge,10,unit,,Average CPU load of the whole system for the last minute,0,otel,cpu load 1m
+process.runtime.jvm.buffer.usage,gauge,10,byte,,Measure of memory used by buffers,0,otel,buffer usage
+process.runtime.jvm.buffer.limit,gauge,10,byte,,Measure of total memory capacity of buffers,0,otel,buffer limit
+process.runtime.jvm.buffer.count,gauge,10,buffer,,Number of buffers in the pool,0,otel,buffer count
+process.runtime.jvm.memory.usage,gauge,10,byte,,The total Java heap memory used.,0,otel,heap mem used
+process.runtime.jvm.memory.committed,gauge,10,byte,,The total Java heap memory committed to be used.,0,otel,heap mem committed,
+process.runtime.jvm.memory.init,gauge,10,byte,,The initial Java heap memory allocated.,0,otel,heap mem initial,
+process.runtime.jvm.memory.limit,gauge,10,byte,,The maximum Java heap memory available.,0,otel,heap mem max,
+process.runtime.jvm.memory.usage,gauge,10,byte,,"The total Java non-heap memory used. Non-heap memory is calculated as follows: `Metaspace + CompressedClassSpace + CodeCache`",0,otel,non-heap mem used,
+process.runtime.jvm.memory.committed,gauge,10,byte,,The total Java non-heap memory committed to be used.,0,otel,non-heap mem committed,
+process.runtime.jvm.memory.init,gauge,10,byte,,The initial Java non-heap memory allocated.,0,otel,non-heap mem initial,
+process.runtime.jvm.memory.limit,gauge,10,byte,,The maximum Java non-heap memory available.,0,otel,non-heap mem max,
+process.runtime.jvm.threads.count,count,10,thread,,The number of live threads.,0,otel,thread count,
+process.runtime.jvm.gc.duration,gauge,10,millisecond,,The approximate accumulated garbage collection time elapsed.,0,otel,gc time,
+otel.process.runtime.jvm.memory.usage_after_last_gc,gauge,10,byte,,Measure of memory used as measured after the most recent garbage collection event on this pool,0,otel,otel usage after last gc
+otel.process.runtime.jvm.classes.loaded,count,10,class,,Number of classes loaded since JVM start,0,otel,otel classes loaded
+otel.process.runtime.jvm.classes.unloaded,count,10,class,,Number of classes unloaded since JVM start,0,otel,otel classes unloaded
+otel.process.runtime.jvm.classes.current_loaded,gauge,10,class,,Number of classes currently loaded,0,otel,otel classes current loaded
+otel.process.runtime.jvm.cpu.utilization,gauge,10,unit,,Recent CPU utilization for the process,0,otel,otel cpu utilization
+otel.process.runtime.jvm.system.cpu.utilization,gauge,10,unit,,Recent CPU utilization for the whole system,0,otel,otel system cpu utilization
+otel.process.runtime.jvm.system.cpu.load_1m,gauge,10,unit,,Average CPU load of the whole system for the last minute,0,otel,otel cpu load 1m
+otel.process.runtime.jvm.buffer.usage,gauge,10,byte,,Measure of memory used by buffers,0,otel,otel buffer usage
+otel.process.runtime.jvm.buffer.limit,gauge,10,byte,,Measure of total memory capacity of buffers,0,otel,otel buffer limit
+otel.process.runtime.jvm.buffer.count,gauge,10,buffer,,Number of buffers in the pool,0,otel,otel buffer count
+otel.process.runtime.jvm.memory.usage,gauge,10,byte,,The total Java heap memory used.,0,otel,otel heap mem used
+otel.process.runtime.jvm.memory.committed,gauge,10,byte,,The total Java heap memory committed to be used.,0,otel,otel heap mem committed,
+otel.process.runtime.jvm.memory.init,gauge,10,byte,,The initial Java heap memory allocated.,0,otel,otel heap mem initial,
+otel.process.runtime.jvm.memory.limit,gauge,10,byte,,The maximum Java heap memory available.,0,otel,otel heap mem max,
+otel.process.runtime.jvm.memory.usage,gauge,10,byte,,"The total Java non-heap memory used. Non-heap memory is calculated as follows: `Metaspace + CompressedClassSpace + CodeCache`",0,otel,otel non-heap mem used,
+otel.process.runtime.jvm.memory.committed,gauge,10,byte,,The total Java non-heap memory committed to be used.,0,otel,otel non-heap mem committed,
+otel.process.runtime.jvm.memory.init,gauge,10,byte,,The initial Java non-heap memory allocated.,0,otel,otel non-heap mem initial,
+otel.process.runtime.jvm.memory.limit,gauge,10,byte,,The maximum Java non-heap memory available.,0,otel,otel non-heap mem max,
+otel.process.runtime.jvm.threads.count,count,10,thread,,The number of live threads.,0,otel,otel thread count,
+otel.process.runtime.jvm.gc.duration,gauge,10,millisecond,,The approximate accumulated garbage collection time elapsed.,0,otel,otel gc time,
