@@ -101,12 +101,11 @@ def test_conn_pool_no_leaks(pg_instance):
         for _ in range(500):
             get_many_connections(51, ttl_long)
 
-            rows = get_activity()
-
             attempts_to_verify = 5
             # Loop here to prevent flakiness. Sometimes postgres doesn't immediately terminate backends.
             # The test can be considered successful as long as the backend is eventually terminated.
             for attempt in range(attempts_to_verify):
+                rows = get_activity()
                 server_pids = set(row['pid'] for row in rows)
                 conn_pids = set(db.info.backend_pid for db, _ in pool._conns.values())
                 leaked_rows = list(row for row in rows if row['pid'] in server_pids - conn_pids)
@@ -124,7 +123,7 @@ def test_conn_pool_no_leaks(pg_instance):
         # Now update db connections with short-lived TTLs and expect them to self-prune
         get_many_connections(55, ttl_short)
         pool.prune_connections()
-        attempts_to_verify = 5
+        attempts_to_verify = 10
         for attempt in range(attempts_to_verify):
             leaked_rows = get_activity()
             if attempt < attempts_to_verify - 1:
