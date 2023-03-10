@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.ibm_db2 import IbmDb2Check
+from datadog_checks.dev import run_command
 
 from . import metrics
 from .common import DB2_VERSION
@@ -129,3 +130,21 @@ def test_metadata(instance, datadog_agent, dd_run_check):
     }
 
     datadog_agent.assert_metadata(CHECK_ID, version_metadata)
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_disconnection(aggregator, instance, dd_run_check):
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    # check.check(instance)
+    # _assert_standard(aggregator)
+
+    # Disconnect the database
+    run_command('docker exec ibm_db2 su - db2inst1 -c "db2stop force"', check=True)
+    with pytest.raises(ConnectionError):
+        dd_run_check(check)
+    aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, check.CRITICAL)
+
+    # # Reconnect the database
+    run_command('docker exec ibm_db2 su - db2inst1 -c "db2start"', check=True)
+    check.check(instance)
+    aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, check.OK)
