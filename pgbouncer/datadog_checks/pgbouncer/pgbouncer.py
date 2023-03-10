@@ -25,7 +25,7 @@ class ShouldRestartException(Exception):
 
 class PgBouncer(AgentCheck):
     """Collects metrics from pgbouncer"""
-
+    # test CI
     DB_NAME = 'pgbouncer'
     SERVICE_CHECK_NAME = 'pgbouncer.can_connect'
 
