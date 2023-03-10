@@ -2,9 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+from requests import ConnectionError
 
-from datadog_checks.ibm_db2 import IbmDb2Check
 from datadog_checks.dev import run_command
+from datadog_checks.ibm_db2 import IbmDb2Check
 
 from . import metrics
 from .common import DB2_VERSION
