@@ -36,9 +36,6 @@ class ConfluentKafkaClient(KafkaClient):
         if not self.config._monitor_all_broker_highwatermarks:
             topics_with_consumer_offset = {(topic, partition) for (_, topic, partition) in consumer_offsets}
 
-        # TODO: We are still failing test_oauth_config and test_gssapi tests
-        # since we haven't implemented OAuth/Kerberos support yet,
-        # so the AdminClient is not configured for those tests yet.
         for consumer_group in consumer_offsets.items():
             consumer_config = {
                 "bootstrap.servers": self.config._kafka_connect_str,
