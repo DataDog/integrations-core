@@ -13,7 +13,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client.kafka_python_client import OAuthTokenProvider
 
-from ..common import KAFKA_CONNECT_STR, metrics
+from ..common import KAFKA_CONNECT_STR, LEGACY_CLIENT, metrics
 
 pytestmark = [pytest.mark.unit]
 
@@ -72,12 +72,14 @@ def test_tls_config_ok(check, kafka_instance_tls):
         ),
     ],
 )
+@pytest.mark.skipif(not LEGACY_CLIENT, reason='not implemented yet with confluent-kafka')
 def test_oauth_config(sasl_oauth_token_provider, check, expected_exception):
     instance = {
         'kafka_connect_str': KAFKA_CONNECT_STR,
         'monitor_unlisted_consumer_groups': True,
         'security_protocol': 'SASL_PLAINTEXT',
         'sasl_mechanism': 'OAUTHBEARER',
+        'use_legacy_client': LEGACY_CLIENT,
     }
     instance.update(sasl_oauth_token_provider)
 
