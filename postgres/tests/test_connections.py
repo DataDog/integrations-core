@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import time
 import datetime
+import time
 
 import psycopg2
 
@@ -31,7 +31,7 @@ def test_conn_pool(pg_instance):
     pool.prune_connections()
     assert len(pool._conns) == 0
 
-    db = pool.get_connection('postgres', 999*1000)
+    db = pool.get_connection('postgres', 999 * 1000)
     assert len(pool._conns) == 1
     success = pool.close_all_connections()
     assert success
@@ -46,7 +46,7 @@ def test_conn_pool_no_leaks(pg_instance):
     check = PostgreSql('postgres', {}, [pg_instance])
 
     pool = MultiDatabaseConnectionPool(check._new_connection)
-    ttl_long = 90*1000
+    ttl_long = 90 * 1000
     ttl_short = 1
 
     def get_time():
@@ -56,7 +56,11 @@ def test_conn_pool_no_leaks(pg_instance):
 
     def get_activity():
         with pool.get_connection('postgres', 1).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-            cursor.execute("SELECT pid, datname, usename, state, query_start, state_change FROM pg_stat_activity WHERE usename = 'datadog' AND datname LIKE 'dogs%%' AND query_start > %s", start_time)
+            cursor.execute(
+                "SELECT pid, datname, usename, state, query_start, state_change FROM pg_stat_activity "
+                "WHERE usename = 'datadog' AND datname LIKE 'dogs%%' AND query_start > %s",
+                start_time,
+            )
             return cursor.fetchall()
 
     def get_many_connections(count, ttl):
@@ -80,7 +84,11 @@ def test_conn_pool_no_leaks(pg_instance):
             dbname = 'dogs_{}'.format(i)
             db, deadline = pool._conns[dbname]
             approximate_deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_long)
-            assert approximate_deadline - datetime.timedelta(seconds=1) < deadline < approximate_deadline + datetime.timedelta(seconds=1)
+            assert (
+                approximate_deadline - datetime.timedelta(seconds=1)
+                < deadline
+                < approximate_deadline + datetime.timedelta(seconds=1)
+            )
             assert not db.closed
             assert db.status == psycopg2.extensions.STATUS_READY
         # Check that those pooled connections do exist on the database
@@ -90,7 +98,7 @@ def test_conn_pool_no_leaks(pg_instance):
         assert all(row['state'] == 'idle' for row in rows)
 
         # Repeat this process many times and expect that only one connection is created per database
-        for i in range(500):
+        for _ in range(500):
             get_many_connections(51, ttl_long)
 
             rows = get_activity()
@@ -104,7 +112,7 @@ def test_conn_pool_no_leaks(pg_instance):
                 leaked_rows = list(row for row in rows if row['pid'] in server_pids - conn_pids)
                 if not leaked_rows:
                     break
-                if attempt < attempts_to_verify-1:
+                if attempt < attempts_to_verify - 1:
                     time.sleep(1)
                     continue
                 assert len(leaked_rows) == 0, 'Found leaked rows on the server not in the connection pool'
@@ -112,18 +120,18 @@ def test_conn_pool_no_leaks(pg_instance):
             assert len(set(row['datname'] for row in rows)) == 51
             assert len(rows) == 51, 'Possible leaked connections'
             assert all(row['state'] == 'idle' for row in rows)
-        
+
         # Now update db connections with short-lived TTLs and expect them to self-prune
         get_many_connections(55, ttl_short)
         pool.prune_connections()
         attempts_to_verify = 5
         for attempt in range(attempts_to_verify):
             leaked_rows = get_activity()
-            if attempt < attempts_to_verify-1:
+            if attempt < attempts_to_verify - 1:
                 time.sleep(1)
                 continue
             assert len(leaked_rows) == 0, 'Found leaked rows remaining after TTL was updated to short TTL'
-        
+
         # Final check that the server contains no leaked connections still open
         rows = get_activity()
         assert len(rows) == 0

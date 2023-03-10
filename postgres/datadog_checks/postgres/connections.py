@@ -29,9 +29,8 @@ class MultiDatabaseConnectionPool(object):
         connect_sig = inspect.signature(connect_fn)
         if len(connect_sig.parameters) != 1:
             raise ValueError(
-                "Invalid signature for the connection function. A single parameter for dbname is expected, got signature: {}".format(
-                    connect_sig
-                )
+                "Invalid signature for the connection function. "
+                "A single parameter for dbname is expected, got signature: {}".format(connect_sig)
             )
         self.connect_fn = connect_fn
 
@@ -80,7 +79,7 @@ class MultiDatabaseConnectionPool(object):
         db, _ = self._conns.pop(dbname, ConnectionWithTTL(None, None))
         if db is not None:
             try:
-                db.close()                    
+                db.close()
             except Exception:
                 self._log.exception("failed to close DB connection for db=%s", dbname)
                 return False
