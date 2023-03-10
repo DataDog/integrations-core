@@ -6,8 +6,8 @@ import os
 import time
 
 import pytest
+from confluent_kafka.admin import AdminClient
 from datadog_test_libs.utils.mock_dns import mock_local
-from kafka import KafkaConsumer
 from packaging.version import parse as parse_version
 
 from datadog_checks.dev import WaitFor, docker_run
@@ -101,8 +101,13 @@ def _get_bootstrap_server_flag():
 
 
 def find_topics():
-    consumer = KafkaConsumer(bootstrap_servers=KAFKA_CONNECT_STR, request_timeout_ms=1000)
-    return consumer.topics() == set(TOPICS)
+    client = AdminClient(
+        {
+            "bootstrap.servers": KAFKA_CONNECT_STR,
+            "socket.timeout.ms": 1000,
+        }
+    )
+    return set(client.list_topics().topics.keys()) == set(TOPICS)
 
 
 def initialize_topics():
