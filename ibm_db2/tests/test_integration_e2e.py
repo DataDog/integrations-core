@@ -26,20 +26,21 @@ def test_e2e(dd_agent_check, instance):
     _assert_standard(aggregator)
 
 
-@pytest.mark.e2e
-def test_disconnection(dd_agent_check, instance):
-    aggregator = dd_agent_check(instance, rate=True)
-
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_disconnection(aggregator, instance):
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    check.check(instance)
     _assert_standard(aggregator)
 
     # Disconnect the database
     run_command('docker exec ibm_db2 su - db2inst1 -c "db2stop force"', check=True)
-    aggregator = dd_agent_check(instance, rate=True)
+    check.check(instance)
     aggregator.assert_service_check('ibm_db2.can_connect', AgentCheck.CRITICAL)
 
     # Reconnect the database
     run_command('docker exec ibm_db2 su - db2inst1 -c "db2start"', check=True)
-    aggregator = dd_agent_check(instance, rate=True)
+    check.check(instance)
 
     _assert_standard(aggregator)
 
