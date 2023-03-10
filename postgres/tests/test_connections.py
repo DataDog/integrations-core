@@ -15,7 +15,7 @@ def test_conn_pool(pg_instance):
     pool = MultiDatabaseConnectionPool(check._new_connection)
     db = pool.get_connection('postgres', 1)
     pool.prune_connections()
-    assert len(pool.connections) == 1
+    assert len(pool._connections) == 1
 
     with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
         cursor.execute("select 1")
@@ -24,4 +24,4 @@ def test_conn_pool(pg_instance):
 
     time.sleep(1)
     pool.prune_connections()
-    assert len(pool.connections) == 0
+    assert len(pool._connections) == 0
