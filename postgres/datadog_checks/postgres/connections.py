@@ -80,7 +80,7 @@ class MultiDatabaseConnectionPool(object):
         db, _ = self._conns.pop(dbname, ConnectionWithTTL(None, None))
         if db is not None:
             try:
-                db.close()
+                db.close()                    
             except Exception:
                 self._log.exception("failed to close DB connection for db=%s", dbname)
                 return False

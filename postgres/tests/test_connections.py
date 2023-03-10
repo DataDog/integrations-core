@@ -56,7 +56,7 @@ def test_conn_pool_no_leaks(pg_instance):
 
     def get_activity():
         with pool.get_connection('postgres', 1).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-            cursor.execute("SELECT datname, usename, state FROM pg_stat_activity WHERE usename = 'datadog' AND datname LIKE 'dogs%%' AND query_start > %s", start_time)
+            cursor.execute("SELECT pid, datname, usename, state, query_start, state_change FROM pg_stat_activity WHERE usename = 'datadog' AND datname LIKE 'dogs%%' AND query_start > %s", start_time)
             return cursor.fetchall()
 
     def get_many_connections(count, ttl):
@@ -90,16 +90,43 @@ def test_conn_pool_no_leaks(pg_instance):
         assert all(row['state'] == 'idle' for row in rows)
 
         # Repeat this process many times and expect that only one connection is created per database
-        for i in range(100):
+        for i in range(500):
             get_many_connections(51, ttl_long)
 
             rows = get_activity()
+
+            attempts_to_verify = 5
+            # Loop here to prevent flakiness. Sometimes postgres doesn't immediately terminate backends.
+            # The test can be considered successful as long as the backend is eventually terminated.
+            for attempt in range(attempts_to_verify):
+                server_pids = set(row['pid'] for row in rows)
+                conn_pids = set(db.info.backend_pid for db, _ in pool._conns.values())
+                leaked_rows = list(row for row in rows if row['pid'] in server_pids - conn_pids)
+                if not leaked_rows:
+                    break
+                if attempt < attempts_to_verify-1:
+                    time.sleep(1)
+                    continue
+                assert len(leaked_rows) == 0, 'Found leaked rows on the server not in the connection pool'
+
             assert len(set(row['datname'] for row in rows)) == 51
-            assert len(rows) == 51, 'Possible leaked connections on iteration {}!'.format(i)
+            assert len(rows) == 51, 'Possible leaked connections'
             assert all(row['state'] == 'idle' for row in rows)
         
         # Now update db connections with short-lived TTLs and expect them to self-prune
-        # TODO
+        get_many_connections(55, ttl_short)
+        pool.prune_connections()
+        attempts_to_verify = 5
+        for attempt in range(attempts_to_verify):
+            leaked_rows = get_activity()
+            if attempt < attempts_to_verify-1:
+                time.sleep(1)
+                continue
+            assert len(leaked_rows) == 0, 'Found leaked rows remaining after TTL was updated to short TTL'
+        
+        # Final check that the server contains no leaked connections still open
+        rows = get_activity()
+        assert len(rows) == 0
 
     finally:
         success = pool.close_all_connections()
