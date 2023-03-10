@@ -69,9 +69,12 @@ class MultiDatabaseConnectionPool(object):
         #     sorted([(dbname, db) for dbname, db in self._conns.items()])
 
     def close_all_connections(self):
+        success = True
         with self._mu:
             for dbname in list(self._conns.keys()):
-                self._terminate_connection_unsafe(dbname)
+                if not self._terminate_connection_unsafe(dbname):
+                    success = False
+        return success
 
     def _terminate_connection_unsafe(self, dbname: str):
         db, _ = self._conns.pop(dbname, ConnectionWithTTL(None, None))
@@ -80,3 +83,5 @@ class MultiDatabaseConnectionPool(object):
                 db.close()
             except Exception:
                 self._log.exception("failed to close DB connection for db=%s", dbname)
+                return False
+        return True
