@@ -196,7 +196,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
             job_name="query-samples",
-            shutdown_callback=shutdown_callback,
+            shutdown_callback=shutdown_cb,
         )
         self._check = check
         self._config = config
