@@ -56,7 +56,7 @@ def test_conn_pool_no_leaks(pg_instance):
 
     def get_activity():
         with pool.get_connection('postgres', 1).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-            cursor.execute("SELECT datname, usename, state FROM pg_stat_activity WHERE usename = 'datadog' AND datname != 'postgres' AND query_start > %s", start_time)
+            cursor.execute("SELECT datname, usename, state FROM pg_stat_activity WHERE usename = 'datadog' AND datname LIKE 'dogs%%' AND query_start > %s", start_time)
             return cursor.fetchall()
 
     def get_many_connections(count, ttl):
@@ -91,13 +91,12 @@ def test_conn_pool_no_leaks(pg_instance):
 
         # Repeat this process many times and expect that only one connection is created per database
         for i in range(100):
-            get_many_connections(50, ttl_long)
+            get_many_connections(51, ttl_long)
 
-        time.sleep(2)  # postgres needs some time to terminate PIDs for closed connections
-        rows = get_activity()
-        assert len(rows) == 50, 'Leaked connections!'
-        assert len(set(row['datname'] for row in rows)) == 50
-        assert all(row['state'] == 'idle' for row in rows)
+            rows = get_activity()
+            assert len(set(row['datname'] for row in rows)) == 51
+            assert len(rows) == 51, 'Possible leaked connections on iteration {}!'.format(i)
+            assert all(row['state'] == 'idle' for row in rows)
         
         # Now update db connections with short-lived TTLs and expect them to self-prune
         # TODO
@@ -108,3 +107,11 @@ def test_conn_pool_no_leaks(pg_instance):
         assert success
         assert len(pool._conns) == 0
 
+
+def test_pg_terminated_connection_is_safe():
+    """
+    Tests that the connection pool propery handles the case where a connection has been
+    terminated by the server (i.e. the client-side state is stale)
+    """
+    # TODO
+    pass

@@ -78,7 +78,7 @@ class MultiDatabaseConnectionPool(object):
 
     def _terminate_connection_unsafe(self, dbname: str):
         db, _ = self._conns.pop(dbname, ConnectionWithTTL(None, None))
-        if db is not None and not db.closed:
+        if db is not None:
             try:
                 db.close()
             except Exception:
