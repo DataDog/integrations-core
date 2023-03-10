@@ -36,14 +36,6 @@ class ConfluentKafkaClient(KafkaClient):
         if not self.config._monitor_all_broker_highwatermarks:
             topics_with_consumer_offset = {(topic, partition) for (_, topic, partition) in consumer_offsets}
 
-        # TODO: This is only to keep the same functionality as the original implementation,
-        # since the kafka-python version needed to get the list of brokers to get the highwater offsets.
-        # However, we don't need to do this in the Confluent implementation anymore,
-        # since there's a specific function get_watermark_offsets() that calculates the offsets.
-        # We still need to raise exceptions if the brokers are not fetched, since the tests assert this.
-        if not self.kafka_client.list_topics(timeout=1).brokers:
-            raise Exception()
-
         # TODO: We are still failing test_oauth_config and test_gssapi tests
         # since we haven't implemented OAuth/Kerberos support yet,
         # so the AdminClient is not configured for those tests yet.

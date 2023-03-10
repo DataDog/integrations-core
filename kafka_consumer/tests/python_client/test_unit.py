@@ -182,14 +182,6 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, check, kafka_inst
             id="Valid str kafka_connect_str",
         ),
         pytest.param(
-            {'kafka_connect_str': 'invalid'},
-            pytest.raises(Exception),
-            'ConfigurationError: Cannot fetch consumer offsets because no consumer_groups are specified and '
-            'monitor_unlisted_consumer_groups is False',
-            0,
-            id="Invalid str kafka_connect_str",
-        ),
-        pytest.param(
             {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {}, 'monitor_unlisted_consumer_groups': True},
             does_not_raise(),
             '',
@@ -226,6 +218,43 @@ def test_config(dd_run_check, check, instance, aggregator, expected_exception, e
 
     for m in metrics:
         aggregator.assert_metric(m, count=metric_count)
+
+    assert exception_msg in caplog.text
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.skipif(not LEGACY_CLIENT, reason='The following condition only occurs in kafka-python implementation')
+def test_legacy_invalid_connect_str(dd_run_check, check, aggregator, caplog):
+    caplog.set_level(logging.DEBUG)
+    instance = {'kafka_connect_str': 'invalid'}
+    with pytest.raises(Exception):
+        dd_run_check(check(instance))
+
+    for m in metrics:
+        aggregator.assert_metric(m, count=0)
+
+    exception_msg = (
+        'ConfigurationError: Cannot fetch consumer offsets because no consumer_groups are specified and '
+        'monitor_unlisted_consumer_groups is False'
+    )
+
+    assert exception_msg in caplog.text
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.skipif(LEGACY_CLIENT, reason='The following condition only occurs in confluent-kafka implementation')
+def test_invalid_connect_str(dd_run_check, check, aggregator, caplog):
+    caplog.set_level(logging.DEBUG)
+    instance = {'kafka_connect_str': 'invalid'}
+    dd_run_check(check(instance))
+
+    for m in metrics:
+        aggregator.assert_metric(m, count=0)
+
+    exception_msg = (
+        'ConfigurationError: Cannot fetch consumer offsets because no consumer_groups are specified and '
+        'monitor_unlisted_consumer_groups is False'
+    )
 
     assert exception_msg in caplog.text
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
