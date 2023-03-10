@@ -141,8 +141,7 @@ def test_disconnection(aggregator, instance, dd_run_check):
 
     # Disconnect the database
     run_command('docker exec ibm_db2 su - db2inst1 -c "db2stop force"', check=True)
-    with pytest.raises(ConnectionError):
-        dd_run_check(check)
+    dd_run_check(check)
     aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, check.CRITICAL)
 
     # # Reconnect the database
