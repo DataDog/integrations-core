@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import time
+
 import psycopg2
 
 from datadog_checks.postgres import PostgreSql
@@ -24,4 +25,3 @@ def test_conn_pool(pg_instance):
     time.sleep(1)
     pool.prune_connections()
     assert len(pool.connections) == 0
-    

@@ -29,6 +29,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
 from .util import DatabaseConfigurationError, warning_with_tags
@@ -179,6 +180,13 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
+
+        self._conn_pool = MultiDatabaseConnectionPool(check._new_connection)
+
+        def shutdown_cb():
+            self._conn_pool.close_all_connections()
+            return shutdown_callback()
+
         super(PostgresStatementSamples, self).__init__(
             check,
             rate_limit=1 / collection_interval,
@@ -192,6 +200,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
         self._check = check
         self._config = config
+        self._conn_ttl_ms = 15 * 1000  # TODO: make this a config option
         self._tags_no_db = None
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
@@ -253,7 +262,9 @@ class PostgresStatementSamples(DBMAsyncJob):
         query = PG_ACTIVE_CONNECTIONS_QUERY.format(
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
-        with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
+            cursor_factory=psycopg2.extras.DictCursor
+        ) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
@@ -286,7 +297,9 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
         )
-        with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
+            cursor_factory=psycopg2.extras.DictCursor
+        ) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
@@ -303,7 +316,9 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
-        with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
+            cursor_factory=psycopg2.extras.DictCursor
+        ) as cursor:
             cursor.execute(
                 "select * from {pg_stat_activity_view} LIMIT 0".format(
                     pg_stat_activity_view=self._config.pg_stat_activity_view
@@ -561,7 +576,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
-        with self._check._get_db(dbname).cursor() as cursor:
+        with self._conn_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms).cursor() as cursor:
             self._log.debug("Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement)
             cursor.execute(
                 """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
