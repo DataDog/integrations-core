@@ -37,18 +37,18 @@ class MultiDatabaseConnectionPool(object):
 
     def get_connection(self, dbname: str, ttl_ms: int):
         self.prune_connections()
-        # with self.mu:
-        db, _ = self.connections.pop(dbname, ConnectionWithTTL(None, None))
-        if db is None or db.closed:
-            db = self.connect_fn(dbname)
+        with self.mu:
+            db, _ = self.connections.pop(dbname, ConnectionWithTTL(None, None))
+            if db is None or db.closed:
+                db = self.connect_fn(dbname)
 
-        if db.status != psycopg2.extensions.STATUS_READY:
-            # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
-            db.rollback()
+            if db.status != psycopg2.extensions.STATUS_READY:
+                # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
+                db.rollback()
 
-        deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
-        self.connections[dbname] = ConnectionWithTTL(db, deadline)
-        return db
+            deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
+            self.connections[dbname] = ConnectionWithTTL(db, deadline)
+            return db
 
     def prune_connections(self):
         """
@@ -58,20 +58,20 @@ class MultiDatabaseConnectionPool(object):
         ttl 1000ms, but the query it's running takes 5000ms, this function will still try to close
         the connection mid-query.
         """
-        # with self.mu:
-        now = datetime.datetime.now()
-        for dbname, conn in list(self.connections.items()):
-            if conn.deadline < now:
-                self._terminate_connection_unsafe(dbname)
+        with self.mu:
+            now = datetime.datetime.now()
+            for dbname, conn in list(self.connections.items()):
+                if conn.deadline < now:
+                    self._terminate_connection_unsafe(dbname)
 
         # TODO: Prune max connections
         # if self.max_connections > 0 and len(self.connections) > self.max_connections:
         #     sorted([(dbname, db) for dbname, db in self.connections.items()])
 
     def close_all_connections(self):
-        # with self.mu:
-        for dbname in list(self.connections.keys()):
-            self._terminate_connection_unsafe(dbname)
+        with self.mu:
+            for dbname in list(self.connections.keys()):
+                self._terminate_connection_unsafe(dbname)
 
     def _terminate_connection_unsafe(self, dbname: str):
         db, _ = self.connections.pop(dbname, ConnectionWithTTL(None, None))
