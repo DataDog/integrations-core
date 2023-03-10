@@ -7,10 +7,6 @@ import psycopg2
 import pytest
 
 from .common import (
-    DB_NAME,
-    HOST,
-    PASSWORD,
-    USER,
     assert_metric_at_least,
     check_bgw_metrics,
     check_common_metrics,
