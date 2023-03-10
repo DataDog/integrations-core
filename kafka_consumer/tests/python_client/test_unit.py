@@ -17,7 +17,7 @@ from ..common import KAFKA_CONNECT_STR, LEGACY_CLIENT, metrics
 
 pytestmark = [pytest.mark.unit]
 
-
+@pytest.mark.skipif(not LEGACY_CLIENT, reason='not implemented yet with confluent-kafka')
 def test_gssapi(kafka_instance, dd_run_check, check):
     instance = copy.deepcopy(kafka_instance)
     instance['sasl_mechanism'] = 'GSSAPI'
