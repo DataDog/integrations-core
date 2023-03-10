@@ -21,7 +21,21 @@ class MultiDatabaseConnectionPool(object):
     TTL.
     """
 
+    class Stats(object):
+        def __init__(self):
+            self.connection_opened = 0
+            self.connection_pruned = 0
+            self.connection_closed = 0
+            self.connection_closed_failed = 0
+
+        def __repr__(self):
+            return str(self.__dict__)
+
+        def reset(self):
+            self.__init__()
+
     def __init__(self, connect_fn, max_connections=-1):
+        self._stats = self.Stats()
         self._mu = threading.Lock()
         self._conns = dict()
         self._max_connections = max_connections
@@ -39,6 +53,7 @@ class MultiDatabaseConnectionPool(object):
         with self._mu:
             db, _ = self._conns.pop(dbname, ConnectionWithTTL(None, None))
             if db is None or db.closed:
+                self._stats.connection_opened += 1
                 db = self.connect_fn(dbname)
 
             if db.status != psycopg2.extensions.STATUS_READY:
@@ -61,6 +76,7 @@ class MultiDatabaseConnectionPool(object):
             now = datetime.datetime.now()
             for dbname, conn in list(self._conns.items()):
                 if conn.deadline < now:
+                    self._stats.connection_pruned += 1
                     self._terminate_connection_unsafe(dbname)
 
         # TODO: Prune max connections
@@ -79,8 +95,10 @@ class MultiDatabaseConnectionPool(object):
         db, _ = self._conns.pop(dbname, ConnectionWithTTL(None, None))
         if db is not None:
             try:
+                self._stats.connection_closed += 1
                 db.close()
             except Exception:
+                self._stats.connection_closed_failed += 1
                 self._log.exception("failed to close DB connection for db=%s", dbname)
                 return False
         return True
