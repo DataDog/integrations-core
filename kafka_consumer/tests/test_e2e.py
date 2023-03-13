@@ -2,8 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
-from ..common import assert_check_kafka
+from tests.common import assert_check_kafka
 
 pytestmark = [pytest.mark.e2e]
 
