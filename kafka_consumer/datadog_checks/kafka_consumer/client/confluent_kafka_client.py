@@ -18,7 +18,7 @@ class ConfluentKafkaClient(KafkaClient):
         if self._kafka_client is None:
             config = {
                 "bootstrap.servers": self.config._kafka_connect_str,
-                "socket.timeout.ms": self.config._request_timeout * 1000,
+                "socket.timeout.ms": self.config._request_timeout_ms,
                 "client.id": "dd-agent",
                 "security.protocol": self.config._security_protocol,
             }
