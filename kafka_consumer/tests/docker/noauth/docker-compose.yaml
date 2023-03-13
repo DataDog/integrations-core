@@ -3,6 +3,8 @@ version: '3.9'
 services:
   zookeeper:
     image: docker.io/bitnami/zookeeper:${ZK_VERSION}
+    container_name: zookeeper
+    hostname: zookeeper
     ports:
       - 2181:2181
     environment:
@@ -16,6 +18,8 @@ services:
 
   kafka1:
     image: docker.io/bitnami/kafka:${KAFKA_VERSION}
+    container_name: kafka1
+    hostname: kafka1
     ports:
       - 9092:9092
     environment:
@@ -34,6 +38,8 @@ services:
     image: docker.io/bitnami/kafka:${KAFKA_VERSION}
     ports:
       - 9093:9093
+    container_name: kafka2
+    hostname: kafka2
     environment:
       KAFKA_CFG_BROKER_ID: 2
       KAFKA_CFG_ZOOKEEPER_CONNECT: "zookeeper:2181"
@@ -48,6 +54,8 @@ services:
 
   kafka-init:
     image: docker.io/bitnami/kafka:${KAFKA_VERSION}
+    container_name: kafka-init
+    hostname: kafka-init
     command: >
       sh -c "sleep 10 &&./opt/bitnami/kafka/bin/kafka-topics.sh ${BOOTSTRAP_SERVER_FLAG} --create --topic marvel --if-not-exists --partitions 2 --replication-factor 1 &&
             ./opt/bitnami/kafka/bin/kafka-topics.sh ${BOOTSTRAP_SERVER_FLAG} --create --topic dc --if-not-exists --partitions 2 --replication-factor 1"
