@@ -52,4 +52,3 @@ class GenericKafkaClient(KafkaClient):
         if self.use_legacy_client:
             return self.python_kafka_client.get_consumer_offsets_dict()
         return self.confluent_kafka_client.get_consumer_offsets_dict()
-
