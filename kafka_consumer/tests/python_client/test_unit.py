@@ -13,11 +13,12 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client.kafka_python_client import OAuthTokenProvider
 
-from ..common import KAFKA_CONNECT_STR, metrics
+from ..common import KAFKA_CONNECT_STR, LEGACY_CLIENT, metrics
 
 pytestmark = [pytest.mark.unit]
 
 
+@pytest.mark.skipif(not LEGACY_CLIENT, reason='not implemented yet with confluent-kafka')
 def test_gssapi(kafka_instance, dd_run_check, check):
     instance = copy.deepcopy(kafka_instance)
     instance['sasl_mechanism'] = 'GSSAPI'
@@ -72,12 +73,14 @@ def test_tls_config_ok(check, kafka_instance_tls):
         ),
     ],
 )
+@pytest.mark.skipif(not LEGACY_CLIENT, reason='not implemented yet with confluent-kafka')
 def test_oauth_config(sasl_oauth_token_provider, check, expected_exception):
     instance = {
         'kafka_connect_str': KAFKA_CONNECT_STR,
         'monitor_unlisted_consumer_groups': True,
         'security_protocol': 'SASL_PLAINTEXT',
         'sasl_mechanism': 'OAUTHBEARER',
+        'use_legacy_client': LEGACY_CLIENT,
     }
     instance.update(sasl_oauth_token_provider)
 
@@ -179,14 +182,6 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, check, kafka_inst
             id="Valid str kafka_connect_str",
         ),
         pytest.param(
-            {'kafka_connect_str': 'invalid'},
-            pytest.raises(Exception),
-            'ConfigurationError: Cannot fetch consumer offsets because no consumer_groups are specified and '
-            'monitor_unlisted_consumer_groups is False',
-            0,
-            id="Invalid str kafka_connect_str",
-        ),
-        pytest.param(
             {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {}, 'monitor_unlisted_consumer_groups': True},
             does_not_raise(),
             '',
@@ -223,6 +218,43 @@ def test_config(dd_run_check, check, instance, aggregator, expected_exception, e
 
     for m in metrics:
         aggregator.assert_metric(m, count=metric_count)
+
+    assert exception_msg in caplog.text
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.skipif(not LEGACY_CLIENT, reason='The kafka-python implementation raises an exception')
+def test_legacy_invalid_connect_str(dd_run_check, check, aggregator, caplog):
+    caplog.set_level(logging.DEBUG)
+    instance = {'kafka_connect_str': 'invalid', 'use_legacy_client': True}
+    with pytest.raises(Exception):
+        dd_run_check(check(instance))
+
+    for m in metrics:
+        aggregator.assert_metric(m, count=0)
+
+    exception_msg = (
+        'ConfigurationError: Cannot fetch consumer offsets because no consumer_groups are specified and '
+        'monitor_unlisted_consumer_groups is False'
+    )
+
+    assert exception_msg in caplog.text
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.skipif(LEGACY_CLIENT, reason='The following condition only occurs in confluent-kafka implementation')
+def test_invalid_connect_str(dd_run_check, check, aggregator, caplog):
+    caplog.set_level(logging.DEBUG)
+    instance = {'kafka_connect_str': 'invalid', 'use_legacy_client': False}
+    dd_run_check(check(instance))
+
+    for m in metrics:
+        aggregator.assert_metric(m, count=0)
+
+    exception_msg = (
+        'ConfigurationError: Cannot fetch consumer offsets because no consumer_groups are specified and '
+        'monitor_unlisted_consumer_groups is False'
+    )
 
     assert exception_msg in caplog.text
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

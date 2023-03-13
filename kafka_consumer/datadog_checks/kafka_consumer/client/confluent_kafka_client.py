@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from confluent_kafka import ConsumerGroupTopicPartitions, KafkaException, TopicPartition
+from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
 from confluent_kafka.admin import AdminClient
 from six import string_types
 
@@ -29,11 +29,39 @@ class ConfluentKafkaClient(KafkaClient):
     def get_consumer_offsets_dict(self):
         return self._consumer_offsets
 
-    def get_highwater_offsets(self):
-        raise NotImplementedError
+    def get_highwater_offsets(self, consumer_offsets):
+        # TODO: Remove broker_requests_batch_size as config after
+        # kafka-python is removed if we don't need to batch requests in Confluent
+        topics_with_consumer_offset = {}
+        if not self.config._monitor_all_broker_highwatermarks:
+            topics_with_consumer_offset = {(topic, partition) for (_, topic, partition) in consumer_offsets}
+
+        for consumer_group in consumer_offsets.items():
+            consumer_config = {
+                "bootstrap.servers": self.config._kafka_connect_str,
+                "group.id": consumer_group,
+            }
+            consumer = Consumer(consumer_config)
+            # TODO: Update config._request_timeout_ms to config._request_timeout
+            topics = consumer.list_topics(timeout=self.config._request_timeout_ms / 1000)
+
+            for topic in topics.topics:
+                topic_partitions = [
+                    TopicPartition(topic, partition) for partition in list(topics.topics[topic].partitions.keys())
+                ]
+
+                for topic_partition in topic_partitions:
+                    partition = topic_partition.partition
+                    if topic not in KAFKA_INTERNAL_TOPICS and (
+                        self.config._monitor_all_broker_highwatermarks
+                        or (topic, partition) in topics_with_consumer_offset
+                    ):
+                        _, high_offset = consumer.get_watermark_offsets(topic_partition)
+
+                        self._highwater_offsets[(topic, partition)] = high_offset
 
     def get_highwater_offsets_dict(self):
-        raise NotImplementedError
+        return self._highwater_offsets
 
     def reset_offsets(self):
         self._consumer_offsets = {}
@@ -42,7 +70,7 @@ class ConfluentKafkaClient(KafkaClient):
     def get_partitions_for_topic(self, topic):
 
         try:
-            cluster_metadata = self.kafka_client.list_topics(topic)
+            cluster_metadata = self.kafka_client.list_topics(topic, timeout=self.config._request_timeout_ms / 1000)
             topic_metadata = cluster_metadata.topics[topic]
             partitions = list(topic_metadata.partitions.keys())
             return partitions
@@ -67,7 +95,7 @@ class ConfluentKafkaClient(KafkaClient):
                 self.log.debug('MONITOR UNLISTED FUTURES RESULT: %s', list_consumer_groups_result)
                 for valid_consumer_group in list_consumer_groups_result.valid:
                     consumer_group = valid_consumer_group.group_id
-                    topics = self.kafka_client.list_topics()
+                    topics = self.kafka_client.list_topics(timeout=self.config._request_timeout_ms / 1000)
                     consumer_groups.append(consumer_group)
             except Exception as e:
                 self.log.error("Failed to collect consumer offsets %s", e)
@@ -82,7 +110,7 @@ class ConfluentKafkaClient(KafkaClient):
                 "monitor_unlisted_consumer_groups is %s." % self.config._monitor_unlisted_consumer_groups
             )
 
-        topics = self.kafka_client.list_topics()
+        topics = self.kafka_client.list_topics(timeout=self.config._request_timeout_ms / 1000)
 
         for consumer_group in consumer_groups:
             self.log.debug('CONSUMER GROUP: %s', consumer_group)
