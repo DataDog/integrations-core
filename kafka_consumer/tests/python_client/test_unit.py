@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import logging
-from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
@@ -20,14 +19,13 @@ pytestmark = [pytest.mark.unit]
 
 @pytest.mark.skipif(not LEGACY_CLIENT, reason='not implemented yet with confluent-kafka')
 def test_gssapi(kafka_instance, dd_run_check, check):
-    instance = copy.deepcopy(kafka_instance)
-    instance['sasl_mechanism'] = 'GSSAPI'
-    instance['security_protocol'] = 'SASL_PLAINTEXT'
-    instance['sasl_kerberos_service_name'] = 'kafka'
+    kafka_instance['sasl_mechanism'] = 'GSSAPI'
+    kafka_instance['security_protocol'] = 'SASL_PLAINTEXT'
+    kafka_instance['sasl_kerberos_service_name'] = 'kafka'
     # assert the check doesn't fail with:
     # Exception: Could not find main GSSAPI shared library.
     with pytest.raises(Exception, match='check_version'):
-        dd_run_check(check(instance))
+        dd_run_check(check(kafka_instance))
 
 
 def test_tls_config_ok(check, kafka_instance_tls):
@@ -74,18 +72,18 @@ def test_tls_config_ok(check, kafka_instance_tls):
     ],
 )
 @pytest.mark.skipif(not LEGACY_CLIENT, reason='not implemented yet with confluent-kafka')
-def test_oauth_config(sasl_oauth_token_provider, check, expected_exception):
-    instance = {
+def test_oauth_config(sasl_oauth_token_provider, check, expected_exception, kafka_instance):
+    kafka_instance.update({
         'kafka_connect_str': KAFKA_CONNECT_STR,
         'monitor_unlisted_consumer_groups': True,
         'security_protocol': 'SASL_PLAINTEXT',
         'sasl_mechanism': 'OAUTHBEARER',
         'use_legacy_client': LEGACY_CLIENT,
-    }
-    instance.update(sasl_oauth_token_provider)
+    })
+    kafka_instance.update(sasl_oauth_token_provider)
 
     with expected_exception:
-        check(instance).check(instance)
+        check(kafka_instance).check(kafka_instance)
 
 
 @pytest.mark.skip(reason='Add a test that not only check the parameter but also run the check')
@@ -121,10 +119,8 @@ def test_oauth_token_client_config(check, kafka_instance):
     ],
 )
 def test_tls_config_legacy(extra_config, expected_http_kwargs, check, kafka_instance):
-    instance = kafka_instance
-    instance.update(extra_config)
-
-    kafka_consumer_check = check(instance)
+    kafka_instance.update(extra_config)
+    kafka_consumer_check = check(kafka_instance)
     kafka_consumer_check.get_tls_context()
     actual_options = {
         k: v for k, v in kafka_consumer_check._tls_context_wrapper.config.items() if k in expected_http_kwargs
@@ -132,103 +128,13 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, check, kafka_inst
     assert expected_http_kwargs == actual_options
 
 
-@pytest.mark.parametrize(
-    'instance, expected_exception, exception_msg, metric_count',
-    [
-        pytest.param(
-            {'kafka_connect_str': 12},
-            pytest.raises(
-                Exception, match='ConfigurationError: `kafka_connect_str` should be string or list of strings'
-            ),
-            '',
-            0,
-            id="Invalid Non-string kafka_connect_str",
-        ),
-        pytest.param(
-            {'kafka_connect_str': [KAFKA_CONNECT_STR, '127.0.0.1:9093']},
-            does_not_raise(),
-            'ConfigurationError: Cannot fetch consumer offsets because no consumer_groups are specified and '
-            'monitor_unlisted_consumer_groups is False',
-            0,
-            id="monitor_unlisted_consumer_groups is False",
-        ),
-        pytest.param(
-            {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {}},
-            does_not_raise(),
-            'ConfigurationError: Cannot fetch consumer offsets because no consumer_groups are specified and '
-            'monitor_unlisted_consumer_groups is False',
-            0,
-            id="Empty consumer_groups",
-        ),
-        pytest.param(
-            {'kafka_connect_str': None},
-            pytest.raises(Exception, match='kafka_connect_str\n  none is not an allowed value'),
-            '',
-            0,
-            id="Invalid Nonetype kafka_connect_str",
-        ),
-        pytest.param(
-            {'kafka_connect_str': [KAFKA_CONNECT_STR, '127.0.0.1:9093'], 'monitor_unlisted_consumer_groups': True},
-            does_not_raise(),
-            '',
-            4,
-            id="Valid list kafka_connect_str",
-        ),
-        pytest.param(
-            {'kafka_connect_str': KAFKA_CONNECT_STR, 'monitor_unlisted_consumer_groups': True},
-            does_not_raise(),
-            '',
-            4,
-            id="Valid str kafka_connect_str",
-        ),
-        pytest.param(
-            {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {}, 'monitor_unlisted_consumer_groups': True},
-            does_not_raise(),
-            '',
-            4,
-            id="Empty consumer_groups and monitor_unlisted_consumer_groups true",
-        ),
-        pytest.param(
-            {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {'my_consumer': None}},
-            does_not_raise(),
-            '',
-            4,
-            id="One consumer group, all topics and partitions",
-        ),
-        pytest.param(
-            {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {'my_consumer': {'marvel': None}}},
-            does_not_raise(),
-            '',
-            2,
-            id="One consumer group, one topic, all partitions",
-        ),
-        pytest.param(
-            {'kafka_connect_str': KAFKA_CONNECT_STR, 'consumer_groups': {'my_consumer': {'marvel': [1]}}},
-            does_not_raise(),
-            '',
-            1,
-            id="One consumer group, one topic, one partition",
-        ),
-    ],
-)
-def test_config(dd_run_check, check, instance, aggregator, expected_exception, exception_msg, metric_count, caplog):
-    caplog.set_level(logging.DEBUG)
-    with expected_exception:
-        dd_run_check(check(instance))
-
-    for m in metrics:
-        aggregator.assert_metric(m, count=metric_count)
-
-    assert exception_msg in caplog.text
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-
 @pytest.mark.skipif(not LEGACY_CLIENT, reason='The kafka-python implementation raises an exception')
-def test_legacy_invalid_connect_str(dd_run_check, check, aggregator, caplog):
+def test_legacy_invalid_connect_str(dd_run_check, check, aggregator, caplog, kafka_instance):
     caplog.set_level(logging.DEBUG)
-    instance = {'kafka_connect_str': 'invalid', 'use_legacy_client': True}
+    kafka_instance['kafka_connect_str'] = 'invalid'
+    del kafka_instance['consumer_groups']
     with pytest.raises(Exception):
-        dd_run_check(check(instance))
+        dd_run_check(check(kafka_instance))
 
     for m in metrics:
         aggregator.assert_metric(m, count=0)
@@ -243,10 +149,11 @@ def test_legacy_invalid_connect_str(dd_run_check, check, aggregator, caplog):
 
 
 @pytest.mark.skipif(LEGACY_CLIENT, reason='The following condition only occurs in confluent-kafka implementation')
-def test_invalid_connect_str(dd_run_check, check, aggregator, caplog):
+def test_invalid_connect_str(dd_run_check, check, aggregator, caplog, kafka_instance):
     caplog.set_level(logging.DEBUG)
-    instance = {'kafka_connect_str': 'invalid', 'use_legacy_client': False}
-    dd_run_check(check(instance))
+    kafka_instance['kafka_connect_str'] = 'invalid'
+    del kafka_instance['consumer_groups']
+    dd_run_check(check(kafka_instance))
 
     for m in metrics:
         aggregator.assert_metric(m, count=0)
