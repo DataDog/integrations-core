@@ -5,7 +5,7 @@ import logging
 from contextlib import nullcontext as does_not_raise
 
 import pytest
-from tests.common import KAFKA_CONNECT_STR, assert_check_kafka, metrics
+from tests.common import assert_check_kafka, metrics
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
