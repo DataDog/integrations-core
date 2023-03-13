@@ -9,7 +9,7 @@ setup = ["sandbox"]
 
 [envs.default.overrides]
 name."^py3.8$".e2e-env = { value = true }
-matrix.setup.e2e-env = { value = true, if = ["sandbox"], env = ["TF_VAR_google_credentials_file", "TF_VAR_google_compute_instance_name"] }
+matrix.setup.e2e-env = { value = true, if = ["sandbox"], env = ["TF_VAR_credentials_file", "TF_VAR_instance_name", "TF_VAR_user"] }
 matrix.setup.env-vars = [
   { key = "USE_OPENSTACK_SANDBOX", value = "true", if = ["sandbox"] },
 ]

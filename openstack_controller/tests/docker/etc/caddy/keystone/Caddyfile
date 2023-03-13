@@ -4,6 +4,14 @@
 }
 :80 {
     root * /usr/share/caddy/
+    @get_root {
+        method GET
+        path /identity/v3
+    }
+    route @get_root {
+        rewrite /identity/v3 /identity/v3/get.json
+        file_server
+    }
     @post_auth_tokens {
         method POST
         path /identity/v3/auth/tokens
@@ -15,7 +23,7 @@
     }
     @get_auth_projects {
         method GET
-        header X-Auth-Token "demo_test"
+        header "X-Auth-Token" "demo_test"
         path /identity/v3/auth/projects
     }
     route @get_auth_projects {

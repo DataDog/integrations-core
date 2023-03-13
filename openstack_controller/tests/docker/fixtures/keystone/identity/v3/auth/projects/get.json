@@ -1,16 +1,36 @@
 {
-  "projects": [
-    {
-      "is_domain": false,
-      "description": "Keystone Identity Service",
-      "links": {
-        "self": "http://10.0.2.15:5000/v3/projects/***************************4bfc1"
-      },
-      "enabled": true,
-      "domain_id": "default",
-      "parent_id": "default",
-      "id": "***************************4bfc1",
-      "name": "service"
-    }
-  ]
+	"projects": [{
+			"id": "be2d971836344c07b01c4a6a8fc1cfc3",
+			"name": "admin",
+			"domain_id": "default",
+			"description": "Bootstrap project for initializing the cloud.",
+			"enabled": true,
+			"parent_id": "default",
+			"is_domain": false,
+			"tags": [],
+			"options": {},
+			"links": {
+				"self": "http://10.164.0.81/identity/v3/projects/be2d971836344c07b01c4a6a8fc1cfc3"
+			}
+		},
+		{
+			"id": "df5998fe61d045b797fcdc860889d5a4",
+			"name": "demo",
+			"domain_id": "default",
+			"description": "",
+			"enabled": true,
+			"parent_id": "default",
+			"is_domain": false,
+			"tags": [],
+			"options": {},
+			"links": {
+				"self": "http://10.164.0.81/identity/v3/projects/df5998fe61d045b797fcdc860889d5a4"
+			}
+		}
+	],
+	"links": {
+		"next": null,
+		"self": "http://10.164.0.81/identity/v3/auth/projects",
+		"previous": null
+	}
 }
