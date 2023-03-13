@@ -1,5 +1,8 @@
 # CHANGELOG - vsphere
 
+## 6.3.0-beta.3 / 2023-03-13
+
+
 ## 6.2.1 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
