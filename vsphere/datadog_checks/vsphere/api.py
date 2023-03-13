@@ -46,7 +46,7 @@ def smart_retry(f):
             # https://code.vmware.com/apis/704/vsphere/vim.fault.RestrictedByAdministrator.html
             raise
         except Exception as e:
-            api_instance.log.debug(
+            api_instance.log.warning(
                 "An exception occurred when executing %s: %s. Refreshing the connection to vCenter and retrying",
                 f.__name__,
                 e,
@@ -143,7 +143,7 @@ class VSphereAPI(object):
             connect.Disconnect(self._conn)
 
         self._conn = conn
-        self.log.debug("Connected to %s", version_info.fullName)
+        self.log.warning("Connected to %s", version_info.fullName)
 
     @smart_retry
     def get_current_time(self):
