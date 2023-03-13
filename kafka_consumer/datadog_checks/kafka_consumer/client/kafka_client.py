@@ -13,9 +13,6 @@ class KafkaClient(ABC):
         self._consumer_offsets = {}
         self._tls_context = tls_context
 
-    @abstractmethod
-    def create_kafka_admin_client(self):
-        pass
 
     @abstractmethod
     def get_consumer_offsets(self):
