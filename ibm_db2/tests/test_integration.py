@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from requests import ConnectionError
 
 from datadog_checks.dev import run_command
 from datadog_checks.ibm_db2 import IbmDb2Check
@@ -135,6 +134,7 @@ def test_metadata(instance, datadog_agent, dd_run_check):
 
 @pytest.mark.usefixtures('dd_environment')
 def test_disconnection(aggregator, instance, dd_run_check):
+    instance["connection_timeout"] = 1
     check = IbmDb2Check('ibm_db2', {}, [instance])
     # check.check(instance)
     # _assert_standard(aggregator)

@@ -22,7 +22,7 @@ class DbManager(object):
             config['port'],
             'none',
             None,
-            config['extra_connection_parametters'],
+            None,
         )
         self.db_name = config['db']
         self.conn = None

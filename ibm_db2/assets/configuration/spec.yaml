@@ -56,15 +56,12 @@ files:
           has to be accessible and readable by the agent user.
         value:
           type: string
-      - name: extra_connection_parametters
+      - name: connection_timeout
         description: |
-          Additional connection parameters, that will be passed to the connection string
+          Connection timeout in seconds
         value:
-          type: array
-          items:
-            type: string
-          example: 
-           - connecttimeout=1
+          type: integer
+          example: 1
 
       - template: instances/db
         overrides:

@@ -47,11 +47,11 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    connection_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     db: str
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
-    extra_connection_parametters: Optional[tuple[str, ...]] = None
     host: Optional[str] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None

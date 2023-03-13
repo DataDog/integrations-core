@@ -8,6 +8,10 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def instance_connection_timeout():
+    return 1
+
+
 def instance_disable_generic_tags():
     return False
 

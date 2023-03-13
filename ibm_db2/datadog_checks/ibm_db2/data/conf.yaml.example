@@ -62,11 +62,10 @@ instances:
     #
     # tls_cert: <TLS_CERT>
 
-    ## @param extra_connection_parametters - list of strings - optional
-    ## Additional connection parameters, that will be passed to the connection string
+    ## @param connection_timeout - integer - optional - default: 1
+    ## Connection timeout in seconds
     #
-    # extra_connection_parametters:
-    #   - connecttimeout=1
+    # connection_timeout: 1
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
