@@ -30,7 +30,7 @@ class KafkaConfig:
         if isinstance(self._kafka_version, str):
             self._kafka_version = tuple(map(int, self._kafka_version.split(".")))
         self._crlfile = instance.get('ssl_crlfile', instance.get('tls_crlfile'))
-        self._request_timeout = init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT)
+        self._request_timeout_ms = init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT) * 1000
         self._security_protocol = instance.get('security_protocol', 'PLAINTEXT')
         self._sasl_mechanism = instance.get('sasl_mechanism')
         self._sasl_plain_username = instance.get('sasl_plain_username')

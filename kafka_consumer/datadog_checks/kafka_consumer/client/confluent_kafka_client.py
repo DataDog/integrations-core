@@ -17,7 +17,7 @@ class ConfluentKafkaClient(KafkaClient):
             self._kafka_client = AdminClient(
                 {
                     "bootstrap.servers": self.config._kafka_connect_str,
-                    "socket.timeout.ms": self.config._request_timeout * 1000,
+                    "socket.timeout.ms": self.config._request_timeout_ms,
                     "client.id": "dd-agent",
                 }
             )
@@ -42,7 +42,8 @@ class ConfluentKafkaClient(KafkaClient):
                 "group.id": consumer_group,
             }
             consumer = Consumer(consumer_config)
-            topics = consumer.list_topics(timeout=self.config._request_timeout)
+            # TODO: Update config._request_timeout_ms to config._request_timeout
+            topics = consumer.list_topics(timeout=self.config._request_timeout_ms / 1000)
 
             for topic in topics.topics:
                 topic_partitions = [
@@ -69,7 +70,7 @@ class ConfluentKafkaClient(KafkaClient):
     def get_partitions_for_topic(self, topic):
 
         try:
-            cluster_metadata = self.kafka_client.list_topics(topic, timeout=self.config._request_timeout)
+            cluster_metadata = self.kafka_client.list_topics(topic, timeout=self.config._request_timeout_ms / 1000)
             topic_metadata = cluster_metadata.topics[topic]
             partitions = list(topic_metadata.partitions.keys())
             return partitions
@@ -94,7 +95,7 @@ class ConfluentKafkaClient(KafkaClient):
                 self.log.debug('MONITOR UNLISTED FUTURES RESULT: %s', list_consumer_groups_result)
                 for valid_consumer_group in list_consumer_groups_result.valid:
                     consumer_group = valid_consumer_group.group_id
-                    topics = self.kafka_client.list_topics(timeout=self.config._request_timeout)
+                    topics = self.kafka_client.list_topics(timeout=self.config._request_timeout_ms / 1000)
                     consumer_groups.append(consumer_group)
             except Exception as e:
                 self.log.error("Failed to collect consumer offsets %s", e)
@@ -109,7 +110,7 @@ class ConfluentKafkaClient(KafkaClient):
                 "monitor_unlisted_consumer_groups is %s." % self.config._monitor_unlisted_consumer_groups
             )
 
-        topics = self.kafka_client.list_topics(timeout=self.config._request_timeout)
+        topics = self.kafka_client.list_topics(timeout=self.config._request_timeout_ms / 1000)
 
         for consumer_group in consumer_groups:
             self.log.debug('CONSUMER GROUP: %s', consumer_group)

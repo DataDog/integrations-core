@@ -223,10 +223,10 @@ def test_config(dd_run_check, check, instance, aggregator, expected_exception, e
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-@pytest.mark.skipif(not LEGACY_CLIENT, reason='The following condition only occurs in kafka-python implementation')
+@pytest.mark.skipif(not LEGACY_CLIENT, reason='The kafka-python implementation raises an exception')
 def test_legacy_invalid_connect_str(dd_run_check, check, aggregator, caplog):
     caplog.set_level(logging.DEBUG)
-    instance = {'kafka_connect_str': 'invalid'}
+    instance = {'kafka_connect_str': 'invalid', 'use_legacy_client': True}
     with pytest.raises(Exception):
         dd_run_check(check(instance))
 
@@ -245,7 +245,7 @@ def test_legacy_invalid_connect_str(dd_run_check, check, aggregator, caplog):
 @pytest.mark.skipif(LEGACY_CLIENT, reason='The following condition only occurs in confluent-kafka implementation')
 def test_invalid_connect_str(dd_run_check, check, aggregator, caplog):
     caplog.set_level(logging.DEBUG)
-    instance = {'kafka_connect_str': 'invalid'}
+    instance = {'kafka_connect_str': 'invalid', 'use_legacy_client': False}
     dd_run_check(check(instance))
 
     for m in metrics:
