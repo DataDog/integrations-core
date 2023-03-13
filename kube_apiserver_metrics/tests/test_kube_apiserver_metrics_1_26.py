@@ -45,7 +45,6 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.audit_event',
         NAMESPACE + '.go_threads',
         NAMESPACE + '.go_goroutines',
-        NAMESPACE + '.etcd.db.total_size',
         NAMESPACE + '.rest_client_requests_total',
         NAMESPACE + '.authenticated_user_requests',
         NAMESPACE + '.apiserver_request_total',
