@@ -37,8 +37,7 @@ class ConfluentKafkaClient(KafkaClient):
                 "group.id": consumer_group,
             }
             consumer = Consumer(consumer_config)
-            # TODO: Update config._request_timeout_ms to config._request_timeout
-            topics = consumer.list_topics(timeout=self.config._request_timeout_ms / 1000)
+            topics = consumer.list_topics(timeout=self.config._request_timeout)
 
             for topic in topics.topics:
                 topic_partitions = [
@@ -59,7 +58,7 @@ class ConfluentKafkaClient(KafkaClient):
 
     def get_partitions_for_topic(self, topic):
         try:
-            cluster_metadata = self.kafka_client.list_topics(topic, timeout=self.config._request_timeout_ms / 1000)
+            cluster_metadata = self.kafka_client.list_topics(topic, timeout=self.config._request_timeout)
             topic_metadata = cluster_metadata.topics[topic]
             partitions = list(topic_metadata.partitions.keys())
             return partitions
@@ -73,7 +72,6 @@ class ConfluentKafkaClient(KafkaClient):
 
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
-        offset_futures = []
         consumer_offsets = {}
 
         if self.config._monitor_unlisted_consumer_groups:
@@ -84,10 +82,10 @@ class ConfluentKafkaClient(KafkaClient):
             try:
                 list_consumer_groups_result = consumer_groups_future.result()
                 self.log.debug('MONITOR UNLISTED FUTURES RESULT: %s', list_consumer_groups_result)
-                for valid_consumer_group in list_consumer_groups_result.valid:
-                    consumer_group = valid_consumer_group.group_id
-                    topics = self.kafka_client.list_topics(timeout=self.config._request_timeout_ms / 1000)
-                    consumer_groups.append(consumer_group)
+
+                consumer_groups.extend(
+                    valid_consumer_group.group_id for valid_consumer_group in list_consumer_groups_result.valid
+                )
             except Exception as e:
                 self.log.error("Failed to collect consumer offsets %s", e)
 
@@ -101,30 +99,21 @@ class ConfluentKafkaClient(KafkaClient):
                 "monitor_unlisted_consumer_groups is %s." % self.config._monitor_unlisted_consumer_groups
             )
 
-        topics = self.kafka_client.list_topics(timeout=self.config._request_timeout_ms / 1000)
-
-        for consumer_group in consumer_groups:
-            self.log.debug('CONSUMER GROUP: %s', consumer_group)
-            topic_partitions = self._get_topic_partitions(topics, consumer_group)
-            for topic_partition in topic_partitions:
-                offset_futures.append(
-                    self.kafka_client.list_consumer_group_offsets(
-                        [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
-                    )[consumer_group]
-                )
-
-        for future in offset_futures:
+        for future in self._get_consumer_offset_futures(consumer_groups):
             try:
                 response_offset_info = future.result()
                 self.log.debug('FUTURE RESULT: %s', response_offset_info)
                 consumer_group = response_offset_info.group_id
                 topic_partitions = response_offset_info.topic_partitions
+
                 self.log.debug('RESULT CONSUMER GROUP: %s', consumer_group)
                 self.log.debug('RESULT TOPIC PARTITIONS: %s', topic_partitions)
+
                 for topic_partition in topic_partitions:
                     topic = topic_partition.topic
                     partition = topic_partition.partition
                     offset = topic_partition.offset
+
                     self.log.debug('RESULTS TOPIC: %s', topic)
                     self.log.debug('RESULTS PARTITION: %s', partition)
                     self.log.debug('RESULTS OFFSET: %s', offset)
@@ -141,6 +130,18 @@ class ConfluentKafkaClient(KafkaClient):
                 self.log.debug("Failed to read consumer offsets for %s: %s", consumer_group, e)
 
         return consumer_offsets
+
+    def _get_consumer_offset_futures(self, consumer_groups):
+        topics = self.kafka_client.list_topics(timeout=self.config._request_timeout)
+        # {(consumer_group, topic, partition): offset}
+
+        for consumer_group in consumer_groups:
+            self.log.debug('CONSUMER GROUP: %s', consumer_group)
+
+            for topic_partition in self._get_topic_partitions(topics, consumer_group):
+                yield self.kafka_client.list_consumer_group_offsets(
+                    [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
+                )[consumer_group]
 
     def _validate_consumer_groups(self):
         """Validate any explicitly specified consumer groups.
@@ -159,10 +160,10 @@ class ConfluentKafkaClient(KafkaClient):
                             assert isinstance(partition, int)
 
     def _get_topic_partitions(self, topics, consumer_group):
-        topic_partitions = []
         for topic in topics.topics:
             if topic in KAFKA_INTERNAL_TOPICS:
                 continue
+
             self.log.debug('CONFIGURED TOPICS: %s', topic)
 
             partitions = list(topics.topics[topic].partitions.keys())
@@ -178,13 +179,21 @@ class ConfluentKafkaClient(KafkaClient):
                         self.config._consumer_groups[consumer_group]
                         and topic not in self.config._consumer_groups[consumer_group]
                     ):
+                        self.log.debug(
+                            "Partition %s skipped because the topic %s is not in the consumer_group.", partition, topic
+                        )
                         continue
                     if (
                         self.config._consumer_groups[consumer_group].get(topic)
                         and partition not in self.config._consumer_groups[consumer_group][topic]
                     ):
+                        self.log.debug(
+                            "Partition %s skipped because it is not defined in the consumer group for the topic %s",
+                            partition,
+                            topic,
+                        )
                         continue
-                self.log.debug("TOPIC PARTITION: %s", TopicPartition(topic, partition))
-                topic_partitions.append(TopicPartition(topic, partition))
 
-        return topic_partitions
+                self.log.debug("TOPIC PARTITION: %s", TopicPartition(topic, partition))
+
+                yield TopicPartition(topic, partition)
