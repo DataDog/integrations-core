@@ -19,19 +19,21 @@ No additional installation is needed on your server.
 
 2. [Restart the Agent][5].
 
+Note: This check has a limit of 2000 metrics per instance. The number of returned metrics is indicated when running the Datadog Agent [status command][6]. You can specify the metrics you are interested in by editing the configuration. If you need to monitor more metrics, contact Datadog support.
+
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `avi_vantage` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `avi_vantage` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this check.
+See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Service Checks
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
+See [service_checks.json][9] for a list of service checks provided by this integration.
 
 ### Events
 
@@ -39,14 +41,15 @@ Avi Vantage does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][10].
 
 [1]: https://avinetworks.com/why-avi/multi-cloud-load-balancing/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://github.com/DataDog/integrations-core/blob/master/avi_vantage/datadog_checks/avi_vantage/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/avi_vantage/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/avi_vantage/assets/service_checks.json
-[9]: https://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6v7#agent-status-and-information
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/avi_vantage/metadata.csv
+[9]: https://github.com/DataDog/integrations-core/blob/master/avi_vantage/assets/service_checks.json
+[10]: https://docs.datadoghq.com/help/
