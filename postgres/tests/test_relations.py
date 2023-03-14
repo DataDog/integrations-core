@@ -16,6 +16,10 @@ from datadog_checks.postgres.relationsmanager import (
 from .common import DB_NAME, HOST, PORT
 
 
+INDEX_FROM_REL_METRICS = ['postgresql.index_rel_scans', 'postgresql.index_rel_rows_fetched']
+INDEX_FROM_STATIO_METRICS = ['postgresql.index_blocks_read', 'postgresql.index_blocks_hit']
+
+
 def _get_metric_names(scope):
     for metric_name, _ in scope['metrics'].values():
         yield metric_name
@@ -48,14 +52,14 @@ def _check_relation_metrics(aggregator, pg_instance, relation):
     ]
 
     for name in _get_metric_names(REL_METRICS):
-        if name in ['postgresql.index_rel_scans', 'postgresql.index_rel_rows_fetched']:
+        if name in INDEX_FROM_REL_METRICS:
             aggregator.assert_metric(name, count=0, tags=expected_tags)
         else:
             aggregator.assert_metric(name, count=1, tags=expected_tags)
         aggregator.assert_metric(name, count=1, tags=expected_toast_tags)
 
     for name in _get_metric_names(STATIO_METRICS):
-        if name in ['postgresql.index_blocks_read', 'postgresql.index_blocks_hit']:
+        if name in INDEX_FROM_STATIO_METRICS:
             aggregator.assert_metric(name, count=0, tags=expected_tags)
         else:
             aggregator.assert_metric(name, count=1, tags=expected_tags)
@@ -140,7 +144,10 @@ def test_max_relations(aggregator, integration_check, pg_instance):
         for m in aggregator._metrics[name]:
             if any(['table:' in tag for tag in m.tags]):
                 relation_metrics.append(m)
-        assert len(relation_metrics) == 1
+        if name in INDEX_FROM_REL_METRICS:
+            assert len(relation_metrics) == 1
+        else:
+            assert len(relation_metrics) == 2
 
     for name in _get_metric_names(SIZE_METRICS):
         relation_metrics = []
