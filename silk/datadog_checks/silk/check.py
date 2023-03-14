@@ -30,7 +30,7 @@ class SilkCheck(AgentCheck):
         if server is None:
             raise ConfigurationError("host_address is a required parameter.")
 
-        self.latest_event_query = int(get_timestamp())
+        self.latest_event_query = get_timestamp()
         self.url = "{}/api/v2/".format(server)
 
         host = urlparse(server).netloc
@@ -205,11 +205,13 @@ class SilkCheck(AgentCheck):
 
     def collect_events(self, system_tags):
         self.log.debug("Starting events collection (query start time: %s).", self.latest_event_query)
-        collect_events_start_time = get_timestamp()
+
+        # Get the time that events collection starts. This will be the new `self.latest_event_query` value afterwards.
+        collect_events_timestamp = get_timestamp()
         try:
-            # Use latest event query as starting time
-            event_query = EVENT_PATH.format(self.latest_event_query)
-            raw_events, code = self._get_data(event_query)
+            # Use `self.latest_event_query` as starting time and `collect_events_timestamp` as ending time
+            event_query = EVENT_PATH.format(int(self.latest_event_query), int(collect_events_timestamp))
+            raw_events, _ = self._get_data(event_query)
 
             for event in raw_events:
                 try:
@@ -226,4 +228,4 @@ class SilkCheck(AgentCheck):
             self.log.warning("Unable to fetch events: %s", str(e))
 
         # Update latest event query to last event time
-        self.latest_event_query = int(collect_events_start_time)
+        self.latest_event_query = collect_events_timestamp
