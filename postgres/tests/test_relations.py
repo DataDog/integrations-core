@@ -5,6 +5,7 @@ import psycopg2
 import pytest
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.postgres.relationsmanager import (
     IDX_METRICS,
     REL_METRICS,
@@ -15,7 +16,6 @@ from datadog_checks.postgres.relationsmanager import (
 
 from .common import DB_NAME, HOST, PORT
 
-
 INDEX_FROM_REL_METRICS = ['postgresql.index_rel_scans', 'postgresql.index_rel_rows_fetched']
 INDEX_FROM_STATIO_METRICS = ['postgresql.index_blocks_read', 'postgresql.index_blocks_hit']
 
@@ -23,6 +23,15 @@ INDEX_FROM_STATIO_METRICS = ['postgresql.index_blocks_read', 'postgresql.index_b
 def _get_metric_names(scope):
     for metric_name, _ in scope['metrics'].values():
         yield metric_name
+
+
+def _get_oid_of_relation(relation):
+    oid = 0
+    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+        with conn.cursor() as cur:
+            cur.execute("select oid from pg_class where relname='{}'".format(relation))
+            oid = cur.fetchall()[0][0]
+    return oid
 
 
 def _check_relation_metrics(aggregator, pg_instance, relation):
@@ -33,12 +42,7 @@ def _check_relation_metrics(aggregator, pg_instance, relation):
         'schema:public',
     ]
 
-    oid = 0
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
-        with conn.cursor() as cur:
-            cur.execute("select oid from pg_class where relname='{}'".format(relation))
-            oid = cur.fetchall()[0][0]
-
+    oid = _get_oid_of_relation(relation)
     expected_toast_tags = base_tags + [
         'toast_of:{}'.format(relation),
         'table:pg_toast_{}'.format(oid),
@@ -83,6 +87,7 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
     posgres_check = integration_check(pg_instance)
     posgres_check.check(pg_instance)
     _check_relation_metrics(aggregator, pg_instance, 'persons')
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
@@ -130,6 +135,35 @@ def test_relations_metrics_regex(aggregator, integration_check, pg_instance):
 
     for relation in relations:
         _check_relation_metrics(aggregator, pg_instance, relation)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_toast_relation_metrics(aggregator, integration_check, pg_instance):
+    pg_instance['relations'] = ['test_toast']
+    posgres_check = integration_check(pg_instance)
+    posgres_check.check(pg_instance)
+
+    oid = _get_oid_of_relation('test_toast')
+    expected_toast_tags = pg_instance['tags'] + [
+        'port:{}'.format(pg_instance['port']),
+        'db:%s' % pg_instance['dbname'],
+        'toast_of:test_toast',
+        'table:pg_toast_{}'.format(oid),
+        'schema:pg_toast',
+    ]
+    expected_toast_index_tags = expected_toast_tags + [
+        'index:pg_toast_{}_index'.format(oid),
+    ]
+    # 5000 iterations * 32 bytes / 1996 bytes per page = 80.16032064128257
+    aggregator.assert_metric('postgresql.seq_scans', count=1, value=1, tags=expected_toast_tags)
+    aggregator.assert_metric('postgresql.index_rel_scans', count=1, value=3, tags=expected_toast_tags)
+    aggregator.assert_metric('postgresql.live_rows', count=1, value=81, tags=expected_toast_tags)
+    aggregator.assert_metric('postgresql.rows_inserted', count=1, value=81, tags=expected_toast_tags)
+    aggregator.assert_metric('postgresql.index_rel_rows_fetched', count=1, value=81 * 2, tags=expected_toast_tags)
+
+    aggregator.assert_metric('postgresql.index_rows_read', count=1, value=81 * 2, tags=expected_toast_index_tags)
+    aggregator.assert_metric('postgresql.index_rows_fetched', count=1, value=81 * 2, tags=expected_toast_index_tags)
 
 
 @pytest.mark.integration

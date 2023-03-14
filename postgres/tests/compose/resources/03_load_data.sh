@@ -12,6 +12,11 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     INSERT INTO pgtable (lastname, firstname, address, city) VALUES ('Cavaille', 'Leo', 'Midtown', 'New York'), ('Someveryveryveryveryveryveryveryveryveryverylongname', 'something', 'Avenue des Champs Elysees', 'Beautiful city of lights');
     CREATE TABLE pg_newtable (personid SERIAL, lastname VARCHAR(255), firstname VARCHAR(255), address VARCHAR(255), city VARCHAR(255));
     INSERT INTO pg_newtable (lastname, firstname, address, city) VALUES ('Cavaille', 'Leo', 'Midtown', 'New York'), ('Someveryveryveryveryveryveryveryveryveryverylongname', 'something', 'Avenue des Champs Elysees', 'Beautiful city of lights');
+    CREATE TABLE test_toast (id SERIAL, txt TEXT);
+    insert into test_toast (txt) select string_agg (md5(random()::text),'') as dummy from generate_series(1,5000);
+    update test_toast set txt = txt;
+    SELECT * FROM test_toast;
+    SELECT * FROM test_toast;
     SELECT * FROM persons;
     SELECT * FROM persons;
     SELECT * FROM persons;
