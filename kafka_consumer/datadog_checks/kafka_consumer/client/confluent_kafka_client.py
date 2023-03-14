@@ -75,7 +75,8 @@ class ConfluentKafkaClient(KafkaClient):
             return None
 
     def request_metadata_update(self):
-        raise NotImplementedError
+        # https://github.com/confluentinc/confluent-kafka-python/issues/594
+        self.kafka_client.list_topics(None, timeout=self.config._request_timeout_ms / 1000)
 
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
