@@ -5,9 +5,9 @@
 
 ProcessMetrics = {
     'name': 'process',
-    'query': 'SELECT PROGRAM, SUM(PGA_USED_MEM), SUM(PGA_ALLOC_MEM), SUM(PGA_FREEABLE_MEM), SUM(PGA_MAX_MEM)\
-         FROM GV$PROCESS GROUP BY PROGRAM',
+    'query': 'SELECT PID, PROGRAM, PGA_USED_MEM, PGA_ALLOC_MEM, PGA_FREEABLE_MEM, PGA_MAX_MEM FROM GV$PROCESS',
     'columns': [
+        {'name': 'pid', 'type': 'tag'},
         {'name': 'program', 'type': 'tag'},
         {'name': 'process.pga_used_memory', 'type': 'gauge'},
         {'name': 'process.pga_allocated_memory', 'type': 'gauge'},
