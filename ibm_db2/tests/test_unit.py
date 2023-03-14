@@ -148,6 +148,4 @@ def test_get_connection_data(instance):
     )
 
     expected = 'database=db1;hostname=host1;port=1000;protocol=tcpip;uid=user1;pwd=pass1;connecttimeout=1'
-    assert (expected, '', '') == check.get_connection_data(
-        'db1', 'user1', 'pass1', 'host1', 1000, 'none', None, 1
-    )
+    assert (expected, '', '') == check.get_connection_data('db1', 'user1', 'pass1', 'host1', 1000, 'none', None, 1)
