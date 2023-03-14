@@ -1,3 +1,6 @@
+ALTER SYSTEM SET max_connections = '1000';
+ALTER SYSTEM SET shared_buffers = '240MB';
+
 CREATE USER datadog WITH PASSWORD 'datadog';
 CREATE USER datadog_no_catalog WITH PASSWORD 'datadog';
 CREATE USER bob WITH PASSWORD 'bob';
