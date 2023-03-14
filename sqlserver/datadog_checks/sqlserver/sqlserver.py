@@ -626,6 +626,17 @@ class SQLServer(AgentCheck):
                     self.log.debug("Got base metric: %s for metric: %s", base_name, counter_name)
                 except Exception as e:
                     self.log.warning("Could not get counter_name of base for metric: %s", e)
+            # HACK: let's see if we get more accurate buffer cache hit ratio data by treating 
+            # it as a count instead of a fraction. Changing the sql type for this metric means 
+            # we will use the SqlSimpleMetric class instead of the fractional class,
+            # and report the raw values intead of dividing by a base metric.
+            # see https://datadoghq.atlassian.net/browse/DBM-2189
+            if sql_type == PERF_RAW_LARGE_FRACTION and counter_name in [
+                'sqlserver.buffer.cache_hit_ratio',
+                'Buffer cache hit ratio',
+            ]:
+                sql_type = PERF_COUNTER_LARGE_RAWCOUNT
+                base_name = None
 
         return sql_type, base_name
 
