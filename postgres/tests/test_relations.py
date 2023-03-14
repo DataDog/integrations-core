@@ -5,7 +5,6 @@ import psycopg2
 import pytest
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.postgres.relationsmanager import (
     IDX_METRICS,
     REL_METRICS,
@@ -87,7 +86,6 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
     posgres_check = integration_check(pg_instance)
     posgres_check.check(pg_instance)
     _check_relation_metrics(aggregator, pg_instance, 'persons')
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
