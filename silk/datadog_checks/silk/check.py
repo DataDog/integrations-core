@@ -220,12 +220,12 @@ class SilkCheck(AgentCheck):
                     event_payload = normalized_event.get_datadog_payload()
                     self.event(event_payload)
                 except ValueError as e:
-                    self.log.warning(str(e))
+                    self.log.error(str(e))
 
         except Exception as e:
             # Don't get stuck on a failure to fetch an event
             # Ignore them for next pass
-            self.log.warning("Unable to fetch events: %s", str(e))
+            self.log.error("Unable to fetch events: %s", str(e))
 
         # Update latest event query to last event time
         self.latest_event_query = collect_events_timestamp
