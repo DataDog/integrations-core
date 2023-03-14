@@ -19,7 +19,7 @@ No additional installation is needed on your server.
 
 2. [Restart the Agent][5].
 
-Note: This check has a limit of 2000 metrics per instance. The number of returned metrics is indicated when running the Datadog Agent [status command][6]. You can specify the metrics you are interested in by editing the configuration. If you need to monitor more metrics, contact Datadog support.
+**Note**: This check has a limit of 2000 metrics per instance. To see the number of returned metrics, run the Datadog Agent [status command][6]. You can specify the metrics you are interested in by editing the configuration. If you need to monitor more metrics, [contact Datadog support][10].
 
 ### Validation
 
