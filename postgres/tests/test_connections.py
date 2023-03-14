@@ -12,6 +12,8 @@ import pytest
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 
+from .common import HOST, USER_ADMIN, PASSWORD_ADMIN
+
 
 def test_conn_pool(pg_instance):
     """
@@ -237,10 +239,43 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
 
 
 
-def test_pg_terminated_connection_is_safe():
+def test_pg_terminated_connection_is_safe(pg_instance):
     """
     Tests that the connection pool propery handles the case where a connection has been
     terminated by the server (i.e. the client-side state is stale)
     """
-    # TODO
-    pass
+    unique_id = str(uuid.uuid4())  # Used to isolate this test from others on the DB
+    ttl_ms = 30*1000
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check._config.application_name = unique_id
+
+    pool = MultiDatabaseConnectionPool(check._new_connection)
+
+    # Open several connections from the pool and sanity check
+    for i in range(10):
+        dbname = "dogs_{}".format(i)
+        conn = pool.get_connection(dbname, ttl_ms)
+        with conn.cursor() as cursor:
+            cursor.execute("select current_database()")
+            assert cursor.fetchone()[0] == dbname
+
+    assert pool._stats.connection_opened == 10
+
+    # Terminate the connections on the server
+    conn_admin = psycopg2.connect(host=HOST, dbname='postgres', user=USER_ADMIN, password=PASSWORD_ADMIN)
+    try:
+        with conn_admin.cursor() as cursor:
+            cursor.execute("SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE application_name = %s", (unique_id,))
+    finally:
+        conn_admin.close()
+
+    for i in range(20):
+        dbname = "dogs_{}".format(i)
+        import pdb; pdb.set_trace()
+        conn = pool.get_connection(dbname, ttl_ms)
+        with conn.cursor() as cursor:
+            # On executing this command, it should fail but properly re-fetch the connection with not exception
+            cursor.execute("select current_database()")
+            assert cursor.fetchone() == dbname
+
