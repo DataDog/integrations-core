@@ -13,6 +13,7 @@
     "media": [],
     "classifier_tags": [
       "Category::Automation",
+      "Category::Issue Tracking",
       "Category::Log Collection",
       "Category::Security",
       "Supported OS::Linux",

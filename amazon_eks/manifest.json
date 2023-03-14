@@ -16,6 +16,7 @@
       "Category::Cloud",
       "Category::Configuration & Deployment",
       "Category::Containers",
+      "Category::Kubernetes",
       "Category::Log Collection",
       "Category::Orchestration",
       "Supported OS::Linux",

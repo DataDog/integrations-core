@@ -12,6 +12,7 @@
     "title": "Ambari",
     "media": [],
     "classifier_tags": [
+      "Category::Log Collection",
       "Category::Network",
       "Supported OS::Linux",
       "Supported OS::macOS"

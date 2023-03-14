@@ -15,6 +15,7 @@
       "Category::Data Store",
       "Category::Log Collection",
       "Category::Notification",
+      "Category::Tracing",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"
