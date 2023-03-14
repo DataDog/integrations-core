@@ -73,11 +73,9 @@ def test_tls_config_ok(check, kafka_instance_tls):
 def test_oauth_config(sasl_oauth_token_provider, check, expected_exception, kafka_instance):
     kafka_instance.update(
         {
-            'kafka_connect_str': KAFKA_CONNECT_STR,
             'monitor_unlisted_consumer_groups': True,
             'security_protocol': 'SASL_PLAINTEXT',
             'sasl_mechanism': 'OAUTHBEARER',
-            'use_legacy_client': LEGACY_CLIENT,
         }
     )
     kafka_instance.update(sasl_oauth_token_provider)
