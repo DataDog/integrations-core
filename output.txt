@@ -1,0 +1,4333 @@
+2023-03-14 16:38:27 UTC | CORE | WARN | (pkg/util/log/log.go:618 in func1) | Agent configuration relax permissions constraint on the secret backend cmd, Group can read and exec
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/util/log/log.go:557 in func1) | FIPS mode is disabled
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/util/log/log.go:590 in func1) | Features detected from environment: 
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/util/hostname/providers.go:161 in GetWithProvider) | trying to get hostname from 'configuration' provider
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/util/hostname/providers.go:172 in GetWithProvider) | hostname provider 'configuration' successfully found hostname 'COMP-KK6Y27KM0D'
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/util/hostname/providers.go:177 in GetWithProvider) | hostname provider 'configuration' succeeded, stoping here with hostname 'COMP-KK6Y27KM0D'
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/config/config.go:1836 in getResolvedDDUrl) | 'site' and 'dd_url' are both set in config: setting main endpoint to 'dd_url': "https://app.datadoghq.com"
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/aggregator/demultiplexer_agent.go:150 in initAgentDemultiplexer) | Creating forwarders
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:265 in newHTTPPassthroughPipeline) | Initialized event platform forwarder pipeline. eventType=dbm-samples mainHosts=dbm-metrics-intake.datadoghq.com additionalHosts= batch_max_concurrent_send=10 batch_max_content_size=10000000 batch_max_size=1000, input_chan_size=100
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:265 in newHTTPPassthroughPipeline) | Initialized event platform forwarder pipeline. eventType=dbm-metrics mainHosts=dbm-metrics-intake.datadoghq.com additionalHosts= batch_max_concurrent_send=10 batch_max_content_size=20000000 batch_max_size=1000, input_chan_size=100
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:265 in newHTTPPassthroughPipeline) | Initialized event platform forwarder pipeline. eventType=dbm-activity mainHosts=dbm-metrics-intake.datadoghq.com additionalHosts= batch_max_concurrent_send=10 batch_max_content_size=20000000 batch_max_size=1000, input_chan_size=100
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:265 in newHTTPPassthroughPipeline) | Initialized event platform forwarder pipeline. eventType=network-devices-metadata mainHosts=ndm-intake.datadoghq.com additionalHosts= batch_max_concurrent_send=10 batch_max_content_size=5000000 batch_max_size=1000, input_chan_size=100
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:265 in newHTTPPassthroughPipeline) | Initialized event platform forwarder pipeline. eventType=network-devices-snmp-traps mainHosts=snmp-traps-intake.datadoghq.com additionalHosts= batch_max_concurrent_send=10 batch_max_content_size=5000000 batch_max_size=1000, input_chan_size=100
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:265 in newHTTPPassthroughPipeline) | Initialized event platform forwarder pipeline. eventType=network-devices-netflow mainHosts=ndmflow-intake.datadoghq.com additionalHosts= batch_max_concurrent_send=10 batch_max_content_size=5000000 batch_max_size=10000, input_chan_size=10000
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/aggregator/demultiplexer_agent.go:214 in initAgentDemultiplexer) | the Demultiplexer will use 1 pipelines
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/aggregator/time_sampler.go:50 in NewTimeSampler) | Creating TimeSampler #0
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/workloadmeta/store.go:402 in startCandidates) | workloadmeta collector "podman" could not start. error: component workloadmeta-podman is disabled: Podman not detected
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/workloadmeta/store.go:402 in startCandidates) | workloadmeta collector "ecs" could not start. error: component workloadmeta-ecs is disabled: Agent is not running on ECS EC2
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/workloadmeta/store.go:402 in startCandidates) | workloadmeta collector "kubelet" could not start. error: component workloadmeta-kubelet is disabled: Agent is not running on Kubernetes
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/workloadmeta/store.go:402 in startCandidates) | workloadmeta collector "kube_metadata" could not start. error: component workloadmeta-kube_metadata is disabled: Agent is not running on Kubernetes
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/workloadmeta/store.go:402 in startCandidates) | workloadmeta collector "containerd" could not start. error: component workloadmeta-containerd is disabled: Agent is not running on containerd
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/workloadmeta/store.go:402 in startCandidates) | workloadmeta collector "docker" could not start. error: component workloadmeta-docker is disabled: Agent is not running on Docker
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/workloadmeta/store.go:402 in startCandidates) | workloadmeta collector "ecs_fargate" could not start. error: component workloadmeta-ecs_fargate is disabled: Agent is not running on Fargate
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/workloadmeta/store.go:402 in startCandidates) | workloadmeta collector "cloudfoundry-container" could not start. error: component workloadmeta-cloudfoundry-container is disabled: Agent is not running on CloudFoundry
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/workloadmeta/store.go:402 in startCandidates) | workloadmeta collector "cloudfoundry-vm" could not start. error: component workloadmeta-cloudfoundry-vm is disabled: Agent is not running on CloudFoundry
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/workloadmeta/store.go:153 in Start) | workloadmeta store initialized successfully
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/collector/python/init.go:324 in resolvePythonExecPath) | Using '/opt/datadog-agent/embedded' as Python home
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/init.go:378 in Initialize) | Using '/opt/datadog-agent/embedded/bin/python3' as Python interpreter path
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/collector/python/init.go:391 in Initialize) | Initializing rtloader with Python 3 /opt/datadog-agent/embedded
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/aggregator/demultiplexer_agent.go:314 in Run) | Starting forwarders
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/aggregator/demultiplexer_agent.go:336 in Run) | not starting the container lifecycle forwarder
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/aggregator/demultiplexer_agent.go:345 in Run) | not starting the container image forwarder
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/aggregator/demultiplexer_agent.go:354 in Run) | not starting the SBOM forwarder
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/aggregator/demultiplexer_agent.go:363 in Run) | Forwarders started
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/aggregator/demultiplexer_agent.go:396 in flushLoop) | flushInterval set to 0: will never flush automatically
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/tagger/collectors/workloadmeta_main.go:115 in stream) | workloadmeta tagger collector started
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:134 in LogMessage) | - | (ddyaml.py:143) | monkey patching yaml.load...
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:134 in LogMessage) | - | (ddyaml.py:147) | monkey patching yaml.load_all...
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/collector/python/datadog_agent.go:134 in LogMessage) | - | (ddyaml.py:151) | monkey patching yaml.dump_all... (affects all yaml dump operations)
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/collector/collector.go:56 in NewCollector) | Embedding Python 3.8.16 (default, Feb 22 2023, 16:02:15) [GCC 5.4.0 20160609]
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/collector.go:57 in NewCollector) | Python Home: /opt/datadog-agent/embedded
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/collector.go:58 in NewCollector) | Python path: ['/opt/datadog-agent/embedded/lib/python38.zip', '/opt/datadog-agent/embedded/lib/python3.8', '/opt/datadog-agent/embedded/lib/python3.8/lib-dynload', '/opt/datadog-agent/embedded/lib/python3.8/site-packages', '/home/openstack_controller', '/opt/datadog-agent/embedded/lib/python3.8/site-packages/setuptools-40.9.0.post20230222-py3.8.egg', '/opt/datadog-agent/embedded/lib/python3.8/site-packages/pip-21.3.1-py3.8.egg', '/opt/datadog-agent/bin/agent/dist', '/opt/datadog-agent/checks.d', '/opt/datadog-agent/bin/agent/dist/checks.d', '/etc/datadog-agent/checks.d']
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/collector.go:66 in NewCollector) | Collector up and running!
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/autodiscovery/providers/config_reader.go:170 in read) | Searching for configuration files at: /etc/datadog-agent/conf.d
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/activemq.d/metrics.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/apache.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/cassandra.d/metrics.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/cert_manager.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/cilium.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/confluent_platform.d/metrics.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/consul.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/container.d/conf.yaml.default
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/containerd.d/conf.yaml.default
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/coredns.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/couch.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/couchbase.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/cpu.d/conf.yaml.default
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/cri.d/conf.yaml.default
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/datadog_cluster_agent.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/disk.d/conf.yaml.default
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/docker.d/conf.yaml.default
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/ecs_fargate.d/conf.yaml.default
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/eks_fargate.d/conf.yaml.default
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/elastic.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/etcd.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/external_dns.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/file_handle.d/conf.yaml.default
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/harbor.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/hazelcast.d/metrics.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/hive.d/metrics.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/hivemq.d/metrics.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/hudi.d/metrics.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/ignite.d/metrics.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/io.d/conf.yaml.default
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/istio.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/jboss_wildfly.d/metrics.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/kafka.d/metrics.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/kube_apiserver_metrics.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/kube_controller_manager.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/kube_dns.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/kube_scheduler.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/kubelet.d/conf.yaml.default
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/kubernetes_state.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/kyototycoon.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/load.d/conf.yaml.default
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/mcache.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/memory.d/conf.yaml.default
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/network.d/conf.yaml.default
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/ntp.d/conf.yaml.default
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/openstack_controller.d/openstack_controller.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/presto.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/presto.d/metrics.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/redisdb.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/riak.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/snmp.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/solr.d/metrics.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/sonarqube.d/metrics.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/tomcat.d/auto_conf.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/tomcat.d/metrics.yaml
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/uptime.d/conf.yaml.default
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/providers/config_reader.go:294 in collectEntry) | Found valid configuration in file: /etc/datadog-agent/conf.d/weblogic.d/metrics.yaml
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/autodiscovery/providers/config_reader.go:170 in read) | Searching for configuration files at: /opt/datadog-agent/bin/agent/dist/conf.d
+2023-03-14 16:38:27 UTC | CORE | WARN | (pkg/autodiscovery/providers/config_reader.go:174 in read) | Skipping, open /opt/datadog-agent/bin/agent/dist/conf.d: no such file or directory
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/autodiscovery/providers/config_reader.go:170 in read) | Searching for configuration files at: 
+2023-03-14 16:38:27 UTC | CORE | WARN | (pkg/autodiscovery/providers/config_reader.go:174 in read) | Skipping, open : no such file or directory
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/autodiscovery/autoconfig.go:296 in addListenerCandidates) | Listener environment was registered
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/autodiscovery/autoconfig.go:310 in initListenerCandidates) | environment listener successfully started
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/autodiscovery/config_poller.go:168 in collectOnce) | file provider: collected 57 new configurations, removed 0
+2023-03-14 16:38:27 UTC | CORE | INFO | (pkg/autodiscovery/autoconfig.go:204 in LoadAndRun) | Started config provider "file"
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/scheduler.go:65 in InitCheckScheduler) | Added JMX Check Loader to Check Scheduler
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/scheduler.go:65 in InitCheckScheduler) | Added Python Check Loader to Check Scheduler
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/scheduler.go:65 in InitCheckScheduler) | Added Core Check Loader to Check Scheduler
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/scheduler.go:171 in getChecks) | Loading check instance for check 'openstack_controller' using default loaders
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/loader.go:123 in Load) | Performing platform loading prep
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (ddyaml.py:87) | Unsafe loading of YAML has been disabled - using safe loader instead in <string>
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (ddyaml.py:87) | Unsafe loading of YAML has been disabled - using safe loader instead in <string>
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/check.go:310 in Configure) | python check configure done openstack_controller
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/loader.go:217 in Load) | python loader: done loading check openstack_controller (version 3.0.0)
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/scheduler.go:182 in getChecks) | Python Check Loader: successfully loaded check 'openstack_controller'
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/check.go:84 in runCheck) | Running python check openstack_controller (version: '3.0.0', id: 'openstack_controller:5d720b2af2e82521')
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (factory.py:12) | creating api object
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (factory.py:13) | instance_config: {'keystone_server_url': 'http://127.0.0.1:8080/identity', 'ssl_verify': False, 'user_name': 'admin', 'user_password': 'password'}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (factory.py:15) | openstack_cloud_name: None
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (factory.py:18) | keystone_server_url: http://127.0.0.1:8080/identity
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (factory.py:29) | creating rest api object
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:23) | creating connection
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:24) | config: {'keystone_server_url': 'http://127.0.0.1:8080/identity', 'user_domain': 'default', 'user_name': 'admin', 'user_password': 'password'}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:8080
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:8080 "GET /identity/v3 HTTP/1.1" 200 291
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:28) | response: {'version': {'id': 'v3.14', 'status': 'stable', 'updated': '2020-04-07T00:00:00Z', 'links': [{'rel': 'self', 'href': 'http://10.164.0.81/identity/v3/'}], 'media-types': [{'base': 'application/json', 'type': 'application/vnd.openstack.identity-v3+json'}]}}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:98) | getting `X-Subject-Token`
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:105) | payload: {"auth": {"identity": {"methods": ["password"], "password": {"user": {"name": "admin", "domain": { "id": "default" }, "password": "password"}}}}}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:8080
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:8080 "POST /identity/v3/auth/tokens HTTP/1.1" 200 4164
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:108) | response: {'token': {'methods': ['password'], 'user': {'domain': {'id': 'default', 'name': 'Default'}, 'id': '***************************272e6', 'name': 'admin', 'password_expires_at': None}, 'audit_ids': ['jVh-I87aT-SVT7-yTguxpg'], 'expires_at': '2023-03-14T09:30:48.000000Z', 'issued_at': '2023-03-14T08:30:48.000000Z', 'project': {'domain': {'id': 'default', 'name': 'Default'}, 'id': '***************************31e6f', 'name': 'admin'}, 'is_domain': False, 'roles': [{'id': '***************************5ecd9', 'name': 'reader'}, {'id': '***************************f1f06', 'name': 'member'}, {'id': '***************************5a3c6', 'name': 'admin'}], 'catalog': [{'endpoints': [{'id': '***************************f913b', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/volume/v3/***************************31e6f', 'region': 'RegionOne'}], 'id': '***************************a86cb', 'type': 'volumev3', 'name': 'cinderv3'}, {'endpoints': [{'id': '***************************6fa36', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/image', 'region': 'RegionOne'}], 'id': '***************************f170f', 'type': 'image', 'name': 'glance'}, {'endpoints': [{'id': '***************************33c58', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1:9696/networking', 'region': 'RegionOne'}], 'id': '***************************ea272', 'type': 'network', 'name': 'neutron'}, {'endpoints': [{'id': '***************************e455b', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/identity', 'region': 'RegionOne'}], 'id': '***************************d3d3f', 'type': 'identity', 'name': 'keystone'}, {'endpoints': [{'id': '***************************8306e', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/placement', 'region': 'RegionOne'}], 'id': '***************************c68bc', 'type': 'placement', 'name': 'placement'}, {'endpoints': [{'id': '***************************36684', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/compute/v2/***************************31e6f', 'region': 'RegionOne'}], 'id': '***************************c45ad', 'type': 'compute_legacy', 'name': 'nova_legacy'}, {'endpoints': [{'id': '***************************1d71e', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/volume/v3/***************************31e6f', 'region': 'RegionOne'}], 'id': '***************************7121b', 'type': 'block-storage', 'name': 'cinder'}, {'endpoints': [{'id': '***************************2f439', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1:8774/compute/v2.1', 'region': 'RegionOne'}], 'id': '***************************bc82a', 'type': 'compute', 'name': 'nova'}]}}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:112) | getting auth/projects
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:8080
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:8080 "GET /identity/v3/auth/projects HTTP/1.1" 200 929
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:115) | response: {'projects': [{'id': '***************************31e6f', 'name': 'admin', 'domain_id': 'default', 'description': 'Bootstrap project for initializing the cloud.', 'enabled': True, 'parent_id': 'default', 'is_domain': False, 'tags': [], 'options': {}, 'links': {'self': 'http://10.164.0.40/identity/v3/projects/***************************31e6f'}}, {'id': '***************************1fa69', 'name': 'demo', 'domain_id': 'default', 'description': '', 'enabled': True, 'parent_id': 'default', 'is_domain': False, 'tags': [], 'options': {}, 'links': {'self': 'http://10.164.0.40/identity/v3/projects/***************************1fa69'}}], 'links': {'next': None, 'self': 'http://10.164.0.40/identity/v3/auth/projects', 'previous': None}}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:132) | payload: {"auth": {"identity": {"methods": ["password"], "password": {"user": {"name": "admin", "domain": { "id": "default" }, "password": "password"}}}, "scope": {"project": {"id": "***************************31e6f"}}}}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:8080
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:8080 "POST /identity/v3/auth/tokens HTTP/1.1" 200 4164
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:134) | project name: admin
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:135) | response: {'token': {'methods': ['password'], 'user': {'domain': {'id': 'default', 'name': 'Default'}, 'id': '***************************272e6', 'name': 'admin', 'password_expires_at': None}, 'audit_ids': ['jVh-I87aT-SVT7-yTguxpg'], 'expires_at': '2023-03-14T09:30:48.000000Z', 'issued_at': '2023-03-14T08:30:48.000000Z', 'project': {'domain': {'id': 'default', 'name': 'Default'}, 'id': '***************************31e6f', 'name': 'admin'}, 'is_domain': False, 'roles': [{'id': '***************************5ecd9', 'name': 'reader'}, {'id': '***************************f1f06', 'name': 'member'}, {'id': '***************************5a3c6', 'name': 'admin'}], 'catalog': [{'endpoints': [{'id': '***************************f913b', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/volume/v3/***************************31e6f', 'region': 'RegionOne'}], 'id': '***************************a86cb', 'type': 'volumev3', 'name': 'cinderv3'}, {'endpoints': [{'id': '***************************6fa36', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/image', 'region': 'RegionOne'}], 'id': '***************************f170f', 'type': 'image', 'name': 'glance'}, {'endpoints': [{'id': '***************************33c58', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1:9696/networking', 'region': 'RegionOne'}], 'id': '***************************ea272', 'type': 'network', 'name': 'neutron'}, {'endpoints': [{'id': '***************************e455b', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/identity', 'region': 'RegionOne'}], 'id': '***************************d3d3f', 'type': 'identity', 'name': 'keystone'}, {'endpoints': [{'id': '***************************8306e', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/placement', 'region': 'RegionOne'}], 'id': '***************************c68bc', 'type': 'placement', 'name': 'placement'}, {'endpoints': [{'id': '***************************36684', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/compute/v2/***************************31e6f', 'region': 'RegionOne'}], 'id': '***************************c45ad', 'type': 'compute_legacy', 'name': 'nova_legacy'}, {'endpoints': [{'id': '***************************1d71e', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/volume/v3/***************************31e6f', 'region': 'RegionOne'}], 'id': '***************************7121b', 'type': 'block-storage', 'name': 'cinder'}, {'endpoints': [{'id': '***************************2f439', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1:8774/compute/v2.1', 'region': 'RegionOne'}], 'id': '***************************bc82a', 'type': 'compute', 'name': 'nova'}]}}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:132) | payload: {"auth": {"identity": {"methods": ["password"], "password": {"user": {"name": "admin", "domain": { "id": "default" }, "password": "password"}}}, "scope": {"project": {"id": "***************************1fa69"}}}}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:8080
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:8080 "POST /identity/v3/auth/tokens HTTP/1.1" 200 4164
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:134) | project name: demo
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:135) | response: {'token': {'methods': ['password'], 'user': {'domain': {'id': 'default', 'name': 'Default'}, 'id': '***************************272e6', 'name': 'admin', 'password_expires_at': None}, 'audit_ids': ['jVh-I87aT-SVT7-yTguxpg'], 'expires_at': '2023-03-14T09:30:48.000000Z', 'issued_at': '2023-03-14T08:30:48.000000Z', 'project': {'domain': {'id': 'default', 'name': 'Default'}, 'id': '***************************31e6f', 'name': 'admin'}, 'is_domain': False, 'roles': [{'id': '***************************5ecd9', 'name': 'reader'}, {'id': '***************************f1f06', 'name': 'member'}, {'id': '***************************5a3c6', 'name': 'admin'}], 'catalog': [{'endpoints': [{'id': '***************************f913b', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/volume/v3/***************************31e6f', 'region': 'RegionOne'}], 'id': '***************************a86cb', 'type': 'volumev3', 'name': 'cinderv3'}, {'endpoints': [{'id': '***************************6fa36', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/image', 'region': 'RegionOne'}], 'id': '***************************f170f', 'type': 'image', 'name': 'glance'}, {'endpoints': [{'id': '***************************33c58', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1:9696/networking', 'region': 'RegionOne'}], 'id': '***************************ea272', 'type': 'network', 'name': 'neutron'}, {'endpoints': [{'id': '***************************e455b', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/identity', 'region': 'RegionOne'}], 'id': '***************************d3d3f', 'type': 'identity', 'name': 'keystone'}, {'endpoints': [{'id': '***************************8306e', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/placement', 'region': 'RegionOne'}], 'id': '***************************c68bc', 'type': 'placement', 'name': 'placement'}, {'endpoints': [{'id': '***************************36684', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/compute/v2/***************************31e6f', 'region': 'RegionOne'}], 'id': '***************************c45ad', 'type': 'compute_legacy', 'name': 'nova_legacy'}, {'endpoints': [{'id': '***************************1d71e', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/volume/v3/***************************31e6f', 'region': 'RegionOne'}], 'id': '***************************7121b', 'type': 'block-storage', 'name': 'cinder'}, {'endpoints': [{'id': '***************************2f439', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1:8774/compute/v2.1', 'region': 'RegionOne'}], 'id': '***************************bc82a', 'type': 'compute', 'name': 'nova'}]}}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:119) | project_auth_tokens: {'***************************31e6f': {'auth_token': 'demo_test', 'name': 'admin', 'catalog': [{'endpoints': [{'id': '***************************f913b', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/volume/v3/***************************31e6f', 'region': 'RegionOne'}], 'id': '***************************a86cb', 'type': 'volumev3', 'name': 'cinderv3'}, {'endpoints': [{'id': '***************************6fa36', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/image', 'region': 'RegionOne'}], 'id': '***************************f170f', 'type': 'image', 'name': 'glance'}, {'endpoints': [{'id': '***************************33c58', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1:9696/networking', 'region': 'RegionOne'}], 'id': '***************************ea272', 'type': 'network', 'name': 'neutron'}, {'endpoints': [{'id': '***************************e455b', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/identity', 'region': 'RegionOne'}], 'id': '***************************d3d3f', 'type': 'identity', 'name': 'keystone'}, {'endpoints': [{'id': '***************************8306e', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/placement', 'region': 'RegionOne'}], 'id': '***************************c68bc', 'type': 'placement', 'name': 'placement'}, {'endpoints': [{'id': '***************************36684', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/compute/v2/***************************31e6f', 'region': 'RegionOne'}], 'id': '***************************c45ad', 'type': 'compute_legacy', 'name': 'nova_legacy'}, {'endpoints': [{'id': '***************************1d71e', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/volume/v3/***************************31e6f', 'region': 'RegionOne'}], 'id': '***************************7121b', 'type': 'block-storage', 'name': 'cinder'}, {'endpoints': [{'id': '***************************2f439', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1:8774/compute/v2.1', 'region': 'RegionOne'}], 'id': '***************************bc82a', 'type': 'compute', 'name': 'nova'}]}, '***************************1fa69': {'auth_token': 'demo_test', 'name': 'demo', 'catalog': [{'endpoints': [{'id': '***************************f913b', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/volume/v3/***************************31e6f', 'region': 'RegionOne'}], 'id': '***************************a86cb', 'type': 'volumev3', 'name': 'cinderv3'}, {'endpoints': [{'id': '***************************6fa36', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/image', 'region': 'RegionOne'}], 'id': '***************************f170f', 'type': 'image', 'name': 'glance'}, {'endpoints': [{'id': '***************************33c58', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1:9696/networking', 'region': 'RegionOne'}], 'id': '***************************ea272', 'type': 'network', 'name': 'neutron'}, {'endpoints': [{'id': '***************************e455b', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/identity', 'region': 'RegionOne'}], 'id': '***************************d3d3f', 'type': 'identity', 'name': 'keystone'}, {'endpoints': [{'id': '***************************8306e', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/placement', 'region': 'RegionOne'}], 'id': '***************************c68bc', 'type': 'placement', 'name': 'placement'}, {'endpoints': [{'id': '***************************36684', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/compute/v2/***************************31e6f', 'region': 'RegionOne'}], 'id': '***************************c45ad', 'type': 'compute_legacy', 'name': 'nova_legacy'}, {'endpoints': [{'id': '***************************1d71e', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1/volume/v3/***************************31e6f', 'region': 'RegionOne'}], 'id': '***************************7121b', 'type': 'block-storage', 'name': 'cinder'}, {'endpoints': [{'id': '***************************2f439', 'interface': 'public', 'region_id': 'RegionOne', 'url': 'http://127.0.0.1:8774/compute/v2.1', 'region': 'RegionOne'}], 'id': '***************************bc82a', 'type': 'compute', 'name': 'nova'}]}}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:33) | getting projects
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (openstack_controller.py:33) | projects: [{'id': '***************************31e6f', 'name': 'admin'}, {'id': '***************************1fa69', 'name': 'demo'}]
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (openstack_controller.py:38) | reporting metrics from project: [id:"***************************31e6f"][name:admin]
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:37) | getting compute response time
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:8774
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:8774 "GET /compute/v2.1 HTTP/1.1" 200 534
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (compute_rest.py:14) | response: {'version': {'id': 'v2.1', 'status': 'CURRENT', 'version': '2.93', 'min_version': '2.1', 'updated': '2013-07-23T11:33:21Z', 'links': [{'rel': 'self', 'href': 'http://10.164.0.40/compute/v2.1/'}, {'rel': 'describedby', 'type': 'text/html', 'href': 'http://docs.openstack.org/'}], 'media-types': [{'base': 'application/json', 'type': 'application/vnd.openstack.compute+json;version=2.1'}]}}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (openstack_controller.py:44) | response_time: 3.7169999999999996
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:58) | getting compute limits
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:145) | cached component of type compute
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:8774
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:8774 "GET /compute/v2.1/limits?project_id=***************************31e6f HTTP/1.1" 200 649
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (compute_rest.py:20) | response: {'limits': {'rate': [], 'absolute': {'maxTotalInstances': 10, 'maxTotalCores': 20, 'maxTotalRAMSize': 51200, 'maxServerMeta': 128, 'maxImageMeta': 128, 'maxPersonality': 5, 'maxPersonalitySize': 10240, 'maxTotalKeypairs': 100, 'maxServerGroups': 10, 'maxServerGroupMembers': 10, 'maxTotalFloatingIps': -1, 'maxSecurityGroups': -1, 'maxSecurityGroupRules': -1, 'totalRAMUsed': 768, 'totalCoresUsed': 3, 'totalInstancesUsed': 3, 'totalFloatingIpsUsed': 0, 'totalSecurityGroupsUsed': 0, 'totalServerGroupsUsed': 0}}}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (openstack_controller.py:47) | compute_limits: {'max_total_instances': 10, 'max_total_cores': 20, 'max_total_ram_size': 51200, 'max_server_meta': 128, 'max_image_meta': 128, 'max_personality': 5, 'max_personality_size': 10240, 'max_total_keypairs': 100, 'max_server_groups': 10, 'max_server_group_members': 10, 'max_total_floating_ips': -1, 'max_security_groups': -1, 'max_security_group_rules': -1, 'total_ram_used': 768, 'total_cores_used': 3, 'total_instances_used': 3, 'total_floating_ips_used': 0, 'total_security_groups_used': 0, 'total_server_groups_used': 0}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:66) | getting compute quotas
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:145) | cached component of type compute
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:8774
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:8774 "GET /compute/v2.1/os-quota-sets/***************************31e6f HTTP/1.1" 200 439
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (compute_rest.py:30) | response: {'quota_set': {'id': '***************************31e6f', 'cores': 20, 'fixed_ips': -1, 'floating_ips': -1, 'injected_file_content_bytes': 10240, 'injected_file_path_bytes': 255, 'injected_files': 5, 'instances': 10, 'key_pairs': 100, 'metadata_items': 128, 'ram': 51200, 'security_group_rules': -1, 'security_groups': -1, 'server_group_members': 10, 'server_groups': 10}}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (openstack_controller.py:51) | compute_quotas: {'cores': 20, 'fixed_ips': -1, 'floating_ips': -1, 'injected_file_content_bytes': 10240, 'injected_file_path_bytes': 255, 'injected_files': 5, 'instances': 10, 'key_pairs': 100, 'metadata_items': 128, 'ram': 51200, 'security_group_rules': -1, 'security_groups': -1, 'server_group_members': 10, 'server_groups': 10}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:74) | getting compute servers
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:145) | cached component of type compute
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:8774
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:8774 "GET /compute/v2.1/servers/detail?project_id=***************************31e6f HTTP/1.1" 200 6362
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (compute_rest.py:40) | response: {'servers': [{'id': '3232a743-5fcf-41f2-8c29-0c84ae18ecb2', 'name': 'server-3', 'status': 'ACTIVE', 'tenant_id': '***************************31e6f', 'user_id': '***************************272e6', 'metadata': {}, 'hostId': '5eb974bb8f2624e7d70b8d676d43cb2e08b56d1db9196d53cf710573', 'image': '', 'flavor': {'id': 'c1', 'links': [{'rel': 'bookmark', 'href': 'http://10.164.0.40/compute/***************************31e6f/flavors/c1'}]}, 'created': '2023-03-13T22:06:29Z', 'updated': '2023-03-13T22:07:01Z', 'addresses': {'shared': [{'version': 4, 'addr': '192.168.233.102', 'OS-EXT-IPS:type': 'fixed', 'OS-EXT-IPS-MAC:mac_addr': 'fa:16:3e:40:f4:40'}]}, 'accessIPv4': '', 'accessIPv6': '', 'links': [{'rel': 'self', 'href': 'http://10.164.0.40/compute/v2.1/***************************31e6f/servers/3232a743-5fcf-41f2-8c29-0c84ae18ecb2'}, {'rel': 'bookmark', 'href': 'http://10.164.0.40/compute/***************************31e6f/servers/3232a743-5fcf-41f2-8c29-0c84ae18ecb2'}], 'OS-DCF:diskConfig': 'AUTO', 'progress': 0, 'OS-EXT-AZ:availability_zone': 'nova', 'config_drive': '', 'key_name': None, 'OS-SRV-USG:launched_at': '2023-03-13T22:07:00.000000', 'OS-SRV-USG:terminated_at': None, 'OS-EXT-SRV-ATTR:host': 'agent-integrations-openstack-default', 'OS-EXT-SRV-ATTR:instance_name': 'instance-00000003', 'OS-EXT-SRV-ATTR:hypervisor_hostname': 'agent-integrations-openstack-default', 'OS-EXT-STS:task_state': None, 'OS-EXT-STS:vm_state': 'active', 'OS-EXT-STS:power_state': 1, 'os-extended-volumes:volumes_attached': [{'id': '5c84efe8-bcb7-4611-84b9-7eea44ea0d45'}], 'security_groups': [{'name': 'default'}]}, {'id': 'aa67f696-095c-4bb3-abe9-0a7747fad92e', 'name': 'server-2', 'status': 'ACTIVE', 'tenant_id': '***************************31e6f', 'user_id': '***************************272e6', 'metadata': {}, 'hostId': '5eb974bb8f2624e7d70b8d676d43cb2e08b56d1db9196d53cf710573', 'image': '', 'flavor': {'id': 'c1', 'links': [{'rel': 'bookmark', 'href': 'http://10.164.0.40/compute/***************************31e6f/flavors/c1'}]}, 'created': '2023-03-13T22:06:29Z', 'updated': '2023-03-13T22:07:05Z', 'addresses': {'shared': [{'version': 4, 'addr': '192.168.233.90', 'OS-EXT-IPS:type': 'fixed', 'OS-EXT-IPS-MAC:mac_addr': 'fa:16:3e:9d:dd:ee'}]}, 'accessIPv4': '', 'accessIPv6': '', 'links': [{'rel': 'self', 'href': 'http://10.164.0.40/compute/v2.1/***************************31e6f/servers/aa67f696-095c-4bb3-abe9-0a7747fad92e'}, {'rel': 'bookmark', 'href': 'http://10.164.0.40/compute/***************************31e6f/servers/aa67f696-095c-4bb3-abe9-0a7747fad92e'}], 'OS-DCF:diskConfig': 'AUTO', 'progress': 0, 'OS-EXT-AZ:availability_zone': 'nova', 'config_drive': '', 'key_name': None, 'OS-SRV-USG:launched_at': '2023-03-13T22:07:04.000000', 'OS-SRV-USG:terminated_at': None, 'OS-EXT-SRV-ATTR:host': 'agent-integrations-openstack-default', 'OS-EXT-SRV-ATTR:instance_name': 'instance-00000002', 'OS-EXT-SRV-ATTR:hypervisor_hostname': 'agent-integrations-openstack-default', 'OS-EXT-STS:task_state': None, 'OS-EXT-STS:vm_state': 'active', 'OS-EXT-STS:power_state': 1, 'os-extended-volumes:volumes_attached': [{'id': 'db4ab31a-d356-44c2-a1a8-99c8260234bc'}], 'security_groups': [{'name': 'default'}]}, {'id': 'f498382f-dbc1-4ed9-9c8d-5ec0aa633171', 'name': 'server-1', 'status': 'ACTIVE', 'tenant_id': '***************************31e6f', 'user_id': '***************************272e6', 'metadata': {}, 'hostId': '5eb974bb8f2624e7d70b8d676d43cb2e08b56d1db9196d53cf710573', 'image': '', 'flavor': {'id': 'c1', 'links': [{'rel': 'bookmark', 'href': 'http://10.164.0.40/compute/***************************31e6f/flavors/c1'}]}, 'created': '2023-03-13T22:06:29Z', 'updated': '2023-03-13T22:07:02Z', 'addresses': {'shared': [{'version': 4, 'addr': '192.168.233.155', 'OS-EXT-IPS:type': 'fixed', 'OS-EXT-IPS-MAC:mac_addr': 'fa:16:3e:2c:08:c1'}]}, 'accessIPv4': '', 'accessIPv6': '', 'links': [{'rel': 'self', 'href': 'http://10.164.0.40/compute/v2.1/***************************31e6f/servers/f498382f-dbc1-4ed9-9c8d-5ec0aa633171'}, {'rel': 'bookmark', 'href': 'http://10.164.0.40/compute/***************************31e6f/servers/f498382f-dbc1-4ed9-9c8d-5ec0aa633171'}], 'OS-DCF:diskConfig': 'AUTO', 'progress': 0, 'OS-EXT-AZ:availability_zone': 'nova', 'config_drive': '', 'key_name': None, 'OS-SRV-USG:launched_at': '2023-03-13T22:07:01.000000', 'OS-SRV-USG:terminated_at': None, 'OS-EXT-SRV-ATTR:host': 'agent-integrations-openstack-default', 'OS-EXT-SRV-ATTR:instance_name': 'instance-00000001', 'OS-EXT-SRV-ATTR:hypervisor_hostname': 'agent-integrations-openstack-default', 'OS-EXT-STS:task_state': None, 'OS-EXT-STS:vm_state': 'active', 'OS-EXT-STS:power_state': 1, 'os-extended-volumes:volumes_attached': [{'id': '314fba93-c303-4447-923c-a6249a86f59d'}], 'security_groups': [{'name': 'default'}]}]}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:8774
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:8774 "GET /compute/v2.1/servers/3232a743-5fcf-41f2-8c29-0c84ae18ecb2/diagnostics HTTP/1.1" 200 783
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (compute_rest.py:46) | response: {'cpu0_time': 13980000000, 'vda_read_req': 842, 'vda_read': 23050240, 'vda_write_req': 21, 'vda_write': 176128, 'vda_errors': -1, 'tap0ced6e65-80_rx': 998, 'tap0ced6e65-80_rx_packets': 9, 'tap0ced6e65-80_rx_errors': 0, 'tap0ced6e65-80_rx_drop': 0, 'tap0ced6e65-80_tx': 726, 'tap0ced6e65-80_tx_packets': 9, 'tap0ced6e65-80_tx_errors': 0, 'tap0ced6e65-80_tx_drop': 0, 'memory': 262144, 'memory-actual': 262144, 'memory-swap_in': 0, 'memory-swap_out': 0, 'memory-major_fault': 14, 'memory-minor_fault': 10895, 'memory-unused': 195948, 'memory-available': 231388, 'memory-usable': 201316, 'memory-last_update': 1678809634, 'memory-disk_caches': 3372, 'memory-hugetlb_pgalloc': 0, 'memory-hugetlb_pgfail': 0, 'memory-rss': 247936}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:8774
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:8774 "GET /compute/v2.1/servers/aa67f696-095c-4bb3-abe9-0a7747fad92e/diagnostics HTTP/1.1" 200 783
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (compute_rest.py:46) | response: {'cpu0_time': 13980000000, 'vda_read_req': 842, 'vda_read': 23050240, 'vda_write_req': 21, 'vda_write': 176128, 'vda_errors': -1, 'tap0ced6e65-80_rx': 998, 'tap0ced6e65-80_rx_packets': 9, 'tap0ced6e65-80_rx_errors': 0, 'tap0ced6e65-80_rx_drop': 0, 'tap0ced6e65-80_tx': 726, 'tap0ced6e65-80_tx_packets': 9, 'tap0ced6e65-80_tx_errors': 0, 'tap0ced6e65-80_tx_drop': 0, 'memory': 262144, 'memory-actual': 262144, 'memory-swap_in': 0, 'memory-swap_out': 0, 'memory-major_fault': 14, 'memory-minor_fault': 10895, 'memory-unused': 195948, 'memory-available': 231388, 'memory-usable': 201316, 'memory-last_update': 1678809634, 'memory-disk_caches': 3372, 'memory-hugetlb_pgalloc': 0, 'memory-hugetlb_pgfail': 0, 'memory-rss': 247936}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:8774
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:8774 "GET /compute/v2.1/servers/f498382f-dbc1-4ed9-9c8d-5ec0aa633171/diagnostics HTTP/1.1" 200 783
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (compute_rest.py:46) | response: {'cpu0_time': 13980000000, 'vda_read_req': 842, 'vda_read': 23050240, 'vda_write_req': 21, 'vda_write': 176128, 'vda_errors': -1, 'tap0ced6e65-80_rx': 998, 'tap0ced6e65-80_rx_packets': 9, 'tap0ced6e65-80_rx_errors': 0, 'tap0ced6e65-80_rx_drop': 0, 'tap0ced6e65-80_tx': 726, 'tap0ced6e65-80_tx_packets': 9, 'tap0ced6e65-80_tx_errors': 0, 'tap0ced6e65-80_tx_drop': 0, 'memory': 262144, 'memory-actual': 262144, 'memory-swap_in': 0, 'memory-swap_out': 0, 'memory-major_fault': 14, 'memory-minor_fault': 10895, 'memory-unused': 195948, 'memory-available': 231388, 'memory-usable': 201316, 'memory-last_update': 1678809634, 'memory-disk_caches': 3372, 'memory-hugetlb_pgalloc': 0, 'memory-hugetlb_pgfail': 0, 'memory-rss': 247936}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (openstack_controller.py:55) | compute_servers: {'3232a743-5fcf-41f2-8c29-0c84ae18ecb2': {'name': 'server-3', 'metrics': {'cpu0_time': 13980000000, 'vda_read_req': 842, 'vda_read': 23050240, 'vda_write_req': 21, 'vda_write': 176128, 'vda_errors': -1, 'tap0ced6e65-80_rx': 998, 'tap0ced6e65-80_rx_packets': 9, 'tap0ced6e65-80_rx_errors': 0, 'tap0ced6e65-80_rx_drop': 0, 'tap0ced6e65-80_tx': 726, 'tap0ced6e65-80_tx_packets': 9, 'tap0ced6e65-80_tx_errors': 0, 'tap0ced6e65-80_tx_drop': 0, 'memory': 262144, 'memory-actual': 262144, 'memory-swap_in': 0, 'memory-swap_out': 0, 'memory-major_fault': 14, 'memory-minor_fault': 10895, 'memory-unused': 195948, 'memory-available': 231388, 'memory-usable': 201316, 'memory-last_update': 1678809634, 'memory-disk_caches': 3372, 'memory-hugetlb_pgalloc': 0, 'memory-hugetlb_pgfail': 0, 'memory-rss': 247936}}, 'aa67f696-095c-4bb3-abe9-0a7747fad92e': {'name': 'server-2', 'metrics': {'cpu0_time': 13980000000, 'vda_read_req': 842, 'vda_read': 23050240, 'vda_write_req': 21, 'vda_write': 176128, 'vda_errors': -1, 'tap0ced6e65-80_rx': 998, 'tap0ced6e65-80_rx_packets': 9, 'tap0ced6e65-80_rx_errors': 0, 'tap0ced6e65-80_rx_drop': 0, 'tap0ced6e65-80_tx': 726, 'tap0ced6e65-80_tx_packets': 9, 'tap0ced6e65-80_tx_errors': 0, 'tap0ced6e65-80_tx_drop': 0, 'memory': 262144, 'memory-actual': 262144, 'memory-swap_in': 0, 'memory-swap_out': 0, 'memory-major_fault': 14, 'memory-minor_fault': 10895, 'memory-unused': 195948, 'memory-available': 231388, 'memory-usable': 201316, 'memory-last_update': 1678809634, 'memory-disk_caches': 3372, 'memory-hugetlb_pgalloc': 0, 'memory-hugetlb_pgfail': 0, 'memory-rss': 247936}}, 'f498382f-dbc1-4ed9-9c8d-5ec0aa633171': {'name': 'server-1', 'metrics': {'cpu0_time': 13980000000, 'vda_read_req': 842, 'vda_read': 23050240, 'vda_write_req': 21, 'vda_write': 176128, 'vda_errors': -1, 'tap0ced6e65-80_rx': 998, 'tap0ced6e65-80_rx_packets': 9, 'tap0ced6e65-80_rx_errors': 0, 'tap0ced6e65-80_rx_drop': 0, 'tap0ced6e65-80_tx': 726, 'tap0ced6e65-80_tx_packets': 9, 'tap0ced6e65-80_tx_errors': 0, 'tap0ced6e65-80_tx_drop': 0, 'memory': 262144, 'memory-actual': 262144, 'memory-swap_in': 0, 'memory-swap_out': 0, 'memory-major_fault': 14, 'memory-minor_fault': 10895, 'memory-unused': 195948, 'memory-available': 231388, 'memory-usable': 201316, 'memory-last_update': 1678809634, 'memory-disk_caches': 3372, 'memory-hugetlb_pgalloc': 0, 'memory-hugetlb_pgfail': 0, 'memory-rss': 247936}}}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:82) | getting compute flavors
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:145) | cached component of type compute
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:8774
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:8774 "GET /compute/v2.1/flavors/detail HTTP/1.1" 200 6225
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (compute_rest.py:62) | response: {'flavors': [{'id': '1', 'name': 'm1.tiny', 'ram': 512, 'disk': 1, 'swap': '', 'OS-FLV-EXT-DATA:ephemeral': 0, 'OS-FLV-DISABLED:disabled': False, 'vcpus': 1, 'os-flavor-access:is_public': True, 'rxtx_factor': 1, 'links': [{'rel': 'self', 'href': 'http://34.91.254.138/compute/v2.1/flavors/1'}, {'rel': 'bookmark', 'href': 'http://34.91.254.138/compute/flavors/1'}]}, {'id': '2', 'name': 'm1.small', 'ram': 2048, 'disk': 20, 'swap': '', 'OS-FLV-EXT-DATA:ephemeral': 0, 'OS-FLV-DISABLED:disabled': False, 'vcpus': 1, 'os-flavor-access:is_public': True, 'rxtx_factor': 1, 'links': [{'rel': 'self', 'href': 'http://34.91.254.138/compute/v2.1/flavors/2'}, {'rel': 'bookmark', 'href': 'http://34.91.254.138/compute/flavors/2'}]}, {'id': '3', 'name': 'm1.medium', 'ram': 4096, 'disk': 40, 'swap': '', 'OS-FLV-EXT-DATA:ephemeral': 0, 'OS-FLV-DISABLED:disabled': False, 'vcpus': 2, 'os-flavor-access:is_public': True, 'rxtx_factor': 1, 'links': [{'rel': 'self', 'href': 'http://34.91.254.138/compute/v2.1/flavors/3'}, {'rel': 'bookmark', 'href': 'http://34.91.254.138/compute/flavors/3'}]}, {'id': '4', 'name': 'm1.large', 'ram': 8192, 'disk': 80, 'swap': '', 'OS-FLV-EXT-DATA:ephemeral': 0, 'OS-FLV-DISABLED:disabled': False, 'vcpus': 4, 'os-flavor-access:is_public': True, 'rxtx_factor': 1, 'links': [{'rel': 'self', 'href': 'http://34.91.254.138/compute/v2.1/flavors/4'}, {'rel': 'bookmark', 'href': 'http://34.91.254.138/compute/flavors/4'}]}, {'id': '42', 'name': 'm1.nano', 'ram': 128, 'disk': 1, 'swap': '', 'OS-FLV-EXT-DATA:ephemeral': 0, 'OS-FLV-DISABLED:disabled': False, 'vcpus': 1, 'os-flavor-access:is_public': True, 'rxtx_factor': 1, 'links': [{'rel': 'self', 'href': 'http://34.91.254.138/compute/v2.1/flavors/42'}, {'rel': 'bookmark', 'href': 'http://34.91.254.138/compute/flavors/42'}]}, {'id': '5', 'name': 'm1.xlarge', 'ram': 16384, 'disk': 160, 'swap': '', 'OS-FLV-EXT-DATA:ephemeral': 0, 'OS-FLV-DISABLED:disabled': False, 'vcpus': 8, 'os-flavor-access:is_public': True, 'rxtx_factor': 1, 'links': [{'rel': 'self', 'href': 'http://34.91.254.138/compute/v2.1/flavors/5'}, {'rel': 'bookmark', 'href': 'http://34.91.254.138/compute/flavors/5'}]}, {'id': '84', 'name': 'm1.micro', 'ram': 192, 'disk': 1, 'swap': '', 'OS-FLV-EXT-DATA:ephemeral': 0, 'OS-FLV-DISABLED:disabled': False, 'vcpus': 1, 'os-flavor-access:is_public': True, 'rxtx_factor': 1, 'links': [{'rel': 'self', 'href': 'http://34.91.254.138/compute/v2.1/flavors/84'}, {'rel': 'bookmark', 'href': 'http://34.91.254.138/compute/flavors/84'}]}, {'id': 'c1', 'name': 'cirros256', 'ram': 256, 'disk': 1, 'swap': '', 'OS-FLV-EXT-DATA:ephemeral': 0, 'OS-FLV-DISABLED:disabled': False, 'vcpus': 1, 'os-flavor-access:is_public': True, 'rxtx_factor': 1, 'links': [{'rel': 'self', 'href': 'http://34.91.254.138/compute/v2.1/flavors/c1'}, {'rel': 'bookmark', 'href': 'http://34.91.254.138/compute/flavors/c1'}]}, {'id': 'd1', 'name': 'ds512M', 'ram': 512, 'disk': 5, 'swap': '', 'OS-FLV-EXT-DATA:ephemeral': 0, 'OS-FLV-DISABLED:disabled': False, 'vcpus': 1, 'os-flavor-access:is_public': True, 'rxtx_factor': 1, 'links': [{'rel': 'self', 'href': 'http://34.91.254.138/compute/v2.1/flavors/d1'}, {'rel': 'bookmark', 'href': 'http://34.91.254.138/compute/flavors/d1'}]}, {'id': 'd2', 'name': 'ds1G', 'ram': 1024, 'disk': 10, 'swap': '', 'OS-FLV-EXT-DATA:ephemeral': 0, 'OS-FLV-DISABLED:disabled': False, 'vcpus': 1, 'os-flavor-access:is_public': True, 'rxtx_factor': 1, 'links': [{'rel': 'self', 'href': 'http://34.91.254.138/compute/v2.1/flavors/d2'}, {'rel': 'bookmark', 'href': 'http://34.91.254.138/compute/flavors/d2'}]}, {'id': 'd3', 'name': 'ds2G', 'ram': 2048, 'disk': 10, 'swap': '', 'OS-FLV-EXT-DATA:ephemeral': 0, 'OS-FLV-DISABLED:disabled': False, 'vcpus': 2, 'os-flavor-access:is_public': True, 'rxtx_factor': 1, 'links': [{'rel': 'self', 'href': 'http://34.91.254.138/compute/v2.1/flavors/d3'}, {'rel': 'bookmark', 'href': 'http://34.91.254.138/compute/flavors/d3'}]}, {'id': 'd4', 'name': 'ds4G', 'ram': 4096, 'disk': 20, 'swap': '', 'OS-FLV-EXT-DATA:ephemeral': 0, 'OS-FLV-DISABLED:disabled': False, 'vcpus': 4, 'os-flavor-access:is_public': True, 'rxtx_factor': 1, 'links': [{'rel': 'self', 'href': 'http://34.91.254.138/compute/v2.1/flavors/d4'}, {'rel': 'bookmark', 'href': 'http://34.91.254.138/compute/flavors/d4'}]}]}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (openstack_controller.py:64) | compute_flavors: {'1': {'name': 'm1.tiny', 'metrics': {'ram': 512, 'disk': 1, 'os-flv-ext-data:ephemeral': 0, 'os-flv-disabled:disabled': False, 'vcpus': 1, 'os-flavor-access:is_public': True, 'rxtx_factor': 1}}, '2': {'name': 'm1.small', 'metrics': {'ram': 2048, 'disk': 20, 'os-flv-ext-data:ephemeral': 0, 'os-flv-disabled:disabled': False, 'vcpus': 1, 'os-flavor-access:is_public': True, 'rxtx_factor': 1}}, '3': {'name': 'm1.medium', 'metrics': {'ram': 4096, 'disk': 40, 'os-flv-ext-data:ephemeral': 0, 'os-flv-disabled:disabled': False, 'vcpus': 2, 'os-flavor-access:is_public': True, 'rxtx_factor': 1}}, '4': {'name': 'm1.large', 'metrics': {'ram': 8192, 'disk': 80, 'os-flv-ext-data:ephemeral': 0, 'os-flv-disabled:disabled': False, 'vcpus': 4, 'os-flavor-access:is_public': True, 'rxtx_factor': 1}}, '42': {'name': 'm1.nano', 'metrics': {'ram': 128, 'disk': 1, 'os-flv-ext-data:ephemeral': 0, 'os-flv-disabled:disabled': False, 'vcpus': 1, 'os-flavor-access:is_public': True, 'rxtx_factor': 1}}, '5': {'name': 'm1.xlarge', 'metrics': {'ram': 16384, 'disk': 160, 'os-flv-ext-data:ephemeral': 0, 'os-flv-disabled:disabled': False, 'vcpus': 8, 'os-flavor-access:is_public': True, 'rxtx_factor': 1}}, '84': {'name': 'm1.micro', 'metrics': {'ram': 192, 'disk': 1, 'os-flv-ext-data:ephemeral': 0, 'os-flv-disabled:disabled': False, 'vcpus': 1, 'os-flavor-access:is_public': True, 'rxtx_factor': 1}}, 'c1': {'name': 'cirros256', 'metrics': {'ram': 256, 'disk': 1, 'os-flv-ext-data:ephemeral': 0, 'os-flv-disabled:disabled': False, 'vcpus': 1, 'os-flavor-access:is_public': True, 'rxtx_factor': 1}}, 'd1': {'name': 'ds512M', 'metrics': {'ram': 512, 'disk': 5, 'os-flv-ext-data:ephemeral': 0, 'os-flv-disabled:disabled': False, 'vcpus': 1, 'os-flavor-access:is_public': True, 'rxtx_factor': 1}}, 'd2': {'name': 'ds1G', 'metrics': {'ram': 1024, 'disk': 10, 'os-flv-ext-data:ephemeral': 0, 'os-flv-disabled:disabled': False, 'vcpus': 1, 'os-flavor-access:is_public': True, 'rxtx_factor': 1}}, 'd3': {'name': 'ds2G', 'metrics': {'ram': 2048, 'disk': 10, 'os-flv-ext-data:ephemeral': 0, 'os-flv-disabled:disabled': False, 'vcpus': 2, 'os-flavor-access:is_public': True, 'rxtx_factor': 1}}, 'd4': {'name': 'ds4G', 'metrics': {'ram': 4096, 'disk': 20, 'os-flv-ext-data:ephemeral': 0, 'os-flv-disabled:disabled': False, 'vcpus': 4, 'os-flavor-access:is_public': True, 'rxtx_factor': 1}}}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:44) | getting network response time
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:9696
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:9696 "GET /networking HTTP/1.1" 200 213
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (network_rest.py:13) | response: {'versions': [{'id': 'v2.0', 'status': 'CURRENT', 'links': [{'rel': 'self', 'href': 'http://10.164.0.40:9696/networking/v2.0/'}]}]}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (openstack_controller.py:78) | response_time: 6.589
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:90) | getting networking quotas
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:145) | cached component of type network
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:9696
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:9696 "GET /networking/v2.0/quotas/***************************31e6f HTTP/1.1" 200 218
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (network_rest.py:19) | response: {'quota': {'network': 100, 'subnet': 100, 'subnetpool': -1, 'port': 500, 'router': 10, 'floatingip': 50, 'rbac_policy': 10, 'security_group': 10, 'security_group_rule': 100}}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (openstack_controller.py:81) | networking_quotas: {'network': 100, 'subnet': 100, 'subnetpool': -1, 'port': 500, 'router': 10, 'floatingip': 50, 'rbac_policy': 10, 'security_group': 10, 'security_group_rule': 100}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:51) | getting baremetal response time
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (openstack_controller.py:38) | reporting metrics from project: [id:"***************************1fa69"][name:demo]
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:37) | getting compute response time
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:8774
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:8774 "GET /compute/v2.1 HTTP/1.1" 200 534
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (compute_rest.py:14) | response: {'version': {'id': 'v2.1', 'status': 'CURRENT', 'version': '2.93', 'min_version': '2.1', 'updated': '2013-07-23T11:33:21Z', 'links': [{'rel': 'self', 'href': 'http://10.164.0.40/compute/v2.1/'}, {'rel': 'describedby', 'type': 'text/html', 'href': 'http://docs.openstack.org/'}], 'media-types': [{'base': 'application/json', 'type': 'application/vnd.openstack.compute+json;version=2.1'}]}}
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (openstack_controller.py:44) | response_time: 2.957
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:58) | getting compute limits
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | openstack_controller:5d720b2af2e82521 | (api_rest.py:145) | cached component of type compute
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:228) | Starting new HTTP connection (1): 127.0.0.1:8774
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:8774 "GET /compute/v2.1/limits?project_id=***************************1fa69 HTTP/1.1" 308 57
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/collector/python/datadog_agent.go:136 in LogMessage) | - | (connectionpool.py:456) | http://127.0.0.1:8774 "GET /compute/v2.1/limits/ HTTP/1.1" 200 None
+=== Series ===
+[
+  {
+    "metric": "openstack.nova.quota_sets.security_groups",
+    "points": [
+      [
+        1678811907,
+        -1
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.ram",
+    "points": [
+      [
+        1678811907,
+        192
+      ]
+    ],
+    "tags": [
+      "flavor_id:84",
+      "flavor_name:m1.micro",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-ext-data:ephemeral",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:c1",
+      "flavor_name:cirros256",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.disk",
+    "points": [
+      [
+        1678811907,
+        40
+      ]
+    ],
+    "tags": [
+      "flavor_id:3",
+      "flavor_name:m1.medium",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.response_time",
+    "points": [
+      [
+        1678811907,
+        3.7169999999999996
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_rx",
+    "points": [
+      [
+        1678811907,
+        998
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.rxtx_factor",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:1",
+      "flavor_name:m1.tiny",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.disk",
+    "points": [
+      [
+        1678811907,
+        10
+      ]
+    ],
+    "tags": [
+      "flavor_id:d3",
+      "flavor_name:ds2G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-minor_fault",
+    "points": [
+      [
+        1678811907,
+        10895
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.vcpus",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:c1",
+      "flavor_name:cirros256",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.rxtx_factor",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:d1",
+      "flavor_name:ds512M",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.ram",
+    "points": [
+      [
+        1678811907,
+        2048
+      ]
+    ],
+    "tags": [
+      "flavor_id:d3",
+      "flavor_name:ds2G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-swap_in",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-ext-data:ephemeral",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:84",
+      "flavor_name:m1.micro",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-usable",
+    "points": [
+      [
+        1678811907,
+        201316
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-ext-data:ephemeral",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:d1",
+      "flavor_name:ds512M",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.neutron.quotas.rbac_policy",
+    "points": [
+      [
+        1678811907,
+        10
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory",
+    "points": [
+      [
+        1678811907,
+        262144
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_rx_packets",
+    "points": [
+      [
+        1678811907,
+        9
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-ext-data:ephemeral",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:3",
+      "flavor_name:m1.medium",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.vcpus",
+    "points": [
+      [
+        1678811907,
+        4
+      ]
+    ],
+    "tags": [
+      "flavor_id:4",
+      "flavor_name:m1.large",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_rx_errors",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_tx_packets",
+    "points": [
+      [
+        1678811907,
+        9
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.max_image_meta",
+    "points": [
+      [
+        1678811907,
+        128
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.total_instances_used",
+    "points": [
+      [
+        1678811907,
+        3
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.vda_write",
+    "points": [
+      [
+        1678811907,
+        176128
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_tx_drop",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-major_fault",
+    "points": [
+      [
+        1678811907,
+        14
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_tx_drop",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_tx",
+    "points": [
+      [
+        1678811907,
+        726
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.vcpus",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:42",
+      "flavor_name:m1.nano",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flavor-access:is_public",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:d2",
+      "flavor_name:ds1G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.vcpus",
+    "points": [
+      [
+        1678811907,
+        2
+      ]
+    ],
+    "tags": [
+      "flavor_id:d3",
+      "flavor_name:ds2G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.total_cores_used",
+    "points": [
+      [
+        1678811907,
+        3
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-minor_fault",
+    "points": [
+      [
+        1678811907,
+        10895
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.vcpus",
+    "points": [
+      [
+        1678811907,
+        8
+      ]
+    ],
+    "tags": [
+      "flavor_id:5",
+      "flavor_name:m1.xlarge",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.max_total_floating_ips",
+    "points": [
+      [
+        1678811907,
+        -1
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_tx_errors",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-minor_fault",
+    "points": [
+      [
+        1678811907,
+        10895
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_tx_errors",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-disk_caches",
+    "points": [
+      [
+        1678811907,
+        3372
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-last_update",
+    "points": [
+      [
+        1678811907,
+        1.678809634e+09
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flavor-access:is_public",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:3",
+      "flavor_name:m1.medium",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.rxtx_factor",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:42",
+      "flavor_name:m1.nano",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.max_security_group_rules",
+    "points": [
+      [
+        1678811907,
+        -1
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.quota_sets.floating_ips",
+    "points": [
+      [
+        1678811907,
+        -1
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-swap_in",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.neutron.response_time",
+    "points": [
+      [
+        1678811907,
+        6.589
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.vda_write",
+    "points": [
+      [
+        1678811907,
+        176128
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-major_fault",
+    "points": [
+      [
+        1678811907,
+        14
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.ram",
+    "points": [
+      [
+        1678811907,
+        4096
+      ]
+    ],
+    "tags": [
+      "flavor_id:3",
+      "flavor_name:m1.medium",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.quota_sets.key_pairs",
+    "points": [
+      [
+        1678811907,
+        100
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.vda_write_req",
+    "points": [
+      [
+        1678811907,
+        21
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.disk",
+    "points": [
+      [
+        1678811907,
+        20
+      ]
+    ],
+    "tags": [
+      "flavor_id:2",
+      "flavor_name:m1.small",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.max_server_group_members",
+    "points": [
+      [
+        1678811907,
+        10
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-hugetlb_pgfail",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.vda_read_req",
+    "points": [
+      [
+        1678811907,
+        842
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.disk",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:1",
+      "flavor_name:m1.tiny",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.vda_read",
+    "points": [
+      [
+        1678811907,
+        2.305024e+07
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-ext-data:ephemeral",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:d2",
+      "flavor_name:ds1G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.max_security_groups",
+    "points": [
+      [
+        1678811907,
+        -1
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-swap_out",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.rxtx_factor",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:d2",
+      "flavor_name:ds1G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.neutron.quotas.port",
+    "points": [
+      [
+        1678811907,
+        500
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.cpu0_time",
+    "points": [
+      [
+        1678811907,
+        1.398e+10
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.disk",
+    "points": [
+      [
+        1678811907,
+        160
+      ]
+    ],
+    "tags": [
+      "flavor_id:5",
+      "flavor_name:m1.xlarge",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.neutron.quotas.security_group_rule",
+    "points": [
+      [
+        1678811907,
+        100
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.quota_sets.server_group_members",
+    "points": [
+      [
+        1678811907,
+        10
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-available",
+    "points": [
+      [
+        1678811907,
+        231388
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_rx_drop",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flavor-access:is_public",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:4",
+      "flavor_name:m1.large",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.vda_read",
+    "points": [
+      [
+        1678811907,
+        2.305024e+07
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_tx_errors",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flavor-access:is_public",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:d4",
+      "flavor_name:ds4G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.vda_read",
+    "points": [
+      [
+        1678811907,
+        2.305024e+07
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-disk_caches",
+    "points": [
+      [
+        1678811907,
+        3372
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.max_total_keypairs",
+    "points": [
+      [
+        1678811907,
+        100
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_rx_packets",
+    "points": [
+      [
+        1678811907,
+        9
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.ram",
+    "points": [
+      [
+        1678811907,
+        8192
+      ]
+    ],
+    "tags": [
+      "flavor_id:4",
+      "flavor_name:m1.large",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.ram",
+    "points": [
+      [
+        1678811907,
+        4096
+      ]
+    ],
+    "tags": [
+      "flavor_id:d4",
+      "flavor_name:ds4G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_rx_errors",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-usable",
+    "points": [
+      [
+        1678811907,
+        201316
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.vda_errors",
+    "points": [
+      [
+        1678811907,
+        -1
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-hugetlb_pgfail",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.rxtx_factor",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:3",
+      "flavor_name:m1.medium",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-disabled:disabled",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:d4",
+      "flavor_name:ds4G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-unused",
+    "points": [
+      [
+        1678811907,
+        195948
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-swap_out",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.neutron.quotas.security_group",
+    "points": [
+      [
+        1678811907,
+        10
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_tx_packets",
+    "points": [
+      [
+        1678811907,
+        9
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-disabled:disabled",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:4",
+      "flavor_name:m1.large",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.disk",
+    "points": [
+      [
+        1678811907,
+        5
+      ]
+    ],
+    "tags": [
+      "flavor_id:d1",
+      "flavor_name:ds512M",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.quota_sets.injected_file_content_bytes",
+    "points": [
+      [
+        1678811907,
+        10240
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flavor-access:is_public",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:84",
+      "flavor_name:m1.micro",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-hugetlb_pgfail",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-hugetlb_pgalloc",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flavor-access:is_public",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:2",
+      "flavor_name:m1.small",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-disabled:disabled",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:3",
+      "flavor_name:m1.medium",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.ram",
+    "points": [
+      [
+        1678811907,
+        128
+      ]
+    ],
+    "tags": [
+      "flavor_id:42",
+      "flavor_name:m1.nano",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.rxtx_factor",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:d3",
+      "flavor_name:ds2G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.vcpus",
+    "points": [
+      [
+        1678811907,
+        2
+      ]
+    ],
+    "tags": [
+      "flavor_id:3",
+      "flavor_name:m1.medium",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-disabled:disabled",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:d3",
+      "flavor_name:ds2G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.vda_read_req",
+    "points": [
+      [
+        1678811907,
+        842
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-ext-data:ephemeral",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:2",
+      "flavor_name:m1.small",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.neutron.quotas.subnet",
+    "points": [
+      [
+        1678811907,
+        100
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.max_personality_size",
+    "points": [
+      [
+        1678811907,
+        10240
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.rxtx_factor",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:5",
+      "flavor_name:m1.xlarge",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.max_total_cores",
+    "points": [
+      [
+        1678811907,
+        20
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.vda_write",
+    "points": [
+      [
+        1678811907,
+        176128
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.ram",
+    "points": [
+      [
+        1678811907,
+        2048
+      ]
+    ],
+    "tags": [
+      "flavor_id:2",
+      "flavor_name:m1.small",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.max_server_groups",
+    "points": [
+      [
+        1678811907,
+        10
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.disk",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:42",
+      "flavor_name:m1.nano",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-ext-data:ephemeral",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:5",
+      "flavor_name:m1.xlarge",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.max_server_meta",
+    "points": [
+      [
+        1678811907,
+        128
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-last_update",
+    "points": [
+      [
+        1678811907,
+        1.678809634e+09
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.neutron.quotas.network",
+    "points": [
+      [
+        1678811907,
+        100
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-rss",
+    "points": [
+      [
+        1678811907,
+        247936
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.vcpus",
+    "points": [
+      [
+        1678811907,
+        4
+      ]
+    ],
+    "tags": [
+      "flavor_id:d4",
+      "flavor_name:ds4G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.controller",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.quota_sets.injected_files",
+    "points": [
+      [
+        1678811907,
+        5
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.vcpus",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:1",
+      "flavor_name:m1.tiny",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.vda_read_req",
+    "points": [
+      [
+        1678811907,
+        842
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_tx_drop",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.vcpus",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:d2",
+      "flavor_name:ds1G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-disabled:disabled",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:1",
+      "flavor_name:m1.tiny",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flavor-access:is_public",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:5",
+      "flavor_name:m1.xlarge",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-rss",
+    "points": [
+      [
+        1678811907,
+        247936
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_rx",
+    "points": [
+      [
+        1678811907,
+        998
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-ext-data:ephemeral",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:1",
+      "flavor_name:m1.tiny",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-usable",
+    "points": [
+      [
+        1678811907,
+        201316
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-actual",
+    "points": [
+      [
+        1678811907,
+        262144
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flavor-access:is_public",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:42",
+      "flavor_name:m1.nano",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-disabled:disabled",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:d2",
+      "flavor_name:ds1G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.neutron.quotas.subnetpool",
+    "points": [
+      [
+        1678811907,
+        -1
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.quota_sets.metadata_items",
+    "points": [
+      [
+        1678811907,
+        128
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.vda_errors",
+    "points": [
+      [
+        1678811907,
+        -1
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-rss",
+    "points": [
+      [
+        1678811907,
+        247936
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.quota_sets.security_group_rules",
+    "points": [
+      [
+        1678811907,
+        -1
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.rxtx_factor",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:84",
+      "flavor_name:m1.micro",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.rxtx_factor",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:c1",
+      "flavor_name:cirros256",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.vcpus",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:d1",
+      "flavor_name:ds512M",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-ext-data:ephemeral",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:d4",
+      "flavor_name:ds4G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.ram",
+    "points": [
+      [
+        1678811907,
+        1024
+      ]
+    ],
+    "tags": [
+      "flavor_id:d2",
+      "flavor_name:ds1G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-major_fault",
+    "points": [
+      [
+        1678811907,
+        14
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flavor-access:is_public",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:c1",
+      "flavor_name:cirros256",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flavor-access:is_public",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:d3",
+      "flavor_name:ds2G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.max_total_ram_size",
+    "points": [
+      [
+        1678811907,
+        51200
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.max_personality",
+    "points": [
+      [
+        1678811907,
+        5
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.ram",
+    "points": [
+      [
+        1678811907,
+        256
+      ]
+    ],
+    "tags": [
+      "flavor_id:c1",
+      "flavor_name:cirros256",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_tx",
+    "points": [
+      [
+        1678811907,
+        726
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.rxtx_factor",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:2",
+      "flavor_name:m1.small",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-hugetlb_pgalloc",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.rxtx_factor",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:4",
+      "flavor_name:m1.large",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.ram",
+    "points": [
+      [
+        1678811907,
+        16384
+      ]
+    ],
+    "tags": [
+      "flavor_id:5",
+      "flavor_name:m1.xlarge",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-disabled:disabled",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:5",
+      "flavor_name:m1.xlarge",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flavor-access:is_public",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:1",
+      "flavor_name:m1.tiny",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.disk",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:84",
+      "flavor_name:m1.micro",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.ram",
+    "points": [
+      [
+        1678811907,
+        512
+      ]
+    ],
+    "tags": [
+      "flavor_id:d1",
+      "flavor_name:ds512M",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_tx",
+    "points": [
+      [
+        1678811907,
+        726
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-hugetlb_pgalloc",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.ram",
+    "points": [
+      [
+        1678811907,
+        512
+      ]
+    ],
+    "tags": [
+      "flavor_id:1",
+      "flavor_name:m1.tiny",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.cpu0_time",
+    "points": [
+      [
+        1678811907,
+        1.398e+10
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.quota_sets.cores",
+    "points": [
+      [
+        1678811907,
+        20
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_rx_packets",
+    "points": [
+      [
+        1678811907,
+        9
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.rxtx_factor",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:d4",
+      "flavor_name:ds4G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.total_floating_ips_used",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.vda_errors",
+    "points": [
+      [
+        1678811907,
+        -1
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.total_ram_used",
+    "points": [
+      [
+        1678811907,
+        768
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_rx_drop",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_rx_errors",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-available",
+    "points": [
+      [
+        1678811907,
+        231388
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.max_total_instances",
+    "points": [
+      [
+        1678811907,
+        10
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_tx_packets",
+    "points": [
+      [
+        1678811907,
+        9
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-actual",
+    "points": [
+      [
+        1678811907,
+        262144
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.vcpus",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:2",
+      "flavor_name:m1.small",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.vda_write_req",
+    "points": [
+      [
+        1678811907,
+        21
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory",
+    "points": [
+      [
+        1678811907,
+        262144
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.neutron.quotas.floatingip",
+    "points": [
+      [
+        1678811907,
+        50
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_rx",
+    "points": [
+      [
+        1678811907,
+        998
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.disk",
+    "points": [
+      [
+        1678811907,
+        80
+      ]
+    ],
+    "tags": [
+      "flavor_id:4",
+      "flavor_name:m1.large",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.quota_sets.instances",
+    "points": [
+      [
+        1678811907,
+        10
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.vda_write_req",
+    "points": [
+      [
+        1678811907,
+        21
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.disk",
+    "points": [
+      [
+        1678811907,
+        10
+      ]
+    ],
+    "tags": [
+      "flavor_id:d2",
+      "flavor_name:ds1G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.total_security_groups_used",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-swap_in",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.neutron.quotas.router",
+    "points": [
+      [
+        1678811907,
+        10
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.disk",
+    "points": [
+      [
+        1678811907,
+        20
+      ]
+    ],
+    "tags": [
+      "flavor_id:d4",
+      "flavor_name:ds4G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.limits.total_server_groups_used",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-unused",
+    "points": [
+      [
+        1678811907,
+        195948
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.vcpus",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:84",
+      "flavor_name:m1.micro",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-disabled:disabled",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:d1",
+      "flavor_name:ds512M",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.quota_sets.fixed_ips",
+    "points": [
+      [
+        1678811907,
+        -1
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.quota_sets.ram",
+    "points": [
+      [
+        1678811907,
+        51200
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.disk",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:c1",
+      "flavor_name:cirros256",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.response_time",
+    "points": [
+      [
+        1678811907,
+        2.957
+      ]
+    ],
+    "tags": [
+      "project_id:c165a94e230a4390af02d7394fb1fa69",
+      "project_name:demo"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-ext-data:ephemeral",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:d3",
+      "flavor_name:ds2G",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-swap_out",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-disk_caches",
+    "points": [
+      [
+        1678811907,
+        3372
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-disabled:disabled",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:2",
+      "flavor_name:m1.small",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-ext-data:ephemeral",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:42",
+      "flavor_name:m1.nano",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-unused",
+    "points": [
+      [
+        1678811907,
+        195948
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-available",
+    "points": [
+      [
+        1678811907,
+        231388
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "server_name:server-2"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.tap0ced6e65-80_rx_drop",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-disabled:disabled",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:84",
+      "flavor_name:m1.micro",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-actual",
+    "points": [
+      [
+        1678811907,
+        262144
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-ext-data:ephemeral",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:4",
+      "flavor_name:m1.large",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory",
+    "points": [
+      [
+        1678811907,
+        262144
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-disabled:disabled",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:42",
+      "flavor_name:m1.nano",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flv-disabled:disabled",
+    "points": [
+      [
+        1678811907,
+        0
+      ]
+    ],
+    "tags": [
+      "flavor_id:c1",
+      "flavor_name:cirros256",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.flavors.os-flavor-access:is_public",
+    "points": [
+      [
+        1678811907,
+        1
+      ]
+    ],
+    "tags": [
+      "flavor_id:d1",
+      "flavor_name:ds512M",
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.quota_sets.injected_file_path_bytes",
+    "points": [
+      [
+        1678811907,
+        255
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.quota_sets.server_groups",
+    "points": [
+      [
+        1678811907,
+        10
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.memory-last_update",
+    "points": [
+      [
+        1678811907,
+        1.678809634e+09
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "server_name:server-3"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  },
+  {
+    "metric": "openstack.nova.servers.cpu0_time",
+    "points": [
+      [
+        1678811907,
+        1.398e+10
+      ]
+    ],
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin",
+      "server_id:f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "server_name:server-1"
+    ],
+    "host": "COMP-KK6Y27KM0D",
+    "type": "gauge",
+    "interval": 0,
+    "source_type_name": "System"
+  }
+]
+=== Service Checks ===
+[
+  {
+    "check": "openstack.keystone.api.up",
+    "host_name": "COMP-KK6Y27KM0D",
+    "timestamp": 1678811907,
+    "status": 0,
+    "message": "",
+    "tags": []
+  },
+  {
+    "check": "openstack.nova.api.up",
+    "host_name": "COMP-KK6Y27KM0D",
+    "timestamp": 1678811907,
+    "status": 0,
+    "message": "",
+    "tags": []
+  },
+  {
+    "check": "openstack.neutron.api.up",
+    "host_name": "COMP-KK6Y27KM0D",
+    "timestamp": 1678811907,
+    "status": 0,
+    "message": "",
+    "tags": []
+  },
+  {
+    "check": "openstack.ironic.api.up",
+    "host_name": "COMP-KK6Y27KM0D",
+    "timestamp": 1678811907,
+    "status": 2,
+    "message": "",
+    "tags": [
+      "project_id:667aee39f2b64032b4d7585809d31e6f",
+      "project_name:admin"
+    ]
+  },
+  {
+    "check": "openstack.nova.api.up",
+    "host_name": "COMP-KK6Y27KM0D",
+    "timestamp": 1678811907,
+    "status": 0,
+    "message": "",
+    "tags": []
+  }
+]
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:168 in Purge) | purged DBM channel dbm-activity: 0 events
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:168 in Purge) | purged DBM channel dbm-samples: 0 events
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/epforwarder/epforwarder.go:168 in Purge) | purged DBM channel dbm-metrics: 0 events
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for AWS Cloud Provider
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for AWS Cloud Provider
+2023-03-14 16:38:27 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for Alibaba Cloud Provider
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/cloudproviders/cloudproviders.go:108 in GetHostAliases) | no Alibaba Host Alias: Alibaba HostAliases: unable to query metadata endpoint: Get "http://100.100.100.200/latest/meta-data/instance-id": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for AWS Cloud Provider
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/ec2/ec2.go:121 in GetHostAliases) | failed to get instance ID from metadata API for Host Alias: Get "http://169.254.169.254/latest/meta-data/instance-id": dial tcp 169.254.169.254:80: connect: connection refused
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/ec2/ec2.go:128 in GetHostAliases) | failed to get instance ID from DMI for Host Alias: board vendor is not AWS
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for Azure Cloud Provider
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/cloudproviders/cloudproviders.go:108 in GetHostAliases) | no Azure Host Alias: Azure HostAliases: unable to query metadata endpoint: Get "http://169.254.169.254/metadata/instance/compute/vmId?api-version=2017-04-02&format=text": dial tcp 169.254.169.254:80: connect: connection refused
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for GCP Cloud Provider
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/cloudproviders/gce/gce.go:62 in GetHostAliases) | failed to get hostname to use as Host Alias: unable to retrieve hostname from GCE: GCE metadata API error: Get "http://169.254.169.254/computeMetadata/v1/instance/hostname": dial tcp 169.254.169.254:80: connect: connection refused
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for GCP Cloud Provider
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/cloudproviders/gce/gce.go:68 in GetHostAliases) | failed to get Host Alias: unable to retrieve instance name and hostname from GCE: GCE metadata API error: Get "http://169.254.169.254/computeMetadata/v1/instance/name": dial tcp 169.254.169.254:80: connect: connection refused
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/cloudproviders/cloudfoundry/cloudfoundry.go:29 in GetHostAliases) | cloud_foundry is not enabled in the conf: no cloudfoudry host alias
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/cloudproviders/cloudproviders.go:108 in GetHostAliases) | no kubelet Host Alias: couldn't extract a host alias from the kubelet: %!s(<nil>)
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/config/config.go:1918 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, skipping Tencent Cloud Provider
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/cloudproviders/cloudproviders.go:108 in GetHostAliases) | no Tencent Host Alias: unable to get TencentCloud CVM instanceID: cloud provider is disabled by configuration
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for Oracle Cloud Provider
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/cloudproviders/cloudproviders.go:108 in GetHostAliases) | no Oracle Host Alias: Oracle HostAliases: unable to query metadata endpoint: Get "http://169.254.169.254/opc/v2/instance/id": dial tcp 169.254.169.254:80: connect: connection refused
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for IBM Cloud Provider
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/cloudproviders/cloudproviders.go:108 in GetHostAliases) | no IBM Host Alias: IBM HostAliases: unable to get a token: Put "http://169.254.169.254/instance_identity/v1/token?version=2022-03-08": dial tcp 169.254.169.254:80: connect: connection refused
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/kubernetes/clustername/clustername.go:91 in getClusterName) | Trying to auto discover the cluster name from the gce API...
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for GCP Cloud Provider
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/kubernetes/clustername/clustername.go:94 in getClusterName) | Unable to auto discover the cluster name from the gce API: unable to retrieve clustername from GCE: GCE metadata API error: Get "http://169.254.169.254/computeMetadata/v1/instance/attributes/cluster-name": dial tcp 169.254.169.254:80: connect: connection refused
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/kubernetes/clustername/clustername.go:91 in getClusterName) | Trying to auto discover the cluster name from the azure API...
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for Azure Cloud Provider
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/kubernetes/clustername/clustername.go:94 in getClusterName) | Unable to auto discover the cluster name from the azure API: unable to query metadata endpoint: Get "http://169.254.169.254/metadata/instance/compute/resourceGroupName?api-version=2017-08-01&format=text": dial tcp 169.254.169.254:80: connect: connection refused
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/kubernetes/clustername/clustername.go:91 in getClusterName) | Trying to auto discover the cluster name from the ec2 API...
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for AWS Cloud Provider
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for AWS Cloud Provider
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/kubernetes/clustername/clustername.go:94 in getClusterName) | Unable to auto discover the cluster name from the ec2 API: unable to get tags from aws and cache is empty: unable to fetch EC2 API to get identity: Get "http://169.254.169.254/latest/dynamic/instance-identity/document/": dial tcp 169.254.169.254:80: connect: connection refused
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for GCP Cloud Provider
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for GCP Cloud Provider
+2023-03-14 16:38:28 UTC | CORE | WARN | (pkg/util/cloudproviders/gce/gce_tags.go:50 in getCachedTags) | unable to get tags from gce and cache is empty: GCE metadata API error: Get "http://169.254.169.254/computeMetadata/v1/?recursive=true": dial tcp 169.254.169.254:80: connect: connection refused
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/metadata/host/host_tags.go:128 in GetHostTags) | No gce host tags, remaining attempts: 0, err: unable to get tags from gce and cache is empty: GCE metadata API error: Get "http://169.254.169.254/computeMetadata/v1/?recursive=true": dial tcp 169.254.169.254:80: connect: connection refused
+2023-03-14 16:38:28 UTC | CORE | INFO | (pkg/metadata/host/host_tags.go:130 in GetHostTags) | Unable to get host tags from source: gce - using cached host tags
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/metadata/host/host.go:168 in func1) | Unable to get docker metadata: Docker feature deactivated
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/containers/cri/util.go:129 in GetUtil) | CRI init error: temporary failure in criutil, will retry later: no cri_socket_path was set
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/metadata/host/host.go:168 in func1) | Unable to get cri metadata: temporary failure in criutil, will retry later: no cri_socket_path was set
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/cloudproviders/network.go:38 in GetNetworkID) | GetNetworkID trying GCE
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for GCP Cloud Provider
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/util/cloudproviders/network.go:45 in GetNetworkID) | GetNetworkID trying EC2
+2023-03-14 16:38:28 UTC | CORE | DEBUG | (pkg/config/config.go:1911 in IsCloudProviderEnabled) | cloud_provider_metadata is set to [aws gcp azure alibaba oracle ibm] in agent configuration, trying endpoints for AWS Cloud Provider
+2023-03-14 16:38:28 UTC | CORE | INFO | (pkg/metadata/host/host.go:141 in getNetworkMeta) | could not get network metadata: could not detect network ID
+2023-03-14 16:38:28 UTC | CORE | INFO | (pkg/config/config.go:1836 in getResolvedDDUrl) | 'site' and 'dd_url' are both set in config: setting main endpoint to 'dd_url': "https://app.datadoghq.com"
+=========
+Collector
+=========
+
+  Running Checks
+  ==============
+    
+    openstack_controller (3.0.0)
+    ----------------------------
+      Instance ID: openstack_controller:5d720b2af2e82521 [ERROR]
+      Configuration Source: file:/etc/datadog-agent/conf.d/openstack_controller.d/openstack_controller.yaml
+      Total Runs: 1
+      Metric Samples: Last Run: 214, Total: 214
+      Events: Last Run: 0, Total: 0
+      Service Checks: Last Run: 5, Total: 5
+      Average Execution Time : 147ms
+      Last Execution Date : 2023-03-14 16:38:27 UTC (1678811907000)
+      Last Successful Execution Date : Never
+      Error: Expecting value: line 1 column 1 (char 0)
+      Traceback (most recent call last):
+        File "/opt/datadog-agent/embedded/lib/python3.8/site-packages/requests/models.py", line 971, in json
+          return complexjson.loads(self.text, **kwargs)
+        File "/opt/datadog-agent/embedded/lib/python3.8/site-packages/simplejson/__init__.py", line 525, in loads
+          return _default_decoder.decode(s)
+        File "/opt/datadog-agent/embedded/lib/python3.8/site-packages/simplejson/decoder.py", line 370, in decode
+          obj, end = self.raw_decode(s)
+        File "/opt/datadog-agent/embedded/lib/python3.8/site-packages/simplejson/decoder.py", line 400, in raw_decode
+          return self.scan_once(s, idx=_w(s, idx).end())
+      simplejson.errors.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+      
+      During handling of the above exception, another exception occurred:
+      
+      Traceback (most recent call last):
+        File "/opt/datadog-agent/embedded/lib/python3.8/site-packages/datadog_checks/base/checks/base.py", line 1122, in run
+          self.check(instance)
+        File "/home/openstack_controller/datadog_checks/openstack_controller/openstack_controller.py", line 27, in check
+          self._report_metrics(api)
+        File "/home/openstack_controller/datadog_checks/openstack_controller/openstack_controller.py", line 35, in _report_metrics
+          self._report_project_metrics(api, project)
+        File "/home/openstack_controller/datadog_checks/openstack_controller/openstack_controller.py", line 46, in _report_project_metrics
+          compute_limits = api.get_compute_limits(project)
+        File "/home/openstack_controller/datadog_checks/openstack_controller/api/api_rest.py", line 62, in get_compute_limits
+          return component.get_limits(project['id'])
+        File "/home/openstack_controller/datadog_checks/openstack_controller/api/compute_rest.py", line 20, in get_limits
+          self.log.debug("response: %s", response.json())
+        File "/opt/datadog-agent/embedded/lib/python3.8/site-packages/requests/models.py", line 975, in json
+          raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+      requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+Check has run only once, if some metrics are missing you can try again with --check-rate to see any other metric if available.
+Note: If some metrics are missing, you may want to try again with the -r / --rate flag for a classic integration.
