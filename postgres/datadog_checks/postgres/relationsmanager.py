@@ -108,7 +108,12 @@ SELECT s.relname, c.relname as toast_of, schemaname, {metrics_columns}
 }
 
 TOAST_IDX_METRICS = {
-    'descriptors': [('relname', 'table'), ('toast_of', 'toast_of'), ('schemaname', 'schema'), ('indexrelname', 'index')],
+    'descriptors': [
+        ('relname', 'table'),
+        ('toast_of', 'toast_of'),
+        ('schemaname', 'schema'),
+        ('indexrelname', 'index'),
+    ],
     'metrics': IDX_TABLE_METRICS,
     'query': """
 SELECT s.relname, c.relname as toast_of, schemaname, indexrelname, {metrics_columns}
@@ -274,8 +279,15 @@ INDEX_BLOAT = {
     'relation': True,
 }
 
-RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, TOAST_REL_METRICS, TOAST_IDX_METRICS,
-    SIZE_METRICS, STATIO_METRICS]
+RELATION_METRICS = [
+    LOCK_METRICS,
+    REL_METRICS,
+    IDX_METRICS,
+    TOAST_REL_METRICS,
+    TOAST_IDX_METRICS,
+    SIZE_METRICS,
+    STATIO_METRICS,
+]
 
 
 class RelationsManager(object):

@@ -5,7 +5,13 @@ import psycopg2
 import pytest
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.postgres.relationsmanager import RelationsManager, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS
+from datadog_checks.postgres.relationsmanager import (
+    IDX_METRICS,
+    REL_METRICS,
+    SIZE_METRICS,
+    STATIO_METRICS,
+    RelationsManager,
+)
 
 from .common import DB_NAME, HOST, PORT
 
@@ -17,9 +23,7 @@ def _get_metric_names(scope):
 
 def _check_relation_metrics(aggregator, pg_instance, relation):
     relation = relation.lower()
-    base_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
-        'db:%s' % pg_instance['dbname']]
+    base_tags = pg_instance['tags'] + ['port:{}'.format(pg_instance['port']), 'db:%s' % pg_instance['dbname']]
     expected_tags = base_tags + [
         'table:{}'.format(relation),
         'schema:public',
