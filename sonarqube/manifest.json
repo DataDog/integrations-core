@@ -12,12 +12,13 @@
     "title": "SonarQube",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Security",
+      "Category::Automation",
       "Category::Issue Tracking",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Category::Security",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

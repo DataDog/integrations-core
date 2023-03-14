@@ -12,11 +12,12 @@
     "title": "Kubernetes",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Category::Orchestration",
       "Category::Containers",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Category::Network",
+      "Category::Orchestration",
+      "Supported OS::Linux",
+      "Supported OS::macOS"
     ]
   },
   "author": {

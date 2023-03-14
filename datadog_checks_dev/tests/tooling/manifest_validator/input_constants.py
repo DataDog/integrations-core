@@ -48,7 +48,7 @@ V2_VALID_MANIFEST = {
             "Category::Cloud",
             "Category::Log Collection",
             "Supported OS::Windows",
-            "Supported OS::Mac OS",
+            "Supported OS::macOS",
             "Offering::Integration",
             "Offering::UI Extension",
         ],

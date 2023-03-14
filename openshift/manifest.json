@@ -12,10 +12,12 @@
     "title": "OpenShift",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
       "Category::Containers",
+      "Category::Log Collection",
+      "Category::Network",
       "Category::Orchestration",
-      "Category::Log Collection"
+      "Category::Provisioning",
+      "Supported OS::Linux"
     ]
   },
   "author": {
