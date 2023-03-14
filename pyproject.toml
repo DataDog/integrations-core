@@ -130,11 +130,6 @@ ban-relative-imports = "all"
 # Tests can use assertions and relative imports
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 "**/tests/**/*" = ["S101", "TID252"]
 "**/config_models/defaults.py" = ["ARG001"]
-=======
-"**/tests/**/*" = ["S101", "TID252"]
->>>>>>> Stashed changes
-=======
-"**/tests/**/*" = ["S101", "TID252"]
->>>>>>> Stashed changes
