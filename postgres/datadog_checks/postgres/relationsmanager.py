@@ -40,27 +40,35 @@ SELECT mode,
     'relation': True,
 }
 
+STAT_TABLE_METRICS = {
+    'seq_scan': ('postgresql.seq_scans', AgentCheck.rate),
+    'seq_tup_read': ('postgresql.seq_rows_read', AgentCheck.rate),
+    'idx_scan': ('postgresql.index_rel_scans', AgentCheck.rate),
+    'idx_tup_fetch': ('postgresql.index_rel_rows_fetched', AgentCheck.rate),
+    'n_tup_ins': ('postgresql.rows_inserted', AgentCheck.rate),
+    'n_tup_upd': ('postgresql.rows_updated', AgentCheck.rate),
+    'n_tup_del': ('postgresql.rows_deleted', AgentCheck.rate),
+    'n_tup_hot_upd': ('postgresql.rows_hot_updated', AgentCheck.rate),
+    'n_live_tup': ('postgresql.live_rows', AgentCheck.gauge),
+    'n_dead_tup': ('postgresql.dead_rows', AgentCheck.gauge),
+    'vacuum_count': ('postgresql.vacuumed', AgentCheck.monotonic_count),
+    'autovacuum_count': ('postgresql.autovacuumed', AgentCheck.monotonic_count),
+    'analyze_count': ('postgresql.analyzed', AgentCheck.monotonic_count),
+    'autoanalyze_count': ('postgresql.autoanalyzed', AgentCheck.monotonic_count),
+}
+
+IDX_TABLE_METRICS = {
+    'idx_scan': ('postgresql.index_scans', AgentCheck.rate),
+    'idx_tup_read': ('postgresql.index_rows_read', AgentCheck.rate),
+    'idx_tup_fetch': ('postgresql.index_rows_fetched', AgentCheck.rate),
+}
+
 # The pg_stat_all_tables contain one row for each table in the current database,
 # showing statistics about accesses to that specific table.
 # pg_stat_user_tables contains the same as pg_stat_all_tables, except that only user tables are shown.
 REL_METRICS = {
     'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
-    'metrics': {
-        'seq_scan': ('postgresql.seq_scans', AgentCheck.rate),
-        'seq_tup_read': ('postgresql.seq_rows_read', AgentCheck.rate),
-        'idx_scan': ('postgresql.index_rel_scans', AgentCheck.rate),
-        'idx_tup_fetch': ('postgresql.index_rel_rows_fetched', AgentCheck.rate),
-        'n_tup_ins': ('postgresql.rows_inserted', AgentCheck.rate),
-        'n_tup_upd': ('postgresql.rows_updated', AgentCheck.rate),
-        'n_tup_del': ('postgresql.rows_deleted', AgentCheck.rate),
-        'n_tup_hot_upd': ('postgresql.rows_hot_updated', AgentCheck.rate),
-        'n_live_tup': ('postgresql.live_rows', AgentCheck.gauge),
-        'n_dead_tup': ('postgresql.dead_rows', AgentCheck.gauge),
-        'vacuum_count': ('postgresql.vacuumed', AgentCheck.monotonic_count),
-        'autovacuum_count': ('postgresql.autovacuumed', AgentCheck.monotonic_count),
-        'analyze_count': ('postgresql.analyzed', AgentCheck.monotonic_count),
-        'autoanalyze_count': ('postgresql.autoanalyzed', AgentCheck.monotonic_count),
-    },
+    'metrics': STAT_TABLE_METRICS,
     'query': """
 SELECT relname,schemaname,{metrics_columns}
   FROM pg_stat_user_tables
@@ -68,17 +76,12 @@ SELECT relname,schemaname,{metrics_columns}
     'relation': True,
 }
 
-
 # The pg_stat_all_indexes view will contain one row for each index in the current database,
 # showing statistics about accesses to that specific index.
 # The pg_stat_user_indexes view contain the same information, but filtered to only show user indexes.
 IDX_METRICS = {
     'descriptors': [('relname', 'table'), ('schemaname', 'schema'), ('indexrelname', 'index')],
-    'metrics': {
-        'idx_scan': ('postgresql.index_scans', AgentCheck.rate),
-        'idx_tup_read': ('postgresql.index_rows_read', AgentCheck.rate),
-        'idx_tup_fetch': ('postgresql.index_rows_fetched', AgentCheck.rate),
-    },
+    'metrics': IDX_TABLE_METRICS,
     'query': """
 SELECT relname,
        schemaname,
@@ -86,6 +89,33 @@ SELECT relname,
        {metrics_columns}
   FROM pg_stat_user_indexes
  WHERE {relations}""",
+    'relation': True,
+}
+
+# Toast version of relation and index metrics
+# Toast statistics are only available in the stat_all tables as they are in the
+# pg_toast schema
+TOAST_REL_METRICS = {
+    'descriptors': [('relname', 'table'), ('toast_of', 'toast_of'), ('schemaname', 'schema')],
+    'metrics': STAT_TABLE_METRICS,
+    'query': """
+SELECT s.relname, c.relname as toast_of, schemaname, {metrics_columns}
+  FROM pg_stat_all_tables AS s
+  LEFT JOIN pg_class c ON s.relid = c.reltoastrelid
+  WHERE c.relname = ANY(SELECT relname FROM pg_class WHERE {relations})
+""",
+    'relation': True,
+}
+
+TOAST_IDX_METRICS = {
+    'descriptors': [('relname', 'table'), ('toast_of', 'toast_of'), ('schemaname', 'schema'), ('indexrelname', 'index')],
+    'metrics': IDX_TABLE_METRICS,
+    'query': """
+SELECT s.relname, c.relname as toast_of, schemaname, indexrelname, {metrics_columns}
+  FROM pg_stat_all_indexes AS s
+  LEFT JOIN pg_class c ON s.relid = c.reltoastrelid
+  WHERE c.relname = ANY(SELECT relname FROM pg_class WHERE {relations})
+""",
     'relation': True,
 }
 
@@ -136,6 +166,7 @@ SELECT relname,
  WHERE {relations}""",
     'relation': True,
 }
+
 # adapted from https://wiki.postgresql.org/wiki/Show_database_bloat and https://github.com/bucardo/check_postgres/
 TABLE_BLOAT_QUERY = """
 SELECT
@@ -243,7 +274,8 @@ INDEX_BLOAT = {
     'relation': True,
 }
 
-RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
+RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, TOAST_REL_METRICS, TOAST_IDX_METRICS,
+    SIZE_METRICS, STATIO_METRICS]
 
 
 class RelationsManager(object):
