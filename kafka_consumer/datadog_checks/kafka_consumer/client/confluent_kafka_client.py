@@ -44,7 +44,7 @@ class ConfluentKafkaClient(KafkaClient):
                     )
 
                 keytab = self.config._sasl_kerberos_keytab
-                if os.environ[KRB5_CLIENT_KTNAME] and not self.config._sasl_kerberos_keytab:
+                if os.getenv(KRB5_CLIENT_KTNAME) and not self.config._sasl_kerberos_keytab:
                     self.warning(
                         "Detected that environment variable `KRB5_CLIENT_KTNAME` is "
                         "set but not config option `sasl_kerberos_keytab`. "
@@ -53,7 +53,7 @@ class ConfluentKafkaClient(KafkaClient):
                         "`sasl_kerberos_keytab` will be required "
                         "for connecting to Kafka via Kerberos."
                     )
-                    keytab = os.environ[KRB5_CLIENT_KTNAME]
+                    keytab = os.getenv(KRB5_CLIENT_KTNAME)
 
                 kerb_config = {
                     "sasl.mechanism": self.config._sasl_mechanism,
@@ -65,6 +65,10 @@ class ConfluentKafkaClient(KafkaClient):
                 config.update(kerb_config)
 
             self._kafka_client = AdminClient(config)
+
+            # attempt a connection
+            self.request_metadata_update()
+
         return self._kafka_client
 
     def get_consumer_offsets_dict(self):

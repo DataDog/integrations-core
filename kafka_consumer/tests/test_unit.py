@@ -2,10 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
-from tests.common import LEGACY_CLIENT, metrics
+from tests.common import KAFKA_CONNECT_STR, LEGACY_CLIENT, metrics
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer import KafkaCheck
@@ -14,30 +15,32 @@ from datadog_checks.kafka_consumer.client.kafka_python_client import OAuthTokenP
 pytestmark = [pytest.mark.unit]
 
 
-@pytest.mark.skipif(not LEGACY_CLIENT, reason='not implemented yet with confluent-kafka')
-def test_gssapi(kafka_instance, dd_run_check, check):
+@pytest.mark.parametrize(
+    'legacy_client, expected_exception',
+    [
+        pytest.param(
+            True,
+            pytest.raises(Exception),
+            id="Legacy implementation",
+        ),
+        pytest.param(
+            False,
+            does_not_raise(),
+            id="Confluent implementation",
+        ),
+    ],
+)
+def test_gssapi(legacy_client, expected_exception, kafka_instance, dd_run_check, check):
     kafka_instance['sasl_mechanism'] = 'GSSAPI'
     kafka_instance['security_protocol'] = 'SASL_PLAINTEXT'
     kafka_instance['sasl_kerberos_service_name'] = 'kafka'
+    kafka_instance['sasl_kerberos_keytab'] = '/dummy_keytab'
+    kafka_instance['use_legacy_client'] = legacy_client
+
     # assert the check doesn't fail with:
     # Exception: Could not find main GSSAPI shared library.
-    with pytest.raises(Exception):
+    with expected_exception:
         dd_run_check(check(kafka_instance))
-
-
-def test_gssapi_config(kafka_instance, dd_run_check, check, caplog):
-    instance = copy.deepcopy(kafka_instance)
-    instance['sasl_mechanism'] = 'GSSAPI'
-    instance['security_protocol'] = 'SASL_PLAINTEXT'
-    instance['sasl_kerberos_service_name'] = 'kafka'
-    instance['sasl_kerberos_domain_name'] = "Not none"
-
-    # TODO: Mock GSSAPI here instead of expecting fail
-    with pytest.raises(Exception):
-        dd_run_check(check(instance))
-
-    expected_warning = "Configuration option `sasl_kerberos_domain_name` has been deprecated"
-    assert expected_warning in caplog.text
 
 
 def test_tls_config_ok(check, kafka_instance_tls):
@@ -88,7 +91,6 @@ def test_tls_config_ok(check, kafka_instance_tls):
         ),
     ],
 )
-@pytest.mark.skipif(not LEGACY_CLIENT, reason='not implemented yet with confluent-kafka')
 def test_oauth_config(sasl_oauth_token_provider, expected_exception, mocked_admin_client, check, dd_run_check):
     instance = {
         'kafka_connect_str': KAFKA_CONNECT_STR,
