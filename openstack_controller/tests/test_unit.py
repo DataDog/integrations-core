@@ -9,6 +9,7 @@ import pytest
 
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller import OpenStackControllerCheck
+from datadog_checks.base import AgentCheck
 
 pytestmark = [pytest.mark.unit]
 
@@ -97,27 +98,31 @@ def test_keystone_server_up_and_credentials_fail(
     aggregator.assert_service_check('openstack.keystone.api.up', status=check.CRITICAL)
 
 
-@mock.patch(
-    'requests.get',
-    side_effect=[
-        MockResponse(status_code=200, json_data={}),
-        MockResponse(status_code=200, json_data={'projects': []}),
-    ],
-)
-@mock.patch(
-    'requests.post', side_effect=[MockResponse(status_code=200, json_data={}, headers={'X-Subject-Token': 'abcd'})]
-)
+# @mock.patch(
+#     'requests.get',
+#     side_effect=[
+#         MockResponse(status_code=200, json_data={}),
+#         MockResponse(status_code=200, json_data={'projects': []}),
+#     ],
+# )
+# @mock.patch(
+#     'requests.post', side_effect=[MockResponse(status_code=200, json_data={}, headers={'X-Subject-Token': 'abcd'})]
+# )
+@pytest.mark.vcr
 def test_keystone_server_up_and_credentials_ok(
-    mocked_post,
-    mocked_get,
-    aggregator,
-    dd_run_check,
+    # mocked_post,
+    # mocked_get,
+    # aggregator,
+    # dd_run_check,
+    dd_agent_check
 ):
     instance = {
-        'keystone_server_url': 'http://127.0.0.1/identity',
+        'keystone_server_url': 'http://10.164.0.83/identity',
         'user_name': 'admin',
         'user_password': 'password',
     }
-    check = OpenStackControllerCheck('test', {}, [instance])
-    dd_run_check(check)
-    aggregator.assert_service_check('openstack.keystone.api.up', status=check.OK)
+    aggregator = dd_agent_check()
+    # check = OpenStackControllerCheck('test', {}, [instance])
+    # dd_run_check(check)
+    aggregator.assert_service_check('openstack.keystone.api.up', status=AgentCheck.OK)
+    assert False

@@ -1,0 +1,202 @@
+{
+  "servers": [
+    {
+      "id": "3232a743-5fcf-41f2-8c29-0c84ae18ecb2",
+      "name": "server-3",
+      "status": "ACTIVE",
+      "tenant_id": "667aee39f2b64032b4d7585809d31e6f",
+      "user_id": "2a2735f0c200433b810751ea447272e6",
+      "metadata": {},
+      "hostId": "5eb974bb8f2624e7d70b8d676d43cb2e08b56d1db9196d53cf710573",
+      "image": "",
+      "flavor": {
+        "id": "c1",
+        "links": [
+          {
+            "rel": "bookmark",
+            "href": "http://10.164.0.40/compute/667aee39f2b64032b4d7585809d31e6f/flavors/c1"
+          }
+        ]
+      },
+      "created": "2023-03-13T22:06:29Z",
+      "updated": "2023-03-13T22:07:01Z",
+      "addresses": {
+        "shared": [
+          {
+            "version": 4,
+            "addr": "192.168.233.102",
+            "OS-EXT-IPS:type": "fixed",
+            "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:40:f4:40"
+          }
+        ]
+      },
+      "accessIPv4": "",
+      "accessIPv6": "",
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://10.164.0.40/compute/v2.1/667aee39f2b64032b4d7585809d31e6f/servers/3232a743-5fcf-41f2-8c29-0c84ae18ecb2"
+        },
+        {
+          "rel": "bookmark",
+          "href": "http://10.164.0.40/compute/667aee39f2b64032b4d7585809d31e6f/servers/3232a743-5fcf-41f2-8c29-0c84ae18ecb2"
+        }
+      ],
+      "OS-DCF:diskConfig": "AUTO",
+      "progress": 0,
+      "OS-EXT-AZ:availability_zone": "nova",
+      "config_drive": "",
+      "key_name": null,
+      "OS-SRV-USG:launched_at": "2023-03-13T22:07:00.000000",
+      "OS-SRV-USG:terminated_at": null,
+      "OS-EXT-SRV-ATTR:host": "agent-integrations-openstack-default",
+      "OS-EXT-SRV-ATTR:instance_name": "instance-00000003",
+      "OS-EXT-SRV-ATTR:hypervisor_hostname": "agent-integrations-openstack-default",
+      "OS-EXT-STS:task_state": null,
+      "OS-EXT-STS:vm_state": "active",
+      "OS-EXT-STS:power_state": 1,
+      "os-extended-volumes:volumes_attached": [
+        {
+          "id": "5c84efe8-bcb7-4611-84b9-7eea44ea0d45"
+        }
+      ],
+      "security_groups": [
+        {
+          "name": "default"
+        }
+      ]
+    },
+    {
+      "id": "aa67f696-095c-4bb3-abe9-0a7747fad92e",
+      "name": "server-2",
+      "status": "ACTIVE",
+      "tenant_id": "667aee39f2b64032b4d7585809d31e6f",
+      "user_id": "2a2735f0c200433b810751ea447272e6",
+      "metadata": {},
+      "hostId": "5eb974bb8f2624e7d70b8d676d43cb2e08b56d1db9196d53cf710573",
+      "image": "",
+      "flavor": {
+        "id": "c1",
+        "links": [
+          {
+            "rel": "bookmark",
+            "href": "http://10.164.0.40/compute/667aee39f2b64032b4d7585809d31e6f/flavors/c1"
+          }
+        ]
+      },
+      "created": "2023-03-13T22:06:29Z",
+      "updated": "2023-03-13T22:07:05Z",
+      "addresses": {
+        "shared": [
+          {
+            "version": 4,
+            "addr": "192.168.233.90",
+            "OS-EXT-IPS:type": "fixed",
+            "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:9d:dd:ee"
+          }
+        ]
+      },
+      "accessIPv4": "",
+      "accessIPv6": "",
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://10.164.0.40/compute/v2.1/667aee39f2b64032b4d7585809d31e6f/servers/aa67f696-095c-4bb3-abe9-0a7747fad92e"
+        },
+        {
+          "rel": "bookmark",
+          "href": "http://10.164.0.40/compute/667aee39f2b64032b4d7585809d31e6f/servers/aa67f696-095c-4bb3-abe9-0a7747fad92e"
+        }
+      ],
+      "OS-DCF:diskConfig": "AUTO",
+      "progress": 0,
+      "OS-EXT-AZ:availability_zone": "nova",
+      "config_drive": "",
+      "key_name": null,
+      "OS-SRV-USG:launched_at": "2023-03-13T22:07:04.000000",
+      "OS-SRV-USG:terminated_at": null,
+      "OS-EXT-SRV-ATTR:host": "agent-integrations-openstack-default",
+      "OS-EXT-SRV-ATTR:instance_name": "instance-00000002",
+      "OS-EXT-SRV-ATTR:hypervisor_hostname": "agent-integrations-openstack-default",
+      "OS-EXT-STS:task_state": null,
+      "OS-EXT-STS:vm_state": "active",
+      "OS-EXT-STS:power_state": 1,
+      "os-extended-volumes:volumes_attached": [
+        {
+          "id": "db4ab31a-d356-44c2-a1a8-99c8260234bc"
+        }
+      ],
+      "security_groups": [
+        {
+          "name": "default"
+        }
+      ]
+    },
+    {
+      "id": "f498382f-dbc1-4ed9-9c8d-5ec0aa633171",
+      "name": "server-1",
+      "status": "ACTIVE",
+      "tenant_id": "667aee39f2b64032b4d7585809d31e6f",
+      "user_id": "2a2735f0c200433b810751ea447272e6",
+      "metadata": {},
+      "hostId": "5eb974bb8f2624e7d70b8d676d43cb2e08b56d1db9196d53cf710573",
+      "image": "",
+      "flavor": {
+        "id": "c1",
+        "links": [
+          {
+            "rel": "bookmark",
+            "href": "http://10.164.0.40/compute/667aee39f2b64032b4d7585809d31e6f/flavors/c1"
+          }
+        ]
+      },
+      "created": "2023-03-13T22:06:29Z",
+      "updated": "2023-03-13T22:07:02Z",
+      "addresses": {
+        "shared": [
+          {
+            "version": 4,
+            "addr": "192.168.233.155",
+            "OS-EXT-IPS:type": "fixed",
+            "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:2c:08:c1"
+          }
+        ]
+      },
+      "accessIPv4": "",
+      "accessIPv6": "",
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://10.164.0.40/compute/v2.1/667aee39f2b64032b4d7585809d31e6f/servers/f498382f-dbc1-4ed9-9c8d-5ec0aa633171"
+        },
+        {
+          "rel": "bookmark",
+          "href": "http://10.164.0.40/compute/667aee39f2b64032b4d7585809d31e6f/servers/f498382f-dbc1-4ed9-9c8d-5ec0aa633171"
+        }
+      ],
+      "OS-DCF:diskConfig": "AUTO",
+      "progress": 0,
+      "OS-EXT-AZ:availability_zone": "nova",
+      "config_drive": "",
+      "key_name": null,
+      "OS-SRV-USG:launched_at": "2023-03-13T22:07:01.000000",
+      "OS-SRV-USG:terminated_at": null,
+      "OS-EXT-SRV-ATTR:host": "agent-integrations-openstack-default",
+      "OS-EXT-SRV-ATTR:instance_name": "instance-00000001",
+      "OS-EXT-SRV-ATTR:hypervisor_hostname": "agent-integrations-openstack-default",
+      "OS-EXT-STS:task_state": null,
+      "OS-EXT-STS:vm_state": "active",
+      "OS-EXT-STS:power_state": 1,
+      "os-extended-volumes:volumes_attached": [
+        {
+          "id": "314fba93-c303-4447-923c-a6249a86f59d"
+        }
+      ],
+      "security_groups": [
+        {
+          "name": "default"
+        }
+      ]
+    }
+  ]
+}

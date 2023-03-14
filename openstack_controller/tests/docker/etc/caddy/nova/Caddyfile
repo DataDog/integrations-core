@@ -4,58 +4,70 @@
 }
 :80 {
     root * /usr/share/caddy/
-    @get_v2_1_4bfc1 {
+    @get_compute_v_2_1 {
         method GET
-        header X-Auth-Token "demo_test"
-        path /v2.1/4bfc1
+        path /compute/v2.1
     }
-    route @get_v2_1_4bfc1 {
-        rewrite /v2.1/4bfc1 /v2.1/4bfc1/get.json
+    route @get_compute_v_2_1 {
+        rewrite /compute/v2.1 /compute/v2.1/get.json
         file_server
     }
-    @get_limits {
+    @get_limits_project_id_667aee39f2b64032b4d7585809d31e6f {
         method GET
-        header X-Auth-Token "demo_test"
-        path /v2.1/4bfc1/limits
+        expression query({'project_id': '667aee39f2b64032b4d7585809d31e6f'})
+        path /compute/v2.1/limits
     }
-    route @get_limits {
-        rewrite /v2.1/4bfc1/limits /v2.1/4bfc1/limits/{query.tenant_id}.json
+    route @get_limits_project_id_667aee39f2b64032b4d7585809d31e6f {
+        rewrite /compute/v2.1/limits /compute/v2.1/limits/667aee39f2b64032b4d7585809d31e6f.json
         file_server
     }
-    @get_servers_detail {
+    @get_os_quota_sets_project_id_667aee39f2b64032b4d7585809d31e6f {
         method GET
-        header X-Auth-Token "demo_test"
-        path /v2.1/4bfc1/servers/detail
+        path /compute/v2.1/os-quota-sets/667aee39f2b64032b4d7585809d31e6f
     }
-    route @get_servers_detail {
-        rewrite /v2.1/4bfc1/servers/detail /v2.1/4bfc1/servers/detail/get.json
+    route @get_os_quota_sets_project_id_667aee39f2b64032b4d7585809d31e6f {
+        rewrite /compute/v2.1/os-quota-sets/667aee39f2b64032b4d7585809d31e6f /compute/v2.1/os-quota-sets/667aee39f2b64032b4d7585809d31e6f.json
         file_server
     }
-    @get_os_hypervisors_detail {
+    @get_servers_detail_project_id_667aee39f2b64032b4d7585809d31e6f {
         method GET
-        header X-Auth-Token "demo_test"
-        path /v2.1/4bfc1/os-hypervisors/detail
+        expression query({'project_id': '667aee39f2b64032b4d7585809d31e6f'})
+        path /compute/v2.1/servers/detail
     }
-    route @get_os_hypervisors_detail {
-        rewrite /v2.1/4bfc1/os-hypervisors/detail /v2.1/4bfc1/os-hypervisors/detail/get.json
+    route @get_servers_detail_project_id_667aee39f2b64032b4d7585809d31e6f {
+        rewrite /compute/v2.1/servers/detail /compute/v2.1/servers/detail/667aee39f2b64032b4d7585809d31e6f.json
         file_server
     }
-    @get_os_aggregates_detail {
+    @get_servers_3232a743-5fcf-41f2-8c29-0c84ae18ecb2_diagnostics {
         method GET
-        header X-Auth-Token "demo_test"
-        path /v2.1/4bfc1/os-aggregates
+        path /compute/v2.1/servers/3232a743-5fcf-41f2-8c29-0c84ae18ecb2/diagnostics
     }
-    route @get_os_aggregates_detail {
-        rewrite /v2.1/4bfc1/os-aggregates /v2.1/4bfc1/os-aggregates/get.json
+    route @get_servers_3232a743-5fcf-41f2-8c29-0c84ae18ecb2_diagnostics {
+        rewrite /compute/v2.1/servers/3232a743-5fcf-41f2-8c29-0c84ae18ecb2/diagnostics /compute/v2.1/servers/3232a743-5fcf-41f2-8c29-0c84ae18ecb2/diagnostics/get.json
         file_server
     }
-    @get_os_hypervisors_uptime {
+    @get_servers_aa67f696-095c-4bb3-abe9-0a7747fad92e_diagnostics {
         method GET
-        header X-Auth-Token "demo_test"
-        path /v2.1/4bfc1/os-hypervisors/*/uptime
+        path /compute/v2.1/servers/aa67f696-095c-4bb3-abe9-0a7747fad92e/diagnostics
     }
-    route @get_os_hypervisors_uptime {
-        rewrite /v2.1/4bfc1/os-hypervisors/*/uptime /v2.1/4bfc1/os-hypervisors/uptime/get.json
+    route @get_servers_aa67f696-095c-4bb3-abe9-0a7747fad92e_diagnostics {
+        rewrite /compute/v2.1/servers/aa67f696-095c-4bb3-abe9-0a7747fad92e/diagnostics /compute/v2.1/servers/aa67f696-095c-4bb3-abe9-0a7747fad92e/diagnostics/get.json
+        file_server
+    }
+    @get_servers_f498382f-dbc1-4ed9-9c8d-5ec0aa633171_diagnostics {
+        method GET
+        path /compute/v2.1/servers/f498382f-dbc1-4ed9-9c8d-5ec0aa633171/diagnostics
+    }
+    route @get_servers_f498382f-dbc1-4ed9-9c8d-5ec0aa633171_diagnostics {
+        rewrite /compute/v2.1/servers/f498382f-dbc1-4ed9-9c8d-5ec0aa633171/diagnostics /compute/v2.1/servers/f498382f-dbc1-4ed9-9c8d-5ec0aa633171/diagnostics/get.json
+        file_server
+    }
+    @get_flavors_detail {
+        method GET
+        path /compute/v2.1/flavors/detail
+    }
+    route @get_flavors_detail {
+        rewrite /compute/v2.1/flavors/detail /compute/v2.1/flavors/detail/get.json
         file_server
     }
     file_server browse

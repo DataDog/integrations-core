@@ -1,1 +1,0 @@
-{"aggregates": [{"name": "test-aggregate", "availability_zone": "nova", "deleted": false, "created_at": "2018-10-05T00:37:02.000000", "updated_at": null, "hosts": ["compute1"], "deleted_at": null, "id": 1, "metadata": {"availability_zone": "nova"}}]}

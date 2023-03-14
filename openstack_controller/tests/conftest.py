@@ -50,9 +50,9 @@ def dd_environment():
         ]
         with docker_run(compose_file, conditions=conditions):
             instance = {
-                'name': 'test',
-                'keystone_server_url': 'http://127.0.0.1:8080/identity/v3',
-                'user': {'name': 'admin', 'password': 'labstack', 'domain': {'id': 'default'}},
+                'keystone_server_url': 'http://127.0.0.1:8080/identity',
+                'user_name': 'admin',
+                'user_password': 'password',
                 'ssl_verify': False,
             }
             yield instance

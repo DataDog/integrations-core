@@ -1,36 +1,37 @@
 {
-	"projects": [{
-			"id": "be2d971836344c07b01c4a6a8fc1cfc3",
-			"name": "admin",
-			"domain_id": "default",
-			"description": "Bootstrap project for initializing the cloud.",
-			"enabled": true,
-			"parent_id": "default",
-			"is_domain": false,
-			"tags": [],
-			"options": {},
-			"links": {
-				"self": "http://10.164.0.81/identity/v3/projects/be2d971836344c07b01c4a6a8fc1cfc3"
-			}
-		},
-		{
-			"id": "df5998fe61d045b797fcdc860889d5a4",
-			"name": "demo",
-			"domain_id": "default",
-			"description": "",
-			"enabled": true,
-			"parent_id": "default",
-			"is_domain": false,
-			"tags": [],
-			"options": {},
-			"links": {
-				"self": "http://10.164.0.81/identity/v3/projects/df5998fe61d045b797fcdc860889d5a4"
-			}
-		}
-	],
-	"links": {
-		"next": null,
-		"self": "http://10.164.0.81/identity/v3/auth/projects",
-		"previous": null
-	}
+  "projects": [
+    {
+      "id": "667aee39f2b64032b4d7585809d31e6f",
+      "name": "admin",
+      "domain_id": "default",
+      "description": "Bootstrap project for initializing the cloud.",
+      "enabled": true,
+      "parent_id": "default",
+      "is_domain": false,
+      "tags": [],
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.40/identity/v3/projects/667aee39f2b64032b4d7585809d31e6f"
+      }
+    },
+    {
+      "id": "c165a94e230a4390af02d7394fb1fa69",
+      "name": "demo",
+      "domain_id": "default",
+      "description": "",
+      "enabled": true,
+      "parent_id": "default",
+      "is_domain": false,
+      "tags": [],
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.40/identity/v3/projects/c165a94e230a4390af02d7394fb1fa69"
+      }
+    }
+  ],
+  "links": {
+    "next": null,
+    "self": "http://10.164.0.40/identity/v3/auth/projects",
+    "previous": null
+  }
 }

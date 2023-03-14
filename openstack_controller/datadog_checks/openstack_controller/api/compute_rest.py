@@ -1,4 +1,5 @@
 import re
+import requests
 
 
 class ComputeRest:
@@ -8,7 +9,7 @@ class ComputeRest:
         self.endpoint = endpoint
 
     def get_response_time(self):
-        response = self.http.get('{}/'.format(self.endpoint))
+        response = self.http.get('{}'.format(self.endpoint))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return response.elapsed.total_seconds() * 1000
@@ -39,17 +40,20 @@ class ComputeRest:
         self.log.debug("response: %s", response.json())
         server_metrics = {}
         for server in response.json()['servers']:
-            response = self.http.get('{}/servers/{}/diagnostics'.format(self.endpoint, server['id']))
-            response.raise_for_status()
-            self.log.debug("response: %s", response.json())
-            server_metrics[server['id']] = {
-                'name': server['name'],
-                'metrics': {
-                    re.sub('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(): value
-                    for key, value in response.json().items()
-                    if isinstance(value, (int, float))
-                },
-            }
+            try:
+                response = self.http.get('{}/servers/{}/diagnostics'.format(self.endpoint, server['id']))
+                response.raise_for_status()
+                self.log.debug("response: %s", response.json())
+                server_metrics[server['id']] = {
+                    'name': server['name'],
+                    'metrics': {
+                        re.sub('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(): value
+                        for key, value in response.json().items()
+                        if isinstance(value, (int, float))
+                    },
+                }
+            except Exception as e:
+                self.log.error("Exception: %s", e)
         return server_metrics
 
     def get_flavors(self):

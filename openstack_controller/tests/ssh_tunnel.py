@@ -54,7 +54,7 @@ class SocksProxyUp(LazyFunction):
         self.private_key = private_key
 
     def __call__(self):
-        WaitForPortListening(self.host, 22, attempts=1)()
+        WaitForPortListening(self.host, 22)()
         with TempDir('socks_proxy') as temp_dir:
             ip = get_ip()
             local_port = find_free_port(ip)
@@ -79,7 +79,7 @@ class SocksProxyUp(LazyFunction):
             ]
             run_background_command(command, os.path.join(temp_dir, PID_FILE))
 
-            WaitForPortListening(ip, local_port, attempts=1)()
+            WaitForPortListening(ip, local_port)()
 
             return ip, local_port
 
