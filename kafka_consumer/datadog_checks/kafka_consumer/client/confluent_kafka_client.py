@@ -23,9 +23,6 @@ class ConfluentKafkaClient(KafkaClient):
             )
         return self._kafka_client
 
-    def create_kafka_admin_client(self):
-        raise NotImplementedError
-
     def get_consumer_offsets_dict(self):
         return self._consumer_offsets
 
@@ -68,7 +65,6 @@ class ConfluentKafkaClient(KafkaClient):
         self._highwater_offsets = {}
 
     def get_partitions_for_topic(self, topic):
-
         try:
             cluster_metadata = self.kafka_client.list_topics(topic, timeout=self.config._request_timeout_ms / 1000)
             topic_metadata = cluster_metadata.topics[topic]
@@ -195,6 +191,3 @@ class ConfluentKafkaClient(KafkaClient):
                 topic_partitions.append(TopicPartition(topic, partition))
 
         return topic_partitions
-
-    def get_broker_offset(self):
-        raise NotImplementedError
