@@ -51,6 +51,7 @@ class KafkaPythonClient(KafkaClient):
         # Store the list of futures on the object because some of the callbacks create/store additional futures and they
         # don't have access to variables scoped to this method, only to the object scope
         self._consumer_futures = []
+        consumer_offsets = {}
 
         if self.config._monitor_unlisted_consumer_groups:
             for broker in self.kafka_client._client.cluster.brokers():
@@ -59,13 +60,13 @@ class KafkaPythonClient(KafkaClient):
                 # Once https://github.com/dpkp/kafka-python/pull/2335 is merged in, we can use the official
                 # implementation for this function instead.
                 list_groups_future = self._list_consumer_groups_send_request(broker.nodeId)
-                list_groups_future.add_callback(self._list_groups_callback, broker.nodeId)
+                list_groups_future.add_callback(self._list_groups_callback, broker.nodeId, consumer_offsets)
                 self._consumer_futures.append(list_groups_future)
         elif self.config._consumer_groups:
             self._validate_consumer_groups()
             for consumer_group in self.config._consumer_groups:
                 find_coordinator_future = self._find_coordinator_id_send_request(consumer_group)
-                find_coordinator_future.add_callback(self._find_coordinator_callback, consumer_group)
+                find_coordinator_future.add_callback(self._find_coordinator_callback, consumer_group, consumer_offsets)
                 self._consumer_futures.append(find_coordinator_future)
         else:
             raise ConfigurationError(
@@ -76,6 +77,8 @@ class KafkaPythonClient(KafkaClient):
         # Loop until all futures resolved.
         self.kafka_client._wait_for_futures(self._consumer_futures)
         del self._consumer_futures  # since it's reset on every check run, no sense holding the reference between runs
+
+        return consumer_offsets
 
     def get_highwater_offsets(self, consumer_offsets):
         """Fetch highwater offsets for topic_partitions in the Kafka cluster.
@@ -103,6 +106,9 @@ class KafkaPythonClient(KafkaClient):
         # If we aren't fetching all broker highwater offsets, then construct the unique set of topic partitions for
         # which this run of the check has at least once saved consumer offset. This is later used as a filter for
         # excluding partitions.
+
+        highwater_offsets = {}
+
         if not self.config._monitor_all_broker_highwatermarks:
             tps_with_consumer_offset = {(topic, partition) for (_, topic, partition) in consumer_offsets}
 
@@ -138,11 +144,13 @@ class KafkaPythonClient(KafkaClient):
                 # is possible that the wakeup itself could block if a large number of sends were processed beforehand.
                 highwater_future = self._send_request_to_node(node_id=broker.nodeId, request=request, wakeup=False)
 
-                highwater_future.add_callback(self._highwater_offsets_callback)
+                highwater_future.add_callback(self._highwater_offsets_callback, highwater_offsets)
                 highwater_futures.append(highwater_future)
 
             # Loop until all futures resolved.
             self.kafka_client._wait_for_futures(highwater_futures)
+
+        return highwater_offsets
 
     def create_kafka_admin_client(self):
         crlfile = self.config._crlfile
@@ -198,7 +206,7 @@ class KafkaPythonClient(KafkaClient):
             self._kafka_client = self._create_kafka_admin_client(api_version=kafka_version)
         return self._kafka_client
 
-    def _highwater_offsets_callback(self, response):
+    def _highwater_offsets_callback(self, highwater_offsets, response):
         """Callback that parses an OffsetFetchResponse and saves it to the highwater_offsets dict."""
         if type(response) not in OffsetResponse:
             raise RuntimeError("response type should be OffsetResponse, but instead was %s." % type(response))
@@ -206,7 +214,7 @@ class KafkaPythonClient(KafkaClient):
             for partition, error_code, offsets in partitions_data:
                 error_type = kafka_errors.for_code(error_code)
                 if error_type is kafka_errors.NoError:
-                    self._highwater_offsets[(topic, partition)] = offsets[0]
+                    highwater_offsets[(topic, partition)] = offsets[0]
                 elif error_type is kafka_errors.NotLeaderForPartitionError:
                     self.log.warning(
                         "Kafka broker returned %s (error_code %s) for topic %s, partition: %s. This should only happen "
@@ -267,7 +275,7 @@ class KafkaPythonClient(KafkaClient):
                         for partition in partitions:
                             assert isinstance(partition, int)
 
-    def _list_groups_callback(self, broker_id, response):
+    def _list_groups_callback(self, broker_id, consumer_offsets, response):
         """Callback that takes a ListGroupsResponse and issues an OffsetFetchRequest for each group.
 
         broker_id must be manually passed in because it is not present in the response. Keeping track of the broker that
@@ -281,10 +289,12 @@ class KafkaPythonClient(KafkaClient):
                 single_group_offsets_future = self._list_consumer_group_offsets_send_request(
                     group_id=consumer_group, group_coordinator_id=broker_id
                 )
-                single_group_offsets_future.add_callback(self._single_group_offsets_callback, consumer_group)
+                single_group_offsets_future.add_callback(
+                    self._single_group_offsets_callback, consumer_group, consumer_offsets
+                )
                 self._consumer_futures.append(single_group_offsets_future)
 
-    def _find_coordinator_callback(self, consumer_group, response):
+    def _find_coordinator_callback(self, consumer_group, consumer_offsets, response):
         """Callback that takes a FindCoordinatorResponse and issues an OffsetFetchRequest for the group.
 
         consumer_group must be manually passed in because it is not present in the response, but we need it in order to
@@ -308,10 +318,10 @@ class KafkaPythonClient(KafkaClient):
         single_group_offsets_future = self._list_consumer_group_offsets_send_request(
             group_id=consumer_group, group_coordinator_id=coordinator_id, partitions=topic_partitions
         )
-        single_group_offsets_future.add_callback(self._single_group_offsets_callback, consumer_group)
+        single_group_offsets_future.add_callback(self._single_group_offsets_callback, consumer_group, consumer_offsets)
         self._consumer_futures.append(single_group_offsets_future)
 
-    def _single_group_offsets_callback(self, consumer_group, response):
+    def _single_group_offsets_callback(self, consumer_group, consumer_offsets, response):
         """Callback that parses an OffsetFetchResponse and saves it to the consumer_offsets dict.
 
         consumer_group must be manually passed in because it is not present in the response, but we need it in order to
@@ -327,7 +337,7 @@ class KafkaPythonClient(KafkaClient):
                 self.kafka_client._client.cluster.request_update()  # force metadata update on next poll()
                 continue
             key = (consumer_group, topic, partition)
-            self._consumer_offsets[key] = offset
+            consumer_offsets[key] = offset
 
     def _list_consumer_groups_send_request(self, broker_id):
         kafka_version = self.kafka_client._matching_api_version(ListGroupsRequest)
@@ -383,18 +393,8 @@ class KafkaPythonClient(KafkaClient):
             )
         return self._send_request_to_node(group_coordinator_id, request, wakeup=False)
 
-    def get_highwater_offsets_dict(self):
-        return self._highwater_offsets
-
-    def get_consumer_offsets_dict(self):
-        return self._consumer_offsets
-
     def get_partitions_for_topic(self, topic):
         return self.kafka_client._client.cluster.partitions_for_topic(topic)
 
     def request_metadata_update(self):
         self.kafka_client._client.cluster.request_update()
-
-    def reset_offsets(self):
-        self._consumer_offsets = {}
-        self._highwater_offsets = {}

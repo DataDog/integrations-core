@@ -23,12 +23,10 @@ class ConfluentKafkaClient(KafkaClient):
             )
         return self._kafka_client
 
-    def get_consumer_offsets_dict(self):
-        return self._consumer_offsets
-
     def get_highwater_offsets(self, consumer_offsets):
         # TODO: Remove broker_requests_batch_size as config after
         # kafka-python is removed if we don't need to batch requests in Confluent
+        highwater_offsets = {}
         topics_with_consumer_offset = {}
         if not self.config._monitor_all_broker_highwatermarks:
             topics_with_consumer_offset = {(topic, partition) for (_, topic, partition) in consumer_offsets}
@@ -55,14 +53,9 @@ class ConfluentKafkaClient(KafkaClient):
                     ):
                         _, high_offset = consumer.get_watermark_offsets(topic_partition)
 
-                        self._highwater_offsets[(topic, partition)] = high_offset
+                        highwater_offsets[(topic, partition)] = high_offset
 
-    def get_highwater_offsets_dict(self):
-        return self._highwater_offsets
-
-    def reset_offsets(self):
-        self._consumer_offsets = {}
-        self._highwater_offsets = {}
+        return highwater_offsets
 
     def get_partitions_for_topic(self, topic):
         try:
@@ -81,6 +74,7 @@ class ConfluentKafkaClient(KafkaClient):
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
         offset_futures = []
+        consumer_offsets = {}
 
         if self.config._monitor_unlisted_consumer_groups:
             # Get all consumer groups
@@ -142,9 +136,11 @@ class ConfluentKafkaClient(KafkaClient):
                             topic_partition.topic,
                             str(topic_partition.partition),
                         )
-                    self._consumer_offsets[(consumer_group, topic, partition)] = offset
+                    consumer_offsets[(consumer_group, topic, partition)] = offset
             except KafkaException as e:
                 self.log.debug("Failed to read consumer offsets for %s: %s", consumer_group, e)
+
+        return consumer_offsets
 
     def _validate_consumer_groups(self):
         """Validate any explicitly specified consumer groups.
