@@ -59,7 +59,9 @@ To configure this check for an Agent running on a host:
       - To use the Agent's Elasticsearch integration for the AWS Elasticsearch services, set the `url` parameter to point to your AWS Elasticsearch stats URL.
       - All requests to the Amazon ES configuration API must be signed. See the [Making and signing OpenSearch Service requests][6] for details.
       - The `aws` auth type relies on [boto3][7] to automatically gather AWS credentials from `.aws/credentials`. Use `auth_type: basic` in the `conf.yaml` and define the credentials with `username: <USERNAME>` and `password: <PASSWORD>`.
-      - You must create a user and a role (if you don't already have them) in Elasticsearch with the proper permissions to monitor. This can be done through the REST API offered by Elasticsearch, or through the Kibana UI. Include the following properties in the created role:
+      - You must create a user and a role (if you don't already have them) in Elasticsearch with the proper permissions to monitor. This can be done through the REST API offered by Elasticsearch, or through the Kibana UI.
+      - Noye: If you have enabled security features in Elastic Search, you can use the `monitor` privilege OR the `manage` privilege while using the API to make the calls to the Elastic Search indices.
+      - Include the following properties in the created role:
         ```json
         name = "datadog"
         indices {
