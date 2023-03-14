@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 11.0.1 / 2023-03-08
+
+* [Fixed] Do not double emit instance metrics when autodiscovery is enabled. See [#14115](https://github.com/DataDog/integrations-core/pull/14115).
+
 ## 11.0.0 / 2023-03-03
 
 * [Added] Collect program_name for SQL Server activity. See [#13953](https://github.com/DataDog/integrations-core/pull/13953).

@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import SQLConnectionError
+from datadog_checks.sqlserver.const import INSTANCE_METRICS_DATABASE
 
 from .common import CHECK_NAME, CUSTOM_METRICS, EXPECTED_DEFAULT_METRICS, assert_metrics
 from .utils import not_windows_ci, windows_ci
@@ -37,9 +38,21 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize('database_autodiscovery', [True, False])
-def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, database_autodiscovery):
+@pytest.mark.parametrize(
+    'database_autodiscovery,dbm_enabled', [(True, True), (True, False), (False, True), (False, False)]
+)
+def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, database_autodiscovery, dbm_enabled):
     instance_docker['database_autodiscovery'] = database_autodiscovery
+    # test that all default integration metrics are sent regardless of
+    # if dbm is enabled or not.
+    instance_docker['dbm'] = dbm_enabled
+    # no need to assert metrics that are emitted from the dbm portion of the
+    # integration in this check as they are all internal
+    instance_docker['query_metrics'] = {'enabled': False}
+    instance_docker['query_activity'] = {'enabled': False}
+    autodiscovery_dbs = ['master', 'msdb', 'datadog_test']
+    if database_autodiscovery:
+        instance_docker['autodiscovery_include'] = autodiscovery_dbs
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     expected_tags = instance_docker.get('tags', []) + [
@@ -48,9 +61,12 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
     ]
     assert_metrics(
         aggregator,
-        expected_tags,
+        check_tags=instance_docker.get('tags', []),
+        service_tags=expected_tags,
+        dbm_enabled=dbm_enabled,
         hostname=sqlserver_check.resolved_hostname,
         database_autodiscovery=database_autodiscovery,
+        dbs=autodiscovery_dbs,
     )
 
 
@@ -246,15 +262,7 @@ def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodisc
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
 
-    expected_metrics = [
-        'sqlserver.database.backup_restore_throughput',
-        'sqlserver.database.log_bytes_flushed',
-        'sqlserver.database.log_flushes',
-        'sqlserver.database.log_flush_wait',
-        'sqlserver.database.transactions',
-        'sqlserver.database.write_transactions',
-        'sqlserver.database.active_transactions',
-    ]
+    expected_metrics = [m[0] for m in INSTANCE_METRICS_DATABASE]
     master_tags = [
         'database:master',
         'optional:tag1',
@@ -263,11 +271,9 @@ def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodisc
         'database:msdb',
         'optional:tag1',
     ]
-    base_tags = ['optional:tag1']
     for metric in expected_metrics:
         aggregator.assert_metric(metric, tags=master_tags)
         aggregator.assert_metric(metric, tags=msdb_tags)
-        aggregator.assert_metric(metric, tags=base_tags)
 
 
 @pytest.mark.integration

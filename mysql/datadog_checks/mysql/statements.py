@@ -79,6 +79,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             job_name="statement-metrics",
             shutdown_callback=self._close_db_conn,
         )
+        self._check = check
         self._metric_collection_interval = collection_interval
         self._connection_args = connection_args
         self._db = None
