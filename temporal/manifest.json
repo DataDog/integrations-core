@@ -38,6 +38,9 @@
     },
     "logs": {
       "source": "temporal"
+    },
+    "dashboards": {
+      "Temporal Server Overview": "assets/dashboards/server_overview.json"
     }
   },
   "author": {
