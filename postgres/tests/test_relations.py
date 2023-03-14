@@ -5,75 +5,76 @@ import psycopg2
 import pytest
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.postgres.relationsmanager import RelationsManager
+from datadog_checks.postgres.relationsmanager import RelationsManager, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS
 
 from .common import DB_NAME, HOST, PORT
 
-RELATION_METRICS = [
-    'postgresql.seq_scans',
-    'postgresql.seq_rows_read',
-    'postgresql.rows_inserted',
-    'postgresql.rows_updated',
-    'postgresql.rows_deleted',
-    'postgresql.rows_hot_updated',
-    'postgresql.live_rows',
-    'postgresql.dead_rows',
-    'postgresql.heap_blocks_read',
-    'postgresql.heap_blocks_hit',
-    'postgresql.toast_blocks_read',
-    'postgresql.toast_blocks_hit',
-    'postgresql.toast_index_blocks_read',
-    'postgresql.toast_index_blocks_hit',
-    'postgresql.vacuumed',
-    'postgresql.autovacuumed',
-    'postgresql.analyzed',
-    'postgresql.autoanalyzed',
-]
 
-RELATION_SIZE_METRICS = ['postgresql.table_size', 'postgresql.total_size', 'postgresql.index_size']
+def _get_metric_names(scope):
+    for metric_name, _ in scope['metrics'].values():
+        yield metric_name
 
-RELATION_INDEX_METRICS = [
-    'postgresql.index_scans',
-    'postgresql.index_rows_fetched',  # deprecated
-    'postgresql.index_rel_rows_fetched',
-    'postgresql.index_blocks_read',
-    'postgresql.index_blocks_hit',
-]
 
-IDX_METRICS = ['postgresql.index_scans', 'postgresql.index_rows_read', 'postgresql.index_rows_fetched']
+def _check_relation_metrics(aggregator, pg_instance, relation):
+    relation = relation.lower()
+    base_tags = pg_instance['tags'] + [
+        'port:{}'.format(pg_instance['port']),
+        'db:%s' % pg_instance['dbname']]
+    expected_tags = base_tags + [
+        'table:{}'.format(relation),
+        'schema:public',
+    ]
+
+    oid = 0
+    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+        with conn.cursor() as cur:
+            cur.execute("select oid from pg_class where relname='{}'".format(relation))
+            oid = cur.fetchall()[0][0]
+
+    expected_toast_tags = base_tags + [
+        'toast_of:{}'.format(relation),
+        'table:pg_toast_{}'.format(oid),
+        'schema:pg_toast',
+    ]
+    expected_toast_index_tags = base_tags + [
+        'toast_of:{}'.format(relation),
+        'table:pg_toast_{}'.format(oid),
+        'index:pg_toast_{}_index'.format(oid),
+        'schema:pg_toast',
+    ]
+
+    for name in _get_metric_names(REL_METRICS):
+        if name in ['postgresql.index_rel_scans', 'postgresql.index_rel_rows_fetched']:
+            aggregator.assert_metric(name, count=0, tags=expected_tags)
+        else:
+            aggregator.assert_metric(name, count=1, tags=expected_tags)
+        aggregator.assert_metric(name, count=1, tags=expected_toast_tags)
+
+    for name in _get_metric_names(STATIO_METRICS):
+        if name in ['postgresql.index_blocks_read', 'postgresql.index_blocks_hit']:
+            aggregator.assert_metric(name, count=0, tags=expected_tags)
+        else:
+            aggregator.assert_metric(name, count=1, tags=expected_tags)
+        # statio table already provides toast specific metrics
+        aggregator.assert_metric(name, count=0, tags=expected_toast_tags)
+
+    for name in _get_metric_names(IDX_METRICS):
+        # 'persons' db don't have any indexes
+        aggregator.assert_metric(name, count=0, tags=expected_tags)
+        # toast table are always indexed
+        aggregator.assert_metric(name, count=1, tags=expected_toast_index_tags)
+
+    for name in _get_metric_names(SIZE_METRICS):
+        aggregator.assert_metric(name, count=1, tags=expected_tags)
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_relations_metrics(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = ['persons']
-
     posgres_check = integration_check(pg_instance)
     posgres_check.check(pg_instance)
-
-    expected_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
-        'db:%s' % pg_instance['dbname'],
-        'table:persons',
-        'schema:public',
-    ]
-
-    expected_size_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
-        'db:%s' % pg_instance['dbname'],
-        'table:persons',
-        'schema:public',
-    ]
-
-    for name in RELATION_METRICS:
-        aggregator.assert_metric(name, count=1, tags=expected_tags)
-
-    # 'persons' db don't have any indexes
-    for name in RELATION_INDEX_METRICS:
-        aggregator.assert_metric(name, count=0, tags=expected_tags)
-
-    for name in RELATION_SIZE_METRICS:
-        aggregator.assert_metric(name, count=1, tags=expected_size_tags)
+    _check_relation_metrics(aggregator, pg_instance, 'persons')
 
 
 @pytest.mark.integration
@@ -119,25 +120,8 @@ def test_relations_metrics_regex(aggregator, integration_check, pg_instance):
     posgres_check = integration_check(pg_instance)
     posgres_check.check(pg_instance)
 
-    expected_tags = {}
     for relation in relations:
-        expected_tags[relation] = pg_instance['tags'] + [
-            'port:{}'.format(pg_instance['port']),
-            'db:%s' % pg_instance['dbname'],
-            'table:{}'.format(relation.lower()),
-            'schema:public',
-        ]
-
-    for relation in relations:
-        for name in RELATION_METRICS:
-            aggregator.assert_metric(name, count=1, tags=expected_tags[relation])
-
-        # 'persons' db don't have any indexes
-        for name in RELATION_INDEX_METRICS:
-            aggregator.assert_metric(name, count=0, tags=expected_tags[relation])
-
-        for name in RELATION_SIZE_METRICS:
-            aggregator.assert_metric(name, count=1, tags=expected_tags[relation])
+        _check_relation_metrics(aggregator, pg_instance, relation)
 
 
 @pytest.mark.integration
@@ -147,14 +131,14 @@ def test_max_relations(aggregator, integration_check, pg_instance):
     posgres_check = integration_check(pg_instance)
     posgres_check.check(pg_instance)
 
-    for name in RELATION_METRICS:
+    for name in _get_metric_names(REL_METRICS):
         relation_metrics = []
         for m in aggregator._metrics[name]:
             if any(['table:' in tag for tag in m.tags]):
                 relation_metrics.append(m)
         assert len(relation_metrics) == 1
 
-    for name in RELATION_SIZE_METRICS:
+    for name in _get_metric_names(SIZE_METRICS):
         relation_metrics = []
         for m in aggregator._metrics[name]:
             if any(['table:' in tag for tag in m.tags]):
@@ -179,7 +163,7 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
         'schema:public',
     ]
 
-    for name in IDX_METRICS:
+    for name in _get_metric_names(IDX_METRICS):
         aggregator.assert_metric(name, count=1, tags=expected_tags)
 
 
