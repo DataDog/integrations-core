@@ -47,9 +47,6 @@ class MultiDatabaseConnectionPool(object):
             )
         self.connect_fn = connect_fn
 
-    def __del__(self):
-        self.close_all_connections()
-
     def get_connection(self, dbname: str, ttl_ms: int):
         self.prune_connections()
         with self._mu:

@@ -50,11 +50,7 @@ def test_conn_pool(pg_instance):
     assert pool._stats.connection_closed_failed == 0
 
 
-@pytest.mark.parametrize(
-    'close_method',
-    ('DEL', 'CLOSE'),
-)
-def test_conn_pool_no_leaks_on_close(close_method, pg_instance):
+def test_conn_pool_no_leaks_on_close(pg_instance):
     """
     Test a simple case of opening and closing many connections. There should be no leaked connections on the server.
     """
@@ -98,16 +94,9 @@ def test_conn_pool_no_leaks_on_close(close_method, pg_instance):
         assert pool._stats.connection_opened == conn_count
         assert len(get_activity()) == conn_count
 
-        # Delete all conns in the pool
-        if close_method == 'CLOSE':
-            pool.close_all_connections()
-            assert pool._stats.connection_closed == conn_count
-            assert pool._stats.connection_closed_failed == 0
-        elif close_method == 'DEL':
-            # When the pool is garbage collected, expect that all connections are cleaned up on the server
-            del pool
-        else:
-            assert 0
+        pool.close_all_connections()
+        assert pool._stats.connection_closed == conn_count
+        assert pool._stats.connection_closed_failed == 0
 
         # Ensure all the connections have been terminated on the server
         attempts = 5
