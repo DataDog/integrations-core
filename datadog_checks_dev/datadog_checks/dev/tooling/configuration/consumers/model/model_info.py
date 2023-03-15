@@ -65,9 +65,10 @@ class ModelInfo:
         :param normalized_option_name: Used to build the function name
         :type_data: dict containing all the relevant information to build the function
         """
-        self.defaults_file_lines.extend(['', '', f'def {model_id}_{normalized_option_name}(field, value):'])
-
         default_value = self._get_default_value(type_data)
+        function_name = f'{model_id}_{normalized_option_name}'
+        function_definition = f'def {function_name}(_field, _value):' if default_value is not NO_DEFAULT else f'def {function_name}(field, value):'
+        self.defaults_file_lines.extend(['', '', function_definition])
         if default_value is not NO_DEFAULT:
             self.defaults_file_needs_value_normalization = True
             self.defaults_file_lines.append(f'    return {default_value!r}')
