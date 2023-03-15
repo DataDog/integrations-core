@@ -64,7 +64,7 @@ def test():
         """
 
 
-        def instance_password(field, value):
+        def instance_password(_field, _value):
             return 'secret'
         """
     )
