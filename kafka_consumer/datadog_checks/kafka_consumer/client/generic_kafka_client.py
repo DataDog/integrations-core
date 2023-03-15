@@ -26,16 +26,6 @@ class GenericKafkaClient(KafkaClient):
             return self.python_kafka_client.get_highwater_offsets(consumer_offsets)
         return self.confluent_kafka_client.get_highwater_offsets(consumer_offsets)
 
-    def get_highwater_offsets_dict(self):
-        if self.use_legacy_client:
-            return self.python_kafka_client.get_highwater_offsets_dict()
-        return self.confluent_kafka_client.get_highwater_offsets_dict()
-
-    def reset_offsets(self):
-        if self.use_legacy_client:
-            return self.python_kafka_client.reset_offsets()
-        return self.confluent_kafka_client.reset_offsets()
-
     def get_partitions_for_topic(self, topic):
         if self.use_legacy_client:
             return self.python_kafka_client.get_partitions_for_topic(topic)
@@ -45,8 +35,3 @@ class GenericKafkaClient(KafkaClient):
         if self.use_legacy_client:
             return self.python_kafka_client.request_metadata_update()
         return self.confluent_kafka_client.request_metadata_update()
-
-    def get_consumer_offsets_dict(self):
-        if self.use_legacy_client:
-            return self.python_kafka_client.get_consumer_offsets_dict()
-        return self.confluent_kafka_client.get_consumer_offsets_dict()

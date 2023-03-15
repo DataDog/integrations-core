@@ -131,8 +131,8 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(
     # highwater_offset = {(topic, partition): offset}
     highwater_offset = {("topic1", "partition1"): 1}
     mock_client = mock.MagicMock()
-    mock_client.get_consumer_offsets_dict.return_value = consumer_offset
-    mock_client.get_highwater_offsets_dict.return_value = highwater_offset
+    mock_client.get_consumer_offsets.return_value = consumer_offset
+    mock_client.get_highwater_offsets.return_value = highwater_offset
     mock_client.get_partitions_for_topic.return_value = ['partition1']
     mock_generic_client.return_value = mock_client
 
@@ -174,8 +174,8 @@ def test_when_partition_is_none_then_emit_warning_log(
     # highwater_offset = {(topic, partition): offset}
     highwater_offset = {("topic1", "partition1"): 1}
     mock_client = mock.MagicMock()
-    mock_client.get_consumer_offsets_dict.return_value = consumer_offset
-    mock_client.get_highwater_offsets_dict.return_value = highwater_offset
+    mock_client.get_consumer_offsets.return_value = consumer_offset
+    mock_client.get_highwater_offsets.return_value = highwater_offset
     mock_client.get_partitions_for_topic.return_value = None
     mock_generic_client.return_value = mock_client
     caplog.set_level(logging.WARNING)
@@ -217,8 +217,8 @@ def test_when_partition_not_in_partitions_then_emit_warning_log(
     # highwater_offset = {(topic, partition): offset}
     highwater_offset = {("topic1", "partition1"): 1}
     mock_client = mock.MagicMock()
-    mock_client.get_consumer_offsets_dict.return_value = consumer_offset
-    mock_client.get_highwater_offsets_dict.return_value = highwater_offset
+    mock_client.get_consumer_offsets.return_value = consumer_offset
+    mock_client.get_highwater_offsets.return_value = highwater_offset
     mock_client.get_partitions_for_topic.return_value = ['partition2']
     mock_generic_client.return_value = mock_client
     caplog.set_level(logging.WARNING)
@@ -260,18 +260,18 @@ def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_me
     # highwater_offset = {(topic, partition): offset}
     highwater_offset = {("topic1", "partition1"): 3, ("topic2", "partition2"): 3}
     mock_client = mock.MagicMock()
-    mock_client.get_consumer_offsets_dict.return_value = consumer_offset
-    mock_client.get_highwater_offsets_dict.return_value = highwater_offset
+    mock_client.get_consumer_offsets.return_value = consumer_offset
+    mock_client.get_highwater_offsets.return_value = highwater_offset
     mock_client.get_partitions_for_topic.return_value = ['partition1']
     mock_generic_client.return_value = mock_client
     caplog.set_level(logging.WARNING)
 
     # When
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {'max_partition_contexts': 1}, [kafka_instance])
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {'max_partition_contexts': 2}, [kafka_instance])
     dd_run_check(kafka_consumer_check)
 
     # Then
-    aggregator.assert_metric("kafka.broker_offset", count=1)
+    aggregator.assert_metric("kafka.broker_offset", count=2)
     aggregator.assert_metric("kafka.consumer_offset", count=0)
     aggregator.assert_metric("kafka.consumer_lag", count=0)
 
@@ -290,8 +290,8 @@ def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metr
     # highwater_offset = {(topic, partition): offset}
     highwater_offset = {("topic1", "partition1"): 3, ("topic2", "partition2"): 3}
     mock_client = mock.MagicMock()
-    mock_client.get_consumer_offsets_dict.return_value = consumer_offset
-    mock_client.get_highwater_offsets_dict.return_value = highwater_offset
+    mock_client.get_consumer_offsets.return_value = consumer_offset
+    mock_client.get_highwater_offsets.return_value = highwater_offset
     mock_client.get_partitions_for_topic.return_value = ['partition1']
     mock_generic_client.return_value = mock_client
     caplog.set_level(logging.DEBUG)

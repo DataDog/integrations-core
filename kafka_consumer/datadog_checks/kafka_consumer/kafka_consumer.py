@@ -31,32 +31,30 @@ class KafkaCheck(AgentCheck):
     def check(self, _):
         """The main entrypoint of the check."""
         # Fetch Kafka consumer offsets
-        self.client.reset_offsets()
+
+        consumer_offsets = {}
 
         try:
-            self.client.get_consumer_offsets()
+            # Fetch consumer offsets
+            # Expected format: {(consumer_group, topic, partition): offset}
+            consumer_offsets = self.client.get_consumer_offsets()
         except Exception:
             self.log.exception("There was a problem collecting consumer offsets from Kafka.")
             # don't raise because we might get valid broker offsets
 
-        # Fetch consumer offsets
-        # Expected format: {(consumer_group, topic, partition): offset}
-        consumer_offsets = self.client.get_consumer_offsets_dict()
-
         # Fetch the broker highwater offsets
+        highwater_offsets = {}
         try:
             if len(consumer_offsets) < self._context_limit:
-                self.client.get_highwater_offsets(consumer_offsets)
+                # Fetch highwater offsets
+                # Expected format: {(topic, partition): offset}
+                highwater_offsets = self.client.get_highwater_offsets(consumer_offsets)
             else:
                 self.warning("Context limit reached. Skipping highwater offset collection.")
         except Exception:
             self.log.exception("There was a problem collecting the highwater mark offsets.")
             # Unlike consumer offsets, fail immediately because we can't calculate consumer lag w/o highwater_offsets
             raise
-
-        # Fetch highwater offsets
-        # Expected format: {(topic, partition): offset}
-        highwater_offsets = self.client.get_highwater_offsets_dict()
 
         total_contexts = len(consumer_offsets) + len(highwater_offsets)
         if total_contexts >= self._context_limit:

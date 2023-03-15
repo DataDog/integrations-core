@@ -9,8 +9,6 @@ class KafkaClient(ABC):
         self.config = config
         self.log = log
         self._kafka_client = None
-        self._highwater_offsets = {}
-        self._consumer_offsets = {}
         self._tls_context = tls_context
 
     @abstractmethod
@@ -18,19 +16,7 @@ class KafkaClient(ABC):
         pass
 
     @abstractmethod
-    def get_consumer_offsets_dict(self):
-        pass
-
-    @abstractmethod
     def get_highwater_offsets(self):
-        pass
-
-    @abstractmethod
-    def get_highwater_offsets_dict(self):
-        pass
-
-    @abstractmethod
-    def reset_offsets(self):
         pass
 
     @abstractmethod
