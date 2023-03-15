@@ -200,7 +200,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
         self._check = check
         self._config = config
-        self._conn_ttl_ms = 15 * 1000  # TODO: make this a config option
+        self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
@@ -428,6 +428,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def run_job(self):
         self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
         self._collect_statement_samples()
+        self._conn_pool.prune_connections()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_statement_samples(self):

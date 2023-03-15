@@ -136,6 +136,15 @@ files:
       value:
         type: integer
         example: 5000
+    - name: idle_connection_timeout
+      description: |
+        Sets the timeout (in ms) a connection used in the connection pool will be idle until it is closed by the pooler.
+        This value should be configured to a lower value if you are observing connection buildup on the Postgres server,
+        or a higher value if connections are getting prematurely closed.
+      hidden: true
+      value:
+        type: number
+        example: 60000
     - name: relations
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.

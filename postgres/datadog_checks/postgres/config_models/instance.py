@@ -130,6 +130,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     gcp: Optional[Gcp]
     host: str
+    idle_connection_timeout: Optional[float]
     ignore_databases: Optional[Sequence[str]]
     log_unobfuscated_plans: Optional[bool]
     log_unobfuscated_queries: Optional[bool]

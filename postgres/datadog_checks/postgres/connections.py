@@ -34,11 +34,10 @@ class MultiDatabaseConnectionPool(object):
         def reset(self):
             self.__init__()
 
-    def __init__(self, connect_fn, max_connections=-1):
+    def __init__(self, connect_fn):
         self._stats = self.Stats()
         self._mu = threading.Lock()
         self._conns = dict()
-        self._max_connections = max_connections
 
         connect_sig = inspect.signature(connect_fn)
         if len(connect_sig.parameters) != 1:
@@ -81,10 +80,6 @@ class MultiDatabaseConnectionPool(object):
                 if conn.deadline < now:
                     self._stats.connection_pruned += 1
                     self._terminate_connection_unsafe(dbname)
-
-        # TODO: Prune max connections
-        # if self._max_connections > 0 and len(self._conns) > self._max_connections:
-        #     sorted([(dbname, db) for dbname, db in self._conns.items()])
 
     def close_all_connections(self):
         success = True
