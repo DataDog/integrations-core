@@ -22,6 +22,8 @@ LABELS_REMAPPER = {'type': 'avi_type', 'tenant': 'avi_tenant'}
 class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = "avi_vantage"
 
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, name, init_config, instances):
         super(AviVantageCheck, self).__init__(name, init_config, instances)
         # Required for storing the auth cookie
