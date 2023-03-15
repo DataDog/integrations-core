@@ -42,7 +42,11 @@ class MultiDatabaseConnectionPool(object):
         self._mu = threading.Lock()
         self._conns = dict()
 
-        connect_sig = inspect.signature(connect_fn)
+        try:
+            signature = inspect.signature
+        except AttributeError:
+            pass
+        connect_sig = signature(connect_fn)
         if len(connect_sig.parameters) != 1:
             raise ValueError(
                 "Invalid signature for the connection function. "
