@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2023-present
+# All rights reserved
+# Licensed under Simplified BSD License (see LICENSE)
+
 import datetime
 import inspect
 import threading
@@ -10,10 +14,10 @@ ConnectionWithTTL = namedtuple("ConnectionWithTTL", "connection deadline")
 
 class MultiDatabaseConnectionPool(object):
     """
-    Manages a connection pool of connections across many logical databases with a maximum
-    of 1 conn per database. Traditional connection pools manage a set of connections to a
-    single database, however the usage patterns of the Agent application should aim to have
-    minimal footprint and reuse a single connection as much as possible.
+    Manages a connection pool across many logical databases with a maximum of 1 conn per
+    database. Traditional connection pools manage a set of connections to a single database,
+    however the usage patterns of the Agent application should aim to have minimal footprint
+    and reuse a single connection as much as possible.
 
     Even when limited to a single connection per database, an instance with hundreds of
     databases still present a connection overhead risk. This class provides a mechanism
@@ -50,7 +54,8 @@ class MultiDatabaseConnectionPool(object):
     def get_connection(self, dbname: str, ttl_ms: int):
         self.prune_connections()
         with self._mu:
-            db, _ = self._conns.pop(dbname, ConnectionWithTTL(None, None))
+            conn = self._conns.pop(dbname, ConnectionWithTTL(None, None))
+            db = conn.connection
             if db is None or db.closed:
                 self._stats.connection_opened += 1
                 db = self.connect_fn(dbname)
@@ -81,7 +86,8 @@ class MultiDatabaseConnectionPool(object):
     def close_all_connections(self):
         success = True
         with self._mu:
-            for dbname in list(self._conns.keys()):
+            while self._conns:
+                dbname = next(iter(self._conns))
                 if not self._terminate_connection_unsafe(dbname):
                     success = False
         return success

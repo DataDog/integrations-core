@@ -1,13 +1,13 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+
 import datetime
 import pprint
 import time
 import uuid
 
 import psycopg2
-import pytest
 
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool

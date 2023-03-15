@@ -143,7 +143,7 @@ files:
         or a higher value if connections are getting prematurely closed.
       hidden: true
       value:
-        type: number
+        type: integer
         example: 60000
     - name: relations
       description: |
