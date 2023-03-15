@@ -58,7 +58,7 @@ def test_enum_of_strings():
     assert not defaults_errors
     assert defaults_contents == normalize_yaml(
         """
-        def instance_my_str(field, value):
+        def instance_my_str(_field, _value):
             return 'a'
         """
     )
@@ -163,7 +163,7 @@ def test_enum_of_ints():
     assert not defaults_errors
     assert defaults_contents == normalize_yaml(
         """
-        def instance_my_int(field, value):
+        def instance_my_int(_field, _value):
             return 1
         """
     )

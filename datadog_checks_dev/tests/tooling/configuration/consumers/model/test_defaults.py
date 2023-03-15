@@ -97,11 +97,11 @@ def test():
         from datadog_checks.base.utils.models.fields import get_default_field_value
 
 
-        def instance_default_precedence(field, value):
+        def instance_default_precedence(_field, _value):
             return 'baz'
 
 
-        def instance_example(field, value):
+        def instance_example(_field, _value):
             return 'bar'
 
 
@@ -113,7 +113,7 @@ def test():
             return get_default_field_value(field, value)
 
 
-        def instance_long_default_formatted(field, value):
+        def instance_long_default_formatted(_field, _value):
             return [
                 ['01', '02', '03', '04', '05'],
                 ['06', '07', '08', '09', '10'],
