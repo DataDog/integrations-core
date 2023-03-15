@@ -22,11 +22,11 @@ def instance_collections(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_collections_indexes_stats(field, value):
+def instance_collections_indexes_stats(_field, _value):
     return False
 
 
-def instance_connection_scheme(field, value):
+def instance_connection_scheme(_field, _value):
     return 'mongodb'
 
 
@@ -42,11 +42,11 @@ def instance_dbnames(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
@@ -58,7 +58,7 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
@@ -70,7 +70,7 @@ def instance_password(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_replica_check(field, value):
+def instance_replica_check(_field, _value):
     return True
 
 
@@ -86,19 +86,19 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_timeout(field, value):
+def instance_timeout(_field, _value):
     return 30
 
 
-def instance_tls(field, value):
+def instance_tls(_field, _value):
     return False
 
 
-def instance_tls_allow_invalid_certificates(field, value):
+def instance_tls_allow_invalid_certificates(_field, _value):
     return False
 
 
-def instance_tls_allow_invalid_hostnames(field, value):
+def instance_tls_allow_invalid_hostnames(_field, _value):
     return False
 
 

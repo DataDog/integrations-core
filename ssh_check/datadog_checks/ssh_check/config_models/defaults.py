@@ -14,15 +14,15 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_add_missing_keys(field, value):
+def instance_add_missing_keys(_field, _value):
     return False
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
@@ -30,7 +30,7 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
@@ -38,7 +38,7 @@ def instance_password(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_port(field, value):
+def instance_port(_field, _value):
     return 22
 
 
@@ -46,7 +46,7 @@ def instance_private_key_file(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_private_key_type(field, value):
+def instance_private_key_type(_field, _value):
     return 'rsa'
 
 
@@ -54,7 +54,7 @@ def instance_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_sftp_check(field, value):
+def instance_sftp_check(_field, _value):
     return True
 
 

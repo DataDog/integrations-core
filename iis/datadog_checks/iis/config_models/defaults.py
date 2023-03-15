@@ -14,7 +14,7 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def shared_use_localized_counters(field, value):
+def shared_use_localized_counters(_field, _value):
     return False
 
 
@@ -30,15 +30,15 @@ def instance_counter_data_types(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
-def instance_enable_health_service_check(field, value):
+def instance_enable_health_service_check(_field, _value):
     return True
 
 
@@ -46,7 +46,7 @@ def instance_extra_metrics(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_host(field, value):
+def instance_host(_field, _value):
     return '.'
 
 
@@ -58,7 +58,7 @@ def instance_metrics(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
@@ -90,7 +90,7 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_use_legacy_check_version(field, value):
+def instance_use_legacy_check_version(_field, _value):
     return False
 
 

@@ -26,7 +26,7 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_all_partitions(field, value):
+def instance_all_partitions(_field, _value):
     return False
 
 
@@ -50,11 +50,11 @@ def instance_device_tag_re(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
@@ -66,7 +66,7 @@ def instance_file_system_include(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_include_all_devices(field, value):
+def instance_include_all_devices(_field, _value):
     return True
 
 
@@ -74,11 +74,11 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
-def instance_min_disk_size(field, value):
+def instance_min_disk_size(_field, _value):
     return 0
 
 
@@ -94,15 +94,15 @@ def instance_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_service_check_rw(field, value):
+def instance_service_check_rw(_field, _value):
     return False
 
 
-def instance_tag_by_filesystem(field, value):
+def instance_tag_by_filesystem(_field, _value):
     return False
 
 
-def instance_tag_by_label(field, value):
+def instance_tag_by_label(_field, _value):
     return True
 
 
@@ -110,13 +110,13 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_timeout(field, value):
+def instance_timeout(_field, _value):
     return 5
 
 
-def instance_use_lsblk(field, value):
+def instance_use_lsblk(_field, _value):
     return False
 
 
-def instance_use_mount(field, value):
+def instance_use_mount(_field, _value):
     return False

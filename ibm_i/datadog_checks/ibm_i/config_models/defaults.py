@@ -18,15 +18,15 @@ def instance_connection_string(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_driver(field, value):
+def instance_driver(_field, _value):
     return 'iSeries Access ODBC Driver'
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
@@ -34,7 +34,7 @@ def instance_hostname(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_job_query_timeout(field, value):
+def instance_job_query_timeout(_field, _value):
     return 240
 
 
@@ -46,7 +46,7 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
@@ -54,7 +54,7 @@ def instance_password(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_queries(field, value):
+def instance_queries(_field, _value):
     return [
         {'name': 'disk_usage'},
         {'name': 'cpu_usage'},
@@ -68,7 +68,7 @@ def instance_queries(field, value):
     ]
 
 
-def instance_query_timeout(field, value):
+def instance_query_timeout(_field, _value):
     return 30
 
 
@@ -76,7 +76,7 @@ def instance_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_severity_threshold(field, value):
+def instance_severity_threshold(_field, _value):
     return 50
 
 
@@ -84,7 +84,7 @@ def instance_system(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_system_mq_query_timeout(field, value):
+def instance_system_mq_query_timeout(_field, _value):
     return 80
 
 

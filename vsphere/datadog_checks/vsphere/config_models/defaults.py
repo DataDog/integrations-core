@@ -18,19 +18,19 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_attributes_prefix(field, value):
+def instance_attributes_prefix(_field, _value):
     return ''
 
 
-def instance_batch_property_collector_size(field, value):
+def instance_batch_property_collector_size(_field, _value):
     return 500
 
 
-def instance_batch_tags_collector_size(field, value):
+def instance_batch_tags_collector_size(_field, _value):
     return 200
 
 
-def instance_collect_attributes(field, value):
+def instance_collect_attributes(_field, _value):
     return False
 
 
@@ -38,7 +38,7 @@ def instance_collect_events(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_collect_events_only(field, value):
+def instance_collect_events_only(_field, _value):
     return False
 
 
@@ -46,35 +46,35 @@ def instance_collect_per_instance_filters(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_collect_tags(field, value):
+def instance_collect_tags(_field, _value):
     return False
 
 
-def instance_collection_level(field, value):
+def instance_collection_level(_field, _value):
     return 1
 
 
-def instance_collection_type(field, value):
+def instance_collection_type(_field, _value):
     return 'realtime'
 
 
-def instance_connection_reset_timeout(field, value):
+def instance_connection_reset_timeout(_field, _value):
     return 900
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_excluded_host_tags(field, value):
+def instance_excluded_host_tags(_field, _value):
     return []
 
 
-def instance_include_datastore_cluster_folder_tag(field, value):
+def instance_include_datastore_cluster_folder_tag(_field, _value):
     return True
 
 
-def instance_max_historical_metrics(field, value):
+def instance_max_historical_metrics(_field, _value):
     return 256
 
 
@@ -86,19 +86,19 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_metrics_per_query(field, value):
+def instance_metrics_per_query(_field, _value):
     return 500
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
-def instance_refresh_infrastructure_cache_interval(field, value):
+def instance_refresh_infrastructure_cache_interval(_field, _value):
     return 300
 
 
-def instance_refresh_metrics_metadata_cache_interval(field, value):
+def instance_refresh_metrics_metadata_cache_interval(_field, _value):
     return 1800
 
 
@@ -118,7 +118,7 @@ def instance_ssl_capath(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_ssl_verify(field, value):
+def instance_ssl_verify(_field, _value):
     return True
 
 
@@ -126,21 +126,21 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_tags_prefix(field, value):
+def instance_tags_prefix(_field, _value):
     return ''
 
 
-def instance_threads_count(field, value):
+def instance_threads_count(_field, _value):
     return 4
 
 
-def instance_tls_ignore_warning(field, value):
+def instance_tls_ignore_warning(_field, _value):
     return False
 
 
-def instance_use_collect_events_fallback(field, value):
+def instance_use_collect_events_fallback(_field, _value):
     return False
 
 
-def instance_use_guest_hostname(field, value):
+def instance_use_guest_hostname(_field, _value):
     return False

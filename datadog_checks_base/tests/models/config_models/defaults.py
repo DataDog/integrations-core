@@ -26,7 +26,7 @@ def instance_deprecated(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_flag(field, value):
+def instance_flag(_field, _value):
     return False
 
 

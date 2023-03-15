@@ -14,11 +14,11 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
@@ -30,15 +30,15 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
-def instance_port(field, value):
+def instance_port(_field, _value):
     return 2181
 
 
-def instance_report_instance_mode(field, value):
+def instance_report_instance_mode(_field, _value):
     return True
 
 
@@ -50,7 +50,7 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_timeout(field, value):
+def instance_timeout(_field, _value):
     return 3
 
 
@@ -70,13 +70,13 @@ def instance_tls_private_key_password(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_tls_validate_hostname(field, value):
+def instance_tls_validate_hostname(_field, _value):
     return True
 
 
-def instance_tls_verify(field, value):
+def instance_tls_verify(_field, _value):
     return True
 
 
-def instance_use_tls(field, value):
+def instance_use_tls(_field, _value):
     return False

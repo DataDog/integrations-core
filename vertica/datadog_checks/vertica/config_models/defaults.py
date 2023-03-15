@@ -26,7 +26,7 @@ def instance_client_lib_log_level(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_connection_load_balance(field, value):
+def instance_connection_load_balance(_field, _value):
     return False
 
 
@@ -38,11 +38,11 @@ def instance_db(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
@@ -54,11 +54,11 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
-def instance_only_custom_queries(field, value):
+def instance_only_custom_queries(_field, _value):
     return False
 
 
@@ -66,11 +66,11 @@ def instance_password(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_port(field, value):
+def instance_port(_field, _value):
     return 5433
 
 
-def instance_server(field, value):
+def instance_server(_field, _value):
     return 'localhost'
 
 
@@ -82,7 +82,7 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_timeout(field, value):
+def instance_timeout(_field, _value):
     return 10
 
 
@@ -102,19 +102,19 @@ def instance_tls_private_key_password(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_tls_validate_hostname(field, value):
+def instance_tls_validate_hostname(_field, _value):
     return True
 
 
-def instance_tls_verify(field, value):
+def instance_tls_verify(_field, _value):
     return True
 
 
-def instance_use_global_custom_queries(field, value):
+def instance_use_global_custom_queries(_field, _value):
     return 'true'
 
 
-def instance_use_tls(field, value):
+def instance_use_tls(_field, _value):
     return False
 
 

@@ -14,7 +14,7 @@ def shared_allowed_versions(field, value):
     return get_default_field_value(field, value)
 
 
-def shared_fetch_intermediate_certs(field, value):
+def shared_fetch_intermediate_certs(_field, _value):
     return False
 
 
@@ -26,27 +26,27 @@ def instance_allowed_versions(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_days_critical(field, value):
+def instance_days_critical(_field, _value):
     return 7.0
 
 
-def instance_days_warning(field, value):
+def instance_days_warning(_field, _value):
     return 14.0
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
-def instance_fetch_intermediate_certs(field, value):
+def instance_fetch_intermediate_certs(_field, _value):
     return False
 
 
-def instance_intermediate_cert_refresh_interval(field, value):
+def instance_intermediate_cert_refresh_interval(_field, _value):
     return 60
 
 
@@ -58,7 +58,7 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
@@ -66,7 +66,7 @@ def instance_name(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_port(field, value):
+def instance_port(_field, _value):
     return 443
 
 
@@ -78,7 +78,7 @@ def instance_seconds_warning(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_send_cert_duration(field, value):
+def instance_send_cert_duration(_field, _value):
     return False
 
 
@@ -98,7 +98,7 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_timeout(field, value):
+def instance_timeout(_field, _value):
     return 10
 
 
@@ -118,13 +118,13 @@ def instance_tls_private_key_password(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_tls_validate_hostname(field, value):
+def instance_tls_validate_hostname(_field, _value):
     return True
 
 
-def instance_tls_verify(field, value):
+def instance_tls_verify(_field, _value):
     return True
 
 
-def instance_transport(field, value):
+def instance_transport(_field, _value):
     return 'TCP'

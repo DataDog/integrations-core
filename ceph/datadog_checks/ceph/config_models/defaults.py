@@ -14,11 +14,11 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_ceph_cluster(field, value):
+def instance_ceph_cluster(_field, _value):
     return 'ceph'
 
 
-def instance_ceph_cmd(field, value):
+def instance_ceph_cmd(_field, _value):
     return '/usr/bin/ceph'
 
 
@@ -26,11 +26,11 @@ def instance_collect_service_check_for(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
@@ -38,7 +38,7 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
@@ -50,5 +50,5 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_use_sudo(field, value):
+def instance_use_sudo(_field, _value):
     return False

@@ -10,15 +10,15 @@
 from datadog_checks.base.utils.models.fields import get_default_field_value
 
 
-def shared_default_event_priority(field, value):
+def shared_default_event_priority(_field, _value):
     return 'normal'
 
 
-def shared_event_priority(field, value):
+def shared_event_priority(_field, _value):
     return 'normal'
 
 
-def shared_interpret_messages(field, value):
+def shared_interpret_messages(_field, _value):
     return True
 
 
@@ -26,23 +26,23 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def shared_tag_event_id(field, value):
+def shared_tag_event_id(_field, _value):
     return False
 
 
-def shared_tag_sid(field, value):
+def shared_tag_sid(_field, _value):
     return False
 
 
-def instance_auth_type(field, value):
+def instance_auth_type(_field, _value):
     return 'default'
 
 
-def instance_bookmark_frequency(field, value):
+def instance_bookmark_frequency(_field, _value):
     return '<PAYLOAD_SIZE>'
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
@@ -50,11 +50,11 @@ def instance_domain(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
-def instance_event_format(field, value):
+def instance_event_format(_field, _value):
     return ['Message']
 
 
@@ -62,7 +62,7 @@ def instance_event_id(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_event_priority(field, value):
+def instance_event_priority(_field, _value):
     return 'normal'
 
 
@@ -74,7 +74,7 @@ def instance_filters(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_host(field, value):
+def instance_host(_field, _value):
     return 'localhost'
 
 
@@ -82,11 +82,11 @@ def instance_included_messages(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_interpret_messages(field, value):
+def instance_interpret_messages(_field, _value):
     return True
 
 
-def instance_legacy_mode(field, value):
+def instance_legacy_mode(_field, _value):
     return True
 
 
@@ -102,7 +102,7 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
@@ -114,7 +114,7 @@ def instance_path(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_payload_size(field, value):
+def instance_payload_size(_field, _value):
     return 10
 
 
@@ -122,7 +122,7 @@ def instance_query(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_server(field, value):
+def instance_server(_field, _value):
     return 'localhost'
 
 
@@ -134,15 +134,15 @@ def instance_source_name(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_start(field, value):
+def instance_start(_field, _value):
     return 'now'
 
 
-def instance_tag_event_id(field, value):
+def instance_tag_event_id(_field, _value):
     return False
 
 
-def instance_tag_sid(field, value):
+def instance_tag_sid(_field, _value):
     return False
 
 
@@ -150,11 +150,11 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_timeout(field, value):
+def instance_timeout(_field, _value):
     return 5
 
 
-def instance_type(field, value):
+def instance_type(_field, _value):
     return ['information']
 
 

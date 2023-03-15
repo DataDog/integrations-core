@@ -14,15 +14,15 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_collect_response_time(field, value):
+def instance_collect_response_time(_field, _value):
     return False
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
@@ -30,7 +30,7 @@ def instance_ip_cache_duration(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_ipv4_only(field, value):
+def instance_ipv4_only(_field, _value):
     return False
 
 
@@ -38,11 +38,11 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
-def instance_multiple_ips(field, value):
+def instance_multiple_ips(_field, _value):
     return False
 
 
@@ -54,5 +54,5 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_timeout(field, value):
+def instance_timeout(_field, _value):
     return 10

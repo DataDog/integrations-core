@@ -14,7 +14,7 @@ def shared_queue_manager_process(field, value):
     return get_default_field_value(field, value)
 
 
-def shared_queue_manager_process_limit(field, value):
+def shared_queue_manager_process_limit(_field, _value):
     return 1
 
 
@@ -22,11 +22,11 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_auto_discover_channels(field, value):
+def instance_auto_discover_channels(_field, _value):
     return True
 
 
-def instance_auto_discover_queues(field, value):
+def instance_auto_discover_queues(_field, _value):
     return False
 
 
@@ -38,11 +38,11 @@ def instance_channels(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_collect_reset_queue_metrics(field, value):
+def instance_collect_reset_queue_metrics(_field, _value):
     return True
 
 
-def instance_collect_statistics_metrics(field, value):
+def instance_collect_statistics_metrics(_field, _value):
     return False
 
 
@@ -50,19 +50,19 @@ def instance_connection_name(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_convert_endianness(field, value):
+def instance_convert_endianness(_field, _value):
     return False
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
-def instance_host(field, value):
+def instance_host(_field, _value):
     return 'localhost'
 
 
@@ -70,15 +70,15 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
-def instance_mqcd_version(field, value):
+def instance_mqcd_version(_field, _value):
     return 6
 
 
-def instance_override_hostname(field, value):
+def instance_override_hostname(_field, _value):
     return False
 
 
@@ -86,7 +86,7 @@ def instance_password(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_port(field, value):
+def instance_port(_field, _value):
     return 1414
 
 
@@ -94,7 +94,7 @@ def instance_queue_manager_process(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_queue_manager_timezone(field, value):
+def instance_queue_manager_timezone(_field, _value):
     return 'Etc/UTC'
 
 
@@ -118,7 +118,7 @@ def instance_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_ssl_auth(field, value):
+def instance_ssl_auth(_field, _value):
     return False
 
 
@@ -130,7 +130,7 @@ def instance_ssl_cipher_spec(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_ssl_key_repository_location(field, value):
+def instance_ssl_key_repository_location(_field, _value):
     return '/var/mqm/ssl-db/client/KeyringClient'
 
 
@@ -138,11 +138,11 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_timeout(field, value):
+def instance_timeout(_field, _value):
     return 5
 
 
-def instance_try_basic_auth(field, value):
+def instance_try_basic_auth(_field, _value):
     return True
 
 

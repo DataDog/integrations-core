@@ -22,15 +22,15 @@ def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
-def instance_jdbc_driver_path(field, value):
+def instance_jdbc_driver_path(_field, _value):
     return '<DRIVER_PATH>.jar'
 
 
@@ -50,15 +50,15 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
-def instance_only_custom_queries(field, value):
+def instance_only_custom_queries(_field, _value):
     return False
 
 
-def instance_protocol(field, value):
+def instance_protocol(_field, _value):
     return 'TCP'
 
 
@@ -70,5 +70,5 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_use_global_custom_queries(field, value):
+def instance_use_global_custom_queries(_field, _value):
     return 'true'
