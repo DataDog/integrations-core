@@ -139,7 +139,7 @@ def test_schema_metrics(aggregator, integration_check, pg_instance):
         'schema:public',
     ]
     aggregator.assert_metric('postgresql.table.count', value=1, count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.db.count', value=5, count=1)
+    aggregator.assert_metric('postgresql.db.count', value=106, count=1)
 
 
 def test_connections_metrics(aggregator, integration_check, pg_instance):
