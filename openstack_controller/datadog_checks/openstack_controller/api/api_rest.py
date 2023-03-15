@@ -8,6 +8,13 @@ from datadog_checks.openstack_controller.api.baremetal_rest import BaremetalRest
 from datadog_checks.openstack_controller.api.compute_rest import ComputeRest
 from datadog_checks.openstack_controller.api.network_rest import NetworkRest
 
+from enum import Enum
+
+class ComponentType(str, Enum):
+    COMPUTE = 'compute'
+    NETWORK = 'network'
+    BAREMETAL = 'baremetal'
+
 
 class ApiRest(Api):
     def __init__(self, logger, config, http):
@@ -35,21 +42,21 @@ class ApiRest(Api):
 
     def get_compute_response_time(self, project):
         self.log.debug("getting compute response time")
-        component = self._get_component(project['id'], 'compute')
+        component = self._get_component(project['id'], ComponentType.COMPUTE)
         if component:
             return component.get_response_time()
         return None
 
     def get_network_response_time(self, project):
         self.log.debug("getting network response time")
-        component = self._get_component(project['id'], 'network')
+        component = self._get_component(project['id'], ComponentType.NETWORK)
         if component:
             return component.get_response_time()
         return None
 
     def get_baremetal_response_time(self, project):
         self.log.debug("getting baremetal response time")
-        component = self._get_component(project['id'], 'baremetal')
+        component = self._get_component(project['id'], ComponentType.BAREMETAL)
         if component:
             return component.get_response_time()
         return None
@@ -57,7 +64,7 @@ class ApiRest(Api):
     def get_compute_limits(self, project):
         self.log.debug("getting compute limits")
         self.http.options['headers']['X-Auth-Token'] = self.project_auth_tokens[project['id']]['auth_token']
-        component = self._get_component(project['id'], 'compute')
+        component = self._get_component(project['id'], ComponentType.COMPUTE)
         if component:
             return component.get_limits(project['id'])
         return None
@@ -65,7 +72,7 @@ class ApiRest(Api):
     def get_compute_quotas(self, project):
         self.log.debug("getting compute quotas")
         self.http.options['headers']['X-Auth-Token'] = self.project_auth_tokens[project['id']]['auth_token']
-        component = self._get_component(project['id'], 'compute')
+        component = self._get_component(project['id'], ComponentType.COMPUTE)
         if component:
             return component.get_quotas(project['id'])
         return None
@@ -73,7 +80,7 @@ class ApiRest(Api):
     def get_compute_servers(self, project):
         self.log.debug("getting compute servers")
         self.http.options['headers']['X-Auth-Token'] = self.project_auth_tokens[project['id']]['auth_token']
-        component = self._get_component(project['id'], 'compute')
+        component = self._get_component(project['id'], ComponentType.COMPUTE)
         if component:
             return component.get_servers(project['id'])
         return None
@@ -81,7 +88,7 @@ class ApiRest(Api):
     def get_compute_flavors(self, project):
         self.log.debug("getting compute flavors")
         self.http.options['headers']['X-Auth-Token'] = self.project_auth_tokens[project['id']]['auth_token']
-        component = self._get_component(project['id'], 'compute')
+        component = self._get_component(project['id'], ComponentType.COMPUTE)
         if component:
             return component.get_flavors()
         return None
@@ -89,7 +96,7 @@ class ApiRest(Api):
     def get_networking_quotas(self, project):
         self.log.debug("getting networking quotas")
         self.http.options['headers']['X-Auth-Token'] = self.project_auth_tokens[project['id']]['auth_token']
-        component = self._get_component(project['id'], 'network')
+        component = self._get_component(project['id'], ComponentType.NETWORK)
         if component:
             return component.get_quotas(project['id'])
         return None
@@ -168,10 +175,10 @@ class ApiRest(Api):
         return None
 
     def _make_component(self, endpoint_type, endpoint):
-        if endpoint_type == 'compute':
+        if endpoint_type == ComponentType.COMPUTE:
             return ComputeRest(self.log, self.http, endpoint)
-        elif endpoint_type == 'network':
+        elif endpoint_type == ComponentType.NETWORK:
             return NetworkRest(self.log, self.http, endpoint)
-        elif endpoint_type == 'baremetal':
+        elif endpoint_type == ComponentType.BAREMETAL:
             return BaremetalRest(self.log, self.http, endpoint)
         return None
