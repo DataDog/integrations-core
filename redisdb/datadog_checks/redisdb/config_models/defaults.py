@@ -14,27 +14,27 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_collect_client_metrics(field, value):
+def instance_collect_client_metrics(_field, _value):
     return False
 
 
-def instance_command_stats(field, value):
+def instance_command_stats(_field, _value):
     return False
 
 
-def instance_db(field, value):
+def instance_db(_field, _value):
     return 0
 
 
-def instance_disable_connection_cache(field, value):
+def instance_disable_connection_cache(_field, _value):
     return False
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
@@ -46,7 +46,7 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
@@ -58,15 +58,15 @@ def instance_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_slowlog_max_len(field, value):
+def instance_slowlog_max_len(_field, _value):
     return 128
 
 
-def instance_socket_timeout(field, value):
+def instance_socket_timeout(_field, _value):
     return 5
 
 
-def instance_ssl(field, value):
+def instance_ssl(_field, _value):
     return False
 
 
@@ -74,7 +74,7 @@ def instance_ssl_ca_certs(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_ssl_cert_reqs(field, value):
+def instance_ssl_cert_reqs(_field, _value):
     return 2
 
 
@@ -98,5 +98,5 @@ def instance_username(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_warn_on_missing_keys(field, value):
+def instance_warn_on_missing_keys(_field, _value):
     return True

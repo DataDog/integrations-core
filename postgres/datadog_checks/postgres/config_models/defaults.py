@@ -14,11 +14,11 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_activity_metrics_excluded_aggregations(field, value):
+def instance_activity_metrics_excluded_aggregations(_field, _value):
     return []
 
 
-def instance_application_name(field, value):
+def instance_application_name(_field, _value):
     return 'datadog-agent'
 
 
@@ -30,31 +30,31 @@ def instance_azure(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_collect_activity_metrics(field, value):
+def instance_collect_activity_metrics(_field, _value):
     return False
 
 
-def instance_collect_bloat_metrics(field, value):
+def instance_collect_bloat_metrics(_field, _value):
     return False
 
 
-def instance_collect_count_metrics(field, value):
+def instance_collect_count_metrics(_field, _value):
     return True
 
 
-def instance_collect_database_size_metrics(field, value):
+def instance_collect_database_size_metrics(_field, _value):
     return True
 
 
-def instance_collect_default_database(field, value):
+def instance_collect_default_database(_field, _value):
     return True
 
 
-def instance_collect_function_metrics(field, value):
+def instance_collect_function_metrics(_field, _value):
     return False
 
 
-def instance_collect_wal_metrics(field, value):
+def instance_collect_wal_metrics(_field, _value):
     return False
 
 
@@ -62,27 +62,27 @@ def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_data_directory(field, value):
+def instance_data_directory(_field, _value):
     return '/usr/local/pgsql/data'
 
 
-def instance_dbm(field, value):
+def instance_dbm(_field, _value):
     return False
 
 
-def instance_dbname(field, value):
+def instance_dbname(_field, _value):
     return 'postgres'
 
 
-def instance_dbstrict(field, value):
+def instance_dbstrict(_field, _value):
     return False
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
@@ -90,19 +90,19 @@ def instance_gcp(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_ignore_databases(field, value):
+def instance_ignore_databases(_field, _value):
     return ['template%', 'rdsadmin', 'azure_maintenance']
 
 
-def instance_log_unobfuscated_plans(field, value):
+def instance_log_unobfuscated_plans(_field, _value):
     return False
 
 
-def instance_log_unobfuscated_queries(field, value):
+def instance_log_unobfuscated_queries(_field, _value):
     return False
 
 
-def instance_max_relations(field, value):
+def instance_max_relations(_field, _value):
     return 300
 
 
@@ -110,7 +110,7 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
@@ -122,11 +122,11 @@ def instance_password(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_pg_stat_statements_view(field, value):
+def instance_pg_stat_statements_view(_field, _value):
     return 'show_pg_stat_statements()'
 
 
-def instance_port(field, value):
+def instance_port(_field, _value):
     return 5432
 
 
@@ -142,7 +142,7 @@ def instance_query_samples(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_query_timeout(field, value):
+def instance_query_timeout(_field, _value):
     return 5000
 
 
@@ -158,31 +158,31 @@ def instance_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_ssl(field, value):
+def instance_ssl(_field, _value):
     return False
 
 
-def instance_ssl_cert(field, value):
+def instance_ssl_cert(_field, _value):
     return False
 
 
-def instance_ssl_key(field, value):
+def instance_ssl_key(_field, _value):
     return False
 
 
-def instance_ssl_password(field, value):
+def instance_ssl_password(_field, _value):
     return False
 
 
-def instance_ssl_root_cert(field, value):
+def instance_ssl_root_cert(_field, _value):
     return False
 
 
-def instance_table_count_limit(field, value):
+def instance_table_count_limit(_field, _value):
     return 200
 
 
-def instance_tag_replication_role(field, value):
+def instance_tag_replication_role(_field, _value):
     return False
 
 

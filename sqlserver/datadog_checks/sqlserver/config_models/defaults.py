@@ -22,7 +22,7 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_adoprovider(field, value):
+def instance_adoprovider(_field, _value):
     return 'SQLOLEDB'
 
 
@@ -30,7 +30,7 @@ def instance_ao_database(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_autodiscovery_db_service_check(field, value):
+def instance_autodiscovery_db_service_check(_field, _value):
     return True
 
 
@@ -54,7 +54,7 @@ def instance_azure(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_command_timeout(field, value):
+def instance_command_timeout(_field, _value):
     return 5
 
 
@@ -62,7 +62,7 @@ def instance_connection_string(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_connector(field, value):
+def instance_connector(_field, _value):
     return 'adodbapi'
 
 
@@ -70,15 +70,15 @@ def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_database(field, value):
+def instance_database(_field, _value):
     return 'master'
 
 
-def instance_database_autodiscovery(field, value):
+def instance_database_autodiscovery(_field, _value):
     return False
 
 
-def instance_database_autodiscovery_interval(field, value):
+def instance_database_autodiscovery_interval(_field, _value):
     return 3600
 
 
@@ -86,15 +86,15 @@ def instance_db_fragmentation_object_names(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_dbm(field, value):
+def instance_dbm(_field, _value):
     return False
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_driver(field, value):
+def instance_driver(_field, _value):
     return 'SQL Server'
 
 
@@ -102,7 +102,7 @@ def instance_dsn(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
@@ -110,39 +110,39 @@ def instance_gcp(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_ignore_missing_database(field, value):
+def instance_ignore_missing_database(_field, _value):
     return False
 
 
-def instance_include_ao_metrics(field, value):
+def instance_include_ao_metrics(_field, _value):
     return False
 
 
-def instance_include_db_fragmentation_metrics(field, value):
+def instance_include_db_fragmentation_metrics(_field, _value):
     return False
 
 
-def instance_include_fci_metrics(field, value):
+def instance_include_fci_metrics(_field, _value):
     return False
 
 
-def instance_include_instance_metrics(field, value):
+def instance_include_instance_metrics(_field, _value):
     return True
 
 
-def instance_include_master_files_metrics(field, value):
+def instance_include_master_files_metrics(_field, _value):
     return False
 
 
-def instance_include_task_scheduler_metrics(field, value):
+def instance_include_task_scheduler_metrics(_field, _value):
     return False
 
 
-def instance_log_unobfuscated_plans(field, value):
+def instance_log_unobfuscated_plans(_field, _value):
     return False
 
 
-def instance_log_unobfuscated_queries(field, value):
+def instance_log_unobfuscated_queries(_field, _value):
     return False
 
 
@@ -150,7 +150,7 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
@@ -158,11 +158,11 @@ def instance_obfuscator_options(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_only_custom_queries(field, value):
+def instance_only_custom_queries(_field, _value):
     return False
 
 
-def instance_only_emit_local(field, value):
+def instance_only_emit_local(_field, _value):
     return False
 
 
@@ -174,7 +174,7 @@ def instance_proc_only_if(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_proc_only_if_database(field, value):
+def instance_proc_only_if_database(_field, _value):
     return 'master'
 
 
@@ -190,7 +190,7 @@ def instance_reported_hostname(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_server_version(field, value):
+def instance_server_version(_field, _value):
     return '2014'
 
 
@@ -206,7 +206,7 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_use_global_custom_queries(field, value):
+def instance_use_global_custom_queries(_field, _value):
     return 'true'
 
 

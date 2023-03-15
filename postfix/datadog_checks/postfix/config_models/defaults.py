@@ -10,11 +10,11 @@
 from datadog_checks.base.utils.models.fields import get_default_field_value
 
 
-def shared_postfix_user(field, value):
+def shared_postfix_user(_field, _value):
     return 'root'
 
 
-def shared_postqueue(field, value):
+def shared_postqueue(_field, _value):
     return False
 
 
@@ -22,7 +22,7 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_config_directory(field, value):
+def instance_config_directory(_field, _value):
     return '/etc/postfix'
 
 
@@ -30,11 +30,11 @@ def instance_directory(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
@@ -42,7 +42,7 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 

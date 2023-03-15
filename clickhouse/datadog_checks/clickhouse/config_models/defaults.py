@@ -22,7 +22,7 @@ def instance_compression(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_connect_timeout(field, value):
+def instance_connect_timeout(_field, _value):
     return 10
 
 
@@ -30,15 +30,15 @@ def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_db(field, value):
+def instance_db(_field, _value):
     return 'default'
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
@@ -46,11 +46,11 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
-def instance_only_custom_queries(field, value):
+def instance_only_custom_queries(_field, _value):
     return False
 
 
@@ -58,11 +58,11 @@ def instance_password(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_port(field, value):
+def instance_port(_field, _value):
     return 9000
 
 
-def instance_read_timeout(field, value):
+def instance_read_timeout(_field, _value):
     return 10
 
 
@@ -74,13 +74,13 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_tls_verify(field, value):
+def instance_tls_verify(_field, _value):
     return False
 
 
-def instance_use_global_custom_queries(field, value):
+def instance_use_global_custom_queries(_field, _value):
     return 'true'
 
 
-def instance_username(field, value):
+def instance_username(_field, _value):
     return 'default'

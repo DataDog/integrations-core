@@ -22,19 +22,19 @@ def instance_access_secret(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
-def instance_host(field, value):
+def instance_host(_field, _value):
     return 'localhost'
 
 
-def instance_is_secure(field, value):
+def instance_is_secure(_field, _value):
     return True
 
 
@@ -46,15 +46,15 @@ def instance_metrics(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
-def instance_port(field, value):
+def instance_port(_field, _value):
     return 8080
 
 
-def instance_s3_root(field, value):
+def instance_s3_root(_field, _value):
     return 's3.amazonaws.com'
 
 

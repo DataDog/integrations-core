@@ -18,7 +18,7 @@ def instance_exclude_labels(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_health_service_check(field, value):
+def instance_health_service_check(_field, _value):
     return True
 
 
@@ -34,7 +34,7 @@ def instance_labels_mapper(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_max_returned_metrics(field, value):
+def instance_max_returned_metrics(_field, _value):
     return 2000
 
 
@@ -42,15 +42,15 @@ def instance_prometheus_metrics_prefix(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_prometheus_timeout(field, value):
+def instance_prometheus_timeout(_field, _value):
     return 10
 
 
-def instance_send_histograms_buckets(field, value):
+def instance_send_histograms_buckets(_field, _value):
     return True
 
 
-def instance_send_monotonic_counter(field, value):
+def instance_send_monotonic_counter(_field, _value):
     return True
 
 

@@ -18,15 +18,15 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def shared_skip_proxy(field, value):
+def shared_skip_proxy(_field, _value):
     return False
 
 
-def shared_timeout(field, value):
+def shared_timeout(_field, _value):
     return 10
 
 
-def instance_allow_redirects(field, value):
+def instance_allow_redirects(_field, _value):
     return True
 
 
@@ -38,7 +38,7 @@ def instance_auth_token(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_auth_type(field, value):
+def instance_auth_type(_field, _value):
     return 'basic'
 
 
@@ -58,19 +58,19 @@ def instance_boto_config(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_cache_metric_wildcards(field, value):
+def instance_cache_metric_wildcards(_field, _value):
     return True
 
 
-def instance_cache_shared_labels(field, value):
+def instance_cache_shared_labels(_field, _value):
     return True
 
 
-def instance_collect_counters_with_distributions(field, value):
+def instance_collect_counters_with_distributions(_field, _value):
     return False
 
 
-def instance_collect_histogram_buckets(field, value):
+def instance_collect_histogram_buckets(_field, _value):
     return True
 
 
@@ -78,15 +78,15 @@ def instance_connect_timeout(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
-def instance_enable_health_service_check(field, value):
+def instance_enable_health_service_check(_field, _value):
     return True
 
 
@@ -114,7 +114,7 @@ def instance_headers(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_histogram_buckets_as_distributions(field, value):
+def instance_histogram_buckets_as_distributions(_field, _value):
     return False
 
 
@@ -134,11 +134,11 @@ def instance_include_labels(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_jmx_exporter_port(field, value):
+def instance_jmx_exporter_port(_field, _value):
     return 11001
 
 
-def instance_kerberos_auth(field, value):
+def instance_kerberos_auth(_field, _value):
     return 'disabled'
 
 
@@ -146,11 +146,11 @@ def instance_kerberos_cache(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_kerberos_delegate(field, value):
+def instance_kerberos_delegate(_field, _value):
     return False
 
 
-def instance_kerberos_force_initiate(field, value):
+def instance_kerberos_force_initiate(_field, _value):
     return False
 
 
@@ -166,7 +166,7 @@ def instance_kerberos_principal(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_log_requests(field, value):
+def instance_log_requests(_field, _value):
     return False
 
 
@@ -178,7 +178,7 @@ def instance_metrics(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
@@ -186,11 +186,11 @@ def instance_namespace(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_node_exporter_port(field, value):
+def instance_node_exporter_port(_field, _value):
     return 11002
 
 
-def instance_non_cumulative_histogram_buckets(field, value):
+def instance_non_cumulative_histogram_buckets(_field, _value):
     return False
 
 
@@ -206,11 +206,11 @@ def instance_password(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_persist_connections(field, value):
+def instance_persist_connections(_field, _value):
     return False
 
 
-def instance_prometheus_metrics_path(field, value):
+def instance_prometheus_metrics_path(_field, _value):
     return '/metrics'
 
 
@@ -238,7 +238,7 @@ def instance_rename_labels(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_request_size(field, value):
+def instance_request_size(_field, _value):
     return 16
 
 
@@ -250,11 +250,11 @@ def instance_share_labels(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_skip_proxy(field, value):
+def instance_skip_proxy(_field, _value):
     return False
 
 
-def instance_tag_by_endpoint(field, value):
+def instance_tag_by_endpoint(_field, _value):
     return True
 
 
@@ -262,11 +262,11 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_telemetry(field, value):
+def instance_telemetry(_field, _value):
     return False
 
 
-def instance_timeout(field, value):
+def instance_timeout(_field, _value):
     return 10
 
 
@@ -278,7 +278,7 @@ def instance_tls_cert(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_tls_ignore_warning(field, value):
+def instance_tls_ignore_warning(_field, _value):
     return False
 
 
@@ -290,27 +290,27 @@ def instance_tls_protocols_allowed(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_tls_use_host_header(field, value):
+def instance_tls_use_host_header(_field, _value):
     return False
 
 
-def instance_tls_verify(field, value):
+def instance_tls_verify(_field, _value):
     return False
 
 
-def instance_use_latest_spec(field, value):
+def instance_use_latest_spec(_field, _value):
     return False
 
 
-def instance_use_legacy_auth_encoding(field, value):
+def instance_use_legacy_auth_encoding(_field, _value):
     return True
 
 
-def instance_use_openmetrics(field, value):
+def instance_use_openmetrics(_field, _value):
     return False
 
 
-def instance_use_process_start_time(field, value):
+def instance_use_process_start_time(_field, _value):
     return False
 
 

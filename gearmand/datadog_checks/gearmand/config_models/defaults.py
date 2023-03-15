@@ -14,11 +14,11 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
@@ -26,15 +26,15 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
-def instance_port(field, value):
+def instance_port(_field, _value):
     return 4730
 
 
-def instance_server(field, value):
+def instance_server(_field, _value):
     return '127.0.0.1'
 
 

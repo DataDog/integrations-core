@@ -34,19 +34,19 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_aggregate_last_24_hours(field, value):
+def instance_aggregate_last_24_hours(_field, _value):
     return False
 
 
-def instance_authenticator(field, value):
+def instance_authenticator(_field, _value):
     return 'snowflake'
 
 
-def instance_client_prefetch_threads(field, value):
+def instance_client_prefetch_threads(_field, _value):
     return 4
 
 
-def instance_client_session_keep_alive(field, value):
+def instance_client_session_keep_alive(_field, _value):
     return False
 
 
@@ -54,19 +54,19 @@ def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_database(field, value):
+def instance_database(_field, _value):
     return 'SNOWFLAKE'
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
-def instance_login_timeout(field, value):
+def instance_login_timeout(_field, _value):
     return 60
 
 
@@ -78,7 +78,7 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 3600
 
 
@@ -86,7 +86,7 @@ def instance_ocsp_response_cache_filename(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_only_custom_queries(field, value):
+def instance_only_custom_queries(_field, _value):
     return False
 
 
@@ -102,7 +102,7 @@ def instance_private_key_path(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_schema_(field, value):
+def instance_schema_(_field, _value):
     return 'ACCOUNT_USAGE'
 
 
@@ -118,11 +118,11 @@ def instance_token(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_token_path(field, value):
+def instance_token_path(_field, _value):
     return '/path/to/token'
 
 
-def instance_use_global_custom_queries(field, value):
+def instance_use_global_custom_queries(_field, _value):
     return 'true'
 
 

@@ -30,11 +30,11 @@ def instance_auth_mechanism(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_collect_res_usage_metrics(field, value):
+def instance_collect_res_usage_metrics(_field, _value):
     return False
 
 
-def instance_collect_table_disk_metrics(field, value):
+def instance_collect_table_disk_metrics(_field, _value):
     return False
 
 
@@ -42,15 +42,15 @@ def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
-def instance_https_port(field, value):
+def instance_https_port(_field, _value):
     return 443
 
 
@@ -58,11 +58,11 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
-def instance_only_custom_queries(field, value):
+def instance_only_custom_queries(_field, _value):
     return False
 
 
@@ -70,7 +70,7 @@ def instance_password(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_port(field, value):
+def instance_port(_field, _value):
     return 1025
 
 
@@ -78,11 +78,11 @@ def instance_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_ssl_mode(field, value):
+def instance_ssl_mode(_field, _value):
     return 'Prefer'
 
 
-def instance_ssl_protocol(field, value):
+def instance_ssl_protocol(_field, _value):
     return 'TLSv1.2'
 
 
@@ -94,7 +94,7 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_use_global_custom_queries(field, value):
+def instance_use_global_custom_queries(_field, _value):
     return 'true'
 
 

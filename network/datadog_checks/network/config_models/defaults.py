@@ -14,35 +14,35 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_blacklist_conntrack_metrics(field, value):
+def instance_blacklist_conntrack_metrics(_field, _value):
     return []
 
 
-def instance_collect_aws_ena_metrics(field, value):
+def instance_collect_aws_ena_metrics(_field, _value):
     return False
 
 
-def instance_collect_connection_queues(field, value):
+def instance_collect_connection_queues(_field, _value):
     return False
 
 
-def instance_collect_connection_state(field, value):
+def instance_collect_connection_state(_field, _value):
     return False
 
 
-def instance_collect_count_metrics(field, value):
+def instance_collect_count_metrics(_field, _value):
     return False
 
 
-def instance_collect_ethtool_metrics(field, value):
+def instance_collect_ethtool_metrics(_field, _value):
     return False
 
 
-def instance_collect_rate_metrics(field, value):
+def instance_collect_rate_metrics(_field, _value):
     return True
 
 
-def instance_combine_connection_states(field, value):
+def instance_combine_connection_states(_field, _value):
     return True
 
 
@@ -50,11 +50,11 @@ def instance_conntrack_path(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
@@ -70,7 +70,7 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
@@ -82,9 +82,9 @@ def instance_tags(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_use_sudo_conntrack(field, value):
+def instance_use_sudo_conntrack(_field, _value):
     return True
 
 
-def instance_whitelist_conntrack_metrics(field, value):
+def instance_whitelist_conntrack_metrics(_field, _value):
     return ['max', 'count']

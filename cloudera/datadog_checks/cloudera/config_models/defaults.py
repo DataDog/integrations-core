@@ -14,7 +14,7 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_cloudera_client(field, value):
+def instance_cloudera_client(_field, _value):
     return 'cm_client'
 
 
@@ -26,15 +26,15 @@ def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags(_field, _value):
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname(_field, _value):
     return False
 
 
-def instance_max_parallel_requests(field, value):
+def instance_max_parallel_requests(_field, _value):
     return 100
 
 
@@ -42,7 +42,7 @@ def instance_metric_patterns(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval(_field, _value):
     return 15
 
 
