@@ -41,6 +41,12 @@
     },
     "dashboards": {
       "Temporal Server Overview": "assets/dashboards/server_overview.json"
+    },
+    "monitors": {
+      "frontend latency": "assets/monitors/FrontendLatency.json",
+      "matching latency": "assets/monitors/MatchingLatency.json",
+      "history latency": "assets/monitors/HistoryLatency.json",
+      "persistence latency": "assets/monitors/PersistenceLatency.json"
     }
   },
   "author": {
