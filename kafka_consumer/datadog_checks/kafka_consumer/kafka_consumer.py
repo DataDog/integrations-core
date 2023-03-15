@@ -46,6 +46,8 @@ class KafkaCheck(AgentCheck):
         highwater_offsets = {}
         try:
             if len(consumer_offsets) < self._context_limit:
+                # Fetch highwater offsets
+                # Expected format: {(topic, partition): offset}
                 highwater_offsets = self.client.get_highwater_offsets(consumer_offsets)
             else:
                 self.warning("Context limit reached. Skipping highwater offset collection.")
