@@ -30,14 +30,5 @@
         rewrite /identity/v3/auth/projects /identity/v3/auth/projects/get.json
         file_server
     }
-    @get_projects {
-        method GET
-        header X-Auth-Token "demo_test"
-        path /identity/v3/projects
-    }
-    route @get_projects {
-        rewrite /identity/v3/projects /identity/v3/projects/get.json
-        file_server
-    }
     file_server browse
 }

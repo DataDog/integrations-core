@@ -1,19 +1,20 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import re
+from enum import Enum
 
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.baremetal_rest import BaremetalRest
 from datadog_checks.openstack_controller.api.compute_rest import ComputeRest
+from datadog_checks.openstack_controller.api.load_balancer_rest import LoadBalancerRest
 from datadog_checks.openstack_controller.api.network_rest import NetworkRest
 
-from enum import Enum
 
 class ComponentType(str, Enum):
     COMPUTE = 'compute'
     NETWORK = 'network'
     BAREMETAL = 'baremetal'
+    LOAD_BALANCER = 'load-balancer'
 
 
 class ApiRest(Api):
@@ -57,6 +58,13 @@ class ApiRest(Api):
     def get_baremetal_response_time(self, project):
         self.log.debug("getting baremetal response time")
         component = self._get_component(project['id'], ComponentType.BAREMETAL)
+        if component:
+            return component.get_response_time()
+        return None
+
+    def get_load_balancer_response_time(self, project):
+        self.log.debug("getting load-balancer response time")
+        component = self._get_component(project['id'], ComponentType.LOAD_BALANCER)
         if component:
             return component.get_response_time()
         return None
@@ -181,4 +189,6 @@ class ApiRest(Api):
             return NetworkRest(self.log, self.http, endpoint)
         elif endpoint_type == ComponentType.BAREMETAL:
             return BaremetalRest(self.log, self.http, endpoint)
+        elif endpoint_type == ComponentType.LOAD_BALANCER:
+            return LoadBalancerRest(self.log, self.http, endpoint)
         return None

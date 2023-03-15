@@ -70,7 +70,7 @@ class OpenStackControllerCheck(AgentCheck):
                         tags=tags + [f'flavor_id:{flavor_id}', f'flavor_name:{flavor_data["name"]}'],
                     )
         else:
-            self.service_check('openstack.nova.api.up', AgentCheck.CRITICAL, tags=tags)
+            self.service_check('openstack.nova.api.up', AgentCheck.CRITICAL)
         # network
         response_time = api.get_network_response_time(project)
         if response_time:
@@ -82,12 +82,20 @@ class OpenStackControllerCheck(AgentCheck):
             for metric, value in networking_quotas.items():
                 self.gauge(f'openstack.neutron.quotas.{metric}', value, tags=tags)
         else:
-            self.service_check('openstack.neutron.api.up', AgentCheck.CRITICAL, tags=tags)
+            self.service_check('openstack.neutron.api.up', AgentCheck.CRITICAL)
         # baremetal
         response_time = api.get_baremetal_response_time(project)
         if response_time:
-            self.service_check('openstack.ironic.api.up', AgentCheck.OK, tags=tags)
+            self.service_check('openstack.ironic.api.up', AgentCheck.OK)
             self.log.debug("response_time: %s", response_time)
-            self.gauge('openstack.baremetal.response_time', response_time, tags=tags)
+            self.gauge('openstack.ironic.response_time', response_time, tags=tags)
         else:
-            self.service_check('openstack.ironic.api.up', AgentCheck.CRITICAL, tags=tags)
+            self.service_check('openstack.ironic.api.up', AgentCheck.CRITICAL)
+        # load-balancer
+        response_time = api.get_load_balancer_response_time(project)
+        if response_time:
+            self.service_check('openstack.octavia.api.up', AgentCheck.OK)
+            self.log.debug("response_time: %s", response_time)
+            self.gauge('openstack.octavia.response_time', response_time, tags=tags)
+        else:
+            self.service_check('openstack.octavia.api.up', AgentCheck.CRITICAL)

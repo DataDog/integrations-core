@@ -14,10 +14,20 @@
     }
     @get_quotas_667aee39f2b64032b4d7585809d31e6f {
         method GET
+        header "X-Auth-Token" "demo_test"
         path /networking/v2.0/quotas/667aee39f2b64032b4d7585809d31e6f
     }
     route @get_quotas_667aee39f2b64032b4d7585809d31e6f {
         rewrite /networking/v2.0/quotas/667aee39f2b64032b4d7585809d31e6f /networking/v2.0/quotas/667aee39f2b64032b4d7585809d31e6f.json
+        file_server
+    }
+    @get_quotas_c165a94e230a4390af02d7394fb1fa69 {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /networking/v2.0/quotas/c165a94e230a4390af02d7394fb1fa69
+    }
+    route @get_quotas_c165a94e230a4390af02d7394fb1fa69 {
+        rewrite /networking/v2.0/quotas/c165a94e230a4390af02d7394fb1fa69 /networking/v2.0/quotas/c165a94e230a4390af02d7394fb1fa69.json
         file_server
     }
     file_server browse

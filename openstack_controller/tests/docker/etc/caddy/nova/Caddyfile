@@ -14,7 +14,18 @@
     }
     @get_limits_project_id_667aee39f2b64032b4d7585809d31e6f {
         method GET
+        header "X-Auth-Token" "demo_test"
         expression query({'project_id': '667aee39f2b64032b4d7585809d31e6f'})
+        path /compute/v2.1/limits
+    }
+    route @get_limits_project_id_c165a94e230a4390af02d7394fb1fa69 {
+        rewrite /compute/v2.1/limits /compute/v2.1/limits/c165a94e230a4390af02d7394fb1fa69.json
+        file_server
+    }
+    @get_limits_project_id_c165a94e230a4390af02d7394fb1fa69 {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        expression query({'project_id': 'c165a94e230a4390af02d7394fb1fa69'})
         path /compute/v2.1/limits
     }
     route @get_limits_project_id_667aee39f2b64032b4d7585809d31e6f {
@@ -23,14 +34,25 @@
     }
     @get_os_quota_sets_project_id_667aee39f2b64032b4d7585809d31e6f {
         method GET
+        header "X-Auth-Token" "demo_test"
         path /compute/v2.1/os-quota-sets/667aee39f2b64032b4d7585809d31e6f
     }
     route @get_os_quota_sets_project_id_667aee39f2b64032b4d7585809d31e6f {
         rewrite /compute/v2.1/os-quota-sets/667aee39f2b64032b4d7585809d31e6f /compute/v2.1/os-quota-sets/667aee39f2b64032b4d7585809d31e6f.json
         file_server
     }
+    @get_os_quota_sets_project_id_c165a94e230a4390af02d7394fb1fa69 {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /compute/v2.1/os-quota-sets/c165a94e230a4390af02d7394fb1fa69
+    }
+    route @get_os_quota_sets_project_id_c165a94e230a4390af02d7394fb1fa69 {
+        rewrite /compute/v2.1/os-quota-sets/c165a94e230a4390af02d7394fb1fa69 /compute/v2.1/os-quota-sets/c165a94e230a4390af02d7394fb1fa69.json
+        file_server
+    }
     @get_servers_detail_project_id_667aee39f2b64032b4d7585809d31e6f {
         method GET
+        header "X-Auth-Token" "demo_test"
         expression query({'project_id': '667aee39f2b64032b4d7585809d31e6f'})
         path /compute/v2.1/servers/detail
     }
@@ -38,8 +60,19 @@
         rewrite /compute/v2.1/servers/detail /compute/v2.1/servers/detail/667aee39f2b64032b4d7585809d31e6f.json
         file_server
     }
+    @get_servers_detail_project_id_c165a94e230a4390af02d7394fb1fa69 {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        expression query({'project_id': 'c165a94e230a4390af02d7394fb1fa69'})
+        path /compute/v2.1/servers/detail
+    }
+    route @get_servers_detail_project_id_c165a94e230a4390af02d7394fb1fa69 {
+        rewrite /compute/v2.1/servers/detail /compute/v2.1/servers/detail/c165a94e230a4390af02d7394fb1fa69.json
+        file_server
+    }
     @get_servers_3232a743-5fcf-41f2-8c29-0c84ae18ecb2_diagnostics {
         method GET
+        header "X-Auth-Token" "demo_test"
         path /compute/v2.1/servers/3232a743-5fcf-41f2-8c29-0c84ae18ecb2/diagnostics
     }
     route @get_servers_3232a743-5fcf-41f2-8c29-0c84ae18ecb2_diagnostics {
@@ -48,6 +81,7 @@
     }
     @get_servers_aa67f696-095c-4bb3-abe9-0a7747fad92e_diagnostics {
         method GET
+        header "X-Auth-Token" "demo_test"
         path /compute/v2.1/servers/aa67f696-095c-4bb3-abe9-0a7747fad92e/diagnostics
     }
     route @get_servers_aa67f696-095c-4bb3-abe9-0a7747fad92e_diagnostics {
@@ -56,6 +90,7 @@
     }
     @get_servers_f498382f-dbc1-4ed9-9c8d-5ec0aa633171_diagnostics {
         method GET
+        header "X-Auth-Token" "demo_test"
         path /compute/v2.1/servers/f498382f-dbc1-4ed9-9c8d-5ec0aa633171/diagnostics
     }
     route @get_servers_f498382f-dbc1-4ed9-9c8d-5ec0aa633171_diagnostics {
@@ -64,6 +99,7 @@
     }
     @get_flavors_detail {
         method GET
+        header "X-Auth-Token" "demo_test"
         path /compute/v2.1/flavors/detail
     }
     route @get_flavors_detail {

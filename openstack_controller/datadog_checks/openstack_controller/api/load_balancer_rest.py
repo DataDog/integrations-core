@@ -1,4 +1,4 @@
-class BaremetalRest:
+class LoadBalancerRest:
     def __init__(self, log, http, endpoint):
         self.log = log
         self.http = http

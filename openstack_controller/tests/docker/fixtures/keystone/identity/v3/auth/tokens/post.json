@@ -152,6 +152,34 @@
         "id": "e8461ca86ff04c9e8a7aad5994bbc82a",
         "type": "compute",
         "name": "nova"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "31c88ca08b024ec0a0a3c9f7c4fd9c13",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://127.0.0.1:6385/baremetal",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "6a7c8906c3be4304b63876978e8eda99",
+        "type": "baremetal",
+        "name": "ironic"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "c1f818af3b704f8c89a16fe214ac16be",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://127.0.0.1:9876/load-balancer",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "b251080b63024914bb74be7154289541",
+        "type": "load-balancer",
+        "name": "octavia"
       }
     ]
   }

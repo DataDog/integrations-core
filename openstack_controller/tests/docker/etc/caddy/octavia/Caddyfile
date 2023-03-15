@@ -4,12 +4,12 @@
 }
 :80 {
     root * /usr/share/caddy/
-    @get_baremetal {
+    @get_load_balancer {
         method GET
-        path /baremetal
+        path /load-balancer
     }
-    route @get_baremetal {
-        rewrite /baremetal /baremetal/get.json
+    route @get_load_balancer {
+        rewrite /load-balancer /load-balancer/get.json
         file_server
     }
     file_server browse

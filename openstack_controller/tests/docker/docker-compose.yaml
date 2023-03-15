@@ -33,3 +33,11 @@ services:
       - ./etc/caddy/ironic:/etc/caddy/
     ports:
       - "6385:80"
+  openstack-octavia:
+    image: caddy:2.6.2-alpine
+    container_name: openstack-octavia
+    volumes:
+      - ./fixtures/octavia:/usr/share/caddy
+      - ./etc/caddy/octavia:/etc/caddy/
+    ports:
+      - "9876:80"
