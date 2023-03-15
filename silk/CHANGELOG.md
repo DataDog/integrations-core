@@ -1,5 +1,9 @@
 # CHANGELOG - Silk
 
+## 1.2.1-beta.2 / 2023-03-15
+
+* [Fixed] Improve Silk service check tagging. See [#13816](https://github.com/DataDog/integrations-core/pull/13816).
+
 ## 1.2.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
