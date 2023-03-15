@@ -84,7 +84,7 @@ instances:
     ## Note: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that does not have access to the full
     ## command line of processes running under a different user. This option cannot be used in such cases.
     ## https://docs.datadoghq.com/integrations/process/#configuration
-    #
+    # test
     # exact_match: true
 
     ## @param ignore_denied_access - boolean - optional - default: true
