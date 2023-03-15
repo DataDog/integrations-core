@@ -67,8 +67,11 @@ class ModelInfo:
         """
         default_value = self._get_default_value(type_data)
         function_name = f'{model_id}_{normalized_option_name}'
-        function_definition = f'def {function_name}(_field, _value):'\
-            if default_value is not NO_DEFAULT else f'def {function_name}(field, value):'
+        function_definition = (
+            f'def {function_name}(_field, _value):'
+            if default_value is not NO_DEFAULT
+            else f'def {function_name}(field, value):'
+        )
         self.defaults_file_lines.extend(['', '', function_definition])
         if default_value is not NO_DEFAULT:
             self.defaults_file_needs_value_normalization = True
