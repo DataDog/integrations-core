@@ -56,6 +56,11 @@ instances:
     #
     password: <PASSWORD>
 
+    ## @param use_instant_client - boolean - optional - default: false
+    ## Determines whether the Agent uses Oracle Instant Client to connect instead of the oracle native client
+    #
+    # use_instant_client: false
+
     ## @param jdbc_driver_path - string - optional - default: <DRIVER_PATH>.jar
     ## Set this parameter if you are not using the oracle native client.
     ## You can also add it to your $CLASSPATH instead.

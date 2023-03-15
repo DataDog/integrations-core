@@ -57,6 +57,7 @@ class InstanceConfig(BaseModel):
     service_name: str
     tags: Optional[Sequence[str]]
     use_global_custom_queries: Optional[str]
+    use_instant_client: Optional[bool]
     username: str
 
     @root_validator(pre=True)

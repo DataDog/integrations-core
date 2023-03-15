@@ -72,3 +72,7 @@ def instance_tags(field, value):
 
 def instance_use_global_custom_queries(field, value):
     return 'true'
+
+
+def instance_use_instant_client(field, value):
+    return False
