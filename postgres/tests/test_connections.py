@@ -7,6 +7,7 @@ import time
 import uuid
 
 import psycopg2
+import pytest
 
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
@@ -14,6 +15,8 @@ from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_conn_pool(pg_instance):
     """
     Test simple case of creating a connection pool, pruning a stale connection,
@@ -49,6 +52,8 @@ def test_conn_pool(pg_instance):
     assert pool._stats.connection_closed_failed == 0
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_conn_pool_no_leaks_on_close(pg_instance):
     """
     Test a simple case of opening and closing many connections. There should be no leaked connections on the server.
@@ -110,6 +115,8 @@ def test_conn_pool_no_leaks_on_close(pg_instance):
             time.sleep(1)
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_conn_pool_no_leaks_on_prune(pg_instance):
     """
     Test a scenario where many connections are created. These connections should be open on the database
