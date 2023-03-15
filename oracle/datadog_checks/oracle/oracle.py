@@ -62,6 +62,7 @@ class Oracle(AgentCheck):
         self._password = self.instance.get('password')
         self._service = self.instance.get('service_name')
         self._protocol = self.instance.get("protocol", PROTOCOL_TCP)
+        self._use_instant_client = self.instance.get("use_instant_client")
         self._jdbc_driver = self.instance.get('jdbc_driver_path')
         self._jdbc_truststore_path = self.instance.get('jdbc_truststore_path')
         self._jdbc_truststore_type = self.instance.get('jdbc_truststore_type')
@@ -102,7 +103,7 @@ class Oracle(AgentCheck):
             prefix = query.get('metric_prefix')
             if prefix and prefix != self.__NAMESPACE__:
                 if prefix.startswith(self.__NAMESPACE__ + '.'):
-                    prefix = prefix[len(self.__NAMESPACE__) + 1 :]
+                    prefix = prefix[len(self.__NAMESPACE__) + 1:]
                 for column in query.get('columns', []):
                     if column.get('type') != 'tag' and column.get('name'):
                         column['name'] = '{}.{}'.format(prefix, column['name'])
@@ -156,6 +157,7 @@ class Oracle(AgentCheck):
                     self.log.error("The JDBC connection failed with the following error: %s", str(e))
                     self._connection_errors += 1
             else:
+                self.can_use_instant_client()
                 self._cached_connection = self._oracle_connect()
         return self._cached_connection
 
@@ -171,6 +173,16 @@ class Oracle(AgentCheck):
                 return True
         else:
             return False
+
+    def can_use_instant_client(self):
+        if self._use_instant_client:
+            oracledb.init_oracle_client()
+            try:
+                oracledb.clientversion()
+            except oracledb.DatabaseError as e:
+                self.log.debug('Oracle Instant Client is unavailable: %s', str(e))
+            else:
+                self.log.debug('Running oracledb version %s', oracledb.version)
 
     def _oracle_connect(self):
         dsn = self._get_dsn()
