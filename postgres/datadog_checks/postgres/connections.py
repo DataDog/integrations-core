@@ -50,7 +50,7 @@ class MultiDatabaseConnectionPool(object):
             )
         self.connect_fn = connect_fn
 
-    def get_connection(self, dbname: str, ttl_ms: int):
+    def get_connection(self, dbname, ttl_ms):
         self.prune_connections()
         with self._mu:
             conn = self._conns.pop(dbname, ConnectionWithTTL(None, None))
@@ -91,7 +91,7 @@ class MultiDatabaseConnectionPool(object):
                     success = False
         return success
 
-    def _terminate_connection_unsafe(self, dbname: str):
+    def _terminate_connection_unsafe(self, dbname):
         db, _ = self._conns.pop(dbname, ConnectionWithTTL(None, None))
         if db is not None:
             try:
