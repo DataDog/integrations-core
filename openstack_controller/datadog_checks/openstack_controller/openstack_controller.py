@@ -13,22 +13,28 @@ class OpenStackControllerCheck(AgentCheck):
         super(OpenStackControllerCheck, self).__init__(name, init_config, instances)
 
     def check(self, instance):
+        self.log.debug(instance)
         try:
             api = make_api(self.log, instance, self.http)
             api.create_connection()
+            # Artificial metric introduced to distinguish between old and new openstack integrations
+            self.gauge("openstack.controller", 1)
             self.service_check('openstack.keystone.api.up', AgentCheck.OK)
         except HTTPError as e:
             self.log.error("HTTPError while creating api: %s", e)
             self.service_check('openstack.keystone.api.up', AgentCheck.CRITICAL)
+            self.service_check('openstack.nova.api.up', AgentCheck.UNKNOWN)
+            self.service_check('openstack.neutron.api.up', AgentCheck.UNKNOWN)
+            self.service_check('openstack.ironic.api.up', AgentCheck.UNKNOWN)
+            self.service_check('openstack.octavia.api.up', AgentCheck.UNKNOWN)
         except Exception as e:
             self.log.error("Exception while creating api: %s", e)
+            self.service_check('openstack.keystone.api.up', AgentCheck.CRITICAL)
             raise e
         else:
             self._report_metrics(api)
 
     def _report_metrics(self, api):
-        # Artificial metric introduced to distinguish between old and new openstack integrations
-        self.gauge("openstack.controller", 1)
         projects = api.get_projects()
         self.log.debug("projects: %s", projects)
         for project in projects:
@@ -47,10 +53,10 @@ class OpenStackControllerCheck(AgentCheck):
             self.log.debug("compute_limits: %s", compute_limits)
             for metric, value in compute_limits.items():
                 self.gauge(f'openstack.nova.limits.{metric}', value, tags=tags)
-            compute_quotas = api.get_compute_quotas(project)
+            compute_quotas = api.get_compute_quota_set(project)
             self.log.debug("compute_quotas: %s", compute_quotas)
             for metric, value in compute_quotas.items():
-                self.gauge(f'openstack.nova.quota_sets.{metric}', value, tags=tags)
+                self.gauge(f'openstack.nova.quota_set.{metric}', value, tags=tags)
             compute_servers = api.get_compute_servers(project)
             self.log.debug("compute_servers: %s", compute_servers)
             for server_id, server_data in compute_servers.items():

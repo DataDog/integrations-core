@@ -20,17 +20,17 @@ class ComputeRest:
         return {
             re.sub('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(): value
             for key, value in response.json()['limits']['absolute'].items()
-            if isinstance(value, (int, float))
+            if isinstance(value, (int, float)) and not isinstance(value, bool)
         }
 
-    def get_quotas(self, project_id):
+    def get_quota_set(self, project_id):
         response = self.http.get('{}/os-quota-sets/{}'.format(self.endpoint, project_id))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return {
             re.sub('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(): value
             for key, value in response.json()['quota_set'].items()
-            if isinstance(value, (int, float))
+            if isinstance(value, (int, float)) and not isinstance(value, bool)
         }
 
     def get_servers(self, project_id):
@@ -48,7 +48,7 @@ class ComputeRest:
                     'metrics': {
                         re.sub('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(): value
                         for key, value in response.json().items()
-                        if isinstance(value, (int, float))
+                        if isinstance(value, (int, float)) and not isinstance(value, bool)
                     },
                 }
             except Exception as e:
@@ -66,7 +66,7 @@ class ComputeRest:
                 'metrics': {
                     re.sub('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(): value
                     for key, value in flavor.items()
-                    if isinstance(value, (int, float))
+                    if isinstance(value, (int, float)) and not isinstance(value, bool)
                 },
             }
         return flavor_metrics

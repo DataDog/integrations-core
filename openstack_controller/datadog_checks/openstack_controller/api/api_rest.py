@@ -77,12 +77,12 @@ class ApiRest(Api):
             return component.get_limits(project['id'])
         return None
 
-    def get_compute_quotas(self, project):
+    def get_compute_quota_set(self, project):
         self.log.debug("getting compute quotas")
         self.http.options['headers']['X-Auth-Token'] = self.project_auth_tokens[project['id']]['auth_token']
         component = self._get_component(project['id'], ComponentType.COMPUTE)
         if component:
-            return component.get_quotas(project['id'])
+            return component.get_quota_set(project['id'])
         return None
 
     def get_compute_servers(self, project):

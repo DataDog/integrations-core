@@ -1,0 +1,122 @@
+{
+    "1": {
+        "name": "m1.tiny",
+        "metrics": {
+            "ram": 512,
+            "disk": 1,
+            "os-flv-ext-data:ephemeral": 0,
+            "vcpus": 1,
+            "rxtx_factor": 1
+        }
+    },
+    "2": {
+        "name": "m1.small",
+        "metrics": {
+            "ram": 2048,
+            "disk": 20,
+            "os-flv-ext-data:ephemeral": 0,
+            "vcpus": 1,
+            "rxtx_factor": 1
+        }
+    },
+    "3": {
+        "name": "m1.medium",
+        "metrics": {
+            "ram": 4096,
+            "disk": 40,
+            "os-flv-ext-data:ephemeral": 0,
+            "vcpus": 2,
+            "rxtx_factor": 1
+        }
+    },
+    "4": {
+        "name": "m1.large",
+        "metrics": {
+            "ram": 8192,
+            "disk": 80,
+            "os-flv-ext-data:ephemeral": 0,
+            "vcpus": 4,
+            "rxtx_factor": 1
+        }
+    },
+    "42": {
+        "name": "m1.nano",
+        "metrics": {
+            "ram": 128,
+            "disk": 1,
+            "os-flv-ext-data:ephemeral": 0,
+            "vcpus": 1,
+            "rxtx_factor": 1
+        }
+    },
+    "5": {
+        "name": "m1.xlarge",
+        "metrics": {
+            "ram": 16384,
+            "disk": 160,
+            "os-flv-ext-data:ephemeral": 0,
+            "vcpus": 8,
+            "rxtx_factor": 1
+        }
+    },
+    "84": {
+        "name": "m1.micro",
+        "metrics": {
+            "ram": 192,
+            "disk": 1,
+            "os-flv-ext-data:ephemeral": 0,
+            "vcpus": 1,
+            "rxtx_factor": 1
+        }
+    },
+    "c1": {
+        "name": "cirros256",
+        "metrics": {
+            "ram": 256,
+            "disk": 1,
+            "os-flv-ext-data:ephemeral": 0,
+            "vcpus": 1,
+            "rxtx_factor": 1
+        }
+    },
+    "d1": {
+        "name": "ds512M",
+        "metrics": {
+            "ram": 512,
+            "disk": 5,
+            "os-flv-ext-data:ephemeral": 0,
+            "vcpus": 1,
+            "rxtx_factor": 1
+        }
+    },
+    "d2": {
+        "name": "ds1G",
+        "metrics": {
+            "ram": 1024,
+            "disk": 10,
+            "os-flv-ext-data:ephemeral": 0,
+            "vcpus": 1,
+            "rxtx_factor": 1
+        }
+    },
+    "d3": {
+        "name": "ds2G",
+        "metrics": {
+            "ram": 2048,
+            "disk": 10,
+            "os-flv-ext-data:ephemeral": 0,
+            "vcpus": 2,
+            "rxtx_factor": 1
+        }
+    },
+    "d4": {
+        "name": "ds4G",
+        "metrics": {
+            "ram": 4096,
+            "disk": 20,
+            "os-flv-ext-data:ephemeral": 0,
+            "vcpus": 4,
+            "rxtx_factor": 1
+        }
+    }
+}

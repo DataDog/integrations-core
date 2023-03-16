@@ -19,13 +19,10 @@ FILTERED_NETWORK_ID = 'server-2'
 FILTERED_SERVER_ID = 'server-1'
 FILTERED_BY_PROJ_SERVER_ID = ['server-1', 'server-2']
 
-CONFIG_FILE_INSTANCE = {
-    'name': 'test_name',
-    'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}},
-    'ssl_verify': False,
-    'exclude_network_ids': EXCLUDED_NETWORK_IDS,
-    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_PATH,
-    'openstack_cloud_name': 'test_cloud',
+REST_CONFIG = {
+    'keystone_server_url': 'http://127.0.0.1:8080/identity',
+    'user_name': 'admin',
+    'user_password': 'password',
 }
 
 KEYSTONE_INSTANCE = {
@@ -374,20 +371,20 @@ DEFAULT_METRICS = [
     'openstack.nova.limits.total_ram_used',
     'openstack.nova.limits.total_security_groups_used',
     'openstack.nova.limits.total_server_groups_used',
-    'openstack.nova.quota_sets.cores',
-    'openstack.nova.quota_sets.fixed_ips',
-    'openstack.nova.quota_sets.floating_ips',
-    'openstack.nova.quota_sets.injected_file_content_bytes',
-    'openstack.nova.quota_sets.injected_file_path_bytes',
-    'openstack.nova.quota_sets.injected_files',
-    'openstack.nova.quota_sets.instances',
-    'openstack.nova.quota_sets.key_pairs',
-    'openstack.nova.quota_sets.metadata_items',
-    'openstack.nova.quota_sets.ram',
-    'openstack.nova.quota_sets.security_group_rules',
-    'openstack.nova.quota_sets.security_groups',
-    'openstack.nova.quota_sets.server_group_members',
-    'openstack.nova.quota_sets.server_groups',
+    'openstack.nova.quota_set.cores',
+    'openstack.nova.quota_set.fixed_ips',
+    'openstack.nova.quota_set.floating_ips',
+    'openstack.nova.quota_set.injected_file_content_bytes',
+    'openstack.nova.quota_set.injected_file_path_bytes',
+    'openstack.nova.quota_set.injected_files',
+    'openstack.nova.quota_set.instances',
+    'openstack.nova.quota_set.key_pairs',
+    'openstack.nova.quota_set.metadata_items',
+    'openstack.nova.quota_set.ram',
+    'openstack.nova.quota_set.security_group_rules',
+    'openstack.nova.quota_set.security_groups',
+    'openstack.nova.quota_set.server_group_members',
+    'openstack.nova.quota_set.server_groups',
     'openstack.neutron.response_time',
     'openstack.neutron.quotas.floatingip',
     'openstack.neutron.quotas.network',
@@ -398,4 +395,9 @@ DEFAULT_METRICS = [
     'openstack.neutron.quotas.security_group_rule',
     'openstack.neutron.quotas.subnet',
     'openstack.neutron.quotas.subnetpool',
+    'openstack.nova.flavors.disk',
+    'openstack.nova.flavors.os-flv-ext-data:ephemeral',
+    'openstack.nova.flavors.ram',
+    'openstack.nova.flavors.rxtx_factor',
+    'openstack.nova.flavors.vcpus',
 ]

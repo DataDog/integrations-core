@@ -23,7 +23,7 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_quotas(self, project):
+    def get_compute_quota_set(self, project):
         pass  # pragma: no cover
 
     @abstractmethod

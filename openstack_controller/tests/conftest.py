@@ -1,8 +1,10 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 import re
+import tempfile
 
 import pytest
 
@@ -12,7 +14,7 @@ from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.fs import get_here
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
-from .common import CHECK_NAME, CONFIG_FILE_INSTANCE, USE_OPENSTACK_SANDBOX
+from .common import CHECK_NAME, REST_CONFIG, USE_OPENSTACK_SANDBOX
 from .ssh_tunnel import socks_proxy
 from .terraform import terraform_run
 
@@ -30,6 +32,10 @@ def dd_environment():
                 'user_password': 'password',
                 'ssl_verify': False,
             }
+            config_file = os.path.join(tempfile.gettempdir(), 'openstack_controller_instance.json')
+            with open(config_file, 'wb') as f:
+                output = json.dumps(instance).encode('utf-8')
+                f.write(output)
             env = dict(os.environ)
             with socks_proxy(
                 ip,
@@ -60,7 +66,7 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return CONFIG_FILE_INSTANCE
+    return REST_CONFIG
 
 
 @pytest.fixture
