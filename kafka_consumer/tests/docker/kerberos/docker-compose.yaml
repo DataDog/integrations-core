@@ -62,7 +62,7 @@ services:
       - ./kdc/krb5.conf:/etc/krb5.conf
       - ./kafka/broker.sasl.jaas.config:/etc/kafka/broker.sasl.jaas.config
       - ./client/command.properties:/etc/kafka/command.properties
-      - ./kafka/setupkeytab.sh:/setupkeytab.sh
+      - ./kafka/grant_acl_permissions.sh:/grant_acl_permissions.sh
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper.kerberos-demo.local:2181'

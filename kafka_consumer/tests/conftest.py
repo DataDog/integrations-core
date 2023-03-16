@@ -33,6 +33,7 @@ if LEGACY_CLIENT:
     }
 else:
     E2E_METADATA = {
+        # Temporarily change kafka1 -> broker and kafka2 -> broker2 for kerberized env
         'custom_hosts': [('broker', '127.0.0.1'), ('broker2', '127.0.0.1')],
         'docker_volumes': [
             f'{HERE}/scripts/start_commands.sh:/tmp/start_commands.sh',
@@ -46,7 +47,7 @@ else:
     }
 
 INSTANCE = {
-    'kafka_connect_str': '127.0.0.1:9092',
+    'kafka_connect_str': KAFKA_CONNECT_STR,
     'tags': ['optional:tag1'],
     'consumer_groups': {'my_consumer': {'marvel': [0]}},
     'broker_requests_batch_size': 1,
@@ -66,15 +67,16 @@ def dd_environment(mock_local_kafka_hosts_dns):
     with docker_run(
         DOCKER_IMAGE_PATH,
         conditions=[
-            WaitFor(setupkeytab),
-            # WaitFor(create_topics, attempts=2, wait=2),
+            WaitFor(grant_acl_permissions),
+            # TODO: This create_topics still does not work yet
+            WaitFor(create_topics, attempts=2, wait=2),
             # WaitFor(initialize_topics),
         ],
         env_vars={
             # Advertising the hostname doesn't work on docker:dind so we manually
             # resolve the IP address. This seems to also work outside docker:dind
             # so we got that goin for us.
-            'KAFKA_HOST': 'localhost',
+            'KAFKA_HOST': HOST_IP,
             'KRB5_CONFIG': "/etc/krb5.conf",
             'KAFKA_OPTS': "-Djava.security.auth.login.config=/etc/kafka/broker.sasl.jaas.config -Djava.security.krb5.conf=/etc/krb5.conf"
 
@@ -111,7 +113,9 @@ def kafka_instance_tls():
         'use_legacy_client': LEGACY_CLIENT,
     }
 
-def setupkeytab():
+def grant_acl_permissions():
+    # We run the grant_acl_permissions.sh job in `broker` container
+    # since we don't have `kafka-acls` in the Agent container
     run_command(
         [
             'docker',
@@ -119,7 +123,7 @@ def setupkeytab():
             'broker',
             'bash',
             '-c',
-            '/setupkeytab.sh'
+            '/grant_acl_permissions.sh'
         ]
     )
 
