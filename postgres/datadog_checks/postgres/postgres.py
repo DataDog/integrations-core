@@ -77,6 +77,21 @@ class PostgreSql(AgentCheck):
         self._db_pool = {}
         self._db_pool_lock = threading.Lock()
 
+        #self._config.tags.append("dd.internal.resource:database_instance,{}".format(self.resolved_hostname))
+        if self._config.cloud_metadata.get("gcp") is not None:
+            self._config.tags.append(
+                "dd.internal.resource:gcp_sql_database_instance,{}:{}".format(
+                    self._config.cloud_metadata.get("gcp")["project_id"],
+                    self._config.cloud_metadata.get("gcp")["instance_id"]
+                )
+            )
+            self._config.tags.append(
+                "dd.internal.resource:gcp_sql_database_instance,//cloudsql.googleapis.com/projects/{}/instances/{}"
+                .format(
+                    self._config.cloud_metadata.get("gcp")["project_id"],
+                    self._config.cloud_metadata.get("gcp")["instance_id"]
+                )
+            )
         self.tags_without_db = [t for t in copy.copy(self._config.tags) if not t.startswith("db:")]
 
         self._dynamic_queries = None
