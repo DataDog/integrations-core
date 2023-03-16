@@ -10,6 +10,7 @@ from datadog_checks.base.stubs.aggregator import normalize_tags
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.postgres.util import (
+    NEWER_14_METRICS,
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_STAT_WAL_RECEIVER,
     REPLICATION_STATS_METRICS,
@@ -108,6 +109,9 @@ def check_common_metrics(aggregator, expected_tags, count=1):
         db_tags = expected_tags + ['db:{}'.format(db)]
         for name in COMMON_METRICS:
             aggregator.assert_metric(name, count=count, tags=db_tags)
+        if POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 14.0:
+            for (metric_name, _) in NEWER_14_METRICS.values():
+                aggregator.assert_metric(metric_name, count=count, tags=db_tags)
 
 
 def check_db_count(aggregator, expected_tags, count=1):
