@@ -41,6 +41,7 @@ def test_conn_pool(pg_instance):
     assert len(pool._conns) == 0
     assert pool._stats.connection_closed == 1
     assert pool._stats.connection_closed_failed == 0
+    assert pool._stats.connection_pruned == 1
 
     db = pool.get_connection('postgres', 999 * 1000)
     assert len(pool._conns) == 1
@@ -50,6 +51,7 @@ def test_conn_pool(pg_instance):
     assert len(pool._conns) == 0
     assert pool._stats.connection_closed == 2
     assert pool._stats.connection_closed_failed == 0
+    assert pool._stats.connection_pruned == 1
 
 
 @pytest.mark.integration
