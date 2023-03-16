@@ -32,7 +32,21 @@ class StoppableThread(threading.Thread):
 
 class Producer(StoppableThread):
     def run(self):
-        producer = KafkaProducer({'bootstrap.servers': KAFKA_CONNECT_STR})
+        config = {
+            'bootstrap.servers': KAFKA_CONNECT_STR,
+            }
+
+        if self.instance.get('sasl_mechanism', 'PLAIN') == "GSSAPI":
+            config.update(
+                {
+                    "sasl.mechanism": "GSSAPI",
+                    "sasl.kerberos.service.name": "kafka_producer",
+                    "security.protocol": "SASL_PLAINTEXT",
+                    "sasl.kerberos.keytab": "/var/lib/secret/broker.key",
+                }
+            )
+        
+        producer = KafkaProducer(config) # update this for kerberos with credentials
 
         iteration = 0
         while not self._shutdown_event.is_set():
@@ -56,18 +70,41 @@ class Producer(StoppableThread):
 
 
 class KConsumer(StoppableThread):
-    def __init__(self, topics, sleep=DEFAULT_SLEEP, timeout=DEFAULT_TIMEOUT):
-        super(KConsumer, self).__init__(sleep=sleep, timeout=timeout)
-        self.kafka_connect_str = KAFKA_CONNECT_STR
+    def __init__(self, instance, topics, sleep=DEFAULT_SLEEP, timeout=DEFAULT_TIMEOUT):
+        super(KConsumer, self).__init__(instance, sleep=sleep, timeout=timeout)
         self.topics = topics
 
     def run(self):
-        consumer = KafkaConsumer(
-            {'bootstrap.servers': self.kafka_connect_str, 'group.id': 'my_consumer', 'auto.offset.reset': 'earliest'}
-        )
+        config = {
+            "bootstrap.servers": self.instance['kafka_connect_str'],
+            "socket.timeout.ms": 1000,
+            'group.id': 'my_consumer',
+            'auto.offset.reset': 'earliest',
+        }
+
+        if self.instance.get('security_protocol', 'PLAINTEXT') == "SSL":
+            config.update(
+                {
+                    "security.protocol": "ssl",
+                    "ssl.ca.location": self.instance.get("tls_ca_cert"),
+                    "ssl.certificate.location": self.instance.get("tls_cert"),
+                    "ssl.key.location": self.instance.get("tls_private_key"),
+                    "ssl.key.password": self.instance.get("tls_private_key_password"),
+                }
+            )
+        
+        if self.instance.get('sasl_mechanism', 'PLAIN') == "GSSAPI":
+            config.update(
+                {
+                    "sasl.mechanism": "GSSAPI",
+                    "sasl.kerberos.service.name": "kafka_consumer",
+                    "security.protocol": "SASL_PLAINTEXT",
+                    "sasl.kerberos.keytab": "/var/lib/secret/kafka-client.key",
+                }
+            )
+
+        consumer = KafkaConsumer(config)
         consumer.subscribe(self.topics)
 
-        iteration = 0
         while not self._shutdown_event.is_set():
-            consumer.poll(timeout=500)
-            iteration += 1
+            consumer.poll(timeout=1)

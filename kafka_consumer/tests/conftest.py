@@ -9,6 +9,7 @@ import pytest
 from confluent_kafka.admin import AdminClient
 from confluent_kafka.cimpl import NewTopic
 from datadog_test_libs.utils.mock_dns import mock_local
+from datadog_checks.dev.subprocess import run_command
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.kafka_consumer import KafkaCheck
@@ -32,17 +33,28 @@ if LEGACY_CLIENT:
     }
 else:
     E2E_METADATA = {
-        'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
-        'docker_volumes': [f'{HERE}/scripts/start_commands.sh:/tmp/start_commands.sh'],
+        'custom_hosts': [('broker', '127.0.0.1'), ('broker2', '127.0.0.1')],
+        'docker_volumes': [
+            f'{HERE}/scripts/start_commands.sh:/tmp/start_commands.sh',
+            f'{HERE}/docker/kerberos/kdc/krb5_agent.conf:/etc/krb5.conf',
+            f'{HERE}/docker/kerberos/kafka/broker.sasl.jaas.config:/etc/kafka/broker.sasl.jaas.config',
+            f'{HERE}/docker/kerberos/kafka/broker2.sasl.jaas.config:/etc/kafka/broker2.sasl.jaas.config',
+            f'{HERE}/docker/kerberos/secret:/var/lib/secret',
+            f'{HERE}/docker/kerberos/client:/etc/kafka',
+            ],
         'start_commands': ['bash /tmp/start_commands.sh'],
     }
 
 INSTANCE = {
-    'kafka_connect_str': KAFKA_CONNECT_STR,
+    'kafka_connect_str': '127.0.0.1:9092',
     'tags': ['optional:tag1'],
     'consumer_groups': {'my_consumer': {'marvel': [0]}},
     'broker_requests_batch_size': 1,
     'use_legacy_client': LEGACY_CLIENT,
+    "sasl_mechanism": "GSSAPI",
+    "sasl_kerberos_service_name": "kafka",
+    "security_protocol": "SASL_PLAINTEXT",
+    # will need keytab value
 }
 
 
@@ -54,14 +66,18 @@ def dd_environment(mock_local_kafka_hosts_dns):
     with docker_run(
         DOCKER_IMAGE_PATH,
         conditions=[
-            WaitFor(create_topics, attempts=60, wait=3),
-            WaitFor(initialize_topics),
+            WaitFor(setupkeytab),
+            # WaitFor(create_topics, attempts=2, wait=2),
+            # WaitFor(initialize_topics),
         ],
         env_vars={
             # Advertising the hostname doesn't work on docker:dind so we manually
             # resolve the IP address. This seems to also work outside docker:dind
             # so we got that goin for us.
-            'KAFKA_HOST': HOST_IP,
+            'KAFKA_HOST': 'localhost',
+            'KRB5_CONFIG': "/etc/krb5.conf",
+            'KAFKA_OPTS': "-Djava.security.auth.login.config=/etc/kafka/broker.sasl.jaas.config -Djava.security.krb5.conf=/etc/krb5.conf"
+
         },
     ):
         yield {
@@ -95,6 +111,17 @@ def kafka_instance_tls():
         'use_legacy_client': LEGACY_CLIENT,
     }
 
+def setupkeytab():
+    run_command(
+        [
+            'docker',
+            'exec',
+            'broker',
+            'bash',
+            '-c',
+            '/setupkeytab.sh'
+        ]
+    )
 
 def create_topics():
     client = _create_admin_client()
@@ -125,5 +152,11 @@ def _create_admin_client():
         {
             "bootstrap.servers": KAFKA_CONNECT_STR,
             "socket.timeout.ms": 1000,
+            "sasl.mechanism": "GSSAPI",
+            "sasl.kerberos.service.name": "kafka",
+            "sasl.kerberos.keytab": "/var/lib/secret/kafka-client.key",
+            "security.protocol": "SASL_PLAINTEXT",
+            "sasl.kerberos.principal": "kafka_producer",
+
         }
     )

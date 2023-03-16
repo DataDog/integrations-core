@@ -5,6 +5,8 @@ services:
     hostname: kdc.kerberos-demo.local
     build: ./kdc
     container_name: kdc
+    ports:
+      - "88:88"
     volumes:
       - ./secret:/var/lib/secret
       - ./kdc/krb5.conf:/etc/kdc/krb5.conf
@@ -60,6 +62,7 @@ services:
       - ./kdc/krb5.conf:/etc/krb5.conf
       - ./kafka/broker.sasl.jaas.config:/etc/kafka/broker.sasl.jaas.config
       - ./client/command.properties:/etc/kafka/command.properties
+      - ./kafka/setupkeytab.sh:/setupkeytab.sh
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper.kerberos-demo.local:2181'
