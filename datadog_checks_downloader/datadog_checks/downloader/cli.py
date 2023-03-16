@@ -85,7 +85,9 @@ def download():
 
     parser.add_argument(
         '--unsafe-disable-verification', action='store_true',
-        help='Disable TUF and in-toto integrity verification. To use only if TUF or in-toto verification fails due to a bug and not an attack.',
+        help=('Disable TUF and in-toto integrity verification. '
+              'To use only if TUF or in-toto verification fails due to a bug and not an attack.'
+        ),
     )
 
     parser.add_argument('--ignore-python-version', action='store_true', help='Ignore Python version requirements.')
@@ -122,7 +124,7 @@ def download():
 
     tuf_downloader = TUFDownloader(
         repository_url_prefix=repository_url_prefix, root_layout_type=root_layout_type, verbose=verbose,
-        disable_verification= args.unsafe_disable_verification,
+        disable_verification=args.unsafe_disable_verification,
     )
     wheel_relpath = tuf_downloader.get_wheel_relpath(
         standard_distribution_name, version=version, ignore_python_version=ignore_python_version
