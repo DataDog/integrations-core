@@ -1,0 +1,231 @@
+id: pan.firewall
+metric_id: pan-firewall
+facets:
+  - name: Event Name
+    source: log
+    path: evt.name
+    groups:
+      - Event
+  - name: Event Outcome
+    source: log
+    path: evt.outcome
+    groups:
+      - Event
+  - name: Browser
+    source: log
+    path: http.useragent_details.browser.family
+    groups:
+      - Web Access
+  - name: Device
+    source: log
+    path: http.useragent_details.device.family
+    groups:
+      - Web Access
+  - name: OS
+    source: log
+    path: http.useragent_details.os.family
+    groups:
+      - Web Access
+  - name: City Name
+    source: log
+    path: network.client.geoip.city.name
+    groups:
+      - Geoip
+  - name: Continent Code
+    source: log
+    path: network.client.geoip.continent.code
+    groups:
+      - Geoip
+  - name: Continent Name
+    source: log
+    path: network.client.geoip.continent.name
+    groups:
+      - Geoip
+  - name: Country ISO Code
+    source: log
+    path: network.client.geoip.country.iso_code
+    groups:
+      - Geoip
+  - name: Country Name
+    source: log
+    path: network.client.geoip.country.name
+    groups:
+      - Geoip
+  - name: Subdivison ISO Code
+    source: log
+    path: network.client.geoip.subdivision.iso_code
+    groups:
+      - Geoip
+  - name: Subdivison Name
+    source: log
+    path: network.client.geoip.subdivision.name
+    groups:
+      - Geoip
+  - name: Client IP
+    source: log
+    path: network.client.ip
+    groups:
+      - Web Access
+  - name: Client Port
+    source: log
+    path: network.client.port
+    groups:
+      - Web Access
+  - name: Destination IP
+    source: log
+    path: network.destination.ip
+    groups:
+      - Web Access
+  - name: Destination Port
+    source: log
+    path: network.destination.port
+    groups:
+      - Web Access
+  - name: User ID
+    source: log
+    path: usr.id
+    groups:
+      - User
+  - name: Type
+    source: log
+    path: type
+    groups:
+      - Event
+  - name: Sub Type
+    source: log
+    path: subtype
+    groups:
+      - PAN Firewall
+  - name: Module
+    source: log
+    path: module
+    groups:
+      - PAN Firewall
+  - name: Source Zone
+    source: log
+    path: source_zone
+    groups:
+      - PAN Firewall
+  - name: Destination Zone
+    source: log
+    path: destination_zone
+    groups:
+      - PAN Firewall
+  - name: Repeat Count
+    source: log
+    path: repeatcnt
+    type: double
+    facetType: range
+    groups:
+      - PAN Firewall
+  - name: Category
+    source: log
+    path: category
+    groups:
+      - PAN Firewall
+  - name: Severity
+    source: log
+    path: severity
+    groups:
+      - PAN Firewall
+  - name: Virtual System Name
+    source: log
+    path: vsys_name
+    groups:
+      - PAN Firewall
+  - name: Device Name
+    source: log
+    path: device_name
+    groups:
+      - PAN Firewall
+  - name: Network Bytes Read
+    source: log
+    path: network.bytes_read
+    type: double
+    facetType: range
+    unit:
+      family: bytes
+      name: byte
+    groups:
+      - Web Access
+  - name: Bytes Written
+    source: log
+    path: network.bytes_written
+    type: double
+    facetType: range
+    unit:
+      family: bytes
+      name: byte
+    groups:
+      - Web Access
+  - name: Packets Sent
+    source: log
+    path: pkts_sent
+    type: double
+    facetType: range
+    groups:
+      - Web Access
+  - name: Packets Recieved
+    source: log
+    path: pkts_received
+    type: double
+    facetType: range
+    groups:
+      - Web Access
+  - name: Authentication Policy
+    source: log
+    path: authpolicy
+    groups:
+      - PAN Firewall
+  - name: Server Profile
+    source: log
+    path: serverprofile
+    groups:
+      - PAN Firewall
+  - name: Security Rule
+    source: log
+    path: rule
+    groups:
+      - PAN Firewall
+pipeline:
+  type: pipeline
+  name: Palo Alto Networks Firewall
+  enabled: true
+  filter:
+    query: source:pan.firewall
+  processors:
+    - type: grok-parser
+      name: Parsing Palo Alto Network Firewall logs
+      enabled: true
+      source: message
+      samples:
+        - "timestamp=2019/05/06 16:43:53, serial=001801010877, type=AUTHENTICATION, subtype=virus, vsys=testVM,  network.client.ip=10.2.75.414, usr.id=Jaydeep,  normalize_user=,  object=,  authpolicy=authpolicy, repeatcnt=1, authid=68376, vendor=Symentic, logset=testForwarder, serverprofile=serverprofile, message=thisIsSampleMessage, \tclienttype=securityApp, evt.name=alert, factorno=687383, seqno=486021038, actionflags=0xa0000 00000000000, vsys_name=JVM, device_name=tab,  vsys_id=786,\tauthproto=authproto"
+      grok:
+        matchRules: |
+          rule_panos %{data::keyvalue("="," \"")}
+        supportRules: ''
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: geo-ip-parser
+      name: Fetching GeoIp data for client ip
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+    - type: user-agent-parser
+      name: Parsing useragent detils from http.useragent
+      enabled: true
+      sources:
+        - http.useragent
+      target: http.useragent_details
+      encoded: false
+    - type: string-builder-processor
+      name: Setting title attribute using usr.id, evt.name and country.name
+      enabled: true
+      target: title
+      template: '%{usr.id} performed event %{evt.name} from %{network.client.geoip.country.name}'
+      replaceMissing: false
+
