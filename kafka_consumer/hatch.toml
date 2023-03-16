@@ -5,6 +5,10 @@ dependencies = [
   "datadog_checks_tests_helper @ {root:uri}/../datadog_checks_tests_helper",
 ]
 e2e-env = false
+post-install-commands = [
+  "python -m pip uninstall -y confluent-kafka",
+  "python -m pip install --no-binary confluent-kafka confluent-kafka==2.0.2",
+]
 
 [envs.default.env-vars]
 ZK_VERSION = "3.6.4"

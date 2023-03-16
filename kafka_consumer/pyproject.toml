@@ -38,8 +38,9 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    # confluent-kafka is in fact built in omnibus, so bumping it here will have no effect
-    "confluent-kafka==2.0.2; python_version > '3.0'", 
+    # confluent-kafka is built in omnibus, so bumping it here will have no real effect
+    # if you bump this version, also bump the one in the `hatch.toml` file
+    "confluent-kafka==2.0.2; python_version > '3.0'",
     "gssapi==1.8.2; python_version > '3.0'",
     "kafka-python==2.0.2",
     "kazoo==2.9.0",
