@@ -1084,3 +1084,42 @@ def test_e2e_core_metadata_cisco_asr_9901(dd_agent_check):
         u'version': u'7.1.3',
     }
     assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_cisco_wlc(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'cisco-5500-wlc',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        u'description': u'Cisco Controller',
+        u'id': u'default:' + device_ip,
+        u'id_tags': [
+            u'device_namespace:default',
+            u'snmp_device:' + device_ip,
+        ],
+        u'ip_address': device_ip,
+        u'location': 'Datadog Paris',
+        u'name': 'DDOGWLC',
+        u'profile': u'cisco-legacy-wlc',
+        u'status': 1,
+        u'sys_object_id': u'1.3.6.1.4.1.9.1.1069',
+        u'tags': [
+            u'device_namespace:default',
+            u'device_vendor:cisco',
+            u'snmp_device:' + device_ip,
+            u'snmp_host:DDOGWLC',
+            u'snmp_profile:cisco-legacy-wlc',
+        ],
+        u'vendor': u'cisco',
+    }
+    assert_device_metadata(aggregator, device)
