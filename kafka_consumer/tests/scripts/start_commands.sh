@@ -10,5 +10,4 @@ cd librdkafka && git checkout tags/v2.0.2
 cd ../ && rm -rf librdkafka
 pip install --no-binary confluent-kafka confluent-kafka
 
-chmod 777 -R /var/lib/secret
 kinit -R -t "/var/lib/secret/kafka-client.key" -k kafka_producer
