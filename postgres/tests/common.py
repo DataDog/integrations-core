@@ -22,7 +22,9 @@ HOST = get_docker_hostname()
 PORT = '5432'
 PORT_REPLICA = '5433'
 USER = 'datadog'
+USER_ADMIN = 'dd_admin'
 PASSWORD = 'datadog'
+PASSWORD_ADMIN = 'dd_admin'
 DB_NAME = 'datadog_test'
 POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
 POSTGRES_IMAGE = "alpine"
@@ -118,7 +120,7 @@ def check_db_count(aggregator, expected_tags, count=1):
     aggregator.assert_metric(
         'postgresql.table.count', value=5, count=count, tags=expected_tags + ['db:{}'.format(DB_NAME), 'schema:public']
     )
-    aggregator.assert_metric('postgresql.db.count', value=5, count=1)
+    aggregator.assert_metric('postgresql.db.count', value=106, count=1)
 
 
 def check_connection_metrics(aggregator, expected_tags, count=1):
