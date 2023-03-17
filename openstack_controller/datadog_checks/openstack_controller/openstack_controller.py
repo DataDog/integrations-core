@@ -21,8 +21,9 @@ class OpenStackControllerCheck(AgentCheck):
             self.gauge("openstack.controller", 1)
             self.service_check('openstack.keystone.api.up', AgentCheck.OK)
         except HTTPError as e:
+            self.warning(e)
             self.log.error("HTTPError while creating api: %s", e)
-            self.service_check('openstack.keystone.api.up', AgentCheck.CRITICAL)
+            self.service_check('openstack.keystone.api.up', AgentCheck.CRITICAL, message=e)
             self.service_check('openstack.nova.api.up', AgentCheck.UNKNOWN)
             self.service_check('openstack.neutron.api.up', AgentCheck.UNKNOWN)
             self.service_check('openstack.ironic.api.up', AgentCheck.UNKNOWN)
@@ -30,6 +31,10 @@ class OpenStackControllerCheck(AgentCheck):
         except Exception as e:
             self.log.error("Exception while creating api: %s", e)
             self.service_check('openstack.keystone.api.up', AgentCheck.CRITICAL)
+            self.service_check('openstack.nova.api.up', AgentCheck.UNKNOWN)
+            self.service_check('openstack.neutron.api.up', AgentCheck.UNKNOWN)
+            self.service_check('openstack.ironic.api.up', AgentCheck.UNKNOWN)
+            self.service_check('openstack.octavia.api.up', AgentCheck.UNKNOWN)
             raise e
         else:
             self._report_metrics(api)
@@ -62,7 +67,7 @@ class OpenStackControllerCheck(AgentCheck):
             for server_id, server_data in compute_servers.items():
                 for metric, value in server_data['metrics'].items():
                     self.gauge(
-                        f'openstack.nova.servers.{metric}',
+                        f'openstack.nova.server.{metric}',
                         value,
                         tags=tags + [f'server_id:{server_id}', f'server_name:{server_data["name"]}'],
                     )
@@ -71,9 +76,19 @@ class OpenStackControllerCheck(AgentCheck):
             for flavor_id, flavor_data in compute_flavors.items():
                 for metric, value in flavor_data['metrics'].items():
                     self.gauge(
-                        f'openstack.nova.flavors.{metric}',
+                        f'openstack.nova.flavor.{metric}',
                         value,
                         tags=tags + [f'flavor_id:{flavor_id}', f'flavor_name:{flavor_data["name"]}'],
+                    )
+            compute_hypervisors_detail = api.get_compute_hypervisors_detail(project)
+            self.log.debug("compute_hypervisors_detail: %s", compute_hypervisors_detail)
+            for hypervisor_id, hypervisor_data in compute_hypervisors_detail.items():
+                for metric, value in hypervisor_data['metrics'].items():
+                    self.gauge(
+                        f'openstack.nova.hypervisor.{metric}',
+                        value,
+                        tags=tags
+                        + [f'hypervisor_id:{hypervisor_id}', f'hypervisor_hostname:{hypervisor_data["name"]}'],
                     )
         else:
             self.service_check('openstack.nova.api.up', AgentCheck.CRITICAL)

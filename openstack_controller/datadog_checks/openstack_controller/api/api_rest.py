@@ -23,6 +23,10 @@ class ApiRest(Api):
         self.log = logger
         self.config = config
         self.http = http
+        nova_microversion = self.config.get('nova_microversion', None)
+        if nova_microversion:
+            self.log.debug("adding X-OpenStack-Nova-API-Version header to `%s`", nova_microversion)
+            self.http.options['headers']['X-OpenStack-Nova-API-Version'] = nova_microversion
         self.project_auth_tokens = {}
         self.endpoints = {}
         self.components = {}
@@ -101,6 +105,14 @@ class ApiRest(Api):
             return component.get_flavors()
         return None
 
+    def get_compute_hypervisors_detail(self, project):
+        self.log.debug("getting compute hypervisors detail")
+        self.http.options['headers']['X-Auth-Token'] = self.project_auth_tokens[project['id']]['auth_token']
+        component = self._get_component(project['id'], ComponentType.COMPUTE)
+        if component:
+            return component.get_hypervisors_detail()
+        return None
+
     def get_networking_quotas(self, project):
         self.log.debug("getting networking quotas")
         self.http.options['headers']['X-Auth-Token'] = self.project_auth_tokens[project['id']]['auth_token']
@@ -114,7 +126,9 @@ class ApiRest(Api):
         payload = (
             '{{"auth": {{"identity": {{"methods": ["password"], '
             '"password": {{"user": {{"name": "{}", "domain": {{ "id": "{}" }}, "password": "{}"}}}}}}}}}}'.format(
-                self.config.get("user_name"), self.config.get("user_domain"), self.config.get("user_password")
+                self.config.get("user_name"),
+                self.config.get("user_domain", "default"),
+                self.config.get("user_password"),
             )
         )
         self.log.debug("payload: %s", payload)
@@ -139,7 +153,7 @@ class ApiRest(Api):
             '"password": {{"user": {{"name": "{}", "domain": {{ "id": "{}" }}, "password": "{}"}}}}}}, '
             '"scope": {{"project": {{"id": "{}"}}}}}}}}'.format(
                 self.config.get("user_name"),
-                self.config.get("user_domain"),
+                self.config.get("user_domain", "default"),
                 self.config.get("user_password"),
                 project['id'],
             )

@@ -1,0 +1,13 @@
+{
+    "max_total_instances": 10,
+    "max_total_cores": 20,
+    "max_total_ram_size": 51200,
+    "max_server_meta": 128,
+    "max_total_keypairs": 100,
+    "max_server_groups": 10,
+    "max_server_group_members": 10,
+    "total_ram_used": 0,
+    "total_cores_used": 0,
+    "total_instances_used": 0,
+    "total_server_groups_used": 0
+}

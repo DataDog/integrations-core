@@ -152,7 +152,7 @@ def test_compute_response_time(aggregator, dd_run_check):
 def test_compute_limits(aggregator, dd_run_check):
     with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
-    ) as two_projects, open(os.path.join(get_here(), 'fixtures/compute_limits.json'), 'r') as compute_limits:
+    ) as two_projects, open(os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/limits.json'), 'r') as compute_limits:
         two_projects_content = json.load(two_projects)
         compute_limits_content = json.load(compute_limits)
         api = mock.MagicMock()
@@ -170,10 +170,32 @@ def test_compute_limits(aggregator, dd_run_check):
             aggregator.assert_metric(f'openstack.nova.limits.{metric}', value)
 
 
+def test_compute_limits_nova_microversion_last(aggregator, dd_run_check):
+    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+        os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
+    ) as two_projects, open(os.path.join(get_here(), 'fixtures/compute/nova_microversion_last/limits.json'), 'r') as compute_limits:
+        two_projects_content = json.load(two_projects)
+        compute_limits_content = json.load(compute_limits)
+        api = mock.MagicMock()
+        api.get_projects.return_value = two_projects_content
+        api.get_compute_limits.return_value = compute_limits_content
+        mocked_api.return_value = api
+        instance = {
+            'keystone_server_url': 'http://10.164.0.83/identity',
+            'user_name': 'admin',
+            'user_password': 'password',
+            'nova_microversion': 'last'
+        }
+        check = OpenStackControllerCheck('test', {}, [instance])
+        dd_run_check(check)
+        for metric, value in compute_limits_content.items():
+            aggregator.assert_metric(f'openstack.nova.limits.{metric}', value)
+
+
 def test_compute_quota_set(aggregator, dd_run_check):
     with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
-    ) as two_projects, open(os.path.join(get_here(), 'fixtures/compute_quota_set.json'), 'r') as compute_quota_set:
+    ) as two_projects, open(os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/quota_set.json'), 'r') as compute_quota_set:
         two_projects_content = json.load(two_projects)
         compute_quota_set_content = json.load(compute_quota_set)
         api = mock.MagicMock()
@@ -191,10 +213,32 @@ def test_compute_quota_set(aggregator, dd_run_check):
             aggregator.assert_metric(f'openstack.nova.quota_set.{metric}', value)
 
 
+def test_compute_quota_set_nova_microversion_last(aggregator, dd_run_check):
+    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+        os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
+    ) as two_projects, open(os.path.join(get_here(), 'fixtures/compute/nova_microversion_last/quota_set.json'), 'r') as compute_quota_set:
+        two_projects_content = json.load(two_projects)
+        compute_quota_set_content = json.load(compute_quota_set)
+        api = mock.MagicMock()
+        api.get_projects.return_value = two_projects_content
+        api.get_compute_quota_set.return_value = compute_quota_set_content
+        mocked_api.return_value = api
+        instance = {
+            'keystone_server_url': 'http://10.164.0.83/identity',
+            'user_name': 'admin',
+            'user_password': 'password',
+            'nova_microversion': 'last'
+        }
+        check = OpenStackControllerCheck('test', {}, [instance])
+        dd_run_check(check)
+        for metric, value in compute_quota_set_content.items():
+            aggregator.assert_metric(f'openstack.nova.quota_set.{metric}', value)
+
+
 def test_compute_servers(aggregator, dd_run_check):
     with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
-    ) as two_projects, open(os.path.join(get_here(), 'fixtures/compute_servers.json'), 'r') as compute_servers:
+    ) as two_projects, open(os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/servers.json'), 'r') as compute_servers:
         two_projects_content = json.load(two_projects)
         compute_servers_content = json.load(compute_servers)
         api = mock.MagicMock()
@@ -210,13 +254,36 @@ def test_compute_servers(aggregator, dd_run_check):
         dd_run_check(check)
         for _server_id, server_data in compute_servers_content.items():
             for metric, value in server_data['metrics'].items():
-                aggregator.assert_metric(f'openstack.nova.servers.{metric}', value)
+                aggregator.assert_metric(f'openstack.nova.server.{metric}', value)
+
+
+def test_compute_servers_nova_microversion_last(aggregator, dd_run_check):
+    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+        os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
+    ) as two_projects, open(os.path.join(get_here(), 'fixtures/compute/nova_microversion_last/servers.json'), 'r') as compute_servers:
+        two_projects_content = json.load(two_projects)
+        compute_servers_content = json.load(compute_servers)
+        api = mock.MagicMock()
+        api.get_projects.return_value = two_projects_content
+        api.get_compute_servers.return_value = compute_servers_content
+        mocked_api.return_value = api
+        instance = {
+            'keystone_server_url': 'http://10.164.0.83/identity',
+            'user_name': 'admin',
+            'user_password': 'password',
+            'nova_microversion': 'last'
+        }
+        check = OpenStackControllerCheck('test', {}, [instance])
+        dd_run_check(check)
+        for _server_id, server_data in compute_servers_content.items():
+            for metric, value in server_data['metrics'].items():
+                aggregator.assert_metric(f'openstack.nova.server.{metric}', value)
 
 
 def test_compute_flavors(aggregator, dd_run_check):
     with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
-    ) as two_projects, open(os.path.join(get_here(), 'fixtures/compute_flavors.json'), 'r') as compute_flavors:
+    ) as two_projects, open(os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/flavors.json'), 'r') as compute_flavors:
         two_projects_content = json.load(two_projects)
         compute_flavors_content = json.load(compute_flavors)
         api = mock.MagicMock()
@@ -232,7 +299,31 @@ def test_compute_flavors(aggregator, dd_run_check):
         dd_run_check(check)
         for _flavor_id, flavor_data in compute_flavors_content.items():
             for metric, value in flavor_data['metrics'].items():
-                aggregator.assert_metric(f'openstack.nova.flavors.{metric}', value)
+                aggregator.assert_metric(f'openstack.nova.flavor.{metric}', value)
+
+
+def test_compute_hypervisors_detail(aggregator, dd_run_check):
+    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+        os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
+    ) as two_projects, open(
+        os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/hypervisors_detail.json'), 'r'
+    ) as compute_hypervisors:
+        two_projects_content = json.load(two_projects)
+        compute_hypervisors_content = json.load(compute_hypervisors)
+        api = mock.MagicMock()
+        api.get_projects.return_value = two_projects_content
+        api.get_compute_hypervisors_detail.return_value = compute_hypervisors_content
+        mocked_api.return_value = api
+        instance = {
+            'keystone_server_url': 'http://10.164.0.83/identity',
+            'user_name': 'admin',
+            'user_password': 'password',
+        }
+        check = OpenStackControllerCheck('test', {}, [instance])
+        dd_run_check(check)
+        for _hypervisor_id, hypervisor_data in compute_hypervisors_content.items():
+            for metric, value in hypervisor_data['metrics'].items():
+                aggregator.assert_metric(f'openstack.nova.hypervisor.{metric}', value)
 
 
 def test_network_endpoint_down(aggregator, dd_run_check):

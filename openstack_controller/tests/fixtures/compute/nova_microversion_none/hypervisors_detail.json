@@ -1,0 +1,20 @@
+{
+    "1": {
+        "name": "agent-integrations-openstack-default",
+        "metrics": {
+            "id": 1,
+            "hypervisor_version": 4002001,
+            "vcpus": 4,
+            "memory_mb": 14990,
+            "local_gb": 96,
+            "vcpus_used": 3,
+            "memory_mb_used": 1152,
+            "local_gb_used": 0,
+            "free_ram_mb": 13838,
+            "free_disk_gb": 96,
+            "current_workload": 0,
+            "running_vms": 3,
+            "disk_available_least": 88
+        }
+    }
+}

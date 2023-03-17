@@ -14,11 +14,15 @@ class ComputeRest:
         return response.elapsed.total_seconds() * 1000
 
     def get_limits(self, project_id):
-        response = self.http.get('{}/limits?project_id={}'.format(self.endpoint, project_id))
+        response = self.http.get('{}/limits?tenant_id={}'.format(self.endpoint, project_id))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return {
-            re.sub('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(): value
+            re.sub(
+                r'(.*)-(.*)',
+                r'\1_\2',
+                re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(),
+            ): value
             for key, value in response.json()['limits']['absolute'].items()
             if isinstance(value, (int, float)) and not isinstance(value, bool)
         }
@@ -28,7 +32,11 @@ class ComputeRest:
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return {
-            re.sub('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(): value
+            re.sub(
+                r'(.*)-(.*)',
+                r'\1_\2',
+                re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(),
+            ): value
             for key, value in response.json()['quota_set'].items()
             if isinstance(value, (int, float)) and not isinstance(value, bool)
         }
@@ -46,7 +54,11 @@ class ComputeRest:
                 server_metrics[server['id']] = {
                     'name': server['name'],
                     'metrics': {
-                        re.sub('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(): value
+                        re.sub(
+                            r'(.*)-(.*)',
+                            r'\1_\2',
+                            re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(),
+                        ): value
                         for key, value in response.json().items()
                         if isinstance(value, (int, float)) and not isinstance(value, bool)
                     },
@@ -64,9 +76,33 @@ class ComputeRest:
             flavor_metrics[flavor['id']] = {
                 'name': flavor['name'],
                 'metrics': {
-                    re.sub('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(): value
+                    re.sub(
+                        r'(.*)-(.*)',
+                        r'\1_\2',
+                        re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(),
+                    ): value
                     for key, value in flavor.items()
                     if isinstance(value, (int, float)) and not isinstance(value, bool)
                 },
             }
         return flavor_metrics
+
+    def get_hypervisors_detail(self):
+        response = self.http.get('{}/os-hypervisors/detail'.format(self.endpoint))
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        hypervisors_detail_metrics = {}
+        for hypervisor in response.json()['hypervisors']:
+            hypervisors_detail_metrics[str(hypervisor['id'])] = {
+                'name': hypervisor['hypervisor_hostname'],
+                'metrics': {
+                    re.sub(
+                        r'(.*)-(.*)',
+                        r'\1_\2',
+                        re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(),
+                    ): value
+                    for key, value in hypervisor.items()
+                    if isinstance(value, (int, float)) and not isinstance(value, bool)
+                },
+            }
+        return hypervisors_detail_metrics

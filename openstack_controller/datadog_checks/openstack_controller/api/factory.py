@@ -29,19 +29,9 @@ def _make_rest_api(logger, instance_config, http):
     logger.debug('creating rest api object')
     user = instance_config.get("user")  # backward compatible
     if user is None:
-        user_domain = instance_config.get("user_domain", "default")
         user_name = instance_config.get("user_name")
         user_password = instance_config.get("user_password")
         if user_name is None or user_password is None:
             raise ConfigurationError("`user_name` and `user_password` need to be configured")
-        return ApiRest(
-            logger,
-            {
-                'keystone_server_url': instance_config.get("keystone_server_url"),
-                'user_domain': user_domain,
-                'user_name': user_name,
-                'user_password': user_password,
-            },
-            http,
-        )
+        return ApiRest(logger, instance_config, http)
     return None

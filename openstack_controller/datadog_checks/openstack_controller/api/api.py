@@ -35,6 +35,10 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
+    def get_compute_hypervisors_detail(self, project):
+        pass  # pragma: no cover
+
+    @abstractmethod
     def get_network_response_time(self, project):
         pass  # pragma: no cover
 
