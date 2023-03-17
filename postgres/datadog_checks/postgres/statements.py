@@ -173,7 +173,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         return col_names
 
     def run_job(self):
-        self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
+        self._tags_no_db = [t for t in self._tags if not (t.startswith('db:') or t.startswith('dd.internal'))]
         self.collect_per_statement_metrics()
 
     def _payload_pg_version(self):

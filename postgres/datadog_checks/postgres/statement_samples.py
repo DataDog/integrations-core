@@ -426,7 +426,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
     def run_job(self):
-        self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
+        self._tags_no_db = [t for t in self._tags if not (t.startswith('db:') or t.startswith('dd.internal'))]
         self._collect_statement_samples()
         self._conn_pool.prune_connections()
 
