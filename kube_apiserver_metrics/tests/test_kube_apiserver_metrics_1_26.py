@@ -1,13 +1,13 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from pathlib import Path
+import os
 
 from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
 
 from .common import HERE
 
-OM_RESPONSE_FIXTURES = HERE / Path('fixtures')
+OM_RESPONSE_FIXTURES = os.path.join(HERE, 'fixtures', 'metrics_1.26.0.txt')
 
 customtag = "custom:tag"
 
@@ -75,7 +75,7 @@ class TestKubeAPIServerMetrics:
         Testing kube_apiserver_metrics metrics collection.
         """
         NAMESPACE = 'kube_apiserver'
-        mock_http_response(file_path=OM_RESPONSE_FIXTURES / "metrics_1.26.0.txt")
+        mock_http_response(file_path=OM_RESPONSE_FIXTURES)
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [instance])
         dd_run_check(check)
 
