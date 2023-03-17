@@ -246,7 +246,6 @@ def test_local_wheels_signer_signature_leaf_error(distribution_name, distributio
 @pytest.mark.offline
 @freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP)
 def test_local_tampered_target_triggers_failure():
-
     distribution_name = "datadog-active-directory"
     distribution_version = "1.10.0"
 

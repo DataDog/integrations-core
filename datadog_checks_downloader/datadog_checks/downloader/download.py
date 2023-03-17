@@ -57,7 +57,10 @@ logger = logging.getLogger(__name__)
 
 class TUFDownloader:
     def __init__(
-        self, repository_url_prefix=REPOSITORY_URL_PREFIX, root_layout_type=DEFAULT_ROOT_LAYOUT_TYPE, verbose=0,
+        self,
+        repository_url_prefix=REPOSITORY_URL_PREFIX,
+        root_layout_type=DEFAULT_ROOT_LAYOUT_TYPE,
+        verbose=0,
         disable_verification=False,
     ):
         # 0 => 60 (effectively /dev/null)
@@ -122,11 +125,7 @@ class TUFDownloader:
 
         # reproducing how the "self.__updater.download_target" method computes the URL
         target_base_url = self.__updater._target_base_url
-        full_url = (
-            target_base_url
-            + ('/' if not target_base_url.endswith('/') else '')
-            + tuf_target_path
-        )
+        full_url = target_base_url + ('/' if not target_base_url.endswith('/') else '') + tuf_target_path
 
         with urllib.request.urlopen(full_url) as resp:
             with open(target_abspath, 'wb') as dest:
