@@ -83,6 +83,7 @@ class TestKubeAPIServerMetrics:
         dd_run_check(check)
 
         for metric in self.METRICS + self.COUNT_METRICS:
-            aggregator.assert_metric(NAMESPACE + "." + metric)
-            aggregator.assert_metric_has_tag(NAMESPACE + "." + metric, customtag)
+            metric_to_assert = NAMESPACE + "." + metric
+            aggregator.assert_metric(metric_to_assert)
+            aggregator.assert_metric_has_tag(metric_to_assert, customtag)
         aggregator.assert_all_metrics_covered()
