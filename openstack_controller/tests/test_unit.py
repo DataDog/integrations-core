@@ -302,6 +302,28 @@ def test_compute_flavors(aggregator, dd_run_check):
                 aggregator.assert_metric(f'openstack.nova.flavor.{metric}', value)
 
 
+def test_compute_flavors_nova_microversion_last(aggregator, dd_run_check):
+    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+        os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
+    ) as two_projects, open(os.path.join(get_here(), 'fixtures/compute/nova_microversion_last/flavors.json'), 'r') as compute_flavors:
+        two_projects_content = json.load(two_projects)
+        compute_flavors_content = json.load(compute_flavors)
+        api = mock.MagicMock()
+        api.get_projects.return_value = two_projects_content
+        api.get_compute_flavors.return_value = compute_flavors_content
+        mocked_api.return_value = api
+        instance = {
+            'keystone_server_url': 'http://10.164.0.83/identity',
+            'user_name': 'admin',
+            'user_password': 'password',
+        }
+        check = OpenStackControllerCheck('test', {}, [instance])
+        dd_run_check(check)
+        for _flavor_id, flavor_data in compute_flavors_content.items():
+            for metric, value in flavor_data['metrics'].items():
+                aggregator.assert_metric(f'openstack.nova.flavor.{metric}', value)
+
+
 def test_compute_hypervisors_detail(aggregator, dd_run_check):
     with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
