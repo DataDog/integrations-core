@@ -24,6 +24,11 @@ files:
       required: true
       value:
         type: integer
+    - name: scope_id
+      description: scope_id of the network device that should handle the traffic.
+      required: false
+      value:
+        type: integer
     - name: timeout
       description: Timeout of the TCP query in second.
       value:
