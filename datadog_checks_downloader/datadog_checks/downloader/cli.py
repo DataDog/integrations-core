@@ -87,7 +87,7 @@ def download():
         '--unsafe-disable-verification', action='store_true',
         help=('Disable TUF and in-toto integrity verification. '
               'To use only if TUF or in-toto verification fails due to a bug and not an attack.'
-        ),
+              ),
     )
 
     parser.add_argument('--ignore-python-version', action='store_true', help='Ignore Python version requirements.')
