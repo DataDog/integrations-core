@@ -76,8 +76,6 @@ class PostgreSql(AgentCheck):
         # map[dbname -> psycopg connection]
         self._db_pool = {}
         self._db_pool_lock = threading.Lock()
-
-        #self._config.tags.append("dd.internal.resource:database_instance,{}".format(self.resolved_hostname))
         if self._config.cloud_metadata.get("gcp") is not None:
             self._config.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance,{}:{}".format(
