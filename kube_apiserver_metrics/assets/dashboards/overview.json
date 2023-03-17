@@ -1306,65 +1306,7 @@
                 "width": 12,
                 "height": 4
             }
-        },
-		{
-			"id": 4164499709691014,
-			"definition": {
-			  "title": "Kubernetes Feature Gates",
-			  "background_color": "gray",
-			  "show_title": true,
-			  "type": "group",
-			  "layout_type": "ordered",
-			  "widgets": [
-				{
-				  "id": 7610489188909648,
-				  "definition": {
-					"title": "Feature Gates",
-					"title_size": "16",
-					"title_align": "left",
-					"time": {},
-					"type": "query_table",
-					"requests": [
-					  {
-						"queries": [
-						  {
-							"data_source": "metrics",
-							"name": "query1",
-							"query": "avg:kube_apiserver.kubernetes_feature_enabled{$cluster} by {name,stage}",
-							"aggregator": "last"
-						  }
-						],
-						"formulas": [
-						  {
-							"conditional_formats": [
-							  {
-								"comparator": ">=",
-								"palette": "white_on_green",
-								"value": 1
-							  },
-							  {
-								"comparator": "<",
-								"palette": "white_on_red",
-								"value": 1
-							  }
-							],
-							"cell_display_mode": "number",
-							"alias": "Enabled",
-							"formula": "query1",
-							"limit": { "count": 500, "order": "desc" }
-						  }
-						],
-						"response_format": "scalar"
-					  }
-					],
-					"has_search_bar": "auto"
-				  },
-				  "layout": { "x": 0, "y": 0, "width": 7, "height": 4 }
-				}
-			  ]
-			},
-			"layout": { "x": 0, "y": 0, "width": 7, "height": 5 }
-		  }
+        }
 	],
 	"template_variables": [
 		{

@@ -67,9 +67,6 @@ METRICS = {
     'apiserver_storage_list_fetched_objects_total': 'storage_list_fetched_objects_total',
     'apiserver_storage_list_evaluated_objects_total': 'storage_list_evaluated_objects_total',
     'apiserver_storage_list_returned_objects_total': 'storage_list_returned_objects_total',
-    # For Kubernetes >= 1.26
-    # https://github.com/kubernetes/kubernetes/pull/112690
-    'kubernetes_feature_enabled': 'kubernetes_feature_enabled',
 }
 
 
