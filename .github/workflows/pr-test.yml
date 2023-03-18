@@ -8,10 +8,44 @@ on:
         type: string
 
 jobs:
-  run:
-    name: Run tests
-    runs-on: ubuntu-22.04
+  compute-matrix:
+    uses: ./.github/workflows/compute-matrix.yml
+    with:
+      repo: "${{ inputs.repo }}"
 
-    steps:
-    - name: Test
-      run: echo "${{ inputs.repo }}"
+  test:
+    needs:
+    - compute-matrix
+    if: needs.compute-matrix.outputs.matrix != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
+
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: "${{ matrix.name }}"
+      target: "${{ matrix.target }}"
+      platform: "${{ matrix.platform }}"
+      runner: "${{ toJson(matrix.runner) }}"
+      repo: "${{ inputs.repo }}"
+
+      # Options
+      standard: true
+      test-py2: true
+    secrets: inherit
+
+  save-event:
+    needs:
+    - test
+    if: success() || failure()
+
+    uses: ./.github/workflows/save-event.yml
+
+  submit-traces:
+    needs:
+    - test
+    if: inputs.repo == 'core' && (success() || failure())
+
+    uses: ./.github/workflows/submit-traces.yml
+    secrets: inherit

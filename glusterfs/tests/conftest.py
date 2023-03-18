@@ -46,7 +46,7 @@ def mock_gstatus_data():
 
 
 def create_volume():
-    run_command("docker exec gluster-node-2 mkdir -p /export-test", capture=True, check=True)
+    run_command("docker exec gluster-node-2 mkdir -p /export-test", check=True)
 
     for command in (
         'gluster peer probe gluster-node-2',
@@ -59,5 +59,6 @@ def create_volume():
         'chmod +x ./gstatus',
         'mv ./gstatus /usr/local/bin/gstatus',
     ):
-        run_command("docker exec gluster-node-1 {}".format(command), capture=True, check=True)
+        print(command)
+        run_command("docker exec gluster-node-1 {}".format(command), check=True)
         time.sleep(10)
