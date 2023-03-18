@@ -1,29 +1,29 @@
 {
-  "name": "[RabbitMQ] Level of disk usage is too high for host: {{host.name}} ",
-  "type": "query alert",
-  "query": "avg(last_5m):avg:rabbitmq.node.mem_used{*} by {host} / avg:system.mem.total{*} by {host} * 100 > 35",
-  "message": "RabbitMQ is using too many resources on host: {{host.name}}.  It may block connections and won't be able to perform many internal operations.",
-  "tags": [
-    "integration:rabbitmq"
-  ],
-  "options": {
-    "notify_audit": false,
-    "locked": false,
-    "timeout_h": 0,
-    "new_host_delay": 300,
-    "require_full_window": true,
-    "notify_no_data": false,
-    "renotify_interval": "0",
-    "escalation_message": "",
-    "no_data_timeframe": null,
-    "include_tags": true,
-    "thresholds": {
-      "critical": 35,
-      "warning": 30
-    }
-  },
-  "priority": null,
-  "recommended_monitor_metadata": {
-    "description": "Notify your team when a host's disk usage reaches critical levels."
-  }
+	  "id": 9795081,
+	  "name": "[RabbitMQ - OMV2] Disk Space is Low",
+	  "type": "query alert",
+	  "query": "avg(last_5m):avg:rabbitmq.alarms.free_disk_space.watermark{*} >= 1",
+	  "message": "{{#is_alert}}\nDisk space is extremely low. \nThis can be caused by an overload of messages or a persistent messages that is being mismanaged. \nPlease resolve.\n{{/is_alert}}",
+	  "tags": [
+		    "integration:rabbitmq"
+	  ],
+	  "options": {
+		    "thresholds": {
+			      "critical": 1
+		    },
+		    "notify_audit": false,
+		    "require_full_window": false,
+		    "notify_no_data": false,
+		    "renotify_interval": 180,
+		    "include_tags": false,
+		    "renotify_statuses": [
+			      "alert"
+		    ],
+		    "escalation_message": "Disk space is still extremely low. \nThis can be caused by an overload of messages or a persistent messages that is being mismanaged. \nPlease resolve.",
+		    "avalanche_window": 10,
+		    "new_host_delay": 300,
+		    "silenced": {}
+	  },
+	  "priority": 3,
+	  "restricted_roles": null
 }
