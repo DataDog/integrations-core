@@ -1,0 +1,2660 @@
+name: Test all
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        required: true
+        type: string
+
+      python-version:
+        required: false
+        default: "3.8"
+        type: string
+      standard:
+        required: false
+        default: false
+        type: boolean
+      latest:
+        required: false
+        default: false
+        type: boolean
+      minimum-base-package:
+        required: false
+        default: false
+        type: boolean
+      test-py2:
+        required: false
+        default: false
+        type: boolean
+      test-py3:
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  jd316aba:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: ddev on Linux
+      target: ddev
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j6712d43:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: ddev on Windows
+      target: ddev
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jb232c8c:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Datadog Checks Base on Linux
+      target: datadog_checks_base
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jda96080:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Datadog Checks Base on Windows
+      target: datadog_checks_base
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j77217e9:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Datadog Checks Dev on Linux
+      target: datadog_checks_dev
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j1176210:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Datadog Checks Dev on Windows
+      target: datadog_checks_dev
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j8cdb65b:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Datadog Checks Downloader on Linux
+      target: datadog_checks_downloader
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j8c73c41:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Datadog Checks Downloader on Windows
+      target: datadog_checks_downloader
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jd66e148:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Active Directory
+      target: active_directory
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j02a4c95:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: ActiveMQ
+      target: activemq
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jb4c5802:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: ActiveMQ XML
+      target: activemq_xml
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jce7999e:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Aerospike
+      target: aerospike
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jd58222c:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Airflow
+      target: airflow
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jaaddf5e:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Amazon Kafka
+      target: amazon_msk
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j9c53fc8:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Ambari
+      target: ambari
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j87ec402:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Apache
+      target: apache
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jacbd843:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: ArangoDB
+      target: arangodb
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j92d42de:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: ArgoCD
+      target: argocd
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j8c9f9aa:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: ASP.NET
+      target: aspdotnet
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j924327f:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Avi Vantage
+      target: avi_vantage
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j8d83b0b:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Azure IoT Edge
+      target: azure_iot_edge
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jfcf4b1a:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Boundary
+      target: boundary
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j2883ff0:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Btrfs
+      target: btrfs
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j481d7ae:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Cacti
+      target: cacti
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j47ac8c7:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Calico
+      target: calico
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  je3297e4:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Cassandra
+      target: cassandra
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jf75679d:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Cassandra Nodetool
+      target: cassandra_nodetool
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jdffb064:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Ceph
+      target: ceph
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  je6bb20d:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: cert-manager
+      target: cert_manager
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jeb29398:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Cilium
+      target: cilium
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j3de8d1a:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Cisco ACI
+      target: cisco_aci
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jafd4d40:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Citrix Hypervisor
+      target: citrix_hypervisor
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jdee91dd:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: ClickHouse
+      target: clickhouse
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j4131274:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Cloud Foundry API
+      target: cloud_foundry_api
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j26f9a18:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Cloudera
+      target: cloudera
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j7faf392:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: CockroachDB
+      target: cockroachdb
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j89ec795:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Confluent Platform
+      target: confluent_platform
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j13a53db:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Consul
+      target: consul
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jb67436a:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: CoreDNS
+      target: coredns
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j483e815:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: CouchDB
+      target: couch
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j1e84c35:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Couchbase
+      target: couchbase
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  ja3692a6:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: CRI-O
+      target: crio
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j2d21154:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Datadog Cluster Agent
+      target: datadog_cluster_agent
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jc8f84c3:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Directory
+      target: directory
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j4b2fe2b:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Disk on Linux
+      target: disk
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j92e8bce:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Disk on Windows
+      target: disk
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j3e27604:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: DNS on Linux
+      target: dns_check
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j301b42d:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: DNS on Windows
+      target: dns_check
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jc6b16d4:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: .NET CLR
+      target: dotnetclr
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j274814f:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Druid
+      target: druid
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j562bfe5:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Amazon ECS Fargate
+      target: ecs_fargate
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j72f26c1:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: EKS Fargate
+      target: eks_fargate
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j31c819b:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Elasticsearch
+      target: elastic
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j93163a5:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Envoy
+      target: envoy
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jc38cbd9:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: etcd
+      target: etcd
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j284dfb9:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Exchange Server
+      target: exchange_server
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j1856b23:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: External DNS
+      target: external_dns
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j0860f26:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: fluentd
+      target: fluentd
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jc364450:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: FoundationDB
+      target: foundationdb
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j3becdbc:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Gearman
+      target: gearmand
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j4ea3f09:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Gitlab
+      target: gitlab
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j563739d:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Gitlab Runner
+      target: gitlab_runner
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j16f5513:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: GlusterFS
+      target: glusterfs
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j3399e09:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Go Expvar
+      target: go_expvar
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j1fede0e:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Gunicorn
+      target: gunicorn
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j5979923:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: HAProxy
+      target: haproxy
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j8a8c654:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Harbor
+      target: harbor
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j9cb9f66:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Hazelcast
+      target: hazelcast
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j240a78b:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: HDFS Datanode
+      target: hdfs_datanode
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j00a0dd6:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: HDFS Namenode
+      target: hdfs_namenode
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jaf48338:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Hive
+      target: hive
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  je66898a:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: HiveMQ
+      target: hivemq
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j56d6f32:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: HTTP
+      target: http_check
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j95a2b08:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Hudi
+      target: hudi
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j5a9585a:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: IBM ACE
+      target: ibm_ace
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j60f59ae:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: IBM Db2
+      target: ibm_db2
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j9accedb:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: IBM i
+      target: ibm_i
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jf4d06ee:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: IBM MQ on Linux
+      target: ibm_mq
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j662406b:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: IBM MQ on Windows
+      target: ibm_mq
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j440815a:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: IBM WAS
+      target: ibm_was
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j0676988:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Ignite
+      target: ignite
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j9267198:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: IIS
+      target: iis
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j5dc7466:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Impala
+      target: impala
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j0c16521:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Istio
+      target: istio
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j46da136:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: JBoss_WildFly
+      target: jboss_wildfly
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  je4a5f92:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kafka
+      target: kafka
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jeaad214:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kafka Consumer
+      target: kafka_consumer
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jaee58c5:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kong
+      target: kong
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j92491f1:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kubernetes API server metrics
+      target: kube_apiserver_metrics
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j1ce0516:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kubernetes Controller Manager
+      target: kube_controller_manager
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j19a1b27:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kube DNS
+      target: kube_dns
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jd1817b8:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kube metrics server
+      target: kube_metrics_server
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j5a98c4e:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kube Proxy
+      target: kube_proxy
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jeebd4ae:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kubernetes Scheduler
+      target: kube_scheduler
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j24a5cff:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kubelet
+      target: kubelet
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jba841f0:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kubernetes State
+      target: kubernetes_state
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j61e565f:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kyoto Tycoon
+      target: kyototycoon
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j1c6adb2:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Lighttpd
+      target: lighttpd
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j8b3b099:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Linkerd
+      target: linkerd
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j29dcd3a:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Linux proc extras
+      target: linux_proc_extras
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  ja15251c:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: MapR
+      target: mapr
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j141298e:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: MapReduce
+      target: mapreduce
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j75f52a9:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Marathon
+      target: marathon
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j8d5404b:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: MarkLogic
+      target: marklogic
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j5b70138:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Memcached
+      target: mcache
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jbdadec9:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Mesos Master
+      target: mesos_master
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j76c310f:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Mesos
+      target: mesos_slave
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j91231ff:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: MongoDB
+      target: mongo
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j211906c:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: MySQL
+      target: mysql
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j5df646e:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Nagios
+      target: nagios
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jfc1e031:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Network on Linux
+      target: network
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j7a1dfc6:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Network on Windows
+      target: network
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j6a5b846:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: NFSstat
+      target: nfsstat
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j93fea02:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: NGINX
+      target: nginx
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  ja114815:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: NGINX Ingress Controller
+      target: nginx_ingress_controller
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j2cf0a0a:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: OpenLDAP
+      target: openldap
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jaaa5727:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: OpenMetrics
+      target: openmetrics
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j88ddb5b:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: OpenStack
+      target: openstack
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j65171af:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: OpenStack Controller
+      target: openstack_controller
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j748e188:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Oracle Database
+      target: oracle
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j4dff42c:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: PDH
+      target: pdh_check
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j4a8166b:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: PGBouncer
+      target: pgbouncer
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jaa8b34b:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: PHP-FPM
+      target: php_fpm
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j54fefc0:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Postfix
+      target: postfix
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j44368ad:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Postgres
+      target: postgres
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j8e38a40:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: PowerDNS Recursor
+      target: powerdns_recursor
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jaeea6e0:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Presto
+      target: presto
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  je083bd8:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Process
+      target: process
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jbfa97cf:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Prometheus
+      target: prometheus
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jbb39de2:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: ProxySQL
+      target: proxysql
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  je00811b:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: pulsar
+      target: pulsar
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j694032b:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: RabbitMQ
+      target: rabbitmq
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  ja7f6415:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Redis
+      target: redisdb
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j47000ee:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: RethinkDB
+      target: rethinkdb
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jdeada9f:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Riak
+      target: riak
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j21f86cb:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: RiakCS
+      target: riakcs
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j111b452:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: SAP HANA
+      target: sap_hana
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j6a5cfa3:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Scylla
+      target: scylla
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j6600bce:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Silk
+      target: silk
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j02f6aa9:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: SingleStore
+      target: singlestore
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j06ca546:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: SNMP
+      target: snmp
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j1dbd59f:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Snowflake
+      target: snowflake
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j2d7c8f5:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Solr
+      target: solr
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j9485e6f:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: SonarQube
+      target: sonarqube
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j529bc3b:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Spark
+      target: spark
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j31a95c8:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: SQL Server on Windows
+      target: sqlserver
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j3a8e004:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: SQL Server on Linux
+      target: sqlserver
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jaf4b616:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Squid
+      target: squid
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j01c4d3c:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: SSH
+      target: ssh_check
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j2981dbe:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: StatsD
+      target: statsd
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jf04a052:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Supervisord
+      target: supervisord
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jde3891f:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: System Core
+      target: system_core
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j64445e6:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: System Swap
+      target: system_swap
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j1eeafd2:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: TCP on Linux
+      target: tcp_check
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j87dbe3f:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: TCP on Windows
+      target: tcp_check
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j8217a3a:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: TeamCity
+      target: teamcity
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jeefbe37:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Teradata
+      target: teradata
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jd1c18ec:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: TLS
+      target: tls
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j8486f6e:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: TokuMX
+      target: tokumx
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: true
+      test-py3: false
+    secrets: inherit
+  j9438e1d:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Tomcat
+      target: tomcat
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j8a1b5bb:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Traffic Server
+      target: traffic_server
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jfc2bf01:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Twemproxy
+      target: twemproxy
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jd0626ef:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Twistlock
+      target: twistlock
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j0c8fc90:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Varnish
+      target: varnish
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j5d55c41:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Vault
+      target: vault
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j9981b0b:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Vertica
+      target: vertica
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jb120af1:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: VoltDB
+      target: voltdb
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j269c8a5:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: vSphere
+      target: vsphere
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j40e5c98:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: WebLogic
+      target: weblogic
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j72589e8:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Win32
+      target: win32_event_log
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  jc1fb93c:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Windows performance counters
+      target: windows_performance_counters
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j9798a89:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Windows Service
+      target: windows_service
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  j25cdd56:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: WMI
+      target: wmi_check
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  ja6bc642:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Yarn
+      target: yarn
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
+  ja446cea:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: ZooKeeper
+      target: zk
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py2 }}
+    secrets: inherit
