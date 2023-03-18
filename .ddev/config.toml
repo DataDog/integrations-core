@@ -9,3 +9,36 @@ nginx = "NGINX"
 nginx_ingress_controller = "NGINX Ingress Controller"
 openstack_controller = "OpenStack Controller"
 teamcity = "TeamCity"
+
+[overrides.ci.ddev]
+platforms = ["linux", "windows"]
+
+[overrides.ci.datadog_checks_base]
+platforms = ["linux", "windows"]
+
+[overrides.ci.datadog_checks_dev]
+platforms = ["linux", "windows"]
+
+[overrides.ci.datadog_checks_downloader]
+platforms = ["linux", "windows"]
+
+[overrides.ci.disk]
+platforms = ["linux", "windows"]
+
+[overrides.ci.dns_check]
+platforms = ["linux", "windows"]
+
+[overrides.ci.ibm_mq]
+platforms = ["linux", "windows"]
+
+[overrides.ci.network]
+platforms = ["linux", "windows"]
+
+[overrides.ci.sqlserver]
+platforms = ["windows", "linux"]
+
+[overrides.ci.tcp_check]
+platforms = ["linux", "windows"]
+
+[overrides.ci.tokumx]
+test-py2 = true

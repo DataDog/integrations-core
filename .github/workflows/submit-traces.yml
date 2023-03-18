@@ -1,0 +1,48 @@
+name: Submit traces
+
+on:
+  workflow_call:
+    inputs:
+      artifact-name:
+        required: true
+        type: string
+      agent-port:
+        required: true
+        type: string
+
+jobs:
+  submit:
+    name: Submit traces
+    runs-on: ubuntu-latest
+
+    services:
+      dd-agent:
+        image: gcr.io/datadoghq/agent:latest
+        ports:
+        - "${{ inputs.agent-port }}:8126"
+        env:
+          DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+          DD_HOSTNAME: "none"
+          DD_INSIDE_CI: "true"
+          DD_LOG_LEVEL: "trace"
+
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: "${{ inputs.artifact-name }}"
+        path: captured-traces
+
+    - name: View trace queue
+      run: ls captured-traces
+
+    - name: Set up trace replaying
+      run: pipx install mitmproxy
+
+    - name: Replay
+      run: |-
+        for request in captured-traces/*; do
+            mitmdump -C "$request"
+        done
+
+    - name: Show Agent status
+      run: docker exec $(docker ps --format "{{.ID}}") agent status
