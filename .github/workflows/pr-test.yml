@@ -7,11 +7,63 @@ on:
         required: true
         type: string
 
-jobs:
-  run:
-    name: Run tests
-    runs-on: ubuntu-22.04
+      setup-env-vars:
+        required: false
+        default: ""
+        type: string
 
-    steps:
-    - name: Test
-      run: echo "${{ inputs.repo }}"
+jobs:
+  compute-matrix:
+    uses: ./.github/workflows/compute-matrix.yml
+    with:
+      repo: "${{ inputs.repo }}"
+
+  validate:
+    needs:
+    - compute-matrix
+    if: needs.compute-matrix.outputs.matrix != '[]'
+
+    uses: ./.github/workflows/validate.yml
+    with:
+      repo: "${{ inputs.repo }}"
+
+  test:
+    needs:
+    - compute-matrix
+    if: needs.compute-matrix.outputs.matrix != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
+
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: "${{ matrix.name }}"
+      target: "${{ matrix.target }}"
+      platform: "${{ matrix.platform }}"
+      runner: "${{ toJson(matrix.runner) }}"
+      repo: "${{ inputs.repo }}"
+
+      # Options
+      standard: true
+      test-py2: ${{ !matrix.python-support || contains(matrix.python-support, '2') }}
+      test-py3: ${{ !matrix.python-support || contains(matrix.python-support, '3') }}
+
+      # For other repositories
+      setup-env-vars: "${{ inputs.setup-env-vars }}"
+    secrets: inherit
+
+  save-event:
+    needs:
+    - test
+    if: success() || failure()
+
+    uses: ./.github/workflows/save-event.yml
+
+  submit-traces:
+    needs:
+    - test
+    if: inputs.repo == 'core' && (success() || failure())
+
+    uses: ./.github/workflows/submit-traces.yml
+    secrets: inherit

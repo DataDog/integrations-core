@@ -1,27 +1,34 @@
-name: validations
+name: Validate repository
 
 on:
-  push:
-    branches:
-    - master
-  pull_request:
+  workflow_call:
+    inputs:
+      repo:
+        required: true
+        type: string
 
-env:
-  CHANGED: ${{ github.event_name == 'pull_request' && 'changed' || '' }}
+defaults:
+  run:
+    shell: bash
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  run:
+    name: Validate
+    runs-on: ubuntu-22.04
+
+    env:
+      PYTHON_VERSION: "3.8"
+      TARGET: ${{ github.event_name == 'pull_request' && 'changed' || '' }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
-        fetch-depth: '0'
+        fetch-depth: "0"
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.8'
+        python-version: "${{ env.PYTHON_VERSION }}"
 
     - name: Upgrade Python packaging tools
       run: pip install --disable-pip-version-check --upgrade pip setuptools wheel
@@ -39,8 +46,9 @@ jobs:
         ddev config set org ci
 
     - name: Run agent requirements validation
+      if: inputs.repo == 'core'
       run: |
-        ddev validate agent-reqs $CHANGED
+        ddev validate agent-reqs $TARGET
 
     - name: Run CI validation
       run: |
@@ -48,38 +56,41 @@ jobs:
 
     - name: Run configuration validation
       run: |
-        ddev validate config $CHANGED
+        ddev validate config $TARGET
 
     - name: Run dashboard validation
       run: |
-        ddev validate dashboards $CHANGED
+        ddev validate dashboards $TARGET
 
     - name: Run dependency validation
+      if: inputs.repo == 'core'
       run: |
         ddev validate dep
 
     - name: Run HTTP wrapper validation
+      if: inputs.repo == 'core'
       run: |
-        ddev validate http $CHANGED
+        ddev validate http $TARGET
 
     - name: Run imports validation
       run: |
-        ddev validate imports $CHANGED
+        ddev validate imports $TARGET
 
     - name: Run integration style and best practices validation
+      if: inputs.repo == 'core'
       run: |
-        ddev validate integration-style $CHANGED --verbose
+        ddev validate integration-style $TARGET --verbose
 
     - name: Run JMX metrics validation
       run: |
-        ddev validate jmx-metrics $CHANGED
+        ddev validate jmx-metrics $TARGET
 
     - name: Run legacy signature validation
       run: |
-        ddev validate legacy-signature $CHANGED
+        ddev validate legacy-signature $TARGET
 
     - name: Run licenses validation
-      if: ${{ github.event.pull_request.head.repo.full_name == github.repository }} # only PRs from this repo
+      if: ${{ inputs.repo == 'core' && github.event.pull_request.head.repo.full_name == github.repository }}  # only PRs from this repo
       env:
         DD_GITHUB_USER: ${{ github.actor }}
         DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -87,36 +98,37 @@ jobs:
         ddev validate licenses
 
     - name: Run license header validation
+      if: inputs.repo == 'core'
       run: |
-        ddev validate license-headers $CHANGED
+        ddev validate license-headers $TARGET
 
     - name: Run metadata validation
       run: |
-        ddev validate metadata $CHANGED
+        ddev validate metadata $TARGET
 
     - name: Run models validation
       run: |
-        ddev validate models $CHANGED
+        ddev validate models $TARGET
 
     - name: Run package validation
       run: |
-        ddev validate package $CHANGED
+        ddev validate package $TARGET
 
     - name: Run readmes validation
       run: |
-        ddev validate readmes $CHANGED
+        ddev validate readmes $TARGET
 
     - name: Run recommended monitors validation
       run: |
-        ddev validate recommended-monitors $CHANGED
+        ddev validate recommended-monitors $TARGET
 
     - name: Run saved views validation
       run: |
-        ddev validate saved-views $CHANGED
+        ddev validate saved-views $TARGET
 
     - name: Run service checks validation
       run: |
-        ddev validate service-checks $CHANGED
+        ddev validate service-checks $TARGET
 
     - name: Comment PR on failure
       if: ${{ failure() && github.event.pull_request.merged != true }}

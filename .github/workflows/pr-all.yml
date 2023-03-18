@@ -1,0 +1,45 @@
+name: PR All
+
+on:
+  pull_request:
+    branches:
+    - master
+    paths:
+    - datadog_checks_base/datadog_checks/**
+    - datadog_checks_dev/datadog_checks/dev/*.py
+    - "!datadog_checks_base/datadog_checks/base/data/agent_requirements.in"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate.yml
+    with:
+      repo: "${{ inputs.repo }}"
+
+  test:
+    uses: ./.github/workflows/test-all.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: true
+    secrets: inherit
+
+  save-event:
+    needs:
+    - test
+    if: success() || failure()
+
+    uses: ./.github/workflows/save-event.yml
+
+  submit-traces:
+    needs:
+    - test
+    if: success() || failure()
+
+    uses: ./.github/workflows/submit-traces.yml
+    secrets: inherit

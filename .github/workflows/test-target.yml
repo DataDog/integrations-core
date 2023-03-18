@@ -1,0 +1,226 @@
+name: Test target
+
+on:
+  workflow_call:
+    inputs:
+      job-name:
+        required: true
+        type: string
+      target:
+        required: true
+        type: string
+      platform:
+        required: true
+        type: string
+      runner:
+        required: true
+        type: string
+      repo:
+        required: true
+        type: string
+
+      python-version:
+        required: false
+        default: "3.8"
+        type: string
+      standard:
+        required: false
+        default: false
+        type: boolean
+      benchmark:
+        required: false
+        default: false
+        type: boolean
+      latest:
+        required: false
+        default: false
+        type: boolean
+      minimum-base-package:
+        required: false
+        default: false
+        type: boolean
+      test-py2:
+        required: false
+        default: false
+        type: boolean
+      test-py3:
+        required: false
+        default: true
+        type: boolean
+      agent-image:
+        required: false
+        default: ""
+        type: string
+      agent-image-py2:
+        required: false
+        default: ""
+        type: string
+      agent-image-windows:
+        required: false
+        default: ""
+        type: string
+      agent-image-windows-py2:
+        required: false
+        default: ""
+        type: string
+      traces-artifact-name:
+        required: false
+        default: "traces"
+        type: string
+      trace-agent-port:
+        required: false
+        default: "8126"
+        type: string
+      setup-env-vars:
+        required: false
+        default: ""
+        type: string
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  run:
+    name: "${{ inputs.job-name }}"
+    runs-on: ${{ fromJson(inputs.runner) }}
+
+    env:
+      FORCE_COLOR: "1"
+      SKIP_ENV_NAME: "${{ (inputs.test-py2 && !inputs.test-py3) && 'py3.*' || (!inputs.test-py2 && inputs.test-py3) && 'py2.*' || '' }}"
+      # Windows E2E requires Windows containers
+      DDEV_E2E_AGENT: "${{ inputs.platform == 'windows' && (inputs.agent-image-windows || 'datadog/agent-dev:master-py3-win-servercore') || inputs.agent-image }}"
+      DDEV_E2E_AGENT_PY2: "${{ inputs.platform == 'windows' && (inputs.agent-image-windows-py2 || 'datadog/agent-dev:master-py2-win-servercore') || inputs.agent-image-py2 }}"
+      # Tracing to monitor our test suite
+      DD_ENV: "ci"
+      DD_SERVICE: "ddev-integrations-${{ inputs.repo }}"
+      DD_TAGS: "team:agent-integrations,platform:${{ inputs.platform }},integration:${{ inputs.target }}"
+      DD_TRACE_ANALYTICS_ENABLED: "true"
+      # Capture traces for a separate job to do the submission
+      TRACE_CAPTURE_FILE: "trace-capture-${{ inputs.job-name }}"
+      TRACE_CAPTURE_LOG: "trace-captures.log"
+
+    steps:
+    - name: Set up Windows
+      if: runner.os == 'Windows'
+      run: |-
+        # Enable disk performance counters
+        diskperf -y
+
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 2.7
+      if: inputs.test-py2
+      uses: actions/setup-python@v4
+      with:
+        python-version: "2.7"
+
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: "${{ inputs.python-version }}"
+
+    - name: Install ddev from local folder
+      if: inputs.repo == 'core'
+      run: |-
+        pip install ./datadog_checks_dev[cli]
+        pip install ./ddev
+
+    - name: Install ddev from PyPI
+      if: inputs.repo != 'core'
+      run: pip install ddev
+
+    - name: Configure ddev
+      run: |-
+        ddev config set repos.${{ inputs.repo }} .
+        ddev config set repo ${{ inputs.repo }}
+
+    - name: Prepare for testing
+      env: >-
+        ${{ fromJson(inputs.setup-env-vars || format(
+          '{{
+            "PYTHONUNBUFFERED": "1",
+            "DOCKER_USERNAME": "{0}",
+            "DOCKER_ACCESS_TOKEN": "{1}",
+            "ORACLE_DOCKER_USERNAME": "{2}",
+            "ORACLE_DOCKER_PASSWORD": "{3}",
+            "SINGLESTORE_LICENSE": "{4}"
+          }}',
+          secrets.DOCKER_USERNAME,
+          secrets.DOCKER_ACCESS_TOKEN,
+          secrets.ORACLE_DOCKER_USERNAME,
+          secrets.ORACLE_DOCKER_PASSWORD,
+          secrets.SINGLESTORE_LICENSE
+        ))}}
+      run: ddev ci setup ${{ inputs.target }}
+
+    - name: Set up trace capturing
+      if: inputs.repo == 'core'
+      run: |-
+        pipx install mitmproxy
+        mitmdump -p "${{ inputs.trace-agent-port }}" -w "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
+
+    - name: Run Unit & Integration tests
+      if: inputs.standard && !inputs.minimum-base-package
+      env:
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
+      run: ddev test --cov --junit ${{ inputs.target }}
+
+    - name: Run Unit & Integration tests with minimum version of base package
+      if: inputs.standard && inputs.minimum-base-package
+      run: ddev test --force-base-min --force-env-rebuild --junit ${{ inputs.target }}
+
+    - name: Run E2E tests with latest base package
+      if: inputs.standard && inputs.repo == 'core'
+      env:
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+      run: ddev env test --base --new-env --junit ${{ inputs.target }}
+
+    - name: Run E2E tests
+      if: inputs.standard && inputs.repo != 'core'
+      env:
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+      run: ddev env test --new-env --junit ${{ inputs.target }}
+
+    - name: Run benchmarks
+      if: inputs.benchmark
+      run: ddev test --bench --junit ${{ inputs.target }}
+
+    - name: Run tests and verify support for the latest version
+      if: inputs.latest
+      run: ddev test --latest --junit ${{ inputs.target }}
+
+    - name: Run E2E tests for the latest version
+      if: inputs.latest
+      env:
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
+      run: ddev env test --base --new-env --junit ${{ inputs.target }}:latest
+
+    - name: Save trace captures
+      if: inputs.repo == 'core'
+      run: |-
+        Stop-Process -Name "*mitmdump*"
+        cat "${{ env.TRACE_CAPTURE_LOG }}"
+      shell: "pwsh"
+
+    - name: Upload captured traces
+      if: inputs.repo == 'core' && always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: "${{ inputs.traces-artifact-name }}"
+        path: "${{ env.TRACE_CAPTURE_FILE }}"
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Test results for ${{ inputs.job-name }}
+        path: "${{ inputs.target }}/.junit/*.xml"
+
+    - name: Upload coverage data
+      if: inputs.standard && !github.event.repository.private
+      uses: codecov/codecov-action@v3
+      with:
+        files: "${{ inputs.target }}/coverage.xml"
+        flags: "${{ inputs.target }}"
