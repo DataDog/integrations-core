@@ -1,0 +1,48 @@
+name: PR test
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        required: true
+        type: string
+
+jobs:
+  compute-matrix:
+    uses: ./.github/workflows/compute-matrix.yml
+    with:
+      repo: "${{ inputs.repo }}"
+
+  run:
+    needs:
+    - compute-matrix
+    if: needs.compute-matrix.outputs.matrix != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
+
+    uses: ./.github/workflows/test-target.yml
+    with:
+      repo: "${{ inputs.repo }}"
+      os: "${{ matrix.os }}"
+      target: "${{ matrix.target }}"
+      target-name: "${{ matrix.name }}"
+
+      # Options
+      standard: true
+      test-py2: true
+      traces-artifact-name: "traces"
+      trace-agent-port: "8127"
+    secrets: inherit
+
+  submit-traces:
+    needs:
+    - run
+    if: inputs.repo == 'core' && always()
+
+    uses: ./.github/workflows/submit-traces.yml
+    with:
+      artifact-name: "traces"
+      agent-port: "8127"
+    secrets: inherit

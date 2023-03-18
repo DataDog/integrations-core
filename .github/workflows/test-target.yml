@@ -1,0 +1,168 @@
+name: Test target
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        required: true
+        type: string
+      os:
+        required: true
+        type: string
+      target:
+        required: true
+        type: string
+      target-name:
+        required: true
+        type: string
+
+      python-version:
+        required: false
+        default: "3.8"
+        type: string
+      standard:
+        required: false
+        default: false
+        type: boolean
+      benchmark:
+        required: false
+        default: false
+        type: boolean
+      latest:
+        required: false
+        default: false
+        type: boolean
+      minimum-base-package:
+        required: false
+        default: false
+        type: boolean
+      test-py2:
+        required: false
+        default: false
+        type: boolean
+      test-py3:
+        required: false
+        default: true
+        type: boolean
+      traces-artifact-name:
+        required: false
+        default: ""
+        type: string
+      trace-agent-port:
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  run:
+    name: "${{ inputs.target-name }}"
+    runs-on: "${{ inputs.os }}"
+
+    env:
+      FORCE_COLOR: "1"
+      SKIP_ENV_NAME: "${{ (inputs.test-py2 && inputs.test-py3) && '^$' || (inputs.test-py2 && !inputs.test-py3) && 'py3.*' || 'py2.*' }}"
+      TRACE_CAPTURE_FILE: "trace-capture-${{ inputs.target-name }}"
+      DD_TRACE_AGENT_PORT: "${{ inputs.trace-agent-port }}"
+      DD_ENV: "ci"
+      DD_SERVICE: "ddev-integrations-${{ inputs.repo }}"
+      DD_TAGS: "team:agent-integrations,platform:linux,check:${{ inputs.target }}"
+      DD_TRACE_ANALYTICS_ENABLED: "true"
+
+    steps:
+    - name: Set up Windows
+      if: runner.os == 'Windows'
+      run: |-
+        # https://github.com/actions/runner-images/issues/6561#issuecomment-1460061208
+        Set-MpPreference -DisableRealtimeMonitoring $true
+        # Enable disk performance counters
+        diskperf -y
+
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 2.7
+      if: inputs.test-py2
+      uses: actions/setup-python@v4
+      with:
+        python-version: "2.7"
+
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: "${{ inputs.python-version }}"
+
+    - name: Install ddev from local folder
+      if: inputs.repo == 'core'
+      run: |-
+        pip install ./datadog_checks_dev[cli]
+        pip install ./ddev
+
+    - name: Install ddev from PyPI
+      if: inputs.repo != 'core'
+      run: pip install ddev
+
+    - name: Configure ddev
+      run: |-
+        ddev config set repos.${{ inputs.repo }} .
+        ddev config set repo ${{ inputs.repo }}
+
+    - name: Prepare ${{ inputs.target }} for testing
+      env:
+        PYTHONUNBUFFERED: 1
+        DOCKER_USERNAME: "${{ secrets.DOCKER_USERNAME }}"
+        DOCKER_ACCESS_TOKEN: "${{ secrets.DOCKER_ACCESS_TOKEN }}"
+        ORACLE_DOCKER_USERNAME: "${{ secrets.ORACLE_DOCKER_USERNAME }}"
+        ORACLE_DOCKER_PASSWORD: "${{ secrets.ORACLE_DOCKER_PASSWORD }}"
+      run: ddev ci setup ${{ inputs.target }}
+
+    - name: Set up trace capturing
+      if: inputs.repo == 'core'
+      run: |-
+        pipx install mitmproxy
+        mitmdump -p "${{ inputs.trace-agent-port }}" -w "${{ env.TRACE_CAPTURE_FILE }}" &
+
+    - name: Run Unit & Integration tests
+      if: inputs.standard && !inputs.minimum-base-package
+      env:
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
+      run: ddev test --cov --junit ${{ inputs.target }}
+
+    - name: Run Unit & Integration tests with minimum version of base package
+      if: inputs.standard && inputs.minimum-base-package
+      run: ddev test --force-base-min --force-env-rebuild --junit ${{ inputs.target }}
+
+    - name: Run E2E tests with latest base package
+      if: inputs.standard && inputs.repo == 'core'
+      env:
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+      run: ddev env test --base --new-env --junit ${{ inputs.target }}
+
+    - name: Run E2E tests
+      if: inputs.standard && inputs.repo != 'core'
+      env:
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+      run: ddev env test --new-env --junit ${{ inputs.target }}
+
+    - name: Run benchmarks
+      if: inputs.benchmark
+      run: ddev test --bench --junit ${{ inputs.target }}
+
+    - name: Run tests and verify support for the latest version
+      if: inputs.latest
+      run: ddev test --latest --junit ${{ inputs.target }}
+
+    - name: Run E2E tests for the latest version
+      if: inputs.latest
+      env:
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
+      run: ddev env test --base --new-env --junit ${{ inputs.target }}:latest
+
+    - name: Save trace captures
+      if: inputs.repo == 'core'
+      run: ${{ runner.os == 'Windows' && 'Stop-Process -Name "mitmdump"' || 'kill -2 $(pgrep mitmdump)' }}
+
+    - uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: "${{ inputs.traces-artifact-name }}"
+        path: "${{ env.TRACE_CAPTURE_FILE }}"
