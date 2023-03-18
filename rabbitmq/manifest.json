@@ -49,12 +49,12 @@
       ]
     },
     "dashboards": {
-      "rabbitmq_openmetrics": "assets/dashboards/rabbitmq_openmetrics_dashboard.json",
-      "rabbitmq_management": "assets/dashboards/rabbitmq_management_dashboard.json"
+      "rabbitmq_screenboard": "assets/dashboards/rabbitmq_screenboard_dashboard.json",
+      "rabbitmq": "assets/dashboards/rabbitmq_dashboard.json"
     },
     "monitors": {
       "disk_usage": "assets/monitors/disk_usage.json",
-      "unacked_messages": "assets/monitors/unacked_messages.json"
+      "message_unacknowledge_rate_anomaly": "assets/monitors/message_unacknowledge_rate_anomaly.json"
     },
     "saved_views": {
       "pid_overview": "assets/saved_views/status_overview.json",
