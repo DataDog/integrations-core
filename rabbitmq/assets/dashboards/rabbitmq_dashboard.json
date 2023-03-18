@@ -1,1 +1,887 @@
-{"title":"RabbitMQ Overview (OpenMetrics Version)","description":"## RabbitMQ Integration\n\nThis dashboard provides an overview of your RabbitMQ (Prometheus plugin) environment. It monitors node status, provides information on message statuses, and gives you insight into various other observability measures of your RMQ setup. \n\n*Note:* If you are using the Management plugin version of RabbitMQ, please use the alternate dashboard.\n\nFor more information, please refer to:\n* [RabbitMQ Integration Doc](https://docs.datadoghq.com/integrations/rabbitmq/?tab=host)\n* [RabbitMQ Blog by Datadog](https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog/)","widgets":[{"id":539814910975430,"definition":{"title":"New group","banner_img":"/static/images/logos/rabbitmq_small.svg","show_title":false,"type":"group","layout_type":"ordered","widgets":[{"id":6507010436924774,"definition":{"type":"note","content":"**RabbitMQ**\n\nThis dashboard provides an overview of your RabbitMQ (Prometheus Plugin) environment. It monitors node status, provides information on message statuses, and gives you insight into various other observability measures of your RMQ setup.\n\n*Note:* If you are using the Management plugin version of RabbitMQ, please use the alternate dashboard.","background_color":"white","font_size":"14","text_align":"left","vertical_align":"top","show_tick":false,"tick_pos":"50%","tick_edge":"left","has_padding":true},"layout":{"x":0,"y":0,"width":3,"height":3}},{"id":7472223195597488,"definition":{"type":"note","content":"**Useful Links**\n\n* [Integration Docs](https://docs.datadoghq.com/integrations/rabbitmq/?tab=host)\n* [RabbitMQ Blog by Datadog](https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog/)\n* [RabbitMQ Documentation](https://www.rabbitmq.com/documentation.html)","background_color":"white","font_size":"16","text_align":"left","vertical_align":"top","show_tick":false,"tick_pos":"50%","tick_edge":"left","has_padding":true},"layout":{"x":3,"y":0,"width":3,"height":3}}]},"layout":{"x":0,"y":0,"width":6,"height":6}},{"id":16881410520542,"definition":{"title":"Overview","background_color":"vivid_orange","show_title":true,"type":"group","layout_type":"ordered","widgets":[{"id":7225439286749620,"definition":{"type":"note","content":"This section provides you with an overview of your system activity.  The monitor summary alerts you of nodes that are running out of disk space or seeing heightened rates of unacknowledged messages.","background_color":"orange","font_size":"14","text_align":"center","vertical_align":"center","show_tick":false,"tick_pos":"50%","tick_edge":"left","has_padding":true},"layout":{"x":0,"y":0,"width":6,"height":1}},{"id":6769103719704604,"definition":{"title":"RMQ Monitor Summary","type":"manage_status","display_format":"countsAndList","color_preference":"text","hide_zero_counts":true,"query":"rabbitmq - omv2","sort":"status,asc","count":50,"start":0,"summary_type":"monitors","show_priority":false,"show_last_triggered":false},"layout":{"x":0,"y":1,"width":6,"height":3}},{"id":7480415605728566,"definition":{"title":"OpenMetrics Status","title_size":"16","title_align":"left","time":{"live_span":"1d"},"type":"check_status","check":"rabbitmq.openmetrics.health","grouping":"cluster","group_by":[],"tags":[]},"layout":{"x":0,"y":4,"width":6,"height":1}}]},"layout":{"x":6,"y":0,"width":6,"height":6}},{"id":2463793046394002,"definition":{"title":"Node Status","background_color":"vivid_orange","show_title":true,"type":"group","layout_type":"ordered","widgets":[{"id":4274214467814750,"definition":{"type":"note","content":"This section is the most useful in monitoring your system on a regular basis. Understanding your active consumers, channels, node space and process/port rates allows you to gain a thorough understanding on the health and capacity of each RabbitMQ instance. ","background_color":"orange","font_size":"14","text_align":"center","vertical_align":"top","show_tick":false,"tick_pos":"50%","tick_edge":"left","has_padding":true},"layout":{"x":0,"y":0,"width":12,"height":1}},{"id":2355726191916836,"definition":{"title":"Queue Pipeline per Node","title_size":"16","title_align":"left","time":{"live_span":"1mo"},"requests":[{"response_format":"scalar","queries":[{"name":"query1","data_source":"metrics","query":"sum:rabbitmq.queues.created.count{*} by {rabbitmq_node}.as_count()","aggregator":"sum"},{"name":"query2","data_source":"metrics","query":"sum:rabbitmq.queues.deleted.count{*} by {rabbitmq_node}.as_count()","aggregator":"sum"},{"name":"query3","data_source":"metrics","query":"sum:rabbitmq.queues.declared.count{*} by {rabbitmq_node}.as_count()","aggregator":"sum"},{"name":"query4","data_source":"metrics","query":"sum:rabbitmq.queues{*} by {rabbitmq_node}","aggregator":"sum"}],"formulas":[{"formula":"query1 + query2 + query3 + query4"}],"style":{"palette":"datadog16"}}],"type":"sunburst","legend":{"type":"automatic"}},"layout":{"x":0,"y":1,"width":4,"height":4}},{"id":4718874940062770,"definition":{"title":"Node Memory Usage","title_size":"16","title_align":"left","type":"query_value","requests":[{"formulas":[{"formula":"query1"}],"response_format":"scalar","queries":[{"query":"avg:rabbitmq.process.resident_memory_bytes{$node_name}","data_source":"metrics","name":"query1","aggregator":"avg"}]}],"autoscale":true,"precision":2,"timeseries_background":{"type":"area"}},"layout":{"x":4,"y":1,"width":2,"height":2}},{"id":8557693890285346,"definition":{"title":"Open Connections","title_size":"16","title_align":"left","type":"query_value","requests":[{"formulas":[{"formula":"query1"}],"response_format":"scalar","queries":[{"query":"sum:rabbitmq.connections.opened.count{$node_name}.as_count()","data_source":"metrics","name":"query1","aggregator":"sum"}]}],"autoscale":true,"precision":2,"timeseries_background":{"type":"bars"}},"layout":{"x":6,"y":1,"width":2,"height":2}},{"id":4732168815117324,"definition":{"title":"Channels","title_size":"16","title_align":"left","type":"query_value","requests":[{"formulas":[{"formula":"query1"}],"response_format":"scalar","queries":[{"query":"sum:rabbitmq.channels{$node_name}","data_source":"metrics","name":"query1","aggregator":"last"}]}],"autoscale":true,"precision":2,"timeseries_background":{"type":"area","yaxis":{"include_zero":true}}},"layout":{"x":8,"y":1,"width":2,"height":2}},{"id":221038392704424,"definition":{"title":"Process Counts/Limit","title_size":"16","title_align":"left","type":"query_value","requests":[{"response_format":"scalar","queries":[{"name":"query1","data_source":"metrics","query":"avg:rabbitmq.erlang.vm.process_count{$node_name}","aggregator":"last"},{"name":"query2","data_source":"metrics","query":"avg:rabbitmq.erlang.vm.process_limit{$node_name}","aggregator":"last"}],"formulas":[{"formula":"100 * (query1 / query2)"}]}],"autoscale":true,"precision":2,"timeseries_background":{"type":"bars","yaxis":{}}},"layout":{"x":10,"y":1,"width":2,"height":2}},{"id":2483993073188470,"definition":{"title":"Node Memory Limit","title_size":"16","title_align":"left","type":"query_value","requests":[{"response_format":"scalar","queries":[{"name":"query1","data_source":"metrics","query":"sum:rabbitmq.resident_memory_limit_bytes{$node_name}","aggregator":"sum"}],"formulas":[{"formula":"query1"}]}],"autoscale":true,"precision":2,"timeseries_background":{"type":"bars"}},"layout":{"x":4,"y":3,"width":2,"height":2}},{"id":6542402629560044,"definition":{"title":"Closed Connections","title_size":"16","title_align":"left","type":"query_value","requests":[{"formulas":[{"formula":"query1"}],"response_format":"scalar","queries":[{"query":"sum:rabbitmq.connections.closed.count{$node_name}.as_count()","data_source":"metrics","name":"query1","aggregator":"sum"}]}],"autoscale":true,"precision":2,"timeseries_background":{"type":"bars"}},"layout":{"x":6,"y":3,"width":2,"height":2}},{"id":1985971358025204,"definition":{"title":"Consumers","title_size":"16","title_align":"left","type":"query_value","requests":[{"formulas":[{"formula":"query1"}],"response_format":"scalar","queries":[{"query":"avg:rabbitmq.global.consumers{$node_name}","data_source":"metrics","name":"query1","aggregator":"avg"}]}],"autoscale":true,"precision":2,"timeseries_background":{"type":"area"}},"layout":{"x":8,"y":3,"width":2,"height":2}},{"id":6931724594109592,"definition":{"title":"Port Counts/Limit ","title_size":"16","title_align":"left","type":"query_value","requests":[{"response_format":"scalar","queries":[{"name":"query1","data_source":"metrics","query":"avg:rabbitmq.erlang.vm.port_count{$node_name}","aggregator":"last"},{"name":"query2","data_source":"metrics","query":"avg:rabbitmq.erlang.vm.port_limit{$node_name}","aggregator":"last"}],"formulas":[{"formula":"100 * (query1 / query2)"}]}],"autoscale":true,"precision":2,"timeseries_background":{"type":"bars","yaxis":{}}},"layout":{"x":10,"y":3,"width":2,"height":2}}]},"layout":{"x":0,"y":6,"width":12,"height":6}},{"id":6211186481704640,"definition":{"title":"Messages Pipelines","background_color":"vivid_orange","show_title":true,"type":"group","layout_type":"ordered","widgets":[{"id":7327292918773178,"definition":{"type":"note","content":"This section shows messages at different stages of their journey. These message pipelines are filtered by the channel and queue levels in the time series graphs, and broken down to the node and connection levels in the pie charts. ","background_color":"orange","font_size":"14","text_align":"center","vertical_align":"top","show_tick":false,"tick_pos":"50%","tick_edge":"left","has_padding":true},"layout":{"x":0,"y":0,"width":12,"height":1}},{"id":5917152195322416,"definition":{"title":"Messages Pipeline - Queue","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"horizontal","legend_columns":["avg","min","max","value","sum"],"type":"timeseries","requests":[{"formulas":[{"alias":"Ready","formula":"query1"},{"alias":"Paged Out","formula":"query2"},{"alias":"Persistent","formula":"query3"},{"alias":"Published","formula":"query4"},{"alias":"Unack'ed","formula":"query5"}],"queries":[{"name":"query1","data_source":"metrics","query":"sum:rabbitmq.queue.messages.ready{$queue}"},{"name":"query2","data_source":"metrics","query":"sum:rabbitmq.queue.messages.paged_out{$queue}"},{"name":"query3","data_source":"metrics","query":"sum:rabbitmq.queue.messages.persistent{$queue}"},{"name":"query4","data_source":"metrics","query":"sum:rabbitmq.queue.messages.published.count{$queue}.as_count()"},{"name":"query5","data_source":"metrics","query":"sum:rabbitmq.queue.messages.unacked{$queue}"}],"response_format":"timeseries","style":{"palette":"dog_classic","line_type":"solid","line_width":"normal"},"display_type":"line"}]},"layout":{"x":0,"y":1,"width":8,"height":4}},{"id":8756701159297916,"definition":{"title":"Messages per queue and node","title_size":"16","title_align":"left","requests":[{"response_format":"scalar","formulas":[{"formula":"query1","limit":{"order":"desc"}}],"queries":[{"query":"sum:rabbitmq.queue.messages{*} by {rabbitmq_queue,rabbitmq_node}","data_source":"metrics","name":"query1","aggregator":"sum"}],"style":{"palette":"datadog16"}}],"type":"sunburst","legend":{"type":"automatic"}},"layout":{"x":8,"y":1,"width":4,"height":4}},{"id":7633664958974524,"definition":{"title":"Messages Pipeline - Channel","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"horizontal","legend_columns":["avg","min","max","value","sum"],"type":"timeseries","requests":[{"formulas":[{"alias":"Ack'ed","formula":"query1"},{"alias":"Delivered","formula":"query2"},{"alias":"Published","formula":"query3"},{"alias":"Unroutable Dropped","formula":"query4"},{"alias":"Unack'ed","formula":"query5"}],"queries":[{"name":"query1","data_source":"metrics","query":"sum:rabbitmq.channel.messages.delivered.ack.count{*}.as_count()"},{"name":"query2","data_source":"metrics","query":"sum:rabbitmq.channel.messages.delivered.count{*}.as_count()"},{"name":"query3","data_source":"metrics","query":"sum:rabbitmq.channel.messages.published.count{*}.as_count()"},{"name":"query4","data_source":"metrics","query":"sum:rabbitmq.channel.messages.unroutable.dropped.count{*}.as_count()"},{"name":"query5","data_source":"metrics","query":"sum:rabbitmq.channel.messages.unacked{*}"}],"response_format":"timeseries","style":{"palette":"dog_classic","line_type":"solid","line_width":"normal"},"display_type":"line"}]},"layout":{"x":0,"y":5,"width":8,"height":4}},{"id":2111728965745842,"definition":{"title":"Packets in a Connection","title_size":"16","title_align":"left","requests":[{"response_format":"scalar","formulas":[{"formula":"query1 + query2 + query3","limit":{"order":"desc"}}],"queries":[{"query":"sum:rabbitmq.connection.incoming_packets.count{$rabbitmq_conn_state}.as_count()","data_source":"metrics","name":"query1","aggregator":"sum"},{"query":"sum:rabbitmq.connection.outgoing_packets.count{$rabbitmq_conn_state}.as_count()","data_source":"metrics","name":"query2","aggregator":"sum"},{"query":"sum:rabbitmq.connection.pending_packets{$rabbitmq_conn_state}","data_source":"metrics","name":"query3","aggregator":"sum"}],"style":{"palette":"datadog16"}}],"type":"sunburst","legend":{"type":"automatic"}},"layout":{"x":8,"y":5,"width":4,"height":4}}]},"layout":{"x":0,"y":12,"width":12,"height":10,"is_column_break":true}},{"id":3412626217094282,"definition":{"title":"Logs","background_color":"vivid_orange","show_title":true,"type":"group","layout_type":"ordered","widgets":[{"id":218491216894336,"definition":{"type":"note","content":"When investigating logs, you can refer to the timeseries data to see the ratio of a certain log status to other expected statuses. In situations where you notice an increase in the ratio of error logs, you can refer to the log stream set up to filter erroneous RabbitMQ logs for your perusal.","background_color":"orange","font_size":"14","text_align":"center","vertical_align":"top","show_tick":false,"tick_pos":"50%","tick_edge":"left","has_padding":true},"layout":{"x":0,"y":0,"width":12,"height":1}},{"id":3257923575107055,"definition":{"title":"Count per Log Status","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"horizontal","legend_columns":["avg","min","max","value","sum"],"type":"timeseries","requests":[{"formulas":[{"formula":"a"}],"queries":[{"data_source":"logs","name":"a","search":{"query":"source:rabbitmq $node_name"},"indexes":["*"],"compute":{"aggregation":"count"},"group_by":[{"facet":"status","limit":50,"sort":{"aggregation":"count","order":"desc"},"should_exclude_missing":true}],"storage":"online_archives"}],"response_format":"timeseries","style":{"palette":"semantic","line_type":"solid","line_width":"normal"},"display_type":"bars"}]},"layout":{"x":0,"y":1,"width":8,"height":4}},{"id":4110452737953996,"definition":{"title":"Error Logs for RabbitMQ","title_size":"16","title_align":"left","requests":[{"response_format":"event_list","columns":[{"field":"status_line","width":"auto"},{"field":"timestamp","width":"auto"},{"field":"host","width":"auto"},{"field":"service","width":"auto"},{"field":"content","width":"compact"}],"query":{"data_source":"logs_stream","query_string":"source:rabbitmq status:error","indexes":[],"storage":"hot"}}],"type":"list_stream"},"layout":{"x":8,"y":1,"width":4,"height":4}}]},"layout":{"x":0,"y":22,"width":12,"height":6}}],"template_variables":[{"name":"cluster_permanent_id","prefix":"rabbitmq_cluster_permanent_id","available_values":[],"default":"*"},{"name":"node_name","prefix":"rabbitmq_node","available_values":[],"default":"*"},{"name":"rabbitmq_exchange","prefix":"rabbitmq_exchange","available_values":[],"default":"*"},{"name":"queue","prefix":"queue","available_values":[],"default":"*"},{"name":"rabbitmq_conn_state","prefix":"rabbitmq_conn_state","available_values":[],"default":"*"}],"layout_type":"ordered","notify_list":[],"reflow_type":"fixed","id":"tvp-ixr-7ua"}
+{
+    "title": "RabbitMQ Overview (OpenMetrics Version)",
+    "description": "## RabbitMQ Integration\n\nThis dashboard provides an overview of your RabbitMQ (Prometheus plugin) environment. It monitors node status, provides information on message statuses, and gives you insight into various other observability measures of your RMQ setup. \n\n*Note:* If you are using the Management plugin version of RabbitMQ, please use the alternate dashboard.\n\nFor more information, please refer to:\n* [RabbitMQ Integration Doc](https://docs.datadoghq.com/integrations/rabbitmq/?tab=host)\n* [RabbitMQ Blog by Datadog](https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog/)",
+    "widgets": [{
+        "id": 539814910975430,
+        "definition": {
+            "title": "New group",
+            "banner_img": "/static/images/logos/rabbitmq_small.svg",
+            "show_title": false,
+            "type": "group",
+            "layout_type": "ordered",
+            "widgets": [{
+                "id": 6507010436924774,
+                "definition": {
+                    "type": "note",
+                    "content": "**RabbitMQ**\n\nThis dashboard provides an overview of your RabbitMQ (Prometheus Plugin) environment. It monitors node status, provides information on message statuses, and gives you insight into various other observability measures of your RMQ setup.\n\n*Note:* If you are using the Management plugin version of RabbitMQ, please use the alternate dashboard.",
+                    "background_color": "white",
+                    "font_size": "14",
+                    "text_align": "left",
+                    "vertical_align": "top",
+                    "show_tick": false,
+                    "tick_pos": "50%",
+                    "tick_edge": "left",
+                    "has_padding": true
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 3,
+                    "height": 3
+                }
+            }, {
+                "id": 7472223195597488,
+                "definition": {
+                    "type": "note",
+                    "content": "**Useful Links**\n\n* [Integration Docs](https://docs.datadoghq.com/integrations/rabbitmq/?tab=host)\n* [RabbitMQ Blog by Datadog](https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog/)\n* [RabbitMQ Documentation](https://www.rabbitmq.com/documentation.html)",
+                    "background_color": "white",
+                    "font_size": "16",
+                    "text_align": "left",
+                    "vertical_align": "top",
+                    "show_tick": false,
+                    "tick_pos": "50%",
+                    "tick_edge": "left",
+                    "has_padding": true
+                },
+                "layout": {
+                    "x": 3,
+                    "y": 0,
+                    "width": 3,
+                    "height": 3
+                }
+            }]
+        },
+        "layout": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 6
+        }
+    }, {
+        "id": 16881410520542,
+        "definition": {
+            "title": "Overview",
+            "background_color": "vivid_orange",
+            "show_title": true,
+            "type": "group",
+            "layout_type": "ordered",
+            "widgets": [{
+                "id": 7225439286749620,
+                "definition": {
+                    "type": "note",
+                    "content": "This section provides you with an overview of your system activity.  The monitor summary alerts you of nodes that are running out of disk space or seeing heightened rates of unacknowledged messages.",
+                    "background_color": "orange",
+                    "font_size": "14",
+                    "text_align": "center",
+                    "vertical_align": "center",
+                    "show_tick": false,
+                    "tick_pos": "50%",
+                    "tick_edge": "left",
+                    "has_padding": true
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 6,
+                    "height": 1
+                }
+            }, {
+                "id": 6769103719704604,
+                "definition": {
+                    "title": "RMQ Monitor Summary",
+                    "type": "manage_status",
+                    "display_format": "countsAndList",
+                    "color_preference": "text",
+                    "hide_zero_counts": true,
+                    "query": "rabbitmq - omv2",
+                    "sort": "status,asc",
+                    "count": 50,
+                    "start": 0,
+                    "summary_type": "monitors",
+                    "show_priority": false,
+                    "show_last_triggered": false
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 1,
+                    "width": 6,
+                    "height": 3
+                }
+            }, {
+                "id": 7480415605728566,
+                "definition": {
+                    "title": "OpenMetrics Status",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "time": {
+                        "live_span": "1d"
+                    },
+                    "type": "check_status",
+                    "check": "rabbitmq.openmetrics.health",
+                    "grouping": "cluster",
+                    "group_by": [],
+                    "tags": []
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 4,
+                    "width": 6,
+                    "height": 1
+                }
+            }]
+        },
+        "layout": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 6
+        }
+    }, {
+        "id": 2463793046394002,
+        "definition": {
+            "title": "Node Status",
+            "background_color": "vivid_orange",
+            "show_title": true,
+            "type": "group",
+            "layout_type": "ordered",
+            "widgets": [{
+                "id": 4274214467814750,
+                "definition": {
+                    "type": "note",
+                    "content": "This section is the most useful in monitoring your system on a regular basis. Understanding your active consumers, channels, node space and process/port rates allows you to gain a thorough understanding on the health and capacity of each RabbitMQ instance. ",
+                    "background_color": "orange",
+                    "font_size": "14",
+                    "text_align": "center",
+                    "vertical_align": "top",
+                    "show_tick": false,
+                    "tick_pos": "50%",
+                    "tick_edge": "left",
+                    "has_padding": true
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 12,
+                    "height": 1
+                }
+            }, {
+                "id": 2355726191916836,
+                "definition": {
+                    "title": "Queue Pipeline per Node",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "time": {
+                        "live_span": "1mo"
+                    },
+                    "requests": [{
+                        "response_format": "scalar",
+                        "queries": [{
+                            "name": "query1",
+                            "data_source": "metrics",
+                            "query": "sum:rabbitmq.queues.created.count{*} by {rabbitmq_node}.as_count()",
+                            "aggregator": "sum"
+                        }, {
+                            "name": "query2",
+                            "data_source": "metrics",
+                            "query": "sum:rabbitmq.queues.deleted.count{*} by {rabbitmq_node}.as_count()",
+                            "aggregator": "sum"
+                        }, {
+                            "name": "query3",
+                            "data_source": "metrics",
+                            "query": "sum:rabbitmq.queues.declared.count{*} by {rabbitmq_node}.as_count()",
+                            "aggregator": "sum"
+                        }, {
+                            "name": "query4",
+                            "data_source": "metrics",
+                            "query": "sum:rabbitmq.queues{*} by {rabbitmq_node}",
+                            "aggregator": "sum"
+                        }],
+                        "formulas": [{
+                            "formula": "query1 + query2 + query3 + query4"
+                        }],
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }],
+                    "type": "sunburst",
+                    "legend": {
+                        "type": "automatic"
+                    }
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 1,
+                    "width": 4,
+                    "height": 4
+                }
+            }, {
+                "id": 4718874940062770,
+                "definition": {
+                    "title": "Node Memory Usage",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "type": "query_value",
+                    "requests": [{
+                        "formulas": [{
+                            "formula": "query1"
+                        }],
+                        "response_format": "scalar",
+                        "queries": [{
+                            "query": "avg:rabbitmq.process.resident_memory_bytes{$node_name}",
+                            "data_source": "metrics",
+                            "name": "query1",
+                            "aggregator": "avg"
+                        }]
+                    }],
+                    "autoscale": true,
+                    "precision": 2,
+                    "timeseries_background": {
+                        "type": "area"
+                    }
+                },
+                "layout": {
+                    "x": 4,
+                    "y": 1,
+                    "width": 2,
+                    "height": 2
+                }
+            }, {
+                "id": 8557693890285346,
+                "definition": {
+                    "title": "Open Connections",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "type": "query_value",
+                    "requests": [{
+                        "formulas": [{
+                            "formula": "query1"
+                        }],
+                        "response_format": "scalar",
+                        "queries": [{
+                            "query": "sum:rabbitmq.connections.opened.count{$node_name}.as_count()",
+                            "data_source": "metrics",
+                            "name": "query1",
+                            "aggregator": "sum"
+                        }]
+                    }],
+                    "autoscale": true,
+                    "precision": 2,
+                    "timeseries_background": {
+                        "type": "bars"
+                    }
+                },
+                "layout": {
+                    "x": 6,
+                    "y": 1,
+                    "width": 2,
+                    "height": 2
+                }
+            }, {
+                "id": 4732168815117324,
+                "definition": {
+                    "title": "Channels",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "type": "query_value",
+                    "requests": [{
+                        "formulas": [{
+                            "formula": "query1"
+                        }],
+                        "response_format": "scalar",
+                        "queries": [{
+                            "query": "sum:rabbitmq.channels{$node_name}",
+                            "data_source": "metrics",
+                            "name": "query1",
+                            "aggregator": "last"
+                        }]
+                    }],
+                    "autoscale": true,
+                    "precision": 2,
+                    "timeseries_background": {
+                        "type": "area",
+                        "yaxis": {
+                            "include_zero": true
+                        }
+                    }
+                },
+                "layout": {
+                    "x": 8,
+                    "y": 1,
+                    "width": 2,
+                    "height": 2
+                }
+            }, {
+                "id": 221038392704424,
+                "definition": {
+                    "title": "Process Counts/Limit",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "type": "query_value",
+                    "requests": [{
+                        "response_format": "scalar",
+                        "queries": [{
+                            "name": "query1",
+                            "data_source": "metrics",
+                            "query": "avg:rabbitmq.erlang.vm.process_count{$node_name}",
+                            "aggregator": "last"
+                        }, {
+                            "name": "query2",
+                            "data_source": "metrics",
+                            "query": "avg:rabbitmq.erlang.vm.process_limit{$node_name}",
+                            "aggregator": "last"
+                        }],
+                        "formulas": [{
+                            "formula": "100 * (query1 / query2)"
+                        }]
+                    }],
+                    "autoscale": true,
+                    "precision": 2,
+                    "timeseries_background": {
+                        "type": "bars",
+                        "yaxis": {}
+                    }
+                },
+                "layout": {
+                    "x": 10,
+                    "y": 1,
+                    "width": 2,
+                    "height": 2
+                }
+            }, {
+                "id": 2483993073188470,
+                "definition": {
+                    "title": "Node Memory Limit",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "type": "query_value",
+                    "requests": [{
+                        "response_format": "scalar",
+                        "queries": [{
+                            "name": "query1",
+                            "data_source": "metrics",
+                            "query": "sum:rabbitmq.resident_memory_limit_bytes{$node_name}",
+                            "aggregator": "sum"
+                        }],
+                        "formulas": [{
+                            "formula": "query1"
+                        }]
+                    }],
+                    "autoscale": true,
+                    "precision": 2,
+                    "timeseries_background": {
+                        "type": "bars"
+                    }
+                },
+                "layout": {
+                    "x": 4,
+                    "y": 3,
+                    "width": 2,
+                    "height": 2
+                }
+            }, {
+                "id": 6542402629560044,
+                "definition": {
+                    "title": "Closed Connections",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "type": "query_value",
+                    "requests": [{
+                        "formulas": [{
+                            "formula": "query1"
+                        }],
+                        "response_format": "scalar",
+                        "queries": [{
+                            "query": "sum:rabbitmq.connections.closed.count{$node_name}.as_count()",
+                            "data_source": "metrics",
+                            "name": "query1",
+                            "aggregator": "sum"
+                        }]
+                    }],
+                    "autoscale": true,
+                    "precision": 2,
+                    "timeseries_background": {
+                        "type": "bars"
+                    }
+                },
+                "layout": {
+                    "x": 6,
+                    "y": 3,
+                    "width": 2,
+                    "height": 2
+                }
+            }, {
+                "id": 1985971358025204,
+                "definition": {
+                    "title": "Consumers",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "type": "query_value",
+                    "requests": [{
+                        "formulas": [{
+                            "formula": "query1"
+                        }],
+                        "response_format": "scalar",
+                        "queries": [{
+                            "query": "avg:rabbitmq.global.consumers{$node_name}",
+                            "data_source": "metrics",
+                            "name": "query1",
+                            "aggregator": "avg"
+                        }]
+                    }],
+                    "autoscale": true,
+                    "precision": 2,
+                    "timeseries_background": {
+                        "type": "area"
+                    }
+                },
+                "layout": {
+                    "x": 8,
+                    "y": 3,
+                    "width": 2,
+                    "height": 2
+                }
+            }, {
+                "id": 6931724594109592,
+                "definition": {
+                    "title": "Port Counts/Limit ",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "type": "query_value",
+                    "requests": [{
+                        "response_format": "scalar",
+                        "queries": [{
+                            "name": "query1",
+                            "data_source": "metrics",
+                            "query": "avg:rabbitmq.erlang.vm.port_count{$node_name}",
+                            "aggregator": "last"
+                        }, {
+                            "name": "query2",
+                            "data_source": "metrics",
+                            "query": "avg:rabbitmq.erlang.vm.port_limit{$node_name}",
+                            "aggregator": "last"
+                        }],
+                        "formulas": [{
+                            "formula": "100 * (query1 / query2)"
+                        }]
+                    }],
+                    "autoscale": true,
+                    "precision": 2,
+                    "timeseries_background": {
+                        "type": "bars",
+                        "yaxis": {}
+                    }
+                },
+                "layout": {
+                    "x": 10,
+                    "y": 3,
+                    "width": 2,
+                    "height": 2
+                }
+            }]
+        },
+        "layout": {
+            "x": 0,
+            "y": 6,
+            "width": 12,
+            "height": 6
+        }
+    }, {
+        "id": 6211186481704640,
+        "definition": {
+            "title": "Messages Pipelines",
+            "background_color": "vivid_orange",
+            "show_title": true,
+            "type": "group",
+            "layout_type": "ordered",
+            "widgets": [{
+                "id": 7327292918773178,
+                "definition": {
+                    "type": "note",
+                    "content": "This section shows messages at different stages of their journey. These message pipelines are filtered by the channel and queue levels in the time series graphs, and broken down to the node and connection levels in the pie charts. ",
+                    "background_color": "orange",
+                    "font_size": "14",
+                    "text_align": "center",
+                    "vertical_align": "top",
+                    "show_tick": false,
+                    "tick_pos": "50%",
+                    "tick_edge": "left",
+                    "has_padding": true
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 12,
+                    "height": 1
+                }
+            }, {
+                "id": 5917152195322416,
+                "definition": {
+                    "title": "Messages Pipeline - Queue",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "show_legend": true,
+                    "legend_layout": "horizontal",
+                    "legend_columns": ["avg", "min", "max", "value", "sum"],
+                    "type": "timeseries",
+                    "requests": [{
+                        "formulas": [{
+                            "alias": "Ready",
+                            "formula": "query1"
+                        }, {
+                            "alias": "Paged Out",
+                            "formula": "query2"
+                        }, {
+                            "alias": "Persistent",
+                            "formula": "query3"
+                        }, {
+                            "alias": "Published",
+                            "formula": "query4"
+                        }, {
+                            "alias": "Unack'ed",
+                            "formula": "query5"
+                        }],
+                        "queries": [{
+                            "name": "query1",
+                            "data_source": "metrics",
+                            "query": "sum:rabbitmq.queue.messages.ready{$queue}"
+                        }, {
+                            "name": "query2",
+                            "data_source": "metrics",
+                            "query": "sum:rabbitmq.queue.messages.paged_out{$queue}"
+                        }, {
+                            "name": "query3",
+                            "data_source": "metrics",
+                            "query": "sum:rabbitmq.queue.messages.persistent{$queue}"
+                        }, {
+                            "name": "query4",
+                            "data_source": "metrics",
+                            "query": "sum:rabbitmq.queue.messages.published.count{$queue}.as_count()"
+                        }, {
+                            "name": "query5",
+                            "data_source": "metrics",
+                            "query": "sum:rabbitmq.queue.messages.unacked{$queue}"
+                        }],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }]
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 1,
+                    "width": 8,
+                    "height": 4
+                }
+            }, {
+                "id": 8756701159297916,
+                "definition": {
+                    "title": "Messages per queue and node",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "requests": [{
+                        "response_format": "scalar",
+                        "formulas": [{
+                            "formula": "query1",
+                            "limit": {
+                                "order": "desc"
+                            }
+                        }],
+                        "queries": [{
+                            "query": "sum:rabbitmq.queue.messages{*} by {rabbitmq_queue,rabbitmq_node}",
+                            "data_source": "metrics",
+                            "name": "query1",
+                            "aggregator": "sum"
+                        }],
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }],
+                    "type": "sunburst",
+                    "legend": {
+                        "type": "automatic"
+                    }
+                },
+                "layout": {
+                    "x": 8,
+                    "y": 1,
+                    "width": 4,
+                    "height": 4
+                }
+            }, {
+                "id": 7633664958974524,
+                "definition": {
+                    "title": "Messages Pipeline - Channel",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "show_legend": true,
+                    "legend_layout": "horizontal",
+                    "legend_columns": ["avg", "min", "max", "value", "sum"],
+                    "type": "timeseries",
+                    "requests": [{
+                        "formulas": [{
+                            "alias": "Ack'ed",
+                            "formula": "query1"
+                        }, {
+                            "alias": "Delivered",
+                            "formula": "query2"
+                        }, {
+                            "alias": "Published",
+                            "formula": "query3"
+                        }, {
+                            "alias": "Unroutable Dropped",
+                            "formula": "query4"
+                        }, {
+                            "alias": "Unack'ed",
+                            "formula": "query5"
+                        }],
+                        "queries": [{
+                            "name": "query1",
+                            "data_source": "metrics",
+                            "query": "sum:rabbitmq.channel.messages.delivered.ack.count{*}.as_count()"
+                        }, {
+                            "name": "query2",
+                            "data_source": "metrics",
+                            "query": "sum:rabbitmq.channel.messages.delivered.count{*}.as_count()"
+                        }, {
+                            "name": "query3",
+                            "data_source": "metrics",
+                            "query": "sum:rabbitmq.channel.messages.published.count{*}.as_count()"
+                        }, {
+                            "name": "query4",
+                            "data_source": "metrics",
+                            "query": "sum:rabbitmq.channel.messages.unroutable.dropped.count{*}.as_count()"
+                        }, {
+                            "name": "query5",
+                            "data_source": "metrics",
+                            "query": "sum:rabbitmq.channel.messages.unacked{*}"
+                        }],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }]
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 5,
+                    "width": 8,
+                    "height": 4
+                }
+            }, {
+                "id": 2111728965745842,
+                "definition": {
+                    "title": "Packets in a Connection",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "requests": [{
+                        "response_format": "scalar",
+                        "formulas": [{
+                            "formula": "query1 + query2 + query3",
+                            "limit": {
+                                "order": "desc"
+                            }
+                        }],
+                        "queries": [{
+                            "query": "sum:rabbitmq.connection.incoming_packets.count{$rabbitmq_conn_state}.as_count()",
+                            "data_source": "metrics",
+                            "name": "query1",
+                            "aggregator": "sum"
+                        }, {
+                            "query": "sum:rabbitmq.connection.outgoing_packets.count{$rabbitmq_conn_state}.as_count()",
+                            "data_source": "metrics",
+                            "name": "query2",
+                            "aggregator": "sum"
+                        }, {
+                            "query": "sum:rabbitmq.connection.pending_packets{$rabbitmq_conn_state}",
+                            "data_source": "metrics",
+                            "name": "query3",
+                            "aggregator": "sum"
+                        }],
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }],
+                    "type": "sunburst",
+                    "legend": {
+                        "type": "automatic"
+                    }
+                },
+                "layout": {
+                    "x": 8,
+                    "y": 5,
+                    "width": 4,
+                    "height": 4
+                }
+            }]
+        },
+        "layout": {
+            "x": 0,
+            "y": 12,
+            "width": 12,
+            "height": 10,
+            "is_column_break": true
+        }
+    }, {
+        "id": 3412626217094282,
+        "definition": {
+            "title": "Logs",
+            "background_color": "vivid_orange",
+            "show_title": true,
+            "type": "group",
+            "layout_type": "ordered",
+            "widgets": [{
+                "id": 218491216894336,
+                "definition": {
+                    "type": "note",
+                    "content": "When investigating logs, you can refer to the timeseries data to see the ratio of a certain log status to other expected statuses. In situations where you notice an increase in the ratio of error logs, you can refer to the log stream set up to filter erroneous RabbitMQ logs for your perusal.",
+                    "background_color": "orange",
+                    "font_size": "14",
+                    "text_align": "center",
+                    "vertical_align": "top",
+                    "show_tick": false,
+                    "tick_pos": "50%",
+                    "tick_edge": "left",
+                    "has_padding": true
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 12,
+                    "height": 1
+                }
+            }, {
+                "id": 3257923575107055,
+                "definition": {
+                    "title": "Count per Log Status",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "show_legend": true,
+                    "legend_layout": "horizontal",
+                    "legend_columns": ["avg", "min", "max", "value", "sum"],
+                    "type": "timeseries",
+                    "requests": [{
+                        "formulas": [{
+                            "formula": "a"
+                        }],
+                        "queries": [{
+                            "data_source": "logs",
+                            "name": "a",
+                            "search": {
+                                "query": "source:rabbitmq $node_name"
+                            },
+                            "indexes": ["*"],
+                            "compute": {
+                                "aggregation": "count"
+                            },
+                            "group_by": [{
+                                "facet": "status",
+                                "limit": 50,
+                                "sort": {
+                                    "aggregation": "count",
+                                    "order": "desc"
+                                },
+                                "should_exclude_missing": true
+                            }],
+                            "storage": "online_archives"
+                        }],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "semantic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "bars"
+                    }]
+                },
+                "layout": {
+                    "x": 0,
+                    "y": 1,
+                    "width": 8,
+                    "height": 4
+                }
+            }, {
+                "id": 4110452737953996,
+                "definition": {
+                    "title": "Error Logs for RabbitMQ",
+                    "title_size": "16",
+                    "title_align": "left",
+                    "requests": [{
+                        "response_format": "event_list",
+                        "columns": [{
+                            "field": "status_line",
+                            "width": "auto"
+                        }, {
+                            "field": "timestamp",
+                            "width": "auto"
+                        }, {
+                            "field": "host",
+                            "width": "auto"
+                        }, {
+                            "field": "service",
+                            "width": "auto"
+                        }, {
+                            "field": "content",
+                            "width": "compact"
+                        }],
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:rabbitmq status:error",
+                            "indexes": [],
+                            "storage": "hot"
+                        }
+                    }],
+                    "type": "list_stream"
+                },
+                "layout": {
+                    "x": 8,
+                    "y": 1,
+                    "width": 4,
+                    "height": 4
+                }
+            }]
+        },
+        "layout": {
+            "x": 0,
+            "y": 22,
+            "width": 12,
+            "height": 6
+        }
+    }],
+    "template_variables": [{
+        "name": "cluster_permanent_id",
+        "prefix": "rabbitmq_cluster_permanent_id",
+        "available_values": [],
+        "default": "*"
+    }, {
+        "name": "node_name",
+        "prefix": "rabbitmq_node",
+        "available_values": [],
+        "default": "*"
+    }, {
+        "name": "rabbitmq_exchange",
+        "prefix": "rabbitmq_exchange",
+        "available_values": [],
+        "default": "*"
+    }, {
+        "name": "queue",
+        "prefix": "queue",
+        "available_values": [],
+        "default": "*"
+    }, {
+        "name": "rabbitmq_conn_state",
+        "prefix": "rabbitmq_conn_state",
+        "available_values": [],
+        "default": "*"
+    }],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed",
+    "id": "tvp-ixr-7ua"
+}
