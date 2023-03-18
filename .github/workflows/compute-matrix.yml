@@ -1,0 +1,83 @@
+name: Compute matrix
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        required: true
+        type: string
+    outputs:
+      matrix:
+        value: ${{ jobs.compute.outputs.data }}
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PYTHON_VERSION: "3.11"
+  MATRIX_SCRIPT: "ddev/src/ddev/utils/scripts/ci_matrix.py"
+
+jobs:
+  compute:
+    name: Compute matrix
+    runs-on: ubuntu-22.04
+    outputs:
+      data: "${{ steps.compute.outputs.data }}"
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: "${{ github.event.pull_request.head.sha }}"
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: "${{ env.PYTHON_VERSION }}"
+
+    - name: Fetch merge base commits
+      env:
+        GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      # Generic version of the following:
+      # https://gist.github.com/bnb/9de89a07278e9f57cd058a535ab89a9b?permalink_comment_id=4417593#gistcomment-4417593
+      run: |-
+        # Fetch commits to a depth so that head and base reach their merge base.
+        comparison=$(gh api\
+          repos/${{ github.repository }}/compare/${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }})
+        behind_by=$(echo -E $comparison | jq -r '.behind_by')
+        ahead_by=$(echo -E $comparison | jq -r '.ahead_by')
+        echo "ahead_by: $ahead_by; behind by: $behind_by"
+        # +1 because fetch depth=1 is the commit itself.
+        if [[ $behind_by -gt 0 ]]; then
+          base_depth=$((behind_by+1))
+          echo Fetching base to depth $base_depth
+          git -c protocol.version=2 fetch --no-tags --no-recurse-submodules\
+            --depth=$base_depth origin ${{ github.event.pull_request.base.sha }}
+        fi
+        if [[ $ahead_by -gt 0 ]]; then
+          head_depth=$((ahead_by+1))
+          echo Fetching head to depth $head_depth
+          git -c protocol.version=2 fetch --no-tags --no-recurse-submodules\
+            --depth=$head_depth origin ${{ github.event.pull_request.head.sha }}
+        fi
+
+    - name: Fetch computation script
+      if: inputs.repo != 'core'
+      run: |-
+        mkdir -p $(dirname ${{ env.MATRIX_SCRIPT }})
+        curl -sLo ${{ env.MATRIX_SCRIPT }} https://raw.githubusercontent.com/DataDog/integrations-core/ofek/gha/${{ env.MATRIX_SCRIPT }}
+
+    - name: Compute
+      id: compute
+      run: |-
+        python ${{ env.MATRIX_SCRIPT }} -v --ref ${{ github.event.pull_request.base.sha }} >> /tmp/matrix.json
+        echo "data=$(cat /tmp/matrix.json)" >> "$GITHUB_OUTPUT"
+
+    - name: Show matrix
+      run: |-
+        import json
+        from pathlib import Path
+        from pprint import pprint
+
+        pprint(json.loads(Path('/tmp/matrix.json').read_text(encoding='utf-8')))
+      shell: python
