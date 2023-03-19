@@ -265,14 +265,14 @@ def check_duplicate_values(current_check, line, row, header_name, duplicates, fa
     return False
 
 
-@click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `metadata.csv` files')
+@click.command(context_settings=CONTEXT_SETTINGS)
 @click.option(
     '--check-duplicates', is_flag=True, help='Output warnings if there are duplicate short names and descriptions'
 )
 @click.option('--show-warnings', '-w', is_flag=True, help='Show warnings in addition to failures')
 @click.argument('check', shell_complete=complete_valid_checks, required=False)
 def metadata(check, check_duplicates, show_warnings):
-    """Validates metadata.csv files
+    """Validate metadata.csv files
 
     If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
     checks, an 'all' or empty `check` value will validate all README files.
