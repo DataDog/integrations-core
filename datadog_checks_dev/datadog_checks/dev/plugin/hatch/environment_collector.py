@@ -103,12 +103,13 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             'detached': True,
             'scripts': {
                 'style': [
+                    f'ruff --config {settings_dir}/pyproject.toml .',
                     f'flake8 --config={settings_dir}/.flake8 .',
                     f'black --config {settings_dir}/pyproject.toml --check --diff .',
-                    f'ruff --config {settings_dir}/pyproject.toml .',
                     f'isort --settings-path {settings_dir}/pyproject.toml --check-only --diff .',
                 ],
                 'fmt': [
+                    f'ruff --config {settings_dir}/pyproject.toml --fix .',
                     f'isort . --settings-path {settings_dir}/pyproject.toml',
                     f'black . --config {settings_dir}/pyproject.toml',
                     'python -c "print(\'\\n[NOTE] hello flake8 may still report style errors for things '
@@ -124,7 +125,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 'flake8-bugbear==22.9.11',
                 'flake8-logging-format==0.9.0',
                 'isort==5.11.4',
-                'ruff==0.0.242',
+                'ruff==0.0.257',
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
                 'pydantic==1.10.4',
             ],

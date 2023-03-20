@@ -77,56 +77,62 @@ exclude = [
 target-version = "py37"
 line-length = 120
 select = [
-  "ARG001",
-  #"ARG",
-  #"B",
-  #"C",
-  #"DTZ",
-  #"E",
-  #"EM",
-  #"F",
-  #"FBT",
-  #"I",
-  #"ICN",
-  #"ISC",
-  #"N",
-  #"PLC",
-  #"PLE",
-  #"PLR",
-  #"PLW",
-  #"Q",
-  #"RUF",
-  #"S",
-  #"T",
-  #"TID",
-  # pyupgrade (UP) is disabled due to PY2
-  # "UP",
-  #"W",
-  #"YTT",
+  "B",
+  "C",
+  "E",
+  "F",
+  "G",
+  "W",
+  "I",
+  "F821",
+  # "B001",  bare except
+  "B003",
+  "B006",
+  "B007",
+  # "B301",
+  # "B305",
+  # "B306",
+  # "B902",
 ]
 ignore = [
+  # From legacy flake8 settings
+  # "E203", 
+  "E722",
+  "E741",
+  # "W503", 
+  # "G200", 
+  "B015",
+  # Testing
+  "B904",
   # Allow non-abstract empty methods in abstract base classes
   "B027",
-  # Ignore complexity
-  "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
-  # Allow boolean positional values in function calls, like `dict.get(... True)`
-  "FBT003",
-  # Ignore checks for possible passwords
-  "S105", "S106", "S107",
-  # Ignore single versus double quotes
-  "Q000",
-  # Ignore because these because of PY2 limitations
-  "RUF005",
+  # # Ignore McCabe complexity
+  "C901",
+  # # Allow boolean positional values in function calls, like `dict.get(... True)`
+  # "FBT003",
+  # # Ignore checks for possible passwords
+  # "S105", "S106", "S107",
+  # # Ignore single versus double quotes
+  # "Q000"
 ]
 unfixable = [
   # Don't touch unused imports
   "F401",
 ]
+
 [tool.ruff.isort]
 known-first-party = ["{template_config['package_name']}"]
+
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
+
 [tool.ruff.per-file-ignores]
 # Tests can use assertions and relative imports
 "**/tests/**/*" = ["S101", "TID252"]
-#"**/config_models/defaults.py" = ["ARG001"]
+"datadog_checks/*/config_models/deprecations.py" = ["E501"]
+"tests/models/config_models/deprecations.py" = ["E501"]
+# B902 not yet implemented in Ruff
+# "datadog_checks/*/config_models/instance.py" = ["B902"]
+# "datadog_checks/*/config_models/shared.py" = ["B902"]
+# "tests/models/config_models/instance.py" = ["B902"]
+# "tests/models/config_models/shared.py" = ["B902"]

@@ -24,7 +24,7 @@ BLACK_DEP = 'black==22.12.0'
 FLAKE8_DEP = 'flake8==5.0.4'
 FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==22.9.11'
 FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.9.0'
-RUFF_DEP = 'ruff==0.0.242'
+RUFF_DEP = 'ruff==0.0.257'
 # TODO: remove extra when we drop Python 2
 MYPY_DEP = 'mypy[python2]==0.910'
 # TODO: when we drop Python 2 and replace with --install-types --non-interactive
@@ -152,10 +152,10 @@ def add_style_checker(config, sections, make_envconfig, reader):
     ] + TYPES_DEPS
 
     commands = [
+        'ruff --config ../pyproject.toml .',
         'flake8 --config=../.flake8 .',
         'black --config ../pyproject.toml --check --diff .',
         'isort --settings-path ../pyproject.toml --check-only --diff .',
-        'ruff --config ../pyproject.toml .',
     ]
 
     if sections['testenv'].get(TYPES_FLAG, 'false').lower() == 'true':
@@ -213,12 +213,12 @@ def add_style_formatter(config, sections, make_envconfig, reader):
         # Run formatter AFTER sorting imports
         'commands': '\n'.join(
             [
+                'ruff . --config ../pyproject.toml'
                 'isort . --settings-path ../pyproject.toml ',
                 'black . --config ../pyproject.toml',
                 'python -c "print(\'\\n[NOTE] flake8 may still report style errors for things black cannot fix, '
                 'these will need to be fixed manually.\')"',
                 'flake8 --config=../.flake8 .',
-                'ruff . --config ../pyproject.toml'
             ]
         ),
     }
