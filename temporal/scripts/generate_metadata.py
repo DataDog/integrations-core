@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2023-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 # Script to update metadata.csv based on temporal's code and current
 # `METRIC_MAP` as defined on metrics.py
 # Must be run in an environment that has the integration installed, e.g.:
