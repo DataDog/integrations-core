@@ -11,6 +11,7 @@ from requests.exceptions import HTTPError
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev import get_here
 from datadog_checks.openstack_controller import OpenStackControllerCheck
+from datadog_checks.openstack_controller.openstack_controller import LEGACY_NOVA_HYPERVISOR_METRICS
 
 pytestmark = [pytest.mark.unit]
 
@@ -431,9 +432,7 @@ def test_network_response_time(aggregator, dd_run_check):
 def test_network_quotas(aggregator, dd_run_check):
     with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
-    ) as one_project, open(
-        os.path.join(get_here(), 'fixtures/network/quotas.json'), 'r'
-    ) as quotas:
+    ) as one_project, open(os.path.join(get_here(), 'fixtures/network/quotas.json'), 'r') as quotas:
         one_project_content = json.load(one_project)
         quotas_content = json.load(quotas)
         api = mock.MagicMock()
@@ -525,3 +524,27 @@ def test_load_balancer_response_time(aggregator, dd_run_check):
         dd_run_check(check)
         aggregator.assert_metric('openstack.octavia.response_time', response_time)
         aggregator.assert_service_check('openstack.octavia.api.up', status=AgentCheck.OK)
+
+
+def test_report_legacy_metrics(aggregator, dd_run_check):
+    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+        os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
+    ) as one_project, open(
+        os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/hypervisors_detail.json'), 'r'
+    ) as hypervisors:
+        one_project_content = json.load(one_project)
+        hypervisors_content = json.load(hypervisors)
+        api = mock.MagicMock()
+        api.get_projects.return_value = one_project_content
+        api.get_compute_hypervisors_detail.return_value = hypervisors_content
+        mocked_api.return_value = api
+        instance = {
+            'keystone_server_url': 'http://10.164.0.83/identity',
+            'user_name': 'admin',
+            'user_password': 'password',
+            'report_legacy_metrics': True,
+        }
+        check = OpenStackControllerCheck('test', {}, [instance])
+        dd_run_check(check)
+        for metric in LEGACY_NOVA_HYPERVISOR_METRICS:
+            aggregator.assert_metric('openstack.nova.{}'.format(metric))

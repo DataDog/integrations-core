@@ -7,15 +7,29 @@ from requests.exceptions import HTTPError
 from datadog_checks.base import AgentCheck
 from datadog_checks.openstack_controller.api.factory import make_api
 
+LEGACY_NOVA_HYPERVISOR_METRICS = [
+    'current_workload',
+    'disk_available_least',
+    'free_disk_gb',
+    'free_ram_mb',
+    'local_gb',
+    'local_gb_used',
+    'memory_mb',
+    'memory_mb_used',
+    'running_vms',
+    'vcpus',
+    'vcpus_used',
+]
+
 
 class OpenStackControllerCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(OpenStackControllerCheck, self).__init__(name, init_config, instances)
 
-    def check(self, instance):
-        self.log.debug(instance)
+    def check(self, _instance):
+        self.log.debug(self.instance)
         try:
-            api = make_api(self.log, instance, self.http)
+            api = make_api(self.log, self.instance, self.http)
             api.create_connection()
             # Artificial metric introduced to distinguish between old and new openstack integrations
             self.gauge("openstack.controller", 1)
@@ -51,6 +65,8 @@ class OpenStackControllerCheck(AgentCheck):
         self._report_network_metrics(api, project)
         self._report_baremetal_metrics(api, project)
         self._report_load_balancer_metrics(api, project)
+        if self.instance.get('report_legacy_metrics', True):
+            self._report_legacy_metrics(api, project)
 
     def _report_compute_metrics(self, api, project):
         tags = [f"project_id:{project['id']}", f"project_name:{project['name']}"]
@@ -131,3 +147,22 @@ class OpenStackControllerCheck(AgentCheck):
             self.gauge('openstack.octavia.response_time', response_time, tags=tags)
         else:
             self.service_check('openstack.octavia.api.up', AgentCheck.CRITICAL)
+
+    def _report_legacy_metrics(self, api, project):
+        tags = [f"project_name:{project['name']}"]
+        compute_hypervisors_detail = api.get_compute_hypervisors_detail(project)
+        self.log.debug("compute_hypervisors_detail: %s", compute_hypervisors_detail)
+        for hypervisor_id, hypervisor_data in compute_hypervisors_detail.items():
+            for metric, value in hypervisor_data['metrics'].items():
+                if metric in LEGACY_NOVA_HYPERVISOR_METRICS:
+                    self.gauge(
+                        f'openstack.nova.{metric}',
+                        value,
+                        tags=tags
+                        + [
+                            f'hypervisor_id:{hypervisor_id}',
+                            f'hypervisor:{hypervisor_data["name"]}',
+                            f'virt_type:{hypervisor_data["type"]}',
+                            f'status:{hypervisor_data["status"]}',
+                        ],
+                    )

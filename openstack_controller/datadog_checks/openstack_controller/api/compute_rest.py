@@ -46,7 +46,9 @@ class ComputeRest:
                 server_metrics[server['id']] = {
                     'name': server['name'],
                     'metrics': {
-                        re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_"): value
+                        re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key)
+                        .lower()
+                        .replace("-", "_"): value
                         for key, value in response.json().items()
                         if isinstance(value, (int, float)) and not isinstance(value, bool)
                     },
@@ -79,6 +81,8 @@ class ComputeRest:
         for hypervisor in response.json()['hypervisors']:
             hypervisors_detail_metrics[str(hypervisor['id'])] = {
                 'name': hypervisor['hypervisor_hostname'],
+                'type': hypervisor['hypervisor_type'],
+                'status': hypervisor['status'],
                 'metrics': {
                     re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_"): value
                     for key, value in hypervisor.items()
