@@ -176,13 +176,15 @@ class Oracle(AgentCheck):
 
     def can_use_instant_client(self):
         if self._use_instant_client:
-            oracledb.init_oracle_client()
             try:
-                oracledb.clientversion()
+                oracledb.init_oracle_client()
             except oracledb.DatabaseError as e:
                 self.log.debug('Oracle Instant Client is unavailable: %s', str(e))
+                raise
             else:
-                self.log.debug('Running oracledb version %s', oracledb.version)
+                self.log.debug('Oracle Instant Client version %s', oracledb.clientversion())
+        else:
+            self.log.debug('Connecting to Oracle using the native client')
 
     def _oracle_connect(self):
         dsn = self._get_dsn()

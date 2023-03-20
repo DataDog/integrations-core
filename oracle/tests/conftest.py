@@ -49,14 +49,22 @@ E2E_METADATA_ORACLE_CLIENT = {
         '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_19_3/sqlnet.ora'.format(HERE),
         '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_19_3/tnsnames.ora'.format(HERE),
         '{}/docker/client/listener.ora:/opt/oracle/instantclient_19_3/listener.ora'.format(HERE),
+        '{}/docker/client/sqlnet.ora:/opt/oracle/instantclient_19_3/network/admin/sqlnet.ora'.format(HERE),
+        '{}/docker/client/tnsnames.ora:/opt/oracle/instantclient_19_3/network/admin/tnsnames.ora'.format(HERE),
+        '{}/docker/client/client_wallet/cwallet.sso:/opt/oracle/instantclient_19_3/network/admin/cwallet.sso'.format(
+            HERE
+        ),
     ],
     'start_commands': [
         'bash /tmp/install_jdbc_client.sh',
         'mkdir -p /usr/local/share/ca-certificates',
-        'touch /usr/local/share/ca-certificates/ca-cert.crt',
         'cp /opt/oracle/instantclient_19_3/client_wallet/cert.pem /usr/local/share/ca-certificates/ca-certificate.crt',
-        'update-ca-certificates',
+        'update-ca-certificates --verbose --fresh',
+        'cp /etc/ssl/certs/ce275665.0 /etc/ssl/ssl/certs/',
     ],
+    'env_vars': {
+        'LD_LIBRARY_PATH': '/opt/oracle/instantclient_19_3',
+    },
 }
 
 
@@ -109,6 +117,8 @@ def dd_environment():
         instance['jdbc_driver_path'] = '/opt/oracle/instantclient_19_3/ojdbc8.jar'
     else:
         e2e_metadata = E2E_METADATA_ORACLE_CLIENT
+        if CLIENT_LIB == 'oracle-instant-client':
+            instance['use_instant_client'] = True
 
     # Set additional config options for TCPS
     if ENABLE_TCPS:
