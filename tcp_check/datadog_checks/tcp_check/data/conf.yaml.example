@@ -28,6 +28,11 @@ instances:
     #
     port: <PORT>
 
+    ## @param scope_id - integer - optional
+    ## The `scope_id` of the network device that should handle the traffic.
+    #
+    # scope_id: <SCOPE_ID>
+
     ## @param timeout - integer - optional - default: 10
     ## Timeout of the TCP query in second.
     #
