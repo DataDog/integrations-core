@@ -33,6 +33,21 @@ def main():
 
     # Merge all the data
     metadata = []
+
+    def append_metric_metadata(metric_name, metric_type='count', unit_name=None):
+        qualified_metric_name = f'temporal.server.{metric_name}'
+        metric_meta = {k: '' for k in metadata_fields}
+        metric_meta['orientation'] = 0
+        metric_meta.update(previous_metadata.get(qualified_metric_name, {}))
+        metric_meta['integration'] = 'temporal'
+        metric_meta['metric_name'] = qualified_metric_name
+        metric_meta['metric_type'] = metric_type
+        metric_meta['short_name'] = metric_name.replace('.', ' ').replace('_', ' ')
+        # Only override unit_name explicitly
+        if unit_name is not None:
+            metric_meta['unit_name'] = unit_name
+        metadata.append(metric_meta)
+
     for temporal_name, name in METRIC_MAP.items():
         try:
             temporal_type = temporal_metric_types[temporal_name]
@@ -40,27 +55,17 @@ def main():
             print(f"WARNING: skipping metric `{temporal_name}/{name}` as it's not present in input data")
             continue
 
-        def append_metric_metadata(metric_name, metric_type='count', unit_name=None):
-            metric_meta = {k: '' for k in metadata_fields}
-            metric_meta['orientation'] = 0
-            metric_meta.update(previous_metadata.get(metric_name, {}))
-            metric_meta['integration'] = 'temporal'
-            metric_meta['metric_name'] = f'temporal.server.{metric_name}'
-            metric_meta['metric_type'] = metric_type
-            metric_meta['short_name'] = metric_name.replace('.', ' ').replace('_', ' ')
-            # Only override unit_name explicitly
-            if unit_name is not None:
-                metric_meta['unit_name'] = unit_name
-            metadata.append(metric_meta)
-
         if temporal_type == 'counter':
             append_metric_metadata(f'{name}.count')
         elif temporal_type == 'gauge':
             append_metric_metadata(name, 'gauge')
         elif temporal_type.endswith('histogram'):
+            unit_name = None
+            if temporal_type == 'byteshistogram':
+                unit_name = "byte"
             append_metric_metadata(f'{name}.bucket')
             append_metric_metadata(f'{name}.count')
-            append_metric_metadata(f'{name}.sum')
+            append_metric_metadata(f'{name}.sum', unit_name=unit_name)
         elif temporal_type == 'timer':
             append_metric_metadata(f'{name}.bucket')
             append_metric_metadata(f'{name}.count')
