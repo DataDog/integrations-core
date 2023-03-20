@@ -15,11 +15,13 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Configure your Temporal Cluster to expose metrics via a `prometheus` endpoint by following the [official temporal documentation][10].
+1. Configure your Temporal services to expose metrics via a `prometheus` endpoint by following the [official temporal documentation][10].
 
 2. Edit the `temporal.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your temporal performance data. 
 
-To get started, configure the `openmetrics_endpoint` configuration option following the `listenAddress` and `handlerPath` options based on your Temporal Cluster configuration.
+To get started, configure the `openmetrics_endpoint` option to match the `listenAddress` and `handlerPath` options from your Temporal server configuration.
+
+Note that when Temporal services in a cluster are deployed independently, every service exposes its own metrics and therefore you will have to configure the `prometheus` endpoint for every service that you want to monitor and define a separate `instance` on the integration's configuration for each of them.
 
 See the [sample temporal.d/conf.yaml][4] for all available configuration options.
 
