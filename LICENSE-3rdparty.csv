@@ -92,7 +92,7 @@ serpent,PyPI,MIT,Copyright (c) by Irmen de Jong
 service-identity,PyPI,MIT,Copyright (c) 2014 Hynek Schlawack
 simplejson,PyPI,MIT,Copyright (c) 2006 Bob Ippolito
 six,PyPI,MIT,Copyright (c) 2010-2020 Benjamin Peterson
-snowflake-connector-python,PyPI,Apache-2.0,"Copyright (c) 2013-2019 Snowflake Computing, Inc."
+snowflake-connector-python,PyPI,Apache-2.0,"Copyright (c) 2013-2023 Snowflake Computing, Inc."
 supervisor,PyPI,BSD-3-Clause-Modification,"Copyright (c) 2002-2005, Daniel Krech, http://eikeon.com/"
 tuf,PyPI,Apache-2.0,Copyright (c) 2010 New York University
 tuf,PyPI,MIT,Copyright (c) 2010 New York University
