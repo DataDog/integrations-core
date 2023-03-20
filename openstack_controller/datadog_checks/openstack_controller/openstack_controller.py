@@ -104,15 +104,29 @@ class OpenStackControllerCheck(AgentCheck):
             compute_hypervisors_detail = api.get_compute_hypervisors_detail(project)
             self.log.debug("compute_hypervisors_detail: %s", compute_hypervisors_detail)
             for hypervisor_id, hypervisor_data in compute_hypervisors_detail.items():
-                for metric, value in hypervisor_data['metrics'].items():
-                    self.gauge(
-                        f'openstack.nova.hypervisor.{metric}',
-                        value,
-                        tags=tags
-                        + [f'hypervisor_id:{hypervisor_id}', f'hypervisor_hostname:{hypervisor_data["name"]}'],
+                self._report_hypervisor_service_check(hypervisor_data.get('state'), hypervisor_data["name"])
+                if self.instance.get('collect_hypervisor_metrics', True):
+                    self._report_hypervisor_metrics(
+                        hypervisor_id, hypervisor_data["name"], hypervisor_data['metrics'], tags
                     )
         else:
             self.service_check('openstack.nova.api.up', AgentCheck.CRITICAL)
+
+    def _report_hypervisor_service_check(self, state, name):
+        if not state:
+            self.service_check('openstack.nova.hypervisor.up', AgentCheck.UNKNOWN, hostname=name)
+        elif state != "up":
+            self.service_check('openstack.nova.hypervisor.up', AgentCheck.CRITICAL, hostname=name)
+        else:
+            self.service_check('openstack.nova.hypervisor.up', AgentCheck.OK, hostname=name)
+
+    def _report_hypervisor_metrics(self, id, name, metrics, tags):
+        for metric, value in metrics.items():
+            self.gauge(
+                f'openstack.nova.hypervisor.{metric}',
+                value,
+                tags=tags + [f'hypervisor_id:{id}', f'hypervisor_hostname:{name}'],
+            )
 
     def _report_network_metrics(self, api, project):
         tags = [f"project_id:{project['id']}", f"project_name:{project['name']}"]
@@ -150,28 +164,20 @@ class OpenStackControllerCheck(AgentCheck):
 
     def _report_legacy_metrics(self, api, project):
         tags = [f"project_name:{project['name']}"]
-        compute_hypervisors_detail = api.get_compute_hypervisors_detail(project)
-        self.log.debug("compute_hypervisors_detail: %s", compute_hypervisors_detail)
-        for hypervisor_id, hypervisor_data in compute_hypervisors_detail.items():
-            state = hypervisor_data.get('state')
-            if not state:
-                self.service_check('openstack.nova.hypervisor.up', AgentCheck.UNKNOWN, hostname=hypervisor_data["name"])
-            elif state != "up":
-                self.service_check(
-                    'openstack.nova.hypervisor.up', AgentCheck.CRITICAL, hostname=hypervisor_data["name"]
-                )
-            else:
-                self.service_check('openstack.nova.hypervisor.up', AgentCheck.OK, hostname=hypervisor_data["name"])
-            for metric, value in hypervisor_data['metrics'].items():
-                if metric in LEGACY_NOVA_HYPERVISOR_METRICS:
-                    self.gauge(
-                        f'openstack.nova.{metric}',
-                        value,
-                        tags=tags
-                        + [
-                            f'hypervisor_id:{hypervisor_id}',
-                            f'hypervisor:{hypervisor_data["name"]}',
-                            f'virt_type:{hypervisor_data["type"]}',
-                            f'status:{hypervisor_data["status"]}',
-                        ],
-                    )
+        if self.instance.get('collect_hypervisor_metrics', True):
+            compute_hypervisors_detail = api.get_compute_hypervisors_detail(project)
+            self.log.debug("compute_hypervisors_detail: %s", compute_hypervisors_detail)
+            for hypervisor_id, hypervisor_data in compute_hypervisors_detail.items():
+                for metric, value in hypervisor_data['metrics'].items():
+                    if metric in LEGACY_NOVA_HYPERVISOR_METRICS:
+                        self.gauge(
+                            f'openstack.nova.{metric}',
+                            value,
+                            tags=tags
+                            + [
+                                f'hypervisor_id:{hypervisor_id}',
+                                f'hypervisor:{hypervisor_data["name"]}',
+                                f'virt_type:{hypervisor_data["type"]}',
+                                f'status:{hypervisor_data["status"]}',
+                            ],
+                        )
