@@ -47,8 +47,13 @@ class OpenStackControllerCheck(AgentCheck):
 
     def _report_project_metrics(self, api, project):
         self.log.debug("reporting metrics from project: [id:%s][name:%s]", project['id'], project['name'])
+        self._report_compute_metrics(api, project)
+        self._report_network_metrics(api, project)
+        self._report_baremetal_metrics(api, project)
+        self._report_load_balancer_metrics(api, project)
+
+    def _report_compute_metrics(self, api, project):
         tags = [f"project_id:{project['id']}", f"project_name:{project['name']}"]
-        # compute
         response_time = api.get_compute_response_time(project)
         if response_time:
             self.service_check('openstack.nova.api.up', AgentCheck.OK)
@@ -92,7 +97,9 @@ class OpenStackControllerCheck(AgentCheck):
                     )
         else:
             self.service_check('openstack.nova.api.up', AgentCheck.CRITICAL)
-        # network
+
+    def _report_network_metrics(self, api, project):
+        tags = [f"project_id:{project['id']}", f"project_name:{project['name']}"]
         response_time = api.get_network_response_time(project)
         if response_time:
             self.service_check('openstack.neutron.api.up', AgentCheck.OK)
@@ -104,7 +111,9 @@ class OpenStackControllerCheck(AgentCheck):
                 self.gauge(f'openstack.neutron.quotas.{metric}', value, tags=tags)
         else:
             self.service_check('openstack.neutron.api.up', AgentCheck.CRITICAL)
-        # baremetal
+
+    def _report_baremetal_metrics(self, api, project):
+        tags = [f"project_id:{project['id']}", f"project_name:{project['name']}"]
         response_time = api.get_baremetal_response_time(project)
         if response_time:
             self.service_check('openstack.ironic.api.up', AgentCheck.OK)
@@ -112,7 +121,9 @@ class OpenStackControllerCheck(AgentCheck):
             self.gauge('openstack.ironic.response_time', response_time, tags=tags)
         else:
             self.service_check('openstack.ironic.api.up', AgentCheck.CRITICAL)
-        # load-balancer
+
+    def _report_load_balancer_metrics(self, api, project):
+        tags = [f"project_id:{project['id']}", f"project_name:{project['name']}"]
         response_time = api.get_load_balancer_response_time(project)
         if response_time:
             self.service_check('openstack.octavia.api.up', AgentCheck.OK)
