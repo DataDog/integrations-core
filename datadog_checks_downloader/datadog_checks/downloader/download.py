@@ -128,8 +128,9 @@ class TUFDownloader:
         full_url = target_base_url + ('/' if not target_base_url.endswith('/') else '') + tuf_target_path
 
         with urllib.request.urlopen(full_url) as resp:
+            os.makedirs(os.path.dirname(target_abspath), exist_ok=True)
             with open(target_abspath, 'wb') as dest:
-                dest.write(resp)
+                dest.write(resp.read())
 
         return target_abspath
 
