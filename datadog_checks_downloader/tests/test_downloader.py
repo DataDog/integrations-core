@@ -71,9 +71,12 @@ def _do_run_downloader(argv):
 
 
 @pytest.mark.online
-def test_download(capfd, distribution_name, distribution_version, temporary_local_repo):
+def test_download(capfd, distribution_name, distribution_version, temporary_local_repo, disable_verification):
     """Test datadog-checks-downloader successfully downloads and validates a wheel file."""
     argv = [distribution_name, "--version", distribution_version]
+
+    if disable_verification:
+        argv.append('--unsafe-disable-verification')
 
     _do_run_downloader(argv)
     stdout, stderr = capfd.readouterr()
@@ -123,7 +126,7 @@ def test_non_datadog_distribution():
     ],
 )
 @freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP)
-def test_local_download(capfd, distribution_name, distribution_version, target):
+def test_local_download(capfd, distribution_name, distribution_version, target, disable_verification):
     """Test local verification of a wheel file."""
 
     with local_http_server("{}-{}".format(distribution_name, distribution_version)) as http_url:
@@ -134,6 +137,10 @@ def test_local_download(capfd, distribution_name, distribution_version, target):
             "--repository",
             http_url,
         ]
+
+        if disable_verification:
+            argv.append('--unsafe-disable-verification')
+
         _do_run_downloader(argv)
 
     stdout, _ = capfd.readouterr()

@@ -12,6 +12,7 @@ import shutil
 import sys
 import tempfile
 import urllib.request
+import urllib.error
 
 from in_toto import verifylib
 from in_toto.exceptions import LinkNotFoundError
@@ -127,10 +128,14 @@ class TUFDownloader:
         target_base_url = self.__updater._target_base_url
         full_url = target_base_url + ('/' if not target_base_url.endswith('/') else '') + tuf_target_path
 
-        with urllib.request.urlopen(full_url) as resp:
-            os.makedirs(os.path.dirname(target_abspath), exist_ok=True)
-            with open(target_abspath, 'wb') as dest:
-                dest.write(resp.read())
+        try:
+            with urllib.request.urlopen(full_url) as resp:
+                os.makedirs(os.path.dirname(target_abspath), exist_ok=True)
+                with open(target_abspath, 'wb') as dest:
+                    dest.write(resp.read())
+        except urllib.error.HTTPError as err:
+            logger.error(f'GET {full_url}: {err}')
+            raise
 
         return target_abspath
 
