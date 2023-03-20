@@ -460,7 +460,7 @@ files:
       description: Timeout in seconds for the connection and each command run
       value:
         type: integer
-        example: 5
+        example: 10
     - template: instances/db
     - name: stored_procedure
       description: |

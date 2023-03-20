@@ -323,6 +323,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             normalized_rows.append(row)
         return normalized_rows
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_metrics_rows(self, cursor):
         rows = self._load_raw_query_metrics_rows(cursor)
         rows = self._normalize_queries(rows)
