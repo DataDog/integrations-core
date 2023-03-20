@@ -42,6 +42,7 @@ class InstanceConfig(BaseModel):
     multiple_ips: Optional[bool]
     name: str
     port: int
+    scope_id: Optional[int]
     service: Optional[str]
     tags: Optional[Sequence[str]]
     timeout: Optional[int]

@@ -46,6 +46,10 @@ def instance_multiple_ips(field, value):
     return False
 
 
+def instance_scope_id(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_service(field, value):
     return get_default_field_value(field, value)
 
