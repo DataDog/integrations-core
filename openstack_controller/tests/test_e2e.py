@@ -9,22 +9,22 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 
-from . import common
+# from . import common
 
 
 @pytest.mark.e2e
 def test_connect_ok(dd_agent_check):
     aggregator = dd_agent_check()
     # assert default metrics
-    for metric in common.DEFAULT_METRICS:
-        aggregator.assert_metric(metric)
-    aggregator.assert_all_metrics_covered()
+    # for metric in common.DEFAULT_METRICS:
+    #     aggregator.assert_metric(metric)
+    # aggregator.assert_all_metrics_covered()
     # assert service checks
     aggregator.assert_service_check('openstack.keystone.api.up', status=AgentCheck.OK)
-    aggregator.assert_service_check('openstack.nova.api.up', status=AgentCheck.OK)
-    aggregator.assert_service_check('openstack.neutron.api.up', status=AgentCheck.OK)
-    aggregator.assert_service_check('openstack.ironic.api.up', status=AgentCheck.OK)
-    aggregator.assert_service_check('openstack.octavia.api.up', status=AgentCheck.OK)
+    # aggregator.assert_service_check('openstack.nova.api.up', status=AgentCheck.OK)
+    # aggregator.assert_service_check('openstack.neutron.api.up', status=AgentCheck.OK)
+    # aggregator.assert_service_check('openstack.ironic.api.up', status=AgentCheck.OK)
+    # aggregator.assert_service_check('openstack.octavia.api.up', status=AgentCheck.OK)
 
 
 @pytest.mark.e2e

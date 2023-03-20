@@ -43,7 +43,7 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_networking_quotas(self, project):
+    def get_network_quotas(self, project):
         pass  # pragma: no cover
 
     @abstractmethod

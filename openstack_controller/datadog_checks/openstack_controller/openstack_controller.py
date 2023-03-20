@@ -23,7 +23,7 @@ class OpenStackControllerCheck(AgentCheck):
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while creating api: %s", e)
-            self.service_check('openstack.keystone.api.up', AgentCheck.CRITICAL, message=e)
+            self.service_check('openstack.keystone.api.up', AgentCheck.CRITICAL, message=str(e))
             self.service_check('openstack.nova.api.up', AgentCheck.UNKNOWN)
             self.service_check('openstack.neutron.api.up', AgentCheck.UNKNOWN)
             self.service_check('openstack.ironic.api.up', AgentCheck.UNKNOWN)
@@ -98,9 +98,9 @@ class OpenStackControllerCheck(AgentCheck):
             self.service_check('openstack.neutron.api.up', AgentCheck.OK)
             self.log.debug("response_time: %s", response_time)
             self.gauge('openstack.neutron.response_time', response_time, tags=tags)
-            networking_quotas = api.get_networking_quotas(project)
-            self.log.debug("networking_quotas: %s", networking_quotas)
-            for metric, value in networking_quotas.items():
+            network_quotas = api.get_network_quotas(project)
+            self.log.debug("network_quotas: %s", network_quotas)
+            for metric, value in network_quotas.items():
                 self.gauge(f'openstack.neutron.quotas.{metric}', value, tags=tags)
         else:
             self.service_check('openstack.neutron.api.up', AgentCheck.CRITICAL)

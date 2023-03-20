@@ -18,7 +18,7 @@ class NetworkRest:
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return {
-            re.sub('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(): value
+            re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_"): value
             for key, value in response.json()['quota'].items()
             if isinstance(value, (int, float))
         }

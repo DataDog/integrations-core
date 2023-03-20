@@ -113,8 +113,8 @@ class ApiRest(Api):
             return component.get_hypervisors_detail()
         return None
 
-    def get_networking_quotas(self, project):
-        self.log.debug("getting networking quotas")
+    def get_network_quotas(self, project):
+        self.log.debug("getting network quotas")
         self.http.options['headers']['X-Auth-Token'] = self.project_auth_tokens[project['id']]['auth_token']
         component = self._get_component(project['id'], ComponentType.NETWORK)
         if component:

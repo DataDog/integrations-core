@@ -18,11 +18,7 @@ class ComputeRest:
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return {
-            re.sub(
-                r'(.*)-(.*)',
-                r'\1_\2',
-                re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(),
-            ): value
+            re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_"): value
             for key, value in response.json()['limits']['absolute'].items()
             if isinstance(value, (int, float)) and not isinstance(value, bool)
         }
@@ -32,11 +28,7 @@ class ComputeRest:
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return {
-            re.sub(
-                r'(.*)-(.*)',
-                r'\1_\2',
-                re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(),
-            ): value
+            re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_"): value
             for key, value in response.json()['quota_set'].items()
             if isinstance(value, (int, float)) and not isinstance(value, bool)
         }
@@ -54,11 +46,7 @@ class ComputeRest:
                 server_metrics[server['id']] = {
                     'name': server['name'],
                     'metrics': {
-                        re.sub(
-                            r'(.*)-(.*)',
-                            r'\1_\2',
-                            re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(),
-                        ): value
+                        re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_"): value
                         for key, value in response.json().items()
                         if isinstance(value, (int, float)) and not isinstance(value, bool)
                     },
@@ -76,11 +64,7 @@ class ComputeRest:
             flavor_metrics[flavor['id']] = {
                 'name': flavor['name'],
                 'metrics': {
-                    re.sub(
-                        r'(.*)-(.*)',
-                        r'\1_\2',
-                        re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(),
-                    ): value
+                    re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_"): value
                     for key, value in flavor.items()
                     if isinstance(value, (int, float)) and not isinstance(value, bool)
                 },
@@ -96,11 +80,7 @@ class ComputeRest:
             hypervisors_detail_metrics[str(hypervisor['id'])] = {
                 'name': hypervisor['hypervisor_hostname'],
                 'metrics': {
-                    re.sub(
-                        r'(.*)-(.*)',
-                        r'\1_\2',
-                        re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower(),
-                    ): value
+                    re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_"): value
                     for key, value in hypervisor.items()
                     if isinstance(value, (int, float)) and not isinstance(value, bool)
                 },

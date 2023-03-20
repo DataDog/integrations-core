@@ -2,7 +2,8 @@ version: "3"
 
 services:
   openstack-keystone:
-    image: caddy:2.6.2-alpine
+#    image: caddy:2.6.2-alpine
+    build: .
     container_name: openstack-keystone
     volumes:
       - ./fixtures/keystone:/usr/share/caddy
