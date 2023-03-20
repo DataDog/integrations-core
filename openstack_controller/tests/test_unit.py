@@ -342,6 +342,75 @@ def test_compute_flavors_nova_microversion_last(aggregator, dd_run_check):
                 aggregator.assert_metric(f'openstack.nova.flavor.{metric}', value)
 
 
+def test_collect_hypervisor_service_check_up(aggregator, dd_run_check):
+    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+        os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
+    ) as one_project, open(
+        os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/hypervisors_detail_up.json'), 'r'
+    ) as hypervisors:
+        one_project_content = json.load(one_project)
+        hypervisors_content = json.load(hypervisors)
+        api = mock.MagicMock()
+        api.get_projects.return_value = one_project_content
+        api.get_compute_hypervisors_detail.return_value = hypervisors_content
+        mocked_api.return_value = api
+        instance = {
+            'keystone_server_url': 'http://10.164.0.83/identity',
+            'user_name': 'admin',
+            'user_password': 'password',
+        }
+        check = OpenStackControllerCheck('test', {}, [instance])
+        dd_run_check(check)
+        for _hypervisor_id, _hypervisor_data in hypervisors_content.items():
+            aggregator.assert_service_check('openstack.nova.hypervisor.up', status=AgentCheck.OK)
+
+
+def test_collect_hypervisor_service_check_down(aggregator, dd_run_check):
+    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+        os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
+    ) as one_project, open(
+        os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/hypervisors_detail_down.json'), 'r'
+    ) as hypervisors:
+        one_project_content = json.load(one_project)
+        hypervisors_content = json.load(hypervisors)
+        api = mock.MagicMock()
+        api.get_projects.return_value = one_project_content
+        api.get_compute_hypervisors_detail.return_value = hypervisors_content
+        mocked_api.return_value = api
+        instance = {
+            'keystone_server_url': 'http://10.164.0.83/identity',
+            'user_name': 'admin',
+            'user_password': 'password',
+        }
+        check = OpenStackControllerCheck('test', {}, [instance])
+        dd_run_check(check)
+        for _hypervisor_id, _hypervisor_data in hypervisors_content.items():
+            aggregator.assert_service_check('openstack.nova.hypervisor.up', status=AgentCheck.CRITICAL)
+
+
+def test_collect_hypervisor_service_check_unknown(aggregator, dd_run_check):
+    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+        os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
+    ) as one_project, open(
+        os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/hypervisors_detail_unknown.json'), 'r'
+    ) as hypervisors:
+        one_project_content = json.load(one_project)
+        hypervisors_content = json.load(hypervisors)
+        api = mock.MagicMock()
+        api.get_projects.return_value = one_project_content
+        api.get_compute_hypervisors_detail.return_value = hypervisors_content
+        mocked_api.return_value = api
+        instance = {
+            'keystone_server_url': 'http://10.164.0.83/identity',
+            'user_name': 'admin',
+            'user_password': 'password',
+        }
+        check = OpenStackControllerCheck('test', {}, [instance])
+        dd_run_check(check)
+        for _hypervisor_id, _hypervisor_data in hypervisors_content.items():
+            aggregator.assert_service_check('openstack.nova.hypervisor.up', status=AgentCheck.UNKNOWN)
+
+
 def test_collect_hypervisor_metrics_false(aggregator, dd_run_check):
     with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
