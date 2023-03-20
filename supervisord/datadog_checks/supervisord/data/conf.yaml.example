@@ -74,6 +74,25 @@ instances:
     #   - <PROCESS_NAME_EXCLUDE_1>
     #   - <PROCESS_NAME_EXCLUDE_2>
 
+    ## @param status_mapping_override - dictionary - optional
+    ## The process status mapping override between Supervisord status and Datadog status.
+    ##
+    ## This setting override default mapping (Supervisord => Datadog):
+    ##   RUNNING  => up
+    ##   BACKOFF  => down
+    ##   STOPPING => down
+    ##   STOPPED  => down
+    ##   EXITED   => down
+    ##   FATAL    => down
+    ##   STARTING => unknown
+    ##   UNKNOWN  => unknown
+    ##
+    ## Available Datadog status are: up / down / unknown
+    #
+    # status_mapping_override:
+    #   <SUPERVISORD_STATUS_1>: <DATADOG_STATUS_1>
+    #   <SUPERVISORD_STATUS_2>: <DATADOG_STATUS_2>
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

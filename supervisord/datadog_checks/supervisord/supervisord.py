@@ -134,6 +134,21 @@ class SupervisordCheck(AgentCheck):
         if not isinstance(proc_names_exclude, list):
             raise Exception("'proc_names_exclude' should be a list of strings. e.g. %s" % [proc_names_exclude])
 
+        # Compile status mapping
+        status_mapping = DD_STATUS
+
+        status_mapping_override = instance.get('status_mapping_override', {})
+        if not isinstance(status_mapping_override, dict):
+            raise Exception("'status_mapping_override' should be a dictionary. e.g. %s" % [status_mapping_override])
+
+        if len(status_mapping_override) != 0:
+            reverse_process_status = {v: k for k, v in PROCESS_STATUS.items()}
+            for status, ddstatus in status_mapping_override.items():
+                if ddstatus in PROCESS_STATUS.values():
+                    status_mapping[status] = reverse_process_status[ddstatus];
+                else:
+                    raise Exception("'status_mapping_override' should be a mapping between Supervisord status and Datadog status. e.g. %s => %s" % [status, ddstatus])
+
         # Collect information on each monitored process
         monitored_processes = []
 
@@ -161,7 +176,7 @@ class SupervisordCheck(AgentCheck):
             tags = instance_tags + ['{}:{}'.format(PROCESS_TAG, proc_name)]
 
             # Report Service Check
-            status = DD_STATUS[proc['statename']]
+            status = status_mapping[proc['statename']]
             msg = self._build_message(proc) if status is not AgentCheck.OK else None
             count_by_status[status] += 1
             self.service_check(PROCESS_SERVICE_CHECK, status, tags=tags, message=msg)
