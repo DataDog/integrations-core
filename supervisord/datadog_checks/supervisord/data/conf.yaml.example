@@ -61,6 +61,12 @@ instances:
     #   - <PROCESS_NAME_1>
     #   - <PROCESS_NAME_2>
 
+    ## @param proc_regex_exclude - list of strings - optional
+    ## Regex pattern[s] matching the names of processes to exclude.
+    #
+    # proc_regex_exclude:
+    #   - <PROC_REGEX>
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

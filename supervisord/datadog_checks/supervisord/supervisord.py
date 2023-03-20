@@ -122,6 +122,10 @@ class SupervisordCheck(AgentCheck):
         if not isinstance(proc_regex, list):
             raise Exception("'proc_regex' should be a list of strings. e.g. %s" % [proc_regex])
 
+        proc_regex_exclude = instance.get('proc_regex_exclude', [])
+        if not isinstance(proc_regex_exclude, list):
+            raise Exception("'proc_regex_exclude' should be a list of strings. e.g. %s" % [proc_regex_exclude])
+
         proc_names = instance.get('proc_names', [])
         if not isinstance(proc_names, list):
             raise Exception("'proc_names' should be a list of strings. e.g. %s" % [proc_names])
@@ -132,14 +136,17 @@ class SupervisordCheck(AgentCheck):
         # monitor all processes if no filters were specified
         if len(proc_regex) == 0 and len(proc_names) == 0:
             monitored_processes = processes
+        else:
+            for pattern, process in itertools.product(proc_regex, processes):
+                if re.match(pattern, process['name']) and process not in monitored_processes:
+                    monitored_processes.append(process)
+            for process in processes:
+                if process['name'] in proc_names and process not in monitored_processes:
+                    monitored_processes.append(process)
 
-        for pattern, process in itertools.product(proc_regex, processes):
-            if re.match(pattern, process['name']) and process not in monitored_processes:
-                monitored_processes.append(process)
-
-        for process in processes:
-            if process['name'] in proc_names and process not in monitored_processes:
-                monitored_processes.append(process)
+        for pattern, process in itertools.product(proc_regex_exclude, monitored_processes):
+            if re.match(pattern, process['name']):
+                monitored_processes.remove(process)
 
         # Report service checks and uptime for each process
         for proc in monitored_processes:
