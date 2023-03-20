@@ -14,9 +14,10 @@ from datadog_checks.kafka_consumer.constants import (
 
 
 class KafkaConfig:
-    def __init__(self, init_config, instance) -> None:
+    def __init__(self, init_config, instance, log) -> None:
         self.instance = instance
         self.init_config = init_config
+        self.log = log
         self._context_limit = int(init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
         self._custom_tags = instance.get('tags', [])
         self._monitor_unlisted_consumer_groups = is_affirmative(instance.get('monitor_unlisted_consumer_groups', False))
@@ -80,3 +81,11 @@ class KafkaConfig:
 
             elif self._sasl_oauth_token_provider.get("client_secret") is None:
                 raise ConfigurationError("The `client_secret` setting of `auth_token` reader is required")
+        
+        # If `monitor_unlisted_consumer_groups` is set to true and
+        # using `consumer_groups`, we prioritize `monitor_unlisted_consumer_groups`
+        if self._monitor_unlisted_consumer_groups and self._consumer_groups:
+            self.log.warning(
+                "Using both monitor_unlisted_consumer_groups and consumer_groups, ignoring " \
+                "consumer_groups config values since monitor_unlisted_consumer_groups has priority."
+            )

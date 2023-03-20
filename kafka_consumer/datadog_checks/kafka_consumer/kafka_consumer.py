@@ -23,7 +23,7 @@ class KafkaCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(KafkaCheck, self).__init__(name, init_config, instances)
-        self.config = KafkaConfig(self.init_config, self.instance)
+        self.config = KafkaConfig(self.init_config, self.instance, self.log)
         self._context_limit = self.config._context_limit
         self.client = GenericKafkaClient(self.config, self.get_tls_context(), self.log)
         self.check_initializations.append(self.config.validate_config)

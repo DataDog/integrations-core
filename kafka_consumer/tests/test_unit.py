@@ -354,3 +354,23 @@ def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metr
 
     expected_debug = "Reported contexts number 1 greater than or equal to contexts limit of 1"
     assert expected_debug in caplog.text
+
+
+# Regex Consumer group test cases:
+# If regex is "*", then get all consmuer groups
+# If regex is "nothing", then get no consumer groups and also output a warning
+# If regex is "nothing" and monitor_unlisted... is true, still monitor everything and output a deprecation notice
+# If regex is "one thing" and monitor_unlisted... is true, still monitor everything and output a deprecation notice
+
+# Regex consumer group + topics test cases
+# If consumer group "*" and topics "*", then collect everything
+# If consumer group "*" and topics "nothing", then collect nothing
+# If consumer group "my_consumer" and topics "marvel"
+
+# If consumer_groups is set and monitor_unlisted_consumer_groups = True, then output a warning
+# If consumer_groups is set and monitor_unlisted_consumer_groups = False, nothing
+
+# if multiple consumer_groups match:
+# consumer_groups:
+#   my_consume*: {}
+#   *_consumer: {}
