@@ -593,5 +593,6 @@ def test_report_legacy_metrics_true(aggregator, dd_run_check):
         }
         check = OpenStackControllerCheck('test', {}, [instance])
         dd_run_check(check)
+        aggregator.assert_service_check('openstack.nova.hypervisor.up', status=AgentCheck.OK)
         for metric in LEGACY_NOVA_HYPERVISOR_METRICS:
             aggregator.assert_metric('openstack.nova.{}'.format(metric))

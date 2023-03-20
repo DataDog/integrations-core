@@ -81,6 +81,7 @@ class ComputeRest:
         for hypervisor in response.json()['hypervisors']:
             hypervisors_detail_metrics[str(hypervisor['id'])] = {
                 'name': hypervisor['hypervisor_hostname'],
+                'state': hypervisor['state'],
                 'type': hypervisor['hypervisor_type'],
                 'status': hypervisor['status'],
                 'metrics': {

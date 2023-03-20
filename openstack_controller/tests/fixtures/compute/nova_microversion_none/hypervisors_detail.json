@@ -1,6 +1,7 @@
 {
     "1": {
         "name": "agent-integrations-openstack-default",
+        "state": "up",
         "type": "QEMU",
         "status": "enabled",
         "metrics": {

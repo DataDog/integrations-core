@@ -153,6 +153,15 @@ class OpenStackControllerCheck(AgentCheck):
         compute_hypervisors_detail = api.get_compute_hypervisors_detail(project)
         self.log.debug("compute_hypervisors_detail: %s", compute_hypervisors_detail)
         for hypervisor_id, hypervisor_data in compute_hypervisors_detail.items():
+            state = hypervisor_data.get('state')
+            if not state:
+                self.service_check('openstack.nova.hypervisor.up', AgentCheck.UNKNOWN, hostname=hypervisor_data["name"])
+            elif state != "up":
+                self.service_check(
+                    'openstack.nova.hypervisor.up', AgentCheck.CRITICAL, hostname=hypervisor_data["name"]
+                )
+            else:
+                self.service_check('openstack.nova.hypervisor.up', AgentCheck.OK, hostname=hypervisor_data["name"])
             for metric, value in hypervisor_data['metrics'].items():
                 if metric in LEGACY_NOVA_HYPERVISOR_METRICS:
                     self.gauge(
