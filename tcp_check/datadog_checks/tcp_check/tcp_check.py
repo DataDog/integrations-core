@@ -51,7 +51,7 @@ class TCPCheck(AgentCheck):
         if not isinstance(self.host, str):  # Would be raised if url is not a string
             raise ConfigurationError(self.CONFIGURATION_ERROR_MSG.format(self.host, 'url', 'string'))
 
-        scope_id = instance.get('scope_id', 0) #Get the interface ID that should handle the traffic (necessary for IPv6 only)
+        self.scope_id = instance.get('scope_id', 0) #Get the interface ID that should handle the traffic (necessary for IPv6 only)
         if not isinstance(self.scope_id, int): #Test whether it is an integer.
             raise ConfigurationError(self.CONFIGURATION_ERROR_MSG.format(scope_id, 'scope_id', 'number')) 
             
