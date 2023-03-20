@@ -1,0 +1,4 @@
+fixes:
+  - |
+    Attach the volume tags to generic ephemeral volume by retrieving the name of 
+    the stand-alone PVC which provisions the volume (<namespace/<pod name>-<volume name>>).
