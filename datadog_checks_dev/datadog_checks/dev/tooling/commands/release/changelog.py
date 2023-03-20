@@ -153,8 +153,10 @@ def changelog(
     changelog_buffer.write(''.join(old[:2]))
 
     # prepend the new changelog to the old contents
-    # make the command idempotent
-    if header not in old:
+    # make the command idempotent in the event the CHANGELOG already contains manual entries
+    header_excluding_date = header.replace(f" / {datetime.utcnow().strftime('%Y-%m-%d')}\n", "")
+    version_header_already_present = any(line.startswith(header_excluding_date) for line in old)
+    if not version_header_already_present:
         changelog_buffer.write(new_entry.getvalue())
 
     # append the rest of the old changelog
