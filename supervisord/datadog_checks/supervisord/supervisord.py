@@ -130,6 +130,10 @@ class SupervisordCheck(AgentCheck):
         if not isinstance(proc_names, list):
             raise Exception("'proc_names' should be a list of strings. e.g. %s" % [proc_names])
 
+        proc_names_exclude = instance.get('proc_names_exclude', [])
+        if not isinstance(proc_names_exclude, list):
+            raise Exception("'proc_names_exclude' should be a list of strings. e.g. %s" % [proc_names_exclude])
+
         # Collect information on each monitored process
         monitored_processes = []
 
@@ -146,6 +150,9 @@ class SupervisordCheck(AgentCheck):
 
         for pattern, process in itertools.product(proc_regex_exclude, monitored_processes):
             if re.match(pattern, process['name']):
+                monitored_processes.remove(process)
+        for process in monitored_processes:
+            if process['name'] in proc_names_exclude:
                 monitored_processes.remove(process)
 
         # Report service checks and uptime for each process

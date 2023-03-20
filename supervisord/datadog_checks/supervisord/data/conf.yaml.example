@@ -67,6 +67,13 @@ instances:
     # proc_regex_exclude:
     #   - <PROC_REGEX>
 
+    ## @param proc_names_exclude - list of strings - optional
+    ## The process not to monitor within this supervisord instance.
+    #
+    # proc_names_exclude:
+    #   - <PROCESS_NAME_EXCLUDE_1>
+    #   - <PROCESS_NAME_EXCLUDE_2>
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
