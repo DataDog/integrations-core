@@ -12,10 +12,8 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 #### Prerequisite
 
-To use the Oracle integration you can either use the native client (no additional install steps required) or download the Oracle JDBC driver (Linux only). To use the Oracle integration with JDBC, download the Oracle JDBC driver. If not using the JDBC method, the minimum [supported version][2] is Oracle 12c.
+To use the Oracle integration you can either use the native client (no additional install steps required), the Oracle Instant Client, or download the Oracle JDBC driver (Linux only). To use the Oracle integration with JDBC, download the Oracle JDBC driver. If not using the JDBC method, the minimum [supported version][2] is Oracle 12c.
 Due to licensing restrictions, the JDBC library is not included in the Datadog Agent, but can be downloaded directly from Oracle.
-
-With Agent v7.42.x, the Agent no longer requires or supports installing the Instant Client libraries. If you're on an older version of the Agent and want to use the Instant Client, refer to the [Oracle Instant Client][3] setup instructions.
 
 *NOTE*: Starting in v7.42.x, the Oracle integration only supports Python 3.
 
@@ -207,6 +205,11 @@ If you are not using JDBC, verify that the Datadog Agent is able to connect to y
 sqlplus <USER>/<PASSWORD>@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCPS)(HOST=<HOST>)(PORT=<PORT>))(SERVICE_NAME=<SERVICE_NAME>)))
 ```
 
+*Note*: When using the [Oracle Instant Client][16] connection, move three files to the `network/admin` directory of the client libraries used by your application:
+  * `tnsnames.ora` - Maps net service names used for application connection strings to your database services
+  * `sqlnet.ora` - Configures Oracle Network settings
+  * `cwallet.sso` - Enables SSL/TLS connections in Thick mode. Keep this file secure
+
 ##### TCPS through JDBC
 
 If you are connecting to Oracle Database using JDBC, you also need to specify `jdbc_truststore_path`, `jdbc_truststore_type`, and `jdbc_truststore_password` (optional) if there is a password on the truststore. 
@@ -378,7 +381,53 @@ See [service_checks.json][12] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
-### JDBC driver (Linux only)
+### Common problems
+
+#### Oracle Native Client
+- If you encounter a `DPY-6000: cannot connect to database`:
+  ```text
+  Failed to connect to Oracle DB, error: DPY-6000: cannot connect to database. Listener refused connection. (Similar to ORA-12660)
+  ```
+    - Ensure Native Network Encryption or Checksumming is not enabled. If they are enabled, you must use thick mode by setting `use_instant_client: true`.
+
+*Note:* See our documentation [here][3] on Oracle Instant Client setup.
+
+#### Oracle Instant Client
+- Verify that both the Oracle Instant Client and SDK files are located in the same directory.
+The structure of the directory should look similar:
+  ```text
+  |____sdk/
+  |____network/
+  |____libociei.dylib
+  |____libocci.dylib
+  |____libocci.dylib.10.1
+  |____adrci
+  |____uidrvci
+  |____libclntsh.dylib.19.1
+  |____ojdbc8.jar
+  |____BASIC_README
+  |____liboramysql19.dylib
+  |____libocijdbc19.dylib
+  |____libocci.dylib.19.1
+  |____libclntsh.dylib
+  |____xstreams.jar
+  |____libclntsh.dylib.10.1
+  |____libnnz19.dylib
+  |____libclntshcore.dylib.19.1
+  |____libocci.dylib.12.1
+  |____libocci.dylib.18.1
+  |____libclntsh.dylib.11.1
+  |____BASIC_LICENSE
+  |____SDK_LICENSE
+  |____libocci.dylib.11.1
+  |____libclntsh.dylib.12.1
+  |____libclntsh.dylib.18.1
+  |____ucp.jar
+  |____genezi
+  |____SDK_README
+  ```
+
+#### JDBC driver (Linux only)
 - If you encounter a `JVMNotFoundException`:
 
     ```text
@@ -420,3 +469,4 @@ Need help? Contact [Datadog support][14].
 [13]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
 [14]: https://docs.datadoghq.com/help/
 [15]: https://www.oracle.com/technetwork/topics/wp-oracle-jdbc-thin-ssl-130128.pdf
+[16]: https://python-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#install-the-wallet-and-network-configuration-files
