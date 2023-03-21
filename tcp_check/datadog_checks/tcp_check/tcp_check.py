@@ -50,11 +50,9 @@ class TCPCheck(AgentCheck):
             raise ConfigurationError(self.CONFIGURATION_ERROR_MSG.format(port, 'port', 'number'))
         if not isinstance(self.host, str):  # Would be raised if url is not a string
             raise ConfigurationError(self.CONFIGURATION_ERROR_MSG.format(self.host, 'url', 'string'))
-        
         self.scope_id = instance.get('scope_id', 0)  # Get the interface ID that should handle the traffic
         if not isinstance(self.scope_id, int):  # Test whether it is an integer.
             raise ConfigurationError(self.CONFIGURATION_ERROR_MSG.format(self.scope_id, 'scope_id', 'number'))
-        
         custom_tags = instance.get('tags', [])
         self.tags = [
             'url:{}:{}'.format(self.host, self.port),
