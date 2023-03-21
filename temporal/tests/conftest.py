@@ -4,7 +4,7 @@
 import copy
 import os
 import time
-from contextlib import ExitStack, contextmanager
+from contextlib import contextmanager
 
 import pytest
 
@@ -46,8 +46,7 @@ def create_log_volumes():
     env_vars = {}
     docker_volumes = get_state("docker_volumes", [])
 
-    with ExitStack() as stack:
-        d = stack.enter_context(TempDir("temporal"))
+    with TempDir("temporal") as d:
         os.chmod(d, 0o777)
         docker_volumes.append(f"{d}:/var/log/temporal")
         env_vars["TEMPORAL_LOG_FOLDER"] = d
