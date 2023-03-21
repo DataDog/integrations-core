@@ -45,7 +45,7 @@ files:
         type: string
     - name: use_instant_client
       description: |
-        Determines whether the Agent uses Oracle Instant Client to connect instead of the oracle native client
+        Determines whether the Agent uses Oracle Instant Client to connect instead of the Oracle native client
       value:
         example: false
         type: boolean
