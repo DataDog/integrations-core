@@ -68,8 +68,9 @@ base_option = click.option(
 @click.option('--org-name', '-o', help='The org to use for data submission.')
 @click.option('--profile-memory', '-pm', is_flag=True, help='Whether to collect metrics about memory usage')
 @click.option('--dogstatsd', is_flag=True, help='Enable dogstatsd port on agent')
+@click.option('--disable-agent-update', is_flag=True, help='Do not try to update the agent image')
 @click.pass_context
-def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile_memory, dogstatsd):
+def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile_memory, dogstatsd, disable_agent_update):
     """Start an environment."""
 
     on_ci = running_on_ci()
@@ -77,9 +78,10 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         ctx, base, check, env, python, org_name, profile_memory, agent, env_vars, dogstatsd, dev, on_ci
     )
 
-    echo_waiting(f'Updating `{environment.agent_build}`... ', nl=False)
-    environment.update_agent()
-    echo_success('success!')
+    if not disable_agent_update:
+        echo_waiting(f'Updating `{environment.agent_build}`... ', nl=False)
+        environment.update_agent()
+        echo_success('success!')
 
     echo_waiting('Detecting the major version... ', nl=False)
     environment.detect_agent_version()
