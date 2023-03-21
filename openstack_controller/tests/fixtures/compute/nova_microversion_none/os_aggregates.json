@@ -1,0 +1,9 @@
+{
+    "1": {
+        "name": "my-aggregate",
+        "availability_zone": "availability-zone",
+        "hosts": [
+            "agent-integrations-openstack-default"
+        ]
+    }
+}

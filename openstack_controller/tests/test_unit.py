@@ -11,10 +11,7 @@ from requests.exceptions import HTTPError
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev import get_here
 from datadog_checks.openstack_controller import OpenStackControllerCheck
-from datadog_checks.openstack_controller.openstack_controller import (
-    LEGACY_NOVA_HYPERVISOR_METRICS,
-    NOVA_HYPERVISOR_METRICS,
-)
+from datadog_checks.openstack_controller.openstack_controller import LEGACY_NOVA_HYPERVISOR_METRICS
 
 pytestmark = [pytest.mark.unit]
 
@@ -180,7 +177,7 @@ def test_compute_limits_nova_microversion_last(aggregator, dd_run_check):
     with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(
-        os.path.join(get_here(), 'fixtures/compute/nova_microversion_last/limits.json'), 'r'
+        os.path.join(get_here(), 'fixtures/compute/nova_microversion_latest/limits.json'), 'r'
     ) as limits:
         one_project_content = json.load(one_project)
         limits_content = json.load(limits)
@@ -227,7 +224,7 @@ def test_compute_quota_set_nova_microversion_last(aggregator, dd_run_check):
     with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(
-        os.path.join(get_here(), 'fixtures/compute/nova_microversion_last/quota_set.json'), 'r'
+        os.path.join(get_here(), 'fixtures/compute/nova_microversion_latest/quota_set.json'), 'r'
     ) as quota_set:
         one_project_content = json.load(one_project)
         quota_set_content = json.load(quota_set)
@@ -275,7 +272,7 @@ def test_compute_servers_nova_microversion_last(aggregator, dd_run_check):
     with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(
-        os.path.join(get_here(), 'fixtures/compute/nova_microversion_last/servers.json'), 'r'
+        os.path.join(get_here(), 'fixtures/compute/nova_microversion_latest/servers.json'), 'r'
     ) as servers:
         one_project_content = json.load(one_project)
         servers_content = json.load(servers)
@@ -324,7 +321,7 @@ def test_compute_flavors_nova_microversion_last(aggregator, dd_run_check):
     with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(
-        os.path.join(get_here(), 'fixtures/compute/nova_microversion_last/flavors.json'), 'r'
+        os.path.join(get_here(), 'fixtures/compute/nova_microversion_latest/flavors.json'), 'r'
     ) as flavors:
         one_project_content = json.load(one_project)
         flavors_content = json.load(flavors)
@@ -345,17 +342,57 @@ def test_compute_flavors_nova_microversion_last(aggregator, dd_run_check):
                 aggregator.assert_metric(f'openstack.nova.flavor.{metric}', value)
 
 
-def test_collect_hypervisor_service_check_up(aggregator, dd_run_check):
+@pytest.mark.parametrize(
+    ('hypervisors_mock_file', 'os_aggregates_mock_file', 'status'),
+    [
+        pytest.param(
+            'fixtures/compute/nova_microversion_none/hypervisors_detail_up.json',
+            'fixtures/compute/nova_microversion_none/os_aggregates.json',
+            AgentCheck.OK,
+            id='up',
+        ),
+        pytest.param(
+            'fixtures/compute/nova_microversion_none/hypervisors_detail_down.json',
+            'fixtures/compute/nova_microversion_none/os_aggregates.json',
+            AgentCheck.CRITICAL,
+            id='down',
+        ),
+        pytest.param(
+            'fixtures/compute/nova_microversion_none/hypervisors_detail_unknown.json',
+            'fixtures/compute/nova_microversion_none/os_aggregates.json',
+            AgentCheck.UNKNOWN,
+            id='unknown',
+        ),
+    ],
+)
+def test_hypervisor_service_check(hypervisors_mock_file, os_aggregates_mock_file, status, aggregator, dd_run_check):
     with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
-    ) as one_project, open(
-        os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/hypervisors_detail_up.json'), 'r'
-    ) as hypervisors:
+    ) as one_project, open(os.path.join(get_here(), hypervisors_mock_file), 'r') as hypervisors, open(
+        os.path.join(get_here(), os_aggregates_mock_file), 'r'
+    ) as os_aggregates:
+        project_tags = ['project_id:667aee39f2b64032b4d7585809d31e6f', 'project_name:admin']
+        tags = project_tags + [
+            'aggregate:my-aggregate',
+            'availability_zone:availability-zone',
+            'hypervisor:agent-integrations-openstack-default',
+            'hypervisor_id:1',
+            'status:enabled',
+            'virt_type:QEMU',
+        ]
+
+        compute_response_time = 2.659812
         one_project_content = json.load(one_project)
         hypervisors_content = json.load(hypervisors)
+        os_aggregates_content = json.load(os_aggregates)
         api = mock.MagicMock()
+        api.get_compute_response_time.return_value = compute_response_time
+        api.get_network_response_time.return_value = None
+        api.get_baremetal_response_time.return_value = None
+        api.get_load_balancer_response_time.return_value = None
         api.get_projects.return_value = one_project_content
         api.get_compute_hypervisors_detail.return_value = hypervisors_content
+        api.get_compute_os_aggregates.return_value = os_aggregates_content
         mocked_api.return_value = api
         instance = {
             'keystone_server_url': 'http://10.164.0.83/identity',
@@ -364,132 +401,139 @@ def test_collect_hypervisor_service_check_up(aggregator, dd_run_check):
         }
         check = OpenStackControllerCheck('test', {}, [instance])
         dd_run_check(check)
-        for _hypervisor_id, _hypervisor_data in hypervisors_content.items():
-            aggregator.assert_service_check('openstack.nova.hypervisor.up', status=AgentCheck.OK)
+        aggregator.assert_service_check('openstack.nova.hypervisor.up', status=status, tags=tags)
 
 
-def test_collect_hypervisor_service_check_down(aggregator, dd_run_check):
+@pytest.mark.parametrize(
+    ('hypervisors_mock_file', 'os_aggregates_mock_file', 'instance'),
+    [
+        pytest.param(
+            'fixtures/compute/nova_microversion_none/hypervisors_detail.json',
+            'fixtures/compute/nova_microversion_none/os_aggregates.json',
+            {
+                'keystone_server_url': 'http://10.164.0.83/identity',
+                'user_name': 'admin',
+                'user_password': 'password',
+            },
+            id='default values',
+        ),
+        pytest.param(
+            'fixtures/compute/nova_microversion_none/hypervisors_detail.json',
+            'fixtures/compute/nova_microversion_none/os_aggregates.json',
+            {
+                'keystone_server_url': 'http://10.164.0.83/identity',
+                'user_name': 'admin',
+                'user_password': 'password',
+                'collect_hypervisor_metrics': False,
+            },
+            id='collect_hypervisor_metrics: False',
+        ),
+        pytest.param(
+            'fixtures/compute/nova_microversion_latest/hypervisors_detail.json',
+            'fixtures/compute/nova_microversion_latest/os_aggregates.json',
+            {
+                'keystone_server_url': 'http://10.164.0.83/identity',
+                'user_name': 'admin',
+                'user_password': 'password',
+                'nova_microversion': 'latest',
+            },
+            id='nova_microversion: latest',
+        ),
+        pytest.param(
+            'fixtures/compute/nova_microversion_none/hypervisors_detail.json',
+            'fixtures/compute/nova_microversion_none/os_aggregates.json',
+            {
+                'keystone_server_url': 'http://10.164.0.83/identity',
+                'user_name': 'admin',
+                'user_password': 'password',
+                'report_legacy_metrics': False,
+            },
+            id='report_legacy_metrics: False',
+        ),
+        pytest.param(
+            'fixtures/compute/nova_microversion_latest/hypervisors_detail.json',
+            'fixtures/compute/nova_microversion_latest/os_aggregates.json',
+            {
+                'keystone_server_url': 'http://10.164.0.83/identity',
+                'user_name': 'admin',
+                'user_password': 'password',
+                'nova_microversion': 'latest',
+                'report_legacy_metrics': False,
+            },
+            id='nova_microversion: latest and report_legacy_metrics: False',
+        ),
+    ],
+)
+def test_hypervisor_metrics(hypervisors_mock_file, os_aggregates_mock_file, instance, aggregator, dd_run_check):
     with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
-    ) as one_project, open(
-        os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/hypervisors_detail_down.json'), 'r'
-    ) as hypervisors:
+    ) as one_project, open(os.path.join(get_here(), hypervisors_mock_file), 'r') as hypervisors, open(
+        os.path.join(get_here(), os_aggregates_mock_file), 'r'
+    ) as os_aggregates:
+        nova_microversion_latest = instance.get('nova_microversion') == 'latest'
+        report_legacy_metrics = instance.get('report_legacy_metrics', True)
+        count = 1 if instance.get('collect_hypervisor_metrics', True) else 0
+        project_tags = ['project_id:667aee39f2b64032b4d7585809d31e6f', 'project_name:admin']
+        tags = project_tags + [
+            'aggregate:my-aggregate',
+            'availability_zone:availability-zone',
+            'hypervisor:agent-integrations-openstack-default',
+            'hypervisor_id:1',
+            'status:enabled',
+            'virt_type:QEMU',
+        ]
+
+        compute_response_time = 2.659812
         one_project_content = json.load(one_project)
         hypervisors_content = json.load(hypervisors)
+        os_aggregates_content = json.load(os_aggregates)
         api = mock.MagicMock()
+        api.get_compute_response_time.return_value = compute_response_time
+        api.get_network_response_time.return_value = None
+        api.get_baremetal_response_time.return_value = None
+        api.get_load_balancer_response_time.return_value = None
         api.get_projects.return_value = one_project_content
         api.get_compute_hypervisors_detail.return_value = hypervisors_content
+        api.get_compute_os_aggregates.return_value = os_aggregates_content
         mocked_api.return_value = api
-        instance = {
-            'keystone_server_url': 'http://10.164.0.83/identity',
-            'user_name': 'admin',
-            'user_password': 'password',
-        }
         check = OpenStackControllerCheck('test', {}, [instance])
         dd_run_check(check)
-        for _hypervisor_id, _hypervisor_data in hypervisors_content.items():
-            aggregator.assert_service_check('openstack.nova.hypervisor.up', status=AgentCheck.CRITICAL)
-
-
-def test_collect_hypervisor_service_check_unknown(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
-        os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
-    ) as one_project, open(
-        os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/hypervisors_detail_unknown.json'), 'r'
-    ) as hypervisors:
-        one_project_content = json.load(one_project)
-        hypervisors_content = json.load(hypervisors)
-        api = mock.MagicMock()
-        api.get_projects.return_value = one_project_content
-        api.get_compute_hypervisors_detail.return_value = hypervisors_content
-        mocked_api.return_value = api
-        instance = {
-            'keystone_server_url': 'http://10.164.0.83/identity',
-            'user_name': 'admin',
-            'user_password': 'password',
-        }
-        check = OpenStackControllerCheck('test', {}, [instance])
-        dd_run_check(check)
-        for _hypervisor_id, _hypervisor_data in hypervisors_content.items():
-            aggregator.assert_service_check('openstack.nova.hypervisor.up', status=AgentCheck.UNKNOWN)
-
-
-def test_collect_hypervisor_metrics_false(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
-        os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
-    ) as one_project, open(
-        os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/hypervisors_detail.json'), 'r'
-    ) as hypervisors:
-        one_project_content = json.load(one_project)
-        hypervisors_content = json.load(hypervisors)
-        api = mock.MagicMock()
-        api.get_projects.return_value = one_project_content
-        api.get_compute_hypervisors_detail.return_value = hypervisors_content
-        mocked_api.return_value = api
-        instance = {
-            'keystone_server_url': 'http://10.164.0.83/identity',
-            'user_name': 'admin',
-            'user_password': 'password',
-            'collect_hypervisor_metrics': False,
-        }
-        check = OpenStackControllerCheck('test', {}, [instance])
-        dd_run_check(check)
-        for _hypervisor_id, hypervisor_data in hypervisors_content.items():
-            for metric, _value in hypervisor_data['metrics'].items():
-                aggregator.assert_metric(f'openstack.nova.hypervisor.{metric}', count=0)
-
-
-def test_compute_hypervisors_detail(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
-        os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
-    ) as one_project, open(
-        os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/hypervisors_detail.json'), 'r'
-    ) as hypervisors:
-        one_project_content = json.load(one_project)
-        hypervisors_content = json.load(hypervisors)
-        api = mock.MagicMock()
-        api.get_projects.return_value = one_project_content
-        api.get_compute_hypervisors_detail.return_value = hypervisors_content
-        mocked_api.return_value = api
-        instance = {
-            'keystone_server_url': 'http://10.164.0.83/identity',
-            'user_name': 'admin',
-            'user_password': 'password',
-        }
-        check = OpenStackControllerCheck('test', {}, [instance])
-        dd_run_check(check)
-        for _hypervisor_id, hypervisor_data in hypervisors_content.items():
-            for metric, _value in hypervisor_data['metrics'].items():
-                aggregator.assert_metric(
-                    f'openstack.nova.hypervisor.{metric}', count=1 if metric in NOVA_HYPERVISOR_METRICS else 0
-                )
-
-
-def test_compute_hypervisors_detail_nova_microversion_last(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
-        os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
-    ) as one_project, open(
-        os.path.join(get_here(), 'fixtures/compute/nova_microversion_last/hypervisors_detail.json'), 'r'
-    ) as hypervisors:
-        one_project_content = json.load(one_project)
-        hypervisors_content = json.load(hypervisors)
-        api = mock.MagicMock()
-        api.get_projects.return_value = one_project_content
-        api.get_compute_hypervisors_detail.return_value = hypervisors_content
-        mocked_api.return_value = api
-        instance = {
-            'keystone_server_url': 'http://10.164.0.83/identity',
-            'user_name': 'admin',
-            'user_password': 'password',
-            'nova_microversion': 'last',
-        }
-        check = OpenStackControllerCheck('test', {}, [instance])
-        dd_run_check(check)
-        for _hypervisor_id, hypervisor_data in hypervisors_content.items():
-            for metric, _value in hypervisor_data['metrics'].items():
-                aggregator.assert_metric(
-                    f'openstack.nova.hypervisor.{metric}', count=1 if metric in NOVA_HYPERVISOR_METRICS else 0
-                )
+        aggregator.assert_metric('openstack.controller', value=1, count=1, tags=[])
+        aggregator.assert_metric(
+            'openstack.nova.response_time', value=compute_response_time, count=1, tags=project_tags
+        )
+        if not nova_microversion_latest:
+            aggregator.assert_metric('openstack.nova.hypervisor.vcpus', value=4, count=count, tags=tags)
+            aggregator.assert_metric('openstack.nova.hypervisor.memory_mb', value=14990, count=count, tags=tags)
+            aggregator.assert_metric('openstack.nova.hypervisor.local_gb', value=96, count=count, tags=tags)
+            aggregator.assert_metric('openstack.nova.hypervisor.vcpus_used', value=1, count=count, tags=tags)
+            aggregator.assert_metric('openstack.nova.hypervisor.memory_mb_used', value=768, count=count, tags=tags)
+            aggregator.assert_metric('openstack.nova.hypervisor.local_gb_used', value=0, count=count, tags=tags)
+            aggregator.assert_metric('openstack.nova.hypervisor.free_ram_mb', value=14222, count=count, tags=tags)
+            aggregator.assert_metric('openstack.nova.hypervisor.free_disk_gb', value=96, count=count, tags=tags)
+            aggregator.assert_metric('openstack.nova.hypervisor.current_workload', value=0, count=count, tags=tags)
+            aggregator.assert_metric('openstack.nova.hypervisor.running_vms', value=1, count=count, tags=tags)
+            aggregator.assert_metric('openstack.nova.hypervisor.disk_available_least', value=84, count=count, tags=tags)
+            if report_legacy_metrics:
+                aggregator.assert_metric('openstack.nova.vcpus', value=4, count=count, tags=tags)
+                aggregator.assert_metric('openstack.nova.memory_mb', value=14990, count=count, tags=tags)
+                aggregator.assert_metric('openstack.nova.local_gb', value=96, count=count, tags=tags)
+                aggregator.assert_metric('openstack.nova.vcpus_used', value=1, count=count, tags=tags)
+                aggregator.assert_metric('openstack.nova.memory_mb_used', value=768, count=count, tags=tags)
+                aggregator.assert_metric('openstack.nova.local_gb_used', value=0, count=count, tags=tags)
+                aggregator.assert_metric('openstack.nova.free_ram_mb', value=14222, count=count, tags=tags)
+                aggregator.assert_metric('openstack.nova.free_disk_gb', value=96, count=count, tags=tags)
+                aggregator.assert_metric('openstack.nova.current_workload', value=0, count=count, tags=tags)
+                aggregator.assert_metric('openstack.nova.running_vms', value=1, count=count, tags=tags)
+                aggregator.assert_metric('openstack.nova.disk_available_least', value=84, count=count, tags=tags)
+        aggregator.assert_metric('openstack.nova.hypervisor.load_1', value=0.11, count=count, tags=tags)
+        aggregator.assert_metric('openstack.nova.hypervisor.load_5', value=0.08, count=count, tags=tags)
+        aggregator.assert_metric('openstack.nova.hypervisor.load_15', value=0.11, count=count, tags=tags)
+        if report_legacy_metrics:
+            aggregator.assert_metric('openstack.nova.hypervisor_load.1', value=0.11, count=count, tags=tags)
+            aggregator.assert_metric('openstack.nova.hypervisor_load.5', value=0.08, count=count, tags=tags)
+            aggregator.assert_metric('openstack.nova.hypervisor_load.15', value=0.11, count=count, tags=tags)
+        aggregator.assert_all_metrics_covered()
 
 
 def test_network_endpoint_down(aggregator, dd_run_check):

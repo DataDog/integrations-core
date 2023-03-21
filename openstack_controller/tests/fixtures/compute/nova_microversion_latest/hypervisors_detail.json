@@ -1,5 +1,5 @@
 {
-    "d884b51a-e464-49dc-916c-766da0237661": {
+    "1": {
         "name": "agent-integrations-openstack-default",
         "state": "up",
         "type": "QEMU",
