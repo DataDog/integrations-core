@@ -5,7 +5,10 @@
         "type": "QEMU",
         "status": "enabled",
         "metrics": {
-            "hypervisor_version": 4002001
+            "hypervisor_version": 4002001,
+            "load_1": 0.11,
+            "load_5": 0.08,
+            "load_15": 0.11
         }
     }
 }

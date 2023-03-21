@@ -1,11 +1,20 @@
 import re
 
 
+def _load_averages_from_uptime(uptime):
+    """Parse u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n'"""
+    uptime = uptime.strip()
+    load_averages = uptime[uptime.find('load average:') :].split(':')[1].strip().split(',')
+    load_averages = [float(load_avg) for load_avg in load_averages]
+    return load_averages
+
+
 class ComputeRest:
     def __init__(self, log, http, endpoint):
         self.log = log
         self.http = http
         self.endpoint = endpoint
+        self.log.debug("compute endpoint: %s", endpoint)
 
     def get_response_time(self):
         response = self.http.get('{}'.format(self.endpoint))
@@ -73,7 +82,7 @@ class ComputeRest:
             }
         return flavor_metrics
 
-    def get_hypervisors_detail(self):
+    def get_hypervisors_detail(self, collect_hypervisor_load):
         response = self.http.get('{}/os-hypervisors/detail'.format(self.endpoint))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
@@ -90,4 +99,23 @@ class ComputeRest:
                     if isinstance(value, (int, float)) and not isinstance(value, bool)
                 },
             }
+            if collect_hypervisor_load:
+                uptime = hypervisor.get('uptime')
+                load_averages = []
+                if uptime:
+                    load_averages = _load_averages_from_uptime(uptime)
+                else:
+                    response_uptime = self.http.get(
+                        '{}/os-hypervisors/{}/uptime'.format(self.endpoint, hypervisor['id'])
+                    )
+                    if 200 <= response_uptime.status_code < 300:
+                        self.log.debug("response uptime: %s", response_uptime.json())
+                        uptime = response_uptime.json().get('hypervisor', {}).get('uptime')
+                        if uptime:
+                            load_averages = _load_averages_from_uptime(uptime)
+                if load_averages and len(load_averages) == 3:
+                    for i, avg in enumerate([1, 5, 15]):
+                        hypervisors_detail_metrics[str(hypervisor['id'])]['metrics'][
+                            'load_{}'.format(avg)
+                        ] = load_averages[i]
         return hypervisors_detail_metrics

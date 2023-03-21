@@ -10,14 +10,17 @@
             "vcpus": 4,
             "memory_mb": 14990,
             "local_gb": 96,
-            "vcpus_used": 3,
-            "memory_mb_used": 1152,
+            "vcpus_used": 1,
+            "memory_mb_used": 768,
             "local_gb_used": 0,
-            "free_ram_mb": 13838,
+            "free_ram_mb": 14222,
             "free_disk_gb": 96,
             "current_workload": 0,
-            "running_vms": 3,
-            "disk_available_least": 88
+            "running_vms": 1,
+            "disk_available_least": 84,
+            "load_1": 0.0,
+            "load_5": 0.06,
+            "load_15": 0.13
         }
     }
 }

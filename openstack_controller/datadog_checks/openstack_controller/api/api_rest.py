@@ -45,9 +45,9 @@ class ApiRest(Api):
         self.log.debug("getting projects")
         return [{'id': key, 'name': value['name']} for key, value in self.project_auth_tokens.items()]
 
-    def get_compute_response_time(self, project):
+    def get_compute_response_time(self, project_id):
         self.log.debug("getting compute response time")
-        component = self._get_component(project['id'], ComponentType.COMPUTE)
+        component = self._get_component(project_id, ComponentType.COMPUTE)
         if component:
             return component.get_response_time()
         return None
@@ -73,12 +73,12 @@ class ApiRest(Api):
             return component.get_response_time()
         return None
 
-    def get_compute_limits(self, project):
+    def get_compute_limits(self, project_id):
         self.log.debug("getting compute limits")
-        self.http.options['headers']['X-Auth-Token'] = self.project_auth_tokens[project['id']]['auth_token']
-        component = self._get_component(project['id'], ComponentType.COMPUTE)
+        self.http.options['headers']['X-Auth-Token'] = self.project_auth_tokens[project_id]['auth_token']
+        component = self._get_component(project_id, ComponentType.COMPUTE)
         if component:
-            return component.get_limits(project['id'])
+            return component.get_limits(project_id)
         return None
 
     def get_compute_quota_set(self, project):
@@ -105,12 +105,12 @@ class ApiRest(Api):
             return component.get_flavors()
         return None
 
-    def get_compute_hypervisors_detail(self, project):
+    def get_compute_hypervisors_detail(self, project, collect_hypervisor_load):
         self.log.debug("getting compute hypervisors detail")
         self.http.options['headers']['X-Auth-Token'] = self.project_auth_tokens[project['id']]['auth_token']
         component = self._get_component(project['id'], ComponentType.COMPUTE)
         if component:
-            return component.get_hypervisors_detail()
+            return component.get_hypervisors_detail(collect_hypervisor_load)
         return None
 
     def get_network_quotas(self, project):

@@ -15,7 +15,7 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_response_time(self, project):
+    def get_compute_response_time(self, project_id):
         pass  # pragma: no cover
 
     @abstractmethod
@@ -35,7 +35,7 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_hypervisors_detail(self, project):
+    def get_compute_hypervisors_detail(self, project, collect_hypervisor_load):
         pass  # pragma: no cover
 
     @abstractmethod

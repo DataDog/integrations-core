@@ -197,7 +197,7 @@ def test_ensure_auth_scope(aggregator):
 
 
 def test_parse_uptime_string():
-    uptime_parsed = openstack_check._parse_uptime_string(
+    uptime_parsed = _parse_uptime_string(
         u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n'
     )
     assert uptime_parsed.get('loads') == [0.04, 0.14, 0.19]

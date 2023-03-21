@@ -7,6 +7,8 @@ from requests.exceptions import HTTPError
 from datadog_checks.base import AgentCheck
 from datadog_checks.openstack_controller.api.factory import make_api
 
+HYPERVISOR_SERVICE_CHECK = {'up': AgentCheck.OK, 'down': AgentCheck.CRITICAL}
+
 LEGACY_NOVA_HYPERVISOR_METRICS = [
     'current_workload',
     'disk_available_least',
@@ -20,6 +22,25 @@ LEGACY_NOVA_HYPERVISOR_METRICS = [
     'vcpus',
     'vcpus_used',
 ]
+
+LEGACY_NOVA_HYPERVISOR_LOAD_METRICS = {
+    'load_1': 'hypervisor_load.1',
+    'load_5': 'hypervisor_load.5',
+    'load_15': 'hypervisor_load.15',
+}
+
+
+def _create_hypervisor_metric_tags(hypervisor_id, hypervisor_data):
+    return [
+        f'hypervisor_id:{hypervisor_id}',
+        f'hypervisor:{hypervisor_data.get("name")}',
+        f'virt_type:{hypervisor_data.get("type")}',
+        f'status:{hypervisor_data.get("status")}',
+    ]
+
+
+def _create_project_tags(project):
+    return [f"project_id:{project.get('id')}", f"project_name:{project.get('name')}"]
 
 
 class OpenStackControllerCheck(AgentCheck):
@@ -61,72 +82,85 @@ class OpenStackControllerCheck(AgentCheck):
 
     def _report_project_metrics(self, api, project):
         self.log.debug("reporting metrics from project: [id:%s][name:%s]", project['id'], project['name'])
-        self._report_compute_metrics(api, project)
+        project_tags = _create_project_tags(project)
+        self._report_compute_metrics(api, project, project_tags)
         self._report_network_metrics(api, project)
         self._report_baremetal_metrics(api, project)
         self._report_load_balancer_metrics(api, project)
-        if self.instance.get('report_legacy_metrics', True):
-            self._report_legacy_metrics(api, project)
 
-    def _report_compute_metrics(self, api, project):
-        tags = [f"project_id:{project['id']}", f"project_name:{project['name']}"]
-        response_time = api.get_compute_response_time(project)
-        if response_time:
-            self.service_check('openstack.nova.api.up', AgentCheck.OK)
-            self.log.debug("response_time: %s", response_time)
-            self.gauge('openstack.nova.response_time', response_time, tags=tags)
-            compute_limits = api.get_compute_limits(project)
-            self.log.debug("compute_limits: %s", compute_limits)
-            for metric, value in compute_limits.items():
-                self.gauge(f'openstack.nova.limits.{metric}', value, tags=tags)
-            compute_quotas = api.get_compute_quota_set(project)
-            self.log.debug("compute_quotas: %s", compute_quotas)
-            for metric, value in compute_quotas.items():
-                self.gauge(f'openstack.nova.quota_set.{metric}', value, tags=tags)
-            compute_servers = api.get_compute_servers(project)
-            self.log.debug("compute_servers: %s", compute_servers)
-            for server_id, server_data in compute_servers.items():
-                for metric, value in server_data['metrics'].items():
-                    self.gauge(
-                        f'openstack.nova.server.{metric}',
-                        value,
-                        tags=tags + [f'server_id:{server_id}', f'server_name:{server_data["name"]}'],
-                    )
-            compute_flavors = api.get_compute_flavors(project)
-            self.log.debug("compute_flavors: %s", compute_flavors)
-            for flavor_id, flavor_data in compute_flavors.items():
-                for metric, value in flavor_data['metrics'].items():
-                    self.gauge(
-                        f'openstack.nova.flavor.{metric}',
-                        value,
-                        tags=tags + [f'flavor_id:{flavor_id}', f'flavor_name:{flavor_data["name"]}'],
-                    )
-            compute_hypervisors_detail = api.get_compute_hypervisors_detail(project)
-            self.log.debug("compute_hypervisors_detail: %s", compute_hypervisors_detail)
-            for hypervisor_id, hypervisor_data in compute_hypervisors_detail.items():
-                self._report_hypervisor_service_check(hypervisor_data.get('state'), hypervisor_data["name"])
-                if self.instance.get('collect_hypervisor_metrics', True):
-                    self._report_hypervisor_metrics(
-                        hypervisor_id, hypervisor_data["name"], hypervisor_data['metrics'], tags
-                    )
-        else:
-            self.service_check('openstack.nova.api.up', AgentCheck.CRITICAL)
+    def _report_compute_metrics(self, api, project, project_tags):
+        project_id = project.get('id')
+        if project_id:
+            response_time = api.get_compute_response_time(project_id)
+            if response_time:
+                self.service_check('openstack.nova.api.up', AgentCheck.OK)
+                self.log.debug("response_time: %s", response_time)
+                self.gauge('openstack.nova.response_time', response_time, tags=project_tags)
+                compute_limits = api.get_compute_limits(project)
+                self.log.debug("compute_limits: %s", compute_limits)
+                for metric, value in compute_limits.items():
+                    self.gauge(f'openstack.nova.limits.{metric}', value, tags=project_tags)
+                compute_quotas = api.get_compute_quota_set(project)
+                self.log.debug("compute_quotas: %s", compute_quotas)
+                for metric, value in compute_quotas.items():
+                    self.gauge(f'openstack.nova.quota_set.{metric}', value, tags=project_tags)
+                compute_servers = api.get_compute_servers(project)
+                self.log.debug("compute_servers: %s", compute_servers)
+                for server_id, server_data in compute_servers.items():
+                    for metric, value in server_data['metrics'].items():
+                        self.gauge(
+                            f'openstack.nova.server.{metric}',
+                            value,
+                            tags=project_tags + [f'server_id:{server_id}', f'server_name:{server_data["name"]}'],
+                        )
+                compute_flavors = api.get_compute_flavors(project)
+                self.log.debug("compute_flavors: %s", compute_flavors)
+                for flavor_id, flavor_data in compute_flavors.items():
+                    for metric, value in flavor_data['metrics'].items():
+                        self.gauge(
+                            f'openstack.nova.flavor.{metric}',
+                            value,
+                            tags=project_tags + [f'flavor_id:{flavor_id}', f'flavor_name:{flavor_data["name"]}'],
+                        )
+                self._report_compute_hypervisors(api, project, project_tags)
+            else:
+                self.service_check('openstack.nova.api.up', AgentCheck.CRITICAL)
 
-    def _report_hypervisor_service_check(self, state, name):
-        if not state:
-            self.service_check('openstack.nova.hypervisor.up', AgentCheck.UNKNOWN, hostname=name)
-        elif state != "up":
-            self.service_check('openstack.nova.hypervisor.up', AgentCheck.CRITICAL, hostname=name)
-        else:
-            self.service_check('openstack.nova.hypervisor.up', AgentCheck.OK, hostname=name)
-
-    def _report_hypervisor_metrics(self, id, name, metrics, tags):
-        for metric, value in metrics.items():
-            self.gauge(
-                f'openstack.nova.hypervisor.{metric}',
-                value,
-                tags=tags + [f'hypervisor_id:{id}', f'hypervisor_hostname:{name}'],
+    def _report_compute_hypervisors(self, api, project, project_tags):
+        compute_hypervisors_detail = api.get_compute_hypervisors_detail(
+            project, self.instance.get('collect_hypervisor_load', True)
+        )
+        self.log.debug("compute_hypervisors_detail: %s", compute_hypervisors_detail)
+        for hypervisor_id, hypervisor_data in compute_hypervisors_detail.items():
+            hypervisor_tags = project_tags + _create_hypervisor_metric_tags(hypervisor_id, hypervisor_data)
+            self._report_hypervisor_service_check(
+                hypervisor_data.get('state'), hypervisor_data["name"], hypervisor_tags
             )
+            if self.instance.get('collect_hypervisor_metrics', True):
+                self._report_hypervisor_metrics(hypervisor_id, hypervisor_data, hypervisor_tags)
+
+    def _report_hypervisor_service_check(self, state, name, hypervisor_tags):
+        self.service_check(
+            'openstack.nova.hypervisor.up',
+            HYPERVISOR_SERVICE_CHECK.get(state, AgentCheck.UNKNOWN),
+            hostname=name,
+            tags=hypervisor_tags,
+        )
+
+    def _report_hypervisor_metrics(self, hypervisor_id, hypervisor_data, hypervisor_tags):
+        for metric, value in hypervisor_data.get('metrics', {}).items():
+            self._report_hypervisor_metric(metric, value, hypervisor_tags)
+            if self.instance.get('report_legacy_metrics', True):
+                self._report_hypervisor_legacy_metric(metric, value, hypervisor_tags)
+
+    def _report_hypervisor_metric(self, metric, value, tags):
+        self.gauge(f'openstack.nova.hypervisor.{metric}', value, tags=tags)
+
+    def _report_hypervisor_legacy_metric(self, metric, value, tags):
+        if metric in LEGACY_NOVA_HYPERVISOR_METRICS:
+            self.gauge(f'openstack.nova.{metric}', value, tags=tags)
+        elif metric in LEGACY_NOVA_HYPERVISOR_LOAD_METRICS:
+            self.gauge(f'openstack.nova.{LEGACY_NOVA_HYPERVISOR_LOAD_METRICS[metric]}', value, tags=tags)
 
     def _report_network_metrics(self, api, project):
         tags = [f"project_id:{project['id']}", f"project_name:{project['name']}"]
@@ -161,23 +195,3 @@ class OpenStackControllerCheck(AgentCheck):
             self.gauge('openstack.octavia.response_time', response_time, tags=tags)
         else:
             self.service_check('openstack.octavia.api.up', AgentCheck.CRITICAL)
-
-    def _report_legacy_metrics(self, api, project):
-        tags = [f"project_name:{project['name']}"]
-        if self.instance.get('collect_hypervisor_metrics', True):
-            compute_hypervisors_detail = api.get_compute_hypervisors_detail(project)
-            self.log.debug("compute_hypervisors_detail: %s", compute_hypervisors_detail)
-            for hypervisor_id, hypervisor_data in compute_hypervisors_detail.items():
-                for metric, value in hypervisor_data['metrics'].items():
-                    if metric in LEGACY_NOVA_HYPERVISOR_METRICS:
-                        self.gauge(
-                            f'openstack.nova.{metric}',
-                            value,
-                            tags=tags
-                            + [
-                                f'hypervisor_id:{hypervisor_id}',
-                                f'hypervisor:{hypervisor_data["name"]}',
-                                f'virt_type:{hypervisor_data["type"]}',
-                                f'status:{hypervisor_data["status"]}',
-                            ],
-                        )
