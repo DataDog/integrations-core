@@ -11,7 +11,10 @@ from requests.exceptions import HTTPError
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev import get_here
 from datadog_checks.openstack_controller import OpenStackControllerCheck
-from datadog_checks.openstack_controller.openstack_controller import LEGACY_NOVA_HYPERVISOR_METRICS
+from datadog_checks.openstack_controller.openstack_controller import (
+    LEGACY_NOVA_HYPERVISOR_METRICS,
+    NOVA_HYPERVISOR_METRICS,
+)
 
 pytestmark = [pytest.mark.unit]
 
@@ -456,8 +459,10 @@ def test_compute_hypervisors_detail(aggregator, dd_run_check):
         check = OpenStackControllerCheck('test', {}, [instance])
         dd_run_check(check)
         for _hypervisor_id, hypervisor_data in hypervisors_content.items():
-            for metric, value in hypervisor_data['metrics'].items():
-                aggregator.assert_metric(f'openstack.nova.hypervisor.{metric}', value)
+            for metric, _value in hypervisor_data['metrics'].items():
+                aggregator.assert_metric(
+                    f'openstack.nova.hypervisor.{metric}', count=1 if metric in NOVA_HYPERVISOR_METRICS else 0
+                )
 
 
 def test_compute_hypervisors_detail_nova_microversion_last(aggregator, dd_run_check):
@@ -481,8 +486,10 @@ def test_compute_hypervisors_detail_nova_microversion_last(aggregator, dd_run_ch
         check = OpenStackControllerCheck('test', {}, [instance])
         dd_run_check(check)
         for _hypervisor_id, hypervisor_data in hypervisors_content.items():
-            for metric, value in hypervisor_data['metrics'].items():
-                aggregator.assert_metric(f'openstack.nova.hypervisor.{metric}', value)
+            for metric, _value in hypervisor_data['metrics'].items():
+                aggregator.assert_metric(
+                    f'openstack.nova.hypervisor.{metric}', count=1 if metric in NOVA_HYPERVISOR_METRICS else 0
+                )
 
 
 def test_network_endpoint_down(aggregator, dd_run_check):

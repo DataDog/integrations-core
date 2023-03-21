@@ -119,3 +119,16 @@ class ComputeRest:
                             'load_{}'.format(avg)
                         ] = load_averages[i]
         return hypervisors_detail_metrics
+
+    def get_os_aggregates(self):
+        response = self.http.get('{}/os-aggregates'.format(self.endpoint))
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        os_aggregates = {}
+        for aggregate in response.json()['aggregates']:
+            os_aggregates[str(aggregate['id'])] = {
+                'name': aggregate['name'],
+                'availability_zone': aggregate['availability_zone'],
+                'hosts': aggregate['hosts'],
+            }
+        return os_aggregates

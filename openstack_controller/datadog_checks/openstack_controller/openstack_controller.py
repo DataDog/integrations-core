@@ -9,6 +9,23 @@ from datadog_checks.openstack_controller.api.factory import make_api
 
 HYPERVISOR_SERVICE_CHECK = {'up': AgentCheck.OK, 'down': AgentCheck.CRITICAL}
 
+NOVA_HYPERVISOR_METRICS = [
+    'current_workload',  # Available until version 2.87
+    'disk_available_least',  # Available until version 2.87
+    'free_disk_gb',  # Available until version 2.87
+    'free_ram_mb',  # Available until version 2.87
+    'local_gb',  # Available until version 2.87
+    'local_gb_used',  # Available until version 2.87
+    'memory_mb',  # Available until version 2.87
+    'memory_mb_used',  # Available until version 2.87
+    'running_vms',  # Available until version 2.87
+    'vcpus',  # Available until version 2.87
+    'vcpus_used',  # Available until version 2.87
+    'load_1',
+    'load_5',
+    'load_15',
+]
+
 LEGACY_NOVA_HYPERVISOR_METRICS = [
     'current_workload',
     'disk_available_least',
@@ -30,13 +47,18 @@ LEGACY_NOVA_HYPERVISOR_LOAD_METRICS = {
 }
 
 
-def _create_hypervisor_metric_tags(hypervisor_id, hypervisor_data):
-    return [
+def _create_hypervisor_metric_tags(hypervisor_id, hypervisor_data, os_aggregates):
+    tags = [
         f'hypervisor_id:{hypervisor_id}',
         f'hypervisor:{hypervisor_data.get("name")}',
         f'virt_type:{hypervisor_data.get("type")}',
         f'status:{hypervisor_data.get("status")}',
     ]
+    for os_aggregate_id, os_aggregate_value in os_aggregates.items():
+        if hypervisor_data.get("name") in os_aggregate_value.get('hosts', []):
+            tags.append('aggregate:{}'.format(os_aggregate_value.get("name")))
+            tags.append('availability_zone:{}'.format(os_aggregate_value.get("availability_zone")))
+    return tags
 
 
 def _create_project_tags(project):
@@ -96,7 +118,7 @@ class OpenStackControllerCheck(AgentCheck):
                 self.service_check('openstack.nova.api.up', AgentCheck.OK)
                 self.log.debug("response_time: %s", response_time)
                 self.gauge('openstack.nova.response_time', response_time, tags=project_tags)
-                compute_limits = api.get_compute_limits(project)
+                compute_limits = api.get_compute_limits(project_id)
                 self.log.debug("compute_limits: %s", compute_limits)
                 for metric, value in compute_limits.items():
                     self.gauge(f'openstack.nova.limits.{metric}', value, tags=project_tags)
@@ -131,8 +153,12 @@ class OpenStackControllerCheck(AgentCheck):
             project, self.instance.get('collect_hypervisor_load', True)
         )
         self.log.debug("compute_hypervisors_detail: %s", compute_hypervisors_detail)
+        compute_os_aggregates = api.get_compute_os_aggregates(project['id'])
+        self.log.debug("compute_os_aggregates: %s", compute_os_aggregates)
         for hypervisor_id, hypervisor_data in compute_hypervisors_detail.items():
-            hypervisor_tags = project_tags + _create_hypervisor_metric_tags(hypervisor_id, hypervisor_data)
+            hypervisor_tags = project_tags + _create_hypervisor_metric_tags(
+                hypervisor_id, hypervisor_data, compute_os_aggregates
+            )
             self._report_hypervisor_service_check(
                 hypervisor_data.get('state'), hypervisor_data["name"], hypervisor_tags
             )
@@ -154,7 +180,8 @@ class OpenStackControllerCheck(AgentCheck):
                 self._report_hypervisor_legacy_metric(metric, value, hypervisor_tags)
 
     def _report_hypervisor_metric(self, metric, value, tags):
-        self.gauge(f'openstack.nova.hypervisor.{metric}', value, tags=tags)
+        if metric in NOVA_HYPERVISOR_METRICS:
+            self.gauge(f'openstack.nova.hypervisor.{metric}', value, tags=tags)
 
     def _report_hypervisor_legacy_metric(self, metric, value, tags):
         if metric in LEGACY_NOVA_HYPERVISOR_METRICS:
