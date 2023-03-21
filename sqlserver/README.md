@@ -73,7 +73,7 @@ To configure this check for an Agent running on a host:
 
     See the [example check configuration][6] for a comprehensive description of all options, including how to use custom queries to create your own metrics.
 
-    **Note**: The (default) provider `SQLOLEDB` is being deprecated. To use the newer `MSOLEDBSQL` provider, set the `adoprovider` variable to `MSOLEDBSQL` in your `sqlserver.d/conf.yaml` file after having downloaded the new provider from [Microsoft][7]. It is also possible to use the Windows Authentication and not specify the username/password with:
+    **Note**: The (default) provider `SQLOLEDB` is being deprecated. To use the newer `MSOLEDBSQL` provider, set the `adoprovider` variable to `MSOLEDBSQL19` in your `sqlserver.d/conf.yaml` file after having downloaded the new provider from [Microsoft][7]. If you're using `MSOLEDBSQL` version 18 or lower, set the `adoprovider` variable to `MSOLEDBSQL` instead. It is also possible to use the Windows Authentication and not specify the username/password with:
 
       ```yaml
       connection_string: "Trusted_Connection=yes"
