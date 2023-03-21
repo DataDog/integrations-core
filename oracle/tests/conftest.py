@@ -60,7 +60,6 @@ E2E_METADATA_ORACLE_CLIENT = {
         'mkdir -p /usr/local/share/ca-certificates',
         'cp /opt/oracle/instantclient_19_3/client_wallet/cert.pem /usr/local/share/ca-certificates/ca-certificate.crt',
         'update-ca-certificates --verbose --fresh',
-        'cp /etc/ssl/certs/ce275665.0 /etc/ssl/ssl/certs/',
     ],
     'env_vars': {
         'LD_LIBRARY_PATH': '/opt/oracle/instantclient_19_3',

@@ -396,35 +396,40 @@ See [service_checks.json][12] for a list of service checks provided by this inte
 - Verify that both the Oracle Instant Client and SDK files are located in the same directory.
 The structure of the directory should look similar:
   ```text
-  |____sdk/
-  |____network/
-  |____libociei.dylib
-  |____libocci.dylib
-  |____libocci.dylib.10.1
-  |____adrci
-  |____uidrvci
-  |____libclntsh.dylib.19.1
-  |____ojdbc8.jar
-  |____BASIC_README
-  |____liboramysql19.dylib
-  |____libocijdbc19.dylib
-  |____libocci.dylib.19.1
-  |____libclntsh.dylib
-  |____xstreams.jar
-  |____libclntsh.dylib.10.1
-  |____libnnz19.dylib
-  |____libclntshcore.dylib.19.1
-  |____libocci.dylib.12.1
-  |____libocci.dylib.18.1
-  |____libclntsh.dylib.11.1
-  |____BASIC_LICENSE
-  |____SDK_LICENSE
-  |____libocci.dylib.11.1
-  |____libclntsh.dylib.12.1
-  |____libclntsh.dylib.18.1
-  |____ucp.jar
-  |____genezi
-  |____SDK_README
+  |___ BASIC_LITE_LICENSE
+  |___ BASIC_LITE_README
+  |___ adrci
+  |___ genezi
+  |___ libclntsh.so -> libclntsh.so.19.1
+  |___ libclntsh.so.10.1 -> libclntsh.so.19.1
+  |___ libclntsh.so.11.1 -> libclntsh.so.19.1
+  |___ libclntsh.so.12.1 -> libclntsh.so.19.1
+  |___ libclntsh.so.18.1 -> libclntsh.so.19.1
+  |___ libclntsh.so.19.1
+  |___ libclntshcore.so.19.1
+  |___ libipc1.so
+  |___ libmql1.so
+  |___ libnnz19.so
+  |___ libocci.so -> libocci.so.19.1
+  |___ libocci.so.10.1 -> libocci.so.19.1
+  |___ libocci.so.11.1 -> libocci.so.19.1
+  |___ libocci.so.12.1 -> libocci.so.19.1
+  |___ libocci.so.18.1 -> libocci.so.19.1
+  |___ libocci.so.19.1
+  |___ libociicus.so
+  |___ libocijdbc19.so
+  |___ liboramysql19.so
+  |___ listener.ora
+  |___ network
+  |   `___ admin
+  |       |___ README
+  |       |___ cwallet.sso
+  |       |___ sqlnet.ora
+  |       `___ tnsnames.ora
+  |___ ojdbc8.jar
+  |___ ucp.jar
+  |___ uidrvci
+  `___ xstreams.jar
   ```
 
 #### JDBC driver (Linux only)
