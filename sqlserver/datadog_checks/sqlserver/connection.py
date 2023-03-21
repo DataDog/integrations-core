@@ -129,7 +129,7 @@ def parse_connection_string_properties(cs):
 class Connection(object):
     """Manages the connection to a SQL Server instance."""
 
-    DEFAULT_COMMAND_TIMEOUT = 5
+    DEFAULT_COMMAND_TIMEOUT = 10
     DEFAULT_DATABASE = 'master'
     DEFAULT_DRIVER = '{ODBC Driver 18 for SQL Server}'
     DEFAULT_DB_KEY = 'database'
