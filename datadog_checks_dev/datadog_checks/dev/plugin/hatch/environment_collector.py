@@ -104,13 +104,13 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             'scripts': {
                 'style': [
                     f'ruff --config {settings_dir}/pyproject.toml .',
-                    f'flake8 --config={settings_dir}/.flake8 .',
+                    # f'flake8 --config={settings_dir}/.flake8 .',
                     f'black --config {settings_dir}/pyproject.toml --check --diff .',
-                    f'isort --settings-path {settings_dir}/pyproject.toml --check-only --diff .',
+                    # f'isort --settings-path {settings_dir}/pyproject.toml --check-only --diff .',
                 ],
                 'fmt': [
                     f'ruff --config {settings_dir}/pyproject.toml --fix .',
-                    f'isort . --settings-path {settings_dir}/pyproject.toml',
+                    # f'isort . --settings-path {settings_dir}/pyproject.toml',
                     f'black . --config {settings_dir}/pyproject.toml',
                     'python -c "print(\'\\n[NOTE] hello flake8 may still report style errors for things '
                     'black cannot fix, these will need to be fixed manually.\')"',
@@ -121,10 +121,10 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             # We pin deps in order to make CI more stable/reliable.
             'dependencies': [
                 'black==22.12.0',
-                'flake8==5.0.4',
-                'flake8-bugbear==22.9.11',
-                'flake8-logging-format==0.9.0',
-                'isort==5.11.4',
+                # 'flake8==5.0.4',
+                # 'flake8-bugbear==22.9.11',
+                # 'flake8-logging-format==0.9.0',
+                # 'isort==5.11.4',
                 'ruff==0.0.257',
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
                 'pydantic==1.10.4',
@@ -151,7 +151,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             )
             lint_env['dependencies'].extend(self.mypy_deps)
 
-        if self.is_dev_package:
-            lint_env['dependencies'].append('flake8-tidy-imports==4.8.0')
+        # if self.is_dev_package:
+        #     lint_env['dependencies'].append('flake8-tidy-imports==4.8.0')
 
         return config
