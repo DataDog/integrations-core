@@ -234,6 +234,10 @@ class ConfluentKafkaClient(KafkaClient):
             for possible_consumer_group_regex in self.config._consumer_groups:
                 if not re.match(possible_consumer_group_regex, consumer_group):
                     continue
+                
+                # If topics is empty, add the topic and partition
+                if not self.config._consumer_groups.get(possible_consumer_group_regex):
+                    filtered_list.append((topic, partition))
 
                 # Do a regex filtering here for topics
                 for posible_topic_regex in self.config._consumer_groups[possible_consumer_group_regex]:
@@ -254,5 +258,6 @@ class ConfluentKafkaClient(KafkaClient):
                             topic,
                         )
                         continue
+            
                     filtered_list.append((topic, partition))
         return filtered_list
