@@ -84,15 +84,6 @@ select = [
   "G",
   "W",
   "I",
-  "F821",
-  # "B001",  bare except
-  "B003",
-  "B006",
-  "B007",
-  # "B301",
-  # "B305",
-  # "B306",
-  # "B902",
 ]
 ignore = [
   # From legacy flake8 settings

@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import Any, Tuple
+from typing import Any, Tuple  # noqa: F401
 
 import pytest
 

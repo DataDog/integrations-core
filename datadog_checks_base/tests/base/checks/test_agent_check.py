@@ -5,7 +5,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import logging
-from typing import Any
+from typing import Any  # noqa: F401
 
 import mock
 import pytest

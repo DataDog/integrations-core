@@ -4,7 +4,7 @@
 
 import re
 from math import isnan
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple  # noqa: F401
 
 from six.moves import range, zip
 
