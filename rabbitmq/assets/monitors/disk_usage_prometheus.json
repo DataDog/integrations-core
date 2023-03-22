@@ -1,0 +1,29 @@
+{
+	  "id": 9795081,
+	  "name": "[RabbitMQ - OMV2] Disk Space is Low",
+	  "type": "query alert",
+	  "query": "avg(last_5m):avg:rabbitmq.alarms.free_disk_space.watermark{*} >= 1",
+	  "message": "{{#is_alert}}\nDisk space is extremely low. \nThis can be caused by an overload of messages or persistent messages that are being mismanaged. \nPlease resolve.\n{{/is_alert}}",
+	  "tags": [
+		    "integration:rabbitmq"
+	  ],
+	  "options": {
+		    "thresholds": {
+			      "critical": 1
+		    },
+		    "notify_audit": false,
+		    "require_full_window": false,
+		    "notify_no_data": false,
+		    "renotify_interval": 180,
+		    "include_tags": false,
+		    "renotify_statuses": [
+			      "alert"
+		    ],
+		    "escalation_message": "Disk space is still extremely low. \nThis can be caused by an overload of messages or persistent messages that are being mismanaged. \nPlease resolve.",
+		    "avalanche_window": 10,
+		    "new_host_delay": 300,
+		    "silenced": {}
+	  },
+	  "priority": 3,
+	  "restricted_roles": null
+}
