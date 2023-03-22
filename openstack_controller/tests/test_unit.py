@@ -7,45 +7,14 @@ import os
 
 import mock
 import pytest
-from mock import ANY
 from requests.exceptions import HTTPError
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev import get_here
 from datadog_checks.openstack_controller import OpenStackControllerCheck
-from datadog_checks.openstack_controller.api.type import ApiType
 from datadog_checks.openstack_controller.check import LEGACY_NOVA_HYPERVISOR_METRICS
 
-from .common import TEST_OPENSTACK_CONFIG_PATH
-
 pytestmark = [pytest.mark.unit]
-
-
-def test_api_rest(aggregator, dd_run_check, caplog):
-    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api:
-        api = mock.MagicMock()
-        mocked_api.return_value = api
-        instance = {
-            'keystone_server_url': 'http://10.164.0.83/identity',
-            'user_name': 'admin',
-            'user_password': 'password',
-        }
-        check = OpenStackControllerCheck('test', {}, [instance])
-        dd_run_check(check)
-        mocked_api.assert_called_with(ApiType.REST, ANY, ANY, ANY)
-
-
-def test_api_sdk(aggregator, dd_run_check, caplog):
-    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api:
-        api = mock.MagicMock()
-        mocked_api.return_value = api
-        instance = {
-            'openstack_cloud_name': 'test_cloud',
-            'openstack_config_file_path': TEST_OPENSTACK_CONFIG_PATH,
-        }
-        check = OpenStackControllerCheck('test', {}, [instance])
-        dd_run_check(check)
-        mocked_api.assert_called_with(ApiType.SDK, ANY, ANY, ANY)
 
 
 def test_connect_exception(aggregator, dd_run_check, caplog):

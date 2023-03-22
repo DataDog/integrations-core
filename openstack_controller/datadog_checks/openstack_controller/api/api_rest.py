@@ -19,7 +19,7 @@ class ComponentType(str, Enum):
 
 
 class ApiRest(Api):
-    def __init__(self, logger, config, http):
+    def __init__(self, config, logger, http):
         super(ApiRest, self).__init__()
         self.log = logger
         self.config = config
@@ -145,10 +145,10 @@ class ApiRest(Api):
         self.log.debug("response: %s", response.json())
         json_resp = response.json()
         for project in json_resp['projects']:
-            self._get_auth_project(project)
+            self._post_auth_project(project)
         self.log.debug("project_auth_tokens: %s", self.project_auth_tokens)
 
-    def _get_auth_project(self, project):
+    def _post_auth_project(self, project):
         payload = (
             '{{"auth": {{"identity": {{"methods": ["password"], '
             '"password": {{"user": {}}}}}, '

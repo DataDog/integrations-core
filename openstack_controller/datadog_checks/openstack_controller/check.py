@@ -74,7 +74,7 @@ class OpenStackControllerCheck(AgentCheck):
     def check(self, _instance):
         self.log.debug(self.instance)
         try:
-            api = make_api(self.config.api_type, self.config, self.log, self.http)
+            api = make_api(self.config, self.log, self.http)
             api.create_connection()
             # Artificial metric introduced to distinguish between old and new openstack integrations
             self.gauge("openstack.controller", 1)
