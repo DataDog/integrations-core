@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import logging
 import os
 
 import mock
@@ -63,12 +64,15 @@ pytestmark = [pytest.mark.unit]
 #         dd_run_check(check)
 
 
-def test_connect_exception(aggregator, dd_run_check):
+def test_connect_exception(aggregator, dd_run_check, caplog):
     with pytest.raises(Exception), mock.patch(
         'datadog_checks.openstack_controller.openstack_controller.make_api'
     ) as mocked_api:
+        exception_msg = "Exception description"
+        warning_msg = f'Exception while creating api: {exception_msg}'
+        caplog.set_level(logging.WARN)
         api = mock.MagicMock()
-        api.create_connection.side_effect = [Exception()]
+        api.create_connection.side_effect = [Exception(exception_msg)]
         mocked_api.return_value = api
         instance = {
             'keystone_server_url': 'http://10.164.0.83/identity',
@@ -78,12 +82,15 @@ def test_connect_exception(aggregator, dd_run_check):
         check = OpenStackControllerCheck('test', {}, [instance])
         dd_run_check(check)
     aggregator.assert_service_check('openstack.keystone.api.up', status=check.CRITICAL)
+    assert warning_msg in caplog.text
 
 
-def test_connect_http_error(aggregator, dd_run_check):
+def test_connect_http_error(aggregator, dd_run_check, caplog):
     with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api:
+        exception_msg = "Exception description"
+        warning_msg = exception_msg
         api = mock.MagicMock()
-        api.create_connection.side_effect = [HTTPError()]
+        api.create_connection.side_effect = [HTTPError(exception_msg)]
         mocked_api.return_value = api
         instance = {
             'keystone_server_url': 'http://10.164.0.83/identity',
@@ -93,6 +100,7 @@ def test_connect_http_error(aggregator, dd_run_check):
         check = OpenStackControllerCheck('test', {}, [instance])
         dd_run_check(check)
         aggregator.assert_service_check('openstack.keystone.api.up', status=check.CRITICAL)
+        assert warning_msg in caplog.text
 
 
 def test_connect_ok(aggregator, dd_run_check):
@@ -365,7 +373,7 @@ def test_compute_flavors_nova_microversion_last(aggregator, dd_run_check):
         ),
     ],
 )
-def test_hypervisor_service_check(hypervisors_mock_file, os_aggregates_mock_file, status, aggregator, dd_run_check):
+def test_compute_hypervisor_service_check(hypervisors_mock_file, os_aggregates_mock_file, status, aggregator, dd_run_check):
     with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(os.path.join(get_here(), hypervisors_mock_file), 'r') as hypervisors, open(
@@ -464,7 +472,7 @@ def test_hypervisor_service_check(hypervisors_mock_file, os_aggregates_mock_file
         ),
     ],
 )
-def test_hypervisor_metrics(hypervisors_mock_file, os_aggregates_mock_file, instance, aggregator, dd_run_check):
+def test_compute_hypervisor_metrics(hypervisors_mock_file, os_aggregates_mock_file, instance, aggregator, dd_run_check):
     with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(os.path.join(get_here(), hypervisors_mock_file), 'r') as hypervisors, open(

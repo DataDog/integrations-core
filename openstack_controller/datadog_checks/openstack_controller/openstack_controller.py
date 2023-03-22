@@ -86,12 +86,8 @@ class OpenStackControllerCheck(AgentCheck):
             self.service_check('openstack.ironic.api.up', AgentCheck.UNKNOWN)
             self.service_check('openstack.octavia.api.up', AgentCheck.UNKNOWN)
         except Exception as e:
-            self.log.error("Exception while creating api: %s", e)
+            self.warning("Exception while creating api: %s", e)
             self.service_check('openstack.keystone.api.up', AgentCheck.CRITICAL)
-            self.service_check('openstack.nova.api.up', AgentCheck.UNKNOWN)
-            self.service_check('openstack.neutron.api.up', AgentCheck.UNKNOWN)
-            self.service_check('openstack.ironic.api.up', AgentCheck.UNKNOWN)
-            self.service_check('openstack.octavia.api.up', AgentCheck.UNKNOWN)
             raise e
         else:
             self._report_metrics(api)
