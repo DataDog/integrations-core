@@ -25,7 +25,7 @@ files:
       value:
         type: integer
     - name: scope_id
-      description: The `scope_id` of the network device that should handle the traffic.
+      description: The `scope_id` of the network device handling the traffic. Used only for IPv6.
       required: false
       value:
         type: integer
