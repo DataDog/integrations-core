@@ -7,61 +7,45 @@ import os
 
 import mock
 import pytest
+from mock import ANY
 from requests.exceptions import HTTPError
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev import get_here
 from datadog_checks.openstack_controller import OpenStackControllerCheck
+from datadog_checks.openstack_controller.api.type import ApiType
 from datadog_checks.openstack_controller.check import LEGACY_NOVA_HYPERVISOR_METRICS
+
+from .common import TEST_OPENSTACK_CONFIG_PATH
 
 pytestmark = [pytest.mark.unit]
 
 
-# @pytest.mark.parametrize(
-#     'instance, expected_exception',
-#     [
-#         pytest.param(
-#             {},
-#             pytest.raises(
-#                 Exception, match='Either `keystone_server_url` or `openstack_config_file_path` need to be configured'
-#             ),
-#             id='keystone_server_url_not_configured',
-#         ),
-#         pytest.param(
-#             {'keystone_server_url': 'http://127.0.0.1/identity'},
-#             pytest.raises(Exception, match='`user_name` and `user_password` need to be configured'),
-#             id='user_name_not_configured',
-#         ),
-#         pytest.param(
-#             {'keystone_server_url': 'http://127.0.0.1/identity', 'user_name': 'admin'},
-#             pytest.raises(Exception, match='`user_name` and `user_password` need to be configured'),
-#             id='user_password_not_configured',
-#         ),
-#         pytest.param(
-#             {
-#                 'keystone_server_url': 'http://127.0.0.1:8080/identity',
-#                 'user_name': 'admin',
-#                 'user_password': 'password',
-#             },
-#             does_not_raise(),
-#             id='ok',
-#         ),
-#     ],
-# )
-# def test_config_validation(
-#     aggregator,
-#     dd_run_check,
-#     instance,
-#     expected_exception,
-# ):
-#     with expected_exception, mock.patch(
-#         'datadog_checks.openstack_controller.check.make_api'
-#     ) as mocked_api, open(os.path.join(get_here(), 'fixtures/empty_projects.json'), 'r') as empty_projects:
-#         api = mock.MagicMock()
-#         api.get_projects.return_value = json.load(empty_projects)
-#         mocked_api.return_value = api
-#         check = OpenStackControllerCheck('test', {}, [instance])
-#         dd_run_check(check)
+def test_api_rest(aggregator, dd_run_check, caplog):
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api:
+        api = mock.MagicMock()
+        mocked_api.return_value = api
+        instance = {
+            'keystone_server_url': 'http://10.164.0.83/identity',
+            'user_name': 'admin',
+            'user_password': 'password',
+        }
+        check = OpenStackControllerCheck('test', {}, [instance])
+        dd_run_check(check)
+        mocked_api.assert_called_with(ApiType.REST, ANY, ANY, ANY)
+
+
+def test_api_sdk(aggregator, dd_run_check, caplog):
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api:
+        api = mock.MagicMock()
+        mocked_api.return_value = api
+        instance = {
+            'openstack_cloud_name': 'test_cloud',
+            'openstack_config_file_path': TEST_OPENSTACK_CONFIG_PATH,
+        }
+        check = OpenStackControllerCheck('test', {}, [instance])
+        dd_run_check(check)
+        mocked_api.assert_called_with(ApiType.SDK, ANY, ANY, ANY)
 
 
 def test_connect_exception(aggregator, dd_run_check, caplog):

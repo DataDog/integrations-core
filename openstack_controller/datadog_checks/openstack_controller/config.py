@@ -1,6 +1,7 @@
 from openstack.config.loader import OpenStackConfig as OpenStackSdkConfig
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.openstack_controller.api.type import ApiType
 
 
 class OpenstackConfig:
@@ -14,6 +15,8 @@ class OpenstackConfig:
         self.user_password = instance.get("user_password")
         self.domain_id = instance.get("domain_id", "default")
         self.user = instance.get("user")
+        self.nova_microversion = instance.get('nova_microversion')
+        self.api_type = None
         self.validate()
 
     def validate(self):
@@ -37,6 +40,7 @@ class OpenstackConfig:
         else:
             self.log.info("Not detected `user_name` in config. Searching for legacy `user` config")
             self._validate_user_legacy()
+        self.api_type = ApiType.REST
 
     def _validate_user_legacy(self):
         if self.user is None:
@@ -58,3 +62,4 @@ class OpenstackConfig:
         config = OpenStackSdkConfig(load_envvars=False, config_files=[self.openstack_config_file_path])
         config.get_all_clouds()
         config.get_one(cloud=self.openstack_cloud_name)
+        self.api_type = ApiType.SDK

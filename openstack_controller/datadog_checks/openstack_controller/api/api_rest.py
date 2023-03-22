@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from enum import Enum
 
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.baremetal_rest import BaremetalRest
 from datadog_checks.openstack_controller.api.compute_rest import ComputeRest
@@ -23,23 +24,20 @@ class ApiRest(Api):
         self.log = logger
         self.config = config
         self.http = http
-        nova_microversion = self.config.get('nova_microversion', None)
-        if nova_microversion:
-            self.log.debug("adding X-OpenStack-Nova-API-Version header to `%s`", nova_microversion)
-            self.http.options['headers']['X-OpenStack-Nova-API-Version'] = nova_microversion
+        if self.config.nova_microversion:
+            self.log.debug("adding X-OpenStack-Nova-API-Version header to `%s`", self.config.nova_microversion)
+            self.http.options['headers']['X-OpenStack-Nova-API-Version'] = self.config.nova_microversion
         self.project_auth_tokens = {}
         self.endpoints = {}
         self.components = {}
 
     def create_connection(self):
         self.log.debug("creating connection")
-        self.log.debug("config: %s", self.config)
-        keystone_server_url = self.config.get("keystone_server_url")
-        response = self.http.get('{}/v3'.format(keystone_server_url))
+        response = self.http.get('{}/v3'.format(self.config.keystone_server_url))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        self._get_x_auth_token(keystone_server_url)
-        self._get_auth_projects(keystone_server_url)
+        self._get_x_auth_token()
+        self._get_auth_projects()
 
     def get_projects(self):
         self.log.debug("getting projects")
@@ -129,45 +127,38 @@ class ApiRest(Api):
             return component.get_quotas(project['id'])
         return None
 
-    def _get_x_auth_token(self, keystone_server_url):
+    def _get_x_auth_token(self):
         self.log.debug("getting `X-Subject-Token`")
-        payload = (
-            '{{"auth": {{"identity": {{"methods": ["password"], '
-            '"password": {{"user": {{"name": "{}", "domain": {{ "id": "{}" }}, "password": "{}"}}}}}}}}}}'.format(
-                self.config.get("user_name"),
-                self.config.get("user_domain", "default"),
-                self.config.get("user_password"),
-            )
+        payload = '{{"auth": {{"identity": {{"methods": ["password"], ' '"password": {{"user": {}}}}}}}}}'.format(
+            json.dumps(self.config.user),
         )
         self.log.debug("payload: %s", payload)
-        response = self.http.post('{}/v3/auth/tokens'.format(keystone_server_url), data=payload)
+        response = self.http.post('{}/v3/auth/tokens'.format(self.config.keystone_server_url), data=payload)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         self.http.options['headers']['X-Auth-Token'] = response.headers['X-Subject-Token']
 
-    def _get_auth_projects(self, keystone_server_url):
+    def _get_auth_projects(self):
         self.log.debug("getting auth/projects")
-        response = self.http.get('{}/v3/auth/projects'.format(keystone_server_url))
+        response = self.http.get('{}/v3/auth/projects'.format(self.config.keystone_server_url))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         json_resp = response.json()
         for project in json_resp['projects']:
-            self._get_auth_project(keystone_server_url, project)
+            self._get_auth_project(project)
         self.log.debug("project_auth_tokens: %s", self.project_auth_tokens)
 
-    def _get_auth_project(self, keystone_server_url, project):
+    def _get_auth_project(self, project):
         payload = (
             '{{"auth": {{"identity": {{"methods": ["password"], '
-            '"password": {{"user": {{"name": "{}", "domain": {{ "id": "{}" }}, "password": "{}"}}}}}}, '
+            '"password": {{"user": {}}}}}, '
             '"scope": {{"project": {{"id": "{}"}}}}}}}}'.format(
-                self.config.get("user_name"),
-                self.config.get("user_domain", "default"),
-                self.config.get("user_password"),
+                json.dumps(self.config.user),
                 project['id'],
             )
         )
         self.log.debug("payload: %s", payload)
-        response = self.http.post('{}/v3/auth/tokens'.format(keystone_server_url), data=payload)
+        response = self.http.post('{}/v3/auth/tokens'.format(self.config.keystone_server_url), data=payload)
         self.log.debug("project name: %s", project['name'])
         self.log.debug("response: %s", response.json())
         self.project_auth_tokens[project['id']] = {
