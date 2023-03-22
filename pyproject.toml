@@ -73,6 +73,19 @@ exclude = [
     "__init__.py",
     "datadog_checks_dev/datadog_checks/dev/tooling/templates/*",
     "*/datadog_checks/*/vendor/*",
+    "AGENT_CHANGELOG.md",
+    "AGENT_INTEGRATIONS.md",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "LICENSE-3rdparty.csv",
+    "README.md",
+    "errors.txt",
+    "mkdocs.yml",
+    "pyproject.toml",
+    "requirements-agent-release.txt",
+    "tox.ini",
+    ".gitlab/*",
+    ".ddev/*"
 ]
 target-version = "py37"
 line-length = 120
@@ -107,8 +120,9 @@ known-first-party = ["{template_config['package_name']}"]
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
 
-# [tool.ruff.per-file-ignores]
-# Tests can use assertions and relative imports
-# "**/tests/**/*" = ["S101", "TID252"]
-# "datadog_checks/*/config_models/deprecations.py" = ["E501"]
-# "tests/models/config_models/deprecations.py" = ["E501"]
+[tool.ruff.per-file-ignores]
+#Tests can use assertions and relative imports
+"**/tests/**/*" = ["S101", "TID252"]
+"datadog_checks/*/config_models/deprecations.py" = ["E501"]
+"tests/models/config_models/deprecations.py" = ["E501"]
+

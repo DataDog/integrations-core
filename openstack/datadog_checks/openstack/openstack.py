@@ -60,32 +60,30 @@ NOVA_SERVER_METRICS = [
 
 NOVA_SERVER_INTERFACE_SEGMENTS = ['_rx', '_tx']
 
-PROJECT_METRICS = dict(
-    [
-        ("maxImageMeta", "max_image_meta"),
-        ("maxPersonality", "max_personality"),
-        ("maxPersonalitySize", "max_personality_size"),
-        ("maxSecurityGroupRules", "max_security_group_rules"),
-        ("maxSecurityGroups", "max_security_groups"),
-        ("maxServerMeta", "max_server_meta"),
-        ("maxTotalCores", "max_total_cores"),
-        ("maxTotalFloatingIps", "max_total_floating_ips"),
-        ("maxTotalInstances", "max_total_instances"),
-        ("maxTotalKeypairs", "max_total_keypairs"),
-        ("maxTotalRAMSize", "max_total_ram_size"),
-        ("totalImageMetaUsed", "total_image_meta_used"),
-        ("totalPersonalityUsed", "total_personality_used"),
-        ("totalPersonalitySizeUsed", "total_personality_size_used"),
-        ("totalSecurityGroupRulesUsed", "total_security_group_rules_used"),
-        ("totalSecurityGroupsUsed", "total_security_groups_used"),
-        ("totalServerMetaUsed", "total_server_meta_used"),
-        ("totalCoresUsed", "total_cores_used"),
-        ("totalFloatingIpsUsed", "total_floating_ips_used"),
-        ("totalInstancesUsed", "total_instances_used"),
-        ("totalKeypairsUsed", "total_keypairs_used"),
-        ("totalRAMUsed", "total_ram_used"),
-    ]
-)
+PROJECT_METRICS = {
+    "maxImageMeta": "max_image_meta",
+        "maxPersonality": "max_personality",
+        "maxPersonalitySize": "max_personality_size",
+        "maxSecurityGroupRules": "max_security_group_rules",
+        "maxSecurityGroups": "max_security_groups",
+        "maxServerMeta": "max_server_meta",
+        "maxTotalCores": "max_total_cores",
+        "maxTotalFloatingIps": "max_total_floating_ips",
+        "maxTotalInstances": "max_total_instances",
+        "maxTotalKeypairs": "max_total_keypairs",
+        "maxTotalRAMSize": "max_total_ram_size",
+        "totalImageMetaUsed": "total_image_meta_used",
+        "totalPersonalityUsed": "total_personality_used",
+        "totalPersonalitySizeUsed": "total_personality_size_used",
+        "totalSecurityGroupRulesUsed": "total_security_group_rules_used",
+        "totalSecurityGroupsUsed": "total_security_groups_used",
+        "totalServerMetaUsed": "total_server_meta_used",
+        "totalCoresUsed": "total_cores_used",
+        "totalFloatingIpsUsed": "total_floating_ips_used",
+        "totalInstancesUsed": "total_instances_used",
+        "totalKeypairsUsed": "total_keypairs_used",
+        "totalRAMUsed": "total_ram_used",
+}
 
 DIAGNOSTICABLE_STATES = ['ACTIVE']
 
@@ -544,9 +542,9 @@ class OpenStackCheck(AgentCheck):
         # Mapping of Nova-managed servers to tags
         self.external_host_tags = {}
 
-        self.exclude_network_id_rules = set([re.compile(ex) for ex in init_config.get('exclude_network_ids', [])])
+        self.exclude_network_id_rules = {re.compile(ex) for ex in init_config.get('exclude_network_ids', [])}
 
-        self.exclude_server_id_rules = set([re.compile(ex) for ex in init_config.get('exclude_server_ids', [])])
+        self.exclude_server_id_rules = {re.compile(ex) for ex in init_config.get('exclude_server_ids', [])}
 
         skip_proxy = not is_affirmative(init_config.get('use_agent_proxy', True))
         self.proxy_config = None if skip_proxy else self.proxies

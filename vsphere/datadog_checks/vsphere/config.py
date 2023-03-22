@@ -29,7 +29,7 @@ from datadog_checks.vsphere.constants import (
     REALTIME_RESOURCES,
 )
 from datadog_checks.vsphere.resource_filters import ResourceFilter, create_resource_filter  # noqa: F401
-from datadog_checks.vsphere.types import InstanceConfig, MetricFilterConfig, MetricFilters, ResourceFilterConfig  # noqa: F401
+from datadog_checks.vsphere.types import InstanceConfig, MetricFilterConfig, MetricFilters, ResourceFilterConfig  # noqa: E501, F401
 
 
 class VSphereConfig(object):

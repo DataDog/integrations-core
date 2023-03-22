@@ -12,7 +12,7 @@ import traceback
 import unicodedata
 from collections import deque
 from os.path import basename
-from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Set, Tuple, Union  # noqa: F401
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Set, Tuple, Union  # noqa: E501, F401
 
 import yaml
 from six import PY2, binary_type, iteritems, raise_from, text_type
@@ -439,7 +439,7 @@ class AgentCheck(object):
         models_config = models_config or {}
         typos = set()  # type: Set[str]
 
-        known_options = set([k for k, _ in models_config])  # type: Set[str]
+        known_options = {k for k, _ in models_config}  # type: Set[str]
 
         if not PY2:
 
