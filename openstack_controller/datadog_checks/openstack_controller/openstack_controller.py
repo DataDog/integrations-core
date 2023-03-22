@@ -60,32 +60,30 @@ NOVA_SERVER_METRICS = [
 
 NOVA_SERVER_INTERFACE_SEGMENTS = ['_rx', '_tx']
 
-PROJECT_METRICS = dict(
-    [
-        ("maxImageMeta", "max_image_meta"),
-        ("maxPersonality", "max_personality"),
-        ("maxPersonalitySize", "max_personality_size"),
-        ("maxSecurityGroupRules", "max_security_group_rules"),
-        ("maxSecurityGroups", "max_security_groups"),
-        ("maxServerMeta", "max_server_meta"),
-        ("maxTotalCores", "max_total_cores"),
-        ("maxTotalFloatingIps", "max_total_floating_ips"),
-        ("maxTotalInstances", "max_total_instances"),
-        ("maxTotalKeypairs", "max_total_keypairs"),
-        ("maxTotalRAMSize", "max_total_ram_size"),
-        ("totalImageMetaUsed", "total_image_meta_used"),
-        ("totalPersonalityUsed", "total_personality_used"),
-        ("totalPersonalitySizeUsed", "total_personality_size_used"),
-        ("totalSecurityGroupRulesUsed", "total_security_group_rules_used"),
-        ("totalSecurityGroupsUsed", "total_security_groups_used"),
-        ("totalServerMetaUsed", "total_server_meta_used"),
-        ("totalCoresUsed", "total_cores_used"),
-        ("totalFloatingIpsUsed", "total_floating_ips_used"),
-        ("totalInstancesUsed", "total_instances_used"),
-        ("totalKeypairsUsed", "total_keypairs_used"),
-        ("totalRAMUsed", "total_ram_used"),
-    ]
-)
+PROJECT_METRICS = {
+    "maxImageMeta": "max_image_meta",
+        "maxPersonality": "max_personality",
+        "maxPersonalitySize": "max_personality_size",
+        "maxSecurityGroupRules": "max_security_group_rules",
+        "maxSecurityGroups": "max_security_groups",
+        "maxServerMeta": "max_server_meta",
+        "maxTotalCores": "max_total_cores",
+        "maxTotalFloatingIps": "max_total_floating_ips",
+        "maxTotalInstances": "max_total_instances",
+        "maxTotalKeypairs": "max_total_keypairs",
+        "maxTotalRAMSize": "max_total_ram_size",
+        "totalImageMetaUsed": "total_image_meta_used",
+        "totalPersonalityUsed": "total_personality_used",
+        "totalPersonalitySizeUsed": "total_personality_size_used",
+        "totalSecurityGroupRulesUsed": "total_security_group_rules_used",
+        "totalSecurityGroupsUsed": "total_security_groups_used",
+        "totalServerMetaUsed": "total_server_meta_used",
+        "totalCoresUsed": "total_cores_used",
+        "totalFloatingIpsUsed": "total_floating_ips_used",
+        "totalInstancesUsed": "total_instances_used",
+        "totalKeypairsUsed": "total_keypairs_used",
+        "totalRAMUsed": "total_ram_used",
+}
 
 DIAGNOSTICABLE_STATES = ['ACTIVE']
 
@@ -824,7 +822,7 @@ class OpenStackControllerCheck(AgentCheck):
             name = project.get('name')
             project_by_name[name] = project
         filtered_project_names = pattern_filter(
-            [p for p in project_by_name], whitelist=include_project_name_rules, blacklist=exclude_project_name_rules
+            list(project_by_name), whitelist=include_project_name_rules, blacklist=exclude_project_name_rules
         )
         result = {name: v for (name, v) in iteritems(project_by_name) if name in filtered_project_names}
         return result

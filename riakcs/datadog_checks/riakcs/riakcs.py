@@ -61,7 +61,7 @@ class RiakCs(AgentCheck):
                 getattr(self, method)("riakcs.{}".format(key), value, tags=tags)
         else:
             # pre 2.1 stats format
-            legends = dict([(len(k), k) for k in stats["legend"]])
+            legends = {len(k): k for k in stats["legend"]}
             del stats["legend"]
             for key, values in iteritems(stats):
                 legend = legends[len(values)]
@@ -147,8 +147,7 @@ STATS_METHODS = {"one": "count"}
 # Helpful references:
 # - https://github.com/basho/riak_cs/wiki/Riak-cs-and-stanchion-metrics
 
-V21_DEFAULT_METRICS = set(
-    [
+V21_DEFAULT_METRICS = {
         "memory_atom",
         "memory_atom_used",
         "memory_binary",
@@ -302,5 +301,4 @@ V21_DEFAULT_METRICS = set(
         "multipart_upload_put_time_99",
         "multipart_upload_put_time_mean",
         "multipart_upload_put_time_median",
-    ]
-)
+    }
