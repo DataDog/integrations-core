@@ -11,8 +11,8 @@ import re
 import shutil
 import sys
 import tempfile
-import urllib.request
 import urllib.error
+import urllib.request
 
 from in_toto import verifylib
 from in_toto.exceptions import LinkNotFoundError
@@ -134,7 +134,7 @@ class TUFDownloader:
                 with open(target_abspath, 'wb') as dest:
                     dest.write(resp.read())
         except urllib.error.HTTPError as err:
-            logger.error(f'GET {full_url}: {err}')
+            logger.error('GET %s: %s', full_url, err)
             raise
 
         return target_abspath
