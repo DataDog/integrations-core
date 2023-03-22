@@ -12,7 +12,7 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 #### Prerequisite
 
-To use the Oracle integration you can either use the native client (no additional install steps required), the Oracle Instant Client via `python-oracledb` Thick mode, or download the Oracle JDBC driver (Linux only). To use the Oracle integration with JDBC, download the Oracle JDBC driver. If not using the JDBC method, the minimum [supported version][2] is Oracle 12c.
+To use the Oracle integration you can either use the native client (no additional install steps required), the Oracle Instant Client by using `python-oracledb` thick mode, or download the Oracle JDBC driver (Linux only). To use the Oracle integration with JDBC, download the Oracle JDBC driver. If you are not using the JDBC method, the minimum [supported version][2] is Oracle 12c.
 Due to licensing restrictions, the JDBC library is not included in the Datadog Agent, but can be downloaded directly from Oracle.
 
 *NOTE*: Starting in v7.42.x, the Oracle integration only supports Python 3.
@@ -205,10 +205,10 @@ If you are not using JDBC, verify that the Datadog Agent is able to connect to y
 sqlplus <USER>/<PASSWORD>@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCPS)(HOST=<HOST>)(PORT=<PORT>))(SERVICE_NAME=<SERVICE_NAME>)))
 ```
 
-*Note*: When using the [Oracle Instant Client][16] connection, move three files to the `network/admin` directory of the client libraries used by your application:
-  * `tnsnames.ora` - Maps net service names used for application connection strings to your database services
-  * `sqlnet.ora` - Configures Oracle Network settings
-  * `cwallet.sso` - Enables SSL/TLS connections in Thick mode. Keep this file secure
+When using the [Oracle Instant Client][16] connection, move three files to the `network/admin` directory of the client libraries used by your application:
+  * `tnsnames.ora`: Maps net service names used for application connection strings to your database services.
+  * `sqlnet.ora`: Configures Oracle Network settings.
+  * `cwallet.sso`: Enables SSL or TLS connections in thick mode. Keep this file secure.
 
 ##### TCPS through JDBC
 
@@ -388,9 +388,9 @@ See [service_checks.json][12] for a list of service checks provided by this inte
   ```text
   Failed to connect to Oracle DB, error: DPY-6000: cannot connect to database. Listener refused connection. (Similar to ORA-12660)
   ```
-    - Ensure Native Network Encryption or Checksumming is not enabled. If they are enabled, you must use thick mode by setting `use_instant_client: true`.
+ - Ensure Native Network Encryption or Checksumming are not enabled. If they are enabled, you must use thick mode by setting `use_instant_client: true`.
 
-*Note:* See our documentation [here][3] on Oracle Instant Client setup.
+For more information about setting up the Oracle Instant Client, see the [Oracle integration documentation][3].
 
 #### Oracle Instant Client
 - Verify that both the Oracle Instant Client and SDK files are located in the same directory.

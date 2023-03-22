@@ -57,7 +57,7 @@ instances:
     password: <PASSWORD>
 
     ## @param use_instant_client - boolean - optional - default: false
-    ## Determines whether the Agent uses Oracle Instant Client to connect instead of the Oracle native client
+    ## Determines whether the Agent uses the Oracle Instant Client to connect instead of the Oracle native client.
     #
     # use_instant_client: false
 
