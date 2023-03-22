@@ -8,7 +8,7 @@ import os
 import re
 import warnings
 from base64 import urlsafe_b64encode
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple  # noqa: F401
 
 import pytest
 from six import PY2

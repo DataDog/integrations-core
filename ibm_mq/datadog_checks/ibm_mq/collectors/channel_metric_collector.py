@@ -1,15 +1,15 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List  # noqa: F401
 
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, to_string
-from datadog_checks.base.log import CheckLoggingAdapter
+from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 
 from .. import metrics
-from ..config import IBMMQConfig
+from ..config import IBMMQConfig  # noqa: F401
 
 try:
     import pymqi
