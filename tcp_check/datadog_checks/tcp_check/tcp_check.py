@@ -4,10 +4,7 @@
 import socket
 from collections import namedtuple
 from contextlib import closing
-<<<<<<< HEAD
 from typing import Any, List, Optional  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException

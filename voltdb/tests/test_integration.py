@@ -2,25 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import hashlib
-<<<<<<< HEAD
 from typing import Callable  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 import mock
 import pytest
 import requests
 
-<<<<<<< HEAD
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub  # noqa: F401
 from datadog_checks.voltdb import VoltDBCheck
 from datadog_checks.voltdb.client import Client
 from datadog_checks.voltdb.types import Instance  # noqa: F401
-=======
-from datadog_checks.voltdb import VoltDBCheck
-from datadog_checks.voltdb.client import Client
->>>>>>> 5f39deac0c (ignore existing F401)
 
 from . import assertions, common
 

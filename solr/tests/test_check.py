@@ -4,10 +4,7 @@
 
 import pytest
 
-<<<<<<< HEAD
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 from datadog_checks.dev.jmx import JVM_E2E_METRICS_NEW
 from datadog_checks.dev.utils import get_metadata_metrics
 

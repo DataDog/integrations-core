@@ -1,12 +1,7 @@
-<<<<<<< HEAD
 import os  # noqa: F401
 from contextlib import contextmanager
 
 from datadog_checks.dev import run_command  # noqa: F401
-=======
-from contextlib import contextmanager
-
->>>>>>> 5f39deac0c (ignore existing F401)
 
 
 @contextmanager

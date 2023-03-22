@@ -2,11 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import closing, contextmanager
-<<<<<<< HEAD
 from typing import Any, AnyStr, Dict, Iterable, Iterator, List, Sequence, cast  # noqa: F401
-=======
-from typing import cast
->>>>>>> 5f39deac0c (ignore existing F401)
 
 import pymysql
 

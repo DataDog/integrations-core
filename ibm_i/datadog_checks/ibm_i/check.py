@@ -7,11 +7,7 @@ import subprocess
 import sys
 import time
 from datetime import datetime
-<<<<<<< HEAD
 from typing import List, NamedTuple, Tuple  # noqa: F401
-=======
-from typing import NamedTuple
->>>>>>> 5f39deac0c (ignore existing F401)
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager

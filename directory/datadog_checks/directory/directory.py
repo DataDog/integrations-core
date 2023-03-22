@@ -4,10 +4,7 @@
 from fnmatch import fnmatch
 from os.path import exists, join, relpath
 from time import time
-<<<<<<< HEAD
 from typing import Any  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException

@@ -1,26 +1,17 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-<<<<<<< HEAD
 import logging  # noqa: F401
 from typing import Any, Callable, Dict, List, Set  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, to_string
-<<<<<<< HEAD
 from datadog_checks.base.types import ServiceCheck  # noqa: F401
 from datadog_checks.ibm_mq.metrics import GAUGE
 
 from .. import metrics
 from ..config import IBMMQConfig  # noqa: F401
-=======
-from datadog_checks.ibm_mq.metrics import GAUGE
-
-from .. import metrics
->>>>>>> 5f39deac0c (ignore existing F401)
 
 try:
     import pymqi

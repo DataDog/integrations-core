@@ -2,19 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-<<<<<<< HEAD
 from typing import Any, Dict, List  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError
-<<<<<<< HEAD
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 from datadog_checks.marklogic import MarklogicCheck
 from datadog_checks.marklogic.config import Config
 from datadog_checks.marklogic.parsers.resources import parse_resources

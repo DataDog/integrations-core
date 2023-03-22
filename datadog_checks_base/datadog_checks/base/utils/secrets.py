@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 from typing import Set  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 
 class SecretsSanitizer:

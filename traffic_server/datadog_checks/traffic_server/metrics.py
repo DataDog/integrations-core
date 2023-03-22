@@ -2,10 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
-<<<<<<< HEAD
 from typing import Any, List, Optional, Tuple  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 SHORT_VERSION_METRIC_NAMES = ['server', 'proxy.node.version.manager.short']
 VERSION_BUILD_NUMBER_METRIC_NAME = 'proxy.node.version.manager.build_number'

@@ -8,10 +8,7 @@ import os
 import time
 import weakref
 from concurrent import futures
-<<<<<<< HEAD
 from typing import Any, List  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 import mock
 import pytest

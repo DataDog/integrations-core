@@ -2,22 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-<<<<<<< HEAD
 from typing import Callable  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 import mock
 import pytest
 
-<<<<<<< HEAD
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub  # noqa: F401
 from datadog_checks.rethinkdb import RethinkDBCheck
 from datadog_checks.rethinkdb.types import Instance  # noqa: F401
-=======
-from datadog_checks.rethinkdb import RethinkDBCheck
->>>>>>> 5f39deac0c (ignore existing F401)
 
 from .assertions import assert_metrics, assert_service_checks
 from .cluster import temporarily_disconnect_server
@@ -29,10 +22,7 @@ from .common import (
     TLS_CLIENT_CERT,
     TLS_SERVER,
 )
-<<<<<<< HEAD
 from .types import ServerName  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 
 @pytest.mark.integration

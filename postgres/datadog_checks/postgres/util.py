@@ -3,10 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import string
 from enum import Enum
-<<<<<<< HEAD
 from typing import Any, List, Tuple  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException

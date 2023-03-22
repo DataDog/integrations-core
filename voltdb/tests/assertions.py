@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-<<<<<<< HEAD
 from typing import List  # noqa: F401
 
 from datadog_checks.base import AgentCheck
@@ -9,11 +8,6 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.base.types import ServiceCheckStatus  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.voltdb.types import Instance  # noqa: F401
-=======
-
-from datadog_checks.base import AgentCheck
-from datadog_checks.dev.utils import get_metadata_metrics
->>>>>>> 5f39deac0c (ignore existing F401)
 
 from . import common
 

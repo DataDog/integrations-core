@@ -2,17 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-<<<<<<< HEAD
 from typing import Any, Dict, List  # noqa: F401
 
 import yaml
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
-=======
-
-import yaml
-
->>>>>>> 5f39deac0c (ignore existing F401)
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.marklogic import MarklogicCheck
 

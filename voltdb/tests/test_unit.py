@@ -3,10 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
-<<<<<<< HEAD
 from typing import Optional  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 import pytest
 
@@ -14,10 +11,7 @@ from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.voltdb.check import VoltDBCheck
 from datadog_checks.voltdb.config import Config
-<<<<<<< HEAD
 from datadog_checks.voltdb.types import Instance  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 from . import common
 

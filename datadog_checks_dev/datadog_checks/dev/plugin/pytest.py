@@ -8,10 +8,7 @@ import os
 import re
 import warnings
 from base64 import urlsafe_b64encode
-<<<<<<< HEAD
 from typing import Dict, List, Optional, Tuple  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 import pytest
 from six import PY2

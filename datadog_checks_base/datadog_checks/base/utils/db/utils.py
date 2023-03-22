@@ -11,19 +11,13 @@ import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from itertools import chain
-<<<<<<< HEAD
 from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 from cachetools import TTLCache
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
-<<<<<<< HEAD
 from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
 

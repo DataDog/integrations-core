@@ -3,10 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import contextlib
-<<<<<<< HEAD
 from typing import Iterator  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 import mock
 

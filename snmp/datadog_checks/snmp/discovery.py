@@ -4,25 +4,16 @@
 
 import json
 import time
-<<<<<<< HEAD
 import weakref  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 from typing import TYPE_CHECKING
 
 from datadog_checks.base import ConfigurationError
 
 from .compat import write_persistent_cache
-<<<<<<< HEAD
 from .config import InstanceConfig  # noqa: F401
 
 if TYPE_CHECKING:
     from .snmp import SnmpCheck  # noqa: F401
-=======
-
-if TYPE_CHECKING:
-    pass
->>>>>>> 5f39deac0c (ignore existing F401)
 
 
 def discover_instances(config, interval, check_ref):

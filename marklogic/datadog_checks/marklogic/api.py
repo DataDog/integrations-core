@@ -1,13 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-<<<<<<< HEAD
 from typing import Any, Dict  # noqa: F401
 
 from datadog_checks.base.utils.http import RequestsWrapper  # noqa: F401
-=======
-
->>>>>>> 5f39deac0c (ignore existing F401)
 
 from .constants import BASE_ENDPOINT
 

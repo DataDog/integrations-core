@@ -1,19 +1,13 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-<<<<<<< HEAD
 from typing import Iterator  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 import pytest
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
-<<<<<<< HEAD
 from datadog_checks.rethinkdb.types import Instance  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 from .cluster import setup_cluster
 from .common import (

@@ -6,11 +6,7 @@ import ssl
 from ssl import SSLContext
 
 import pytest
-<<<<<<< HEAD
 from mock import MagicMock, patch  # noqa: F401
-=======
-from mock import patch
->>>>>>> 5f39deac0c (ignore existing F401)
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.tls import TlsContextWrapper

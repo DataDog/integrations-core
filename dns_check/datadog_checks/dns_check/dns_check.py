@@ -4,10 +4,7 @@
 
 from __future__ import unicode_literals
 
-<<<<<<< HEAD
 from typing import List, Optional  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 import dns.resolver
 

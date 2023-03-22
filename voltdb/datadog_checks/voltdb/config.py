@@ -1,20 +1,14 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-<<<<<<< HEAD
 from typing import Callable, List, Optional  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
 from . import queries
-<<<<<<< HEAD
 from .types import Instance  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 DEFAULT_STATISTICS_COMPONENTS = [
     "COMMANDLOG",

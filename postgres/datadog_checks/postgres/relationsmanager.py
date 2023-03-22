@@ -16,10 +16,7 @@
 # to connect to a specific database.
 # =============================================================================================
 
-<<<<<<< HEAD
 from typing import Any, Dict, List, Union  # noqa: F401
-=======
->>>>>>> 5f39deac0c (ignore existing F401)
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
