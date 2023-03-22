@@ -21,6 +21,7 @@ from datadog_checks.postgres.version_utils import VersionUtils
 HOST = get_docker_hostname()
 PORT = '5432'
 PORT_REPLICA = '5433'
+PORT_REPLICA2 = '5434'
 USER = 'datadog'
 USER_ADMIN = 'dd_admin'
 PASSWORD = 'datadog'
@@ -62,6 +63,14 @@ COMMON_METRICS = [
 
 DBM_MIGRATED_METRICS = [
     'postgresql.connections',
+]
+
+CONFLICT_METRICS = [
+    'postgresql.conflicts.tablespace',
+    'postgresql.conflicts.lock',
+    'postgresql.conflicts.snapshot',
+    'postgresql.conflicts.bufferpin',
+    'postgresql.conflicts.deadlock',
 ]
 
 COMMON_BGW_METRICS = [
@@ -197,6 +206,15 @@ def check_replication_delay(aggregator, metrics_cache, expected_tags, count=1):
     replication_metrics = metrics_cache.get_replication_metrics(VersionUtils.parse_version(POSTGRES_VERSION), False)
     for (metric_name, _) in replication_metrics.values():
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_conflict_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 9.1:
+        return
+    for db in COMMON_DBS:
+        db_tags = expected_tags + ['db:{}'.format(db)]
+        for name in CONFLICT_METRICS:
+            aggregator.assert_metric(name, count=count, tags=db_tags)
 
 
 def check_bgw_metrics(aggregator, expected_tags, count=1):
