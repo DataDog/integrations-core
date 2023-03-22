@@ -298,7 +298,7 @@ def metadata(check, check_duplicates, show_warnings):
         # get any manifest info needed for validation - and skip if no integration included in manifest
         manifest = Manifest.load_manifest(current_check)
         if not manifest.has_metrics_integration():
-            echo_success(f"Skipping {check} - metadata not required since this check doesn't contain an integration.")
+            echo_success(f"Skipping {check} - not validating metadata since this check's manifest doesn't contain a metrics section.")
             continue
 
         try:
