@@ -3,7 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import importlib
 from contextlib import contextmanager
+<<<<<<< HEAD
 from typing import Any, Callable, Dict, Iterator, List, Optional, cast  # noqa: F401
+=======
+from typing import cast
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 import rethinkdb
 

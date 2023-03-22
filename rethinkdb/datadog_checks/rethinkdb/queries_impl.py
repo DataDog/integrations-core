@@ -3,7 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import collections
 import itertools
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 import rethinkdb
 

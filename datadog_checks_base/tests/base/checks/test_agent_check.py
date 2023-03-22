@@ -5,7 +5,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import logging
+<<<<<<< HEAD
 from typing import Any  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 import mock
 import pytest

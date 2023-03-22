@@ -10,7 +10,10 @@ except ImportError:
 
 import os
 import shlex
+<<<<<<< HEAD
 from typing import Dict, List  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 from six import iteritems
 

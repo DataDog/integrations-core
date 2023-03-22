@@ -3,12 +3,18 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import time
 from contextlib import contextmanager
+<<<<<<< HEAD
 from typing import Any, Dict, Generator, Iterator, List, Type  # noqa: F401
 
 from pyVmomi import vim  # noqa: F401
 from six import iterkeys
 
 from datadog_checks.vsphere.types import CounterId, MetricName, ResourceTags  # noqa: F401
+=======
+
+from six import iterkeys
+
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 
 class VSphereCache(object):

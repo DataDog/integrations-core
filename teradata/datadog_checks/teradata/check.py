@@ -5,7 +5,10 @@ import json
 import re
 from contextlib import closing, contextmanager
 from copy import deepcopy
+<<<<<<< HEAD
 from typing import Any, AnyStr, Iterable, Iterator, Sequence  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 try:
     import teradatasql

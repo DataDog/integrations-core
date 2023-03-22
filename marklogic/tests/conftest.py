@@ -2,7 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+<<<<<<< HEAD
 from typing import Any, Dict, Generator  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 import pytest
 import requests

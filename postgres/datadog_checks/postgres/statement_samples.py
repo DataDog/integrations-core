@@ -6,7 +6,10 @@ import copy
 import re
 import time
 from enum import Enum
+<<<<<<< HEAD
 from typing import Dict, Optional, Tuple  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 import psycopg2
 from cachetools import TTLCache

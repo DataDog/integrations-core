@@ -1,7 +1,10 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+<<<<<<< HEAD
 from typing import Any, Dict, List, Optional  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 

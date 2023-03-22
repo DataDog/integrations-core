@@ -8,7 +8,11 @@ import logging
 from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
+<<<<<<< HEAD
 from typing import Any, Dict, Generator, Iterable, List, Set, Type, cast  # noqa: F401
+=======
+from typing import cast
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 from pyVmomi import vim, vmodl
 from six import iteritems
@@ -31,6 +35,7 @@ from datadog_checks.vsphere.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
 from datadog_checks.vsphere.resource_filters import TagFilter
 from datadog_checks.vsphere.types import (
+<<<<<<< HEAD
     CounterId,  # noqa: F401
     InfrastructureData,  # noqa: F401
     InfrastructureDataItem,  # noqa: F401
@@ -38,6 +43,9 @@ from datadog_checks.vsphere.types import (
     MetricName,  # noqa: F401
     MorBatch,  # noqa: F401
     ResourceTags,  # noqa: F401
+=======
+    InstanceConfig,
+>>>>>>> 5f39deac0c (ignore existing F401)
 )
 from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,

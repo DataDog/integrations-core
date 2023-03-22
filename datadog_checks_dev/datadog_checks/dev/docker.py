@@ -3,7 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from contextlib import contextmanager
+<<<<<<< HEAD
 from typing import Iterator  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 from six import string_types
 from six.moves.urllib.parse import urlparse

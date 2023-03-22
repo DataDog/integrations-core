@@ -2,11 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from decimal import Decimal
+<<<<<<< HEAD
 from typing import Any, Callable, Dict  # noqa: F401
 
 import mock
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
+=======
+
+import mock
+
+>>>>>>> 5f39deac0c (ignore existing F401)
 from datadog_checks.base.utils.db import Query
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.snowflake import SnowflakeCheck, queries

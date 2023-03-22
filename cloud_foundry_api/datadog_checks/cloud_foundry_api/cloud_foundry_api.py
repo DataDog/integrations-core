@@ -4,7 +4,10 @@
 import copy
 import json
 import time
+<<<<<<< HEAD
 from typing import Any, Dict, Generator, Tuple  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 from requests.exceptions import HTTPError, RequestException
 from semver import VersionInfo
@@ -12,7 +15,10 @@ from six.moves.urllib_parse import urlparse
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException, ConfigurationError
+<<<<<<< HEAD
 from datadog_checks.base.types import Event  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 from .constants import (
     API_SERVICE_CHECK_NAME,

@@ -7,7 +7,10 @@ import decimal
 import time
 from contextlib import closing
 from enum import Enum
+<<<<<<< HEAD
 from typing import Dict, List  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 import pymysql
 

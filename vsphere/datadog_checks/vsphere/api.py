@@ -1,17 +1,26 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+<<<<<<< HEAD
 import datetime as dt  # noqa: F401
 import functools
 import ssl
 from typing import Any, Callable, List, TypeVar, cast  # noqa: F401
+=======
+import functools
+import ssl
+from typing import Callable, TypeVar, cast
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 from pyVim import connect
 from pyVmomi import SoapAdapter, vim, vmodl
 from six import itervalues
 
+<<<<<<< HEAD
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 from datadog_checks.vsphere.constants import ALL_RESOURCES, MAX_QUERY_METRICS_OPTION, UNLIMITED_HIST_METRICS_PER_QUERY
 from datadog_checks.vsphere.event import ALLOWED_EVENTS
 from datadog_checks.vsphere.types import InfrastructureData

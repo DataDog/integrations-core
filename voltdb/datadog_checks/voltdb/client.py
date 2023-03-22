@@ -2,7 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+<<<<<<< HEAD
 from typing import Callable, Union  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 import requests
 from six.moves.urllib.parse import urljoin

@@ -2,7 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
+<<<<<<< HEAD
 from typing import Callable, Dict, List, Optional, Tuple  # noqa: F401
+=======
+from typing import Callable, Dict, Optional, Tuple
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 import win32wnet
 from six import iteritems

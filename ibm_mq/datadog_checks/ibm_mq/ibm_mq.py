@@ -15,7 +15,11 @@ from .config import IBMMQConfig
 from .process_matcher import QueueManagerProcessMatcher
 
 try:
+<<<<<<< HEAD
     from typing import Any, Dict, List  # noqa: F401
+=======
+    pass
+>>>>>>> 5f39deac0c (ignore existing F401)
 except ImportError:
     pass
 

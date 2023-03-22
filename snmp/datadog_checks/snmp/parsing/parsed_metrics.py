@@ -5,11 +5,19 @@
 Containers from parsed metrics data.
 """
 
+<<<<<<< HEAD
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Pattern, Union  # noqa: F401
 
 if TYPE_CHECKING:
     # needed to avoid circular import
     from .metrics import ColumnTag, IndexTag  # noqa: F401
+=======
+from typing import TYPE_CHECKING, Union
+
+if TYPE_CHECKING:
+    # needed to avoid circular import
+    pass
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 
 class ParsedSymbolMetric(object):

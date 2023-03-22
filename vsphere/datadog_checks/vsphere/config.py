@@ -3,14 +3,20 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
+<<<<<<< HEAD
 from typing import Any, Dict, List  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 from pyVmomi import vim
 from six import iteritems, string_types
 
 from datadog_checks.base import ConfigurationError, is_affirmative
+<<<<<<< HEAD
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 from datadog_checks.base.types import InitConfigType  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 from datadog_checks.vsphere.constants import (
     ALLOWED_FILTER_PROPERTIES,
     ALLOWED_FILTER_TYPES,
@@ -28,8 +34,12 @@ from datadog_checks.vsphere.constants import (
     MOR_TYPE_AS_STRING,
     REALTIME_RESOURCES,
 )
+<<<<<<< HEAD
 from datadog_checks.vsphere.resource_filters import ResourceFilter, create_resource_filter  # noqa: F401
 from datadog_checks.vsphere.types import InstanceConfig, MetricFilterConfig, MetricFilters, ResourceFilterConfig  # noqa: F401
+=======
+from datadog_checks.vsphere.resource_filters import create_resource_filter
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 
 class VSphereConfig(object):

@@ -7,7 +7,10 @@ import re
 from copy import copy, deepcopy
 from itertools import chain
 from math import isinf, isnan
+<<<<<<< HEAD
 from typing import List  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_metric_families_strict
 from prometheus_client.parser import text_fd_to_metric_families as parse_metric_families

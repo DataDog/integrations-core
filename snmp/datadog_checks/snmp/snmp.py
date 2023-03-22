@@ -12,7 +12,10 @@ import time
 import weakref
 from collections import defaultdict
 from concurrent import futures
+<<<<<<< HEAD
 from typing import Any, DefaultDict, Dict, List, Optional, Pattern, Tuple  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 from six import iteritems
 
@@ -28,7 +31,11 @@ from .exceptions import PySnmpError
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type, try_varbind_value_to_float
 from .mibs import MIBLoader
 from .models import OID
+<<<<<<< HEAD
 from .parsing import ColumnTag, IndexTag, ParsedMetric, ParsedTableMetric, SymbolTag  # noqa: F401
+=======
+from .parsing import ParsedTableMetric
+>>>>>>> 5f39deac0c (ignore existing F401)
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
 from .utils import (
     OIDPrinter,

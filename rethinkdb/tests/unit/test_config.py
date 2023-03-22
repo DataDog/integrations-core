@@ -1,13 +1,19 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+<<<<<<< HEAD
 from typing import Any  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.rethinkdb.config import Config
+<<<<<<< HEAD
 from datadog_checks.rethinkdb.types import Instance  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 pytestmark = pytest.mark.unit
 

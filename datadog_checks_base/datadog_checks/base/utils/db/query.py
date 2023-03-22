@@ -2,11 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
+<<<<<<< HEAD
 from typing import Any, Dict, List, Tuple  # noqa: F401
 
 from six import raise_from
 
 from datadog_checks.base.utils.db.types import Transformer, TransformerFactory  # noqa: F401
+=======
+
+from six import raise_from
+
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 from .utils import create_extra_transformer
 

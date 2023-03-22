@@ -3,16 +3,24 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import json
 from collections import defaultdict
+<<<<<<< HEAD
 from typing import Any, Dict, Iterator, List, Set  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 from pyVmomi import vim
 from six import iteritems
 
+<<<<<<< HEAD
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
 from datadog_checks.vsphere.constants import ALL_RESOURCES_WITH_METRICS
 from datadog_checks.vsphere.types import ResourceTags, TagAssociation  # noqa: F401
+=======
+from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.vsphere.constants import ALL_RESOURCES_WITH_METRICS
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 from .api import APIResponseError, smart_retry
 

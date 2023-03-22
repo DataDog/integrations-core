@@ -2,7 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import threading
+<<<<<<< HEAD
 from typing import Dict, Optional, Tuple  # noqa: F401
+=======
+from typing import Tuple
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 from .pysnmp_types import (
     DirMibSource,

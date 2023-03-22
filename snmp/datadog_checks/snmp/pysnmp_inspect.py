@@ -4,9 +4,13 @@
 """
 Helpers for inspecting PySNMP objects.
 """
+<<<<<<< HEAD
 from typing import Any  # noqa: F401
 
 from .pysnmp_types import ObjectIdentity, ObjectType  # noqa: F401
+=======
+
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 
 def _get_constructor_arguments(obj):

@@ -3,14 +3,20 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+<<<<<<< HEAD
 from typing import Iterator  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 import mock
 import pytest
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
+<<<<<<< HEAD
 from datadog_checks.voltdb.types import Instance  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 
 from . import common
 from .utils import CreateSchema, EnsureExpectedMetricsShowUp

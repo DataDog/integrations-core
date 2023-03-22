@@ -11,7 +11,10 @@ from datetime import datetime
 
 import requests
 from cryptography import x509
+<<<<<<< HEAD
 from requests import Response  # noqa: F401
+=======
+>>>>>>> 5f39deac0c (ignore existing F401)
 from six import PY2, string_types
 from six.moves.urllib.parse import urlparse
 
