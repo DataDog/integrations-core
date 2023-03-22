@@ -39,7 +39,6 @@ ipaddress,PyPI,PSF,Copyright (c) 2013 Philipp Hagemeister
 jellyfish,PyPI,BSD-3-Clause,"Copyright (c) 2015, James Turk"
 kafka-python,PyPI,Apache-2.0,Copyright 2015 David Arthur
 kazoo,PyPI,Apache-2.0,Copyright 2012 Kazoo team
-keystoneauth1,PyPI,Apache-2.0,Copyright (c) 2009 Jacob Kaplan-Moss - initial codebase (< v2.1)
 kubernetes,PyPI,Apache-2.0,Copyright 2014 The Kubernetes Authors.
 ldap3,PyPI,LGPL-3.0-only,Copyright 2013 - 2020 Giovanni Cannata
 lxml,PyPI,BSD-3-Clause,Copyright (c) 2004 Infrae. All rights reserved.
@@ -92,7 +91,7 @@ serpent,PyPI,MIT,Copyright (c) by Irmen de Jong
 service-identity,PyPI,MIT,Copyright (c) 2014 Hynek Schlawack
 simplejson,PyPI,MIT,Copyright (c) 2006 Bob Ippolito
 six,PyPI,MIT,Copyright (c) 2010-2020 Benjamin Peterson
-snowflake-connector-python,PyPI,Apache-2.0,"Copyright (c) 2013-2019 Snowflake Computing, Inc."
+snowflake-connector-python,PyPI,Apache-2.0,"Copyright (c) 2013-2023 Snowflake Computing, Inc."
 supervisor,PyPI,BSD-3-Clause-Modification,"Copyright (c) 2002-2005, Daniel Krech, http://eikeon.com/"
 tuf,PyPI,Apache-2.0,Copyright (c) 2010 New York University
 tuf,PyPI,MIT,Copyright (c) 2010 New York University

@@ -119,6 +119,8 @@ snmp.fgVpnTunEntStatus,gauge,,,,[Fortinet FortiGate] The current status of tunne
 snmp.ifAdminStatus,gauge,,,,[Generic router] [F5 BIG-IP] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The desired state of the interface.,0,snmp,,
 snmp.ifSpeed,gauge,,,,"[Generic router] An estimate of the interface's current bandwidth in bits per second, or the nominal bandwidth.",0,snmp,,
 snmp.ifHighSpeed,gauge,,,,"[Generic router] An estimate of the interface's current bandwidth in units of 1,000,000 bits per second, or the nominal bandwidth.",0,snmp,,
+snmp.ifInSpeed,gauge,,,,"[Generic router] An estimate of the interface's current inbound bandwidth in bits per second.",0,snmp,,
+snmp.ifOutSpeed,gauge,,,,"[Generic router] An estimate of the interface's current outbound bandwidth in bits per second.",0,snmp,,
 snmp.ifBandwidthInUsage.rate,gauge,,percent,,"[Generic router] The percent rate of used received bandwidth.",0,snmp,,
 snmp.ifBandwidthOutUsage.rate,gauge,,percent,,"[Generic router] The percent rate of used sent bandwidth.",0,snmp,,
 snmp.ifHCInBroadcastPkts,count,,packet,,[Generic router] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The number of packets delivered by this sub-layer to a higher (sub-)layer that were addressed to a broadcast address at this sub-layer.,0,snmp,,

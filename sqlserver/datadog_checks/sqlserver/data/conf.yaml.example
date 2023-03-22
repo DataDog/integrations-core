@@ -231,12 +231,12 @@ instances:
         #
         # enabled: true
 
-        ## @param collection_interval - number - optional - default: 10
+        ## @param collection_interval - number - optional - default: 60
         ## Set the query metric collection interval (in seconds). Each collection involves one or more queries to
         ## the SQL Server Query Plan Cache. If a non-default value is chosen then that exact same value must be used
         ## for *every* check instance. Running different instances with different collection intervals is not supported.
         #
-        # collection_interval: 10
+        # collection_interval: 60
 
         ## @param dm_exec_query_stats_row_limit - integer - optional - default: 10000
         ## Set the maximum number of query stats rows that can be retrieved in a single check run.
@@ -384,10 +384,10 @@ instances:
         #
         # keep_sql_alias: true
 
-    ## @param command_timeout - integer - optional - default: 5
+    ## @param command_timeout - integer - optional - default: 10
     ## Timeout in seconds for the connection and each command run
     #
-    # command_timeout: 5
+    # command_timeout: 10
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.

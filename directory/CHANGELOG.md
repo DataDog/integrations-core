@@ -1,5 +1,9 @@
 # CHANGELOG - directory
 
+## 1.14.1 / 2023-03-05
+
+* [Fixed] Convert warning to debug log. See [#14081](https://github.com/DataDog/integrations-core/pull/14081).
+
 ## 1.14.0 / 2022-10-28 / Agent 7.41.0
 
 * [Added] Add count of folders in the directory check. See [#12107](https://github.com/DataDog/integrations-core/pull/12107).

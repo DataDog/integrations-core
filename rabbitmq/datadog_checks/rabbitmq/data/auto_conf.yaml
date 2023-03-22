@@ -14,6 +14,8 @@ init_config:
 #
 instances:
 
+    ## RabbitMQ Prometheus Plugin Example
+  -
     ## Settings for talking to the Prometheus plugin of RabbitMQ.
     ## Specify this section to trigger metric collection from the Prometheus plugin endpoints.
     #

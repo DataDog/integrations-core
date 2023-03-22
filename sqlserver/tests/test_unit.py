@@ -306,8 +306,9 @@ def test_set_default_driver_conf():
 def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
-    expected_tags = instance_docker.get('tags', []) + ['sqlserver_host:{}'.format(DOCKER_SERVER), 'db:master']
-    assert_metrics(aggregator, expected_tags, hostname=sqlserver_check.resolved_hostname)
+    check_tags = instance_docker.get('tags', [])
+    expected_tags = check_tags + ['sqlserver_host:{}'.format(DOCKER_SERVER), 'db:master']
+    assert_metrics(aggregator, check_tags, expected_tags, hostname=sqlserver_check.resolved_hostname)
 
 
 SQL_SERVER_2012_VERSION_EXAMPLE = """\

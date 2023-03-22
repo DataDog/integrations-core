@@ -75,6 +75,12 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
         for metric in IF_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+        custom_speed_tags = tags + ['speed_source:device']
+        for metric in metrics.IF_CUSTOM_SPEED_GAUGES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=custom_speed_tags, count=2
+            )
+
     for metric in TCP_COUNTS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=common_tags, count=1)
     for metric in TCP_GAUGES:
