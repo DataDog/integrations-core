@@ -1,0 +1,8 @@
+clouds:
+  test_cloud:
+    auth:
+      auth_url: https://cloud.example.com:5000/
+      username: demo
+      password: password
+      project_name: demo
+      project_domain_name: Default

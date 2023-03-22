@@ -6,6 +6,7 @@ from requests.exceptions import HTTPError
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.openstack_controller.api.factory import make_api
+from datadog_checks.openstack_controller.config import OpenstackConfig
 
 HYPERVISOR_SERVICE_CHECK = {'up': AgentCheck.OK, 'down': AgentCheck.CRITICAL}
 
@@ -68,6 +69,7 @@ def _create_project_tags(project):
 class OpenStackControllerCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(OpenStackControllerCheck, self).__init__(name, init_config, instances)
+        self.config = OpenstackConfig(self.log, self.instance)
 
     def check(self, _instance):
         self.log.debug(self.instance)

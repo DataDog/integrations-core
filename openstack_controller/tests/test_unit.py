@@ -12,7 +12,7 @@ from requests.exceptions import HTTPError
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev import get_here
 from datadog_checks.openstack_controller import OpenStackControllerCheck
-from datadog_checks.openstack_controller.openstack_controller import LEGACY_NOVA_HYPERVISOR_METRICS
+from datadog_checks.openstack_controller.check import LEGACY_NOVA_HYPERVISOR_METRICS
 
 pytestmark = [pytest.mark.unit]
 
@@ -55,7 +55,7 @@ pytestmark = [pytest.mark.unit]
 #     expected_exception,
 # ):
 #     with expected_exception, mock.patch(
-#         'datadog_checks.openstack_controller.openstack_controller.make_api'
+#         'datadog_checks.openstack_controller.check.make_api'
 #     ) as mocked_api, open(os.path.join(get_here(), 'fixtures/empty_projects.json'), 'r') as empty_projects:
 #         api = mock.MagicMock()
 #         api.get_projects.return_value = json.load(empty_projects)
@@ -65,9 +65,7 @@ pytestmark = [pytest.mark.unit]
 
 
 def test_connect_exception(aggregator, dd_run_check, caplog):
-    with pytest.raises(Exception), mock.patch(
-        'datadog_checks.openstack_controller.openstack_controller.make_api'
-    ) as mocked_api:
+    with pytest.raises(Exception), mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api:
         exception_msg = "Exception description"
         warning_msg = f'Exception while creating api: {exception_msg}'
         caplog.set_level(logging.WARN)
@@ -86,7 +84,7 @@ def test_connect_exception(aggregator, dd_run_check, caplog):
 
 
 def test_connect_http_error(aggregator, dd_run_check, caplog):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api:
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api:
         exception_msg = "Exception description"
         warning_msg = exception_msg
         api = mock.MagicMock()
@@ -104,7 +102,7 @@ def test_connect_http_error(aggregator, dd_run_check, caplog):
 
 
 def test_connect_ok(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/empty_projects.json'), 'r'
     ) as empty_projects:
         api = mock.MagicMock()
@@ -121,7 +119,7 @@ def test_connect_ok(aggregator, dd_run_check):
 
 
 def test_nova_endpoint_down(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project:
         api = mock.MagicMock()
@@ -140,7 +138,7 @@ def test_nova_endpoint_down(aggregator, dd_run_check):
 
 def test_compute_response_time(aggregator, dd_run_check):
     response_time = 2.659812
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project:
         api = mock.MagicMock()
@@ -159,7 +157,7 @@ def test_compute_response_time(aggregator, dd_run_check):
 
 
 def test_compute_limits(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(
         os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/limits.json'), 'r'
@@ -182,7 +180,7 @@ def test_compute_limits(aggregator, dd_run_check):
 
 
 def test_compute_limits_nova_microversion_last(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(
         os.path.join(get_here(), 'fixtures/compute/nova_microversion_latest/limits.json'), 'r'
@@ -206,7 +204,7 @@ def test_compute_limits_nova_microversion_last(aggregator, dd_run_check):
 
 
 def test_compute_quota_set(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(
         os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/quota_set.json'), 'r'
@@ -229,7 +227,7 @@ def test_compute_quota_set(aggregator, dd_run_check):
 
 
 def test_compute_quota_set_nova_microversion_last(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(
         os.path.join(get_here(), 'fixtures/compute/nova_microversion_latest/quota_set.json'), 'r'
@@ -253,7 +251,7 @@ def test_compute_quota_set_nova_microversion_last(aggregator, dd_run_check):
 
 
 def test_compute_servers(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(
         os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/servers.json'), 'r'
@@ -277,7 +275,7 @@ def test_compute_servers(aggregator, dd_run_check):
 
 
 def test_compute_servers_nova_microversion_last(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(
         os.path.join(get_here(), 'fixtures/compute/nova_microversion_latest/servers.json'), 'r'
@@ -302,7 +300,7 @@ def test_compute_servers_nova_microversion_last(aggregator, dd_run_check):
 
 
 def test_compute_flavors(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(
         os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/flavors.json'), 'r'
@@ -326,7 +324,7 @@ def test_compute_flavors(aggregator, dd_run_check):
 
 
 def test_compute_flavors_nova_microversion_last(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(
         os.path.join(get_here(), 'fixtures/compute/nova_microversion_latest/flavors.json'), 'r'
@@ -373,8 +371,10 @@ def test_compute_flavors_nova_microversion_last(aggregator, dd_run_check):
         ),
     ],
 )
-def test_compute_hypervisor_service_check(hypervisors_mock_file, os_aggregates_mock_file, status, aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+def test_compute_hypervisor_service_check(
+    hypervisors_mock_file, os_aggregates_mock_file, status, aggregator, dd_run_check
+):
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(os.path.join(get_here(), hypervisors_mock_file), 'r') as hypervisors, open(
         os.path.join(get_here(), os_aggregates_mock_file), 'r'
@@ -473,7 +473,7 @@ def test_compute_hypervisor_service_check(hypervisors_mock_file, os_aggregates_m
     ],
 )
 def test_compute_hypervisor_metrics(hypervisors_mock_file, os_aggregates_mock_file, instance, aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(os.path.join(get_here(), hypervisors_mock_file), 'r') as hypervisors, open(
         os.path.join(get_here(), os_aggregates_mock_file), 'r'
@@ -545,7 +545,7 @@ def test_compute_hypervisor_metrics(hypervisors_mock_file, os_aggregates_mock_fi
 
 
 def test_network_endpoint_down(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project:
         api = mock.MagicMock()
@@ -564,7 +564,7 @@ def test_network_endpoint_down(aggregator, dd_run_check):
 
 def test_network_response_time(aggregator, dd_run_check):
     response_time = 2.659812
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project:
         api = mock.MagicMock()
@@ -583,7 +583,7 @@ def test_network_response_time(aggregator, dd_run_check):
 
 
 def test_network_quotas(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(os.path.join(get_here(), 'fixtures/network/quotas.json'), 'r') as quotas:
         one_project_content = json.load(one_project)
@@ -604,7 +604,7 @@ def test_network_quotas(aggregator, dd_run_check):
 
 
 def test_baremetal_endpoint_down(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project:
         api = mock.MagicMock()
@@ -623,7 +623,7 @@ def test_baremetal_endpoint_down(aggregator, dd_run_check):
 
 def test_baremetal_response_time(aggregator, dd_run_check):
     response_time = 2.659812
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project:
         api = mock.MagicMock()
@@ -642,7 +642,7 @@ def test_baremetal_response_time(aggregator, dd_run_check):
 
 
 def test_load_balancer_endpoint_down(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project:
         api = mock.MagicMock()
@@ -661,7 +661,7 @@ def test_load_balancer_endpoint_down(aggregator, dd_run_check):
 
 def test_load_balancer_response_time(aggregator, dd_run_check):
     response_time = 2.659812
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project:
         api = mock.MagicMock()
@@ -680,7 +680,7 @@ def test_load_balancer_response_time(aggregator, dd_run_check):
 
 
 def test_report_legacy_metrics_default(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(
         os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/hypervisors_detail.json'), 'r'
@@ -703,7 +703,7 @@ def test_report_legacy_metrics_default(aggregator, dd_run_check):
 
 
 def test_report_legacy_metrics_false(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(
         os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/hypervisors_detail.json'), 'r'
@@ -727,7 +727,7 @@ def test_report_legacy_metrics_false(aggregator, dd_run_check):
 
 
 def test_report_legacy_metrics_true(aggregator, dd_run_check):
-    with mock.patch('datadog_checks.openstack_controller.openstack_controller.make_api') as mocked_api, open(
+    with mock.patch('datadog_checks.openstack_controller.check.make_api') as mocked_api, open(
         os.path.join(get_here(), 'fixtures/one_project.json'), 'r'
     ) as one_project, open(
         os.path.join(get_here(), 'fixtures/compute/nova_microversion_none/hypervisors_detail.json'), 'r'
