@@ -1,5 +1,4 @@
 {
-	  "id": 9817582,
 	  "name": "[RabbitMQ - OMV2] Unacknowledged Messages are higher than usual",
 	  "type": "query alert",
 	  "query": "avg(last_5m):100 * sum:rabbitmq.queue.messages.unacked{*} / (sum:rabbitmq.queue.messages.unacked{*} + sum:rabbitmq.queue.messages.ready{*}) > 120",

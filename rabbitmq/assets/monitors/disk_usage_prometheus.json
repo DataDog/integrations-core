@@ -1,5 +1,4 @@
 {
-	  "id": 9795081,
 	  "name": "[RabbitMQ - OMV2] Disk Space is Low",
 	  "type": "query alert",
 	  "query": "avg(last_5m):avg:rabbitmq.alarms.free_disk_space.watermark{*} >= 1",
