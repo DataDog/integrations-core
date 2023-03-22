@@ -285,7 +285,7 @@ def metadata(check, check_duplicates, show_warnings):
 
         # only abort if we have an integration and require a manifest file
         manifest = Manifest.load_manifest(check)
-        if manifest.has_integration():
+        if manifest.has_metrics_integration():
             abort(f'Metadata file for {check} not found.')
 
     errors = False
@@ -297,7 +297,7 @@ def metadata(check, check_duplicates, show_warnings):
 
         # get any manifest info needed for validation - and skip if no integration included in manifest
         manifest = Manifest.load_manifest(current_check)
-        if not manifest.has_integration():
+        if not manifest.has_metrics_integration():
             echo_success(f"Skipping {check} - metadata not required since this check doesn't contain an integration.")
             continue
 
