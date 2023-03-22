@@ -161,7 +161,7 @@ class Oracle(AgentCheck):
                     try:
                         oracledb.init_oracle_client()
                     except oracledb.DatabaseError as e:
-                        self.log.warning('Oracle Instant Client is unavailable: %s', str(e))
+                        self.log.error('Oracle Instant Client is unavailable: %s', str(e))
                         raise
                     else:
                         self.log.debug('Oracle Instant Client version %s', oracledb.clientversion())
