@@ -38,7 +38,7 @@ def test_make_api_sdk():
     assert isinstance(api, ApiSdk)
 
 
-def test_rest_create_connection_fails():
+def test_rest_create_connection_exception():
     with pytest.raises(HTTPError):
         mocked_http = mock.MagicMock()
         mocked_http.get.side_effect = [HTTPError()]
@@ -50,6 +50,22 @@ def test_rest_create_connection_fails():
         config = OpenstackConfig(mock.MagicMock(), instance)
         api = make_api(config, logging, mocked_http)
         api.create_connection()
+    assert mocked_http.get.call_count == 1
+
+
+def test_rest_create_connection_http_error_500():
+    with pytest.raises(HTTPError):
+        mocked_http = mock.MagicMock()
+        mocked_http.get.side_effect = [MockResponse(status_code=500)]
+        instance = {
+            'keystone_server_url': 'http://10.164.0.83/identity',
+            'user_name': 'admin',
+            'user_password': 'password',
+        }
+        config = OpenstackConfig(mock.MagicMock(), instance)
+        api = make_api(config, logging, mocked_http)
+        api.create_connection()
+    assert mocked_http.get.call_count == 1
 
 
 def test_rest_create_connection_ok():
