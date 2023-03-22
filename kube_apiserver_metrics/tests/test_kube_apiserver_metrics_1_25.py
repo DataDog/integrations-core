@@ -83,7 +83,7 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.apiserver_admission_webhook_fail_open_count',
         NAMESPACE + '.admission_webhook_admission_latencies_seconds.sum',
         NAMESPACE + '.admission_webhook_admission_latencies_seconds.count',
-        NAMESPACE + '.kubernetes_feature_enabled'
+        NAMESPACE + '.kubernetes_feature_enabled',
         NAMESPACE + '.apiserver_envelope_encryption_dek_cache_fill_percent',
         NAMESPACE + '.aggregator_unavailable_apiservice',
         NAMESPACE + '.apiserver_flowcontrol_request_concurrency_limit',
