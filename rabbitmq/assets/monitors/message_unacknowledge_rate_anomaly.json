@@ -3,7 +3,7 @@
 	  "name": "[RabbitMQ - OMV2] Unacknowledged Messages are higher than usual",
 	  "type": "query alert",
 	  "query": "avg(last_5m):100 * sum:rabbitmq.queue.messages.unacked{*} / (sum:rabbitmq.queue.messages.unacked{*} + sum:rabbitmq.queue.messages.ready{*}) > 120",
-	  "message": "{{#is_alert}}\nThe ratio of unacknowledged messages in this queue is higher than the rate of messages ready for the consumers. \nPlease check your message pipeline. \n{{/is_alert}}",
+	  "message": "{{#is_alert}}\nThe ratio of unacknowledged to acknowledged messages in this queue is higher than usual. \nPlease check your message pipeline. \n{{/is_alert}}",
 	  "tags": [
 		    "integration:rabbitmq"
 	  ],
