@@ -35,17 +35,6 @@ line-length = 120
 py36 = false
 skip-string-normalization = true
 
-[tool.isort]
-default_section = 'THIRDPARTY'
-force_grid_wrap = 0
-include_trailing_comma = true
-known_first_party = 'datadog_checks'
-src_paths = ''
-line_length = 120
-multi_line_output = 3
-skip_glob = '.*,*/datadog_checks/dev/tooling/signing.py,*/datadog_checks/dev/tooling/templates/*,*/datadog_checks/*/vendor/*'
-use_parentheses = true
-
 [tool.mypy]
 plugins = "pydantic.mypy"
 # Follows imports and type-check imported modules.
@@ -63,3 +52,53 @@ mypy_path = "../.stubs"
 # Exclude generated files
 # TODO Remove when we drop python 2
 exclude = '.*/config_models/.*\.py$'
+
+[tool.ruff]
+exclude = [
+    ".eggs",
+    ".tox",
+    "build",
+    "compat.py",
+    "__init__.py",
+    "datadog_checks_dev/datadog_checks/dev/tooling/templates/*",
+    "*/datadog_checks/*/vendor/*",
+]
+target-version = "py37"
+line-length = 120
+select = [
+  "B",
+  "C",
+  "E",
+  "F",
+  "G",
+  "W",
+  "I",
+]
+ignore = [
+  # From legacy flake8 settings
+  "E722",
+  "E741",
+  "B015",
+  "B904",
+  # Allow non-abstract empty methods in abstract base classes
+  "B027",
+  # Ignore McCabe complexity
+  "C901",
+]
+unfixable = [
+  # Don't touch unused imports
+  "F401",
+]
+
+[tool.ruff.isort]
+known-first-party = ["{template_config['package_name']}"]
+
+[tool.ruff.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.per-file-ignores]
+#Tests can use assertions and relative imports
+"**/tests/**/*" = ["S101", "TID252"]
+"datadog_checks/*/config_models/deprecations.py" = ["E501"]
+"tests/models/config_models/deprecations.py" = ["E501"]
+
