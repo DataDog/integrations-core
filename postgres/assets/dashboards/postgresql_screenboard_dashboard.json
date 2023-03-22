@@ -1556,7 +1556,7 @@
     {
       "name": "db",
       "default": "*",
-      "prefix": "db
+      "prefix": "db"
     },
     {
       "name": "host",
