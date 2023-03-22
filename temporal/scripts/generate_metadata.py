@@ -4,8 +4,9 @@
 
 # Script to update metadata.csv based on temporal's code and current
 # `METRIC_MAP` as defined on metrics.py
-# Must be run in an environment that has the integration installed, e.g.:
-# hatch run py3.8-1.19:python ./scripts/generate_metadata.py
+# Must be run in an environment that has the integration installed,
+# and passed the go code from temporal's codebase where metrics are defined via stdin, e.g.:
+# cat ${path_to_temporal}/common/metrics/metric_defs.go | hatch run py3.8-1.19:python ./scripts/generate_metadata.py
 
 import csv
 import re
