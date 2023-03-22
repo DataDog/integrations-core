@@ -21,5 +21,8 @@
 		    "silenced": {}
 	  },
 	  "priority": 3,
-	  "restricted_roles": null
+	  "restricted_roles": null,
+    "recommended_monitor_metadata": {
+      "description": "Notify your team when a RabbitMQ message unacknowledged rate is higher than usual."
+    }
 }
