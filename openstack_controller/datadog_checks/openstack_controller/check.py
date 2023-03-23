@@ -104,15 +104,16 @@ class OpenStackControllerCheck(AgentCheck):
             self._report_project_metrics(api, project)
 
     def _report_project_metrics(self, api, project):
-        self.log.debug("reporting metrics from project: [id:%s][name:%s]", project['id'], project['name'])
-        project_tags = _create_project_tags(project)
-        self._report_compute_metrics(api, project, project_tags)
-        self._report_network_metrics(api, project, project_tags)
-        self._report_baremetal_metrics(api, project)
-        self._report_load_balancer_metrics(api, project)
-
-    def _report_compute_metrics(self, api, project, project_tags):
         project_id = project.get('id')
+        project_name = project.get('name')
+        self.log.debug("reporting metrics from project: [id:%s][name:%s]", project_id, project_name)
+        project_tags = _create_project_tags(project)
+        self._report_compute_metrics(api, project_id, project_tags)
+        self._report_network_metrics(api, project_id, project_tags)
+        self._report_baremetal_metrics(api, project_id, project_tags)
+        self._report_load_balancer_metrics(api, project_id, project_tags)
+
+    def _report_compute_metrics(self, api, project_id, project_tags):
         response_time = api.get_compute_response_time(project_id)
         if response_time:
             self.service_check('openstack.nova.api.up', AgentCheck.OK)
@@ -201,8 +202,7 @@ class OpenStackControllerCheck(AgentCheck):
         elif self.instance.get('collect_hypervisor_load', True) and metric in LEGACY_NOVA_HYPERVISOR_LOAD_METRICS:
             self.gauge(f'openstack.nova.{LEGACY_NOVA_HYPERVISOR_LOAD_METRICS[metric]}', value, tags=tags)
 
-    def _report_network_metrics(self, api, project, project_tags):
-        project_id = project.get('id')
+    def _report_network_metrics(self, api, project_id, project_tags):
         response_time = api.get_network_response_time(project_id)
         if response_time:
             self.service_check('openstack.neutron.api.up', AgentCheck.OK)
@@ -218,22 +218,20 @@ class OpenStackControllerCheck(AgentCheck):
         for metric, value in network_quotas.items():
             self.gauge(f'openstack.neutron.quotas.{metric}', value, tags=project_tags)
 
-    def _report_baremetal_metrics(self, api, project):
-        tags = [f"project_id:{project['id']}", f"project_name:{project['name']}"]
-        response_time = api.get_baremetal_response_time(project)
+    def _report_baremetal_metrics(self, api, project_id, project_tags):
+        response_time = api.get_baremetal_response_time(project_id)
         if response_time:
             self.service_check('openstack.ironic.api.up', AgentCheck.OK)
             self.log.debug("response_time: %s", response_time)
-            self.gauge('openstack.ironic.response_time', response_time, tags=tags)
+            self.gauge('openstack.ironic.response_time', response_time, tags=project_tags)
         else:
             self.service_check('openstack.ironic.api.up', AgentCheck.CRITICAL)
 
-    def _report_load_balancer_metrics(self, api, project):
-        tags = [f"project_id:{project['id']}", f"project_name:{project['name']}"]
-        response_time = api.get_load_balancer_response_time(project)
+    def _report_load_balancer_metrics(self, api, project_id, project_tags):
+        response_time = api.get_load_balancer_response_time(project_id)
         if response_time:
             self.service_check('openstack.octavia.api.up', AgentCheck.OK)
             self.log.debug("response_time: %s", response_time)
-            self.gauge('openstack.octavia.response_time', response_time, tags=tags)
+            self.gauge('openstack.octavia.response_time', response_time, tags=project_tags)
         else:
             self.service_check('openstack.octavia.api.up', AgentCheck.CRITICAL)
