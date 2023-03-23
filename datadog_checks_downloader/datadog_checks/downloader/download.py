@@ -12,6 +12,7 @@ import shutil
 import sys
 import tempfile
 import urllib.error
+import urllib.parse
 import urllib.request
 
 from in_toto import verifylib
@@ -79,6 +80,12 @@ class TUFDownloader:
         self.__root_layout = ROOT_LAYOUTS[self.__root_layout_type]
 
         self.__disable_verification = disable_verification
+
+        if self.__disable_verification:
+            logger.warning(
+                'Running with TUF and in-toto verification disabled. '
+                'Integrity is only protected with TLS (HTTPS).'
+            )
 
         # NOTE: The directory where the targets for *this* repository is
         # cached. We hard-code this keep this to a subdirectory dedicated to
