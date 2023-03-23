@@ -1,5 +1,15 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 18.0.0 / 2023-03-23
+
+* [Added] Allow to specify the mode when creating a temp dir. See [#14208](https://github.com/DataDog/integrations-core/pull/14208).
+* [Added] Allow enabling of tracing for tests with an environment variable. See [#14206](https://github.com/DataDog/integrations-core/pull/14206).
+* [Added] Move CI setup scripts to a provider-agnostic location. See [#14179](https://github.com/DataDog/integrations-core/pull/14179).
+* [Fixed] Skip metadata validation for non-metrics integrations. See [#14211](https://github.com/DataDog/integrations-core/pull/14211).
+* [Fixed] Consider empty environment variables as unset. See [#14210](https://github.com/DataDog/integrations-core/pull/14210).
+* [Fixed] Fix `generate-traps-db` command on windows. See [#14117](https://github.com/DataDog/integrations-core/pull/14117).
+* [Changed] Upgrade openstacksdk dependency and drop py2. See [#14109](https://github.com/DataDog/integrations-core/pull/14109).
+
 ## 17.9.0 / 2023-03-01
 
 * [Added] Add process and runtime to allowed prefixes. See [#14058](https://github.com/DataDog/integrations-core/pull/14058).
