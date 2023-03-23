@@ -131,3 +131,98 @@ def test_rest_create_connection_ok():
             ),
         ]
     )
+
+
+def test_rest_get_projects():
+    mocked_http = mock.MagicMock()
+    mocked_http.get.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'docker/fixtures/keystone/identity/v3/get.json'),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'docker/fixtures/keystone/identity/v3/auth/projects/get.json'),
+            status_code=200,
+        ),
+    ]
+    mocked_http.post.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'docker/fixtures/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'test1234'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'docker/fixtures/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_1'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'docker/fixtures/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_2'},
+        ),
+    ]
+    instance = {
+        'keystone_server_url': 'http://10.164.0.83/identity',
+        'user_name': 'admin',
+        'user_password': 'password',
+    }
+    config = OpenstackConfig(mock.MagicMock(), instance)
+    api = make_api(config, logging, mocked_http)
+    api.create_connection()
+    projects = api.get_projects()
+    assert projects == [
+        {'id': '667aee39f2b64032b4d7585809d31e6f', 'name': 'admin'},
+        {'id': 'c165a94e230a4390af02d7394fb1fa69', 'name': 'demo'},
+    ]
+
+
+def test_get_compute_response_time():
+    total_seconds = 0.0015
+    mocked_total_seconds = mock.MagicMock(return_value=total_seconds)
+    mocked_elapsed = mock.MagicMock()
+    mocked_elapsed.total_seconds = mocked_total_seconds
+    mocked_http = mock.MagicMock()
+    mocked_compute_response_time = MockResponse(
+        file_path=os.path.join(get_here(), 'docker/fixtures/nova/compute/v2.1/get.json'),
+        status_code=200,
+    )
+    mocked_compute_response_time.elapsed = mocked_elapsed
+    mocked_http.get.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'docker/fixtures/keystone/identity/v3/get.json'),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'docker/fixtures/keystone/identity/v3/auth/projects/get.json'),
+            status_code=200,
+        ),
+        mocked_compute_response_time,
+    ]
+    mocked_http.post.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'docker/fixtures/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'test1234'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'docker/fixtures/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_1'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'docker/fixtures/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_2'},
+        ),
+    ]
+    instance = {
+        'keystone_server_url': 'http://10.164.0.83/identity',
+        'user_name': 'admin',
+        'user_password': 'password',
+    }
+    config = OpenstackConfig(mock.MagicMock(), instance)
+    api = make_api(config, logging, mocked_http)
+    api.create_connection()
+    compute_response_time = api.get_compute_response_time("667aee39f2b64032b4d7585809d31e6f")
+    assert compute_response_time == total_seconds*1000
