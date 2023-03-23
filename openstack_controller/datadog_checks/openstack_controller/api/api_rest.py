@@ -64,9 +64,9 @@ class ApiRest(Api):
             return component.get_response_time()
         return None
 
-    def get_load_balancer_response_time(self, project):
+    def get_load_balancer_response_time(self, project_id):
         self.log.debug("getting load-balancer response time")
-        component = self._get_component(project['id'], ComponentType.LOAD_BALANCER)
+        component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
         if component:
             return component.get_response_time()
         return None
