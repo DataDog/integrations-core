@@ -89,6 +89,7 @@ def test(
     \b
     `$ ddev test mysql:mysql57,maria10130`
     """
+    raise Exception('ahhhhhhhhhhh')
     if list_envs:
         display_check_envs(checks, changed)
         return
