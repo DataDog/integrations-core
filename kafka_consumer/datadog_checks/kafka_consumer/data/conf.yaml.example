@@ -75,6 +75,26 @@ instances:
     #     <TOPIC_NAME_2>: []
     #   <CONSUMER_NAME_3>: {}
 
+    ## @param consumer_groups_regex - mapping - optional
+    ## Set consumer groups and topics as regex strings.
+    ##
+    ## If both `consumer_groups_regex` and `consumer_groups` are filled out,
+    ## both configuration options will be used. 
+    ##
+    ## If `monitor_unlisted_consumer_groups` is enabled, then
+    ## `consumer_groups_regex` is ignored.
+    #
+    # consumer_groups_regex:
+    #   <CONSUMER_NAME_1>:
+    #     <TOPIC_NAME_1>:
+    #     - 0
+    #     - 1
+    #     - 4
+    #     - 12
+    #   <CONSUMER_NAME_2>:
+    #     <TOPIC_NAME_2>: []
+    #   <CONSUMER_NAME_3>: {}
+
     ## @param monitor_unlisted_consumer_groups - boolean - optional - default: false
     ## Setting `monitor_unlisted_consumer_groups` to `true` tells the check to discover all consumer groups
     ## and fetch all their known offsets. If this is not set to true, you must specify `consumer_groups`.

@@ -119,7 +119,7 @@ class ConfluentKafkaClient(KafkaClient):
         # {(consumer_group, topic, partition): offset}
         consumer_offsets = {}
 
-        if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups:
+        if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_regex:
             # Get all consumer groups
             consumer_groups = []
             consumer_groups_future = self.kafka_client.list_consumer_groups()
@@ -133,10 +133,9 @@ class ConfluentKafkaClient(KafkaClient):
                 )
             except Exception as e:
                 self.log.error("Failed to collect consumer offsets %s", e)
-        # elif self.config._consumer_groups:
-        #     self._validate_consumer_groups()
-        #     # instead of doing this, just submit the entire list of consumer groups
-        #     consumer_groups = self.config._consumer_groups
+        elif self.config._consumer_groups:
+            self._validate_consumer_groups()
+            consumer_groups = self.config._consumer_groups
         else:
             raise ConfigurationError(
                 "Cannot fetch consumer offsets because no consumer_groups are specified and "
@@ -211,46 +210,77 @@ class ConfluentKafkaClient(KafkaClient):
 
             partitions = list(topics.topics[topic].partitions.keys())
 
-            if not self.config._monitor_unlisted_consumer_groups:
-                filtered_topic_partitions = self._filter_topic_partitions(consumer_group, topic, partitions)
+            if self.config._monitor_unlisted_consumer_groups:
+                for partition in partitions:
+                    self.log.debug("TOPIC PARTITION: %s", TopicPartition(topic, partition))
+                    yield TopicPartition(topic, partition)
+
+            elif self.config._consumer_groups_regex:
+                filtered_topic_partitions = self._get_filtered_topic_partitions(consumer_group, topic, partitions)
                 for filtered_topic_partition in filtered_topic_partitions:
                     self.log.debug(
                         "TOPIC PARTITION: %s", TopicPartition(filtered_topic_partition[0], filtered_topic_partition[1])
                     )
                     yield TopicPartition(filtered_topic_partition[0], filtered_topic_partition[1])
-            else:
+
+            if self.config._consumer_groups:
                 for partition in partitions:
+                    # Get all topic-partition combinations allowed based on config
+                    # if topics is None => collect all topics and partitions for the consumer group
+                    # if partitions is None => collect all partitions from the consumer group's topic
+                    if not self.config._monitor_unlisted_consumer_groups and self.config._consumer_groups.get(
+                        consumer_group
+                    ):
+                        if (
+                            self.config._consumer_groups[consumer_group]
+                            and topic not in self.config._consumer_groups[consumer_group]
+                        ):
+                            self.log.debug(
+                                "Partition %s skipped because the topic %s is not in the consumer_group.",
+                                partition,
+                                topic,
+                            )
+                            continue
+                        if (
+                            self.config._consumer_groups[consumer_group].get(topic)
+                            and partition not in self.config._consumer_groups[consumer_group][topic]
+                        ):
+                            self.log.debug(
+                                "Partition %s skipped because it is not defined in the consumer group for the topic %s",
+                                partition,
+                                topic,
+                            )
+                            continue
+
                     self.log.debug("TOPIC PARTITION: %s", TopicPartition(topic, partition))
+
                     yield TopicPartition(topic, partition)
 
-    def _filter_topic_partitions(self, consumer_group, topic, partitions):
-        # Get all topic-partition combinations allowed based on config
-        # if topics is None => collect all topics and partitions for the consumer group
-        # if partitions is None => collect all partitions from the consumer group's topic
-
-        filtered_list = []
+    def _get_filtered_topic_partitions(self, consumer_group, topic, partitions):
+        filtered_topic_partitions = []
         for partition in partitions:
             # Do a regex filtering here for consumer groups
-            for possible_consumer_group_regex in self.config._consumer_groups:
-                if not re.match(possible_consumer_group_regex, consumer_group):
+            for consumer_group_regex in self.config._consumer_groups_regex:
+                if not re.match(consumer_group_regex, consumer_group):
                     continue
-                
+
+                consumer_group_topics_regex = self.config._consumer_groups_regex.get(consumer_group_regex)
+
                 # If topics is empty, add the topic and partition
-                if not self.config._consumer_groups.get(possible_consumer_group_regex):
-                    filtered_list.append((topic, partition))
+                if not consumer_group_topics_regex:
+                    filtered_topic_partitions.append((topic, partition))
 
                 # Do a regex filtering here for topics
-                for posible_topic_regex in self.config._consumer_groups[possible_consumer_group_regex]:
-                    self.log.debug(
-                        "Partition %s skipped because the topic %s is not in the consumer_group.", partition, topic
-                    )
-                    if not re.match(posible_topic_regex, topic):
+                for topic_regex in consumer_group_topics_regex:
+                    if not re.match(topic_regex, topic):
+                        self.log.debug(
+                            "Partition %s skipped because the topic %s is not in the consumer_group.", partition, topic
+                        )
                         continue
 
                     if (
-                        self.config._consumer_groups[possible_consumer_group_regex].get(posible_topic_regex)
-                        and partition
-                        not in self.config._consumer_groups[possible_consumer_group_regex][posible_topic_regex]
+                        consumer_group_topics_regex.get(topic_regex)
+                        and partition not in consumer_group_topics_regex[topic_regex]
                     ):
                         self.log.debug(
                             "Partition %s skipped because it is not defined in the consumer group for the topic %s",
@@ -258,6 +288,6 @@ class ConfluentKafkaClient(KafkaClient):
                             topic,
                         )
                         continue
-            
-                    filtered_list.append((topic, partition))
-        return filtered_list
+
+                    filtered_topic_partitions.append((topic, partition))
+        return filtered_topic_partitions

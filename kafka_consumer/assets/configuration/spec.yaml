@@ -77,6 +77,23 @@ files:
             <CONSUMER_NAME_2>:
               <TOPIC_NAME_2>: []
             <CONSUMER_NAME_3>: {}
+      - name: consumer_groups_regex
+        description: |
+          Set consumer groups and topics as regex strings.
+
+          If both `consumer_groups_regex` and `consumer_groups` are filled out,
+          both configuration options will be used. 
+
+          If `monitor_unlisted_consumer_groups` is enabled, then
+          `consumer_groups_regex` is ignored.
+        value:
+          type: object
+          example:
+            <CONSUMER_NAME_1>:
+              <TOPIC_NAME_1>: [0, 1, 4, 12]
+            <CONSUMER_NAME_2>:
+              <TOPIC_NAME_2>: []
+            <CONSUMER_NAME_3>: {}
       - name: monitor_unlisted_consumer_groups
         description: |
           Setting `monitor_unlisted_consumer_groups` to `true` tells the check to discover all consumer groups

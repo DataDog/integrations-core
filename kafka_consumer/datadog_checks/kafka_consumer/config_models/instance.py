@@ -42,6 +42,7 @@ class InstanceConfig(BaseModel):
 
     broker_requests_batch_size: Optional[int]
     consumer_groups: Optional[Mapping[str, Any]]
+    consumer_groups_regex: Optional[Mapping[str, Any]]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     kafka_client_api_version: Optional[str]

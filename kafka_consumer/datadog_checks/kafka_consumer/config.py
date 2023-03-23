@@ -25,6 +25,7 @@ class KafkaConfig:
             instance.get('monitor_all_broker_highwatermarks', False)
         )
         self._consumer_groups = instance.get('consumer_groups', {})
+        self._consumer_groups_regex = instance.get('consumer_groups_regex', {})
         self._broker_requests_batch_size = instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
 
         self._kafka_connect_str = instance.get('kafka_connect_str')
@@ -84,8 +85,13 @@ class KafkaConfig:
         
         # If `monitor_unlisted_consumer_groups` is set to true and
         # using `consumer_groups`, we prioritize `monitor_unlisted_consumer_groups`
-        if self._monitor_unlisted_consumer_groups and self._consumer_groups:
+        if self._monitor_unlisted_consumer_groups and (self._consumer_groups or self._consumer_groups_regex):
             self.log.warning(
-                "Using both monitor_unlisted_consumer_groups and consumer_groups, ignoring " \
-                "consumer_groups config values since monitor_unlisted_consumer_groups has priority."
+                "Using both monitor_unlisted_consumer_groups and consumer_groups or consumer_groups_regex, " \
+                    "so all consumer groups will be collected."
+            )
+
+        if self._consumer_groups and self._consumer_groups_regex:
+            self.log.warning(
+                "Using consumer_groups and consumer_groups_regex, will combine the two config options."
             )

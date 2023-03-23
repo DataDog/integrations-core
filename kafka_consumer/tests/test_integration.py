@@ -179,44 +179,170 @@ def test_config(
     'consumer_groups_config, broker_offset_count, consumer_offset_count, consumer_lag_count, expected_warning',
     [
         pytest.param(
-            {'consumer_groups': {'.+': {}}}, 4, 4, 4, '', id="All consumer offsets, empty topics"
+            {
+                'consumer_groups': {},
+                'consumer_groups_regex': {'.+': {}},
+            },
+            4,
+            4,
+            4,
+            '',
+            id="All consumer offsets, empty topics",
         ),
         pytest.param(
-            {'consumer_groups': {'.+': {'.+': []}}}, 4, 4, 4, '', id="All consumer offsets, all topics"
+            {
+                'consumer_groups': {},
+                'consumer_groups_regex': {'.+': {'.+': []}},
+            },
+            4,
+            4,
+            4,
+            '',
+            id="All consumer offsets, all topics",
         ),
         pytest.param(
-            {'consumer_groups': {'.+': {'!.+': []}}}, 0, 0, 0, '', id="All consumer offsets, no topics"
+            {
+                'consumer_groups': {},
+                'consumer_groups_regex': {'.+': {'!.+': []}},
+            },
+            0,
+            0,
+            0,
+            '',
+            id="All consumer offsets, no topics",
         ),
         pytest.param(
-            {'consumer_groups': {'!.+': {'!.+': []}}}, 0, 0, 0, '', id="No consumer offsets, No topics"
+            {
+                'consumer_groups': {},
+                'consumer_groups_regex': {'!.+': {'!.+': []}},
+            },
+            0,
+            0,
+            0,
+            '',
+            id="No consumer offsets, No topics",
         ),
         pytest.param(
-            {'consumer_groups': {'!.+': {}}}, 0, 0, 0, '', id="No consumer offsets, empty topics"
+            {
+                'consumer_groups': {},
+                'consumer_groups_regex': {'!.+': {}},
+            },
+            0,
+            0,
+            0,
+            '',
+            id="No consumer offsets, empty topics",
         ),
         pytest.param(
-            {'consumer_groups': {'my_consumer': {'dc': [0]}}}, 1, 1, 1, '', id="Specified consumer group, topic, and partition"
+            {
+                'consumer_groups': {},
+                'consumer_groups_regex': {'my_consumer': {'dc': [0]}},
+            },
+            1,
+            1,
+            1,
+            '',
+            id="Specified consumer group, topic, and partition",
         ),
         pytest.param(
-            {'consumer_groups': {'my_consumer': {'dc': []}}}, 2, 2, 2, '', id="Specified consumer group, topic"
+            {
+                'consumer_groups': {},
+                'consumer_groups_regex': {'my_consumer': {'dc': []}},
+            },
+            2,
+            2,
+            2,
+            '',
+            id="Specified consumer group, topic",
         ),
         pytest.param(
-            {'consumer_groups': {'m.+': {}, 'm.+': {}}}, 4, 4, 4, '', id="Multiple consumer_groups specified"
+            {
+                'consumer_groups': {},
+                'consumer_groups_regex': {'m.+': {}, '.+': {}},
+            },
+            4,
+            4,
+            4,
+            '',
+            id="Multiple consumer_groups specified",
         ),
         pytest.param(
-            {'consumer_groups': {'!.+': {}}, 'monitor_unlisted_consumer_groups': True}, 4, 4, 4, 'Using both monitor_unlisted_consumer_groups and consumer_groups', id="No specified consumer groups, but monitor_unlisted_consumer_groups true"
+            {
+                'consumer_groups': {},
+                'consumer_groups_regex': {'!.+': {}},
+                'monitor_unlisted_consumer_groups': True,
+            },
+            4,
+            4,
+            4,
+            'Using both monitor_unlisted_consumer_groups and consumer_groups or consumer_groups_regex',
+            id="No specified consumer groups, but monitor_unlisted_consumer_groups true",
         ),
         pytest.param(
-            {'consumer_groups': {'my_consumer': {'dc': []}}, 'monitor_unlisted_consumer_groups': True}, 4, 4, 4, 'Using both monitor_unlisted_consumer_groups and consumer_groups', id="Specified topics, but monitor_unlisted_consumer_groups true"
+            {
+                'consumer_groups': {},
+                'consumer_groups_regex': {'my_consumer': {'dc': []}},
+                'monitor_unlisted_consumer_groups': True,
+            },
+            4,
+            4,
+            4,
+            'Using both monitor_unlisted_consumer_groups and consumer_groups or consumer_groups_regex',
+            id="Specified topics, but monitor_unlisted_consumer_groups true",
         ),
         pytest.param(
-            {'consumer_groups': {'my_consumer': {'dc': []}}, 'monitor_unlisted_consumer_groups': False}, 2, 2, 2, '', id="Specified topic, monitor_unlisted_consumer_groups false"
+            {
+                'consumer_groups': {},
+                'consumer_groups_regex': {'my_consume*': {'dc': []}},
+                'monitor_unlisted_consumer_groups': False,
+            },
+            2,
+            2,
+            2,
+            '',
+            id="Specified topic, monitor_unlisted_consumer_groups false",
+        ),
+        pytest.param(
+            {
+                'consumer_groups': {'my_consumer': {'marvel': []}},
+                'consumer_groups_regex': {'my_consumer': {'dc': []}},
+                'monitor_unlisted_consumer_groups': False,
+            },
+            4,
+            4,
+            4,
+            'Using consumer_groups and consumer_groups_regex',
+            id="Mixing both consumer_groups and consumer_groups_regex",
+        ),
+        pytest.param(
+            {
+                'consumer_groups': {'my_consumer': {'marvel': []}},
+                'consumer_groups_regex': {'my_consumer': {'dc': []}},
+                'monitor_unlisted_consumer_groups': True,
+            },
+            4,
+            4,
+            4,
+            'Using both monitor_unlisted_consumer_groups and consumer_groups or consumer_groups_regex',
+            id="Mixing consumer_groups, consumer_groups_regex, and monitor_unlisted_consumer_groups",
         ),
     ],
 )
-def test_regex_consumer_groups(consumer_groups_config, broker_offset_count, consumer_offset_count, consumer_lag_count, expected_warning, caplog, kafka_instance, dd_run_check, aggregator, check):
+def test_regex_consumer_groups(
+    consumer_groups_regex_config,
+    broker_offset_count,
+    consumer_offset_count,
+    consumer_lag_count,
+    expected_warning,
+    caplog,
+    kafka_instance,
+    dd_run_check,
+    aggregator,
+    check,
+):
     caplog.set_level(logging.WARN)
     # Given
-    kafka_instance.update(consumer_groups_config)
+    kafka_instance.update(consumer_groups_regex_config)
 
     # When
     dd_run_check(check(kafka_instance))
