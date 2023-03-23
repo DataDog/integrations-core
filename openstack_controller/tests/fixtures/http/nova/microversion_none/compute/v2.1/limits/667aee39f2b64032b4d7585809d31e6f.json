@@ -15,9 +15,9 @@
       "maxTotalFloatingIps": -1,
       "maxSecurityGroups": -1,
       "maxSecurityGroupRules": -1,
-      "totalRAMUsed": 768,
-      "totalCoresUsed": 3,
-      "totalInstancesUsed": 3,
+      "totalRAMUsed": 256,
+      "totalCoresUsed": 1,
+      "totalInstancesUsed": 1,
       "totalFloatingIpsUsed": 0,
       "totalSecurityGroupsUsed": 0,
       "totalServerGroupsUsed": 0

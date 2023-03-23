@@ -12,9 +12,9 @@
     "max_total_floating_ips": -1,
     "max_security_groups": -1,
     "max_security_group_rules": -1,
-    "total_ram_used": 768,
-    "total_cores_used": 3,
-    "total_instances_used": 3,
+    "total_ram_used": 256,
+    "total_cores_used": 1,
+    "total_instances_used": 1,
     "total_floating_ips_used": 0,
     "total_security_groups_used": 0,
     "total_server_groups_used": 0
