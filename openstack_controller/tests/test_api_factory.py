@@ -666,3 +666,124 @@ def test_rest_get_compute_flavors_nova_microversion_latest():
     mocked_http.get.assert_has_calls([mock.call('http://127.0.0.1:8774/compute/v2.1/flavors/detail')])
     with open(os.path.join(get_here(), 'fixtures/api/compute/nova_microversion_latest/flavors.json'), 'r') as flavors:
         assert compute_flavors == json.load(flavors)
+
+
+def test_rest_get_compute_hypervisors():
+    mocked_http = mock.MagicMock()
+    mocked_http.get.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/get.json'),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/projects/get.json'),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(
+                get_here(),
+                'fixtures/http/nova/microversion_none/compute/v2.1/os-hypervisors/detail/get.json',
+            ),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(
+                get_here(),
+                'fixtures/http/nova/microversion_none/compute/v2.1/os-hypervisors/1/uptime/get.json',
+            ),
+            status_code=200,
+        ),
+    ]
+    mocked_http.post.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'test1234'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_1'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_2'},
+        ),
+    ]
+    instance = {
+        'keystone_server_url': 'http://10.164.0.83/identity',
+        'user_name': 'admin',
+        'user_password': 'password',
+    }
+    config = OpenstackConfig(mock.MagicMock(), instance)
+    api = make_api(config, logging, mocked_http)
+    api.create_connection()
+    compute_hypervisors = api.get_compute_hypervisors("667aee39f2b64032b4d7585809d31e6f")
+    mocked_http.get.assert_has_calls(
+        [
+            mock.call('http://127.0.0.1:8774/compute/v2.1/os-hypervisors/detail?with_servers=true'),
+            mock.call('http://127.0.0.1:8774/compute/v2.1/os-hypervisors/1/uptime'),
+        ]
+    )
+    with open(
+        os.path.join(get_here(), 'fixtures/api/compute/nova_microversion_none/hypervisors_detail.json'), 'r'
+    ) as hypervisors:
+        assert compute_hypervisors == json.load(hypervisors)
+
+
+def test_rest_get_compute_hypervisors_nova_microversion_latest():
+    mocked_http = mock.MagicMock()
+    mocked_http.get.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/get.json'),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/projects/get.json'),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(
+                get_here(),
+                'fixtures/http/nova/microversion_latest/compute/v2.1/os-hypervisors/detail/get.json',
+            ),
+            status_code=200,
+        ),
+    ]
+    mocked_http.post.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'test1234'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_1'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_2'},
+        ),
+    ]
+    instance = {
+        'keystone_server_url': 'http://10.164.0.83/identity',
+        'user_name': 'admin',
+        'user_password': 'password',
+        'nova_microversion': 'latest',
+    }
+    config = OpenstackConfig(mock.MagicMock(), instance)
+    api = make_api(config, logging, mocked_http)
+    api.create_connection()
+    compute_hypervisors = api.get_compute_hypervisors("667aee39f2b64032b4d7585809d31e6f")
+    mocked_http.get.assert_has_calls(
+        [
+            mock.call('http://127.0.0.1:8774/compute/v2.1/os-hypervisors/detail?with_servers=true'),
+        ]
+    )
+    with open(
+        os.path.join(get_here(), 'fixtures/api/compute/nova_microversion_latest/hypervisors_detail.json'), 'r'
+    ) as hypervisors:
+        assert compute_hypervisors == json.load(hypervisors)

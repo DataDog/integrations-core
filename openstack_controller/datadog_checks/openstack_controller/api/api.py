@@ -35,7 +35,7 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_hypervisors_detail(self, project, collect_hypervisor_load):
+    def get_compute_hypervisors(self, project, collect_hypervisor_load):
         pass  # pragma: no cover
 
     @abstractmethod

@@ -352,7 +352,7 @@ def test_compute_hypervisor_service_check(
         api.get_baremetal_response_time.return_value = None
         api.get_load_balancer_response_time.return_value = None
         api.get_projects.return_value = one_project_content
-        api.get_compute_hypervisors_detail.return_value = hypervisors_content
+        api.get_compute_hypervisors.return_value = hypervisors_content
         api.get_compute_os_aggregates.return_value = os_aggregates_content
         mocked_api.return_value = api
         instance = {
@@ -439,7 +439,7 @@ def test_compute_hypervisor_metrics(hypervisors_mock_file, os_aggregates_mock_fi
             'aggregate:my-aggregate',
             'availability_zone:availability-zone',
             'hypervisor:agent-integrations-openstack-default',
-            'hypervisor_id:1',
+            'hypervisor_id:d884b51a-e464-49dc-916c-766da0237661' if nova_microversion_latest else 'hypervisor_id:1',
             'status:enabled',
             'virt_type:QEMU',
         ]
@@ -454,7 +454,7 @@ def test_compute_hypervisor_metrics(hypervisors_mock_file, os_aggregates_mock_fi
         api.get_baremetal_response_time.return_value = None
         api.get_load_balancer_response_time.return_value = None
         api.get_projects.return_value = one_project_content
-        api.get_compute_hypervisors_detail.return_value = hypervisors_content
+        api.get_compute_hypervisors.return_value = hypervisors_content
         api.get_compute_os_aggregates.return_value = os_aggregates_content
         mocked_api.return_value = api
         check = OpenStackControllerCheck('test', {}, [instance])
@@ -487,13 +487,13 @@ def test_compute_hypervisor_metrics(hypervisors_mock_file, os_aggregates_mock_fi
                 aggregator.assert_metric('openstack.nova.current_workload', value=0, count=count, tags=tags)
                 aggregator.assert_metric('openstack.nova.running_vms', value=1, count=count, tags=tags)
                 aggregator.assert_metric('openstack.nova.disk_available_least', value=84, count=count, tags=tags)
-        aggregator.assert_metric('openstack.nova.hypervisor.load_1', value=0.11, count=count, tags=tags)
-        aggregator.assert_metric('openstack.nova.hypervisor.load_5', value=0.08, count=count, tags=tags)
-        aggregator.assert_metric('openstack.nova.hypervisor.load_15', value=0.11, count=count, tags=tags)
+        aggregator.assert_metric('openstack.nova.hypervisor.load_1', value=0.12, count=count, tags=tags)
+        aggregator.assert_metric('openstack.nova.hypervisor.load_5', value=0.17, count=count, tags=tags)
+        aggregator.assert_metric('openstack.nova.hypervisor.load_15', value=0.19, count=count, tags=tags)
         if report_legacy_metrics:
-            aggregator.assert_metric('openstack.nova.hypervisor_load.1', value=0.11, count=count, tags=tags)
-            aggregator.assert_metric('openstack.nova.hypervisor_load.5', value=0.08, count=count, tags=tags)
-            aggregator.assert_metric('openstack.nova.hypervisor_load.15', value=0.11, count=count, tags=tags)
+            aggregator.assert_metric('openstack.nova.hypervisor_load.1', value=0.12, count=count, tags=tags)
+            aggregator.assert_metric('openstack.nova.hypervisor_load.5', value=0.17, count=count, tags=tags)
+            aggregator.assert_metric('openstack.nova.hypervisor_load.15', value=0.19, count=count, tags=tags)
         aggregator.assert_all_metrics_covered()
 
 
@@ -642,7 +642,7 @@ def test_report_legacy_metrics_default(aggregator, dd_run_check):
         hypervisors_content = json.load(hypervisors)
         api = mock.MagicMock()
         api.get_projects.return_value = one_project_content
-        api.get_compute_hypervisors_detail.return_value = hypervisors_content
+        api.get_compute_hypervisors.return_value = hypervisors_content
         mocked_api.return_value = api
         instance = {
             'keystone_server_url': 'http://10.164.0.83/identity',
@@ -665,7 +665,7 @@ def test_report_legacy_metrics_false(aggregator, dd_run_check):
         hypervisors_content = json.load(hypervisors)
         api = mock.MagicMock()
         api.get_projects.return_value = one_project_content
-        api.get_compute_hypervisors_detail.return_value = hypervisors_content
+        api.get_compute_hypervisors.return_value = hypervisors_content
         mocked_api.return_value = api
         instance = {
             'keystone_server_url': 'http://10.164.0.83/identity',
@@ -689,7 +689,7 @@ def test_report_legacy_metrics_true(aggregator, dd_run_check):
         hypervisors_content = json.load(hypervisors)
         api = mock.MagicMock()
         api.get_projects.return_value = one_project_content
-        api.get_compute_hypervisors_detail.return_value = hypervisors_content
+        api.get_compute_hypervisors.return_value = hypervisors_content
         mocked_api.return_value = api
         instance = {
             'keystone_server_url': 'http://10.164.0.83/identity',

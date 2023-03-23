@@ -14,19 +14,19 @@ class ApiSdk(Api):
     def get_compute_response_time(self, project_id):
         pass  # pragma: no cover
 
-    def get_compute_limits(self, project):
+    def get_compute_limits(self, project_id):
         pass  # pragma: no cover
 
-    def get_compute_quota_set(self, project):
+    def get_compute_quota_set(self, project_id):
         pass  # pragma: no cover
 
-    def get_compute_servers(self, project):
+    def get_compute_servers(self, project_id):
         pass  # pragma: no cover
 
-    def get_compute_flavors(self, project):
+    def get_compute_flavors(self, project_id):
         pass  # pragma: no cover
 
-    def get_compute_hypervisors_detail(self, project, collect_hypervisor_load):
+    def get_compute_hypervisors(self, project_id):
         pass  # pragma: no cover
 
     def get_compute_os_aggregates(self, project_id):

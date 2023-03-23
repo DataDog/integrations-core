@@ -17,9 +17,9 @@
             "current_workload": 0,
             "running_vms": 1,
             "disk_available_least": 84,
-            "load_1": 0.0,
-            "load_5": 0.06,
-            "load_15": 0.13
+            "load_1": 0.12,
+            "load_5": 0.17,
+            "load_15": 0.19
         }
     }
 }

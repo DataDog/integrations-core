@@ -1,14 +1,14 @@
 {
-    "1": {
+    "d884b51a-e464-49dc-916c-766da0237661": {
         "name": "agent-integrations-openstack-default",
         "state": "up",
         "type": "QEMU",
         "status": "enabled",
         "metrics": {
             "hypervisor_version": 4002001,
-            "load_1": 0.11,
-            "load_5": 0.08,
-            "load_15": 0.11
+            "load_1": 0.12,
+            "load_5": 0.17,
+            "load_15": 0.19
         }
     }
 }

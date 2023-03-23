@@ -161,11 +161,11 @@ class OpenStackControllerCheck(AgentCheck):
                 )
 
     def _report_compute_hypervisors(self, api, project_id, project_tags):
-        compute_hypervisors_detail = api.get_compute_hypervisors_detail(project_id)
-        self.log.debug("compute_hypervisors_detail: %s", compute_hypervisors_detail)
+        compute_hypervisors = api.get_compute_hypervisors(project_id)
+        self.log.debug("compute_hypervisors: %s", compute_hypervisors)
         compute_os_aggregates = api.get_compute_os_aggregates(project_id)
         self.log.debug("compute_os_aggregates: %s", compute_os_aggregates)
-        for hypervisor_id, hypervisor_data in compute_hypervisors_detail.items():
+        for hypervisor_id, hypervisor_data in compute_hypervisors.items():
             hypervisor_tags = project_tags + _create_hypervisor_metric_tags(
                 hypervisor_id, hypervisor_data, compute_os_aggregates
             )

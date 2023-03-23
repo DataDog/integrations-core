@@ -82,8 +82,8 @@ class ComputeRest:
             }
         return flavor_metrics
 
-    def get_hypervisors_detail(self):
-        response = self.http.get('{}/os-hypervisors/detail'.format(self.endpoint))
+    def get_hypervisors(self):
+        response = self.http.get('{}/os-hypervisors/detail?with_servers=true'.format(self.endpoint))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         hypervisors_detail_metrics = {}
