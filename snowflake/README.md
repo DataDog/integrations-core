@@ -74,7 +74,7 @@ datadog-agent integration install datadog-snowflake==2.0.1
         ## For more information on Snowflake account names,
         ## see https://docs.snowflake.com/en/user-guide/connecting.html#your-snowflake-account-name
         #
-      - account:  <ORG_NAME>-<ACCOUNT_NAME>
+      - account: <ORG_NAME>-<ACCOUNT_NAME>
     
         ## @param user - string - required
         ## Login name for the user.
