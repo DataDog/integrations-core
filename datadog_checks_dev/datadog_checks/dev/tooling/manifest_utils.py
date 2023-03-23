@@ -169,3 +169,6 @@ class ManifestV2:
 
     def has_integration(self):
         return self._manifest_json.get_path("/assets/integration") is not None
+    
+    def has_metrics_integration(self):
+        return self._manifest_json.get_path("/assets/integration/metrics") is not None
