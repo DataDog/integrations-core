@@ -612,9 +612,7 @@ def test_rest_get_compute_flavors():
     api = make_api(config, logging, mocked_http)
     api.create_connection()
     compute_flavors = api.get_compute_flavors("667aee39f2b64032b4d7585809d31e6f")
-    mocked_http.get.assert_has_calls(
-        [mock.call('http://127.0.0.1:8774/compute/v2.1/flavors/detail')]
-    )
+    mocked_http.get.assert_has_calls([mock.call('http://127.0.0.1:8774/compute/v2.1/flavors/detail')])
     with open(os.path.join(get_here(), 'fixtures/api/compute/nova_microversion_none/flavors.json'), 'r') as flavors:
         assert compute_flavors == json.load(flavors)
 
@@ -665,9 +663,6 @@ def test_rest_get_compute_flavors_nova_microversion_latest():
     api = make_api(config, logging, mocked_http)
     api.create_connection()
     compute_flavors = api.get_compute_flavors("667aee39f2b64032b4d7585809d31e6f")
-    mocked_http.get.assert_has_calls(
-        [mock.call('http://127.0.0.1:8774/compute/v2.1/flavors/detail')]
-    )
+    mocked_http.get.assert_has_calls([mock.call('http://127.0.0.1:8774/compute/v2.1/flavors/detail')])
     with open(os.path.join(get_here(), 'fixtures/api/compute/nova_microversion_latest/flavors.json'), 'r') as flavors:
         assert compute_flavors == json.load(flavors)
-

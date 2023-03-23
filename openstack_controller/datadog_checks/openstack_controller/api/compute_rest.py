@@ -82,7 +82,7 @@ class ComputeRest:
             }
         return flavor_metrics
 
-    def get_hypervisors_detail(self, collect_hypervisor_load):
+    def get_hypervisors_detail(self):
         response = self.http.get('{}/os-hypervisors/detail'.format(self.endpoint))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
@@ -99,25 +99,22 @@ class ComputeRest:
                     if isinstance(value, (int, float)) and not isinstance(value, bool)
                 },
             }
-            if collect_hypervisor_load:
-                uptime = hypervisor.get('uptime')
-                load_averages = []
-                if uptime:
-                    load_averages = _load_averages_from_uptime(uptime)
-                else:
-                    response_uptime = self.http.get(
-                        '{}/os-hypervisors/{}/uptime'.format(self.endpoint, hypervisor['id'])
-                    )
-                    if 200 <= response_uptime.status_code < 300:
-                        self.log.debug("response uptime: %s", response_uptime.json())
-                        uptime = response_uptime.json().get('hypervisor', {}).get('uptime')
-                        if uptime:
-                            load_averages = _load_averages_from_uptime(uptime)
-                if load_averages and len(load_averages) == 3:
-                    for i, avg in enumerate([1, 5, 15]):
-                        hypervisors_detail_metrics[str(hypervisor['id'])]['metrics'][
-                            'load_{}'.format(avg)
-                        ] = load_averages[i]
+            uptime = hypervisor.get('uptime')
+            load_averages = []
+            if uptime:
+                load_averages = _load_averages_from_uptime(uptime)
+            else:
+                response_uptime = self.http.get('{}/os-hypervisors/{}/uptime'.format(self.endpoint, hypervisor['id']))
+                if 200 <= response_uptime.status_code < 300:
+                    self.log.debug("response uptime: %s", response_uptime.json())
+                    uptime = response_uptime.json().get('hypervisor', {}).get('uptime')
+                    if uptime:
+                        load_averages = _load_averages_from_uptime(uptime)
+            if load_averages and len(load_averages) == 3:
+                for i, avg in enumerate([1, 5, 15]):
+                    hypervisors_detail_metrics[str(hypervisor['id'])]['metrics']['load_{}'.format(avg)] = load_averages[
+                        i
+                    ]
         return hypervisors_detail_metrics
 
     def get_os_aggregates(self):

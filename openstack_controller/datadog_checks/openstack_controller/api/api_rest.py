@@ -103,12 +103,12 @@ class ApiRest(Api):
             return component.get_flavors()
         return None
 
-    def get_compute_hypervisors_detail(self, project_id, collect_hypervisor_load):
+    def get_compute_hypervisors_detail(self, project_id):
         self.log.debug("getting compute hypervisors detail")
         self.http.options['headers']['X-Auth-Token'] = self.project_auth_tokens[project_id]['auth_token']
         component = self._get_component(project_id, ComponentType.COMPUTE)
         if component:
-            return component.get_hypervisors_detail(collect_hypervisor_load)
+            return component.get_hypervisors_detail()
         return None
 
     def get_compute_os_aggregates(self, project_id):
