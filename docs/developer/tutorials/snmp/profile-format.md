@@ -276,8 +276,7 @@ External table indexes must be a subset of the indexes of the current table, or 
     ```
 
 ##### Mapping column to tag string value
-
-You can use the following syntax to map OID values to tag string values. In the example below, the submitted metrics will be `snmp.ifInOctets` with tags like `if_type:regular1822`.
+You can use the following syntax to map OID values to tag string values. In the example below, the submitted metrics will be `snmp.ifInOctets` with tags like `if_type:regular1822`. Available in Agent 7.45.
 
 ```yaml
 metrics:
