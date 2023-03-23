@@ -1,16 +1,9 @@
 {
-    "1": {
+    "3": {
         "name": "my-aggregate",
         "availability_zone": "availability-zone",
         "hosts": [
             "agent-integrations-openstack-default"
-        ]
-    },
-    "2": {
-        "name": "my-other-aggregate",
-        "availability_zone": "availability-zone",
-        "hosts": [
-            "datadog-openstack-default"
         ]
     }
 }
