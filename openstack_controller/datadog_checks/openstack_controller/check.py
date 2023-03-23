@@ -107,7 +107,7 @@ class OpenStackControllerCheck(AgentCheck):
         self.log.debug("reporting metrics from project: [id:%s][name:%s]", project['id'], project['name'])
         project_tags = _create_project_tags(project)
         self._report_compute_metrics(api, project, project_tags)
-        self._report_network_metrics(api, project)
+        self._report_network_metrics(api, project, project_tags)
         self._report_baremetal_metrics(api, project)
         self._report_load_balancer_metrics(api, project)
 
@@ -201,17 +201,17 @@ class OpenStackControllerCheck(AgentCheck):
         elif self.instance.get('collect_hypervisor_load', True) and metric in LEGACY_NOVA_HYPERVISOR_LOAD_METRICS:
             self.gauge(f'openstack.nova.{LEGACY_NOVA_HYPERVISOR_LOAD_METRICS[metric]}', value, tags=tags)
 
-    def _report_network_metrics(self, api, project):
-        tags = [f"project_id:{project['id']}", f"project_name:{project['name']}"]
-        response_time = api.get_network_response_time(project)
+    def _report_network_metrics(self, api, project, project_tags):
+        project_id = project.get('id')
+        response_time = api.get_network_response_time(project_id)
         if response_time:
             self.service_check('openstack.neutron.api.up', AgentCheck.OK)
             self.log.debug("response_time: %s", response_time)
-            self.gauge('openstack.neutron.response_time', response_time, tags=tags)
+            self.gauge('openstack.neutron.response_time', response_time, tags=project_tags)
             network_quotas = api.get_network_quotas(project)
             self.log.debug("network_quotas: %s", network_quotas)
             for metric, value in network_quotas.items():
-                self.gauge(f'openstack.neutron.quotas.{metric}', value, tags=tags)
+                self.gauge(f'openstack.neutron.quotas.{metric}', value, tags=project_tags)
         else:
             self.service_check('openstack.neutron.api.up', AgentCheck.CRITICAL)
 

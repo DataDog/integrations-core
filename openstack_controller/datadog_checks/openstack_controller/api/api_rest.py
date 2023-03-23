@@ -50,9 +50,9 @@ class ApiRest(Api):
             return component.get_response_time()
         return None
 
-    def get_network_response_time(self, project):
+    def get_network_response_time(self, project_id):
         self.log.debug("getting network response time")
-        component = self._get_component(project['id'], ComponentType.NETWORK)
+        component = self._get_component(project_id, ComponentType.NETWORK)
         if component:
             return component.get_response_time()
         return None
