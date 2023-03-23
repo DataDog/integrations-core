@@ -91,7 +91,7 @@ You can set multiple categories and define submitted or queried data types for t
 
 You can find the complete list of classifier tags for the `manifest.json` file below: 
 
-// Classifier tag shortcode with tag definitions
+{{% integration_categories %}}
 
 ## Service check file
 
