@@ -2,7 +2,7 @@
     "2c653a68-b520-4582-a05d-41a68067d76c": {
         "name": "server",
         "metrics": {
-            "uptime": 7652,
+            "uptime": 502856,
             "num_cpus": 1,
             "num_nics": 1,
             "num_disks": 1

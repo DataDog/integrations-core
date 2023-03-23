@@ -244,7 +244,7 @@ def test_rest_get_compute_limits():
         MockResponse(
             file_path=os.path.join(
                 get_here(),
-                'fixtures/http/nova/microversion_none/compute/v2.1/limits/667aee39f2b64032b4d7585809d31e6f.json'
+                'fixtures/http/nova/microversion_none/compute/v2.1/limits/667aee39f2b64032b4d7585809d31e6f.json',
             ),
             status_code=200,
         ),
@@ -296,7 +296,7 @@ def test_rest_get_compute_limits_nova_microversion_latest():
         MockResponse(
             file_path=os.path.join(
                 get_here(),
-                'fixtures/http/nova/microversion_latest/compute/v2.1/limits/667aee39f2b64032b4d7585809d31e6f.json'
+                'fixtures/http/nova/microversion_latest/compute/v2.1/limits/667aee39f2b64032b4d7585809d31e6f.json',
             ),
             status_code=200,
         ),
@@ -322,7 +322,7 @@ def test_rest_get_compute_limits_nova_microversion_latest():
         'keystone_server_url': 'http://10.164.0.83/identity',
         'user_name': 'admin',
         'user_password': 'password',
-        'nova_microversion': 'latest'
+        'nova_microversion': 'latest',
     }
     config = OpenstackConfig(mock.MagicMock(), instance)
     api = make_api(config, logging, mocked_http)
@@ -333,3 +333,235 @@ def test_rest_get_compute_limits_nova_microversion_latest():
     )
     with open(os.path.join(get_here(), 'fixtures/api/compute/nova_microversion_latest/limits.json'), 'r') as limits:
         assert compute_limits == json.load(limits)
+
+
+def test_rest_get_compute_quota_set():
+    mocked_http = mock.MagicMock()
+    mocked_http.get.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/get.json'),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/projects/get.json'),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(
+                get_here(),
+                'fixtures/http/nova/microversion_none/compute/v2.1/os-quota-sets/667aee39f2b64032b4d7585809d31e6f.json',
+            ),
+            status_code=200,
+        ),
+    ]
+    mocked_http.post.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'test1234'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_1'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_2'},
+        ),
+    ]
+    instance = {
+        'keystone_server_url': 'http://10.164.0.83/identity',
+        'user_name': 'admin',
+        'user_password': 'password',
+    }
+    config = OpenstackConfig(mock.MagicMock(), instance)
+    api = make_api(config, logging, mocked_http)
+    api.create_connection()
+    compute_limits = api.get_compute_quota_set("667aee39f2b64032b4d7585809d31e6f")
+    mocked_http.get.assert_has_calls(
+        [mock.call('http://127.0.0.1:8774/compute/v2.1/os-quota-sets/667aee39f2b64032b4d7585809d31e6f')]
+    )
+    with open(os.path.join(get_here(), 'fixtures/api/compute/nova_microversion_none/quota_set.json'), 'r') as limits:
+        assert compute_limits == json.load(limits)
+
+
+def test_rest_get_compute_quota_set_nova_microversion_latest():
+    mocked_http = mock.MagicMock()
+    mocked_http.get.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/get.json'),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/projects/get.json'),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(
+                get_here(),
+                'fixtures/http/nova/microversion_latest/compute/v2.1/os-quota-sets/'
+                '667aee39f2b64032b4d7585809d31e6f.json',
+            ),
+            status_code=200,
+        ),
+    ]
+    mocked_http.post.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'test1234'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_1'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_2'},
+        ),
+    ]
+    instance = {
+        'keystone_server_url': 'http://10.164.0.83/identity',
+        'user_name': 'admin',
+        'user_password': 'password',
+        'nova_microversion': 'latest',
+    }
+    config = OpenstackConfig(mock.MagicMock(), instance)
+    api = make_api(config, logging, mocked_http)
+    api.create_connection()
+    compute_limits = api.get_compute_quota_set("667aee39f2b64032b4d7585809d31e6f")
+    mocked_http.get.assert_has_calls(
+        [mock.call('http://127.0.0.1:8774/compute/v2.1/os-quota-sets/667aee39f2b64032b4d7585809d31e6f')]
+    )
+    with open(os.path.join(get_here(), 'fixtures/api/compute/nova_microversion_latest/quota_set.json'), 'r') as limits:
+        assert compute_limits == json.load(limits)
+
+
+def test_rest_get_compute_servers():
+    mocked_http = mock.MagicMock()
+    mocked_http.get.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/get.json'),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/projects/get.json'),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(
+                get_here(),
+                'fixtures/http/nova/microversion_none/compute/v2.1/servers/detail/'
+                '6e39099cccde4f809b003d9e0dd09304.json',
+            ),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(
+                get_here(),
+                'fixtures/http/nova/microversion_none/compute/v2.1/servers/'
+                '2c653a68-b520-4582-a05d-41a68067d76c/diagnostics/get.json',
+            ),
+            status_code=200,
+        ),
+    ]
+    mocked_http.post.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'test1234'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_1'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_2'},
+        ),
+    ]
+    instance = {
+        'keystone_server_url': 'http://10.164.0.83/identity',
+        'user_name': 'admin',
+        'user_password': 'password',
+    }
+    config = OpenstackConfig(mock.MagicMock(), instance)
+    api = make_api(config, logging, mocked_http)
+    api.create_connection()
+    compute_servers = api.get_compute_servers("667aee39f2b64032b4d7585809d31e6f")
+    mocked_http.get.assert_has_calls(
+        [mock.call('http://127.0.0.1:8774/compute/v2.1/servers/detail?project_id=667aee39f2b64032b4d7585809d31e6f')]
+    )
+    with open(os.path.join(get_here(), 'fixtures/api/compute/nova_microversion_none/servers.json'), 'r') as servers:
+        assert compute_servers == json.load(servers)
+
+
+def test_rest_get_compute_servers_nova_microversion_latest():
+    mocked_http = mock.MagicMock()
+    mocked_http.get.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/get.json'),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/projects/get.json'),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(
+                get_here(),
+                'fixtures/http/nova/microversion_latest/compute/v2.1/servers/detail/'
+                '6e39099cccde4f809b003d9e0dd09304.json',
+            ),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(
+                get_here(),
+                'fixtures/http/nova/microversion_latest/compute/v2.1/servers/'
+                '2c653a68-b520-4582-a05d-41a68067d76c/diagnostics/get.json',
+            ),
+            status_code=200,
+        ),
+    ]
+    mocked_http.post.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'test1234'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_1'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_2'},
+        ),
+    ]
+    instance = {
+        'keystone_server_url': 'http://10.164.0.83/identity',
+        'user_name': 'admin',
+        'user_password': 'password',
+        'nova_microversion': 'latest',
+    }
+    config = OpenstackConfig(mock.MagicMock(), instance)
+    api = make_api(config, logging, mocked_http)
+    api.create_connection()
+    compute_servers = api.get_compute_servers("667aee39f2b64032b4d7585809d31e6f")
+    mocked_http.get.assert_has_calls(
+        [
+            mock.call('http://127.0.0.1:8774/compute/v2.1/servers/detail?project_id=667aee39f2b64032b4d7585809d31e6f'),
+            mock.call('http://127.0.0.1:8774/compute/v2.1/servers/2c653a68-b520-4582-a05d-41a68067d76c/diagnostics'),
+        ]
+    )
+    with open(os.path.join(get_here(), 'fixtures/api/compute/nova_microversion_latest/servers.json'), 'r') as servers:
+        assert compute_servers == json.load(servers)
