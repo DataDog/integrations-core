@@ -171,6 +171,7 @@ Need help? Contact [Datadog support][17].
 - [SQL Server monitoring tools][20]
 - [Monitor SQL Server performance with Datadog][21]
 - [Custom SQL Server metrics for detailed monitoring][22]
+- [Strategize your Azure migration for SQL workloads with Datadog][23]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -194,3 +195,4 @@ Need help? Contact [Datadog support][17].
 [20]: https://www.datadoghq.com/blog/sql-server-monitoring-tools
 [21]: https://www.datadoghq.com/blog/sql-server-performance
 [22]: https://www.datadoghq.com/blog/sql-server-metrics
+[23]: https://www.datadoghq.com/blog/migrate-sql-workloads-to-azure-with-datadog/
