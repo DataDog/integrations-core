@@ -57,9 +57,9 @@ class ApiRest(Api):
             return component.get_response_time()
         return None
 
-    def get_baremetal_response_time(self, project):
+    def get_baremetal_response_time(self, project_id):
         self.log.debug("getting baremetal response time")
-        component = self._get_component(project['id'], ComponentType.BAREMETAL)
+        component = self._get_component(project_id, ComponentType.BAREMETAL)
         if component:
             return component.get_response_time()
         return None
