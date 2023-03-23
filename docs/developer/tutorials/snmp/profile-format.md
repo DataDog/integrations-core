@@ -378,6 +378,31 @@ metrics:
 
 See meaning of index as used here in [Using an index](#using-an-index) section.
 
+##### Formatting MAC Addresses
+
+If you see MAC Address in tags being encoded as `0x000000000000` instead of `00:00:00:00:00:00`,
+then you can use `format: mac_address` to format the MAC Address to `00:00:00:00:00:00` format.
+
+Example:
+
+```yaml
+metrics:
+  - MIB: MERAKI-CLOUD-CONTROLLER-MIB
+    table:
+      OID: 1.3.6.1.4.1.29671.1.1.4
+      name: devTable
+    symbols:
+      - OID: 1.3.6.1.4.1.29671.1.1.4.1.5
+        name: devClientCount
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.29671.1.1.4.1.1
+          name: devMac
+          format: mac_address
+        tag: mac_address
+```
+
+In this case, the metrics will be tagged with `mac_address:00:00:00:00:00:00`.
 
 ##### Tagging tips
 
