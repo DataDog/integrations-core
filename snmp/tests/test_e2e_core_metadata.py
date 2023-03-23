@@ -1084,3 +1084,52 @@ def test_e2e_core_metadata_cisco_asr_9901(dd_agent_check):
         u'version': u'7.1.3',
     }
     assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_cisco_cdp(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'cisco-cdp',
+            'loader': 'core',
+            'collect_topology': True,
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+    device_id = u'default:' + device_ip
+
+    topology_link1 = {
+        'id': device_id + ':1.5',
+        'source_type': 'cdp',
+        "local": {
+            "device": {'dd_id': device_id},
+            'interface': {'dd_id': device_id + ':1'},
+        },
+        "remote": {
+            "device": {"id": "K10-ITV.tine.no", "ip_address": "10.10.0.134"},
+            "interface": {"id": "GE0/1", "id_type": "interface_name"},
+        },
+    }
+    topology_link2 = {
+        'id': device_id + ':2.3',
+        'source_type': 'cdp',
+        "local": {
+            "device": {'dd_id': device_id},
+            'interface': {'dd_id': device_id + ':2'},
+        },
+        "remote": {
+            "device": {"id": "K06-ITV.tine.no", "ip_address": "10.10.0.132"},
+            "interface": {"id": "GE0/2", "id_type": "interface_name"},
+        },
+    }
+    events = get_events(aggregator)
+
+    print("TOPOLOGY LINKS: " + json.dumps(events[0]['links'], indent=4))
+
+    assert events[0]['links'][0] == topology_link1
+    assert events[0]['links'][1] == topology_link2
+    assert len(events[0]['links']) == 10
