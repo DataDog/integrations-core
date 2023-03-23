@@ -12,6 +12,7 @@ import mock
 import psycopg2
 import pytest
 from dateutil import parser
+from psycopg2 import tz
 from semver import VersionInfo
 from six import string_types
 
@@ -41,7 +42,7 @@ SAMPLE_QUERIES = [
 
 dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
 
-DEFAULT_TZ_INFO = psycopg2.tz.FixedOffsetTimezone(offset=0, name=None)
+DEFAULT_TZ_INFO = tz.FixedOffsetTimezone(offset=0, name=None)
 
 
 @pytest.fixture(autouse=True)
