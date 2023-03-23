@@ -119,12 +119,12 @@ class ApiRest(Api):
             return component.get_os_aggregates()
         return None
 
-    def get_network_quotas(self, project):
+    def get_network_quotas(self, project_id):
         self.log.debug("getting network quotas")
-        self.http.options['headers']['X-Auth-Token'] = self.project_auth_tokens[project['id']]['auth_token']
-        component = self._get_component(project['id'], ComponentType.NETWORK)
+        self.http.options['headers']['X-Auth-Token'] = self.project_auth_tokens[project_id]['auth_token']
+        component = self._get_component(project_id, ComponentType.NETWORK)
         if component:
-            return component.get_quotas(project['id'])
+            return component.get_quotas(project_id)
         return None
 
     def _get_x_auth_token(self):

@@ -208,12 +208,15 @@ class OpenStackControllerCheck(AgentCheck):
             self.service_check('openstack.neutron.api.up', AgentCheck.OK)
             self.log.debug("response_time: %s", response_time)
             self.gauge('openstack.neutron.response_time', response_time, tags=project_tags)
-            network_quotas = api.get_network_quotas(project)
-            self.log.debug("network_quotas: %s", network_quotas)
-            for metric, value in network_quotas.items():
-                self.gauge(f'openstack.neutron.quotas.{metric}', value, tags=project_tags)
+            self._report_network_quotas(api, project_id, project_tags)
         else:
             self.service_check('openstack.neutron.api.up', AgentCheck.CRITICAL)
+
+    def _report_network_quotas(self, api, project_id, project_tags):
+        network_quotas = api.get_network_quotas(project_id)
+        self.log.debug("network_quotas: %s", network_quotas)
+        for metric, value in network_quotas.items():
+            self.gauge(f'openstack.neutron.quotas.{metric}', value, tags=project_tags)
 
     def _report_baremetal_metrics(self, api, project):
         tags = [f"project_id:{project['id']}", f"project_name:{project['name']}"]

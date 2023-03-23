@@ -919,3 +919,56 @@ def test_rest_get_network_response_time():
     compute_response_time = api.get_network_response_time("667aee39f2b64032b4d7585809d31e6f")
     mocked_http.get.assert_has_calls([mock.call('http://127.0.0.1:9696/networking')])
     assert compute_response_time == total_seconds * 1000
+
+
+def test_rest_get_network_quotas():
+    mocked_http = mock.MagicMock()
+    mocked_http.get.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/get.json'),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/projects/get.json'),
+            status_code=200,
+        ),
+        MockResponse(
+            file_path=os.path.join(
+                get_here(),
+                'fixtures/http/neutron/networking/v2.0/quotas/667aee39f2b64032b4d7585809d31e6f.json'
+            ),
+            status_code=200,
+        ),
+    ]
+    mocked_http.post.side_effect = [
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'test1234'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_1'},
+        ),
+        MockResponse(
+            file_path=os.path.join(get_here(), 'fixtures/http/keystone/identity/v3/auth/tokens/post.json'),
+            status_code=200,
+            headers={'X-Subject-Token': 'project_2'},
+        ),
+    ]
+    instance = {
+        'keystone_server_url': 'http://10.164.0.83/identity',
+        'user_name': 'admin',
+        'user_password': 'password',
+    }
+    config = OpenstackConfig(mock.MagicMock(), instance)
+    api = make_api(config, logging, mocked_http)
+    api.create_connection()
+    network_quotas = api.get_network_quotas("667aee39f2b64032b4d7585809d31e6f")
+    mocked_http.get.assert_has_calls(
+        [mock.call('http://127.0.0.1:9696/networking/v2.0/quotas/667aee39f2b64032b4d7585809d31e6f')]
+    )
+    with open(os.path.join(get_here(), 'fixtures/api/network/quotas.json'), 'r') as quotas:
+        assert network_quotas == json.load(quotas)
+
