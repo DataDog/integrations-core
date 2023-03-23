@@ -110,6 +110,28 @@ QUERY_PG_STAT_DATABASE = {
     ],
 }
 
+QUERY_PG_STAT_DATABASE_CONFLICTS = {
+    'name': 'pg_stat_database_conflicts',
+    'query': """
+        SELECT
+            datname,
+            confl_tablespace,
+            confl_lock,
+            confl_snapshot,
+            confl_bufferpin,
+            confl_deadlock
+        FROM pg_stat_database_conflicts
+    """.strip(),
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'postgresql.conflicts.tablespace', 'type': 'monotonic_count'},
+        {'name': 'postgresql.conflicts.lock', 'type': 'monotonic_count'},
+        {'name': 'postgresql.conflicts.snapshot', 'type': 'monotonic_count'},
+        {'name': 'postgresql.conflicts.bufferpin', 'type': 'monotonic_count'},
+        {'name': 'postgresql.conflicts.deadlock', 'type': 'monotonic_count'},
+    ],
+}
+
 COMMON_BGW_METRICS = {
     'checkpoints_timed': ('postgresql.bgwriter.checkpoints_timed', AgentCheck.monotonic_count),
     'checkpoints_req': ('postgresql.bgwriter.checkpoints_requested', AgentCheck.monotonic_count),

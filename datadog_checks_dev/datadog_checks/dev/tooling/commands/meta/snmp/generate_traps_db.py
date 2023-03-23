@@ -4,6 +4,7 @@
 
 import json
 import os
+import pathlib
 from collections import namedtuple
 from enum import Enum
 from functools import lru_cache
@@ -75,7 +76,12 @@ VarMetadata = namedtuple('VarMetadata', ['oid', 'description', 'enum', 'bits'])
     '--no-descr', help='Removes descriptions from the generated file(s) when set (more compact).', is_flag=True
 )
 @click.option('--debug', '-d', help='Include debug output', is_flag=True)
-@click.argument('mib-files', nargs=-1, required=True, type=click.Path(exists=True, dir_okay=False, resolve_path=True))
+@click.argument(
+    'mib-files',
+    nargs=-1,
+    required=True,
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
+)
 def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_descr, debug, mib_files):
     """Generate yaml or json formatted documents containing various information about traps. These files can be used by
     the Datadog Agent to enrich trap data.
@@ -128,7 +134,7 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
             os.mkdir(mibs_sources_dir)
 
         mib_sources = (
-            sorted(set([os.path.abspath(os.path.dirname(x)) for x in mib_files if os.path.sep in x])) + mib_sources
+            sorted(set([pathlib.Path(x).parent.as_uri() for x in mib_files if os.path.sep in x])) + mib_sources
         )
 
         mib_files = [os.path.basename(x) for x in mib_files]
