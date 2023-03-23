@@ -5,7 +5,7 @@
       "name": "m1.tiny",
       "ram": 512,
       "disk": 1,
-      "swap": "",
+      "swap": 0,
       "OS-FLV-EXT-DATA:ephemeral": 0,
       "OS-FLV-DISABLED:disabled": false,
       "vcpus": 1,
@@ -20,14 +20,18 @@
           "rel": "bookmark",
           "href": "http://34.91.114.145/compute/flavors/1"
         }
-      ]
+      ],
+      "description": null,
+      "extra_specs": {
+        "hw_rng:allowed": "True"
+      }
     },
     {
       "id": "2",
       "name": "m1.small",
       "ram": 2048,
       "disk": 20,
-      "swap": "",
+      "swap": 0,
       "OS-FLV-EXT-DATA:ephemeral": 0,
       "OS-FLV-DISABLED:disabled": false,
       "vcpus": 1,
@@ -42,14 +46,18 @@
           "rel": "bookmark",
           "href": "http://34.91.114.145/compute/flavors/2"
         }
-      ]
+      ],
+      "description": null,
+      "extra_specs": {
+        "hw_rng:allowed": "True"
+      }
     },
     {
       "id": "3",
       "name": "m1.medium",
       "ram": 4096,
       "disk": 40,
-      "swap": "",
+      "swap": 0,
       "OS-FLV-EXT-DATA:ephemeral": 0,
       "OS-FLV-DISABLED:disabled": false,
       "vcpus": 2,
@@ -64,14 +72,18 @@
           "rel": "bookmark",
           "href": "http://34.91.114.145/compute/flavors/3"
         }
-      ]
+      ],
+      "description": null,
+      "extra_specs": {
+        "hw_rng:allowed": "True"
+      }
     },
     {
       "id": "4",
       "name": "m1.large",
       "ram": 8192,
       "disk": 80,
-      "swap": "",
+      "swap": 0,
       "OS-FLV-EXT-DATA:ephemeral": 0,
       "OS-FLV-DISABLED:disabled": false,
       "vcpus": 4,
@@ -86,14 +98,18 @@
           "rel": "bookmark",
           "href": "http://34.91.114.145/compute/flavors/4"
         }
-      ]
+      ],
+      "description": null,
+      "extra_specs": {
+        "hw_rng:allowed": "True"
+      }
     },
     {
       "id": "42",
       "name": "m1.nano",
       "ram": 128,
       "disk": 1,
-      "swap": "",
+      "swap": 0,
       "OS-FLV-EXT-DATA:ephemeral": 0,
       "OS-FLV-DISABLED:disabled": false,
       "vcpus": 1,
@@ -108,14 +124,18 @@
           "rel": "bookmark",
           "href": "http://34.91.114.145/compute/flavors/42"
         }
-      ]
+      ],
+      "description": null,
+      "extra_specs": {
+        "hw_rng:allowed": "True"
+      }
     },
     {
       "id": "5",
       "name": "m1.xlarge",
       "ram": 16384,
       "disk": 160,
-      "swap": "",
+      "swap": 0,
       "OS-FLV-EXT-DATA:ephemeral": 0,
       "OS-FLV-DISABLED:disabled": false,
       "vcpus": 8,
@@ -130,14 +150,18 @@
           "rel": "bookmark",
           "href": "http://34.91.114.145/compute/flavors/5"
         }
-      ]
+      ],
+      "description": null,
+      "extra_specs": {
+        "hw_rng:allowed": "True"
+      }
     },
     {
       "id": "84",
       "name": "m1.micro",
       "ram": 192,
       "disk": 1,
-      "swap": "",
+      "swap": 0,
       "OS-FLV-EXT-DATA:ephemeral": 0,
       "OS-FLV-DISABLED:disabled": false,
       "vcpus": 1,
@@ -152,14 +176,18 @@
           "rel": "bookmark",
           "href": "http://34.91.114.145/compute/flavors/84"
         }
-      ]
+      ],
+      "description": null,
+      "extra_specs": {
+        "hw_rng:allowed": "True"
+      }
     },
     {
       "id": "c1",
       "name": "cirros256",
       "ram": 256,
       "disk": 1,
-      "swap": "",
+      "swap": 0,
       "OS-FLV-EXT-DATA:ephemeral": 0,
       "OS-FLV-DISABLED:disabled": false,
       "vcpus": 1,
@@ -174,14 +202,18 @@
           "rel": "bookmark",
           "href": "http://34.91.114.145/compute/flavors/c1"
         }
-      ]
+      ],
+      "description": null,
+      "extra_specs": {
+        "hw_rng:allowed": "True"
+      }
     },
     {
       "id": "d1",
       "name": "ds512M",
       "ram": 512,
       "disk": 5,
-      "swap": "",
+      "swap": 0,
       "OS-FLV-EXT-DATA:ephemeral": 0,
       "OS-FLV-DISABLED:disabled": false,
       "vcpus": 1,
@@ -196,14 +228,18 @@
           "rel": "bookmark",
           "href": "http://34.91.114.145/compute/flavors/d1"
         }
-      ]
+      ],
+      "description": null,
+      "extra_specs": {
+        "hw_rng:allowed": "True"
+      }
     },
     {
       "id": "d2",
       "name": "ds1G",
       "ram": 1024,
       "disk": 10,
-      "swap": "",
+      "swap": 0,
       "OS-FLV-EXT-DATA:ephemeral": 0,
       "OS-FLV-DISABLED:disabled": false,
       "vcpus": 1,
@@ -218,14 +254,18 @@
           "rel": "bookmark",
           "href": "http://34.91.114.145/compute/flavors/d2"
         }
-      ]
+      ],
+      "description": null,
+      "extra_specs": {
+        "hw_rng:allowed": "True"
+      }
     },
     {
       "id": "d3",
       "name": "ds2G",
       "ram": 2048,
       "disk": 10,
-      "swap": "",
+      "swap": 0,
       "OS-FLV-EXT-DATA:ephemeral": 0,
       "OS-FLV-DISABLED:disabled": false,
       "vcpus": 2,
@@ -240,14 +280,18 @@
           "rel": "bookmark",
           "href": "http://34.91.114.145/compute/flavors/d3"
         }
-      ]
+      ],
+      "description": null,
+      "extra_specs": {
+        "hw_rng:allowed": "True"
+      }
     },
     {
       "id": "d4",
       "name": "ds4G",
       "ram": 4096,
       "disk": 20,
-      "swap": "",
+      "swap": 0,
       "OS-FLV-EXT-DATA:ephemeral": 0,
       "OS-FLV-DISABLED:disabled": false,
       "vcpus": 4,
@@ -262,7 +306,11 @@
           "rel": "bookmark",
           "href": "http://34.91.114.145/compute/flavors/d4"
         }
-      ]
+      ],
+      "description": null,
+      "extra_specs": {
+        "hw_rng:allowed": "True"
+      }
     }
   ]
 }

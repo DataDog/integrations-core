@@ -4,9 +4,9 @@
         "metrics": {
             "ram": 512,
             "disk": 1,
-            "os-flv-ext-data:ephemeral": 0,
+            "os_flv_ext_data:ephemeral": 0,
             "vcpus": 1,
-            "rxtx_factor": 1
+            "rxtx_factor": 1.0
         }
     },
     "2": {
@@ -14,9 +14,9 @@
         "metrics": {
             "ram": 2048,
             "disk": 20,
-            "os-flv-ext-data:ephemeral": 0,
+            "os_flv_ext_data:ephemeral": 0,
             "vcpus": 1,
-            "rxtx_factor": 1
+            "rxtx_factor": 1.0
         }
     },
     "3": {
@@ -24,9 +24,9 @@
         "metrics": {
             "ram": 4096,
             "disk": 40,
-            "os-flv-ext-data:ephemeral": 0,
+            "os_flv_ext_data:ephemeral": 0,
             "vcpus": 2,
-            "rxtx_factor": 1
+            "rxtx_factor": 1.0
         }
     },
     "4": {
@@ -34,9 +34,9 @@
         "metrics": {
             "ram": 8192,
             "disk": 80,
-            "os-flv-ext-data:ephemeral": 0,
+            "os_flv_ext_data:ephemeral": 0,
             "vcpus": 4,
-            "rxtx_factor": 1
+            "rxtx_factor": 1.0
         }
     },
     "42": {
@@ -44,9 +44,9 @@
         "metrics": {
             "ram": 128,
             "disk": 1,
-            "os-flv-ext-data:ephemeral": 0,
+            "os_flv_ext_data:ephemeral": 0,
             "vcpus": 1,
-            "rxtx_factor": 1
+            "rxtx_factor": 1.0
         }
     },
     "5": {
@@ -54,9 +54,9 @@
         "metrics": {
             "ram": 16384,
             "disk": 160,
-            "os-flv-ext-data:ephemeral": 0,
+            "os_flv_ext_data:ephemeral": 0,
             "vcpus": 8,
-            "rxtx_factor": 1
+            "rxtx_factor": 1.0
         }
     },
     "84": {
@@ -64,9 +64,9 @@
         "metrics": {
             "ram": 192,
             "disk": 1,
-            "os-flv-ext-data:ephemeral": 0,
+            "os_flv_ext_data:ephemeral": 0,
             "vcpus": 1,
-            "rxtx_factor": 1
+            "rxtx_factor": 1.0
         }
     },
     "c1": {
@@ -74,9 +74,9 @@
         "metrics": {
             "ram": 256,
             "disk": 1,
-            "os-flv-ext-data:ephemeral": 0,
+            "os_flv_ext_data:ephemeral": 0,
             "vcpus": 1,
-            "rxtx_factor": 1
+            "rxtx_factor": 1.0
         }
     },
     "d1": {
@@ -84,9 +84,9 @@
         "metrics": {
             "ram": 512,
             "disk": 5,
-            "os-flv-ext-data:ephemeral": 0,
+            "os_flv_ext_data:ephemeral": 0,
             "vcpus": 1,
-            "rxtx_factor": 1
+            "rxtx_factor": 1.0
         }
     },
     "d2": {
@@ -94,9 +94,9 @@
         "metrics": {
             "ram": 1024,
             "disk": 10,
-            "os-flv-ext-data:ephemeral": 0,
+            "os_flv_ext_data:ephemeral": 0,
             "vcpus": 1,
-            "rxtx_factor": 1
+            "rxtx_factor": 1.0
         }
     },
     "d3": {
@@ -104,9 +104,9 @@
         "metrics": {
             "ram": 2048,
             "disk": 10,
-            "os-flv-ext-data:ephemeral": 0,
+            "os_flv_ext_data:ephemeral": 0,
             "vcpus": 2,
-            "rxtx_factor": 1
+            "rxtx_factor": 1.0
         }
     },
     "d4": {
@@ -114,9 +114,9 @@
         "metrics": {
             "ram": 4096,
             "disk": 20,
-            "os-flv-ext-data:ephemeral": 0,
+            "os_flv_ext_data:ephemeral": 0,
             "vcpus": 4,
-            "rxtx_factor": 1
+            "rxtx_factor": 1.0
         }
     }
 }
