@@ -48,7 +48,7 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
-        "istio"
+        "istiod"
       ]
     },
     "dashboards": {
