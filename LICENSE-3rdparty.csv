@@ -2,7 +2,6 @@ Component,Origin,License,Copyright
 JPype1,PyPI,Apache-2.0,Copyright (c) 2004-2008 Steve Menard
 JayDeBeApi,PyPI,LGPL-3.0-only,Copyright (C) 2014 Bastian Bowe
 PyJWT,PyPI,MIT,Copyright (c) 2015-2022 José Padilla
-PyMySQL,PyPI,MIT,"Copyright (c) 2010, 2013 PyMySQL contributors"
 PySocks,PyPI,BSD-3-Clause,Copyright 2006 Dan-Haim. All rights reserved.
 PyYAML,PyPI,MIT,Copyright (c) 2017-2021 Ingy döt Net
 Pyro4,PyPI,MIT,Copyright (c) 2016 Irmen de Jong
@@ -65,6 +64,7 @@ pycryptodomex,PyPI,Unlicense,Helder Eijs. pycryptodomex is dedicated to the publ
 pydantic,PyPI,MIT,Copyright (c) 2017 - 2022 Samuel Colvin and other contributors
 pymongo,PyPI,Apache-2.0,Copyright 2009 The MongoDB Python Team
 pymqi,PyPI,PSF,Copyright (c) Zato Source s.r.o.
+pymysql,PyPI,MIT,"Copyright (c) 2010, 2013 PyMySQL contributors"
 pyodbc,PyPI,MIT,Copyright (c) 2008 Michael Kleehammer
 pysmi,PyPI,BSD-3-Clause,Copyright (c) 2015-2020 Ilya Etingof <etingof@gmail.com>
 pysnmp,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
