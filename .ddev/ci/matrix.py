@@ -100,6 +100,14 @@ def main():
 
     args = parser.parse_args()
 
+    matrices = []
+    for i in range(300):
+        matrices.append({'os': 'ubuntu-22.04', 'target': 'disk', 'name': f'Disk {i}'})
+    output = json.dumps(matrices, separators=(',', ':'))
+    print(output)
+    print(f'Output size: {len(output)} / {OUTPUT_LIMIT}', file=sys.stderr)
+    return
+
     changed_files = get_changed_files(ref=args.ref, local=args.pretty)
     if args.verbose:
         print('\n'.join(changed_files), file=sys.stderr)
