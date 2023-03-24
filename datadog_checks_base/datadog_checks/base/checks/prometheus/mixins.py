@@ -186,7 +186,7 @@ class PrometheusScraperMixin(object):
 
         :param response: requests.Response
         :return: metrics_pb2.MetricFamily()
-        """
+        """  # noqa: E501
         if 'application/vnd.google.protobuf' in response.headers['Content-Type']:
             n = 0
             buf = response.content
