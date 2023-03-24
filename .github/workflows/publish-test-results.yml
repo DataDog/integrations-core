@@ -3,7 +3,7 @@ name: Test results
 on:
   workflow_run:
     workflows:
-    - PR test
+    - PR
     types:
     - completed
 
