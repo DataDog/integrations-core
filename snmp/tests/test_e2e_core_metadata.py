@@ -1143,3 +1143,45 @@ def test_e2e_core_metadata_cisco_cdp(dd_agent_check):
     assert events[0]['links'][0] == topology_link1
     assert events[0]['links'][2] == topology_link2
     assert len(events[0]['links']) == 10
+
+
+#  test that we're only using lldp even when we have both cdp and lldp
+def test_e2e_core_metadata_cisco_cdp_lldp(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'cisco-cdp-lldp',
+            'loader': 'core',
+            'collect_topology': True,
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+    device_id = u'default:' + device_ip
+
+    topology_link = {
+        'id': device_id + ':7.1',
+        'source_type': 'lldp',
+        "local": {
+            "device": {'dd_id': device_id},
+            'interface': {'dd_id': device_id + ':7', 'id': 'te1/0/7'},
+        },
+        "remote": {
+            "device": {
+                "id": "82:8a:8c:2f:f8:36",
+                "id_type": "mac_address",
+                "ip_address": "10.25.0.19",
+                "name": "K05-ITV",
+            },
+            "interface": {"id": "gi9", "id_type": "interface_name"},
+        },
+    }
+    events = get_events(aggregator)
+
+    print("TOPOLOGY LINKS: " + json.dumps(events[0]['links'], indent=4))
+
+    assert events[0]['links'][0] == topology_link
+    assert len(events[0]['links']) == 1
