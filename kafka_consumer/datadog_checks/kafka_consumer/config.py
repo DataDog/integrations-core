@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 from six import string_types
 
 from datadog_checks.base import ConfigurationError, is_affirmative
@@ -38,6 +40,8 @@ class KafkaConfig:
         self._sasl_plain_password = instance.get('sasl_plain_password')
         self._sasl_kerberos_service_name = instance.get('sasl_kerberos_service_name', 'kafka')
         self._sasl_kerberos_domain_name = instance.get('sasl_kerberos_domain_name')
+        self._sasl_kerberos_keytab = instance.get('sasl_kerberos_keytab', os.environ.get("KRB5_CLIENT_KTNAME"))
+        self._sasl_kerberos_principal = instance.get('sasl_kerberos_principal', 'kafkaclient')
         self._sasl_oauth_token_provider = instance.get('sasl_oauth_token_provider')
         self._tls_ca_cert = instance.get("tls_ca_cert")
         self._tls_cert = instance.get("tls_cert")

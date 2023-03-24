@@ -58,6 +58,14 @@ def instance_sasl_kerberos_domain_name(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_sasl_kerberos_keytab(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_sasl_kerberos_principal(field, value):
+    return 'kafkaclient'
+
+
 def instance_sasl_kerberos_service_name(field, value):
     return 'kafka'
 

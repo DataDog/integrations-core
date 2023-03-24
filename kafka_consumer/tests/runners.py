@@ -7,7 +7,7 @@ import time
 from confluent_kafka import Consumer as KafkaConsumer
 from confluent_kafka import Producer as KafkaProducer
 
-from .common import PARTITIONS
+from .common import PARTITIONS, get_authentication_configuration
 
 DEFAULT_SLEEP = 5
 DEFAULT_TIMEOUT = 5
@@ -33,23 +33,7 @@ class StoppableThread(threading.Thread):
 
 class Producer(StoppableThread):
     def run(self):
-        config = {
-            "bootstrap.servers": self.instance['kafka_connect_str'],
-            "socket.timeout.ms": 1000,
-        }
-
-        if self.instance.get('security_protocol', 'PLAINTEXT') == "SSL":
-            config.update(
-                {
-                    "security.protocol": "ssl",
-                    "ssl.ca.location": self.instance.get("tls_ca_cert"),
-                    "ssl.certificate.location": self.instance.get("tls_cert"),
-                    "ssl.key.location": self.instance.get("tls_private_key"),
-                    "ssl.key.password": self.instance.get("tls_private_key_password"),
-                }
-            )
-
-        producer = KafkaProducer(config)
+        producer = self.__get_producer_client()
 
         while not self._shutdown_event.is_set():
             for partition in PARTITIONS:
@@ -69,33 +53,34 @@ class Producer(StoppableThread):
 
             time.sleep(1)
 
+    def __get_producer_client(self):
+        config = {
+            "bootstrap.servers": self.instance['kafka_connect_str'],
+            "socket.timeout.ms": 1000,
+        }
+        config.update(get_authentication_configuration(self.instance))
 
-class KConsumer(StoppableThread):
+        return KafkaProducer(config)
+
+
+class Consumer(StoppableThread):
     def __init__(self, instance, topics, sleep=DEFAULT_SLEEP, timeout=DEFAULT_TIMEOUT):
-        super(KConsumer, self).__init__(instance, sleep=sleep, timeout=timeout)
+        super(Consumer, self).__init__(instance, sleep=sleep, timeout=timeout)
         self.topics = topics
 
     def run(self):
+        consumer = self.__get_consumer_client()
+        consumer.subscribe(self.topics)
+
+        while not self._shutdown_event.is_set():
+            consumer.poll(timeout=1)
+
+    def __get_consumer_client(self):
         config = {
             "bootstrap.servers": self.instance['kafka_connect_str'],
             "socket.timeout.ms": 1000,
             'group.id': 'my_consumer',
             'auto.offset.reset': 'earliest',
         }
-
-        if self.instance.get('security_protocol', 'PLAINTEXT') == "SSL":
-            config.update(
-                {
-                    "security.protocol": "ssl",
-                    "ssl.ca.location": self.instance.get("tls_ca_cert"),
-                    "ssl.certificate.location": self.instance.get("tls_cert"),
-                    "ssl.key.location": self.instance.get("tls_private_key"),
-                    "ssl.key.password": self.instance.get("tls_private_key_password"),
-                }
-            )
-
-        consumer = KafkaConsumer(config)
-        consumer.subscribe(self.topics)
-
-        while not self._shutdown_event.is_set():
-            consumer.poll(timeout=1)
+        config.update(get_authentication_configuration(self.instance))
+        return KafkaConsumer(config)

@@ -51,6 +51,8 @@ class InstanceConfig(BaseModel):
     monitor_all_broker_highwatermarks: Optional[bool]
     monitor_unlisted_consumer_groups: Optional[bool]
     sasl_kerberos_domain_name: Optional[str]
+    sasl_kerberos_keytab: Optional[str]
+    sasl_kerberos_principal: Optional[str]
     sasl_kerberos_service_name: Optional[str]
     sasl_mechanism: Optional[str]
     sasl_oauth_token_provider: Optional[SaslOauthTokenProvider]
