@@ -14,14 +14,50 @@ class ConfluentKafkaClient(KafkaClient):
     @property
     def kafka_client(self):
         if self._kafka_client is None:
-            self._kafka_client = AdminClient(
-                {
-                    "bootstrap.servers": self.config._kafka_connect_str,
-                    "socket.timeout.ms": self.config._request_timeout_ms,
-                    "client.id": "dd-agent",
-                }
-            )
+            config = {
+                "bootstrap.servers": self.config._kafka_connect_str,
+                "socket.timeout.ms": self.config._request_timeout_ms,
+                "client.id": "dd-agent",
+            }
+            config.update(self.__get_authentication_config())
+
+            self._kafka_client = AdminClient(config)
+
         return self._kafka_client
+
+    def __create_consumer(self, consumer_group):
+        config = {
+            "bootstrap.servers": self.config._kafka_connect_str,
+            "group.id": consumer_group,
+        }
+        config.update(self.__get_authentication_config())
+
+        return Consumer(config)
+
+    def __get_authentication_config(self):
+        config = {
+            "security.protocol": self.config._security_protocol.lower(),
+        }
+
+        extras_parameters = {
+            "ssl.ca.location": self.config._tls_ca_cert,
+            "ssl.certificate.location": self.config._tls_cert,
+            "ssl.key.location": self.config._tls_private_key,
+            "ssl.key.password": self.config._tls_private_key_password,
+            "ssl.endpoint.identification.algorithm": "https" if self.config._tls_validate_hostname else "none",
+            "ssl.crl.location": self.config._crlfile,
+            "enable.ssl.certificate.verification": self.config._tls_verify,
+            "sasl.mechanism": self.config._sasl_mechanism,
+            "sasl.username": self.config._sasl_plain_username,
+            "sasl.password": self.config._sasl_plain_password,
+        }
+
+        for key, value in extras_parameters.items():
+            # Do not add the value if it's not specified
+            if value:
+                config[key] = value
+
+        return config
 
     def get_highwater_offsets(self, consumer_offsets):
         # TODO: Remove broker_requests_batch_size as config after
@@ -32,11 +68,7 @@ class ConfluentKafkaClient(KafkaClient):
             topics_with_consumer_offset = {(topic, partition) for (_, topic, partition) in consumer_offsets}
 
         for consumer_group in consumer_offsets.items():
-            consumer_config = {
-                "bootstrap.servers": self.config._kafka_connect_str,
-                "group.id": consumer_group,
-            }
-            consumer = Consumer(consumer_config)
+            consumer = self.__create_consumer(consumer_group)
             topics = consumer.list_topics(timeout=self.config._request_timeout)
 
             for topic in topics.topics:
