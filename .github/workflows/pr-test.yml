@@ -1,13 +1,11 @@
 name: PR test
 
 on:
-  pull_request:
-    branches:
-    - master
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}
-  cancel-in-progress: true
+  workflow_call:
+    inputs:
+      repo:
+        required: true
+        type: string
 
 jobs:
   run:
@@ -16,4 +14,4 @@ jobs:
 
     steps:
     - name: Test
-      run: echo test
+      run: echo "${{ inputs.repo }}"
