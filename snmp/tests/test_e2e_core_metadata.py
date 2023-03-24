@@ -1107,10 +1107,15 @@ def test_e2e_core_metadata_cisco_cdp(dd_agent_check):
         'source_type': 'cdp',
         "local": {
             "device": {'dd_id': device_id},
-            'interface': {'dd_id': device_id + ':1'},
+            'interface': {'dd_id': device_id + ':1', 'id': ''},
         },
         "remote": {
-            "device": {"id": "K10-ITV.tine.no", "ip_address": "10.10.0.134"},
+            "device": {
+                "id": "K10-ITV.tine.no",
+                "ip_address": "10.10.0.134",
+                u"description": u'Cisco IOS Software, C2960C Software (C2960c405-UNIVERSALK9-M), Version 15.0(2)SE8, '
+                'RELEASE SOFTWARE (fc1)\nTechnical Support: http://www.cisco.com/techsupport\r',
+            },
             "interface": {"id": "GE0/1", "id_type": "interface_name"},
         },
     }
@@ -1119,10 +1124,15 @@ def test_e2e_core_metadata_cisco_cdp(dd_agent_check):
         'source_type': 'cdp',
         "local": {
             "device": {'dd_id': device_id},
-            'interface': {'dd_id': device_id + ':2'},
+            'interface': {'dd_id': device_id + ':2', "id": ''},
         },
         "remote": {
-            "device": {"id": "K06-ITV.tine.no", "ip_address": "10.10.0.132"},
+            "device": {
+                "id": "K06-ITV.tine.no",
+                "ip_address": "10.10.0.132",
+                u"description": u'Cisco IOS Software, C2960C Software (C2960c405-UNIVERSALK9-M), Version 15.0(2)SE8, '
+                'RELEASE SOFTWARE (fc1)\nTechnical Support: http://www.cisco.com/techsupport\r',
+            },
             "interface": {"id": "GE0/2", "id_type": "interface_name"},
         },
     }
@@ -1131,5 +1141,5 @@ def test_e2e_core_metadata_cisco_cdp(dd_agent_check):
     print("TOPOLOGY LINKS: " + json.dumps(events[0]['links'], indent=4))
 
     assert events[0]['links'][0] == topology_link1
-    assert events[0]['links'][1] == topology_link2
+    assert events[0]['links'][2] == topology_link2
     assert len(events[0]['links']) == 10
