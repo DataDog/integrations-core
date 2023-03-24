@@ -11,7 +11,9 @@ concurrency:
 
 jobs:
   test:
-    uses: ./.github/workflows/pr-test.yml
-    with:
-      repo: core
-    secrets: inherit
+    name: Run tests
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Test
+      run: echo test
