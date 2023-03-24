@@ -14,6 +14,7 @@ jobs:
       repo: "${{ inputs.repo }}"
 
   run:
+    name: test
     needs:
     - compute-matrix
     if: needs.compute-matrix.outputs.matrix != '[]'

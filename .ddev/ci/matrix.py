@@ -101,7 +101,7 @@ def main():
     args = parser.parse_args()
 
     matrices = []
-    for i in range(JOB_LIMIT):
+    for i in range(2):
         matrices.append({'os': 'ubuntu-22.04', 'target': 'disk', 'name': f'Disk {i}'})
     output = json.dumps(matrices, separators=(',', ':'))
     print(output)
