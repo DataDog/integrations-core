@@ -2,9 +2,7 @@
 
 set -ex
 
-docker info
-
-# sudo mkdir /sys/fs/cgroup/systemd
-# sudo mount -t cgroup -o none,name=systemd cgroup /sys/fs/cgroup/systemd
+mkdir -p $HOME/.docker/cli-plugins
+curl -sLo $HOME/.docker/cli-plugins/docker-compose https://github.com/docker/compose/releases/download/v2.17.2/docker-compose-linux-x86_64
 
 set +ex

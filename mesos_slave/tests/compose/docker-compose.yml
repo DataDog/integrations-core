@@ -1,4 +1,3 @@
-version: "3.5"
 # References:
 # - https://github.com/bobrik/mesos-compose
 # - https://github.com/mesosphere/docker-containers/tree/master/mesos
@@ -11,10 +10,7 @@ services:
 
   mesos-slave:
     image: mesosphere/mesos-slave:${MESOS_SLAVE_VERSION}
-    # privileged: true
-    cap_add:
-    - SYS_ADMIN
-    - NET_ADMIN
+    cgroup: host
     pid: host
     environment:
       - MESOS_MASTER=zk://zookeeper:2181/mesos
@@ -26,7 +22,7 @@ services:
     ports:
       - 5051:5051
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - zookeeper
