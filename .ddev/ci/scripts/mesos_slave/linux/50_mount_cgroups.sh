@@ -2,6 +2,8 @@
 
 set -ex
 
+docker info
+
 sudo apt update
 sudo apt -y install cgroup-tools
 
