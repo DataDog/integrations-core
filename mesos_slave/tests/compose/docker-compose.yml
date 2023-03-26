@@ -12,6 +12,8 @@ services:
   mesos-slave:
     image: mesosphere/mesos-slave:${MESOS_SLAVE_VERSION}
     privileged: true
+    cap_add:
+    - SYS_ADMIN
     pid: host
     environment:
       - MESOS_MASTER=zk://zookeeper:2181/mesos
