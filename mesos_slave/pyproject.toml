@@ -6,6 +6,7 @@ requires = [
 ]
 build-backend = "hatchling.build"
 
+
 [project]
 name = "datadog-mesos-slave"
 description = "The Mesos check"
