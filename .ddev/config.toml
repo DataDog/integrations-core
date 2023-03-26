@@ -45,3 +45,6 @@ exclude = true
 
 [overrides.ci.tokumx]
 test-py2 = true
+
+[overrides.ci.mesos_slave]
+runners = { linux = ["ubuntu-20.04"] }

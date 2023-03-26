@@ -10,9 +10,6 @@ services:
 
   mesos-slave:
     image: mesosphere/mesos-slave:${MESOS_SLAVE_VERSION}
-    privileged: true
-    cap_add:
-      - ALL
     pid: host
     environment:
       - MESOS_MASTER=zk://zookeeper:2181/mesos
@@ -24,6 +21,7 @@ services:
     ports:
       - 5051:5051
     volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - zookeeper
