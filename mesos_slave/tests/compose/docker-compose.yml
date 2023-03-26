@@ -22,7 +22,7 @@ services:
     ports:
       - 5051:5051
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - zookeeper
