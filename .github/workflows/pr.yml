@@ -5,6 +5,7 @@ on:
     branches:
     - master
     paths:
+    - "**"
     - "!datadog_checks_base/datadog_checks/**"
     - "!datadog_checks_dev/datadog_checks/dev/*.py"
 
