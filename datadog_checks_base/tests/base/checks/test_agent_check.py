@@ -11,9 +11,8 @@ import mock
 import pytest
 from six import PY3
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, to_native_string
 from datadog_checks.base import __version__ as base_package_version
-from datadog_checks.base import to_native_string
 from datadog_checks.base.checks.base import datadog_agent
 from datadog_checks.dev.testing import requires_py3
 
