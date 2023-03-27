@@ -30,20 +30,35 @@ def smart_retry(f):
         # type: (VSphereAPI, *Any, **Any) -> Any
         try:
             return f(api_instance, *args, **kwargs)
-        except vmodl.fault.InvalidArgument:
+        except vmodl.fault.InvalidArgument as e:
             # This error is raised when the api call request is invalid. This error also appear when
             # requesting non existing metrics. Retrying won't help
             # https://code.vmware.com/apis/704/vsphere/vmodl.fault.InvalidArgument.html
+            api_instance.log.warning(
+                "An InvalidArgument exception occurred when executing %s: %s.",
+                f.__name__,
+                e,
+            )
             raise
-        except vim.fault.InvalidName:
+        except vim.fault.InvalidName as e:
             # For the scope of this integration, this is raised when fetching a config value from vCenter
             # that doesn't exist (especially maxQueryMetrics). Retrying won't help
             # https://code.vmware.com/apis/704/vsphere/vim.fault.InvalidName.html
+            api_instance.log.warning(
+                "An InvalidName exception occurred when executing %s: %s.",
+                f.__name__,
+                e,
+            )
             raise
-        except vim.fault.RestrictedByAdministrator:
+        except vim.fault.RestrictedByAdministrator as e:
             # The operation cannot complete because of some restriction set by the server administrator.
             # Retrying won't help
             # https://code.vmware.com/apis/704/vsphere/vim.fault.RestrictedByAdministrator.html
+            api_instance.log.warning(
+                "A RestrictedByAdministrator exception occurred when executing %s: %s.",
+                f.__name__,
+                e,
+            )
             raise
         except Exception as e:
             api_instance.log.warning(

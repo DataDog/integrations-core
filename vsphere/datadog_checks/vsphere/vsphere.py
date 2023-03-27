@@ -488,6 +488,7 @@ class VSphereCheck(AgentCheck):
                 future_exc = future.exception()
                 if isinstance(future_exc, vmodl.fault.InvalidArgument):
                     # The query was invalid or the resource does not have values for this metric.
+                    self.log.warning("Query was invalid: %s", future_exc)
                     continue
                 elif future_exc is not None:
                     self.log.warning("A metric collection API call failed with the following error: %s", future_exc)
@@ -495,7 +496,7 @@ class VSphereCheck(AgentCheck):
 
                 results = future.result()
                 if not results:
-                    self.log.debug("A metric collection API call did not return data.")
+                    self.log.warning("A metric collection API call did not return data.")
                     continue
 
                 try:
