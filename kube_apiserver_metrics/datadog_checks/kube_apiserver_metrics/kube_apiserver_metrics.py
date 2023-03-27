@@ -67,7 +67,6 @@ METRICS = {
     'apiserver_storage_list_fetched_objects_total': 'storage_list_fetched_objects_total',
     'apiserver_storage_list_evaluated_objects_total': 'storage_list_evaluated_objects_total',
     'apiserver_storage_list_returned_objects_total': 'storage_list_returned_objects_total',
-
     'apiserver_envelope_encryption_dek_cache_fill_percent': 'envelope_encryption_dek_cache_fill_percent',
     'aggregator_unavailable_apiservice': 'aggregator_unavailable_apiservice',
     'apiserver_flowcontrol_request_concurrency_limit': 'flowcontrol_request_concurrency_limit',

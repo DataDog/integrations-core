@@ -36,7 +36,7 @@ datadog-couch==5.2.0
 datadog-couchbase==2.2.0
 datadog-crio==2.3.0
 datadog-datadog-cluster-agent==2.5.0
-datadog-directory==1.14.1
+datadog-directory==1.14.2
 datadog-disk==4.9.0
 datadog-dns-check==2.3.0
 datadog-dotnetclr==1.13.0; sys_platform == 'win32'
@@ -139,7 +139,7 @@ datadog-snowflake==4.5.1
 datadog-solr==1.11.1
 datadog-sonarqube==2.2.3
 datadog-spark==3.1.3
-datadog-sqlserver==11.0.1
+datadog-sqlserver==11.0.2
 datadog-squid==2.2.0
 datadog-ssh-check==2.3.3
 datadog-statsd==1.10.0
