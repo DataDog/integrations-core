@@ -55,10 +55,7 @@ def __find_shipped_integrations():
     return integrations
 
 
-# Public module functions.
-
-
-def download():
+def instantiate_downloader():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -130,8 +127,21 @@ def download():
         verbose=verbose,
         disable_verification=args.unsafe_disable_verification,
     )
+
+    return tuf_downloader, standard_distribution_name, version, ignore_python_version
+
+
+def run_downloader(tuf_downloader, standard_distribution_name, version, ignore_python_version):
     wheel_relpath = tuf_downloader.get_wheel_relpath(
         standard_distribution_name, version=version, ignore_python_version=ignore_python_version
     )
     wheel_abspath = tuf_downloader.download(wheel_relpath)
     print(wheel_abspath)  # pylint: disable=print-statement
+
+
+# Public module functions.
+
+
+def download():
+    tuf_downloader, standard_distribution_name, version, ignore_python_version = instantiate_downloader()
+    run_downloader(tuf_downloader, standard_distribution_name, version, ignore_python_version)

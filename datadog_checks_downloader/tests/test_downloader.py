@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from contextlib import contextmanager
 import json
 import logging
 import os
@@ -24,7 +25,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 from tuf.api.exceptions import DownloadError, ExpiredMetadataError, RepositoryError, UnsignedMetadataError
 
 import datadog_checks.downloader
-from datadog_checks.downloader.cli import download
+from datadog_checks.downloader.cli import download, instantiate_downloader, run_downloader
 from datadog_checks.downloader.download import REPOSITORY_URL_PREFIX
 from datadog_checks.downloader.exceptions import NonDatadogPackage, NoSuchDatadogPackage
 from tests.local_http import local_http_server, local_http_server_local_dir
@@ -69,16 +70,29 @@ def _do_run_downloader(argv):
     finally:
         sys.argv = old_sys_argv
 
+@contextmanager
+def modified_args(argv):
+    old_sys_argv = sys.argv
+
+    sys.argv = ["datadog_checks_downloader"] + argv  # Make sure argv[0] (program name) is prepended.
+
+    yield
+
+    sys.argv = old_sys_argv
+
 
 @pytest.mark.online
-def test_download(capfd, distribution_name, distribution_version, temporary_local_repo, disable_verification):
+def test_download(capfd, distribution_name, distribution_version, temporary_local_repo, disable_verification, mocker):
     """Test datadog-checks-downloader successfully downloads and validates a wheel file."""
     argv = [distribution_name, "--version", distribution_version]
 
     if disable_verification:
         argv.append('--unsafe-disable-verification')
 
-    _do_run_downloader(argv)
+    with modified_args(argv):
+        tuf_downloader, standard_distribution_name, version, ignore_python_version = instantiate_downloader()
+        run_downloader(tuf_downloader, standard_distribution_name, version, ignore_python_version)
+
     stdout, stderr = capfd.readouterr()
 
     assert not stderr, "No standard error expected, got: {}".format(stderr)
