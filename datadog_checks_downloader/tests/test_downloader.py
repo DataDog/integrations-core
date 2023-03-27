@@ -60,16 +60,6 @@ EXCLUDED_INTEGRATION_VERSION = [
 ]
 
 
-def _do_run_downloader(argv):
-    """Run the Datadog checks downloader."""
-    old_sys_argv = sys.argv
-
-    sys.argv = ["datadog_checks_downloader"] + argv  # Make sure argv[0] (program name) is prepended.
-    try:
-        download()
-    finally:
-        sys.argv = old_sys_argv
-
 @contextmanager
 def modified_args(argv):
     old_sys_argv = sys.argv
@@ -79,6 +69,13 @@ def modified_args(argv):
     yield
 
     sys.argv = old_sys_argv
+
+
+def _do_run_downloader(argv):
+    """Run the Datadog checks downloader."""
+
+    with modified_args(argv):
+        download()
 
 
 @pytest.mark.online
@@ -91,7 +88,18 @@ def test_download(capfd, distribution_name, distribution_version, temporary_loca
 
     with modified_args(argv):
         tuf_downloader, standard_distribution_name, version, ignore_python_version = instantiate_downloader()
+
+        spy_with_tuf = mocker.spy(tuf_downloader, '_download_with_tuf')
+        spy_without_tuf = mocker.spy(tuf_downloader, '_download_without_tuf')
+
         run_downloader(tuf_downloader, standard_distribution_name, version, ignore_python_version)
+
+        if disable_verification:
+            spy_with_tuf.assert_not_called()
+            spy_without_tuf.assert_called()
+        else:
+            spy_without_tuf.assert_not_called()
+            spy_with_tuf.assert_called()
 
     stdout, stderr = capfd.readouterr()
 

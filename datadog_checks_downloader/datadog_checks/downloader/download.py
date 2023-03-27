@@ -83,8 +83,7 @@ class TUFDownloader:
 
         if self.__disable_verification:
             logger.warning(
-                'Running with TUF and in-toto verification disabled. '
-                'Integrity is only protected with TLS (HTTPS).'
+                'Running with TUF and in-toto verification disabled. Integrity is only protected with TLS (HTTPS).'
             )
 
         # NOTE: The directory where the targets for *this* repository is
@@ -126,7 +125,7 @@ class TUFDownloader:
 
         return tuf_target_path, target_abspath
 
-    def __download_without_tuf(self, target_relpath):
+    def _download_without_tuf(self, target_relpath):
         assert isinstance(self.__updater._target_base_url, str), self.__updater._target_base_url
 
         tuf_target_path, target_abspath = self.__compute_target_paths(target_relpath)
@@ -146,7 +145,7 @@ class TUFDownloader:
 
         return target_abspath
 
-    def __download_with_tuf(self, target_relpath):
+    def _download_with_tuf(self, target_relpath):
         tuf_target_path, target_abspath = self.__compute_target_paths(target_relpath)
 
         target = self.__updater.get_targetinfo(tuf_target_path)
@@ -174,7 +173,7 @@ class TUFDownloader:
         # can introduce new parameters w/o breaking old downloaders that don't
         # know how to substitute them.
         target_relpath = f'{IN_TOTO_METADATA_DIR}/{self.__root_layout}'
-        return self.__download_with_tuf(target_relpath)
+        return self._download_with_tuf(target_relpath)
 
     def __download_custom(self, target, extension):
         # A set to collect where in-toto pubkeys / links live.
@@ -198,7 +197,7 @@ class TUFDownloader:
             # for in-toto metadata themselves, and so on ad
             # infinitum.
             if target_relpath.endswith(extension):
-                target_abspath, _ = self.__download_with_tuf(target_relpath)
+                target_abspath, _ = self._download_with_tuf(target_relpath)
 
                 # Add this file to the growing collection of where
                 # in-toto pubkeys / links live.
@@ -289,8 +288,8 @@ class TUFDownloader:
         inspection_packet |= pubkey_abspaths | link_abspaths
         self.__in_toto_verify(inspection_packet, target_relpath)
 
-    def __download_with_tuf_in_toto(self, target_relpath):
-        target_abspath, target = self.__download_with_tuf(target_relpath)
+    def _download_with_tuf_in_toto(self, target_relpath):
+        target_abspath, target = self._download_with_tuf(target_relpath)
 
         # Next, we use in-toto to verify the supply chain of the target.
         # NOTE: We use a flag to avoid recursively downloading in-toto
@@ -312,9 +311,9 @@ class TUFDownloader:
             return the complete filepath to the desired target.
         """
         if self.__disable_verification:
-            target_abspath = self.__download_without_tuf(target_relpath)
+            target_abspath = self._download_without_tuf(target_relpath)
         else:
-            target_abspath = self.__download_with_tuf_in_toto(target_relpath)
+            target_abspath = self._download_with_tuf_in_toto(target_relpath)
         # Always return the posix version of the path for consistency across platforms
         return pathlib.Path(target_abspath).as_posix()
 
@@ -327,11 +326,11 @@ class TUFDownloader:
         wheels = collections.defaultdict(dict)
 
         if self.__disable_verification:
-            index_abspath = self.__download_without_tuf(index_relpath)
+            index_abspath = self._download_without_tuf(index_relpath)
         else:
             try:
                 # NOTE: We do not perform in-toto inspection for simple indices; only for wheels.
-                index_abspath, _ = self.__download_with_tuf(index_relpath)
+                index_abspath, _ = self._download_with_tuf(index_relpath)
             except TargetNotFoundError:
                 raise NoSuchDatadogPackage(standard_distribution_name)
 
