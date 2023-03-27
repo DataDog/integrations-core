@@ -150,6 +150,8 @@ class SummaryScraperMixin(object):
                 if cpu_usage:
                     self.gauge(self.NAMESPACE + '.runtime.cpu.usage', cpu_usage, instance_tags)
                 memory_usage = ctr.get('memory', {}).get('usageBytes')
+                if memory_usage:
+                    self.gauge(self.NAMESPACE + '.runtime.memory.usage', memory_usage, instance_tags)
             if ctr.get('name') == 'kubelet':
                 mem_rss = ctr.get('memory', {}).get('rssBytes')
                 if mem_rss:
