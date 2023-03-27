@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 
 from six import string_types
 
@@ -26,6 +27,8 @@ class KafkaConfig:
         )
         self._consumer_groups = instance.get('consumer_groups', {})
         self._consumer_groups_regex = instance.get('consumer_groups_regex', {})
+
+        self._consumer_groups_compiled_regex = self._compile_regex(self._consumer_groups_regex)
         self._broker_requests_batch_size = instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
 
         self._kafka_connect_str = instance.get('kafka_connect_str')
@@ -87,11 +90,26 @@ class KafkaConfig:
         # using `consumer_groups`, we prioritize `monitor_unlisted_consumer_groups`
         if self._monitor_unlisted_consumer_groups and (self._consumer_groups or self._consumer_groups_regex):
             self.log.warning(
-                "Using both monitor_unlisted_consumer_groups and consumer_groups or consumer_groups_regex, " \
-                    "so all consumer groups will be collected."
+                "Using both monitor_unlisted_consumer_groups and consumer_groups or consumer_groups_regex, "
+                "so all consumer groups will be collected."
             )
 
         if self._consumer_groups and self._consumer_groups_regex:
-            self.log.warning(
-                "Using consumer_groups and consumer_groups_regex, will combine the two config options."
-            )
+            self.log.warning("Using consumer_groups and consumer_groups_regex, will combine the two config options.")
+
+    def _compile_regex(self, consumer_groups_regex):
+        patterns = {}
+
+        for consumer_group_regex in consumer_groups_regex:
+            consumer_group_pattern = re.compile(consumer_group_regex)
+            patterns[consumer_group_pattern] = {}
+
+            topics_regex = consumer_groups_regex.get(consumer_group_regex)
+
+            for topic_regex in topics_regex:
+                topic_pattern = re.compile(topic_regex)
+
+                partitions = self._consumer_groups_regex[consumer_group_regex][topic_regex]
+                patterns[consumer_group_pattern].update({topic_pattern: partitions})
+
+        return patterns
