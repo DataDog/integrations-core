@@ -275,6 +275,30 @@ External table indexes must be a subset of the indexes of the current table, or 
                 end: 6
     ```
 
+##### Mapping column to tag string value
+You can use the following syntax to map OID values to tag string values. In the example below, the submitted metrics will be `snmp.ifInOctets` with tags like `if_type:regular1822`. Available in Agent 7.45+.
+
+```yaml
+metrics:
+  - MIB: IP-MIB
+    table:
+      OID: 1.3.6.1.2.1.2.2
+      name: ifTable
+    symbols:
+      - OID: 1.3.6.1.2.1.2.2.1.10
+        name: ifInOctets
+    metric_tags:
+      - tag: if_type
+        column:
+          OID: 1.3.6.1.2.1.2.2.1.3
+          name: ifType
+        mapping:
+          1: other
+          2: regular1822
+          3: hdh1822
+          4: ddn-x25
+          29: ultra
+```
 
 ##### Using an index
 
@@ -618,6 +642,12 @@ metric_tags:
     tags:
         device_type: \1
         host: \2
+  - # With value mapping
+    OID: 1.3.6.1.2.1.1.7
+    symbol: sysServices
+    mapping:
+      4: routing
+      72: application
 ```
 
 ### `metadata`
