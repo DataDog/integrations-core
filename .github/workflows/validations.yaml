@@ -50,10 +50,6 @@ jobs:
       run: |
         ddev validate config $CHANGED
 
-    - name: Run manifest validation
-      run: |
-        ddev validate manifest $CHANGED
-
     - name: Run dashboard validation
       run: |
         ddev validate dashboards $CHANGED

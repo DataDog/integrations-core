@@ -299,7 +299,8 @@ def metadata(check, check_duplicates, show_warnings):
         manifest = Manifest.load_manifest(current_check)
         if not manifest.has_metrics_integration():
             echo_success(
-                f"Skipping {check} - not validating metadata since this check's manifest doesn't contain a metrics section."
+                f"Skipping {check} - not validating metadata since this check's "
+                f"manifest doesn't contain a metrics section."
             )
             continue
 

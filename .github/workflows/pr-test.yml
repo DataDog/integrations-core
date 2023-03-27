@@ -1,0 +1,17 @@
+name: PR test
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        required: true
+        type: string
+
+jobs:
+  run:
+    name: Run tests
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Test
+      run: echo "${{ inputs.repo }}"
