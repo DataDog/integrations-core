@@ -38,8 +38,6 @@ EXPLICIT_LICENSES = {
     'cryptography': ['Apache-2.0', 'BSD-3-Clause', 'PSF'],
     # https://github.com/rthalley/dnspython/blob/master/LICENSE
     'dnspython': ['ISC'],
-    # https://github.com/pythongssapi/python-gssapi/blob/main/LICENSE.txt
-    'gssapi': ['ISC'],
     # https://github.com/cannatag/ldap3/blob/dev/COPYING.txt
     'ldap3': ['LGPL-3.0-only'],
     # https://cloudera.github.io/cm_api/
@@ -155,7 +153,6 @@ PACKAGE_REPO_OVERRIDES = {
     'dnspython': 'https://github.com/rthalley/dnspython',
     'foundationdb': 'https://github.com/apple/foundationdb',
     'in-toto': 'https://github.com/in-toto/in-toto',
-    'kazoo': 'https://github.com/python-zk/kazoo',
     'lxml': 'https://github.com/lxml/lxml',
     'oracledb': 'https://github.com/oracle/python-oracledb',
     'packaging': 'https://github.com/pypa/packaging',
