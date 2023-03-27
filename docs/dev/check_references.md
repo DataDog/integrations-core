@@ -16,7 +16,7 @@ further_reading:
 
 ## Overview
 
-This page walks you through how to develop an offering on the [Integrations page][12]. 
+This page walks you through how to develop an offering on the [**Integrations** page][12] or the [**Marketplace** page][11]. 
 
 ## Configuration file
 
