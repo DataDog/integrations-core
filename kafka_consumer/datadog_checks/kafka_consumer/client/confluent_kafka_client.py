@@ -252,10 +252,10 @@ class ConfluentKafkaClient(KafkaClient):
                                 topic,
                             )
                             continue
-
-                    self.log.debug("TOPIC PARTITION: %s", TopicPartition(topic, partition))
-
-                    yield TopicPartition(topic, partition)
+                    
+                    topic_partition = TopicPartition(topic, partition)
+                    self.log.debug("TOPIC PARTITION: %s", topic_partition)
+                    yield topic_partition
 
     def _get_regex_filtered_topic_partitions(self, consumer_group, topic, partitions):
         for partition in partitions:
