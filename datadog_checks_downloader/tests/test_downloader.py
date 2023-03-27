@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from contextlib import contextmanager
 import json
 import logging
 import os
@@ -14,6 +13,7 @@ import string
 import subprocess
 import sys
 from collections import defaultdict, namedtuple
+from contextlib import contextmanager
 from datetime import datetime
 from urllib.parse import urljoin
 
