@@ -5,24 +5,13 @@ import logging
 
 import mock
 import pytest
-from tests.common import LEGACY_CLIENT, metrics
+from tests.common import metrics
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client.kafka_python_client import OAuthTokenProvider
 
 pytestmark = [pytest.mark.unit]
-
-
-@pytest.mark.skipif(not LEGACY_CLIENT, reason='not implemented yet with confluent-kafka')
-def test_gssapi(kafka_instance, dd_run_check, check):
-    kafka_instance['sasl_mechanism'] = 'GSSAPI'
-    kafka_instance['security_protocol'] = 'SASL_PLAINTEXT'
-    kafka_instance['sasl_kerberos_service_name'] = 'kafka'
-    # assert the check doesn't fail with:
-    # Exception: Could not find main GSSAPI shared library.
-    with pytest.raises(Exception, match='check_version'):
-        dd_run_check(check(kafka_instance))
 
 
 @pytest.mark.skip(reason='Add a test that not only check the parameter but also run the check')
@@ -67,32 +56,12 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, check, kafka_inst
     assert expected_http_kwargs == actual_options
 
 
-@pytest.mark.skipif(not LEGACY_CLIENT, reason='The kafka-python implementation raises an exception')
 def test_legacy_invalid_connect_str(dd_run_check, check, aggregator, caplog, kafka_instance):
     caplog.set_level(logging.DEBUG)
     kafka_instance['kafka_connect_str'] = 'invalid'
     del kafka_instance['consumer_groups']
     with pytest.raises(Exception):
         dd_run_check(check(kafka_instance))
-
-    for m in metrics:
-        aggregator.assert_metric(m, count=0)
-
-    exception_msg = (
-        'ConfigurationError: Cannot fetch consumer offsets because no consumer_groups are specified and '
-        'monitor_unlisted_consumer_groups is False'
-    )
-
-    assert exception_msg in caplog.text
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-
-@pytest.mark.skipif(LEGACY_CLIENT, reason='The following condition only occurs in confluent-kafka implementation')
-def test_invalid_connect_str(dd_run_check, check, aggregator, caplog, kafka_instance):
-    caplog.set_level(logging.DEBUG)
-    kafka_instance['kafka_connect_str'] = 'invalid'
-    del kafka_instance['consumer_groups']
-    dd_run_check(check(kafka_instance))
 
     for m in metrics:
         aggregator.assert_metric(m, count=0)

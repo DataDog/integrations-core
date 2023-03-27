@@ -5,7 +5,7 @@ import logging
 from contextlib import nullcontext as does_not_raise
 
 import pytest
-from tests.common import LEGACY_CLIENT, assert_check_kafka, metrics
+from tests.common import assert_check_kafka, metrics
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -206,7 +206,6 @@ def test_config(
         ),
     ],
 )
-@pytest.mark.skipif(not LEGACY_CLIENT, reason='not implemented yet with confluent-kafka')
 def test_oauth_config(sasl_oauth_token_provider, check, expected_exception, kafka_instance):
     kafka_instance.update(
         {

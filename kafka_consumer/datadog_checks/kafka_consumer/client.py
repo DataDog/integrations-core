@@ -6,11 +6,10 @@ from confluent_kafka.admin import AdminClient
 from six import string_types
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.kafka_consumer.client.kafka_client import KafkaClient
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
 
-class ConfluentKafkaClient(KafkaClient):
+class KafkaClient:
     @property
     def kafka_client(self):
         if self._kafka_client is None:
@@ -63,8 +62,6 @@ class ConfluentKafkaClient(KafkaClient):
         return config
 
     def get_highwater_offsets(self, consumer_offsets):
-        # TODO: Remove broker_requests_batch_size as config after
-        # kafka-python is removed if we don't need to batch requests in Confluent
         highwater_offsets = {}
         topics_with_consumer_offset = {}
         if not self.config._monitor_all_broker_highwatermarks:

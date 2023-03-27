@@ -13,15 +13,7 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev._env import e2e_testing
 from datadog_checks.kafka_consumer import KafkaCheck
 
-from .common import (
-    AUTHENTICATION,
-    DOCKER_IMAGE_PATH,
-    HERE,
-    KAFKA_CONNECT_STR,
-    LEGACY_CLIENT,
-    TOPICS,
-    get_authentication_configuration,
-)
+from .common import AUTHENTICATION, DOCKER_IMAGE_PATH, HERE, KAFKA_CONNECT_STR, TOPICS, get_authentication_configuration
 from .runners import Consumer, Producer
 
 CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'docker', 'ssl', 'certificate')
@@ -30,46 +22,30 @@ CERTIFICATE = os.path.join(CERTIFICATE_DIR, 'cert.pem')
 PRIVATE_KEY = os.path.join(CERTIFICATE_DIR, 'key.pem')
 PRIVATE_KEY_PASSWORD = 'secret'
 
-if LEGACY_CLIENT:
-    E2E_METADATA = {
-        'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
-        'start_commands': [
-            'apt-get update',
-            'apt-get install -y build-essential',
-        ],
-        'docker_volumes': [
-            f'{HERE}/docker/ssl/certificate:/tmp/certificate',
-        ],
-    }
-else:
-    E2E_METADATA = {
-        'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
-        'docker_volumes': [
-            f'{HERE}/docker/ssl/certificate:/tmp/certificate',
-            f'{HERE}/docker/kerberos/kdc/krb5_agent.conf:/etc/krb5.conf',
-        ],
-    }
+E2E_METADATA = {
+    'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
+    'docker_volumes': [
+        f'{HERE}/docker/ssl/certificate:/tmp/certificate',
+        f'{HERE}/docker/kerberos/kdc/krb5_agent.conf:/etc/krb5.conf',
+    ],
+}
 
 if AUTHENTICATION == "ssl":
     INSTANCE = {
         'kafka_connect_str': "localhost:9092",
         'tags': ['optional:tag1'],
         'consumer_groups': {'my_consumer': {'marvel': [0]}},
-        'broker_requests_batch_size': 1,
         'security_protocol': 'SSL',
         'tls_cert': CERTIFICATE,
         'tls_private_key': PRIVATE_KEY,
         'tls_private_key_password': PRIVATE_KEY_PASSWORD,
         'tls_ca_cert': ROOT_CERTIFICATE,
-        'use_legacy_client': LEGACY_CLIENT,
     }
 elif AUTHENTICATION == "kerberos":
     INSTANCE = {
         'kafka_connect_str': "localhost:9092",
         'tags': ['optional:tag1'],
         'consumer_groups': {'my_consumer': {'marvel': [0]}},
-        'broker_requests_batch_size': 1,
-        'use_legacy_client': LEGACY_CLIENT,
         "sasl_mechanism": "GSSAPI",
         "sasl_kerberos_service_name": "kafka",
         "security_protocol": "SASL_PLAINTEXT",
@@ -82,8 +58,6 @@ else:
         'kafka_connect_str': KAFKA_CONNECT_STR,
         'tags': ['optional:tag1'],
         'consumer_groups': {'my_consumer': {'marvel': [0]}},
-        'broker_requests_batch_size': 1,
-        'use_legacy_client': LEGACY_CLIENT,
     }
 
 E2E_INSTANCE = copy.deepcopy(INSTANCE)

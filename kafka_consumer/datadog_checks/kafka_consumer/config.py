@@ -6,11 +6,7 @@ import os
 from six import string_types
 
 from datadog_checks.base import ConfigurationError, is_affirmative
-from datadog_checks.kafka_consumer.constants import (
-    BROKER_REQUESTS_BATCH_SIZE,
-    CONTEXT_UPPER_BOUND,
-    DEFAULT_KAFKA_TIMEOUT,
-)
+from datadog_checks.kafka_consumer.constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
 
 
 class KafkaConfig:
@@ -24,7 +20,6 @@ class KafkaConfig:
             instance.get('monitor_all_broker_highwatermarks', False)
         )
         self._consumer_groups = instance.get('consumer_groups', {})
-        self._broker_requests_batch_size = instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
 
         self._kafka_connect_str = instance.get('kafka_connect_str')
 
@@ -48,7 +43,6 @@ class KafkaConfig:
         self._tls_private_key = instance.get("tls_private_key")
         self._tls_private_key_password = instance.get("tls_private_key_password")
         self._tls_validate_hostname = is_affirmative(instance.get("tls_validate_hostname", True))
-        self.use_legacy_client = is_affirmative(instance.get('use_legacy_client', False))
 
         if self._tls_cert or self._tls_ca_cert or self._tls_private_key or self._tls_private_key_password:
             self._tls_verify = True
