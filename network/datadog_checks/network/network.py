@@ -296,8 +296,6 @@ class Network(AgentCheck):
     def is_collect_cx_state_runnable(self, proc_location):
         """
         Determine if collect_connection_state is set and can effectively run.
-        If self._collect_cx_state is True and a custom proc_location is provided, the system cannot
-         run `ss` or `netstat` over a custom proc_location
         :param proc_location: str
         :return: bool
         """
