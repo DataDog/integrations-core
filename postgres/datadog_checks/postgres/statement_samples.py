@@ -6,7 +6,7 @@ import copy
 import re
 import time
 from enum import Enum
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple  # noqa: F401
 
 import psycopg2
 from cachetools import TTLCache
@@ -324,7 +324,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     pg_stat_activity_view=self._config.pg_stat_activity_view
                 )
             )
-            all_columns = set([i[0] for i in cursor.description])
+            all_columns = {i[0] for i in cursor.description}
             available_columns = [c for c in all_expected_columns if c in all_columns]
             missing_columns = set(all_expected_columns) - set(available_columns)
             if missing_columns:

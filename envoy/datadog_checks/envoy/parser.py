@@ -4,7 +4,7 @@
 
 import re
 from math import isnan
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple  # noqa: F401
 
 from six.moves import range, zip
 
@@ -45,7 +45,7 @@ def _parse_metric(metric, metric_mapping, skip_part=None):
 
                 tags = next(
                     (mapped_tags for mapped_tags in metric_mapping['|_tags_|'] if tags_to_build >= len(mapped_tags)),
-                    tuple(),
+                    (),
                 )
                 constructed_tag_values = construct_tag_values(tag_value_builder, len(tags))
                 # Once the builder has been used, clear its contents.
@@ -111,7 +111,7 @@ def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE, disable_legacy
     # Rebuild any trailing tags
     if tag_value_builder:
         tags = next(
-            (mapped_tags for mapped_tags in last_mapping['|_tags_|'] if tags_to_build >= len(mapped_tags)), tuple()
+            (mapped_tags for mapped_tags in last_mapping['|_tags_|'] if tags_to_build >= len(mapped_tags)), ()
         )
         constructed_tag_values = construct_tag_values(tag_value_builder, len(tags))
 

@@ -134,7 +134,7 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
             os.mkdir(mibs_sources_dir)
 
         mib_sources = (
-            sorted(set([pathlib.Path(x).parent.as_uri() for x in mib_files if os.path.sep in x])) + mib_sources
+            sorted({pathlib.Path(x).parent.as_uri() for x in mib_files if os.path.sep in x}) + mib_sources
         )
 
         mib_files = [os.path.basename(x) for x in mib_files]
@@ -142,7 +142,7 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
         code_generator = JsonCodeGen()
         file_writer = FileWriter(compiled_mibs_sources).setOptions(suffix='.json')
         mib_compiler = MibCompiler(SmiV1CompatParser(tempdir=''), code_generator, file_writer)
-        mib_compiler.addSources(*getReadersFromUrls(*mib_sources, **dict(fuzzyMatching=True)))
+        mib_compiler.addSources(*getReadersFromUrls(*mib_sources, **{'fuzzyMatching': True}))
         mib_compiler.addSearchers(*searchers)
 
         compiled_mibs, compiled_dependencies_mibs = compile_and_report_status(mib_files, mib_compiler)
@@ -210,7 +210,7 @@ def compile_and_report_status(mib_files, mib_compiler):
 
     # These MIBs were compiled but where not explicitly requested by the user. They will be moved
     # to a different folder.
-    dependencies_only_mibs = set([x for x in all_compiled_mibs if x not in child_compiled_mibs])
+    dependencies_only_mibs = {x for x in all_compiled_mibs if x not in child_compiled_mibs}
 
     return child_compiled_mibs, dependencies_only_mibs
 

@@ -776,7 +776,7 @@ def test_report_container_spec_metrics(monkeypatch, tagger):
         mock.call('kubernetes.memory.limits', 536870912.0, ['kube_container_name:datadog-agent'] + instance_tags),
         mock.call('kubernetes.cpu.requests', 0.1, ["pod_name:demo-app-success-c485bc67b-klj45"] + instance_tags),
     ]
-    if any(map(lambda e: 'pod_name:pi-kff76' in e, [x[0][2] for x in check.gauge.call_args_list])):
+    if any(('pod_name:pi-kff76' in e for e in [x[0][2] for x in check.gauge.call_args_list])):
         raise AssertionError("kubernetes.cpu.requests was submitted for a non-running pod")
     check.gauge.assert_has_calls(calls, any_order=True)
 
@@ -833,9 +833,9 @@ def test_report_container_state_metrics(monkeypatch, tagger):
     container_state_gauges = [
         x[0][2] for x in check.gauge.call_args_list if x[0][0].startswith('kubernetes.containers.state')
     ]
-    if any(map(lambda e: 'reason:TransientReason' in e, container_state_gauges)):
+    if any(('reason:TransientReason' in e for e in container_state_gauges)):
         raise AssertionError('kubernetes.containers.state.* was submitted with a transient reason')
-    if any(map(lambda e: not any(x for x in e if x.startswith('reason:')), container_state_gauges)):
+    if any((not any(x for x in e if x.startswith('reason:')) for e in container_state_gauges)):
         raise AssertionError('kubernetes.containers.state.* was submitted without a reason')
 
 
