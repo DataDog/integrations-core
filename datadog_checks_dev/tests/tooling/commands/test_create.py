@@ -50,7 +50,7 @@ def test_new_check_test(integration_type, installable):
             # We only run style checks on the generated integration. Running the entire test suite would result in tox
             # creating Python environments, which would be too slow with little benefits.
             result = run_command(
-                [sys.executable, '-m', 'datadog_checks.dev', 'test', '-s', 'my_check'], capture=True, check=True
+                [sys.executable, '-m', 'datadog_checks.dev', 'test', '-fs', 'my_check'], capture=True, check=True
             )
             # `ddev test` will not fail if the provided check name doesn't correspond to an existing integration.
             # Instead, it will log a message. So we test for that message to verify style checks ran at all.
