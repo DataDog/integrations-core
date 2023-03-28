@@ -7,7 +7,7 @@ import re
 from copy import copy, deepcopy
 from itertools import chain
 from math import isinf, isnan
-from typing import List
+from typing import List  # noqa: F401
 
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_metric_families_strict
 from prometheus_client.parser import text_fd_to_metric_families as parse_metric_families
@@ -167,7 +167,7 @@ class OpenMetricsScraper:
                             )
 
                     self.exclude_metrics_by_labels[label] = (
-                        lambda label_value, pattern=re.compile('|'.join(values)): pattern.search(label_value)
+                        lambda label_value, pattern=re.compile('|'.join(values)): pattern.search(label_value)  # noqa: B008, E501
                         is not None
                     )
                 else:

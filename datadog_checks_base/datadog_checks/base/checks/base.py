@@ -12,7 +12,7 @@ import traceback
 import unicodedata
 from collections import deque
 from os.path import basename
-from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, AnyStr, Callable, Deque, Dict, List, Optional, Sequence, Set, Tuple, Union  # noqa: F401
 
 import yaml
 from six import PY2, binary_type, iteritems, raise_from, text_type
@@ -21,13 +21,13 @@ from ..config import is_affirmative
 from ..constants import ServiceCheck
 from ..errors import ConfigurationError
 from ..types import (
-    AgentConfigType,
-    Event,
-    ExternalTagType,
-    InitConfigType,
-    InstanceType,
-    ProxySettings,
-    ServiceCheckStatus,
+    AgentConfigType,  # noqa: F401
+    Event,  # noqa: F401
+    ExternalTagType,  # noqa: F401
+    InitConfigType,  # noqa: F401
+    InstanceType,  # noqa: F401
+    ProxySettings,  # noqa: F401
+    ServiceCheckStatus,  # noqa: F401
 )
 from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, to_native_string
@@ -70,7 +70,7 @@ if not PY2:
     from pydantic import BaseModel, ValidationError
 
 if TYPE_CHECKING:
-    import ssl
+    import ssl  # noqa: F401
 
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
@@ -439,7 +439,7 @@ class AgentCheck(object):
         models_config = models_config or {}
         typos = set()  # type: Set[str]
 
-        known_options = set([k for k, _ in models_config])  # type: Set[str]
+        known_options = {k for k, _ in models_config}  # type: Set[str]
 
         if not PY2:
 

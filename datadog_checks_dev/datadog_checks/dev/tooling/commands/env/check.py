@@ -92,20 +92,20 @@ def check_run(
         abort()
 
     environment = create_interface(check, env)
-    check_args = dict(
-        rate=rate,
-        times=times,
-        pause=pause,
-        delay=delay,
-        log_level=log_level,
-        as_json=as_json,
-        as_table=as_table,
-        break_point=break_point,
-        jmx_list=jmx_list,
-        discovery_timeout=discovery_timeout,
-        discovery_retry_interval=discovery_retry_interval,
-        discovery_min_instances=discovery_min_instances,
-    )
+    check_args = {
+        'rate': rate,
+        'times': times,
+        'pause': pause,
+        'delay': delay,
+        'log_level': log_level,
+        'as_json': as_json,
+        'as_table': as_table,
+        'break_point': break_point,
+        'jmx_list': jmx_list,
+        'discovery_timeout': discovery_timeout,
+        'discovery_retry_interval': discovery_retry_interval,
+        'discovery_min_instances': discovery_min_instances,
+    }
 
     if config_file:
         config = json.loads(read_file(config_file))

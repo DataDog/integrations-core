@@ -4,7 +4,7 @@
 from fnmatch import fnmatch
 from os.path import exists, join, relpath
 from time import time
-from typing import Any
+from typing import Any  # noqa: F401
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
