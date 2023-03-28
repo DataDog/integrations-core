@@ -15,7 +15,12 @@ def test_legacy_run(benchmark, dd_run_check, gitlab_check, legacy_config):
     benchmark(check.check, None)
 
 
-def test_run(benchmark, dd_run_check, gitlab_check, config):
+@pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
+def test_run(benchmark, dd_run_check, gitlab_check, config, use_openmetrics):
+    if use_openmetrics:
+        instance = config['instances'][0]
+        instance["openmetrics_endpoint"] = instance["prometheus_url"]
+
     check = gitlab_check(config)
 
     # Run once to get any initialization out of the way.

@@ -211,3 +211,17 @@ METRICS_MAP = {
     'upload_file_does_not_exist': 'upload_file_does_not_exist',
     'user_session_logins_total': 'user_session_logins_total',
 }
+
+
+def construct_metrics_config(metric_map):
+    metrics = []
+    for raw_metric_name, metric_name in metric_map.items():
+        if raw_metric_name.endswith('_total'):
+            raw_metric_name = raw_metric_name[:-6]
+            metric_name = metric_name[:-6]
+        elif metric_name.endswith('.count'):
+            metric_name = metric_name[:-6]
+
+        metrics.append({raw_metric_name: {'name': metric_name}})
+
+    return metrics

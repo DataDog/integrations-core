@@ -8,6 +8,7 @@ from time import sleep
 import mock
 import pytest
 import requests
+from six import PY2
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
@@ -31,7 +32,7 @@ CONFIG = {
     'init_config': {},
     'instances': [
         {
-            'prometheus_endpoint': GITLAB_PROMETHEUS_ENDPOINT,
+            'prometheus_url': GITLAB_PROMETHEUS_ENDPOINT,
             'gitlab_url': GITLAB_URL,
             'disable_ssl_validation': True,
             'tags': CUSTOM_TAGS,
@@ -103,7 +104,7 @@ def legacy_config():
         'init_config': {'allowed_metrics': ALLOWED_METRICS},
         'instances': [
             {
-                'prometheus_endpoint': PROMETHEUS_ENDPOINT,
+                'prometheus_url': PROMETHEUS_ENDPOINT,
                 'gitlab_url': GITLAB_URL,
                 'disable_ssl_validation': True,
                 'tags': CUSTOM_TAGS,
@@ -118,7 +119,7 @@ def bad_config():
         'init_config': {'allowed_metrics': ALLOWED_METRICS},
         'instances': [
             {
-                'prometheus_endpoint': 'http://{}:1234/-/metrics'.format(HOST),
+                'prometheus_url': 'http://{}:1234/-/metrics'.format(HOST),
                 'gitlab_url': 'http://{}:1234/ci'.format(HOST),
                 'disable_ssl_validation': True,
                 'tags': CUSTOM_TAGS,
@@ -133,10 +134,18 @@ def auth_config():
         'init_config': {'allowed_metrics': ALLOWED_METRICS},
         'instances': [
             {
-                'prometheus_endpoint': PROMETHEUS_ENDPOINT,
+                'prometheus_url': PROMETHEUS_ENDPOINT,
                 'gitlab_url': GITLAB_URL,
                 'disable_ssl_validation': True,
                 'api_token': GITLAB_TEST_API_TOKEN,
             }
         ],
     }
+
+
+@pytest.fixture
+def use_openmetrics(request):
+    if request.param and PY2:
+        pytest.skip('This version of the integration is only available when using Python 3.')
+
+    return request.param
