@@ -136,8 +136,6 @@ def test_metadata(instance, datadog_agent, dd_run_check):
 def test_disconnection(aggregator, instance, dd_run_check):
     instance["connection_timeout"] = 1
     check = IbmDb2Check('ibm_db2', {}, [instance])
-    # check.check(instance)
-    # _assert_standard(aggregator)
 
     # Disconnect the database
     run_command('docker exec ibm_db2 su - db2inst1 -c "db2stop force"', check=True)
