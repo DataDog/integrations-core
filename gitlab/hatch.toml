@@ -2,6 +2,7 @@
 
 [[envs.default.matrix]]
 python = ["2.7", "3.8"]
+# https://about.gitlab.com/support/statement-of-support/#version-support
 version = ["13.12", "14.10", "15.10"]
 
 [envs.default.env-vars]
