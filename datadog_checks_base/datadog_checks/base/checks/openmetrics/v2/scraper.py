@@ -167,7 +167,7 @@ class OpenMetricsScraper:
                             )
 
                     self.exclude_metrics_by_labels[label] = (
-                        lambda label_value, pattern=re.compile('|'.join(values)): pattern.search(
+                        lambda label_value, pattern=re.compile('|'.join(values)): pattern.search(  # noqa: B008
                             label_value
                         )  # noqa: B008, E501
                         is not None
