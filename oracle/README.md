@@ -255,7 +255,7 @@ sqlplus <USER>/<PASSWORD>@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCPS)(HO
 When using the [Oracle Instant Client][16] connection, move three files to the `network/admin` directory of the client libraries used by your application:
   * `tnsnames.ora`: Maps net service names used for application connection strings to your database services.
   * `sqlnet.ora`: Configures Oracle Network settings.
-  * `cwallet.sso`: Enables SSL or TLS connections in thick mode. Keep this file secure.
+  * `cwallet.sso`: Enables SSL or TLS connections. Keep this file secure.
 
 ##### TCPS through JDBC
 
@@ -435,7 +435,7 @@ See [service_checks.json][12] for a list of service checks provided by this inte
   ```text
   Failed to connect to Oracle DB, error: DPY-6000: cannot connect to database. Listener refused connection. (Similar to ORA-12660)
   ```
- - Ensure Native Network Encryption or Checksumming are not enabled. If they are enabled, you must use thick mode by setting `use_instant_client: true`.
+ - Ensure Native Network Encryption or Checksumming are not enabled. If they are enabled, you must use the Instant Client method by setting `use_instant_client: true`.
 
 For more information about setting up the Oracle Instant Client, see the [Oracle integration documentation][3].
 
