@@ -17,6 +17,54 @@ Due to licensing restrictions, the JDBC library is not included in the Datadog A
 
 *NOTE*: Starting in v7.42.x, the Oracle integration only supports Python 3.
 
+##### Oracle Instant Client
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Linux" xxx -->
+###### Linux
+
+1. Follow the [Oracle Instant Client installation for Linux][17].
+
+2. Verify the following:
+    - Both the *Instant Client Basic* and *SDK* packages are installed. Find them on Oracle's [download page][18].
+
+        After the Instant Client libraries are installed, ensure the runtime linker can find the libraries. For example, using `ldconfig`:
+    
+       ```shell
+       # Put the library location in an ld configuration file.
+    
+       sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > \
+           /etc/ld.so.conf.d/oracle-instantclient.conf"
+    
+       # Update the bindings.
+    
+       sudo ldconfig
+       ```
+
+    - Both packages are decompressed into a single directory that is available to all users on the given machine (for example, `/opt/oracle`):
+       ```shell
+       mkdir -p /opt/oracle/ && cd /opt/oracle/
+       unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
+       unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
+       ```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Windows" xxx -->
+###### Windows
+
+1. Follow the [Oracle Windows installation guide][19] to configure your Oracle Instant Client.
+
+2. Verify the following:
+    - The [Microsoft Visual Studio 2017 Redistributable][20] or the appropriate version is installed for the Oracle Instant Client.
+
+    - Both the *Instant Client Basic* and *SDK* packages from Oracle's [download page][18] are installed.
+
+    - Both packages are extracted into a single directory that is available to all users on the given machine (for example, `C:\oracle`).
+
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 
 ##### JDBC driver
 
@@ -475,3 +523,7 @@ Need help? Contact [Datadog support][14].
 [14]: https://docs.datadoghq.com/help/
 [15]: https://www.oracle.com/technetwork/topics/wp-oracle-jdbc-thin-ssl-130128.pdf
 [16]: https://python-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#install-the-wallet-and-network-configuration-files
+[17]: https://docs.oracle.com/en/database/oracle/oracle-database/21/lacli/install-instant-client-using-zip.html
+[18]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
+[19]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html#ic_winx64_inst
+[20]: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
