@@ -439,7 +439,7 @@ class AgentCheck(object):
         models_config = models_config or {}
         typos = set()  # type: Set[str]
 
-        known_options = set([k for k, _ in models_config])  # type: Set[str]
+        known_options = {k for k, _ in models_config}  # type: Set[str]
 
         if not PY2:
 

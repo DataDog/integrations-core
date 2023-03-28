@@ -3,8 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .common import VERTICA_MAJOR_VERSION
 
-ALL_METRICS = set(
-    [
+ALL_METRICS = {
         'vertica.connection.active',
         'vertica.connection.total',
         'vertica.delete_vectors',
@@ -87,13 +86,11 @@ ALL_METRICS = set(
         'vertica.table.row.wos',
         'vertica.thread.active',
         'vertica.thread.max',
-    ]
-)
+    }
 
 if VERTICA_MAJOR_VERSION >= 11:
     # Drop metrics not available in v11+
-    ALL_METRICS -= set(
-        [
+    ALL_METRICS -= {
             'vertica.node.disk.used.ros',
             'vertica.node.disk.used.wos',
             'vertica.node.row.ros',
@@ -110,5 +107,4 @@ if VERTICA_MAJOR_VERSION >= 11:
             'vertica.disk.used.wos',
             'vertica.row.ros',
             'vertica.row.wos',
-        ]
-    )
+        }

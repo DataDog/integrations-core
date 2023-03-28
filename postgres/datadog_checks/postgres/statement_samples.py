@@ -324,7 +324,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     pg_stat_activity_view=self._config.pg_stat_activity_view
                 )
             )
-            all_columns = set([i[0] for i in cursor.description])
+            all_columns = {i[0] for i in cursor.description}
             available_columns = [c for c in all_expected_columns if c in all_columns]
             missing_columns = set(all_expected_columns) - set(available_columns)
             if missing_columns:
