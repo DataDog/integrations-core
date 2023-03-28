@@ -252,7 +252,7 @@ class ConfluentKafkaClient(KafkaClient):
                                 topic,
                             )
                             continue
-                    
+
                     topic_partition = TopicPartition(topic, partition)
                     self.log.debug("TOPIC PARTITION: %s", topic_partition)
                     yield topic_partition
