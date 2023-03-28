@@ -4,10 +4,11 @@
 from copy import deepcopy
 
 import requests
+from six import PY2
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.base.errors import CheckException
+from datadog_checks.base.errors import CheckException, ConfigurationError
 
 from .metrics import METRICS_MAP
 
@@ -34,6 +35,23 @@ class GitlabCheck(OpenMetricsBaseCheck):
         'ssl_cert_validation': {'name': 'tls_verify'},
         'ssl_ca_certs': {'name': 'tls_ca_cert'},
     }
+
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if instance.get('openmetrics_endpoint'):
+            if PY2:
+                raise ConfigurationError(
+                    'This version of the integration is only available when using Python 3. '
+                    'Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3/ '
+                    'for more information or use the older style config.'
+                )
+            # TODO: when we drop Python 2 move this import up top
+            from .gitlab_v2 import GitlabCheckV2
+
+            return GitlabCheckV2(name, init_config, instances)
+        else:
+            return super(GitlabCheck, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances):
         super(GitlabCheck, self).__init__(

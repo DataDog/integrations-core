@@ -31,7 +31,7 @@ CONFIG = {
     'init_config': {},
     'instances': [
         {
-            'prometheus_endpoint': GITLAB_PROMETHEUS_ENDPOINT,
+            'prometheus_url': GITLAB_PROMETHEUS_ENDPOINT,
             'gitlab_url': GITLAB_URL,
             'send_distribution_counts_as_monotonic': True,
             'send_monotonic_counter': True,
@@ -105,7 +105,7 @@ def legacy_config():
         'init_config': {'allowed_metrics': ALLOWED_METRICS},
         'instances': [
             {
-                'prometheus_endpoint': PROMETHEUS_ENDPOINT,
+                'prometheus_url': PROMETHEUS_ENDPOINT,
                 'gitlab_url': GITLAB_URL,
                 'disable_ssl_validation': True,
                 'tags': CUSTOM_TAGS,
@@ -120,7 +120,7 @@ def bad_config():
         'init_config': {'allowed_metrics': ALLOWED_METRICS},
         'instances': [
             {
-                'prometheus_endpoint': 'http://{}:1234/-/metrics'.format(HOST),
+                'prometheus_url': 'http://{}:1234/-/metrics'.format(HOST),
                 'gitlab_url': 'http://{}:1234/ci'.format(HOST),
                 'disable_ssl_validation': True,
                 'tags': CUSTOM_TAGS,
@@ -135,7 +135,7 @@ def auth_config():
         'init_config': {'allowed_metrics': ALLOWED_METRICS},
         'instances': [
             {
-                'prometheus_endpoint': PROMETHEUS_ENDPOINT,
+                'prometheus_url': PROMETHEUS_ENDPOINT,
                 'gitlab_url': GITLAB_URL,
                 'disable_ssl_validation': True,
                 'api_token': GITLAB_TEST_API_TOKEN,
