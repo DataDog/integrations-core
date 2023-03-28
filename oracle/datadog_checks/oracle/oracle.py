@@ -158,17 +158,21 @@ class Oracle(AgentCheck):
                     self._connection_errors += 1
             else:
                 if self._use_instant_client:
-                    try:
-                        oracledb.init_oracle_client()
-                    except oracledb.DatabaseError as e:
-                        self.log.error('Oracle Instant Client is unavailable: %s', str(e))
-                        raise
-                    else:
-                        self.log.debug('Oracle Instant Client version %s', oracledb.clientversion())
+                    self.init_instant_client()
                 else:
                     self.log.debug('Connecting to Oracle using the native client')
                 self._cached_connection = self._oracle_connect()
         return self._cached_connection
+
+    def init_instant_client(self):
+        try:
+            oracledb.init_oracle_client()
+        except oracledb.DatabaseError as e:
+            self.log.error('Oracle Instant Client is unavailable: %s', str(e))
+            self._connection_errors += 1
+            raise
+        else:
+            self.log.debug('Oracle Instant Client version %s', oracledb.clientversion())
 
     def can_use_jdbc(self):
         if self._jdbc_driver:
