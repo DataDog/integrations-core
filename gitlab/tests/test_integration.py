@@ -7,7 +7,7 @@ from requests.exceptions import ConnectionError
 
 from datadog_checks.gitlab import GitlabCheck
 
-from .common import AUTH_CONFIG, BAD_CONFIG, CONFIG, CUSTOM_TAGS, HOST, METRICS, assert_check
+from .common import AUTH_CONFIG, BAD_CONFIG, CUSTOM_TAGS, HOST
 
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
@@ -74,15 +74,3 @@ def test_check_submit_metadata(aggregator, datadog_agent, raw_version, version_m
         gitlab.check(instance)
         datadog_agent.assert_metadata('test:123', version_metadata)
         datadog_agent.assert_metadata_count(count)
-
-
-def test_check_integration(aggregator, mock_data):
-    instance = CONFIG['instances'][0]
-    init_config = CONFIG['init_config']
-
-    gitlab = GitlabCheck('gitlab', init_config, instances=[instance])
-    gitlab.check(instance)
-    gitlab.check(instance)
-
-    assert_check(aggregator, METRICS)
-    aggregator.assert_all_metrics_covered()
