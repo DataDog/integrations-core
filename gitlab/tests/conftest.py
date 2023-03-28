@@ -29,7 +29,6 @@ def dd_environment():
     Spin up and initialize gitlab
     """
 
-    # specify couchbase container name
     env = {
         'GITLAB_TEST_PASSWORD': GITLAB_TEST_PASSWORD,
         'GITLAB_LOCAL_PORT': str(GITLAB_LOCAL_PORT),
