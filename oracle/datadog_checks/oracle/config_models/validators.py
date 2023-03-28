@@ -14,7 +14,7 @@ def initialize_instance(values, **kwargs):
 
     if values.get('jdbc_driver_path') and values.get('use_instant_client'):
         raise ValueError(
-            'Oracle Instant Client and Oracle JDBC are configured. Use either `use_instant_client` or `jdbc_driver_path`'
+            'Oracle Instant Client and Oracle JDBC configured. Use either `use_instant_client` or `jdbc_driver_path`'
         )
 
     protocol = values.get('protocol', 'TCP')

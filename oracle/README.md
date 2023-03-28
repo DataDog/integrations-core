@@ -65,7 +65,6 @@ Due to licensing restrictions, the JDBC library is not included in the Datadog A
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-
 ##### JDBC driver
 
 *NOTE*: This method only works on Linux.
