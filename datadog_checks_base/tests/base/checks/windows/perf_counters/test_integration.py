@@ -290,6 +290,7 @@ def test_skip_typo_counter(aggregator, dd_run_check):
     aggregator.assert_metric('test.mem.committed_bytes')
     aggregator.assert_metric('test.mem.commit_limit')
 
+def test_validate_counter_names_sensitivity(aggregator, dd_run_check):
     # Run check with different counter names of different casing to make sure
     # the check is not affected since Windows Performance counters API
     # are case insensitive.
