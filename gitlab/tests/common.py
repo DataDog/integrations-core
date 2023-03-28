@@ -12,7 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # Networking
 HOST = get_docker_hostname()
 
-GITLAB_TEST_PASSWORD = "testroot"
+GITLAB_TEST_PASSWORD = 'hdkss33jdijb123'
 GITLAB_TEST_API_TOKEN = 'token'
 GITLAB_LOCAL_PORT = 8086
 GITLAB_LOCAL_PROMETHEUS_PORT = 8088
