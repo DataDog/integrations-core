@@ -2,7 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime
+import json
 import os
+from urllib.parse import urlparse
+
+from datadog_checks.dev.fs import get_here
+from datadog_checks.dev.http import MockResponse
 
 CHECK_NAME = 'openstack'
 
@@ -401,3 +406,76 @@ DEFAULT_METRICS = [
     'openstack.nova.flavor.rxtx_factor',
     'openstack.nova.flavor.vcpus',
 ]
+
+
+class MockHttp:
+    def __init__(self, **kwargs):
+        self._exceptions = kwargs.get('exceptions')
+        self._defaults = kwargs.get('defaults')
+
+    def get(self, url, *args, **kwargs):
+        parsed_url = urlparse(url)
+        path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
+        path_parts = path_and_args.split('/')
+        nova_microversion_header = kwargs['headers'].get('X-OpenStack-Nova-API-Version')
+        subpath = os.path.join(
+            *path_parts,
+        )
+        if self._exceptions and subpath in self._exceptions:
+            raise self._exceptions[subpath]
+        elif self._defaults and subpath in self._defaults:
+            return self._defaults[subpath]
+        else:
+            file_path = os.path.join(
+                get_here(),
+                'fixtures',
+                nova_microversion_header if nova_microversion_header is not None else "default",
+                subpath,
+                'get.json',
+            )
+            return MockResponse(
+                file_path=file_path,
+                status_code=200,
+            )
+
+    def post(self, url, *args, **kwargs):
+        parsed_url = urlparse(url)
+        path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
+        path_parts = path_and_args.split('/')
+        nova_microversion_header = kwargs['headers'].get('X-OpenStack-Nova-API-Version')
+        subpath = os.path.join(
+            *path_parts,
+        )
+        if self._exceptions and subpath in self._exceptions:
+            return self._exceptions[subpath]
+        elif self._defaults and subpath in self._defaults:
+            return self._defaults[subpath]
+        elif path_and_args == '/identity/v3/auth/tokens':
+            data = json.loads(kwargs['data'])
+            project_id = data.get('auth', {}).get('scope', {}).get('project', {}).get('id')
+            if project_id:
+                file_path = os.path.join(
+                    get_here(),
+                    'fixtures',
+                    nova_microversion_header if nova_microversion_header is not None else "default",
+                    *path_parts,
+                    f'{project_id}.json',
+                )
+                headers = {'X-Subject-Token': f'token_{project_id}'}
+            else:
+                file_path = os.path.join(
+                    get_here(),
+                    'fixtures',
+                    nova_microversion_header if nova_microversion_header is not None else "default",
+                    *path_parts,
+                    'unscoped.json',
+                )
+                headers = {'X-Subject-Token': 'token_test1234'}
+        else:
+            file_path = os.path.join(
+                get_here(),
+                'fixtures',
+                nova_microversion_header if nova_microversion_header is not None else "default",
+                subpath,
+            )
+        return MockResponse(file_path=file_path, status_code=200, headers=headers)
