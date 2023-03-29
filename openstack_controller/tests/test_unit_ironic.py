@@ -10,6 +10,16 @@ from .common import MockHttp
 pytestmark = [pytest.mark.unit]
 
 
+def test_exception(aggregator, dd_run_check, instance, caplog, monkeypatch):
+    http = MockHttp("agent-integrations-openstack-ironic", exceptions={'baremetal': Exception()})
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    assert 'Exception while reporting baremetal metrics' in caplog.text
+
+
 def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch):
     http = MockHttp("agent-integrations-openstack-default")
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
