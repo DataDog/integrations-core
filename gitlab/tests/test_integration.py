@@ -32,19 +32,14 @@ def test_connection_failure(aggregator, gitlab_check, bad_config):
     with pytest.raises(ConnectionError):
         check.check(None)
 
-    aggregator.assert_service_check(
-        'gitlab.prometheus_endpoint_up',
-        status=GitlabCheck.CRITICAL,
-        count=1,
-    )
-
     # We should get only one extra failed service check, the first (readiness)
-    aggregator.assert_service_check(
-        'gitlab.readiness',
-        status=GitlabCheck.CRITICAL,
-        tags=['gitlab_host:{}'.format(HOST), 'gitlab_port:1234'] + CUSTOM_TAGS,
-        count=1,
-    )
+    for service_check in ("prometheus_endpoint_up", "readiness"):
+        aggregator.assert_service_check(
+            'gitlab.{}'.format(service_check),
+            status=GitlabCheck.CRITICAL,
+            tags=['gitlab_host:{}'.format(HOST), 'gitlab_port:1234'] + CUSTOM_TAGS,
+            count=1,
+        )
 
     for service_check in ('liveness', 'health'):
         aggregator.assert_service_check(
