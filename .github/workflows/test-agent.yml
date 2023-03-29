@@ -3,6 +3,16 @@ name: Test Agent version
 on:
   workflow_dispatch:
     inputs:
+      test-py2:
+        required: false
+        description: Run Python 2 tests
+        default: true
+        type: boolean
+      test-py3:
+        required: false
+        description: Run Python 3 tests
+        default: true
+        type: boolean
       agent-image:
         required: false
         description: The Agent 7 image to use on Linux and macOS
@@ -32,7 +42,12 @@ jobs:
 
       # Options
       standard: true
-      test-py2: true
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
     secrets: inherit
 
   submit-traces:
