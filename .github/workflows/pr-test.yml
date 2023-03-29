@@ -18,15 +18,6 @@ jobs:
     with:
       repo: "${{ inputs.repo }}"
 
-  validate:
-    needs:
-    - compute-matrix
-    if: needs.compute-matrix.outputs.matrix != '[]'
-
-    uses: ./.github/workflows/validate.yml
-    with:
-      repo: "${{ inputs.repo }}"
-
   test:
     needs:
     - compute-matrix

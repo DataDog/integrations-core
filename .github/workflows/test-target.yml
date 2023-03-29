@@ -97,8 +97,9 @@ jobs:
       DD_TAGS: "team:agent-integrations,platform:${{ inputs.platform }},integration:${{ inputs.target }}"
       DD_TRACE_ANALYTICS_ENABLED: "true"
       # Capture traces for a separate job to do the submission
-      TRACE_CAPTURE_FILE: "trace-capture-${{ inputs.job-name }}"
-      TRACE_CAPTURE_LOG: "trace-captures.log"
+      TRACE_CAPTURE_DIRECTORY: ".trace-captures"
+      TRACE_CAPTURE_FILE: "${{ inputs.job-name }}"
+      TRACE_CAPTURE_LOG: "output.log"
 
     steps:
     - name: Set up Windows
@@ -158,6 +159,8 @@ jobs:
       if: inputs.repo == 'core'
       run: |-
         pipx install mitmproxy
+        mkdir "${{ env.TRACE_CAPTURE_DIRECTORY }}"
+        cd "${{ env.TRACE_CAPTURE_DIRECTORY }}"
         mitmdump -p "${{ inputs.trace-agent-port }}" -w "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
 
     - name: Run Unit & Integration tests
@@ -201,7 +204,7 @@ jobs:
       if: inputs.repo == 'core'
       run: |-
         Stop-Process -Name "*mitmdump*"
-        cat "${{ env.TRACE_CAPTURE_LOG }}"
+        cat "${{ env.TRACE_CAPTURE_DIRECTORY }}/${{ env.TRACE_CAPTURE_LOG }}"
       shell: "pwsh"
 
     - name: Upload captured traces
@@ -209,7 +212,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: "${{ inputs.traces-artifact-name }}"
-        path: "${{ env.TRACE_CAPTURE_FILE }}"
+        path: "${{ env.TRACE_CAPTURE_DIRECTORY }}/${{ env.TRACE_CAPTURE_FILE }}"
 
     - name: Upload test results
       if: always()

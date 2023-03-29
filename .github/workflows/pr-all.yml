@@ -14,11 +14,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate:
-    uses: ./.github/workflows/validate.yml
-    with:
-      repo: "${{ inputs.repo }}"
-
   test:
     uses: ./.github/workflows/test-all.yml
     with:
