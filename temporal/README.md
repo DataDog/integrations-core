@@ -15,7 +15,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Configure your Temporal services to expose metrics via a `prometheus` endpoint by following the [official temporal documentation][10].
+1. Configure your Temporal services to expose metrics via a `prometheus` endpoint by following the [official Temporal documentation][10].
 
 2. Edit the `temporal.d/conf.yaml` file located in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your temporal performance data. 
 
