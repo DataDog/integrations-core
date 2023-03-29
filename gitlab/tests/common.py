@@ -34,33 +34,21 @@ ALLOWED_METRICS = [
     'process_virtual_memory_bytes',
 ]
 
-METRICS = [
+COMMON_METRICS = [
     "banzai.cacheless_render_real_duration_seconds.count",
     "banzai.cacheless_render_real_duration_seconds.sum",
-    "cache.misses_total",
     "cache.operation_duration_seconds.count",
     "cache.operation_duration_seconds.sum",
-    "cache_operations_total",
-    "job.waiter_started_total",
-    "job.waiter_timeouts_total",
     "rails_queue_duration_seconds.count",
     "rails_queue_duration_seconds.sum",
     "transaction.allocated_memory_bytes.count",
     "transaction.allocated_memory_bytes.sum",
-    "transaction.cache_read_hit_count_total",
-    "transaction.cache_read_miss_count_total",
     "transaction.duration_seconds.count",
     "transaction.duration_seconds.sum",
-    "transaction.new_redis_connections_total",
-    "transaction.view_duration_total",
-    "transaction.rails_queue_duration_total",
-    "rack.http_requests_total",
     "rack.http_request_duration_seconds.sum",
     "rack.http_request_duration_seconds.count",
     "ruby.file_descriptors",
     "ruby.memory_bytes",
-    "ruby.sampler_duration_seconds_total",
-    "ruby.process_cpu_seconds_total",
     "ruby.process_max_fds",
     "ruby.process_resident_memory_bytes",
     "ruby.process_start_time_seconds",
@@ -68,7 +56,6 @@ METRICS = [
     "ruby.gc_duration_seconds.sum",
     "sql_duration_seconds.count",
     "sql_duration_seconds.sum",
-    "ruby.gc_stat.count",
     "ruby.gc_stat.heap_allocated_pages",
     "ruby.gc_stat.heap_sorted_length",
     "ruby.gc_stat.heap_allocatable_pages",
@@ -96,6 +83,44 @@ METRICS = [
     "unicorn.active_connections",
     "unicorn.queued_connections",
     "unicorn.workers",
+]
+
+V1_METRICS = COMMON_METRICS + [
+    "cache.misses_total",
+    "cache_operations_total",
+    "job.waiter_started_total",
+    "job.waiter_timeouts_total",
+    "transaction.cache_read_hit_count_total",
+    "transaction.cache_read_miss_count_total",
+    "transaction.new_redis_connections_total",
+    "transaction.view_duration_total",
+    "transaction.rails_queue_duration_total",
+    "rack.http_requests_total",
+    "ruby.sampler_duration_seconds_total",
+    "ruby.process_cpu_seconds_total",
+    "ruby.gc_stat.count",
+]
+
+V2_METRICS = COMMON_METRICS + [
+    "ruby.gc_stat",
+    "banzai.cacheless_render_real_duration_seconds.bucket",
+    "cache.misses.count",
+    "cache.operation_duration_seconds.bucket",
+    "cache_operations.count",
+    "job.waiter_started.count",
+    "job.waiter_timeouts.count",
+    "rack.http_request_duration_seconds.bucket",
+    "rack.http_requests.count",
+    "rails_queue_duration_seconds.bucket",
+    "ruby.gc_duration_seconds.bucket",
+    "ruby.sampler_duration_seconds.count",
+    "sql_duration_seconds.bucket",
+    "transaction.allocated_memory_bytes.bucket",
+    "transaction.cache_read_hit_count.count",
+    "transaction.cache_read_miss_count.count",
+    "transaction.duration_seconds.bucket",
+    "transaction.new_redis_connections.count",
+    "transaction.view_duration.count",
 ]
 
 METRICS_TO_TEST = [
@@ -129,5 +154,5 @@ def assert_check(aggregator, metrics, use_openmetrics=False):
             GitlabCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabCheck.OK, tags=GITLAB_TAGS + CUSTOM_TAGS
         )
 
-        for metric in metrics:
-            aggregator.assert_metric("gitlab.{}".format(metric))
+    for metric in metrics:
+        aggregator.assert_metric("gitlab.{}".format(metric))

@@ -211,3 +211,25 @@ METRICS_MAP = {
     'upload_file_does_not_exist': 'upload_file_does_not_exist',
     'user_session_logins_total': 'user_session_logins_total',
 }
+
+OPENMETRICS_V2_TYPE_OVERRIDES = {
+    'gitlab_banzai_cacheless_render_real_duration_seconds_sum': 'gauge',
+}
+
+
+def construct_metrics_config(metric_map, type_overrides):
+    metrics = []
+    for raw_metric_name, metric_name in metric_map.items():
+        if raw_metric_name.endswith('_total'):
+            raw_metric_name = raw_metric_name[:-6]
+            metric_name = metric_name[:-6]
+        elif metric_name.endswith('.count'):
+            metric_name = metric_name[:-6]
+
+        config = {raw_metric_name: {'name': metric_name}}
+        if raw_metric_name in type_overrides:
+            config[raw_metric_name]['type'] = type_overrides[raw_metric_name]
+
+        metrics.append(config)
+
+    return metrics

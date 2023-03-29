@@ -9,7 +9,7 @@ from datadog_checks.dev.testing import requires_py2
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab.common import get_gitlab_version
 
-from .common import METRICS, assert_check
+from .common import V1_METRICS, V2_METRICS, assert_check
 
 pytestmark = [pytest.mark.unit]
 
@@ -24,7 +24,7 @@ def test_check(dd_run_check, aggregator, mock_data, gitlab_check, config, use_op
     dd_run_check(check)
     dd_run_check(check)
 
-    assert_check(aggregator, METRICS, use_openmetrics)
+    assert_check(aggregator, V2_METRICS if use_openmetrics else V1_METRICS, use_openmetrics)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 

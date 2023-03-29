@@ -1,13 +1,17 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
+
 import requests
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.gitlab.config_models import ConfigMixin
 
+from ..base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 from ..base.errors import CheckException
 from .common import get_gitlab_version, get_tags
+from .metrics import METRICS_MAP, OPENMETRICS_V2_TYPE_OVERRIDES, construct_metrics_config
 
 
 class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
@@ -34,8 +38,13 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
 
     def get_default_config(self):
         return {
-            "metrics": [],
+            "metrics": construct_metrics_config(METRICS_MAP, OPENMETRICS_V2_TYPE_OVERRIDES),
         }
+
+    def create_scraper(self, config):
+        new_config = copy.deepcopy(config)
+        new_config["tags"] = get_tags(config)
+        return OpenMetricsCompatibilityScraper(self, self.get_config_with_defaults(new_config))
 
     @AgentCheck.metadata_entrypoint
     def _submit_version(self):
@@ -55,7 +64,7 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                     check_type,
                     OpenMetricsBaseCheckV2.CRITICAL,
                     message=f"Got {r.status_code} when hitting {check_url}",
-                    tags=self.config.tags,
+                    tags=self._tags,
                 )
                 raise CheckException(f"Http status code {r.status_code} on check_url {check_url}")
             else:
@@ -65,17 +74,17 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                 check_type,
                 OpenMetricsBaseCheckV2.CRITICAL,
                 message=f"Timeout when hitting {check_url}",
-                tags=self.config.tags,
+                tags=self._tags,
             )
         except Exception as e:
             self.service_check(
                 check_type,
                 OpenMetricsBaseCheckV2.CRITICAL,
                 message=f"Error hitting {check_url}. Error: {e}",
-                tags=self.config.tags,
+                tags=self._tags,
             )
         else:
-            self.service_check(check_type, OpenMetricsBaseCheckV2.OK, self.config.tags)
+            self.service_check(check_type, OpenMetricsBaseCheckV2.OK, self._tags)
 
         self.log.debug("GitLab check `%s` done", check_type)
 
@@ -87,13 +96,4 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
             )
             self.instance["prometheus_url"] = self.instance["prometheus_endpoint"]
 
-        if self.instance.get("openmetrics_endpoint") and self.instance.get("prometheus_url"):
-            self.warning(
-                "`openmetrics_endpoint` and `prometheus_url` are both defined using OpenMetricsV2. "
-                "Only `openmetrics_endpoint` will be used"
-            )
-
-        if not self.instance.get("openmetrics_endpoint") and self.instance.get("prometheus_url"):
-            self.instance['openmetrics_endpoint'] = self.instance.get("prometheus_url")
-
-        self.instance["tags"] = get_tags(self.instance)
+        self._tags = get_tags(self.instance)
