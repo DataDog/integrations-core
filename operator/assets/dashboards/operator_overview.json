@@ -15,7 +15,7 @@
                         "id": 4981651194825710,
                         "definition": {
                             "type": "note",
-                            "content": "### Datadog Operator is an open source Kubernetes Operator that enables you to deploy and configure the Datadog Agent in a Kubernetes environment.\n\nThe Datadog Operator dashboard give you visibility into health and performance metrics of the Operator and overview of the resources it manages.\n\nFurther reading around the Datadog Operator and Kubernetes Controllers\n* [Datadog Operator](https://docs.datadoghq.com/containers/datadog_operator/)\n* [Kubernetes Metrics Reference](https://kubernetes.io/docs/reference/instrumentation/metrics/)\n* [Kubernetes Operator Pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)",
+                            "content": "### Datadog Operator is an open source Kubernetes Operator that enables you to deploy and configure the Datadog Agent in a Kubernetes environment.\n\nThe Datadog Operator dashboard give you visibility into health and performance metrics of the Operator and overview of the resources it manages.\n\n***Some of the graphs assume `datadog-agent` as the [DatadogAgent](https://docs.datadoghq.com/containers/kubernetes/installation/?tab=operator#deploy-an-agent-with-the-operator) resource name. They will appear empty if that's not the case.***\n\nFurther reading around the Datadog Operator and Kubernetes Controllers\n* [Datadog Operator](https://docs.datadoghq.com/containers/datadog_operator/)\n* [Kubernetes Metrics Reference](https://kubernetes.io/docs/reference/instrumentation/metrics/)\n* [Kubernetes Operator Pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)",
                             "background_color": "white",
                             "font_size": "14",
                             "text_align": "left",
@@ -1035,7 +1035,7 @@
                     {
                         "id": 7905199788293553,
                         "definition": {
-                            "title": "Reconcile Duration p99",
+                            "title": "Reconcile Duration Average Seconds",
                             "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
@@ -1050,12 +1050,17 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query2 / query1"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "p99:datadog.operator.controller_runtime_reconcile_time_seconds{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "query": "avg:datadog.operator.controller_runtime_reconcile_time_seconds.sum{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        },
+                                        {
+                                            "query": "avg:datadog.operator.controller_runtime_reconcile_time_seconds.count{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1080,7 +1085,7 @@
                     {
                         "id": 6373892084974387,
                         "definition": {
-                            "title": "Work Queue Work Duration Seconds p99",
+                            "title": "Work Queue Work Duration Average Seconds",
                             "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
@@ -1095,14 +1100,19 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1 / query2"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "p99:datadog.operator.workqueue_work_duration_seconds{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "query": "avg:datadog.operator.workqueue_work_duration_seconds.sum{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
                                             "data_source": "metrics",
                                             "name": "query1"
+                                        },
+                                        {
+                                            "query": "avg:datadog.operator.workqueue_work_duration_seconds.count{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1125,7 +1135,7 @@
                     {
                         "id": 7683573785436862,
                         "definition": {
-                            "title": "Work Queue Duration p99",
+                            "title": "Work Queue Duration Average Seconds",
                             "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
@@ -1140,14 +1150,19 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1 / query2"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "p99:datadog.operator.workqueue_queue_duration_seconds{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "query": "avg:datadog.operator.workqueue_queue_duration_seconds.sum{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
                                             "data_source": "metrics",
                                             "name": "query1"
+                                        },
+                                        {
+                                            "query": "avg:datadog.operator.workqueue_queue_duration_seconds.count{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1350,7 +1365,7 @@
                     {
                         "id": 7281557575030031,
                         "definition": {
-                            "title": "Conroller Runtime Webhook Latency Seconds p99",
+                            "title": "Conroller Runtime Webhook Latency Average Seconds",
                             "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
@@ -1365,14 +1380,19 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1 / query2"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "query": "p99:datadog.operator.controller_runtime_webhook_latency_seconds{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "query": "avg:datadog.operator.controller_runtime_webhook_latency_seconds.sum{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
                                             "data_source": "metrics",
                                             "name": "query1"
+                                        },
+                                        {
+                                            "query": "avg:datadog.operator.controller_runtime_webhook_latency_seconds.count{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1643,51 +1663,6 @@
                         }
                     },
                     {
-                        "id": 3851053723859639,
-                        "definition": {
-                            "title": "Memory % by Cluster",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:kubernetes.memory.usage_pct{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}.fill(null)",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 3,
-                            "width": 4,
-                            "height": 3
-                        }
-                    },
-                    {
                         "id": 3167946172785878,
                         "definition": {
                             "title": "Memory RSS by Cluster",
@@ -1726,7 +1701,7 @@
                             ]
                         },
                         "layout": {
-                            "x": 8,
+                            "x": 4,
                             "y": 3,
                             "width": 4,
                             "height": 3

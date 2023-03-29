@@ -24,10 +24,10 @@
     "saved_views": {}
   },
   "author": {
-    "support_email": "levan.machablishvili@datadoghq.com",
-    "name": "Levan Machablishvili",
-    "homepage": "",
-    "sales_email": ""
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
   },
   "oauth": {}
 }
