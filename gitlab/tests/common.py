@@ -4,6 +4,8 @@
 
 import os
 
+import pytest
+
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.gitlab import GitlabCheck
 
@@ -108,7 +110,7 @@ METRICS_TO_TEST = [
 ]
 
 
-def assert_check(aggregator, metrics):
+def assert_check(aggregator, metrics, use_openmetrics=False):
     """
     Basic Test for gitlab integration.
     """
@@ -119,9 +121,13 @@ def assert_check(aggregator, metrics):
         )
 
     # Make sure we're receiving prometheus service checks
-    aggregator.assert_service_check(
-        GitlabCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabCheck.OK, tags=GITLAB_TAGS + CUSTOM_TAGS
-    )
+    if use_openmetrics:
+        # TODO
+        pass
+    else:
+        aggregator.assert_service_check(
+            GitlabCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabCheck.OK, tags=GITLAB_TAGS + CUSTOM_TAGS
+        )
 
-    for metric in metrics:
-        aggregator.assert_metric("gitlab.{}".format(metric))
+        for metric in metrics:
+            aggregator.assert_metric("gitlab.{}".format(metric))

@@ -13,15 +13,16 @@ from .common import METRICS, assert_check
 pytestmark = [pytest.mark.unit]
 
 
-def test_check(dd_run_check, aggregator, mock_data, gitlab_check, config):
+@pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
+def test_check(dd_run_check, aggregator, mock_data, gitlab_check, config, use_openmetrics):
     instance = config['instances'][0]
-    instance["use_openmetrics"] = True
+    instance["use_openmetrics"] = use_openmetrics
 
     check = gitlab_check(config)
     dd_run_check(check)
     dd_run_check(check)
 
-    assert_check(aggregator, METRICS)
+    assert_check(aggregator, METRICS, use_openmetrics)
     aggregator.assert_all_metrics_covered()
 
 
