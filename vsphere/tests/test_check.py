@@ -6,7 +6,6 @@ import json
 import os
 import time
 
-
 import mock
 import pytest
 from mock import MagicMock
