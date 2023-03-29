@@ -1,4 +1,4 @@
-name: Test Agent version
+name: Test Agent release
 
 on:
   workflow_dispatch:
@@ -15,23 +15,23 @@ on:
         type: boolean
       agent-image:
         required: false
-        description: The Agent 7 image to use on Linux and macOS
-        default: ""
-        type: string
-      agent-image-py2:
-        required: false
-        description: The Agent 6 image to use on Linux and macOS
-        default: ""
+        description: Agent 7 image
+        default: "datadog/agent:7-rc"
         type: string
       agent-image-windows:
         required: false
-        description: The Agent 7 image to use on Windows
-        default: ""
+        description: Agent 7 image on Windows
+        default: "datadog/agent:7-rc-servercore"
+        type: string
+      agent-image-py2:
+        required: false
+        description: Agent 6 image
+        default: "datadog/agent:6-rc"
         type: string
       agent-image-windows-py2:
         required: false
-        description: The Agent 6 image to use on Windows
-        default: ""
+        description: Agent 6 image on Windows
+        default: "datadog/agent-dev:master-py2-win-servercore"
         type: string
 
 jobs:
