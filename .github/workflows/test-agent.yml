@@ -1,0 +1,44 @@
+name: Test Agent version
+
+on:
+  workflow_dispatch:
+    inputs:
+      agent-image:
+        required: false
+        description: The Agent 7 image to use on Linux and macOS
+        default: ""
+        type: string
+      agent-image-py2:
+        required: false
+        description: The Agent 6 image to use on Linux and macOS
+        default: ""
+        type: string
+      agent-image-windows:
+        required: false
+        description: The Agent 7 image to use on Windows
+        default: ""
+        type: string
+      agent-image-windows-py2:
+        required: false
+        description: The Agent 6 image to use on Windows
+        default: ""
+        type: string
+
+jobs:
+  test:
+    uses: ./.github/workflows/test-all.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: true
+    secrets: inherit
+
+  submit-traces:
+    needs:
+    - test
+    if: success() || failure()
+
+    uses: ./.github/workflows/submit-traces.yml
+    secrets: inherit
