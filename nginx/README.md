@@ -291,7 +291,7 @@ metadata:
     ad.datadoghq.com/nginx.instances: |
       [
         {
-          "nginx_status_url":"http://%%host%%:81/nginx_status/"
+          "nginx_status_url":"http://%%host%%:18080/nginx_status/"
         }
       ]
   labels:
@@ -312,7 +312,7 @@ metadata:
           "init_config": {},
           "instances": [
             {
-              "nginx_status_url":"http://%%host%%:81/nginx_status/"
+              "nginx_status_url":"http://%%host%%:18080/nginx_status/"
             }
           ]
         }
