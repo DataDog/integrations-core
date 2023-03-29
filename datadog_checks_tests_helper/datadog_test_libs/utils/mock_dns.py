@@ -13,6 +13,7 @@ def mock_local(src_to_dest_mapping):
         If port is None or evaluates to False, then only the host will be overridden and not the port.
     """
     import socket
+
     _orig_getaddrinfo = socket.getaddrinfo
     _orig_connect = socket.socket.connect
 

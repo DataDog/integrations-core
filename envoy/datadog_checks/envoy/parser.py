@@ -110,9 +110,7 @@ def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE, disable_legacy
             raise UnknownMetric
     # Rebuild any trailing tags
     if tag_value_builder:
-        tags = next(
-            (mapped_tags for mapped_tags in last_mapping['|_tags_|'] if tags_to_build >= len(mapped_tags)), ()
-        )
+        tags = next((mapped_tags for mapped_tags in last_mapping['|_tags_|'] if tags_to_build >= len(mapped_tags)), ())
         constructed_tag_values = construct_tag_values(tag_value_builder, len(tags))
 
         if tags:
