@@ -60,6 +60,7 @@ def test_connection_failure(aggregator, gitlab_check, bad_config):
                 'version.patch': '6',
                 'version.raw': '12.7.6',
             },
+            id="12.7.9",
         ),
         pytest.param(
             '1.4.5',
@@ -70,9 +71,11 @@ def test_connection_failure(aggregator, gitlab_check, bad_config):
                 'version.patch': '5',
                 'version.raw': '1.4.5',
             },
+            id="1.4.5",
         ),
     ],
 )
+@pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
 @pytest.mark.parametrize('enable_metadata_collection', [True, False])
 def test_check_submit_metadata(
     dd_run_check,
@@ -83,6 +86,7 @@ def test_check_submit_metadata(
     gitlab_check,
     auth_config,
     enable_metadata_collection,
+    use_openmetrics,
 ):
     with mock.patch('datadog_checks.base.utils.http.requests.Response.json') as g:
         # mock the api call so that it returns the given version
@@ -90,6 +94,10 @@ def test_check_submit_metadata(
 
         datadog_agent.reset()
         datadog_agent._config["enable_metadata_collection"] = enable_metadata_collection
+
+        if use_openmetrics:
+            instance = auth_config['instances'][0]
+            instance["openmetrics_endpoint"] = instance["prometheus_url"]
 
         dd_run_check(gitlab_check(auth_config))
 
