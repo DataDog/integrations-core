@@ -50,7 +50,7 @@ jobs:
         # +1 because fetch depth=1 is the commit itself.
         if [[ $behind_by -gt 0 ]]; then
           base_depth=$((behind_by+1))
-          echo Fetching base to depth $base_depth
+          echo "Fetching base to depth $base_depth"
           git -c protocol.version=2 fetch --no-tags --no-recurse-submodules\
             --depth=$base_depth origin ${{ github.event.pull_request.base.sha }}
         fi

@@ -38,16 +38,19 @@ jobs:
         name: "${{ inputs.artifact-name }}"
         path: captured-traces
 
-    - name: View trace queue
-      run: ls captured-traces
-
     - name: Set up trace replaying
       run: pipx install mitmproxy
 
     - name: Replay
       run: |-
-        for request in captured-traces/*; do
+        cd captured-traces
+        for request in *; do
+          # The file could be empty if there were no traces, i.e. no Agent
+          # check classes like when testing ddev or the downloader
+          if [[ -s "$request" ]]; then
+            echo "/// Replaying: $request"
             mitmdump -C "$request"
+          fi
         done
 
     - name: Show Agent status

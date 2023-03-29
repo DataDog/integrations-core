@@ -36,3 +36,4 @@ jobs:
       recommended-monitors: true
       saved-views: true
       service-checks: true
+    secrets: inherit

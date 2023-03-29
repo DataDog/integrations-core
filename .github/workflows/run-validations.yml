@@ -125,8 +125,8 @@ jobs:
     - name: Install ddev from local folder
       if: inputs.repo == 'core'
       run: |-
-        pip install ./datadog_checks_dev[cli]
-        pip install ./ddev
+        pip install -e ./datadog_checks_dev[cli]
+        pip install -e ./ddev
 
     - name: Install ddev from PyPI
       if: inputs.repo != 'core'
@@ -226,6 +226,9 @@ jobs:
     # Every validation below here is sorted by increasing runtime rather than alphabetically
     - name: Validate third-party license metadata
       if: inputs.licenses
+      env:
+        DD_GITHUB_USER: "${{ github.actor }}"
+        DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: ddev validate licenses
 
     - name: Comment PR on failure

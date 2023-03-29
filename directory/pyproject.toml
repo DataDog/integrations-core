@@ -6,6 +6,7 @@ requires = [
 ]
 build-backend = "hatchling.build"
 
+
 [project]
 name = "datadog-directory"
 description = "The Directory check"
