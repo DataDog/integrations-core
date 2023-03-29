@@ -3,11 +3,6 @@ name: Test Agent release
 on:
   workflow_dispatch:
     inputs:
-      test-py2:
-        required: false
-        description: Run Python 2 tests
-        default: true
-        type: boolean
       test-py3:
         required: false
         description: Run Python 3 tests
@@ -23,6 +18,11 @@ on:
         description: Agent 7 image on Windows
         default: "datadog/agent:7-rc-servercore"
         type: string
+      test-py2:
+        required: false
+        description: Run Python 2 tests
+        default: true
+        type: boolean
       agent-image-py2:
         required: false
         description: Agent 6 image
