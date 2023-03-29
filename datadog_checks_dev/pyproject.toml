@@ -1,103 +1,126 @@
-# NOTE: You have to use single-quoted strings in TOML for regular expressions.
-# It's the equivalent of r-strings in Python. Multiline strings are treated as
-# verbose regular expressions by Black. Use [ ] to denote a significant space
-# character.
-
-[tool.black]
-exclude = '''
-# Directories
-/(
-    \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-
-  # New integration templates
-  | datadog_checks/dev/tooling/templates
-  # Vendored third party libraries
-  | datadog_checks/[^/]+/vendor
-)/
-  |
-# Files
-(
-    # TODO: remove when upstream addresses https://github.com/DataDog/integrations-core/blob/c71e6d7204192a8002109da92452003598df2d28/datadog_checks_dev/datadog_checks/dev/tooling/signing.py#L9-L14
-    datadog_checks/dev/tooling/signing\.py$
-)
-'''
-include = '\.pyi?$'
-line-length = 120
-py36 = false
-skip-string-normalization = true
-
-[tool.mypy]
-plugins = "pydantic.mypy"
-# Follows imports and type-check imported modules.
-follow_imports = "normal"
-# Ignore errors about imported packages that don't provide type hints.
-ignore_missing_imports = true
-# Don't require that all functions be annotated, as it would create
-# a lot of noise for imported modules that aren't annotated yet.
-# Note that this is the default behavior, but we're making our choice explicit here.
-disallow_untyped_defs = false
-# Include column numbers in errors.
-show_column_numbers = true
-# Mypy path is relative to the tox execution path, it correspond here to the integration folder.
-mypy_path = "../.stubs"
-# Exclude generated files
-# TODO Remove when we drop python 2
-exclude = '.*/config_models/.*\.py$'
-
-[tool.ruff]
-exclude = [
-    ".eggs",
-    ".tox",
-    "build",
-    "compat.py",
-    "__init__.py",
-    "**/datadog_checks/dev/tooling/templates/*",
-    "**/datadog_checks/*/vendor/*",
+[build-system]
+requires = [
+    "hatchling>=0.11.2",
+    "setuptools>=66; python_version > '3.0'",
+    "setuptools; python_version < '3.0'",
 ]
-target-version = "py37"
-line-length = 120
-select = [
-  "B",
-  "C",
-  "E",
-  "F",
-  "G",
-  "W",
-  "I",
+build-backend = "hatchling.build"
+
+[project]
+name = "datadog-checks-dev"
+description = "The Datadog Checks Developer Tool"
+readme = "README.md"
+license = {text = "BSD-3-Clause"}
+keywords = [
+    "datadog",
+    "datadog agent",
+    "datadog check",
+    "dev tool",
+    "tests",
 ]
-ignore = [
-  # From legacy flake8 settings
-  "E722",
-  "E741",
-  "B015",
-  "B904",
-  # Allow non-abstract empty methods in abstract base classes
-  "B027",
-  # Ignore McCabe complexity
-  "C901",
+authors = [
+    { name = "Datadog", email = "packages@datadoghq.com" },
 ]
-unfixable = [
-  # Don't touch unused imports
-  "F401",
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3.8",
+]
+dependencies = [
+    "contextlib2; python_version < '3.0'",
+    "coverage>=5.0.3",
+    "flaky",
+    "mock",
+    "psutil",
+    "py>=1.8.2; python_version < '3.0'",  # https://github.com/ionelmc/pytest-benchmark/issues/226
+    "pytest",
+    "pytest-asyncio>=0.20.3; python_version > '3.0'",
+    "pytest-benchmark[histogram]<4.0.0; python_version < '3.0'",
+    "pytest-benchmark[histogram]>=4.0.0; python_version > '3.0'",
+    "pytest-cov>=2.6.1",
+    "pytest-memray>=1.4.0; python_version > '3.0' and (platform_system=='Linux' or platform_system=='Darwin')",
+    "pytest-mock",
+    "pyyaml>=5.4.1",
+    "requests>=2.22.0",
+    "shutilwhich==1.1.0; python_version < '3.0'",
+    "six",
+    "subprocess32==3.5.4; python_version < '3.0'",
+    "tenacity",
+]
+dynamic = [
+    "version",
 ]
 
-[tool.ruff.isort]
-known-first-party = ["{template_config['package_name']}"]
+[project.optional-dependencies]
+cli = [
+    "aiohttp",
+    "aiomultiprocess",
+    "atomicwrites",
+    "beautifulsoup4>=4.9.3",
+    "build>=0.7.0",
+    "click~=8.1",
+    "codespell",
+    "colorama",
+    "datamodel-code-generator~=0.12.0",
+    "hatch>=1.5.0",
+    "in-toto==1.0.1",
+    "jsonschema",
+    "markdown",
+    "orjson",
+    "packaging",
+    "pip-tools",
+    "pathspec>=0.10.0",
+    "platformdirs>=2.0.0a3",
+    "pyperclip>=1.7.0",
+    "pysmi>=0.3.4",
+    "securesystemslib[crypto]==0.20.1",
+    "semver>=2.13.0",
+    "tabulate>=0.8.9",
+    "toml>=0.9.4, <1.0.0",
+    "tomli>=1.1.0",
+    "tomli-w>=1.0.0",
+    "tox>=3.12.1",
+    "twine>=1.11.0",
+    "virtualenv",
+    # TODO: Remove once every check has a pyproject.toml
+    "setuptools>=66; python_version > '3.0'",
+    "setuptools; python_version < '3.0'",
+    "wheel>=0.31.0",
+]
 
-[tool.ruff.flake8-tidy-imports]
-ban-relative-imports = "all"
+[project.scripts]
+ddev = "datadog_checks.dev.tooling.cli:ddev"
 
-[tool.ruff.per-file-ignores]
-#Tests can use assertions and relative imports
-"**/tests/**/*" = ["S101", "TID252"]
-"datadog_checks/*/config_models/deprecations.py" = ["E501"]
-"tests/models/config_models/deprecations.py" = ["E501"]
+[project.entry-points.pytest11]
+datadog_checks = "datadog_checks.dev.plugin.pytest"
+
+[project.entry-points.tox]
+datadog_checks = "datadog_checks.dev.plugin.tox"
+
+[project.entry-points.hatch]
+datadog_checks = "datadog_checks.dev.plugin.hatch"
+
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
+
+[tool.hatch.version]
+path = "datadog_checks/dev/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/datadog_checks",
+    "/tests",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/datadog_checks",
+]
+dev-mode-dirs = [
+    ".",
+]
