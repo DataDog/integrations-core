@@ -1,5 +1,7 @@
 """
-This script requires Python 3.11 or later and must not use any external dependencies.
+Running this script by itself requires Python 3.11 or later and must not use any external dependencies.
+
+The logic is also imported by ddev to perform the CI validation on 3.8 which works because dependencies exist.
 """
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
