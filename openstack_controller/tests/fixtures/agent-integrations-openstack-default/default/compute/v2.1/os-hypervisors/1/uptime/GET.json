@@ -1,0 +1,9 @@
+{
+  "hypervisor": {
+    "id": 1,
+    "hypervisor_hostname": "agent-integrations-openstack-default",
+    "state": "up",
+    "status": "enabled",
+    "uptime": " 14:38:59 up 13 days,  2:27,  0 users,  load average: 0.00, 0.02, 0.03\n"
+  }
+}

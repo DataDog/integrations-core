@@ -8,7 +8,9 @@ class BaremetalRest:
         self.endpoint = endpoint
 
     def get_response_time(self):
-        response = self.http.get('{}'.format(self.endpoint))
+        url = '{}'.format(self.endpoint)
+        self.log.debug("GET %s", url)
+        response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return response.elapsed.total_seconds() * 1000

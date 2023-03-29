@@ -61,7 +61,7 @@ process_endpoint() {
 }
 
 os_ip=$(gcloud compute instances describe "$1" --format='get(networkInterfaces[0].accessConfigs[0].natIP)' --project "datadog-integrations-lab" --zone "europe-west4-a")
-root_folder="tests/fixtures/${2:-"default"}"
+root_folder="tests/fixtures/"$1"/${2:-"default"}"
 microversion_header=""
 if [ $# -eq 2 ]
   then

@@ -11,11 +11,9 @@ pytestmark = [pytest.mark.unit]
 
 
 def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
-    monkeypatch.setattr(
-        'requests.get',
-        mock.MagicMock(side_effect=MockHttp(defaults={'networking': MockResponse(status_code=500)}).get),
-    )
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=MockHttp().post))
+    http = MockHttp("agent-integrations-openstack-default", defaults={'networking': MockResponse(status_code=500)})
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)

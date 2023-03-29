@@ -409,7 +409,8 @@ DEFAULT_METRICS = [
 
 
 class MockHttp:
-    def __init__(self, **kwargs):
+    def __init__(self, host, **kwargs):
+        self._host = host
         self._exceptions = kwargs.get('exceptions')
         self._defaults = kwargs.get('defaults')
         self._replace = kwargs.get('replace')
@@ -430,6 +431,7 @@ class MockHttp:
             file_path = os.path.join(
                 get_here(),
                 'fixtures',
+                self._host,
                 nova_microversion_header if nova_microversion_header is not None else "default",
                 subpath,
                 'get.json',
@@ -458,6 +460,7 @@ class MockHttp:
                 file_path = os.path.join(
                     get_here(),
                     'fixtures',
+                    self._host,
                     nova_microversion_header if nova_microversion_header is not None else "default",
                     *path_parts,
                     f'{project_id}.json',
@@ -467,6 +470,7 @@ class MockHttp:
                 file_path = os.path.join(
                     get_here(),
                     'fixtures',
+                    self._host,
                     nova_microversion_header if nova_microversion_header is not None else "default",
                     *path_parts,
                     'unscoped.json',
@@ -476,6 +480,7 @@ class MockHttp:
             file_path = os.path.join(
                 get_here(),
                 'fixtures',
+                self._host,
                 nova_microversion_header if nova_microversion_header is not None else "default",
                 subpath,
             )

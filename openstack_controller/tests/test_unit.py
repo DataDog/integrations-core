@@ -14,10 +14,9 @@ pytestmark = [pytest.mark.unit]
 
 
 def test_connect_exception(aggregator, dd_run_check, instance, caplog, monkeypatch):
-    monkeypatch.setattr(
-        'requests.get', mock.MagicMock(side_effect=MockHttp(exceptions={'identity/v3': Exception()}).get)
-    )
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=MockHttp().post))
+    http = MockHttp("agent-integrations-openstack-default", exceptions={'identity/v3': Exception()})
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
     with pytest.raises(Exception):
         check = OpenStackControllerCheck('test', {}, [instance])
@@ -31,10 +30,9 @@ def test_connect_exception(aggregator, dd_run_check, instance, caplog, monkeypat
 
 
 def test_connect_http_error(aggregator, dd_run_check, instance, caplog, monkeypatch):
-    monkeypatch.setattr(
-        'requests.get', mock.MagicMock(side_effect=MockHttp(exceptions={'identity/v3': HTTPError()}).get)
-    )
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=MockHttp().post))
+    http = MockHttp("agent-integrations-openstack-default", exceptions={'identity/v3': HTTPError()})
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
@@ -47,8 +45,9 @@ def test_connect_http_error(aggregator, dd_run_check, instance, caplog, monkeypa
 
 
 def test_connect_ok(aggregator, dd_run_check, instance, monkeypatch):
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=MockHttp().get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=MockHttp().post))
+    http = MockHttp("agent-integrations-openstack-default")
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)

@@ -58,10 +58,6 @@ class OpenStackControllerCheck(AgentCheck):
             self.warning(e)
             self.log.error("HTTPError while creating api: %s", e)
             self.service_check('openstack.keystone.api.up', AgentCheck.CRITICAL, message=str(e), tags=tags)
-            # self.service_check('openstack.nova.api.up', AgentCheck.UNKNOWN)
-            # self.service_check('openstack.neutron.api.up', AgentCheck.UNKNOWN)
-            # self.service_check('openstack.ironic.api.up', AgentCheck.UNKNOWN)
-            # self.service_check('openstack.octavia.api.up', AgentCheck.UNKNOWN)
         except Exception as e:
             self.warning("Exception while creating api: %s", e)
             self.service_check('openstack.keystone.api.up', AgentCheck.CRITICAL, message=str(e), tags=tags)
@@ -82,8 +78,8 @@ class OpenStackControllerCheck(AgentCheck):
         project_tags = _create_project_tags(project)
         self._report_compute_metrics(api, project_id, tags + project_tags)
         self._report_network_metrics(api, project_id, tags + project_tags)
-        self._report_baremetal_metrics(api, project_id, project_tags)
-        self._report_load_balancer_metrics(api, project_id, project_tags)
+        self._report_baremetal_metrics(api, project_id, tags + project_tags)
+        self._report_load_balancer_metrics(api, project_id, tags + project_tags)
 
     def _report_compute_metrics(self, api, project_id, project_tags):
         try:
