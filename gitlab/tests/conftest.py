@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import copy
 import os
 from time import sleep
 
@@ -11,8 +11,11 @@ import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.gitlab import GitlabCheck
 
 from .common import (
+    AUTH_CONFIG,
+    BAD_CONFIG,
     CONFIG,
     GITLAB_LOCAL_PORT,
     GITLAB_LOCAL_PROMETHEUS_PORT,
@@ -20,6 +23,7 @@ from .common import (
     GITLAB_TEST_PASSWORD,
     GITLAB_URL,
     HERE,
+    LEGACY_CONFIG,
 )
 
 
@@ -63,3 +67,33 @@ def mock_data():
         ),
     ):
         yield
+
+
+@pytest.fixture()
+def gitlab_check():
+    def create_check(config, check_id="test:123"):
+        check = GitlabCheck('gitlab', config["init_config"], config["instances"])
+        check.check_id = check_id
+        return check
+
+    return create_check
+
+
+@pytest.fixture()
+def config():
+    return copy.deepcopy(CONFIG)
+
+
+@pytest.fixture()
+def legacy_config():
+    return copy.deepcopy(LEGACY_CONFIG)
+
+
+@pytest.fixture()
+def bad_config():
+    return copy.deepcopy(BAD_CONFIG)
+
+
+@pytest.fixture()
+def auth_config():
+    return copy.deepcopy(AUTH_CONFIG)
