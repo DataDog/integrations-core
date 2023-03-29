@@ -7,10 +7,11 @@ import requests
 from six import PY2
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException, ConfigurationError
 
+from .common import get_gitlab_version
 from .metrics import METRICS_MAP
 
 
@@ -129,22 +130,13 @@ class GitlabCheck(OpenMetricsBaseCheck):
 
         return ['gitlab_host:{}'.format(gitlab_host), 'gitlab_port:{}'.format(gitlab_port)] + custom_tags
 
+    @AgentCheck.metadata_entrypoint
     def submit_version(self):
-        if not self.is_metadata_collection_enabled():
-            return
-        try:
-            if self.token is None:
-                self.log.debug(
-                    "Gitlab token not found; please add one in your config to enable version metadata collection."
-                )
-                return
-            param = {'access_token': self.token}
-            response = self.http.get("{}/api/v4/version".format(self.url), params=param)
-            version = response.json().get('version')
-            self.set_metadata('version', version)
-            self.log.debug("Set version %s for Gitlab", version)
-        except Exception as e:
-            self.log.warning("Gitlab version metadata not collected: %s", e)
+        version = get_gitlab_version(self.http, self.log, self.url, self.token)
+
+        if version:
+            self.log.debug("Set version %s for GitLab", version)
+            self.set_metadata("version", version)
 
     # Validates an health endpoint
     #
