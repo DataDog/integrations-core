@@ -107,56 +107,6 @@ METRICS_TO_TEST = [
     "sql_duration_seconds.sum",
 ]
 
-LEGACY_CONFIG = {
-    'init_config': {'allowed_metrics': ALLOWED_METRICS},
-    'instances': [
-        {
-            'prometheus_endpoint': PROMETHEUS_ENDPOINT,
-            'gitlab_url': GITLAB_URL,
-            'disable_ssl_validation': True,
-            'tags': list(CUSTOM_TAGS),
-        }
-    ],
-}
-
-CONFIG = {
-    'init_config': {},
-    'instances': [
-        {
-            'prometheus_endpoint': GITLAB_PROMETHEUS_ENDPOINT,
-            'gitlab_url': GITLAB_URL,
-            'send_distribution_counts_as_monotonic': True,
-            'send_monotonic_counter': True,
-            'disable_ssl_validation': True,
-            'tags': list(CUSTOM_TAGS),
-        }
-    ],
-}
-
-AUTH_CONFIG = {
-    'init_config': {'allowed_metrics': ALLOWED_METRICS},
-    'instances': [
-        {
-            'prometheus_endpoint': PROMETHEUS_ENDPOINT,
-            'gitlab_url': GITLAB_URL,
-            'disable_ssl_validation': True,
-            'api_token': GITLAB_TEST_API_TOKEN,
-        }
-    ],
-}
-
-BAD_CONFIG = {
-    'init_config': {'allowed_metrics': ALLOWED_METRICS},
-    'instances': [
-        {
-            'prometheus_endpoint': 'http://{}:1234/-/metrics'.format(HOST),
-            'gitlab_url': 'http://{}:1234/ci'.format(HOST),
-            'disable_ssl_validation': True,
-            'tags': list(CUSTOM_TAGS),
-        }
-    ],
-}
-
 
 def assert_check(aggregator, metrics):
     """
