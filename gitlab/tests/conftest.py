@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import copy
 import os
 from time import sleep
 
@@ -11,16 +11,35 @@ import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.gitlab import GitlabCheck
 
 from .common import (
-    CONFIG,
+    ALLOWED_METRICS,
+    CUSTOM_TAGS,
     GITLAB_LOCAL_PORT,
     GITLAB_LOCAL_PROMETHEUS_PORT,
     GITLAB_PROMETHEUS_ENDPOINT,
+    GITLAB_TEST_API_TOKEN,
     GITLAB_TEST_PASSWORD,
     GITLAB_URL,
     HERE,
+    HOST,
+    PROMETHEUS_ENDPOINT,
 )
+
+CONFIG = {
+    'init_config': {},
+    'instances': [
+        {
+            'prometheus_endpoint': GITLAB_PROMETHEUS_ENDPOINT,
+            'gitlab_url': GITLAB_URL,
+            'send_distribution_counts_as_monotonic': True,
+            'send_monotonic_counter': True,
+            'disable_ssl_validation': True,
+            'tags': CUSTOM_TAGS,
+        }
+    ],
+}
 
 
 @pytest.fixture(scope="session")
@@ -63,3 +82,63 @@ def mock_data():
         ),
     ):
         yield
+
+
+@pytest.fixture()
+def gitlab_check():
+    def create_check(config, check_id="test:123"):
+        check = GitlabCheck('gitlab', config["init_config"], config["instances"])
+        check.check_id = check_id
+        return check
+
+    return create_check
+
+
+@pytest.fixture()
+def config():
+    return copy.deepcopy(CONFIG)
+
+
+@pytest.fixture()
+def legacy_config():
+    return {
+        'init_config': {'allowed_metrics': ALLOWED_METRICS},
+        'instances': [
+            {
+                'prometheus_endpoint': PROMETHEUS_ENDPOINT,
+                'gitlab_url': GITLAB_URL,
+                'disable_ssl_validation': True,
+                'tags': CUSTOM_TAGS,
+            }
+        ],
+    }
+
+
+@pytest.fixture()
+def bad_config():
+    return {
+        'init_config': {'allowed_metrics': ALLOWED_METRICS},
+        'instances': [
+            {
+                'prometheus_endpoint': 'http://{}:1234/-/metrics'.format(HOST),
+                'gitlab_url': 'http://{}:1234/ci'.format(HOST),
+                'disable_ssl_validation': True,
+                'tags': CUSTOM_TAGS,
+            }
+        ],
+    }
+
+
+@pytest.fixture()
+def auth_config():
+    return {
+        'init_config': {'allowed_metrics': ALLOWED_METRICS},
+        'instances': [
+            {
+                'prometheus_endpoint': PROMETHEUS_ENDPOINT,
+                'gitlab_url': GITLAB_URL,
+                'disable_ssl_validation': True,
+                'api_token': GITLAB_TEST_API_TOKEN,
+            }
+        ],
+    }
