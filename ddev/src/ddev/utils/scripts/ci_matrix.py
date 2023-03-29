@@ -117,6 +117,7 @@ def get_changed_files(*, ref: str, local: bool) -> list[str]:
         # Untracked
         changed_files.update(git('ls-files', '--others', '--exclude-standard').splitlines())
 
+    # Sort for nicer display when using the --verbose flag
     return sorted(changed_files, key=lambda path: (path, -path.count('/')))
 
 
@@ -181,23 +182,23 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
             continue
 
         manifest = read_manifest(root, target)
-        platforms = matrix_overrides.get('platforms', [])
-        if not platforms:
+        platform_ids = matrix_overrides.get('platforms', [])
+        if not platform_ids:
             if manifest:
-                platforms = []
+                platform_ids = []
                 for classifier_tag in manifest['tile']['classifier_tags']:
                     key, _, value = classifier_tag.partition('::')
                     if key == 'Supported OS':
-                        platforms.append(value.lower())
+                        platform_ids.append(value.lower())
 
                 # Run only on Linux if not exclusive to Windows
-                if platforms != ['windows']:
-                    platforms = ['linux']
+                if platform_ids != ['windows']:
+                    platform_ids = ['linux']
             else:
-                platforms = ['linux']
+                platform_ids = ['linux']
 
         runners = matrix_overrides.get('runners', {})
-        for platform_id in platforms:
+        for platform_id in platform_ids:
             if platform_id not in PLATFORMS:
                 raise ValueError(f'Unsupported platform for `{target}`: {platform_id}')
 
@@ -215,7 +216,7 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
             else:
                 config['name'] = target
 
-            if len(platforms) > 1:
+            if len(platform_ids) > 1:
                 config['name'] += f' on {platform.name}'
 
             supported_python_versions = []
