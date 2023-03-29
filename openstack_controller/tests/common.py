@@ -412,6 +412,7 @@ class MockHttp:
     def __init__(self, **kwargs):
         self._exceptions = kwargs.get('exceptions')
         self._defaults = kwargs.get('defaults')
+        self._replace = kwargs.get('replace')
 
     def get(self, url, *args, **kwargs):
         parsed_url = urlparse(url)
@@ -433,10 +434,10 @@ class MockHttp:
                 subpath,
                 'get.json',
             )
-            return MockResponse(
-                file_path=file_path,
-                status_code=200,
-            )
+            response = MockResponse(file_path=file_path, status_code=200).json()
+            if self._replace and subpath in self._replace:
+                response = self._replace[subpath](response)
+            return MockResponse(json_data=response, status_code=200)
 
     def post(self, url, *args, **kwargs):
         parsed_url = urlparse(url)
@@ -478,4 +479,7 @@ class MockHttp:
                 nova_microversion_header if nova_microversion_header is not None else "default",
                 subpath,
             )
-        return MockResponse(file_path=file_path, status_code=200, headers=headers)
+        response = MockResponse(file_path=file_path, status_code=200).json()
+        if self._replace and subpath in self._replace:
+            response.update(self._replace)
+        return MockResponse(json_data=response, status_code=200, headers=headers)

@@ -268,3 +268,63 @@ def test_latest_flavor_metrics(aggregator, dd_run_check, instance_nova_microvers
                 'flavor_name:m1.tiny',
             ],
         )
+
+
+def test_hypervisor_service_check_up(aggregator, dd_run_check, instance, monkeypatch):
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=MockHttp().get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=MockHttp().post))
+
+    project_tags = [
+        'keystone_server:{}'.format(instance["keystone_server_url"]),
+        'project_id:6e39099cccde4f809b003d9e0dd09304',
+        'project_name:admin',
+    ]
+    tags = project_tags + [
+        'aggregate:my-aggregate',
+        'availability_zone:availability-zone',
+        'hypervisor:agent-integrations-openstack-default',
+        'hypervisor_id:1',
+        'status:enabled',
+        'virt_type:QEMU',
+    ]
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_service_check('openstack.nova.hypervisor.up', status=AgentCheck.OK, tags=tags)
+
+
+def test_hypervisor_service_check_down(aggregator, dd_run_check, instance, monkeypatch):
+    monkeypatch.setattr(
+        'requests.get',
+        mock.MagicMock(
+            side_effect=MockHttp(
+                replace={
+                    'compute/v2.1/os-hypervisors/detail?with_servers=true': lambda d: {
+                        **d,
+                        **{
+                            'hypervisors': d['hypervisors'][:0]
+                            + [{**d['hypervisors'][0], **{'state': 'down'}}]
+                            + d['hypervisors'][1:]
+                        },
+                    }
+                }
+            ).get
+        ),
+    )
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=MockHttp().post))
+
+    project_tags = [
+        'keystone_server:{}'.format(instance["keystone_server_url"]),
+        'project_id:6e39099cccde4f809b003d9e0dd09304',
+        'project_name:admin',
+    ]
+    tags = project_tags + [
+        'aggregate:my-aggregate',
+        'availability_zone:availability-zone',
+        'hypervisor:agent-integrations-openstack-default',
+        'hypervisor_id:1',
+        'status:enabled',
+        'virt_type:QEMU',
+    ]
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_service_check('openstack.nova.hypervisor.up', status=AgentCheck.CRITICAL, tags=tags)
