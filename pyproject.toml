@@ -60,8 +60,8 @@ exclude = [
     "build",
     "compat.py",
     "__init__.py",
-    "datadog_checks_dev/datadog_checks/dev/tooling/templates/*",
-    "*/datadog_checks/*/vendor/*",
+    "**/datadog_checks/dev/tooling/templates/*",
+    "**/datadog_checks/*/vendor/*",
 ]
 target-version = "py37"
 line-length = 120
@@ -101,4 +101,3 @@ ban-relative-imports = "all"
 "**/tests/**/*" = ["S101", "TID252"]
 "datadog_checks/*/config_models/deprecations.py" = ["E501"]
 "tests/models/config_models/deprecations.py" = ["E501"]
-
