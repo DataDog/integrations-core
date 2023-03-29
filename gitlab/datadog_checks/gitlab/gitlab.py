@@ -5,13 +5,12 @@ from copy import deepcopy
 
 import requests
 from six import PY2
-from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException, ConfigurationError
 
-from .common import get_gitlab_version
+from .common import get_gitlab_version, get_tags
 from .metrics import METRICS_MAP
 
 
@@ -102,7 +101,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
         # gitlab uses 'prometheus_endpoint' and not 'prometheus_url', so we have to rename the key
         gitlab_instance['prometheus_url'] = instance.get('prometheus_url', instance.get('prometheus_endpoint'))
 
-        self._tags = self._check_tags(gitlab_instance)
+        self._tags = get_tags(gitlab_instance)
 
         gitlab_instance.update(
             {
@@ -117,18 +116,6 @@ class GitlabCheck(OpenMetricsBaseCheck):
         )
 
         return gitlab_instance
-
-    def _check_tags(self, instance):
-        custom_tags = instance.get('tags', [])
-
-        url = instance.get('gitlab_url')
-
-        # creating tags for host and port
-        parsed_url = urlparse(url)
-        gitlab_host = parsed_url.hostname
-        gitlab_port = 443 if parsed_url.scheme == 'https' else (parsed_url.port or 80)
-
-        return ['gitlab_host:{}'.format(gitlab_host), 'gitlab_port:{}'.format(gitlab_port)] + custom_tags
 
     @AgentCheck.metadata_entrypoint
     def submit_version(self):

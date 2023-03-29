@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import os
 
 from datadog_checks.base.utils.common import get_docker_hostname
@@ -108,7 +107,7 @@ METRICS_TO_TEST = [
 ]
 
 
-def assert_check(aggregator, metrics):
+def assert_check(aggregator, metrics, use_openmetrics=False):
     """
     Basic Test for gitlab integration.
     """
@@ -119,9 +118,16 @@ def assert_check(aggregator, metrics):
         )
 
     # Make sure we're receiving prometheus service checks
-    aggregator.assert_service_check(
-        GitlabCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabCheck.OK, tags=GITLAB_TAGS + CUSTOM_TAGS
-    )
+    if use_openmetrics:
+        aggregator.assert_service_check(
+            'gitlab.openmetrics.health',
+            status=GitlabCheck.OK,
+            tags=GITLAB_TAGS + CUSTOM_TAGS + ['endpoint:{}'.format(GITLAB_PROMETHEUS_ENDPOINT)],
+        )
+    else:
+        aggregator.assert_service_check(
+            GitlabCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabCheck.OK, tags=GITLAB_TAGS + CUSTOM_TAGS
+        )
 
-    for metric in metrics:
-        aggregator.assert_metric("gitlab.{}".format(metric))
+        for metric in metrics:
+            aggregator.assert_metric("gitlab.{}".format(metric))
