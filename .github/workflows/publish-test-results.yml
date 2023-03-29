@@ -4,6 +4,7 @@ on:
   workflow_run:
     workflows:
     - PR
+    - PR All
     types:
     - completed
 
