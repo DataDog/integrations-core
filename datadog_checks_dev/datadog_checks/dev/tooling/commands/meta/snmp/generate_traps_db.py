@@ -133,9 +133,7 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
         if not os.path.isdir(mibs_sources_dir):
             os.mkdir(mibs_sources_dir)
 
-        mib_sources = (
-            sorted({pathlib.Path(x).parent.as_uri() for x in mib_files if os.path.sep in x}) + mib_sources
-        )
+        mib_sources = sorted({pathlib.Path(x).parent.as_uri() for x in mib_files if os.path.sep in x}) + mib_sources
 
         mib_files = [os.path.basename(x) for x in mib_files]
         searchers = [AnyFileSearcher(compiled_mibs_sources).setOptions(exts=['.json'])]
