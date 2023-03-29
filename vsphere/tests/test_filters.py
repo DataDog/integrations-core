@@ -7,6 +7,7 @@ import pytest
 from mock import MagicMock
 from pyVmomi import vim
 
+
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.config import VSphereConfig
