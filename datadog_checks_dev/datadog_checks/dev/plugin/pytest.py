@@ -374,7 +374,7 @@ def pytest_collection_modifyitems(config, items):
     if PY2:
         for option in ("--memray",):
             if config.getoption(option):
-                warnings.warn(
+                warnings.warn(  # noqa: B028
                     "`{}` option ignored as it's not supported for py2 environments.".format(option)
                 )  # noqa: B028, E501
 
