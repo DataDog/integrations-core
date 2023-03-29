@@ -83,12 +83,12 @@ class OpenStackControllerCheck(AgentCheck):
 
     def _report_compute_metrics(self, api, project_id, project_tags):
         try:
-            self._report_compute_response_time(api, project_id, project_tags)
-            self._report_compute_limits(api, project_id, project_tags)
-            self._report_compute_quotas(api, project_id, project_tags)
-            self._report_compute_servers(api, project_id, project_tags)
-            self._report_compute_flavors(api, project_id, project_tags)
-            self._report_compute_hypervisors(api, project_id, project_tags)
+            if self._report_compute_response_time(api, project_id, project_tags):
+                self._report_compute_limits(api, project_id, project_tags)
+                self._report_compute_quotas(api, project_id, project_tags)
+                self._report_compute_servers(api, project_id, project_tags)
+                self._report_compute_flavors(api, project_id, project_tags)
+                self._report_compute_hypervisors(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting compute metrics: %s", e)
@@ -102,8 +102,10 @@ class OpenStackControllerCheck(AgentCheck):
         if response_time is not None:
             self.gauge('openstack.nova.response_time', response_time, tags=project_tags)
             self.service_check('openstack.nova.api.up', AgentCheck.OK, tags=project_tags)
+            return True
         else:
             self.service_check('openstack.nova.api.up', AgentCheck.UNKNOWN, tags=project_tags)
+            return False
 
     def _report_compute_limits(self, api, project_id, project_tags):
         compute_limits = api.get_compute_limits(project_id)
@@ -185,20 +187,25 @@ class OpenStackControllerCheck(AgentCheck):
 
     def _report_network_metrics(self, api, project_id, project_tags):
         try:
-            self._report_network_response_time(api, project_id, project_tags)
-            self._report_network_quotas(api, project_id, project_tags)
+            if self._report_network_response_time(api, project_id, project_tags):
+                self._report_network_quotas(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting network metrics: %s", e)
             self.service_check('openstack.neutron.api.up', AgentCheck.CRITICAL, tags=project_tags)
+        except Exception as e:
+            self.warning("Exception while reporting network metrics: %s", e)
 
     def _report_network_response_time(self, api, project_id, project_tags):
         response_time = api.get_network_response_time(project_id)
         self.log.debug("network response time: %s", response_time)
         if response_time is not None:
             self.gauge('openstack.neutron.response_time', response_time, tags=project_tags)
+            self.service_check('openstack.neutron.api.up', AgentCheck.OK, tags=project_tags)
+            return True
         else:
-            self.service_check('openstack.neutron.api.up', AgentCheck.UNKNOWN)
+            self.service_check('openstack.neutron.api.up', AgentCheck.UNKNOWN, tags=project_tags)
+            return False
 
     def _report_network_quotas(self, api, project_id, project_tags):
         network_quotas = api.get_network_quotas(project_id)
@@ -213,14 +220,19 @@ class OpenStackControllerCheck(AgentCheck):
             self.warning(e)
             self.log.error("HTTPError while reporting baremetal metrics: %s", e)
             self.service_check('openstack.ironic.api.up', AgentCheck.CRITICAL, tags=project_tags)
+        except Exception as e:
+            self.warning("Exception while reporting baremetal metrics: %s", e)
 
     def _report_baremetal_response_time(self, api, project_id, project_tags):
         response_time = api.get_baremetal_response_time(project_id)
         self.log.debug("baremetal response time: %s", response_time)
         if response_time is not None:
             self.gauge('openstack.ironic.response_time', response_time, tags=project_tags)
+            self.service_check('openstack.ironic.api.up', AgentCheck.OK, tags=project_tags)
+            return True
         else:
-            self.service_check('openstack.ironic.api.up', AgentCheck.UNKNOWN)
+            self.service_check('openstack.ironic.api.up', AgentCheck.UNKNOWN, tags=project_tags)
+            return False
 
     def _report_load_balancer_metrics(self, api, project_id, project_tags):
         try:
@@ -229,11 +241,16 @@ class OpenStackControllerCheck(AgentCheck):
             self.warning(e)
             self.log.error("HTTPError while reporting load balancer metrics: %s", e)
             self.service_check('openstack.octavia.api.up', AgentCheck.CRITICAL, tags=project_tags)
+        except Exception as e:
+            self.warning("Exception while reporting load balancer metrics: %s", e)
 
     def _report_load_balancer_response_time(self, api, project_id, project_tags):
         response_time = api.get_load_balancer_response_time(project_id)
         self.log.debug("load balancer response time: %s", response_time)
-        if response_time:
+        if response_time is not None:
             self.gauge('openstack.octavia.response_time', response_time, tags=project_tags)
+            self.service_check('openstack.octavia.api.up', AgentCheck.OK, tags=project_tags)
+            return True
         else:
-            self.service_check('openstack.octavia.api.up', AgentCheck.UNKNOWN)
+            self.service_check('openstack.octavia.api.up', AgentCheck.UNKNOWN, tags=project_tags)
+            return False

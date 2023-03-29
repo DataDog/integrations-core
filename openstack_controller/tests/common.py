@@ -486,5 +486,5 @@ class MockHttp:
             )
         response = MockResponse(file_path=file_path, status_code=200).json()
         if self._replace and subpath in self._replace:
-            response.update(self._replace)
+            response = self._replace[subpath](response)
         return MockResponse(json_data=response, status_code=200, headers=headers)

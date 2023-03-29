@@ -78,10 +78,12 @@ if [ $? -eq 0 ]
   then
     projects=$RESPONSE
 fi
+# Component endpoints
 process_endpoint --endpoint="/compute/v2.1"
 process_endpoint --port=9696 --endpoint="/networking/"
 process_endpoint --endpoint="/baremetal"
 process_endpoint --endpoint="/load-balancer"
+# Nova
 for project_id in $(echo "$projects" | jq -r '.projects[]' | jq -r '.id'); do
   printf "\033[32m%-6s\033[0m Project id: %s\n" "INFO" "$project_id"
   data=$(echo "{'auth': {'identity': {'methods': ['password'], 'password': {'user': {'name': 'admin', 'domain': { 'id': 'default' }, 'password': 'password'}}}, 'scope': {'project': {'id': '$project_id'}}}}" | sed "s/'/\"/g")
@@ -103,4 +105,10 @@ if [[ $num_uptime -eq 0 ]]; then
   done
 fi
 process_endpoint --endpoint="/compute/v2.1/flavors/detail"
+
+# Ironic
+
+
+# Octavia
+
 rm headers
