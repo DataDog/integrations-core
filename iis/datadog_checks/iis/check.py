@@ -107,7 +107,10 @@ class CompatibilityPerfObject(PerfObject):
         self.service_check_counter = service_check_counter
         self.instance_type = instance_type
         self.instance_service_check_name = f'{self.instance_type}_up'
-        self.instances_included = set(instances_included)
+        if isinstance(instances_included, dict):
+            self.instances_included = set(instances_included.get('include', []))
+        else:
+            self.instances_included = set(instances_included)
 
         # Resets during refreshes
         self.instances_unseen = set()

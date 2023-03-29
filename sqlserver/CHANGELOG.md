@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 11.0.2 / 2023-03-21
+
+* [Fixed] Increase command_timeout default from 5s to 10s to prevent timeouts on instances with large SQL caches. See [#14195](https://github.com/DataDog/integrations-core/pull/14195).
+
 ## 11.0.1 / 2023-03-08
 
 * [Fixed] Do not double emit instance metrics when autodiscovery is enabled. See [#14115](https://github.com/DataDog/integrations-core/pull/14115).

@@ -50,7 +50,8 @@
       "Datacenter Overview": "assets/dashboards/datacenter_overview.json"
     },
     "monitors": {
-      "[SNMP] Device Down Alert": "assets/monitors/device_down.json"
+      "[SNMP] Device Down Alert": "assets/monitors/device_down.json",
+      "[SNMP] Device Unreachable Alert": "assets/monitors/device_unreachable.json"
     }
   }
 }

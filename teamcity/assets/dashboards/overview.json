@@ -1,1319 +1,1342 @@
 {
-	"title": "TeamCity Overview",
-	"description": "## TeamCity Integration \nThis dashboard provides an overview of your TeamCity environment. It monitors resource utilization, provides information on build statuses and progress, and gives you insight into various other observability measures.\n\nFor more information, please reference:\n\n* [TeamCity Integration Doc](https://docs.datadoghq.com/integrations/teamcity/?tab=host)\n* [TeamCity Blog by Datadog](https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog/)\n",
-	"widgets": [
-		{
-			"id": 4773422341623554,
-			"definition": {
-				"title": "TeamCity Overview",
-				"type": "group",
-				"banner_img": "https://static.datadoghq.com/static/images/logos/teamcity_large.svg",
-				"show_title": false,
-				"layout_type": "ordered",
-				"widgets": [
-					{
-						"id": 79549173630110,
-						"definition": {
-							"type": "note",
-							"content": "## TeamCity\nThis dashboard provides an overview of your TeamCity environment. It monitors resource utilization, provides information on build statuses and progress, and gives you insight into various other observability measures. \n\n***Note:*** \nThe current time periods for most time series based measures are set to the past 1 week. For measures like service checks, the time period is set to 1 day. The agent collects data every 15 seconds. ",
-							"background_color": "white",
-							"font_size": "12",
-							"text_align": "left",
-							"vertical_align": "top",
-							"show_tick": false,
-							"tick_pos": "50%",
-							"tick_edge": "left",
-							"has_padding": true
-						},
-						"layout": {
-							"x": 0,
-							"y": 0,
-							"width": 3,
-							"height": 3
-						}
-					},
-					{
-						"id": 2766800039757678,
-						"definition": {
-							"type": "note",
-							"content": "## Useful Links\n* [TeamCity Integration Doc](https://docs.datadoghq.com/integrations/teamcity/?tab=host)\n* [TeamCity Blog by Datadog](https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog/)",
-							"background_color": "white",
-							"font_size": "12",
-							"text_align": "left",
-							"vertical_align": "top",
-							"show_tick": false,
-							"tick_pos": "50%",
-							"tick_edge": "left",
-							"has_padding": true
-						},
-						"layout": {
-							"x": 3,
-							"y": 0,
-							"width": 3,
-							"height": 3
-						}
-					}
-				],
-				"template_variables": []
-			},
-			"layout": {
-				"x": 0,
-				"y": 0,
-				"width": 6,
-				"height": 6
-			}
-		},
-		{
-			"id": 3674468399117316,
-			"definition": {
-				"title": "Overview",
-				"type": "group",
-				"background_color": "vivid_green",
-				"show_title": true,
-				"layout_type": "ordered",
-				"widgets": [
-					{
-						"id": 6039693779520186,
-						"definition": {
-							"type": "note",
-							"content": "This overview combines service checks along with a monitor group so you can view all active alerts and system issues in one place. A failed build status within the Status check is broken down by the Build Problems check.",
-							"background_color": "green",
-							"font_size": "14",
-							"text_align": "left",
-							"vertical_align": "top",
-							"show_tick": false,
-							"tick_pos": "50%",
-							"tick_edge": "left",
-							"has_padding": true
-						},
-						"layout": {
-							"x": 0,
-							"y": 0,
-							"width": 6,
-							"height": 1
-						}
-					},
-					{
-						"id": 4665487199277634,
-						"definition": {
-							"title": "OpenMetrics Health",
-							"title_size": "16",
-							"title_align": "left",
-							"time": {
-								"live_span": "1d"
-							},
-							"type": "check_status",
-							"check": "teamcity.openmetrics.health",
-							"grouping": "cluster",
-							"group_by": [],
-							"tags": [
-								"*"
-							]
-						},
-						"layout": {
-							"x": 0,
-							"y": 1,
-							"width": 2,
-							"height": 1
-						}
-					},
-					{
-						"id": 5125788107287596,
-						"definition": {
-							"title": "Monitors Summary",
-							"type": "manage_status",
-							"display_format": "countsAndList",
-							"color_preference": "text",
-							"hide_zero_counts": true,
-							"query": "tag:(integration:teamcity) $host $build_config $project_id $type",
-							"sort": "status,asc",
-							"count": 50,
-							"start": 0,
-							"summary_type": "groups",
-							"show_priority": false,
-							"show_last_triggered": false
-						},
-						"layout": {
-							"x": 2,
-							"y": 1,
-							"width": 4,
-							"height": 4
-						}
-					},
-					{
-						"id": 6470283539452220,
-						"definition": {
-							"title": "Build Status",
-							"title_size": "16",
-							"title_align": "left",
-							"time": {
-								"live_span": "1d"
-							},
-							"type": "check_status",
-							"check": "teamcity.build.status",
-							"grouping": "cluster",
-							"group_by": [],
-							"tags": [
-								"*"
-							]
-						},
-						"layout": {
-							"x": 0,
-							"y": 2,
-							"width": 2,
-							"height": 1
-						}
-					},
-					{
-						"id": 5533359711400208,
-						"definition": {
-							"title": "Build Problems",
-							"title_size": "16",
-							"title_align": "left",
-							"type": "check_status",
-							"check": "teamcity.build.problems",
-							"grouping": "cluster",
-							"group_by": [],
-							"tags": [
-								"*"
-							]
-						},
-						"layout": {
-							"x": 0,
-							"y": 3,
-							"width": 2,
-							"height": 1
-						}
-					},
-					{
-						"id": 7739849470393458,
-						"definition": {
-							"title": "Test Results",
-							"title_size": "16",
-							"title_align": "left",
-							"type": "check_status",
-							"check": "teamcity.test.results",
-							"grouping": "cluster",
-							"group_by": [],
-							"tags": [
-								"*"
-							]
-						},
-						"layout": {
-							"x": 0,
-							"y": 4,
-							"width": 2,
-							"height": 1
-						}
-					}
-				],
-				"template_variables": []
-			},
-			"layout": {
-				"x": 6,
-				"y": 0,
-				"width": 6,
-				"height": 6
-			}
-		},
-		{
-			"id": 2411894865042744,
-			"definition": {
-				"title": "Builds",
-				"type": "group",
-				"background_color": "vivid_green",
-				"show_title": true,
-				"layout_type": "ordered",
-				"widgets": [
-					{
-						"id": 5891909933532438,
-						"definition": {
-							"type": "note",
-							"content": "This section provides various perspectives into your build pipeline. You can view the ratio of successful to failed builds in the first graph. The subsequent graphs provide more detailed insights into the bottle-necking and regressions in your build pipeline, like the number of builds in queue compared to started, running, and completed builds. ",
-							"background_color": "green",
-							"font_size": "14",
-							"text_align": "left",
-							"vertical_align": "top",
-							"show_tick": false,
-							"tick_pos": "50%",
-							"tick_edge": "left",
-							"has_padding": true
-						},
-						"layout": {
-							"x": 0,
-							"y": 0,
-							"width": 12,
-							"height": 1
-						}
-					},
-					{
-						"id": 8430864535793956,
-						"definition": {
-							"title": "Successful and Failed Build Events",
-							"title_size": "16",
-							"title_align": "left",
-							"time": {
-								"live_span": "1w"
-							},
-							"type": "event_timeline",
-							"query": "source:teamcity $host $build_config $project_id $type",
-							"tags_execution": "and"
-						},
-						"layout": {
-							"x": 0,
-							"y": 1,
-							"width": 12,
-							"height": 2
-						}
-					},
-					{
-						"id": 7142770913497902,
-						"definition": {
-							"title": "Job Duration Trends per Build Config",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": false,
-							"legend_layout": "vertical",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"time": {
-								"live_span": "1w"
-							},
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "timeseries",
-									"queries": [
-										{
-											"query": "avg:teamcity.build_duration{$build_config,$host,$type,$project_id} by {type}",
-											"data_source": "metrics",
-											"name": "query1"
-										}
-									],
-									"style": {
-										"palette": "dog_classic",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "line"
-								}
-							],
-							"yaxis": {
-								"min": "0"
-							},
-							"custom_links": []
-						},
-						"layout": {
-							"x": 0,
-							"y": 3,
-							"width": 12,
-							"height": 2
-						}
-					},
-					{
-						"id": 8475578294431264,
-						"definition": {
-							"title": "Build Progress Counts across all hosts",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": false,
-							"legend_layout": "horizontal",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"time": {
-								"live_span": "1w"
-							},
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										},
-										{
-											"formula": "query2"
-										},
-										{
-											"formula": "query3"
-										}
-									],
-									"response_format": "timeseries",
-									"queries": [
-										{
-											"query": "sum:teamcity.builds.started.count{$host,$build_config,$project_id,$type} by {host}.as_count()",
-											"data_source": "metrics",
-											"name": "query1"
-										},
-										{
-											"query": "sum:teamcity.builds.finished.count{$host,$build_config,$project_id,$type} by {host}.as_count()",
-											"data_source": "metrics",
-											"name": "query2"
-										},
-										{
-											"query": "sum:teamcity.build.queue.incoming.count{$host,$build_config,$project_id,$type} by {host}.as_count()",
-											"data_source": "metrics",
-											"name": "query3"
-										}
-									],
-									"style": {
-										"palette": "dog_classic",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "bars"
-								}
-							]
-						},
-						"layout": {
-							"x": 0,
-							"y": 5,
-							"width": 12,
-							"height": 2
-						}
-					},
-					{
-						"id": 2462825592575232,
-						"definition": {
-							"title": "Queued vs. Running Builds",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": false,
-							"legend_layout": "auto",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"time": {
-								"live_span": "1w"
-							},
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1",
-											"style": {
-												"palette": "purple"
-											}
-										},
-										{
-											"formula": "query2",
-											"style": {
-												"palette": "cool"
-											}
-										}
-									],
-									"response_format": "timeseries",
-									"queries": [
-										{
-											"query": "avg:teamcity.builds.running{$host,$build_config,$project_id,$type} by {host}",
-											"data_source": "metrics",
-											"name": "query1"
-										},
-										{
-											"query": "avg:teamcity.builds.queued{$host,$build_config,$project_id,$type} by {host}",
-											"data_source": "metrics",
-											"name": "query2"
-										}
-									],
-									"style": {
-										"palette": "dog_classic",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "bars"
-								}
-							]
-						},
-						"layout": {
-							"x": 0,
-							"y": 7,
-							"width": 12,
-							"height": 2
-						}
-					}
-				]
-			},
-			"layout": {
-				"x": 0,
-				"y": 6,
-				"width": 12,
-				"height": 10
-			}
-		},
-		{
-			"id": 8341908516804804,
-			"definition": {
-				"title": "Logs and Events",
-				"type": "group",
-				"background_color": "vivid_green",
-				"show_title": true,
-				"layout_type": "ordered",
-				"widgets": [
-					{
-						"id": 5194053800302806,
-						"definition": {
-							"type": "note",
-							"content": "The logs table can show us the number of logs per log type. For instance, a spike in erroneous logs or warning logs can signal a problem. These problems can be further investigated through reviewing the event stream.",
-							"background_color": "green",
-							"font_size": "14",
-							"text_align": "left",
-							"vertical_align": "top",
-							"show_tick": false,
-							"tick_pos": "50%",
-							"tick_edge": "left",
-							"has_padding": true
-						},
-						"layout": {
-							"x": 0,
-							"y": 0,
-							"width": 12,
-							"height": 1
-						}
-					},
-					{
-						"id": 5474490800543822,
-						"definition": {
-							"title": "Count per Log Status",
-							"title_size": "16",
-							"title_align": "left",
-							"time": {
-								"live_span": "1w"
-							},
-							"type": "toplist",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "a",
-											"limit": {
-												"count": 10,
-												"order": "desc"
-											}
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"search": {
-												"query": "teamcity $host $build_config $project_id $type"
-											},
-											"data_source": "logs",
-											"compute": {
-												"aggregation": "count"
-											},
-											"name": "a",
-											"indexes": [
-												"*"
-											],
-											"group_by": [
-												{
-													"facet": "status",
-													"sort": {
-														"aggregation": "count",
-														"order": "desc"
-													},
-													"limit": 10,
-													"should_exclude_missing": true
-												}
-											]
-										}
-									]
-								}
-							]
-						},
-						"layout": {
-							"x": 0,
-							"y": 1,
-							"width": 5,
-							"height": 3
-						}
-					},
-					{
-						"id": 3508434246606430,
-						"definition": {
-							"title": "TeamCity Events",
-							"title_size": "16",
-							"title_align": "left",
-							"time": {
-								"live_span": "1w"
-							},
-							"type": "event_stream",
-							"query": "source:teamcity @evt.type:$host.value $host $build_config $project_id $type",
-							"event_size": "l"
-						},
-						"layout": {
-							"x": 5,
-							"y": 1,
-							"width": 7,
-							"height": 3
-						}
-					}
-				],
-				"template_variables": []
-			},
-			"layout": {
-				"x": 0,
-				"y": 16,
-				"width": 12,
-				"height": 5
-			}
-		},
-		{
-			"id": 329315447424670,
-			"definition": {
-				"title": "Resource Utilization",
-				"type": "group",
-				"background_color": "vivid_green",
-				"show_title": true,
-				"layout_type": "ordered",
-				"widgets": [
-					{
-						"id": 6396396805845350,
-						"definition": {
-							"type": "note",
-							"content": "The resource utilization section provides an understanding of the health of your overall system, including insights into active database connections and HTTP sessions, and patterns on CPU Usage over time. TeamCity's architecture also has a JVM layer. The second half of this section provides resource allocation \n metrics for the JVM layer.",
-							"background_color": "green",
-							"font_size": "14",
-							"text_align": "left",
-							"vertical_align": "top",
-							"show_tick": false,
-							"tick_pos": "50%",
-							"tick_edge": "left",
-							"has_padding": true
-						},
-						"layout": {
-							"x": 0,
-							"y": 0,
-							"width": 12,
-							"height": 1
-						}
-					},
-					{
-						"id": 8860701907922144,
-						"definition": {
-							"title": "Active HTTP sessions",
-							"title_size": "16",
-							"title_align": "left",
-							"type": "query_value",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "avg:teamcity.httpSessions.active{$host,$build_config,$project_id,$type}",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "avg"
-										}
-									]
-								}
-							],
-							"autoscale": true,
-							"precision": 2,
-							"timeseries_background": {
-								"type": "area"
-							}
-						},
-						"layout": {
-							"x": 0,
-							"y": 1,
-							"width": 3,
-							"height": 2
-						}
-					},
-					{
-						"id": 6531421338631452,
-						"definition": {
-							"title": "Active Database Connections",
-							"title_size": "16",
-							"title_align": "left",
-							"type": "query_value",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "avg:teamcity.database.connections.active{$host,$build_config,$project_id,$type}",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "sum"
-										}
-									]
-								}
-							],
-							"autoscale": true,
-							"precision": 2,
-							"timeseries_background": {
-								"type": "area",
-								"yaxis": {
-									"include_zero": false
-								}
-							}
-						},
-						"layout": {
-							"x": 3,
-							"y": 1,
-							"width": 3,
-							"height": 2
-						}
-					},
-					{
-						"id": 2946758251517526,
-						"definition": {
-							"title": "Connected Authorized Agents",
-							"title_size": "16",
-							"title_align": "left",
-							"type": "query_value",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "avg:teamcity.agents.connected.authorized{$host,$build_config,$project_id,$type}",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "avg"
-										}
-									]
-								}
-							],
-							"autoscale": true,
-							"precision": 2,
-							"timeseries_background": {
-								"type": "area",
-								"yaxis": {
-									"include_zero": true
-								}
-							}
-						},
-						"layout": {
-							"x": 6,
-							"y": 1,
-							"width": 3,
-							"height": 2
-						}
-					},
-					{
-						"id": 5110751378253012,
-						"definition": {
-							"title": "System Load",
-							"title_size": "16",
-							"title_align": "left",
-							"type": "query_value",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "avg:teamcity.system.load.average.1m{$host,$build_config,$project_id,$type}",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "avg"
-										}
-									]
-								}
-							],
-							"autoscale": true,
-							"precision": 2,
-							"timeseries_background": {
-								"type": "area",
-								"yaxis": {
-									"include_zero": false
-								}
-							}
-						},
-						"layout": {
-							"x": 9,
-							"y": 1,
-							"width": 3,
-							"height": 2
-						}
-					},
-					{
-						"id": 3227538277207478,
-						"definition": {
-							"title": "CPU Usage for JVM vs. Entire System",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": true,
-							"legend_layout": "horizontal",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"time": {
-								"live_span": "1w"
-							},
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"alias": "JVM CPU",
-											"style": {
-												"palette": "cool"
-											},
-											"formula": "query1"
-										},
-										{
-											"alias": "System CPU",
-											"style": {
-												"palette": "cool"
-											},
-											"formula": "query2"
-										}
-									],
-									"response_format": "timeseries",
-									"queries": [
-										{
-											"query": "avg:teamcity.cpu.usage.process{$host,$build_config,$project_id,$type} by {host}",
-											"data_source": "metrics",
-											"name": "query1"
-										},
-										{
-											"query": "avg:teamcity.cpu.usage.system{$host,$build_config,$project_id,$type} by {host}",
-											"data_source": "metrics",
-											"name": "query2"
-										}
-									],
-									"style": {
-										"palette": "cool",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "line"
-								}
-							],
-							"markers": []
-						},
-						"layout": {
-							"x": 0,
-							"y": 3,
-							"width": 12,
-							"height": 3
-						}
-					},
-					{
-						"id": 17268412694266,
-						"definition": {
-							"title": "Old Gen. Mem. Pool after GC",
-							"title_size": "16",
-							"title_align": "left",
-							"time": {
-								"live_span": "1w"
-							},
-							"type": "query_value",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "avg:teamcity.jvm.gc.live.data.size.bytes{$host,$build_config,$project_id,$type}",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "avg"
-										}
-									]
-								}
-							],
-							"autoscale": true,
-							"precision": 2,
-							"timeseries_background": {
-								"type": "area"
-							}
-						},
-						"layout": {
-							"x": 0,
-							"y": 6,
-							"width": 3,
-							"height": 2
-						}
-					},
-					{
-						"id": 5789768258960898,
-						"definition": {
-							"title": "Max Size of Old Gen. Mem. Pool",
-							"title_size": "16",
-							"title_align": "left",
-							"time": {
-								"live_span": "1w"
-							},
-							"type": "query_value",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "avg:teamcity.jvm.gc.max.data.size.bytes{$host,$build_config,$project_id,$type}",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "avg"
-										}
-									]
-								}
-							],
-							"autoscale": true,
-							"precision": 2,
-							"timeseries_background": {
-								"type": "area"
-							}
-						},
-						"layout": {
-							"x": 3,
-							"y": 6,
-							"width": 3,
-							"height": 2
-						}
-					},
-					{
-						"id": 3278445456720758,
-						"definition": {
-							"title": "# of GC Calls",
-							"title_size": "16",
-							"title_align": "left",
-							"time": {
-								"live_span": "1w"
-							},
-							"type": "query_value",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "avg:teamcity.jvm.gc.count{$host,$build_config,$project_id,$type}",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "avg"
-										}
-									]
-								}
-							],
-							"autoscale": true,
-							"precision": 2,
-							"timeseries_background": {
-								"type": "area",
-								"yaxis": {
-									"include_zero": false
-								}
-							}
-						},
-						"layout": {
-							"x": 6,
-							"y": 6,
-							"width": 3,
-							"height": 2
-						}
-					},
-					{
-						"id": 1083072904284484,
-						"definition": {
-							"title": "Total GC Duration",
-							"title_size": "16",
-							"title_align": "left",
-							"time": {
-								"live_span": "1w"
-							},
-							"type": "query_value",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "avg:teamcity.jvm.gc.duration.total.milliseconds{$host,$build_config,$project_id,$type}",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "avg"
-										}
-									]
-								}
-							],
-							"autoscale": true,
-							"precision": 2,
-							"timeseries_background": {
-								"type": "area"
-							}
-						},
-						"layout": {
-							"x": 9,
-							"y": 6,
-							"width": 3,
-							"height": 2
-						}
-					},
-					{
-						"id": 711016189857370,
-						"definition": {
-							"title": "JVM Memory available per host",
-							"title_size": "16",
-							"title_align": "left",
-							"time": {
-								"live_span": "1w"
-							},
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"style": {
-										"palette": "datadog16"
-									},
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "sum:teamcity.jvm.memory.max.bytes{$host,$build_config,$project_id,$type} by {host}",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "avg"
-										}
-									]
-								}
-							],
-							"type": "sunburst",
-							"legend": {
-								"type": "inline"
-							}
-						},
-						"layout": {
-							"x": 0,
-							"y": 8,
-							"width": 4,
-							"height": 4
-						}
-					},
-					{
-						"id": 6525398245226392,
-						"definition": {
-							"title": "Java Virtual Machine Memory Utilization",
-							"title_size": "16",
-							"title_align": "left",
-							"time": {
-								"live_span": "1w"
-							},
-							"type": "query_table",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"alias": "Max Memory Available",
-											"cell_display_mode": "bar",
-											"limit": {
-												"count": 500,
-												"order": "desc"
-											},
-											"formula": "query1"
-										},
-										{
-											"alias": "Memory Currently Used",
-											"cell_display_mode": "bar",
-											"formula": "query2"
-										},
-										{
-											"alias": "Memory Committed for Use",
-											"cell_display_mode": "bar",
-											"formula": "query3"
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "sum:teamcity.jvm.memory.max.bytes{$host,$build_config,$project_id,$type} by {host}",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "avg"
-										},
-										{
-											"query": "sum:teamcity.jvm.memory.used.bytes{$host,$build_config,$project_id,$type} by {host}",
-											"data_source": "metrics",
-											"name": "query2",
-											"aggregator": "avg"
-										},
-										{
-											"query": "sum:teamcity.jvm.memory.committed.bytes{$host,$build_config,$project_id,$type} by {host}",
-											"data_source": "metrics",
-											"name": "query3",
-											"aggregator": "avg"
-										}
-									]
-								}
-							]
-						},
-						"layout": {
-							"x": 4,
-							"y": 8,
-							"width": 8,
-							"height": 2
-						}
-					},
-					{
-						"id": 2064073444459934,
-						"definition": {
-							"title": "Java Virtual Machine Threads",
-							"title_size": "16",
-							"title_align": "left",
-							"time": {
-								"live_span": "1w"
-							},
-							"type": "query_table",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"alias": "# of Live Threads",
-											"conditional_formats": [],
-											"limit": {
-												"count": 500,
-												"order": "desc"
-											},
-											"cell_display_mode": "bar",
-											"formula": "query1"
-										},
-										{
-											"alias": "# of Live Daemon Threads",
-											"conditional_formats": [],
-											"cell_display_mode": "bar",
-											"formula": "query2"
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "avg:teamcity.jvm.threads{$host,$build_config,$project_id,$type} by {host}",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "avg"
-										},
-										{
-											"query": "avg:teamcity.jvm.threads.daemon{$host,$build_config,$project_id,$type} by {host}",
-											"data_source": "metrics",
-											"name": "query2",
-											"aggregator": "avg"
-										}
-									]
-								}
-							],
-							"has_search_bar": "auto"
-						},
-						"layout": {
-							"x": 4,
-							"y": 10,
-							"width": 8,
-							"height": 2
-						}
-					}
-				]
-			},
-			"layout": {
-				"x": 0,
-				"y": 0,
-				"width": 12,
-				"height": 13,
-				"is_column_break": true
-			}
-		},
-		{
-			"id": 7360065819218422,
-			"definition": {
-				"title": "Test Counts",
-				"type": "group",
-				"background_color": "vivid_green",
-				"show_title": true,
-				"layout_type": "ordered",
-				"widgets": [
-					{
-						"id": 3800329223146644,
-						"definition": {
-							"type": "note",
-							"content": "Test counts are split into Failed, Passed and Ignored Tests by host. A healthy instance should primarily constitute Passed Tests. ",
-							"background_color": "green",
-							"font_size": "14",
-							"text_align": "left",
-							"vertical_align": "top",
-							"show_tick": false,
-							"tick_pos": "50%",
-							"tick_edge": "left",
-							"has_padding": true
-						},
-						"layout": {
-							"x": 0,
-							"y": 0,
-							"width": 12,
-							"height": 1
-						}
-					},
-					{
-						"id": 23054258097652,
-						"definition": {
-							"title": "Test Counts per Build Config",
-							"title_size": "16",
-							"title_align": "left",
-							"time": {
-								"live_span": "1w"
-							},
-							"type": "query_table",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"alias": "Total Tests",
-											"limit": {
-												"count": 500,
-												"order": "desc"
-											},
-											"formula": "query1"
-										},
-										{
-											"alias": "Failed Tests",
-											"formula": "query2"
-										},
-										{
-											"alias": "Passed Tests",
-											"formula": "query3"
-										},
-										{
-											"alias": "Ignored Tests",
-											"formula": "query4"
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "min:teamcity.total_test_count{$host,$build_config,$project_id,$type} by {build_config}",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "avg"
-										},
-										{
-											"query": "avg:teamcity.failed_test_count{$host,$build_config,$project_id,$type} by {build_config}",
-											"data_source": "metrics",
-											"name": "query2",
-											"aggregator": "avg"
-										},
-										{
-											"query": "avg:teamcity.passed_test_count{$host,$build_config,$project_id,$type} by {build_config}",
-											"data_source": "metrics",
-											"name": "query3",
-											"aggregator": "avg"
-										},
-										{
-											"query": "avg:teamcity.ignored_test_count{$host,$build_config,$project_id,$type} by {build_config}",
-											"data_source": "metrics",
-											"name": "query4",
-											"aggregator": "avg"
-										}
-									]
-								}
-							]
-						},
-						"layout": {
-							"x": 0,
-							"y": 1,
-							"width": 12,
-							"height": 2
-						}
-					}
-				],
-				"template_variables": []
-			},
-			"layout": {
-				"x": 0,
-				"y": 13,
-				"width": 12,
-				"height": 4
-			}
-		}
-	],
-	"template_variables": [
-		{
-			"name": "host",
-			"prefix": "host",
-			"available_values": [],
-			"default": "*"
-		},
-		{
-			"name": "build_config",
-			"prefix": "build_config",
-			"available_values": [],
-			"default": "*"
-		},
-		{
-			"name": "project_id",
-			"prefix": "project_id",
-			"available_values": [],
-			"default": "*"
-		},
-		{
-			"name": "type",
-			"prefix": "type",
-			"available_values": [],
-			"default": "*"
-		}
-	],
-	"layout_type": "ordered",
-	"notify_list": [],
-	"reflow_type": "fixed",
-	"id": "ddv-zx8-czm"
+  "title": "TeamCity Overview",
+  "description": "## TeamCity Integration \nThis dashboard provides an overview of your TeamCity environment. It monitors resource utilization, provides information on build statuses and progress, and gives you insight into various other observability measures.\n\nFor more information, please reference:\n\n* [TeamCity Integration Doc](https://docs.datadoghq.com/integrations/teamcity/?tab=host)\n* [TeamCity Blog by Datadog](https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog/)\n",
+  "widgets": [
+    {
+      "id": 1006707459310838,
+      "definition": {
+        "title": "",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6834495338223556,
+            "definition": {
+              "type": "image",
+              "url": "/static/images/logos/teamcity_small.svg",
+              "url_dark_theme": "/static/images/logos/teamcity_reversed_small.svg",
+              "sizing": "cover",
+              "has_background": true,
+              "has_border": true,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 7506655173365042,
+            "definition": {
+              "type": "note",
+              "content": "## TeamCity\nThis dashboard provides an overview of your TeamCity environment. It monitors resource utilization, provides information on build statuses and progress, and gives you insight into various other observability measures. \n\n***Note:*** \nThe current time periods for most time series based measures are set to the past 1 week. For measures like service checks, the time period is set to 1 day. The agent collects data every 15 seconds. ",
+              "background_color": "white",
+              "font_size": "12",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 4339779467181026,
+            "definition": {
+              "type": "note",
+              "content": "## Useful Links\n* [TeamCity Integration Doc](https://docs.datadoghq.com/integrations/teamcity/?tab=host)\n* [TeamCity Blog by Datadog](https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog/)",
+              "background_color": "white",
+              "font_size": "12",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 3,
+              "y": 2,
+              "width": 3,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 6
+      }
+    },
+    {
+      "id": 3674468399117316,
+      "definition": {
+        "title": "Overview",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6039693779520186,
+            "definition": {
+              "type": "note",
+              "content": "This overview combines service checks along with a monitor group so you can view all active alerts and system issues in one place. A failed build status within the Status check is broken down by the Build Problems check.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "id": 4665487199277634,
+            "definition": {
+              "title": "OpenMetrics Health",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1d"
+              },
+              "type": "check_status",
+              "check": "teamcity.openmetrics.health",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": [
+                "*"
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 5125788107287596,
+            "definition": {
+              "title": "Monitors Summary",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "query": "tag:(integration:teamcity) $host $build_config $project_id $type",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "groups",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 6470283539452220,
+            "definition": {
+              "title": "Build Status",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1d"
+              },
+              "type": "check_status",
+              "check": "teamcity.build.status",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": [
+                "*"
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 5533359711400208,
+            "definition": {
+              "title": "Build Problems",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "check_status",
+              "check": "teamcity.build.problems",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": [
+                "*"
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 7739849470393458,
+            "definition": {
+              "title": "Test Results",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "check_status",
+              "check": "teamcity.test.results",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": [
+                "*"
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 2,
+              "height": 1
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 6
+      }
+    },
+    {
+      "id": 2411894865042744,
+      "definition": {
+        "title": "Builds",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5891909933532438,
+            "definition": {
+              "type": "note",
+              "content": "This section provides various perspectives into your build pipeline. You can view the ratio of successful to failed builds in the first graph. The subsequent graphs provide more detailed insights into the bottle-necking and regressions in your build pipeline, like the number of builds in queue compared to started, running, and completed builds. ",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 8430864535793956,
+            "definition": {
+              "title": "Successful and Failed Build Events",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1w"
+              },
+              "type": "event_timeline",
+              "query": "source:teamcity $host $build_config $project_id $type",
+              "tags_execution": "and"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 2
+            }
+          },
+          {
+            "id": 7142770913497902,
+            "definition": {
+              "title": "Job Duration Trends per Build Config",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "live_span": "1w"
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:teamcity.build_duration{$build_config,$host,$type,$project_id} by {type}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "min": "0"
+              },
+              "custom_links": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 12,
+              "height": 2
+            }
+          },
+          {
+            "id": 8475578294431264,
+            "definition": {
+              "title": "Build Progress Counts across all hosts",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "live_span": "1w"
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    },
+                    {
+                      "formula": "query2"
+                    },
+                    {
+                      "formula": "query3"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:teamcity.builds.started.count{$host,$build_config,$project_id,$type} by {host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:teamcity.builds.finished.count{$host,$build_config,$project_id,$type} by {host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:teamcity.build.queue.incoming.count{$host,$build_config,$project_id,$type} by {host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 2
+            }
+          },
+          {
+            "id": 2462825592575232,
+            "definition": {
+              "title": "Queued vs. Running Builds",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "live_span": "1w"
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "style": {
+                        "palette": "purple"
+                      }
+                    },
+                    {
+                      "formula": "query2",
+                      "style": {
+                        "palette": "cool"
+                      }
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:teamcity.builds.running{$host,$build_config,$project_id,$type} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:teamcity.builds.queued{$host,$build_config,$project_id,$type} by {host}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 6,
+        "width": 12,
+        "height": 10
+      }
+    },
+    {
+      "id": 8341908516804804,
+      "definition": {
+        "title": "Logs and Events",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5194053800302806,
+            "definition": {
+              "type": "note",
+              "content": "The logs table can show us the number of logs per log type. For instance, a spike in erroneous logs or warning logs can signal a problem. These problems can be further investigated through reviewing the event stream.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 5474490800543822,
+            "definition": {
+              "title": "Count per Log Status",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1w"
+              },
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "a",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "search": {
+                        "query": "teamcity $host $build_config $project_id $type"
+                      },
+                      "data_source": "logs",
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "name": "a",
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "status",
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          },
+                          "limit": 10,
+                          "should_exclude_missing": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 3508434246606430,
+            "definition": {
+              "title": "TeamCity Events",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1w"
+              },
+              "requests": [
+                {
+                  "query": {
+                    "query_string": "source:teamcity @evt.type:$host.value $host $build_config $project_id $type",
+                    "data_source": "event_stream",
+                    "event_size": "l"
+                  },
+                  "columns": [],
+                  "response_format": "event_list"
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 5,
+              "y": 1,
+              "width": 7,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 16,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 329315447424670,
+      "definition": {
+        "title": "Resource Utilization",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6396396805845350,
+            "definition": {
+              "type": "note",
+              "content": "The resource utilization section provides an understanding of the health of your overall system, including insights into active database connections and HTTP sessions, and patterns on CPU Usage over time. TeamCity's architecture also has a JVM layer. The second half of this section provides resource allocation \n metrics for the JVM layer.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 8860701907922144,
+            "definition": {
+              "title": "Active HTTP sessions",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:teamcity.httpSessions.active{$host,$build_config,$project_id,$type}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 6531421338631452,
+            "definition": {
+              "title": "Active Database Connections",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:teamcity.database.connections.active{$host,$build_config,$project_id,$type}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "sum"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": false
+                }
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 1,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 2946758251517526,
+            "definition": {
+              "title": "Connected Authorized Agents",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:teamcity.agents.connected.authorized{$host,$build_config,$project_id,$type}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 5110751378253012,
+            "definition": {
+              "title": "System Load",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:teamcity.system.load.average.1m{$host,$build_config,$project_id,$type}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": false
+                }
+              }
+            },
+            "layout": {
+              "x": 9,
+              "y": 1,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 3227538277207478,
+            "definition": {
+              "title": "CPU Usage for JVM vs. Entire System",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "live_span": "1w"
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "JVM CPU",
+                      "style": {
+                        "palette": "cool"
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "System CPU",
+                      "style": {
+                        "palette": "cool"
+                      },
+                      "formula": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:teamcity.cpu.usage.process{$host,$build_config,$project_id,$type} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:teamcity.cpu.usage.system{$host,$build_config,$project_id,$type} by {host}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 17268412694266,
+            "definition": {
+              "title": "Old Gen. Mem. Pool after GC",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1w"
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:teamcity.jvm.gc.live.data.size.bytes{$host,$build_config,$project_id,$type}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 5789768258960898,
+            "definition": {
+              "title": "Max Size of Old Gen. Mem. Pool",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1w"
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:teamcity.jvm.gc.max.data.size.bytes{$host,$build_config,$project_id,$type}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 6,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 3278445456720758,
+            "definition": {
+              "title": "# of GC Calls",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1w"
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:teamcity.jvm.gc.count{$host,$build_config,$project_id,$type}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": false
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 6,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 1083072904284484,
+            "definition": {
+              "title": "Total GC Duration",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1w"
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:teamcity.jvm.gc.duration.total.milliseconds{$host,$build_config,$project_id,$type}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 9,
+              "y": 6,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 711016189857370,
+            "definition": {
+              "title": "JVM Memory available per host",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1w"
+              },
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:teamcity.jvm.memory.max.bytes{$host,$build_config,$project_id,$type} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "inline"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 6525398245226392,
+            "definition": {
+              "title": "Java Virtual Machine Memory Utilization",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1w"
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Max Memory Available",
+                      "cell_display_mode": "bar",
+                      "limit": {
+                        "count": 500,
+                        "order": "desc"
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Memory Currently Used",
+                      "cell_display_mode": "bar",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Memory Committed for Use",
+                      "cell_display_mode": "bar",
+                      "formula": "query3"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:teamcity.jvm.memory.max.bytes{$host,$build_config,$project_id,$type} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:teamcity.jvm.memory.used.bytes{$host,$build_config,$project_id,$type} by {host}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:teamcity.jvm.memory.committed.bytes{$host,$build_config,$project_id,$type} by {host}",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 8,
+              "width": 8,
+              "height": 2
+            }
+          },
+          {
+            "id": 2064073444459934,
+            "definition": {
+              "title": "Java Virtual Machine Threads",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1w"
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "# of Live Threads",
+                      "conditional_formats": [],
+                      "limit": {
+                        "count": 500,
+                        "order": "desc"
+                      },
+                      "cell_display_mode": "bar",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "# of Live Daemon Threads",
+                      "conditional_formats": [],
+                      "cell_display_mode": "bar",
+                      "formula": "query2"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:teamcity.jvm.threads{$host,$build_config,$project_id,$type} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "avg:teamcity.jvm.threads.daemon{$host,$build_config,$project_id,$type} by {host}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 4,
+              "y": 10,
+              "width": 8,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 13,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 7360065819218422,
+      "definition": {
+        "title": "Test Counts",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3800329223146644,
+            "definition": {
+              "type": "note",
+              "content": "Test counts are split into Failed, Passed and Ignored Tests by host. A healthy instance should primarily constitute Passed Tests. ",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 23054258097652,
+            "definition": {
+              "title": "Test Counts per Build Config",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "live_span": "1w"
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Total Tests",
+                      "limit": {
+                        "count": 500,
+                        "order": "desc"
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Failed Tests",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Passed Tests",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Ignored Tests",
+                      "formula": "query4"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "min:teamcity.total_test_count{$host,$build_config,$project_id,$type} by {build_config}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "avg:teamcity.failed_test_count{$host,$build_config,$project_id,$type} by {build_config}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "avg:teamcity.passed_test_count{$host,$build_config,$project_id,$type} by {build_config}",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "avg:teamcity.ignored_test_count{$host,$build_config,$project_id,$type} by {build_config}",
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 13,
+        "width": 12,
+        "height": 4
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "host",
+      "prefix": "host",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "build_config",
+      "prefix": "build_config",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "project_id",
+      "prefix": "project_id",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "type",
+      "prefix": "type",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed",
+  "id": "ddv-zx8-czm"
 }

@@ -41,6 +41,9 @@
         "check": "calico.felix.active.local_endpoints",
         "metadata_path": "metadata.csv"
       },
+      "process_signatures": [
+        "calico-node"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }

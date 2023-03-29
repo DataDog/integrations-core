@@ -17,12 +17,15 @@ from .common import (
     DB_NAME,
     DBM_MIGRATED_METRICS,
     HOST,
+    PASSWORD,
     PORT,
     POSTGRES_VERSION,
+    USER,
     assert_metric_at_least,
     check_activity_metrics,
     check_bgw_metrics,
     check_common_metrics,
+    check_conflict_metrics,
     check_connection_metrics,
     check_db_count,
     check_replication_slots,
@@ -31,7 +34,7 @@ from .common import (
     check_wal_receiver_metrics,
     requires_static_version,
 )
-from .utils import requires_over_10
+from .utils import requires_over_10, requires_over_14
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 
@@ -46,6 +49,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check_common_metrics(aggregator, expected_tags=expected_tags)
     check_bgw_metrics(aggregator, expected_tags)
     check_connection_metrics(aggregator, expected_tags=expected_tags)
+    check_conflict_metrics(aggregator, expected_tags=expected_tags)
     check_db_count(aggregator, expected_tags=expected_tags)
     check_slru_metrics(aggregator, expected_tags=expected_tags)
     check_stat_replication(aggregator, expected_tags=expected_tags)
@@ -75,6 +79,87 @@ def test_common_metrics_without_size(aggregator, integration_check, pg_instance)
     check = integration_check(pg_instance)
     check.check(pg_instance)
     assert 'postgresql.database_size' not in aggregator.metric_names
+
+
+def _get_conn(user=USER, db=DB_NAME, application_name='test'):
+    passwords = {'postgres': 'datad0g', USER: PASSWORD}
+    conn = psycopg2.connect(
+        host=HOST, dbname=db, user=user, password=passwords[user], application_name=application_name
+    )
+    return conn
+
+
+@requires_over_14
+def test_session_number(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+    expected_tags = pg_instance['tags'] + ['db:postgres', 'port:{}'.format(PORT)]
+    conn = _get_conn()
+    with conn.cursor() as cur:
+        cur.execute("select sessions from pg_stat_database where datname='postgres'")
+        session_number = cur.fetchall()[0][0]
+    aggregator.assert_metric('postgresql.sessions.count', value=session_number, count=1, tags=expected_tags)
+
+    # Generate a new session in postgres database
+    conn = _get_conn('postgres', 'postgres')
+    conn.close()
+
+    # Leave time for stats to be flushed in the stats collector
+    time.sleep(0.5)
+
+    aggregator.reset()
+    check.check(pg_instance)
+
+    aggregator.assert_metric('postgresql.sessions.count', value=session_number + 1, count=1, tags=expected_tags)
+
+
+@requires_over_14
+def test_session_idle_and_killed(aggregator, integration_check, pg_instance):
+    # Reset idle time to 0
+    postgres_conn = _get_conn('postgres')
+    with postgres_conn.cursor() as cur:
+        cur.execute("select pg_stat_reset();")
+        cur.fetchall()
+    # Make sure the stats collector is updated
+    time.sleep(0.5)
+
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+    expected_tags = pg_instance['tags'] + ['db:{}'.format(DB_NAME), 'port:{}'.format(PORT)]
+
+    aggregator.assert_metric('postgresql.sessions.idle_in_transaction_time', value=0, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.sessions.killed', value=0, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.sessions.fatal', value=0, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.sessions.abandoned', value=0, count=1, tags=expected_tags)
+
+    conn = _get_conn()
+    with conn.cursor() as cur:
+        cur.execute('BEGIN;')
+        cur.execute('select txid_current();')
+        cur.fetchall()
+        # Keep transaction idle for 500ms
+        time.sleep(0.5)
+        cur.execute('select pg_backend_pid();')
+        pid = cur.fetchall()[0][0]
+
+    # Kill session
+    with postgres_conn.cursor() as cur:
+        cur.execute("SELECT pg_terminate_backend({})".format(pid))
+        cur.fetchall()
+
+    # Abandon session
+    sock = socket.fromfd(postgres_conn.fileno(), socket.AF_INET, socket.SOCK_STREAM)
+    sock.shutdown(socket.SHUT_RDWR)
+
+    aggregator.reset()
+    check.check(pg_instance)
+
+    assert_metric_at_least(
+        aggregator, 'postgresql.sessions.idle_in_transaction_time', count=1, lower_bound=0.5, tags=expected_tags
+    )
+    aggregator.assert_metric('postgresql.sessions.killed', value=1, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.sessions.fatal', value=0, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.sessions.abandoned', value=1, count=1, tags=expected_tags)
 
 
 def test_unsupported_replication(aggregator, integration_check, pg_instance):
@@ -139,7 +224,7 @@ def test_schema_metrics(aggregator, integration_check, pg_instance):
         'schema:public',
     ]
     aggregator.assert_metric('postgresql.table.count', value=1, count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.db.count', value=5, count=1)
+    aggregator.assert_metric('postgresql.db.count', value=106, count=1)
 
 
 def test_connections_metrics(aggregator, integration_check, pg_instance):
@@ -220,10 +305,10 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
         aggregator.assert_metric('postgresql.activity.backend_xmin_age', count=0, tags=dd_agent_tags)
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=dd_agent_tags)
 
-    conn1 = psycopg2.connect(host=HOST, dbname=DB_NAME, user="datadog", password="datadog", application_name="test")
+    conn1 = _get_conn()
     cur = conn1.cursor()
 
-    conn2 = psycopg2.connect(host=HOST, dbname=DB_NAME, user="datadog", password="datadog", application_name="test")
+    conn2 = _get_conn()
     cur2 = conn2.cursor()
 
     # Start a transaction in repeatable read to force pinning of backend_xmin

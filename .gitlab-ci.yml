@@ -169,7 +169,7 @@ notify-failed-pipeline:
   script:
     - export SLACK_CACHE_DIR="${PWD}/.slack-cache"
     - |
-      MESSAGE="The pipeline uncountered an unexpected error."
+      MESSAGE="The pipeline encountered an unexpected error."
       postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
   tags: [ "runner:main" ]
 
