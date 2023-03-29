@@ -65,7 +65,7 @@ jobs:
       if: inputs.repo != 'core'
       run: |-
         mkdir -p $(dirname ${{ env.MATRIX_SCRIPT }})
-        curl -sLo ${{ env.MATRIX_SCRIPT }} https://raw.githubusercontent.com/DataDog/integrations-core/ofek/gha/${{ env.MATRIX_SCRIPT }}
+        curl -sLo ${{ env.MATRIX_SCRIPT }} https://raw.githubusercontent.com/DataDog/integrations-core/master/${{ env.MATRIX_SCRIPT }}
 
     - name: Compute
       id: compute
