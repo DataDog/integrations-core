@@ -12,7 +12,7 @@
     "title": "WMI Check",
     "media": [],
     "classifier_tags": [
-      "Category::OS & System"
+      "Category::OS & System",
       "Supported OS::Windows"
     ]
   },
