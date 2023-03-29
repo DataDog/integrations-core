@@ -111,6 +111,7 @@ class InstanceConfig(BaseModel):
     ntlm_domain: Optional[str]
     password: Optional[str]
     persist_connections: Optional[bool]
+    prometheus_endpoint: Optional[str]
     prometheus_metrics_prefix: Optional[str]
     prometheus_url: str
     proxy: Optional[Proxy]
