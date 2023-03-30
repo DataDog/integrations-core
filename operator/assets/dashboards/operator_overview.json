@@ -1415,7 +1415,7 @@
                     {
                         "id": 2207306838207780,
                         "definition": {
-                            "title": "Webhook Inflight Requests",
+                            "title": "Webhook In-flight Requests",
                             "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
