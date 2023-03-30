@@ -1320,7 +1320,7 @@
                     {
                         "id": 7987366423681764,
                         "definition": {
-                            "title": "Workqueue longest Running Processor in seconds",
+                            "title": "Work Queue Longest Running Processor in seconds",
                             "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
