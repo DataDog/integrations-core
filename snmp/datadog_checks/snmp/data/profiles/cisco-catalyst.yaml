@@ -371,3 +371,6 @@ sysobjectid:
   - 1.3.6.1.4.1.9.1.2498
   - 1.3.6.1.4.1.9.1.2694 # cisco9200FixedSwitchStack
   - 1.3.6.1.4.1.9.1.2695 # cisco9200RFixedSwitchStack
+  - 1.3.6.1.4.1.9.1.2501 # ciscoC9410R
+  - 1.3.6.1.4.1.9.1.2648 # ciscoC9606R
+  - 1.3.6.1.4.1.9.1.2494 # ciscoCat9300FixedSwitchStack
