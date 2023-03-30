@@ -1275,7 +1275,7 @@
                     {
                         "id": 2246786119938033,
                         "definition": {
-                            "title": "Workqueue Adds Total",
+                            "title": "Work Queue Adds Total",
                             "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
