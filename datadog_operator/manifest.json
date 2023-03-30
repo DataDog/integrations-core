@@ -19,11 +19,13 @@
   },
   "assets": {
     "dashboards": {
-      "Datadog Operator Overview": "operator/assets/dashboards/operator_overview.json"
+      "Datadog Operator Overview": "assets/dashboards/operator_overview.json"
     },
-    "monitors": {},
-    "logs": {},
-    "saved_views": {}
+    "metrics": {
+      "prefix": "datadog.operator.",
+      "check": "datadog.operator.go_info",
+      "metadata_path": "metadata.csv"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
