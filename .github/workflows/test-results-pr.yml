@@ -17,7 +17,7 @@ jobs:
       id: download
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
+      run: |-
         mkdir -p artifacts && cd artifacts
 
         artifacts_url=${{ github.event.workflow_run.artifacts_url }}
@@ -25,13 +25,13 @@ jobs:
         gh api --paginate "$artifacts_url" -q '.artifacts[] | [.name, .archive_download_url] | @tsv' | while read artifact
         do
           IFS=$'\t' read name url <<< "$artifact"
-          gh api $url > "$name.zip"
-          unzip -d "$name" "$name.zip"
+          if [[ "$name" =~ ^(github-event|test-results)$ ]]; then
+            gh api $url > "$name.zip"
+            unzip -d "$name" "$name.zip"
+          fi
         done
 
-        if [[ -f "github-event/event.json" ]]; then
-          ls
-        else
+        if ! [[ -d github-event && -d test-results ]]; then
           exit 1
         fi
       continue-on-error: true
@@ -43,4 +43,4 @@ jobs:
         commit: ${{ github.event.workflow_run.head_sha }}
         event_file: artifacts/github-event/event.json
         event_name: ${{ github.event.workflow_run.event }}
-        files: "artifacts/Test results for*/*.xml"
+        files: "artifacts/test-results/*/*.xml"
