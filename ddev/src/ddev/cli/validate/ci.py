@@ -25,6 +25,7 @@ def ci(ctx: click.Context, sync: bool):
     from ddev.utils.scripts.ci_matrix import construct_job_matrix, get_all_targets
 
     app: Application = ctx.obj
+    is_core = app.repo.name == 'core'
     test_workflow = (
         './.github/workflows/test-target.yml'
         if app.repo.name == 'core'
@@ -46,15 +47,25 @@ def ci(ctx: click.Context, sync: bool):
             'python-version': '${{ inputs.python-version }}',
             'standard': '${{ inputs.standard }}',
             'latest': '${{ inputs.latest }}',
-            'minimum-base-package': '${{ inputs.minimum-base-package }}',
             'agent-image': '${{ inputs.agent-image }}',
             'agent-image-py2': '${{ inputs.agent-image-py2 }}',
             'agent-image-windows': '${{ inputs.agent-image-windows }}',
             'agent-image-windows-py2': '${{ inputs.agent-image-windows-py2 }}',
             'test-py2': '2' in python_restriction if python_restriction else '${{ inputs.test-py2 }}',
             'test-py3': '3' in python_restriction if python_restriction else '${{ inputs.test-py3 }}',
-            'setup-env-vars': '${{ inputs.setup-env-vars }}',
         }
+        if is_core:
+            config.update(
+                {
+                    'minimum-base-package': '${{ inputs.minimum-base-package }}',
+                }
+            )
+        else:
+            config.update(
+                {
+                    'setup-env-vars': '${{ inputs.setup-env-vars }}',
+                }
+            )
 
         # Prevent redundant job hierarchy names at the bottom of pull requests and also satisfy the naming requirements:
         # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_id
