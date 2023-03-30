@@ -18,7 +18,9 @@
     ]
   },
   "assets": {
-    "dashboards": {},
+    "dashboards": {
+      "Datadog Operator Overview": "operator/assets/dashboards/operator_overview.json"
+    },
     "monitors": {},
     "logs": {},
     "saved_views": {}
