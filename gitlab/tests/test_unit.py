@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
+
 from .common import METRICS, assert_check
 
 pytestmark = [pytest.mark.unit]
@@ -15,3 +17,4 @@ def test_check(dd_run_check, aggregator, mock_data, gitlab_check, config):
 
     assert_check(aggregator, METRICS)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
