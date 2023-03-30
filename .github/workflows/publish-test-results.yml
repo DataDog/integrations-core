@@ -8,6 +8,10 @@ on:
     types:
     - completed
 
+defaults:
+  run:
+    shell: bash
+
 permissions: {}
 
 jobs:
@@ -42,7 +46,7 @@ jobs:
           unzip -d "$name" "$name.zip"
         done
 
-        if [ "$(ls -A)" ]; then
+        if [[ -f "github-event/event.json" ]]; then
           ls
         else
           exit 1
@@ -56,4 +60,4 @@ jobs:
         commit: ${{ github.event.workflow_run.head_sha }}
         event_file: artifacts/github-event/event.json
         event_name: ${{ github.event.workflow_run.event }}
-        files: "artifacts/**/*.xml"
+        files: "artifacts/Test results for*/*.xml"

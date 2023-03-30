@@ -2,6 +2,9 @@
 
 set -ex
 
-git fetch origin master:master
+# Only required on pull requests
+if [[ -z "$GITHUB_BASE_REF" ]]; then
+  git fetch origin master:master
+fi
 
 set +ex
