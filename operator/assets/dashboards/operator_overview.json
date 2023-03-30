@@ -1,6 +1,6 @@
 {
     "title": "Datadog Operator",
-    "description": "Datadog Operator is an open source Kubernetes Operator that enables you to deploy and configure the Datadog Agent in a Kubernetes environment.\n\nThe Datadog Operator dashboard give you visibility into health and performance metrics of the Operator and overview of the resources it manages.\n\nFurther reading around the Datadog Operator and Kubernetes Controllers\n* [Datadog Operator](https://docs.datadoghq.com/containers/datadog_operator/)\n* [Kubernetes Metrics Reference](https://kubernetes.io/docs/reference/instrumentation/metrics/)\n* [Kubernetes Operator Pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)",
+    "description": "The Datadog Operator is an open source Kubernetes Operator that enables you to deploy and configure the Datadog Agent in a Kubernetes environment.\n\nThe Datadog Operator dashboard gives you visibility into health and performance metrics of the Operator and overview of the resources it manages.\n\nFurther reading around the Datadog Operator and Kubernetes Controllers\n* [Datadog Operator](https://docs.datadoghq.com/containers/datadog_operator/)\n* [Kubernetes Metrics Reference](https://kubernetes.io/docs/reference/instrumentation/metrics/)\n* [Kubernetes Operator Pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)",
     "widgets": [
         {
             "id": 7545770048236095,
