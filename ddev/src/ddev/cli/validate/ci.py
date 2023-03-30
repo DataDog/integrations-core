@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 
-@click.command(short_help='Validate CI infrastructure configuration')
+@click.command()
 @click.option('--sync', is_flag=True, help='Update the CI configuration')
 @click.pass_context
 def ci(ctx: click.Context, sync: bool):
@@ -58,6 +58,8 @@ def ci(ctx: click.Context, sync: bool):
 
         # Prevent redundant job hierarchy names at the bottom of pull requests and also satisfy the naming requirements:
         # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_id
+        #
+        # We want the job ID to be unique but also small so it displays concisely on the bottom of pull requests
         job_id = hashlib.sha256(config['job-name'].encode('utf-8')).hexdigest()[:7]
         job_id = f'j{job_id}'
 

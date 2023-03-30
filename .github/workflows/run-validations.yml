@@ -119,9 +119,6 @@ jobs:
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
-    - name: Upgrade Python packaging tools
-      run: pip install --disable-pip-version-check --upgrade pip setuptools wheel
-
     - name: Install ddev from local folder
       if: inputs.repo == 'core'
       run: |-
