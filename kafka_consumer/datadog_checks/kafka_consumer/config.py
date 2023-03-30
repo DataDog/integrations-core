@@ -85,7 +85,7 @@ class KafkaConfig:
 
             elif self._sasl_oauth_token_provider.get("client_secret") is None:
                 raise ConfigurationError("The `client_secret` setting of `auth_token` reader is required")
-        
+
         # If `monitor_unlisted_consumer_groups` is set to true and
         # using `consumer_groups`, we prioritize `monitor_unlisted_consumer_groups`
         if self._monitor_unlisted_consumer_groups and (self._consumer_groups or self._consumer_groups_regex):
