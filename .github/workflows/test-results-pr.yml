@@ -1,29 +1,16 @@
-name: Test results
+name: Test results for PRs
 
 on:
-  workflow_run:
-    workflows:
-    - PR
-    - PR All
-    types:
-    - completed
+  workflow_call:
 
-permissions: {}
+defaults:
+  run:
+    shell: bash
 
 jobs:
   test-results:
-    name: Test results
+    name: Publish test results
     runs-on: ubuntu-22.04
-    if: github.event.workflow_run.conclusion != 'skipped'
-
-    permissions:
-      checks: write
-      pull-requests: write
-      actions: read
-
-      # Only needed for private repositories
-      contents: read
-      issues: read
 
     steps:
     - name: Download and extract artifacts
@@ -42,7 +29,7 @@ jobs:
           unzip -d "$name" "$name.zip"
         done
 
-        if [ "$(ls -A)" ]; then
+        if [[ -f "github-event/event.json" ]]; then
           ls
         else
           exit 1
@@ -56,4 +43,4 @@ jobs:
         commit: ${{ github.event.workflow_run.head_sha }}
         event_file: artifacts/github-event/event.json
         event_name: ${{ github.event.workflow_run.event }}
-        files: "artifacts/**/*.xml"
+        files: "artifacts/Test results for*/*.xml"
