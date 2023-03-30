@@ -3,7 +3,7 @@
 set -ex
 
 # Only required on pull requests
-if [[ -z "$GITHUB_BASE_REF" ]]; then
+if [[ $GITHUB_BASE_REF ]]; then
   git fetch origin master:master
 fi
 
