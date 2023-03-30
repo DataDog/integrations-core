@@ -28,17 +28,9 @@ DESC_PER_RESOURCE = {
     "services.loadbalancers": "service load balancers",
 }
 
-DESC_PER_COUNT_TYPE = {
-    "used": "Observed {} usage",
-    "limit": "Hard limit for {}",
-    "remaining": "Remaining available {}"
-}
+DESC_PER_COUNT_TYPE = {"used": "Observed {} usage", "limit": "Hard limit for {}", "remaining": "Remaining available {}"}
 
-ORIENTATION_PER_COUNT_TYPE = {
-    "used": 0,
-    "limit": 0,
-    "remaining": 1
-}
+ORIENTATION_PER_COUNT_TYPE = {"used": 0, "limit": 0, "remaining": 1}
 
 
 def gen_clusterquota_line(resource, count_type, applied=False):
@@ -57,15 +49,16 @@ def gen_clusterquota_line(resource, count_type, applied=False):
     else:
         description += " for all namespaces"
 
-    print("{},gauge,,{},,{},{},openshift,".format(
-        metric_name,
-        UNITS_PER_RESOURCE.get(resource, ""),
-        description,
-        ORIENTATION_PER_COUNT_TYPE[count_type]
-    ))
+    print(
+        "{},gauge,,{},,{},{},openshift,".format(
+            metric_name, UNITS_PER_RESOURCE.get(resource, ""), description, ORIENTATION_PER_COUNT_TYPE[count_type]
+        )
+    )
 
 
-print("metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric")
+print(
+    "metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric"
+)
 
 for res in RESOURCES:
     gen_clusterquota_line(res, "used", False)

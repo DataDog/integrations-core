@@ -7,7 +7,6 @@ import json
 import mock
 import pytest
 import requests
-from tests.common import EXCHANGE_MESSAGE_STATS
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
@@ -18,6 +17,7 @@ from datadog_checks.rabbitmq.rabbitmq import (
     RabbitMQException,
     RabbitMQManagement,
 )
+from tests.common import EXCHANGE_MESSAGE_STATS
 
 from . import common, metrics
 
