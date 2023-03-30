@@ -1230,7 +1230,7 @@
                     {
                         "id": 5026072239463127,
                         "definition": {
-                            "title": "Workqueue Retries Total",
+                            "title": "Work Queue Retries Total",
                             "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
