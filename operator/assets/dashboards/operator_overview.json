@@ -550,7 +550,7 @@
                             ],
                             "custom_links": [
                                 {
-                                    "link": "https://app.datadoghq.com/screen/integration/30322/kubernetes-pods-overview",
+                                    "link": "/dash/integration/30322/kubernetes-pods-overview",
                                     "label": "View Pods overview"
                                 }
                             ],
