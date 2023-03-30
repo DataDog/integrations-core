@@ -21,10 +21,13 @@
     "dashboards": {
       "Datadog Operator Overview": "assets/dashboards/operator_overview.json"
     },
-    "metrics": {
-      "prefix": "datadog.operator.",
-      "check": "datadog.operator.go_info",
-      "metadata_path": "metadata.csv"
+    "integration": {
+      "source_type_name": "Datadog Operator",
+      "metrics": {
+        "prefix": "datadog.operator.",
+        "check": "datadog.operator.go_info",
+        "metadata_path": "metadata.csv"
+      }
     }
   },
   "author": {
