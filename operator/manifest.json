@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Monitor the Datadog Operator",
-    "title": "Operator",
+    "title": "Datadog Operator",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
