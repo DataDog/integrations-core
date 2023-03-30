@@ -365,7 +365,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:datadog.operator.go_info{$scope,$cluster,kube_app_name:datadog-operator,kube_deployment:*} by {kube_deployment,kube_cluster_name,kube_namespace,datacenter}",
+                                            "query": "sum:datadog.operator.go_info{$scope,$cluster,kube_app_name:datadog-operator,kube_deployment:*} by {kube_deployment,kube_cluster_name,kube_namespace}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
@@ -435,7 +435,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_instance:datadog-agent-cluster-agent,kube_deployment:*} by {kube_deployment,kube_cluster_name,datacenter,kube_namespace}",
+                                            "query": "sum:kubernetes.memory.rss{$scope,$cluster,kube_app_managed_by:datadog-operator,kube_app_instance:datadog-agent-cluster-agent,kube_deployment:*} by {kube_deployment,kube_cluster_name,kube_namespace}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"
@@ -470,7 +470,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.memory.rss{$scope,$cluster,kube_app_component:cluster-checks-runner,kube_app_managed_by:datadog-operator,kube_deployment:*} by {kube_deployment,kube_cluster_name,datacenter,kube_namespace}",
+                                            "query": "sum:kubernetes.memory.rss{$scope,$cluster,kube_app_component:cluster-checks-runner,kube_app_managed_by:datadog-operator,kube_deployment:*} by {kube_deployment,kube_cluster_name,kube_namespace}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"
