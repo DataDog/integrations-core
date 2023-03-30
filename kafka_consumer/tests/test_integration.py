@@ -5,7 +5,7 @@ import logging
 from contextlib import nullcontext as does_not_raise
 
 import pytest
-from tests.common import assert_check_kafka, metrics
+from tests.common import LEGACY_CLIENT, assert_check_kafka, metrics
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -176,7 +176,7 @@ def test_config(
 
 
 @pytest.mark.parametrize(
-    'consumer_groups_config, broker_offset_count, consumer_offset_count, consumer_lag_count, expected_warning',
+    'consumer_groups_regex_config, broker_offset_count, consumer_offset_count, consumer_lag_count, expected_warning',
     [
         pytest.param(
             {
