@@ -19,7 +19,7 @@ files:
         type: string
     - name: prometheus_endpoint
       description: |
-        Alias for `prometheus_url`.
+        Deprecated alias for `prometheus_url`.
       hidden: true
       value:
         type: string
