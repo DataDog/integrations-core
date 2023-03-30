@@ -1185,7 +1185,7 @@
                     {
                         "id": 3086510812227483,
                         "definition": {
-                            "title": "Workqueue Depth",
+                            "title": "Work Queue Depth",
                             "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
