@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
@@ -104,6 +105,62 @@ def test_invalid_connect_str(dd_run_check, check, aggregator, caplog, kafka_inst
 
     assert exception_msg in caplog.text
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.parametrize(
+    'sasl_oauth_token_provider, expected_exception, mocked_admin_client',
+    [
+        pytest.param(
+            {},
+            pytest.raises(Exception, match="sasl_oauth_token_provider required for OAUTHBEARER sasl"),
+            None,
+            id="No sasl_oauth_token_provider",
+        ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {}},
+            pytest.raises(Exception, match="The `url` setting of `auth_token` reader is required"),
+            None,
+            id="Empty sasl_oauth_token_provider, url missing",
+        ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {'url': 'http://fake.url'}},
+            pytest.raises(Exception, match="The `client_id` setting of `auth_token` reader is required"),
+            None,
+            id="client_id missing",
+        ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {'url': 'http://fake.url', 'client_id': 'id'}},
+            pytest.raises(Exception, match="The `client_secret` setting of `auth_token` reader is required"),
+            None,
+            id="client_secret missing",
+        ),
+        pytest.param(
+            {'sasl_oauth_token_provider': {'url': 'http://fake.url', 'client_id': 'id', 'client_secret': 'secret'}},
+            does_not_raise(),
+            mock.MagicMock(),
+            id="valid config",
+        ),
+    ],
+)
+@pytest.mark.skipif(LEGACY_CLIENT, reason='kafka_python does not have confluent_kafka_client.AdminClient')
+def test_oauth_config(
+    sasl_oauth_token_provider, expected_exception, mocked_admin_client, check, dd_run_check, kafka_instance
+):
+    kafka_instance.update(
+        {
+            'monitor_unlisted_consumer_groups': True,
+            'security_protocol': 'SASL_PLAINTEXT',
+            'sasl_mechanism': 'OAUTHBEARER',
+        }
+    )
+    kafka_instance.update(sasl_oauth_token_provider)
+
+    with expected_exception:
+        with mock.patch(
+            'datadog_checks.kafka_consumer.client.confluent_kafka_client.AdminClient',
+            return_value=mocked_admin_client,
+        ):
+            dd_run_check(check(kafka_instance))
 
 
 # TODO: After these tests are finished and the revamp is complete,
