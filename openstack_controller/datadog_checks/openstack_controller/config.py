@@ -20,6 +20,10 @@ class OpenstackConfig:
         self.user = instance.get("user")
         self.nova_microversion = instance.get('nova_microversion')
         self.api_type = None
+        self.custom_tags = instance.get("tags", [])
+        self.collect_hypervisor_metrics = instance.get("collect_hypervisor_metrics", True)
+        self.collect_hypervisor_load = instance.get("collect_hypervisor_load", True)
+        self.report_legacy_metrics = instance.get("report_legacy_metrics", True)
         self.validate()
 
     def validate(self):
