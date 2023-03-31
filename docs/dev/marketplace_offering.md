@@ -11,7 +11,7 @@ further_reading:
 - link: "https://www.datadoghq.com/blog/datadog-marketplace/"
   tag: "Blog"
   text: "Expand your monitoring reach with the Datadog Marketplace"
-- link: "/developers/marketplace/offering/"
+- link: "/developers/integrations/marketplace_offering/"
   tag: "Documentation"
   text: "Learn how to develop a Marketplace offering"
 - link: "/developers/datadog_apps/"
@@ -74,7 +74,7 @@ Professional services
 
 To request access to the private Marketplace repository, email <a href="mailto:marketplace@datadoghq.com">marketplace@datadoghq.com</a>. A Marketplace offering requires files and information such as pricing plans. Once you have been granted access, you can review an [example pull request][12] in the Marketplace repository with annotations and best practices.
 
-To get started with creating an offering on the Datadog Marketplace, see [Develop a Marketplace Offering][13].
+To get started with creating an offering, see [Create a Tile][13].
 
 ## Further Reading
 
@@ -92,9 +92,9 @@ To get started with creating an offering on the Datadog Marketplace, see [Develo
 [10]: https://chat.datadoghq.com/
 [11]: https://docs.datadoghq.com/developers/authorization/
 [12]: https://github.com/DataDog/marketplace/pull/107
-[13]: https://docs.datadoghq.com/developers/marketplace/offering
+[13]: https://docs.datadoghq.com/developers/integrations/create_a_tile
 [14]: https://docs.datadoghq.com/developers/integrations/api_integration/
-[15]: https://docs.datadoghq.com/developers/marketplace/offering#agent-based-integrations
-[16]: https://docs.datadoghq.com/developers/marketplace/offering#rest-api-integrations
-[17]: https://docs.datadoghq.com/developers/marketplace/offering#datadog-apps
-[18]: https://docs.datadoghq.com/developers/marketplace/offering#saas-license-or-professional-service-offerings
+[15]: https://docs.datadoghq.com/integrations/create_a_tile/#agent-based-integrations
+[16]: https://docs.datadoghq.com/integrations/create_a_tile/#rest-api-integrations
+[17]: https://docs.datadoghq.com/integrations/create_a_tile/#datadog-apps
+[18]: https://docs.datadoghq.com/integrations/create_a_tile/#saas-license-or-professional-service-offerings

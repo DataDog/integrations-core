@@ -16,7 +16,7 @@ further_reading:
 
 ## Overview
 
-This page walks you through how to develop an offering on the [**Integrations** page][12] or the [**Marketplace** page][11]. 
+This page walks you through how to develop an offering on the [**Integrations** page][12] or the [**Marketplace** page][9]. 
 
 ## Configuration file
 
@@ -141,7 +141,7 @@ You can find the complete list of mandatory and optional attributes for the `met
 [6]: https://docs.datadoghq.com/metrics/types/#metric-types
 [7]: https://docs.datadoghq.com/metrics/units/#unit-list
 [8]: https://docs.datadoghq.com/getting_started/tagging/
-[9]: https://docs.datadoghq.com/developers/marketplace/
+[9]: https://app.datadoghq.com/marketplace/
 [10]: https://docs.datadoghq.com/developers/datadog_apps/
-[11]: https://docs.datadoghq.com/developers/marketplace/
+[11]: https://docs.datadoghq.com/developers/integrations/marketplace_offering
 [12]: https://app.datadoghq.com/integrations

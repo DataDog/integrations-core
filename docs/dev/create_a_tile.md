@@ -12,9 +12,9 @@ further_reading:
 - link: "https://www.datadoghq.com/blog/datadog-marketplace/"
   tag: "Blog"
   text: "Expand your monitoring reach with the Datadog Marketplace"
-- link: "/developers/marketplace/"
+- link: "/developers/integrations/marketplace_offering/"
   tag: "Documentation"
-  text: "Learn about the Datadog Marketplace"
+  text: "Learn how to build a Marketplace offering"
 - link: "/developers/integrations/oauth_for_integrations"
   tag: "Documentation"
   text: "Learn about using OAuth for integrations"
@@ -273,7 +273,7 @@ Once a Marketplace tile is live, Technology Partners can meet with Datadog's Par
 [16]: https://docs.datadoghq.com/developers/datadog_apps/
 [17]: https://app.datadoghq.com/apps/
 [18]: https://github.com/Datadog/marketplace
-[19]: https://docs.datadoghq.com/developers/marketplace/#request-access-to-marketplace
+[19]: https://docs.datadoghq.com/developers/integrations/marketplace_offering/#request-access-to-marketplace
 [20]: https://www.python.org/downloads/
 [21]: https://pypi.org/project/datadog-checks-dev/
 [22]: https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file

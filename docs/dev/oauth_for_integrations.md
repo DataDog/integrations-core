@@ -132,7 +132,7 @@ Additional helpful documentation, links, and articles:
 [4]: https://app.datadoghq.com/apps
 [5]: https://github.com/DataDog/integrations-extras/
 [6]: http://github.com/DataDog/marketplace
-[7]: https://docs.datadoghq.com/developers/marketplace/#develop-your-offering
+[7]: https://docs.datadoghq.com/developers/integrations/marketplace_offering/#list-an-offering-on-marketplace
 [8]: https://docs.datadoghq.com/getting_started/site/
 [9]: https://app.datadoghq.com/organization-settings/oauth-applications
 [10]: https://app.datadoghq.com/organization-settings/api-keys
