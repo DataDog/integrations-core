@@ -61,9 +61,8 @@ jobs:
 
     - name: Commit if stats have changed
       run: |-
-        if ! git diff --quiet; then
-          git add "${{ env.BADGE_PATH }}"
-          git commit -m "Update test results from ${{ github.sha }}"
+        git add "${{ env.BADGE_PATH }}"
+        if git commit -m "Update test results from ${{ github.sha }}"; then
           git push
         else
           echo "Nothing has changed"
