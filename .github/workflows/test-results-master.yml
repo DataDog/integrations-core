@@ -18,7 +18,7 @@ jobs:
 
     steps:
     - name: Sleep
-      run: sleep 600
+      run: sleep 360
 
     - uses: actions/checkout@v3
       with:
@@ -66,4 +66,4 @@ jobs:
       run: |-
         git add "${{ env.BADGE_PATH }}"
         git commit -m "Update test results from ${{ github.sha }}"
-        git diff --quiet || git push
+        git push
