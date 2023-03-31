@@ -54,6 +54,14 @@ class KafkaClient:
             "sasl.kerberos.service.name": self.config._sasl_kerberos_service_name,
         }
 
+        if self.config._sasl_mechanism == "OAUTHBEARER":
+            extras_parameters['sasl.oauthbearer.method'] = "oidc"
+            extras_parameters["sasl.oauthbearer.client.id"] = self.config._sasl_oauth_token_provider.get("client_id")
+            extras_parameters["sasl.oauthbearer.token.endpoint.url"] = self.config._sasl_oauth_token_provider.get("url")
+            extras_parameters["sasl.oauthbearer.client.secret"] = self.config._sasl_oauth_token_provider.get(
+                "client_secret"
+            )
+
         for key, value in extras_parameters.items():
             # Do not add the value if it's not specified
             if value:

@@ -11,6 +11,7 @@ from confluent_kafka.cimpl import NewTopic
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev._env import e2e_testing
+from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.kafka_consumer import KafkaCheck
 
 from .common import AUTHENTICATION, DOCKER_IMAGE_PATH, HERE, KAFKA_CONNECT_STR, TOPICS, get_authentication_configuration
@@ -96,7 +97,9 @@ def dd_environment():
             DOCKER_IMAGE_PATH,
             conditions=conditions,
             env_vars={
-                "KRB5_CONFIG": f"{HERE}/docker/kerberos/kdc/krb5_agent.conf",
+                "KRB5_CONFIG": f"{HERE}/docker/kerberos/kdc/krb5_agent.conf"
+                if running_on_ci()
+                else f"{HERE}/docker/kerberos/kdc/krb5_local.conf",
                 "SECRET_DIR": secret_dir,
             },
             build=True,

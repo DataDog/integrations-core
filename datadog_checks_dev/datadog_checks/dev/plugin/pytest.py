@@ -186,12 +186,13 @@ def dd_agent_check(request, aggregator, datadog_agent):
         matches = re.findall(r'((?:\{ \[|\[).*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
 
         if not matches:
-            raise ValueError(
-                '{}{}\nCould not find valid check output'.format(
-                    result.stdout,
-                    result.stderr,
-                )
-            )
+            message_parts = []
+            debug_result = run_command(['docker', 'logs', 'dd_{}_{}'.format(check, env)], capture=True)
+            if not debug_result.code:
+                message_parts.append(debug_result.stdout + debug_result.stderr)
+
+            message_parts.append(result.stdout + result.stderr)
+            raise ValueError('{}\nCould not find valid check output'.format('\n'.join(message_parts)))
 
         for raw_json in matches:
             try:

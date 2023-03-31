@@ -17,6 +17,12 @@ files:
         used to collect the GitLab version.
       value:
         type: string
+    - name: prometheus_endpoint
+      description: |
+        Deprecated alias for `prometheus_url`.
+      hidden: true
+      value:
+        type: string
     - template: instances/openmetrics_legacy
       overrides:
         prometheus_url.value.example: http://<GITLAB_URL>/-/metrics

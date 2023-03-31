@@ -12,7 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # Networking
 HOST = get_docker_hostname()
 
-GITLAB_TEST_PASSWORD = "testroot"
+GITLAB_TEST_PASSWORD = 'hdkss33jdijb123'
 GITLAB_TEST_API_TOKEN = 'token'
 GITLAB_LOCAL_PORT = 8086
 GITLAB_LOCAL_PROMETHEUS_PORT = 8088
@@ -104,59 +104,8 @@ METRICS_TO_TEST = [
     "rack.http_requests_total",
     "ruby.process_start_time_seconds",
     "rack.http_request_duration_seconds.sum",
-    "ruby.process_start_time_seconds",
     "sql_duration_seconds.sum",
 ]
-
-LEGACY_CONFIG = {
-    'init_config': {'allowed_metrics': ALLOWED_METRICS},
-    'instances': [
-        {
-            'prometheus_endpoint': PROMETHEUS_ENDPOINT,
-            'gitlab_url': GITLAB_URL,
-            'disable_ssl_validation': True,
-            'tags': list(CUSTOM_TAGS),
-        }
-    ],
-}
-
-CONFIG = {
-    'init_config': {},
-    'instances': [
-        {
-            'prometheus_endpoint': GITLAB_PROMETHEUS_ENDPOINT,
-            'gitlab_url': GITLAB_URL,
-            'send_distribution_counts_as_monotonic': True,
-            'send_monotonic_counter': True,
-            'disable_ssl_validation': True,
-            'tags': list(CUSTOM_TAGS),
-        }
-    ],
-}
-
-AUTH_CONFIG = {
-    'init_config': {'allowed_metrics': ALLOWED_METRICS},
-    'instances': [
-        {
-            'prometheus_endpoint': PROMETHEUS_ENDPOINT,
-            'gitlab_url': GITLAB_URL,
-            'disable_ssl_validation': True,
-            'api_token': GITLAB_TEST_API_TOKEN,
-        }
-    ],
-}
-
-BAD_CONFIG = {
-    'init_config': {'allowed_metrics': ALLOWED_METRICS},
-    'instances': [
-        {
-            'prometheus_endpoint': 'http://{}:1234/-/metrics'.format(HOST),
-            'gitlab_url': 'http://{}:1234/ci'.format(HOST),
-            'disable_ssl_validation': True,
-            'tags': list(CUSTOM_TAGS),
-        }
-    ],
-}
 
 
 def assert_check(aggregator, metrics):
