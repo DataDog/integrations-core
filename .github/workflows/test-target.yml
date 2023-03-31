@@ -91,6 +91,9 @@ jobs:
       # Windows E2E requires Windows containers
       DDEV_E2E_AGENT: "${{ inputs.platform == 'windows' && (inputs.agent-image-windows || 'datadog/agent-dev:master-py3-win-servercore') || inputs.agent-image }}"
       DDEV_E2E_AGENT_PY2: "${{ inputs.platform == 'windows' && (inputs.agent-image-windows-py2 || 'datadog/agent-dev:master-py2-win-servercore') || inputs.agent-image-py2 }}"
+      # Test results for later processing
+      TEST_RESULTS_BASE_DIR: ".test-results"
+      TEST_RESULTS_DIR: ".test-results/${{ inputs.job-name }}"
       # Tracing to monitor our test suite
       DD_ENV: "ci"
       DD_SERVICE: "ddev-integrations-${{ inputs.repo }}"
@@ -198,6 +201,11 @@ jobs:
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
       run: ddev env test --base --new-env --junit ${{ inputs.target }}:latest
 
+    - name: Finalize test results
+      run: |-
+        mkdir -p "${{ env.TEST_RESULTS_DIR }}"
+        mv ${{ inputs.target }}/.junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
+
     - name: Save trace captures
       if: inputs.repo == 'core'
       run: |-
@@ -216,8 +224,8 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v3
       with:
-        name: Test results for ${{ inputs.job-name }}
-        path: "${{ inputs.target }}/.junit/*.xml"
+        name: test-results
+        path: "${{ env.TEST_RESULTS_BASE_DIR }}"
 
     - name: Upload coverage data
       if: inputs.standard && !github.event.repository.private
