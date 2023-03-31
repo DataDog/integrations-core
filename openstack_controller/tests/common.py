@@ -26,8 +26,8 @@ FILTERED_BY_PROJ_SERVER_ID = ['server-1', 'server-2']
 
 REST_CONFIG = {
     'keystone_server_url': 'http://127.0.0.1:8080/identity',
-    'user_name': 'admin',
-    'user_password': 'password',
+    'username': 'admin',
+    'password': 'password',
 }
 
 KEYSTONE_INSTANCE = {

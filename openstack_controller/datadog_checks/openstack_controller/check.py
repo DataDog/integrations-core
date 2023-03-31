@@ -46,7 +46,6 @@ class OpenStackControllerCheck(AgentCheck):
         self.config = OpenstackConfig(self.log, self.instance)
 
     def check(self, _instance):
-        self.log.debug(self.instance)
         tags = ['keystone_server:{}'.format(self.instance["keystone_server_url"])] + self.instance.get('tags', [])
         try:
             api = make_api(self.config, self.log, self.http)
@@ -83,12 +82,12 @@ class OpenStackControllerCheck(AgentCheck):
 
     def _report_compute_metrics(self, api, project_id, project_tags):
         try:
-            if self._report_compute_response_time(api, project_id, project_tags):
-                self._report_compute_limits(api, project_id, project_tags)
-                self._report_compute_quotas(api, project_id, project_tags)
-                self._report_compute_servers(api, project_id, project_tags)
-                self._report_compute_flavors(api, project_id, project_tags)
-                self._report_compute_hypervisors(api, project_id, project_tags)
+            self._report_compute_response_time(api, project_id, project_tags)
+            self._report_compute_limits(api, project_id, project_tags)
+            self._report_compute_quotas(api, project_id, project_tags)
+            self._report_compute_servers(api, project_id, project_tags)
+            self._report_compute_flavors(api, project_id, project_tags)
+            self._report_compute_hypervisors(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting compute metrics: %s", e)
@@ -102,62 +101,65 @@ class OpenStackControllerCheck(AgentCheck):
         if response_time is not None:
             self.gauge('openstack.nova.response_time', response_time, tags=project_tags)
             self.service_check('openstack.nova.api.up', AgentCheck.OK, tags=project_tags)
-            return True
         else:
             self.service_check('openstack.nova.api.up', AgentCheck.UNKNOWN, tags=project_tags)
-            return False
 
     def _report_compute_limits(self, api, project_id, project_tags):
         compute_limits = api.get_compute_limits(project_id)
         self.log.debug("compute_limits: %s", compute_limits)
-        for metric, value in compute_limits.items():
-            if metric in NOVA_LIMITS_METRICS or metric in NOVA_LATEST_LIMITS_METRICS:
-                self.gauge(f'openstack.nova.limits.{metric}', value, tags=project_tags)
+        if compute_limits:
+            for metric, value in compute_limits.items():
+                if metric in NOVA_LIMITS_METRICS or metric in NOVA_LATEST_LIMITS_METRICS:
+                    self.gauge(f'openstack.nova.limits.{metric}', value, tags=project_tags)
 
     def _report_compute_quotas(self, api, project_id, project_tags):
         compute_quotas = api.get_compute_quota_set(project_id)
         self.log.debug("compute_quotas: %s", compute_quotas)
-        for metric, value in compute_quotas.items():
-            if metric in NOVA_QUOTA_SETS_METRICS or metric in NOVA_LATEST_QUOTA_SETS_METRICS:
-                self.gauge(f'openstack.nova.quota_set.{metric}', value, tags=project_tags)
+        if compute_quotas:
+            for metric, value in compute_quotas.items():
+                if metric in NOVA_QUOTA_SETS_METRICS or metric in NOVA_LATEST_QUOTA_SETS_METRICS:
+                    self.gauge(f'openstack.nova.quota_set.{metric}', value, tags=project_tags)
 
     def _report_compute_servers(self, api, project_id, project_tags):
         compute_servers = api.get_compute_servers(project_id)
         self.log.debug("compute_servers: %s", compute_servers)
-        for server_id, server_data in compute_servers.items():
-            for metric, value in server_data['metrics'].items():
-                if metric in NOVA_SERVER_METRICS or metric in NOVA_LATEST_SERVER_METRICS:
-                    self.gauge(
-                        f'openstack.nova.server.{metric}',
-                        value,
-                        tags=project_tags + [f'server_id:{server_id}', f'server_name:{server_data["name"]}'],
-                    )
+        if compute_servers:
+            for server_id, server_data in compute_servers.items():
+                for metric, value in server_data['metrics'].items():
+                    if metric in NOVA_SERVER_METRICS or metric in NOVA_LATEST_SERVER_METRICS:
+                        self.gauge(
+                            f'openstack.nova.server.{metric}',
+                            value,
+                            tags=project_tags + [f'server_id:{server_id}', f'server_name:{server_data["name"]}'],
+                        )
 
     def _report_compute_flavors(self, api, project_id, project_tags):
         compute_flavors = api.get_compute_flavors(project_id)
         self.log.debug("compute_flavors: %s", compute_flavors)
-        for flavor_id, flavor_data in compute_flavors.items():
-            for metric, value in flavor_data['metrics'].items():
-                self.gauge(
-                    f'openstack.nova.flavor.{metric}',
-                    value,
-                    tags=project_tags + [f'flavor_id:{flavor_id}', f'flavor_name:{flavor_data["name"]}'],
-                )
+        if compute_flavors:
+            for flavor_id, flavor_data in compute_flavors.items():
+                for metric, value in flavor_data['metrics'].items():
+                    self.gauge(
+                        f'openstack.nova.flavor.{metric}',
+                        value,
+                        tags=project_tags + [f'flavor_id:{flavor_id}', f'flavor_name:{flavor_data["name"]}'],
+                    )
 
     def _report_compute_hypervisors(self, api, project_id, project_tags):
         compute_hypervisors = api.get_compute_hypervisors(project_id)
         self.log.debug("compute_hypervisors: %s", compute_hypervisors)
         compute_os_aggregates = api.get_compute_os_aggregates(project_id)
         self.log.debug("compute_os_aggregates: %s", compute_os_aggregates)
-        for hypervisor_id, hypervisor_data in compute_hypervisors.items():
-            hypervisor_tags = project_tags + _create_hypervisor_metric_tags(
-                hypervisor_id, hypervisor_data, compute_os_aggregates
-            )
-            self._report_hypervisor_service_check(
-                hypervisor_data.get('state'), hypervisor_data["name"], hypervisor_tags
-            )
-            if self.instance.get('collect_hypervisor_metrics', True):
-                self._report_hypervisor_metrics(hypervisor_data, hypervisor_tags)
+        if compute_hypervisors:
+            for hypervisor_id, hypervisor_data in compute_hypervisors.items():
+                hypervisor_tags = project_tags + _create_hypervisor_metric_tags(
+                    hypervisor_id, hypervisor_data, compute_os_aggregates
+                )
+                self._report_hypervisor_service_check(
+                    hypervisor_data.get('state'), hypervisor_data["name"], hypervisor_tags
+                )
+                if self.instance.get('collect_hypervisor_metrics', True):
+                    self._report_hypervisor_metrics(hypervisor_data, hypervisor_tags)
 
     def _report_hypervisor_service_check(self, state, name, hypervisor_tags):
         self.service_check(
@@ -187,8 +189,8 @@ class OpenStackControllerCheck(AgentCheck):
 
     def _report_network_metrics(self, api, project_id, project_tags):
         try:
-            if self._report_network_response_time(api, project_id, project_tags):
-                self._report_network_quotas(api, project_id, project_tags)
+            self._report_network_response_time(api, project_id, project_tags)
+            self._report_network_quotas(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting network metrics: %s", e)
@@ -202,16 +204,15 @@ class OpenStackControllerCheck(AgentCheck):
         if response_time is not None:
             self.gauge('openstack.neutron.response_time', response_time, tags=project_tags)
             self.service_check('openstack.neutron.api.up', AgentCheck.OK, tags=project_tags)
-            return True
         else:
             self.service_check('openstack.neutron.api.up', AgentCheck.UNKNOWN, tags=project_tags)
-            return False
 
     def _report_network_quotas(self, api, project_id, project_tags):
         network_quotas = api.get_network_quotas(project_id)
         self.log.debug("network_quotas: %s", network_quotas)
-        for metric, value in network_quotas.items():
-            self.gauge(f'openstack.neutron.quotas.{metric}', value, tags=project_tags)
+        if network_quotas:
+            for metric, value in network_quotas.items():
+                self.gauge(f'openstack.neutron.quotas.{metric}', value, tags=project_tags)
 
     def _report_baremetal_metrics(self, api, project_id, project_tags):
         try:
@@ -229,10 +230,8 @@ class OpenStackControllerCheck(AgentCheck):
         if response_time is not None:
             self.gauge('openstack.ironic.response_time', response_time, tags=project_tags)
             self.service_check('openstack.ironic.api.up', AgentCheck.OK, tags=project_tags)
-            return True
         else:
             self.service_check('openstack.ironic.api.up', AgentCheck.UNKNOWN, tags=project_tags)
-            return False
 
     def _report_load_balancer_metrics(self, api, project_id, project_tags):
         try:
@@ -250,7 +249,5 @@ class OpenStackControllerCheck(AgentCheck):
         if response_time is not None:
             self.gauge('openstack.octavia.response_time', response_time, tags=project_tags)
             self.service_check('openstack.octavia.api.up', AgentCheck.OK, tags=project_tags)
-            return True
         else:
             self.service_check('openstack.octavia.api.up', AgentCheck.UNKNOWN, tags=project_tags)
-            return False

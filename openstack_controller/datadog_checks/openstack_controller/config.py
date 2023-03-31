@@ -14,8 +14,8 @@ class OpenstackConfig:
         self.openstack_config_file_path = instance.get("openstack_config_file_path")
         self.openstack_cloud_name = instance.get("openstack_cloud_name")
         self.keystone_server_url = instance.get("keystone_server_url")
-        self.user_name = instance.get("user_name")
-        self.user_password = instance.get("user_password")
+        self.username = instance.get("username")
+        self.password = instance.get("password")
         self.domain_id = instance.get("domain_id", "default")
         self.user = instance.get("user")
         self.nova_microversion = instance.get('nova_microversion')
@@ -32,22 +32,22 @@ class OpenstackConfig:
             self._validate_user()
 
     def _validate_user(self):
-        if self.user_name:
-            if not self.user_password:
-                raise ConfigurationError("Please specify `user_password` in your config.")
+        if self.username:
+            if not self.password:
+                raise ConfigurationError("Please specify `password` in your config.")
             self.user = {
-                "name": self.user_name,
-                "password": self.user_password,
+                "name": self.username,
+                "password": self.password,
                 "domain": {"id": self.domain_id},
             }
         else:
-            self.log.info("Not detected `user_name` in config. Searching for legacy `user` config")
+            self.log.info("Not detected `username` in config. Searching for legacy `user` config")
             self._validate_user_legacy()
         self.api_type = ApiType.REST
 
     def _validate_user_legacy(self):
         if self.user is None:
-            raise ConfigurationError("Please specify `user_name` in your config.")
+            raise ConfigurationError("Please specify `username` in your config.")
         if not (
             self.user.get('name')
             and self.user.get('password')

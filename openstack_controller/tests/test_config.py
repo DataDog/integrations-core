@@ -49,13 +49,13 @@ pytestmark = [pytest.mark.unit]
         ),
         pytest.param(
             {'keystone_server_url': 'http://localhost'},
-            'Please specify `user_name` in your config.',
-            id='no user_name',
+            'Please specify `username` in your config.',
+            id='no username',
         ),
         pytest.param(
-            {'keystone_server_url': 'http://localhost', 'user_name': 'admin'},
-            'Please specify `user_password` in your config.',
-            id='no user_password',
+            {'keystone_server_url': 'http://localhost', 'username': 'admin'},
+            'Please specify `password` in your config.',
+            id='no password',
         ),
         pytest.param(
             {'keystone_server_url': 'http://localhost', 'user': {}},
@@ -102,8 +102,8 @@ def test_legacy_config_ok():
 def test_config_ok():
     instance = {
         'keystone_server_url': 'http://localhost',
-        'user_name': 'my_name',
-        'user_password': 'my_password',
+        'username': 'my_name',
+        'password': 'my_password',
         'domain_id': 'default',
     }
     OpenStackControllerCheck('test', {}, [instance])
