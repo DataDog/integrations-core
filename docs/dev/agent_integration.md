@@ -6,7 +6,8 @@ aliases:
   - /developers/integrations/testing/
   - /integrations/datadog_checks_dev/
   - /guides/new_integration/
-
+  - /developers/integrations/new_check_howto/
+dependencies: "https://github.com/DataDog/integrations-core/blob/alai97/add-marketplace-documentation/docs/dev/agent_integration.md"
 ---
 
 ## Overview
