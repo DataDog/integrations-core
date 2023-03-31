@@ -10,33 +10,8 @@ from tests.common import metrics
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer import KafkaCheck
-from datadog_checks.kafka_consumer.client.kafka_python_client import OAuthTokenProvider
 
 pytestmark = [pytest.mark.unit]
-
-
-@pytest.mark.skip(reason='Add a test that not only check the parameter but also run the check')
-def test_oauth_token_client_config(check, kafka_instance):
-    kafka_instance['kafka_client_api_version'] = "3.3.2"
-    kafka_instance['security_protocol'] = "SASL_PLAINTEXT"
-    kafka_instance['sasl_mechanism'] = "OAUTHBEARER"
-    kafka_instance['sasl_oauth_token_provider'] = {
-        "url": "http://fake.url",
-        "client_id": "id",
-        "client_secret": "secret",
-    }
-
-    with mock.patch('kafka.KafkaAdminClient') as kafka_admin_client:
-        kafka_consumer_check = check(kafka_instance)
-        kafka_consumer_check.client._create_kafka_client(clazz=kafka_admin_client)
-        params = kafka_admin_client.call_args_list[0].kwargs
-
-        assert params['security_protocol'] == 'SASL_PLAINTEXT'
-        assert params['sasl_mechanism'] == 'OAUTHBEARER'
-        assert params['sasl_oauth_token_provider'].reader._client_id == "id"
-        assert params['sasl_oauth_token_provider'].reader._client_secret == "secret"
-        assert params['sasl_oauth_token_provider'].reader._url == "http://fake.url"
-        assert isinstance(params['sasl_oauth_token_provider'], OAuthTokenProvider)
 
 
 @pytest.mark.parametrize(
@@ -55,25 +30,6 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, check, kafka_inst
         k: v for k, v in kafka_consumer_check._tls_context_wrapper.config.items() if k in expected_http_kwargs
     }
     assert expected_http_kwargs == actual_options
-
-
-def test_legacy_invalid_connect_str(dd_run_check, check, aggregator, caplog, kafka_instance):
-    caplog.set_level(logging.DEBUG)
-    kafka_instance['kafka_connect_str'] = 'invalid'
-    del kafka_instance['consumer_groups']
-    with pytest.raises(Exception):
-        dd_run_check(check(kafka_instance))
-
-    for m in metrics:
-        aggregator.assert_metric(m, count=0)
-
-    exception_msg = (
-        'ConfigurationError: Cannot fetch consumer offsets because no consumer_groups are specified and '
-        'monitor_unlisted_consumer_groups is False'
-    )
-
-    assert exception_msg in caplog.text
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_invalid_connect_str(dd_run_check, check, aggregator, caplog, kafka_instance):
@@ -143,7 +99,7 @@ def test_oauth_config(
 
     with expected_exception:
         with mock.patch(
-            'datadog_checks.kafka_consumer.client.confluent_kafka_client.AdminClient',
+            'datadog_checks.kafka_consumer.kafka_consumer.KafkaClient',
             return_value=mocked_admin_client,
         ):
             dd_run_check(check(kafka_instance))
@@ -151,7 +107,7 @@ def test_oauth_config(
 
 # TODO: After these tests are finished and the revamp is complete,
 # the tests should be refactored to be parameters instead of separate tests
-@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.GenericKafkaClient")
+@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.KafkaClient")
 def test_when_consumer_lag_less_than_zero_then_emit_event(
     mock_generic_client, check, kafka_instance, dd_run_check, aggregator
 ):
@@ -194,7 +150,7 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(
     )
 
 
-@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.GenericKafkaClient")
+@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.KafkaClient")
 def test_when_partition_is_none_then_emit_warning_log(
     mock_generic_client, check, kafka_instance, dd_run_check, aggregator, caplog
 ):
@@ -237,7 +193,7 @@ def test_when_partition_is_none_then_emit_warning_log(
     assert expected_warning in caplog.text
 
 
-@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.GenericKafkaClient")
+@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.KafkaClient")
 def test_when_partition_not_in_partitions_then_emit_warning_log(
     mock_generic_client, check, kafka_instance, dd_run_check, aggregator, caplog
 ):
@@ -280,7 +236,7 @@ def test_when_partition_not_in_partitions_then_emit_warning_log(
     assert expected_warning in caplog.text
 
 
-@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.GenericKafkaClient")
+@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.KafkaClient")
 def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_metrics(
     mock_generic_client, kafka_instance, dd_run_check, aggregator, caplog
 ):
@@ -310,7 +266,7 @@ def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_me
     assert expected_warning in caplog.text
 
 
-@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.GenericKafkaClient")
+@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.KafkaClient")
 def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metrics(
     mock_generic_client, kafka_instance, dd_run_check, aggregator, caplog
 ):

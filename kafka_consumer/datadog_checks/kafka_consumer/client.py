@@ -10,6 +10,12 @@ from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
 
 class KafkaClient:
+    def __init__(self, config, tls_context, log) -> None:
+        self.config = config
+        self.log = log
+        self._kafka_client = None
+        self._tls_context = tls_context
+
     @property
     def kafka_client(self):
         if self._kafka_client is None:
