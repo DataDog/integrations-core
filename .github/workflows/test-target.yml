@@ -201,13 +201,8 @@ jobs:
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
       run: ddev env test --base --new-env --junit ${{ inputs.target }}:latest
 
-    - name: Finalize test results
-      run: |-
-        mkdir -p "${{ env.TEST_RESULTS_DIR }}"
-        mv ${{ inputs.target }}/.junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
-
     - name: Save trace captures
-      if: inputs.repo == 'core'
+      if: inputs.repo == 'core' && always()
       run: |-
         Stop-Process -Name "*mitmdump*"
         cat "${{ env.TRACE_CAPTURE_LOG }}"
@@ -220,6 +215,14 @@ jobs:
         name: "${{ inputs.traces-artifact-name }}"
         path: "${{ env.TRACE_CAPTURE_FILE }}"
 
+    - name: Finalize test results
+      if: always()
+      run: |-
+        mkdir -p "${{ env.TEST_RESULTS_DIR }}"
+        if [[ -d ${{ inputs.target }}/.junit ]]; then
+          mv ${{ inputs.target }}/.junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
+        fi
+
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v3
@@ -228,7 +231,7 @@ jobs:
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
 
     - name: Upload coverage data
-      if: inputs.standard && !github.event.repository.private
+      if: inputs.standard && !github.event.repository.private && always()
       uses: codecov/codecov-action@v3
       with:
         files: "${{ inputs.target }}/coverage.xml"

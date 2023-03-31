@@ -17,9 +17,6 @@ jobs:
       BADGE_PATH: test-results.svg
 
     steps:
-    - name: Sleep
-      run: sleep 360
-
     - uses: actions/checkout@v3
       with:
         ref: "${{ env.BADGES_BRANCH }}"
@@ -64,6 +61,10 @@ jobs:
 
     - name: Commit if stats have changed
       run: |-
-        git add "${{ env.BADGE_PATH }}"
-        git commit -m "Update test results from ${{ github.sha }}"
-        git push
+        if ! git diff --quiet; then
+          git add "${{ env.BADGE_PATH }}"
+          git commit -m "Update test results from ${{ github.sha }}"
+          git push
+        else
+          echo "Nothing has changed"
+        fi

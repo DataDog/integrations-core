@@ -20,9 +20,9 @@ jobs:
     secrets: inherit
 
   publish-test-results:
-    # needs:
-    # - test
-    # if: success() || failure()
+    needs:
+    - test
+    if: success() || failure()
     concurrency:
       group: test-results
 
