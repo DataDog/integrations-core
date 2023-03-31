@@ -66,7 +66,7 @@ In addition to mounting `system-probe.yaml` and `oom_kill.d/conf.yaml` as descri
 
 With the [Datadog Helm chart][4], ensure that the `datadog.systemProbe` and `datadog.systemProbe.enableOOMKill` parameters are enabled in the `values.yaml` file.
 
-### Configuration with the Operator
+### Configuration with the Operator (v1.0.0+)
 
 Set the `features.oomKill.enabled` parameter in the DatadogAgent manifest:
 ```yaml
