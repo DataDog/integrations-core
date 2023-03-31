@@ -24,7 +24,7 @@ yum install -y kernel-devel-$(uname -r)
 ```
 
 **Note**: Kernel version 4.11 or later is required for the OOM Kill check to work.
-In addition, Windows, Container-Optimized OS, and CentOS/RHEL versions earlier than 8 are not supported.
+In addition, Windows andCentOS/RHEL versions earlier than 8 are not supported.
 
 ### Configuration
 
@@ -65,6 +65,37 @@ In addition to mounting `system-probe.yaml` and `oom_kill.d/conf.yaml` as descri
 ### Configuration with Helm
 
 With the [Datadog Helm chart][4], ensure that the `datadog.systemProbe` and `datadog.systemProbe.enableOOMKill` parameters are enabled in the `values.yaml` file.
+
+### Configuration with the Operator
+
+Set the `features.oomKill.enabled` parameter in the DatadogAgent manifest:
+```yaml
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+spec:
+  features:
+    oomKill:
+      enabled: true
+```
+
+**Note**: When using COS (Container Optimized OS), override the `src` volume in the node agent:
+```yaml
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+spec:
+  features:
+    oomKill:
+      enabled: true
+  override:
+    nodeAgent:
+      volumes: 
+      - emptyDir: {}
+        name: src
+```
 
 ### Validation
 

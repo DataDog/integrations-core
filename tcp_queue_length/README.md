@@ -23,7 +23,7 @@ yum install -y kernel-headers-$(uname -r)
 yum install -y kernel-devel-$(uname -r)
 ```
 
-**Note**: Windows, Container-Optimized OS, and CentOS/RHEL versions earlier than 8 are not supported.
+**Note**: Windows and CentOS/RHEL versions earlier than 8 are not supported.
 
 ### Configuration
 
@@ -46,6 +46,37 @@ system_probe_config:
 
 With the [Datadog Helm chart][3], the `system-probe` must be activated by setting `datadog.systemProbe.enabled` to `true` in the `values.yaml` file.
 Then, the check can be activated by setting the `datadog.systemProbe.enableTCPQueueLength` parameter.
+
+### Configuration with the Operator
+
+Set the `features.tcpQueueLength.enabled` parameter in the DatadogAgent manifest:
+```yaml
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+spec:
+  features:
+    tcpQueueLength:
+      enabled: true
+```
+
+**Note**: When using COS (Container Optimized OS), override the `src` volume in the node agent:
+```yaml
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+spec:
+  features:
+    tcpQueueLength:
+      enabled: true
+  override:
+    nodeAgent:
+      volumes: 
+      - emptyDir: {}
+        name: src
+```
 
 ### Validation
 
