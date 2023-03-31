@@ -19,6 +19,16 @@ jobs:
       standard: true
     secrets: inherit
 
+  publish-test-results:
+    # needs:
+    # - test
+    # if: success() || failure()
+    concurrency:
+      group: test-results
+
+    uses: ./.github/workflows/test-results-master.yml
+    secrets: inherit
+
   submit-traces:
     needs:
     - test
