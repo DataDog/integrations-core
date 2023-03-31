@@ -1,0 +1,69 @@
+name: Test results for the master branch
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test-results:
+    name: Publish
+    runs-on: ubuntu-22.04
+
+    env:
+      BADGES_BRANCH: badges
+      BADGE_PATH: test-results.svg
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: "${{ env.BADGES_BRANCH }}"
+
+    - uses: actions/download-artifact@v3
+      with:
+        name: test-results
+        path: test-results
+
+    - name: Publish test results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      id: test-results
+      with:
+        files: "test-results/*/*.xml"
+
+    - name: Set badge color
+      run: |-
+        case ${{ fromJSON( steps.test-results.outputs.json ).conclusion }} in
+          success)
+            echo "BADGE_COLOR=31c653" >> $GITHUB_ENV
+            ;;
+          failure)
+            echo "BADGE_COLOR=800000" >> $GITHUB_ENV
+            ;;
+          neutral)
+            echo "BADGE_COLOR=696969" >> $GITHUB_ENV
+            ;;
+        esac
+
+    - name: Create badge
+      uses: emibcn/badge-action@v2.0.2
+      with:
+        label: Tests
+        status: "${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests }} tests, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs }} runs: ${{ fromJSON( steps.test-results.outputs.json ).conclusion }}"
+        color: "${{ env.BADGE_COLOR }}"
+        path: "${{ env.BADGE_PATH }}"
+
+    - name: Configure Git for GitHub Actions bot
+      run: |-
+        git config --local user.name "github-actions[bot]"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Commit if stats have changed
+      run: |-
+        git add "${{ env.BADGE_PATH }}"
+        if git commit -m "Update test results from ${{ github.sha }}"; then
+          git push
+        else
+          echo "Nothing has changed"
+        fi

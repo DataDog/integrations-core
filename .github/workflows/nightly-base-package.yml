@@ -1,0 +1,26 @@
+name: Nightly minimum base package test
+
+on:
+  schedule:
+  # 5 AM UTC
+  - cron: "0 5 * * *"
+
+jobs:
+  test:
+    uses: ./.github/workflows/test-all.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      minimum-base-package: true
+      test-py2: true
+    secrets: inherit
+
+  submit-traces:
+    needs:
+    - test
+    if: success() || failure()
+
+    uses: ./.github/workflows/submit-traces.yml
+    secrets: inherit
