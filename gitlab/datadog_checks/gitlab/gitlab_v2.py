@@ -18,6 +18,8 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
     ALLOWED_SERVICE_CHECKS = ['readiness', 'liveness', 'health']
     __NAMESPACE__ = CHECK_NAME = 'gitlab'
     DEFAULT_METRIC_LIMIT = 0
+    DEFAULT_CONNECT_TIMEOUT = 5
+    DEFAULT_RECEIVE_TIMEOUT = 15
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
