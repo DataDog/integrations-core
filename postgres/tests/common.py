@@ -9,14 +9,23 @@ import pytest
 from datadog_checks.base.stubs.aggregator import normalize_tags
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
-from datadog_checks.postgres.util import QUERY_PG_STAT_WAL_RECEIVER, REPLICATION_STATS_METRICS, SLRU_METRICS
+from datadog_checks.postgres.util import (
+    NEWER_14_METRICS,
+    QUERY_PG_REPLICATION_SLOTS,
+    QUERY_PG_STAT_WAL_RECEIVER,
+    REPLICATION_STATS_METRICS,
+    SLRU_METRICS,
+)
 from datadog_checks.postgres.version_utils import VersionUtils
 
 HOST = get_docker_hostname()
 PORT = '5432'
 PORT_REPLICA = '5433'
+PORT_REPLICA2 = '5434'
 USER = 'datadog'
+USER_ADMIN = 'dd_admin'
 PASSWORD = 'datadog'
+PASSWORD_ADMIN = 'dd_admin'
 DB_NAME = 'datadog_test'
 POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
 POSTGRES_IMAGE = "alpine"
@@ -56,6 +65,14 @@ DBM_MIGRATED_METRICS = [
     'postgresql.connections',
 ]
 
+CONFLICT_METRICS = [
+    'postgresql.conflicts.tablespace',
+    'postgresql.conflicts.lock',
+    'postgresql.conflicts.snapshot',
+    'postgresql.conflicts.bufferpin',
+    'postgresql.conflicts.deadlock',
+]
+
 COMMON_BGW_METRICS = [
     'postgresql.bgwriter.checkpoints_timed',
     'postgresql.bgwriter.checkpoints_requested',
@@ -80,6 +97,7 @@ requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `late
 def assert_metric_at_least(aggregator, metric_name, lower_bound=None, higher_bound=None, count=None, tags=None):
     found_values = 0
     expected_tags = normalize_tags(tags, sort=True)
+    aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
     for metric in aggregator.metrics(metric_name):
         if expected_tags and expected_tags == sorted(metric.tags):
             if lower_bound is not None:
@@ -102,13 +120,16 @@ def check_common_metrics(aggregator, expected_tags, count=1):
         db_tags = expected_tags + ['db:{}'.format(db)]
         for name in COMMON_METRICS:
             aggregator.assert_metric(name, count=count, tags=db_tags)
+        if POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 14.0:
+            for (metric_name, _) in NEWER_14_METRICS.values():
+                aggregator.assert_metric(metric_name, count=count, tags=db_tags)
 
 
 def check_db_count(aggregator, expected_tags, count=1):
     aggregator.assert_metric(
         'postgresql.table.count', value=5, count=count, tags=expected_tags + ['db:{}'.format(DB_NAME), 'schema:public']
     )
-    aggregator.assert_metric('postgresql.db.count', value=5, count=1)
+    aggregator.assert_metric('postgresql.db.count', value=106, count=1)
 
 
 def check_connection_metrics(aggregator, expected_tags, count=1):
@@ -163,10 +184,37 @@ def check_wal_receiver_metrics(aggregator, expected_tags, count=1, connected=1):
         aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
 
 
+def check_replication_slots(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 10.0:
+        return
+    for column in QUERY_PG_REPLICATION_SLOTS['columns']:
+        if column['type'] == 'tag':
+            continue
+        if 'slot_type:physical' in expected_tags and column['name'] in [
+            'postgresql.replication_slot.confirmed_flush_delay_bytes',
+        ]:
+            continue
+        if 'slot_type:logical' in expected_tags and column['name'] in [
+            'postgresql.replication_slot.restart_delay_bytes',
+            'postgresql.replication_slot.xmin_age',
+        ]:
+            continue
+        aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
+
+
 def check_replication_delay(aggregator, metrics_cache, expected_tags, count=1):
     replication_metrics = metrics_cache.get_replication_metrics(VersionUtils.parse_version(POSTGRES_VERSION), False)
     for (metric_name, _) in replication_metrics.values():
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_conflict_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 9.1:
+        return
+    for db in COMMON_DBS:
+        db_tags = expected_tags + ['db:{}'.format(db)]
+        for name in CONFLICT_METRICS:
+            aggregator.assert_metric(name, count=count, tags=db_tags)
 
 
 def check_bgw_metrics(aggregator, expected_tags, count=1):

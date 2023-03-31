@@ -1,14 +1,13 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["3.8"]
 
 [[envs.default.matrix]]
 python = ["3.8"]
 setup = ["sandbox"]
 
 [envs.default.overrides]
-name."^py2.7$".e2e-env = { value = true }
 name."^py3.8$".e2e-env = { value = true }
 matrix.setup.e2e-env = { value = true, if = ["sandbox"], env = ["TF_VAR_google_credentials_file", "TF_VAR_google_compute_instance_name"] }
 matrix.setup.env-vars = [

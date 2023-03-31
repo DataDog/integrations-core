@@ -7,6 +7,8 @@ import os
 CHECK_NAME = 'openstack'
 
 FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
+TEST_OPENSTACK_CONFIG_PATH = os.path.join(FIXTURES_DIR, 'openstack_config.yaml')
+TEST_OPENSTACK_NO_AUTH_CONFIG_PATH = os.path.join(FIXTURES_DIR, 'openstack_bad_config.yaml')
 
 USE_OPENSTACK_SANDBOX = os.environ.get('USE_OPENSTACK_SANDBOX')
 
@@ -22,7 +24,7 @@ CONFIG_FILE_INSTANCE = {
     'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}},
     'ssl_verify': False,
     'exclude_network_ids': EXCLUDED_NETWORK_IDS,
-    'openstack_config_file_path': os.path.abspath('./tests/fixtures/openstack_config.yaml'),
+    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_PATH,
     'openstack_cloud_name': 'test_cloud',
 }
 

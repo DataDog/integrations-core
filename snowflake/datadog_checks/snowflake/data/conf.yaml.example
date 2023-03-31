@@ -52,7 +52,7 @@ instances:
     ## If you are using private connectivity with Snowflake, your account name should be in the following format:
     ##   account: <ACCOUNT>.<REGION_ID>.privatelink
     #
-  - account: <ACCOUNT>
+  - account: <ORG_NAME>-<ACCOUNT_NAME>
 
     ## @param username - string - required
     ## Login name for the user.
@@ -269,7 +269,7 @@ instances:
 
     ## @param disable_generic_tags - boolean - optional - default: false
     ## Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
-    ## getting mixed with other integraton tags.
+    ## getting mixed with other integration tags.
     #
     disable_generic_tags: true
 

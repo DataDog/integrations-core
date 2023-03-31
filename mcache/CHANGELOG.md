@@ -1,5 +1,9 @@
 # CHANGELOG - mcache
 
+## 3.3.1 / 2023-03-03
+
+* [Fixed] Remove the use of the deprecated `pkg_resources` package. See [#13842](https://github.com/DataDog/integrations-core/pull/13842).
+
 ## 3.3.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Add the `max_connections` metric. See [#12689](https://github.com/DataDog/integrations-core/pull/12689).

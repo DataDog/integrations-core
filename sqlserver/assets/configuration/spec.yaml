@@ -260,7 +260,7 @@ files:
             for *every* check instance. Running different instances with different collection intervals is not supported.
           value:
             type: number
-            example: 10
+            example: 60
         - name: dm_exec_query_stats_row_limit
           description: |
             Set the maximum number of query stats rows that can be retrieved in a single check run.
@@ -460,7 +460,7 @@ files:
       description: Timeout in seconds for the connection and each command run
       value:
         type: integer
-        example: 5
+        example: 10
     - template: instances/db
     - name: stored_procedure
       description: |
@@ -492,7 +492,7 @@ files:
         disable_generic_tags.enabled: True
         disable_generic_tags.description: |
             Generic tags such as `host` are replaced by `sqlserver_host` to avoid
-            getting mixed with other integraton tags.
+            getting mixed with other integration tags.
 
   - template: logs
     example:

@@ -99,7 +99,7 @@ def instance_headers(field, value):
 
 
 def instance_health_service_check(field, value):
-    return True
+    return False
 
 
 def instance_ignore_metrics(field, value):
@@ -188,6 +188,10 @@ def instance_password(field, value):
 
 def instance_persist_connections(field, value):
     return False
+
+
+def instance_prometheus_endpoint(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_prometheus_metrics_prefix(field, value):

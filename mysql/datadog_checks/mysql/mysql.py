@@ -126,6 +126,7 @@ class MySql(AgentCheck):
     def _send_metadata(self):
         self.set_metadata('version', self.version.version + '+' + self.version.build)
         self.set_metadata('flavor', self.version.flavor)
+        self.set_metadata('resolved_hostname', self.resolved_hostname)
 
     @property
     def resolved_hostname(self):

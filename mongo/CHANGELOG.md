@@ -1,6 +1,12 @@
 # CHANGELOG - mongo
 
-## 4.3.0 / 2023-02-07
+## 5.0.0 / 2023-03-03
+
+* [Added] Mongo Date types support in custom queries. See [#13516](https://github.com/DataDog/integrations-core/pull/13516).
+* [Fixed] Exception is thrown when items of a list in a custom query are not iterable. See [#13895](https://github.com/DataDog/integrations-core/pull/13895).
+* [Changed] remove ssl params from mongo integration. See [#13881](https://github.com/DataDog/integrations-core/pull/13881).
+
+## 4.3.0 / 2023-02-07 / Agent 7.43.0
 
 * [Fixed] Exception is thrown when items of a list in a custom query are not iterable. See [#13895](https://github.com/DataDog/integrations-core/pull/13895).
 

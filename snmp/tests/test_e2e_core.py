@@ -83,6 +83,9 @@ def assert_apc_ups_metrics(dd_agent_check, config):
     tags = profile_tags + ["snmp_device:{}".format(instance['ip_address'])]
 
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
+    aggregator.assert_metric(
+        'datadog.snmp.submitted_metrics', metric_type=aggregator.GAUGE, tags=tags + ['loader:core'], value=31
+    )
 
     for metric in metrics.APC_UPS_METRICS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
@@ -299,11 +302,17 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
     for metric in metrics.IF_BANDWIDTH_USAGE:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
+    custom_speed_tags = if_tags + ['speed_source:device']
+    for metric in metrics.IF_CUSTOM_SPEED_GAUGES:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=custom_speed_tags, count=2
+        )
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=2, tags=common_tags)
     aggregator.assert_metric(
         'snmp.interface.status',
         metric_type=aggregator.GAUGE,
-        tags=if_tags + ['interface_index:11', 'status:warning'],
+        tags=if_tags + ['interface_index:11', 'status:warning', 'admin_status:down', 'oper_status:lower_layer_down'],
         value=1,
     )
     aggregator.assert_all_metrics_covered()

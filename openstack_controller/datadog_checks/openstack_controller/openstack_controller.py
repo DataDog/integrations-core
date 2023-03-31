@@ -217,7 +217,7 @@ class OpenStackControllerCheck(AgentCheck):
             hypervisor_hostname = server.get('hypervisor_hostname')
             if not hypervisor_hostname:
                 self.log.debug(
-                    "hypervisor_hostname is None for server %s. Check that your user is an administrative users.",
+                    "hypervisor_hostname is None for server %s. Check that your user is an admin user.",
                     server['server_id'],
                 )
             else:
@@ -234,7 +234,7 @@ class OpenStackControllerCheck(AgentCheck):
                 collect_hypervisor_load=collect_hypervisor_load,
             )
         if not hypervisors:
-            self.warning("Unable to collect any hypervisors from Nova response.")
+            self.warning("Unable to collect any hypervisors from the Nova response.")
 
     def get_stats_for_single_hypervisor(
         self,
@@ -288,7 +288,7 @@ class OpenStackControllerCheck(AgentCheck):
             try:
                 load_averages = self.get_loads_for_single_hypervisor(hyp)
             except Exception as e:
-                self.warning('Unable to get loads averages for hypervisor %s: %s', hyp['id'], e)
+                self.warning('Unable to get load averages for hypervisor %s: %s', hyp['id'], e)
                 load_averages = []
             if load_averages and len(load_averages) == 3:
                 for i, avg in enumerate([1, 5, 15]):
@@ -409,15 +409,15 @@ class OpenStackControllerCheck(AgentCheck):
 
         try:
             server_stats = self.get_server_diagnostics(server_id)
-        except InstancePowerOffFailure:  # 409 response code came back for nova
-            self.log.debug("Server %s is powered off and cannot be monitored", server_id)
+        except InstancePowerOffFailure as e:  # 409 response code came back for nova
+            self.log.debug("Server %s is powered off and cannot be monitored: %s", server_id, e)
             return
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 404:
                 self.log.debug("Server %s is not in an ACTIVE state and cannot be monitored, %s", server_id, e)
             else:
                 self.warning(
-                    "Received HTTP Error when reaching the Diagnostics endpoint for server:%s, %s", e, server_name
+                    "Received HTTP Error when reaching the Diagnostics endpoint for server %s: %s", server_name, e
                 )
             return
         except Exception as e:
@@ -469,7 +469,7 @@ class OpenStackControllerCheck(AgentCheck):
         project_name = project.get('name')
         project_id = project.get('id')
 
-        self.log.debug("Collecting metrics for project. name: %s id: %s", project_name, project['id'])
+        self.log.debug("Collecting metrics for project: name: %s, id: %s", project_name, project['id'])
         server_stats = self.get_project_limits(project['id'])
         server_tags.append('tenant_id:{}'.format(project_id))
 
@@ -605,7 +605,7 @@ class OpenStackControllerCheck(AgentCheck):
             # authentication previously failed and got removed from the cache
             # Let's populate it now
             try:
-                self.log.debug("Fetch scope for instance %s", self.instance_name)
+                self.log.debug("Fetching scope for instance %s", self.instance_name)
                 # Set keystone api with proper token
                 self._api = ApiFactory.create(self.log, instance_config, self.http)
                 self.service_check(
@@ -641,7 +641,7 @@ class OpenStackControllerCheck(AgentCheck):
 
             except MissingNovaEndpoint as e:
                 self.warning("The agent could not find a compatible Nova endpoint in your service catalog!")
-                self.log.debug("Failed to get nova endpoint for response catalog: %s", e)
+                self.log.debug("Failed to get Nova endpoint for response catalog: %s", e)
                 self.service_check(
                     self.COMPUTE_API_SC,
                     AgentCheck.CRITICAL,
@@ -697,7 +697,7 @@ class OpenStackControllerCheck(AgentCheck):
             keystone_server_url = self._get_keystone_server_url(instance)
             self.init_api(instance, keystone_server_url, custom_tags)
             if self._api is None:
-                self.log.info("Not api found, make sure you admin user has access to your OpenStack projects: \n")
+                self.log.info("No API found, make sure your admin user has access to your OpenStack projects: \n")
                 return
 
             self.log.debug("Running check with credentials: \n")
@@ -727,12 +727,12 @@ class OpenStackControllerCheck(AgentCheck):
 
             if collect_server_diagnostic_metrics or collect_server_flavor_metrics:
                 if collect_server_diagnostic_metrics:
-                    self.log.debug("Fetch stats from %s server(s)", len(servers))
+                    self.log.debug("Fetching stats from %s server(s)", len(servers))
                     for server in itervalues(servers):
                         self.collect_server_diagnostic_metrics(server, tags=custom_tags, use_shortname=use_shortname)
                 if collect_server_flavor_metrics:
                     if len(servers) >= 1 and 'flavor_id' in next(itervalues(servers)):
-                        self.log.debug("Fetch server flavors")
+                        self.log.debug("Fetching server flavors")
                         # If flavors are not part of servers detail (new in version 2.47) then we need to fetch them
                         flavors = self.get_flavors()
                     else:
@@ -762,7 +762,7 @@ class OpenStackControllerCheck(AgentCheck):
             self.delete_api_cache()
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             if isinstance(e, requests.exceptions.HTTPError) and e.response.status_code < 500:
-                self.warning("Error reaching nova API: %s", e)
+                self.warning("Error reaching Nova API: %s", e)
             else:
                 # exponential backoff
                 self.do_backoff(custom_tags)
@@ -775,7 +775,7 @@ class OpenStackControllerCheck(AgentCheck):
 
         self.gauge("openstack.backoff.interval", backoff_interval, tags=tags)
         self.gauge("openstack.backoff.retries", retries, tags=tags)
-        self.warning("There were some problems reaching the nova API - applying exponential backoff")
+        self.warning("There were some problems reaching the Nova API - applying exponential backoff")
 
     # For attaching tags to hosts that are not the host running the agent
     def get_external_host_tags(self):
@@ -783,7 +783,7 @@ class OpenStackControllerCheck(AgentCheck):
         integration.
         List of pairs (hostname, list_of_tags)
         """
-        self.log.debug("Collecting external_host_tags now")
+        self.log.debug("Collecting external_host_tags")
         external_host_tags = []
         for k, v in iteritems(self.external_host_tags):
             external_host_tags.append((k, {SOURCE_TYPE: v}))

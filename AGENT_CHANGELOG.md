@@ -1,3 +1,37 @@
+## Datadog Agent version [7.43.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7431)
+
+* datadog_checks_base [30.0.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Snowflake [4.5.1](https://github.com/DataDog/integrations-core/blob/master/snowflake/CHANGELOG.md)
+
+## Datadog Agent version [7.43.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7430)
+
+* Amazon Kafka [3.2.3](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* datadog_checks_base [30.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) **BREAKING CHANGE**
+* datadog_checks_downloader [4.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md) **BREAKING CHANGE**
+* ClickHouse [2.8.2](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md)
+* Cloudera [1.0.1](https://github.com/DataDog/integrations-core/blob/master/cloudera/CHANGELOG.md)
+* Disk [4.9.0](https://github.com/DataDog/integrations-core/blob/master/disk/CHANGELOG.md)
+* Amazon Fargate [3.3.0](https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/CHANGELOG.md)
+* Envoy [2.4.1](https://github.com/DataDog/integrations-core/blob/master/envoy/CHANGELOG.md)
+* HTTP [8.2.0](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
+* IBM MQ [4.0.3](https://github.com/DataDog/integrations-core/blob/master/ibm_mq/CHANGELOG.md)
+* IBM WAS [2.3.2](https://github.com/DataDog/integrations-core/blob/master/ibm_was/CHANGELOG.md)
+* Kafka Consumer [2.16.3](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
+* Kube DNS [4.0.1](https://github.com/DataDog/integrations-core/blob/master/kube_dns/CHANGELOG.md)
+* Kube metrics server [3.0.1](https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/CHANGELOG.md)
+* Kube Proxy [6.0.1](https://github.com/DataDog/integrations-core/blob/master/kube_proxy/CHANGELOG.md)
+* MongoDB [4.3.0](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MySQL [10.0.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* Oracle Database [4.0.1](https://github.com/DataDog/integrations-core/blob/master/oracle/CHANGELOG.md)
+* Postgres [13.3.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* RabbitMQ [3.4.0](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/CHANGELOG.md)
+* Snowflake [4.5.0](https://github.com/DataDog/integrations-core/blob/master/snowflake/CHANGELOG.md)
+* SonarQube [2.2.3](https://github.com/DataDog/integrations-core/blob/master/sonarqube/CHANGELOG.md)
+* SQL Server [10.1.3](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* SSH [2.3.3](https://github.com/DataDog/integrations-core/blob/master/ssh_check/CHANGELOG.md)
+* Varnish [1.14.3](https://github.com/DataDog/integrations-core/blob/master/varnish/CHANGELOG.md)
+* Yarn [4.3.0](https://github.com/DataDog/integrations-core/blob/master/yarn/CHANGELOG.md)
+
 ## Datadog Agent version [7.42.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7422)
 
 * IIS [2.18.1](https://github.com/DataDog/integrations-core/blob/master/iis/CHANGELOG.md)
@@ -722,7 +756,6 @@
 * HDFS Namenode [2.2.1](https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/CHANGELOG.md)
 * Hive [1.7.2](https://github.com/DataDog/integrations-core/blob/master/hive/CHANGELOG.md)
 * HiveMQ [1.5.2](https://github.com/DataDog/integrations-core/blob/master/hivemq/CHANGELOG.md)
-* HTTP [6.1.2](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
 * Hudi [2.0.1](https://github.com/DataDog/integrations-core/blob/master/hudi/CHANGELOG.md)
 * HyperV [1.5.0](https://github.com/DataDog/integrations-core/blob/master/hyperv/CHANGELOG.md)
 * IBM Db2 [1.9.1](https://github.com/DataDog/integrations-core/blob/master/ibm_db2/CHANGELOG.md)
@@ -853,7 +886,7 @@
 * HDFS Namenode [2.2.0](https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/CHANGELOG.md)
 * Hive [1.7.1](https://github.com/DataDog/integrations-core/blob/master/hive/CHANGELOG.md)
 * HiveMQ [1.5.1](https://github.com/DataDog/integrations-core/blob/master/hivemq/CHANGELOG.md)
-* HTTP [6.1.2-rc.1](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
+* HTTP [6.1.2](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
 * Hudi [2.0.0](https://github.com/DataDog/integrations-core/blob/master/hudi/CHANGELOG.md) **BREAKING CHANGE**
 * IBM Db2 [1.9.0](https://github.com/DataDog/integrations-core/blob/master/ibm_db2/CHANGELOG.md)
 * IBM i [1.1.0](https://github.com/DataDog/integrations-core/blob/master/ibm_i/CHANGELOG.md)

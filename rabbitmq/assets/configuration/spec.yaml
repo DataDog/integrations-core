@@ -7,6 +7,9 @@ files:
     - template: init_config/http
     - template: init_config/default
   - template: instances
+    description: |
+      There are two versions of RabbitMQ (Prometheus plugin and Management plugin).
+      Please do not edit sections pertaining to the version of RabbitMQ that you are not using.
     multiple_instances_defined: true
     options:
     - name: OpenMetrics
@@ -73,10 +76,7 @@ files:
           example: true
       - name: nodes
         description: |
-          Use the `nodes` parameters to specify the nodes you'd like to
-          collect metrics on (up to 100 nodes).
-          If you have less than 100 nodes, you don't have to set this parameter,
-          the metrics are collected on all the nodes by default.
+          Use the `nodes` parameters to specify the nodes you'd like to collect metrics on (up to 100 nodes).
         value:
           type: array
           items:
@@ -86,10 +86,11 @@ files:
             - <NODE_NAME_2>
       - name: nodes_regexes
         description: |
-          Use the `nodes_regexes` parameters to specify one or multiple regex to
-          match the nodes you'd like to collect metrics on (up to 100 nodes).
-          If you have less than 100 nodes, you don't have to set this parameter,
-          the metrics are collected on all the nodes by default.
+          Use the `nodes_regexes` parameters to specify which nodes you would like to
+          collect using one or multiple Python regular expressions. The same limit applies as
+          for the `nodes` field.
+          For any named groups in your pattern the names of the groups are added as tag keys
+          paired with the matched contents of the groups as tag values.
         value:
           type: array
           items:
@@ -98,16 +99,7 @@ files:
             - <REGEX>
       - name: queues
         description: |
-          Use the `queues` parameters to specify the queues you'd like to
-          collect metrics on (up to 200 queues).
-          If you have less than 200 queues, you don't have to set this parameter,
-          the metrics are collected on all the queues by default.
-          If you have set up vhosts, set the queue names as `vhost_name/queue_name`.
-          If you have `tag_families` enabled, the first captured group in the regex
-          is used as the queue_family tag if no named group is specified.
-          If you have named groups the tag names will be the named groups in regex.
-          If you use multiplies groups and not all are named, the tags are going to be
-          used only on the groups that contains names.
+          Use the `queues` parameters to specify the queues you'd like to collect metrics on (up to 200 queues).
         value:
           type: array
           items:
@@ -117,17 +109,18 @@ files:
             - <QUEUE_NAME_2>
       - name: queues_regexes
         description: |
-          Use the `queues_regexes` parameters to specify one or multiple regex to to match
-          the queues you'd like to collect metrics on (up to 200 queues).
-          If you have vhosts set up, the regex pattern needs to be formatted with vhost
-          in the format of `<vhost>/<queue_name>`.
-          If you have less than 200 queues, you don't have to set this parameter,
-          the metrics are collected on all the queues by default.
-          If you have `tag_families` enabled, the first captured group in the regex
-          is used as the queue_family tag.
-          If you have named groups the tag names will be the named groups in regex.
-          If you use multiplies groups and not all have are named, the tags are going to be
-          used only on the groups that contains names.
+          Use the `queues_regexes` parameters to specify which queues you would like to
+          collect using one or multiple Python regular expressions. The same limit applies
+          as for the `queues` field.
+          If you have `tag_families` enabled, the first captured group in the pattern is used
+          as the `queue_family` tag.
+          Named groups in your pattern behave like in `nodes_regexes`.
+          Your pattern is compared to queue names and queue names prefixed by vhost.
+          For example, if you have a vhost named "myvhost" and a queue named "myqueue", your
+          pattern is compared to:
+            - myqueue
+            - /myvhost/myqueue
+          If you have no vhost defined in this example, your pattern is compared to "//myqueue".
         value:
           type: array
           items:
@@ -136,10 +129,7 @@ files:
             - <REGEX>
       - name: exchanges
         description: |
-          Use the `exchanges` parameters to specify the exchanges you'd like to
-          collect metrics on (up to 50 exchanges).
-          If you have less than 50 exchanges, you don't have to set this parameter,
-          the metrics is collected on all the exchanges by default.
+          Use the `exchanges` parameters to specify the exchanges you'd like to collect metrics on (up to 50 exchanges).
         value:
           type: array
           items:
@@ -149,10 +139,18 @@ files:
             - <EXCHANGE_2>
       - name: exchanges_regexes
         description: |
-          Use the `exchanges_regexes` parameters to specify one or multiple regex to to match
-          the exchanges you'd like to collect metrics on (up to 50 exchanges).
-          If you have less than 50 exchanges, you don't have to set this parameter,
-          the metrics is collected on all the exchanges by default.
+          Use the `exchanges_regexes` parameters to specify which exchanges you would like to
+          collect using one or multiple Python regular expressions. The same limit applies
+          as for the `exchanges` field.
+          If you have `tag_families` enabled, the first captured group in the pattern is used
+          as the `exchange_family` tag.
+          Named groups in your pattern behave like in `nodes_regexes`.
+          Your pattern is compared to exchange names and exchange names prefixed by vhost.
+          For example, if you have a vhost named "myvhost" and a exchange named "myexchange", your
+          pattern is compared to:
+            - myexchange
+            - /myvhost/myexchange
+          If you have no vhost defined in this example, your pattern is compared to "//myexchange".
         value:
           type: array
           items:
@@ -192,39 +190,43 @@ files:
   - template: init_config
     options: []
   - template: instances
+    multiple_instances_defined: true
     options:
-    - name: prometheus_plugin
-      description: |
-        Settings for talking to the Prometheus plugin of RabbitMQ.
-        Specify this section to trigger metric collection from the Prometheus plugin endpoints.
-      enabled: true
+    - name: OpenMetrics
+      description: RabbitMQ Prometheus Plugin Example
       options:
-        - name: url
+        - name: prometheus_plugin
+          description: |
+            Settings for talking to the Prometheus plugin of RabbitMQ.
+            Specify this section to trigger metric collection from the Prometheus plugin endpoints.
           enabled: true
-          required: true
-          description: |
-            Base URL for OpenMetrics endpoints.
-          value:
-            type: string
-            example: 'http://%%host%%:15692'
-        - name: include_aggregated_endpoint
-          description: |
-            Whether or not to include metrics from the aggregated endpoint (/metrics).
+          options:
+            - name: url
+              enabled: true
+              required: true
+              description: |
+                Base URL for OpenMetrics endpoints.
+              value:
+                type: string
+                example: 'http://%%host%%:15692'
+            - name: include_aggregated_endpoint
+              description: |
+                Whether or not to include metrics from the aggregated endpoint (/metrics).
 
-            Note: This option must be set to true when 'unaggregated_endpoint' is unspecified.
-          value:
-            type: boolean
-            example: true
-        - name: unaggregated_endpoint
-          description: |
-            Which  unaggregated endpoint to use.
-            The choices are:
-              - If the field is left unspecified, no endpoint is used.
-              - "detailed" means the /metrics/detailed endpoint is used.
-                You can also provide a query for this option, exactly as if you were making an HTTP request
-                to this endpoint. For example, `detailed?family=queue_consumer_count`.
-                You can specify this and the aggregated endpoint. In that case any duplicate metrics will
-                be taken from this endpoint and the corresponding aggregated ones dropped.
-          value:
-            type: string
-            example: "detailed"
+                Note: This option must be set to true when 'unaggregated_endpoint' is unspecified.
+              value:
+                type: boolean
+                example: true
+            - name: unaggregated_endpoint
+              description: |
+                Which  unaggregated endpoint to use.
+                The choices are:
+                  - If the field is left unspecified, no endpoint is used.
+                  - "detailed" means the /metrics/detailed endpoint is used.
+                    You can also provide a query for this option, exactly as if you were making an HTTP request
+                    to this endpoint. For example, `detailed?family=queue_consumer_count`.
+                    You can specify this and the aggregated endpoint. In that case any duplicate metrics will
+                    be taken from this endpoint and the corresponding aggregated ones dropped.
+              value:
+                type: string
+                example: "detailed"

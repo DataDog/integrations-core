@@ -15,6 +15,10 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_ext_authz_denied': 'cluster.ext_authz.denied',
     'envoy_cluster_ext_authz_disabled': 'cluster.ext_authz.disabled',
     'envoy_cluster_ext_authz_failure_mode_allowed': 'cluster.ext_authz.failure_mode_allowed',
+    'envoy_cluster_external_upstream_rq': 'cluster.external.upstream_rq',
+    'envoy_cluster_external_upstream_rq_completed': 'cluster.external.upstream_rq_completed',
+    'envoy_cluster_external_upstream_rq_xx': 'cluster.external.upstream_rq_xx',
+    'envoy_cluster_external_upstream_rq_time': 'cluster.external.upstream_rq_time',
     'envoy_cluster_http2_dropped_headers_with_underscores': 'cluster.http2.dropped_headers_with_underscores',
     'envoy_cluster_http2_header_overflow': 'cluster.http2.header_overflow',
     'envoy_cluster_http2_headers_cb_no_stream': 'cluster.http2.headers_cb_no_stream',
@@ -70,7 +74,7 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_upstream_cx_destroy_local': 'cluster.upstream_cx_destroy_local',
     'envoy_cluster_upstream_cx_destroy_local_with_active_rq': 'cluster.upstream_cx_destroy_local_with_active_rq',
     'envoy_cluster_upstream_cx_destroy_remote': 'cluster.upstream_cx_destroy_remote',
-    'envoy_cluster_upstream_cx_destroy_remote_with_active_rq': 'cluster.upstream_cx_destroy_with_active_rq',
+    'envoy_cluster_upstream_cx_destroy_remote_with_active_rq': 'cluster.upstream_cx_destroy_remote_with_active_rq',
     'envoy_cluster_upstream_cx_destroy_with_active_rq': 'cluster.upstream_cx_destroy_with_active_rq',
     'envoy_cluster_upstream_cx_http1': 'cluster.upstream_cx_http1',
     'envoy_cluster_upstream_cx_http2': 'cluster.upstream_cx_http2',
@@ -108,7 +112,6 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_upstream_rq_rx_reset': 'cluster.upstream_rq_rx_reset',
     'envoy_cluster_upstream_rq_time': 'cluster.upstream_rq_time',
     'envoy_cluster_upstream_rq_timeout': 'cluster.upstream_rq_timeout',
-    'envoy_cluster_upstream_rq': 'cluster.upstream_rq',
     'envoy_cluster_upstream_rq_tx_reset': 'cluster.upstream_rq_tx_reset',
     'envoy_cluster_upstream_rq_xx': 'cluster.upstream_rq_xx',
     'envoy_cluster_manager_cds_control_plane_rate_limit_enforced': (
@@ -324,7 +327,7 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_upstream_cx_connect_ms': 'cluster.upstream_cx_connect_ms',
     'envoy_cluster_upstream_cx_length_ms': 'cluster.upstream_cx_length_ms',
     'envoy_cluster_manager_cds_update_duration': 'cluster_manager.cds.update_duration',
-    'envoy_http_downstream_cx_length_ms': 'listener.downstream_cx_length_ms',
+    'envoy_http_downstream_cx_length_ms': 'http.downstream_cx_length_ms',
     'envoy_http_downstream_rq_time': 'http.downstream_rq_time',
     'envoy_listener_admin_downstream_cx_length_ms': 'listener.admin.downstream_cx_length_ms',
     'envoy_listener_downstream_cx_length_ms': 'listener.downstream_cx_length_ms',
@@ -786,7 +789,7 @@ METRICS = {
     'cluster.ext_authz.ok': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -794,7 +797,7 @@ METRICS = {
     'cluster.ext_authz.error': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -802,7 +805,7 @@ METRICS = {
     'cluster.ext_authz.denied': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',
@@ -810,7 +813,7 @@ METRICS = {
     'cluster.ext_authz.disabled': {
         'tags': (
             ('envoy_cluster', ),
-            (),
+            ('stat_prefix', ),
             (),
         ),
         'method': 'monotonic_count',

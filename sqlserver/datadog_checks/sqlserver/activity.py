@@ -61,6 +61,7 @@ SELECT
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
+    sess.program_name as program_name,
     {exec_request_columns}
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c

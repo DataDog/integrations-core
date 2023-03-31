@@ -1,6 +1,6 @@
 # CHANGELOG - varnish
 
-## 1.14.3 / 2023-01-20
+## 1.14.3 / 2023-01-20 / Agent 7.43.0
 
 * [Fixed] Fix UNKNOWN service check with backend:name. See [#13706](https://github.com/DataDog/integrations-core/pull/13706).
 
