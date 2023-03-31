@@ -99,7 +99,7 @@ def instance_headers(field, value):
 
 
 def instance_health_service_check(field, value):
-    return True
+    return False
 
 
 def instance_ignore_metrics(field, value):
