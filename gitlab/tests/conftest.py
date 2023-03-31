@@ -33,8 +33,6 @@ CONFIG = {
         {
             'prometheus_endpoint': GITLAB_PROMETHEUS_ENDPOINT,
             'gitlab_url': GITLAB_URL,
-            'send_distribution_counts_as_monotonic': True,
-            'send_monotonic_counter': True,
             'disable_ssl_validation': True,
             'tags': CUSTOM_TAGS,
         }

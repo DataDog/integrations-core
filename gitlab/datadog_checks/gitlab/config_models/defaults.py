@@ -219,7 +219,7 @@ def instance_send_distribution_counts_as_monotonic(field, value):
 
 
 def instance_send_distribution_sums_as_monotonic(field, value):
-    return False
+    return True
 
 
 def instance_send_histograms_buckets(field, value):
@@ -227,7 +227,7 @@ def instance_send_histograms_buckets(field, value):
 
 
 def instance_send_monotonic_counter(field, value):
-    return False
+    return True
 
 
 def instance_send_monotonic_with_gauge(field, value):
