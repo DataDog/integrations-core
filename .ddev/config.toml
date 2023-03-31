@@ -9,3 +9,55 @@ nginx = "NGINX"
 nginx_ingress_controller = "NGINX Ingress Controller"
 openstack_controller = "OpenStack Controller"
 teamcity = "TeamCity"
+
+[overrides.ci.ddev]
+platforms = ["linux", "windows"]
+
+[overrides.ci.datadog_checks_base]
+platforms = ["linux", "windows"]
+
+[overrides.ci.datadog_checks_dev]
+platforms = ["linux", "windows"]
+
+[overrides.ci.datadog_checks_downloader]
+platforms = ["linux", "windows"]
+
+[overrides.ci.disk]
+platforms = ["linux", "windows"]
+
+[overrides.ci.dns_check]
+platforms = ["linux", "windows"]
+
+[overrides.ci.glusterfs]
+runners = { linux = ["ubuntu-20.04"] }
+
+[overrides.ci.hyperv]
+exclude = true
+
+[overrides.ci.ibm_mq]
+platforms = ["linux", "windows"]
+
+[overrides.ci.mesos_slave]
+runners = { linux = ["ubuntu-20.04"] }
+
+[overrides.ci.mysql]
+runners = { linux = ["ubuntu-20.04"] }
+
+[overrides.ci.network]
+platforms = ["linux", "windows"]
+
+[overrides.ci.spark]
+runners = { linux = ["ubuntu-20.04"] }
+
+[overrides.ci.ssh]
+runners = { linux = ["ubuntu-20.04"] }
+
+[overrides.ci.sqlserver]
+platforms = ["windows", "linux"]
+runners = { windows = ["windows-2019"] }
+
+[overrides.ci.tcp_check]
+platforms = ["linux", "windows"]
+
+[overrides.ci.tokumx]
+only-py2 = true

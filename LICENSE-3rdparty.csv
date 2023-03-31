@@ -2,7 +2,6 @@ Component,Origin,License,Copyright
 JPype1,PyPI,Apache-2.0,Copyright (c) 2004-2008 Steve Menard
 JayDeBeApi,PyPI,LGPL-3.0-only,Copyright (C) 2014 Bastian Bowe
 PyJWT,PyPI,MIT,Copyright (c) 2015-2022 José Padilla
-PyMySQL,PyPI,MIT,"Copyright (c) 2010, 2013 PyMySQL contributors"
 PySocks,PyPI,BSD-3-Clause,Copyright 2006 Dan-Haim. All rights reserved.
 PyYAML,PyPI,MIT,Copyright (c) 2017-2021 Ingy döt Net
 Pyro4,PyPI,MIT,Copyright (c) 2016 Irmen de Jong
@@ -36,14 +35,14 @@ immutables,PyPI,Apache-2.0,Copyright 2018-present Contributors to the immutables
 importlib-metadata,PyPI,Apache-2.0,Copyright Jason R. Coombs
 in-toto,PyPI,Apache-2.0,Copyright 2018 New York University
 ipaddress,PyPI,PSF,Copyright (c) 2013 Philipp Hagemeister
-jellyfish,PyPI,BSD-3-Clause,"Copyright (c) 2015, James Turk"
+jellyfish,PyPI,BSD-3-Clause,Copyright (c) 2015 James Turk
 kafka-python,PyPI,Apache-2.0,Copyright 2015 David Arthur
 kazoo,PyPI,Apache-2.0,Copyright 2012 Kazoo team
 kubernetes,PyPI,Apache-2.0,Copyright 2014 The Kubernetes Authors.
 ldap3,PyPI,LGPL-3.0-only,Copyright 2013 - 2020 Giovanni Cannata
 lxml,PyPI,BSD-3-Clause,Copyright (c) 2004 Infrae. All rights reserved.
 lz4,PyPI,BSD-3-Clause,"Copyright (c) 2012-2013, Steeve Morin"
-mmh3,PyPI,CC0-1.0,Hajime Senuma. mmh3 is dedicated to the public domain under CC0-1.0.
+mmh3,PyPI,CC0-1.0,Copyright (c) 2011-2023 Hajime Senuma
 oauthlib,PyPI,BSD-3-Clause,Copyright (c) 2019 The OAuthlib Community
 openstacksdk,PyPI,Apache-2.0,Copyright OpenStack
 oracledb,PyPI,Apache-2.0,"Copyright (c) 2016, 2022 Oracle and/or its affiliates."
@@ -64,6 +63,7 @@ pycryptodomex,PyPI,Unlicense,Helder Eijs. pycryptodomex is dedicated to the publ
 pydantic,PyPI,MIT,Copyright (c) 2017 - 2022 Samuel Colvin and other contributors
 pymongo,PyPI,Apache-2.0,Copyright 2009 The MongoDB Python Team
 pymqi,PyPI,PSF,Copyright (c) Zato Source s.r.o.
+pymysql,PyPI,MIT,"Copyright (c) 2010, 2013 PyMySQL contributors"
 pyodbc,PyPI,MIT,Copyright (c) 2008 Michael Kleehammer
 pysmi,PyPI,BSD-3-Clause,Copyright (c) 2015-2020 Ilya Etingof <etingof@gmail.com>
 pysnmp,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
@@ -91,7 +91,7 @@ serpent,PyPI,MIT,Copyright (c) by Irmen de Jong
 service-identity,PyPI,MIT,Copyright (c) 2014 Hynek Schlawack
 simplejson,PyPI,MIT,Copyright (c) 2006 Bob Ippolito
 six,PyPI,MIT,Copyright (c) 2010-2020 Benjamin Peterson
-snowflake-connector-python,PyPI,Apache-2.0,"Copyright (c) 2013-2019 Snowflake Computing, Inc."
+snowflake-connector-python,PyPI,Apache-2.0,"Copyright (c) 2013-2023 Snowflake Computing, Inc."
 supervisor,PyPI,BSD-3-Clause-Modification,"Copyright (c) 2002-2005, Daniel Krech, http://eikeon.com/"
 tuf,PyPI,Apache-2.0,Copyright (c) 2010 New York University
 tuf,PyPI,MIT,Copyright (c) 2010 New York University

@@ -199,6 +199,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         self._connection_args = connection_args
         self._last_check_run = 0
         self._db = None
+        self._check = check
         self._configured_collection_interval = self._config.statement_samples_config.get('collection_interval', -1)
         self._events_statements_row_limit = self._config.statement_samples_config.get(
             'events_statements_row_limit', 5000

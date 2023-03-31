@@ -384,10 +384,10 @@ instances:
         #
         # keep_sql_alias: true
 
-    ## @param command_timeout - integer - optional - default: 5
+    ## @param command_timeout - integer - optional - default: 10
     ## Timeout in seconds for the connection and each command run
     #
-    # command_timeout: 5
+    # command_timeout: 10
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
@@ -489,7 +489,7 @@ instances:
 
     ## @param disable_generic_tags - boolean - optional - default: false
     ## Generic tags such as `host` are replaced by `sqlserver_host` to avoid
-    ## getting mixed with other integraton tags.
+    ## getting mixed with other integration tags.
     #
     disable_generic_tags: true
 

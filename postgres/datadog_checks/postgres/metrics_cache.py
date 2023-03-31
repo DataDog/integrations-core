@@ -18,6 +18,7 @@ from .util import (
     COUNT_METRICS,
     DATABASE_SIZE_METRICS,
     DBM_MIGRATED_METRICS,
+    NEWER_14_METRICS,
     NEWER_91_BGW_METRICS,
     NEWER_92_BGW_METRICS,
     NEWER_92_METRICS,
@@ -26,7 +27,7 @@ from .util import (
     REPLICATION_METRICS_10,
     REPLICATION_STATS_METRICS,
 )
-from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10
+from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, V14
 
 logger = logging.getLogger(__name__)
 
@@ -71,10 +72,11 @@ class PostgresMetricsCache:
             if not self.config.dbm_enabled:
                 c_metrics = dict(c_metrics, **DBM_MIGRATED_METRICS)
             # select the right set of metrics to collect depending on postgres version
+            self.instance_metrics = dict(c_metrics)
             if version >= V9_2:
-                self.instance_metrics = dict(c_metrics, **NEWER_92_METRICS)
-            else:
-                self.instance_metrics = dict(c_metrics)
+                self.instance_metrics = dict(self.instance_metrics, **NEWER_92_METRICS)
+            if version >= V14:
+                self.instance_metrics = dict(self.instance_metrics, **NEWER_14_METRICS)
 
             # add size metrics if needed
             if self.config.collect_database_size_metrics:
