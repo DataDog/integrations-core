@@ -5,10 +5,6 @@ on:
     branches:
     - master
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref }}
-  cancel-in-progress: true
-
 jobs:
   test:
     uses: ./.github/workflows/test-all.yml
