@@ -25,6 +25,8 @@ METRICS = [
     'admission_webhooks.rc_provider.invalid_configs',
     'admission_webhooks.reconcile_errors',
     'admission_webhooks.reconcile_success',
+    'admission_webhooks.response_duration.count',
+    'admission_webhooks.response_duration.sum',
     'admission_webhooks.webhooks_received',
     'aggregator.flush',
     'aggregator.processed',

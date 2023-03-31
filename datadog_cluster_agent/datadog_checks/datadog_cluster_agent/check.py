@@ -17,6 +17,7 @@ DEFAULT_METRICS = {
     'admission_webhooks_rc_provider_configs_invalid': 'admission_webhooks.rc_provider.invalid_configs',
     'admission_webhooks_reconcile_errors': 'admission_webhooks.reconcile_errors',
     'admission_webhooks_reconcile_success': 'admission_webhooks.reconcile_success',
+    'admission_webhooks_response_duration': 'admission_webhooks.response_duration',
     'admission_webhooks_webhooks_received': 'admission_webhooks.webhooks_received',
     'aggregator__flush': 'aggregator.flush',
     'aggregator__processed': 'aggregator.processed',
