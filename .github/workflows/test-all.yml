@@ -9,7 +9,7 @@ on:
 
       python-version:
         required: false
-        default: "3.8"
+        default: ""
         type: string
       standard:
         required: false
