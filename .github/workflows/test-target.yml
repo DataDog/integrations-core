@@ -100,6 +100,7 @@ jobs:
       DD_TAGS: "team:agent-integrations,platform:${{ inputs.platform }},integration:${{ inputs.target }}"
       DD_TRACE_ANALYTICS_ENABLED: "true"
       # Capture traces for a separate job to do the submission
+      TRACE_CAPTURE_BASE_DIR: ".trace-captures"
       TRACE_CAPTURE_FILE: ".trace-captures/${{ inputs.job-name }}"
       TRACE_CAPTURE_LOG: ".trace-captures/output.log"
 
@@ -157,12 +158,15 @@ jobs:
         ))}}
       run: ddev ci setup ${{ inputs.target }}
 
+    - uses: actions/setup-go@v4
     - name: Set up trace capturing
       if: inputs.repo == 'core'
       run: |-
-        pipx install mitmproxy
-        mkdir .trace-captures
-        mitmdump -p "${{ inputs.trace-agent-port }}" -w "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
+        go install github.com/google/go-replayers/httpreplay/cmd/httpr@latest
+        mkdir "${{ env.TRACE_CAPTURE_BASE_DIR }}"
+        httpr -port "${{ inputs.trace-agent-port }}" -record "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
+        pid=$!
+        echo "$pid" > "${{ env.TRACE_CAPTURE_BASE_DIR }}/pid"
 
     - name: Run Unit & Integration tests
       if: inputs.standard && !inputs.minimum-base-package
@@ -204,9 +208,8 @@ jobs:
     - name: Save trace captures
       if: inputs.repo == 'core' && always()
       run: |-
-        Stop-Process -Name "*mitmdump*"
+        kill -2 $(cat "${{ env.TRACE_CAPTURE_BASE_DIR }}/pid")
         cat "${{ env.TRACE_CAPTURE_LOG }}"
-      shell: "pwsh"
 
     - name: Upload captured traces
       if: inputs.repo == 'core' && always()

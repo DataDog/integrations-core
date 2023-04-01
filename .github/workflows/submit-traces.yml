@@ -39,7 +39,7 @@ jobs:
         path: captured-traces
 
     - name: Set up trace replaying
-      run: pipx install mitmproxy
+      run: go install github.com/google/go-replayers/httpreplay/cmd/httpr@latest
 
     - name: Replay
       run: |-
@@ -49,7 +49,7 @@ jobs:
           # check classes like when testing ddev or the downloader
           if [[ -s "$request" ]]; then
             echo "/// Replaying: $request"
-            mitmdump -C "$request"
+            httpr -replay "$request"
           fi
         done
 
