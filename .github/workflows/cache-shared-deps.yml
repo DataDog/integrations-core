@@ -1,0 +1,65 @@
+name: Cache shared Python dependencies
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: true
+        type: string
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  cache:
+    name: Cache Python dependencies for ${{ startsWith(matrix.os, 'windows-') && 'Windows' || startsWith(matrix.os, 'macos-') && 'macOS' || 'Linux' }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@v4
+      id: python
+      with:
+        python-version: "${{ inputs.python-version }}"
+
+    - name: Check cache
+      uses: actions/cache/restore@v3
+      id: cache
+      with:
+        path: "__lookup_only__"
+        key: >-
+          ${{ format(
+            'v01-python-{0}-{1}-{2}-{3}',
+            env.pythonLocation,
+            hashFiles('datadog_checks_base/pyproject.toml'),
+            hashFiles('datadog_checks_dev/pyproject.toml'),
+            hashFiles('ddev/pyproject.toml')
+          )}}
+        lookup-only: true
+
+    - name: Install dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: pip install ./datadog_checks_base[deps] ./datadog_checks_dev[cli] ./ddev mitmproxy
+
+    - name: Set up Python 2.7
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/setup-python@v4
+      with:
+        python-version: "2.7"
+
+    - name: Install dependencies for Python 2.7
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: pip install ./datadog_checks_base[deps] ./datadog_checks_dev
+
+    - name: Cache dependencies
+      uses: actions/cache/save@v3
+      if: steps.cache.outputs.cache-hit != 'true'
+      with:
+        path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
+        key: ${{ steps.cache.outputs.cache-primary-key }}
