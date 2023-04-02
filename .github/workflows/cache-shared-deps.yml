@@ -2,10 +2,6 @@ name: Cache shared Python dependencies
 
 on:
   workflow_call:
-    inputs:
-      python-version:
-        required: true
-        type: string
 
 defaults:
   run:
@@ -19,14 +15,17 @@ jobs:
       matrix:
         os: [ubuntu-22.04, windows-2022]
 
+    env:
+      PYTHON_VERSION: "3.8"
+
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Python ${{ inputs.python-version }}
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@v4
       id: python
       with:
-        python-version: "${{ inputs.python-version }}"
+        python-version: "${{ env.PYTHON_VERSION }}"
 
     - name: Check cache
       uses: actions/cache/restore@v3
