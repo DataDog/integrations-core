@@ -1,0 +1,424 @@
+{
+  "nodes": [
+    {
+      "uuid": "a91c98d9-7e58-4552-9d95-62ea85ae923c",
+      "created_at": "2023-03-13T10:14:35+00:00",
+      "updated_at": "2023-03-13T10:24:54+00:00",
+      "automated_clean": null,
+      "bios_interface": "no-bios",
+      "boot_interface": "ipxe",
+      "boot_mode": null,
+      "clean_step": {},
+      "conductor_group": "",
+      "console_enabled": false,
+      "console_interface": "no-console",
+      "deploy_interface": "direct",
+      "deploy_step": {},
+      "description": null,
+      "driver": "ipmi",
+      "driver_info": {
+        "ipmi_address": "10.164.0.18",
+        "ipmi_username": "admin",
+        "ipmi_password": "******",
+        "ipmi_port": 6230
+      },
+      "driver_internal_info": {
+        "clean_steps": null,
+        "agent_erase_devices_iterations": 1,
+        "agent_erase_devices_zeroize": true,
+        "agent_continue_if_secure_erase_failed": false,
+        "agent_continue_if_ata_erase_failed": false,
+        "agent_enable_nvme_secure_erase": true,
+        "agent_enable_ata_secure_erase": true,
+        "disk_erasure_concurrency": 4,
+        "agent_erase_skip_read_only": false,
+        "last_power_state_change": "2023-03-13T10:24:42.236632",
+        "agent_version": "9.5.0.dev1",
+        "agent_last_heartbeat": "2023-03-13T10:20:28.778089",
+        "hardware_manager_version": {
+          "generic_hardware_manager": "1.1"
+        },
+        "agent_cached_clean_steps_refreshed": "2023-03-13T10:20:21.636985"
+      },
+      "extra": {},
+      "fault": null,
+      "inspection_finished_at": null,
+      "inspection_started_at": null,
+      "inspect_interface": "no-inspect",
+      "instance_info": {},
+      "instance_uuid": null,
+      "last_error": null,
+      "lessee": null,
+      "maintenance": false,
+      "maintenance_reason": null,
+      "management_interface": "ipmitool",
+      "name": "node-0",
+      "network_data": {},
+      "network_interface": "flat",
+      "owner": "223fd91579d448feb399f68655515efb",
+      "power_interface": "ipmitool",
+      "power_state": "power on",
+      "properties": {
+        "cpu_arch": "x86_64",
+        "capabilities": "boot_mode:uefi",
+        "vendor": "unknown",
+        "root_device": {
+          "vendor": "0x1af4"
+        }
+      },
+      "protected": false,
+      "protected_reason": null,
+      "provision_state": "available",
+      "provision_updated_at": "2023-03-13T10:21:12+00:00",
+      "raid_config": {},
+      "raid_interface": "no-raid",
+      "rescue_interface": "no-rescue",
+      "reservation": null,
+      "resource_class": "baremetal",
+      "retired": false,
+      "retired_reason": null,
+      "secure_boot": null,
+      "storage_interface": "noop",
+      "target_power_state": null,
+      "target_provision_state": null,
+      "target_raid_config": {},
+      "traits": [
+        "CUSTOM_GOLD"
+      ],
+      "vendor_interface": "ipmitool",
+      "links": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/a91c98d9-7e58-4552-9d95-62ea85ae923c",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/a91c98d9-7e58-4552-9d95-62ea85ae923c",
+          "rel": "bookmark"
+        }
+      ],
+      "conductor": "agent-integrations-openstack-ironic",
+      "allocation_uuid": null,
+      "chassis_uuid": "6a4f97a0-aade-4b19-8ff3-99e9c1e1be3e",
+      "ports": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/a91c98d9-7e58-4552-9d95-62ea85ae923c/ports",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/a91c98d9-7e58-4552-9d95-62ea85ae923c/ports",
+          "rel": "bookmark"
+        }
+      ],
+      "states": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/a91c98d9-7e58-4552-9d95-62ea85ae923c/states",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/a91c98d9-7e58-4552-9d95-62ea85ae923c/states",
+          "rel": "bookmark"
+        }
+      ],
+      "portgroups": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/a91c98d9-7e58-4552-9d95-62ea85ae923c/portgroups",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/a91c98d9-7e58-4552-9d95-62ea85ae923c/portgroups",
+          "rel": "bookmark"
+        }
+      ],
+      "volume": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/a91c98d9-7e58-4552-9d95-62ea85ae923c/volume",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/a91c98d9-7e58-4552-9d95-62ea85ae923c/volume",
+          "rel": "bookmark"
+        }
+      ]
+    },
+    {
+      "uuid": "6bc313ce-066d-4be0-97b0-acd7ff7f46da",
+      "created_at": "2023-03-13T10:14:52+00:00",
+      "updated_at": "2023-03-13T10:21:24+00:00",
+      "automated_clean": null,
+      "bios_interface": "no-bios",
+      "boot_interface": "ipxe",
+      "boot_mode": null,
+      "clean_step": {},
+      "conductor_group": "",
+      "console_enabled": false,
+      "console_interface": "no-console",
+      "deploy_interface": "direct",
+      "deploy_step": {},
+      "description": null,
+      "driver": "ipmi",
+      "driver_info": {
+        "ipmi_address": "10.164.0.18",
+        "ipmi_username": "admin",
+        "ipmi_password": "******",
+        "ipmi_port": 6231
+      },
+      "driver_internal_info": {
+        "clean_steps": null,
+        "agent_erase_devices_iterations": 1,
+        "agent_erase_devices_zeroize": true,
+        "agent_continue_if_secure_erase_failed": false,
+        "agent_continue_if_ata_erase_failed": false,
+        "agent_enable_nvme_secure_erase": true,
+        "agent_enable_ata_secure_erase": true,
+        "disk_erasure_concurrency": 4,
+        "agent_erase_skip_read_only": false,
+        "last_power_state_change": "2023-03-13T10:21:10.607897",
+        "agent_version": "9.5.0.dev1",
+        "agent_last_heartbeat": "2023-03-13T10:20:36.946613",
+        "hardware_manager_version": {
+          "generic_hardware_manager": "1.1"
+        },
+        "agent_cached_clean_steps_refreshed": "2023-03-13T10:20:29.201935"
+      },
+      "extra": {},
+      "fault": null,
+      "inspection_finished_at": null,
+      "inspection_started_at": null,
+      "inspect_interface": "no-inspect",
+      "instance_info": {},
+      "instance_uuid": null,
+      "last_error": null,
+      "lessee": null,
+      "maintenance": false,
+      "maintenance_reason": null,
+      "management_interface": "ipmitool",
+      "name": "node-1",
+      "network_data": {},
+      "network_interface": "flat",
+      "owner": "223fd91579d448feb399f68655515efb",
+      "power_interface": "ipmitool",
+      "power_state": "power off",
+      "properties": {
+        "cpu_arch": "x86_64",
+        "capabilities": "boot_mode:uefi",
+        "vendor": "unknown",
+        "root_device": {
+          "vendor": "0x1af4"
+        }
+      },
+      "protected": false,
+      "protected_reason": null,
+      "provision_state": "available",
+      "provision_updated_at": "2023-03-13T10:21:24+00:00",
+      "raid_config": {},
+      "raid_interface": "no-raid",
+      "rescue_interface": "no-rescue",
+      "reservation": null,
+      "resource_class": "baremetal",
+      "retired": false,
+      "retired_reason": null,
+      "secure_boot": null,
+      "storage_interface": "noop",
+      "target_power_state": null,
+      "target_provision_state": null,
+      "target_raid_config": {},
+      "traits": [
+        "CUSTOM_GOLD"
+      ],
+      "vendor_interface": "ipmitool",
+      "links": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/6bc313ce-066d-4be0-97b0-acd7ff7f46da",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/6bc313ce-066d-4be0-97b0-acd7ff7f46da",
+          "rel": "bookmark"
+        }
+      ],
+      "conductor": "agent-integrations-openstack-ironic",
+      "allocation_uuid": null,
+      "chassis_uuid": "6a4f97a0-aade-4b19-8ff3-99e9c1e1be3e",
+      "ports": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/6bc313ce-066d-4be0-97b0-acd7ff7f46da/ports",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/6bc313ce-066d-4be0-97b0-acd7ff7f46da/ports",
+          "rel": "bookmark"
+        }
+      ],
+      "states": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/6bc313ce-066d-4be0-97b0-acd7ff7f46da/states",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/6bc313ce-066d-4be0-97b0-acd7ff7f46da/states",
+          "rel": "bookmark"
+        }
+      ],
+      "portgroups": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/6bc313ce-066d-4be0-97b0-acd7ff7f46da/portgroups",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/6bc313ce-066d-4be0-97b0-acd7ff7f46da/portgroups",
+          "rel": "bookmark"
+        }
+      ],
+      "volume": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/6bc313ce-066d-4be0-97b0-acd7ff7f46da/volume",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/6bc313ce-066d-4be0-97b0-acd7ff7f46da/volume",
+          "rel": "bookmark"
+        }
+      ]
+    },
+    {
+      "uuid": "b4b2971b-355b-4cc2-953d-2e95232bd7e2",
+      "created_at": "2023-03-13T10:15:09+00:00",
+      "updated_at": "2023-03-13T10:21:17+00:00",
+      "automated_clean": null,
+      "bios_interface": "no-bios",
+      "boot_interface": "ipxe",
+      "boot_mode": null,
+      "clean_step": {},
+      "conductor_group": "",
+      "console_enabled": false,
+      "console_interface": "no-console",
+      "deploy_interface": "direct",
+      "deploy_step": {},
+      "description": null,
+      "driver": "ipmi",
+      "driver_info": {
+        "ipmi_address": "10.164.0.18",
+        "ipmi_username": "admin",
+        "ipmi_password": "******",
+        "ipmi_port": 6232
+      },
+      "driver_internal_info": {
+        "clean_steps": null,
+        "agent_erase_devices_iterations": 1,
+        "agent_erase_devices_zeroize": true,
+        "agent_continue_if_secure_erase_failed": false,
+        "agent_continue_if_ata_erase_failed": false,
+        "agent_enable_nvme_secure_erase": true,
+        "agent_enable_ata_secure_erase": true,
+        "disk_erasure_concurrency": 4,
+        "agent_erase_skip_read_only": false,
+        "last_power_state_change": "2023-03-13T10:21:03.231768",
+        "agent_version": "9.5.0.dev1",
+        "agent_last_heartbeat": "2023-03-13T10:20:32.538704",
+        "hardware_manager_version": {
+          "generic_hardware_manager": "1.1"
+        },
+        "agent_cached_clean_steps_refreshed": "2023-03-13T10:20:25.217869"
+      },
+      "extra": {},
+      "fault": null,
+      "inspection_finished_at": null,
+      "inspection_started_at": null,
+      "inspect_interface": "no-inspect",
+      "instance_info": {},
+      "instance_uuid": null,
+      "last_error": null,
+      "lessee": null,
+      "maintenance": false,
+      "maintenance_reason": null,
+      "management_interface": "ipmitool",
+      "name": "node-2",
+      "network_data": {},
+      "network_interface": "flat",
+      "owner": "223fd91579d448feb399f68655515efb",
+      "power_interface": "ipmitool",
+      "power_state": "power off",
+      "properties": {
+        "cpu_arch": "x86_64",
+        "capabilities": "boot_mode:uefi",
+        "vendor": "unknown",
+        "root_device": {
+          "vendor": "0x1af4"
+        }
+      },
+      "protected": false,
+      "protected_reason": null,
+      "provision_state": "available",
+      "provision_updated_at": "2023-03-13T10:21:17+00:00",
+      "raid_config": {},
+      "raid_interface": "no-raid",
+      "rescue_interface": "no-rescue",
+      "reservation": null,
+      "resource_class": "baremetal",
+      "retired": false,
+      "retired_reason": null,
+      "secure_boot": null,
+      "storage_interface": "noop",
+      "target_power_state": null,
+      "target_provision_state": null,
+      "target_raid_config": {},
+      "traits": [
+        "CUSTOM_GOLD"
+      ],
+      "vendor_interface": "ipmitool",
+      "links": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/b4b2971b-355b-4cc2-953d-2e95232bd7e2",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/b4b2971b-355b-4cc2-953d-2e95232bd7e2",
+          "rel": "bookmark"
+        }
+      ],
+      "conductor": "agent-integrations-openstack-ironic",
+      "allocation_uuid": null,
+      "chassis_uuid": "6a4f97a0-aade-4b19-8ff3-99e9c1e1be3e",
+      "ports": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/b4b2971b-355b-4cc2-953d-2e95232bd7e2/ports",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/b4b2971b-355b-4cc2-953d-2e95232bd7e2/ports",
+          "rel": "bookmark"
+        }
+      ],
+      "states": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/b4b2971b-355b-4cc2-953d-2e95232bd7e2/states",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/b4b2971b-355b-4cc2-953d-2e95232bd7e2/states",
+          "rel": "bookmark"
+        }
+      ],
+      "portgroups": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/b4b2971b-355b-4cc2-953d-2e95232bd7e2/portgroups",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/b4b2971b-355b-4cc2-953d-2e95232bd7e2/portgroups",
+          "rel": "bookmark"
+        }
+      ],
+      "volume": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/b4b2971b-355b-4cc2-953d-2e95232bd7e2/volume",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/b4b2971b-355b-4cc2-953d-2e95232bd7e2/volume",
+          "rel": "bookmark"
+        }
+      ]
+    }
+  ]
+}
