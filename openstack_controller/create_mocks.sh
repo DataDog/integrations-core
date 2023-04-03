@@ -41,7 +41,7 @@ process_endpoint() {
 
   printf "\033[32m%-6s\033[0m $method $endpoint [$data]\n" "INFO"
 
-  local response=$(curl -D headers -s --request "$method" -H "$microversion_header" -H "X-Auth-Token: $x_auth_token" -H "Content-Type: application/json" --data "$data" "http://$os_ip:$port$endpoint")
+  local response=$(curl -D headers -s --request "$method" -H "$nova_microversion_header" -H "$ironic_microversion_header" -H "X-Auth-Token: $x_auth_token" -H "Content-Type: application/json" --data "$data" "http://$os_ip:$port$endpoint")
   http_status_code=$(cat "headers" | awk '/^HTTP/ {print $2}' | dos2unix)
   auth_token=$(cat "headers" | awk '/X-Subject-Token/ {print $2}' | dos2unix)
   if [ -n "$auth_token" ]; then
@@ -61,11 +61,18 @@ process_endpoint() {
 }
 
 os_ip=$(gcloud compute instances describe "$1" --format='get(networkInterfaces[0].accessConfigs[0].natIP)' --project "datadog-integrations-lab" --zone "europe-west4-a")
-root_folder="tests/fixtures/"$1"/${2:-"default"}"
-microversion_header=""
+root_folder="tests/fixtures/"$1"/nova-${2:-"default"}-ironic-${3:-"default"}"
+
+nova_microversion_header=""
+ironic_microversion_header=""
 if [ $# -eq 2 ]
   then
-    microversion_header="X-OpenStack-Nova-API-Version: $2"
+    nova_microversion_header="X-OpenStack-Nova-API-Version: $2"
+fi
+if [ $# -eq 3 ]
+  then
+    nova_microversion_header="X-OpenStack-Nova-API-Version: $2"
+    ironic_microversion_header="X-OpenStack-Ironic-API-Version: $3"
 fi
 x_auth_token=""
 
@@ -107,7 +114,9 @@ fi
 process_endpoint --endpoint="/compute/v2.1/flavors/detail"
 
 # Ironic
+process_endpoint --endpoint="/baremetal/v1/nodes?detail=True"
 
+process_endpoint --endpoint="/baremetal/v1/conductors"
 
 # Octavia
 
