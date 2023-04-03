@@ -18,7 +18,7 @@ files:
           and enable the plugin within coredns.
           See: https://coredns.io/plugins/metrics/
 
-          Either `prometheus_url` or `openmetrics_url` must be specified.
+          Either `prometheus_url` or `openmetrics_endpoint` must be specified.
           See documentation: https://docs.datadoghq.com/integrations/coredns
         tags.display_priority: 1
         tags.value.example:
@@ -39,7 +39,7 @@ files:
           and enable the plugin within coredns.
           See: https://coredns.io/plugins/metrics/
 
-          Either `prometheus_url` or `openmetrics_url` must be specified.
+          Either `prometheus_url` or `openmetrics_endpoint` must be specified.
           See documentation: https://docs.datadoghq.com/integrations/coredns
 - name: auto_conf.yaml
   options:
@@ -57,7 +57,7 @@ files:
         and enable the plugin within coredns.
         See: https://coredns.io/plugins/metrics/
 
-        Either `prometheus_url` or `openmetrics_url` must be specified.
+        Either `prometheus_url` or `openmetrics_endpoint` must be specified.
         See documentation: https://docs.datadoghq.com/integrations/coredns
 
       enabled: true
@@ -108,7 +108,7 @@ files:
         and enable the plugin within coredns.
         See: https://coredns.io/plugins/metrics/
 
-        Either `prometheus_url` or `openmetrics_url` must be specified.
+        Either `prometheus_url` or `openmetrics_endpoint` must be specified.
         See documentation: https://docs.datadoghq.com/integrations/coredns
       value:
         type: string
