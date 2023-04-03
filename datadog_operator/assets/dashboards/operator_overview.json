@@ -344,7 +344,7 @@
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 2,
+                            "width": 3,
                             "height": 2
                         }
                     },
@@ -377,9 +377,9 @@
                             "precision": 0
                         },
                         "layout": {
-                            "x": 2,
+                            "x": 3,
                             "y": 0,
-                            "width": 2,
+                            "width": 3,
                             "height": 2
                         }
                     },
@@ -519,7 +519,7 @@
                         "layout": {
                             "x": 0,
                             "y": 2,
-                            "width": 2,
+                            "width": 3,
                             "height": 2
                         }
                     },
@@ -557,9 +557,9 @@
                             "precision": 0
                         },
                         "layout": {
-                            "x": 2,
+                            "x": 3,
                             "y": 2,
-                            "width": 2,
+                            "width": 3,
                             "height": 2
                         }
                     },
@@ -689,7 +689,7 @@
                     {
                         "id": 6952001278071111,
                         "definition": {
-                            "title": "Operator CLB by Cluster",
+                            "title": "Operator CrashLoopBackOff by Cluster",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
@@ -1011,7 +1011,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "avg:datadog.operator.controller_runtime_reconcile_errors_total{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}.as_count()",
+                                            "query": "sum:datadog.operator.controller_runtime_reconcile_errors_total{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1296,7 +1296,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "avg:datadog.operator.workqueue_adds_total{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}.as_count()",
+                                            "query": "sum:datadog.operator.workqueue_adds_total{$scope,$cluster,kube_app_name:datadog-operator} by {kube_cluster_name}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
