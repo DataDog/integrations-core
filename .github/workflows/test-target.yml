@@ -21,7 +21,7 @@ on:
 
       python-version:
         required: false
-        default: "3.8"
+        default: ""
         type: string
       standard:
         required: false
@@ -87,6 +87,7 @@ jobs:
 
     env:
       FORCE_COLOR: "1"
+      PYTHON_VERSION: "${{ inputs.python-version || '3.8' }}"
       SKIP_ENV_NAME: "${{ (inputs.test-py2 && !inputs.test-py3) && 'py3.*' || (!inputs.test-py2 && inputs.test-py3) && 'py2.*' || '' }}"
       # Windows E2E requires Windows containers
       DDEV_E2E_AGENT: "${{ inputs.platform == 'windows' && (inputs.agent-image-windows || 'datadog/agent-dev:master-py3-win-servercore') || inputs.agent-image }}"
@@ -118,10 +119,26 @@ jobs:
       with:
         python-version: "2.7"
 
-    - name: Set up Python ${{ inputs.python-version }}
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@v4
       with:
-        python-version: "${{ inputs.python-version }}"
+        python-version: "${{ env.PYTHON_VERSION }}"
+
+    - name: Restore cache
+      if: inputs.repo == 'core'
+      uses: actions/cache/restore@v3
+      with:
+        path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
+        key: >-
+          ${{ format(
+            'v01-python-{0}-{1}-{2}-{3}',
+            env.pythonLocation,
+            hashFiles('datadog_checks_base/pyproject.toml'),
+            hashFiles('datadog_checks_dev/pyproject.toml'),
+            hashFiles('ddev/pyproject.toml')
+          )}}
+        restore-keys: |-
+          v01-python-${{ env.pythonLocation }}
 
     - name: Install ddev from local folder
       if: inputs.repo == 'core'
@@ -160,7 +177,7 @@ jobs:
     - name: Set up trace capturing
       if: inputs.repo == 'core'
       run: |-
-        pipx install mitmproxy
+        pipx install mitmproxy --python $(which python)
         mkdir .trace-captures
         mitmdump -p "${{ inputs.trace-agent-port }}" -w "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
 
