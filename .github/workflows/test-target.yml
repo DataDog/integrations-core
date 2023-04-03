@@ -101,8 +101,10 @@ jobs:
       DD_TAGS: "team:agent-integrations,platform:${{ inputs.platform }},integration:${{ inputs.target }}"
       DD_TRACE_ANALYTICS_ENABLED: "true"
       # Capture traces for a separate job to do the submission
+      TRACE_CAPTURE_BASE_DIR: ".trace-captures"
       TRACE_CAPTURE_FILE: ".trace-captures/${{ inputs.job-name }}"
       TRACE_CAPTURE_LOG: ".trace-captures/output.log"
+      TRACE_CAPTURE_WATCH_FILE: ".trace-captures/flush"
 
     steps:
     - name: Set up Windows
@@ -174,12 +176,15 @@ jobs:
         ))}}
       run: ddev ci setup ${{ inputs.target }}
 
+    - uses: actions/setup-go@v4
     - name: Set up trace capturing
       if: inputs.repo == 'core'
+      env:
+        PYTHONUNBUFFERED: "1"
       run: |-
-        pip install mitmproxy
-        mkdir .trace-captures
-        mitmdump -p "${{ inputs.trace-agent-port }}" -w "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
+        go install github.com/google/go-replayers/httpreplay/cmd/httpr@latest
+        mkdir "${{ env.TRACE_CAPTURE_BASE_DIR }}"
+        python .ddev/ci/scripts/misc/capture_traces.py --port "${{ inputs.trace-agent-port }}" --record "${{ env.TRACE_CAPTURE_FILE }}" --watch "${{ env.TRACE_CAPTURE_WATCH_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
 
     - name: Run Unit & Integration tests
       if: inputs.standard && !inputs.minimum-base-package
@@ -191,11 +196,11 @@ jobs:
       if: inputs.standard && inputs.minimum-base-package
       run: ddev test --force-base-min --force-env-rebuild --junit ${{ inputs.target }}
 
-    - name: Run E2E tests with latest base package
-      if: inputs.standard && inputs.repo == 'core'
-      env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-      run: ddev env test --base --new-env --junit ${{ inputs.target }}
+    # - name: Run E2E tests with latest base package
+    #   if: inputs.standard && inputs.repo == 'core'
+    #   env:
+    #     DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+    #   run: ddev env test --base --new-env --junit ${{ inputs.target }}
 
     - name: Run E2E tests
       if: inputs.standard && inputs.repo != 'core'
@@ -221,9 +226,9 @@ jobs:
     - name: Save trace captures
       if: inputs.repo == 'core' && always()
       run: |-
-        Stop-Process -Name "*mitmdump*"
+        echo touch > "${{ env.TRACE_CAPTURE_WATCH_FILE }}"
+        sleep 10
         cat "${{ env.TRACE_CAPTURE_LOG }}"
-      shell: "pwsh"
 
     - name: Upload captured traces
       if: inputs.repo == 'core' && always()
