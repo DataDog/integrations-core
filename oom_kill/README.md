@@ -80,7 +80,7 @@ spec:
       enabled: true
 ```
 
-**Note**: When using COS (Container Optimized OS), override the `src` volume in the node agent:
+**Note**: When using COS (Container Optimized OS), override the `src` volume in the node Agent:
 ```yaml
 apiVersion: datadoghq.com/v2alpha1
 kind: DatadogAgent
