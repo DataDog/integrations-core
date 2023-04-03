@@ -177,7 +177,7 @@ jobs:
     - name: Set up trace capturing
       if: inputs.repo == 'core'
       run: |-
-        pipx install mitmproxy --python $(which python)
+        pip install mitmproxy
         mkdir .trace-captures
         mitmdump -p "${{ inputs.trace-agent-port }}" -w "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
 
