@@ -14,6 +14,8 @@ See [Monitoring GitLab with Prometheus][1] for more information.
 
 The GitLab check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your GitLab servers.
 
+**Note**: The current version of the check (6.0.0+) uses [OpenMetrics][15] (OpenMetricsBaseCheckV2) for metric collection, which requires Python 3. For hosts unable to use Python 3, or to use the legacy OpenMetricsBaseCheckV1 version of this check, see the following [config][16].
+
 ### Configuration
 
 <!-- xxx tabs xxx -->
@@ -37,9 +39,6 @@ To configure this check for an Agent running on a host:
     **Note** Save and restart GitLab to see the changes.
 
 4. [Restart the Agent][7].
-
-**Note**: The metrics in [gitlab/metrics.py][8] are collected by default. The `allowed_metrics` configuration option in the `init_config` collects specific legacy metrics. Some metrics may not be collected depending on your GitLab instance version and configuration. See [GitLab Prometheus metrics][6] for more information about metric collection.
-
 
 ##### Log collection
 
@@ -78,11 +77,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 
 ##### Metric collection
 
-| Parameter            | Value                                                                                      |
-| -------------------- | ------------------------------------------------------------------------------------------ |
-| `<INTEGRATION_NAME>` | `gitlab`                                                                                   |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                              |
-| `<INSTANCE_CONFIG>`  | `{"gitlab_url":"http://%%host%%/", "prometheus_endpoint":"http://%%host%%:10055/-/metrics"}` |
+| Parameter            | Value                                                                                         |
+| -------------------- |-----------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `gitlab`                                                                                      |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                 |
+| `<INSTANCE_CONFIG>`  | `{"gitlab_url":"http://%%host%%/", "openmetrics_endpoint":"http://%%host%%:10055/-/metrics"}` |
 
 ##### Log collection
 
@@ -131,3 +130,5 @@ Need help? Contact [Datadog support][14].
 [12]: https://github.com/DataDog/integrations-core/blob/master/gitlab/metadata.csv
 [13]: https://github.com/DataDog/integrations-core/blob/master/gitlab/assets/service_checks.json
 [14]: https://docs.datadoghq.com/help/
+[15]: https://docs.datadoghq.com/integrations/openmetrics
+[16]: https://github.com/DataDog/integrations-core/blob/7.43.x/gitlab/datadog_checks/gitlab/data/conf.yaml.example
