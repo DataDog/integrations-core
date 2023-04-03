@@ -42,7 +42,7 @@ kubernetes,PyPI,Apache-2.0,Copyright 2014 The Kubernetes Authors.
 ldap3,PyPI,LGPL-3.0-only,Copyright 2013 - 2020 Giovanni Cannata
 lxml,PyPI,BSD-3-Clause,Copyright (c) 2004 Infrae. All rights reserved.
 lz4,PyPI,BSD-3-Clause,"Copyright (c) 2012-2013, Steeve Morin"
-mmh3,PyPI,CC0-1.0,Hajime Senuma. mmh3 is dedicated to the public domain under CC0-1.0.
+mmh3,PyPI,CC0-1.0,Copyright (c) 2011-2023 Hajime Senuma
 oauthlib,PyPI,BSD-3-Clause,Copyright (c) 2019 The OAuthlib Community
 openstacksdk,PyPI,Apache-2.0,Copyright OpenStack
 oracledb,PyPI,Apache-2.0,"Copyright (c) 2016, 2023 Oracle and/or its affiliates."
