@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.dotnetclr import dotnetclr
+from datadog_checks.dotnetclr import DotnetclrCheck
 
 from .common import INSTANCE
 
@@ -23,7 +23,7 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return lambda instance: dotnetclr('dotnetclr', {}, [instance])
+    return lambda instance: DotnetclrCheck('dotnetclr', {}, [instance])
 
 
 @pytest.fixture
