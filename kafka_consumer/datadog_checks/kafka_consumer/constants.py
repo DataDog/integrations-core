@@ -18,5 +18,3 @@ KAFKA_INTERNAL_TOPICS = {
     '_confluent-telemetry-metrics',
     '_confluent-command',
 }
-
-BROKER_REQUESTS_BATCH_SIZE = 30
