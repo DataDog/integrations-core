@@ -1,0 +1,43 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "8ea2f311-02dd-478b-9b3b-3fbef310d82c",
+  "app_id": "datadog-operator",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the Datadog Operator",
+    "title": "Datadog Operator",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
+    ]
+  },
+  "assets": {
+    "dashboards": {
+      "Datadog Operator Overview": "assets/dashboards/operator_overview.json"
+    },
+    "integration": {
+      "source_type_name": "Datadog Operator",
+      "metrics": {
+        "prefix": "datadog.operator.",
+        "check": "datadog.operator.go_info",
+        "metadata_path": "metadata.csv"
+      },
+    "service_checks": {
+      "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {}
+}
