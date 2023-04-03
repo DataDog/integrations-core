@@ -31,7 +31,7 @@ jobs:
       uses: actions/cache/restore@v3
       id: cache
       with:
-        path: "__lookup_only__"
+        path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
         key: >-
           ${{ format(
             'v01-python-{0}-{1}-{2}-{3}',
