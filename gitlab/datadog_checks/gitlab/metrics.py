@@ -212,10 +212,6 @@ METRICS_MAP = {
     'user_session_logins_total': 'user_session_logins_total',
 }
 
-OPENMETRICS_V2_TYPE_OVERRIDES = {
-    'gitlab_banzai_cacheless_render_real_duration_seconds_sum': 'gauge',
-}
-
 
 def construct_metrics_config(metric_map, type_overrides):
     metrics = []

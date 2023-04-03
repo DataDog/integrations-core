@@ -11,7 +11,7 @@ from datadog_checks.gitlab.config_models import ConfigMixin
 from ..base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 from ..base.errors import CheckException
 from .common import get_gitlab_version, get_tags
-from .metrics import METRICS_MAP, OPENMETRICS_V2_TYPE_OVERRIDES, construct_metrics_config
+from .metrics import METRICS_MAP, construct_metrics_config
 
 
 class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
@@ -40,12 +40,12 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
 
     def get_default_config(self):
         return {
-            "metrics": construct_metrics_config(METRICS_MAP, OPENMETRICS_V2_TYPE_OVERRIDES),
+            "metrics": construct_metrics_config(METRICS_MAP, {}),
         }
 
     def create_scraper(self, config):
         new_config = copy.deepcopy(config)
-        new_config["tags"] = get_tags(config)
+        new_config["tags"] = self._tags
         return OpenMetricsCompatibilityScraper(self, self.get_config_with_defaults(new_config))
 
     @AgentCheck.metadata_entrypoint

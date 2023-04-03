@@ -83,6 +83,29 @@ COMMON_METRICS = [
     "unicorn.active_connections",
     "unicorn.queued_connections",
     "unicorn.workers",
+    "action_cable.active_connections",
+    "database.connection_pool_busy",
+    "database.connection_pool_connections",
+    "database.connection_pool_dead",
+    "database.connection_pool_idle",
+    "database.connection_pool_size",
+    "database.connection_pool_waiting",
+    "db_load_balancing_hosts",
+    "puma.active_connections",
+    "puma.idle_threads",
+    "puma.max_threads",
+    "puma.pool_capacity",
+    "puma.queued_connections",
+    "puma.running",
+    "puma.running_workers",
+    "puma.stale_workers",
+    "puma.workers",
+    "redis.client_requests_duration_seconds.count",
+    "redis.client_requests_duration_seconds.sum",
+    "ruby.process_proportional_memory_bytes",
+    "ruby.process_unique_memory_bytes",
+    "ruby.threads_max_expected_threads",
+    "ruby.threads_running_threads",
 ]
 
 V1_METRICS = COMMON_METRICS + [
@@ -99,6 +122,7 @@ V1_METRICS = COMMON_METRICS + [
     "ruby.sampler_duration_seconds_total",
     "ruby.process_cpu_seconds_total",
     "ruby.gc_stat.count",
+    "redis.client_requests_total",
 ]
 
 V2_METRICS = COMMON_METRICS + [
@@ -121,6 +145,8 @@ V2_METRICS = COMMON_METRICS + [
     "transaction.duration_seconds.bucket",
     "transaction.new_redis_connections.count",
     "transaction.view_duration.count",
+    "redis.client_requests.count",
+    "redis.client_requests_duration_seconds.bucket",
 ]
 
 METRICS_TO_TEST = [
