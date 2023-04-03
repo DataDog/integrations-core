@@ -36,9 +36,9 @@ files:
         send_monotonic_counter.value.display_default: false
   - template: init_config
     options:
-      - template: init_config/openmetrics_legacy
+      - template: init_config/openmetrics
       - name: allowed_metrics
-        description: The list of legacy metrics to extract from Prometheus.
+        description: The list of legacy metrics to extract from Prometheus from the `prometheus_url`.
         value:
           type: array
           items:

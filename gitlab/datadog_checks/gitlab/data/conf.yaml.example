@@ -546,7 +546,7 @@ init_config:
     # service: <SERVICE>
 
     ## @param allowed_metrics - list of strings - optional
-    ## The list of legacy metrics to extract from Prometheus.
+    ## The list of legacy metrics to extract from Prometheus from the `prometheus_url`.
     #
     # allowed_metrics:
     #   - go_gc_duration_seconds
