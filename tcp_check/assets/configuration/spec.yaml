@@ -14,7 +14,7 @@ files:
         type: string
         example: <TCP_CHECK_INSTANCE_NAME>
     - name: host
-      description: Host to connect to.
+      description: Host to connect to (supports <address>%<zone_id> notation for scoped IPv6 addresses).
       required: true
       value:
         type: string
@@ -22,11 +22,6 @@ files:
     - name: port
       description: Port of the host to connect to.
       required: true
-      value:
-        type: integer
-    - name: scope_id
-      description: The `scope_id` of the network device handling the traffic. Used only for IPv6.
-      required: false
       value:
         type: integer
     - name: timeout
