@@ -19,7 +19,7 @@ instances:
   - name: <TCP_CHECK_INSTANCE_NAME>
 
     ## @param host - string - required
-    ## Host to connect to.
+    ## Host to connect to (supports <address>%<zone_id> notation for scoped IPv6 addresses).
     #
     host: <TCP_HOST_TO_CONNECT_TO>
 
@@ -27,11 +27,6 @@ instances:
     ## Port of the host to connect to.
     #
     port: <PORT>
-
-    ## @param scope_id - integer - optional
-    ## The `scope_id` of the network device handling the traffic. Used only for IPv6.
-    #
-    # scope_id: <SCOPE_ID>
 
     ## @param timeout - integer - optional - default: 10
     ## Timeout of the TCP query in second.
