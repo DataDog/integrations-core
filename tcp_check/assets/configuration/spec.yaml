@@ -14,7 +14,7 @@ files:
         type: string
         example: <TCP_CHECK_INSTANCE_NAME>
     - name: host
-      description: Host to connect to (supports <address>%<zone_id> notation for scoped IPv6 addresses).
+      description: Host to connect to (supports <address>%<zone_id> notation for scoped IPv6).
       required: true
       value:
         type: string

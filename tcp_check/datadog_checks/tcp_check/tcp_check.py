@@ -107,7 +107,9 @@ class TCPCheck(AgentCheck):
             sock.settimeout(self.timeout)
             start = get_precise_time()
             if "%" in addr:
-                sock.connect((addr, self.port, 0, socket.if_nametoindex(addr.split("%")[1])))  # Add the extra necessary arguments.
+                sock.connect(
+                    (addr, self.port, 0, socket.if_nametoindex(addr.split("%")[1]))
+                    )  # Add the extra necessary arguments.
             else:
                 sock.connect((addr, self.port))
             response_time = get_precise_time() - start
