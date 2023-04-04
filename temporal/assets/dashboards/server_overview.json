@@ -1527,7 +1527,6 @@
                                     "response_format": "event_list"
                                 }
                             ],
-                            "time": {},
                             "title": "Frontend",
                             "title_align": "left",
                             "title_size": "16",
@@ -1570,7 +1569,7 @@
                                     "query": {
                                         "data_source": "logs_stream",
                                         "indexes": [],
-                                        "query_string": "source:temporal @service_name:temporal-matching",
+                                        "query_string": "source:temporal service:temporal-matching",
                                         "storage": "hot"
                                     },
                                     "response_format": "event_list"
@@ -1619,7 +1618,7 @@
                                     "query": {
                                         "data_source": "logs_stream",
                                         "indexes": [],
-                                        "query_string": "source:temporal service_name:temporal-history",
+                                        "query_string": "source:temporal service:temporal-history",
                                         "storage": "hot"
                                     },
                                     "response_format": "event_list"
@@ -1668,7 +1667,7 @@
                                     "query": {
                                         "data_source": "logs_stream",
                                         "indexes": [],
-                                        "query_string": "source:temporal service_name:temporal",
+                                        "query_string": "source:temporal service:temporal",
                                         "storage": "hot"
                                     },
                                     "response_format": "event_list"
