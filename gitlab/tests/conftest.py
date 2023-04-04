@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import json
 import os
 from time import sleep
 
@@ -71,16 +72,51 @@ def dd_environment():
 
 @pytest.fixture()
 def mock_data():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
     with mock.patch(
         'requests.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
+        side_effect=mocked_requests_get,
     ):
         yield
+
+
+def mocked_requests_get(*args, **kwargs):
+    if args[0].startswith("http://{}:{}/-/readiness".format(HOST, GITLAB_LOCAL_PORT)):
+        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'readiness_check.json')
+        with open(f_name, 'r') as f:
+            text_data = f.read()
+            response = mock.MagicMock()
+            response.status_code = 200
+            response.json.return_value = json.loads(text_data)
+            return response
+
+    elif args[0] == "http://{}:{}/-/liveness".format(HOST, GITLAB_LOCAL_PORT) or args[
+        0
+    ] == "http://{}:{}/-/health".format(HOST, GITLAB_LOCAL_PORT):
+        response = mock.MagicMock()
+        response.status_code = 200
+        return response
+    elif args[0] == "http://{}:{}/-/metrics".format(HOST, GITLAB_LOCAL_PORT):
+        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
+
+        with open(f_name, 'r') as f:
+            text_data = f.read()
+            return mock.MagicMock(
+                status_code=200,
+                iter_lines=lambda **kwargs: text_data.split("\n"),
+                headers={'Content-Type': "text/plain"},
+            )
+    elif args[0] == "http://{}:{}/api/v4/version".format(HOST, GITLAB_LOCAL_PORT) or args[
+        0
+    ] == "http://{}:{}/-/health".format(HOST, GITLAB_LOCAL_PORT):
+        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'version.json')
+        with open(f_name, 'r') as f:
+            text_data = f.read()
+            response = mock.MagicMock()
+            response.status_code = 200
+            response.json.return_value = text_data
+            return response
+
+    pytest.fail("url `{}` not registered".format(args[0]))
 
 
 @pytest.fixture()
