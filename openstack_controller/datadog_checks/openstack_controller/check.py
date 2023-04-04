@@ -36,6 +36,20 @@ def _create_hypervisor_metric_tags(hypervisor_id, hypervisor_data, os_aggregates
     return tags
 
 
+def _create_baremetal_nodes_metric_tags(node_name, node_uuid, maintenance, conductor_group, power_state):
+    tags = [
+        f'maintenance:{maintenance}',
+        f'power_state:{power_state}',
+    ]
+    if node_name:
+        tags.append(f'node_name:{node_name}')
+    elif node_uuid:
+        tags.append(f'node_uuid:{node_uuid}')
+    if conductor_group:
+        tags.append(f'conductor_group:{conductor_group}')
+    return tags
+
+
 def _create_project_tags(project):
     return [f"project_id:{project.get('id')}", f"project_name:{project.get('name')}"]
 
@@ -217,6 +231,7 @@ class OpenStackControllerCheck(AgentCheck):
     def _report_baremetal_metrics(self, api, project_id, project_tags):
         try:
             self._report_baremetal_response_time(api, project_id, project_tags)
+            self._report_baremetal_nodes(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting baremetal metrics: %s", e)
@@ -232,6 +247,19 @@ class OpenStackControllerCheck(AgentCheck):
             self.service_check('openstack.ironic.api.up', AgentCheck.OK, tags=project_tags)
         else:
             self.service_check('openstack.ironic.api.up', AgentCheck.UNKNOWN, tags=project_tags)
+
+    def _report_baremetal_nodes(self, api, project_id, project_tags):
+        nodes_data = api.get_baremetal_nodes(project_id)
+        for node_data in nodes_data:
+            baremetal_tags = _create_baremetal_nodes_metric_tags(
+                node_data.get('node_name'),
+                node_data.get('node_uuid'),
+                node_data.get('maintenance'),
+                node_data.get('conductor_group'),
+                node_data.get('power_state'),
+            )
+            all_tags = baremetal_tags + project_tags
+            self.gauge('openstack.ironic.nodes.count', value=1, tags=all_tags)
 
     def _report_load_balancer_metrics(self, api, project_id, project_tags):
         try:

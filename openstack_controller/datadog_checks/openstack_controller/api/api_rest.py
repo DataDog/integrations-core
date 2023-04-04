@@ -24,13 +24,20 @@ class ApiRest(Api):
         self.log = logger
         self.config = config
         self.http = http
-        if self.config.nova_microversion:
-            self.log.debug("adding X-OpenStack-Nova-API-Version header to `%s`", self.config.nova_microversion)
-            self.http.options['headers']['X-OpenStack-Nova-API-Version'] = self.config.nova_microversion
         self.auth_projects = {}
         self.auth_tokens = {}
         self.endpoints = {}
         self.components = {}
+        self.add_microversion_headers()
+
+    def add_microversion_headers(self):
+        if self.config.nova_microversion:
+            self.log.debug("adding X-OpenStack-Nova-API-Version header to `%s`", self.config.nova_microversion)
+            self.http.options['headers']['X-OpenStack-Nova-API-Version'] = self.config.nova_microversion
+
+        if self.config.ironic_microversion:
+            self.log.debug("adding X-OpenStack-Ironic-API-Version header to `%s`", self.config.ironic_microversion)
+            self.http.options['headers']['X-OpenStack-Ironic-API-Version'] = self.config.ironic_microversion
 
     def create_connection(self):
         self.log.debug("creating connection")
@@ -130,6 +137,20 @@ class ApiRest(Api):
             return component.get_quotas(project_id)
         return None
 
+    def get_baremetal_nodes(self, project_id):
+        self.log.debug("getting baremetal nodes")
+        component = self._get_component(project_id, ComponentType.BAREMETAL)
+        if component:
+            return component.get_nodes()
+        return None
+
+    def get_baremetal_conductors(self, project_id):
+        self.log.debug("getting baremetal conductors")
+        component = self._get_component(project_id, ComponentType.BAREMETAL)
+        if component:
+            return component.get_conductors()
+        return None
+
     def _post_auth_tokens(self):
         self.log.debug("getting `X-Subject-Token`")
         data = '{{"auth": {{"identity": {{"methods": ["password"], ' '"password": {{"user": {}}}}}}}}}'.format(
@@ -208,7 +229,7 @@ class ApiRest(Api):
         elif endpoint_type == ComponentType.NETWORK:
             return NetworkRest(self.log, self.http, endpoint)
         elif endpoint_type == ComponentType.BAREMETAL:
-            return BaremetalRest(self.log, self.http, endpoint)
+            return BaremetalRest(self.log, self.http, endpoint, self.config.ironic_microversion)
         elif endpoint_type == ComponentType.LOAD_BALANCER:
             return LoadBalancerRest(self.log, self.http, endpoint)
         return None
