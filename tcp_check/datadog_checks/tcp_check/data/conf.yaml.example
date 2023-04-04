@@ -19,7 +19,7 @@ instances:
   - name: <TCP_CHECK_INSTANCE_NAME>
 
     ## @param host - string - required
-    ## Host to connect to (supports <address>%<zone_id> notation for scoped IPv6 addresses).
+    ## Host to connect to (supports <address>%<zone_id> notation for scoped IPv6).
     #
     host: <TCP_HOST_TO_CONNECT_TO>
 
