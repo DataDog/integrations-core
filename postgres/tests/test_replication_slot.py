@@ -25,7 +25,7 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
             cur.execute("select * from pg_create_physical_replication_slot('phys_2', true);")
             cur.execute("select * from pg_create_physical_replication_slot('phys_3', true, true);")
 
-    time.sleep(0.2)
+    time.sleep(0.5)
     check.check(pg_instance)
 
     #     slot_name     | slot_type | temporary | active | active_pid | xmin | restart_lsn
