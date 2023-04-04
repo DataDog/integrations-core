@@ -19,7 +19,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import DatabaseConfigurationError, warning_with_tags
-from .version_utils import V9_4
+from .version_utils import V9_4, V14
 
 try:
     import datadog_agent
@@ -42,6 +42,8 @@ SELECT {cols}
 # Use pg_stat_statements(false) when available as an optimization to avoid pulling SQL text from disk
 PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements(false)"
 PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 = "SELECT COUNT(*) FROM pg_stat_statements"
+PG_STAT_STATEMENTS_DEALLOC = "SELECT dealloc FROM pg_stat_statements_info"
+
 
 # Required columns for the check to run
 PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({'calls', 'query', 'rows'})
@@ -349,6 +351,25 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
             return []
 
+    def _emit_pg_stat_statements_dealloc(self):
+        if self._check.version < V14:
+            return
+        try:
+            rows = self._execute_query(
+                self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor),
+                PG_STAT_STATEMENTS_DEALLOC,
+            )
+            if rows:
+                dealloc = rows[0][0]
+                self._check.monotonic_count(
+                    "postgresql.pg_stat_statements.dealloc",
+                    dealloc,
+                    tags=self._tags,
+                    hostname=self._check.resolved_hostname,
+                )
+        except psycopg2.Error as e:
+            self._log.warning("Failed to query for pg_stat_statements_info: %s", e)
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _emit_pg_stat_statements_metrics(self):
         query = PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 if self._check.version < V9_4 else PG_STAT_STATEMENTS_COUNT_QUERY
@@ -378,6 +399,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):
         self._emit_pg_stat_statements_metrics()
+        self._emit_pg_stat_statements_dealloc()
         rows = self._load_pg_stat_statements()
 
         rows = self._normalize_queries(rows)
