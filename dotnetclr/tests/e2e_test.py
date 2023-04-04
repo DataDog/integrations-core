@@ -5,7 +5,7 @@
 import pytest
 
 from datadog_checks.dev.testing import requires_py3
-from datadog_checks.dotnetclr.check import DotnetclrCheck
+from datadog_checks.dotnetclr.check import DotnetclrCheckV2
 
 
 @pytest.mark.e2e
