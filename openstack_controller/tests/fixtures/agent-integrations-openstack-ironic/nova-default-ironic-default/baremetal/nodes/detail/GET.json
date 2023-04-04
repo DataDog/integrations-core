@@ -1,0 +1,166 @@
+{
+  "nodes": [
+    {
+      "uuid": "a91c98d9-7e58-4552-9d95-62ea85ae923c",
+      "created_at": "2023-03-13T10:14:35+00:00",
+      "updated_at": "2023-03-13T10:24:54+00:00",
+      "console_enabled": false,
+      "driver": "ipmi",
+      "driver_info": {
+        "ipmi_address": "10.164.0.18",
+        "ipmi_username": "admin",
+        "ipmi_password": "******",
+        "ipmi_port": 6230
+      },
+      "extra": {},
+      "instance_info": {},
+      "instance_uuid": null,
+      "last_error": null,
+      "maintenance": false,
+      "maintenance_reason": null,
+      "power_state": "power on",
+      "properties": {
+        "cpu_arch": "x86_64",
+        "capabilities": "boot_mode:uefi",
+        "vendor": "unknown",
+        "root_device": {
+          "vendor": "0x1af4"
+        }
+      },
+      "provision_state": null,
+      "provision_updated_at": "2023-03-13T10:21:12+00:00",
+      "reservation": null,
+      "target_power_state": null,
+      "target_provision_state": null,
+      "links": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/a91c98d9-7e58-4552-9d95-62ea85ae923c",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/a91c98d9-7e58-4552-9d95-62ea85ae923c",
+          "rel": "bookmark"
+        }
+      ],
+      "chassis_uuid": "6a4f97a0-aade-4b19-8ff3-99e9c1e1be3e",
+      "ports": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/a91c98d9-7e58-4552-9d95-62ea85ae923c/ports",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/a91c98d9-7e58-4552-9d95-62ea85ae923c/ports",
+          "rel": "bookmark"
+        }
+      ]
+    },
+    {
+      "uuid": "6bc313ce-066d-4be0-97b0-acd7ff7f46da",
+      "created_at": "2023-03-13T10:14:52+00:00",
+      "updated_at": "2023-03-13T10:21:24+00:00",
+      "console_enabled": false,
+      "driver": "ipmi",
+      "driver_info": {
+        "ipmi_address": "10.164.0.18",
+        "ipmi_username": "admin",
+        "ipmi_password": "******",
+        "ipmi_port": 6231
+      },
+      "extra": {},
+      "instance_info": {},
+      "instance_uuid": null,
+      "last_error": null,
+      "maintenance": false,
+      "maintenance_reason": null,
+      "power_state": "power off",
+      "properties": {
+        "cpu_arch": "x86_64",
+        "capabilities": "boot_mode:uefi",
+        "vendor": "unknown",
+        "root_device": {
+          "vendor": "0x1af4"
+        }
+      },
+      "provision_state": null,
+      "provision_updated_at": "2023-03-13T10:21:24+00:00",
+      "reservation": null,
+      "target_power_state": null,
+      "target_provision_state": null,
+      "links": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/6bc313ce-066d-4be0-97b0-acd7ff7f46da",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/6bc313ce-066d-4be0-97b0-acd7ff7f46da",
+          "rel": "bookmark"
+        }
+      ],
+      "chassis_uuid": "6a4f97a0-aade-4b19-8ff3-99e9c1e1be3e",
+      "ports": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/6bc313ce-066d-4be0-97b0-acd7ff7f46da/ports",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/6bc313ce-066d-4be0-97b0-acd7ff7f46da/ports",
+          "rel": "bookmark"
+        }
+      ]
+    },
+    {
+      "uuid": "b4b2971b-355b-4cc2-953d-2e95232bd7e2",
+      "created_at": "2023-03-13T10:15:09+00:00",
+      "updated_at": "2023-03-13T10:21:17+00:00",
+      "console_enabled": false,
+      "driver": "ipmi",
+      "driver_info": {
+        "ipmi_address": "10.164.0.18",
+        "ipmi_username": "admin",
+        "ipmi_password": "******",
+        "ipmi_port": 6232
+      },
+      "extra": {},
+      "instance_info": {},
+      "instance_uuid": null,
+      "last_error": null,
+      "maintenance": false,
+      "maintenance_reason": null,
+      "power_state": "power off",
+      "properties": {
+        "cpu_arch": "x86_64",
+        "capabilities": "boot_mode:uefi",
+        "vendor": "unknown",
+        "root_device": {
+          "vendor": "0x1af4"
+        }
+      },
+      "provision_state": null,
+      "provision_updated_at": "2023-03-13T10:21:17+00:00",
+      "reservation": null,
+      "target_power_state": null,
+      "target_provision_state": null,
+      "links": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/b4b2971b-355b-4cc2-953d-2e95232bd7e2",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/b4b2971b-355b-4cc2-953d-2e95232bd7e2",
+          "rel": "bookmark"
+        }
+      ],
+      "chassis_uuid": "6a4f97a0-aade-4b19-8ff3-99e9c1e1be3e",
+      "ports": [
+        {
+          "href": "http://34.91.125.201/baremetal/v1/nodes/b4b2971b-355b-4cc2-953d-2e95232bd7e2/ports",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.91.125.201/baremetal/nodes/b4b2971b-355b-4cc2-953d-2e95232bd7e2/ports",
+          "rel": "bookmark"
+        }
+      ]
+    }
+  ]
+}

@@ -114,9 +114,9 @@ fi
 process_endpoint --endpoint="/compute/v2.1/flavors/detail"
 
 # Ironic
-process_endpoint --endpoint="/baremetal/v1/nodes?detail=True"
-
-process_endpoint --endpoint="/baremetal/v1/conductors"
+process_endpoint --endpoint="/baremetal/nodes?detail=True"
+process_endpoint --endpoint="/baremetal/nodes/detail"
+process_endpoint --endpoint="/baremetal/conductors"
 
 # Octavia
 
