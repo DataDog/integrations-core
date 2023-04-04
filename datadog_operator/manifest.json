@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "8ea2f311-02dd-478b-9b3b-3fbef310d82c",
   "app_id": "datadog-operator",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
