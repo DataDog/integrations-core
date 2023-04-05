@@ -59,6 +59,12 @@ def test_connection_failure_openmetrics(dd_run_check, aggregator, gitlab_check, 
         count=1,
     )
 
+    for service_check in ('readiness', 'liveness', 'health'):
+        aggregator.assert_service_check(
+            'gitlab.{}'.format(service_check),
+            count=0,
+        )
+
 
 @pytest.mark.parametrize(
     'raw_version, version_metadata',
