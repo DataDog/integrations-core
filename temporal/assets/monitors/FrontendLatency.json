@@ -1,7 +1,7 @@
 {
 	"name": "Temporal frontend latency is elevated",
 	"type": "query alert",
-	"query": "avg(last_5m):sum:temporal.server.service.latency.sum{!operation:poll*,*,service_name:frontend}.as_rate() / sum:temporal.server.service.latency.count{!operation:poll*,*,service_name:frontend}.as_rate() > 1000",
+	"query": "avg(last_5m):sum:temporal.server.service.latency.sum{!operation:poll*,service_name:frontend}.as_rate() / sum:temporal.server.service.latency.count{!operation:poll*,service_name:frontend}.as_rate() > 1000",
 	"message": "The latency for the Temporal frontend service is elevated ({{ value }}).",
 	"tags": [
                 "integration:temporal",
