@@ -126,11 +126,11 @@ def test_node_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
 
-    tags = ['keystone_server:http://127.0.0.1:8080/identity']
+    base_tags = ['keystone_server:http://127.0.0.1:8080/identity']
 
-    demo_project_tags = [
+    demo_project_tags = base_tags + [
         'project_id:41ee3922506448f1a869f60f115c55c0',
-        'project_name:demoa',
+        'project_name:demo',
     ]
 
     nodes = [
