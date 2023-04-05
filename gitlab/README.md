@@ -4,7 +4,7 @@
 
 Integration that allows to:
 
-- Visualize and monitor metrics collected with GitLab through Prometheus
+- Visualize and monitor metrics collected with GitLab and Gitaly through Prometheus
 
 See [Monitoring GitLab with Prometheus][1] for more information.
 
