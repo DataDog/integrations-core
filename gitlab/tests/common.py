@@ -106,6 +106,8 @@ COMMON_METRICS = [
     "ruby.process_unique_memory_bytes",
     "ruby.threads_max_expected_threads",
     "ruby.threads_running_threads",
+    "transaction.rails_queue_duration_total",
+    "ruby.process_cpu_seconds_total",
 ]
 
 V1_METRICS = COMMON_METRICS + [
@@ -117,10 +119,8 @@ V1_METRICS = COMMON_METRICS + [
     "transaction.cache_read_miss_count_total",
     "transaction.new_redis_connections_total",
     "transaction.view_duration_total",
-    "transaction.rails_queue_duration_total",
     "rack.http_requests_total",
     "ruby.sampler_duration_seconds_total",
-    "ruby.process_cpu_seconds_total",
     "ruby.gc_stat.count",
     "redis.client_requests_total",
 ]
