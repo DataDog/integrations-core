@@ -13,7 +13,7 @@
         "host": "agent-integrations-openstack-default",
         "disabled_reason": null
       },
-      "uptime": " 14:39:18 up 13 days,  2:27,  0 users,  load average: 0.00, 0.02, 0.03\n",
+      "uptime": " 08:26:42 up 17 days, 20:14,  0 users,  load average: 0.20, 0.23, 0.20\n",
       "servers": [
         {
           "name": "instance-00000004",

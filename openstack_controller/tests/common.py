@@ -24,10 +24,17 @@ FILTERED_NETWORK_ID = 'server-2'
 FILTERED_SERVER_ID = 'server-1'
 FILTERED_BY_PROJ_SERVER_ID = ['server-1', 'server-2']
 
-REST_CONFIG = {
+CONFIG = {
     'keystone_server_url': 'http://127.0.0.1:8080/identity',
     'username': 'admin',
     'password': 'password',
+}
+
+CONFIG_NOVA_MICROVERSION_LATEST = {
+    'keystone_server_url': 'http://127.0.0.1:8080/identity',
+    'username': 'admin',
+    'password': 'password',
+    'nova_microversion': 'latest',
 }
 
 KEYSTONE_INSTANCE = {

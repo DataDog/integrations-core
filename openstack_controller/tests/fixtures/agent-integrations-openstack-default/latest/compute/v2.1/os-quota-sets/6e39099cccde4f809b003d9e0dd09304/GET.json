@@ -2,7 +2,7 @@
   "quota_set": {
     "id": "6e39099cccde4f809b003d9e0dd09304",
     "cores": 20,
-    "instances": 10,
+    "instances": 20,
     "key_pairs": 100,
     "metadata_items": 128,
     "ram": 51200,

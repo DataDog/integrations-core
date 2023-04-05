@@ -105,6 +105,9 @@ if [[ $num_uptime -eq 0 ]]; then
   done
 fi
 process_endpoint --endpoint="/compute/v2.1/flavors/detail"
+for flavor_id in $(echo "$RESPONSE" | jq -r '.flavors[]' | jq -r '.id'); do
+  process_endpoint --endpoint="/compute/v2.1/flavors/$flavor_id"
+done
 
 # Ironic
 

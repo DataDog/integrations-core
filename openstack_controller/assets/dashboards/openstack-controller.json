@@ -2,726 +2,1923 @@
     "title": "OpenStack Controller Overview",
     "description": "## OpenStack Controller - Overview\n\nPreset dashboard for the OpenStack Controller integration. Used for OpenStack deployments v13 and higher. \n\n[See integration docs for more details](https://docs.datadoghq.com/integrations/openstack_controller/)",
     "widgets": [
-      {
-        "id": 0,
-        "definition": {
-          "type": "note",
-          "content": "\n[Hypervisors](https://www.datadoghq.com/blog/openstack-monitoring-nova/#hypervisor-metrics)",
-          "background_color": "gray",
-          "font_size": "36",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 21,
-          "y": 2,
-          "width": 94,
-          "height": 8
-        }
-      },
-      {
-        "id": 1,
-        "definition": {
-          "type": "toplist",
-          "requests": [
-            {
-              "q": "top(avg:openstack.nova.server.memory_rss{*} by {project_name}, 10, 'mean', 'desc')",
-              "conditional_formats": [
-                {
-                  "comparator": ">",
-                  "value": 200,
-                  "palette": "red"
-                }
-              ]
-            }
-          ],
-          "custom_links": [],
-          "title": "Top memory RSS by project in $aggregate",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "1h"
-          }
-        },
-        "layout": {
-          "x": 21,
-          "y": 12,
-          "width": 46,
-          "height": 16
-        }
-      },
-      {
-        "id": 2,
-        "definition": {
-          "type": "check_status",
-          "title": "Keystone",
-          "title_size": "13",
-          "title_align": "center",
-          "check": "openstack.keystone.api.up",
-          "grouping": "cluster",
-          "tags": [
-            "*"
-          ],
-          "time": {
-            "live_span": "4h"
-          }
-        },
-        "layout": {
-          "x": 0,
-          "y": 22,
-          "width": 19,
-          "height": 9
-        }
-      },
-      {
-        "id": 3,
-        "definition": {
-          "type": "note",
-          "content": "APIs",
-          "background_color": "gray",
-          "font_size": "36",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 0,
-          "y": 12,
-          "width": 19,
-          "height": 8
-        }
-      },
-      {
-        "id": 4,
-        "definition": {
-          "type": "check_status",
-          "title": "Hypervisors",
-          "title_size": "13",
-          "title_align": "center",
-          "check": "openstack.nova.hypervisor.up",
-          "grouping": "cluster",
-          "tags": [
-            "$aggregate"
-          ],
-          "time": {
-            "live_span": "1h"
-          }
-        },
-        "layout": {
-          "x": 0,
-          "y": 55,
-          "width": 19,
-          "height": 9
-        }
-      },
-      {
-        "id": 5,
-        "definition": {
-          "type": "check_status",
-          "title": "Neutron",
-          "title_size": "13",
-          "title_align": "center",
-          "check": "openstack.neutron.api.up",
-          "grouping": "cluster",
-          "tags": [
-            "*"
-          ],
-          "time": {
-            "live_span": "10m"
-          }
-        },
-        "layout": {
-          "x": 0,
-          "y": 44,
-          "width": 19,
-          "height": 9
-        }
-      },
-      {
-        "id": 6,
-        "definition": {
-          "type": "check_status",
-          "title": "Nova",
-          "title_size": "13",
-          "title_align": "center",
-          "check": "openstack.nova.api.up",
-          "grouping": "cluster",
-          "tags": [
-            "*"
-          ],
-          "time": {
-            "live_span": "10m"
-          }
-        },
-        "layout": {
-          "x": 0,
-          "y": 33,
-          "width": 19,
-          "height": 9
-        }
-      },
-      {
-        "id": 7,
-        "definition": {
-          "type": "note",
-          "content": "\n[Project](https://www.datadoghq.com/blog/openstack-monitoring-nova/#tenant-metrics)",
-          "background_color": "gray",
-          "font_size": "36",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 21,
-          "y": 65,
-          "width": 94,
-          "height": 8
-        }
-      },
-      {
-        "id": 8,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:openstack.nova.limits.total_cores_used{$project}",
-              "display_type": "area",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
+        {
+            "id": 3650127614551902,
+            "definition": {
+                "title": "",
+                "banner_img": "/static/images/logos/openstack_large.svg",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1279542448767170,
+                        "definition": {
+                            "type": "note",
+                            "content": "This dashboard provides an overview of your Openstack deployment. Track the health of your Nova, Neutron, Ironic, and Octavia services and view key information such as:\n- hypervisor load and status \n- server errors \n- status of bare metal nodes \n- load balancer service health",
+                            "background_color": "white",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 695657035123988,
+                        "definition": {
+                            "type": "note",
+                            "content": "**Further Reading on Openstack**\n\n[Datadog Openstack Controller Integration Docs&nbsp;↗]( https://docs.datadoghq.com/integrations/openstack_controller/)\n\n[Openstack Docs &nbsp;↗]( https://www.openstack.org/)\n\n[Openstack Services &nbsp;↗](https://www.openstack.org/software/project-navigator/openstack-components#openstack-services)\n",
+                            "background_color": "white",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
             },
-            {
-              "q": "avg:openstack.nova.limits.max_total_cores{$project}",
-              "display_type": "line",
-              "style": {
-                "palette": "warm",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 8
             }
-          ],
-          "custom_links": [],
-          "yaxis": {
-            "label": "",
-            "scale": "linear",
-            "min": "auto",
-            "max": "auto",
-            "include_zero": true
-          },
-          "title": "Cores used vs max by $project",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "1h"
-          },
-          "show_legend": true,
-          "legend_size": "0"
         },
-        "layout": {
-          "x": 69,
-          "y": 74,
-          "width": 46,
-          "height": 16
-        }
-      },
-      {
-        "id": 9,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:openstack.nova.limits.total_instances_used{$project}",
-              "display_type": "area",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
+        {
+            "id": 1149578833829744,
+            "definition": {
+                "title": "Overview",
+                "background_color": "white",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6076858181941086,
+                        "definition": {
+                            "type": "note",
+                            "content": "Components",
+                            "background_color": "gray",
+                            "font_size": "36",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 5012464578391900,
+                        "definition": {
+                            "title": "Keystone",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "openstack.keystone.api.up",
+                            "grouping": "cluster",
+                            "group": "keystone_server:http://10.164.0.11/identity",
+                            "group_by": [
+                                "host"
+                            ],
+                            "tags": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 7127932884759874,
+                        "definition": {
+                            "title": "Nova",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "openstack.nova.api.up",
+                            "grouping": "cluster",
+                            "group": "$Project",
+                            "group_by": [
+                                "project_name"
+                            ],
+                            "tags": [
+                                "$Project"
+                            ]
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 1,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 7813309804115824,
+                        "definition": {
+                            "title": "Neutron",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "openstack.neutron.api.up",
+                            "grouping": "cluster",
+                            "group": "$Project",
+                            "group_by": [
+                                "project_name"
+                            ],
+                            "tags": [
+                                "$Project"
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 5893131258645472,
+                        "definition": {
+                            "title": "Response Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:openstack.keystone.response_time{*}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": false,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2275586178175996,
+                        "definition": {
+                            "title": "Response Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:openstack.nova.response_time{$Project}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": false,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7927320907633026,
+                        "definition": {
+                            "title": "Response Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:openstack.neutron.response_time{$Project}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": false,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 435440859398038,
+                        "definition": {
+                            "title": "Cinder",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "openstack.cinder.api.up",
+                            "grouping": "cluster",
+                            "group_by": [
+                                "project_name"
+                            ],
+                            "tags": [
+                                "$Project"
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 5227104244716420,
+                        "definition": {
+                            "title": "Ironic",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "openstack.ironic.api.up",
+                            "grouping": "cluster",
+                            "group": "$Project",
+                            "group_by": [
+                                "project_name"
+                            ],
+                            "tags": [
+                                "$Project"
+                            ]
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 4,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 1294662051798076,
+                        "definition": {
+                            "title": "Octavia",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "openstack.octavia.api.up",
+                            "grouping": "cluster",
+                            "group": "$Project",
+                            "group_by": [
+                                "project_name"
+                            ],
+                            "tags": [
+                                "$Project"
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 4,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 5218774259137714,
+                        "definition": {
+                            "title": "Response Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:openstack.cinder.response_time{$Project}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": false,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7244495661221860,
+                        "definition": {
+                            "title": "Response Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:openstack.ironic.response_time{$Project}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": false,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 5,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4992704165041010,
+                        "definition": {
+                            "title": "Response Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:openstack.octavia.response_time{$Project}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": false,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 5,
+                            "width": 2,
+                            "height": 2
+                        }
+                    }
+                ]
             },
-            {
-              "q": "avg:openstack.nova.limits.max_total_instances{$project}",
-              "display_type": "line",
-              "style": {
-                "palette": "warm",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 8
             }
-          ],
-          "custom_links": [],
-          "yaxis": {
-            "label": "",
-            "scale": "linear",
-            "min": "auto",
-            "max": "auto",
-            "include_zero": true
-          },
-          "title": "Instances used vs max by $project",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "1h"
-          },
-          "show_legend": true,
-          "legend_size": "0"
         },
-        "layout": {
-          "x": 69,
-          "y": 92,
-          "width": 46,
-          "height": 16
-        }
-      },
-      {
-        "id": 10,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:openstack.nova.limits.total_ram_used{$project}",
-              "display_type": "area",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
+        {
+            "id": 2104133510782750,
+            "definition": {
+                "title": "Compute",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1083091091293100,
+                        "definition": {
+                            "type": "note",
+                            "content": "Cores",
+                            "background_color": "gray",
+                            "font_size": "36",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 4489659513775978,
+                        "definition": {
+                            "type": "note",
+                            "content": "RAM",
+                            "background_color": "gray",
+                            "font_size": "36",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 7316697881838270,
+                        "definition": {
+                            "type": "note",
+                            "content": "Servers",
+                            "background_color": "gray",
+                            "font_size": "36",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 3,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 8389755498827206,
+                        "definition": {
+                            "title": "Total",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:openstack.nova.server.count{$Project}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 0,
+                            "width": 1,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 8959907913169442,
+                        "definition": {
+                            "title": "Active",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:openstack.nova.server.active{$Project,$Server}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "green_on_white"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 1,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 847817452869816,
+                        "definition": {
+                            "title": "Error",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:openstack.nova.server.error{$Project,$Server}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default(query1, 0)"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "red_on_white"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 0,
+                            "width": 1,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 7914730465800642,
+                        "definition": {
+                            "title": "Available",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:openstack.nova.limits.max_total_instances{$Project}",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "query": "sum:openstack.nova.server.count{$Project}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default(query2, 0) - query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_green"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 10,
+                            "y": 0,
+                            "width": 1,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 2371291432188162,
+                        "definition": {
+                            "title": "Allowed",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:openstack.nova.limits.max_total_instances{$Project}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 11,
+                            "y": 0,
+                            "width": 1,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 1065326342064856,
+                        "definition": {
+                            "title": "Used",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:openstack.nova.server.flavor.vcpus{$Project,$Server}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default(query1, 0)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 8259629504654942,
+                        "definition": {
+                            "title": "Used",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:openstack.nova.server.flavor.ram{$Project,$Server}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default(query1, 0)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 1,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 1423442814929672,
+                        "definition": {
+                            "title": "Servers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:openstack.nova.server.flavor.vcpus{$Project,$Server,$Hypervisor,$Flavor,$Status} by {project_name,server_name,hypervisor,flavor_name,server_status}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:openstack.nova.server.flavor.ram{$Project,$Server,$Hypervisor,$Flavor,$Status} by {project_name,server_name,hypervisor,flavor_name,server_status}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:openstack.nova.server.flavor.disk{$Project,$Server,$Hypervisor,$Flavor,$Status} by {project_name,server_name,hypervisor,flavor_name,server_status}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:openstack.nova.server.uptime{$Project,$Server,$Hypervisor,$Flavor,$Status} by {project_name,server_name,hypervisor,flavor_name,server_status}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "conditional_formats": [],
+                                            "cell_display_mode": "number",
+                                            "alias": "vCPUS",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 25,
+                                                "order": "desc"
+                                            }
+                                        },
+                                        {
+                                            "conditional_formats": [],
+                                            "cell_display_mode": "number",
+                                            "alias": "RAM",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "conditional_formats": [],
+                                            "cell_display_mode": "number",
+                                            "alias": "Disk",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "conditional_formats": [],
+                                            "cell_display_mode": "number",
+                                            "number_format": {
+                                                "unit": {
+                                                    "unit_name": "second",
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
+                                            "alias": "Uptime",
+                                            "formula": "query4"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1360251480683836,
+                        "definition": {
+                            "title": "Available",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:openstack.nova.limits.max_total_cores{$Project}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:openstack.nova.server.flavor.vcpus{$Project,$Server}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_green"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query2 - query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 3415917263580914,
+                        "definition": {
+                            "title": "Available",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:openstack.nova.limits.max_total_ram_size{$Project}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:openstack.nova.server.flavor.ram{$Project,$Server}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 - query2"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_green"
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 5860332524501452,
+                        "definition": {
+                            "title": "Allowed",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:openstack.nova.limits.max_total_cores{$Project,$Server}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 1846875472355724,
+                        "definition": {
+                            "title": "Total",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:openstack.nova.limits.max_total_ram_size{$Project,$Server}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars"
+                            }
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 3,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 1621257520086820,
+                        "definition": {
+                            "type": "note",
+                            "content": "Details",
+                            "background_color": "gray",
+                            "font_size": "36",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 5735202382077678,
+                        "definition": {
+                            "type": "note",
+                            "content": "Disk",
+                            "background_color": "yellow",
+                            "font_size": "24",
+                            "text_align": "center",
+                            "vertical_align": "top",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 6,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 7744232803180308,
+                        "definition": {
+                            "type": "note",
+                            "content": "Cpu",
+                            "background_color": "yellow",
+                            "font_size": "24",
+                            "text_align": "center",
+                            "vertical_align": "top",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 5,
+                            "width": 6,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 152404002909504,
+                        "definition": {
+                            "title": "Read bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:openstack.nova.server.disk_details.read_bytes{$Project,$Server} by {project_name,server_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5222580265600808,
+                        "definition": {
+                            "title": "Read bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:openstack.nova.server.cpu_details.time{$Project,$Server} by {project_name,server_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 6,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 941665402921108,
+                        "definition": {
+                            "title": "Read requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:openstack.nova.server.disk_details.read_requests{$Project,$Server} by {project_name,server_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4463947926974516,
+                        "definition": {
+                            "title": "Write bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:openstack.nova.server.disk_details.write_bytes{$Project,$Server} by {project_name,server_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 151587003195190,
+                        "definition": {
+                            "title": "Write requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:openstack.nova.server.disk_details.write_requests{$Project,$Server} by {project_name,server_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1846417427059902,
+                        "definition": {
+                            "title": "Errors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:openstack.nova.server.disk_details.errors_count{$Project,$Server} by {project_name,server_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 14,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6757644244857988,
+                        "definition": {
+                            "type": "note",
+                            "content": "Hypervisors",
+                            "background_color": "yellow",
+                            "font_size": "36",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 16,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 1069740071171818,
+                        "definition": {
+                            "title": "Status",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "openstack.nova.hypervisor.up",
+                            "grouping": "cluster",
+                            "group_by": [
+                                "hypervisor"
+                            ],
+                            "tags": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 17,
+                            "width": 1,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2113318735504040,
+                        "definition": {
+                            "title": "Load",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Load 1",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Load 5",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Load 15",
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:openstack.nova.hypervisor.load_1{$Project,$Hypervisor} by {project_name,hypervisor}"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:openstack.nova.hypervisor.load_5{$Project,$Hypervisor} by {project_name,hypervisor}"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "metrics",
+                                            "query": "avg:openstack.nova.hypervisor.load_15{$Project,$Hypervisor} by {project_name,hypervisor}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 1,
+                            "y": 17,
+                            "width": 5,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5422663317276710,
+                        "definition": {
+                            "title": "",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:system.cpu.user{*} by {service}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            },
+                                            "conditional_formats": [],
+                                            "cell_display_mode": "bar"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 17,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2883437765393604,
+                        "definition": {
+                            "type": "note",
+                            "content": "Flavors",
+                            "background_color": "gray",
+                            "font_size": "36",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 19,
+                            "width": 6,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 4466210427706886,
+                        "definition": {
+                            "type": "note",
+                            "content": "Quotas",
+                            "background_color": "gray",
+                            "font_size": "36",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 19,
+                            "width": 6,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 5631263369283910,
+                        "definition": {
+                            "title": "Flavors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:openstack.nova.flavor.vcpus{$Project,$Flavor} by {project_name,flavor_name}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:openstack.nova.flavor.ram{$Project,$Flavor} by {project_name,flavor_name}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:openstack.nova.flavor.disk{$Project,$Flavor} by {project_name,flavor_name}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:openstack.nova.flavor.swap{$Project,$Flavor} by {project_name,flavor_name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "conditional_formats": [],
+                                            "cell_display_mode": "number",
+                                            "alias": "Virtual CPUs",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 50,
+                                                "order": "desc"
+                                            }
+                                        },
+                                        {
+                                            "conditional_formats": [],
+                                            "cell_display_mode": "number",
+                                            "alias": "RAM",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "conditional_formats": [],
+                                            "cell_display_mode": "number",
+                                            "alias": "Disk",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "conditional_formats": [],
+                                            "cell_display_mode": "number",
+                                            "alias": "Swap",
+                                            "formula": "query4"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 20,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5982142728955998,
+                        "definition": {
+                            "title": "Quotas",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:openstack.nova.quota_set.instances{$Project} by {project_name}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:openstack.nova.quota_set.cores{$Project} by {project_name}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:openstack.nova.quota_set.ram{$Project} by {project_name}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:openstack.nova.quota_set.metadata_items{$Project} by {project_name}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "avg:openstack.nova.quota_set.key_pairs{$Project} by {project_name}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query6",
+                                            "query": "avg:openstack.nova.quota_set.server_groups{$Project} by {project_name}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query7",
+                                            "query": "avg:openstack.nova.quota_set.server_group_members{$Project} by {project_name}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "conditional_formats": [],
+                                            "cell_display_mode": "number",
+                                            "alias": "instances",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        },
+                                        {
+                                            "conditional_formats": [],
+                                            "cell_display_mode": "number",
+                                            "alias": "vcpus",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "conditional_formats": [],
+                                            "cell_display_mode": "number",
+                                            "alias": "ram",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "conditional_formats": [],
+                                            "cell_display_mode": "number",
+                                            "alias": "metadata items",
+                                            "formula": "query4"
+                                        },
+                                        {
+                                            "conditional_formats": [],
+                                            "cell_display_mode": "number",
+                                            "alias": "key pairs",
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "conditional_formats": [],
+                                            "cell_display_mode": "number",
+                                            "alias": "server groups",
+                                            "formula": "query6"
+                                        },
+                                        {
+                                            "conditional_formats": [],
+                                            "cell_display_mode": "number",
+                                            "alias": "server groups members",
+                                            "formula": "query7"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 20,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
             },
-            {
-              "q": "avg:openstack.nova.limits.max_total_ram_size{$project}",
-              "display_type": "line",
-              "style": {
-                "palette": "warm",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 12,
+                "height": 25
             }
-          ],
-          "custom_links": [],
-          "yaxis": {
-            "label": "",
-            "scale": "linear",
-            "min": "auto",
-            "max": "auto",
-            "include_zero": true
-          },
-          "title": "RAM used vs max by $project",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "1h"
-          },
-          "show_legend": true,
-          "legend_size": "0"
         },
-        "layout": {
-          "x": 21,
-          "y": 91,
-          "width": 46,
-          "height": 16
-        }
-      },
-      {
-        "id": 11,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:openstack.nova.limits.total_floating_ips_used{$project}",
-              "display_type": "area",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
+        {
+            "id": 2520929327185178,
+            "definition": {
+                "title": "Networking",
+                "background_color": "yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": []
             },
-            {
-              "q": "avg:openstack.nova.limits.max_total_floating_ips{$project}",
-              "display_type": "line",
-              "style": {
-                "palette": "warm",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 1,
+                "is_column_break": true
             }
-          ],
-          "custom_links": [],
-          "yaxis": {
-            "label": "",
-            "scale": "linear",
-            "min": "auto",
-            "max": "auto",
-            "include_zero": true
-          },
-          "title": "Floating IPs used vs max by $project",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "1h"
-          },
-          "show_legend": true,
-          "legend_size": "0"
         },
-        "layout": {
-          "x": 21,
-          "y": 74,
-          "width": 46,
-          "height": 16
-        }
-      },
-      {
-        "id": 12,
-        "definition": {
-          "type": "hostmap",
-          "requests": {
-            "fill": {
-              "q": "avg:openstack.nova.hypervisor_load.1{*} by {host}"
-            }
-          },
-          "custom_links": [],
-          "title": "Hypervisor load map by $aggregate",
-          "title_size": "16",
-          "title_align": "left",
-          "no_metric_hosts": false,
-          "no_group_hosts": true,
-          "group": [
-            "aggregate"
-          ],
-          "style": {
-            "palette": "hostmap_blues",
-            "palette_flip": false
-          }
-        },
-        "layout": {
-          "x": 21,
-          "y": 29,
-          "width": 46,
-          "height": 18
-        }
-      },
-      {
-        "id": 13,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:openstack.nova.local_gb_used{*} by {host}",
-              "display_type": "area"
+        {
+            "id": 7531945469768704,
+            "definition": {
+                "title": "Volume",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": []
             },
-            {
-              "q": "avg:openstack.nova.free_disk_gb{*} by {host}",
-              "display_type": "line",
-              "style": {
-                "palette": "purple"
-              }
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 1
             }
-          ],
-          "custom_links": [],
-          "title": "Used vs free disk by physical host",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "1h"
-          },
-          "show_legend": false,
-          "legend_size": "0"
         },
-        "layout": {
-          "x": 21,
-          "y": 48,
-          "width": 46,
-          "height": 16
-        }
-      },
-      {
-        "id": 14,
-        "definition": {
-          "type": "change",
-          "requests": [
-            {
-              "q": "sum:openstack.nova.running_vms{$aggregate} by {hypervisor}",
-              "change_type": "absolute",
-              "compare_to": "hour_before",
-              "increase_good": true,
-              "order_by": "change",
-              "order_dir": "desc",
-              "show_present": true
-            }
-          ],
-          "custom_links": [],
-          "title": "Change in running VMs by hypervisor in $aggregate",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "1h"
-          }
-        },
-        "layout": {
-          "x": 69,
-          "y": 29,
-          "width": 46,
-          "height": 18
-        }
-      },
-      {
-        "id": 15,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:openstack.nova.current_workload{*} by {hypervisor}",
-              "display_type": "bars"
-            }
-          ],
-          "custom_links": [],
-          "title": "Nova current workload by hypervisor",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "1h"
-          },
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 69,
-          "y": 12,
-          "width": 46,
-          "height": 16
-        }
-      },
-      {
-        "id": 16,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "sum:openstack.nova.vcpus{$aggregate} by {host}",
-              "display_type": "line",
-              "style": {
-                "palette": "warm"
-              }
+        {
+            "id": 3202912144961762,
+            "definition": {
+                "title": "Bare Metal",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": []
             },
-            {
-              "q": "sum:openstack.nova.vcpus_used{$aggregate} by {hypervisor}",
-              "display_type": "area"
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 1
             }
-          ],
-          "custom_links": [],
-          "title": "VCPUs used vs available by hypervisor",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "1h"
-          },
-          "show_legend": false,
-          "legend_size": "0"
         },
-        "layout": {
-          "x": 69,
-          "y": 48,
-          "width": 46,
-          "height": 16
-        }
-      },
-      {
-        "id": 17,
-        "definition": {
-          "type": "note",
-          "content": "[Nova Server](https://www.datadoghq.com/blog/openstack-monitoring-nova/#nova-server-metrics)",
-          "background_color": "gray",
-          "font_size": "36",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 117,
-          "y": 66,
-          "width": 46,
-          "height": 7
-        }
-      },
-      {
-        "id": 18,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "avg:openstack.nova.server.vda_read_req{$project} by {host}",
-              "display_type": "area",
-              "style": {
-                "palette": "dog_classic",
-                "line_type": "solid",
-                "line_width": "normal"
-              }
+        {
+            "id": 374604610534690,
+            "definition": {
+                "title": "Load Balancer",
+                "background_color": "orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": []
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 1
             }
-          ],
-          "custom_links": [],
-          "yaxis": {
-            "label": "",
-            "scale": "linear",
-            "min": "auto",
-            "max": "auto",
-            "include_zero": true
-          },
-          "title": "HDD read rate by instance for $project",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "1h"
-          },
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 117,
-          "y": 75,
-          "width": 46,
-          "height": 16
         }
-      },
-      {
-        "id": 19,
-        "definition": {
-          "type": "image",
-          "url": "/static/images/logos/openstack_large.svg",
-          "sizing": "fit"
-        },
-        "layout": {
-          "x": 0,
-          "y": 0,
-          "width": 19,
-          "height": 10
-        }
-      },
-      {
-        "id": 20,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "sum:rabbitmq.queue.memory{*} by {rabbitmq_queue}",
-              "display_type": "area",
-              "style": {
-                "palette": "cool"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "RabbitMQ queue memory",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "1h"
-          },
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 117,
-          "y": 12,
-          "width": 46,
-          "height": 16
-        }
-      },
-      {
-        "id": 21,
-        "definition": {
-          "type": "note",
-          "content": "\n[RabbitMQ](https://www.datadoghq.com/blog/openstack-monitoring-nova/#rabbitmq-metrics)",
-          "background_color": "gray",
-          "font_size": "36",
-          "text_align": "center",
-          "show_tick": true,
-          "tick_pos": "50%",
-          "tick_edge": "bottom"
-        },
-        "layout": {
-          "x": 117,
-          "y": 2,
-          "width": 46,
-          "height": 8
-        }
-      },
-      {
-        "id": 22,
-        "definition": {
-          "type": "toplist",
-          "requests": [
-            {
-              "q": "top(sum:rabbitmq.queue.consumers{*} by {rabbitmq_queue}, 50, 'mean', 'asc')",
-              "style": {
-                "palette": "dog_classic"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "Consumers by queue",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "1h"
-          }
-        },
-        "layout": {
-          "x": 117,
-          "y": 29,
-          "width": 46,
-          "height": 18
-        }
-      },
-      {
-        "id": 23,
-        "definition": {
-          "type": "timeseries",
-          "requests": [
-            {
-              "q": "sum:rabbitmq.queue.consumer_utilisation{*} by {rabbitmq_queue}",
-              "display_type": "area",
-              "style": {
-                "palette": "cool"
-              }
-            }
-          ],
-          "custom_links": [],
-          "title": "RabbitMQ consumer utilization",
-          "title_size": "16",
-          "title_align": "left",
-          "time": {
-            "live_span": "1h"
-          },
-          "show_legend": false,
-          "legend_size": "0"
-        },
-        "layout": {
-          "x": 117,
-          "y": 48,
-          "width": 46,
-          "height": 16
-        }
-      }
     ],
     "template_variables": [
-      {
-        "name": "project",
-        "default": "*",
-        "prefix": "project_name"
-      },
-      {
-        "name": "aggregate",
-        "default": "*",
-        "prefix": "aggregate"
-      }
+        {
+            "name": "Project",
+            "prefix": "project_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Server",
+            "prefix": "server_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Status",
+            "prefix": "server_status",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Hypervisor",
+            "prefix": "hypervisor",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Flavor",
+            "prefix": "flavor_name",
+            "available_values": [],
+            "default": "*"
+        }
     ],
-    "layout_type": "free",
-    "is_read_only": true,
+    "layout_type": "ordered",
     "notify_list": [],
-    "id": 30317
-  }
+    "reflow_type": "fixed",
+    "id": "p4h-64g-nap"
+}

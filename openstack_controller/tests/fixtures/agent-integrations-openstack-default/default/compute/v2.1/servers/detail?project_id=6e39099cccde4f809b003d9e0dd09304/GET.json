@@ -6,7 +6,9 @@
       "status": "ACTIVE",
       "tenant_id": "6e39099cccde4f809b003d9e0dd09304",
       "user_id": "78205c506b534738bc851d3e189a00c3",
-      "metadata": {},
+      "metadata": {
+        "sw_runtime_java_version": "null"
+      },
       "hostId": "817ebf69d75b4cbd4ce16ed833468d628f7214b96bda065353b23549",
       "image": "",
       "flavor": {
@@ -19,7 +21,7 @@
         ]
       },
       "created": "2023-03-17T14:17:54Z",
-      "updated": "2023-03-17T14:18:06Z",
+      "updated": "2023-04-03T07:51:44Z",
       "addresses": {
         "shared": [
           {

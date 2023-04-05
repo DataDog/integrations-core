@@ -45,7 +45,8 @@
       }
     },
     "dashboards": {
-      "OpenStack Controller Overview": "assets/dashboards/openstack-controller.json"
+      "OpenStack Controller Overview": "assets/dashboards/openstack-controller.json",
+      "OpenStack Controller Overview [Legacy]": "assets/dashboards/openstack-controller-legacy.json"
     },
     "logs": {
       "source": "openstack"

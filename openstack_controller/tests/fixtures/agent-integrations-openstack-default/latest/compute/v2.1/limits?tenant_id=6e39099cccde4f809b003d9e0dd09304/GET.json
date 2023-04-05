@@ -2,7 +2,7 @@
   "limits": {
     "rate": [],
     "absolute": {
-      "maxTotalInstances": 10,
+      "maxTotalInstances": 20,
       "maxTotalCores": 20,
       "maxTotalRAMSize": 51200,
       "maxServerMeta": 128,

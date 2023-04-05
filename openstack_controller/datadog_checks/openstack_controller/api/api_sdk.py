@@ -11,7 +11,10 @@ class ApiSdk(Api):
     def create_connection(self):
         pass  # pragma: no cover
 
-    def get_projects(self):
+    def get_identity_response_time(self, project_id):
+        pass  # pragma: no cover
+
+    def get_auth_projects(self):
         pass  # pragma: no cover
 
     def get_compute_response_time(self, project_id):

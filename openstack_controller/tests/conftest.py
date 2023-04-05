@@ -18,7 +18,7 @@ from datadog_checks.dev.fs import get_here
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
-from .common import CHECK_NAME, REST_CONFIG, USE_OPENSTACK_SANDBOX
+from .common import CHECK_NAME, CONFIG, CONFIG_NOVA_MICROVERSION_LATEST, USE_OPENSTACK_SANDBOX
 from .ssh_tunnel import socks_proxy
 from .terraform import terraform_run
 
@@ -44,9 +44,10 @@ def dd_environment():
             private_key = outputs['ssh_private_key']['value']
             instance = {
                 'keystone_server_url': 'http://{}/identity'.format(internal_ip),
-                'user_name': 'admin',
-                'user_password': 'password',
+                'username': 'admin',
+                'password': 'password',
                 'ssl_verify': False,
+                'nova_microversion': 'latest',
             }
             config_file = os.path.join(tempfile.gettempdir(), 'openstack_controller_instance.json')
             with open(config_file, 'wb') as f:
@@ -73,8 +74,8 @@ def dd_environment():
         with docker_run(compose_file, conditions=conditions):
             instance = {
                 'keystone_server_url': 'http://127.0.0.1:8080/identity',
-                'user_name': 'admin',
-                'user_password': 'password',
+                'username': 'admin',
+                'password': 'password',
                 'ssl_verify': False,
             }
             yield instance
@@ -82,14 +83,12 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return deepcopy(REST_CONFIG)
+    return deepcopy(CONFIG)
 
 
 @pytest.fixture
 def instance_nova_microversion_latest():
-    instance = deepcopy(REST_CONFIG)
-    instance.update({'nova_microversion': 'latest'})
-    return instance
+    return deepcopy(CONFIG_NOVA_MICROVERSION_LATEST)
 
 
 @pytest.fixture

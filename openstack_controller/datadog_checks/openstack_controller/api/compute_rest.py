@@ -39,11 +39,15 @@ class ComputeRest:
         response = self.http.get('{}/os-quota-sets/{}'.format(self.endpoint, project_id))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        return {
-            re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_"): value
-            for key, value in response.json()['quota_set'].items()
-            if isinstance(value, (int, float)) and not isinstance(value, bool)
+        quota_set = {
+            'id': response.json()['quota_set']['id'],
+            'metrics': {
+                re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_"): value
+                for key, value in response.json()['quota_set'].items()
+                if isinstance(value, (int, float)) and not isinstance(value, bool)
+            },
         }
+        return quota_set
 
     def get_servers(self, project_id):
         response = self.http.get('{}/servers/detail?project_id={}'.format(self.endpoint, project_id))
@@ -51,20 +55,87 @@ class ComputeRest:
         self.log.debug("response: %s", response.json())
         server_metrics = {}
         for server in response.json()['servers']:
+            server_metrics[server['id']] = {
+                'name': server['name'],
+                'status': server['status'].lower(),
+                'hypervisor_hostname': server['OS-EXT-SRV-ATTR:hypervisor_hostname'],
+                'metrics': {},
+            }
+            flavor = server.get('flavor')
+            if flavor:
+                flavor_id = flavor.get('id')
+                if flavor_id is not None:
+                    flavor_metrics = self._get_flavor_id(flavor_id)
+                    server_metrics[server['id']]['flavor_name'] = flavor_metrics[flavor_id]['name']
+                    server_metrics[server['id']]['metrics'].update(
+                        {
+                            '{}.{}'.format(
+                                'flavor',
+                                re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key)
+                                .lower()
+                                .replace("-", "_"),
+                            ): value
+                            for key, value in flavor_metrics[flavor_id]['metrics'].items()
+                            if isinstance(value, (int, float)) and not isinstance(value, bool)
+                        }
+                    )
+                else:
+                    server_metrics[server['id']]['flavor_name'] = flavor.get('original_name')
+                    server_metrics[server['id']]['metrics'].update(
+                        {
+                            '{}.{}'.format(
+                                'flavor',
+                                re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key)
+                                .lower()
+                                .replace("-", "_"),
+                            ): value
+                            for key, value in flavor.items()
+                            if isinstance(value, (int, float)) and not isinstance(value, bool)
+                        }
+                    )
             try:
                 response = self.http.get('{}/servers/{}/diagnostics'.format(self.endpoint, server['id']))
                 response.raise_for_status()
                 self.log.debug("response: %s", response.json())
-                server_metrics[server['id']] = {
-                    'name': server['name'],
-                    'metrics': {
+                disk_details = response.json().get('disk_details')
+                if disk_details:
+                    for disk_detail in disk_details:
+                        server_metrics[server['id']]['metrics'].update(
+                            {
+                                '{}.{}'.format(
+                                    'disk_details',
+                                    re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key)
+                                    .lower()
+                                    .replace("-", "_"),
+                                ): value
+                                for key, value in disk_detail.items()
+                                if isinstance(value, (int, float)) and not isinstance(value, bool)
+                            }
+                        )
+                cpu_details = response.json().get('cpu_details')
+                if cpu_details:
+                    for cpu_detail in cpu_details:
+                        server_metrics[server['id']]['metrics'].update(
+                            {
+                                '{}.{}'.format(
+                                    'cpu_details',
+                                    re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key)
+                                    .lower()
+                                    .replace("-", "_"),
+                                ): value
+                                for key, value in cpu_detail.items()
+                                if isinstance(value, (int, float)) and not isinstance(value, bool)
+                            }
+                        )
+                server_metrics[server['id']]['metrics'].update(
+                    {
                         re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key)
                         .lower()
                         .replace("-", "_"): value
                         for key, value in response.json().items()
                         if isinstance(value, (int, float)) and not isinstance(value, bool)
-                    },
-                }
+                    }
+                )
             except Exception as e:
                 self.log.error("Exception: %s", e)
         return server_metrics
@@ -83,6 +154,24 @@ class ComputeRest:
                     if isinstance(value, (int, float)) and not isinstance(value, bool)
                 },
             }
+        return flavor_metrics
+
+    def _get_flavor_id(self, flavor_id):
+        response = self.http.get('{}/flavors/{}'.format(self.endpoint, flavor_id))
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        flavor_metrics = {}
+        flavor = response.json()['flavor']
+        flavor_metrics[flavor['id']] = {'name': flavor['name'], 'metrics': {}}
+        for key, value in flavor.items():
+            metric_key = re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_")
+            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                flavor_metrics[flavor['id']]['metrics'][metric_key] = value
+            elif isinstance(value, str):
+                try:
+                    flavor_metrics[flavor['id']]['metrics'][metric_key] = int(value) if value else 0
+                except ValueError:
+                    pass
         return flavor_metrics
 
     def get_hypervisors(self):

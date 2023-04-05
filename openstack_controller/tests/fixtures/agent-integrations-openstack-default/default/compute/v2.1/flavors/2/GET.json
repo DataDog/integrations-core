@@ -1,0 +1,24 @@
+{
+  "flavor": {
+    "id": "2",
+    "name": "m1.small",
+    "ram": 2048,
+    "disk": 20,
+    "swap": "",
+    "OS-FLV-EXT-DATA:ephemeral": 0,
+    "OS-FLV-DISABLED:disabled": false,
+    "vcpus": 1,
+    "os-flavor-access:is_public": true,
+    "rxtx_factor": 1,
+    "links": [
+      {
+        "rel": "self",
+        "href": "http://34.91.114.145/compute/v2.1/flavors/2"
+      },
+      {
+        "rel": "bookmark",
+        "href": "http://34.91.114.145/compute/flavors/2"
+      }
+    ]
+  }
+}

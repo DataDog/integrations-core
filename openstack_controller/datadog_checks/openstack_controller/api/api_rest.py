@@ -6,14 +6,18 @@ from enum import Enum
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.baremetal_rest import BaremetalRest
+from datadog_checks.openstack_controller.api.block_storage_rest import BlockStorageRest
 from datadog_checks.openstack_controller.api.compute_rest import ComputeRest
+from datadog_checks.openstack_controller.api.identity_rest import IdentityRest
 from datadog_checks.openstack_controller.api.load_balancer_rest import LoadBalancerRest
 from datadog_checks.openstack_controller.api.network_rest import NetworkRest
 
 
 class ComponentType(str, Enum):
+    IDENTITY = 'identity'
     COMPUTE = 'compute'
     NETWORK = 'network'
+    BLOCK_STORAGE = 'block-storage'
     BAREMETAL = 'baremetal'
     LOAD_BALANCER = 'load-balancer'
 
@@ -39,9 +43,17 @@ class ApiRest(Api):
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        self._post_auth_tokens()
+        response_time = response.elapsed.total_seconds() * 1000
+        # self._post_auth_tokens()
+        return response_time
 
-    def get_projects(self):
+    def get_identity_response_time(self):
+        self.log.debug("getting identity response time")
+        self._post_auth_tokens()
+        component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
+        return component.get_response_time()
+
+    def get_auth_projects(self):
         self.log.debug("getting projects")
         self._get_auth_projects()
         return [{'id': project_id, 'name': project_name} for project_id, project_name in self.auth_projects.items()]
@@ -59,6 +71,13 @@ class ApiRest(Api):
         component = self._get_component(project_id, ComponentType.NETWORK)
         if component:
             return component.get_response_time()
+        return None
+
+    def get_block_storage_response_time(self, project_id):
+        self.log.debug("getting block-storage response time")
+        component = self._get_component(project_id, ComponentType.BLOCK_STORAGE)
+        if component:
+            return component.get_response_time(project_id)
         return None
 
     def get_baremetal_response_time(self, project_id):
@@ -207,6 +226,8 @@ class ApiRest(Api):
             return ComputeRest(self.log, self.http, endpoint)
         elif endpoint_type == ComponentType.NETWORK:
             return NetworkRest(self.log, self.http, endpoint)
+        elif endpoint_type == ComponentType.BLOCK_STORAGE:
+            return BlockStorageRest(self.log, self.http, endpoint)
         elif endpoint_type == ComponentType.BAREMETAL:
             return BaremetalRest(self.log, self.http, endpoint)
         elif endpoint_type == ComponentType.LOAD_BALANCER:
