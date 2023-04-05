@@ -185,6 +185,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
     def __init__(self, check):
         self.check = check
+        # do not emit any dd.internal metrics for DBM specific check code
+        self.tags = [t for t in self.check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         collection_interval = float(
             check.statement_metrics_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
@@ -349,7 +351,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'host': self.check.resolved_hostname,
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
-            'tags': self.check.tags,
+            'tags': self.tags,
             'cloud_metadata': self.check.cloud_metadata,
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
@@ -402,7 +404,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
-            tags = list(self.check.tags)
+            tags = list(self.tags)
             if 'database_name' in row:
                 tags += ["db:{}".format(row['database_name'])]
             yield {
@@ -476,7 +478,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         1,
                         **self.check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))])
                     )
-                tags = list(self.check.tags)
+                tags = list(self.tags)
 
                 # for stored procedures, we want to send the plan
                 # events with the full procedure text, not the text

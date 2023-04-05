@@ -113,6 +113,8 @@ class SqlserverActivity(DBMAsyncJob):
 
     def __init__(self, check):
         self.check = check
+        # do not emit any dd.internal metrics for DBM specific check code
+        self.tags = [t for t in self.check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         collection_interval = float(check.activity_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL))
         if collection_interval <= 0:
@@ -271,7 +273,7 @@ class SqlserverActivity(DBMAsyncJob):
             "ddsource": "sqlserver",
             "dbm_type": "activity",
             "collection_interval": self.collection_interval,
-            "ddtags": self.check.tags,
+            "ddtags": self.tags,
             "timestamp": time.time() * 1000,
             "sqlserver_activity": active_sessions,
             "sqlserver_connections": active_connections,
