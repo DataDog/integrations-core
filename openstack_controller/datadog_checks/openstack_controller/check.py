@@ -48,7 +48,7 @@ class OpenStackControllerCheck(AgentCheck):
         self.config = OpenstackConfig(self.log, self.instance)
 
     def check(self, _instance):
-        tags = ['keystone_server:{}'.format(self.instance["keystone_server_url"])] + self.instance.get('tags', [])
+        tags = ['keystone_server:{}'.format(self.config.keystone_server_url)] + self.instance.get('tags', [])
         api = make_api(self.config, self.log, self.http)
         self.gauge("openstack.controller", 1)
         self._report_metrics(api, tags)
@@ -203,7 +203,7 @@ class OpenStackControllerCheck(AgentCheck):
                 self._report_hypervisor_service_check(
                     hypervisor_data.get('state'), hypervisor_data["name"], hypervisor_tags
                 )
-                if self.instance.get('collect_hypervisor_metrics', True):
+                if self.config.collect_hypervisor_metrics:
                     self._report_hypervisor_metrics(hypervisor_data, hypervisor_tags)
 
     def _report_hypervisor_service_check(self, state, name, hypervisor_tags):
@@ -217,19 +217,19 @@ class OpenStackControllerCheck(AgentCheck):
     def _report_hypervisor_metrics(self, hypervisor_data, hypervisor_tags):
         for metric, value in hypervisor_data.get('metrics', {}).items():
             self._report_hypervisor_metric(metric, value, hypervisor_tags)
-            if self.instance.get('report_legacy_metrics', True):
+            if self.config.report_legacy_metrics:
                 self._report_hypervisor_legacy_metric(metric, value, hypervisor_tags)
 
     def _report_hypervisor_metric(self, metric, value, tags):
         if metric in NOVA_HYPERVISOR_METRICS:
             self.gauge(f'openstack.nova.hypervisor.{metric}', value, tags=tags)
-        elif self.instance.get('collect_hypervisor_load', True) and metric in NOVA_HYPERVISOR_LOAD_METRICS:
+        elif self.config.collect_hypervisor_load and metric in NOVA_HYPERVISOR_LOAD_METRICS:
             self.gauge(f'openstack.nova.hypervisor.{metric}', value, tags=tags)
 
     def _report_hypervisor_legacy_metric(self, metric, value, tags):
         if metric in LEGACY_NOVA_HYPERVISOR_METRICS:
             self.gauge(f'openstack.nova.{metric}', value, tags=tags)
-        elif self.instance.get('collect_hypervisor_load', True) and metric in LEGACY_NOVA_HYPERVISOR_LOAD_METRICS:
+        elif self.config.collect_hypervisor_load and metric in LEGACY_NOVA_HYPERVISOR_LOAD_METRICS:
             self.gauge(f'openstack.nova.{LEGACY_NOVA_HYPERVISOR_LOAD_METRICS[metric]}', value, tags=tags)
 
     def _report_network_metrics(self, api, project_id, project_tags):
