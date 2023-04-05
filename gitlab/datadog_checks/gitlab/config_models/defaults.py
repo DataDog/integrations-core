@@ -99,7 +99,7 @@ def instance_headers(field, value):
 
 
 def instance_health_service_check(field, value):
-    return True
+    return False
 
 
 def instance_ignore_metrics(field, value):
@@ -190,6 +190,10 @@ def instance_persist_connections(field, value):
     return False
 
 
+def instance_prometheus_endpoint(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_prometheus_metrics_prefix(field, value):
     return get_default_field_value(field, value)
 
@@ -215,7 +219,7 @@ def instance_send_distribution_counts_as_monotonic(field, value):
 
 
 def instance_send_distribution_sums_as_monotonic(field, value):
-    return False
+    return True
 
 
 def instance_send_histograms_buckets(field, value):
@@ -223,7 +227,7 @@ def instance_send_histograms_buckets(field, value):
 
 
 def instance_send_monotonic_counter(field, value):
-    return False
+    return True
 
 
 def instance_send_monotonic_with_gauge(field, value):

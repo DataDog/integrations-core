@@ -139,6 +139,12 @@ See [service_checks.json][7] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][8].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitor Calico with Datadog][15]
+
 [1]: https://www.tigera.io/project-calico/
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/calico/datadog_checks/calico/data/conf.yaml.example
@@ -147,9 +153,10 @@ Need help? Contact [Datadog support][8].
 [6]: https://github.com/DataDog/integrations-core/blob/master/calico/metadata.csv
 [7]: https://github.com/DataDog/integrations-core/blob/master/calico/assets/service_checks.json
 [8]: https://docs.datadoghq.com/help/
-[9]: https://docs.projectcalico.org/maintenance/monitor/monitor-component-metrics
+[9]: https://docs.tigera.io/calico/3.25/operations/monitor/monitor-component-metrics
 [10]: https://docs.datadoghq.com/developers/integrations/new_check_howto/#developer-toolkit
 [11]: https://app.datadoghq.com/account/settings#agent
 [12]: https://docs.datadoghq.com/agent/kubernetes
 [13]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [14]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[15]: https://www.datadoghq.com/blog/monitor-calico-with-datadog/

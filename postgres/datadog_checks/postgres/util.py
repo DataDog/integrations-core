@@ -86,6 +86,16 @@ NEWER_92_METRICS = {
     'temp_files': ('postgresql.temp_files', AgentCheck.rate),
 }
 
+NEWER_14_METRICS = {
+    'session_time': ('postgresql.sessions.session_time', AgentCheck.monotonic_count),
+    'active_time': ('postgresql.sessions.active_time', AgentCheck.monotonic_count),
+    'idle_in_transaction_time': ('postgresql.sessions.idle_in_transaction_time', AgentCheck.monotonic_count),
+    'sessions': ('postgresql.sessions.count', AgentCheck.monotonic_count),
+    'sessions_abandoned': ('postgresql.sessions.abandoned', AgentCheck.monotonic_count),
+    'sessions_fatal': ('postgresql.sessions.fatal', AgentCheck.monotonic_count),
+    'sessions_killed': ('postgresql.sessions.killed', AgentCheck.monotonic_count),
+}
+
 QUERY_PG_STAT_DATABASE = {
     'name': 'pg_stat_database',
     'query': """
@@ -97,6 +107,28 @@ QUERY_PG_STAT_DATABASE = {
     'columns': [
         {'name': 'db', 'type': 'tag'},
         {'name': 'postgresql.deadlocks.count', 'type': 'monotonic_count'},
+    ],
+}
+
+QUERY_PG_STAT_DATABASE_CONFLICTS = {
+    'name': 'pg_stat_database_conflicts',
+    'query': """
+        SELECT
+            datname,
+            confl_tablespace,
+            confl_lock,
+            confl_snapshot,
+            confl_bufferpin,
+            confl_deadlock
+        FROM pg_stat_database_conflicts
+    """.strip(),
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'postgresql.conflicts.tablespace', 'type': 'monotonic_count'},
+        {'name': 'postgresql.conflicts.lock', 'type': 'monotonic_count'},
+        {'name': 'postgresql.conflicts.snapshot', 'type': 'monotonic_count'},
+        {'name': 'postgresql.conflicts.bufferpin', 'type': 'monotonic_count'},
+        {'name': 'postgresql.conflicts.deadlock', 'type': 'monotonic_count'},
     ],
 }
 
@@ -144,7 +176,8 @@ LIMIT {table_count_limit}
 }
 
 q1 = (
-    'CASE WHEN pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN 0 ELSE GREATEST '
+    'CASE WHEN pg_last_wal_receive_lsn() IS NULL OR '
+    'pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN 0 ELSE GREATEST '
     '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
 )
 q2 = 'abs(pg_wal_lsn_diff(pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn()))'
@@ -154,7 +187,8 @@ REPLICATION_METRICS_10 = {
 }
 
 q = (
-    'CASE WHEN pg_last_xlog_receive_location() = pg_last_xlog_replay_location() THEN 0 ELSE GREATEST '
+    'CASE WHEN pg_last_xlog_receive_location() IS NULL OR '
+    'pg_last_xlog_receive_location() = pg_last_xlog_replay_location() THEN 0 ELSE GREATEST '
     '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
 )
 REPLICATION_METRICS_9_1 = {q: ('postgresql.replication_delay', AgentCheck.gauge)}
@@ -214,6 +248,54 @@ REPLICATION_STATS_METRICS = {
 SELECT application_name, state, sync_state, client_addr, {metrics_columns}
 FROM pg_stat_replication
 """,
+}
+
+
+QUERY_PG_STAT_WAL_RECEIVER = {
+    'name': 'pg_stat_wal_receiver',
+    'query': """
+        WITH connected(c) AS (VALUES (1))
+        SELECT CASE WHEN status IS NULL THEN 'disconnected' ELSE status END AS connected,
+               c,
+               received_tli,
+               EXTRACT(EPOCH FROM (clock_timestamp() - last_msg_send_time)),
+               EXTRACT(EPOCH FROM (clock_timestamp() - last_msg_receipt_time)),
+               EXTRACT(EPOCH FROM (clock_timestamp() - latest_end_time))
+        FROM pg_stat_wal_receiver
+        RIGHT JOIN connected ON (true);
+    """.strip(),
+    'columns': [
+        {'name': 'status', 'type': 'tag'},
+        {'name': 'postgresql.wal_receiver.connected', 'type': 'gauge'},
+        {'name': 'postgresql.wal_receiver.received_timeline', 'type': 'gauge'},
+        {'name': 'postgresql.wal_receiver.last_msg_send_age', 'type': 'gauge'},
+        {'name': 'postgresql.wal_receiver.last_msg_receipt_age', 'type': 'gauge'},
+        {'name': 'postgresql.wal_receiver.latest_end_age', 'type': 'gauge'},
+    ],
+}
+
+QUERY_PG_REPLICATION_SLOTS = {
+    'name': 'pg_replication_slots',
+    'query': """
+    SELECT
+        slot_name,
+        slot_type,
+        CASE WHEN temporary THEN 'temporary' ELSE 'permanent' END,
+        CASE WHEN active THEN 'active' ELSE 'inactive' END,
+        CASE WHEN xmin IS NULL THEN NULL ELSE age(xmin) END,
+        pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn),
+        pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn)
+    FROM pg_replication_slots;
+    """.strip(),
+    'columns': [
+        {'name': 'slot_name', 'type': 'tag'},
+        {'name': 'slot_type', 'type': 'tag'},
+        {'name': 'slot_persistence', 'type': 'tag'},
+        {'name': 'slot_state', 'type': 'tag'},
+        {'name': 'postgresql.replication_slot.xmin_age', 'type': 'gauge'},
+        {'name': 'postgresql.replication_slot.restart_delay_bytes', 'type': 'gauge'},
+        {'name': 'postgresql.replication_slot.confirmed_flush_delay_bytes', 'type': 'gauge'},
+    ],
 }
 
 CONNECTION_METRICS = {

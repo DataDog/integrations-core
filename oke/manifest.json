@@ -12,12 +12,13 @@
     "title": "Oracle Container Engine for Kubernetes",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Oracle",
       "Category::Containers",
-      "Category::Orchestration"
+      "Category::Kubernetes",
+      "Category::Oracle",
+      "Category::Orchestration",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

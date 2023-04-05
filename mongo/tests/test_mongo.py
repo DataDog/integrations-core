@@ -244,6 +244,23 @@ def test_mongo_custom_query_with_date(aggregator, check, instance, dd_run_check)
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag2:val2', count=2)
 
 
+@common.standalone
+@pytest.mark.parametrize(
+    'instance',
+    [
+        pytest.param(common.INSTANCE_CUSTOM_QUERIES_WITH_STRING_LIST, id='String list'),
+    ],
+)
+def test_mongo_custom_query_with_string_list(aggregator, check, instance, dd_run_check):
+    check = check(instance)
+    dd_run_check(check)
+
+    aggregator.assert_metric("dd.custom.mongo.string.result", value=299, count=1, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric("dd.custom.mongo.string.result", value=99, count=1, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric("dd.custom.mongo.string.result", value=49, count=2, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric_has_tag("dd.custom.mongo.string.result", 'collection:orders', count=4)
+
+
 @common.shard
 def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
     mongo_check = check(instance_shard)

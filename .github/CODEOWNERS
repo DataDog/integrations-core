@@ -96,7 +96,7 @@ assets/               @DataDog/documentation @DataDog/agent-integrations
 /tcp_queue_length/*.md                    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /tcp_queue_length/manifest.json           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 
-# Infrastructure integrations
+# NDM
 /snmp/                                                             @DataDog/network-device-monitoring @DataDog/agent-integrations
 /snmp/*.md                                                         @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
 /snmp_*/                                                           @DataDog/network-device-monitoring @DataDog/agent-integrations
@@ -105,6 +105,15 @@ assets/               @DataDog/documentation @DataDog/agent-integrations
 /docs/developer/tutorials/snmp/                                    @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
 
 # Platform Integrations
+/citrix_hypervisor/                     @DataDog/platform-integrations @DataDog/agent-integrations
+/citrix_hypervisor/manifest.json        @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/citrix_hypervisor/*.md                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/cloudera/                              @DataDog/platform-integrations @DataDog/agent-integrations
+/cloudera/manifest.json                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/cloudera/*.md                          @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/cloud_foundry_api/                     @DataDog/platform-integrations @DataDog/agent-integrations
+/cloud_foundry_api/manifest.json        @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/cloud_foundry_api/*.md                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack/                             @DataDog/platform-integrations @DataDog/agent-integrations
 /openstack/*.md                         @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack/manifest.json                @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation

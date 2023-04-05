@@ -12,11 +12,12 @@
     "title": "CoreDNS",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
+      "Category::Caching",
       "Category::Containers",
+      "Category::Kubernetes",
+      "Category::Log Collection",
       "Category::Network",
-      "Category::Autodiscovery",
-      "Category::Log Collection"
+      "Supported OS::Linux"
     ]
   },
   "author": {

@@ -12,12 +12,10 @@
     "title": "Yarn",
     "media": [],
     "classifier_tags": [
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Processing",
-      "Category::Autodiscovery",
-      "Category::Log Collection"
+      "Supported OS::macOS"
     ]
   },
   "author": {

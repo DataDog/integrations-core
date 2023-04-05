@@ -19,13 +19,14 @@ if USE_MULTIPLE_BROKERS:
     DOCKER_IMAGE_PATH = os.path.join(HERE, 'docker', 'multiple-brokers.yaml')
 else:
     DOCKER_IMAGE_PATH = os.path.join(HERE, 'docker', 'single-broker.yaml')
+KAFKA_VERSION = os.environ.get('KAFKA_VERSION')
 
 
 def is_supported(flavor):
     """
     Returns whether the current CI configuration is supported
     """
-    if not os.environ.get('KAFKA_VERSION'):
+    if not KAFKA_VERSION:
         return False
 
     if flavor != os.environ.get('KAFKA_OFFSETS_STORAGE'):

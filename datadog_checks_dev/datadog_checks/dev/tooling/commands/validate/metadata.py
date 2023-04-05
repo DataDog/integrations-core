@@ -227,7 +227,7 @@ VALID_UNIT_NAMES = {
     'hop',
 }
 
-ALLOWED_PREFIXES = ['system', 'jvm', 'http', 'datadog', 'sftp']
+ALLOWED_PREFIXES = ['system', 'jvm', 'http', 'datadog', 'sftp', 'process', 'runtime']
 PROVIDER_INTEGRATIONS = {'openmetrics', 'prometheus'}
 
 MAX_DESCRIPTION_LENGTH = 400
@@ -265,14 +265,14 @@ def check_duplicate_values(current_check, line, row, header_name, duplicates, fa
     return False
 
 
-@click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `metadata.csv` files')
+@click.command(context_settings=CONTEXT_SETTINGS)
 @click.option(
     '--check-duplicates', is_flag=True, help='Output warnings if there are duplicate short names and descriptions'
 )
 @click.option('--show-warnings', '-w', is_flag=True, help='Show warnings in addition to failures')
 @click.argument('check', shell_complete=complete_valid_checks, required=False)
 def metadata(check, check_duplicates, show_warnings):
-    """Validates metadata.csv files
+    """Validate `metadata.csv` files
 
     If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
     checks, an 'all' or empty `check` value will validate all README files.
@@ -285,7 +285,7 @@ def metadata(check, check_duplicates, show_warnings):
 
         # only abort if we have an integration and require a manifest file
         manifest = Manifest.load_manifest(check)
-        if manifest.has_integration():
+        if manifest.has_metrics_integration():
             abort(f'Metadata file for {check} not found.')
 
     errors = False
@@ -297,8 +297,11 @@ def metadata(check, check_duplicates, show_warnings):
 
         # get any manifest info needed for validation - and skip if no integration included in manifest
         manifest = Manifest.load_manifest(current_check)
-        if not manifest.has_integration():
-            echo_success(f"Skipping {check} - metadata not required since this check doesn't contain an integration.")
+        if not manifest.has_metrics_integration():
+            echo_success(
+                f"Skipping {check} - not validating metadata since this check's "
+                f"manifest doesn't contain a metrics section."
+            )
             continue
 
         try:

@@ -1,5 +1,13 @@
 # CHANGELOG - Openstack_controller
 
+## 3.0.0 / 2023-03-07
+
+* [Changed] Upgrade openstacksdk dependency and drop py2. See [#14109](https://github.com/DataDog/integrations-core/pull/14109).
+
+## 2.1.4 / 2023-03-03
+
+* [Fixed] Standardize log messages. See [#14072](https://github.com/DataDog/integrations-core/pull/14072).
+
 ## 2.1.3 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).

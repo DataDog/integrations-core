@@ -11,8 +11,8 @@ from aiohttp import request
 from aiomultiprocess import Pool
 from packaging.markers import Marker
 from packaging.requirements import Requirement
-from packaging.specifiers import SpecifierSet
-from packaging.version import parse as parse_version
+from packaging.specifiers import InvalidSpecifier, SpecifierSet
+from packaging.version import InvalidVersion, Version
 
 from ..constants import get_agent_requirements
 from ..dependencies import (
@@ -46,7 +46,6 @@ IGNORED_DEPS = {
     'lz4',  # Breaking clickhouse tests
     'pyodbc',  # Breaking sqlserver tests
     'psutil',  # Breaking disk tests
-    'keystoneauth1',  # Running our update command actually downgrades this 5.0.0 -> 3.18.0.
     'aerospike',  # v8+ breaks agent build.
 }
 
@@ -148,7 +147,11 @@ def sync():
 def filter_releases(releases):
     filtered_releases = []
     for version, artifacts in releases.items():
-        parsed_version = parse_version(version)
+        try:
+            parsed_version = Version(version)
+        except InvalidVersion:
+            continue
+
         if not parsed_version.is_prerelease:
             filtered_releases.append((parsed_version, artifacts))
 
@@ -158,7 +161,12 @@ def filter_releases(releases):
 def artifact_compatible_with_python(artifact, major_version):
     requires_python = artifact['requires_python']
     if requires_python is not None:
-        return SpecifierSet(requires_python).contains(SUPPORTED_PYTHON_MINOR_VERSIONS[major_version])
+        try:
+            specifiers = SpecifierSet(requires_python)
+        except InvalidSpecifier:
+            return False
+
+        return specifiers.contains(SUPPORTED_PYTHON_MINOR_VERSIONS[major_version])
 
     python_version = artifact['python_version']
     return f'py{major_version}' in python_version or f'cp{major_version}' in python_version

@@ -1,6 +1,11 @@
 # CHANGELOG - Amazon MSK
 
-## 3.2.3 / 2023-01-20
+## 3.2.4 / 2023-03-03
+
+* [Fixed] Switch count method to monotonic count, that's correct for OM counts. See [#13972](https://github.com/DataDog/integrations-core/pull/13972).
+* [Fixed] Submit count versions of metrics that we mistakenly submit as gauges. See [#13886](https://github.com/DataDog/integrations-core/pull/13886).
+
+## 3.2.3 / 2023-01-20 / Agent 7.43.0
 
 * [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).
 

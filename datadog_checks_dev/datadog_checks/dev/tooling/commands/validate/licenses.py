@@ -34,6 +34,8 @@ EXPLICIT_LICENSES = {
     'JayDeBeApi': ['LGPL-3.0-only'],
     # https://github.com/mhammond/pywin32/blob/master/adodbapi/license.txt
     'adodbapi': ['LGPL-2.1-only'],
+    # https://github.com/pyca/cryptography/blob/main/LICENSE
+    'cryptography': ['Apache-2.0', 'BSD-3-Clause', 'PSF'],
     # https://github.com/rthalley/dnspython/blob/master/LICENSE
     'dnspython': ['ISC'],
     # https://github.com/pythongssapi/python-gssapi/blob/main/LICENSE.txt
@@ -58,7 +60,7 @@ EXPLICIT_LICENSES = {
     # https://github.com/requests/requests-kerberos/pull/123
     'requests-kerberos': ['ISC'],
     # https://github.com/requests/requests-ntlm/blob/master/LICENSE
-    'requests_ntlm': ['ISC'],
+    'requests-ntlm': ['ISC'],
     # https://github.com/rethinkdb/rethinkdb-python/blob/master/LICENSE
     'rethinkdb': ['Apache-2.0'],
     # https://github.com/simplejson/simplejson/blob/master/LICENSE.txt
@@ -154,7 +156,6 @@ PACKAGE_REPO_OVERRIDES = {
     'foundationdb': 'https://github.com/apple/foundationdb',
     'in-toto': 'https://github.com/in-toto/in-toto',
     'kazoo': 'https://github.com/python-zk/kazoo',
-    'keystoneauth1': 'https://github.com/openstack/keystoneauth',
     'lxml': 'https://github.com/lxml/lxml',
     'oracledb': 'https://github.com/oracle/python-oracledb',
     'packaging': 'https://github.com/pypa/packaging',

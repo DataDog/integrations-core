@@ -6,7 +6,6 @@ from __future__ import division
 import re
 import time
 from collections import defaultdict
-from itertools import chain
 
 import six
 from cachetools import TTLCache
@@ -43,7 +42,7 @@ from datadog_checks.sqlserver.const import (
     DEFAULT_AUTODISCOVERY_INTERVAL,
     ENGINE_EDITION_SQL_DATABASE,
     INSTANCE_METRICS,
-    INSTANCE_METRICS_TOTAL,
+    INSTANCE_METRICS_DATABASE,
     PERF_AVERAGE_BULK,
     PERF_COUNTER_BULK_COUNT,
     PERF_COUNTER_LARGE_RAWCOUNT,
@@ -131,6 +130,7 @@ class SQLServer(AgentCheck):
             self.cloud_metadata.update({'gcp': gcp})
         if azure:
             self.cloud_metadata.update({'azure': azure})
+
         obfuscator_options_config = self.instance.get('obfuscator_options', {}) or {}
         self.obfuscator_options = to_native_string(
             json.dumps(
@@ -160,6 +160,8 @@ class SQLServer(AgentCheck):
             # cache these for a full day
             ttl=60 * 60 * 24,
         )
+
+        self.check_initializations.append(self.set_resolved_hostname_metadata)
 
         # Query declarations
         self.server_state_queries = self._new_query_executor([QUERY_SERVER_STATIC_INFO])
@@ -200,13 +202,16 @@ class SQLServer(AgentCheck):
             hostname=self.resolved_hostname,
         )
 
+    def set_resolved_hostname_metadata(self):
+        self.set_metadata('resolved_hostname', self.resolved_hostname)
+
     @property
     def resolved_hostname(self):
         if self._resolved_hostname is None:
             if self.reported_hostname:
                 self._resolved_hostname = self.reported_hostname
             elif self.dbm_enabled:
-                host, port = split_sqlserver_host_port(self.instance.get('host'))
+                host, _ = split_sqlserver_host_port(self.instance.get('host'))
                 self._resolved_hostname = resolve_db_host(host)
                 engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
                 if engine_edition == ENGINE_EDITION_SQL_DATABASE:
@@ -422,24 +427,25 @@ class SQLServer(AgentCheck):
         # If several check instances are querying the same server host, it can be wise to turn these off
         # to avoid sending duplicate metrics
         if is_affirmative(self.instance.get('include_instance_metrics', True)):
-            common_metrics = INSTANCE_METRICS
+            common_metrics = list(INSTANCE_METRICS)
             if not self.dbm_enabled:
-                common_metrics = common_metrics + DBM_MIGRATED_METRICS
+                common_metrics.extend(DBM_MIGRATED_METRICS)
+            if not self.databases:
+                # if autodiscovery is enabled, we report metrics from the
+                # INSTANCE_METRICS_DATABASE struct below, so do not double report here
+                common_metrics.extend(INSTANCE_METRICS_DATABASE)
+            self._add_performance_counters(common_metrics, metrics_to_collect, tags, db=None)
 
-            self._add_performance_counters(
-                chain(common_metrics, INSTANCE_METRICS_TOTAL), metrics_to_collect, tags, db=None
-            )
-
-        # populated through autodiscovery
-        if self.databases:
-            for db in self.databases:
-                self._add_performance_counters(
-                    INSTANCE_METRICS_TOTAL,
-                    metrics_to_collect,
-                    tags,
-                    db=db.name,
-                    physical_database_name=db.physical_db_name,
-                )
+            # populated through autodiscovery
+            if self.databases:
+                for db in self.databases:
+                    self._add_performance_counters(
+                        INSTANCE_METRICS_DATABASE,
+                        metrics_to_collect,
+                        tags,
+                        db=db.name,
+                        physical_database_name=db.physical_db_name,
+                    )
 
         # Load database statistics
         for name, table, column in DATABASE_METRICS:

@@ -3,28 +3,22 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.gitlab import GitlabCheck
-
-from .common import CONFIG, LEGACY_CONFIG
+pytestmark = [pytest.mark.usefixtures('dd_environment')]
 
 
-@pytest.mark.usefixtures("dd_environment")
-def test_legacy_run(benchmark):
-    instance = LEGACY_CONFIG['instances'][0]
-    c = GitlabCheck('gitlab', LEGACY_CONFIG['init_config'], instances=LEGACY_CONFIG['instances'])
+def test_legacy_run(benchmark, dd_run_check, gitlab_check, legacy_config):
+    check = gitlab_check(legacy_config)
 
     # Run once to get any initialization out of the way.
-    c.check(instance)
+    dd_run_check(check)
 
-    benchmark(c.check, instance)
+    benchmark(check.check, None)
 
 
-@pytest.mark.usefixtures("dd_environment")
-def test_run(benchmark):
-    instance = CONFIG['instances'][0]
-    c = GitlabCheck('gitlab', CONFIG['init_config'], instances=CONFIG['instances'])
+def test_run(benchmark, dd_run_check, gitlab_check, config):
+    check = gitlab_check(config)
 
     # Run once to get any initialization out of the way.
-    c.check(instance)
+    dd_run_check(check)
 
-    benchmark(c.check, instance)
+    benchmark(check.check, None)
