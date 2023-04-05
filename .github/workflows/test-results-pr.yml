@@ -44,3 +44,4 @@ jobs:
         event_file: artifacts/github-event/event.json
         event_name: ${{ github.event.workflow_run.event }}
         files: "artifacts/test-results/*/*.xml"
+        compare_to_earlier_commit: false
