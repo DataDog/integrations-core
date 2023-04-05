@@ -62,7 +62,8 @@ def test_connection_failure_openmetrics(dd_run_check, aggregator, gitlab_check, 
     for service_check in ('readiness', 'liveness', 'health'):
         aggregator.assert_service_check(
             'gitlab.{}'.format(service_check),
-            count=0,
+            status=GitlabCheck.CRITICAL,
+            count=1,
         )
 
 

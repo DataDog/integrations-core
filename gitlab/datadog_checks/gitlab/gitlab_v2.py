@@ -23,16 +23,17 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         self.check_initializations.appendleft(self.parse_config)
 
     def check(self, _):
-        super().check(_)
+        try:
+            super().check(_)
+        finally:
+            # Service check to check GitLab's health endpoints
+            if self.config.gitlab_url is not None:
+                for check_type in self.ALLOWED_SERVICE_CHECKS:
+                    self._check_health_endpoint(check_type)
+            else:
+                self.log.debug("gitlab_url not configured, service checks are skipped")
 
-        # Service check to check GitLab's health endpoints
-        if self.config.gitlab_url is not None:
-            for check_type in self.ALLOWED_SERVICE_CHECKS:
-                self._check_health_endpoint(check_type)
-        else:
-            self.log.debug("gitlab_url not configured, service checks are skipped")
-
-        self._submit_version()
+            self._submit_version()
 
     def get_default_config(self):
         return {
