@@ -62,6 +62,8 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                     message=f"Got {r.status_code} when hitting {check_url}",
                     tags=self._tags,
                 )
+            else:
+                self.service_check(check_type, OpenMetricsBaseCheckV2.OK, self._tags)
         except requests.exceptions.Timeout:
             self.service_check(
                 check_type,
@@ -76,8 +78,6 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                 message=f"Error hitting {check_url}. Error: {e}",
                 tags=self._tags,
             )
-        else:
-            self.service_check(check_type, OpenMetricsBaseCheckV2.OK, self._tags)
 
         self.log.debug("GitLab check `%s` done", check_type)
 
