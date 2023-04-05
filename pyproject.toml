@@ -63,7 +63,7 @@ exclude = [
     "**/datadog_checks/dev/tooling/templates/*",
     "**/datadog_checks/*/vendor/*",
 ]
-target-version = "py37"
+target-version = "py38"
 line-length = 120
 select = [
   "B",
