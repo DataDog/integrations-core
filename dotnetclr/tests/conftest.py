@@ -3,11 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from .common import INSTANCE
+from .common import MINIMAL_INSTANCE
 
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    yield INSTANCE, {
+    yield MINIMAL_INSTANCE, {
         'docker_platform': 'windows',
     }
