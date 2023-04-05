@@ -245,6 +245,7 @@ class MySQLActivity(DBMAsyncJob):
             "collection_interval": self.collection_interval,
             "ddtags": self._tags,
             "timestamp": time.time() * 1000,
+            "cloud_metadata": self._config.cloud_metadata,
             "mysql_activity": active_sessions,
         }
 
