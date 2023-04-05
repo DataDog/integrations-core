@@ -498,6 +498,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "ddtags": ",".join(tags),
                     "timestamp": time.time() * 1000,
                     "dbm_type": "plan",
+                    "cloud_metadata": self.check.cloud_metadata,
                     "db": {
                         "instance": row.get("database_name", None),
                         "plan": {
