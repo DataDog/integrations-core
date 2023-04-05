@@ -18,12 +18,8 @@ def test_e2e_legacy(dd_agent_check, legacy_config):
 
 
 @pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
-def test_e2e(dd_agent_check, config, use_openmetrics):
-    if use_openmetrics:
-        instance = config['instances'][0]
-        instance["openmetrics_endpoint"] = instance["prometheus_url"]
-
-    aggregator = dd_agent_check(config, rate=True)
+def test_e2e(dd_agent_check, get_config, use_openmetrics):
+    aggregator = dd_agent_check(get_config(use_openmetrics), rate=True)
     assert_check(aggregator, METRICS_TO_TEST_V2 if use_openmetrics else METRICS_TO_TEST, use_openmetrics)
     # Excluding gitlab.rack.http_requests_total because it is a distribution metric
     # (its sum and count metrics are in the metadata)

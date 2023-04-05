@@ -15,12 +15,8 @@ pytestmark = [pytest.mark.unit]
 
 
 @pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
-def test_check(dd_run_check, aggregator, mock_data, gitlab_check, config, use_openmetrics):
-    if use_openmetrics:
-        instance = config['instances'][0]
-        instance["openmetrics_endpoint"] = instance["prometheus_url"]
-
-    check = gitlab_check(config)
+def test_check(dd_run_check, aggregator, mock_data, gitlab_check, get_config, use_openmetrics):
+    check = gitlab_check(get_config(use_openmetrics))
     dd_run_check(check)
     dd_run_check(check)
 
@@ -30,14 +26,11 @@ def test_check(dd_run_check, aggregator, mock_data, gitlab_check, config, use_op
 
 
 @requires_py2
-def test_openmetrics_with_python2(gitlab_check, config):
-    instance = config['instances'][0]
-    instance["openmetrics_endpoint"] = instance["prometheus_url"]
-
+def test_openmetrics_with_python2(gitlab_check, get_config):
     with pytest.raises(
         ConfigurationError, match="This version of the integration is only available when using Python 3."
     ):
-        gitlab_check(config)
+        gitlab_check(get_config(True))
 
 
 @pytest.mark.parametrize(

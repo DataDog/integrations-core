@@ -14,19 +14,15 @@ pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration
 
 
 @pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
-def test_check(dd_run_check, aggregator, gitlab_check, config, use_openmetrics):
-    if use_openmetrics:
-        instance = config['instances'][0]
-        instance["openmetrics_endpoint"] = instance["prometheus_url"]
-
-    check = gitlab_check(config)
+def test_check(dd_run_check, aggregator, gitlab_check, get_config, use_openmetrics):
+    check = gitlab_check(get_config(use_openmetrics))
     dd_run_check(check)
 
     assert_check(aggregator, METRICS_TO_TEST_V2 if use_openmetrics else METRICS_TO_TEST, use_openmetrics)
 
 
-def test_connection_failure(aggregator, gitlab_check, bad_config):
-    check = gitlab_check(bad_config)
+def test_connection_failure(aggregator, gitlab_check, get_bad_config):
+    check = gitlab_check(get_bad_config(False))
 
     with pytest.raises(ConnectionError):
         check.check(None)
@@ -48,11 +44,8 @@ def test_connection_failure(aggregator, gitlab_check, bad_config):
 
 
 @requires_py3
-def test_connection_failure_openmetrics(dd_run_check, aggregator, gitlab_check, bad_config):
-    instance = bad_config['instances'][0]
-    instance["openmetrics_endpoint"] = instance["prometheus_url"]
-
-    check = gitlab_check(bad_config)
+def test_connection_failure_openmetrics(dd_run_check, aggregator, gitlab_check, get_bad_config):
+    check = gitlab_check(get_bad_config(True))
 
     with pytest.raises(Exception, match="requests.exceptions.ConnectionError"):
         dd_run_check(check)
@@ -103,7 +96,7 @@ def test_check_submit_metadata(
     raw_version,
     version_metadata,
     gitlab_check,
-    auth_config,
+    get_auth_config,
     enable_metadata_collection,
     use_openmetrics,
 ):
@@ -114,11 +107,7 @@ def test_check_submit_metadata(
         datadog_agent.reset()
         datadog_agent._config["enable_metadata_collection"] = enable_metadata_collection
 
-        if use_openmetrics:
-            instance = auth_config['instances'][0]
-            instance["openmetrics_endpoint"] = instance["prometheus_url"]
-
-        dd_run_check(gitlab_check(auth_config))
+        dd_run_check(gitlab_check(get_auth_config(use_openmetrics)))
 
         if enable_metadata_collection:
             g.assert_called_once()

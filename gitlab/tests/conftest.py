@@ -94,8 +94,16 @@ def gitlab_check():
 
 
 @pytest.fixture()
-def config():
-    return copy.deepcopy(CONFIG)
+def get_config():
+    def _config(use_openmetrics=False):
+        config = copy.deepcopy(CONFIG)
+
+        if use_openmetrics:
+            return to_omv2_config(config)
+
+        return config
+
+    return _config
 
 
 @pytest.fixture()
@@ -114,33 +122,55 @@ def legacy_config():
 
 
 @pytest.fixture()
-def bad_config():
-    return {
-        'init_config': {'allowed_metrics': ALLOWED_METRICS},
-        'instances': [
-            {
-                'prometheus_url': 'http://{}:1234/-/metrics'.format(HOST),
-                'gitlab_url': 'http://{}:1234/ci'.format(HOST),
-                'disable_ssl_validation': True,
-                'tags': CUSTOM_TAGS,
-            }
-        ],
-    }
+def get_bad_config():
+    def _config(use_openmetrics=False):
+        config = {
+            'init_config': {'allowed_metrics': ALLOWED_METRICS},
+            'instances': [
+                {
+                    'prometheus_url': 'http://{}:1234/-/metrics'.format(HOST),
+                    'gitlab_url': 'http://{}:1234/ci'.format(HOST),
+                    'disable_ssl_validation': True,
+                    'tags': CUSTOM_TAGS,
+                }
+            ],
+        }
+
+        if use_openmetrics:
+            return to_omv2_config(config)
+
+        return config
+
+    return _config
 
 
 @pytest.fixture()
-def auth_config():
-    return {
-        'init_config': {'allowed_metrics': ALLOWED_METRICS},
-        'instances': [
-            {
-                'prometheus_url': PROMETHEUS_ENDPOINT,
-                'gitlab_url': GITLAB_URL,
-                'disable_ssl_validation': True,
-                'api_token': GITLAB_TEST_API_TOKEN,
-            }
-        ],
-    }
+def get_auth_config():
+    def _config(use_openmetrics=False):
+        config = {
+            'init_config': {'allowed_metrics': ALLOWED_METRICS},
+            'instances': [
+                {
+                    'prometheus_url': PROMETHEUS_ENDPOINT,
+                    'gitlab_url': GITLAB_URL,
+                    'disable_ssl_validation': True,
+                    'api_token': GITLAB_TEST_API_TOKEN,
+                }
+            ],
+        }
+
+        if use_openmetrics:
+            return to_omv2_config(config)
+
+        return config
+
+    return _config
+
+
+def to_omv2_config(config):
+    instance = config['instances'][0]
+    instance["openmetrics_endpoint"] = instance["prometheus_url"]
+    return config
 
 
 @pytest.fixture
