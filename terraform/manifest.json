@@ -12,10 +12,12 @@
     "title": "terraform",
     "media": [],
     "classifier_tags": [
+      "Category::Configuration & Deployment",
+      "Category::Developer Tools",
+      "Category::Orchestration",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Orchestration"
+      "Supported OS::macOS"
     ]
   },
   "author": {
