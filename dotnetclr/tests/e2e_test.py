@@ -12,7 +12,7 @@ pytestmark = pytest.mark.e2e
 
 @requires_py3
 def test(dd_agent_check):
-    from datadog_checks.dotnetclr import DotnetclrCheckV2
+    from datadog_checks.dotnetclr.check import DotnetclrCheckV2
 
     aggregator = dd_agent_check(MINIMAL_INSTANCE, rate=True)
     aggregator.assert_service_check('dotnetclr.windows.perf.health', DotnetclrCheckV2.OK)
