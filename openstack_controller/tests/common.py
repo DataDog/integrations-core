@@ -408,6 +408,16 @@ DEFAULT_METRICS = [
 ]
 
 
+def _get_microversion_path(headers):
+    nova_microversion_header = headers.get('X-OpenStack-Nova-API-Version')
+    ironic_microversion_header = headers.get('X-OpenStack-Ironic-API-Version')
+
+    nova_microversion = nova_microversion_header if nova_microversion_header is not None else "default"
+    ironic_microversion = ironic_microversion_header if ironic_microversion_header is not None else "default"
+    microversion_path = 'nova-{}-ironic-{}'.format(nova_microversion, ironic_microversion)
+    return microversion_path
+
+
 class MockHttp:
     def __init__(self, host, **kwargs):
         self._host = host
@@ -419,7 +429,7 @@ class MockHttp:
         parsed_url = urlparse(url)
         path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
         path_parts = path_and_args.split('/')
-        nova_microversion_header = kwargs['headers'].get('X-OpenStack-Nova-API-Version')
+        microversion_path = _get_microversion_path(kwargs['headers'])
         subpath = os.path.join(
             *path_parts,
         )
@@ -432,7 +442,7 @@ class MockHttp:
                 get_here(),
                 'fixtures',
                 self._host,
-                nova_microversion_header if nova_microversion_header is not None else "default",
+                microversion_path,
                 subpath,
                 'get.json',
             )
@@ -445,7 +455,7 @@ class MockHttp:
         parsed_url = urlparse(url)
         path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
         path_parts = path_and_args.split('/')
-        nova_microversion_header = kwargs['headers'].get('X-OpenStack-Nova-API-Version')
+        microversion_path = _get_microversion_path(kwargs['headers'])
         subpath = os.path.join(
             *path_parts,
         )
@@ -461,7 +471,7 @@ class MockHttp:
                     get_here(),
                     'fixtures',
                     self._host,
-                    nova_microversion_header if nova_microversion_header is not None else "default",
+                    microversion_path,
                     *path_parts,
                     f'{project_id}.json',
                 )
@@ -471,7 +481,7 @@ class MockHttp:
                     get_here(),
                     'fixtures',
                     self._host,
-                    nova_microversion_header if nova_microversion_header is not None else "default",
+                    microversion_path,
                     *path_parts,
                     'unscoped.json',
                 )
@@ -481,7 +491,7 @@ class MockHttp:
                 get_here(),
                 'fixtures',
                 self._host,
-                nova_microversion_header if nova_microversion_header is not None else "default",
+                microversion_path,
                 subpath,
             )
         response = MockResponse(file_path=file_path, status_code=200).json()

@@ -1,0 +1,72 @@
+{
+  "servers": [
+    {
+      "id": "2c653a68-b520-4582-a05d-41a68067d76c",
+      "name": "server",
+      "status": "ACTIVE",
+      "tenant_id": "6e39099cccde4f809b003d9e0dd09304",
+      "user_id": "78205c506b534738bc851d3e189a00c3",
+      "metadata": {
+        "sw_runtime_java_version": "null"
+      },
+      "hostId": "817ebf69d75b4cbd4ce16ed833468d628f7214b96bda065353b23549",
+      "image": "",
+      "flavor": {
+        "id": "c1",
+        "links": [
+          {
+            "rel": "bookmark",
+            "href": "http://34.91.114.145/compute/6e39099cccde4f809b003d9e0dd09304/flavors/c1"
+          }
+        ]
+      },
+      "created": "2023-03-17T14:17:54Z",
+      "updated": "2023-04-03T07:51:44Z",
+      "addresses": {
+        "shared": [
+          {
+            "version": 4,
+            "addr": "192.168.233.80",
+            "OS-EXT-IPS:type": "fixed",
+            "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:fe:84:d5"
+          }
+        ]
+      },
+      "accessIPv4": "",
+      "accessIPv6": "",
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://34.91.114.145/compute/v2.1/6e39099cccde4f809b003d9e0dd09304/servers/2c653a68-b520-4582-a05d-41a68067d76c"
+        },
+        {
+          "rel": "bookmark",
+          "href": "http://34.91.114.145/compute/6e39099cccde4f809b003d9e0dd09304/servers/2c653a68-b520-4582-a05d-41a68067d76c"
+        }
+      ],
+      "OS-DCF:diskConfig": "AUTO",
+      "progress": 0,
+      "OS-EXT-AZ:availability_zone": "availability-zone",
+      "config_drive": "",
+      "key_name": null,
+      "OS-SRV-USG:launched_at": "2023-03-17T14:18:06.000000",
+      "OS-SRV-USG:terminated_at": null,
+      "OS-EXT-SRV-ATTR:host": "agent-integrations-openstack-default",
+      "OS-EXT-SRV-ATTR:instance_name": "instance-00000004",
+      "OS-EXT-SRV-ATTR:hypervisor_hostname": "agent-integrations-openstack-default",
+      "OS-EXT-STS:task_state": null,
+      "OS-EXT-STS:vm_state": "active",
+      "OS-EXT-STS:power_state": 1,
+      "os-extended-volumes:volumes_attached": [
+        {
+          "id": "267a47aa-ef2b-46ae-820f-77afb9f014ae"
+        }
+      ],
+      "security_groups": [
+        {
+          "name": "default"
+        }
+      ]
+    }
+  ]
+}

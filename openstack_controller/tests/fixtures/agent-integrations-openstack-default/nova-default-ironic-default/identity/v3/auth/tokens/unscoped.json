@@ -1,0 +1,21 @@
+{
+  "token": {
+    "methods": [
+      "password"
+    ],
+    "user": {
+      "domain": {
+        "id": "default",
+        "name": "Default"
+      },
+      "id": "78205c506b534738bc851d3e189a00c3",
+      "name": "admin",
+      "password_expires_at": null
+    },
+    "audit_ids": [
+      "uKflo7cSThqghx_iKpUbjg"
+    ],
+    "expires_at": "2023-04-03T21:41:31.000000Z",
+    "issued_at": "2023-04-03T20:41:31.000000Z"
+  }
+}
