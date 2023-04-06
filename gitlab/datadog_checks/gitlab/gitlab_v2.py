@@ -135,12 +135,7 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                 #         }
                 #     ]
                 # }
-                if (
-                    not key.endswith("_check")
-                    or not isinstance(value, list)
-                    or not value
-                    or not value[0].get("status")
-                ):
+                if not key.endswith("_check") or not isinstance(value, list) or not value or not value[0].get("status"):
                     continue
 
                 if check := self.READINESS_SERVICE_CHECKS.get(key):
@@ -159,7 +154,7 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                     self.log.debug("Unknown service check %s", check)
 
         # Handle all the declared checks that we did not get from the endpoint
-        for missing_service_check in (self.READINESS_SERVICE_CHECKS.keys() - service_checks_sent):
+        for missing_service_check in self.READINESS_SERVICE_CHECKS.keys() - service_checks_sent:
             self.service_check(
                 f"readiness.{self.READINESS_SERVICE_CHECKS[missing_service_check]}",
                 OpenMetricsBaseCheckV2.UNKNOWN,

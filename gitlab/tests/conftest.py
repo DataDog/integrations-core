@@ -80,7 +80,9 @@ def mock_data():
 
 
 def mocked_requests_get(*args, **kwargs):
-    if args[0].startswith("http://{}:{}/-/readiness".format(HOST, GITLAB_LOCAL_PORT)):
+    url = args[0]
+
+    if url.startswith("http://{}:{}/-/readiness".format(HOST, GITLAB_LOCAL_PORT)):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'readiness_check.json')
         with open(f_name, 'r') as f:
             text_data = f.read()
@@ -89,13 +91,13 @@ def mocked_requests_get(*args, **kwargs):
             response.json.return_value = json.loads(text_data)
             return response
 
-    elif args[0] == "http://{}:{}/-/liveness".format(HOST, GITLAB_LOCAL_PORT) or args[
-        0
-    ] == "http://{}:{}/-/health".format(HOST, GITLAB_LOCAL_PORT):
+    elif url == "http://{}:{}/-/liveness".format(HOST, GITLAB_LOCAL_PORT) or url == "http://{}:{}/-/health".format(
+        HOST, GITLAB_LOCAL_PORT
+    ):
         response = mock.MagicMock()
         response.status_code = 200
         return response
-    elif args[0] == "http://{}:{}/-/metrics".format(HOST, GITLAB_LOCAL_PORT):
+    elif url == "http://{}:{}/-/metrics".format(HOST, GITLAB_LOCAL_PORT):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
 
         with open(f_name, 'r') as f:
@@ -105,9 +107,9 @@ def mocked_requests_get(*args, **kwargs):
                 iter_lines=lambda **kwargs: text_data.split("\n"),
                 headers={'Content-Type': "text/plain"},
             )
-    elif args[0] == "http://{}:{}/api/v4/version".format(HOST, GITLAB_LOCAL_PORT) or args[
-        0
-    ] == "http://{}:{}/-/health".format(HOST, GITLAB_LOCAL_PORT):
+    elif url == "http://{}:{}/api/v4/version".format(HOST, GITLAB_LOCAL_PORT) or url == "http://{}:{}/-/health".format(
+        HOST, GITLAB_LOCAL_PORT
+    ):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'version.json')
         with open(f_name, 'r') as f:
             text_data = f.read()
