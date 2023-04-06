@@ -1,4 +1,15 @@
+# Keystone
+Keystone is an OpenStack service that provides identity, authentication, and authorization functionality for other OpenStack services. It acts as a central authentication system and manages the mapping of users, roles, and groups to specific OpenStack services and resources. Keystone is responsible for creating, storing, and managing user credentials, tokens, and roles. It also provides a catalog of available OpenStack services and endpoints that users can access.
+
+| Datadog Metric                       | Openstack Metric | Description                                        | Tags                                                      |
+|--------------------------------------|------------------|----------------------------------------------------|-----------------------------------------------------------|
+| openstack.keystone.domains.count*    | -                | The number of domains.                             | [keystone_server:URL]                                     |
+| openstack.keystone.domains.enabled*  | -                | The tagged domain is enabled.                      | [keystone_server:URL, domain_id:DOMAIN, domain_tags:TAGS] |
+| openstack.keystone.projects.count*   | -                | The number of projects owned by the tagged domain. | [keystone_server:URL, domain_id:DOMAIN, domain_tags:TAGS] |
+| openstack.keystone.users.count*      | -                | The number of users owned by the tagged domain.    | [keystone_server:URL, domain_id:DOMAIN, domain_tags:TAGS] |
+
 # Nova
+Nova is a core component of the OpenStack cloud computing platform that provides the ability to provision and manage virtual machines (VMs) and other instances. Nova enables users to launch and manage virtual machine instances, attach and detach virtual disk images to instances, and manage networks and security groups.
 
 ## Limits
 In Nova OpenStack, limits are a way to enforce quotas on the usage of resources by individual users or projects. Limits are enforced to ensure that resources are fairly distributed among all users and to prevent any single user or project from consuming too many resources.

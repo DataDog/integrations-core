@@ -48,7 +48,9 @@ class OpenStackControllerCheck(AgentCheck):
         self.config = OpenstackConfig(self.log, self.instance)
 
     def check(self, _instance):
-        tags = ['keystone_server:{}'.format(self.config.keystone_server_url)] + self.instance.get('tags', [])
+        tags = [
+            'keystone_server:{}'.format(self.config.keystone_server_url),
+        ] + self.instance.get('tags', [])
         api = make_api(self.config, self.log, self.http)
         self.gauge("openstack.controller", 1)
         self._report_metrics(api, tags)
@@ -58,11 +60,14 @@ class OpenStackControllerCheck(AgentCheck):
         auth_projects = api.get_auth_projects()
         self.log.debug("auth_projects: %s", auth_projects)
         for project in auth_projects:
-            self._report_project_metrics(api, project, tags)
+            self._report_project_metrics(api, project, tags + ['domain_id:{}'.format(self.config.domain_id)])
 
     def _report_identity_metrics(self, api, tags):
         try:
             self._report_identity_response_time(api, tags)
+            self._report_identity_domains(api, tags)
+            self._report_identity_projects(api, tags)
+            self._report_identity_users(api, tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting identity metrics: %s", e)
@@ -78,6 +83,57 @@ class OpenStackControllerCheck(AgentCheck):
             self.service_check(KEYSTONE_SERVICE_CHECK, AgentCheck.OK, tags=tags)
         else:
             self.service_check(KEYSTONE_SERVICE_CHECK, AgentCheck.UNKNOWN, tags=tags)
+
+    def _report_identity_domains(self, api, tags):
+        identity_domains = api.get_identity_domains()
+        self.log.debug("identity_domains: %s", identity_domains)
+        self.gauge('openstack.keystone.domains.count', len(identity_domains), tags=tags)
+        for domain in identity_domains:
+            enabled = domain.get("enabled")
+            if enabled is not None:
+                self.gauge(
+                    'openstack.keystone.domains.enabled',
+                    1 if enabled else 0,
+                    tags + ['domain_id:{}'.format(domain.get("id"))],
+                )
+
+    def _report_identity_projects(self, api, tags):
+        identity_projects = api.get_identity_projects()
+        self.log.debug("identity_projects: %s", identity_projects)
+        self.gauge(
+            'openstack.keystone.projects.count',
+            len(identity_projects),
+            tags=tags + ['domain_id:{}'.format(self.config.domain_id)],
+        )
+        for project in identity_projects:
+            enabled = project.get("enabled")
+            if enabled is not None:
+                self.gauge(
+                    'openstack.keystone.projects.enabled',
+                    1 if enabled else 0,
+                    tags
+                    + ['domain_id:{}'.format(self.config.domain_id)]
+                    + [f"project_id:{project.get('id')}", f"project_name:{project.get('name')}"],
+                )
+
+    def _report_identity_users(self, api, tags):
+        identity_users = api.get_identity_users()
+        self.log.debug("identity_users: %s", identity_users)
+        self.gauge(
+            'openstack.keystone.users.count',
+            len(identity_users),
+            tags=tags + ['domain_id:{}'.format(self.config.domain_id)],
+        )
+        for user in identity_users:
+            enabled = user.get("enabled")
+            if enabled is not None:
+                self.gauge(
+                    'openstack.keystone.users.enabled',
+                    1 if enabled else 0,
+                    tags
+                    + ['domain_id:{}'.format(self.config.domain_id)]
+                    + [f"user_id:{user.get('id')}", f"user_name:{user.get('name')}"],
+                )
 
     def _report_project_metrics(self, api, project, tags):
         project_id = project.get('id')

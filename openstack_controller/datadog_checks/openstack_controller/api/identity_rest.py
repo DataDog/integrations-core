@@ -12,3 +12,21 @@ class IdentityRest:
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return response.elapsed.total_seconds() * 1000
+
+    def get_domains(self):
+        response = self.http.get('{}/domains'.format(self.endpoint))
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        return response.json()['domains']
+
+    def get_projects(self):
+        response = self.http.get('{}/projects'.format(self.endpoint))
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        return response.json()['projects']
+
+    def get_users(self):
+        response = self.http.get('{}/users'.format(self.endpoint))
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        return response.json()['users']

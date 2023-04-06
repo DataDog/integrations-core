@@ -7,11 +7,19 @@ from abc import ABC, abstractmethod
 
 class Api(ABC):
     @abstractmethod
-    def create_connection(self):
+    def get_identity_response_time(self):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_identity_response_time(self):
+    def get_identity_domains(self):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_identity_projects(self):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_identity_users(self):
         pass  # pragma: no cover
 
     @abstractmethod

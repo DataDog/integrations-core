@@ -44,6 +44,8 @@ def dd_environment():
             private_key = outputs['ssh_private_key']['value']
             instance = {
                 'keystone_server_url': 'http://{}/identity'.format(internal_ip),
+                # 'domain_id': '03e40b01788d403e98e4b9a20210492e',
+                # 'username': 'new_admin',
                 'username': 'admin',
                 'password': 'password',
                 'ssl_verify': False,
