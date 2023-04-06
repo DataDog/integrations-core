@@ -48,7 +48,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "gitlab-kas",
+        "gitlab-workhorse",
+        "gitlab-ctl"
+      ]
     },
     "dashboards": {
       "Gitlab Overview": "assets/dashboards/overview.json"
