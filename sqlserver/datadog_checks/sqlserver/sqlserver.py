@@ -222,7 +222,7 @@ class SQLServer(AgentCheck):
                     self.cloud_metadata.get("aws")["instance_endpoint"],
                 )
             )
-        elif AWS_RDS_HOSTNAME_SUFFIX in self.hostname:
+        elif AWS_RDS_HOSTNAME_SUFFIX in resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
             self.tags.append(
