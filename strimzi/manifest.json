@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "Strimzi",
     "title": "Strimzi",
     "media": [],
     "classifier_tags": [
@@ -34,11 +34,7 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
-    },
-    "dashboards": {},
-    "monitors": {},
-    "logs": {},
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
