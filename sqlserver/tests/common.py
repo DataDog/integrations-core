@@ -32,7 +32,7 @@ def get_local_driver():
     if ON_MACOS:
         return '/usr/local/lib/libtdsodbc.so'
     elif ON_WINDOWS:
-        return '{ODBC Driver 17 for SQL Server}'
+        return '{ODBC Driver 18 for SQL Server}'
     else:
         return 'FreeTDS'
 

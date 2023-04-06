@@ -2107,7 +2107,7 @@ jobs:
       job-name: MySQL
       target: mysql
       platform: linux
-      runner: '["ubuntu-20.04"]'
+      runner: '["ubuntu-agent-4core"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
@@ -2810,7 +2810,7 @@ jobs:
       job-name: SQL Server on Windows
       target: sqlserver
       platform: windows
-      runner: '["windows-2019"]'
+      runner: '["windows-agent-8core"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}

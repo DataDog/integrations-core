@@ -41,7 +41,8 @@ platforms = ["linux", "windows"]
 runners = { linux = ["ubuntu-20.04"] }
 
 [overrides.ci.mysql]
-runners = { linux = ["ubuntu-20.04"] }
+only-py3 = true
+runners = { linux = ["ubuntu-agent-4core"] }
 
 [overrides.ci.network]
 platforms = ["linux", "windows"]
@@ -53,8 +54,9 @@ runners = { linux = ["ubuntu-20.04"] }
 runners = { linux = ["ubuntu-20.04"] }
 
 [overrides.ci.sqlserver]
+only-py3 = true
 platforms = ["windows", "linux"]
-runners = { windows = ["windows-2019"] }
+runners = { windows = ["windows-agent-8core"] }
 
 [overrides.ci.tcp_check]
 platforms = ["linux", "windows"]
