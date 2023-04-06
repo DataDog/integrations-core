@@ -5,29 +5,24 @@ import mock
 import pytest
 from requests.exceptions import ConnectionError
 
+from datadog_checks.dev.testing import requires_py3
 from datadog_checks.gitlab import GitlabCheck
 
-from .common import CUSTOM_TAGS, HOST, METRICS_TO_TEST, assert_check
+from .common import CUSTOM_TAGS, HOST, METRICS_TO_TEST, METRICS_TO_TEST_V2, assert_check
 
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
 
-def test_check(dd_run_check, aggregator, gitlab_check, config):
-    """
-    Make sure we're failing when the URL isn't right
-    """
-    check = gitlab_check(config)
+@pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
+def test_check(dd_run_check, aggregator, gitlab_check, get_config, use_openmetrics):
+    check = gitlab_check(get_config(use_openmetrics))
     dd_run_check(check)
 
-    assert_check(aggregator, METRICS_TO_TEST)
+    assert_check(aggregator, METRICS_TO_TEST_V2 if use_openmetrics else METRICS_TO_TEST, use_openmetrics)
 
 
-def test_connection_failure(aggregator, gitlab_check, bad_config):
-    """
-    Make sure we're failing when the URL isn't right
-    """
-
-    check = gitlab_check(bad_config)
+def test_connection_failure(aggregator, gitlab_check, get_bad_config):
+    check = gitlab_check(get_bad_config(False))
 
     with pytest.raises(ConnectionError):
         check.check(None)
@@ -48,6 +43,30 @@ def test_connection_failure(aggregator, gitlab_check, bad_config):
         )
 
 
+@requires_py3
+def test_connection_failure_openmetrics(dd_run_check, aggregator, gitlab_check, get_bad_config):
+    check = gitlab_check(get_bad_config(True))
+
+    with pytest.raises(Exception, match="requests.exceptions.ConnectionError"):
+        dd_run_check(check)
+
+    aggregator.assert_service_check(
+        'gitlab.openmetrics.health',
+        status=GitlabCheck.CRITICAL,
+        tags=['gitlab_host:{}'.format(HOST), 'gitlab_port:1234']
+        + CUSTOM_TAGS
+        + ['endpoint:http://localhost:1234/-/metrics'],
+        count=1,
+    )
+
+    for service_check in ('readiness', 'liveness', 'health'):
+        aggregator.assert_service_check(
+            'gitlab.{}'.format(service_check),
+            status=GitlabCheck.CRITICAL,
+            count=1,
+        )
+
+
 @pytest.mark.parametrize(
     'raw_version, version_metadata',
     [
@@ -60,6 +79,7 @@ def test_connection_failure(aggregator, gitlab_check, bad_config):
                 'version.patch': '6',
                 'version.raw': '12.7.6',
             },
+            id="12.7.9",
         ),
         pytest.param(
             '1.4.5',
@@ -70,9 +90,11 @@ def test_connection_failure(aggregator, gitlab_check, bad_config):
                 'version.patch': '5',
                 'version.raw': '1.4.5',
             },
+            id="1.4.5",
         ),
     ],
 )
+@pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
 @pytest.mark.parametrize('enable_metadata_collection', [True, False])
 def test_check_submit_metadata(
     dd_run_check,
@@ -81,8 +103,9 @@ def test_check_submit_metadata(
     raw_version,
     version_metadata,
     gitlab_check,
-    auth_config,
+    get_auth_config,
     enable_metadata_collection,
+    use_openmetrics,
 ):
     with mock.patch('datadog_checks.base.utils.http.requests.Response.json') as g:
         # mock the api call so that it returns the given version
@@ -91,7 +114,7 @@ def test_check_submit_metadata(
         datadog_agent.reset()
         datadog_agent._config["enable_metadata_collection"] = enable_metadata_collection
 
-        dd_run_check(gitlab_check(auth_config))
+        dd_run_check(gitlab_check(get_auth_config(use_openmetrics)))
 
         if enable_metadata_collection:
             g.assert_called_once()

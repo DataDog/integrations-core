@@ -4,7 +4,7 @@
 
 Integration that allows to:
 
-- Visualize and monitor metrics collected with Gitlab through Prometheus
+- Visualize and monitor metrics collected with GitLab through Prometheus
 
 See [Monitoring GitLab with Prometheus][1] for more information.
 
@@ -37,9 +37,6 @@ To configure this check for an Agent running on a host:
     **Note** Save and restart GitLab to see the changes.
 
 4. [Restart the Agent][7].
-
-**Note**: The metrics in [gitlab/metrics.py][8] are collected by default. The `allowed_metrics` configuration option in the `init_config` collects specific legacy metrics. Some metrics may not be collected depending on your GitLab instance version and configuration. See [GitLab Prometheus metrics][6] for more information about metric collection.
-
 
 ##### Log collection
 
@@ -78,11 +75,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 
 ##### Metric collection
 
-| Parameter            | Value                                                                                      |
-| -------------------- | ------------------------------------------------------------------------------------------ |
-| `<INTEGRATION_NAME>` | `gitlab`                                                                                   |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                              |
-| `<INSTANCE_CONFIG>`  | `{"gitlab_url":"http://%%host%%/", "prometheus_endpoint":"http://%%host%%:10055/-/metrics"}` |
+| Parameter            | Value                                                                                         |
+| -------------------- |-----------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `gitlab`                                                                                      |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                 |
+| `<INSTANCE_CONFIG>`  | `{"gitlab_url":"http://%%host%%/", "openmetrics_endpoint":"http://%%host%%:10055/-/metrics"}` |
 
 ##### Log collection
 
