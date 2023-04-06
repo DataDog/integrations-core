@@ -9,8 +9,26 @@ cd devstack
 sudo git checkout stable/zed
 cat <<EOF | sudo tee -a local.conf
 [[local|localrc]]
-# Enable only minimal services
-disable_all_services
+# Credentials
+ADMIN_PASSWORD=password
+DATABASE_PASSWORD=password
+RABBIT_PASSWORD=password
+SERVICE_PASSWORD=password
+SERVICE_TOKEN=password
+
+# Set glance's default limit to be baremetal image friendly
+GLANCE_LIMIT_IMAGE_SIZE_TOTAL=5000
+
+# Configure ironic from ironic devstack plugin.
+enable_plugin ironic https://opendev.org/openstack/ironic stable/zed
+enable_plugin ironic-ui https://github.com/openstack/ironic-ui stable/zed
+
+# Create 3 virtual machines to pose as Ironic's baremetal nodes.
+IRONIC_VM_COUNT=3
+IRONIC_BAREMETAL_BASIC_OPS=True
+DEFAULT_INSTANCE_TYPE=baremetal
+
+# Enable services
 enable_service horizon
 enable_service g-api
 enable_service key
@@ -24,24 +42,19 @@ enable_service q-metering
 enable_service q-svc
 enable_service rabbit
 
-# Credentials
-ADMIN_PASSWORD=password
-DATABASE_PASSWORD=password
-RABBIT_PASSWORD=password
-SERVICE_PASSWORD=password
-SERVICE_TOKEN=password
+# Enable Ironic API and Ironic Conductor
+enable_service ironic
+enable_service ir-api
+enable_service ir-cond
 
-# Set glance's default limit to be baremetal image friendly
-GLANCE_LIMIT_IMAGE_SIZE_TOTAL=5000
+# Disable nova novnc service, ironic does not support it anyway.
+disable_service n-novnc
 
-# Enable Ironic plugin
-enable_plugin ironic https://opendev.org/openstack/ironic stable/zed
-enable_plugin ironic-ui https://github.com/openstack/ironic-ui stable/zed
+# Disable Cinder
+disable_service cinder c-sch c-api c-vol
 
-# Create 3 virtual machines to pose as Ironic's baremetal nodes.
-IRONIC_VM_COUNT=3
-IRONIC_BAREMETAL_BASIC_OPS=True
-DEFAULT_INSTANCE_TYPE=baremetal
+# Disable Tempest
+disable_service tempest
 
 IRONIC_RPC_TRANSPORT=json-rpc
 IRONIC_RAMDISK_TYPE=tinyipa
@@ -92,3 +105,4 @@ IRONIC_VM_LOG_DIR=/opt/stack/ironic-bm-logs
 EOF
 sudo chown stack:stack /opt/stack/devstack -R
 sudo -u stack -H ./stack.sh
+
