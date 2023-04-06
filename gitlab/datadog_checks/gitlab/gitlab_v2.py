@@ -138,7 +138,7 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                 if (
                     not key.endswith("_check")
                     or not isinstance(value, list)
-                    or len(value) == 0
+                    or not value
                     or not value[0].get("status")
                 ):
                     continue
