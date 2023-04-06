@@ -108,7 +108,7 @@ The GitLab check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][13] for a list of service checks provided by this integration. More information about the `gitlab.readiness.*` service checks can be found [in the official GitLab documentation][15].
+See [service_checks.json][13] for a list of service checks provided by this integration. More information about the `gitlab.readiness.*` service checks can be found in the official [GitLab documentation][15].
 
 ## Troubleshooting
 
