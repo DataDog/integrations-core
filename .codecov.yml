@@ -510,6 +510,10 @@ coverage:
         target: 75
         flags:
         - statsd
+      Strimzi:
+        target: 75
+        flags:
+          - strimzi
       Supervisord:
         target: 75
         flags:
