@@ -33,7 +33,7 @@ AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES = {
     # related tags and metrics
     "sql_database": "azure_sql_server_database,azure_sql_server",
     "managed_instance": "azure_sql_server_managed_instance",
-    "virtual_machine": "azure_virtual_machine_instance"
+    "virtual_machine": "azure_virtual_machine_instance",
 }
 
 # Metric discovery queries

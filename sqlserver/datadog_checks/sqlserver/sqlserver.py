@@ -173,13 +173,13 @@ class SQLServer(AgentCheck):
         self._query_manager = QueryManager(
             self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
         )
-        self.set_resource_tags(self.resolved_hostname)
 
         self._dynamic_queries = None
 
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.check_initializations.append(self.initialize_connection)
+        self.set_resource_tags()
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -208,12 +208,11 @@ class SQLServer(AgentCheck):
     def set_resolved_hostname_metadata(self):
         self.set_metadata('resolved_hostname', self.resolved_hostname)
 
-    def set_resource_tags(self, resolved_hostname):
+    def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
-                    self.cloud_metadata.get("gcp")["project_id"],
-                    self.cloud_metadata.get("gcp")["instance_id"]
+                    self.cloud_metadata.get("gcp")["project_id"], self.cloud_metadata.get("gcp")["instance_id"]
                 )
             )
         if self.cloud_metadata.get("aws") is not None:
@@ -222,12 +221,10 @@ class SQLServer(AgentCheck):
                     self.cloud_metadata.get("aws")["instance_endpoint"],
                 )
             )
-        elif AWS_RDS_HOSTNAME_SUFFIX in resolved_hostname:
+        elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
-            self.tags.append(
-                "dd.internal.resource:aws_rds_instance:{}".format(resolved_hostname)
-            )
+            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
         if self.cloud_metadata.get("azure") is not None:
             deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
             name = self.cloud_metadata.get("azure")["name"]
@@ -235,19 +232,15 @@ class SQLServer(AgentCheck):
                 # azure sql databases have a special format, which is set for DBM
                 # customers in the resolved_hostname.
                 # If user is not DBM customer, the resource_name should just be set to the `name`
-                name = resolved_hostname
+                name = self.resolved_hostname
             # some `deployment_type`s map to multiple `resource_type`s
             resource_types = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES.get(deployment_type).split(",")
             for r_type in resource_types:
-                self.tags.append(
-                    "dd.internal.resource:{}:{}".format(
-                        r_type, name
-                    )
-                )
+                self.tags.append("dd.internal.resource:{}:{}".format(r_type, name))
         # finally, emit a `database_instance` resource for this instance
         self.tags.append(
             "dd.internal.resource:database_instance:{}".format(
-                resolved_hostname,
+                self.resolved_hostname,
             )
         )
 

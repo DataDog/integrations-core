@@ -110,9 +110,7 @@ def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object
     instance_tags = instance_docker.get('tags', []) + ['optional_tag:tag1']
 
     aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=instance_tags, count=1)
-    aggregator.assert_metric(
-        'sqlserver.broker_activation.tasks_running', tags=instance_tags, count=1
-    )
+    aggregator.assert_metric('sqlserver.broker_activation.tasks_running', tags=instance_tags, count=1)
 
 
 @pytest.mark.integration
@@ -214,9 +212,7 @@ def test_autodiscovery_db_service_checks(
     # to match against, so this assertion does not require the exact string
     sc = aggregator.service_checks('sqlserver.database.can_connect')
     db_critical_exists = False
-    critical_tags = instance_tags + [
-        'db:unavailable_db', 'sqlserver_host:{}'.format(check.resolved_hostname)
-    ]
+    critical_tags = instance_tags + ['db:unavailable_db', 'sqlserver_host:{}'.format(check.resolved_hostname)]
     for c in sc:
         if c.status == SQLServer.CRITICAL:
             db_critical_exists = True
@@ -361,8 +357,8 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker, custom_query,
     "cloud_metadata,metric_names",
     [
         (
-                {},
-                [],
+            {},
+            [],
         ),
         (
             {
@@ -384,32 +380,32 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker, custom_query,
             ],
         ),
         (
-                {
-                    'gcp': {
-                        'project_id': 'foo-project',
-                        'instance_id': 'bar',
-                        'extra_field': 'included',
-                    },
+            {
+                'gcp': {
+                    'project_id': 'foo-project',
+                    'instance_id': 'bar',
+                    'extra_field': 'included',
                 },
-                [
-                    "dd.internal.resource:gcp_sql_database_instance:foo-project:bar",
-                ],
+            },
+            [
+                "dd.internal.resource:gcp_sql_database_instance:foo-project:bar",
+            ],
         ),
         (
-                {
-                    'aws': {
-                        'instance_endpoint': 'foo.aws.com',
-                    },
-                    'azure': {
-                        'deployment_type': 'sql_database',
-                        'name': 'my-instance',
-                    },
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
                 },
-                [
-                    "dd.internal.resource:aws_rds_instance:foo.aws.com",
-                    "dd.internal.resource:azure_sql_server_database:my-instance",
-                    "dd.internal.resource:azure_sql_server:my-instance",
-                ],
+                'azure': {
+                    'deployment_type': 'sql_database',
+                    'name': 'my-instance',
+                },
+            },
+            [
+                "dd.internal.resource:aws_rds_instance:foo.aws.com",
+                "dd.internal.resource:azure_sql_server_database:my-instance",
+                "dd.internal.resource:azure_sql_server:my-instance",
+            ],
         ),
     ],
 )
