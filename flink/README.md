@@ -53,25 +53,9 @@ No additional installation is needed on your server.
 
 _Available for Agent >6.0_
 
-1. Flink uses the `log4j` logger by default. To activate logging to a file and customize the format edit the `log4j.properties`, `log4j-cli.properties`, `log4j-yarn-session.properties`, or `log4j-console.properties` file. See [Flink's repository][6] for default configurations. For example `log4j.properties` contains this configuration by default:
+1. Flink uses the `log4j` logger by default. To activate logging to a file and customize the format edit the `log4j*.properties` configuration files in the `conf/` directory of the Flink distribution. See the [Flink logging documentation][13] for which configuration file is relevant for your setup. See [Flink's repository][6] for default configurations.
 
-   ```conf
-   appender.main.name = MainAppender
-   appender.main.type = RollingFile
-   appender.main.append = true
-   appender.main.fileName = ${sys:log.file}
-   appender.main.filePattern = ${sys:log.file}.%i
-   appender.main.layout.type = PatternLayout
-   appender.main.layout.pattern = %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
-   appender.main.policies.type = Policies
-   appender.main.policies.size.type = SizeBasedTriggeringPolicy
-   appender.main.policies.size.size = 100MB
-   appender.main.policies.startup.type = OnStartupTriggeringPolicy
-   appender.main.strategy.type = DefaultRolloverStrategy
-   appender.main.strategy.max = ${env:MAX_LOG_FILE_NUMBER:-10}
-   ```
-
-2. By default, the integration pipeline supports the following conversion pattern:
+2. By default, the integration pipeline supports the following layout pattern:
 
     ```text
     %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
@@ -139,3 +123,4 @@ Need help? Contact [Datadog support][12].
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/flink/metadata.csv
 [12]: https://docs.datadoghq.com/help/
+[13]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/advanced/logging/
