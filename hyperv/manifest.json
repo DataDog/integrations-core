@@ -12,11 +12,9 @@
     "title": "HyperV",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Windows",
-      "Category::Azure",
       "Category::Cloud",
-      "Category::Monitoring",
-      "Category::OS & System"
+      "Category::OS & System",
+      "Supported OS::Windows"
     ]
   },
   "author": {

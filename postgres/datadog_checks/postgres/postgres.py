@@ -24,6 +24,7 @@ from .util import (
     FUNCTION_METRICS,
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_STAT_DATABASE,
+    QUERY_PG_STAT_DATABASE_CONFLICTS,
     QUERY_PG_STAT_WAL_RECEIVER,
     REPLICATION_METRICS,
     SLRU_METRICS,
@@ -106,11 +107,16 @@ class PostgreSql(AgentCheck):
             q_pg_stat_database["query"] += " WHERE " + " AND ".join(
                 "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
             )
+            q_pg_stat_database_conflicts = copy.deepcopy(QUERY_PG_STAT_DATABASE_CONFLICTS)
+            q_pg_stat_database_conflicts["query"] += " WHERE " + " AND ".join(
+                "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
+            )
 
             if self._config.dbstrict:
                 q_pg_stat_database["query"] += " AND datname in('{}')".format(self._config.dbname)
+                q_pg_stat_database_conflicts["query"] += " AND datname in('{}')".format(self._config.dbname)
 
-            queries.extend([q_pg_stat_database])
+            queries.extend([q_pg_stat_database, q_pg_stat_database_conflicts])
 
         if self.version >= V10:
             queries.append(QUERY_PG_STAT_WAL_RECEIVER)

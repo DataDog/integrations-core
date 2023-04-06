@@ -25,6 +25,7 @@ from .common import (
     check_activity_metrics,
     check_bgw_metrics,
     check_common_metrics,
+    check_conflict_metrics,
     check_connection_metrics,
     check_db_count,
     check_replication_slots,
@@ -48,6 +49,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check_common_metrics(aggregator, expected_tags=expected_tags)
     check_bgw_metrics(aggregator, expected_tags)
     check_connection_metrics(aggregator, expected_tags=expected_tags)
+    check_conflict_metrics(aggregator, expected_tags=expected_tags)
     check_db_count(aggregator, expected_tags=expected_tags)
     check_slru_metrics(aggregator, expected_tags=expected_tags)
     check_stat_replication(aggregator, expected_tags=expected_tags)
