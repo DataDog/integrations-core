@@ -68,6 +68,8 @@ exclude = [
 ]
 target-version = "py38"
 line-length = 120
+# Rules were ported over from the legacy flake8 settings for parity
+# All the rules can be found here: https://beta.ruff.rs/docs/rules/
 select = [
   "B",
   "C",
