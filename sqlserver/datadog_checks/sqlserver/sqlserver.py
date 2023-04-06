@@ -244,13 +244,12 @@ class SQLServer(AgentCheck):
                         r_type, name
                     )
                 )
-            # finally, emit a `database_instance` resource for this instance
-            self.tags.append(
-                "dd.internal.resource:database_instance:{}".format(
-                    resolved_hostname,
-                )
+        # finally, emit a `database_instance` resource for this instance
+        self.tags.append(
+            "dd.internal.resource:database_instance:{}".format(
+                resolved_hostname,
             )
-            # TODO: also set database_instance tag to resolved_hostname? (check with Dusan)
+        )
 
     @property
     def resolved_hostname(self):
