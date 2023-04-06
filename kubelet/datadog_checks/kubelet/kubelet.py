@@ -311,8 +311,8 @@ class KubeletCheck(
                     pod_tags_by_pvc['{}/{}'.format(kube_ns, pvc_name)].update(tags)
 
                 # get standalone PVC associated to potential EVC
-                # when a generic ephemeral volume is created, an associated pvc named <pod_name>-<volume_name> is created
-                # (see https://docs.openshift.com/container-platform/4.11/storage/generic-ephemeral-vols.html#generic-ephemeral-vols-pvc-naming_generic-ephemeral-volumes).
+                # when a generic ephemeral volume is created, an associated pvc named <pod_name>-<volume_name>
+                # is created (https://docs.openshift.com/container-platform/4.11/storage/generic-ephemeral-vols.html).
                 evc = v.get('ephemeral', {}).get('volumeClaimTemplate')
                 volume_name = v.get('name')
                 if evc and volume_name:

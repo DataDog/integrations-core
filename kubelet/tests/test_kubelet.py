@@ -1259,6 +1259,12 @@ def test_create_pod_tags_by_pvc(monkeypatch, tagger):
     pod_tags_by_pvc = check._create_pod_tags_by_pvc(pod_list)
 
     expected_result = {
+        'default/web-2-ephemeralvolume': {
+            'kube_namespace:default',
+            'kube_service:nginx',
+            'kube_stateful_set:web',
+            'namespace:default',
+        },
         'default/www-web-2': {
             'kube_namespace:default',
             'kube_service:nginx',
