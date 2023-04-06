@@ -25,6 +25,7 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
             cur.execute("select * from pg_create_physical_replication_slot('phys_2', true);")
             cur.execute("select * from pg_create_physical_replication_slot('phys_3', true, true);")
 
+    # Wait for replication slot to be visible and up to date in pg_replication_slots
     time.sleep(0.5)
     check.check(pg_instance)
 
