@@ -147,11 +147,12 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                     gitlab_status = value[0].get("status")
 
                     if gitlab_status == "ok":
-                        self.service_check(f"readiness.{check}", OpenMetricsBaseCheckV2.OK, self._tags)
+                        dd_status = OpenMetricsBaseCheckV2.OK
                     elif gitlab_status is None:
-                        self.service_check(f"readiness.{check}", OpenMetricsBaseCheckV2.UNKNOWN, self._tags)
+                        dd_status = OpenMetricsBaseCheckV2.UNKNOWN
                     else:
-                        self.service_check(f"readiness.{check}", OpenMetricsBaseCheckV2.CRITICAL, self._tags)
+                        dd_status = OpenMetricsBaseCheckV2.CRITICAL
+                    self.service_check(f"readiness.{check}", dd_status, self._tags)
 
                     service_checks_sent.add(key)
                 else:
