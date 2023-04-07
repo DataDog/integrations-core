@@ -67,8 +67,10 @@ EXPECTED_METRICS_COMMON = [
     'kubernetes.network.tx_bytes',
     'kubernetes.ephemeral_storage.usage',
     'kubernetes.runtime.cpu.usage',
+    'kubernetes.runtime.memory.usage',
     'kubernetes.runtime.memory.rss',
     'kubernetes.kubelet.cpu.usage',
+    'kubernetes.kubelet.memory.usage',
     'kubernetes.kubelet.memory.rss',
 ]
 
@@ -148,6 +150,7 @@ EXPECTED_METRICS_PROMETHEUS_1_21 = [
     'kubernetes.go_threads',
     'kubernetes.kubelet.container.log_filesystem.used_bytes',
     'kubernetes.kubelet.cpu.usage',
+    'kubernetes.kubelet.memory.usage',
     'kubernetes.kubelet.memory.rss',
     'kubernetes.kubelet.network_plugin.latency.count',
     'kubernetes.kubelet.network_plugin.latency.sum',
@@ -173,6 +176,7 @@ EXPECTED_METRICS_PROMETHEUS_1_21 = [
     'kubernetes.rest.client.latency.sum',
     'kubernetes.rest.client.requests',
     'kubernetes.runtime.cpu.usage',
+    'kubernetes.runtime.memory.usage',
     'kubernetes.runtime.memory.rss',
 ]
 
@@ -847,8 +851,10 @@ def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
     aggregator.assert_metric('kubernetes.memory.capacity')
     aggregator.assert_metric('kubernetes.cpu.capacity')
     aggregator.assert_metric('kubernetes.runtime.cpu.usage')
+    aggregator.assert_metric('kubernetes.runtime.memory.usage')
     aggregator.assert_metric('kubernetes.runtime.memory.rss')
     aggregator.assert_metric('kubernetes.kubelet.cpu.usage')
+    aggregator.assert_metric('kubernetes.kubelet.memory.usage')
     aggregator.assert_metric('kubernetes.kubelet.memory.rss')
     aggregator.assert_metric('kubernetes.apiserver.certificate.expiration.count')
     aggregator.assert_metric('kubernetes.apiserver.certificate.expiration.sum')
