@@ -45,7 +45,10 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
     check_common_metrics(aggregator, expected_tags=expected_tags)
     check_bgw_metrics(aggregator, expected_tags)
     check_connection_metrics(aggregator, expected_tags=expected_tags)
@@ -93,7 +96,11 @@ def _get_conn(user=USER, db=DB_NAME, application_name='test'):
 def test_session_number(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
-    expected_tags = pg_instance['tags'] + ['db:postgres', 'port:{}'.format(PORT)]
+    expected_tags = pg_instance['tags'] + [
+        'db:postgres',
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
     conn = _get_conn()
     with conn.cursor() as cur:
         cur.execute("select sessions from pg_stat_database where datname='postgres'")
@@ -125,7 +132,11 @@ def test_session_idle_and_killed(aggregator, integration_check, pg_instance):
 
     check = integration_check(pg_instance)
     check.check(pg_instance)
-    expected_tags = pg_instance['tags'] + ['db:{}'.format(DB_NAME), 'port:{}'.format(PORT)]
+    expected_tags = pg_instance['tags'] + [
+        'db:{}'.format(DB_NAME),
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
 
     aggregator.assert_metric('postgresql.sessions.idle_in_transaction_time', value=0, count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.sessions.killed', value=0, count=1, tags=expected_tags)
@@ -182,7 +193,10 @@ def test_unsupported_replication(aggregator, integration_check, pg_instance):
     # Verify our mocking was called
     assert called == [True]
 
-    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
     check_bgw_metrics(aggregator, expected_tags)
 
     check_common_metrics(aggregator, expected_tags=expected_tags)
@@ -194,6 +208,7 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     expected_tags = pg_instance['tags'] + [
         'port:{}'.format(PORT),
         'db:{}'.format(DB_NAME),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
     check.check(pg_instance)
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags)
@@ -222,6 +237,7 @@ def test_schema_metrics(aggregator, integration_check, pg_instance):
         'db:{}'.format(DB_NAME),
         'port:{}'.format(PORT),
         'schema:public',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
     aggregator.assert_metric('postgresql.table.count', value=1, count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.db.count', value=106, count=1)
@@ -231,7 +247,10 @@ def test_connections_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
     for name in CONNECTION_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
     expected_tags += ['db:datadog_test']
@@ -261,6 +280,7 @@ def test_activity_metrics(aggregator, integration_check, pg_instance):
         'db:datadog_test',
         'app:datadog-agent',
         'user:datadog',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
     check_activity_metrics(aggregator, expected_tags)
 
@@ -271,7 +291,12 @@ def test_activity_metrics_no_application_aggregation(aggregator, integration_che
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'user:datadog']
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'db:datadog_test',
+        'user:datadog',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
     check_activity_metrics(aggregator, expected_tags)
 
 
@@ -281,7 +306,10 @@ def test_activity_metrics_no_aggregations(aggregator, integration_check, pg_inst
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT)]
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
     check_activity_metrics(aggregator, expected_tags)
 
 
@@ -296,6 +324,7 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
         'db:datadog_test',
         'app:datadog-agent',
         'user:datadog',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
     test_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'app:test', 'user:datadog']
     # No transaction in progress, we have 0
@@ -428,7 +457,11 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
     pg_instance['tag_replication_role'] = True
     check = integration_check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test']
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'db:datadog_test',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
 
     for _ in range(3):
         check.check(pg_instance)
@@ -464,7 +497,11 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         else:
             assert resolve_db_host.called == dbm_enabled, 'Expected resolve_db_host.called to be ' + str(dbm_enabled)
 
-    expected_tags_no_db = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
+    expected_tags_no_db = pg_instance['tags'] + [
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
     expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
     expected_activity_tags = expected_tags_with_db + ['app:datadog-agent', 'user:datadog']
     c_metrics = COMMON_METRICS
