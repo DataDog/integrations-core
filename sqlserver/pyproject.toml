@@ -6,6 +6,7 @@ requires = [
 ]
 build-backend = "hatchling.build"
 
+
 [project]
 name = "datadog-sqlserver"
 description = "The SQL Server check"
