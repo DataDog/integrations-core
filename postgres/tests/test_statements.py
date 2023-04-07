@@ -178,7 +178,6 @@ def test_statement_metrics(
         if not _should_catch_query(dbname):
             assert len(matching_rows) == 0
             continue
-
         # metrics
         assert len(matching_rows) == 1
         row = matching_rows[0]
@@ -224,7 +223,7 @@ def test_statement_metrics(
         {
             'azure': {
                 'deployment_type': 'flexible_server',
-                'database_name': 'test-server',
+                'name': 'test-server',
             },
         },
         {
@@ -233,7 +232,7 @@ def test_statement_metrics(
             },
             'azure': {
                 'deployment_type': 'flexible_server',
-                'database_name': 'test-server',
+                'name': 'test-server',
             },
         },
         {
