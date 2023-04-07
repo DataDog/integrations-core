@@ -1,5 +1,13 @@
 # CHANGELOG - ddev
 
+## 1.6.0 / 2023-03-31
+
+* [Added] Add GitHub Actions workflows. See [#14187](https://github.com/DataDog/integrations-core/pull/14187).
+
+## 1.5.0 / 2023-03-23
+
+* [Added] Bump datadog-checks-dev to 18.x. See [#14225](https://github.com/DataDog/integrations-core/pull/14225).
+
 ## 1.4.3 / 2023-03-01
 
 * [Fixed] Bump datadog_checks_dev dependency version. See [#14064](https://github.com/DataDog/integrations-core/pull/14064).

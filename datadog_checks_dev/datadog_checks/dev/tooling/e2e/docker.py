@@ -357,8 +357,6 @@ class DockerInterface(object):
         command = [
             'docker',
             'run',
-            # Remove it when stopped
-            '--rm',
             # Keep it up
             '-d',
             # Ensure consistent naming
@@ -407,6 +405,7 @@ class DockerInterface(object):
     def stop_agent(self):
         # Only error for exit code if config actually exists
         run_command(['docker', 'stop', '-t', '0', self.container_name], capture=True, check=self.exists())
+        run_command(['docker', 'rm', self.container_name], capture=True, check=self.exists())
 
     def restart_agent(self):
         return run_command(['docker', 'restart', self.container_name], capture=True)

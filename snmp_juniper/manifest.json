@@ -12,13 +12,12 @@
     "title": "Juniper Networks",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Monitoring",
-      "Category::Notification",
       "Category::Network",
-      "Category::SNMP"
+      "Category::Notification",
+      "Category::SNMP",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

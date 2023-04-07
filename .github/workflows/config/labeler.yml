@@ -124,6 +124,8 @@ integration/datadog_checks_tests_helper:
 - datadog_checks_tests_helper/**/*
 integration/datadog_cluster_agent:
 - datadog_cluster_agent/**/*
+integration/datadog_operator:
+- datadog_operator/**/*
 integration/directory:
 - directory/**/*
 integration/disk:

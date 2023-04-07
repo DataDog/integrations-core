@@ -1545,19 +1545,23 @@
   "template_variables": [
     {
       "name": "scope",
-      "default": "*"
+      "default": "*",
+      "prefix": "scope"
     },
     {
       "name": "table",
-      "default": "*"
+      "default": "*",
+      "prefix": "table"
     },
     {
       "name": "db",
-      "default": "*"
+      "default": "*",
+      "prefix": "db"
     },
     {
       "name": "host",
-      "default": "*"
+      "default": "*",
+      "prefix": "host"
     }
   ],
   "layout_type": "ordered",

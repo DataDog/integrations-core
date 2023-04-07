@@ -12,11 +12,12 @@
     "title": "Istio",
     "media": [],
     "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Network",
+      "Category::Tracing",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
-      "Category::Log Collection"
+      "Supported OS::macOS"
     ]
   },
   "author": {
@@ -46,7 +47,10 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "istiod"
+      ]
     },
     "dashboards": {
       "Istio base dashboard": "assets/dashboards/istio_overview.json",

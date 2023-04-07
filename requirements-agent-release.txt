@@ -36,7 +36,7 @@ datadog-couch==5.2.0
 datadog-couchbase==2.2.0
 datadog-crio==2.3.0
 datadog-datadog-cluster-agent==2.5.0
-datadog-directory==1.14.1
+datadog-directory==1.14.2
 datadog-disk==4.9.0
 datadog-dns-check==2.3.0
 datadog-dotnetclr==1.13.0; sys_platform == 'win32'
@@ -125,7 +125,7 @@ datadog-prometheus==3.4.0
 datadog-proxysql==4.0.0
 datadog-pulsar==1.2.0
 datadog-rabbitmq==4.0.1
-datadog-redisdb==4.5.3
+datadog-redisdb==4.6.0
 datadog-rethinkdb==2.3.1
 datadog-riak==3.2.0
 datadog-riakcs==2.9.0

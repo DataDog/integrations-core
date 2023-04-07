@@ -1,5 +1,8 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 snmp.devices_monitored,gauge,,,,Devices monitored count. Make 'sum by {X}' queries to count all the Devices with the tag X.,0,snmp,,
+snmp.device.reachable,gauge,,,,"Tagged by 'snmp_device', the value is 1 is the device is reachable, 0 otherwise. Reachability is determined by performing a GETNEXT on the OID '1.0'.",0,snmp,,
+snmp.device.unreachable,gauge,,,,"Tagged by 'snmp_device', the value is 1 is the device is unreachable, 0 otherwise. Reachability is determined by performing a GETNEXT on the OID '1.0'.",0,snmp,,
+snmp.interface.status,gauge,,,,"For each interface of each monitored network device, this metric reports always 1 with the admin_status and oper_status as tags, as long as a 'combined' status that can be used for monitors.",0,snmp,,
 snmp.sysUpTimeInstance,gauge,,,,The time (in hundredths of a second) since the network management portion of the system was last re-initialized.,0,snmp,,
 snmp.adapterCollisions,count,,,,[Dell iDRAC] Total number of single collisions.,0,snmp,,
 snmp.adapterRxBytes,count,,byte,,[Dell iDRAC] Total number of bytes received.,0,snmp,,
@@ -136,6 +139,7 @@ snmp.ifInDiscards,count,,packet,,[Generic router] [Cisco c3850]  [Cisco Nexus] [
 snmp.ifInDiscards.rate,gauge,,packet,second,[Generic router] [Cisco c3850]  [Cisco Nexus] [Cisco ASA 5525] The number of inbound packets chosen to be discarded even though no errors had been detected to prevent them being deliverable to a higher-layer protocol.,0,snmp,,
 snmp.ifInErrors,count,,packet,,[Generic router] [Cisco c3850] [Cisco Nexus][Cisco ASA 5525] [F5 BIG-IP] The number of inbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.,0,snmp,,
 snmp.ifInErrors.rate,gauge,,packet,second,[Generic router] [Cisco c3850] [Cisco Nexus][Cisco ASA 5525] [F5 BIG-IP] The number of inbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.,0,snmp,,
+snmp.ifNumber,gauge,,,,[Generic router] The number of network interfaces (regardless of their current state) present on this system.,0,snmp,,
 snmp.ifOperStatus,gauge,,,,[Generic router] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The current operational state of the interface.,0,snmp,,
 snmp.ifOutDiscards,count,,packet,,[Generic router] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The number of outbound packets chosen to be discarded even though no errors had been detected to prevent them being transmitted.,0,snmp,,
 snmp.ifOutDiscards.rate,gauge,,packet,second,[Generic router] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The number of outbound packets chosen to be discarded even though no errors had been detected to prevent them being transmitted.,0,snmp,,

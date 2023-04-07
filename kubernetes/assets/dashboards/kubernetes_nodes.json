@@ -174,9 +174,6 @@
                 "title": "Total Kubernetes CPU requests per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -213,9 +210,6 @@
                 "title": "Total Kubernetes memory requests per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -341,9 +335,6 @@
                 "title": "Network in per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -380,9 +371,6 @@
                 "title": "Network out per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -419,9 +407,6 @@
                 "title": "Disk reads per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -458,9 +443,6 @@
                 "title": "Disk writes per node",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                },
                 "show_legend": false,
                 "legend_size": "0"
             },
@@ -499,10 +481,7 @@
                 "query": "source:kubernetes $host $cluster",
                 "title": "",
                 "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                }
+                "title_align": "left"
             },
             "layout": {
                 "x": 0,
