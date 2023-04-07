@@ -136,10 +136,9 @@ class MySQLStatementMetrics(DBMAsyncJob):
         rows = self._collect_per_statement_metrics()
         if not rows:
             return
-
-        for event in self._rows_to_fqt_events(rows):
+        tags = [t for t in self._tags if not t.startswith('dd.internal')]
+        for event in self._rows_to_fqt_events(rows, tags):
             self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
-
         payload = {
             'host': self._check.resolved_hostname,
             'timestamp': time.time() * 1000,
@@ -148,7 +147,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             "ddagenthostname": self._check.agent_hostname,
             'ddagentversion': datadog_agent.get_version(),
             'min_collection_interval': self._metric_collection_interval,
-            'tags': self._tags,
+            'tags': tags,
             'cloud_metadata': self._config.cloud_metadata,
             'mysql_rows': rows,
         }
@@ -156,7 +155,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
         self._check.count(
             "dd.mysql.collect_per_statement_metrics.rows",
             len(rows),
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
 
@@ -223,13 +222,13 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
         return normalized_rows
 
-    def _rows_to_fqt_events(self, rows):
+    def _rows_to_fqt_events(self, rows, tags):
         for row in rows:
             query_cache_key = _row_key(row)
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
-            row_tags = self._tags + ["schema:{}".format(row['schema_name'])] if row['schema_name'] else self._tags
+            row_tags = tags + ["schema:{}".format(row['schema_name'])] if row['schema_name'] else tags
             yield {
                 "timestamp": time.time() * 1000,
                 "host": self._check.resolved_hostname,

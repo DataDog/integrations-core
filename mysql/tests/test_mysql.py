@@ -137,14 +137,18 @@ def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
             continue
 
         if mname == 'mysql.performance.query_run_time.avg':
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], count=1)
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:mysql'], count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:testdb'], count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:mysql'], count=1)
         elif mname == 'mysql.info.schema.size':
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], count=1)
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:information_schema'], count=1)
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:performance_schema'], count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:testdb'], count=1)
+            aggregator.assert_metric(
+                mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:information_schema'], count=1
+            )
+            aggregator.assert_metric(
+                mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:performance_schema'], count=1
+            )
         else:
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS, at_least=0)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE, at_least=0)
 
     # TODO: test this if it is implemented
     # Assert service metadata
@@ -238,13 +242,17 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         if mname == 'mysql.performance.cpu_time' and Platform.is_windows():
             continue
         if mname == 'mysql.performance.query_run_time.avg':
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], at_least=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:testdb'], at_least=1)
         elif mname == 'mysql.info.schema.size':
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], count=1)
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:information_schema'], count=1)
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:performance_schema'], count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:testdb'], count=1)
+            aggregator.assert_metric(
+                mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:information_schema'], count=1
+            )
+            aggregator.assert_metric(
+                mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:performance_schema'], count=1
+            )
         else:
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS, at_least=0)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE, at_least=0)
 
     # test custom query metrics
     aggregator.assert_metric('alice.age', value=25)
@@ -294,7 +302,11 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         else:
             assert resolve_db_host.called == dbm_enabled, 'Expected resolve_db_host.called to be ' + str(dbm_enabled)
 
-    expected_tags = ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
+    expected_tags = [
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(expected_hostname),
+    ]
     aggregator.assert_service_check(
         'mysql.can_connect', status=MySql.OK, tags=expected_tags, count=1, hostname=expected_hostname
     )
@@ -323,7 +335,7 @@ def _test_optional_metrics(aggregator, optional_metrics):
     before = len(aggregator.not_asserted())
 
     for mname in optional_metrics:
-        aggregator.assert_metric(mname, tags=tags.METRIC_TAGS, at_least=0)
+        aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE, at_least=0)
 
     # Compute match rate
     after = len(aggregator.not_asserted())
@@ -349,8 +361,8 @@ def test_custom_queries(aggregator, instance_custom_queries, dd_run_check):
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_custom_queries])
     dd_run_check(mysql_check)
 
-    aggregator.assert_metric('alice.age', value=25, tags=tags.METRIC_TAGS)
-    aggregator.assert_metric('bob.age', value=20, tags=tags.METRIC_TAGS)
+    aggregator.assert_metric('alice.age', value=25, tags=tags.METRIC_TAGS_WITH_RESOURCE)
+    aggregator.assert_metric('bob.age', value=20, tags=tags.METRIC_TAGS_WITH_RESOURCE)
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -384,8 +396,8 @@ def test_only_custom_queries(aggregator, dd_run_check, instance_custom_queries):
     for m in internal_metrics:
         aggregator.assert_metric(m, at_least=0)
 
-    aggregator.assert_metric('alice.age', value=25, tags=tags.METRIC_TAGS)
-    aggregator.assert_metric('bob.age', value=20, tags=tags.METRIC_TAGS)
+    aggregator.assert_metric('alice.age', value=25, tags=tags.METRIC_TAGS_WITH_RESOURCE)
+    aggregator.assert_metric('bob.age', value=20, tags=tags.METRIC_TAGS_WITH_RESOURCE)
     aggregator.assert_all_metrics_covered()
 
 
@@ -395,8 +407,8 @@ def test_additional_status(aggregator, dd_run_check, instance_additional_status)
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_additional_status])
     dd_run_check(mysql_check)
 
-    aggregator.assert_metric('mysql.innodb.rows_read', metric_type=1, tags=tags.METRIC_TAGS)
-    aggregator.assert_metric('mysql.innodb.row_lock_time', metric_type=1, tags=tags.METRIC_TAGS)
+    aggregator.assert_metric('mysql.innodb.rows_read', metric_type=1, tags=tags.METRIC_TAGS_WITH_RESOURCE)
+    aggregator.assert_metric('mysql.innodb.row_lock_time', metric_type=1, tags=tags.METRIC_TAGS_WITH_RESOURCE)
 
 
 @pytest.mark.integration
@@ -405,8 +417,10 @@ def test_additional_variable(aggregator, dd_run_check, instance_additional_varia
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_additional_variable])
     dd_run_check(mysql_check)
 
-    aggregator.assert_metric('mysql.performance.long_query_time', metric_type=0, tags=tags.METRIC_TAGS)
-    aggregator.assert_metric('mysql.performance.innodb_flush_log_at_trx_commit', metric_type=0, tags=tags.METRIC_TAGS)
+    aggregator.assert_metric('mysql.performance.long_query_time', metric_type=0, tags=tags.METRIC_TAGS_WITH_RESOURCE)
+    aggregator.assert_metric(
+        'mysql.performance.innodb_flush_log_at_trx_commit', metric_type=0, tags=tags.METRIC_TAGS_WITH_RESOURCE
+    )
 
 
 @pytest.mark.integration
@@ -415,9 +429,11 @@ def test_additional_variable_unknown(aggregator, dd_run_check, instance_invalid_
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_invalid_var])
     dd_run_check(mysql_check)
 
-    aggregator.assert_metric('mysql.performance.longer_query_time', metric_type=0, tags=tags.METRIC_TAGS, count=0)
     aggregator.assert_metric(
-        'mysql.performance.innodb_flush_log_at_trx_commit', metric_type=0, tags=tags.METRIC_TAGS, count=1
+        'mysql.performance.longer_query_time', metric_type=0, tags=tags.METRIC_TAGS_WITH_RESOURCE, count=0
+    )
+    aggregator.assert_metric(
+        'mysql.performance.innodb_flush_log_at_trx_commit', metric_type=0, tags=tags.METRIC_TAGS_WITH_RESOURCE, count=1
     )
 
 
@@ -429,8 +445,12 @@ def test_additional_status_already_queried(aggregator, dd_run_check, instance_st
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_status_already_queried])
     dd_run_check(mysql_check)
 
-    aggregator.assert_metric('mysql.performance.open_files_test', metric_type=0, tags=tags.METRIC_TAGS, count=0)
-    aggregator.assert_metric('mysql.performance.open_files', metric_type=0, tags=tags.METRIC_TAGS, count=1)
+    aggregator.assert_metric(
+        'mysql.performance.open_files_test', metric_type=0, tags=tags.METRIC_TAGS_WITH_RESOURCE, count=0
+    )
+    aggregator.assert_metric(
+        'mysql.performance.open_files', metric_type=0, tags=tags.METRIC_TAGS_WITH_RESOURCE, count=1
+    )
 
     assert (
         "Skipping status variable Open_files for metric mysql.performance.open_files_test as "
@@ -446,9 +466,90 @@ def test_additional_var_already_queried(aggregator, dd_run_check, instance_var_a
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_var_already_queried])
     dd_run_check(mysql_check)
 
-    aggregator.assert_metric('mysql.myisam.key_buffer_size', metric_type=0, tags=tags.METRIC_TAGS, count=1)
+    aggregator.assert_metric(
+        'mysql.myisam.key_buffer_size', metric_type=0, tags=tags.METRIC_TAGS_WITH_RESOURCE, count=1
+    )
 
     assert (
         "Skipping variable Key_buffer_size for metric mysql.myisam.key_buffer_size as "
         "it is already collected by mysql.myisam.key_buffer_size" in caplog.text
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "cloud_metadata,metric_names",
+    [
+        (
+            {},
+            [],
+        ),
+        (
+            {
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'name': 'my-instance',
+                },
+            },
+            ["dd.internal.resource:azure_mysql_flexible_server:my-instance"],
+        ),
+        (
+            {
+                'azure': {
+                    'deployment_type': 'virtual_machine',
+                    'name': 'my-instance',
+                },
+            },
+            ["dd.internal.resource:azure_virtual_machine_instance:my-instance"],
+        ),
+        (
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+            },
+            [
+                "dd.internal.resource:aws_rds_instance:foo.aws.com",
+            ],
+        ),
+        (
+            {
+                'gcp': {
+                    'project_id': 'foo-project',
+                    'instance_id': 'bar',
+                    'extra_field': 'included',
+                },
+            },
+            [
+                "dd.internal.resource:gcp_sql_database_instance:foo-project:bar",
+            ],
+        ),
+        (
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+                'azure': {
+                    'deployment_type': 'single_server',
+                    'name': 'my-instance',
+                },
+            },
+            [
+                "dd.internal.resource:aws_rds_instance:foo.aws.com",
+                "dd.internal.resource:azure_mysql_server:my-instance",
+            ],
+        ),
+    ],
+)
+def test_set_resources(aggregator, dd_run_check, instance_basic, cloud_metadata, metric_names):
+    if cloud_metadata:
+        for k, v in cloud_metadata.items():
+            instance_basic[k] = v
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
+    dd_run_check(mysql_check)
+    for m in metric_names:
+        aggregator.assert_metric_has_tag("mysql.net.connections", m)
+    aggregator.assert_metric_has_tag(
+        "mysql.net.connections", "dd.internal.resource:database_instance:{}".format(mysql_check.resolved_hostname)
     )
