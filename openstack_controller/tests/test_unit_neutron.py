@@ -29,7 +29,7 @@ def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch
                 **{
                     'token': {
                         **d['token'],
-                        **{'catalog': d['token'].get('catalog', [])[:0] + d['token'].get('catalog', [])[1:]},
+                        **{'catalog': d['token'].get('catalog', [])[3:]},
                     }
                 },
             }
@@ -45,7 +45,7 @@ def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch
         status=AgentCheck.UNKNOWN,
         tags=[
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:41ee3922506448f1a869f60f115c55c0',
+            'project_id:18a64e25fb53453ebd10a45fd974b816',
             'project_name:demo',
         ],
     )
@@ -54,7 +54,7 @@ def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch
         status=AgentCheck.UNKNOWN,
         tags=[
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:223fd91579d448feb399f68655515efb',
+            'project_id:01b21103a92d4997ab09e46ff8346bd5',
             'project_name:admin',
         ],
     )

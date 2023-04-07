@@ -93,6 +93,14 @@ def instance_nova_microversion_latest():
 
 
 @pytest.fixture
+def instance_ironic_nova_microversion_latest():
+    instance = deepcopy(REST_CONFIG)
+    instance.update({'nova_microversion': 'latest'})
+    instance.update({'ironic_microversion': 'latest'})
+    return instance
+
+
+@pytest.fixture
 def check(instance):
     return OpenStackControllerCheck(CHECK_NAME, {}, [instance])
 

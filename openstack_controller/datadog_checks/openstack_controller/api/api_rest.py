@@ -147,9 +147,14 @@ class ApiRest(Api):
     def get_baremetal_conductors(self, project_id):
         self.log.debug("getting baremetal conductors")
         component = self._get_component(project_id, ComponentType.BAREMETAL)
-        if component:
+        if component and component.collect_conductor_metrics():
             return component.get_conductors()
-        return None
+        else:
+            self.log.info(
+                "Ironic conductors metrics are not available. "
+                "Please specify an `ironic_microversion` greater than 1.49 to recieve these metrics"
+            )
+            return []
 
     def _post_auth_tokens(self):
         self.log.debug("getting `X-Subject-Token`")

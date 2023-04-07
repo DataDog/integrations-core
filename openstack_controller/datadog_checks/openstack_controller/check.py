@@ -43,9 +43,19 @@ def _create_baremetal_nodes_metric_tags(node_name, node_uuid, maintenance, condu
     ]
     if node_name:
         tags.append(f'node_name:{node_name}')
-    elif node_uuid:
+    if node_uuid:
         tags.append(f'node_uuid:{node_uuid}')
     if conductor_group:
+        tags.append(f'conductor_group:{conductor_group}')
+    return tags
+
+
+def _create_baremetal_conductors_metric_tags(hostname, conductor_group, alive):
+    tags = [
+        f'conductor_hostname:{hostname}',
+        f'is_alive:{alive}',
+    ]
+    if conductor_group != "":
         tags.append(f'conductor_group:{conductor_group}')
     return tags
 
@@ -232,6 +242,7 @@ class OpenStackControllerCheck(AgentCheck):
         try:
             self._report_baremetal_response_time(api, project_id, project_tags)
             self._report_baremetal_nodes(api, project_id, project_tags)
+            self._report_baremetal_conductors(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting baremetal metrics: %s", e)
@@ -251,15 +262,26 @@ class OpenStackControllerCheck(AgentCheck):
     def _report_baremetal_nodes(self, api, project_id, project_tags):
         nodes_data = api.get_baremetal_nodes(project_id)
         for node_data in nodes_data:
-            baremetal_tags = _create_baremetal_nodes_metric_tags(
+            node_tags = _create_baremetal_nodes_metric_tags(
                 node_data.get('node_name'),
                 node_data.get('node_uuid'),
                 node_data.get('maintenance'),
                 node_data.get('conductor_group'),
                 node_data.get('power_state'),
             )
-            all_tags = baremetal_tags + project_tags
+            all_tags = node_tags + project_tags
             self.gauge('openstack.ironic.nodes.count', value=1, tags=all_tags)
+
+    def _report_baremetal_conductors(self, api, project_id, project_tags):
+        conductors_data = api.get_baremetal_conductors(project_id)
+        for conductor_data in conductors_data:
+            conductor_tags = _create_baremetal_conductors_metric_tags(
+                conductor_data.get('hostname'),
+                conductor_data.get('conductor_group'),
+                conductor_data.get('alive'),
+            )
+            all_tags = conductor_tags + project_tags
+            self.gauge('openstack.ironic.conductors.count', value=1, tags=all_tags)
 
     def _report_load_balancer_metrics(self, api, project_id, project_tags):
         try:

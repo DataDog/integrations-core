@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
+
 class BaremetalRest:
     def __init__(self, log, http, endpoint, microversion):
         self.log = log
@@ -16,14 +18,35 @@ class BaremetalRest:
         self.log.debug("response: %s", response.json())
         return response.elapsed.total_seconds() * 1000
 
+    def use_legacy_nodes_resource(self):
+        if not self.microversion:
+            return True
+        legacy_microversion = False
+        try:
+            legacy_microversion = float(self.microversion) < 1.43
+        except Exception:
+            pass
+
+        return legacy_microversion or self.microversion.lower() != 'latest'
+
+    def collect_conductor_metrics(self):
+        if not self.microversion:
+            return False
+        legacy_microversion = False
+        try:
+            legacy_microversion = float(self.microversion) < 1.49
+        except Exception:
+            pass
+
+        return not legacy_microversion
+
     def get_nodes(self):
-        use_legacy_resource = not self.microversion or float(self.microversion) < 1.43
-        resource = 'nodes/detail' if use_legacy_resource else '/nodes?detail=True'
+        resource = 'nodes/detail' if self.use_legacy_nodes_resource() else '/nodes?detail=True'
         response = self.http.get('{}/{}'.format(self.endpoint, resource))
         response.raise_for_status()
         self.log.debug("Nodes response: %s", response.json())
         node_metrics = []
-        for node in response.json()['nodes']:
+        for node in response.json().get('nodes'):
             node_metrics.append(
                 {
                     'node_name': node.get('name'),
@@ -39,11 +62,13 @@ class BaremetalRest:
         response = self.http.get('{}/conductors'.format(self.endpoint))
         response.raise_for_status()
         self.log.debug("Conductors response: %s", response.json())
-        conductor_metrics = {}
-        for conductor in response.json()['conductors']:
-            conductor_metrics[conductor['hostname']] = {
-                'hostname': conductor['hostname'],
-                'conductor_group': conductor['conductor_group'],
-                'alive': conductor['alive'],
-            }
+        conductor_metrics = []
+        for conductor in response.json().get('conductors'):
+            conductor_metrics.append(
+                {
+                    'hostname': conductor.get('hostname'),
+                    'conductor_group': conductor.get('conductor_group'),
+                    'alive': conductor.get('alive'),
+                }
+            )
         return conductor_metrics
