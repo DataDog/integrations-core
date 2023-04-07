@@ -380,7 +380,7 @@ class LinuxNetwork(Network):
                     metric, value = cell.split('=')
                     self.monotonic_count('system.net.conntrack.{}'.format(metric), int(value), tags=tags + cpu_tag)
         except SubprocessOutputEmptyError:
-            self.log.debug("Couldn't use %s to get conntrack stats", conntrack_path)
+            self.log.error("Couldn't use %s to get conntrack stats", ' '.join(cmd))
 
     def _parse_short_state_lines(self, lines, metrics, tcp_states, ip_version):
         for line in lines:
