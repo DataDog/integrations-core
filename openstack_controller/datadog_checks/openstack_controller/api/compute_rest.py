@@ -66,7 +66,11 @@ class ComputeRest:
                     },
                 }
             except Exception as e:
-                self.log.error("Exception: %s", e)
+                self.log.info(
+                    "Could not query the server diagnostics endpoint for server %s, perhaps it is a bare metal machine: %s",
+                    server.get("id", None),
+                    e,
+                )
         return server_metrics
 
     def get_flavors(self):
@@ -107,12 +111,22 @@ class ComputeRest:
             if uptime:
                 load_averages = _load_averages_from_uptime(uptime)
             else:
-                response_uptime = self.http.get('{}/os-hypervisors/{}/uptime'.format(self.endpoint, hypervisor['id']))
-                if 200 <= response_uptime.status_code < 300:
-                    self.log.debug("response uptime: %s", response_uptime.json())
-                    uptime = response_uptime.json().get('hypervisor', {}).get('uptime')
-                    if uptime:
-                        load_averages = _load_averages_from_uptime(uptime)
+                try:
+                    response_uptime = self.http.get(
+                        '{}/os-hypervisors/{}/uptime'.format(self.endpoint, hypervisor['id'])
+                    )
+                    if 200 <= response_uptime.status_code < 300:
+                        self.log.debug("response uptime: %s", response_uptime.json())
+                        uptime = response_uptime.json().get('hypervisor', {}).get('uptime')
+                        if uptime:
+                            load_averages = _load_averages_from_uptime(uptime)
+                except Exception as e:
+                    self.log.info(
+                        "Could not query the uptime for hypervisor %s, perhaps it is a bare metal: %s",
+                        hypervisor.get('id'),
+                        e,
+                    )
+
             if load_averages and len(load_averages) == 3:
                 for i, avg in enumerate([1, 5, 15]):
                     hypervisors_detail_metrics[str(hypervisor['id'])]['metrics']['load_{}'.format(avg)] = load_averages[

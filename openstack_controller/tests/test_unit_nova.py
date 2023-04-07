@@ -20,7 +20,7 @@ from datadog_checks.openstack_controller.metrics import (
     NOVA_SERVER_METRICS,
 )
 
-from .common import MockHttp
+from .common import DEFAULT_METRICS, MockHttp
 
 pytestmark = [pytest.mark.unit]
 
@@ -433,3 +433,24 @@ def test_latest_hypervisor_metrics(aggregator, dd_run_check, instance_nova_micro
                 'virt_type:QEMU',
             ],
         )
+
+
+def test_nova_metrics_ironic(aggregator, dd_run_check, instance_ironic_nova_microversion_latest, monkeypatch):
+    http = MockHttp("agent-integrations-openstack-ironic")
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance_ironic_nova_microversion_latest])
+    dd_run_check(check)
+    for metric in NOVA_FLAVOR_METRICS:
+        aggregator.assert_metric(f'openstack.nova.flavor.{metric}')
+
+    for metric in NOVA_LATEST_LIMITS_METRICS:
+        aggregator.assert_metric(f'openstack.nova.limits.{metric}')
+
+    for metric in NOVA_LATEST_QUOTA_SETS_METRICS:
+        aggregator.assert_metric(f'openstack.nova.quota_set.{metric}')
+
+    # we can't collect hypervisor metrics for bare metal
+    for metric in NOVA_HYPERVISOR_LOAD_METRICS:
+        aggregator.assert_metric(f'openstack.nova.quota_set.{metric}', count=0)
