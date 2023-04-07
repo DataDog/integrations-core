@@ -48,7 +48,8 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
-        "istiod"
+        "pilot-agent proxy router",
+        "envoy envoy-rev0.json"
       ]
     },
     "dashboards": {
