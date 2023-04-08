@@ -31,6 +31,7 @@ def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch
         'openstack.ironic.api.up',
         status=AgentCheck.UNKNOWN,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
@@ -40,6 +41,7 @@ def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch
         'openstack.ironic.api.up',
         status=AgentCheck.UNKNOWN,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'project_id:6e39099cccde4f809b003d9e0dd09304',
             'project_name:admin',
@@ -58,8 +60,9 @@ def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
         'openstack.ironic.api.up',
         status=AgentCheck.CRITICAL,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:41ee3922506448f1a869f60f115c55c0',
+            'project_id:18a64e25fb53453ebd10a45fd974b816',
             'project_name:demo',
         ],
     )
@@ -67,8 +70,9 @@ def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
         'openstack.ironic.api.up',
         status=AgentCheck.CRITICAL,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:223fd91579d448feb399f68655515efb',
+            'project_id:01b21103a92d4997ab09e46ff8346bd5',
             'project_name:admin',
         ],
     )
@@ -85,8 +89,9 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
         'openstack.ironic.api.up',
         status=AgentCheck.OK,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:41ee3922506448f1a869f60f115c55c0',
+            'project_id:18a64e25fb53453ebd10a45fd974b816',
             'project_name:demo',
         ],
     )
@@ -94,8 +99,9 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
         'openstack.ironic.api.up',
         status=AgentCheck.OK,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:223fd91579d448feb399f68655515efb',
+            'project_id:01b21103a92d4997ab09e46ff8346bd5',
             'project_name:admin',
         ],
     )

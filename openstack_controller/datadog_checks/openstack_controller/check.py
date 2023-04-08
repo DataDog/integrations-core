@@ -56,24 +56,26 @@ class OpenStackControllerCheck(AgentCheck):
         self._report_metrics(api, tags)
 
     def _report_metrics(self, api, tags):
-        self._report_identity_metrics(api, tags)
-        auth_projects = api.get_auth_projects()
-        self.log.debug("auth_projects: %s", auth_projects)
-        for project in auth_projects:
-            self._report_project_metrics(api, project, tags + ['domain_id:{}'.format(self.config.domain_id)])
+        if self._report_identity_metrics(api, tags):
+            auth_projects = api.get_auth_projects()
+            self.log.debug("auth_projects: %s", auth_projects)
+            for project in auth_projects:
+                self._report_project_metrics(api, project, tags + ['domain_id:{}'.format(self.config.domain_id)])
 
     def _report_identity_metrics(self, api, tags):
         try:
-            self._report_identity_response_time(api, tags)
-            self._report_identity_domains(api, tags)
-            self._report_identity_projects(api, tags)
-            self._report_identity_users(api, tags)
+            if self._report_identity_response_time(api, tags):
+                self._report_identity_domains(api, tags)
+                self._report_identity_projects(api, tags)
+                self._report_identity_users(api, tags)
+                return True
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting identity metrics: %s", e)
             self.service_check(KEYSTONE_SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
         except Exception as e:
             self.warning("Exception while reporting identity metrics: %s", e)
+        return False
 
     def _report_identity_response_time(self, api, tags):
         response_time = api.get_identity_response_time()
@@ -81,8 +83,10 @@ class OpenStackControllerCheck(AgentCheck):
         if response_time is not None:
             self.gauge('openstack.keystone.response_time', response_time, tags=tags)
             self.service_check(KEYSTONE_SERVICE_CHECK, AgentCheck.OK, tags=tags)
+            return True
         else:
             self.service_check(KEYSTONE_SERVICE_CHECK, AgentCheck.UNKNOWN, tags=tags)
+            return False
 
     def _report_identity_domains(self, api, tags):
         identity_domains = api.get_identity_domains()

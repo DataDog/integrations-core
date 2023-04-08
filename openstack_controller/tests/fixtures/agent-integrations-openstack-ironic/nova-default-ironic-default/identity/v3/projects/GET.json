@@ -1,0 +1,79 @@
+{
+  "projects": [
+    {
+      "id": "01b21103a92d4997ab09e46ff8346bd5",
+      "name": "admin",
+      "domain_id": "default",
+      "description": "Bootstrap project for initializing the cloud.",
+      "enabled": true,
+      "parent_id": "default",
+      "is_domain": false,
+      "tags": [],
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.32/identity/v3/projects/01b21103a92d4997ab09e46ff8346bd5"
+      }
+    },
+    {
+      "id": "18a64e25fb53453ebd10a45fd974b816",
+      "name": "demo",
+      "domain_id": "default",
+      "description": "",
+      "enabled": true,
+      "parent_id": "default",
+      "is_domain": false,
+      "tags": [],
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.32/identity/v3/projects/18a64e25fb53453ebd10a45fd974b816"
+      }
+    },
+    {
+      "id": "337e7c980c7742838957d2056da77155",
+      "name": "alt_demo",
+      "domain_id": "default",
+      "description": "",
+      "enabled": true,
+      "parent_id": "default",
+      "is_domain": false,
+      "tags": [],
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.32/identity/v3/projects/337e7c980c7742838957d2056da77155"
+      }
+    },
+    {
+      "id": "f18ff84ddcc14e7e87a5054fdff37dae",
+      "name": "invisible_to_admin",
+      "domain_id": "default",
+      "description": "",
+      "enabled": true,
+      "parent_id": "default",
+      "is_domain": false,
+      "tags": [],
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.32/identity/v3/projects/f18ff84ddcc14e7e87a5054fdff37dae"
+      }
+    },
+    {
+      "id": "f1b04ce9de644c6b8f00f79420a80790",
+      "name": "service",
+      "domain_id": "default",
+      "description": "",
+      "enabled": true,
+      "parent_id": "default",
+      "is_domain": false,
+      "tags": [],
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.32/identity/v3/projects/f1b04ce9de644c6b8f00f79420a80790"
+      }
+    }
+  ],
+  "links": {
+    "next": null,
+    "self": "http://10.164.0.32/identity/v3/projects",
+    "previous": null
+  }
+}

@@ -45,7 +45,7 @@ class ApiRest(Api):
 
     def get_identity_domains(self):
         self.log.debug("getting identity domains")
-        self._post_auth_system()
+        self._post_auth_domain(self.config.domain_id)
         component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
         projects = component.get_domains()
         return projects
@@ -164,7 +164,7 @@ class ApiRest(Api):
         self.log.debug("getting `X-Subject-Token`")
         data = (
             '{{"auth": {{"identity": {{"methods": ["password"], '
-            '"password": {{"user": {}}}}}, "scope": "unscoped"}}}}'.format(
+            '"password": {{"user": {}}}}}}}}}'.format(
                 json.dumps(self.config.user),
             )
         )
@@ -174,30 +174,6 @@ class ApiRest(Api):
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         self.http.options['headers']['X-Auth-Token'] = response.headers['X-Subject-Token']
-
-    def _post_auth_system(self):
-        data = (
-            '{{"auth": {{"identity": {{"methods": ["password"], '
-            '"password": {{"user": {}}}}}, '
-            '"scope": {{"system": {{"all": true }}}}}}}}'.format(json.dumps(self.config.user))
-        )
-        url = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
-        self.log.debug("POST %s data: %s", url, data)
-        response = self.http.post('{}/v3/auth/tokens'.format(self.config.keystone_server_url), data=data)
-        response.raise_for_status()
-        self.http.options['headers']['X-Auth-Token'] = response.headers['X-Subject-Token']
-
-    def _get_auth_projects(self):
-        self.log.debug("getting auth/projects")
-        url = '{}/v3/auth/projects'.format(self.config.keystone_server_url)
-        self.log.debug("GET %s", url)
-        response = self.http.get('{}/v3/auth/projects'.format(self.config.keystone_server_url))
-        response.raise_for_status()
-        self.log.debug("response: %s", response.json())
-        json_resp = response.json()
-        for project in json_resp['projects']:
-            self.auth_projects[project['id']] = project['name']
-        self.log.debug("auth_projects: %s", self.auth_projects)
 
     def _post_auth_domain(self, domain_id):
         if domain_id not in self.auth_domain_id_tokens:
@@ -218,6 +194,18 @@ class ApiRest(Api):
                 'catalog': response.json()['token']['catalog'],
             }
         self.http.options['headers']['X-Auth-Token'] = self.auth_domain_id_tokens[domain_id]['auth_token']
+
+    def _get_auth_projects(self):
+        self.log.debug("getting auth/projects")
+        url = '{}/v3/auth/projects'.format(self.config.keystone_server_url)
+        self.log.debug("GET %s", url)
+        response = self.http.get('{}/v3/auth/projects'.format(self.config.keystone_server_url))
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        json_resp = response.json()
+        for project in json_resp['projects']:
+            self.auth_projects[project['id']] = project['name']
+        self.log.debug("auth_projects: %s", self.auth_projects)
 
     def _post_auth_project(self, project_id):
         if project_id not in self.auth_project_tokens:

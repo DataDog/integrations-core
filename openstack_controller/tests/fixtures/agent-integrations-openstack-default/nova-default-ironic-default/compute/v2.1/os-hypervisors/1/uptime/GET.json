@@ -4,6 +4,6 @@
     "hypervisor_hostname": "agent-integrations-openstack-default",
     "state": "up",
     "status": "enabled",
-    "uptime": " 15:36:00 up 20 days,  3:24,  0 users,  load average: 0.18, 0.15, 0.17\n"
+    "uptime": " 09:15:11 up 22 days, 21:03,  0 users,  load average: 0.01, 0.14, 0.21\n"
   }
 }

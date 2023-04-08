@@ -1,0 +1,20 @@
+{
+  "domains": [
+    {
+      "id": "default",
+      "name": "Default",
+      "description": "The default domain",
+      "enabled": true,
+      "tags": [],
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.32/identity/v3/domains/default"
+      }
+    }
+  ],
+  "links": {
+    "next": null,
+    "self": "http://10.164.0.32/identity/v3/domains",
+    "previous": null
+  }
+}

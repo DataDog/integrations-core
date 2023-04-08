@@ -1,0 +1,68 @@
+{
+  "hypervisors": [
+    {
+      "id": "9d72cf53-19c8-4942-9314-005fa5d2a6a0",
+      "hypervisor_hostname": "9d72cf53-19c8-4942-9314-005fa5d2a6a0",
+      "state": "up",
+      "status": "enabled",
+      "hypervisor_type": "ironic",
+      "hypervisor_version": 1,
+      "host_ip": "10.164.0.32",
+      "service": {
+        "id": "087b06f2-5e31-46d7-903c-bcd3e02dccc5",
+        "host": "agent-integrations-openstack-ironic",
+        "disabled_reason": null
+      },
+      "uptime": null,
+      "servers": []
+    },
+    {
+      "id": "54855e59-83ca-46f8-a78f-55d3370e0656",
+      "hypervisor_hostname": "54855e59-83ca-46f8-a78f-55d3370e0656",
+      "state": "up",
+      "status": "enabled",
+      "hypervisor_type": "ironic",
+      "hypervisor_version": 1,
+      "host_ip": "10.164.0.32",
+      "service": {
+        "id": "087b06f2-5e31-46d7-903c-bcd3e02dccc5",
+        "host": "agent-integrations-openstack-ironic",
+        "disabled_reason": null
+      },
+      "uptime": null,
+      "servers": []
+    },
+    {
+      "id": "bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
+      "hypervisor_hostname": "bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
+      "state": "up",
+      "status": "enabled",
+      "hypervisor_type": "ironic",
+      "hypervisor_version": 1,
+      "host_ip": "10.164.0.32",
+      "service": {
+        "id": "087b06f2-5e31-46d7-903c-bcd3e02dccc5",
+        "host": "agent-integrations-openstack-ironic",
+        "disabled_reason": null
+      },
+      "uptime": null,
+      "servers": []
+    },
+    {
+      "id": "20512deb-e493-4796-a046-5d6e4e072c95",
+      "hypervisor_hostname": "20512deb-e493-4796-a046-5d6e4e072c95",
+      "state": "up",
+      "status": "enabled",
+      "hypervisor_type": "ironic",
+      "hypervisor_version": 1,
+      "host_ip": "10.164.0.32",
+      "service": {
+        "id": "087b06f2-5e31-46d7-903c-bcd3e02dccc5",
+        "host": "agent-integrations-openstack-ironic",
+        "disabled_reason": null
+      },
+      "uptime": null,
+      "servers": []
+    }
+  ]
+}

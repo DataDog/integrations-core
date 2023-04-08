@@ -31,6 +31,7 @@ def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch
         'openstack.octavia.api.up',
         status=AgentCheck.UNKNOWN,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
@@ -40,6 +41,7 @@ def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch
         'openstack.octavia.api.up',
         status=AgentCheck.UNKNOWN,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'project_id:6e39099cccde4f809b003d9e0dd09304',
             'project_name:admin',
@@ -58,6 +60,7 @@ def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
         'openstack.octavia.api.up',
         status=AgentCheck.CRITICAL,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'project_id:9ce326b602c2425ab52d1a6a1cd4a28d',
             'project_name:demo',
@@ -67,6 +70,7 @@ def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
         'openstack.octavia.api.up',
         status=AgentCheck.CRITICAL,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'project_id:267659b7998d4bd0b134c15feced0dd1',
             'project_name:admin',
@@ -85,6 +89,7 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
         'openstack.octavia.api.up',
         status=AgentCheck.OK,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'project_id:9ce326b602c2425ab52d1a6a1cd4a28d',
             'project_name:demo',
@@ -94,6 +99,7 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
         'openstack.octavia.api.up',
         status=AgentCheck.OK,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'project_id:267659b7998d4bd0b134c15feced0dd1',
             'project_name:admin',

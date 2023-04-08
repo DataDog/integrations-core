@@ -4,6 +4,10 @@
 import re
 
 
+def convert_metric_name(name):
+    return re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', name).lower().replace("-", "_")
+
+
 def _load_averages_from_uptime(uptime):
     """Parse u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n'"""
     uptime = uptime.strip()
@@ -30,7 +34,7 @@ class ComputeRest:
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return {
-            re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_"): value
+            convert_metric_name(key): value
             for key, value in response.json()['limits']['absolute'].items()
             if isinstance(value, (int, float)) and not isinstance(value, bool)
         }

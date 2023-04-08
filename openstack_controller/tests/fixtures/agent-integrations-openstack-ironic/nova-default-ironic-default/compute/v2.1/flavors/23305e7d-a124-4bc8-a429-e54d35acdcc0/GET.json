@@ -1,0 +1,24 @@
+{
+  "flavor": {
+    "id": "23305e7d-a124-4bc8-a429-e54d35acdcc0",
+    "name": "baremetal",
+    "ram": 1024,
+    "disk": 3,
+    "swap": "",
+    "OS-FLV-EXT-DATA:ephemeral": 0,
+    "OS-FLV-DISABLED:disabled": false,
+    "vcpus": 1,
+    "os-flavor-access:is_public": true,
+    "rxtx_factor": 1,
+    "links": [
+      {
+        "rel": "self",
+        "href": "http://34.90.136.159/compute/v2.1/flavors/23305e7d-a124-4bc8-a429-e54d35acdcc0"
+      },
+      {
+        "rel": "bookmark",
+        "href": "http://34.90.136.159/compute/flavors/23305e7d-a124-4bc8-a429-e54d35acdcc0"
+      }
+    ]
+  }
+}

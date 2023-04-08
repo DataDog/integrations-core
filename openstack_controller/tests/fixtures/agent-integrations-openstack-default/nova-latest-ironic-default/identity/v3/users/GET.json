@@ -1,0 +1,159 @@
+{
+  "users": [
+    {
+      "id": "78205c506b534738bc851d3e189a00c3",
+      "name": "admin",
+      "domain_id": "default",
+      "enabled": true,
+      "password_expires_at": null,
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/users/78205c506b534738bc851d3e189a00c3"
+      }
+    },
+    {
+      "email": "demo@example.com",
+      "id": "2059bc7347c94546bef812b1092cc5cf",
+      "name": "demo",
+      "domain_id": "default",
+      "enabled": true,
+      "password_expires_at": null,
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/users/2059bc7347c94546bef812b1092cc5cf"
+      }
+    },
+    {
+      "email": "demo_reader@example.com",
+      "id": "e3e3e90d24b34e52970a54c9e8656778",
+      "name": "demo_reader",
+      "domain_id": "default",
+      "enabled": false,
+      "password_expires_at": null,
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/users/e3e3e90d24b34e52970a54c9e8656778"
+      }
+    },
+    {
+      "email": "alt_demo@example.com",
+      "id": "3472440960de4595be3b975d230979d3",
+      "name": "alt_demo",
+      "domain_id": "default",
+      "enabled": true,
+      "password_expires_at": null,
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/users/3472440960de4595be3b975d230979d3"
+      }
+    },
+    {
+      "email": "alt_demo_member@example.com",
+      "id": "87e289ddac6d4dce8626a659c5ea88ae",
+      "name": "alt_demo_member",
+      "domain_id": "default",
+      "enabled": true,
+      "password_expires_at": null,
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/users/87e289ddac6d4dce8626a659c5ea88ae"
+      }
+    },
+    {
+      "email": "alt_demo_reader@example.com",
+      "id": "61f0cd4dec604f968ff6cc92d4c1c278",
+      "name": "alt_demo_reader",
+      "domain_id": "default",
+      "enabled": true,
+      "password_expires_at": null,
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/users/61f0cd4dec604f968ff6cc92d4c1c278"
+      }
+    },
+    {
+      "email": "system_member@example.com",
+      "id": "5d0c9a6896c9430b8a1528424c9ee6f6",
+      "name": "system_member",
+      "domain_id": "default",
+      "enabled": true,
+      "password_expires_at": null,
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/users/5d0c9a6896c9430b8a1528424c9ee6f6"
+      }
+    },
+    {
+      "email": "system_reader@example.com",
+      "id": "aeaa8e9835284e4380583e10bb2575fd",
+      "name": "system_reader",
+      "domain_id": "default",
+      "enabled": true,
+      "password_expires_at": null,
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/users/aeaa8e9835284e4380583e10bb2575fd"
+      }
+    },
+    {
+      "id": "bc603ecd6ed940119be9a3a933c39509",
+      "name": "nova",
+      "domain_id": "default",
+      "enabled": true,
+      "password_expires_at": null,
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/users/bc603ecd6ed940119be9a3a933c39509"
+      }
+    },
+    {
+      "id": "ad9f72f911744acbbf69379e45a3ef37",
+      "name": "glance",
+      "domain_id": "default",
+      "enabled": true,
+      "password_expires_at": null,
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/users/ad9f72f911744acbbf69379e45a3ef37"
+      }
+    },
+    {
+      "id": "94fb5df1e547496894f9304a9b4a06d4",
+      "name": "neutron",
+      "domain_id": "default",
+      "enabled": true,
+      "password_expires_at": null,
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/users/94fb5df1e547496894f9304a9b4a06d4"
+      }
+    },
+    {
+      "id": "af4653d4f2dc4a38b8af36cbd3993d5a",
+      "name": "cinder",
+      "domain_id": "default",
+      "enabled": true,
+      "password_expires_at": null,
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/users/af4653d4f2dc4a38b8af36cbd3993d5a"
+      }
+    },
+    {
+      "id": "fc7c3571bed548e98e7df266f57a50f7",
+      "name": "placement",
+      "domain_id": "default",
+      "enabled": true,
+      "password_expires_at": null,
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/users/fc7c3571bed548e98e7df266f57a50f7"
+      }
+    }
+  ],
+  "links": {
+    "next": null,
+    "self": "http://10.164.0.11/identity/v3/users",
+    "previous": null
+  }
+}
