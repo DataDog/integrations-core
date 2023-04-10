@@ -2,7 +2,7 @@
 
 ## 2.3.1 / 2023-04-10
 
-* [Changed] Update Cilium Agent port for autoconfiguration  
+* [Changed] Update Cilium Agent port for autoconfiguration. See [#14339](https://github.com/DataDog/integrations-core/pull/14339)
 
 ## 2.3.0 / 2022-09-16 / Agent 7.40.0
 
