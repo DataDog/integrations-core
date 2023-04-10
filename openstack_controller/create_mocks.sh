@@ -95,6 +95,7 @@ for project_id in $(echo "$projects" | jq -r '.projects[]' | jq -r '.id'); do
   printf "\033[32m%-6s\033[0m Project id: %s\n" "INFO" "$project_id"
   data=$(echo "{'auth': {'identity': {'methods': ['password'], 'password': {'user': {'name': 'admin', 'domain': { 'id': 'default' }, 'password': 'password'}}}, 'scope': {'project': {'id': '$project_id'}}}}" | sed "s/'/\"/g")
   process_endpoint --method="POST" --endpoint="/identity/v3/auth/tokens" --file_name="$project_id.json" --data="$data"
+  process_endpoint --endpoint="/compute/v2.1/os-services"
   process_endpoint --endpoint="/compute/v2.1/limits?tenant_id=$project_id"
   process_endpoint --endpoint="/compute/v2.1/os-quota-sets/$project_id"
   process_endpoint --endpoint="/compute/v2.1/servers/detail?project_id=$project_id"

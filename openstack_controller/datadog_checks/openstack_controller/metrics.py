@@ -106,6 +106,12 @@ NOVA_FLAVOR_METRICS = [
     'rxtx_factor',
 ]
 
+NOVA_SERVICE_METRICS = [
+    'nova_compute',
+    'nova_scheduler',
+    'nova_conductor',
+]
+
 NOVA_HYPERVISOR_METRICS = [
     'current_workload',  # Available until version 2.87
     'disk_available_least',  # Available until version 2.87

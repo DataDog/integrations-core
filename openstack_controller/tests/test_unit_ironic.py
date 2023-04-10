@@ -219,7 +219,7 @@ def test_node_metrics_latest(aggregator, dd_run_check, instance_ironic_nova_micr
             'power_state:power on',
         ],
         [
-            'node_uuid:20512deb-e493-4796-a046-5d6e4e072c9',
+            'node_uuid:20512deb-e493-4796-a046-5d6e4e072c95',
             'node_name:test',
             'maintenance:False',
             'power_state:power on',

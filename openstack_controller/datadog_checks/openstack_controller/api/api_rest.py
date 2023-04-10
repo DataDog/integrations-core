@@ -98,6 +98,14 @@ class ApiRest(Api):
             return component.get_quota_set(project_id)
         return None
 
+    def get_compute_services(self, project_id):
+        self.log.debug("getting compute servers")
+        self._post_auth_project(project_id)
+        component = self._get_component(project_id, ComponentType.COMPUTE)
+        if component:
+            return component.get_services()
+        return None
+
     def get_compute_servers(self, project_id):
         self.log.debug("getting compute servers")
         self._post_auth_project(project_id)
@@ -154,7 +162,7 @@ class ApiRest(Api):
                 "Ironic conductors metrics are not available. "
                 "Please specify an `ironic_microversion` greater than 1.49 to recieve these metrics"
             )
-            return []
+            return None
 
     def _post_auth_tokens(self):
         self.log.debug("getting `X-Subject-Token`")

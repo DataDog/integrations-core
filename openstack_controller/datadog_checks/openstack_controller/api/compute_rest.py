@@ -45,6 +45,25 @@ class ComputeRest:
             if isinstance(value, (int, float)) and not isinstance(value, bool)
         }
 
+    def get_services(self):
+        response = self.http.get('{}/os-services'.format(self.endpoint))
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        services = []
+        for service in response.json().get('services'):
+            binary = service.get('binary').replace('-', '_')
+            is_up = 1 if service.get('status') == 'enabled' else 0
+            services.append(
+                {
+                    'binary': binary,
+                    'host': service.get('host'),
+                    'status': is_up,
+                    'service_id': service.get('id'),
+                    'state': service.get('state'),
+                }
+            )
+        return services
+
     def get_servers(self, project_id):
         response = self.http.get('{}/servers/detail?project_id={}'.format(self.endpoint, project_id))
         response.raise_for_status()
@@ -67,7 +86,8 @@ class ComputeRest:
                 }
             except Exception as e:
                 self.log.info(
-                    "Could not query the server diagnostics endpoint for server %s, perhaps it is a bare metal machine: %s",
+                    "Could not query the server diagnostics endpoint for server %s, "
+                    "perhaps it is a bare metal machine: %s",
                     server.get("id", None),
                     e,
                 )

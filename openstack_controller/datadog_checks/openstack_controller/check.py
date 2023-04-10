@@ -19,6 +19,7 @@ from datadog_checks.openstack_controller.metrics import (
     NOVA_LIMITS_METRICS,
     NOVA_QUOTA_SETS_METRICS,
     NOVA_SERVER_METRICS,
+    NOVA_SERVICE_METRICS,
 )
 
 
@@ -57,6 +58,18 @@ def _create_baremetal_conductors_metric_tags(hostname, conductor_group, alive):
     ]
     if conductor_group != "":
         tags.append(f'conductor_group:{conductor_group}')
+    return tags
+
+
+def _create_nova_services_metric_tags(host, state, nova_id):
+    tags = [
+        f'nova_service_host:{host}',
+    ]
+    if nova_id:
+        tags.append(f'nova_service_id:{nova_id}')
+
+    if state:
+        tags.append(f'nova_service_state:{state}')
     return tags
 
 
@@ -112,6 +125,7 @@ class OpenStackControllerCheck(AgentCheck):
             self._report_compute_servers(api, project_id, project_tags)
             self._report_compute_flavors(api, project_id, project_tags)
             self._report_compute_hypervisors(api, project_id, project_tags)
+            self._report_compute_services(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting compute metrics: %s", e)
@@ -143,6 +157,20 @@ class OpenStackControllerCheck(AgentCheck):
             for metric, value in compute_quotas.items():
                 if metric in NOVA_QUOTA_SETS_METRICS or metric in NOVA_LATEST_QUOTA_SETS_METRICS:
                     self.gauge(f'openstack.nova.quota_set.{metric}', value, tags=project_tags)
+
+    def _report_compute_services(self, api, project_id, project_tags):
+        compute_services = api.get_compute_services(project_id)
+        self.log.debug("compute_services: %s", compute_services)
+        if compute_services is not None:
+            for compute_service in compute_services:
+                service_tags = _create_nova_services_metric_tags(
+                    compute_service.get('host'), compute_service.get('state'), compute_service.get('service_id')
+                )
+                all_tags = project_tags + service_tags
+                binary = compute_service.get('binary')
+                status = compute_service.get('status')
+                if binary in NOVA_SERVICE_METRICS:
+                    self.gauge(f'openstack.nova.services.{binary}.status', status, tags=all_tags)
 
     def _report_compute_servers(self, api, project_id, project_tags):
         compute_servers = api.get_compute_servers(project_id)
@@ -261,27 +289,29 @@ class OpenStackControllerCheck(AgentCheck):
 
     def _report_baremetal_nodes(self, api, project_id, project_tags):
         nodes_data = api.get_baremetal_nodes(project_id)
-        for node_data in nodes_data:
-            node_tags = _create_baremetal_nodes_metric_tags(
-                node_data.get('node_name'),
-                node_data.get('node_uuid'),
-                node_data.get('maintenance'),
-                node_data.get('conductor_group'),
-                node_data.get('power_state'),
-            )
-            all_tags = node_tags + project_tags
-            self.gauge('openstack.ironic.nodes.count', value=1, tags=all_tags)
+        if nodes_data is not None:
+            for node_data in nodes_data:
+                node_tags = _create_baremetal_nodes_metric_tags(
+                    node_data.get('node_name'),
+                    node_data.get('node_uuid'),
+                    node_data.get('maintenance'),
+                    node_data.get('conductor_group'),
+                    node_data.get('power_state'),
+                )
+                all_tags = node_tags + project_tags
+                self.gauge('openstack.ironic.nodes.count', value=1, tags=all_tags)
 
     def _report_baremetal_conductors(self, api, project_id, project_tags):
         conductors_data = api.get_baremetal_conductors(project_id)
-        for conductor_data in conductors_data:
-            conductor_tags = _create_baremetal_conductors_metric_tags(
-                conductor_data.get('hostname'),
-                conductor_data.get('conductor_group'),
-                conductor_data.get('alive'),
-            )
-            all_tags = conductor_tags + project_tags
-            self.gauge('openstack.ironic.conductors.count', value=1, tags=all_tags)
+        if conductors_data:
+            for conductor_data in conductors_data:
+                conductor_tags = _create_baremetal_conductors_metric_tags(
+                    conductor_data.get('hostname'),
+                    conductor_data.get('conductor_group'),
+                    conductor_data.get('alive'),
+                )
+                all_tags = conductor_tags + project_tags
+                self.gauge('openstack.ironic.conductors.count', value=1, tags=all_tags)
 
     def _report_load_balancer_metrics(self, api, project_id, project_tags):
         try:
