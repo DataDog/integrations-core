@@ -7,11 +7,23 @@ from abc import ABC, abstractmethod
 
 class Api(ABC):
     @abstractmethod
-    def create_connection(self):
+    def get_identity_response_time(self):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_projects(self):
+    def get_identity_domains(self):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_identity_projects(self):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_identity_users(self):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_auth_projects(self):
         pass  # pragma: no cover
 
     @abstractmethod
@@ -19,19 +31,19 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_limits(self, project):
+    def get_compute_limits(self, project_id):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_quota_set(self, project):
+    def get_compute_quota_set(self, project_id):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_servers(self, project):
+    def get_compute_servers(self, project_id):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_flavors(self, project):
+    def get_compute_flavors(self, project_id):
         pass  # pragma: no cover
 
     @abstractmethod

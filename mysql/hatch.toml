@@ -32,6 +32,7 @@ flavor = ["mariadb"]
 version = [
   "10.2",  # EOL 23 May 2022
   "10.5",  # EOL 24 June 2025
+  "10.10", # EOL 17 November 2023
 ]
 
 [envs.default.overrides]

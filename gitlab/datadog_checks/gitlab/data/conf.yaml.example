@@ -26,11 +26,11 @@ instances:
     #
     # prometheus_metrics_prefix: <PREFIX>_
 
-    ## @param health_service_check - boolean - optional - default: true
+    ## @param health_service_check - boolean - optional - default: false
     ## Send a service check reporting about the health of the Prometheus endpoint.
     ## The service check is named <NAMESPACE>.prometheus.health
     #
-    # health_service_check: true
+    # health_service_check: false
 
     ## @param label_to_hostname - string - optional
     ## Override the hostname with the value of one label.

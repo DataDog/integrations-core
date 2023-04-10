@@ -76,26 +76,27 @@ if [ $# -eq 3 ]
 fi
 x_auth_token=""
 
-process_endpoint --endpoint="/identity/v3"
 data=$(echo "{'auth': {'identity': {'methods': ['password'], 'password': {'user': {'name': 'admin', 'domain': { 'id': 'default' }, 'password': 'password'}}}}}" | sed "s/'/\"/g")
 process_endpoint --method="POST" --endpoint="/identity/v3/auth/tokens" --file_name="unscoped.json" --data="$data"
-projects="{}"
-process_endpoint --endpoint="/identity/v3/auth/projects"
-if [ $? -eq 0 ]
-  then
-    projects=$RESPONSE
-fi
+data=$(echo "{'auth': {'identity': {'methods': ['password'], 'password': {'user': {'name': 'admin', 'domain': { 'id': 'default' }, 'password': 'password'}}}, 'scope': {'domain': {'id': 'default' }}}}" | sed "s/'/\"/g")
+process_endpoint --method="POST" --endpoint="/identity/v3/auth/tokens" --file_name="domain_default.json" --data="$data"
 # Component endpoints
+process_endpoint --endpoint="/identity/v3"
 process_endpoint --endpoint="/compute/v2.1"
+process_endpoint --endpoint="/volume/v3/"
 process_endpoint --port=9696 --endpoint="/networking/"
 process_endpoint --endpoint="/baremetal"
 process_endpoint --endpoint="/load-balancer"
+# Keystone
+process_endpoint --endpoint="/identity/v3/domains"
+process_endpoint --endpoint="/identity/v3/projects"
+process_endpoint --endpoint="/identity/v3/users"
 # Nova
-for project_id in $(echo "$projects" | jq -r '.projects[]' | jq -r '.id'); do
+process_endpoint --endpoint="/identity/v3/auth/projects"
+for project_id in $(echo "$RESPONSE" | jq -r '.projects[]' | jq -r '.id'); do
   printf "\033[32m%-6s\033[0m Project id: %s\n" "INFO" "$project_id"
   data=$(echo "{'auth': {'identity': {'methods': ['password'], 'password': {'user': {'name': 'admin', 'domain': { 'id': 'default' }, 'password': 'password'}}}, 'scope': {'project': {'id': '$project_id'}}}}" | sed "s/'/\"/g")
-  process_endpoint --method="POST" --endpoint="/identity/v3/auth/tokens" --file_name="$project_id.json" --data="$data"
-  process_endpoint --endpoint="/compute/v2.1/os-services"
+  process_endpoint --method="POST" --endpoint="/identity/v3/auth/tokens" --file_name="project_$project_id.json" --data="$data"
   process_endpoint --endpoint="/compute/v2.1/limits?tenant_id=$project_id"
   process_endpoint --endpoint="/compute/v2.1/os-quota-sets/$project_id"
   process_endpoint --endpoint="/compute/v2.1/servers/detail?project_id=$project_id"
@@ -113,6 +114,9 @@ if [[ $num_uptime -eq 0 ]]; then
   done
 fi
 process_endpoint --endpoint="/compute/v2.1/flavors/detail"
+for flavor_id in $(echo "$RESPONSE" | jq -r '.flavors[]' | jq -r '.id'); do
+  process_endpoint --endpoint="/compute/v2.1/flavors/$flavor_id"
+done
 
 # Ironic
 process_endpoint --endpoint="/baremetal/nodes?detail=True"

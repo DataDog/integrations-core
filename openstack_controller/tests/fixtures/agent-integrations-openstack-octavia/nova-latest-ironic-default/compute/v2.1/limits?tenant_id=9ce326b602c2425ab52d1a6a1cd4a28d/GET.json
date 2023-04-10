@@ -6,20 +6,12 @@
       "maxTotalCores": 20,
       "maxTotalRAMSize": 51200,
       "maxServerMeta": 128,
-      "maxImageMeta": 128,
-      "maxPersonality": 5,
-      "maxPersonalitySize": 10240,
       "maxTotalKeypairs": 100,
       "maxServerGroups": 10,
       "maxServerGroupMembers": 10,
-      "maxTotalFloatingIps": -1,
-      "maxSecurityGroups": -1,
-      "maxSecurityGroupRules": -1,
       "totalRAMUsed": 0,
       "totalCoresUsed": 0,
       "totalInstancesUsed": 0,
-      "totalFloatingIpsUsed": 0,
-      "totalSecurityGroupsUsed": 0,
       "totalServerGroupsUsed": 0
     }
   }

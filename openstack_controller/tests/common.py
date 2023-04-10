@@ -24,10 +24,17 @@ FILTERED_NETWORK_ID = 'server-2'
 FILTERED_SERVER_ID = 'server-1'
 FILTERED_BY_PROJ_SERVER_ID = ['server-1', 'server-2']
 
-REST_CONFIG = {
+CONFIG = {
     'keystone_server_url': 'http://127.0.0.1:8080/identity',
     'username': 'admin',
     'password': 'password',
+}
+
+CONFIG_NOVA_MICROVERSION_LATEST = {
+    'keystone_server_url': 'http://127.0.0.1:8080/identity',
+    'username': 'admin',
+    'password': 'password',
+    'nova_microversion': 'latest',
 }
 
 KEYSTONE_INSTANCE = {
@@ -473,19 +480,31 @@ class MockHttp:
                     self._host,
                     microversion_path,
                     *path_parts,
-                    f'{project_id}.json',
+                    f'project_{project_id}.json',
                 )
                 headers = {'X-Subject-Token': f'token_{project_id}'}
             else:
-                file_path = os.path.join(
-                    get_here(),
-                    'fixtures',
-                    self._host,
-                    microversion_path,
-                    *path_parts,
-                    'unscoped.json',
-                )
-                headers = {'X-Subject-Token': 'token_test1234'}
+                domain_id = data.get('auth', {}).get('scope', {}).get('domain', {}).get('id')
+                if domain_id:
+                    file_path = os.path.join(
+                        get_here(),
+                        'fixtures',
+                        self._host,
+                        microversion_path,
+                        *path_parts,
+                        f'domain_{domain_id}.json',
+                    )
+                    headers = {'X-Subject-Token': f'token_{domain_id}'}
+                else:
+                    file_path = os.path.join(
+                        get_here(),
+                        'fixtures',
+                        self._host,
+                        microversion_path,
+                        *path_parts,
+                        'unscoped.json',
+                    )
+                    headers = {'X-Subject-Token': 'token_test1234'}
         else:
             file_path = os.path.join(
                 get_here(),

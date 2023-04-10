@@ -90,6 +90,9 @@ class OpenstackConfig:
                 'The user should look like: '
                 '{"name": "my_name", "password": "my_password", "domain": {"id": "my_domain_id"}}'
             )
+        self.username = self.user.get('name')
+        self.password = self.user.get('password')
+        self.domain_id = self.user.get("domain").get("id")
 
     def _validate_cloud_config(self):
         self.log.debug("openstack_config_file_path: %s", self.openstack_config_file_path)

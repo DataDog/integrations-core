@@ -1,0 +1,19 @@
+{
+  "conductors": [
+    {
+      "hostname": "agent-integrations-openstack-ironic",
+      "conductor_group": "",
+      "links": [
+        {
+          "href": "http://34.90.136.159/baremetal/v1/conductors/agent-integrations-openstack-ironic",
+          "rel": "self"
+        },
+        {
+          "href": "http://34.90.136.159/baremetal/conductors/agent-integrations-openstack-ironic",
+          "rel": "bookmark"
+        }
+      ],
+      "alive": true
+    }
+  ]
+}

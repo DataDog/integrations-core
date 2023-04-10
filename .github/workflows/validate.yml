@@ -1,0 +1,39 @@
+name: Validate repository
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  run:
+    uses: ./.github/workflows/run-validations.yml
+    with:
+      repo: core
+
+      # Validations
+      agent-reqs: true
+      ci: true
+      config: true
+      dashboards: true
+      dep: true
+      http: true
+      imports: true
+      integration-style: true
+      jmx-metrics: true
+      legacy-signature: true
+      license-headers: true
+      licenses: true
+      metadata: true
+      models: true
+      package: true
+      readmes: true
+      recommended-monitors: true
+      saved-views: true
+      service-checks: true
+    secrets: inherit

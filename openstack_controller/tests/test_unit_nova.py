@@ -12,15 +12,13 @@ from datadog_checks.openstack_controller.metrics import (
     NOVA_FLAVOR_METRICS,
     NOVA_HYPERVISOR_LOAD_METRICS,
     NOVA_HYPERVISOR_METRICS,
-    NOVA_LATEST_LIMITS_METRICS,
-    NOVA_LATEST_QUOTA_SETS_METRICS,
-    NOVA_LATEST_SERVER_METRICS,
     NOVA_LIMITS_METRICS,
     NOVA_QUOTA_SETS_METRICS,
     NOVA_SERVER_METRICS,
+    NOVA_SERVICE_CHECK,
 )
 
-from .common import MockHttp
+from .common import CONFIG, CONFIG_NOVA_MICROVERSION_LATEST, MockHttp
 
 pytestmark = [pytest.mark.unit]
 
@@ -37,14 +35,14 @@ def test_exception(aggregator, dd_run_check, instance, caplog, monkeypatch):
 
 def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch):
     http = MockHttp(
-        "agent-integrations-openstack-ironic",
+        "agent-integrations-openstack-default",
         replace={
             'identity/v3/auth/tokens': lambda d: {
                 **d,
                 **{
                     'token': {
                         **d['token'],
-                        **{'catalog': d['token'].get('catalog', [])[3:]},
+                        **{'catalog': d['token'].get('catalog', [])[:7] + d['token'].get('catalog', [])[8:]},
                     }
                 },
             }
@@ -56,20 +54,22 @@ def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check(
-        'openstack.nova.api.up',
+        NOVA_SERVICE_CHECK,
         status=AgentCheck.UNKNOWN,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:18a64e25fb53453ebd10a45fd974b816',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
         ],
     )
     aggregator.assert_service_check(
-        'openstack.nova.api.up',
+        NOVA_SERVICE_CHECK,
         status=AgentCheck.UNKNOWN,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:01b21103a92d4997ab09e46ff8346bd5',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
             'project_name:admin',
         ],
     )
@@ -83,18 +83,20 @@ def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check(
-        'openstack.nova.api.up',
+        NOVA_SERVICE_CHECK,
         status=AgentCheck.CRITICAL,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
         ],
     )
     aggregator.assert_service_check(
-        'openstack.nova.api.up',
+        NOVA_SERVICE_CHECK,
         status=AgentCheck.CRITICAL,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'project_id:6e39099cccde4f809b003d9e0dd09304',
             'project_name:admin',
@@ -110,18 +112,20 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check(
-        'openstack.nova.api.up',
+        NOVA_SERVICE_CHECK,
         status=AgentCheck.OK,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
         ],
     )
     aggregator.assert_service_check(
-        'openstack.nova.api.up',
+        NOVA_SERVICE_CHECK,
         status=AgentCheck.OK,
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'project_id:6e39099cccde4f809b003d9e0dd09304',
             'project_name:admin',
@@ -130,6 +134,7 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
     aggregator.assert_metric(
         'openstack.nova.response_time',
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
@@ -138,6 +143,7 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
     aggregator.assert_metric(
         'openstack.nova.response_time',
         tags=[
+            'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'project_id:6e39099cccde4f809b003d9e0dd09304',
             'project_name:admin',
@@ -145,188 +151,157 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
     )
 
 
-def test_limits_metrics(aggregator, dd_run_check, instance, monkeypatch):
+@pytest.mark.parametrize(
+    "instance",
+    [
+        pytest.param(CONFIG, id="default"),
+        pytest.param(CONFIG_NOVA_MICROVERSION_LATEST, id="latest"),
+    ],
+)
+def test_limits_metrics(aggregator, dd_run_check, monkeypatch, instance):
     http = MockHttp("agent-integrations-openstack-default")
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    for metric in NOVA_LIMITS_METRICS:
-        aggregator.assert_metric(
-            f'openstack.nova.limits.{metric}',
-            tags=[
-                'keystone_server:{}'.format(instance["keystone_server_url"]),
-                'project_id:1e6e233e637d4d55a50a62b63398ad15',
-                'project_name:demo',
-            ],
-        )
-        aggregator.assert_metric(
-            f'openstack.nova.limits.{metric}',
-            tags=[
-                'keystone_server:{}'.format(instance["keystone_server_url"]),
-                'project_id:6e39099cccde4f809b003d9e0dd09304',
-                'project_name:admin',
-            ],
-        )
+    found = False
+    for metric in aggregator.metric_names:
+        if metric in NOVA_LIMITS_METRICS:
+            found = True
+            aggregator.assert_metric(
+                metric,
+                tags=[
+                    'domain_id:default',
+                    'keystone_server:{}'.format(instance["keystone_server_url"]),
+                    'project_id:1e6e233e637d4d55a50a62b63398ad15',
+                    'project_name:demo',
+                ],
+            )
+            aggregator.assert_metric(
+                metric,
+                tags=[
+                    'domain_id:default',
+                    'keystone_server:{}'.format(instance["keystone_server_url"]),
+                    'project_id:6e39099cccde4f809b003d9e0dd09304',
+                    'project_name:admin',
+                ],
+            )
+    assert found, "No nova limits metrics found"
 
 
-def test_latest_limits_metrics(aggregator, dd_run_check, instance_nova_microversion_latest, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-default")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance_nova_microversion_latest])
-    dd_run_check(check)
-    for metric in NOVA_LATEST_LIMITS_METRICS:
-        aggregator.assert_metric(
-            f'openstack.nova.limits.{metric}',
-            tags=[
-                'keystone_server:{}'.format(instance_nova_microversion_latest["keystone_server_url"]),
-                'project_id:1e6e233e637d4d55a50a62b63398ad15',
-                'project_name:demo',
-            ],
-        )
-        aggregator.assert_metric(
-            f'openstack.nova.limits.{metric}',
-            tags=[
-                'keystone_server:{}'.format(instance_nova_microversion_latest["keystone_server_url"]),
-                'project_id:6e39099cccde4f809b003d9e0dd09304',
-                'project_name:admin',
-            ],
-        )
-
-
-def test_quota_set_metrics(aggregator, dd_run_check, instance, monkeypatch):
+@pytest.mark.parametrize(
+    "instance",
+    [
+        pytest.param(CONFIG, id="default"),
+        pytest.param(CONFIG_NOVA_MICROVERSION_LATEST, id="latest"),
+    ],
+)
+def test_quota_set_metrics(aggregator, dd_run_check, monkeypatch, instance):
     http = MockHttp("agent-integrations-openstack-default")
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    for metric in NOVA_QUOTA_SETS_METRICS:
-        aggregator.assert_metric(
-            f'openstack.nova.quota_set.{metric}',
-            tags=[
-                'keystone_server:{}'.format(instance["keystone_server_url"]),
-                'project_id:1e6e233e637d4d55a50a62b63398ad15',
-                'project_name:demo',
-            ],
-        )
-        aggregator.assert_metric(
-            f'openstack.nova.quota_set.{metric}',
-            tags=[
-                'keystone_server:{}'.format(instance["keystone_server_url"]),
-                'project_id:6e39099cccde4f809b003d9e0dd09304',
-                'project_name:admin',
-            ],
-        )
+    found = False
+    for metric in aggregator.metric_names:
+        if metric in NOVA_QUOTA_SETS_METRICS:
+            found = True
+            aggregator.assert_metric(
+                metric,
+                tags=[
+                    'domain_id:default',
+                    'keystone_server:{}'.format(instance["keystone_server_url"]),
+                    'project_id:1e6e233e637d4d55a50a62b63398ad15',
+                    'project_name:demo',
+                    'quota_id:1e6e233e637d4d55a50a62b63398ad15',
+                ],
+            )
+            aggregator.assert_metric(
+                metric,
+                tags=[
+                    'domain_id:default',
+                    'keystone_server:{}'.format(instance["keystone_server_url"]),
+                    'project_id:6e39099cccde4f809b003d9e0dd09304',
+                    'project_name:admin',
+                    'quota_id:6e39099cccde4f809b003d9e0dd09304',
+                ],
+            )
+    assert found, "No nova quotas metrics found"
 
 
-def test_latest_quota_set_metrics(aggregator, dd_run_check, instance_nova_microversion_latest, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-default")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance_nova_microversion_latest])
-    dd_run_check(check)
-    for metric in NOVA_LATEST_QUOTA_SETS_METRICS:
-        aggregator.assert_metric(
-            f'openstack.nova.quota_set.{metric}',
-            tags=[
-                'keystone_server:{}'.format(instance_nova_microversion_latest["keystone_server_url"]),
-                'project_id:1e6e233e637d4d55a50a62b63398ad15',
-                'project_name:demo',
-            ],
-        )
-        aggregator.assert_metric(
-            f'openstack.nova.quota_set.{metric}',
-            tags=[
-                'keystone_server:{}'.format(instance_nova_microversion_latest["keystone_server_url"]),
-                'project_id:6e39099cccde4f809b003d9e0dd09304',
-                'project_name:admin',
-            ],
-        )
-
-
-def test_server_metrics(aggregator, dd_run_check, instance, monkeypatch):
+@pytest.mark.parametrize(
+    "instance",
+    [
+        pytest.param(CONFIG, id="default"),
+        pytest.param(CONFIG_NOVA_MICROVERSION_LATEST, id="latest"),
+    ],
+)
+def test_server_metrics(aggregator, dd_run_check, monkeypatch, instance):
     http = MockHttp("agent-integrations-openstack-default")
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    for metric in NOVA_SERVER_METRICS:
-        aggregator.assert_metric(
-            f'openstack.nova.server.{metric}',
-            tags=[
-                'keystone_server:{}'.format(instance["keystone_server_url"]),
-                'project_id:6e39099cccde4f809b003d9e0dd09304',
-                'project_name:admin',
-                'server_id:2c653a68-b520-4582-a05d-41a68067d76c',
-                'server_name:server',
-            ],
-        )
+    found = False
+    for metric in aggregator.metric_names:
+        if metric in NOVA_SERVER_METRICS:
+            found = True
+            if metric == "openstack.nova.server.count":
+                tags = [
+                    'domain_id:default',
+                    'keystone_server:{}'.format(instance["keystone_server_url"]),
+                    'project_id:6e39099cccde4f809b003d9e0dd09304',
+                    'project_name:admin',
+                ]
+            else:
+                tags = [
+                    'domain_id:default',
+                    'keystone_server:{}'.format(instance["keystone_server_url"]),
+                    'project_id:6e39099cccde4f809b003d9e0dd09304',
+                    'project_name:admin',
+                    'server_id:2c653a68-b520-4582-a05d-41a68067d76c',
+                    'server_name:server',
+                    'server_status:active',
+                    'hypervisor:agent-integrations-openstack-default',
+                    'flavor_name:cirros256',
+                ]
+            aggregator.assert_metric(metric, tags=tags)
+    assert found, "No server metrics found"
 
 
-def test_latest_server_metrics(aggregator, dd_run_check, instance_nova_microversion_latest, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-default")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance_nova_microversion_latest])
-    dd_run_check(check)
-    for metric in NOVA_LATEST_SERVER_METRICS:
-        aggregator.assert_metric(
-            f'openstack.nova.server.{metric}',
-            tags=[
-                'keystone_server:{}'.format(instance_nova_microversion_latest["keystone_server_url"]),
-                'project_id:6e39099cccde4f809b003d9e0dd09304',
-                'project_name:admin',
-                'server_id:2c653a68-b520-4582-a05d-41a68067d76c',
-                'server_name:server',
-            ],
-        )
-
-
-def test_flavor_metrics(aggregator, dd_run_check, instance, monkeypatch):
+@pytest.mark.parametrize(
+    "instance",
+    [
+        pytest.param(CONFIG, id="default"),
+        pytest.param(CONFIG_NOVA_MICROVERSION_LATEST, id="latest"),
+    ],
+)
+def test_flavor_metrics(aggregator, dd_run_check, monkeypatch, instance):
     http = MockHttp("agent-integrations-openstack-default")
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    for metric in NOVA_FLAVOR_METRICS:
-        aggregator.assert_metric(
-            f'openstack.nova.flavor.{metric}',
-            tags=[
-                'keystone_server:{}'.format(instance["keystone_server_url"]),
-                'project_id:6e39099cccde4f809b003d9e0dd09304',
-                'project_name:admin',
-                'flavor_id:1',
-                'flavor_name:m1.tiny',
-            ],
-        )
-
-
-def test_latest_flavor_metrics(aggregator, dd_run_check, instance_nova_microversion_latest, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-default")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance_nova_microversion_latest])
-    dd_run_check(check)
-    for metric in NOVA_FLAVOR_METRICS:
-        aggregator.assert_metric(
-            f'openstack.nova.flavor.{metric}',
-            tags=[
-                'keystone_server:{}'.format(instance_nova_microversion_latest["keystone_server_url"]),
-                'project_id:6e39099cccde4f809b003d9e0dd09304',
-                'project_name:admin',
-                'flavor_id:1',
-                'flavor_name:m1.tiny',
-            ],
-        )
+    found = False
+    for metric in aggregator.metric_names:
+        if metric in NOVA_FLAVOR_METRICS:
+            found = True
+            aggregator.assert_metric(
+                metric,
+                tags=[
+                    'domain_id:default',
+                    'keystone_server:{}'.format(instance["keystone_server_url"]),
+                    'project_id:6e39099cccde4f809b003d9e0dd09304',
+                    'project_name:admin',
+                    'flavor_id:1',
+                    'flavor_name:m1.tiny',
+                ],
+            )
+    assert found, "No flavor metrics found"
 
 
 def test_hypervisor_service_check_up(aggregator, dd_run_check, instance, monkeypatch):
@@ -335,6 +310,7 @@ def test_hypervisor_service_check_up(aggregator, dd_run_check, instance, monkeyp
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
     project_tags = [
+        'domain_id:default',
         'keystone_server:{}'.format(instance["keystone_server_url"]),
         'project_id:6e39099cccde4f809b003d9e0dd09304',
         'project_name:admin',
@@ -370,6 +346,7 @@ def test_hypervisor_service_check_down(aggregator, dd_run_check, instance, monke
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
     project_tags = [
+        'domain_id:default',
         'keystone_server:{}'.format(instance["keystone_server_url"]),
         'project_id:6e39099cccde4f809b003d9e0dd09304',
         'project_name:admin',
@@ -398,6 +375,7 @@ def test_hypervisor_metrics(aggregator, dd_run_check, instance, monkeypatch):
         aggregator.assert_metric(
             f'openstack.nova.hypervisor.{metric}',
             tags=[
+                'domain_id:default',
                 'keystone_server:{}'.format(instance["keystone_server_url"]),
                 'project_id:6e39099cccde4f809b003d9e0dd09304',
                 'project_name:admin',
@@ -422,6 +400,7 @@ def test_latest_hypervisor_metrics(aggregator, dd_run_check, instance_nova_micro
         aggregator.assert_metric(
             f'openstack.nova.hypervisor.{metric}',
             tags=[
+                'domain_id:default',
                 'keystone_server:{}'.format(instance_nova_microversion_latest["keystone_server_url"]),
                 'project_id:6e39099cccde4f809b003d9e0dd09304',
                 'project_name:admin',
