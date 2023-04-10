@@ -1,5 +1,9 @@
 # CHANGELOG - Cilium
 
+## 2.3.1 / 2023-04-10
+
+* [Changed] Update Cilium Agent port for autoconfiguration  
+
 ## 2.3.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Refactor tooling for getting the current env name. See [#12939](https://github.com/DataDog/integrations-core/pull/12939).
