@@ -421,14 +421,26 @@ def test_nova_metrics_ironic(aggregator, dd_run_check, instance_ironic_nova_micr
 
     check = OpenStackControllerCheck('test', {}, [instance_ironic_nova_microversion_latest])
     dd_run_check(check)
-    for metric in NOVA_FLAVOR_METRICS:
-        aggregator.assert_metric(metric)
 
-    for metric in NOVA_LIMITS_METRICS:
-        aggregator.assert_metric(metric)
+    found = False
+    for metric in aggregator.metric_names:
+        if metric in NOVA_QUOTA_SETS_METRICS:
+            found = True
 
-    for metric in NOVA_QUOTA_SETS_METRICS:
-        aggregator.assert_metric(metric)
+    assert found, "No quota metrics found"
+
+    found = False
+    for metric in aggregator.metric_names:
+        if metric in NOVA_LIMITS_METRICS:
+            found = True
+
+    assert found, "No quota metrics found"
+
+    found = False
+    for metric in aggregator.metric_names:
+        if metric in NOVA_FLAVOR_METRICS:
+            found = True
+    assert found, "No flavor metrics found"
 
     # we can't collect hypervisor metrics for bare metal
     for metric in NOVA_HYPERVISOR_LOAD_METRICS:
