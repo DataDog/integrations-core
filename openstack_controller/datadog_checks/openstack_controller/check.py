@@ -20,8 +20,8 @@ from datadog_checks.openstack_controller.metrics import (
     NOVA_QUOTA_SETS_METRICS,
     NOVA_QUOTA_SETS_METRICS_PREFIX,
     NOVA_SERVER_METRICS,
-    NOVA_SERVICE_METRICS,
     NOVA_SERVICE_CHECK,
+    NOVA_SERVICE_METRICS,
 )
 
 

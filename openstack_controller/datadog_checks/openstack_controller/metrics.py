@@ -97,7 +97,8 @@ NOVA_SERVER_METRICS = [
 NOVA_FLAVOR_METRICS = [
     'openstack.nova.flavor.ram',
     'openstack.nova.flavor.disk',
-    'openstack.nova.flavor.swap' 'openstack.nova.flavor.os_flv_ext_data:ephemeral',
+    'openstack.nova.flavor.swap',
+    'openstack.nova.flavor.os_flv_ext_data:ephemeral',
     'openstack.nova.flavor.vcpus',
     'openstack.nova.flavor.rxtx_factor',
 ]

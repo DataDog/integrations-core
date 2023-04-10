@@ -422,17 +422,17 @@ def test_nova_metrics_ironic(aggregator, dd_run_check, instance_ironic_nova_micr
     check = OpenStackControllerCheck('test', {}, [instance_ironic_nova_microversion_latest])
     dd_run_check(check)
     for metric in NOVA_FLAVOR_METRICS:
-        aggregator.assert_metric(f'openstack.nova.flavor.{metric}')
+        aggregator.assert_metric(metric)
 
-    for metric in NOVA_LATEST_LIMITS_METRICS:
-        aggregator.assert_metric(f'openstack.nova.limits.{metric}')
+    for metric in NOVA_LIMITS_METRICS:
+        aggregator.assert_metric(metric)
 
-    for metric in NOVA_LATEST_QUOTA_SETS_METRICS:
-        aggregator.assert_metric(f'openstack.nova.quota_set.{metric}')
+    for metric in NOVA_QUOTA_SETS_METRICS:
+        aggregator.assert_metric(metric)
 
     # we can't collect hypervisor metrics for bare metal
     for metric in NOVA_HYPERVISOR_LOAD_METRICS:
-        aggregator.assert_metric(f'openstack.nova.quota_set.{metric}', count=0)
+        aggregator.assert_metric(metric, count=0)
 
 
 def test_latest_service_metrics(aggregator, dd_run_check, instance_nova_microversion_latest, monkeypatch):
@@ -443,7 +443,10 @@ def test_latest_service_metrics(aggregator, dd_run_check, instance_nova_microver
     check = OpenStackControllerCheck('test', {}, [instance_nova_microversion_latest])
     dd_run_check(check)
 
-    base_tags = ['keystone_server:{}'.format(instance_nova_microversion_latest["keystone_server_url"])]
+    base_tags = [
+        'domain_id:default',
+        'keystone_server:{}'.format(instance_nova_microversion_latest["keystone_server_url"]),
+    ]
 
     admin_project_tags = base_tags + [
         'project_id:6e39099cccde4f809b003d9e0dd09304',
@@ -564,7 +567,7 @@ def test_default_service_metrics(aggregator, dd_run_check, instance, monkeypatch
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
 
-    base_tags = ['keystone_server:{}'.format(instance["keystone_server_url"])]
+    base_tags = ['domain_id:default', 'keystone_server:{}'.format(instance["keystone_server_url"])]
 
     admin_project_tags = base_tags + [
         'project_id:6e39099cccde4f809b003d9e0dd09304',
@@ -685,7 +688,7 @@ def test_default_ironic_service_metrics(aggregator, dd_run_check, instance, monk
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
 
-    base_tags = ['keystone_server:{}'.format(instance["keystone_server_url"])]
+    base_tags = ['domain_id:default', 'keystone_server:{}'.format(instance["keystone_server_url"])]
 
     admin_project_tags = base_tags + [
         'project_id:01b21103a92d4997ab09e46ff8346bd5',

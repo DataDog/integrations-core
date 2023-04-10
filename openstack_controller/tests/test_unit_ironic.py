@@ -117,7 +117,7 @@ def test_node_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
 
-    base_tags = ['keystone_server:{}'.format(instance["keystone_server_url"])]
+    base_tags = ['domain_id:default', 'keystone_server:{}'.format(instance["keystone_server_url"])]
 
     demo_project_tags = base_tags + [
         'project_id:18a64e25fb53453ebd10a45fd974b816',
@@ -165,7 +165,7 @@ def test_node_metrics_latest(aggregator, dd_run_check, instance_ironic_nova_micr
     check = OpenStackControllerCheck('test', {}, [instance_ironic_nova_microversion_latest])
     dd_run_check(check)
 
-    base_tags = ['keystone_server:http://127.0.0.1:8080/identity']
+    base_tags = ['domain_id:default', 'keystone_server:http://127.0.0.1:8080/identity']
 
     demo_project_tags = base_tags + [
         'project_id:18a64e25fb53453ebd10a45fd974b816',
@@ -257,7 +257,10 @@ def test_conductor_metrics_latest(aggregator, dd_run_check, instance_ironic_nova
 
     check = OpenStackControllerCheck('test', {}, [instance_ironic_nova_microversion_latest])
     dd_run_check(check)
-    base_tags = ['keystone_server:{}'.format(instance_ironic_nova_microversion_latest["keystone_server_url"])]
+    base_tags = [
+        'domain_id:default',
+        'keystone_server:{}'.format(instance_ironic_nova_microversion_latest["keystone_server_url"]),
+    ]
 
     conductor_tags = [
         [
