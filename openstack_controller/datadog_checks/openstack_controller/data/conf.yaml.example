@@ -115,6 +115,17 @@ instances:
     #
     # keystone_server_url: https://<KEYSTONE_ENDPOINT>:<PORT>/
 
+    ## @param ironic_microversion - string - optional
+    ## The microversion of the Ironic (Bare Metal) API to call.
+    ## It is recommended to set this parameter to the latest Ironic microversion supported by your Openstack version.
+    ##
+    ## View this page for more about Ironic microvoersion compatibility:
+    ##    https://docs.openstack.org/ironic/latest/contributor/webapi-version-history.html
+    ## View this page for more information about microversions in Openstack:
+    ##    https://docs.openstack.org/api-guide/compute/microversions.html
+    #
+    ironic_microversion: '1.80'
+
     ## @param collect_hypervisor_load - boolean - optional - default: true
     ## Collects hypervisor_load.1/5/15 for each hypervisor
     ## Disabled by default to increase performance of the check.

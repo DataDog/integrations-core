@@ -124,6 +124,20 @@ files:
             example: https://<KEYSTONE_ENDPOINT>:<PORT>/
             type: string
             display_default: null
+        - name: ironic_microversion
+          description: |
+           The microversion of the Ironic (Bare Metal) API to call.
+           It is recommended to set this parameter to the latest Ironic microversion supported by your Openstack version.
+
+           View this page for more about Ironic microvoersion compatibility:
+              https://docs.openstack.org/ironic/latest/contributor/webapi-version-history.html
+           View this page for more information about microversions in Openstack:
+              https://docs.openstack.org/api-guide/compute/microversions.html
+          enabled: true
+          value:
+            example: "1.80"
+            type: string
+            display_default: null
         - name: collect_hypervisor_load
           description: |
            Collects hypervisor_load.1/5/15 for each hypervisor
