@@ -47,13 +47,14 @@ class BaremetalRest:
         self.log.debug("Nodes response: %s", response.json())
         node_metrics = []
         for node in response.json().get('nodes'):
+            is_up = 1 if node.get('maintenance') is False else 0
             node_metrics.append(
                 {
                     'node_name': node.get('name'),
                     'node_uuid': node.get('uuid'),
                     'power_state': node.get('power_state'),
                     'conductor_group': node.get('conductor_group'),
-                    'maintenance': node.get('maintenance'),
+                    'is_up': is_up,
                 }
             )
         return node_metrics
@@ -64,11 +65,12 @@ class BaremetalRest:
         self.log.debug("Conductors response: %s", response.json())
         conductor_metrics = []
         for conductor in response.json().get('conductors'):
+            is_alive = 1 if conductor.get('alive') is True else 0
             conductor_metrics.append(
                 {
                     'hostname': conductor.get('hostname'),
                     'conductor_group': conductor.get('conductor_group'),
-                    'alive': conductor.get('alive'),
+                    'alive': is_alive,
                 }
             )
         return conductor_metrics

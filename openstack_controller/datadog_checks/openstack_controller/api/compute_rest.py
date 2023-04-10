@@ -52,12 +52,15 @@ class ComputeRest:
         services = []
         for service in response.json().get('services'):
             binary = service.get('binary').replace('-', '_')
-            is_up = 1 if service.get('status') == 'enabled' else 0
+            is_down = service.get('state') is not None and service.get('state') == 'down'
+            is_enabled = service.get('status') == 'enabled'
+            is_up = not (is_down and is_enabled)
             services.append(
                 {
                     'binary': binary,
+                    'is_up': is_up,
                     'host': service.get('host'),
-                    'status': is_up,
+                    'status': service.get('status'),
                     'service_id': service.get('id'),
                     'state': service.get('state'),
                 }
