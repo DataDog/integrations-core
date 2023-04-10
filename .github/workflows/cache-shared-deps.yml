@@ -45,7 +45,6 @@ jobs:
     - name: Install dependencies
       if: steps.cache.outputs.cache-hit != 'true'
       run: |-
-        pip install mitmproxy
         pip install ./ddev
         pip install ./datadog_checks_dev[cli]
         pip install ./datadog_checks_base[deps]

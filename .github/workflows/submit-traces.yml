@@ -7,10 +7,6 @@ on:
         required: false
         default: "traces"
         type: string
-      agent-port:
-        required: false
-        default: "8126"
-        type: string
 
 defaults:
   run:
@@ -25,7 +21,7 @@ jobs:
       dd-agent:
         image: gcr.io/datadoghq/agent:latest
         ports:
-        - "${{ inputs.agent-port }}:8126"
+        - "8126:8126"
         env:
           DD_API_KEY: "${{ secrets.DD_API_KEY }}"
           DD_HOSTNAME: "none"
@@ -33,13 +29,12 @@ jobs:
           DD_LOG_LEVEL: "trace"
 
     steps:
+    - uses: actions/checkout@v3
+
     - uses: actions/download-artifact@v3
       with:
         name: "${{ inputs.artifact-name }}"
         path: captured-traces
-
-    - name: Set up trace replaying
-      run: pipx install mitmproxy
 
     - name: Replay
       run: |-
@@ -49,7 +44,7 @@ jobs:
           # check classes like when testing ddev or the downloader
           if [[ -s "$request" ]]; then
             echo "/// Replaying: $request"
-            mitmdump -C "$request"
+            python ../.ddev/ci/scripts/traces.py replay --record-file "$request"
           fi
         done
 
