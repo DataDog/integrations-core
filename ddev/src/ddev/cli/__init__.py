@@ -12,6 +12,7 @@ from datadog_checks.dev.tooling.commands.run import run
 from datadog_checks.dev.tooling.commands.test import test
 
 from ddev.__about__ import __version__
+from ddev.cli import upgrade
 from ddev.cli.application import Application
 from ddev.cli.ci import ci
 from ddev.cli.config import config
@@ -25,7 +26,6 @@ from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.plugin import specs
 from ddev.utils.ci import running_in_ci
 from ddev.utils.fs import Path
-
 
 @click.group(context_settings={'help_option_names': ['-h', '--help']}, invoke_without_command=True)
 @click.option('--core', '-c', is_flag=True, help='Work on `integrations-core`.')
@@ -106,10 +106,6 @@ def ddev(ctx: click.Context, core, extras, marketplace, agent, here, color, inte
                 f'Unable to create config file located at `{str(app.config_file.path)}`. Please check your permissions.'
             )
 
-    if not ctx.invoked_subcommand:
-        app.display_info(ctx.get_help(), highlight=False)
-        return
-
     # Persist app data for sub-commands
     ctx.obj = app
 
@@ -117,6 +113,13 @@ def ddev(ctx: click.Context, core, extras, marketplace, agent, here, color, inte
         app.config_file.load()
     except OSError as e:  # no cov
         app.abort(f'Error loading configuration: {e}')
+
+    if app.config.check_update:    
+        upgrade.check_upgrade(app, __version__)
+
+    if not ctx.invoked_subcommand:
+        app.display_info(ctx.get_help(), highlight=False)
+        return
 
     app.set_repo(core, extras, marketplace, agent, here)
 
