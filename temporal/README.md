@@ -17,7 +17,7 @@ No additional installation is needed on your server.
 
 1. Configure your Temporal services to expose metrics via a `prometheus` endpoint by following the [official Temporal documentation][10].
 
-2. Edit the `temporal.d/conf.yaml` file located in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your temporal performance data. 
+2. Edit the `temporal.d/conf.yaml` file located in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Temporal performance data. 
 
 To get started, configure the `openmetrics_endpoint` option to match the `listenAddress` and `handlerPath` options from your Temporal server configuration.
 
