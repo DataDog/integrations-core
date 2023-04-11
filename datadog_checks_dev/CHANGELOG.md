@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 19.0.0 / 2023-04-11
+
+* [Changed] Replace flake8 and isort with Ruff. See [#14212](https://github.com/DataDog/integrations-core/pull/14212).
+
 ## 18.1.0 / 2023-03-31
 
 * [Added] Get more insight into Agent E2E communication errors. See [#14259](https://github.com/DataDog/integrations-core/pull/14259).
