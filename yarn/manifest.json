@@ -41,7 +41,11 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "java org.apache.hadoop.yarn.server.resourcemanager.ResourceManager",
+        "java org.apache.hadoop.yarn.server.nodemanager.NodeManager"
+      ]
     },
     "dashboards": {
       "yarn": "assets/dashboards/yarn_dashboard.json",
