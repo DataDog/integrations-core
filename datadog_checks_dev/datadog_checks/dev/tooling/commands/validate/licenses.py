@@ -224,7 +224,7 @@ async def get_data(url):
 
 async def scrape_license_data(urls):
     package_data = defaultdict(
-        lambda: {'copyright': dict(), 'licenses': set(), 'classifiers': set(), 'home_page': None, 'author': None}
+        lambda: {'copyright': {}, 'licenses': set(), 'classifiers': set(), 'home_page': None, 'author': None}
     )
 
     async with Pool() as pool:

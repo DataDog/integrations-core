@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 
-from typing import List, Optional
+from typing import List, Optional  # noqa: F401
 
 import dns.resolver
 

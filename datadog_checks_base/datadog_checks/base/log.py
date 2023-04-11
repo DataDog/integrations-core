@@ -4,7 +4,7 @@
 import logging
 import sys
 import warnings
-from typing import Callable
+from typing import Callable  # noqa: F401
 
 from six import PY2, text_type
 from urllib3.exceptions import InsecureRequestWarning
