@@ -140,7 +140,7 @@ files:
         irc, postgres, mysql, lmtp, nntp, sieve, and ldap.
 
         Currently this checks supports only the below protocols:
-          postgres
+          postgres, mysql
       value:
         type: string
         enum:
