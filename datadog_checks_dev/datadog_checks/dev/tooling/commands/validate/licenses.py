@@ -3,10 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
 import difflib
+import io
 import os
 import re
 import tarfile
 from collections import defaultdict
+from contextlib import closing
+from zipfile import ZipFile
 
 import click
 import orjson
@@ -208,18 +211,7 @@ def get_known_spdx_licenses():
 
 async def get_data(url):
     async with request('GET', url) as response:
-        try:
-            info = orjson.loads(await response.read())['info']
-        except Exception as e:
-            raise type(e)(f'Error processing URL {url}: {e}')
-        else:
-            return (
-                info['name'],
-                info['author'] or info['maintainer'] or info['author_email'] or info['maintainer_email'] or '',
-                info['license'],
-                info['home_page'],
-                {extract_classifier_value(c) for c in info['classifiers'] if c.startswith('License ::')},
-            )
+        return orjson.loads(await response.read())
 
 
 async def scrape_license_data(urls):
@@ -228,21 +220,24 @@ async def scrape_license_data(urls):
     )
 
     async with Pool() as pool:
-        async for package_name, package_author, package_license, home_page, license_classifiers in pool.map(
-            get_data, urls
-        ):
-            data = package_data[package_name]
-            if package_author:
-                data['author'] = package_author
+        async for resp in pool.map(get_data, urls):
+            info = resp['info']
+            data = package_data[info['name']]
+            data['urls'] = resp['urls']
+            pkg_author = info['author'] or info['maintainer'] or info['author_email'] or info['maintainer_email'] or ''
+            if pkg_author:
+                data['author'] = pkg_author
 
-            data['classifiers'].update(license_classifiers)
-            if package_license:
+            data['classifiers'].update(
+                {extract_classifier_value(c) for c in info['classifiers'] if c.startswith('License ::')}
+            )
+            if package_license := info['license']:
                 if ' :: ' in package_license:
                     data['classifiers'].add(extract_classifier_value(package_license))
                 else:
                     data['licenses'].add(package_license)
 
-            if home_page:
+            if home_page := info['home_page']:
                 data['home_page'] = home_page
 
     return package_data
@@ -252,17 +247,21 @@ def update_copyrights(package_name, license_id, data, ctx):
     """
     Update package data with scraped copyright attributions.
     """
-    home_page = data['home_page']
-    repo_url = PACKAGE_REPO_OVERRIDES.get(package_name)
-    created_date = ''
 
-    if not repo_url:
-        repo_url = home_page
+    gh_repo_url = PACKAGE_REPO_OVERRIDES.get(package_name)
+    gh_repo_url = gh_repo_url if gh_repo_url else data['home_page']
+    if gh_repo_url is not None:
+        created_date = probe_github(gh_repo_url, ctx)
 
-    if repo_url:
-        cp, created_date = scrape_copyright_data(repo_url, ctx)
-        if cp:
-            data['copyright'][license_id] = cp
+    pkg_urls = [u for u in (d['url'] for d in data['urls']) if u.endswith('.whl') or u.endswith('.tar.gz')]
+    if not pkg_urls:
+        raise ValueError(
+            f"Found no urls to packages, here are the urls for this dependency: {[u['url'] for u in data['urls']]}"
+        )
+    url = pkg_urls[0]  # Since we only scan the contents of the package archive we don't care which package we download.
+    cp = scrape_copyright_data(url)
+    if cp:
+        data['copyright'][license_id] = cp
 
     if data['author'] and not data['copyright'].get(license_id):
         cp = 'Copyright {}{}'.format(created_date, data['author'])
@@ -282,19 +281,16 @@ def probe_github(url, ctx):
     if url.endswith('/'):
         url = url[:-1]
     if 'github.com' not in url:
-        return None, ''
+        return ''
     owner_repo = re.sub(r'.*github.com/', '', url)
     repo_api_url = f'https://api.github.com/repos/{owner_repo}'
     try:
-        repo_res = requests.get(repo_api_url, auth=get_auth_info(ctx.obj)).json()
-        def_branch = repo_res.get('default_branch')
-        created_date = repo_res.get('created_at', '')
-        if created_date:
-            created_date = created_date[:4] + ' '
-        tar_path = f'https://github.com/{owner_repo}/archive/refs/heads/{def_branch}.tar.gz'
-        return tar_path, created_date
-    except Exception:
-        return None, ''
+        resp = requests.get(repo_api_url, auth=get_auth_info(ctx.obj))
+        resp.raise_for_status()
+        created_date = resp.json().get('created_at', '')
+    except requests.exceptions.RequestException:
+        created_date = ''
+    return created_date[:4] + ' ' if created_date else created_date
 
 
 def parse_license_path(tar_file_name):
@@ -310,35 +306,42 @@ def parse_license_path(tar_file_name):
     return None
 
 
-def generate_tarfiles(tar_path):
-    """
-    Streams tarball archive and generates tarfile for each file.
-    """
-    stream = requests.get(tar_path, stream=True)
-    with tarfile.open(fileobj=stream.raw, mode="r|gz") as tar_file:
-        for tar_info in tar_file:
-            if not tar_info.islnk() and not tar_info.issym():
-                yield tar_info, tar_file
-    stream.close()
+def generate_from_tarball(stream):
+    with tarfile.open(fileobj=stream, mode="r|gz") as archive:
+        for tar_info in archive:
+            if not (tar_info.islnk() or tar_info.issym()) and parse_license_path(tar_info.name):
+                fh = archive.extractfile(tar_info)
+                if fh is not None:
+                    with closing(fh) as safe_fh:
+                        yield safe_fh.read()
 
 
-def scrape_copyright_data(url_path, ctx):
+def generate_from_wheel(stream):
+    with ZipFile((stream)) as archive:
+        for name in archive.namelist():
+            if parse_license_path(name):
+                with archive.open(name) as fh:
+                    yield fh.read()
+
+
+def pick_file_generator(url):
+    if url.endswith(".tar.gz"):
+        return generate_from_tarball
+    elif url.endswith(".whl"):
+        return generate_from_wheel
+    else:
+        raise ValueError(f"Unknown type of archive based on this url: {url}")
+
+
+def scrape_copyright_data(url_path):
     """
     Scrapes each tarfile for copyright attributions.
     """
-    tar_path, created_date = probe_github(url_path, ctx)
-    if tar_path:
-        for tar_info, tar_file in generate_tarfiles(tar_path):
-            local_path = parse_license_path(tar_info.name)
-            if local_path:
-                file = tar_file.extractfile(tar_info)
-                cp = find_cpy(file.read())
-                if cp:
-                    file.close()
-                    return cp, created_date
-                if file:
-                    file.close()
-    return None, created_date
+    with closing(requests.get(url_path, stream=True)) as resp:
+        for fcontents in pick_file_generator(url_path)(io.BytesIO(resp.content)):
+            if cp := find_cpy(fcontents):
+                return cp
+    return None
 
 
 def find_cpy(data):
