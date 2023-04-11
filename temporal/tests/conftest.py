@@ -5,14 +5,18 @@ import copy
 import os
 import time
 from contextlib import contextmanager
+from unittest import mock
 
 import pytest
 
 from datadog_checks.dev import EnvVars, TempDir, docker_run, get_docker_hostname, get_here, run_command
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.temporal import TemporalCheck
 
-INSTANCE = {"service": "server"}
+INSTANCE = {
+    "openmetrics_endpoint": f"http://{get_docker_hostname()}:8000/metrics",
+}
 
 
 @pytest.fixture(scope='session')
@@ -70,3 +74,22 @@ def create_log_volumes():
 @pytest.fixture
 def instance():
     return copy.deepcopy(INSTANCE)
+
+
+@pytest.fixture
+def check(instance):
+    return TemporalCheck('temporal.server', {}, [instance])
+
+
+@pytest.fixture()
+def mock_metrics():
+    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
+    with open(f_name, 'r') as f:
+        text_data = f.read()
+    with mock.patch(
+        'requests.get',
+        return_value=mock.MagicMock(
+            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
+        ),
+    ):
+        yield
