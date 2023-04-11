@@ -145,5 +145,6 @@ files:
         type: string
         enum:
         - postgres
+        - mysql
     - template: instances/default
     - template: instances/tls
