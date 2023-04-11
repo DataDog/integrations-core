@@ -201,7 +201,7 @@ def add_style_formatter(config, sections, make_envconfig, reader):
         # Run formatter AFTER sorting imports
         'commands': '\n'.join(
             [
-                'ruff . --config ../pyproject.toml',
+                'ruff . --config ../pyproject.toml --fix',
                 'black . --config ../pyproject.toml',
                 'python -c "print(\'\\n[NOTE] ruff may still report style errors for things it cannot fix, '
                 'these will need to be fixed manually.\')"',
