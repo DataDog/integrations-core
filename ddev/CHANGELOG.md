@@ -1,5 +1,9 @@
 # CHANGELOG - ddev
 
+## 2.0.0 / 2023-04-11
+
+* [Changed] Replace flake8 and isort with Ruff. See [#14212](https://github.com/DataDog/integrations-core/pull/14212).
+
 ## 1.6.0 / 2023-03-31
 
 * [Added] Add GitHub Actions workflows. See [#14187](https://github.com/DataDog/integrations-core/pull/14187).
