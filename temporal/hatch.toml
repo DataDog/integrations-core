@@ -8,6 +8,3 @@ version = ["1.19"]
 matrix.version.env-vars = [
   { key = "TEMPORAL_VERSION", value = "1.19.1", if = ["1.19"] },
 ]
-
-[envs.default.env-vars]
-DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
