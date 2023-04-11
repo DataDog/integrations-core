@@ -27,6 +27,7 @@ from ddev.plugin import specs
 from ddev.utils.ci import running_in_ci
 from ddev.utils.fs import Path
 
+
 @click.group(context_settings={'help_option_names': ['-h', '--help']}, invoke_without_command=True)
 @click.option('--core', '-c', is_flag=True, help='Work on `integrations-core`.')
 @click.option('--extras', '-e', is_flag=True, help='Work on `integrations-extras`.')
@@ -114,7 +115,7 @@ def ddev(ctx: click.Context, core, extras, marketplace, agent, here, color, inte
     except OSError as e:  # no cov
         app.abort(f'Error loading configuration: {e}')
 
-    if app.config.check_update:    
+    if app.config.check_update:
         upgrade.check_upgrade(app, __version__)
 
     if not ctx.invoked_subcommand:
