@@ -48,7 +48,7 @@ def check_upgrade(app, version):
 
     # Check from last run to see if the data inside the registry.json is older than 7 days
     # If the last checked version is newer than current.
-    if date_now - last_run < timedelta(days=7) and latest_version < current_version:
+    if date_now - last_run < timedelta(days=7) and latest_version > current_version:
         msg = (
             f'\n!!An upgrade to version {latest_version} is available for {PACKAGE_NAME}. '
             f'Your current version is {current_version}!!'
@@ -65,7 +65,7 @@ def check_upgrade(app, version):
         data = response.json()
         latest_version = data['info']['version']
         write_last_run(registry_file_path, latest_version, date_now)
-        if VersionInfo.parse(latest_version) < current_version:
+        if VersionInfo.parse(latest_version) > current_version:
             msg = (
                 f'\n!!An upgrade to version {latest_version} is available for {PACKAGE_NAME}. '
                 f'Your current version is {current_version}!!'
