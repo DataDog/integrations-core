@@ -72,9 +72,9 @@ class RootConfig(LazilyParsedConfig):
                 elif raw_update.lower() == 'false':
                     check_update = False
                 else:
-                    raise ValueError('Invalid value for check_update, it should be True or False: {}'.format(raw_update))
+                    raise ValueError('Invalid value for check_update, it must be True or False: {}'.format(raw_update))
             else:
-                raise TypeError('Invalid value for check_update, it should be True or False: {}'.format(type(raw_update)))
+                raise TypeError('Invalid value for check_update, it must be True or False: {}'.format(type(raw_update)))
             return check_update
 
     @check_update.setter
