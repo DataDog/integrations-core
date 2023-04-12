@@ -479,7 +479,7 @@ def test_latest_service_metrics(aggregator, dd_run_check, instance_nova_microver
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-default',
             'nova_service_id:7bf08d7e-a939-46c3-bdae-fbe3ebfe78a4',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
     aggregator.assert_metric(
@@ -491,7 +491,7 @@ def test_latest_service_metrics(aggregator, dd_run_check, instance_nova_microver
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-default',
             'nova_service_id:7bf08d7e-a939-46c3-bdae-fbe3ebfe78a4',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
 
@@ -504,7 +504,7 @@ def test_latest_service_metrics(aggregator, dd_run_check, instance_nova_microver
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-default',
             'nova_service_id:df55f706-a60e-4d3d-8cd6-30f5b33d79ce',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
     aggregator.assert_metric(
@@ -516,7 +516,7 @@ def test_latest_service_metrics(aggregator, dd_run_check, instance_nova_microver
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-default',
             'nova_service_id:df55f706-a60e-4d3d-8cd6-30f5b33d79ce',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
 
@@ -529,7 +529,7 @@ def test_latest_service_metrics(aggregator, dd_run_check, instance_nova_microver
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-default',
             'nova_service_id:aadbda65-f523-419a-b3df-c287d196a2c1',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
     aggregator.assert_metric(
@@ -541,7 +541,7 @@ def test_latest_service_metrics(aggregator, dd_run_check, instance_nova_microver
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-default',
             'nova_service_id:aadbda65-f523-419a-b3df-c287d196a2c1',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
 
@@ -554,7 +554,7 @@ def test_latest_service_metrics(aggregator, dd_run_check, instance_nova_microver
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-default',
             'nova_service_id:2ec2027d-ac70-4e2b-95ed-fb1756d24996',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
     aggregator.assert_metric(
@@ -566,7 +566,7 @@ def test_latest_service_metrics(aggregator, dd_run_check, instance_nova_microver
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-default',
             'nova_service_id:2ec2027d-ac70-4e2b-95ed-fb1756d24996',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
 
@@ -600,7 +600,7 @@ def test_default_service_metrics(aggregator, dd_run_check, instance, monkeypatch
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-default',
             'nova_service_id:3',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
     aggregator.assert_metric(
@@ -612,7 +612,7 @@ def test_default_service_metrics(aggregator, dd_run_check, instance, monkeypatch
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-default',
             'nova_service_id:3',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
 
@@ -625,7 +625,7 @@ def test_default_service_metrics(aggregator, dd_run_check, instance, monkeypatch
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-default',
             'nova_service_id:5',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
     aggregator.assert_metric(
@@ -637,7 +637,7 @@ def test_default_service_metrics(aggregator, dd_run_check, instance, monkeypatch
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-default',
             'nova_service_id:5',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
 
@@ -650,7 +650,7 @@ def test_default_service_metrics(aggregator, dd_run_check, instance, monkeypatch
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-default',
             'nova_service_id:1',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
     aggregator.assert_metric(
@@ -662,7 +662,7 @@ def test_default_service_metrics(aggregator, dd_run_check, instance, monkeypatch
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-default',
             'nova_service_id:1',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
 
@@ -675,7 +675,7 @@ def test_default_service_metrics(aggregator, dd_run_check, instance, monkeypatch
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-default',
             'nova_service_id:2',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
     aggregator.assert_metric(
@@ -687,7 +687,7 @@ def test_default_service_metrics(aggregator, dd_run_check, instance, monkeypatch
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-default',
             'nova_service_id:2',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
 
@@ -721,7 +721,7 @@ def test_default_ironic_service_metrics(aggregator, dd_run_check, instance, monk
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-ironic',
             'nova_service_id:3',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
     aggregator.assert_metric(
@@ -733,7 +733,7 @@ def test_default_ironic_service_metrics(aggregator, dd_run_check, instance, monk
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-ironic',
             'nova_service_id:3',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
 
@@ -746,7 +746,7 @@ def test_default_ironic_service_metrics(aggregator, dd_run_check, instance, monk
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-ironic',
             'nova_service_id:5',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
     aggregator.assert_metric(
@@ -758,7 +758,7 @@ def test_default_ironic_service_metrics(aggregator, dd_run_check, instance, monk
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-ironic',
             'nova_service_id:5',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
 
@@ -771,7 +771,7 @@ def test_default_ironic_service_metrics(aggregator, dd_run_check, instance, monk
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-ironic',
             'nova_service_id:1',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
     aggregator.assert_metric(
@@ -783,7 +783,7 @@ def test_default_ironic_service_metrics(aggregator, dd_run_check, instance, monk
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-ironic',
             'nova_service_id:1',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
 
@@ -796,7 +796,7 @@ def test_default_ironic_service_metrics(aggregator, dd_run_check, instance, monk
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-ironic',
             'nova_service_id:2',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )
     aggregator.assert_metric(
@@ -808,6 +808,6 @@ def test_default_ironic_service_metrics(aggregator, dd_run_check, instance, monk
             'nova_service_state:up',
             'nova_service_host:agent-integrations-openstack-ironic',
             'nova_service_id:2',
-            'service_status:enabled',
+            'nova_service_status:enabled',
         ],
     )

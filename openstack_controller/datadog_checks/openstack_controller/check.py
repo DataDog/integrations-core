@@ -64,7 +64,7 @@ def _create_baremetal_conductors_metric_tags(hostname, conductor_group):
 def _create_nova_services_metric_tags(host, state, nova_id, status):
     tags = [
         f'nova_service_host:{host}',
-        f'service_status:{status}',
+        f'nova_service_status:{status}',
     ]
     if nova_id:
         tags.append(f'nova_service_id:{nova_id}')
