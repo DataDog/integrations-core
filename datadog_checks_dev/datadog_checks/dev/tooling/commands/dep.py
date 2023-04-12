@@ -28,13 +28,8 @@ from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 
 # Dependencies to ignore when update dependencies
 IGNORED_DEPS = {
-    'psycopg2-binary',  # https://github.com/DataDog/integrations-core/pull/10456
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
     'flup',  # https://github.com/DataDog/integrations-core/pull/1997
-    # https://github.com/DataDog/integrations-core/pull/10105;
-    # snowflake-connector-python caps cryptography which means we need to be careful with how we update it
-    # (and do so manually)
-    'cryptography',
     'dnspython',
     'pymysql',  # https://github.com/DataDog/integrations-core/pull/12612
     'foundationdb',  # Breaking datadog_checks_base tests
