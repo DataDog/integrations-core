@@ -15,14 +15,12 @@ files:
     - template: instances
       options:
         - name: name
-          required: true
           description: |
             Unique identifier for this instance.
           value:
             example: <INSTANCE_NAME>
             type: string
         - name: user
-          required: true
           description: |
            Password authentication is the only auth method supported
            User expects username, password, and user domain id
