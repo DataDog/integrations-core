@@ -17,8 +17,8 @@ from .common import get_container_label, get_pod_by_uid, is_static_pending_pod, 
 METRIC_TYPES = ['counter', 'gauge', 'summary']
 
 # container-specific metrics should have all these labels
-PRE_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container_name', 'pod_name'])
-POST_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container', 'pod'])
+PRE_1_16_CONTAINER_LABELS = {'namespace', 'name', 'image', 'id', 'container_name', 'pod_name'}
+POST_1_16_CONTAINER_LABELS = {'namespace', 'name', 'image', 'id', 'container', 'pod'}
 
 # Value above which the figure can be discarded because it's an aberrant transient value
 MAX_MEMORY_RSS = 2**63

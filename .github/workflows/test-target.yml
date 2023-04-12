@@ -101,6 +101,7 @@ jobs:
       DD_TAGS: "team:agent-integrations,platform:${{ inputs.platform }},integration:${{ inputs.target }}"
       DD_TRACE_ANALYTICS_ENABLED: "true"
       # Capture traces for a separate job to do the submission
+      TRACE_CAPTURE_BASE_DIR: ".trace-captures"
       TRACE_CAPTURE_FILE: ".trace-captures/${{ inputs.job-name }}"
       TRACE_CAPTURE_LOG: ".trace-captures/output.log"
 
@@ -176,10 +177,11 @@ jobs:
 
     - name: Set up trace capturing
       if: inputs.repo == 'core'
+      env:
+        PYTHONUNBUFFERED: "1"
       run: |-
-        pipx install mitmproxy --python $(which python)
-        mkdir .trace-captures
-        mitmdump -p "${{ inputs.trace-agent-port }}" -w "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
+        mkdir "${{ env.TRACE_CAPTURE_BASE_DIR }}"
+        python .ddev/ci/scripts/traces.py capture --port "${{ inputs.trace-agent-port }}" --record-file "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
 
     - name: Run Unit & Integration tests
       if: inputs.standard && !inputs.minimum-base-package
@@ -218,12 +220,9 @@ jobs:
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
       run: ddev env test --base --new-env --junit ${{ inputs.target }}:latest
 
-    - name: Save trace captures
+    - name: View trace log
       if: inputs.repo == 'core' && always()
-      run: |-
-        Stop-Process -Name "*mitmdump*"
-        cat "${{ env.TRACE_CAPTURE_LOG }}"
-      shell: "pwsh"
+      run: cat "${{ env.TRACE_CAPTURE_LOG }}"
 
     - name: Upload captured traces
       if: inputs.repo == 'core' && always()

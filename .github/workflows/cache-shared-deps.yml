@@ -31,7 +31,7 @@ jobs:
       uses: actions/cache/restore@v3
       id: cache
       with:
-        path: "__lookup_only__"
+        path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
         key: >-
           ${{ format(
             'v01-python-{0}-{1}-{2}-{3}',
@@ -45,7 +45,6 @@ jobs:
     - name: Install dependencies
       if: steps.cache.outputs.cache-hit != 'true'
       run: |-
-        pip install mitmproxy
         pip install ./ddev
         pip install ./datadog_checks_dev[cli]
         pip install ./datadog_checks_base[deps]

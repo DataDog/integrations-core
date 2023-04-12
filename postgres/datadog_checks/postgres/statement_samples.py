@@ -6,7 +6,7 @@ import copy
 import re
 import time
 from enum import Enum
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple  # noqa: F401
 
 import psycopg2
 from cachetools import TTLCache
@@ -324,7 +324,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     pg_stat_activity_view=self._config.pg_stat_activity_view
                 )
             )
-            all_columns = set([i[0] for i in cursor.description])
+            all_columns = {i[0] for i in cursor.description}
             available_columns = [c for c in all_expected_columns if c in all_columns]
             missing_columns = set(all_expected_columns) - set(available_columns)
             if missing_columns:
@@ -718,10 +718,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             event = {
                 "host": self._check.resolved_hostname,
+                "dbm_type": "plan",
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(self._dbtags(row['datname'])),
                 "timestamp": time.time() * 1000,
+                "cloud_metadata": self._config.cloud_metadata,
                 "network": {
                     "client": {
                         "ip": row.get('client_addr', None),
@@ -804,6 +806,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "collection_interval": self._activity_coll_interval,
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
+            "cloud_metadata": self._config.cloud_metadata,
             "postgres_activity": active_sessions,
             "postgres_connections": active_connections,
         }

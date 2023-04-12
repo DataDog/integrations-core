@@ -12,11 +12,10 @@
     "title": "HDFS Datanode",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Category::Processing",
+      "Category::Log Collection",
       "Category::OS & System",
-      "Category::Log Collection"
+      "Supported OS::Linux",
+      "Supported OS::macOS"
     ]
   },
   "author": {

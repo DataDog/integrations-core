@@ -7,10 +7,6 @@ on:
         required: false
         default: "traces"
         type: string
-      agent-port:
-        required: false
-        default: "8126"
-        type: string
 
 defaults:
   run:
@@ -25,7 +21,7 @@ jobs:
       dd-agent:
         image: gcr.io/datadoghq/agent:latest
         ports:
-        - "${{ inputs.agent-port }}:8126"
+        - "8126:8126"
         env:
           DD_API_KEY: "${{ secrets.DD_API_KEY }}"
           DD_HOSTNAME: "none"
@@ -33,15 +29,17 @@ jobs:
           DD_LOG_LEVEL: "trace"
 
     steps:
+    - uses: actions/checkout@v3
+
     - uses: actions/download-artifact@v3
+      id: download
       with:
         name: "${{ inputs.artifact-name }}"
         path: captured-traces
-
-    - name: Set up trace replaying
-      run: pipx install mitmproxy
+      continue-on-error: true
 
     - name: Replay
+      if: steps.download.outcome == 'success'
       run: |-
         cd captured-traces
         for request in *; do
@@ -49,14 +47,16 @@ jobs:
           # check classes like when testing ddev or the downloader
           if [[ -s "$request" ]]; then
             echo "/// Replaying: $request"
-            mitmdump -C "$request"
+            python ../.ddev/ci/scripts/traces.py replay --record-file "$request"
           fi
         done
 
     - name: Show Agent status
+      if: steps.download.outcome == 'success'
       run: docker exec $(docker ps --format "{{.ID}}") agent status
 
     - uses: geekyeggo/delete-artifact@v2
+      if: steps.download.outcome == 'success'
       with:
         name: "${{ inputs.artifact-name }}"
         failOnError: false

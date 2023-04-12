@@ -32,7 +32,6 @@ class SharedConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    allowed_metrics: Optional[Sequence[str]]
     proxy: Optional[Proxy]
     service: Optional[str]
     skip_proxy: Optional[bool]

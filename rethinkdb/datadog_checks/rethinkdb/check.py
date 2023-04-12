@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import importlib
 from contextlib import contextmanager
-from typing import Any, Callable, Dict, Iterator, List, Optional, cast
+from typing import Any, Callable, Dict, Iterator, List, Optional, cast  # noqa: F401
 
 import rethinkdb
 
