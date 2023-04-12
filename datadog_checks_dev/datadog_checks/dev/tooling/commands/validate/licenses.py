@@ -242,6 +242,24 @@ async def scrape_license_data(urls):
 
     return package_data
 
+def collect_source_url(package_data):
+    """Collect url to a tarball (preferred) or wheel (backup) for a package."""
+    tarballs, wheels = [], []
+    for urld in package_data['urls']:
+        url = urld['url']
+        if url.endswith('.tar.gz'):
+            tarballs.append(url)
+        elif url.endswith('.whl'):
+            wheels.append(url)
+        else:
+            continue
+    combined = tarballs + wheels
+    if not combined:
+        raise ValueError(
+            f"No urls for packages, here are the urls for this dependency: {[u['url'] for u in package_data['urls']]}"
+        )
+    return combined[0]
+
 
 def update_copyrights(package_name, license_id, data, ctx):
     """
@@ -251,14 +269,7 @@ def update_copyrights(package_name, license_id, data, ctx):
     gh_repo_url = PACKAGE_REPO_OVERRIDES.get(package_name) or data['home_page']
     created_date = '' if gh_repo_url is None else probe_github(gh_repo_url, ctx)
 
-    pkg_urls = [u for u in (d['url'] for d in data['urls']) if u.endswith(('.whl', '.tar.gz'))]
-    if not pkg_urls:
-        raise ValueError(
-            f"Found no urls to packages, here are the urls for this dependency: {[u['url'] for u in data['urls']]}"
-        )
-
-    # Since we only scan the contents of the package archive we don't care which package we download.
-    url = pkg_urls[0]
+    url = collect_source_url(data)
     cp = scrape_copyright_data(url)
     if cp:
         data['copyright'][license_id] = cp
@@ -273,11 +284,7 @@ def update_copyrights(package_name, license_id, data, ctx):
 
 
 def probe_github(url, ctx):
-    """
-    Probe GitHub API for package's repo creation date and default branch.
-    Generates URL path for downloading the repo's tarball archive file.
-    Returns tarball path and repo creation date.
-    """
+    """Probe GitHub API for package's repo creation date."""
     if url.endswith('/'):
         url = url[:-1]
     if 'github.com' not in url:
@@ -306,8 +313,8 @@ def parse_license_path(tar_file_name):
     return None
 
 
-def generate_from_tarball(stream):
-    with tarfile.open(fileobj=stream, mode="r|gz") as archive:
+def generate_from_tarball(response):
+    with tarfile.open(fileobj=response.raw, mode="r|gz") as archive:
         for tar_info in archive:
             if not (tar_info.islnk() or tar_info.issym()) and parse_license_path(tar_info.name):
                 fh = archive.extractfile(tar_info)
@@ -316,8 +323,8 @@ def generate_from_tarball(stream):
                         yield safe_fh.read()
 
 
-def generate_from_wheel(stream):
-    with ZipFile(stream) as archive:
+def generate_from_wheel(response):
+    with ZipFile(io.BytesIO(response.content)) as archive:
         for name in archive.namelist():
             if parse_license_path(name):
                 with archive.open(name) as fh:
@@ -338,7 +345,7 @@ def scrape_copyright_data(url_path):
     Scrapes each tarfile for copyright attributions.
     """
     with requests.get(url_path, stream=True) as resp:
-        for fcontents in pick_file_generator(url_path)(io.BytesIO(resp.content)):
+        for fcontents in pick_file_generator(url_path)(resp):
             if cp := find_cpy(fcontents):
                 return cp
     return None
