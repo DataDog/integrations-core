@@ -40,7 +40,31 @@ Linux: Configure the following sudoers rule for this to work:
 dd-agent ALL=NOPASSWD: /usr/sbin/conntrack -S
 ```
 
-Kubernetes: Conntrack metrics are available by default in Kubernetes < v1.11 or when using the `host` networking mode in Kubernetes v1.11+.
+**Kubernetes**:  
+
+Conntrack metrics are available by default in Kubernetes < v1.11 or when using the `host` networking mode in Kubernetes v1.11+.  
+
+In order to collect AWS ENA metrics, use `host` network mode and if you are using Datadog [Helm Chart][11]:  
+Save the following content into a file named `daemonset-patch.yaml`:  
+```spec:
+  template:
+    spec:
+      containers:
+      - name: agent
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+```
+
+and patch your agent deployment with:  
+```
+kubectl patch daemonset datadog --patch-file daemonset-patch.yaml
+kubectl rollout restart daemonset datadog
+```
+
+If you are using Deamonset, add the above content directly into datadog agent's manifest.
+
 
 ### Validation
 
@@ -80,3 +104,4 @@ The Network check does not include any service checks.
 [8]: https://github.com/DataDog/integrations-core/blob/master/network/CHANGELOG.md#1110--2019-05-14
 [9]: https://docs.datadoghq.com/integrations/guide/send-tcp-udp-host-metrics-to-the-datadog-api/
 [10]: https://docs.datadoghq.com/monitors/monitor_types/network/
+[11]: https://docs.datadoghq.com/containers/kubernetes/installation/?tab=helm#installation
