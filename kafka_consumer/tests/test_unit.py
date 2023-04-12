@@ -6,10 +6,10 @@ from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
-from tests.common import metrics
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer import KafkaCheck
+from tests.common import metrics
 
 pytestmark = [pytest.mark.unit]
 
