@@ -66,7 +66,6 @@ def test__get_connection_oracledb(instance, dd_run_check, aggregator, expected_t
                 'service_name': 'xe',
                 'protocol': 'TCP',
                 'tags': ['optional:tag1'],
-                'use_instant_client': True,
             },
             ['server:localhost:1521', 'optional:tag1'],
         ),
@@ -79,7 +78,6 @@ def test__get_connection_oracledb(instance, dd_run_check, aggregator, expected_t
                 'service_name': 'xe',
                 'protocol': 'TCPS',
                 'tags': ['optional:tag1'],
-                'use_instant_client': True,
             },
             ['server:localhost:2484', 'optional:tag1'],
         ),
@@ -89,7 +87,7 @@ def test__get_connection_oracledb_instant_client(instance, dd_run_check, aggrega
     """
     Test the _get_connection method using the instant client
     """
-    check = Oracle(CHECK_NAME, {}, [instance])
+    check = Oracle(CHECK_NAME, { 'use_instant_client': True }, [instance])
     con = mock.MagicMock()
     with mock.patch('datadog_checks.oracle.oracle.oracledb') as pyoradb:
         pyoradb.connect.return_value = con

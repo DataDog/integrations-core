@@ -69,41 +69,35 @@ E2E_METADATA_ORACLE_CLIENT = {
 
 @pytest.fixture
 def check(instance):
-    return Oracle(CHECK_NAME, {}, [instance])
+    return Oracle(CHECK_NAME, { "use_instant_client": False }, [instance])
 
 
 @pytest.fixture
 def tcps_check(tcps_instance):
-    return Oracle(CHECK_NAME, {}, [tcps_instance])
+    return Oracle(CHECK_NAME, { "use_instant_client": False }, [tcps_instance])
 
 
 @pytest.fixture
 def instance():
     return {
-        init_config: { "use_instant_client": False },
-        instances: {
-            'server': 'localhost:1521',
-            'username': 'system',
-            'password': 'oracle',
-            'service_name': 'xe',
-            'protocol': 'TCP',
-            'tags': ['optional:tag1'],
-        }
+        'server': 'localhost:1521',
+        'username': 'system',
+        'password': 'oracle',
+        'service_name': 'xe',
+        'protocol': 'TCP',
+        'tags': ['optional:tag1'],
     }
 
 
 @pytest.fixture
 def tcps_instance():
     return {
-        init_config: { "use_instant_client": False },
-        instances: {
-            'server': 'localhost:2484',
-            'username': 'system',
-            'password': 'oracle',
-            'service_name': 'xe',
-            'protocol': 'TCP',
-            'tags': ['optional:tag1'],
-        }
+        'server': 'localhost:2484',
+        'username': 'system',
+        'password': 'oracle',
+        'service_name': 'xe',
+        'protocol': 'TCP',
+        'tags': ['optional:tag1'],
     }
 
 
@@ -117,13 +111,15 @@ def dd_environment():
         'protocol': 'TCP',
     }
 
+    use_instant_client = False
+
     if CLIENT_LIB == 'jdbc':
         e2e_metadata = E2E_METADATA_JDBC_CLIENT
         instance['jdbc_driver_path'] = '/opt/oracle/instantclient_19_3/ojdbc8.jar'
     else:
         e2e_metadata = E2E_METADATA_ORACLE_CLIENT
         if CLIENT_LIB == 'oracle-instant-client':
-            instance['use_instant_client'] = True
+            use_instant_client = True
 
     # Set additional config options for TCPS
     if ENABLE_TCPS:
@@ -144,7 +140,10 @@ def dd_environment():
         attempts=20,
         attempts_wait=5,
     ):
-        yield instance, e2e_metadata
+        yield { 
+                'init_config': { "use_instant_client": use_instant_client },
+                'instances': [instance],
+            }, e2e_metadata
 
 
 @pytest.fixture
