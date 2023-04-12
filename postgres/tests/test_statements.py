@@ -41,7 +41,7 @@ SAMPLE_QUERIES = [
 
 dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
 
-DEFAULT_TZ_INFO = datetime.timezone(offset=datetime.timedelta(0))
+DEFAULT_TZ_INFO = datetime.tzinfo('UTC')
 
 
 @pytest.fixture(autouse=True)
