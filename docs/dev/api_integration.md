@@ -83,6 +83,8 @@ The options you use with the `ddev` command are different depending on what type
 
 Make sure that the following required assets for your integration are complete:
 
+{{% integration-assets %}}
+   
 ### README
 
 Once you have created a `README.md` file, add the following sections as H2s (`##`) and fill out the content that is displayed in the Integrations tile:

@@ -480,7 +480,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         """
         with closing(self._get_db_connection().cursor()) as cursor:
             self._cursor_run(cursor, ENABLED_STATEMENTS_CONSUMERS_QUERY)
-            return set([r[0] for r in cursor.fetchall()])
+            return {r[0] for r in cursor.fetchall()}
 
     def _enable_events_statements_consumers(self):
         """

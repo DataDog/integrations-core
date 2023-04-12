@@ -1,6 +1,6 @@
 import json
 import os
-import re
+import re  # noqa: F401
 
 
 with open(os.environ['GITHUB_EVENT_PATH']) as event_file:

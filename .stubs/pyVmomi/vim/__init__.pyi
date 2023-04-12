@@ -2,9 +2,9 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, List
 
-from . import event
-from . import fault
-from . import view
+from . import event  # noqa: F401
+from . import fault  # noqa: F401
+from . import view  # noqa: F401
 from ..vmodl.query import PropertyCollector
 from .event import EventManager
 from .option import OptionManager
