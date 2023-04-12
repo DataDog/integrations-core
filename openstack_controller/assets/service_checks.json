@@ -11,7 +11,9 @@
         "name": "OpenStack Neutron API Up",
         "groups": [
             "host",
-            "keystone_server"
+            "keystone_server",
+            "project_id",
+            "project_name"
         ],
         "description": "Returns `CRITICAL` if the Agent is unable to query the Neutron API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
     },
@@ -27,7 +29,9 @@
         "name": "OpenStack Nova API Up",
         "groups": [
             "host",
-            "keystone_server"
+            "keystone_server",
+            "project_id",
+            "project_name"
         ],
         "description": "Returns `CRITICAL` if the Agent is unable to query the Nova API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
     },
@@ -60,7 +64,10 @@
             "host",
             "hypervisor",
             "hypervisor_id",
-            "virt_type"
+            "virt_type",
+            "project_id",
+            "project_name",
+            "status"
         ],
         "description": "Returns `UNKNOWN` if the Agent is unable to get the Hypervisor state, `CRITICAL` if the Hypervisor is down. Returns `OK` otherwise."
     },
@@ -81,5 +88,41 @@
             "tenant_id"
         ],
         "description": "Returns `UNKNOWN` if the Agent is unable to get the Network state, `CRITICAL` if the Network is down. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.46.0",
+        "check": "openstack.ironic.api.up",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "integration": "OpenStack",
+        "name": "OpenStack Ironic API Up",
+        "groups": [
+            "host",
+            "keystone_server",
+            "project_name",
+            "project_id"
+        ],
+        "description": "Returns `CRITICAL` if the Agent is unable to query the Ironic API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.46.0",
+        "check": "openstack.octavia.api.up",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "integration": "OpenStack",
+        "name": "OpenStack Octavia API Up",
+        "groups": [
+            "host",
+            "keystone_server",
+            "project_name",
+            "project_id"
+        ],
+        "description": "Returns `CRITICAL` if the Agent is unable to query the Octavia API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
     }
 ]
