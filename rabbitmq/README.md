@@ -38,8 +38,15 @@ Configure the `prometheus_plugin` section in your instance configuration. When u
        url: http://<HOST>:15692
  ```
 
- This enables scraping of the [`/metrics` endpoint][20] on one RabbitMQ node. We can also collect data from the [`/metrics/detailed` endpoint][22].
+ This enables scraping of the [`/metrics` endpoint][20] on one RabbitMQ node. We can also collect data from the [`/metrics/detailed` endpoint][22]. 
 
+ ```yaml
+ instances:
+   - prometheus_plugin:
+       url: http://<HOST>:15692
+       unaggregated_endpoint: detailed?family=queue_coarse_metrics
+ ```
+ This enables scraping of the [`/metrics/detailed` endpoint][22] and collect `queue coarse metrics`.
 
 ##### [RabbitMQ Management Plugin][4].
 
