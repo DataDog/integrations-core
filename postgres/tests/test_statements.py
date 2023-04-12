@@ -12,13 +12,13 @@ import mock
 import psycopg2
 import pytest
 from dateutil import parser
-from dateutil.tz import UTC
 from semver import VersionInfo
 from six import string_types
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.time import UTC
 from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
 
