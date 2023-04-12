@@ -41,7 +41,8 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "psycopg2-binary==2.8.6; sys_platform != 'darwin' or platform_machine != 'arm64'",
+    "psycopg2-binary==2.8.6; python_version < '3.0'",
+    "psycopg2-binary==2.9.6; python_version > '3.0'",
 ]
 
 [project.urls]
