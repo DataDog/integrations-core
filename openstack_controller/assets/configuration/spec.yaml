@@ -20,6 +20,7 @@ files:
           value:
             example: <INSTANCE_NAME>
             type: string
+          enabled: true
         - name: user
           description: |
            Password authentication is the only auth method supported
@@ -34,6 +35,7 @@ files:
               domain:
                 id: <DOMAIN_ID>
             type: object
+          enabled: truewq
         - name: whitelist_project_names
           description: |
            IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
