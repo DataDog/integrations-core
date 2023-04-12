@@ -1,6 +1,7 @@
 Component,Origin,License,Copyright
 JPype1,PyPI,Apache-2.0,Copyright (c) 2004-2008 Steve Menard
 JayDeBeApi,PyPI,LGPL-3.0-only,Copyright (C) 2014 Bastian Bowe
+PyJWT,PyPI,MIT,Copyright (c) 2015 José Padilla
 PyJWT,PyPI,MIT,Copyright (c) 2015-2022 José Padilla
 PySocks,PyPI,BSD-3-Clause,Copyright 2006 Dan-Haim. All rights reserved.
 PyYAML,PyPI,MIT,Copyright (c) 2017-2021 Ingy döt Net
@@ -8,11 +9,14 @@ Pyro4,PyPI,MIT,Copyright (c) 2016 Irmen de Jong
 aerospike,PyPI,Apache-2.0,"Copyright Aerospike, Inc."
 aws-requests-auth,PyPI,BSD-3-Clause,Copyright (c) David Muller.
 beautifulsoup4,PyPI,MIT,Copyright (c) 2004-2017 Leonard Richardson
+beautifulsoup4,PyPI,MIT,Copyright (c) Leonard Richardson
 binary,PyPI,Apache-2.0,Copyright 2018 Ofek Lev
 binary,PyPI,MIT,Copyright (c) 2018 Ofek Lev
 boto,PyPI,MIT,Copyright (c) 2010 Mitch Garnaat
 boto3,PyPI,Apache-2.0,"Copyright 2013-2017 Amazon.com, Inc. or its affiliates. All Rights Reserved."
 botocore,PyPI,Apache-2.0,"Copyright 2012-2017 Amazon.com, Inc. or its affiliates. All Rights Reserved."
+botocore,PyPI,Apache-2.0,"Copyright 2012-2022 Amazon.com, Inc. or its affiliates. All Rights Reserved."
+cachetools,PyPI,MIT,Copyright (c) 2014-2019 Thomas Kemmer
 cachetools,PyPI,MIT,Copyright (c) 2014-2022 Thomas Kemmer
 check-postgres,"https://github.com/bucardo/",BSD-2-Clause,Copyright 2007 - 2023 Greg Sabino Mullane
 clickhouse-cityhash,PyPI,MIT,"Copyright (c) 2011, Alexander Marshalov <alone.amper@gmail.com>"
@@ -68,6 +72,7 @@ pyodbc,PyPI,MIT,Copyright (c) 2008 Michael Kleehammer
 pysmi,PyPI,BSD-3-Clause,Copyright (c) 2015-2019 Ilya Etingof <etingof@gmail.com>
 pysnmp,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
 pysnmp-mibs,PyPI,BSD-3-Clause,Copyright Ilya Etingof <ilya@glas.net>
+python-binary-memcached,PyPI,MIT,Copyright (c) 2011 Jayson Reis
 python-binary-memcached,PyPI,MIT,Copyright (c) 2011 Jayson Reis <santosdosreis@gmail.com>
 python-dateutil,PyPI,Apache-2.0,Copyright 2017- Paul Ganssle <paul@ganssle.io>
 python-dateutil,PyPI,BSD-3-Clause,Copyright 2017- Paul Ganssle <paul@ganssle.io>
@@ -75,7 +80,9 @@ python3-gearman,PyPI,Apache-2.0,
 pyvmomi,PyPI,Apache-2.0,"Copyright (c) 2005-2021 VMware, Inc. All Rights Reserved."
 pywin32,PyPI,PSF,Copyright 2002-2003 by Blackdog Software Pty Ltd.
 redis,PyPI,MIT,"Copyright (c) 2022, Redis, inc."
+redis,PyPI,MIT,Copyright (c) 2012 Andy McCurdy
 requests,PyPI,Apache-2.0,Copyright 2011 Kenneth Reitz
+requests-kerberos,PyPI,ISC,"Copyright 2012 Ian Cordasco, Cory Benfield, Michael Komitee"
 requests-kerberos,PyPI,ISC,Copyright (c) 2012 Kenneth Reitz
 requests-ntlm,PyPI,ISC,Copyright 2012 Ben Toews
 requests-oauthlib,PyPI,BSD-3-Clause,Copyright (c) 2014 Kenneth Reitz.

@@ -146,10 +146,10 @@ VALID_LICENSES = (
 
 HEADERS = ['Component', 'Origin', 'License', 'Copyright']
 
-ADDITIONAL_LICENSES = [
+ADDITIONAL_LICENSES = {
     'flup,Vendor,BSD-3-Clause,Copyright (c) 2005 Allan Saddi. All Rights Reserved.\n',
     'flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.com> All rights reserved."\n',
-]
+}
 
 PACKAGE_REPO_OVERRIDES = {
     'PyYAML': 'https://github.com/yaml/pyyaml',
@@ -222,7 +222,7 @@ async def scrape_license_data(urls):
     async with Pool() as pool:
         async for resp in pool.map(get_data, urls):
             info = resp['info']
-            data = package_data[info['name']]
+            data = package_data[(info['name'], info['version'])]
             data['urls'] = resp['urls']
             pkg_author = info['author'] or info['maintainer'] or info['author_email'] or info['maintainer_email'] or ''
             if pkg_author:
@@ -249,8 +249,7 @@ def update_copyrights(package_name, license_id, data, ctx):
     """
 
     gh_repo_url = PACKAGE_REPO_OVERRIDES.get(package_name) or data['home_page']
-    if gh_repo_url is not None:
-        created_date = probe_github(gh_repo_url, ctx)
+    created_date = '' if gh_repo_url is None else probe_github(gh_repo_url, ctx)
 
     pkg_urls = [u for u in (d['url'] for d in data['urls']) if u.endswith(('.whl', '.tar.gz'))]
     if not pkg_urls:
@@ -338,7 +337,7 @@ def scrape_copyright_data(url_path):
     """
     Scrapes each tarfile for copyright attributions.
     """
-    with closing(requests.get(url_path, stream=True)) as resp:
+    with requests.get(url_path, stream=True) as resp:
         for fcontents in pick_file_generator(url_path)(io.BytesIO(resp.content)):
             if cp := find_cpy(fcontents):
                 return cp
@@ -374,7 +373,7 @@ def validate_extra_licenses():
     An integration may use code from an outside source or origin that is not pypi-
     it will have a file in its check directory titled `3rdparty-extra-LICENSE.csv`
     """
-    lines = []
+    lines = set()
     any_errors = False
 
     all_extra_licenses = get_extra_license_files()
@@ -416,7 +415,7 @@ def validate_extra_licenses():
                 annotate_error(license_file, f"Detected invalid license type {license_type}", line=line_no)
                 continue
             if not errors:
-                lines.append(line)
+                lines.add(line)
 
     return lines, any_errors
 
@@ -454,15 +453,13 @@ def licenses(ctx, sync):
 
     package_license_errors = defaultdict(list)
 
-    header_line = "{}\n".format(','.join(HEADERS))
-
-    lines = [header_line]
-    for package_name, data in sorted(package_data.items()):
+    lines = set()
+    for (package_name, _version), data in sorted(package_data.items()):
         if package_name in EXPLICIT_LICENSES:
             for license_id in sorted(EXPLICIT_LICENSES[package_name]):
                 data['licenses'].add(license_id)
                 update_copyrights(package_name, license_id, data, ctx)
-                lines.append(format_attribution_line(package_name, license_id, data['copyright'].get(license_id, '')))
+                lines.add(format_attribution_line(package_name, license_id, data['copyright'].get(license_id, '')))
             continue
 
         license_ids = set()
@@ -500,7 +497,7 @@ def licenses(ctx, sync):
         if license_ids:
             for license_id in sorted(license_ids):
                 update_copyrights(package_name, license_id, data, ctx)
-                lines.append(format_attribution_line(package_name, license_id, data['copyright'].get(license_id, '')))
+                lines.add(format_attribution_line(package_name, license_id, data['copyright'].get(license_id, '')))
         else:
             package_license_errors[package_name].append('no license information')
 
@@ -513,9 +510,12 @@ def licenses(ctx, sync):
         abort()
 
     extra_licenses_lines, any_errors = validate_extra_licenses()
-    lines.extend(extra_licenses_lines)
-    lines.extend(ADDITIONAL_LICENSES)
-    lines.sort()
+    lines |= extra_licenses_lines
+    lines |= ADDITIONAL_LICENSES
+
+    lines = sorted(lines)
+    header_line = "{}\n".format(','.join(HEADERS))
+    lines = [header_line] + lines
     license_attribution_file = get_license_attribution_file()
     if sync:
         write_file_lines(license_attribution_file, lines)
