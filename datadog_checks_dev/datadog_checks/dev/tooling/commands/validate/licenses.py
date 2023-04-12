@@ -242,6 +242,7 @@ async def scrape_license_data(urls):
 
     return package_data
 
+
 def collect_source_url(package_data):
     """Collect url to a tarball (preferred) or wheel (backup) for a package."""
     tarballs, wheels = [], []
