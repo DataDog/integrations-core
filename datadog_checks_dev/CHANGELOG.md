@@ -1,5 +1,27 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 19.0.0 / 2023-04-11
+
+* [Changed] Replace flake8 and isort with Ruff. See [#14212](https://github.com/DataDog/integrations-core/pull/14212).
+
+## 18.1.0 / 2023-03-31
+
+* [Added] Get more insight into Agent E2E communication errors. See [#14259](https://github.com/DataDog/integrations-core/pull/14259).
+* [Added] Support GitHub Actions for testing. See [#14237](https://github.com/DataDog/integrations-core/pull/14237).
+* [Fixed] Fix a typo in the `disable_generic_tags` option description. See [#14246](https://github.com/DataDog/integrations-core/pull/14246).
+* [Fixed] Fix style. See [#14230](https://github.com/DataDog/integrations-core/pull/14230).
+* [Fixed] Fix traps db generation for expended representation. See [#14002](https://github.com/DataDog/integrations-core/pull/14002).
+
+## 18.0.0 / 2023-03-23
+
+* [Added] Allow to specify the mode when creating a temp dir. See [#14208](https://github.com/DataDog/integrations-core/pull/14208).
+* [Added] Allow enabling of tracing for tests with an environment variable. See [#14206](https://github.com/DataDog/integrations-core/pull/14206).
+* [Added] Move CI setup scripts to a provider-agnostic location. See [#14179](https://github.com/DataDog/integrations-core/pull/14179).
+* [Fixed] Skip metadata validation for non-metrics integrations. See [#14211](https://github.com/DataDog/integrations-core/pull/14211).
+* [Fixed] Consider empty environment variables as unset. See [#14210](https://github.com/DataDog/integrations-core/pull/14210).
+* [Fixed] Fix `generate-traps-db` command on windows. See [#14117](https://github.com/DataDog/integrations-core/pull/14117).
+* [Changed] Upgrade openstacksdk dependency and drop py2. See [#14109](https://github.com/DataDog/integrations-core/pull/14109).
+
 ## 17.9.0 / 2023-03-01
 
 * [Added] Add process and runtime to allowed prefixes. See [#14058](https://github.com/DataDog/integrations-core/pull/14058).

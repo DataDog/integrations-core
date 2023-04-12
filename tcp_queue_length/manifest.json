@@ -12,8 +12,9 @@
     "title": "TCP Queue Length",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Category::Network"
+      "Category::Developer Tools",
+      "Category::Network",
+      "Supported OS::Linux"
     ]
   },
   "author": {

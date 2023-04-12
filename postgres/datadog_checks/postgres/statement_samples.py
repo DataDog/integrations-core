@@ -6,7 +6,7 @@ import copy
 import re
 import time
 from enum import Enum
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple  # noqa: F401
 
 import psycopg2
 from cachetools import TTLCache
@@ -29,6 +29,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
 from .util import DatabaseConfigurationError, warning_with_tags
@@ -179,6 +180,13 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
+
+        self._conn_pool = MultiDatabaseConnectionPool(check._new_connection)
+
+        def shutdown_cb():
+            self._conn_pool.close_all_connections()
+            return shutdown_callback()
+
         super(PostgresStatementSamples, self).__init__(
             check,
             rate_limit=1 / collection_interval,
@@ -188,10 +196,11 @@ class PostgresStatementSamples(DBMAsyncJob):
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
             job_name="query-samples",
-            shutdown_callback=shutdown_callback,
+            shutdown_callback=shutdown_cb,
         )
         self._check = check
         self._config = config
+        self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
@@ -253,7 +262,9 @@ class PostgresStatementSamples(DBMAsyncJob):
         query = PG_ACTIVE_CONNECTIONS_QUERY.format(
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
-        with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
+            cursor_factory=psycopg2.extras.DictCursor
+        ) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
@@ -286,7 +297,9 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
         )
-        with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
+            cursor_factory=psycopg2.extras.DictCursor
+        ) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
@@ -303,13 +316,15 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
-        with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
+            cursor_factory=psycopg2.extras.DictCursor
+        ) as cursor:
             cursor.execute(
                 "select * from {pg_stat_activity_view} LIMIT 0".format(
                     pg_stat_activity_view=self._config.pg_stat_activity_view
                 )
             )
-            all_columns = set([i[0] for i in cursor.description])
+            all_columns = {i[0] for i in cursor.description}
             available_columns = [c for c in all_expected_columns if c in all_columns]
             missing_columns = set(all_expected_columns) - set(available_columns)
             if missing_columns:
@@ -413,6 +428,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def run_job(self):
         self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
         self._collect_statement_samples()
+        self._conn_pool.prune_connections()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_statement_samples(self):
@@ -561,7 +577,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
-        with self._check._get_db(dbname).cursor() as cursor:
+        with self._conn_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms).cursor() as cursor:
             self._log.debug("Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement)
             cursor.execute(
                 """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
@@ -702,10 +718,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             event = {
                 "host": self._check.resolved_hostname,
+                "dbm_type": "plan",
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(self._dbtags(row['datname'])),
                 "timestamp": time.time() * 1000,
+                "cloud_metadata": self._config.cloud_metadata,
                 "network": {
                     "client": {
                         "ip": row.get('client_addr', None),
@@ -788,6 +806,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "collection_interval": self._activity_coll_interval,
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
+            "cloud_metadata": self._config.cloud_metadata,
             "postgres_activity": active_sessions,
             "postgres_connections": active_connections,
         }

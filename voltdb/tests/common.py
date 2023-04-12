@@ -2,11 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from typing import List, Set, Tuple
+from typing import List, Set, Tuple  # noqa: F401
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.dev import get_docker_hostname, get_here
-from datadog_checks.voltdb.types import Instance
+from datadog_checks.voltdb.types import Instance  # noqa: F401
 
 HERE = get_here()
 HOST = get_docker_hostname()

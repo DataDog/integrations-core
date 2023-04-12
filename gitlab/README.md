@@ -4,7 +4,7 @@
 
 Integration that allows to:
 
-- Visualize and monitor metrics collected with Gitlab through Prometheus
+- Visualize and monitor metrics collected with GitLab through Prometheus
 
 See [Monitoring GitLab with Prometheus][1] for more information.
 
@@ -37,9 +37,6 @@ To configure this check for an Agent running on a host:
     **Note** Save and restart GitLab to see the changes.
 
 4. [Restart the Agent][7].
-
-**Note**: The metrics in [gitlab/metrics.py][8] are collected by default. The `allowed_metrics` configuration option in the `init_config` collects specific legacy metrics. Some metrics may not be collected depending on your GitLab instance version and configuration. See [GitLab Prometheus metrics][6] for more information about metric collection.
-
 
 ##### Log collection
 
@@ -78,11 +75,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 
 ##### Metric collection
 
-| Parameter            | Value                                                                                      |
-| -------------------- | ------------------------------------------------------------------------------------------ |
-| `<INTEGRATION_NAME>` | `gitlab`                                                                                   |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                              |
-| `<INSTANCE_CONFIG>`  | `{"gitlab_url":"http://%%host%%/", "prometheus_endpoint":"http://%%host%%:10055/-/metrics"}` |
+| Parameter            | Value                                                                                         |
+| -------------------- |-----------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `gitlab`                                                                                      |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                 |
+| `<INSTANCE_CONFIG>`  | `{"gitlab_url":"http://%%host%%/", "openmetrics_endpoint":"http://%%host%%:10055/-/metrics"}` |
 
 ##### Log collection
 
@@ -111,7 +108,7 @@ The GitLab check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][13] for a list of service checks provided by this integration.
+See [service_checks.json][13] for a list of service checks provided by this integration. More information about the `gitlab.readiness.*` service checks can be found in the official [GitLab documentation][15].
 
 ## Troubleshooting
 
@@ -131,3 +128,4 @@ Need help? Contact [Datadog support][14].
 [12]: https://github.com/DataDog/integrations-core/blob/master/gitlab/metadata.csv
 [13]: https://github.com/DataDog/integrations-core/blob/master/gitlab/assets/service_checks.json
 [14]: https://docs.datadoghq.com/help/
+[15]: https://docs.gitlab.com/ee/user/admin_area/monitoring/health_check.html#readiness
