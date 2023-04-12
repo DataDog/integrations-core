@@ -158,7 +158,7 @@ def mock_psutil_wrapper(method, accessors):
     if accessors is None:
         result = 0
     else:
-        result = dict([(accessor, 0) for accessor in accessors])
+        result = {accessor: 0 for accessor in accessors}
     return result
 
 

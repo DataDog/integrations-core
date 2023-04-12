@@ -185,6 +185,11 @@ def assert_check(aggregator, metrics, use_openmetrics=False):
             status=GitlabCheckV2.OK,
             tags=GITLAB_TAGS + CUSTOM_TAGS + ['endpoint:{}'.format(GITLAB_PROMETHEUS_ENDPOINT)],
         )
+
+        for readiness_service_check in GitlabCheckV2.READINESS_SERVICE_CHECKS.values():
+            aggregator.assert_service_check(
+                'gitlab.readiness.{}'.format(readiness_service_check), tags=GITLAB_TAGS + CUSTOM_TAGS
+            )
     else:
         aggregator.assert_service_check(
             GitlabCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabCheck.OK, tags=GITLAB_TAGS + CUSTOM_TAGS

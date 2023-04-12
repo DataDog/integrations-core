@@ -5,14 +5,14 @@
 Helpers for deriving metrics from SNMP values.
 """
 
-from typing import Any, Optional
+from typing import Any, Optional  # noqa: F401
 
 from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 
 from .compat import total_time_to_temporal_percent
 from .pysnmp_inspect import is_counter, is_gauge, is_opaque
 from .pysnmp_types import OctetString
-from .types import MetricDefinition
+from .types import MetricDefinition  # noqa: F401
 
 
 def as_metric_with_inferred_type(value):

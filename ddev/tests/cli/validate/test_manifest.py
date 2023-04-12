@@ -4,7 +4,6 @@
 import json
 
 import pytest
-
 from ddev.utils.structures import EnvVars
 
 

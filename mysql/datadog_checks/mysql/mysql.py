@@ -8,7 +8,7 @@ import copy
 import traceback
 from collections import defaultdict
 from contextlib import closing, contextmanager
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional  # noqa: F401
 
 import pymysql
 from six import PY3, iteritems, itervalues
@@ -62,7 +62,7 @@ from .queries import (
 )
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
-from .util import DatabaseConfigurationError
+from .util import DatabaseConfigurationError  # noqa: F401
 from .version_utils import get_version
 
 try:

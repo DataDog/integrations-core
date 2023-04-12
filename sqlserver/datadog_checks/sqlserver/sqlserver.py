@@ -376,11 +376,11 @@ class SQLServer(AgentCheck):
             cursor.execute(query)
             rows = list(cursor.fetchall())
             if len(rows[0]) == 2:
-                all_dbs = set(Database(row.name, row.physical_database_name) for row in rows)
+                all_dbs = {Database(row.name, row.physical_database_name) for row in rows}
             else:
-                all_dbs = set(Database(row.name) for row in rows)
-            excluded_dbs = set([d for d in all_dbs if self._exclude_patterns.match(d.name)])
-            included_dbs = set([d for d in all_dbs if self._include_patterns.match(d.name)])
+                all_dbs = {Database(row.name) for row in rows}
+            excluded_dbs = {d for d in all_dbs if self._exclude_patterns.match(d.name)}
+            included_dbs = {d for d in all_dbs if self._include_patterns.match(d.name)}
 
             self.log.debug(
                 'Autodiscovered databases: %s, excluding: %s, including: %s', all_dbs, excluded_dbs, included_dbs
@@ -409,7 +409,7 @@ class SQLServer(AgentCheck):
         # support 'physical_database_name' column. The 'name' column will always be present &
         # will be returned as the first column in the autodiscovery query
         cursor.execute("select top 0 * from sys.databases")
-        all_columns = set([i[0] for i in cursor.description])
+        all_columns = {i[0] for i in cursor.description}
         available_columns = [c for c in all_expected_columns if c in all_columns]
         self.log.debug("found available sys.databases columns: %s", available_columns)
         return available_columns

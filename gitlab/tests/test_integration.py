@@ -116,10 +116,11 @@ def test_check_submit_metadata(
 
         dd_run_check(gitlab_check(get_auth_config(use_openmetrics)))
 
+        # With use_openmetrics, we also have a request to get the service checks.
         if enable_metadata_collection:
-            g.assert_called_once()
+            assert g.call_count == (2 if use_openmetrics else 1)
             datadog_agent.assert_metadata('test:123', version_metadata)
             datadog_agent.assert_metadata_count(5)
         else:
-            g.assert_not_called()
+            assert g.call_count == (1 if use_openmetrics else 0)
             datadog_agent.assert_metadata_count(0)
