@@ -10,7 +10,6 @@ build-backend = "hatchling.build"
 name = "datadog-spark"
 description = "The Spark check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
 keywords = [
     "datadog",
     "datadog agent",
@@ -37,9 +36,12 @@ dynamic = [
     "version",
 ]
 
+[project.license]
+text = "BSD-3-Clause"
+
 [project.optional-dependencies]
 deps = [
-    "beautifulsoup4==4.11.1; python_version > '3.0'",
+    "beautifulsoup4==4.12.2; python_version > '3.0'",
     "beautifulsoup4==4.9.3; python_version < '3.0'",
 ]
 
