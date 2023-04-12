@@ -33,23 +33,42 @@ init_config:
 #
 instances:
 
-    ## @param name - string - required
-    ## Unique identifier for this instance.
+  -
+    ## @param username - string - optional
+    ## The username used to connect to Openstack.
     #
-  - name: <INSTANCE_NAME>
+    # username: <USERNAME>
 
-    ## @param user - mapping - required
-    ## Password authentication is the only auth method supported
-    ## User expects username, password, and user domain id
-    ## `user` should resolve to a structure like
-    ## {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
-    ## The check uses the Unscoped token method to collect information about all available projects to the user.
+    ## @param password - string - optional
+    ## The password used to connect to Openstack.
+    ## Password authentication is the only auth method supported.
     #
-    user:
-      password: <PASSWORD>
-      name: <USER_NAME>
-      domain:
-        id: <DOMAIN_ID>
+    # password: <PASSWORD>
+
+    ## @param keystone_server_url - string - optional
+    ## URL of your identity server. NOTE: The server must support Identity API v3.
+    ## This parameter is required if openstack_config_file_path or openstack_cloud_name are not specified.
+    #
+    # keystone_server_url: https://<KEYSTONE_ENDPOINT>:<PORT>/
+
+    ## @param openstack_config_file_path - string - optional
+    ## Absolute path of the configuration file for the connection to openstack with openstacksdk.
+    #
+    # openstack_config_file_path: <PATH_TO_YAML_FILE>
+
+    ## @param openstack_cloud_name - string - optional
+    ## Name of the cloud configuration to use.
+    ## If this parameter is specified, the connection to Openstack only uses the configuration file specified in
+    ## openstack_config_file_path, or at the default location:
+    ## ~/.config/openstack or /etc/openstack
+    #
+    # openstack_cloud_name: <CLOUD_NAME>
+
+    ## @param domain_id - string - optional - default: default
+    ## The domain ID used to connect to Openstack. If not specified, the check will
+    ## use the "default" Domain ID
+    #
+    # domain_id: default
 
     ## @param whitelist_project_names - list of strings - optional - default: []
     ## IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
@@ -96,24 +115,15 @@ instances:
     #
     # paginated_limit: 1000
 
-    ## @param openstack_config_file_path - string - optional
-    ## Absolute path of the configuration file for the connection to openstack with openstacksdk.
+    ## @param nova_microversion - string - optional
+    ## The microversion of the Nova (Compute) API to call.
+    ## It is recommended to set this parameter to the latest Compute microversion supported by your Openstack version.
+    ## View this page for more about Compute microvoersion compatibility:
+    ##    https://docs.openstack.org/nova/latest/reference/api-microversion-history.html
+    ## View this page for more information about microversions in Openstack:
+    ##    https://docs.openstack.org/api-guide/compute/microversions.html
     #
-    # openstack_config_file_path: <PATH_TO_YAML_FILE>
-
-    ## @param openstack_cloud_name - string - optional
-    ## Name of the cloud configuration to use.
-    ## If this parameter is specified, the connection to Openstack only uses the configuration file specified in
-    ## openstack_config_file_path, or at the default location:
-    ## ~/.config/openstack or /etc/openstack
-    #
-    # openstack_cloud_name: <CLOUD_NAME>
-
-    ## @param keystone_server_url - string - optional
-    ## URL of your identity server. NOTE: The server must support Identity API v3.
-    ## This parameter is required if openstack_config_file_path or openstack_cloud_name are not specified.
-    #
-    # keystone_server_url: https://<KEYSTONE_ENDPOINT>:<PORT>/
+    nova_microversion: '1.80'
 
     ## @param collect_hypervisor_load - boolean - optional - default: true
     ## Collects hypervisor_load.1/5/15 for each hypervisor
@@ -208,16 +218,6 @@ instances:
     ## settings enabled and attempt to reach services directly.
     #
     # skip_proxy: false
-
-    ## @param username - string - optional
-    ## The username to use if services are behind basic or digest auth.
-    #
-    # username: <USERNAME>
-
-    ## @param password - string - optional
-    ## The password to use if services are behind basic or NTLM auth.
-    #
-    # password: <PASSWORD>
 
     ## @param ntlm_domain - string - optional
     ## If your services use NTLM authentication, specify
