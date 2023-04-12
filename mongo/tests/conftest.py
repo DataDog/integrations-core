@@ -5,16 +5,18 @@ import copy
 import os
 import time
 from contextlib import contextmanager
+from datetime import datetime
 
 import mock
 import pymongo
 import pytest
 from datadog_test_libs.utils.mock_dns import mock_local
-from tests.mocked_api import MockedPyMongoClient
+from dateutil.tz import tzutc
 
 from datadog_checks.dev import LazyFunction, WaitFor, docker_run, run_command
 from datadog_checks.dev.conditions import WaitForPortListening
 from datadog_checks.mongo import MongoDb
+from tests.mocked_api import MockedPyMongoClient
 
 from . import common
 
@@ -198,12 +200,12 @@ class InitializeDB(LazyFunction):
             bars.append({})
 
         orders = [
-            {"cust_id": "abc1", "status": "A", "amount": 50, "elements": 3},
-            {"cust_id": "xyz1", "status": "A", "amount": 100},
-            {"cust_id": "abc1", "status": "D", "amount": 50, "elements": 1},
-            {"cust_id": "abc1", "status": "A", "amount": 25},
-            {"cust_id": "xyz1", "status": "A", "amount": 25},
-            {"cust_id": "abc1", "status": "A", "amount": 300, "elements": 10},
+            {'created_time': datetime.now(tz=tzutc()), "cust_id": "abc1", "status": "A", "amount": 50, "elements": 3},
+            {'created_time': datetime.now(tz=tzutc()), "cust_id": "xyz1", "status": "A", "amount": 100},
+            {'created_time': datetime.now(tz=tzutc()), "cust_id": "abc1", "status": "D", "amount": 50, "elements": 1},
+            {'created_time': datetime.now(tz=tzutc()), "cust_id": "abc1", "status": "A", "amount": 25},
+            {'created_time': datetime.now(tz=tzutc()), "cust_id": "xyz1", "status": "A", "amount": 25},
+            {'created_time': datetime.now(tz=tzutc()), "cust_id": "abc1", "status": "A", "amount": 300, "elements": 10},
         ]
 
         for db_name in ['test', 'test2', 'admin']:

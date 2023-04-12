@@ -6,7 +6,6 @@
 Collects network metrics.
 """
 
-import distutils.spawn
 import re
 import socket
 
@@ -24,6 +23,19 @@ except ImportError:
 
 if PY3:
     long = int
+
+
+# Use a different find_executable implementation depending on Python version,
+# because we want to avoid depending on distutils.
+if PY3:
+    import shutil
+
+    def find_executable(name):
+        return shutil.which(name)
+
+else:
+    # Fallback to distutils for Python 2 as shutil.which was added on Python 3.3
+    from distutils.spawn import find_executable
 
 
 class Network(AgentCheck):
@@ -284,8 +296,6 @@ class Network(AgentCheck):
     def is_collect_cx_state_runnable(self, proc_location):
         """
         Determine if collect_connection_state is set and can effectively run.
-        If self._collect_cx_state is True and a custom proc_location is provided, the system cannot
-         run `ss` or `netstat` over a custom proc_location
         :param proc_location: str
         :return: bool
         """
@@ -294,7 +304,7 @@ class Network(AgentCheck):
 
         if proc_location != "/proc":
             # If we have `ss`, we're fine with a non-standard `/proc` location
-            if distutils.spawn.find_executable("ss") is None:
+            if find_executable("ss") is None:
                 self.warning(
                     "Cannot collect connection state: `ss` cannot be found and "
                     "currently with a custom /proc path: %s",

@@ -2,21 +2,28 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
+
 import mock
 import pytest
 import requests
-from tests.common import EXCHANGE_MESSAGE_STATS
 
-import datadog_checks.base
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
-from datadog_checks.rabbitmq.rabbitmq import EXCHANGE_TYPE, NODE_TYPE, OVERVIEW_TYPE, RabbitMQException
+from datadog_checks.rabbitmq.rabbitmq import (
+    EXCHANGE_TYPE,
+    NODE_TYPE,
+    OVERVIEW_TYPE,
+    RabbitMQException,
+    RabbitMQManagement,
+)
+from tests.common import EXCHANGE_MESSAGE_STATS
 
 from . import common, metrics
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, common.requires_management]
 
 
-@pytest.mark.unit
 def test__get_data(check):
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.side_effect = [requests.exceptions.HTTPError, ValueError]
@@ -28,7 +35,6 @@ def test__get_data(check):
             assert isinstance(e, RabbitMQException)
 
 
-@pytest.mark.unit
 def test_status_check(check, aggregator):
     check.check({"rabbitmq_api_url": "http://example.com"})
     assert len(aggregator._service_checks) == 1
@@ -66,7 +72,6 @@ def test_status_check(check, aggregator):
     assert sc.status == RabbitMQ.OK
 
 
-@pytest.mark.unit
 def test__check_aliveness(check, aggregator):
     instance = {"rabbitmq_api_url": "http://example.com"}
     check._get_data = mock.MagicMock()
@@ -86,7 +91,6 @@ def test__check_aliveness(check, aggregator):
         assert isinstance(e, RabbitMQException)
 
 
-@pytest.mark.unit
 def test__get_metrics(check, aggregator):
     data = {'fd_used': 3.14, 'disk_free': 4242, 'mem_used': 9000}
 
@@ -94,7 +98,6 @@ def test__get_metrics(check, aggregator):
     assert check._get_metrics({}, NODE_TYPE, []) == 0
 
 
-@pytest.mark.unit
 def test__get_metrics_3_1(check, aggregator):
     data = {'queue_totals': []}
 
@@ -102,8 +105,7 @@ def test__get_metrics_3_1(check, aggregator):
     assert metrics == 0
 
 
-@pytest.mark.unit
-@mock.patch.object(datadog_checks.rabbitmq.rabbitmq.RabbitMQManagement, '_get_object_data')
+@mock.patch.object(RabbitMQManagement, '_get_object_data')
 def test_get_stats_empty_exchanges(mock__get_object_data, instance, check, aggregator):
     data = [
         {'name': 'ex1', 'message_stats': EXCHANGE_MESSAGE_STATS},
@@ -141,21 +143,20 @@ def test_config(check, test_case, extra_config, expected_http_kwargs):
 
         check.check(config)
 
-        http_wargs = dict(
-            auth=mock.ANY,
-            cert=mock.ANY,
-            headers=mock.ANY,
-            proxies=mock.ANY,
-            timeout=mock.ANY,
-            verify=mock.ANY,
-            allow_redirects=mock.ANY,
-        )
+        http_wargs = {
+            'auth': mock.ANY,
+            'cert': mock.ANY,
+            'headers': mock.ANY,
+            'proxies': mock.ANY,
+            'timeout': mock.ANY,
+            'verify': mock.ANY,
+            'allow_redirects': mock.ANY,
+        }
         http_wargs.update(expected_http_kwargs)
 
         r.get.assert_called_with('http://localhost:15672/api/connections', **http_wargs)
 
 
-@pytest.mark.unit
 def test_nodes(aggregator, check):
 
     # default, node metrics are collected
@@ -168,7 +169,6 @@ def test_nodes(aggregator, check):
     aggregator.reset()
 
 
-@pytest.mark.unit
 def test_disable_nodes(aggregator, check):
 
     # node metrics collection disabled in config, node metrics should not appear
@@ -181,3 +181,46 @@ def test_disable_nodes(aggregator, check):
     # check to ensure other metrics are being collected
     for m in metrics.Q_METRICS:
         aggregator.assert_metric(m, count=1)
+
+
+def test_queues_regexes_exclude_with_negative_lookahead(aggregator, dd_run_check):
+    """Based on a support case where a customer was confused why their regular expression didn't work.
+
+    The key piece is optionally matching the vhost part.
+    """
+    data = {}
+    for ep in ("queues", "overview"):
+        with open("tests/fixtures/mgmt/{}.json".format(ep)) as fh:
+            data[common.URL + ep] = json.load(fh)
+
+    def mock_get_data(_self, url):
+        return data.get(url, [])
+
+    instance = {
+        "rabbitmq_api_url": common.URL,
+        "rabbitmq_user": "guest",
+        "rabbitmq_pass": "guest",
+        "queues_regexes": [
+            r"""(?x) # Enable verbose flag to split expression into commented parts.
+        ^ # We have to anchor at beginning of string to enforce checking for the prefix.
+        (?!
+        (?://)? # Match vhost part if it's present.
+        config/foo\.updated-configs\.) # Prefix we want to exclude.
+        .+ # Match everything else as long as it's NOT preceded by prefix.
+        """
+        ],
+    }
+    check = RabbitMQ("rabbitmq", {}, instances=[instance])
+    with mock.patch.object(RabbitMQManagement, "_get_data", new_callable=lambda: mock_get_data):
+        dd_run_check(check)
+
+    for m in metrics.Q_METRICS:
+        # Make sure we did collect the metric.
+        aggregator.assert_metric(m, at_least=1)
+        # Make sure we didn't collect it for the excluded queue.
+        aggregator.assert_metric_has_tag(
+            m,
+            "rabbitmq_queue:config/foo.updated-configs.2023-01-18",
+            count=0,
+        )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

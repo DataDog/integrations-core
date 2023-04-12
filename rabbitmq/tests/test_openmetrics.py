@@ -8,12 +8,13 @@ from urllib.parse import urlparse
 import pytest
 
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.types import ServiceCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 
 from .common import HERE
-from .metrics import AGGREGATED_ONLY_METRICS, DEFAULT_OPENMETRICS, MISSING_OPENMETRICS
+from .metrics import AGGREGATED_ONLY_METRICS, DEFAULT_OPENMETRICS, MISSING_OPENMETRICS, SUMMARY_METRICS
 
 OM_RESPONSE_FIXTURES = HERE / Path('fixtures')
 TEST_URL = "http://localhost:15692"
@@ -35,6 +36,12 @@ def _rmq_om_check(prom_plugin_settings):
     return RabbitMQ("rabbitmq", {}, [{'prometheus_plugin': prom_plugin_settings}])
 
 
+def _common_assertions(aggregator):
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_service_check('rabbitmq.openmetrics.health', status=ServiceCheck.OK)
+
+
 @pytest.mark.parametrize(
     'aggregated_setting',
     [
@@ -54,34 +61,62 @@ def test_aggregated_endpoint(aggregated_setting, aggregator, dd_run_check, mock_
 
     for m in DEFAULT_OPENMETRICS:
         aggregator.assert_metric(m)
+        for tag in IDENTITY_INFO_TAGS:
+            aggregator.assert_metric_has_tag(m, tag)
 
     for m in MISSING_OPENMETRICS:
         aggregator.assert_metric(m, at_least=0)
 
-    aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG] + BUILD_INFO_TAGS)
+    aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG] + BUILD_INFO_TAGS + IDENTITY_INFO_TAGS)
     aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG] + IDENTITY_INFO_TAGS)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    aggregator.assert_all_metrics_covered()
+    _common_assertions(aggregator)
+
+
+def test_aggregated_endpoint_as_per_object(aggregator, dd_run_check, mock_http_response):
+    """Rabbitmq is configured to emit per-object metrics from the `/metrics` endpoint.
+
+    We expect all metrics except the ones unique to the `/metrics` endpoint to be collected.
+    """
+    mock_http_response(file_path=OM_RESPONSE_FIXTURES / "per-object.txt")
+    prometheus_settings = {'url': TEST_URL}
+    check = _rmq_om_check(prometheus_settings)
+    dd_run_check(check)
+
+    for m in DEFAULT_OPENMETRICS - AGGREGATED_ONLY_METRICS:
+        aggregator.assert_metric(m)
+        for tag in IDENTITY_INFO_TAGS:
+            aggregator.assert_metric_has_tag(m, tag)
+
+    for m in MISSING_OPENMETRICS:
+        aggregator.assert_metric(m, at_least=0)
+
+    aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG] + BUILD_INFO_TAGS + IDENTITY_INFO_TAGS)
+    aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG] + IDENTITY_INFO_TAGS)
+    _common_assertions(aggregator)
 
 
 @pytest.mark.parametrize(
     'endpoint, fixture_file, expected_metrics',
     [
-        pytest.param("detailed", 'detailed.txt', [], id="no query"),
+        pytest.param("detailed", 'detailed.txt', set(), id="detailed, no query"),
         pytest.param(
             'detailed?family=queue_coarse_metrics',
             "detailed-queue_coarse_metrics.txt",
-            [
+            {
                 'rabbitmq.queue.messages',
                 'rabbitmq.queue.messages.ready',
                 'rabbitmq.queue.messages.unacked',
                 'rabbitmq.queue.process_reductions.count',
-            ],
-            id="query queue_coarse_metrics family",
+            },
+            id="detailed, query queue_coarse_metrics family",
         ),
     ],
 )
-def test_detailed_endpoint(endpoint, fixture_file, expected_metrics, aggregator, dd_run_check, mock_http_response):
+def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggregator, dd_run_check, mock_http_response):
+    """User only enables unaggregated endpoint, e.g. '/metrics/per-object' or '/metrics/detailed'.
+
+    We expect in this case only the metrics for the unaggregated endpoint, nothing from '/metrics'.
+    """
     mock_http_response(file_path=OM_RESPONSE_FIXTURES / fixture_file)
     check = _rmq_om_check(
         {
@@ -94,40 +129,17 @@ def test_detailed_endpoint(endpoint, fixture_file, expected_metrics, aggregator,
 
     for m in expected_metrics:
         aggregator.assert_metric(m)
+        for tag in IDENTITY_INFO_TAGS:
+            aggregator.assert_metric_has_tag(m, tag)
 
-    for m in set(DEFAULT_OPENMETRICS).difference(expected_metrics):
+    for m in (DEFAULT_OPENMETRICS - expected_metrics) | MISSING_OPENMETRICS:
         # We check that all metrics that are not in the query don't show up at all.
         aggregator.assert_metric(m, at_least=0)
-    aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + BUILD_INFO_TAGS)
-    aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + IDENTITY_INFO_TAGS)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    aggregator.assert_all_metrics_covered()
-
-
-def test_per_object(aggregator, dd_run_check, mock_http_response):
-    """We scrape the /metrics/per-object endpoint."""
-    endpoint = "per-object"
-    fixture_file = "per-object.txt"
-    mock_http_response(file_path=OM_RESPONSE_FIXTURES / fixture_file)
-    check = _rmq_om_check(
-        {
-            'url': TEST_URL,
-            'unaggregated_endpoint': endpoint,
-            "include_aggregated_endpoint": False,
-        }
+    aggregator.assert_metric(
+        'rabbitmq.build_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + BUILD_INFO_TAGS + IDENTITY_INFO_TAGS
     )
-    dd_run_check(check)
-
-    for m in set(DEFAULT_OPENMETRICS).difference(AGGREGATED_ONLY_METRICS):
-        aggregator.assert_metric(m)
-
-    for m in MISSING_OPENMETRICS:
-        aggregator.assert_metric(m, at_least=0)
-
-    aggregator.assert_metric('rabbitmq.build_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + BUILD_INFO_TAGS)
     aggregator.assert_metric('rabbitmq.identity_info', tags=[OM_ENDPOINT_TAG + f"/{endpoint}"] + IDENTITY_INFO_TAGS)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    aggregator.assert_all_metrics_covered()
+    _common_assertions(aggregator)
 
 
 def mock_http_responses(url, **_params):
@@ -169,7 +181,6 @@ def mock_http_responses(url, **_params):
             ],
             id="two metric families",
         ),
-        pytest.param('per-object', set(DEFAULT_OPENMETRICS).difference(AGGREGATED_ONLY_METRICS), id='per-object'),
     ],
 )
 def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd_run_check, mocker):
@@ -188,25 +199,30 @@ def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd
     mocker.patch('requests.get', wraps=mock_http_responses)
     dd_run_check(check)
 
+    meta_metrics = {'rabbitmq.build_info', 'rabbitmq.identity_info'}
+
     for m in metrics:
         aggregator.assert_metric_has_tag(m, f'endpoint:http://localhost:15692/metrics/{endpoint}', at_least=1)
         # Here we want to make sure that we don't collect the equivalent metrics from
         # the aggregated endpoint.
-        aggregator.assert_metric_has_tag(m, 'endpoint:http://localhost:15692/metrics', at_least=0)
-    for m in set(DEFAULT_OPENMETRICS).difference(metrics):
+        aggregator.assert_metric_has_tag(m, 'endpoint:http://localhost:15692/metrics', count=0)
+    for m in (DEFAULT_OPENMETRICS.difference(metrics) - SUMMARY_METRICS) - meta_metrics:
         # We check the equivalent for metrics that come from the aggregated endpoint.
-        aggregator.assert_metric_has_tag(m, f'endpoint:http://localhost:15692/metrics/{endpoint}', at_least=0)
+        aggregator.assert_metric_has_tag(m, f'endpoint:http://localhost:15692/metrics/{endpoint}', count=0)
         aggregator.assert_metric_has_tag(m, 'endpoint:http://localhost:15692/metrics', at_least=1)
-
+    # Summary metrics MAY come from both endpoints or from only one, so we just make sure at least one is submitted.
+    for m in SUMMARY_METRICS:
+        aggregator.assert_metric(m, at_least=1)
     # Identity and build info metrics should come from both endpoints.
     for m, tag in product(
-        ['rabbitmq.build_info', 'rabbitmq.identity_info'],
+        meta_metrics,
         [
             f'endpoint:http://localhost:15692/metrics/{endpoint}',
             'endpoint:http://localhost:15692/metrics',
         ],
     ):
         aggregator.assert_metric_has_tag(m, tag, count=1)
+    _common_assertions(aggregator)
 
 
 @pytest.mark.parametrize(
@@ -220,15 +236,18 @@ def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd
         ),
         pytest.param(
             {'url': "http://localhost", "unaggregated_endpoint": "detailed?"},
-            r"'prometheus_plugin\.unaggregated_endpoint' must be 'per-object', "
-            + r"'detailed', or 'detailed\?<QUERY>'\.",
+            r"'prometheus_plugin\.unaggregated_endpoint' must be 'detailed', or 'detailed\?<QUERY>'\.",
             id="Invalid nonempty unaggregated_endpoint value.",
         ),
         pytest.param(
             {'url': "http://localhost", "unaggregated_endpoint": ""},
-            r"'prometheus_plugin\.unaggregated_endpoint' must be 'per-object', "
-            + r"'detailed', or 'detailed\?<QUERY>'\.",
+            r"'prometheus_plugin\.unaggregated_endpoint' must be 'detailed', or 'detailed\?<QUERY>'\.",
             id="Empty unaggregated_endpoint value is invalid.",
+        ),
+        pytest.param(
+            {'url': "http://localhost", "unaggregated_endpoint": "per-object"},
+            r"'prometheus_plugin\.unaggregated_endpoint' must be 'detailed', or 'detailed\?<QUERY>'\.",
+            id="We do not support per-object endpoint in the config.",
         ),
         pytest.param(
             {'url': "http://localhost", "unaggregated_endpoint": []},
@@ -252,3 +271,11 @@ def test_config(prom_plugin_settings, err):
     check = _rmq_om_check(prom_plugin_settings)
     with pytest.raises(ConfigurationError, match=err):
         check.load_configuration_models()
+
+
+def test_service_check_critical(aggregator, dd_run_check, mock_http_response):
+    mock_http_response(status_code=404)
+    check = _rmq_om_check({'url': 'http://fail'})
+    with pytest.raises(Exception, match="requests.exceptions.HTTPError"):
+        dd_run_check(check)
+    aggregator.assert_service_check('rabbitmq.openmetrics.health', status=check.CRITICAL)

@@ -289,3 +289,36 @@ def test_skip_typo_counter(aggregator, dd_run_check):
     aggregator.assert_metric('test.mem.available_bytes')
     aggregator.assert_metric('test.mem.committed_bytes')
     aggregator.assert_metric('test.mem.commit_limit')
+
+
+def test_validate_counter_names_sensitivity(aggregator, dd_run_check):
+    # Run check with different counter names of different casing to make sure
+    # the check is not affected since Windows Performance counters API
+    # are case insensitive.
+    aggregator.reset()
+    check = get_check(
+        {
+            'metrics': {
+                'mEmOrY': {
+                    'name': 'mem',
+                    'tag_name': 'memory',
+                    'instance_counts': {
+                        'total': 'memory.total',
+                        'monitored': 'memory.monitored',
+                        'unique': 'memory.unique',
+                    },
+                    'counters': [
+                        {'available bytes': 'available_bytes'},
+                        {'committeD byteS': 'committed_bytes'},
+                        {'cOmMiT lImIt': 'commit_limit'},
+                    ],
+                }
+            },
+            'server_tag': 'machine',
+        }
+    )
+
+    dd_run_check(check)
+    aggregator.assert_metric('test.mem.available_bytes')
+    aggregator.assert_metric('test.mem.committed_bytes')
+    aggregator.assert_metric('test.mem.commit_limit')

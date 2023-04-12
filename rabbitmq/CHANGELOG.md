@@ -1,5 +1,19 @@
 # CHANGELOG - rabbitmq
 
+## 4.0.1 / 2023-03-07
+
+* [Fixed] Fix autodiscovery config instances. See [#14112](https://github.com/DataDog/integrations-core/pull/14112).
+
+## 4.0.0 / 2023-03-03
+
+* [Added] Add autodiscovery for docker containers. See [#13960](https://github.com/DataDog/integrations-core/pull/13960).
+* [Fixed] Improve descriptions of config fields to select objects. See [#14045](https://github.com/DataDog/integrations-core/pull/14045).
+* [Changed] Remove support for /metrics/per-object endpoint. See [#13869](https://github.com/DataDog/integrations-core/pull/13869).
+
+## 3.3.1 / 2023-01-27
+
+* [Fixed] Add validation for `include_aggregated_endpoint`. See [#13793](https://github.com/DataDog/integrations-core/pull/13793).
+
 ## 3.3.0 / 2023-01-20
 
 * [Added] Support RabbitMQ Prometheus Metrics. See [#13662](https://github.com/DataDog/integrations-core/pull/13662).

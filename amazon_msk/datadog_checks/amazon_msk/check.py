@@ -10,7 +10,13 @@ from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompati
 from datadog_checks.base.utils.serialization import json
 
 from .config_models import ConfigMixin
-from .metrics import METRICS_WITH_NAME_AS_LABEL, construct_jmx_metrics_config, construct_node_metrics_config
+from .metrics import (
+    JMX_METRICS_MAP,
+    METRICS_AS_GAUGE_AND_COUNT,
+    METRICS_WITH_NAME_AS_LABEL,
+    construct_jmx_metrics_config,
+    construct_node_metrics_config,
+)
 from .utils import construct_boto_config
 
 try:
@@ -95,6 +101,7 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                             scrapers[url] = self.scrapers[url]
                             continue
 
+                        self.log.debug("OpenMetricsV2 prometheus endpoint: %s", url)
                         scraper = self.create_scraper(
                             {'openmetrics_endpoint': url, 'metrics': metrics, **self.instance}
                         )
@@ -106,23 +113,37 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
 
         self.scrapers = scrapers
 
-    def configure_transformer_with_metric_label(self, legacy_name, new_name, label_name, metric_type):
-        method = getattr(self, metric_type)
-
+    def configure_transformer_with_metric_label(self, legacy_name, new_name, label_name):
         def transform(metric, sample_data, runtime_data):
             for sample, tags, hostname in sample_data:
-                method(legacy_name, sample.value, tags=tags, hostname=hostname)
+                self._submit_both_gauge_and_count(legacy_name, sample.value, tags=tags, hostname=hostname)
 
                 tag = sample.labels.pop(label_name)
                 tags.remove('{}:{}'.format(label_name, tag))
 
-                method('{}.{}'.format(new_name, tag), sample.value, tags=tags, hostname=hostname)
+                new_name_to_submit = '{}.{}'.format(new_name, tag)
+                self._submit_both_gauge_and_count(new_name_to_submit, sample.value, tags=tags, hostname=hostname)
 
         return transform
+
+    def configure_submission_as_gauge_and_count(self, raw_metric_name):
+        dd_name = JMX_METRICS_MAP[raw_metric_name]
+
+        def transform(_metric, sample_data, _runtime_data):
+            for sample, tags, hostname in sample_data:
+                self._submit_both_gauge_and_count(dd_name, sample.value, tags=tags, hostname=hostname)
+
+        return transform
+
+    def _submit_both_gauge_and_count(self, name, value, tags, hostname):
+        self.gauge(name, value, tags=tags, hostname=hostname)
+        self.monotonic_count(name + ".count", value, tags=tags, hostname=hostname)
 
     def configure_additional_transformers(self, transformer_data):
         for metric, data in METRICS_WITH_NAME_AS_LABEL.items():
             transformer_data[metric] = None, self.configure_transformer_with_metric_label(**data)
+        for metric in METRICS_AS_GAUGE_AND_COUNT:
+            transformer_data[metric] = None, self.configure_submission_as_gauge_and_count(metric)
 
     def parse_config(self):
         self._region_name = self.config.region_name

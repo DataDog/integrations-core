@@ -1,7 +1,8 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools<61",
+    "setuptools>=66; python_version > '3.0'",
+    "setuptools; python_version < '3.0'",
 ]
 build-backend = "hatchling.build"
 
@@ -83,11 +84,12 @@ cli = [
     "toml>=0.9.4, <1.0.0",
     "tomli>=1.1.0",
     "tomli-w>=1.0.0",
-    "tox>=3.12.1",
+    "tox>=3.12.1, <4.0.0",
     "twine>=1.11.0",
     "virtualenv",
     # TODO: Remove once every check has a pyproject.toml
-    "setuptools<61",
+    "setuptools>=66; python_version > '3.0'",
+    "setuptools; python_version < '3.0'",
     "wheel>=0.31.0",
 ]
 

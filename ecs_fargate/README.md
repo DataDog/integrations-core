@@ -219,8 +219,6 @@ For details on collecting integration metrics, see [Integration Setup for ECS Fa
 
 Metrics are collected with [DogStatsD][13] through UDP port 8125.
 
-To send custom metrics by listening to DogStatsD packets from other containers, set the environment variable `DD_DOGSTATSD_NON_LOCAL_TRAFFIC` to `true` within the Datadog Agent container.
-
 #### Other environment variables
 
 For environment variables available with the Docker Agent container, see the [Docker Agent][14] page. **Note**: Some variables are not be available for Fargate.
@@ -692,7 +690,7 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
 
 ### Trace collection
 
-1. Follow the [instructions above](#installation) to add the Datadog Agent container to your task definition with the additional environment variable `DD_APM_ENABLED` set to `true` and set up a container port that uses **8126** with **tcp** protocol under port mappings. Set the `DD_SITE` variable to {{< region-param key="dd_site" code="true" >}}. It defaults to `datadoghq.com` if you don't set it.
+1. Follow the [instructions above](#installation) to add the Datadog Agent container to your task definition with the additional environment variable `DD_APM_ENABLED` set to `true`. Set the `DD_SITE` variable to {{< region-param key="dd_site" code="true" >}}. It defaults to `datadoghq.com` if you don't set it.
 
 2. [Instrument your application][32] based on your setup. With Fargate APM applications do **not** set `DD_AGENT_HOST`, the default of `localhost` works.
 
@@ -716,7 +714,7 @@ The Agent can autodiscover and attach tags to all data emitted by the entire tas
   | `task_family`                 | Low          | ECS API              |
   | `task_name`                   | Low          | ECS API              |
   | `task_version`                | Low          | ECS API              |
-  | `availability_zone`           | Low          | ECS API              |
+  | `availability-zone`           | Low          | ECS API              |
   | `region`                      | Low          | ECS API              |
 
 ## Data Collected

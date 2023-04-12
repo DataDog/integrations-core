@@ -12,13 +12,12 @@
     "title": "Power DNS Recursor",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Web",
+      "Category::Caching",
+      "Category::Log Collection",
       "Category::Network",
-      "Category::Autodiscovery",
-      "Category::Log Collection"
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-
 from ddev.config.constants import AppEnvVars
 from ddev.utils.structures import EnvVars
 

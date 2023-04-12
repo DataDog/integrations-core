@@ -11,7 +11,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import ENVOY_VERSION, FLAVOR, HOST, INSTANCES
+from .common import ENVOY_VERSION, EXT_METRICS, FLAVOR, HOST, INSTANCES
 
 CHECK_NAME = 'envoy'
 
@@ -26,7 +26,9 @@ def test_success(aggregator, check, dd_run_check):
     metrics_collected = 0
     for metric in METRICS:
         collected_metrics = aggregator.metrics(METRIC_PREFIX + metric)
-        if collected_metrics:
+        # The ext_auth metrics are excluded because the stats_prefix is not always present.
+        # They're tested in a different test.
+        if collected_metrics and collected_metrics[0].name not in EXT_METRICS:
             expected_tags = [t for t in METRICS[metric]['tags'] if t]
             for tag_set in expected_tags:
                 assert all(
@@ -67,6 +69,18 @@ def test_retrocompatible_config(check):
 
     c1 = check(instance)
     c2 = check(INSTANCES['included_excluded_metrics'])
+    assert c1.config_included_metrics == c2.config_included_metrics
+    assert c1.config_excluded_metrics == c2.config_excluded_metrics
+
+
+@pytest.mark.unit
+def test_retrocompatible_config2(check):
+    instance = deepcopy(INSTANCES['main'])
+    instance['metric_whitelist'] = deepcopy(INSTANCES['include_exclude_metrics']['include_metrics'])
+    instance['metric_blacklist'] = deepcopy(INSTANCES['include_exclude_metrics']['exclude_metrics'])
+
+    c1 = check(instance)
+    c2 = check(INSTANCES['include_exclude_metrics'])
     assert c1.config_included_metrics == c2.config_included_metrics
     assert c1.config_excluded_metrics == c2.config_excluded_metrics
 
@@ -133,15 +147,17 @@ def test_unknown(fixture_path, mock_http_response, dd_run_check, check):
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    'test_case, extra_config, expected_http_kwargs',
+    'extra_config, expected_http_kwargs',
     [
-        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
-        ("legacy ssl config True", {'verify_ssl': True}, {'verify': True}),
-        ("legacy ssl config False", {'verify_ssl': False}, {'verify': False}),
-        ("legacy ssl config unset", {}, {'verify': True}),
+        pytest.param(
+            {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}, id="new auth config"
+        ),
+        pytest.param({'verify_ssl': True}, {'verify': True}, id="legacy ssl config True"),
+        pytest.param({'verify_ssl': False}, {'verify': False}, id="legacy ssl config False"),
+        pytest.param({}, {'verify': True}, id="legacy ssl config unset"),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs, check, dd_run_check):
+def test_config(extra_config, expected_http_kwargs, check, dd_run_check):
     instance = deepcopy(INSTANCES['main'])
     instance.update(extra_config)
     check = check(instance)
@@ -151,15 +167,15 @@ def test_config(test_case, extra_config, expected_http_kwargs, check, dd_run_che
 
         dd_run_check(check)
 
-        http_wargs = dict(
-            auth=mock.ANY,
-            cert=mock.ANY,
-            headers=mock.ANY,
-            proxies=mock.ANY,
-            timeout=mock.ANY,
-            verify=mock.ANY,
-            allow_redirects=mock.ANY,
-        )
+        http_wargs = {
+            'auth': mock.ANY,
+            'cert': mock.ANY,
+            'headers': mock.ANY,
+            'proxies': mock.ANY,
+            'timeout': mock.ANY,
+            'verify': mock.ANY,
+            'allow_redirects': mock.ANY,
+        }
         http_wargs.update(expected_http_kwargs)
         r.get.assert_called_with('http://{}:8001/stats'.format(HOST), **http_wargs)
 
@@ -252,7 +268,7 @@ def test_metadata_not_collected(datadog_agent, check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_metadata_integration(aggregator, datadog_agent, check):
+def test_metadata_integration(datadog_agent, check):
     instance = INSTANCES['main']
     c = check(instance)
     c.check_id = 'test:123'
@@ -269,3 +285,24 @@ def test_metadata_integration(aggregator, datadog_agent, check):
 
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata))
+
+
+@pytest.mark.unit
+def test_stats_prefix_ext_auth(aggregator, fixture_path, mock_http_response, check, dd_run_check):
+    instance = INSTANCES['main']
+    tags = ['cluster_name:foo', 'envoy_cluster:foo']
+    tags_prefix = tags + ['stat_prefix:bar']
+    c = check(instance)
+    mock_http_response(file_path=fixture_path('stat_prefix')).return_value
+    dd_run_check(c)
+
+    # To ensure that this change didn't break the old behavior, both the value and the tags are asserted.
+    # The fixture is created with a specific value and the EXT_METRICS list is done in alphabetical order
+    # allowing for value to also be asserted
+    for index, metric in enumerate(EXT_METRICS):
+        aggregator.assert_metric(
+            metric,
+            value=index + 5,
+            tags=tags_prefix,
+        )
+        aggregator.assert_metric(metric, value=index, tags=tags)

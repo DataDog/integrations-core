@@ -117,6 +117,24 @@ logs:
           - '*'
 ```
 
+##### Filter journal messages
+
+In Datadog Agent version `7.39.0`+, you can filter arbitrary messages using key-value pairs with these parameters:
+
+- `include_matches`: Includes messages matching `key=value`
+- `exclude_matches`: Excludes messages matching `key=value`
+
+
+Example:
+
+```yaml
+logs:
+    - type: journald
+      path: /var/log/journal/
+      include_matches:
+          - _TRANSPORT=kernel
+```
+
 ##### Tailing the same journal multiple times
 
 If you want to report units with different source or service tags, these must appear in separate journald configs.

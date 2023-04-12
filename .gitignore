@@ -125,3 +125,6 @@ benchmark_*.svg
 
 ## Kind
 .kube
+
+## Direnv
+.envrc

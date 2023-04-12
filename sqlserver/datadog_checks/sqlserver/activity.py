@@ -61,6 +61,7 @@ SELECT
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
+    sess.program_name as program_name,
     {exec_request_columns}
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
@@ -196,7 +197,7 @@ class SqlserverActivity(DBMAsyncJob):
 
     def _get_available_requests_columns(self, cursor, all_expected_columns):
         cursor.execute("select TOP 0 * from sys.dm_exec_requests")
-        all_columns = set([i[0] for i in cursor.description])
+        all_columns = {i[0] for i in cursor.description}
         available_columns = [c for c in all_expected_columns if c in all_columns]
         missing_columns = set(all_expected_columns) - set(available_columns)
         if missing_columns:

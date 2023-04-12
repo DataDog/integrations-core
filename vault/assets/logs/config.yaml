@@ -1,0 +1,217 @@
+id: vault
+metric_id: vault
+facets:
+  - name: Method
+    source: log
+    path: http.method
+    groups:
+      - Web Access
+  - name: Status Code
+    source: log
+    path: http.status_code
+    groups:
+      - Web Access
+  - name: URL Path
+    source: log
+    path: http.url_details.path
+    groups:
+      - Web Access
+  - name: City Name
+    source: log
+    path: network.client.geoip.city.name
+    groups:
+      - Geoip
+  - name: Continent Code
+    source: log
+    path: network.client.geoip.continent.code
+    groups:
+      - Geoip
+  - name: Continent Name
+    source: log
+    path: network.client.geoip.continent.name
+    groups:
+      - Geoip
+  - name: Country ISO Code
+    source: log
+    path: network.client.geoip.country.iso_code
+    groups:
+      - Geoip
+  - name: Country Name
+    source: log
+    path: network.client.geoip.country.name
+    groups:
+      - Geoip
+  - name: Subdivison ISO Code
+    source: log
+    path: network.client.geoip.subdivision.iso_code
+    groups:
+      - Geoip
+  - name: Subdivison Name
+    source: log
+    path: network.client.geoip.subdivision.name
+    groups:
+      - Geoip
+  - name: Client IP
+    source: log
+    path: network.client.ip
+    groups:
+      - Web Access
+  - name: User ID
+    source: log
+    path: usr.id
+    groups:
+      - User
+  - name: Vault Service Name
+    source: log
+    path: vault.service
+    groups:
+      - Vault
+  - name: Auth Accessor
+    source: log
+    path: auth.accessor
+    groups:
+      - Vault
+  - name: Auth Token type
+    source: log
+    path: auth.token_type
+    groups:
+      - Vault
+  - name: Auth Token TTL
+    source: log
+    path: auth.token_ttl
+    type: double
+    facetType: range
+    unit:
+      family: time
+      name: second
+    groups:
+      - Vault
+  - name: Auth Client Token
+    source: log
+    path: auth.client_token
+    groups:
+      - Vault
+  - name: Auth Policies
+    source: log
+    path: auth.policies
+    groups:
+      - Vault
+  - name: Request Operation
+    source: log
+    path: request.operation
+    groups:
+      - Vault
+  - name: Request Mount Type
+    source: log
+    path: request.mount_type
+    groups:
+      - Vault
+  - name: Request Remote Address
+    source: log
+    path: request.remote_address
+    groups:
+      - Vault
+  - name: Request Client Token Accessor
+    source: log
+    path: request.client_token_accessor
+    groups:
+      - Vault
+  - name: Type
+    source: log
+    path: type
+    groups:
+      - Event
+pipeline:
+  type: pipeline
+  name: Vault
+  enabled: true
+  filter:
+    query: source:vault
+  processors:
+    - type: grok-parser
+      name: Parsing Vault Server logs
+      enabled: true
+      source: message
+      samples:
+        - 2019-11-04T17:48:44.226-0800 [WARN]  no `api_addr` value specified in config or in VAULT_API_ADDR; falling back to detection if possible, but this value should be manually set
+        - '2019-11-04T17:48:58.967-0800 [DEBUG] core: starting cluster listeners'
+        - '2019-11-04T17:48:58.967-0800 [INFO]  core.cluster-listener: starting listener: listener_address=0.0.0.0:8201'
+      grok:
+        supportRules: |
+          _date %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):timestamp}
+          _level %{word:level}
+        matchRules: |
+          vault_server_svc %{_date}\s+\[%{_level}\]\s+%{notSpace:vault.service}:\s+%{data:message}
+          vault_server %{_date}\s+\[%{_level}\]\s+%{data:message}
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: status-remapper
+      name: Define `level` as the official status of the log
+      enabled: true
+      sources:
+        - level
+    - type: message-remapper
+      name: Define `message` as the official message of the log
+      enabled: true
+      sources:
+        - message
+    - type: attribute-remapper
+      name: Map `auth.display_name`, `auth.metatdata.username` to `usr.id`
+      enabled: true
+      sources:
+        - auth.display_name
+        - auth.metatdata.username
+      target: usr.id
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+      targetType: attribute
+    - type: attribute-remapper
+      name: Map `request.path` to `http.url_details.path`
+      enabled: true
+      sources:
+        - request.path
+      target: http.url_details.path
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+      targetType: attribute
+    - type: attribute-remapper
+      name: Map `request.data.http_status_code` to `http.status_code`
+      enabled: true
+      sources:
+        - request.data.http_status_code
+      target: http.status_code
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+      targetType: attribute
+    - type: attribute-remapper
+      name: Map `request.remote_address` to `network.client.ip`
+      enabled: true
+      sources:
+        - request.remote_address
+      target: network.client.ip
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+      targetType: attribute
+    - type: geo-ip-parser
+      name: Fetching GeoIp data for client ip
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+    - type: attribute-remapper
+      name: Map `request.operation` to `http.method`
+      enabled: true
+      sources:
+        - request.operation
+      target: http.method
+      preserveSource: true
+      overrideOnConflict: false
+      sourceType: attribute
+      targetType: attribute

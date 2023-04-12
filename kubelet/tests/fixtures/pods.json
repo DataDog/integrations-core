@@ -1463,6 +1463,27 @@
                         "claimName": "www-web-2"
                     }
                 }, {
+                    "name": "ephemeralvolume",
+                    "ephemeral": {
+                        "volumeClaimTemplate": {
+                            "metadata": {
+                                "labels": {
+                                    "abc": "efg"
+                                }
+                            },
+                            "spec": {
+                                "accessModes": [ "ReadWriteOnce" ],
+                                "storageClassName": "any",
+                                "resources":{
+                                    "requests":{
+                                        "storage": "1Gi"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                {
                     "name": "default-token-s7dz6",
                     "secret": {
                         "secretName": "default-token-s7dz6",

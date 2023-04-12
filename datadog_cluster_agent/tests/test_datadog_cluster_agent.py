@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict
+from typing import Any, Dict  # noqa: F401
 
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.datadog_cluster_agent import DatadogClusterAgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -21,6 +21,11 @@ METRICS = [
     'admission_webhooks.webhooks_received',
     'admission_webhooks.library_injection_attempts',
     'admission_webhooks.library_injection_errors',
+    'admission_webhooks.patcher.attempts',
+    'admission_webhooks.patcher.completed',
+    'admission_webhooks.patcher.errors',
+    'admission_webhooks.rc_provider.configs',
+    'admission_webhooks.rc_provider.invalid_configs',
     'aggregator.flush',
     'aggregator.processed',
     'api_requests',
