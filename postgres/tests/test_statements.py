@@ -12,6 +12,7 @@ import mock
 import psycopg2
 import pytest
 from dateutil import parser
+from dateutil.tz import UTC
 from semver import VersionInfo
 from six import string_types
 
@@ -40,8 +41,6 @@ SAMPLE_QUERIES = [
 ]
 
 dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
-
-DEFAULT_TZ_INFO = datetime.tzinfo('UTC')
 
 
 @pytest.fixture(autouse=True)
@@ -1023,15 +1022,15 @@ def test_activity_reported_hostname(
 
 
 def new_time():
-    return datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+    return datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=UTC)
 
 
 def old_time():
-    return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+    return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330, tzinfo=UTC)
 
 
 def very_old_time():
-    return datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+    return datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=UTC)
 
 
 @pytest.mark.parametrize(
