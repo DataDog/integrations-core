@@ -108,7 +108,7 @@ The GitLab check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][13] for a list of service checks provided by this integration.
+See [service_checks.json][13] for a list of service checks provided by this integration. More information about the `gitlab.readiness.*` service checks can be found in the official [GitLab documentation][15].
 
 ## Troubleshooting
 
@@ -128,3 +128,4 @@ Need help? Contact [Datadog support][14].
 [12]: https://github.com/DataDog/integrations-core/blob/master/gitlab/metadata.csv
 [13]: https://github.com/DataDog/integrations-core/blob/master/gitlab/assets/service_checks.json
 [14]: https://docs.datadoghq.com/help/
+[15]: https://docs.gitlab.com/ee/user/admin_area/monitoring/health_check.html#readiness

@@ -73,5 +73,213 @@
         ],
         "name": "Gitlab readiness",
         "description": "Returns `CRITICAL` if the Gitlab instance is unable to accept traffic via Rails Controllers."
+    },
+    {
+        "agent_version": "7.44.0",
+        "integration": "Gitlab",
+        "check": "gitlab.readiness.master",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "GitLab readiness - master",
+        "description": "Returns `CRITICAL` if master is not ready."
+    },
+    {
+        "agent_version": "7.44.0",
+        "integration": "Gitlab",
+        "check": "gitlab.readiness.database",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "GitLab readiness - database",
+        "description": "Returns `CRITICAL` if the database is not ready."
+    },
+    {
+        "agent_version": "7.44.0",
+        "integration": "Gitlab",
+        "check": "gitlab.readiness.cache",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "GitLab readiness - cache",
+        "description": "Returns `CRITICAL` if the cache is not ready."
+    },
+    {
+        "agent_version": "7.44.0",
+        "integration": "Gitlab",
+        "check": "gitlab.readiness.database_load_balancing",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "GitLab readiness - database_load_balancing",
+        "description": "Returns `CRITICAL` if the database load balancing is not ready."
+    },
+    {
+        "agent_version": "7.44.0",
+        "integration": "Gitlab",
+        "check": "gitlab.readiness.queues",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "GitLab readiness - queues",
+        "description": "Returns `CRITICAL` if the queues are not ready."
+    },
+    {
+        "agent_version": "7.44.0",
+        "integration": "Gitlab",
+        "check": "gitlab.readiness.rate_limiting",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "GitLab readiness - rate_limiting",
+        "description": "Returns `CRITICAL` if the rate limiting is not ready."
+    },
+    {
+        "agent_version": "7.44.0",
+        "integration": "Gitlab",
+        "check": "gitlab.readiness.repository_cache",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "GitLab readiness - repository_cache",
+        "description": "Returns `CRITICAL` if the repository cache is not ready."
+    },
+    {
+        "agent_version": "7.44.0",
+        "integration": "Gitlab",
+        "check": "gitlab.readiness.cluster_rate_limiting",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "GitLab readiness - cluster_rate_limiting",
+        "description": "Returns `CRITICAL` if the cluster rate limiting is not ready."
+    },
+    {
+        "agent_version": "7.44.0",
+        "integration": "Gitlab",
+        "check": "gitlab.readiness.sessions",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "GitLab readiness - sessions",
+        "description": "Returns `CRITICAL` if the sessions are not ready."
+    },
+    {
+        "agent_version": "7.44.0",
+        "integration": "Gitlab",
+        "check": "gitlab.readiness.shared_state",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "GitLab readiness - shared_state",
+        "description": "Returns `CRITICAL` if the shared state is not ready."
+    },
+    {
+        "agent_version": "7.44.0",
+        "integration": "Gitlab",
+        "check": "gitlab.readiness.trace_chunks",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "GitLab readiness - trace_chunks",
+        "description": "Returns `CRITICAL` if the trace chunks are not ready."
+    },
+    {
+        "agent_version": "7.44.0",
+        "integration": "Gitlab",
+        "check": "gitlab.readiness.gitaly",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "GitLab readiness - gitaly",
+        "description": "Returns `CRITICAL` if gitaly is not ready."
+    },
+    {
+        "agent_version": "7.44.0",
+        "integration": "Gitlab",
+        "check": "gitlab.readiness.redis",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "GitLab readiness - redis",
+        "description": "Returns `CRITICAL` if redis is not ready."
     }
 ]
