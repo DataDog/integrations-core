@@ -248,17 +248,18 @@ def update_copyrights(package_name, license_id, data, ctx):
     Update package data with scraped copyright attributions.
     """
 
-    gh_repo_url = PACKAGE_REPO_OVERRIDES.get(package_name)
-    gh_repo_url = gh_repo_url if gh_repo_url else data['home_page']
+    gh_repo_url = PACKAGE_REPO_OVERRIDES.get(package_name) or data['home_page']
     if gh_repo_url is not None:
         created_date = probe_github(gh_repo_url, ctx)
 
-    pkg_urls = [u for u in (d['url'] for d in data['urls']) if u.endswith('.whl') or u.endswith('.tar.gz')]
+    pkg_urls = [u for u in (d['url'] for d in data['urls']) if u.endswith(('.whl', '.tar.gz'))]
     if not pkg_urls:
         raise ValueError(
             f"Found no urls to packages, here are the urls for this dependency: {[u['url'] for u in data['urls']]}"
         )
-    url = pkg_urls[0]  # Since we only scan the contents of the package archive we don't care which package we download.
+
+    # Since we only scan the contents of the package archive we don't care which package we download.
+    url = pkg_urls[0]
     cp = scrape_copyright_data(url)
     if cp:
         data['copyright'][license_id] = cp
@@ -317,7 +318,7 @@ def generate_from_tarball(stream):
 
 
 def generate_from_wheel(stream):
-    with ZipFile((stream)) as archive:
+    with ZipFile(stream) as archive:
         for name in archive.namelist():
             if parse_license_path(name):
                 with archive.open(name) as fh:
