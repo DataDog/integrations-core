@@ -69,12 +69,12 @@ E2E_METADATA_ORACLE_CLIENT = {
 
 @pytest.fixture
 def check(instance):
-    return Oracle(CHECK_NAME, { "use_instant_client": False }, [instance])
+    return Oracle(CHECK_NAME, {"use_instant_client": False}, [instance])
 
 
 @pytest.fixture
 def tcps_check(tcps_instance):
-    return Oracle(CHECK_NAME, { "use_instant_client": False }, [tcps_instance])
+    return Oracle(CHECK_NAME, {"use_instant_client": False}, [tcps_instance])
 
 
 @pytest.fixture
@@ -140,10 +140,10 @@ def dd_environment():
         attempts=20,
         attempts_wait=5,
     ):
-        yield { 
-                'init_config': { "use_instant_client": use_instant_client },
-                'instances': [instance],
-            }, e2e_metadata
+        yield {
+            'init_config': {"use_instant_client": use_instant_client},
+            'instances': [instance],
+        }, e2e_metadata
 
 
 @pytest.fixture

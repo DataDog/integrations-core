@@ -87,7 +87,7 @@ def test__get_connection_oracledb_instant_client(instance, dd_run_check, aggrega
     """
     Test the _get_connection method using the instant client
     """
-    check = Oracle(CHECK_NAME, { 'use_instant_client': True }, [instance])
+    check = Oracle(CHECK_NAME, {'use_instant_client': True}, [instance])
     con = mock.MagicMock()
     with mock.patch('datadog_checks.oracle.oracle.oracledb') as pyoradb:
         pyoradb.connect.return_value = con
