@@ -2,6 +2,12 @@
 #
 init_config:
 
+    ## @param use_instant_client - boolean - optional - default: false
+    ## Determines whether the Agent uses the Oracle Instant Client to connect instead of the Oracle native client. 
+    ## This option cannot be used at the same time as `jdbc_driver_path`.
+    #
+    # use_instant_client: false
+
     ## @param global_custom_queries - list of mappings - optional
     ## See `custom_queries` defined below.
     ##
@@ -55,12 +61,6 @@ instances:
     ## The password for the Datadog user account.
     #
     password: <PASSWORD>
-
-    ## @param use_instant_client - boolean - optional - default: false
-    ## Determines whether the Agent uses the Oracle Instant Client to connect instead of the Oracle native client. 
-    ## This option cannot be used at the same time as `jdbc_driver_path`.
-    #
-    # use_instant_client: false
 
     ## @param jdbc_driver_path - string - optional - default: <DRIVER_PATH>.jar
     ## Set this parameter if you are not using the Oracle native client or Instant Client.

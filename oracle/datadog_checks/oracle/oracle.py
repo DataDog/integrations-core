@@ -8,7 +8,7 @@ from contextlib import closing
 import oracledb
 from six import PY2
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
@@ -62,7 +62,7 @@ class Oracle(AgentCheck):
         self._password = self.instance.get('password')
         self._service = self.instance.get('service_name')
         self._protocol = self.instance.get("protocol", PROTOCOL_TCP)
-        self._use_instant_client = self.instance.get("use_instant_client")
+        self._use_instant_client = is_affirmative(self.init_config.get("use_instant_client"))
         self._jdbc_driver = self.instance.get('jdbc_driver_path')
         self._jdbc_truststore_path = self.instance.get('jdbc_truststore_path')
         self._jdbc_truststore_type = self.instance.get('jdbc_truststore_type')

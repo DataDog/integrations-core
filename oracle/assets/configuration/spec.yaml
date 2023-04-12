@@ -4,6 +4,13 @@ files:
   options:
   - template: init_config
     options:
+    - name: use_instant_client
+      description: |
+          Determines whether the Agent uses the Oracle Instant Client to connect instead of the Oracle native client. 
+          This option cannot be used at the same time as `jdbc_driver_path`.
+      value:
+        example: false
+        type: boolean
     - template: init_config/db
     - template: init_config/default
   - template: instances
@@ -43,13 +50,6 @@ files:
       required: true
       value:
         type: string
-    - name: use_instant_client
-      description: |
-          Determines whether the Agent uses the Oracle Instant Client to connect instead of the Oracle native client. 
-          This option cannot be used at the same time as `jdbc_driver_path`.
-      value:
-        example: false
-        type: boolean
     - name: jdbc_driver_path
       description: |
         Set this parameter if you are not using the Oracle native client or Instant Client.

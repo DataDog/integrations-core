@@ -80,24 +80,30 @@ def tcps_check(tcps_instance):
 @pytest.fixture
 def instance():
     return {
-        'server': 'localhost:1521',
-        'username': 'system',
-        'password': 'oracle',
-        'service_name': 'xe',
-        'protocol': 'TCP',
-        'tags': ['optional:tag1'],
+        init_config: { "use_instant_client": False },
+        instances: {
+            'server': 'localhost:1521',
+            'username': 'system',
+            'password': 'oracle',
+            'service_name': 'xe',
+            'protocol': 'TCP',
+            'tags': ['optional:tag1'],
+        }
     }
 
 
 @pytest.fixture
 def tcps_instance():
     return {
-        'server': 'localhost:2484',
-        'username': 'system',
-        'password': 'oracle',
-        'service_name': 'xe',
-        'protocol': 'TCPS',
-        'tags': ['optional:tag1'],
+        init_config: { "use_instant_client": False },
+        instances: {
+            'server': 'localhost:2484',
+            'username': 'system',
+            'password': 'oracle',
+            'service_name': 'xe',
+            'protocol': 'TCP',
+            'tags': ['optional:tag1'],
+        }
     }
 
 
