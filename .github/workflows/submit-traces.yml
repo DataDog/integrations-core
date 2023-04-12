@@ -1,0 +1,62 @@
+name: Submit traces
+
+on:
+  workflow_call:
+    inputs:
+      artifact-name:
+        required: false
+        default: "traces"
+        type: string
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  submit:
+    name: Submit traces
+    runs-on: ubuntu-22.04
+
+    services:
+      dd-agent:
+        image: gcr.io/datadoghq/agent:latest
+        ports:
+        - "8126:8126"
+        env:
+          DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+          DD_HOSTNAME: "none"
+          DD_INSIDE_CI: "true"
+          DD_LOG_LEVEL: "trace"
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/download-artifact@v3
+      id: download
+      with:
+        name: "${{ inputs.artifact-name }}"
+        path: captured-traces
+      continue-on-error: true
+
+    - name: Replay
+      if: steps.download.outcome == 'success'
+      run: |-
+        cd captured-traces
+        for request in *; do
+          # The file could be empty if there were no traces, i.e. no Agent
+          # check classes like when testing ddev or the downloader
+          if [[ -s "$request" ]]; then
+            echo "/// Replaying: $request"
+            python ../.ddev/ci/scripts/traces.py replay --record-file "$request"
+          fi
+        done
+
+    - name: Show Agent status
+      if: steps.download.outcome == 'success'
+      run: docker exec $(docker ps --format "{{.ID}}") agent status
+
+    - uses: geekyeggo/delete-artifact@v2
+      if: steps.download.outcome == 'success'
+      with:
+        name: "${{ inputs.artifact-name }}"
+        failOnError: false

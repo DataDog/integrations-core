@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from typing import Any, Dict, Generator
+from typing import Any, Dict, Generator  # noqa: F401
 
 import pytest
 import requests

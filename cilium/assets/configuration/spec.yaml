@@ -26,7 +26,7 @@ files:
       enabled: true
       value:
         type: string
-        example: http://localhost:9090/metrics
+        example: http://localhost:9962/metrics
         display_default: null
     - name: operator_endpoint
       description: |
@@ -63,7 +63,7 @@ files:
         By default, the Cilium integration collects `cilium-agent` metrics.
         One of agent_endpoint or operator_endpoint must be provided.
       value:
-        example: http://%%host%%:9090/metrics
+        example: http://%%host%%:9962/metrics
         type: string
     - name: tags
       description: |

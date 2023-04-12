@@ -4,7 +4,7 @@
 from time import time
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.kafka_consumer.client.generic_kafka_client import GenericKafkaClient
+from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.config import KafkaConfig
 
 
@@ -25,7 +25,7 @@ class KafkaCheck(AgentCheck):
         super(KafkaCheck, self).__init__(name, init_config, instances)
         self.config = KafkaConfig(self.init_config, self.instance, self.log)
         self._context_limit = self.config._context_limit
-        self.client = GenericKafkaClient(self.config, self.get_tls_context(), self.log)
+        self.client = KafkaClient(self.config, self.get_tls_context(), self.log)
         self.check_initializations.append(self.config.validate_config)
 
     def check(self, _):

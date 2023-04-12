@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence, Union
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, Extra, Field, root_validator, validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -25,6 +25,15 @@ class AuthToken(BaseModel):
 
     reader: Optional[Mapping[str, Any]]
     writer: Optional[Mapping[str, Any]]
+
+
+class ExtraMetric(BaseModel):
+    class Config:
+        extra = Extra.allow
+        allow_mutation = False
+
+    name: Optional[str]
+    type: Optional[str]
 
 
 class IgnoreMetricsByLabels(BaseModel):
@@ -58,6 +67,15 @@ class MetricPatterns(BaseModel):
     include: Optional[Sequence[str]]
 
 
+class Metric(BaseModel):
+    class Config:
+        extra = Extra.allow
+        allow_mutation = False
+
+    name: Optional[str]
+    type: Optional[str]
+
+
 class Proxy(BaseModel):
     class Config:
         allow_mutation = False
@@ -65,6 +83,14 @@ class Proxy(BaseModel):
     http: Optional[str]
     https: Optional[str]
     no_proxy: Optional[Sequence[str]]
+
+
+class ShareLabel(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    labels: Optional[Sequence[str]]
+    match: Optional[Sequence[str]]
 
 
 class InstanceConfig(BaseModel):
@@ -81,14 +107,25 @@ class InstanceConfig(BaseModel):
     bearer_token_auth: Optional[Union[bool, str]]
     bearer_token_path: Optional[str]
     bearer_token_refresh_interval: Optional[int]
+    cache_metric_wildcards: Optional[bool]
+    cache_shared_labels: Optional[bool]
+    collect_counters_with_distributions: Optional[bool]
+    collect_histogram_buckets: Optional[bool]
     connect_timeout: Optional[float]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
+    enable_health_service_check: Optional[bool]
     exclude_labels: Optional[Sequence[str]]
+    exclude_metrics: Optional[Sequence[str]]
+    exclude_metrics_by_labels: Optional[Mapping[str, Union[bool, Sequence[str]]]]
     extra_headers: Optional[Mapping[str, Any]]
+    extra_metrics: Optional[Sequence[Union[str, Mapping[str, Union[str, ExtraMetric]]]]]
     gitlab_url: Optional[str]
     headers: Optional[Mapping[str, Any]]
     health_service_check: Optional[bool]
+    histogram_buckets_as_distributions: Optional[bool]
+    hostname_format: Optional[str]
+    hostname_label: Optional[str]
     ignore_metrics: Optional[Sequence[str]]
     ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels]
     ignore_tags: Optional[Sequence[str]]
@@ -105,17 +142,22 @@ class InstanceConfig(BaseModel):
     labels_mapper: Optional[Mapping[str, Any]]
     log_requests: Optional[bool]
     metric_patterns: Optional[MetricPatterns]
-    metrics: Optional[Sequence[Union[str, Mapping[str, str]]]]
+    metrics: Optional[Sequence[Union[str, Mapping[str, Union[str, Metric]]]]]
     min_collection_interval: Optional[float]
-    namespace: Optional[str]
+    namespace: Optional[str] = Field(None, regex='\\w*')
+    non_cumulative_histogram_buckets: Optional[bool]
     ntlm_domain: Optional[str]
+    openmetrics_endpoint: Optional[str]
     password: Optional[str]
     persist_connections: Optional[bool]
     prometheus_endpoint: Optional[str]
     prometheus_metrics_prefix: Optional[str]
-    prometheus_url: str
+    prometheus_url: Optional[str]
     proxy: Optional[Proxy]
+    raw_line_filters: Optional[Sequence[str]]
+    raw_metric_prefix: Optional[str]
     read_timeout: Optional[float]
+    rename_labels: Optional[Mapping[str, Any]]
     request_size: Optional[float]
     send_distribution_buckets: Optional[bool]
     send_distribution_counts_as_monotonic: Optional[bool]
@@ -124,8 +166,11 @@ class InstanceConfig(BaseModel):
     send_monotonic_counter: Optional[bool]
     send_monotonic_with_gauge: Optional[bool]
     service: Optional[str]
+    share_labels: Optional[Mapping[str, Union[bool, ShareLabel]]]
     skip_proxy: Optional[bool]
+    tag_by_endpoint: Optional[bool]
     tags: Optional[Sequence[str]]
+    telemetry: Optional[bool]
     timeout: Optional[float]
     tls_ca_cert: Optional[str]
     tls_cert: Optional[str]
@@ -135,6 +180,7 @@ class InstanceConfig(BaseModel):
     tls_use_host_header: Optional[bool]
     tls_verify: Optional[bool]
     type_overrides: Optional[Mapping[str, Any]]
+    use_latest_spec: Optional[bool]
     use_legacy_auth_encoding: Optional[bool]
     use_process_start_time: Optional[bool]
     username: Optional[str]

@@ -1,5 +1,17 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 19.0.0 / 2023-04-11
+
+* [Changed] Replace flake8 and isort with Ruff. See [#14212](https://github.com/DataDog/integrations-core/pull/14212).
+
+## 18.1.0 / 2023-03-31
+
+* [Added] Get more insight into Agent E2E communication errors. See [#14259](https://github.com/DataDog/integrations-core/pull/14259).
+* [Added] Support GitHub Actions for testing. See [#14237](https://github.com/DataDog/integrations-core/pull/14237).
+* [Fixed] Fix a typo in the `disable_generic_tags` option description. See [#14246](https://github.com/DataDog/integrations-core/pull/14246).
+* [Fixed] Fix style. See [#14230](https://github.com/DataDog/integrations-core/pull/14230).
+* [Fixed] Fix traps db generation for expended representation. See [#14002](https://github.com/DataDog/integrations-core/pull/14002).
+
 ## 18.0.0 / 2023-03-23
 
 * [Added] Allow to specify the mode when creating a temp dir. See [#14208](https://github.com/DataDog/integrations-core/pull/14208).

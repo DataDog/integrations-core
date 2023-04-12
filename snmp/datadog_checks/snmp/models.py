@@ -5,11 +5,11 @@
 Define our own models and interfaces for dealing with SNMP data.
 """
 
-from typing import List, Optional, Sequence, Tuple, Union
+from typing import List, Optional, Sequence, Tuple, Union  # noqa: F401
 
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
 from .pysnmp_inspect import object_identity_from_object_type
-from .pysnmp_types import MibViewController, ObjectIdentity, ObjectName, ObjectType
+from .pysnmp_types import MibViewController, ObjectIdentity, ObjectName, ObjectType  # noqa: F401
 from .types import MIBSymbol
 from .utils import format_as_oid_string, parse_as_oid_tuple
 

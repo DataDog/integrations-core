@@ -204,14 +204,4 @@ files:
         value:
           type: string
           example: <SSL_FILE_PATH>
-      - name: broker_requests_batch_size
-        description: |
-          The OffsetRequests sent to each broker are batched by the kafka_consumer check in groups of 30 by default.
-          If the batch size is too big, you may see KafkaTimeoutError exceptions in the logs while
-          running the wakeup calls.
-          If the batch size is too small, the check will take longer to run.
-        display_default: 30
-        value:
-          type: integer
-          example: 30
       - template: instances/default
