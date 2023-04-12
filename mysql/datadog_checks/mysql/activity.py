@@ -7,7 +7,7 @@ import decimal
 import time
 from contextlib import closing
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List  # noqa: F401
 
 import pymysql
 

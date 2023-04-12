@@ -2,11 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+from ddev.validation.tracker import ValidationTracker
 from rich.console import Console
 from rich.style import Style
 from rich.tree import Tree
-
-from ddev.validation.tracker import ValidationTracker
 
 
 def get_tracker():

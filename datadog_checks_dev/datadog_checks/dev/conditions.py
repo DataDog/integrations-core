@@ -5,7 +5,7 @@ import re
 import socket
 import time
 from contextlib import closing
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Tuple, Union  # noqa: F401
 
 from six import string_types
 from six.moves.urllib.request import urlopen

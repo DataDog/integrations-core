@@ -25,7 +25,7 @@ class Connection(object):
         self.schema = kwargs.get('schema')
 
     def cursor(self, *args, **kwargs):
-        return Cursor(schema=self.schema, *args, **kwargs)
+        return Cursor(schema=self.schema, *args, **kwargs)  # noqa: B026
 
     def close(self):
         pass
