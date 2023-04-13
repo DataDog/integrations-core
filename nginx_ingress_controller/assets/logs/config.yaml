@@ -1,82 +1,180 @@
-id: weave-npc
-metric_id: nginx-ingress-controller
+id: nginx-ingress-controller
+backend_only: true
 facets:
+  - name: Duration
+    source: log
+    path: duration
+    type: double
+    facetType: range
+    unit:
+      family: time
+      name: nanosecond
+    groups:
+      - Measure
+  - name: Method
+    source: log
+    path: http.method
+    groups:
+      - Web Access
+  - name: Status Code
+    source: log
+    path: http.status_code
+    groups:
+      - Web Access
+  - name: URL Host
+    source: log
+    path: http.url_details.host
+    groups:
+      - Web Access
+  - name: URL Path
+    source: log
+    path: http.url_details.path
+    groups:
+      - Web Access
+  - name: URL Port
+    source: log
+    path: http.url_details.port
+    groups:
+      - Web Access
+  - name: URL scheme
+    source: log
+    path: http.url_details.scheme
+    groups:
+      - Web Access
+  - name: Browser
+    source: log
+    path: http.useragent_details.browser.family
+    groups:
+      - Web Access
+  - name: Device
+    source: log
+    path: http.useragent_details.device.family
+    groups:
+      - Web Access
+  - name: OS
+    source: log
+    path: http.useragent_details.os.family
+    groups:
+      - Web Access
   - name: Client IP
     source: log
     path: network.client.ip
     groups:
       - Web Access
-  - name: User
+  - name: Referer
     source: log
-    path: system.user
+    path: http.referer
     groups:
-      - System
-  - name: Action
-    source: log
-    path: system.action
-    groups:
-      - System
-  - name: Ipset
-    source: log
-    path: network.ipset
-    groups:
-      - Weave
+      - Web Access
 pipeline:
   type: pipeline
-  name: Weave NPC
+  name: Nginx Ingress Controller
   enabled: true
   filter:
-    query: source:weave-npc
+    query: source:nginx-ingress-controller
   processors:
     - type: grok-parser
-      name: Parsing Weave NPC logs
+      name: Parsing Nginx Ingress Controller logs
       enabled: true
       source: message
       samples:
-        - 'WARN: 2018/12/07 18:49:34.228275 UDP connection from 192.168.131.39:2817 to 255.255.255.255:67 blocked by Weave NPC.'
-        - 'INFO: 2018/12/07 18:45:05.223738 added entry 192.168.131.39 to weave-myipset of 1234566-abcdefgb-123456'
-        - 'INFO: 2018/02/27 10:29:15.725883 destroying ipset: &npc.selectorSpec{key:"", selector:labels.internalSelector{}, dst:false, ipsetType:"hash:ip", ipsetName:"weave-myipset", nsName:"test"}'
-        - 'DEBU: 2018/12/07 18:45:00.277478 EVENT AddPod {"metadata":{"creationTimestamp":"2018-12-07T18:45:00Z","generateName":"dns-update-123456789"}'
+        - 172.17.0.1 - [172.17.0.1] - - [07/Dec/2018:18:31:33 +0000] "GET /datadoghq/company?test=var1%20Pl HTTP/1.1" 200 261 "-" "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0" 1904 0.011 [proxyname-8080] 172.17.0.1:9000 298 0.012 200 abcdefg12345abcdef
+        - 172.17.0.1 - - [07/Dec/2018:18:31:33 +0000] "GET /datadoghq/company?test=var1%20Pl HTTP/1.1" 200 261 "-" "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0" 1904 0.011 [proxyname-8080] 172.17.0.1:9000 298 0.012 200 abcdefg12345abcdef
+        - 103.94.12.0 - [106.92.12.0] - - [22/Aug/2019:20:18:37 +0000] "GET /datadoghq/datadog-6c32ec1925 HTTP/1.0" 301 124 "-" "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.96 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" 903 0.002 [dev-test-main-nginx-ingress-http] [] 105.94.191.12:80 124 0.004 301 abcdefg12345abcdef
+        - I1221 13:00:58.488494       7 controller.go:202] Initial sync, sleeping for 1 second.
+        - 172.16.99.64 - - [19/Mar/2020:16:02:20 +0000] "GET /datadoghq/company?test=var1%20Pl HTTP/1.1" 503 605 "-" "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0" 4033 0.000 [proxyname-8080] [] - - - - abcdefg12345abcdef
       grok:
         supportRules: |
-          _status %{word:status}
-          _date %{date("yyyy/MM/dd HH:mm:ss.SSSSSS"):timestamp}
+          _request_id %{notSpace:http.request_id}
+          _upstream_status %{number:http.upstream_status_code}
+          _upstream_time %{number:http.upstream_duration}
+          _bytes_read %{number:network.bytes_read}
+          _upstream_port %{number:network.destination.port}
+          _upstream_ip %{ipOrHost:network.destination.ip}
+          _proxy_name %{notSpace:proxy.name}
+          _alternate_proxy_name %{notSpace:proxy.alternate_name}
+          _duration %{number:duration:scale(1000000000)}
+          _request_size %{number:network.request_size}
+          _bytes_written %{integer:network.bytes_written}
           _client_ip %{ipOrHost:network.client.ip}
-          _client_port %{number:network.client.port}
-          _destination_ip %{ipOrHost:network.destination.ip}
-          _destination_port %{number:network.destination.port}
-          _ipset %{notSpace:network.ipset}
-          _action %{word:system.action:lowercase}
-          _user %{notSpace:system.user}
+          _version HTTP\/%{regex("\\d+\\.\\d+"):http.version}
+          _url %{notSpace:http.url}
+          _ident %{notSpace:http.ident:nullIf("-")}
+          _user_agent %{regex("[^\\\"]*"):http.useragent}
+          _referer %{notSpace:http.referer}
+          _status_code %{integer:http.status_code}
+          _method %{word:http.method}
+          _date_access %{date("dd/MMM/yyyy:HH:mm:ss Z"):date_access}
+          _x_forwarded_for %{regex("[^\\\"]*"):http._x_forwarded_for:nullIf("-")}
+
         matchRules: |
-          blocked_rule %{_status}: %{_date} %{word:http.protocol:lowercase} connection from %{_client_ip}:%{_client_port} to %{_destination_ip}:%{_destination_port} %{_action} .*
+          access.common %{_client_ip}(?: - \[%{notSpace}\])? - %{_ident} \[%{_date_access}\] "(?>%{_method} |)%{_url}(?> %{_version}|)" %{_status_code} (?>%{_bytes_written}|-) "%{_referer}" "%{_user_agent}" %{_request_size} %{_duration} \[%{_proxy_name}\](?: \[%{_alternate_proxy_name}?\])? (?:%{_upstream_ip}:%{_upstream_port}|-)(?:, %{notSpace})?(?:, %{notSpace})? (?:%{_bytes_read}|-)(?:, %{number}|, -)?(?:, %{number}|, -)? (?:%{_upstream_time}|-)(?:, %{number}|, -)?(?:, %{number}|, -)? (?:%{_upstream_status}|-)(?:, %{number}|, -)?(?:, %{number}|, -)?(?: %{_request_id})?.*
 
-          entry_rule %{_status}: %{_date} %{_action} entry %{_client_ip} (to|from) %{_ipset} of %{_user}
+          error.format %{date("yyyy/MM/dd HH:mm:ss"):date_access} \[%{word:level}\] %{data:error.message}(, %{data::keyvalue(": ",",")})?
 
-          event_rule %{_status}: %{_date} EVENT %{_action} %{data::json}
+          controller_format %{regex("\\w"):level}%{date("MMdd HH:mm:ss.SSSSSS"):date_access}\s+%{number} %{notSpace:logger.name}:%{number:lineno}\] .*
 
-          ipset_rule %{_status}: %{_date} %{_action} ipset(: %{data:network.ipset_details:keyvalue(":",",")}| %{_ipset})
-          ipset_crash %{_status}: %{_date} ipset \[%{word} %{_ipset} .*\] %{_action}: %{data:error.message}
-
-          fallback %{_status}: %{_date} %{data::keyvalue}
-
-    - type: date-remapper
-      name: Define `timestamp` as the official date of the log
-      enabled: true
-      sources:
-        - timestamp
-    - type: status-remapper
-      name: Define `status` as the official status of the log
-      enabled: true
-      sources:
-        - status
     - type: attribute-remapper
-      name: Map `network.ipset_details.ipsetName` to `network.ipset`
+      name: Map `client` to `network.client.ip`
       enabled: true
       sources:
-        - network.ipset_details.ipsetName
-      target: network.ipset
+        - client
+      target: network.client.ip
       preserveSource: false
-      overrideOnConflict: true
+      overrideOnConflict: false
       sourceType: attribute
       targetType: attribute
+    - type: grok-parser
+      name: Parsing Nginx ingress controller error log requests
+      enabled: true
+      source: request
+      grok:
+        supportRules: |
+          _method %{word:http.method}
+          _url %{notSpace:http.url}
+          _version HTTP\/%{regex("\\d+\\.\\d+"):http.version}
+        matchRules: |
+          request_parsing (?>%{_method} |)%{_url}(?> %{_version}|)
+      samples:
+        - HEAD http://174.138.82.103:80/sql/sql-admin/ HTTP/1.1
+    - type: url-parser
+      name: ''
+      enabled: true
+      sources:
+        - http.url
+      target: http.url_details
+    - type: user-agent-parser
+      name: ''
+      enabled: true
+      sources:
+        - http.useragent
+      target: http.useragent_details
+      encoded: false
+    - type: date-remapper
+      name: Define `date_access` as the official date of the log
+      enabled: true
+      sources:
+        - date_access
+    - type: category-processor
+      name: Categorise status code
+      enabled: true
+      categories:
+        - filter:
+            query: '@http.status_code:[200 TO 299]'
+          name: OK
+        - filter:
+            query: '@http.status_code:[300 TO 399]'
+          name: notice
+        - filter:
+            query: '@http.status_code:[400 TO 499]'
+          name: warning
+        - filter:
+            query: '@http.status_code:[500 TO 599]'
+          name: error
+      target: http.status_category
+    - type: status-remapper
+      name: Define `http.status_category`, `level` as the official status of the log
+      enabled: true
+      sources:
+        - http.status_category
+        - level

@@ -1,156 +1,425 @@
-id: "weave-npc"
+id: "nginx-ingress-controller"
 tests:
  -
-  sample: "DEBU: 2018/12/07 18:45:05.217708 EVENT UpdatePod {\"metadata\":{\"creationTimestamp\":\"2018-12-07T18:45:00Z\",\"generateName\":\"dns-update-1544208300-\",\"labels\":{\"controller-uid\":\"33718ae4-fa50-11e8-aa50-be3ec6ae8e2f\",\"job-name\":\"dns-update-1544208300\"},\"name\":\"dns-update-1544208300-mkb5b\",\"namespace\":\"default\",\"resourceVersion\":\"4371420\",\"selfLink\":\"/api/v1/namespaces/default/pods/dns-update-1544208300-mkb5b\",\"uid\":\"337712a0-fa50-11e8-aa50-be3ec6ae8e2f\"},\"spec\":{\"containers\":[{\"image\":\"evns/rpi-utilities\",\"imagePullPolicy\":\"Always\",\"name\":\"dns-update\",\"terminationMessagePath\":\"/dev/termination-log\",\"terminationMessagePolicy\":\"File\"}],\"dnsPolicy\":\"ClusterFirst\",\"nodeName\":\"k8s-slave-2\",\"priority\":0,\"restartPolicy\":\"OnFailure\",\"schedulerName\":\"default-scheduler\",\"securityContext\":{},\"serviceAccount\":\"default\",\"serviceAccountName\":\"default\",\"terminationGracePeriodSeconds\":30},\"status\":{\"conditions\":[{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"status\":\"True\",\"type\":\"Initialized\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"message\":\"containers with unready status: [dns-update]\",\"reason\":\"ContainersNotReady\",\"status\":\"False\",\"type\":\"Ready\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"message\":\"containers with unready status: [dns-update]\",\"reason\":\"ContainersNotReady\",\"status\":\"False\",\"type\":\"ContainersReady\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"status\":\"True\",\"type\":\"PodScheduled\"}],\"hostIP\":\"192.168.0.102\",\"phase\":\"Pending\",\"qosClass\":\"BestEffort\",\"startTime\":\"2018-12-07T18:45:00Z\"}} {\"metadata\":{\"creationTimestamp\":\"2018-12-07T18:45:00Z\",\"generateName\":\"dns-update-1544208300-\",\"labels\":{\"controller-uid\":\"33718ae4-fa50-11e8-aa50-be3ec6ae8e2f\",\"job-name\":\"dns-update-1544208300\"},\"name\":\"dns-update-1544208300-mkb5b\",\"namespace\":\"default\",\"resourceVersion\":\"4371432\",\"selfLink\":\"/api/v1/namespaces/default/pods/dns-update-1544208300-mkb5b\",\"uid\":\"337712a0-fa50-11e8-aa50-be3ec6ae8e2f\"},\"spec\":{\"containers\":[{\"image\":\"evns/rpi-utilities\",\"imagePullPolicy\":\"Always\",\"name\":\"dns-update\",\"terminationMessagePath\":\"/dev/termination-log\",\"terminationMessagePolicy\":\"File\"}],\"dnsPolicy\":\"ClusterFirst\",\"nodeName\":\"k8s-slave-2\",\"priority\":0,\"restartPolicy\":\"OnFailure\",\"schedulerName\":\"default-scheduler\",\"securityContext\":{},\"serviceAccount\":\"default\",\"serviceAccountName\":\"default\",\"terminationGracePeriodSeconds\":30},\"status\":{\"conditions\":[{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"status\":\"True\",\"type\":\"Initialized\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:05Z\",\"status\":\"True\",\"type\":\"Ready\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:05Z\",\"status\":\"True\",\"type\":\"ContainersReady\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"status\":\"True\",\"type\":\"PodScheduled\"}],\"hostIP\":\"192.168.0.102\",\"phase\":\"Running\",\"podIP\":\"10.42.0.2\",\"qosClass\":\"BestEffort\",\"startTime\":\"2018-12-07T18:45:00Z”}}"
+  sample: "172.17.0.1 - [172.17.0.1] - - [07/Dec/2018:18:31:33 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 200 261 \"-\" \"Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0\" 1904 0.011 [proxyname-8080] 172.17.0.1:9000 298 0.012 200 abcdefg12345abcdef"
   result:
     custom:
-      metadata:
-        creationTimestamp: "2018-12-07T18:45:00Z"
-        generateName: "dns-update-1544208300-"
-        labels:
-          controller-uid: "33718ae4-fa50-11e8-aa50-be3ec6ae8e2f"
-          job-name: "dns-update-1544208300"
-        name: "dns-update-1544208300-mkb5b"
-        namespace: "default"
-        resourceVersion: "4371420"
-        selfLink: "/api/v1/namespaces/default/pods/dns-update-1544208300-mkb5b"
-        uid: "337712a0-fa50-11e8-aa50-be3ec6ae8e2f"
-      spec:
-        containers:
-         -
-          image: "evns/rpi-utilities"
-          imagePullPolicy: "Always"
-          terminationMessagePolicy: "File"
-          terminationMessagePath: "/dev/termination-log"
-          name: "dns-update"
-        dnsPolicy: "ClusterFirst"
-        nodeName: "k8s-slave-2"
-        priority: 0
-        restartPolicy: "OnFailure"
-        schedulerName: "default-scheduler"
-        serviceAccount: "default"
-        serviceAccountName: "default"
-        terminationGracePeriodSeconds: 30
-      status:
-        conditions:
-         -
-          lastTransitionTime: "2018-12-07T18:45:00Z"
-          type: "Initialized"
-          status: "True"
-         -
-          reason: "ContainersNotReady"
-          lastTransitionTime: "2018-12-07T18:45:00Z"
-          message: "containers with unready status: [dns-update]"
-          type: "Ready"
-          status: "False"
-         -
-          reason: "ContainersNotReady"
-          lastTransitionTime: "2018-12-07T18:45:00Z"
-          message: "containers with unready status: [dns-update]"
-          type: "ContainersReady"
-          status: "False"
-         -
-          lastTransitionTime: "2018-12-07T18:45:00Z"
-          type: "PodScheduled"
-          status: "True"
-        hostIP: "192.168.0.102"
-        phase: "Pending"
-        qosClass: "BestEffort"
-        startTime: "2018-12-07T18:45:00Z"
-      system:
-        action: "updatepod"
-      timestamp: 1544208305217
-    message: "DEBU: 2018/12/07 18:45:05.217708 EVENT UpdatePod {\"metadata\":{\"creationTimestamp\":\"2018-12-07T18:45:00Z\",\"generateName\":\"dns-update-1544208300-\",\"labels\":{\"controller-uid\":\"33718ae4-fa50-11e8-aa50-be3ec6ae8e2f\",\"job-name\":\"dns-update-1544208300\"},\"name\":\"dns-update-1544208300-mkb5b\",\"namespace\":\"default\",\"resourceVersion\":\"4371420\",\"selfLink\":\"/api/v1/namespaces/default/pods/dns-update-1544208300-mkb5b\",\"uid\":\"337712a0-fa50-11e8-aa50-be3ec6ae8e2f\"},\"spec\":{\"containers\":[{\"image\":\"evns/rpi-utilities\",\"imagePullPolicy\":\"Always\",\"name\":\"dns-update\",\"terminationMessagePath\":\"/dev/termination-log\",\"terminationMessagePolicy\":\"File\"}],\"dnsPolicy\":\"ClusterFirst\",\"nodeName\":\"k8s-slave-2\",\"priority\":0,\"restartPolicy\":\"OnFailure\",\"schedulerName\":\"default-scheduler\",\"securityContext\":{},\"serviceAccount\":\"default\",\"serviceAccountName\":\"default\",\"terminationGracePeriodSeconds\":30},\"status\":{\"conditions\":[{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"status\":\"True\",\"type\":\"Initialized\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"message\":\"containers with unready status: [dns-update]\",\"reason\":\"ContainersNotReady\",\"status\":\"False\",\"type\":\"Ready\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"message\":\"containers with unready status: [dns-update]\",\"reason\":\"ContainersNotReady\",\"status\":\"False\",\"type\":\"ContainersReady\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"status\":\"True\",\"type\":\"PodScheduled\"}],\"hostIP\":\"192.168.0.102\",\"phase\":\"Pending\",\"qosClass\":\"BestEffort\",\"startTime\":\"2018-12-07T18:45:00Z\"}} {\"metadata\":{\"creationTimestamp\":\"2018-12-07T18:45:00Z\",\"generateName\":\"dns-update-1544208300-\",\"labels\":{\"controller-uid\":\"33718ae4-fa50-11e8-aa50-be3ec6ae8e2f\",\"job-name\":\"dns-update-1544208300\"},\"name\":\"dns-update-1544208300-mkb5b\",\"namespace\":\"default\",\"resourceVersion\":\"4371432\",\"selfLink\":\"/api/v1/namespaces/default/pods/dns-update-1544208300-mkb5b\",\"uid\":\"337712a0-fa50-11e8-aa50-be3ec6ae8e2f\"},\"spec\":{\"containers\":[{\"image\":\"evns/rpi-utilities\",\"imagePullPolicy\":\"Always\",\"name\":\"dns-update\",\"terminationMessagePath\":\"/dev/termination-log\",\"terminationMessagePolicy\":\"File\"}],\"dnsPolicy\":\"ClusterFirst\",\"nodeName\":\"k8s-slave-2\",\"priority\":0,\"restartPolicy\":\"OnFailure\",\"schedulerName\":\"default-scheduler\",\"securityContext\":{},\"serviceAccount\":\"default\",\"serviceAccountName\":\"default\",\"terminationGracePeriodSeconds\":30},\"status\":{\"conditions\":[{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"status\":\"True\",\"type\":\"Initialized\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:05Z\",\"status\":\"True\",\"type\":\"Ready\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:05Z\",\"status\":\"True\",\"type\":\"ContainersReady\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"status\":\"True\",\"type\":\"PodScheduled\"}],\"hostIP\":\"192.168.0.102\",\"phase\":\"Running\",\"podIP\":\"10.42.0.2\",\"qosClass\":\"BestEffort\",\"startTime\":\"2018-12-07T18:45:00Z”}}"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1544208305217
- -
-  sample: "INFO: 2018/12/07 18:45:10.580325 deleting entry 10.42.0.2 from weave-k?Z;25^M}|1s7P3|H9i;*;MhG of 337712a0-fa50-11e8-aa50-be3ec6ae8e2f"
-  result:
-    custom:
-      network:
-        client:
-          ip: "10.42.0.2"
-        ipset: "weave-k?Z;25^M}|1s7P3|H9i;*;MhG"
-      status: "INFO"
-      system:
-        action: "deleting"
-        user: "337712a0-fa50-11e8-aa50-be3ec6ae8e2f"
-      timestamp: 1544208310580
-    message: "INFO: 2018/12/07 18:45:10.580325 deleting entry 10.42.0.2 from weave-k?Z;25^M}|1s7P3|H9i;*;MhG of 337712a0-fa50-11e8-aa50-be3ec6ae8e2f"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1544208310580
- -
-  sample: "INFO: 2018/12/07 18:45:05.223738 added entry 10.42.0.2 to weave-k?Z;25^M}|1s7P3|H9i;*;MhG of 337712a0-fa50-11e8-aa50-be3ec6ae8e2f"
-  result:
-    custom:
-      network:
-        client:
-          ip: "10.42.0.2"
-        ipset: "weave-k?Z;25^M}|1s7P3|H9i;*;MhG"
-      status: "INFO"
-      system:
-        action: "added"
-        user: "337712a0-fa50-11e8-aa50-be3ec6ae8e2f"
-      timestamp: 1544208305223
-    message: "INFO: 2018/12/07 18:45:05.223738 added entry 10.42.0.2 to weave-k?Z;25^M}|1s7P3|H9i;*;MhG of 337712a0-fa50-11e8-aa50-be3ec6ae8e2f"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1544208305223
- -
-  sample: "WARN: 2018/12/07 18:49:34.228275 UDP connection from 0.0.0.0:68 to 255.255.255.255:67 blocked by Weave NPC."
-  result:
-    custom:
+      date_access: 1544207493000
+      duration: 1.1E7
       http:
-        protocol: "udp"
+        method: "GET"
+        referer: "-"
+        request_id: "abcdefg12345abcdef"
+        status_category: "OK"
+        status_code: 200
+        upstream_duration: 0.012
+        upstream_status_code: 200.0
+        url: "/datadoghq/company?test=var1%20Pl"
+        url_details:
+          path: "/datadoghq/company"
+          queryString:
+            test: "var1%20Pl"
+        useragent: "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0"
+        useragent_details:
+          browser:
+            family: "Firefox"
+            major: "31"
+            minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "XP"
+        version: "1.1"
+      network:
+        bytes_read: 298.0
+        bytes_written: 261
+        client:
+          ip: "172.17.0.1"
+        destination:
+          ip: "172.17.0.1"
+          port: 9000.0
+        request_size: 1904.0
+      proxy:
+        name: "proxyname-8080"
+    message: "172.17.0.1 - [172.17.0.1] - - [07/Dec/2018:18:31:33 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 200 261 \"-\" \"Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0\" 1904 0.011 [proxyname-8080] 172.17.0.1:9000 298 0.012 200 abcdefg12345abcdef"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1544207493000
+ -
+  sample: "172.17.0.1 - - [07/Dec/2018:18:31:33 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 200 261 \"-\" \"Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0\" 1904 0.011 [proxyname-8080] 172.17.0.1:9000 298 0.012 200 abcdefg12345abcdef"
+  result:
+    custom:
+      date_access: 1544207493000
+      duration: 1.1E7
+      http:
+        method: "GET"
+        referer: "-"
+        request_id: "abcdefg12345abcdef"
+        status_category: "OK"
+        status_code: 200
+        upstream_duration: 0.012
+        upstream_status_code: 200.0
+        url: "/datadoghq/company?test=var1%20Pl"
+        url_details:
+          path: "/datadoghq/company"
+          queryString:
+            test: "var1%20Pl"
+        useragent: "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0"
+        useragent_details:
+          browser:
+            family: "Firefox"
+            major: "31"
+            minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "XP"
+        version: "1.1"
+      network:
+        bytes_read: 298.0
+        bytes_written: 261
+        client:
+          ip: "172.17.0.1"
+        destination:
+          ip: "172.17.0.1"
+          port: 9000.0
+        request_size: 1904.0
+      proxy:
+        name: "proxyname-8080"
+    message: "172.17.0.1 - - [07/Dec/2018:18:31:33 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 200 261 \"-\" \"Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0\" 1904 0.011 [proxyname-8080] 172.17.0.1:9000 298 0.012 200 abcdefg12345abcdef"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1544207493000
+ -
+  sample: "2017/09/26 14:36:50 [error] 8409#8409: *317058 \"/usr/share/nginx/html/sql/sql-admin/index.html\" is not found (2: No such file or directory), client: 217.92.148.44, server: localhost, request: \"HEAD http://174.138.82.103:80/sql/sql-admin/ HTTP/1.1\", host: \"174.138.82.103\""
+  result:
+    custom:
+      date_access: 1506436610000
+      error:
+        message: "8409#8409: *317058 \"/usr/share/nginx/html/sql/sql-admin/index.html\" is not found (2: No such file or directory)"
+      host: "174.138.82.103"
+      http:
+        method: "HEAD"
+        url: "http://174.138.82.103:80/sql/sql-admin/"
+        url_details:
+          host: "174.138.82.103"
+          path: "/sql/sql-admin/"
+          port: 80
+          scheme: "http"
+        version: "1.1"
+      level: "error"
       network:
         client:
-          ip: "0.0.0.0"
-          port: 68.0
-        destination:
-          ip: "255.255.255.255"
-          port: 67.0
-      status: "WARN"
-      system:
-        action: "blocked"
-      timestamp: 1544208574228
-    message: "WARN: 2018/12/07 18:49:34.228275 UDP connection from 0.0.0.0:68 to 255.255.255.255:67 blocked by Weave NPC."
+          ip: "217.92.148.44"
+      request: "HEAD http://174.138.82.103:80/sql/sql-admin/ HTTP/1.1"
+      server: "localhost"
+    message: "2017/09/26 14:36:50 [error] 8409#8409: *317058 \"/usr/share/nginx/html/sql/sql-admin/index.html\" is not found (2: No such file or directory), client: 217.92.148.44, server: localhost, request: \"HEAD http://174.138.82.103:80/sql/sql-admin/ HTTP/1.1\", host: \"174.138.82.103\""
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1544208574228
+    timestamp: 1506436610000
  -
-  sample: "FATA: 2018/02/27 10:31:00.769529 ipset [create weave-IdwzZLfj(%b(2#AY)mt/Me/~X hash:ip comment] failed: ipset v6.32: Set cannot be created: set with the same name already exists"
+  sample: "2017/09/26 14:36:50 [info] 14#14: *285 client 172.17.0.27 closed keepalive connection"
   result:
     custom:
+      date_access: 1506436610000
       error:
-        message: "ipset v6.32: Set cannot be created: set with the same name already exists"
-      network:
-        ipset: "weave-IdwzZLfj(%b(2#AY)mt/Me/~X"
-      status: "FATA"
-      system:
-        action: "failed"
-      timestamp: 1519727460769
-    message: "FATA: 2018/02/27 10:31:00.769529 ipset [create weave-IdwzZLfj(%b(2#AY)mt/Me/~X hash:ip comment] failed: ipset v6.32: Set cannot be created: set with the same name already exists"
+        message: "14#14: *285 client 172.17.0.27 closed keepalive connection"
+      level: "info"
+    message: "2017/09/26 14:36:50 [info] 14#14: *285 client 172.17.0.27 closed keepalive connection"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1519727460769
+    timestamp: 1506436610000
  -
-  sample: "INFO: 2018/02/27 10:29:15.725883 destroying ipset: &npc.selectorSpec{key:\"\", selector:labels.internalSelector{}, dst:false, ipsetType:\"hash:ip\", ipsetName:\"weave-V7d@]hQsm@w.FTL;i6Lv]yC8g\", nsName:\"helium\"}"
+  sample: "I1221 13:00:58.488494       7 controller.go:202] Initial sync, sleeping for 1 second."
   result:
     custom:
-      network:
-        ipset: "weave-V7d@]hQsm@w.FTL;i6Lv]yC8g"
-        ipset_details:
-          dst: false
-          ipsetType: "hash:ip"
-          nsName: "helium"
-      status: "INFO"
-      system:
-        action: "destroying"
-      timestamp: 1519727355725
-    message: "INFO: 2018/02/27 10:29:15.725883 destroying ipset: &npc.selectorSpec{key:\"\", selector:labels.internalSelector{}, dst:false, ipsetType:\"hash:ip\", ipsetName:\"weave-V7d@]hQsm@w.FTL;i6Lv]yC8g\", nsName:\"helium\"}"
+      date_access: 30632458488
+      level: "I"
+      lineno: 202.0
+      logger:
+        name: "controller.go"
+    message: "I1221 13:00:58.488494       7 controller.go:202] Initial sync, sleeping for 1 second."
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1519727355725
+    timestamp: 30632458488
+ -
+  sample: "172.17.0.1 - [172.17.0.1] - - [07/Dec/2018:18:31:33 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 200 261 \"-\" \"Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0\" 1904 0.011 [proxyname-8080] 172.17.0.1:9000 298 0.012 200"
+  result:
+    custom:
+      date_access: 1544207493000
+      duration: 1.1E7
+      http:
+        method: "GET"
+        referer: "-"
+        status_category: "OK"
+        status_code: 200
+        upstream_duration: 0.012
+        upstream_status_code: 200.0
+        url: "/datadoghq/company?test=var1%20Pl"
+        url_details:
+          path: "/datadoghq/company"
+          queryString:
+            test: "var1%20Pl"
+        useragent: "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0"
+        useragent_details:
+          browser:
+            family: "Firefox"
+            major: "31"
+            minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "XP"
+        version: "1.1"
+      network:
+        bytes_read: 298.0
+        bytes_written: 261
+        client:
+          ip: "172.17.0.1"
+        destination:
+          ip: "172.17.0.1"
+          port: 9000.0
+        request_size: 1904.0
+      proxy:
+        name: "proxyname-8080"
+    message: "172.17.0.1 - [172.17.0.1] - - [07/Dec/2018:18:31:33 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 200 261 \"-\" \"Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0\" 1904 0.011 [proxyname-8080] 172.17.0.1:9000 298 0.012 200"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1544207493000
+ -
+  sample: "172.17.0.1 - [172.17.0.1] - - [07/Dec/2018:18:31:33 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 200 261 \"-\" \"Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0\" 1904 0.011 [proxyname-8080] 172.17.0.1:9000, 100.110.0.3:80 298, 0 0.012, - 200, - abcdefg12345abcdef"
+  result:
+    custom:
+      date_access: 1544207493000
+      duration: 1.1E7
+      http:
+        method: "GET"
+        referer: "-"
+        request_id: "abcdefg12345abcdef"
+        status_category: "OK"
+        status_code: 200
+        upstream_duration: 0.012
+        upstream_status_code: 200.0
+        url: "/datadoghq/company?test=var1%20Pl"
+        url_details:
+          path: "/datadoghq/company"
+          queryString:
+            test: "var1%20Pl"
+        useragent: "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0"
+        useragent_details:
+          browser:
+            family: "Firefox"
+            major: "31"
+            minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "XP"
+        version: "1.1"
+      network:
+        bytes_read: 298.0
+        bytes_written: 261
+        client:
+          ip: "172.17.0.1"
+        destination:
+          ip: "172.17.0.1"
+          port: 9000.0
+        request_size: 1904.0
+      proxy:
+        name: "proxyname-8080"
+    message: "172.17.0.1 - [172.17.0.1] - - [07/Dec/2018:18:31:33 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 200 261 \"-\" \"Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0\" 1904 0.011 [proxyname-8080] 172.17.0.1:9000, 100.110.0.3:80 298, 0 0.012, - 200, - abcdefg12345abcdef"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1544207493000
+ -
+  sample: "172.17.0.1 - [172.17.0.1] - - [07/Dec/2018:18:31:33 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 200 261 \"-\" \"Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0\" 1904 0.011 [proxyname-8080] 172.17.0.1:9000, 100.110.0.3:80 298, 0 0.012, 0.013 200, - abcdefg12345abcdef"
+  result:
+    custom:
+      date_access: 1544207493000
+      duration: 1.1E7
+      http:
+        method: "GET"
+        referer: "-"
+        request_id: "abcdefg12345abcdef"
+        status_category: "OK"
+        status_code: 200
+        upstream_duration: 0.012
+        upstream_status_code: 200.0
+        url: "/datadoghq/company?test=var1%20Pl"
+        url_details:
+          path: "/datadoghq/company"
+          queryString:
+            test: "var1%20Pl"
+        useragent: "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0"
+        useragent_details:
+          browser:
+            family: "Firefox"
+            major: "31"
+            minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "XP"
+        version: "1.1"
+      network:
+        bytes_read: 298.0
+        bytes_written: 261
+        client:
+          ip: "172.17.0.1"
+        destination:
+          ip: "172.17.0.1"
+          port: 9000.0
+        request_size: 1904.0
+      proxy:
+        name: "proxyname-8080"
+    message: "172.17.0.1 - [172.17.0.1] - - [07/Dec/2018:18:31:33 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 200 261 \"-\" \"Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0\" 1904 0.011 [proxyname-8080] 172.17.0.1:9000, 100.110.0.3:80 298, 0 0.012, 0.013 200, - abcdefg12345abcdef"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1544207493000
+ -
+  sample: "172.17.0.1 - [172.17.0.1] - - [07/Dec/2018:18:31:33 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 200 261 \"-\" \"Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0\" 1904 0.011 [proxyname-8080] 172.17.0.1:9000, 100.110.0.3:80, 100.110.0.3:80 298, -, - 0.012, -, - 200, -, - abcdefg12345abcdef"
+  result:
+    custom:
+      date_access: 1544207493000
+      duration: 1.1E7
+      http:
+        method: "GET"
+        referer: "-"
+        request_id: "abcdefg12345abcdef"
+        status_category: "OK"
+        status_code: 200
+        upstream_duration: 0.012
+        upstream_status_code: 200.0
+        url: "/datadoghq/company?test=var1%20Pl"
+        url_details:
+          path: "/datadoghq/company"
+          queryString:
+            test: "var1%20Pl"
+        useragent: "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0"
+        useragent_details:
+          browser:
+            family: "Firefox"
+            major: "31"
+            minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "XP"
+        version: "1.1"
+      network:
+        bytes_read: 298.0
+        bytes_written: 261
+        client:
+          ip: "172.17.0.1"
+        destination:
+          ip: "172.17.0.1"
+          port: 9000.0
+        request_size: 1904.0
+      proxy:
+        name: "proxyname-8080"
+    message: "172.17.0.1 - [172.17.0.1] - - [07/Dec/2018:18:31:33 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 200 261 \"-\" \"Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0\" 1904 0.011 [proxyname-8080] 172.17.0.1:9000, 100.110.0.3:80, 100.110.0.3:80 298, -, - 0.012, -, - 200, -, - abcdefg12345abcdef"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1544207493000
+ -
+  sample: "172.17.0.1 - [172.17.0.1] - - [07/Dec/2018:18:31:33 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 200 261 \"-\" \"Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0\" 1904 0.011 [proxyname-8080] [alt-proxyname-8080] 172.17.0.1:9000 298 0.012 200 abcdefg12345abcdef"
+  result:
+    custom:
+      date_access: 1544207493000
+      duration: 1.1E7
+      http:
+        method: "GET"
+        referer: "-"
+        request_id: "abcdefg12345abcdef"
+        status_category: "OK"
+        status_code: 200
+        upstream_duration: 0.012
+        upstream_status_code: 200.0
+        url: "/datadoghq/company?test=var1%20Pl"
+        url_details:
+          path: "/datadoghq/company"
+          queryString:
+            test: "var1%20Pl"
+        useragent: "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0"
+        useragent_details:
+          browser:
+            family: "Firefox"
+            major: "31"
+            minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "XP"
+        version: "1.1"
+      network:
+        bytes_read: 298.0
+        bytes_written: 261
+        client:
+          ip: "172.17.0.1"
+        destination:
+          ip: "172.17.0.1"
+          port: 9000.0
+        request_size: 1904.0
+      proxy:
+        alternate_name: "alt-proxyname-8080"
+        name: "proxyname-8080"
+    message: "172.17.0.1 - [172.17.0.1] - - [07/Dec/2018:18:31:33 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 200 261 \"-\" \"Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0\" 1904 0.011 [proxyname-8080] [alt-proxyname-8080] 172.17.0.1:9000 298 0.012 200 abcdefg12345abcdef"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1544207493000
+ -
+  sample: "172.16.99.64 - - [19/Mar/2020:16:02:20 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 503 605 \"-\" \"Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0\" 4033 0.000 [proxyname-8080] [] - - - - abcdefg12345abcdef"
+  result:
+    custom:
+      date_access: 1584633740000
+      duration: 0.0
+      http:
+        method: "GET"
+        referer: "-"
+        request_id: "abcdefg12345abcdef"
+        status_category: "error"
+        status_code: 503
+        url: "/datadoghq/company?test=var1%20Pl"
+        url_details:
+          path: "/datadoghq/company"
+          queryString:
+            test: "var1%20Pl"
+        useragent: "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0"
+        useragent_details:
+          browser:
+            family: "Firefox"
+            major: "31"
+            minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "XP"
+        version: "1.1"
+      network:
+        bytes_written: 605
+        client:
+          ip: "172.16.99.64"
+        request_size: 4033.0
+      proxy:
+        name: "proxyname-8080"
+    message: "172.16.99.64 - - [19/Mar/2020:16:02:20 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 503 605 \"-\" \"Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0\" 4033 0.000 [proxyname-8080] [] - - - - abcdefg12345abcdef"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1584633740000
 
