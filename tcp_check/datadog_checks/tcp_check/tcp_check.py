@@ -109,6 +109,7 @@ class TCPCheck(AgentCheck):
             if "%" in addr:
                 sock.connect(
                     (addr, self.port, 0, socket.if_nametoindex(addr.split("%")[1]))
+                    
                     )  # Add the extra necessary arguments.
             else:
                 sock.connect((addr, self.port))
