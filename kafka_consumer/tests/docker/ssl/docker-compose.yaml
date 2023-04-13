@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   zookeeper:
     image: docker.io/bitnami/zookeeper:${ZK_VERSION}

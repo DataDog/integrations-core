@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
 from confluent_kafka.admin import AdminClient
-from six import string_types
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
@@ -195,11 +194,11 @@ class KafkaClient:
         """
         assert isinstance(self.config._consumer_groups, dict)
         for consumer_group, topics in self.config._consumer_groups.items():
-            assert isinstance(consumer_group, string_types)
+            assert isinstance(consumer_group, str)
             assert isinstance(topics, dict) or topics is None  # topics are optional
             if topics is not None:
                 for topic, partitions in topics.items():
-                    assert isinstance(topic, string_types)
+                    assert isinstance(topic, str)
                     assert isinstance(partitions, (list, tuple)) or partitions is None  # partitions are optional
                     if partitions is not None:
                         for partition in partitions:

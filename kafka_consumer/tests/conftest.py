@@ -14,77 +14,23 @@ from datadog_checks.dev._env import e2e_testing
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.kafka_consumer import KafkaCheck
 
-from .common import AUTHENTICATION, DOCKER_IMAGE_PATH, HERE, KAFKA_CONNECT_STR, TOPICS, get_authentication_configuration
+from . import common
 from .runners import Consumer, Producer
-
-CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'docker', 'ssl', 'certificate')
-ROOT_CERTIFICATE = os.path.join(CERTIFICATE_DIR, 'caroot.pem')
-CERTIFICATE = os.path.join(CERTIFICATE_DIR, 'cert.pem')
-PRIVATE_KEY = os.path.join(CERTIFICATE_DIR, 'key.pem')
-PRIVATE_KEY_PASSWORD = 'secret'
-
-E2E_METADATA = {
-    'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
-    'docker_volumes': [
-        f'{HERE}/docker/ssl/certificate:/tmp/certificate',
-        f'{HERE}/docker/kerberos/kdc/krb5_agent.conf:/etc/krb5.conf',
-    ],
-}
-
-if AUTHENTICATION == "ssl":
-    INSTANCE = {
-        'kafka_connect_str': "localhost:9092",
-        'tags': ['optional:tag1'],
-        'consumer_groups': {'my_consumer': {'marvel': [0]}},
-        'security_protocol': 'SSL',
-        'tls_cert': CERTIFICATE,
-        'tls_private_key': PRIVATE_KEY,
-        'tls_private_key_password': PRIVATE_KEY_PASSWORD,
-        'tls_ca_cert': ROOT_CERTIFICATE,
-    }
-elif AUTHENTICATION == "kerberos":
-    INSTANCE = {
-        'kafka_connect_str': "localhost:9092",
-        'tags': ['optional:tag1'],
-        'consumer_groups': {'my_consumer': {'marvel': [0]}},
-        "sasl_mechanism": "GSSAPI",
-        "sasl_kerberos_service_name": "kafka",
-        "security_protocol": "SASL_PLAINTEXT",
-        # Real path will be replaced once the temp dir will be created in `dd_environment`
-        "sasl_kerberos_keytab": "{}/localhost.key",
-        "sasl_kerberos_principal": "kafka/localhost",
-    }
-else:
-    INSTANCE = {
-        'kafka_connect_str': KAFKA_CONNECT_STR,
-        'tags': ['optional:tag1'],
-        'consumer_groups': {'my_consumer': {'marvel': [0]}},
-    }
-
-E2E_INSTANCE = copy.deepcopy(INSTANCE)
-
-if AUTHENTICATION == "ssl":
-    E2E_INSTANCE["tls_cert"] = "/tmp/certificate/cert.pem"
-    E2E_INSTANCE["tls_private_key"] = "/tmp/certificate/key.pem"
-    E2E_INSTANCE["tls_ca_cert"] = "/tmp/certificate/caroot.pem"
-elif AUTHENTICATION == "kerberos":
-    E2E_INSTANCE["sasl_kerberos_keytab"] = "/var/lib/secret/localhost.key"
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
+    """
+    Start a kafka cluster and wait for it to be up and running.
+    """
     with TempDir() as secret_dir:
         os.chmod(secret_dir, 0o777)
-        """
-        Start a kafka cluster and wait for it to be up and running.
-        """
-
         conditions = []
 
-        if AUTHENTICATION == "kerberos":
-            INSTANCE["sasl_kerberos_keytab"] = INSTANCE["sasl_kerberos_keytab"].format(secret_dir)
+        if common.AUTHENTICATION == "kerberos":
+            common.INSTANCE["sasl_kerberos_keytab"] = common.INSTANCE["sasl_kerberos_keytab"].format(secret_dir)
             conditions.append(WaitFor(wait_for_cp_kafka_topics, attempts=10, wait=10))
-            E2E_METADATA["docker_volumes"].append(f"{secret_dir}:/var/lib/secret")
+            common.E2E_METADATA["docker_volumes"].append(f"{secret_dir}:/var/lib/secret")
 
         conditions.extend(
             [
@@ -94,20 +40,20 @@ def dd_environment():
         )
 
         with docker_run(
-            DOCKER_IMAGE_PATH,
+            common.DOCKER_IMAGE_PATH,
             conditions=conditions,
             env_vars={
-                "KRB5_CONFIG": f"{HERE}/docker/kerberos/kdc/krb5_agent.conf"
+                "KRB5_CONFIG": f"{common.HERE}/docker/kerberos/kdc/krb5_agent.conf"
                 if running_on_ci()
-                else f"{HERE}/docker/kerberos/kdc/krb5_local.conf",
+                else f"{common.HERE}/docker/kerberos/kdc/krb5_local.conf",
                 "SECRET_DIR": secret_dir,
             },
             build=True,
         ):
             yield {
-                'instances': [E2E_INSTANCE],
+                'instances': [common.E2E_INSTANCE],
                 'init_config': {'kafka_timeout': 30},
-            }, E2E_METADATA
+            }, common.E2E_METADATA
 
 
 @pytest.fixture
@@ -117,22 +63,22 @@ def check():
 
 @pytest.fixture
 def kafka_instance():
-    return copy.deepcopy(E2E_INSTANCE) if e2e_testing() else copy.deepcopy(INSTANCE)
+    return copy.deepcopy(common.E2E_INSTANCE if e2e_testing() else common.INSTANCE)
 
 
 def create_topics():
     client = _create_admin_client()
 
-    if set(TOPICS).issubset(set(client.list_topics(timeout=1).topics.keys())):
+    if set(common.TOPICS).issubset(set(client.list_topics(timeout=1).topics.keys())):
         return True
 
-    for topic in TOPICS:
+    for topic in common.TOPICS:
         client.create_topics([NewTopic(topic, 2, 1)])
         time.sleep(1)
 
     # Make sure the topics in `TOPICS` are created. Brokers may have more topics (such as internal topics)
     # so we only check if it contains the topic we need.
-    return set(TOPICS).issubset(set(client.list_topics(timeout=1).topics.keys()))
+    return set(common.TOPICS).issubset(set(client.list_topics(timeout=1).topics.keys()))
 
 
 def wait_for_cp_kafka_topics():
@@ -148,17 +94,17 @@ def wait_for_cp_kafka_topics():
 
 
 def initialize_topics():
-    with Producer(INSTANCE):
-        with Consumer(INSTANCE, TOPICS):
+    with Producer(common.INSTANCE):
+        with Consumer(common.INSTANCE, common.TOPICS):
             time.sleep(5)
 
 
 def _create_admin_client():
     config = {
-        "bootstrap.servers": INSTANCE['kafka_connect_str'],
+        "bootstrap.servers": common.INSTANCE['kafka_connect_str'],
         "socket.timeout.ms": 1000,
         "topic.metadata.refresh.interval.ms": 2000,
     }
-    config.update(get_authentication_configuration(INSTANCE))
+    config.update(common.get_authentication_configuration(common.INSTANCE))
 
     return AdminClient(config)
