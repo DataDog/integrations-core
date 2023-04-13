@@ -129,6 +129,7 @@ files:
           description: |
            URL of your identity server. NOTE: The server must support Identity API v3.
            This parameter is required if openstack_config_file_path or openstack_cloud_name are not specified.
+          display_priority: 4
           value:
             example: https://<KEYSTONE_ENDPOINT>:<PORT>/
             type: string
@@ -140,7 +141,10 @@ files:
 
            View this page for more about Ironic microvoersion compatibility:
               https://docs.openstack.org/ironic/latest/contributor/webapi-version-history.html
-          display_priority: 4
+          enabled: true
+          value:
+            example: "1.8"
+            type: string
         - name: nova_microversion
           description: |
            The microversion of the Nova (Compute) API to call.
@@ -150,7 +154,6 @@ files:
            View this page for more information about microversions in Openstack:
               https://docs.openstack.org/api-guide/compute/microversions.html
           enabled: true
-          display_priority: 4
           value:
             example: "2.1"
             type: string

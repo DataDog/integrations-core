@@ -115,6 +115,15 @@ instances:
     #
     # paginated_limit: 1000
 
+    ## @param ironic_microversion - string - optional - default: 1.8
+    ## The microversion of the Ironic (Bare Metal) API to call.
+    ## It is recommended to set this parameter to the latest Ironic microversion supported by your Openstack version.
+    ##
+    ## View this page for more about Ironic microvoersion compatibility:
+    ##    https://docs.openstack.org/ironic/latest/contributor/webapi-version-history.html
+    #
+    ironic_microversion: '1.8'
+
     ## @param nova_microversion - string - optional
     ## The microversion of the Nova (Compute) API to call.
     ## It is recommended to set this parameter to the latest Compute microversion supported by your Openstack version.
@@ -124,17 +133,6 @@ instances:
     ##    https://docs.openstack.org/api-guide/compute/microversions.html
     #
     nova_microversion: '2.1'
-
-    ## @param ironic_microversion - string - optional
-    ## The microversion of the Ironic (Bare Metal) API to call.
-    ## It is recommended to set this parameter to the latest Ironic microversion supported by your Openstack version.
-    ##
-    ## View this page for more about Ironic microvoersion compatibility:
-    ##    https://docs.openstack.org/ironic/latest/contributor/webapi-version-history.html
-    ## View this page for more information about microversions in Openstack:
-    ##    https://docs.openstack.org/api-guide/compute/microversions.html
-    #
-    ironic_microversion: '1.80'
 
     ## @param collect_hypervisor_load - boolean - optional - default: true
     ## Collects hypervisor_load.1/5/15 for each hypervisor
