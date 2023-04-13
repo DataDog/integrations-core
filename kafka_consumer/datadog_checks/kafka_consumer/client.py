@@ -149,7 +149,7 @@ class KafkaClient:
             try:
                 response_offset_info = future.result()
             except KafkaException as e:
-                self.log.debug("Failed to read consumer offsets for %s: %s", consumer_group, e)
+                self.log.debug("Failed to read consumer offsets for future %s: %s", future, e)
             else:
                 self.log.debug('FUTURE RESULT: %s', response_offset_info)
                 consumer_group = response_offset_info.group_id
@@ -176,7 +176,6 @@ class KafkaClient:
                         )
                     consumer_offsets[(consumer_group, topic, partition)] = offset
 
-
         return consumer_offsets
 
     def _get_consumer_offset_futures(self, consumer_groups):
@@ -195,17 +194,23 @@ class KafkaClient:
         """Validate any explicitly specified consumer groups.
         consumer_groups = {'consumer_group': {'topic': [0, 1]}}
         """
-        assert isinstance(self.config._consumer_groups, dict)
+        if not isinstance(self.config._consumer_groups, dict):
+            raise ConfigurationError("consumer_groups is not a dictionary")
         for consumer_group, topics in self.config._consumer_groups.items():
-            assert isinstance(consumer_group, str)
-            assert isinstance(topics, dict) or topics is None  # topics are optional
+            if not isinstance(consumer_group, str):
+                raise ConfigurationError("consumer group is not a valid string")
+            if not (isinstance(topics, dict) or topics is None):  # topics are optional
+                raise ConfigurationError("Topics is not a dictionary")
             if topics is not None:
                 for topic, partitions in topics.items():
-                    assert isinstance(topic, str)
-                    assert isinstance(partitions, (list, tuple)) or partitions is None  # partitions are optional
+                    if not isinstance(topic, str):
+                        raise ConfigurationError("Topic is not a valid string")
+                    if not (isinstance(partitions, (list, tuple)) or partitions is None):  # partitions are optional
+                        raise ConfigurationError("Partitions is not a list or tuple")
                     if partitions is not None:
                         for partition in partitions:
-                            assert isinstance(partition, int)
+                            if not isinstance(partition, int):
+                                raise ConfigurationError("Partition is not a valid integer")
 
     def _get_topic_partitions(self, topics, consumer_group):
         for topic in topics.topics:
