@@ -343,7 +343,8 @@
     type: boolean
 - name: use_latest_spec
   description: |
-    Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
+    Whether or not the parser will adhere to the OpenMetrics specification. The default assumes
+    the more loosely defined Prometheus exposition format.
   value:
     example: false
     type: boolean
