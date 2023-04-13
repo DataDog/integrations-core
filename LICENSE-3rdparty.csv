@@ -37,14 +37,11 @@ flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.
 foundationdb,PyPI,Apache-2.0,Copyright 2017 FoundationDB
 futures,PyPI,PSF,Copyright (c) 2015 Brian Quinlan
 gearman,PyPI,Apache-2.0,Copyright 2010 Yelp
-gssapi,PyPI,ISC,"Copyright (c) 2014, The Python GSSAPI Team"
 immutables,PyPI,Apache-2.0,Copyright 2018-present Contributors to the immutables project.
 importlib-metadata,PyPI,Apache-2.0,"Copyright 2017-2019 Jason R. Coombs, Barry Warsaw"
 in-toto,PyPI,Apache-2.0,Copyright 2018 New York University
 ipaddress,PyPI,PSF,Copyright (c) 2013 Philipp Hagemeister
 jellyfish,PyPI,BSD-3-Clause,"Copyright (c) 2015, James Turk"
-kafka-python,PyPI,Apache-2.0,Copyright 2015 David Arthur
-kazoo,PyPI,Apache-2.0,Copyright 2012 Kazoo team
 kubernetes,PyPI,Apache-2.0,Copyright 2014 The Kubernetes Authors.
 ldap3,PyPI,LGPL-3.0-only,Copyright 2013 - 2020 Giovanni Cannata
 lxml,PyPI,BSD-3-Clause,Copyright (c) 2004 Infrae. All rights reserved.
