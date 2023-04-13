@@ -267,7 +267,8 @@ def test_replication_tag(aggregator, integration_check, pg_instance):
 
     check = integration_check(pg_instance)
     expected_tags = pg_instance['tags'] + [
-        'port:{}'.format(PORT), 'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname)
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
 
     # default configuration (no replication)
