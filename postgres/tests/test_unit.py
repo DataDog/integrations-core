@@ -6,13 +6,12 @@ import copy
 import mock
 import psycopg2
 import pytest
+from datadog_checks.postgres import PostgreSql, util
+from datadog_checks.postgres.version_utils import VersionUtils
 from mock import MagicMock, PropertyMock
 from pytest import fail
 from semver import VersionInfo
 from six import iteritems
-
-from datadog_checks.postgres import PostgreSql, util
-from datadog_checks.postgres.version_utils import VersionUtils
 
 from .common import PORT
 
@@ -357,12 +356,10 @@ def test_server_tag_(disable_generic_tags, expected_tags, pg_instance):
 def test_resolved_hostname(disable_generic_tags, expected_hostname, pg_instance):
     instance = copy.deepcopy(pg_instance)
     instance['disable_generic_tags'] = disable_generic_tags
-    check = PostgreSql('test_instance', {}, [instance])
 
-    with mock.patch(
-        'datadog_checks.postgres.PostgreSql.resolve_db_host', return_value='resolved.hostname'
-    ) as resolve_db_host:
+    with mock.patch('datadog_checks.postgres.PostgreSql.resolve_db_host', return_value='resolved.hostname') as resolve_db_host_mock:
+        check = PostgreSql('test_instance', {}, [instance])
         assert check.resolved_hostname == expected_hostname
-        assert resolve_db_host.called == disable_generic_tags, 'Expected resolve_db_host.called to be ' + str(
+        assert resolve_db_host_mock.called == disable_generic_tags, 'Expected resolve_db_host.called to be ' + str(
             disable_generic_tags
         )
