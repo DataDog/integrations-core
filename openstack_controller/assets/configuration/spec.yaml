@@ -144,7 +144,7 @@ files:
               https://docs.openstack.org/api-guide/compute/microversions.html
           enabled: true
           value:
-            example: "1.80"
+            example: "2.1"
             type: string
             display_default: null
         - name: collect_hypervisor_load
