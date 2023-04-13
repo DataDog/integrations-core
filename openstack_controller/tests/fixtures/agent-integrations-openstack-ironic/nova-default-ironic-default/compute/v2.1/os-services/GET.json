@@ -1,0 +1,44 @@
+{
+  "services": [
+    {
+      "binary": "nova-scheduler",
+      "host": "agent-integrations-openstack-ironic",
+      "id": 2,
+      "zone": "internal",
+      "status": "enabled",
+      "state": "up",
+      "updated_at": "2023-04-07T18:39:04.000000",
+      "disabled_reason": null
+    },
+    {
+      "binary": "nova-conductor",
+      "host": "agent-integrations-openstack-ironic",
+      "id": 5,
+      "zone": "internal",
+      "status": "enabled",
+      "state": "up",
+      "updated_at": "2023-04-07T18:39:10.000000",
+      "disabled_reason": null
+    },
+    {
+      "binary": "nova-conductor",
+      "host": "agent-integrations-openstack-ironic",
+      "id": 1,
+      "zone": "internal",
+      "status": "enabled",
+      "state": "up",
+      "updated_at": "2023-04-07T18:39:04.000000",
+      "disabled_reason": null
+    },
+    {
+      "binary": "nova-compute",
+      "host": "agent-integrations-openstack-ironic",
+      "id": 3,
+      "zone": "nova",
+      "status": "enabled",
+      "state": "up",
+      "updated_at": "2023-04-07T18:39:06.000000",
+      "disabled_reason": null
+    }
+  ]
+}
