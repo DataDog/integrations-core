@@ -25,6 +25,7 @@ class SharedConfig(BaseModel):
 
     global_custom_queries: Optional[Sequence[Mapping[str, Any]]]
     service: Optional[str]
+    use_instant_client: Optional[bool]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

@@ -50,7 +50,8 @@ TESTABLE_FILE_PATTERN = re.compile(
     """,
     re.VERBOSE,
 )
-NON_TESTABLE_FILES = {'auto_conf.yaml', 'agent_requirements.in'}
+AGENT_REQUIREMENTS_FILE = 'datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+NON_TESTABLE_FILES = {'auto_conf.yaml'}
 DISPLAY_ORDER_OVERRIDE = {
     _d: _i
     for _i, _d in enumerate(
@@ -133,7 +134,11 @@ def get_changed_targets(root: Path, *, ref: str, local: bool, verbose: bool) -> 
     if verbose:
         print('\n'.join(changed_files), file=sys.stderr)
 
-    if (root / 'datadog_checks_base').is_dir() and any(SKIPPED_PATTERN.search(path) for path in changed_files):
+    if (
+        (root / 'datadog_checks_base').is_dir()
+        and AGENT_REQUIREMENTS_FILE not in changed_files
+        and any(SKIPPED_PATTERN.search(path) for path in changed_files)
+    ):
         return []
 
     changed_directories: defaultdict[str, list[str]] = defaultdict(list)
@@ -142,6 +147,7 @@ def get_changed_targets(root: Path, *, ref: str, local: bool, verbose: bool) -> 
         if remaining_path:
             changed_directories[directory_name].append(remaining_path)
 
+    agent_requirements_file = root / AGENT_REQUIREMENTS_FILE
     targets = []
     for directory_name, files in changed_directories.items():
         directory = root / directory_name
@@ -150,7 +156,7 @@ def get_changed_targets(root: Path, *, ref: str, local: bool, verbose: bool) -> 
 
         for remaining_path in files:
             possible_file = directory / remaining_path
-            if possible_file.name in NON_TESTABLE_FILES:
+            if possible_file.name in NON_TESTABLE_FILES or possible_file == agent_requirements_file:
                 continue
             elif TESTABLE_FILE_PATTERN.search(remaining_path):
                 targets.append(directory_name)

@@ -14,6 +14,22 @@ admission_webhooks_reconcile_errors{controller="secrets"} 5
 # TYPE admission_webhooks_reconcile_success gauge
 admission_webhooks_reconcile_success{controller="secrets"} 221
 admission_webhooks_reconcile_success{controller="webhooks"} 7
+# HELP admission_webhooks_response_duration Webhook response duration distribution (in seconds).
+# TYPE admission_webhooks_response_duration histogram
+admission_webhooks_response_duration_bucket{le="0.005"} 65
+admission_webhooks_response_duration_bucket{le="0.01"} 102
+admission_webhooks_response_duration_bucket{le="0.025"} 108
+admission_webhooks_response_duration_bucket{le="0.05"} 108
+admission_webhooks_response_duration_bucket{le="0.1"} 108
+admission_webhooks_response_duration_bucket{le="0.25"} 108
+admission_webhooks_response_duration_bucket{le="0.5"} 108
+admission_webhooks_response_duration_bucket{le="1"} 108
+admission_webhooks_response_duration_bucket{le="2.5"} 108
+admission_webhooks_response_duration_bucket{le="5"} 108
+admission_webhooks_response_duration_bucket{le="10"} 108
+admission_webhooks_response_duration_bucket{le="+Inf"} 108
+admission_webhooks_response_duration_sum 0.4897835529999999
+admission_webhooks_response_duration_count 108
 # HELP admission_webhooks_webhooks_received Number of mutation webhook requests received.
 # TYPE admission_webhooks_webhooks_received gauge
 admission_webhooks_webhooks_received 300
