@@ -104,12 +104,13 @@ class KafkaClient:
     def get_partitions_for_topic(self, topic):
         try:
             cluster_metadata = self.kafka_client.list_topics(topic, timeout=self.config._request_timeout)
-            topic_metadata = cluster_metadata.topics[topic]
-            partitions = list(topic_metadata.partitions.keys())
-            return partitions
         except KafkaException as e:
             self.log.error("Received exception when getting partitions for topic %s: %s", topic, e)
             return None
+        else:
+            topic_metadata = cluster_metadata.topics[topic]
+            partitions = list(topic_metadata.partitions.keys())
+            return partitions
 
     def request_metadata_update(self):
         # https://github.com/confluentinc/confluent-kafka-python/issues/594
@@ -147,6 +148,9 @@ class KafkaClient:
         for future in self._get_consumer_offset_futures(consumer_groups):
             try:
                 response_offset_info = future.result()
+            except KafkaException as e:
+                self.log.debug("Failed to read consumer offsets for %s: %s", consumer_group, e)
+            else:
                 self.log.debug('FUTURE RESULT: %s', response_offset_info)
                 consumer_group = response_offset_info.group_id
                 topic_partitions = response_offset_info.topic_partitions
@@ -171,8 +175,7 @@ class KafkaClient:
                             str(topic_partition.partition),
                         )
                     consumer_offsets[(consumer_group, topic, partition)] = offset
-            except KafkaException as e:
-                self.log.debug("Failed to read consumer offsets for %s: %s", consumer_group, e)
+
 
         return consumer_offsets
 
