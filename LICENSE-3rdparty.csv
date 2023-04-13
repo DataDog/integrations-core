@@ -9,7 +9,7 @@ Pyro4,PyPI,MIT,Copyright (c) 2016 Irmen de Jong
 aerospike,PyPI,Apache-2.0,"Copyright Aerospike, Inc."
 aws-requests-auth,PyPI,BSD-3-Clause,Copyright (c) David Muller.
 beautifulsoup4,PyPI,MIT,Copyright (c) 2004-2017 Leonard Richardson
-beautifulsoup4,PyPI,MIT,Copyright (c) 2004-2022 Leonard Richardson
+beautifulsoup4,PyPI,MIT,Copyright (c) Leonard Richardson
 binary,PyPI,Apache-2.0,Copyright 2018 Ofek Lev
 binary,PyPI,MIT,Copyright 2018 Ofek Lev
 boto,PyPI,MIT,Copyright (c) 2010 Mitch Garnaat
@@ -41,7 +41,7 @@ immutables,PyPI,Apache-2.0,Copyright 2018-present Contributors to the immutables
 importlib-metadata,PyPI,Apache-2.0,"Copyright 2017-2019 Jason R. Coombs, Barry Warsaw"
 in-toto,PyPI,Apache-2.0,Copyright 2018 New York University
 ipaddress,PyPI,PSF,Copyright (c) 2013 Philipp Hagemeister
-jellyfish,PyPI,BSD-3-Clause,"Copyright (c) 2015, James Turk"
+jellyfish,PyPI,MIT,Copyright (c) 2015 James Turk
 kubernetes,PyPI,Apache-2.0,Copyright 2014 The Kubernetes Authors.
 ldap3,PyPI,LGPL-3.0-only,Copyright 2013 - 2020 Giovanni Cannata
 lxml,PyPI,BSD-3-Clause,Copyright (c) 2004 Infrae. All rights reserved.

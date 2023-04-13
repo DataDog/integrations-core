@@ -38,6 +38,8 @@ DEFAULT_METRICS = {
     'datadog_requests': 'datadog.requests',
     'endpoint_checks_configs_dispatched': 'endpoint_checks.configs_dispatched',
     'external_metrics': 'external_metrics',
+    'external_metrics_api_elapsed': 'external_metrics.api_elapsed',
+    'external_metrics_api_requests': 'external_metrics.api_requests',
     'external_metrics_datadog_metrics': 'external_metrics.datadog_metrics',
     'external_metrics_delay_seconds': 'external_metrics.delay_seconds',
     'external_metrics_processed_value': 'external_metrics.processed_value',
