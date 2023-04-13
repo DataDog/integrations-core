@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
 import os
 import socket
 
@@ -19,6 +20,60 @@ AUTHENTICATION = os.environ.get('AUTHENTICATION', 'noauth')
 DOCKER_IMAGE_PATH = os.path.join(HERE, 'docker', AUTHENTICATION, "docker-compose.yaml")
 
 metrics = BROKER_METRICS + CONSUMER_METRICS
+
+
+CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'docker', 'ssl', 'certificate')
+ROOT_CERTIFICATE = os.path.join(CERTIFICATE_DIR, 'caroot.pem')
+CERTIFICATE = os.path.join(CERTIFICATE_DIR, 'cert.pem')
+PRIVATE_KEY = os.path.join(CERTIFICATE_DIR, 'key.pem')
+PRIVATE_KEY_PASSWORD = 'secret'
+
+E2E_METADATA = {
+    'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
+    'docker_volumes': [
+        f'{HERE}/docker/ssl/certificate:/tmp/certificate',
+        f'{HERE}/docker/kerberos/kdc/krb5_agent.conf:/etc/krb5.conf',
+    ],
+}
+
+if AUTHENTICATION == "ssl":
+    INSTANCE = {
+        'kafka_connect_str': "localhost:9092",
+        'tags': ['optional:tag1'],
+        'consumer_groups': {'my_consumer': {'marvel': [0]}},
+        'security_protocol': 'SSL',
+        'tls_cert': CERTIFICATE,
+        'tls_private_key': PRIVATE_KEY,
+        'tls_private_key_password': PRIVATE_KEY_PASSWORD,
+        'tls_ca_cert': ROOT_CERTIFICATE,
+    }
+elif AUTHENTICATION == "kerberos":
+    INSTANCE = {
+        'kafka_connect_str': "localhost:9092",
+        'tags': ['optional:tag1'],
+        'consumer_groups': {'my_consumer': {'marvel': [0]}},
+        "sasl_mechanism": "GSSAPI",
+        "sasl_kerberos_service_name": "kafka",
+        "security_protocol": "SASL_PLAINTEXT",
+        # Real path will be replaced once the temp dir will be created in `dd_environment`
+        "sasl_kerberos_keytab": "{}/localhost.key",
+        "sasl_kerberos_principal": "kafka/localhost",
+    }
+else:
+    INSTANCE = {
+        'kafka_connect_str': KAFKA_CONNECT_STR,
+        'tags': ['optional:tag1'],
+        'consumer_groups': {'my_consumer': {'marvel': [0]}},
+    }
+
+E2E_INSTANCE = copy.deepcopy(INSTANCE)
+
+if AUTHENTICATION == "ssl":
+    E2E_INSTANCE["tls_cert"] = "/tmp/certificate/cert.pem"
+    E2E_INSTANCE["tls_private_key"] = "/tmp/certificate/key.pem"
+    E2E_INSTANCE["tls_ca_cert"] = "/tmp/certificate/caroot.pem"
+elif AUTHENTICATION == "kerberos":
+    E2E_INSTANCE["sasl_kerberos_keytab"] = "/var/lib/secret/localhost.key"
 
 
 def assert_check_kafka(aggregator, consumer_groups):
@@ -44,11 +99,7 @@ def get_authentication_configuration(instance):
     config = {}
 
     if AUTHENTICATION != "noauth":
-        config.update(
-            {
-                "security.protocol": instance.get("security_protocol").lower(),
-            }
-        )
+        config["security.protocol"] = instance.get("security_protocol").lower()
 
         if AUTHENTICATION == "ssl":
             config.update(

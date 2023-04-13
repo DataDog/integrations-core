@@ -4,8 +4,6 @@
 import os
 import re
 
-from six import string_types
-
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.kafka_consumer.constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
 
@@ -58,7 +56,7 @@ class KafkaConfig:
         if not self._kafka_connect_str:
             raise ConfigurationError('`kafka_connect_str` is required')
 
-        if not isinstance(self._kafka_connect_str, (string_types, list)):
+        if not isinstance(self._kafka_connect_str, (str, list)):
             raise ConfigurationError('`kafka_connect_str` should be string or list of strings')
 
         if isinstance(self._kafka_connect_str, list):
