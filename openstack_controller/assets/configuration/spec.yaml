@@ -15,14 +15,21 @@ files:
     - template: instances
       options:
         - name: name
-          required: true
+          hidden: true
           description: |
             Unique identifier for this instance.
           value:
             example: <INSTANCE_NAME>
             type: string
+        - name: domain_id
+          description: |
+           The domain ID used to connect to Openstack. If not specified, the check will
+           use the "default" Domain ID
+          value:
+            example: "default"
+            type: string
         - name: user
-          required: true
+          hidden: true
           description: |
            Password authentication is the only auth method supported
            User expects username, password, and user domain id
@@ -107,6 +114,7 @@ files:
           value:
             example: <PATH_TO_YAML_FILE>
             type: string
+          display_priority: 3
         - name: openstack_cloud_name
           description: |
            Name of the cloud configuration to use.
@@ -116,6 +124,7 @@ files:
           value:
             example: <CLOUD_NAME>
             type: string
+          display_priority: 2
         - name: keystone_server_url
           description: |
            URL of your identity server. NOTE: The server must support Identity API v3.
@@ -131,9 +140,17 @@ files:
 
            View this page for more about Ironic microvoersion compatibility:
               https://docs.openstack.org/ironic/latest/contributor/webapi-version-history.html
+          display_priority: 4
+        - name: nova_microversion
+          description: |
+           The microversion of the Nova (Compute) API to call.
+           It is recommended to set this parameter to the latest Compute microversion supported by your Openstack version.
+           View this page for more about Compute microvoersion compatibility:
+              https://docs.openstack.org/nova/latest/reference/api-microversion-history.html
            View this page for more information about microversions in Openstack:
               https://docs.openstack.org/api-guide/compute/microversions.html
           enabled: true
+          display_priority: 4
           value:
             example: "1.80"
             type: string
@@ -202,6 +219,12 @@ files:
             empty_default_hostname.hidden: true
         - template: instances/http
           overrides:
+            username.display_priority: 6
+            username.description: The username used to connect to Openstack.
+            password.display_priority: 5
+            password.description: |
+              The password used to connect to Openstack.
+              Password authentication is the only auth method supported.
             tls_use_host_header.hidden: true
             auth_type.hidden: true
             use_legacy_auth_encoding.hidden: true
