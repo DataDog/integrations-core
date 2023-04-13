@@ -19,6 +19,7 @@ class OpenstackConfig:
         self.domain_id = instance.get("domain_id", "default")
         self.user = instance.get("user")
         self.nova_microversion = instance.get('nova_microversion')
+        self.ironic_microversion = instance.get('ironic_microversion')
         self.api_type = None
         self.custom_tags = instance.get("tags", [])
         self.collect_hypervisor_metrics = instance.get("collect_hypervisor_metrics", True)
@@ -34,6 +35,33 @@ class OpenstackConfig:
             self._validate_cloud_config()
         else:
             self._validate_user()
+
+        if self.nova_microversion:
+            self._validate_microversion(self.nova_microversion, 'nova')
+
+        if self.ironic_microversion:
+            self._validate_microversion(self.ironic_microversion, 'ironic')
+
+    def _validate_microversion(self, microversion, service):
+        is_latest = microversion.lower() == 'latest'
+        is_float = False
+        if is_latest:
+            self.log.warning(
+                "Setting `%s_microversion` to `latest` is not recommended, see the Openstack documentation "
+                "for more details: https://docs.openstack.org/api-guide/compute/microversions.html",
+                service,
+            )
+        try:
+            is_float = float(microversion)
+        except Exception:
+            pass
+        if not is_latest and not is_float:
+            raise ConfigurationError(
+                "Invalid `{}_microversion`: {}; please specify a valid version, see the Openstack documentation"
+                "for more details: https://docs.openstack.org/api-guide/compute/microversions.html".format(
+                    service, microversion
+                ),
+            )
 
     def _validate_user(self):
         if self.username:

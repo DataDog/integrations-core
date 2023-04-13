@@ -28,14 +28,21 @@ class ApiRest(Api):
         self.log = logger
         self.config = config
         self.http = http
-        if self.config.nova_microversion:
-            self.log.debug("adding X-OpenStack-Nova-API-Version header to `%s`", self.config.nova_microversion)
-            self.http.options['headers']['X-OpenStack-Nova-API-Version'] = self.config.nova_microversion
         self.auth_projects = {}
         self.auth_domain_id_tokens = {}
         self.auth_project_tokens = {}
         self.endpoints = {}
         self.components = {}
+        self.add_microversion_headers()
+
+    def add_microversion_headers(self):
+        if self.config.nova_microversion:
+            self.log.debug("adding X-OpenStack-Nova-API-Version header to `%s`", self.config.nova_microversion)
+            self.http.options['headers']['X-OpenStack-Nova-API-Version'] = self.config.nova_microversion
+
+        if self.config.ironic_microversion:
+            self.log.debug("adding X-OpenStack-Ironic-API-Version header to `%s`", self.config.ironic_microversion)
+            self.http.options['headers']['X-OpenStack-Ironic-API-Version'] = self.config.ironic_microversion
 
     def get_identity_response_time(self):
         self.log.debug("getting identity response time")
@@ -162,11 +169,8 @@ class ApiRest(Api):
 
     def _post_auth_unscoped(self):
         self.log.debug("getting `X-Subject-Token`")
-        data = (
-            '{{"auth": {{"identity": {{"methods": ["password"], '
-            '"password": {{"user": {}}}}}}}}}'.format(
-                json.dumps(self.config.user),
-            )
+        data = '{{"auth": {{"identity": {{"methods": ["password"], ' '"password": {{"user": {}}}}}}}}}'.format(
+            json.dumps(self.config.user),
         )
         url = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
         self.log.debug("POST %s data: %s", url, data)
