@@ -28,7 +28,7 @@ from .util import (
     QUERY_PG_STAT_WAL_RECEIVER,
     REPLICATION_METRICS,
     SLRU_METRICS,
-    DatabaseConfigurationError,
+    DatabaseConfigurationError,  # noqa: F401
     fmt,
     get_schema_field,
 )
@@ -128,7 +128,7 @@ class PostgreSql(AgentCheck):
 
         self._dynamic_queries = self._new_query_executor(queries)
         self._dynamic_queries.compile_queries()
-        self.log.debug("initialized {cnt} dynamic querie(s)", extra=dict(cnt=str(len(queries))))
+        self.log.debug("initialized {cnt} dynamic querie(s)", extra={"cnt": str(len(queries))})
 
         return self._dynamic_queries
 

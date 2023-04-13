@@ -15,7 +15,8 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Category::Containers",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Category::Network"
     ]
   },
   "author": {

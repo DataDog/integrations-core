@@ -5,12 +5,14 @@ on:
     branches:
     - master
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref }}
-  cancel-in-progress: true
-
 jobs:
+  cache:
+    uses: ./.github/workflows/cache-shared-deps.yml
+
   test:
+    needs:
+    - cache
+
     uses: ./.github/workflows/test-all.yml
     with:
       repo: core

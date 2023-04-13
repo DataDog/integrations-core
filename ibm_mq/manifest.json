@@ -12,12 +12,12 @@
     "title": "IBM MQ",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Processing",
+      "Category::Log Collection",
       "Category::Messaging",
-      "Category::Log Collection"
+      "Category::Network",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

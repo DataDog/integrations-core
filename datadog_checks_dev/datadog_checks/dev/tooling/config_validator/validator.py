@@ -139,7 +139,7 @@ def _check_no_duplicate_names(blocks, errors):
     """
     same_level_blocks = [b for b in blocks if isinstance(b, ConfigBlock)]
     names_list = [b.param_prop.var_name for b in same_level_blocks if b.param_prop]
-    duplicates = set([x for x in names_list if names_list.count(x) > 1])
+    duplicates = {x for x in names_list if names_list.count(x) > 1}
     for dup in duplicates:
         errors.append(ValidatorError(f"Duplicate variable with name {dup}", None))
 

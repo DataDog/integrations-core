@@ -50,7 +50,7 @@ jobs:
       uses: emibcn/badge-action@v2.0.2
       with:
         label: Tests
-        status: "${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests }} tests, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs }} runs: ${{ fromJSON( steps.test-results.outputs.json ).conclusion }}"
+        status: "${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests }} tests, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs }} runs, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests_fail }} failed"
         color: "${{ env.BADGE_COLOR }}"
         path: "${{ env.BADGE_PATH }}"
 
@@ -61,9 +61,8 @@ jobs:
 
     - name: Commit if stats have changed
       run: |-
-        if ! git diff --quiet; then
-          git add "${{ env.BADGE_PATH }}"
-          git commit -m "Update test results from ${{ github.sha }}"
+        git add "${{ env.BADGE_PATH }}"
+        if git commit -m "Update test results from ${{ github.sha }}"; then
           git push
         else
           echo "Nothing has changed"
