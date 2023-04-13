@@ -326,7 +326,13 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
         'user:datadog',
         'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
-    test_tags = pg_instance['tags'] + ['port:{}'.format(PORT), 'db:datadog_test', 'app:test', 'user:datadog']
+    test_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'db:datadog_test',
+        'app:test',
+        'user:datadog',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
     # No transaction in progress, we have 0
     if float(POSTGRES_VERSION) >= 9.6:
         aggregator.assert_metric('postgresql.activity.backend_xmin_age', value=0, count=1, tags=dd_agent_tags)

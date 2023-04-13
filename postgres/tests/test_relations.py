@@ -56,6 +56,7 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
         'db:%s' % pg_instance['dbname'],
         'table:persons',
         'schema:public',
+        'dd.internal.resource:database_instance:{}'.format(posgres_check.resolved_hostname),
     ]
 
     expected_size_tags = pg_instance['tags'] + [
@@ -63,6 +64,7 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
         'db:%s' % pg_instance['dbname'],
         'table:persons',
         'schema:public',
+        'dd.internal.resource:database_instance:{}'.format(posgres_check.resolved_hostname),
     ]
 
     for name in RELATION_METRICS:
@@ -97,6 +99,7 @@ def test_bloat_metrics(aggregator, collect_bloat_metrics, expected_count, integr
         'db:%s' % pg_instance['dbname'],
         'table:pg_index',
         'schema:pg_catalog',
+        'dd.internal.resource:database_instance:{}'.format(posgres_check.resolved_hostname),
     ]
 
     aggregator.assert_metric('postgresql.table_bloat', count=expected_count, tags=base_tags)
@@ -126,6 +129,7 @@ def test_relations_metrics_regex(aggregator, integration_check, pg_instance):
             'db:%s' % pg_instance['dbname'],
             'table:{}'.format(relation.lower()),
             'schema:public',
+            'dd.internal.resource:database_instance:{}'.format(posgres_check.resolved_hostname),
         ]
 
     for relation in relations:
@@ -177,6 +181,7 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
         'table:breed',
         'index:breed_names',
         'schema:public',
+        'dd.internal.resource:database_instance:{}'.format(posgres_check.resolved_hostname),
     ]
 
     for name in IDX_METRICS:
@@ -199,6 +204,7 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
                 'lock_type:relation',
                 'table:persons',
                 'schema:public',
+                'dd.internal.resource:database_instance:stubbed.hostname',
             ],
             id="test with single table lock should return 1",
         ),
