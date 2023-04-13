@@ -41,7 +41,7 @@ matrix.version.env-vars = [
 ]
 matrix.auth.env-vars = "AUTHENTICATION"
 # We can allow kerberos once the agent image contains confluent-kafka built from source
-
+matrix.auth.e2e-env = { value = false, if = ["kerberos"] }
 
 [envs.latest.env-vars]
 KAFKA_VERSION = "latest"
