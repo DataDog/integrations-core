@@ -46,7 +46,8 @@ Conntrack metrics are available by default in Kubernetes < v1.11 or when using t
 
 In order to collect AWS ENA metrics, use `host` network mode and if you are using Datadog [Helm Chart][11]:  
 Save the following content into a file named `daemonset-patch.yaml`:  
-```spec:
+```
+spec:
   template:
     spec:
       containers:
