@@ -35,7 +35,7 @@ files:
               domain:
                 id: <DOMAIN_ID>
             type: object
-          enabled: truewq
+          enabled: true
         - name: whitelist_project_names
           description: |
            IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
