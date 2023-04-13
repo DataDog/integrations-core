@@ -123,7 +123,7 @@ instances:
     ## View this page for more information about microversions in Openstack:
     ##    https://docs.openstack.org/api-guide/compute/microversions.html
     #
-    nova_microversion: '1.80'
+    nova_microversion: '2.1'
 
     ## @param ironic_microversion - string - optional
     ## The microversion of the Ironic (Bare Metal) API to call.
