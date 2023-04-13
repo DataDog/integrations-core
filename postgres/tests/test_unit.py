@@ -221,6 +221,18 @@ def test_version_metadata(check, test_case, params):
         m.assert_any_call('test:123', 'version.scheme', 'semver')
         m.assert_any_call('test:123', 'version.raw', test_case)
 
+@pytest.mark.parametrize(
+    'test_case',
+    [
+        ('any_hostname'),
+    ],
+)
+def test_resolved_hostname_metadata(check, test_case):
+    check.check_id = 'test:123'
+    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
+        check.set_metadata('resolved_hostname', test_case)
+        m.assert_any_call('test:123', 'resolved_hostname', test_case)
+
 
 @pytest.mark.parametrize(
     'pg_version, wal_path',
