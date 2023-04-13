@@ -267,7 +267,8 @@ instances:
     # cache_metric_wildcards: true
 
     ## @param use_latest_spec - boolean - optional - default: false
-    ## Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
+    ## Whether or not the parser will adhere to the OpenMetrics specification. The default assumes
+    ## the more loosely defined Prometheus exposition format.
     #
     # use_latest_spec: false
 
