@@ -2,7 +2,7 @@
 
 ## 2.10.0 / 2023-04-14
 
-* [Added] Implement StartTLS protocol for Mysql. See [#14352](https://github.com/DataDog/integrations-core/pull/14352). Thanks [dpavlov-smartling](https://github.com/dpavlov-smartling).
+* [Added] Implement StartTLS protocol for MySQL. See [#14352](https://github.com/DataDog/integrations-core/pull/14352). Thanks [dpavlov-smartling](https://github.com/dpavlov-smartling).
 
 ## 2.9.1 / 2022-12-09 / Agent 7.42.0
 
