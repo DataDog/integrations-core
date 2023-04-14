@@ -302,4 +302,4 @@ class KafkaClient:
                         )
                         continue
 
-                yield (topic, partition)
+                    yield (topic, partition)
