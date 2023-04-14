@@ -7,7 +7,6 @@ import os
 
 import mock
 import pytest
-
 from freezegun import freeze_time
 
 from datadog_checks.dev.fs import read_file
