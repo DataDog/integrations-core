@@ -18,20 +18,8 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
-def shared_zk_timeout(field, value):
-    return 5
-
-
-def instance_broker_requests_batch_size(field, value):
-    return 30
-
-
 def instance_consumer_groups(field, value):
     return get_default_field_value(field, value)
-
-
-def instance_data_streams_enabled(field, value):
-    return False
 
 
 def instance_disable_generic_tags(field, value):
@@ -44,10 +32,6 @@ def instance_empty_default_hostname(field, value):
 
 def instance_kafka_client_api_version(field, value):
     return get_default_field_value(field, value)
-
-
-def instance_kafka_consumer_offsets(field, value):
-    return False
 
 
 def instance_metric_patterns(field, value):
@@ -68,6 +52,14 @@ def instance_monitor_unlisted_consumer_groups(field, value):
 
 def instance_sasl_kerberos_domain_name(field, value):
     return get_default_field_value(field, value)
+
+
+def instance_sasl_kerberos_keytab(field, value):
+    return get_default_field_value(field, value)
+
+
+def instance_sasl_kerberos_principal(field, value):
+    return 'kafkaclient'
 
 
 def instance_sasl_kerberos_service_name(field, value):
@@ -128,11 +120,3 @@ def instance_tls_validate_hostname(field, value):
 
 def instance_tls_verify(field, value):
     return True
-
-
-def instance_zk_connect_str(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_zk_prefix(field, value):
-    return get_default_field_value(field, value)

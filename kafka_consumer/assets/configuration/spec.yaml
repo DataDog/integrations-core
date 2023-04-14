@@ -10,21 +10,9 @@ files:
         WARNING: To avoid blindly collecting offsets and lag for an unbounded number
         of partitions (as could be the case after enabling monitor_unlisted_consumer_groups
         or monitor_all_broker_highwatermarks) the check collects metrics for at most 500 partitions.
-
-        DEPRECATION NOTICE: In the early days of Kafka, consumer offsets were stored in Zookeeper.
-        So this check currently supports fetching consumer offsets from both Kafka and Zookeeper.
-        However, Kafka 0.9 (released in 2015) deprecated Zookeeper storage. As a result, we have also
-        deprecated fetching consumer offsets from Zookeeper.
     options:
     - name: kafka_timeout
       description: Customizes the Kafka connection timeout.
-      value:
-        type: integer
-        example: 5
-      display_default: 5
-    - name: zk_timeout
-      description: |
-        DEPRECATED: Customizes the ZooKeeper connection timeout.
       value:
         type: integer
         example: 5
@@ -76,9 +64,6 @@ files:
           Each level is optional. Any empty values are fetched from the Kafka cluster.
           You can have empty partitions (example: <CONSUMER_NAME_2>), topics (example: <CONSUMER_NAME_3>),
           and even consumer_groups. If you omit consumer_groups, you must set `monitor_unlisted_consumer_groups` to true.
-
-          Deprecation notice: Omitting various levels works for zookeeper-based consumers. However, all
-          functionality related to fetching offsets from Zookeeper is deprecated.
         value:
           type: object
           example:
@@ -96,8 +81,6 @@ files:
           support this feature on older brokers because they do not provide a way to determine the mapping
           of consumer groups to topics. For details, see KIP-88. For older Kafka brokers, the consumer groups
           must be specified. This requirement only applies to the brokers, not the consumers--they can be any version.
-
-          Deprecation notice: Functionality related to consumers fetching offsets from Zookeeper is deprecated.
         value:
           type: boolean
           example: false
@@ -138,6 +121,21 @@ files:
         value:
           type: string
           example: <PASSWORD>
+      - name: sasl_kerberos_keytab
+        description: |
+          Path to Kerberos keytab file.
+          Note: If this config option is not used, the check will attempt to find
+          the keytab file using the environment variable KRB5_CLIENT_KTNAME.
+          Using `sasl_kerberos_keytab` will eventually be required and using the
+          environment variable directly will be deprecated.
+        value:
+          type: string
+      - name: sasl_kerberos_principal
+        description: |
+          Kerberos principal to use.
+        value:
+          type: string
+          example: kafkaclient
       - name: sasl_kerberos_service_name
         description: Service name to include in GSSAPI sasl mechanism handshake.
         value:
@@ -184,68 +182,4 @@ files:
         value:
           type: string
           example: <SSL_FILE_PATH>
-      - name: broker_requests_batch_size
-        description: |
-          The OffsetRequests sent to each broker are batched by the kafka_consumer check in groups of 30 by default.
-          If the batch size is too big, you may see KafkaTimeoutError exceptions in the logs while
-          running the wakeup calls.
-          If the batch size is too small, the check will take longer to run.
-        display_default: 30
-        value:
-          type: integer
-          example: 30
       - template: instances/default
-      - name: zk_connect_str
-        description: |
-          DEPRECATION NOTICE: This option is only used for fetching consumer offsets
-          from Zookeeper and is deprecated.
-          Zookeeper endpoints and port to connect to.
-          In a production environment, it's often useful to specify multiple
-          Zookeeper nodes for a single check instance. This way you
-          only generate a single check process, but if one host goes down,
-          KafkaClient / KazooClient tries contacting the next host.
-          Details: https://github.com/DataDog/dd-agent/issues/2943
-
-          You may specify a single server like:
-
-            zk_connect_str: localhost:2181
-
-          or multiple servers like:
-
-            zk_connect_str:
-            - server1:2181
-            - server2:2181
-        value:
-          anyOf:
-          - type: string
-          - type: array
-            items:
-              type: string
-      - name: zk_prefix
-        description: |
-          DEPRECATION NOTICE: This option is only used for fetching consumer offsets
-          from Zookeeper and is deprecated.
-          Zookeeper chroot prefix under which kafka data is living in zookeeper.
-          If kafka is connecting to `my-zookeeper:2181/kafka` then the `zk_prefix` is `/kafka`.
-        value:
-          type: string
-          example: <ZK_PREFIX>
-      - name: kafka_consumer_offsets
-        description: |
-          DEPRECATION NOTICE: This option is only used for fetching consumer offsets
-          from Zookeeper and is deprecated.
-          This setting only applies if `zk_connect_str` is set and cannot work with
-          `monitor_unlisted_consumer_groups` since the generated list comes from Zookeeper.
-          Set to true to fetch consumer offsets from both Zookeeper and Kafka
-          Set to false to fetch consumer offsets only from Zookeeper.
-        value:
-          type: boolean
-          example: false
-        display_default: false
-      - name: data_streams_enabled
-        description: |
-          Beta feature to get a lag metric in Seconds. It's part of the Data Streams Monitoring Product
-        value:
-          type: boolean
-          example: false
-        display_default: false

@@ -40,19 +40,18 @@ class InstanceConfig(BaseModel):
     class Config:
         allow_mutation = False
 
-    broker_requests_batch_size: Optional[int]
     consumer_groups: Optional[Mapping[str, Any]]
-    data_streams_enabled: Optional[bool]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
     kafka_client_api_version: Optional[str]
     kafka_connect_str: Union[str, Sequence[str]]
-    kafka_consumer_offsets: Optional[bool]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]
     monitor_all_broker_highwatermarks: Optional[bool]
     monitor_unlisted_consumer_groups: Optional[bool]
     sasl_kerberos_domain_name: Optional[str]
+    sasl_kerberos_keytab: Optional[str]
+    sasl_kerberos_principal: Optional[str]
     sasl_kerberos_service_name: Optional[str]
     sasl_mechanism: Optional[str]
     sasl_oauth_token_provider: Optional[SaslOauthTokenProvider]
@@ -68,8 +67,6 @@ class InstanceConfig(BaseModel):
     tls_private_key_password: Optional[str]
     tls_validate_hostname: Optional[bool]
     tls_verify: Optional[bool]
-    zk_connect_str: Optional[Union[str, Sequence[str]]]
-    zk_prefix: Optional[str]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):
