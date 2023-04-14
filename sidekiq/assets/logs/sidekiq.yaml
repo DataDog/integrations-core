@@ -40,7 +40,7 @@ pipeline:
         - '2012-03-02T19:40:55.077Z 3640 TID-oveahmcxw ElasticSearchBulkOperationJob JID-12343drgwe23413 INFO: done: 0.046 sec'
       grok:
         supportRules: |
-          _class %{word:sidekiq.class}
+          _class %{notSpace:sidekiq.class}
           _thread_id %{notSpace:logger.thread_id}
           _pid %{integer:pid}
           _level %{word:level}
