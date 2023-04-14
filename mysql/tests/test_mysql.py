@@ -71,7 +71,7 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
     dd_run_check(mysql_check)
 
-    _assert_complex_config(aggregator, instance_complex)
+    _assert_complex_config(aggregator)
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), check_submission_type=True, exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
     )
@@ -80,20 +80,19 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance_complex):
     aggregator = dd_agent_check(instance_complex)
-    _assert_complex_config(aggregator, instance_complex, hostname=None)  # Do not assert hostname
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
+    _assert_complex_config(aggregator, hostname=mysql_check.resolved_hostname)  # Do not assert hostname
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
     )
 
 
-def _assert_complex_config(aggregator, instance_complex, hostname='stubbed.hostname'):
-    mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
-
+def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
     # Test service check
     aggregator.assert_service_check(
         'mysql.can_connect',
         status=MySql.OK,
-        tags=tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=mysql_check.resolved_hostname)],
+        tags=tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=hostname)],
         hostname=hostname,
         count=1,
     )
