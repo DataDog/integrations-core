@@ -2,7 +2,7 @@
 
 ## 2.18.3 / 2023-04-14
 
-* [Fixed] fix `iis.*_up` service check when configured using a mapping. See [#13747](https://github.com/DataDog/integrations-core/pull/13747).
+* [Fixed] Fix `iis.*_up` service check when configured using a mapping. See [#13747](https://github.com/DataDog/integrations-core/pull/13747).
 
 ## 2.18.2 / 2023-03-03
 
