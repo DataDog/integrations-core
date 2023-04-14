@@ -71,7 +71,7 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
     dd_run_check(mysql_check)
 
-    _assert_complex_config(aggregator)
+    _assert_complex_config(aggregator, instance_complex)
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), check_submission_type=True, exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
     )
@@ -80,20 +80,32 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance_complex):
     aggregator = dd_agent_check(instance_complex)
-    _assert_complex_config(aggregator, hostname=None)  # Do not assert hostname
+    _assert_complex_config(aggregator, instance_complex, hostname=None)  # Do not assert hostname
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
     )
 
 
-def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
+def _assert_complex_config(aggregator, instance_complex, hostname='stubbed.hostname'):
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
+
     # Test service check
-    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS, hostname=hostname, count=1)
+    aggregator.assert_service_check(
+        'mysql.can_connect',
+        status=MySql.OK,
+        tags=tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=mysql_check.resolved_hostname)],
+        hostname=hostname,
+        count=1,
+    )
     if MYSQL_REPLICATION == 'classic':
         aggregator.assert_service_check(
             'mysql.replication.slave_running',
             status=MySql.OK,
-            tags=tags.SC_TAGS + ['replication_mode:source'],
+            tags=tags.SC_TAGS
+            + [
+                'replication_mode:source',
+                tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=mysql_check.resolved_hostname),
+            ],
             hostname=hostname,
             at_least=1,
         )
@@ -118,6 +130,7 @@ def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
             'mysql.replication.group.status',
             status=MySql.OK,
             tags=tags.SC_TAGS
+            + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=mysql_check.resolved_hostname)]
             + ['channel_name:group_replication_applier', 'member_role:PRIMARY', 'member_state:ONLINE'],
             count=1,
         )
@@ -136,19 +149,18 @@ def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
         if mname == 'mysql.performance.cpu_time' and Platform.is_windows():
             continue
 
+        base_tags = tags.METRIC_TAGS + [
+            tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=mysql_check.resolved_hostname)
+        ]
         if mname == 'mysql.performance.query_run_time.avg':
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:testdb'], count=1)
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:mysql'], count=1)
+            aggregator.assert_metric(mname, tags=base_tags + ['schema:testdb'], count=1)
+            aggregator.assert_metric(mname, tags=base_tags + ['schema:mysql'], count=1)
         elif mname == 'mysql.info.schema.size':
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:testdb'], count=1)
-            aggregator.assert_metric(
-                mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:information_schema'], count=1
-            )
-            aggregator.assert_metric(
-                mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:performance_schema'], count=1
-            )
+            aggregator.assert_metric(mname, tags=base_tags + ['schema:testdb'], count=1)
+            aggregator.assert_metric(mname, tags=base_tags + ['schema:information_schema'], count=1)
+            aggregator.assert_metric(mname, tags=base_tags + ['schema:performance_schema'], count=1)
         else:
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE, at_least=0)
+            aggregator.assert_metric(mname, tags=base_tags, at_least=0)
 
     # TODO: test this if it is implemented
     # Assert service metadata
@@ -551,5 +563,5 @@ def test_set_resources(aggregator, dd_run_check, instance_basic, cloud_metadata,
     for m in metric_names:
         aggregator.assert_metric_has_tag("mysql.net.connections", m)
     aggregator.assert_metric_has_tag(
-        "mysql.net.connections", "dd.internal.resource:database_instance:{}".format(mysql_check.resolved_hostname)
+        "mysql.net.connections", tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=mysql_check.resolved_hostname)
     )
