@@ -62,8 +62,28 @@ files:
       - name: consumer_groups
         description: |
           Each level is optional. Any empty values are fetched from the Kafka cluster.
-          You can have empty partitions (example: <CONSUMER_NAME_2>), topics (example: <CONSUMER_NAME_3>),
-          and even consumer_groups. If you omit consumer_groups, you must set `monitor_unlisted_consumer_groups` to true.
+          You can have empty partitions (example: <CONSUMER_NAME_2>), topics
+          (example: <CONSUMER_NAME_3>),
+          and even consumer_groups. If you do not specify `consumer_groups`,
+          you must set `monitor_unlisted_consumer_groups` to true. 
+          
+          If both `consumer_groups` and `monitor_unlisted_consumer_groups` are used,
+          then `consumer_groups` is ignored.
+        value:
+          type: object
+          example:
+            <CONSUMER_NAME_1>:
+              <TOPIC_NAME_1>: [0, 1, 4, 12]
+            <CONSUMER_NAME_2>:
+              <TOPIC_NAME_2>: []
+            <CONSUMER_NAME_3>: {}
+      - name: consumer_groups_regex
+        description: |
+          Set consumer groups and topics as regex strings.
+          If both `consumer_groups_regex` and `consumer_groups` are filled out,
+          both configuration options will be used. 
+          If `monitor_unlisted_consumer_groups` is enabled, then
+          `consumer_groups_regex` is ignored.
         value:
           type: object
           example:

@@ -120,30 +120,7 @@ class KafkaClient:
         # {(consumer_group, topic, partition): offset}
         consumer_offsets = {}
 
-        if self.config._monitor_unlisted_consumer_groups:
-            # Get all consumer groups
-            consumer_groups = []
-            consumer_groups_future = self.kafka_client.list_consumer_groups()
-            self.log.debug('MONITOR UNLISTED CG FUTURES: %s', consumer_groups_future)
-            try:
-                list_consumer_groups_result = consumer_groups_future.result()
-                self.log.debug('MONITOR UNLISTED FUTURES RESULT: %s', list_consumer_groups_result)
-
-                consumer_groups.extend(
-                    valid_consumer_group.group_id for valid_consumer_group in list_consumer_groups_result.valid
-                )
-            except Exception as e:
-                self.log.error("Failed to collect consumer offsets %s", e)
-
-        elif self.config._consumer_groups:
-            self._validate_consumer_groups()
-            consumer_groups = self.config._consumer_groups
-
-        else:
-            raise ConfigurationError(
-                "Cannot fetch consumer offsets because no consumer_groups are specified and "
-                "monitor_unlisted_consumer_groups is %s." % self.config._monitor_unlisted_consumer_groups
-            )
+        consumer_groups = self._get_consumer_groups()
 
         for future in self._get_consumer_offset_futures(consumer_groups):
             try:
@@ -177,6 +154,31 @@ class KafkaClient:
                     consumer_offsets[(consumer_group, topic, partition)] = offset
 
         return consumer_offsets
+
+    def _get_consumer_groups(self):
+        if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_regex:
+            # Get all consumer groups
+            consumer_groups = []
+            consumer_groups_future = self.kafka_client.list_consumer_groups()
+            self.log.debug('MONITOR UNLISTED CG FUTURES: %s', consumer_groups_future)
+            try:
+                list_consumer_groups_result = consumer_groups_future.result()
+                self.log.debug('MONITOR UNLISTED FUTURES RESULT: %s', list_consumer_groups_result)
+
+                consumer_groups.extend(
+                    valid_consumer_group.group_id for valid_consumer_group in list_consumer_groups_result.valid
+                )
+            except Exception as e:
+                self.log.error("Failed to collect consumer groups: %s", e)
+            return consumer_groups
+        elif self.config._consumer_groups:
+            self._validate_consumer_groups()
+            return self.config._consumer_groups
+        else:
+            raise ConfigurationError(
+                "Cannot fetch consumer offsets because no consumer_groups are specified and "
+                "monitor_unlisted_consumer_groups is %s." % self.config._monitor_unlisted_consumer_groups
+            )
 
     def _get_consumer_offset_futures(self, consumer_groups):
         topics = self.kafka_client.list_topics(timeout=self.config._request_timeout)
@@ -221,24 +223,77 @@ class KafkaClient:
 
             partitions = list(topics.topics[topic].partitions.keys())
 
-            for partition in partitions:
-                # Get all topic-partition combinations allowed based on config
-                # if topics is None => collect all topics and partitions for the consumer group
-                # if partitions is None => collect all partitions from the consumer group's topic
-                if not self.config._monitor_unlisted_consumer_groups and self.config._consumer_groups.get(
-                    consumer_group
+            if self.config._monitor_unlisted_consumer_groups:
+                for partition in partitions:
+                    topic_partition = TopicPartition(topic, partition)
+                    self.log.debug("TOPIC PARTITION: %s", topic_partition)
+                    yield topic_partition
+
+            elif self.config._consumer_groups_regex:
+                for filtered_topic_partition in self._get_regex_filtered_topic_partitions(
+                    consumer_group, topic, partitions
                 ):
-                    if (
-                        self.config._consumer_groups[consumer_group]
-                        and topic not in self.config._consumer_groups[consumer_group]
-                    ):
+                    topic_partition = TopicPartition(filtered_topic_partition[0], filtered_topic_partition[1])
+                    self.log.debug("TOPIC PARTITION: %s", topic_partition)
+                    yield topic_partition
+
+            if self.config._consumer_groups:
+                for partition in partitions:
+                    # Get all topic-partition combinations allowed based on config
+                    # if topics is None => collect all topics and partitions for the consumer group
+                    # if partitions is None => collect all partitions from the consumer group's topic
+                    if self.config._consumer_groups.get(consumer_group):
+                        if (
+                            self.config._consumer_groups[consumer_group]
+                            and topic not in self.config._consumer_groups[consumer_group]
+                        ):
+                            self.log.debug(
+                                "Partition %s skipped because the topic %s is not in the consumer_group.",
+                                partition,
+                                topic,
+                            )
+                            continue
+                        if (
+                            self.config._consumer_groups[consumer_group].get(topic)
+                            and partition not in self.config._consumer_groups[consumer_group][topic]
+                        ):
+                            self.log.debug(
+                                "Partition %s skipped because it is not defined in the consumer group for the topic %s",
+                                partition,
+                                topic,
+                            )
+                            continue
+
+                    topic_partition = TopicPartition(topic, partition)
+                    self.log.debug("TOPIC PARTITION: %s", topic_partition)
+                    yield topic_partition
+
+    def _get_regex_filtered_topic_partitions(self, consumer_group, topic, partitions):
+        for partition in partitions:
+            # Do a regex filtering here for consumer groups
+            for consumer_group_compiled_regex in self.config._consumer_groups_compiled_regex:
+                if not consumer_group_compiled_regex.match(consumer_group):
+                    return
+
+                consumer_group_topics_regex = self.config._consumer_groups_compiled_regex.get(
+                    consumer_group_compiled_regex
+                )
+
+                # If topics is empty, return all combinations of topic and partition
+                if not consumer_group_topics_regex:
+                    yield (topic, partition)
+
+                # Do a regex filtering here for topics
+                for topic_regex in consumer_group_topics_regex:
+                    if not topic_regex.match(topic):
                         self.log.debug(
                             "Partition %s skipped because the topic %s is not in the consumer_group.", partition, topic
                         )
                         continue
+
                     if (
-                        self.config._consumer_groups[consumer_group].get(topic)
-                        and partition not in self.config._consumer_groups[consumer_group][topic]
+                        consumer_group_topics_regex.get(topic_regex)
+                        and partition not in consumer_group_topics_regex[topic_regex]
                     ):
                         self.log.debug(
                             "Partition %s skipped because it is not defined in the consumer group for the topic %s",
@@ -247,6 +302,4 @@ class KafkaClient:
                         )
                         continue
 
-                self.log.debug("TOPIC PARTITION: %s", TopicPartition(topic, partition))
-
-                yield TopicPartition(topic, partition)
+                yield (topic, partition)
