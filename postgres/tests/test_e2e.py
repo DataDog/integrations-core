@@ -13,7 +13,6 @@ def test_e2e(dd_agent_check, pg_instance):
 
     expected_tags = pg_instance['tags'] + [
         'port:{}'.format(PORT),
-        'dd.internal.resource:database_instance:stubbed.hostname',
     ]
     check_bgw_metrics(aggregator, expected_tags)
     check_common_metrics(aggregator, expected_tags=expected_tags, count=None)
