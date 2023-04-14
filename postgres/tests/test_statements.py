@@ -11,17 +11,16 @@ from concurrent.futures.thread import ThreadPoolExecutor
 import mock
 import psycopg2
 import pytest
+from dateutil import parser
+from semver import VersionInfo
+from six import string_types
+
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import UTC
-from datadog_checks.postgres.statement_samples import (
-    DBExplainError, StatementTruncationState)
-from datadog_checks.postgres.statements import (
-    PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS)
-from dateutil import parser
-from semver import VersionInfo
-from six import string_types
+from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState
+from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
 
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
 
@@ -1261,7 +1260,11 @@ def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
         aggregator.assert_metric(
             "dd.postgres.error",
             tags=_expected_dbm_instance_tags(dbm_instance)
-            + ['error:load-pg-settings', 'agent_hostname:stubbed.hostname', 'dd.internal.resource:database_instance:stubbed.hostname'],
+            + [
+                'error:load-pg-settings',
+                'agent_hostname:stubbed.hostname',
+                'dd.internal.resource:database_instance:stubbed.hostname',
+            ],
             hostname='stubbed.hostname',
         )
     else:

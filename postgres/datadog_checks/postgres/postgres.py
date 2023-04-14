@@ -273,11 +273,10 @@ class PostgreSql(AgentCheck):
         """
         set_resolved_hostname_metadata cannot be invoked in the __init__ method because it calls self.set_metadata.
         self.set_metadata can only be called successfully after the __init__ method has completed because
-        it relies on the metadata manager, which in turn relies on having a check_id set. The Agent only 
+        it relies on the metadata manager, which in turn relies on having a check_id set. The Agent only
         sets the check_id after initialization has completed.
         """
         self.set_metadata('resolved_hostname', self._resolved_hostname)
-
 
     @property
     def agent_hostname(self):
