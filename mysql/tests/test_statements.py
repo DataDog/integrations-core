@@ -19,7 +19,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql import MySql, statements
 from datadog_checks.mysql.statement_samples import StatementTruncationState
 
-from . import common, tags
+from . import common
 from .common import MYSQL_VERSION_PARSED
 
 logger = logging.getLogger(__name__)
@@ -138,7 +138,7 @@ def test_statement_metrics(
     assert event['mysql_flavor'] == mysql_check.version.flavor
     assert event['timestamp'] > 0
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
-    expected_tags = set(tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)])
+    expected_tags = set(_expected_dbm_instance_tags(dbm_instance))
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
     assert set(event['tags']) == expected_tags
@@ -231,7 +231,7 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
         {
             'azure': {
                 'deployment_type': 'flexible_server',
-                'database_name': 'test-server',
+                'name': 'test-server',
             },
         },
         {
@@ -240,7 +240,7 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
             },
             'azure': {
                 'deployment_type': 'flexible_server',
-                'database_name': 'test-server',
+                'name': 'test-server',
             },
         },
         {
@@ -360,7 +360,7 @@ def test_statement_samples_collect(
     if explain_strategy:
         mysql_check._statement_samples._preferred_explain_strategies = [explain_strategy]
 
-    expected_tags = set(tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)])
+    expected_tags = set(_expected_dbm_instance_tags(dbm_instance))
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
 
@@ -752,7 +752,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     mysql_check._statement_metrics._job_loop_future.result()
     for job in ['statement-metrics', 'statement-samples']:
         aggregator.assert_metric(
-            "dd.mysql.async_job.inactive_stop", tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job]
+            "dd.mysql.async_job.inactive_stop", tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job]
         )
 
 
@@ -774,12 +774,22 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     assert mysql_check._statement_metrics._db is None, "metrics db connection should be gone"
     for job in ['statement-metrics', 'statement-samples']:
         aggregator.assert_metric(
-            "dd.mysql.async_job.cancel", tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job]
+            "dd.mysql.async_job.cancel", tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job]
         )
 
 
 def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance['tags'] + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
+    return dbm_instance.get('tags', []) + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
+
+
+# the inactive job metrics are emitted from the main integrations
+# directly to metrics-intake, so they should also be properly tagged with a resource
+def _expected_dbm_job_err_tags(dbm_instance):
+    return dbm_instance['tags'] + [
+        'port:{}'.format(common.PORT),
+        'server:{}'.format(common.HOST),
+        'dd.internal.resource:database_instance:stubbed.hostname',
+    ]
 
 
 @pytest.mark.parametrize("statement_samples_enabled", [True, False])
