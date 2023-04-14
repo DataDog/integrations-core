@@ -440,12 +440,13 @@ class PostgreSql(AgentCheck):
             conn = psycopg2.connect(connection_string)
         else:
             password = self._config.password
-            if self._config.aws.iam_profile:
+            aws_iam_profile = self._config.cloud_metadata.get('aws', {}).get('iam_profile', None)
+            if aws_iam_profile is not None:
                 password = aws.generate_rds_iam_token(
                     host=self._config.host,
                     username=self._config.user,
                     port=self._config.port,
-                    profile=self._config.aws.iam_profile,
+                    profile=aws_iam_profile,
                 )
 
             args = {
