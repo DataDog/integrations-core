@@ -93,8 +93,9 @@ def changelog(
     if initial:
         # For initial releases, just keep the ddev generated CHANGELOG but update the date to today
         for idx, line in enumerate(old):
-            if "## 1.0.0" in line:
-                old[idx] = f"## 1.0.0 {date.today()}\n"
+            if line.startswith("## 1.0.0"):
+                old[idx] = f"## 1.0.0 / {date.today()}\n"
+                break
         write_result(dry_run, changelog_path, ''.join(old), num_changes=1)
         return
 
