@@ -78,9 +78,10 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, instance_complex):
+def test_e2e(dd_agent_check, dd_run_check, instance_complex):
     aggregator = dd_agent_check(instance_complex)
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
+    dd_run_check(mysql_check)
     _assert_complex_config(aggregator, hostname=mysql_check.resolved_hostname)  # Do not assert hostname
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
