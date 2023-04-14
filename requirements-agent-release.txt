@@ -53,7 +53,7 @@ datadog-fluentd==2.2.0
 datadog-foundationdb==1.2.0
 datadog-gearmand==2.3.0; sys_platform != 'win32'
 datadog-gitlab-runner==3.3.2
-datadog-gitlab==5.3.2
+datadog-gitlab==6.0.0
 datadog-glusterfs==1.5.0; sys_platform == 'linux2'
 datadog-go-expvar==2.2.0
 datadog-gunicorn==2.3.1; sys_platform != 'win32'
