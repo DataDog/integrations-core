@@ -1,5 +1,9 @@
 # CHANGELOG - network
 
+## 2.9.4 / 2023-04-14
+
+* [Fixed] Remove `distutils` dependency from python 3 version of the check. See [#14245](https://github.com/DataDog/integrations-core/pull/14245).
+
 ## 2.9.3 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Fix network check for solaris. See [#13319](https://github.com/DataDog/integrations-core/pull/13319).
