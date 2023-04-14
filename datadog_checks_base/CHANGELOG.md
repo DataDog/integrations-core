@@ -5,7 +5,7 @@
 * [Added] Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).
 * [Added] Update redis to 4.5.4. See [#14270](https://github.com/DataDog/integrations-core/pull/14270).
 * [Fixed] Fix duplicate events bug. See [#14020](https://github.com/DataDog/integrations-core/pull/14020).
-* [Changed] Revamp Kafka consumer check. See [#13918](https://github.com/DataDog/integrations-core/pull/13918).
+* [Changed] Replace `kafka-python` dependency with `confluent-kafka-python`. See [#13918](https://github.com/DataDog/integrations-core/pull/13918).
 
 ## 30.2.0 / 2023-03-07
 
