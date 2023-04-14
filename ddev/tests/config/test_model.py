@@ -4,7 +4,6 @@
 import os
 
 import pytest
-
 from ddev.config.model import ConfigurationError, RootConfig
 
 

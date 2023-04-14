@@ -1,3 +1,8 @@
+## Datadog Agent version [7.43.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7431)
+
+* datadog_checks_base [30.0.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Snowflake [4.5.1](https://github.com/DataDog/integrations-core/blob/master/snowflake/CHANGELOG.md)
+
 ## Datadog Agent version [7.43.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7430)
 
 * Amazon Kafka [3.2.3](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
@@ -751,7 +756,6 @@
 * HDFS Namenode [2.2.1](https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/CHANGELOG.md)
 * Hive [1.7.2](https://github.com/DataDog/integrations-core/blob/master/hive/CHANGELOG.md)
 * HiveMQ [1.5.2](https://github.com/DataDog/integrations-core/blob/master/hivemq/CHANGELOG.md)
-* HTTP [6.1.2](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
 * Hudi [2.0.1](https://github.com/DataDog/integrations-core/blob/master/hudi/CHANGELOG.md)
 * HyperV [1.5.0](https://github.com/DataDog/integrations-core/blob/master/hyperv/CHANGELOG.md)
 * IBM Db2 [1.9.1](https://github.com/DataDog/integrations-core/blob/master/ibm_db2/CHANGELOG.md)
@@ -882,7 +886,7 @@
 * HDFS Namenode [2.2.0](https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/CHANGELOG.md)
 * Hive [1.7.1](https://github.com/DataDog/integrations-core/blob/master/hive/CHANGELOG.md)
 * HiveMQ [1.5.1](https://github.com/DataDog/integrations-core/blob/master/hivemq/CHANGELOG.md)
-* HTTP [6.1.2-rc.1](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
+* HTTP [6.1.2](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
 * Hudi [2.0.0](https://github.com/DataDog/integrations-core/blob/master/hudi/CHANGELOG.md) **BREAKING CHANGE**
 * IBM Db2 [1.9.0](https://github.com/DataDog/integrations-core/blob/master/ibm_db2/CHANGELOG.md)
 * IBM i [1.1.0](https://github.com/DataDog/integrations-core/blob/master/ibm_i/CHANGELOG.md)

@@ -2811,6 +2811,7 @@ def test_cisco_asr_1001x(aggregator):
         )
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_cisco_asr_9001(aggregator):
@@ -2867,6 +2868,7 @@ def test_cisco_asr_9001(aggregator):
             tags=common_tags + ['ipversion:ipv6', 'interface:45'],
         )
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_cisco_asr_9901(aggregator):
@@ -2883,6 +2885,7 @@ def test_cisco_asr_9901(aggregator):
     _check_common_asr(aggregator, common_tags + ['interface:eth0'])
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def _check_common_asr(aggregator, tags):

@@ -115,7 +115,7 @@ def test_db_exists(get_cursor, mock_connect, instance_docker_defaults, dd_run_ch
 
 def test_autodiscovery_matches_all_by_default(instance_autodiscovery):
     fetchall_results, mock_cursor = _mock_database_list()
-    all_dbs = set([Database(r.name) for r in fetchall_results])
+    all_dbs = {Database(r.name) for r in fetchall_results}
     # check base case of default filters
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     check.autodiscover_databases(mock_cursor)
@@ -124,7 +124,7 @@ def test_autodiscovery_matches_all_by_default(instance_autodiscovery):
 
 def test_azure_autodiscovery_matches_all_by_default(instance_autodiscovery):
     fetchall_results, mock_cursor = _mock_database_list_azure()
-    all_dbs = set([Database(r.name, r.physical_database_name) for r in fetchall_results])
+    all_dbs = {Database(r.name, r.physical_database_name) for r in fetchall_results}
 
     # check base case of default filters
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
@@ -197,7 +197,7 @@ def test_autodiscovery_exclude_override(instance_autodiscovery):
     instance_autodiscovery['autodiscovery_exclude'] = ['.*2020db$', 'm.*']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     check.autodiscover_databases(mock_cursor)
-    assert check.databases == set([Database("tempdb")])
+    assert check.databases == {Database("tempdb")}
 
 
 def test_azure_autodiscovery_exclude_override(instance_autodiscovery):
@@ -206,7 +206,7 @@ def test_azure_autodiscovery_exclude_override(instance_autodiscovery):
     instance_autodiscovery['autodiscovery_exclude'] = ['.*2020db$', 'm.*']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     check.autodiscover_databases(mock_cursor)
-    assert check.databases == set([Database("tempdb", "tempdb")])
+    assert check.databases == {Database("tempdb", "tempdb")}
 
 
 @pytest.mark.parametrize(
@@ -306,8 +306,9 @@ def test_set_default_driver_conf():
 def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
-    expected_tags = instance_docker.get('tags', []) + ['sqlserver_host:{}'.format(DOCKER_SERVER), 'db:master']
-    assert_metrics(aggregator, expected_tags, hostname=sqlserver_check.resolved_hostname)
+    check_tags = instance_docker.get('tags', [])
+    expected_tags = check_tags + ['sqlserver_host:{}'.format(DOCKER_SERVER), 'db:master']
+    assert_metrics(aggregator, check_tags, expected_tags, hostname=sqlserver_check.resolved_hostname)
 
 
 SQL_SERVER_2012_VERSION_EXAMPLE = """\

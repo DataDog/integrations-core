@@ -12,11 +12,11 @@
     "title": "Kubernetes State Core",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::Mac OS",
-      "Supported OS::Windows",
+      "Category::Containers",
       "Category::Orchestration",
-      "Category::Containers"
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows"
     ]
   },
   "author": {

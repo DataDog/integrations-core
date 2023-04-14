@@ -19,7 +19,7 @@ datadog-cassandra-nodetool==1.11.0
 datadog-cassandra==1.16.0
 datadog-ceph==2.7.0; sys_platform != 'win32'
 datadog-cert-manager==3.0.0
-datadog-checks-base==30.1.0
+datadog-checks-base==30.2.0
 datadog-checks-dependency-provider==1.3.0
 datadog-checks-downloader==4.1.0
 datadog-cilium==2.3.0
@@ -36,7 +36,7 @@ datadog-couch==5.2.0
 datadog-couchbase==2.2.0
 datadog-crio==2.3.0
 datadog-datadog-cluster-agent==2.5.0
-datadog-directory==1.14.0
+datadog-directory==1.14.2
 datadog-disk==4.9.0
 datadog-dns-check==2.3.0
 datadog-dotnetclr==1.13.0; sys_platform == 'win32'
@@ -109,7 +109,7 @@ datadog-nginx-ingress-controller==2.3.0
 datadog-nginx==5.4.0
 datadog-openldap==1.10.0
 datadog-openmetrics==2.3.0
-datadog-openstack-controller==2.1.4
+datadog-openstack-controller==3.0.0
 datadog-openstack==1.13.1
 datadog-oracle==4.0.1
 datadog-pan-firewall==1.1.0
@@ -124,8 +124,8 @@ datadog-process==2.3.2
 datadog-prometheus==3.4.0
 datadog-proxysql==4.0.0
 datadog-pulsar==1.2.0
-datadog-rabbitmq==4.0.0
-datadog-redisdb==4.5.3
+datadog-rabbitmq==4.0.1
+datadog-redisdb==4.6.0
 datadog-rethinkdb==2.3.1
 datadog-riak==3.2.0
 datadog-riakcs==2.9.0
@@ -139,7 +139,7 @@ datadog-snowflake==4.5.1
 datadog-solr==1.11.1
 datadog-sonarqube==2.2.3
 datadog-spark==3.1.3
-datadog-sqlserver==11.0.0
+datadog-sqlserver==11.0.2
 datadog-squid==2.2.0
 datadog-ssh-check==2.3.3
 datadog-statsd==1.10.0

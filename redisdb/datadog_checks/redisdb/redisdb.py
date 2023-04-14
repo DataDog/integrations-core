@@ -173,7 +173,7 @@ class Redis(AgentCheck):
 
                 # Set a default timeout (in seconds) if no timeout is specified in the instance config
                 instance_config['socket_timeout'] = instance_config.get('socket_timeout', 5)
-                connection_params = dict((k, instance_config[k]) for k in list_params if k in instance_config)
+                connection_params = {k: instance_config[k] for k in list_params if k in instance_config}
                 # If caching is disabled, we overwrite the dictionary value so the old connection
                 # will be closed as soon as the corresponding Python object gets garbage collected
                 self.connections[key] = redis.Redis(**connection_params)

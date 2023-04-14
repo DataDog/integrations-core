@@ -46,7 +46,6 @@ IGNORED_DEPS = {
     'lz4',  # Breaking clickhouse tests
     'pyodbc',  # Breaking sqlserver tests
     'psutil',  # Breaking disk tests
-    'keystoneauth1',  # Running our update command actually downgrades this 5.0.0 -> 3.18.0.
     'aerospike',  # v8+ breaks agent build.
 }
 
@@ -192,7 +191,7 @@ async def scrape_version_data(urls):
             latest_py3 = None
 
             versions = []
-            for parsed_version, artifacts in reversed(sorted(filter_releases(releases))):
+            for parsed_version, artifacts in sorted(filter_releases(releases), reverse=True):
                 version = str(parsed_version)
                 versions.append(version)
 
