@@ -82,13 +82,13 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, dd_default_hostname, instance_complex):
     aggregator = dd_agent_check(instance_complex)
-    _assert_complex_config(aggregator, hostname=dd_default_hostname)
+    _assert_complex_config(aggregator, [], hostname=dd_default_hostname)
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
     )
 
 
-def _assert_complex_config(aggregator, expected_internal_tags=[], hostname='stubbed.hostname'):
+def _assert_complex_config(aggregator, expected_internal_tags, hostname='stubbed.hostname'):
     # Test service check
     aggregator.assert_service_check(
         'mysql.can_connect',
@@ -125,8 +125,14 @@ def _assert_complex_config(aggregator, expected_internal_tags=[], hostname='stub
         aggregator.assert_service_check(
             'mysql.replication.group.status',
             status=MySql.OK,
-            tags=tags.METRIC_TAGS + expected_internal_tags
-                 + ['port:' + str(common.PORT), 'channel_name:group_replication_applier', 'member_role:PRIMARY', 'member_state:ONLINE'],
+            tags=tags.METRIC_TAGS
+            + expected_internal_tags
+            + [
+                'port:' + str(common.PORT),
+                'channel_name:group_replication_applier',
+                'member_role:PRIMARY',
+                'member_state:ONLINE',
+            ],
             count=1,
         )
 
@@ -149,8 +155,12 @@ def _assert_complex_config(aggregator, expected_internal_tags=[], hostname='stub
             aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + expected_internal_tags + ['schema:mysql'], count=1)
         elif mname == 'mysql.info.schema.size':
             aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + expected_internal_tags + ['schema:testdb'], count=1)
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + expected_internal_tags + ['schema:information_schema'], count=1)
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + expected_internal_tags + ['schema:performance_schema'], count=1)
+            aggregator.assert_metric(
+                mname, tags=tags.METRIC_TAGS + expected_internal_tags + ['schema:information_schema'], count=1
+            )
+            aggregator.assert_metric(
+                mname, tags=tags.METRIC_TAGS + expected_internal_tags + ['schema:performance_schema'], count=1
+            )
         else:
             aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + expected_internal_tags, at_least=0)
 
