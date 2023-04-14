@@ -20,6 +20,8 @@ from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .config import PostgresConfig
 from .util import (
+    AWS_RDS_HOSTNAME_SUFFIX,
+    AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
     CONNECTION_METRICS,
     FUNCTION_METRICS,
     QUERY_PG_REPLICATION_SLOTS,
@@ -66,6 +68,9 @@ class PostgreSql(AgentCheck):
                 "rather than the now deprecated custom_metrics"
             )
         self._config = PostgresConfig(self.instance)
+        self.cloud_metadata = self._config.cloud_metadata
+        self.tags = self._config.tags
+        self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
         self.metrics_cache = PostgresMetricsCache(self._config)
@@ -74,13 +79,45 @@ class PostgreSql(AgentCheck):
         self._relations_manager = RelationsManager(self._config.relations)
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
+        self.check_initializations.append(self.set_resolved_hostname_metadata)
         # map[dbname -> psycopg connection]
         self._db_pool = {}
         self._db_pool_lock = threading.Lock()
-
-        self.tags_without_db = [t for t in copy.copy(self._config.tags) if not t.startswith("db:")]
+        self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
 
         self._dynamic_queries = None
+
+    def set_resource_tags(self):
+        if self.cloud_metadata.get("gcp") is not None:
+            self.tags.append(
+                "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
+                    self.cloud_metadata.get("gcp")["project_id"], self.cloud_metadata.get("gcp")["instance_id"]
+                )
+            )
+        if self.cloud_metadata.get("aws") is not None:
+            self.tags.append(
+                "dd.internal.resource:aws_rds_instance:{}".format(
+                    self.cloud_metadata.get("aws")["instance_endpoint"],
+                )
+            )
+        elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
+            # allow for detecting if the host is an RDS host, and emit
+            # the resource properly even if the `aws` config is unset
+            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
+        if self.cloud_metadata.get("azure") is not None:
+            deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
+            # some `deployment_type`s map to multiple `resource_type`s
+            resource_type = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE.get(deployment_type)
+            if resource_type:
+                self.tags.append(
+                    "dd.internal.resource:{}:{}".format(resource_type, self.cloud_metadata.get("azure")["name"])
+                )
+        # finally, emit a `database_instance` resource for this instance
+        self.tags.append(
+            "dd.internal.resource:database_instance:{}".format(
+                self.resolved_hostname,
+            )
+        )
 
     def _new_query_executor(self, queries):
         return QueryExecutor(
@@ -147,7 +184,7 @@ class PostgreSql(AgentCheck):
 
     def _get_service_check_tags(self):
         service_check_tags = []
-        service_check_tags.extend(self._config.tags)
+        service_check_tags.extend(self.tags)
         return list(service_check_tags)
 
     def _get_replication_role(self):
@@ -230,8 +267,16 @@ class PostgreSql(AgentCheck):
                 self._resolved_hostname = self.resolve_db_host()
             else:
                 self._resolved_hostname = self.agent_hostname
-        self.set_metadata('resolved_hostname', self._resolved_hostname)
         return self._resolved_hostname
+
+    def set_resolved_hostname_metadata(self):
+        """
+        set_resolved_hostname_metadata cannot be invoked in the __init__ method because it calls self.set_metadata.
+        self.set_metadata can only be called successfully after the __init__ method has completed because
+        it relies on the metadata manager, which in turn relies on having a check_id set. The Agent only
+        sets the check_id after initialization has completed.
+        """
+        self.set_metadata('resolved_hostname', self._resolved_hostname)
 
     @property
     def agent_hostname(self):
@@ -495,7 +540,7 @@ class PostgreSql(AgentCheck):
             self.count(
                 "dd.postgres.error",
                 1,
-                tags=self._config.tags + ["error:load-pg-settings"] + self._get_debug_tags(),
+                tags=self.tags + ["error:load-pg-settings"] + self._get_debug_tags(),
                 hostname=self.resolved_hostname,
             )
 
@@ -641,7 +686,7 @@ class PostgreSql(AgentCheck):
             self.warning(warning)
 
     def check(self, _):
-        tags = copy.copy(self._config.tags)
+        tags = copy.copy(self.tags)
         # Collect metrics
         try:
             # Check version

@@ -42,6 +42,7 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
         'slot_persistence:permanent',
         'slot_state:inactive',
         'slot_type:physical',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
     expected_phys3_tags = pg_instance['tags'] + [
         'port:{}'.format(pg_instance['port']),
@@ -49,6 +50,7 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
         'slot_persistence:temporary',
         'slot_state:active',
         'slot_type:physical',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
     expected_repslot_tags = pg_instance['tags'] + [
         'port:{}'.format(pg_instance['port']),
@@ -56,6 +58,7 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
         'slot_persistence:permanent',
         'slot_state:active',
         'slot_type:physical',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
 
     assert_metric_at_least(
@@ -92,6 +95,7 @@ def test_logical_replication_slots(aggregator, integration_check, pg_instance):
         'slot_persistence:permanent',
         'slot_state:inactive',
         'slot_type:logical',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
     # Both should be in the past
     assert_metric_at_least(
