@@ -126,7 +126,6 @@ def _assert_complex_config(aggregator, expected_internal_tags, hostname='stubbed
             'mysql.replication.group.status',
             status=MySql.OK,
             tags=tags.METRIC_TAGS
-            + expected_internal_tags
             + [
                 'port:' + str(common.PORT),
                 'channel_name:group_replication_applier',
