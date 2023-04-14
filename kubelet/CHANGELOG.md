@@ -3,7 +3,7 @@
 ## 7.6.0 / 2023-04-14
 
 * [Added] Adds container memory usage metrics from /stats/summary and kubelet memory usage. See [#14150](https://github.com/DataDog/integrations-core/pull/14150).
-* [Fixed] [Kubelet] Support Ephemeral Percistent volume claim. See [#14194](https://github.com/DataDog/integrations-core/pull/14194).
+* [Fixed] Support Ephemeral Percistent volume claim. See [#14194](https://github.com/DataDog/integrations-core/pull/14194).
 
 ## 7.5.2 / 2022-12-09 / Agent 7.42.0
 
