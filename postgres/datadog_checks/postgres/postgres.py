@@ -13,6 +13,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
+from datadog_checks.postgres import aws
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import INDEX_BLOAT, RELATION_METRICS, TABLE_BLOAT, RelationsManager
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
@@ -438,10 +439,19 @@ class PostgreSql(AgentCheck):
                 connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
             conn = psycopg2.connect(connection_string)
         else:
+            password = self._config.password
+            if self._config.aws.iam_profile:
+                password = aws.generate_rds_iam_token(
+                    host=self._config.host,
+                    username=self._config.user,
+                    port=self._config.port,
+                    profile=self._config.aws.iam_profile,
+                )
+
             args = {
                 'host': self._config.host,
                 'user': self._config.user,
-                'password': self._config.password,
+                'password': password,
                 'database': dbname,
                 'sslmode': self._config.ssl_mode,
                 'application_name': self._config.application_name,
