@@ -20,11 +20,11 @@ class KafkaConfig:
             instance.get('monitor_all_broker_highwatermarks', False)
         )
         self._consumer_groups = instance.get('consumer_groups', {})
-
-        self._kafka_connect_str = instance.get('kafka_connect_str')
         self._consumer_groups_regex = instance.get('consumer_groups_regex', {})
 
         self._consumer_groups_compiled_regex = self._compile_regex(self._consumer_groups_regex)
+
+        self._kafka_connect_str = instance.get('kafka_connect_str')
         self._kafka_version = instance.get('kafka_client_api_version')
         if isinstance(self._kafka_version, str):
             self._kafka_version = tuple(map(int, self._kafka_version.split(".")))

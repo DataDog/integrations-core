@@ -94,8 +94,8 @@ instances:
     #   <CONSUMER_NAME_3>: {}
 
     ## @param monitor_unlisted_consumer_groups - boolean - optional - default: false
-    ## Setting monitor_unlisted_consumer_groups to `true` tells the check to discover all consumer groups
-    ## and fetch all their known offsets. If this is not set to true, you must specify consumer_groups.
+    ## Setting `monitor_unlisted_consumer_groups` to `true` tells the check to discover all consumer groups
+    ## and fetch all their known offsets. If this is not set to true, you must specify `consumer_groups`.
     ##
     ## WARNING: This feature requires that your Kafka brokers be version >= 0.10.2. It is impossible to
     ## support this feature on older brokers because they do not provide a way to determine the mapping
