@@ -6,13 +6,12 @@ import copy
 import mock
 import psycopg2
 import pytest
+from datadog_checks.postgres import PostgreSql, util
+from datadog_checks.postgres.version_utils import VersionUtils
 from mock import MagicMock, PropertyMock
 from pytest import fail
 from semver import VersionInfo
 from six import iteritems
-
-from datadog_checks.postgres import PostgreSql, util
-from datadog_checks.postgres.version_utils import VersionUtils
 
 from .common import PORT
 
@@ -329,7 +328,6 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'db:datadog_test',
                 'port:5432',
                 'foo:bar',
-                'dd.internal.resource:database_instance:stubbed.hostname',
             },
         ),
         (
@@ -339,7 +337,6 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'foo:bar',
                 'port:5432',
                 'server:localhost',
-                'dd.internal.resource:database_instance:stubbed.hostname',
             },
         ),
     ],

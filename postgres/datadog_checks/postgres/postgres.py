@@ -8,32 +8,27 @@ from contextlib import closing
 from time import time
 
 import psycopg2
-from six import iteritems
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
-from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
+from datadog_checks.base.utils.db.utils import \
+    resolve_db_host as agent_host_resolver
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
-from datadog_checks.postgres.relationsmanager import INDEX_BLOAT, RELATION_METRICS, TABLE_BLOAT, RelationsManager
+from datadog_checks.postgres.relationsmanager import (INDEX_BLOAT,
+                                                      RELATION_METRICS,
+                                                      TABLE_BLOAT,
+                                                      RelationsManager)
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
+from six import iteritems
 
 from .config import PostgresConfig
-from .util import (
-    AWS_RDS_HOSTNAME_SUFFIX,
-    AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
-    CONNECTION_METRICS,
-    FUNCTION_METRICS,
-    QUERY_PG_REPLICATION_SLOTS,
-    QUERY_PG_STAT_DATABASE,
-    QUERY_PG_STAT_DATABASE_CONFLICTS,
-    QUERY_PG_STAT_WAL_RECEIVER,
-    REPLICATION_METRICS,
-    SLRU_METRICS,
-    DatabaseConfigurationError,  # noqa: F401
-    fmt,
-    get_schema_field,
-)
+from .util import DatabaseConfigurationError  # noqa: F401
+from .util import (AWS_RDS_HOSTNAME_SUFFIX,
+                   AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE, CONNECTION_METRICS,
+                   FUNCTION_METRICS, QUERY_PG_REPLICATION_SLOTS,
+                   QUERY_PG_STAT_DATABASE, QUERY_PG_STAT_DATABASE_CONFLICTS,
+                   QUERY_PG_STAT_WAL_RECEIVER, REPLICATION_METRICS,
+                   SLRU_METRICS, fmt, get_schema_field)
 from .version_utils import V9, V9_2, V10, V13, VersionUtils
 
 try:
@@ -184,7 +179,7 @@ class PostgreSql(AgentCheck):
 
     def _get_service_check_tags(self):
         service_check_tags = []
-        service_check_tags.extend(self.tags)
+        service_check_tags.extend([tag for tag in self.tags if not tag.startswith("dd.internal")])
         return list(service_check_tags)
 
     def _get_replication_role(self):
@@ -703,8 +698,9 @@ class PostgreSql(AgentCheck):
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
             if self._config.dbm_enabled:
-                self.statement_metrics.run_job_loop(tags)
-                self.statement_samples.run_job_loop(tags)
+                dbm_tags = [tag for tag in tags if not tag.startswith("dd.internal")]
+                self.statement_metrics.run_job_loop(dbm_tags)
+                self.statement_samples.run_job_loop(dbm_tags)
             if self._config.collect_wal_metrics:
                 self._collect_wal_metrics(tags)
 

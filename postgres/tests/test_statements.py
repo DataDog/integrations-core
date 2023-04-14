@@ -11,16 +11,17 @@ from concurrent.futures.thread import ThreadPoolExecutor
 import mock
 import psycopg2
 import pytest
-from dateutil import parser
-from semver import VersionInfo
-from six import string_types
-
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import UTC
-from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState
-from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
+from datadog_checks.postgres.statement_samples import (
+    DBExplainError, StatementTruncationState)
+from datadog_checks.postgres.statements import (
+    PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS)
+from dateutil import parser
+from semver import VersionInfo
+from six import string_types
 
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
 
@@ -349,14 +350,6 @@ def _expected_dbm_instance_tags(dbm_instance):
     return dbm_instance['tags'] + [
         'port:{}'.format(PORT),
         'db:{}'.format(dbm_instance['dbname']),
-    ]
-
-
-def _expected_dbm_job_err_tags(dbm_instance):
-    return dbm_instance['tags'] + [
-        'port:{}'.format(PORT),
-        'db:{}'.format(dbm_instance['dbname']),
-        'dd.internal.resource:database_instance:stubbed.hostname',
     ]
 
 
@@ -1382,7 +1375,7 @@ def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
             "dd.postgres.async_job.inactive_stop",
-            tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job],
+            tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job],
         )
 
 
@@ -1404,7 +1397,7 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
             "dd.postgres.async_job.cancel",
-            tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job],
+            tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job],
         )
 
 
@@ -1427,7 +1420,7 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     check.statement_samples._job_loop_future.result()
     aggregator.assert_metric(
         "dd.postgres.async_job.error",
-        tags=_expected_dbm_job_err_tags(dbm_instance)
+        tags=_expected_dbm_instance_tags(dbm_instance)
         + [
             'job:query-samples',
             "error:database-<class 'psycopg2.errors.UndefinedTable'>",

@@ -7,33 +7,18 @@ import time
 import mock
 import psycopg2
 import pytest
-from semver import VersionInfo
-
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.util import PartialFormatter, fmt
+from semver import VersionInfo
 
-from .common import (
-    COMMON_METRICS,
-    DB_NAME,
-    DBM_MIGRATED_METRICS,
-    HOST,
-    PASSWORD,
-    PORT,
-    POSTGRES_VERSION,
-    USER,
-    assert_metric_at_least,
-    check_activity_metrics,
-    check_bgw_metrics,
-    check_common_metrics,
-    check_conflict_metrics,
-    check_connection_metrics,
-    check_db_count,
-    check_replication_slots,
-    check_slru_metrics,
-    check_stat_replication,
-    check_wal_receiver_metrics,
-    requires_static_version,
-)
+from .common import (COMMON_METRICS, DB_NAME, DBM_MIGRATED_METRICS, HOST,
+                     PASSWORD, PORT, POSTGRES_VERSION, USER,
+                     assert_metric_at_least, check_activity_metrics,
+                     check_bgw_metrics, check_common_metrics,
+                     check_conflict_metrics, check_connection_metrics,
+                     check_db_count, check_replication_slots,
+                     check_slru_metrics, check_stat_replication,
+                     check_wal_receiver_metrics, requires_static_version)
 from .utils import requires_over_10, requires_over_14
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
@@ -208,7 +193,6 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     expected_tags = pg_instance['tags'] + [
         'port:{}'.format(PORT),
         'db:{}'.format(DB_NAME),
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
     check.check(pg_instance)
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags)
@@ -502,28 +486,30 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         else:
             assert resolve_db_host.called == dbm_enabled, 'Expected resolve_db_host.called to be ' + str(dbm_enabled)
 
-    expected_tags_no_db = pg_instance['tags'] + [
+    base_tags = pg_instance['tags'] + [
         'server:{}'.format(HOST),
         'port:{}'.format(PORT),
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
-    expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']
-    expected_activity_tags = expected_tags_with_db + ['app:datadog-agent', 'user:datadog']
+
+    expected_connection_metric_tags = base_tags + ['dd.internal.resource:database_instance:{}'.format(check.resolved_hostname)]
+    expected_service_check_tags = base_tags + ['db:datadog_test', 'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname)]
+    expected_activity_tags = base_tags + ['db:datadog_test', 'app:datadog-agent', 'user:datadog']
+
     c_metrics = COMMON_METRICS
     if not dbm_enabled:
         c_metrics = c_metrics + DBM_MIGRATED_METRICS
     for name in c_metrics:
-        aggregator.assert_metric(name, count=1, tags=expected_tags_with_db, hostname=expected_hostname)
+        aggregator.assert_metric(name, count=1, tags=expected_service_check_tags, hostname=expected_hostname)
     check_activity_metrics(aggregator, tags=expected_activity_tags, hostname=expected_hostname)
 
     for name in CONNECTION_METRICS:
-        aggregator.assert_metric(name, count=1, tags=expected_tags_no_db, hostname=expected_hostname)
+        aggregator.assert_metric(name, count=1, tags=expected_connection_metric_tags, hostname=expected_hostname)
 
     aggregator.assert_service_check(
         'postgres.can_connect',
         count=1,
         status=PostgreSql.OK,
-        tags=expected_tags_with_db,
+        tags=expected_service_check_tags,
         hostname=expected_hostname,
     )
 
