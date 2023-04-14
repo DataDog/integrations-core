@@ -1,4 +1,5 @@
 # Profile for Cisco catalyst WLC
+# This profile is only compatible with the core SNMP integration
 
 extends:
   - _base.yaml

@@ -68,12 +68,16 @@ from .metrics import (
 
 pytestmark = common.snmp_integration_only
 
+IGNORED_PROFILES_PYTHON_INTEGRATION_TESTS = {"cisco-catalyst-wlc", "cisco-legacy-wlc"}
+
 
 def test_load_profiles(caplog):
     instance = common.generate_instance_config([])
     check = SnmpCheck('snmp', {}, [instance])
     caplog.at_level(logging.WARNING)
     for name, profile in check.profiles.items():
+        if name in IGNORED_PROFILES_PYTHON_INTEGRATION_TESTS:
+            continue
         try:
             check._config.refresh_with_profile(profile)
         except ConfigurationError as e:
@@ -2914,91 +2918,3 @@ def _check_common_asr(aggregator, tags):
     for metric in RATE_METRICS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags)
 
-
-@pytest.mark.usefixtures("dd_environment")
-def test_cisco_legacy_wlc(aggregator):
-    run_profile_check('cisco-5500-wlc', profile_name='cisco-legacy-wlc')
-    common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-legacy-wlc', 'device_vendor:cisco', 'snmp_host:DDOGWLC']
-    common.assert_common_metrics(aggregator, common_tags)
-
-    SYSTEM_GAUGES = ["cpu.usage", "memory.free", "memory.total"]
-
-    for metric in SYSTEM_GAUGES:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
-
-    if_tags = ["interface:If1"] + common_tags
-
-    for metric in IF_COUNTS:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags)
-
-    for metric in IF_GAUGES:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags)
-
-    for metric in IF_RATES:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags)
-
-    for metric in IF_SCALAR_GAUGE:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
-
-    for metric in IF_BANDWIDTH_USAGE:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags)
-
-    TCP_COUNTS = [
-        'tcpActiveOpens',
-        'tcpPassiveOpens',
-        'tcpAttemptFails',
-        'tcpEstabResets',
-        'tcpRetransSegs',
-        'tcpInErrs',
-        'tcpOutRsts',
-    ]
-
-    for metric in TCP_COUNTS:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
-
-    for metric in TCP_GAUGES:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
-
-    UDP_COUNTS = ['udpNoPorts', 'udpInErrors']
-
-    for metric in UDP_COUNTS:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
-
-    common_ap_tags = [
-        'ap_location:default location',
-        'ap_name:DD-AP-1',
-        'ap_ip_address:1.1.1.1',
-    ] + common_tags
-
-    AP_METRICS = ["bsnAPOperationStatus", "bsnAPAdminStatus"]
-
-    for metric in AP_METRICS:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_ap_tags)
-
-    common_if_ap_tags = ["slot_id:0"] + common_ap_tags
-
-    AP_IF_GAUGE_METRICS = [
-        "bsnAPIfLoadChannelUtilization",
-        "bsnAPIfLoadRxUtilization",
-        "bsnAPIfLoadTxUtilization",
-        "bsnAPIfOperStatus",
-        "bsnAPIfPoorSNRClients",
-    ]
-
-    for metric in AP_IF_GAUGE_METRICS:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_if_ap_tags)
-
-    aggregator.assert_metric('snmp.bsnApIfNoOfUsers', metric_type=aggregator.RATE, tags=common_if_ap_tags)
-
-    common_wlan_tags = ["ssid:DD-1", "wlan_index:17"] + common_tags
-
-    AP_WLAN_GAUGE_METRICS = ["bsnDot11EssAdminStatus", "bsnDot11EssRowStatus"]
-
-    for metric in AP_WLAN_GAUGE_METRICS:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_wlan_tags)
-
-    aggregator.assert_metric(
-        'snmp.bsnDot11EssNumberOfMobileStations', metric_type=aggregator.RATE, tags=common_wlan_tags
-    )
-
-    aggregator.assert_all_metrics_covered()

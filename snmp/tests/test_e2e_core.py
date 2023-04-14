@@ -372,3 +372,112 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
     assert if_in_error_metrics[0].value > 0
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_e2e_cisco_legacy_wlc(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'cisco-5500-wlc',
+        }
+    )
+    config['init_config']['loader'] = 'core'
+    instance = config['instances'][0]
+
+    ip_address = get_container_ip(SNMP_CONTAINER_NAME)
+
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
+
+    tags = ['device_namespace:default', 'snmp_profile:cisco-legacy-wlc', 'device_vendor:cisco', 'snmp_host:DDOGWLC', 'snmp_device:' + ip_address]
+    common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
+
+    SYSTEM_GAUGES = ["cpu.usage", "memory.free", "memory.total", "memory.usage"]
+
+    for metric in SYSTEM_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+    if_tags = ["interface:If1"] + tags
+
+    for metric in metrics.IF_COUNTS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=if_tags)
+
+    for metric in metrics.IF_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags)
+
+    for metric in metrics.IF_RATES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags)
+
+    for metric in metrics.IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+    for metric in metrics.IF_BANDWIDTH_USAGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags)
+
+    custom_speed_tags = if_tags + ['speed_source:device']
+    for metric in metrics.IF_CUSTOM_SPEED_GAUGES:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=custom_speed_tags, count=2
+        )
+
+    TCP_COUNTS = [
+        'tcpActiveOpens',
+        'tcpPassiveOpens',
+        'tcpAttemptFails',
+        'tcpEstabResets',
+        'tcpRetransSegs',
+        'tcpInErrs',
+        'tcpOutRsts',
+    ]
+
+    for metric in TCP_COUNTS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags)
+
+    for metric in metrics.TCP_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+    UDP_COUNTS = ['udpNoPorts', 'udpInErrors']
+
+    for metric in UDP_COUNTS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags)
+
+    ap_tags = [
+        'ap_location:default location',
+        'ap_name:DD-AP-1',
+        'ap_ip_address:1.1.1.1',
+        'mac_address:  00 00 00 00 00 01',
+    ] + tags
+
+    ap_status_tags = ['ap_oper_status:associated',
+        'ap_admin_status:enable'] + ap_tags
+
+    aggregator.assert_metric('snmp.accessPoints'.format(metric), metric_type=aggregator.GAUGE, tags=ap_status_tags, value=1)
+
+    if_ap_tags = ["slot_id:0"] + ap_tags
+    if_ap_status_tags = ['ap_if_oper_status:up', 'ap_if_admin_status:enable'] + if_ap_tags
+
+    AP_IF_GAUGE_METRICS = [
+        "bsnAPIfLoadChannelUtilization",
+        "bsnAPIfLoadRxUtilization",
+        "bsnAPIfLoadTxUtilization",
+        "bsnAPIfPoorSNRClients",
+    ]
+
+    for metric in AP_IF_GAUGE_METRICS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_ap_tags)
+
+    aggregator.assert_metric('snmp.accessPointsIf'.format(metric), metric_type=aggregator.GAUGE, tags=if_ap_status_tags, value=1)
+
+    aggregator.assert_metric('snmp.bsnApIfNoOfUsers', metric_type=aggregator.GAUGE, tags=if_ap_tags)
+
+    wlan_tags = ["ssid:DD-1", "wlan_index:17"] + tags
+
+    wlan_status_tags = ['wlan_row_status:active', 'wlan_admin_status:enable'] + wlan_tags
+
+    aggregator.assert_metric('snmp.wlan'.format(metric), metric_type=aggregator.GAUGE, tags=wlan_status_tags, value=1)
+
+    aggregator.assert_metric(
+        'snmp.bsnDot11EssNumberOfMobileStations', metric_type=aggregator.GAUGE, tags=wlan_tags
+    )
+
+    aggregator.assert_all_metrics_covered()
