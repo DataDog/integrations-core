@@ -28,6 +28,7 @@ enum34,PyPI,BSD-3-Clause,Copyright Ethan Furman
 flup,Vendor,BSD-3-Clause,Copyright (c) 2005 Allan Saddi. All Rights Reserved.
 flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.com> All rights reserved."
 foundationdb,PyPI,Apache-2.0,Copyright 2017 FoundationDB
+freezegun,PyPI,Apache-2.0,Copyright 2012 Steve Pulec
 futures,PyPI,PSF,Copyright (c) 2015 Brian Quinlan
 gearman,PyPI,Apache-2.0,Copyright 2010 Yelp <python-gearman@yelp.com>
 gssapi,PyPI,ISC,"Copyright (c) 2014, The Python GSSAPI Team"

@@ -7,7 +7,12 @@ import os
 
 import mock
 import pytest
-from freezegun import freeze_time
+
+from six import PY3
+if PY3:
+    from freezegun import freeze_time
+else:
+    freeze_time = None
 
 from datadog_checks.dev.fs import read_file
 from datadog_checks.silk import SilkCheck
@@ -80,6 +85,7 @@ def test_malformed_event(aggregator, instance, dd_run_check, file, log_warning, 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.skipif(not PY3, reason="freezegun version not available on Python 2")
 def test_events_test(aggregator, dd_run_check, instance):
     # Freeze time when starting check to set initial time
     with freeze_time("2012-01-13"):
