@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from collections import defaultdict, namedtuple
-from datetime import datetime, date
+from datetime import date, datetime
 from io import StringIO
 
 import click
