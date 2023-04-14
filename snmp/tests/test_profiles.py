@@ -2917,4 +2917,3 @@ def _check_common_asr(aggregator, tags):
 
     for metric in RATE_METRICS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags)
-

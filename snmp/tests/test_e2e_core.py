@@ -389,7 +389,13 @@ def test_e2e_cisco_legacy_wlc(dd_agent_check):
 
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
-    tags = ['device_namespace:default', 'snmp_profile:cisco-legacy-wlc', 'device_vendor:cisco', 'snmp_host:DDOGWLC', 'snmp_device:' + ip_address]
+    tags = [
+        'device_namespace:default',
+        'snmp_profile:cisco-legacy-wlc',
+        'device_vendor:cisco',
+        'snmp_host:DDOGWLC',
+        'snmp_device:' + ip_address,
+    ]
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
 
     SYSTEM_GAUGES = ["cpu.usage", "memory.free", "memory.total", "memory.usage"]
@@ -448,10 +454,9 @@ def test_e2e_cisco_legacy_wlc(dd_agent_check):
         'mac_address:  00 00 00 00 00 01',
     ] + tags
 
-    ap_status_tags = ['ap_oper_status:associated',
-        'ap_admin_status:enable'] + ap_tags
+    ap_status_tags = ['ap_oper_status:associated', 'ap_admin_status:enable'] + ap_tags
 
-    aggregator.assert_metric('snmp.accessPoints'.format(metric), metric_type=aggregator.GAUGE, tags=ap_status_tags, value=1)
+    aggregator.assert_metric("snmp.accessPoints".format(), metric_type=aggregator.GAUGE, tags=ap_status_tags, value=1)
 
     if_ap_tags = ["slot_id:0"] + ap_tags
     if_ap_status_tags = ['ap_if_oper_status:up', 'ap_if_admin_status:enable'] + if_ap_tags
@@ -466,7 +471,9 @@ def test_e2e_cisco_legacy_wlc(dd_agent_check):
     for metric in AP_IF_GAUGE_METRICS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_ap_tags)
 
-    aggregator.assert_metric('snmp.accessPointsIf'.format(metric), metric_type=aggregator.GAUGE, tags=if_ap_status_tags, value=1)
+    aggregator.assert_metric(
+        "snmp.accessPointsIf".format(), metric_type=aggregator.GAUGE, tags=if_ap_status_tags, value=1
+    )
 
     aggregator.assert_metric('snmp.bsnApIfNoOfUsers', metric_type=aggregator.GAUGE, tags=if_ap_tags)
 
@@ -474,10 +481,8 @@ def test_e2e_cisco_legacy_wlc(dd_agent_check):
 
     wlan_status_tags = ['wlan_row_status:active', 'wlan_admin_status:enable'] + wlan_tags
 
-    aggregator.assert_metric('snmp.wlan'.format(metric), metric_type=aggregator.GAUGE, tags=wlan_status_tags, value=1)
+    aggregator.assert_metric("snmp.wlan".format(), metric_type=aggregator.GAUGE, tags=wlan_status_tags, value=1)
 
-    aggregator.assert_metric(
-        'snmp.bsnDot11EssNumberOfMobileStations', metric_type=aggregator.GAUGE, tags=wlan_tags
-    )
+    aggregator.assert_metric('snmp.bsnDot11EssNumberOfMobileStations', metric_type=aggregator.GAUGE, tags=wlan_tags)
 
     aggregator.assert_all_metrics_covered()
