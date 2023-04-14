@@ -15,7 +15,6 @@ import re
 import subprocess
 import sys
 from collections import defaultdict, namedtuple
-from fnmatch import fnmatch
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -34,18 +33,25 @@ JOB_LIMIT = 256
 
 # GitHub Actions' `paths-ignore` job filtering option requires that every changed path must match at least one of
 # the exclusion patterns, but we want any to cause that condition for the core repository to run all jobs
-SKIPPED_PATTERNS = (
-    'datadog_checks_base/datadog_checks/**',
-    'datadog_checks_dev/datadog_checks/dev/*.py',
+SKIPPED_PATTERN = re.compile(
+    r"""
+    datadog_checks_base/datadog_checks/.+
+  | datadog_checks_dev/datadog_checks/dev/[^/]+.py
+    """,
+    re.VERBOSE,
 )
-TESTABLE_FILE_PATTERNS = (
-    'assets/configuration/**/*',
-    'tests/**/*',
-    '*.py',
-    'hatch.toml',
-    'pyproject.toml',
+TESTABLE_FILE_PATTERN = re.compile(
+    r"""
+    assets/configuration/.+
+  | tests/.+
+  | [^/]+.py
+  | hatch.toml
+  | pyproject.toml
+    """,
+    re.VERBOSE,
 )
-NON_TESTABLE_FILES = {'auto_conf.yaml', 'agent_requirements.in'}
+AGENT_REQUIREMENTS_FILE = 'datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+NON_TESTABLE_FILES = {'auto_conf.yaml'}
 DISPLAY_ORDER_OVERRIDE = {
     _d: _i
     for _i, _d in enumerate(
@@ -128,10 +134,10 @@ def get_changed_targets(root: Path, *, ref: str, local: bool, verbose: bool) -> 
     if verbose:
         print('\n'.join(changed_files), file=sys.stderr)
 
-    if (root / 'datadog_checks_base').is_dir() and any(
-        fnmatch(str(root / changed_file), str(root / pattern))
-        for changed_file in changed_files
-        for pattern in SKIPPED_PATTERNS
+    if (
+        (root / 'datadog_checks_base').is_dir()
+        and AGENT_REQUIREMENTS_FILE not in changed_files
+        and any(SKIPPED_PATTERN.search(path) for path in changed_files)
     ):
         return []
 
@@ -141,6 +147,7 @@ def get_changed_targets(root: Path, *, ref: str, local: bool, verbose: bool) -> 
         if remaining_path:
             changed_directories[directory_name].append(remaining_path)
 
+    agent_requirements_file = root / AGENT_REQUIREMENTS_FILE
     targets = []
     for directory_name, files in changed_directories.items():
         directory = root / directory_name
@@ -149,9 +156,9 @@ def get_changed_targets(root: Path, *, ref: str, local: bool, verbose: bool) -> 
 
         for remaining_path in files:
             possible_file = directory / remaining_path
-            if possible_file.name in NON_TESTABLE_FILES:
+            if possible_file.name in NON_TESTABLE_FILES or possible_file == agent_requirements_file:
                 continue
-            elif any(fnmatch(str(possible_file), str(directory / pattern)) for pattern in TESTABLE_FILE_PATTERNS):
+            elif TESTABLE_FILE_PATTERN.search(remaining_path):
                 targets.append(directory_name)
                 break
 

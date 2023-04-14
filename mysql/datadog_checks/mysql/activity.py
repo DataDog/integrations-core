@@ -7,7 +7,7 @@ import decimal
 import time
 from contextlib import closing
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List  # noqa: F401
 
 import pymysql
 
@@ -245,6 +245,7 @@ class MySQLActivity(DBMAsyncJob):
             "collection_interval": self.collection_interval,
             "ddtags": self._tags,
             "timestamp": time.time() * 1000,
+            "cloud_metadata": self._config.cloud_metadata,
             "mysql_activity": active_sessions,
         }
 

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from collections import defaultdict
+from datetime import date
 
 import click
 
@@ -116,7 +117,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     if os.path.exists(integration_dir):
         abort(f'Path `{integration_dir}` already exists!')
 
-    template_fields = {'manifest_version': '1.0.0'}
+    template_fields = {'manifest_version': '1.0.0', "today": date.today()}
     if non_interactive and repo_choice != 'core':
         abort(f'Cannot use non-interactive mode with repo_choice: {repo_choice}')
 

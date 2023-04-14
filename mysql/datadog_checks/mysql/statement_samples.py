@@ -432,6 +432,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         if self._seen_samples_ratelimiter.acquire(query_plan_cache_key):
             return {
                 "timestamp": row["timer_end_time_s"] * 1000,
+                "dbm_type": "plan",
                 "host": self._check.resolved_hostname,
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "mysql",
@@ -442,6 +443,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                         "ip": row.get('processlist_host', None),
                     }
                 },
+                "cloud_metadata": self._config.cloud_metadata,
                 "db": {
                     "instance": row['current_schema'],
                     "plan": {
@@ -480,7 +482,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         """
         with closing(self._get_db_connection().cursor()) as cursor:
             self._cursor_run(cursor, ENABLED_STATEMENTS_CONSUMERS_QUERY)
-            return set([r[0] for r in cursor.fetchall()])
+            return {r[0] for r in cursor.fetchall()}
 
     def _enable_events_statements_consumers(self):
         """

@@ -631,7 +631,7 @@ def test_filter_sample_on_gauge(p_check):
     response = MockResponse(text_data, 'text/plain; version=0.0.4')
     check = p_check
     check._text_filter_blacklist = ["deployment=\"kube-dns\""]
-    metrics = [k for k in check.parse_metric_family(response)]
+    metrics = list(check.parse_metric_family(response))
 
     assert 1 == len(metrics)
     current_metric = metrics[0]
@@ -664,7 +664,7 @@ def test_parse_one_gauge(p_check):
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, 'text/plain; version=0.0.4')
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response)]
+    metrics = list(check.parse_metric_family(response))
 
     assert 1 == len(metrics)
     current_metric = metrics[0]
@@ -707,7 +707,7 @@ def test_parse_one_counter(p_check):
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, 'text/plain; version=0.0.4')
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response)]
+    metrics = list(check.parse_metric_family(response))
 
     assert 1 == len(metrics)
     current_metric = metrics[0]
@@ -781,7 +781,7 @@ def test_parse_one_histograms_with_label(p_check):
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, 'text/plain; version=0.0.4')
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response)]
+    metrics = list(check.parse_metric_family(response))
 
     assert 1 == len(metrics)
     current_metric = metrics[0]
@@ -916,7 +916,7 @@ def test_parse_one_histogram(p_check):
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, 'text/plain; version=0.0.4')
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response)]
+    metrics = list(check.parse_metric_family(response))
 
     assert 1 == len(metrics)
     current_metric = metrics[0]
@@ -1039,7 +1039,7 @@ def test_parse_two_histograms_with_label(p_check):
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, 'text/plain; version=0.0.4')
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response)]
+    metrics = list(check.parse_metric_family(response))
 
     assert 1 == len(metrics)
 
@@ -1125,7 +1125,7 @@ def test_parse_one_summary(p_check):
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, 'text/plain; version=0.0.4')
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response)]
+    metrics = list(check.parse_metric_family(response))
 
     assert 1 == len(metrics)
     current_metric = metrics[0]
@@ -1210,7 +1210,7 @@ def test_parse_two_summaries_with_labels(p_check):
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, 'text/plain; version=0.0.4')
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response)]
+    metrics = list(check.parse_metric_family(response))
 
     assert 1 == len(metrics)
 
@@ -1269,7 +1269,7 @@ def test_parse_one_summary_with_none_values(p_check):
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, 'text/plain; version=0.0.4')
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response)]
+    metrics = list(check.parse_metric_family(response))
     assert 1 == len(metrics)
     current_metric = metrics[0]
     # As the NaN value isn't supported when we are calling assertEqual
@@ -1959,7 +1959,7 @@ def test_text_filter_input():
     ]
     expected_out = ["line with string3", "line with string"]
 
-    filtered = [x for x in check._text_filter_input(lines_in)]
+    filtered = list(check._text_filter_input(lines_in))
     assert filtered == expected_out
 
 

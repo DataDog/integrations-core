@@ -6,7 +6,13 @@ on:
     - master
 
 jobs:
+  cache:
+    uses: ./.github/workflows/cache-shared-deps.yml
+
   test:
+    needs:
+    - cache
+
     uses: ./.github/workflows/test-all.yml
     with:
       repo: core

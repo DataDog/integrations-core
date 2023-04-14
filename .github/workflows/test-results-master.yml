@@ -50,7 +50,7 @@ jobs:
       uses: emibcn/badge-action@v2.0.2
       with:
         label: Tests
-        status: "${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests }} tests, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs }} runs: ${{ fromJSON( steps.test-results.outputs.json ).conclusion }}"
+        status: "${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests }} tests, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs }} runs, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests_fail }} failed"
         color: "${{ env.BADGE_COLOR }}"
         path: "${{ env.BADGE_PATH }}"
 

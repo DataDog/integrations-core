@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, List, Optional, cast
+from typing import Any, List, Optional, cast  # noqa: F401
 
-import requests
+import requests  # noqa: F401
 from six import raise_from
 
 from datadog_checks.base import AgentCheck
