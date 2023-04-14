@@ -151,7 +151,7 @@ datadog-teamcity==3.0.1
 datadog-temporal==1.0.0
 datadog-tenable==1.4.0
 datadog-teradata==1.1.0; sys_platform != 'darwin'
-datadog-tls==2.9.1
+datadog-tls==2.10.0
 datadog-tokumx==3.2.0
 datadog-tomcat==1.11.1
 datadog-traffic-server==1.1.0
