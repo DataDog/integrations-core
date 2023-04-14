@@ -152,7 +152,6 @@ class MySql(AgentCheck):
         return self._agent_hostname
 
     def set_resource_tags(self):
-        self.log.warning("setting resource tags...")
         if self.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
@@ -183,7 +182,6 @@ class MySql(AgentCheck):
                 self.resolved_hostname,
             )
         )
-        self.log.warning("resource tags are %s", self.tags)
 
     def _check_database_configuration(self, db):
         self._check_performance_schema_enabled(db)
