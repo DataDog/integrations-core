@@ -136,6 +136,8 @@ class MySQLStatementMetrics(DBMAsyncJob):
         rows = self._collect_per_statement_metrics()
         if not rows:
             return
+        # Omit internal tags for dbm payloads since those are only relevant to metrics processed directly
+        # by the agent
         tags = [t for t in self._tags if not t.startswith('dd.internal')]
         for event in self._rows_to_fqt_events(rows, tags):
             self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
