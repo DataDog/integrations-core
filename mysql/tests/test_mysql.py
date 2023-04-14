@@ -103,7 +103,7 @@ def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
             tags=tags.SC_TAGS
             + [
                 'replication_mode:source',
-                tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=mysql_check.resolved_hostname),
+                tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=hostname),
             ],
             hostname=hostname,
             at_least=1,
@@ -129,7 +129,7 @@ def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
             'mysql.replication.group.status',
             status=MySql.OK,
             tags=tags.SC_TAGS
-            + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=mysql_check.resolved_hostname)]
+            + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=hostname)]
             + ['channel_name:group_replication_applier', 'member_role:PRIMARY', 'member_state:ONLINE'],
             count=1,
         )
@@ -148,9 +148,7 @@ def _assert_complex_config(aggregator, hostname='stubbed.hostname'):
         if mname == 'mysql.performance.cpu_time' and Platform.is_windows():
             continue
 
-        base_tags = tags.METRIC_TAGS + [
-            tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=mysql_check.resolved_hostname)
-        ]
+        base_tags = tags.METRIC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=hostname)]
         if mname == 'mysql.performance.query_run_time.avg':
             aggregator.assert_metric(mname, tags=base_tags + ['schema:testdb'], count=1)
             aggregator.assert_metric(mname, tags=base_tags + ['schema:mysql'], count=1)
