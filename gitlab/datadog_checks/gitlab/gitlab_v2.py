@@ -68,6 +68,12 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         scraper = OpenMetricsCompatibilityScraper(
             self, ChainMap({"tags": self._tags}, config, self.get_default_config())
         )
+
+        # If we scrape the Gitaly metrics, we have two configs that are mostly the same except for the
+        # `openmetrics_endpoint` and `metrics` options. Our only way to know this is the config for Gitaly is to check
+        # if the `openmetrics_endpoint` is the same as the `gitaly_server_endpoint` option,
+        # as defined in the `parse_config` method.
+        # There's no other option AFAIK to override the service check name.
         if config['openmetrics_endpoint'] == config.get('gitaly_server_endpoint'):
             scraper.SERVICE_CHECK_HEALTH = f"gitaly.{scraper.SERVICE_CHECK_HEALTH}"
         return scraper
@@ -132,6 +138,8 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         gitaly_server_endpoint = self.instance.get("gitaly_server_endpoint")
 
         if gitaly_server_endpoint:
+            # We create another config to scrape Gitaly metrics, so we have two different scrapers:
+            # one for the main GitLab and another one for the Gitaly endpoint.
             config = copy.deepcopy(self.instance)
             config['openmetrics_endpoint'] = gitaly_server_endpoint
             config['metrics'] = [GITALY_METRICS_MAP]
