@@ -192,12 +192,11 @@ class SilkCheck(AgentCheck):
             response.raise_for_status()
             response_json = response.json()
             code = response.status_code
-            if response_json:
-                if 'error_msg' in response_json:
-                    msg = "Received error message: " + response_json.get('error_msg')
-                    self.log.warning(msg)
-                    self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.WARNING, message=msg, tags=self._tags)
-                    return None, code
+            if response_json and 'error_msg' in response_json:
+                msg = "Received error message: " + response_json.get('error_msg')
+                self.log.warning(msg)
+                self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.WARNING, message=msg, tags=self._tags)
+                return None, code
             return response_json.get("hits"), code
         except Exception as e:
             self.log.warning("Encountered error while getting data from %s: %s", path, str(e))
@@ -209,13 +208,12 @@ class SilkCheck(AgentCheck):
         # Get the time that events collection starts. This will be the new `self.latest_event_query` value afterwards.
         collect_events_timestamp = get_timestamp()
         try:
-            # Use `self.latest_event_query` as starting time and `collect_events_timestamp` as ending time
-            event_query = EVENT_PATH.format(int(self.latest_event_query), int(collect_events_timestamp))
+            event_query = EVENT_PATH.format(start_time=int(self.latest_event_query),
+                                            end_time=int(collect_events_timestamp))
             raw_events, _ = self._get_data(event_query)
-
+            tags = self._tags + system_tags
             for event in raw_events:
                 try:
-                    tags = self._tags + system_tags
                     normalized_event = SilkEvent(event, tags)
                     event_payload = normalized_event.get_datadog_payload()
                     self.event(event_payload)
@@ -226,6 +224,6 @@ class SilkCheck(AgentCheck):
             # Don't get stuck on a failure to fetch an event
             # Ignore them for next pass
             self.log.error("Unable to fetch events: %s", str(e))
-
-        # Update latest event query to last event time
-        self.latest_event_query = collect_events_timestamp
+        finally:
+            # Update latest event query to last event time
+            self.latest_event_query = collect_events_timestamp
