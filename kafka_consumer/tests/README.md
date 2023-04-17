@@ -14,6 +14,8 @@ For other systems, you can follow the instructions [here](https://github.com/con
 
 Once done, you can run `ddev test kafka_consumer`, the `confluent-kafka` will be built from source.
 
+Note: On CI, the dependencies are built in the `32_install_kerberos.sh` script.
+
 ## Troubleshooting
 
 ### fatal error: 'librdkafka/rdkafka.h' file not found
