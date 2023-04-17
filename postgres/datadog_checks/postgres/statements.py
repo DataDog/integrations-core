@@ -364,7 +364,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 self._check.monotonic_count(
                     "postgresql.pg_stat_statements.dealloc",
                     dealloc,
-                    tags=self._tags,
+                    tags=self.tags,
                     hostname=self._check.resolved_hostname,
                 )
         except psycopg2.Error as e:

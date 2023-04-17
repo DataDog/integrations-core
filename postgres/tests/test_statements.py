@@ -1679,7 +1679,6 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
     expected_tags = dbm_instance_replica2['tags'] + [
         'port:{}'.format(PORT_REPLICA2),
         'db:{}'.format(DB_NAME),
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
     aggregator.assert_metric("postgresql.pg_stat_statements.max", value=100, tags=expected_tags)
     if float(POSTGRES_VERSION) >= 14.0:
