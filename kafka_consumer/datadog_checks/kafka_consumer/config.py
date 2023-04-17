@@ -87,6 +87,7 @@ class KafkaConfig:
 
         if self._consumer_groups and self._consumer_groups_regex:
             self.log.warning("Using consumer_groups and consumer_groups_regex, will combine the two config options.")
+        self._validate_consumer_groups()
 
     def _compile_regex(self, consumer_groups_regex):
         patterns = {}
@@ -104,3 +105,25 @@ class KafkaConfig:
                 patterns[consumer_group_pattern].update({topic_pattern: partitions})
 
         return patterns
+
+    def _validate_consumer_groups(self):
+        """Validate any explicitly specified consumer groups.
+        consumer_groups = {'consumer_group': {'topic': [0, 1]}}
+        """
+        if not isinstance(self._consumer_groups, dict):
+            raise ConfigurationError("consumer_groups is not a dictionary")
+        for consumer_group, topics in self._consumer_groups.items():
+            if not isinstance(consumer_group, str):
+                raise ConfigurationError("consumer group is not a valid string")
+            if not (isinstance(topics, dict) or topics is None):  # topics are optional
+                raise ConfigurationError("Topics is not a dictionary")
+            if topics is not None:
+                for topic, partitions in topics.items():
+                    if not isinstance(topic, str):
+                        raise ConfigurationError("Topic is not a valid string")
+                    if not (isinstance(partitions, (list, tuple)) or partitions is None):  # partitions are optional
+                        raise ConfigurationError("Partitions is not a list or tuple")
+                    if partitions is not None:
+                        for partition in partitions:
+                            if not isinstance(partition, int):
+                                raise ConfigurationError("Partition is not a valid integer")

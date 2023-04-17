@@ -172,7 +172,6 @@ class KafkaClient:
                 self.log.error("Failed to collect consumer groups: %s", e)
             return consumer_groups
         elif self.config._consumer_groups:
-            self._validate_consumer_groups()
             return self.config._consumer_groups
         else:
             raise ConfigurationError(
@@ -191,28 +190,6 @@ class KafkaClient:
                 yield self.kafka_client.list_consumer_group_offsets(
                     [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
                 )[consumer_group]
-
-    def _validate_consumer_groups(self):
-        """Validate any explicitly specified consumer groups.
-        consumer_groups = {'consumer_group': {'topic': [0, 1]}}
-        """
-        if not isinstance(self.config._consumer_groups, dict):
-            raise ConfigurationError("consumer_groups is not a dictionary")
-        for consumer_group, topics in self.config._consumer_groups.items():
-            if not isinstance(consumer_group, str):
-                raise ConfigurationError("consumer group is not a valid string")
-            if not (isinstance(topics, dict) or topics is None):  # topics are optional
-                raise ConfigurationError("Topics is not a dictionary")
-            if topics is not None:
-                for topic, partitions in topics.items():
-                    if not isinstance(topic, str):
-                        raise ConfigurationError("Topic is not a valid string")
-                    if not (isinstance(partitions, (list, tuple)) or partitions is None):  # partitions are optional
-                        raise ConfigurationError("Partitions is not a list or tuple")
-                    if partitions is not None:
-                        for partition in partitions:
-                            if not isinstance(partition, int):
-                                raise ConfigurationError("Partition is not a valid integer")
 
     def _get_topic_partitions(self, topics, consumer_group):
         for topic in topics.topics:
