@@ -51,7 +51,7 @@ instances:
   - openmetrics_endpoint: http://<GITLAB_URL>/-/metrics
 
     ## @param gitaly_server_endpoint - string - optional
-    ## Endpoint exposing the Gitaly Server's Prometheus metrics (only available when `openmetrics_endpoint` is used).
+    ## Endpoint exposing the Gitaly server's Prometheus metrics (only available when `openmetrics_endpoint` is used).
     #
     # gitaly_server_endpoint: http://<GITALY-URL>:9236/metrics
 
