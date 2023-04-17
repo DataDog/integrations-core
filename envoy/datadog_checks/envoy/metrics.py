@@ -6,6 +6,8 @@ from .utils import make_metric_tree
 METRIC_PREFIX = 'envoy.'
 
 PROMETHEUS_METRICS_MAP = {
+    'envoy_access_logs_grpc_access_log_logs_dropped': 'access_logs.grpc_access_log.logs_dropped',
+    'envoy_access_logs_grpc_access_log_logs_written': 'access_logs.grpc_access_log.logs_written',
     'envoy_cluster_assignment_stale': 'cluster.assignment_stale',
     'envoy_cluster_assignment_timeout_received': 'cluster.assignment_timeout_received',
     'envoy_cluster_bind_errors': 'cluster.bind_errors',

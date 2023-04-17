@@ -1,4 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+envoy.access_logs.grpc_access_log.logs_dropped,count,,,,[OpenMetrics V2] Total gRPC log entries dropped.,0,envoy,,
+envoy.access_logs.grpc_access_log.logs_written,count,,,,[OpenMetrics V2] Total gRPC log entries written.,0,envoy,,
 envoy.cluster.assignment_stale.count,count,,,,[OpenMetrics V2] Number of times the received assignments went stale before new assignments arrived.,0,envoy,,
 envoy.cluster.assignment_timeout_received.count,count,,occurrence,,[OpenMetrics V2] Total assignments received with endpoint lease information.,0,envoy,,
 envoy.cluster.bind_errors.count,count,,error,,[OpenMetrics V2] Total errors binding the socket to the configured source address,-1,envoy,,
