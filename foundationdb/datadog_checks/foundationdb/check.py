@@ -200,10 +200,10 @@ class FoundationdbCheck(AgentCheck):
 
             self.count(
                 "foundationdb.instances",
-                sum(map(lambda p: len(p["roles"]) if "roles" in p else 0, cluster["processes"].values())),
+                sum((len(p["roles"]) if "roles" in p else 0 for p in cluster["processes"].values())),
             )
 
-            role_counts = dict()
+            role_counts = {}
             for process_key in cluster["processes"]:
                 process = cluster["processes"][process_key]
                 self.report_process(process)

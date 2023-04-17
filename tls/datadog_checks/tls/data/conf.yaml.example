@@ -133,7 +133,7 @@ instances:
     ## irc, postgres, mysql, lmtp, nntp, sieve, and ldap.
     ##
     ## Currently this checks supports only the below protocols:
-    ##   postgres
+    ##   postgres, mysql
     #
     # start_tls: <START_TLS>
 

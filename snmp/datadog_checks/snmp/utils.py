@@ -3,24 +3,24 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import logging
 import os
-from typing import Any, Dict, Iterator, List, Mapping, Optional, Pattern, Sequence, Tuple, Union
+from typing import Any, Dict, Iterator, List, Mapping, Optional, Pattern, Sequence, Tuple, Union  # noqa: F401
 
 import yaml
 
 from .compat import get_config
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
 from .pysnmp_types import (
-    ContextData,
+    ContextData,  # noqa: F401
     ObjectIdentity,
     ObjectName,
     ObjectType,
-    SnmpEngine,
+    SnmpEngine,  # noqa: F401
     UdpTransportTarget,
     endOfMibView,
     lcd,
     noSuchInstance,
 )
-from .types import T
+from .types import T  # noqa: F401
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,13 @@
 # CHANGELOG - mysql
 
+## 10.2.0 / 2023-04-14
+
+* [Added] Send resource_type/name for mysql integration metrics. See [#14333](https://github.com/DataDog/integrations-core/pull/14333).
+* [Added] Add cloud_metadata to DBM event payloads. See [#14312](https://github.com/DataDog/integrations-core/pull/14312).
+* [Added] Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).
+* [Fixed] Fix MariaDB InnoDB pending flush metric parsing. See [#13658](https://github.com/DataDog/integrations-core/pull/13658). Thanks [Jack97](https://github.com/Jack97).
+* [Fixed] Set self._check instance variables to make tracking work. See [#14146](https://github.com/DataDog/integrations-core/pull/14146).
+
 ## 10.1.0 / 2023-03-03
 
 * [Added] Add resolved_hostname to metadata. See [#14092](https://github.com/DataDog/integrations-core/pull/14092).

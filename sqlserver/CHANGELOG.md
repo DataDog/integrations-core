@@ -1,5 +1,12 @@
 # CHANGELOG - sqlserver
 
+## 11.1.0 / 2023-04-14
+
+* [Added] Add resolved_hostname to metatdata. See [#13639](https://github.com/DataDog/integrations-core/pull/13639).
+* [Fixed] Fix a typo in the `disable_generic_tags` option description. See [#14246](https://github.com/DataDog/integrations-core/pull/14246).
+* [Fixed] Increase command_timeout default from 5s to 10s to prevent timeouts on instances with large SQL caches. See [#14195](https://github.com/DataDog/integrations-core/pull/14195).
+* [Fixed] Do not double emit instance metrics when autodiscovery is enabled. See [#14115](https://github.com/DataDog/integrations-core/pull/14115).
+
 ## 11.0.2 / 2023-03-21
 
 * [Fixed] Increase command_timeout default from 5s to 10s to prevent timeouts on instances with large SQL caches. See [#14195](https://github.com/DataDog/integrations-core/pull/14195).
@@ -11,8 +18,6 @@
 ## 11.0.0 / 2023-03-03
 
 * [Added] Collect program_name for SQL Server activity. See [#13953](https://github.com/DataDog/integrations-core/pull/13953).
-* [Fixed] sqlserver.database.state not sent for all databases. See [#13735](https://github.com/DataDog/integrations-core/pull/13735).
-* [Fixed] Bug Fix: Azure SQL DB database name tags properly applied on perf metrics. See [#13757](https://github.com/DataDog/integrations-core/pull/13757).
 * [Changed] Lower the frequency of query metrics collection. See [#14033](https://github.com/DataDog/integrations-core/pull/14033).
 
 ## 10.1.3 / 2023-02-01 / Agent 7.43.0

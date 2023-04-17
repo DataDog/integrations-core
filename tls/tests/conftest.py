@@ -32,7 +32,7 @@ HOSTNAME_TO_PORT_MAPPING = {
 
 @pytest.fixture(scope='session', autouse=True)
 def dd_environment(instance_e2e, mock_local_tls_dns):
-    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=5):
+    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=20):
         e2e_metadata = {'docker_volumes': ['{}:{}'.format(CA_CERT, CA_CERT_MOUNT_PATH)]}
         yield instance_e2e, e2e_metadata
 
@@ -256,5 +256,16 @@ def instance_remote_postgresql_valid():
         'port': 55432,
         'server_hostname': 'valid.mock',
         'start_tls': 'postgres',
+        'tls_ca_cert': CA_CERT,
+    }
+
+
+@pytest.fixture
+def instance_remote_mysql_valid():
+    return {
+        'server': 'localhost',
+        'port': 3306,
+        'server_hostname': 'valid.mock',
+        'start_tls': 'mysql',
         'tls_ca_cert': CA_CERT,
     }

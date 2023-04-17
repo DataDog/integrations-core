@@ -1,16 +1,16 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import List, Optional, Type
+from typing import List, Optional, Type  # noqa: F401
 
 from pyVmomi import vim
 from six import iteritems
 
 from datadog_checks.base import to_string
-from datadog_checks.vsphere.config import VSphereConfig
+from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
 from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
-from datadog_checks.vsphere.resource_filters import ResourceFilter, match_any_regex
-from datadog_checks.vsphere.types import InfrastructureData, MetricFilters, MetricName
+from datadog_checks.vsphere.resource_filters import ResourceFilter, match_any_regex  # noqa: F401
+from datadog_checks.vsphere.types import InfrastructureData, MetricFilters, MetricName  # noqa: F401
 
 METRIC_TO_INSTANCE_TAG_MAPPING = {
     # Structure:

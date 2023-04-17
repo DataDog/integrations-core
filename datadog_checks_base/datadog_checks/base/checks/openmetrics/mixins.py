@@ -654,7 +654,7 @@ class OpenMetricsScraperMixin(object):
             sample_labels_keys = sample_labels.keys()
 
             if match_all or matching_labels.issubset(sample_labels_keys):
-                label_dict = dict()
+                label_dict = {}
 
                 if get_all:
                     for label_name, label_value in iteritems(sample_labels):

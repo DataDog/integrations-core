@@ -15,23 +15,25 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["3.8"]
 version = [
   "5.7",  # EOL October 21, 2023
   "8.0",  # EOL April, 2026
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["3.8"]
 version = ["8.0"]
 replication = ["group"]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["3.8"]
 flavor = ["mariadb"]
 version = [
   "10.2",  # EOL 23 May 2022
   "10.5",  # EOL 24 June 2025
+# TODO: Re-enable this after figuring out why mariadb-10.10 fails on CI with connection error
+#  "10.10", # EOL 17 November 2023
 ]
 
 [envs.default.overrides]

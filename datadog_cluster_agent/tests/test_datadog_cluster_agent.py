@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict
+from typing import Any, Dict  # noqa: F401
 
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.datadog_cluster_agent import DatadogClusterAgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -14,21 +14,27 @@ NAMESPACE = 'datadog.cluster_agent'
 
 METRICS = [
     'admission_webhooks.certificate_expiry',
-    'admission_webhooks.mutation_attempts',
-    'admission_webhooks.mutation_errors',
-    'admission_webhooks.reconcile_errors',
-    'admission_webhooks.reconcile_success',
-    'admission_webhooks.webhooks_received',
     'admission_webhooks.library_injection_attempts',
     'admission_webhooks.library_injection_errors',
+    'admission_webhooks.mutation_attempts',
+    'admission_webhooks.mutation_errors',
     'admission_webhooks.patcher.attempts',
     'admission_webhooks.patcher.completed',
     'admission_webhooks.patcher.errors',
     'admission_webhooks.rc_provider.configs',
     'admission_webhooks.rc_provider.invalid_configs',
+    'admission_webhooks.reconcile_errors',
+    'admission_webhooks.reconcile_success',
+    'admission_webhooks.response_duration.count',
+    'admission_webhooks.response_duration.sum',
+    'admission_webhooks.webhooks_received',
     'aggregator.flush',
     'aggregator.processed',
     'api_requests',
+    'autodiscovery.errors',
+    'autodiscovery.poll_duration.count',
+    'autodiscovery.poll_duration.sum',
+    'autodiscovery.watched_resources',
     'cluster_checks.busyness',
     'cluster_checks.configs_dangling',
     'cluster_checks.configs_dispatched',
@@ -44,21 +50,20 @@ METRICS = [
     'datadog.rate_limit_queries.remaining',
     'datadog.rate_limit_queries.reset',
     'datadog.requests',
+    'endpoint_checks.configs_dispatched',
     'external_metrics',
+    'external_metrics.api_elapsed.count',
+    'external_metrics.api_elapsed.sum',
+    'external_metrics.api_requests',
     'external_metrics.datadog_metrics',
     'external_metrics.delay_seconds',
     'external_metrics.processed_value',
-    'secret_backend.elapsed',
     'go.goroutines',
     'go.memstats.alloc_bytes',
     'go.threads',
-    'endpoint_checks.configs_dispatched',
-    'autodiscovery.poll_duration.count',
-    'autodiscovery.poll_duration.sum',
-    'autodiscovery.watched_resources',
-    'autodiscovery.errors',
-    'kubernetes_apiserver.kube_events',
     'kubernetes_apiserver.emitted_events',
+    'kubernetes_apiserver.kube_events',
+    'secret_backend.elapsed',
 ]
 
 
