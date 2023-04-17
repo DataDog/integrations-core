@@ -1022,6 +1022,12 @@ class AgentCheck(object):
         # When implementation is completed this method should return empty list ([]) because
         # it is base and default method to be overridden by a specific check's get_diagnoses()
         # method.
+        #
+        # get_diagnoses() if implemented in derived checks can
+        #     * ... return diagnostic errors collected and cached (only latest version) during regular run
+        #           or if the collection is too slow to run during each run() then ...
+        #     * ... run it immediately and inline or ...
+        #     * ... use combinations of both
         diagnoses = [
             Diagnosis(DIAGNOSIS_SUCCESS,
                        'foo_check_instance_a', 'All looks good', 'foo_check',
