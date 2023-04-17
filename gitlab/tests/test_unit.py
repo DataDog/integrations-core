@@ -34,9 +34,10 @@ def test_check(dd_run_check, aggregator, mock_data, gitlab_check, get_config, us
 
 
 @requires_py3
-def test_check_gitaly(dd_run_check, aggregator, mock_data, gitlab_check, config):
+def test_check_gitaly(dd_run_check, aggregator, mock_data, gitlab_check, get_config):
     from datadog_checks.gitlab.gitlab_v2 import GitlabCheckV2
 
+    config = get_config(True)
     instance = config['instances'][0]
     instance["openmetrics_endpoint"] = instance["prometheus_url"]
     instance["gitaly_server_endpoint"] = GITLAB_GITALY_PROMETHEUS_ENDPOINT
