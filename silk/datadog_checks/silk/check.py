@@ -208,8 +208,9 @@ class SilkCheck(AgentCheck):
         # Get the time that events collection starts. This will be the new `self.latest_event_query` value afterwards.
         collect_events_timestamp = get_timestamp()
         try:
-            event_query = EVENT_PATH.format(start_time=int(self.latest_event_query),
-                                            end_time=int(collect_events_timestamp))
+            event_query = EVENT_PATH.format(
+                start_time=int(self.latest_event_query), end_time=int(collect_events_timestamp)
+            )
             raw_events, _ = self._get_data(event_query)
             tags = self._tags + system_tags
             for event in raw_events:
