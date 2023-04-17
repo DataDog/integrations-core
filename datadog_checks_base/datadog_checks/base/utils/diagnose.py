@@ -1,11 +1,11 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
- 
+
 """
 defined in
-    datadog-agent\pkg\diagnose\diagnosis\loader.go and 
-
+    datadog-agent\\pkg\\diagnose\\diagnosis\\loader.go and
+    datadog-agent\\rtloader\\include\\rtloader_types.h
 
 // Use explicit constant instead of iota because the same numbers are used
 // in Python/CGO calls.
@@ -54,7 +54,7 @@ class Diagnosis(object):
             RawError error
         }
 
-    defined in datadog-agent\pkg\diagnose\diagnosis\loader.go
+    defined in datadog-agent\\pkg\\diagnose\\diagnosis\\loader.go
 
     The list of this class instances is used as return value of check instance
     get_diagnoses() method. By default base get_diagnoses() class returns empty
