@@ -1,4 +1,4 @@
-Component,Origin,License,Copyright
+çComponent,Origin,License,Copyright
 JPype1,PyPI,Apache-2.0,Copyright (c) 2004-2008 Steve Menard
 JayDeBeApi,PyPI,LGPL-3.0-only,Copyright (C) 2014 Bastian Bowe
 PyJWT,PyPI,MIT,Copyright (c) 2015 José Padilla
@@ -35,7 +35,6 @@ enum34,PyPI,BSD-3-Clause,Copyright Ethan Furman
 flup,Vendor,BSD-3-Clause,Copyright (c) 2005 Allan Saddi. All Rights Reserved.
 flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.com> All rights reserved."
 foundationdb,PyPI,Apache-2.0,Copyright 2017 FoundationDB
-freezegun,PyPI,Apache-2.0,Copyright 2012 Steve Pulec
 futures,PyPI,PSF,Copyright (c) 2015 Brian Quinlan
 gearman,PyPI,Apache-2.0,Copyright 2010 Yelp
 immutables,PyPI,Apache-2.0,Copyright 2018-present Contributors to the immutables project.
