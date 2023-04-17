@@ -23,6 +23,8 @@ DEFAULT_INSTANCE = {'openmetrics_endpoint': '{}/stats/prometheus'.format(URL)}
 requires_new_environment = pytest.mark.skipif(FLAVOR == 'api_v2', reason='Requires prometheus environment')
 
 PROMETHEUS_METRICS = [
+    "grpc_access_log.logs_dropped",
+    "grpc_access_log.logs_written",
     "cluster.assignment_stale.count",
     "cluster.assignment_timeout_received.count",
     "cluster.bind_errors.count",
