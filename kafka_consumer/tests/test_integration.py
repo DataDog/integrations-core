@@ -281,6 +281,18 @@ def test_config(
         ),
         pytest.param(
             {
+                'consumer_groups': {'my_consumer': {'dc': []}},
+                'consumer_groups_regex': {},
+                'monitor_unlisted_consumer_groups': True,
+            },
+            4,
+            4,
+            4,
+            'Using both monitor_unlisted_consumer_groups and consumer_groups or consumer_groups_regex',
+            id="Specified topics on consumer_groups, but monitor_unlisted_consumer_groups true",
+        ),
+        pytest.param(
+            {
                 'consumer_groups': {},
                 'consumer_groups_regex': {'my_consumer': {'dc': []}},
                 'monitor_unlisted_consumer_groups': True,
@@ -289,7 +301,7 @@ def test_config(
             4,
             4,
             'Using both monitor_unlisted_consumer_groups and consumer_groups or consumer_groups_regex',
-            id="Specified topics, but monitor_unlisted_consumer_groups true",
+            id="Specified topics on consumer_groups_regex, but monitor_unlisted_consumer_groups true",
         ),
         pytest.param(
             {
