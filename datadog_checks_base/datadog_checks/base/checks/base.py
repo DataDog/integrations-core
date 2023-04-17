@@ -51,7 +51,7 @@ from ..utils.secrets import SecretsSanitizer
 from ..utils.tagging import GENERIC_TAGS
 from ..utils.tls import TlsContextWrapper
 from ..utils.tracing import traced_class
-from ..utils.diagnose import Diagnosis, DIAGNOSIS_SUCCESS, DIAGNOSIS_NOT_ENABLE, DIAGNOSIS_FAIL, DIAGNOSIS_WARNING, DIAGNOSIS_UNEXPECTED_ERROR
+from ..utils.diagnose import Diagnosis, DIAGNOSIS_SUCCESS, DIAGNOSIS_FAIL
 
 try:
     import datadog_agent

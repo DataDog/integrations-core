@@ -10,13 +10,13 @@ defined in
 // Use explicit constant instead of iota because the same numbers are used
 // in Python/CGO calls.
 const (
-	DiagnosisSuccess         DiagnosisResult = 0
-	DiagnosisNotEnable       DiagnosisResult = 1
-	DiagnosisFail            DiagnosisResult = 2
-	DiagnosisWarning         DiagnosisResult = 3
-	DiagnosisUnexpectedError DiagnosisResult = 4
-	DiagnosisResultMIN                       = DiagnosisSuccess
-	DiagnosisResultMAX                       = DiagnosisUnexpectedError
+    DiagnosisSuccess         DiagnosisResult = 0
+    DiagnosisNotEnable       DiagnosisResult = 1
+    DiagnosisFail            DiagnosisResult = 2
+    DiagnosisWarning         DiagnosisResult = 3
+    DiagnosisUnexpectedError DiagnosisResult = 4
+    DiagnosisResultMIN                       = DiagnosisSuccess
+    DiagnosisResultMAX                       = DiagnosisUnexpectedError
 )
 """
 DIAGNOSIS_SUCCESS = 0
@@ -28,7 +28,7 @@ DIAGNOSIS_RESULT_MAX = DIAGNOSIS_UNEXPECTED_ERROR
 
 class Diagnosis(object):
     """
-    Class encapsulated Agent's 
+    Class encapsulated Agent's
         // Diagnose result (diagnosis)
         type Diagnosis struct {
             // --------------------------
@@ -58,7 +58,7 @@ class Diagnosis(object):
 
     The list of this class instances is used as return value of check instance
     get_diagnoses() method. By default base get_diagnoses() class returns empty
-    list (see integrations-core\datadog_checks_base\datadog_checks\base\checks\base.py)
+    list (see integrations-core\\datadog_checks_base\\datadog_checks\\base\\checks\\base.py)
     """
 
     def __init__(self, result, name, diagnosis, category=None, description=None, remedeition=None, raw_error=None):
@@ -70,5 +70,5 @@ class Diagnosis(object):
         # Optional fields
         self.category = category        # category of the diagnosis (e.g DBM)
         self.description = description  # description of this particular diagnose test
-        self.remedeition = remedeition  # if available potential steps to fix the problem and or reference to the documentation
+        self.remedeition = remedeition  # if available steps to fix the problem and or reference to the documentation
         self.raw_error = raw_error      # actual error reported by diagnose method
