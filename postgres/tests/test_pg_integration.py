@@ -91,7 +91,6 @@ def test_session_number(aggregator, integration_check, pg_instance):
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
-    expected_tags = pg_instance['tags'] + ['db:postgres', 'port:{}'.format(PORT)]
     conn = _get_conn(pg_instance)
     with conn.cursor() as cur:
         cur.execute("select sessions from pg_stat_database where datname='postgres'")
