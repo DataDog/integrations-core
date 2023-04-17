@@ -86,7 +86,6 @@ def test_common_metrics_without_size(aggregator, integration_check, pg_instance)
 def test_session_number(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
-<<<<<<< HEAD
     expected_tags = pg_instance['tags'] + [
         'db:postgres',
         'port:{}'.format(PORT),
