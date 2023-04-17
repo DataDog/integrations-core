@@ -8,13 +8,15 @@ from itertools import chain
 import mock
 import pytest
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.silk import SilkCheck
 from datadog_checks.silk.metrics import BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS, Metric
 
-from .common import mock_get_data
+from .common import HOST, mock_get_data
+
+pytestmark = [pytest.mark.unit]
 
 
-@pytest.mark.unit
 def test_submit_system_state_error(instance, caplog):
     caplog.set_level(logging.DEBUG)
     check = SilkCheck('silk', {}, [instance])
@@ -28,7 +30,6 @@ def test_submit_system_state_error(instance, caplog):
     )
 
 
-@pytest.mark.unit
 @pytest.mark.parametrize(
     'get_data_url, expected_metrics, metrics_to_collect',
     [
@@ -186,7 +187,6 @@ def test_bs_rw_metrics(aggregator, instance, get_data_url, expected_metrics, met
         pytest.param(True, False, deepcopy(READ_WRITE_METRICS), id="rw enabled"),
     ],
 )
-@pytest.mark.unit
 def test_metrics_to_collect(instance, enable_rw, enable_bs, extra_metrics_to_collect):
     inst = deepcopy(instance)
     inst['enable_read_write_statistics'] = enable_rw
@@ -197,3 +197,18 @@ def test_metrics_to_collect(instance, enable_rw, enable_bs, extra_metrics_to_col
     expected_metrics_to_collect = deepcopy(METRICS)
     expected_metrics_to_collect.update(extra_metrics_to_collect)
     assert sorted(check.metrics_to_collect.keys()) == sorted(expected_metrics_to_collect.keys())
+
+
+def test_unreachable_endpoint(dd_run_check, aggregator):
+    invalid_instance = {'host_address': 'http://{}:81'.format(HOST)}
+    check = SilkCheck('silk', {}, [invalid_instance])
+
+    with pytest.raises(Exception):
+        dd_run_check(check)
+    aggregator.assert_service_check('silk.can_connect', SilkCheck.CRITICAL)
+
+
+def test_incorrect_config(dd_run_check):
+    invalid_instance = {'host_addres': 'localhost'}  # misspelled required parameter
+    with pytest.raises(ConfigurationError):
+        SilkCheck('silk', {}, [invalid_instance])
