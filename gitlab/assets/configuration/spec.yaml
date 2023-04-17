@@ -30,7 +30,7 @@ files:
         type: string
     - name: gitaly_server_endpoint
       description: |
-        Endpoint exposing the Gitaly Server's Prometheus metrics (only available when `openmetrics_endpoint` is used).
+        Endpoint exposing the Gitaly server's Prometheus metrics (only available when `openmetrics_endpoint` is used).
       display_priority: 4
       value:
         display_default: null
