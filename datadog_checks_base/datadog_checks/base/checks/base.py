@@ -51,6 +51,7 @@ from ..utils.secrets import SecretsSanitizer
 from ..utils.tagging import GENERIC_TAGS
 from ..utils.tls import TlsContextWrapper
 from ..utils.tracing import traced_class
+from ..utils.diagnose import Diagnosis, DIAGNOSIS_SUCCESS, DIAGNOSIS_NOT_ENABLE, DIAGNOSIS_FAIL, DIAGNOSIS_WARNING, DIAGNOSIS_UNEXPECTED_ERROR
 
 try:
     import datadog_agent
@@ -1003,13 +1004,36 @@ class AgentCheck(object):
         self.warnings.append(warning_message)
 
     def get_warnings(self):
-        # type: () -> List[str]
+        # type: () -> List[Diagnosis]
         """
         Return the list of warnings messages to be displayed in the info page
         """
         warnings = self.warnings
         self.warnings = []
         return warnings
+
+    def get_diagnoses(self):
+        # type: () -> List[Diagnosis]
+        """
+        Return the list of diagnosis
+        """
+
+        # This is a temporary dummy return diagnoses to end-to-end early implementation versions.
+        # When implementation is completed this method should return empty list ([]) because
+        # it is base and default method to be overridden by a specific check's get_diagnoses()
+        # method.
+        diagnoses = [
+            Diagnosis(DIAGNOSIS_SUCCESS,
+                       'foo_check_instance_a', 'All looks good', 'foo_check',
+                         'This is description of the diagnose 1',
+                         'No need to fix', 'Strange error 1'),
+            Diagnosis(DIAGNOSIS_FAIL,
+                       'foo_check_instance_b', 'All looks bad', 'foo_check',
+                         'This is description of the diagnose 2',
+                         'Fix it', 'Strange error 2'),
+        ]
+
+        return diagnoses
 
     def _get_requests_proxy(self):
         # type: () -> ProxySettings
