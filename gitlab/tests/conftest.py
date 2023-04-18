@@ -79,7 +79,7 @@ def mock_data():
         yield
 
 
-def mocked_requests_get(*args, **kwargs):
+def mocked_requests_get(*args, **):
     url = args[0]
 
     if url.startswith("http://{}:{}/-/readiness".format(HOST, GITLAB_LOCAL_PORT)):
@@ -104,7 +104,7 @@ def mocked_requests_get(*args, **kwargs):
             text_data = f.read()
             return mock.MagicMock(
                 status_code=200,
-                iter_lines=text_data.split("\n"),
+                iter_lines=lambda **kwargs: text_data.split("\n"),
                 headers={'Content-Type': "text/plain"},
             )
     elif url == "http://{}:{}/api/v4/version".format(HOST, GITLAB_LOCAL_PORT) or url == "http://{}:{}/-/health".format(
