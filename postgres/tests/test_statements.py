@@ -337,11 +337,11 @@ def bob_conn():
 @pytest.fixture
 def dbm_instance(pg_instance):
     pg_instance['dbm'] = True
-    pg_instance['min_collection_interval'] = 1
+    pg_instance['min_collection_interval'] = 0.2
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
-    pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
-    pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
-    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
+    pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
+    pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.2}
+    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
     return pg_instance
 
 
