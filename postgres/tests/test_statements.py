@@ -1294,7 +1294,7 @@ def _check_until_time(check, dbm_instance, sleep_time, check_interval):
     start_time = time.time()
     elapsed = 0
     # Keep calling check to avoid triggering check inactivity
-    while elapsed < 1:
+    while elapsed < sleep_time:
         check.check(dbm_instance)
         time.sleep(check_interval)
         elapsed = time.time() - start_time
