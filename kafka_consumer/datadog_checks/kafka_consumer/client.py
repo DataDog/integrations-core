@@ -209,70 +209,41 @@ class KafkaClient:
         return filtered_partitions
 
     def _filter_partitions_with_regex(self, consumer_group, topic, partitions):
-        for consumer_group_compiled_regex in self.config._consumer_groups_compiled_regex:
-            # Do a regex filtering here for consumer groups
-            if not consumer_group_compiled_regex.match(consumer_group):
+        partitions_to_collect = set()
+
+        for consumer_group_regex, topic_filters in self.config._consumer_groups_compiled_regex.items():
+            if not consumer_group_regex.match(consumer_group):
                 continue
 
-            for partition in partitions:
-                consumer_group_topics_regex = self.config._consumer_groups_compiled_regex.get(
-                    consumer_group_compiled_regex
-                )
+            # No topics specified means we collect all topics and partitions
+            if not topic_filters:
+                return partitions
 
-                # If topics is empty, return all combinations of topic and partition
-                if not consumer_group_topics_regex:
-                    yield partition
+            for topic_regex, topic_partitions in topic_filters.items():
+                if not topic_regex.match(topic):
                     continue
 
-                # Do a regex filtering here for topics
-                for topic_regex in consumer_group_topics_regex:
-                    if not topic_regex.match(topic):
-                        self.log.debug(
-                            "Partition %s skipped because the topic %s is not in the consumer_group.", partition, topic
-                        )
-                        continue
+                # No partitions specified means we collect all
+                if not topic_partitions:
+                    return partitions
 
-                    if (
-                        consumer_group_topics_regex.get(topic_regex)
-                        and partition not in consumer_group_topics_regex[topic_regex]
-                    ):
-                        self.log.debug(
-                            "Partition %s skipped because it is not defined in the consumer group for the topic %s",
-                            partition,
-                            topic,
-                        )
-                        continue
+                partitions_to_collect.update(topic_partitions)
 
-                    yield partition
+        return partitions_to_collect.intersection(partitions)
 
     def _filter_partitions_with_consumer_groups(self, consumer_group, topic, partitions):
         if consumer_group not in self.config._consumer_groups:
-            return
+            return []
 
-        for partition in partitions:
-            # Get all topic-partition combinations allowed based on config
-            # if topics is None => collect all topics and partitions for the consumer group
-            # if partitions is None => collect all partitions from the consumer group's topic
-            if self.config._consumer_groups.get(consumer_group):
-                if (
-                    self.config._consumer_groups[consumer_group]
-                    and topic not in self.config._consumer_groups[consumer_group]
-                ):
-                    self.log.debug(
-                        "Partition %s skipped because the topic %s is not in the consumer_group.",
-                        partition,
-                        topic,
-                    )
-                    continue
-                if (
-                    self.config._consumer_groups[consumer_group].get(topic)
-                    and partition not in self.config._consumer_groups[consumer_group][topic]
-                ):
-                    self.log.debug(
-                        "Partition %s skipped because it is not defined in the consumer group for the topic %s",
-                        partition,
-                        topic,
-                    )
-                    continue
+        # No topics specified means we allow all topics and partitions
+        if not self.config._consumer_groups[consumer_group]:
+            return partitions
 
-            yield partition
+        if topic not in self.config._consumer_groups[consumer_group]:
+            return []
+
+        # No partitions specified means we collect all
+        if not self.config._consumer_groups[consumer_group][topic]:
+            return partitions
+
+        return set(self.config._consumer_groups[consumer_group][topic]).intersection(partitions)
