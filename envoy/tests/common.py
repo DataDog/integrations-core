@@ -375,6 +375,8 @@ PROMETHEUS_METRICS = [
 
 
 FLAKY_METRICS = {
+    "access_logs.grpc_access_log.logs_dropped",
+    "access_logs.grpc_access_log.logs_written",
     "listener.downstream_cx_active",
     "listener.downstream_cx_destroy.count",
     "cluster.internal.upstream_rq.count",
