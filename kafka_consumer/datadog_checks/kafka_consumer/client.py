@@ -209,12 +209,12 @@ class KafkaClient:
         return filtered_partitions
 
     def _filter_partitions_with_regex(self, consumer_group, topic, partitions):
-        for partition in partitions:
+        for consumer_group_compiled_regex in self.config._consumer_groups_compiled_regex:
             # Do a regex filtering here for consumer groups
-            for consumer_group_compiled_regex in self.config._consumer_groups_compiled_regex:
-                if not consumer_group_compiled_regex.match(consumer_group):
-                    continue
+            if not consumer_group_compiled_regex.match(consumer_group):
+                continue
 
+            for partition in partitions:
                 consumer_group_topics_regex = self.config._consumer_groups_compiled_regex.get(
                     consumer_group_compiled_regex
                 )
@@ -222,6 +222,7 @@ class KafkaClient:
                 # If topics is empty, return all combinations of topic and partition
                 if not consumer_group_topics_regex:
                     yield partition
+                    continue
 
                 # Do a regex filtering here for topics
                 for topic_regex in consumer_group_topics_regex:
