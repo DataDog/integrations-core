@@ -155,23 +155,20 @@ class KafkaClient:
         return consumer_offsets
 
     def _get_consumer_groups(self):
-        if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_regex:
-            # Get all consumer groups
-            consumer_groups = []
-            consumer_groups_future = self.kafka_client.list_consumer_groups()
-            self.log.debug('MONITOR UNLISTED CG FUTURES: %s', consumer_groups_future)
-            try:
-                list_consumer_groups_result = consumer_groups_future.result()
-                self.log.debug('MONITOR UNLISTED FUTURES RESULT: %s', list_consumer_groups_result)
+        # Get all consumer groups
+        consumer_groups = []
+        consumer_groups_future = self.kafka_client.list_consumer_groups()
+        self.log.debug('MONITOR UNLISTED CG FUTURES: %s', consumer_groups_future)
+        try:
+            list_consumer_groups_result = consumer_groups_future.result()
+            self.log.debug('MONITOR UNLISTED FUTURES RESULT: %s', list_consumer_groups_result)
 
-                consumer_groups.extend(
-                    valid_consumer_group.group_id for valid_consumer_group in list_consumer_groups_result.valid
-                )
-            except Exception as e:
-                self.log.error("Failed to collect consumer groups: %s", e)
-            return consumer_groups
-        elif self.config._consumer_groups:
-            return self.config._consumer_groups
+            consumer_groups.extend(
+                valid_consumer_group.group_id for valid_consumer_group in list_consumer_groups_result.valid
+            )
+        except Exception as e:
+            self.log.error("Failed to collect consumer groups: %s", e)
+        return consumer_groups
 
     def _get_consumer_offset_futures(self, consumer_groups):
         topics = self.kafka_client.list_topics(timeout=self.config._request_timeout)
@@ -209,6 +206,9 @@ class KafkaClient:
                     yield topic_partition
 
             if self.config._consumer_groups:
+                if consumer_group not in self.config._consumer_groups:
+                    continue
+
                 for partition in partitions:
                     # Get all topic-partition combinations allowed based on config
                     # if topics is None => collect all topics and partitions for the consumer group
