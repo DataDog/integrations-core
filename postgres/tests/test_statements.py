@@ -871,6 +871,8 @@ def test_activity_snapshot_collection(
     expected_conn_out,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
+    # No need for query metrics here
+    dbm_instance['query_metrics']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -982,6 +984,8 @@ def test_activity_snapshot_collection(
         # this means we should report bob as no longer blocked
         # close blocking_bob's tx
         blocking_conn.close()
+        # Wait collection interval to make sure dbm events are reported
+        time.sleep(0.2)
         check.check(dbm_instance)
         dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
         event = dbm_activity_event[1]
@@ -1286,16 +1290,28 @@ def test_pg_settings_caching(aggregator, integration_check, dbm_instance):
     ), "key should not have been blown away. If it was then pg_settings was not cached correctly"
 
 
+def _check_until_time(check, dbm_instance, sleep_time, check_interval):
+    start_time = time.time()
+    elapsed = 0
+    # Keep calling check to avoid triggering check inactivity
+    while elapsed < 1:
+        check.check(dbm_instance)
+        time.sleep(check_interval)
+        elapsed = time.time() - start_time
+
+
 def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the main collection loop rate limit
     collection_interval = 0.1
+    # Don't need query metrics or activity for this one
+    dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_activity']['enabled'] = False
     dbm_instance['query_samples']['collection_interval'] = collection_interval
     dbm_instance['query_samples']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
-    check.check(dbm_instance)
     sleep_time = 1
-    time.sleep(sleep_time)
+    _check_until_time(check, dbm_instance, sleep_time, collection_interval)
     max_collections = int(1 / collection_interval * sleep_time) + 1
     check.cancel()
     metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
@@ -1306,6 +1322,8 @@ def test_activity_collection_rate_limit(aggregator, integration_check, dbm_insta
     # test the activity collection loop rate limit
     collection_interval = 0.1
     activity_interval = 0.2  # double the main loop
+    # Don't need query metrics on this one
+    dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['collection_interval'] = collection_interval
     dbm_instance['query_activity']['collection_interval'] = activity_interval
     dbm_instance['query_samples']['run_sync'] = False
@@ -1313,7 +1331,7 @@ def test_activity_collection_rate_limit(aggregator, integration_check, dbm_insta
     check._connect()
     check.check(dbm_instance)
     sleep_time = 1
-    time.sleep(sleep_time)
+    _check_until_time(check, dbm_instance, sleep_time, collection_interval)
     max_activity_collections = int(1 / activity_interval * sleep_time) + 1
     check.cancel()
     activity_metrics = aggregator.metrics("dd.postgres.collect_activity_snapshot.time")
