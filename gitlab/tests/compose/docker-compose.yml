@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   gitlab:
-    image: gitlab/gitlab-ce:${GITLAB_VERSION}
+    image: ${GITLAB_IMAGE:-gitlab/gitlab-ce}:${GITLAB_VERSION}
     healthcheck:
       test: curl -f http://localhost:80/-/health | grep "GitLab OK" || exit 1
       interval: 3s
