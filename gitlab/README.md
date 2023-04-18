@@ -25,7 +25,8 @@ To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
-1. Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to the GitLab's metrics [endpoint][4]. See the [sample gitlab.d/conf.yaml][5] for all available configuration options.
+1. Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to the GitLab's metrics [endpoint][4].
+See the [sample gitlab.d/conf.yaml][5] for all available configuration options. If you previously implemented this integration, see the [legacy example][16].
 
 2. In the GitLab settings page, ensure that the option `Enable Prometheus Metrics` is enabled (administrator access is required). For more information on how to enable metric collection, see [GitLab Prometheus metrics][6].
 
@@ -129,3 +130,4 @@ Need help? Contact [Datadog support][14].
 [13]: https://github.com/DataDog/integrations-core/blob/master/gitlab/assets/service_checks.json
 [14]: https://docs.datadoghq.com/help/
 [15]: https://docs.gitlab.com/ee/user/admin_area/monitoring/health_check.html#readiness
+[16]: https://github.com/DataDog/integrations-core/blob/7.43.x/gitlab/datadog_checks/gitlab/data/conf.yaml.example
