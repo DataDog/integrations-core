@@ -12,7 +12,7 @@ dependencies: "https://github.com/DataDog/integrations-core/blob/alai97/add-mark
 
 ## Overview
 
-This guide provides instructions for creating a Datadog Agent integration in the `integrations-extras` repository. For more information about why you would want to create an Agent-based integration, see [Creating your own solution][1].
+This guide provides instructions for creating a Datadog Agent integration. For more information about why you would want to create an Agent-based integration, see [Creating your own solution][1].
 
 ## Prerequisites
 
@@ -22,8 +22,7 @@ The required Datadog Agent integration development tools include:
 - [Docker][4] to run the full test suite.
 - The git [command-line][5] or [GitHub desktop client][19].
 
-PAID
-{{% tab "Paid integrations" %}}
+{{% tab "Marketplace integrations" %}}
 ## Set up a directory and clone the Marketplace repository
 
 Once you've decided on an offering, set up a directory:
@@ -114,7 +113,7 @@ The `ddev create` command runs an interactive tool that creates the basic file a
    ddev create -n Awesome
    ```
 
-   This command displays the path where the files would have been written, as well as the structure itself. Make sure the path in the first line of output matches your `integrations-extras` repository location.
+   This command displays the path where the files would have been written, as well as the structure itself. Make sure the path in the first line of output matches your `integrations-extras` or `marketplace` repository location.
 
 1. Run the command without the `-n` flag. The tool asks you for an email and name and then creates the files you need to get started with an integration.
    ```
