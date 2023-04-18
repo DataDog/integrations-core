@@ -23,9 +23,44 @@ The required Datadog Agent integration development tools include:
 - The git [command-line][5] or [GitHub desktop client][19].
 
 PAID
+{{% tab "Paid integrations" %}}
+## Set up a directory and clone the Marketplace repository
 
+Once you've decided on an offering, set up a directory:
 
-FREE TAB
+1. Request access to the [Marketplace repository][18] by following the instructions in the [Marketplace documentation][19].
+2. Create a `dd` directory:
+   {{< code-block lang="shell" >}}mkdir $HOME/dd{{< /code-block >}}
+
+   The Datadog Development Toolkit command expects you to be working in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps.
+3. Once you have been granted access to the Marketplace repository, create the `dd` directory and clone the `marketplace` repo:
+   {{< code-block lang="shell" >}}git clone git@github.com:DataDog/marketplace.git{{< /code-block >}}
+4. Create a feature branch to work in.
+    git switch -c <YOUR INTEGRATION NAME> origin/master
+
+## Install and configure the Datadog development toolkit
+
+The Agent Integration Developer Tool allows you to create scaffolding when you are developing an integration by generating a skeleton of your integration tile's assets and metadata. For instructions on installing the tool, see [Install the Datadog Agent Integration Developer Tool][25].
+
+After you install the Developer tool, configure it for the `marketplace` repo:
+
+Set `marketplace` as the default working repository:
+
+{{< code-block lang="shell" >}}
+ddev config set marketplace $HOME/dd/marketplace
+ddev config set repo marketplace
+{{< /code-block >}}
+
+If you used a directory other than `$HOME/dd` to clone the marketplace directory, use the following command to set your working repository:
+
+{{< code-block lang="shell" >}}
+ddev config set marketplace <PATH/TO/MARKETPLACE>
+ddev config set repo marketplace
+{{< /code-block >}}
+
+{{% /tab %}}
+
+{{% tab "Free Integrations" %}
 ## Set up your integrations-extra repo
 
 Follow these instructions to set up your repo for integration development:
@@ -64,6 +99,7 @@ Assuming you've installed [the Agent Integration Developer Tool][3], configure t
    ```
    ddev config set repo extras
    ```
+{{% /tab %}}
 
 ## Create your integration
 
@@ -318,11 +354,6 @@ sudo datadog-agent integration install -w /path/to/wheel.whl
 
 After you've created your Agent-based integration, make sure that the following required assets for your integration are complete: <link to assets list> 
 
-Before you open a pull request, run the following command to catch any problems with your integration:
-
-```
-ddev validate all <INTEGRATION_NAME>
-```
 
 After you've created your pull request, automatic checks run to verify that your pull request is in good shape and contains all the required content to be updated.
 

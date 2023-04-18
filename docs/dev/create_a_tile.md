@@ -24,7 +24,7 @@ further_reading:
 
 This page walks you through how to develop an offering on the Datadog Marketplace. If you have any questions, reach out to <a href="mailto:marketplace@datadoghq.com">marketplace@datadoghq.com</a>.
 
-{{% tab "Paid integrations" %}}
+{{% tab "Paid" %}}
 ## Set up a directory and clone the Marketplace repository
 
 Once you've decided on an offering, set up a directory:
@@ -71,7 +71,7 @@ To create the informational tile-only listing's scaffolding:
 
 {{% /tab %}}
 
-{{% tab "Free" %}
+{{% tab "Free Offering" %}
 
 ## Set up a directory and fork the `integrations-extras` repository
 
@@ -192,7 +192,7 @@ Before you open a pull request, run the following command to catch any problems 
 ```
 ddev validate all <INTEGRATION_NAME>
 ```
-#ANNA - where should we put this as the partner has to run this once assets completed. I am thinking of putting it with Agent but this is after partner completes assets
+
 
 ## Open a pull request
 
@@ -205,6 +205,27 @@ To request access to the Azure DevOps pipeline, leave a comment in the pull requ
 Once your pull request passes all the checks, reviewers from the `Datadog/agent-integrations`, `Datadog/marketplace-review`, and `Datadog/documentation` teams provide suggestions and feedback on best practices.
 
 Once you have addressed the feedback and re-requested reviews, these reviewers approve your pull request. Contact the Marketplace team if you would like to preview the integration tile in your sandbox account. This allows you to validate and preview additional changes in the integration tile on the Datadog Marketplace before your pull request is merged.
+
+
+Validation errors
+
+Updating the forked repository via the Web App
+
+1. Go to the github webapp
+2. Go to your repositories
+3. Select/click on your forked repo of integrations-extras
+4. Go to "sync fork"  in the github web--ui 
+5. Click "update branch" 
+
+To rebase and push changes:
+
+git checkout <your working branch>
+
+git rebase master
+
+   If there are any merge conflicts, you'd resolve them here
+
+git push origin <working branch> -f
 
 ## Further Reading
 

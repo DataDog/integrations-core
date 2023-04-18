@@ -20,9 +20,18 @@ further_reading:
 ---
 
 ## Overview
-Add why join the Marketplace (GTM,)
 
-The Datadog Marketplace is a digital marketplace where Datadog Technology Partners can list their paid offerings to Datadog users. Datadog customers can access paid integration tiles on the [**Marketplace** page][2].
+The Datadog Marketplace is a digital marketplace where Datadog Technology Partners can list their paid offerings to Datadog users. Datadog customers can access paid integration tiles on the [**Marketplace** page][2]. 
+
+### Why join? 
+
+Partners have many benefits that bring value to their business such as:
+ 
+  Go-To-Market support with access to dedicated sales and marketing resources focused on accelerating partner growth. 
+
+  Training and Support for sales enablement in the form of on-demand courses to quickly onboard sales and technical teams.
+
+  Partner Portal that has everything a partner needs to grow their business with Datadog.
 
 {{< img src="developers/marketplace/marketplace_overview.png" alt="The Datadog Marketplace page" style="width:100%" >}}
 
