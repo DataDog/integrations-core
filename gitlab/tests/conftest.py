@@ -79,7 +79,7 @@ def mock_data():
         yield
 
 
-def mocked_requests_get(*args, **):
+def mocked_requests_get(*args, **kwargs):
     url = args[0]
 
     if url.startswith("http://{}:{}/-/readiness".format(HOST, GITLAB_LOCAL_PORT)):
