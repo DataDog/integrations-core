@@ -151,7 +151,7 @@ def test_monitor_broker_highwatermarks(
             {'consumer_groups': {'nonsense': {'marvel': None}}},
             does_not_raise(),
             0,
-            id="Nonexisting consumer group, resulting in no metrics",
+            id="Nonexistent consumer group, resulting in no metrics",
         ),
         pytest.param(
             {'consumer_groups': {'my_consumer': {'marvel': [1]}}},
