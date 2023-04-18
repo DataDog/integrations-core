@@ -203,7 +203,7 @@ class KafkaClient:
     def _filter_partitions(self, consumer_group, topic, partitions):
         return (
             self._filter_partitions_with_regex(consumer_group, topic, partitions)
-            | self._filter_partitions_with_consumer_groups(consumer_group, topic, partitions)
+            | self._filter_partitions_with_exact_match(consumer_group, topic, partitions)
         )  # fmt: skip
 
     def _filter_partitions_with_regex(self, consumer_group, topic, partitions):
@@ -229,7 +229,7 @@ class KafkaClient:
 
         return partitions_to_collect.intersection(partitions)
 
-    def _filter_partitions_with_consumer_groups(self, consumer_group, topic, partitions):
+    def _filter_partitions_with_exact_match(self, consumer_group, topic, partitions):
         if consumer_group not in self.config._consumer_groups:
             return set()
 
