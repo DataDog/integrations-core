@@ -213,7 +213,7 @@ class KafkaClient:
             # Do a regex filtering here for consumer groups
             for consumer_group_compiled_regex in self.config._consumer_groups_compiled_regex:
                 if not consumer_group_compiled_regex.match(consumer_group):
-                    return
+                    continue
 
                 consumer_group_topics_regex = self.config._consumer_groups_compiled_regex.get(
                     consumer_group_compiled_regex

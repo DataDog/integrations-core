@@ -313,6 +313,18 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
         ),
         pytest.param(
             {
+                'consumer_groups': {},
+                'consumer_groups_regex': {'foo': {'bar': []}, 'my_consume*': {'dc': []}},
+                'monitor_unlisted_consumer_groups': False,
+            },
+            2,
+            2,
+            2,
+            '',
+            id="Specified topic with an extra nonmatching consumer group regex, monitor_unlisted_consumer_groups false",
+        ),
+        pytest.param(
+            {
                 'consumer_groups': {'my_consumer': {'marvel': []}},
                 'consumer_groups_regex': {'my_consumer': {'dc': []}},
                 'monitor_unlisted_consumer_groups': False,
