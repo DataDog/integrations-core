@@ -43,6 +43,66 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
+    def get_load_balancer_response_time(self, project_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_load_balancer_loadbalancers(self, project_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_load_balancer_listeners(self, project_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_load_balancer_pools(self, project_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_load_balancer_members_by_pool(self, project_id, pool_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_load_balancer_healthmonitors(self, project_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_load_balancer_loadbalancer_statistics(self, project_id, loadbalancer_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_load_balancer_listener_statistics(self, project_id, listener_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_load_balancer_listeners_by_loadbalancer(self, project_id, loadbalancer_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_load_balancer_pools_by_loadbalancer(self, project_id, loadbalancer_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_load_balancer_healthmonitors_by_pool(self, project_id, pool_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_load_balancer_amphorae(self, project_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_load_balancer_amphorae_by_loadbalancer(self, project_id, loadbalancer_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_load_balancer_amphora_statistics(self, project_id, loadbalancer_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_compute_response_time(self, project_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
     def get_compute_response_time(self, project_id):
         pass  # pragma: no cover
 
