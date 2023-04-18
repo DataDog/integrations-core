@@ -244,6 +244,5 @@
   "template_variables": [],
   "layout_type": "free",
   "is_read_only": true,
-  "notify_list": [],
-  "id": 248
+  "notify_list": []
 }

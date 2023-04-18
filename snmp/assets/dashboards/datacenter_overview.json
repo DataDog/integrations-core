@@ -530,6 +530,5 @@
   "layout_type": "ordered",
   "is_read_only": true,
   "notify_list": [],
-  "reflow_type": "fixed",  
-  "id": "y5x-nan-rkm"
+  "reflow_type": "fixed"
 }

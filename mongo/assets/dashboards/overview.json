@@ -1623,6 +1623,5 @@
   "layout_type": "ordered",
   "is_read_only": false,
   "notify_list": [],
-  "reflow_type": "fixed",
-  "id": "gxg-c59-wyr"
+  "reflow_type": "fixed"
 }

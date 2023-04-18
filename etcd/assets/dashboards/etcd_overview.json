@@ -1588,6 +1588,5 @@
 	"layout_type": "ordered",
 	"is_read_only": false,
 	"notify_list": [],
-	"reflow_type": "fixed",
-	"id": "id6-ij5-wvc"
+	"reflow_type": "fixed"
 }

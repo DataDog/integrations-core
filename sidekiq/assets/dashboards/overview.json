@@ -607,6 +607,5 @@
 	}],
 	"layout_type": "free",
 	"is_read_only": false,
-	"notify_list": [],
-	"id": "fyi-k7c-8uc"
+	"notify_list": []
 }
