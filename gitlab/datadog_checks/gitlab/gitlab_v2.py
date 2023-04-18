@@ -50,8 +50,8 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         try:
             super().check(_)
         finally:
-            # Service check to check GitLab's health endpoints
             if self.config.gitlab_url:
+                # Service check to check GitLab's health endpoints
                 for check_type, options in self.ALLOWED_SERVICE_CHECKS.items():
                     self._check_health_endpoint(check_type, **options)
                 self._submit_version()
