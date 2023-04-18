@@ -1,5 +1,9 @@
 # CHANGELOG - nginx
 
+## 5.4.1 / 2023-04-14
+
+* [Fixed] Fix a typo in the `disable_generic_tags` option description. See [#14246](https://github.com/DataDog/integrations-core/pull/14246).
+
 ## 5.4.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).

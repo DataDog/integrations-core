@@ -1,5 +1,14 @@
 # CHANGELOG - Datadog-Cluster-Agent
 
+## 2.6.0 / 2023-04-14
+
+* [Added] Add `external_metrics.api_elapsed` and `external_metrics.api_requests` metrics. See [#14369](https://github.com/DataDog/integrations-core/pull/14369).
+* [Added] Add `admission_webhooks.response_duration` metric. See [#14287](https://github.com/DataDog/integrations-core/pull/14287).
+
+## 2.5.0 / 2023-03-03
+
+* [Added] Add rc and patcher metrics. See [#13911](https://github.com/DataDog/integrations-core/pull/13911).
+
 ## 2.4.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] [datadog_cluster_agent] Add kubernetes_apiserver metrics. See [#12935](https://github.com/DataDog/integrations-core/pull/12935).

@@ -12,14 +12,14 @@
     "title": "GitLab",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::Collaboration",
-      "Category::Source Control",
+      "Category::Developer Tools",
       "Category::Issue Tracking",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Source Control",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

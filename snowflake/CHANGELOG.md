@@ -1,9 +1,23 @@
 # CHANGELOG - Snowflake
 
-## 4.5.0 / 2023-01-20
+## 4.5.2 / 2023-04-14
+
+* [Fixed] Fix a typo in the `disable_generic_tags` option description. See [#14246](https://github.com/DataDog/integrations-core/pull/14246).
+* [Fixed] Update snowflake-connector-python to 3.0.0. See [#13926](https://github.com/DataDog/integrations-core/pull/13926).
+
+# 4.5.1 / 2023-03-02
+
+* [Fixed] Bump dependency `snowflake-connector-python` to 3.0.1. See [#14073](https://github.com/DataDog/integrations-core/pull/14073).
+
+## 4.5.0 / 2023-01-20 / Agent 7.43.0
 
 * [Added] Bump snowflake to 2.8.3. See [#13756](https://github.com/DataDog/integrations-core/pull/13756).
 * [Fixed] Bump the base check dependency. See [#13641](https://github.com/DataDog/integrations-core/pull/13641).
+
+## 4.4.6 / 2023-01-27 / Agent 7.42.1
+
+* [Fixed] Bump base check dependency. See [#13824](https://github.com/DataDog/integrations-core/pull/13824).
+* [Fixed] Backport snowflake-connector-python bump 2.8.3 to 7.42.x. See [#13794](https://github.com/DataDog/integrations-core/pull/13794).
 
 ## 4.4.5 / 2022-11-28 / Agent 7.42.0
 

@@ -44,7 +44,11 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "gitlab-runner",
+        "gitlab-ci-multi-runner"
+      ]
     },
     "logs": {
       "source": "gitlab_runner"

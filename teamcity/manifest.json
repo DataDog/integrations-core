@@ -12,12 +12,12 @@
     "title": "TeamCity",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::Configuration & Deployment",
-      "Category::Autodiscovery",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Category::Notification",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {
@@ -39,7 +39,10 @@
       },
       "metrics": {
         "prefix": "teamcity.",
-        "check": ["teamcity.builds", "teamcity.build_duration"],
+        "check": [
+          "teamcity.builds",
+          "teamcity.build_duration"
+        ],
         "metadata_path": "metadata.csv"
       },
       "events": {

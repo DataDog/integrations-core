@@ -1,6 +1,31 @@
 # CHANGELOG - datadog_checks_base
 
-## 30.0.0 / 2023-01-20
+## 31.0.0 / 2023-04-14
+
+* [Added] Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).
+* [Added] Update redis to 4.5.4. See [#14270](https://github.com/DataDog/integrations-core/pull/14270).
+* [Fixed] Fix duplicate events bug. See [#14020](https://github.com/DataDog/integrations-core/pull/14020).
+* [Changed] Replace `kafka-python` dependency with `confluent-kafka-python`. See [#13918](https://github.com/DataDog/integrations-core/pull/13918).
+
+## 30.2.0 / 2023-03-07
+
+* [Added] Upgrade openstacksdk dependency. See [#14109](https://github.com/DataDog/integrations-core/pull/14109).
+
+## 30.1.0 / 2023-03-03
+
+* [Added] Update kubernetes and supervisor dependencies. See [#14093](https://github.com/DataDog/integrations-core/pull/14093).
+* [Fixed] Do not install gssapi and dtrace on py2 on arm macs. See [#13749](https://github.com/DataDog/integrations-core/pull/13749).
+* [Fixed] Remove the use of the deprecated `pkg_resources` package. See [#13842](https://github.com/DataDog/integrations-core/pull/13842).
+
+# 30.0.2 / 2023-03-02
+
+* [Fixed] Bump dependency `snowflake-connector-python` to 3.0.1. See [#14073](https://github.com/DataDog/integrations-core/pull/14073).
+
+## 30.0.1 / 2023-02-28
+
+* [Fixed] Update cryptography to 39.0.1. See [#13913](https://github.com/DataDog/integrations-core/pull/13913).
+
+## 30.0.0 / 2023-01-20 / Agent 7.43.0
 
 * [Added] Bump snowflake to 2.8.3. See [#13756](https://github.com/DataDog/integrations-core/pull/13756).
 * [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).
@@ -15,6 +40,10 @@
 * [Added] Add Cloudera integration. See [#13244](https://github.com/DataDog/integrations-core/pull/13244).
 * [Changed] Improve integration tracing of warnings & errors. See [#13620](https://github.com/DataDog/integrations-core/pull/13620).
 * [Removed] Update TUF to 2.0.0. See [#13331](https://github.com/DataDog/integrations-core/pull/13331).
+
+## 28.0.2 / 2023-01-27 / Agent 7.42.1
+
+* [Fixed] Backport snowflake-connector-python bump 2.8.3 to 7.42.x. See [#13794](https://github.com/DataDog/integrations-core/pull/13794).
 
 ## 28.0.1 / 2022-12-16 / Agent 7.42.0
 

@@ -3,10 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
 import difflib
+import io
 import os
 import re
 import tarfile
 from collections import defaultdict
+from contextlib import closing
+from zipfile import ZipFile
 
 import click
 import orjson
@@ -34,6 +37,8 @@ EXPLICIT_LICENSES = {
     'JayDeBeApi': ['LGPL-3.0-only'],
     # https://github.com/mhammond/pywin32/blob/master/adodbapi/license.txt
     'adodbapi': ['LGPL-2.1-only'],
+    # https://github.com/pyca/cryptography/blob/main/LICENSE
+    'cryptography': ['Apache-2.0', 'BSD-3-Clause', 'PSF'],
     # https://github.com/rthalley/dnspython/blob/master/LICENSE
     'dnspython': ['ISC'],
     # https://github.com/pythongssapi/python-gssapi/blob/main/LICENSE.txt
@@ -58,7 +63,7 @@ EXPLICIT_LICENSES = {
     # https://github.com/requests/requests-kerberos/pull/123
     'requests-kerberos': ['ISC'],
     # https://github.com/requests/requests-ntlm/blob/master/LICENSE
-    'requests_ntlm': ['ISC'],
+    'requests-ntlm': ['ISC'],
     # https://github.com/rethinkdb/rethinkdb-python/blob/master/LICENSE
     'rethinkdb': ['Apache-2.0'],
     # https://github.com/simplejson/simplejson/blob/master/LICENSE.txt
@@ -141,10 +146,10 @@ VALID_LICENSES = (
 
 HEADERS = ['Component', 'Origin', 'License', 'Copyright']
 
-ADDITIONAL_LICENSES = [
+ADDITIONAL_LICENSES = {
     'flup,Vendor,BSD-3-Clause,Copyright (c) 2005 Allan Saddi. All Rights Reserved.\n',
     'flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.com> All rights reserved."\n',
-]
+}
 
 PACKAGE_REPO_OVERRIDES = {
     'PyYAML': 'https://github.com/yaml/pyyaml',
@@ -154,7 +159,6 @@ PACKAGE_REPO_OVERRIDES = {
     'foundationdb': 'https://github.com/apple/foundationdb',
     'in-toto': 'https://github.com/in-toto/in-toto',
     'kazoo': 'https://github.com/python-zk/kazoo',
-    'keystoneauth1': 'https://github.com/openstack/keystoneauth',
     'lxml': 'https://github.com/lxml/lxml',
     'oracledb': 'https://github.com/oracle/python-oracledb',
     'packaging': 'https://github.com/pypa/packaging',
@@ -207,61 +211,69 @@ def get_known_spdx_licenses():
 
 async def get_data(url):
     async with request('GET', url) as response:
-        try:
-            info = orjson.loads(await response.read())['info']
-        except Exception as e:
-            raise type(e)(f'Error processing URL {url}: {e}')
-        else:
-            return (
-                info['name'],
-                info['author'] or info['maintainer'] or info['author_email'] or info['maintainer_email'] or '',
-                info['license'],
-                info['home_page'],
-                {extract_classifier_value(c) for c in info['classifiers'] if c.startswith('License ::')},
-            )
+        return orjson.loads(await response.read())
 
 
 async def scrape_license_data(urls):
     package_data = defaultdict(
-        lambda: {'copyright': dict(), 'licenses': set(), 'classifiers': set(), 'home_page': None, 'author': None}
+        lambda: {'copyright': {}, 'licenses': set(), 'classifiers': set(), 'home_page': None, 'author': None}
     )
 
     async with Pool() as pool:
-        async for package_name, package_author, package_license, home_page, license_classifiers in pool.map(
-            get_data, urls
-        ):
-            data = package_data[package_name]
-            if package_author:
-                data['author'] = package_author
+        async for resp in pool.map(get_data, urls):
+            info = resp['info']
+            data = package_data[(info['name'], info['version'])]
+            data['urls'] = resp['urls']
+            pkg_author = info['author'] or info['maintainer'] or info['author_email'] or info['maintainer_email'] or ''
+            if pkg_author:
+                data['author'] = pkg_author
 
-            data['classifiers'].update(license_classifiers)
-            if package_license:
+            data['classifiers'].update(
+                {extract_classifier_value(c) for c in info['classifiers'] if c.startswith('License ::')}
+            )
+            if package_license := info['license']:
                 if ' :: ' in package_license:
                     data['classifiers'].add(extract_classifier_value(package_license))
                 else:
                     data['licenses'].add(package_license)
 
-            if home_page:
+            if home_page := info['home_page']:
                 data['home_page'] = home_page
 
     return package_data
+
+
+def collect_source_url(package_data):
+    """Collect url to a tarball (preferred) or wheel (backup) for a package."""
+    tarballs, wheels = [], []
+    for urld in package_data['urls']:
+        url = urld['url']
+        if url.endswith('.tar.gz'):
+            tarballs.append(url)
+        elif url.endswith('.whl'):
+            wheels.append(url)
+        else:
+            continue
+    combined = tarballs + wheels
+    if not combined:
+        raise ValueError(
+            f"No urls for packages, here are the urls for this dependency: {[u['url'] for u in package_data['urls']]}"
+        )
+    return combined[0]
 
 
 def update_copyrights(package_name, license_id, data, ctx):
     """
     Update package data with scraped copyright attributions.
     """
-    home_page = data['home_page']
-    repo_url = PACKAGE_REPO_OVERRIDES.get(package_name)
-    created_date = ''
 
-    if not repo_url:
-        repo_url = home_page
+    gh_repo_url = PACKAGE_REPO_OVERRIDES.get(package_name) or data['home_page']
+    created_date = '' if gh_repo_url is None else probe_github(gh_repo_url, ctx)
 
-    if repo_url:
-        cp, created_date = scrape_copyright_data(repo_url, ctx)
-        if cp:
-            data['copyright'][license_id] = cp
+    url = collect_source_url(data)
+    cp = scrape_copyright_data(url)
+    if cp:
+        data['copyright'][license_id] = cp
 
     if data['author'] and not data['copyright'].get(license_id):
         cp = 'Copyright {}{}'.format(created_date, data['author'])
@@ -273,27 +285,20 @@ def update_copyrights(package_name, license_id, data, ctx):
 
 
 def probe_github(url, ctx):
-    """
-    Probe GitHub API for package's repo creation date and default branch.
-    Generates URL path for downloading the repo's tarball archive file.
-    Returns tarball path and repo creation date.
-    """
+    """Probe GitHub API for package's repo creation date."""
     if url.endswith('/'):
         url = url[:-1]
     if 'github.com' not in url:
-        return None, ''
+        return ''
     owner_repo = re.sub(r'.*github.com/', '', url)
     repo_api_url = f'https://api.github.com/repos/{owner_repo}'
     try:
-        repo_res = requests.get(repo_api_url, auth=get_auth_info(ctx.obj)).json()
-        def_branch = repo_res.get('default_branch')
-        created_date = repo_res.get('created_at', '')
-        if created_date:
-            created_date = created_date[:4] + ' '
-        tar_path = f'https://github.com/{owner_repo}/archive/refs/heads/{def_branch}.tar.gz'
-        return tar_path, created_date
-    except Exception:
-        return None, ''
+        resp = requests.get(repo_api_url, auth=get_auth_info(ctx.obj))
+        resp.raise_for_status()
+        created_date = resp.json().get('created_at', '')
+    except requests.exceptions.RequestException:
+        created_date = ''
+    return created_date[:4] + ' ' if created_date else created_date
 
 
 def parse_license_path(tar_file_name):
@@ -309,35 +314,42 @@ def parse_license_path(tar_file_name):
     return None
 
 
-def generate_tarfiles(tar_path):
-    """
-    Streams tarball archive and generates tarfile for each file.
-    """
-    stream = requests.get(tar_path, stream=True)
-    with tarfile.open(fileobj=stream.raw, mode="r|gz") as tar_file:
-        for tar_info in tar_file:
-            if not tar_info.islnk() and not tar_info.issym():
-                yield tar_info, tar_file
-    stream.close()
+def generate_from_tarball(response):
+    with tarfile.open(fileobj=response.raw, mode="r|gz") as archive:
+        for tar_info in archive:
+            if not (tar_info.islnk() or tar_info.issym()) and parse_license_path(tar_info.name):
+                fh = archive.extractfile(tar_info)
+                if fh is not None:
+                    with closing(fh) as safe_fh:
+                        yield safe_fh.read()
 
 
-def scrape_copyright_data(url_path, ctx):
+def generate_from_wheel(response):
+    with ZipFile(io.BytesIO(response.content)) as archive:
+        for name in archive.namelist():
+            if parse_license_path(name):
+                with archive.open(name) as fh:
+                    yield fh.read()
+
+
+def pick_file_generator(url):
+    if url.endswith(".tar.gz"):
+        return generate_from_tarball
+    elif url.endswith(".whl"):
+        return generate_from_wheel
+    else:
+        raise ValueError(f"Unknown type of archive based on this url: {url}")
+
+
+def scrape_copyright_data(url_path):
     """
     Scrapes each tarfile for copyright attributions.
     """
-    tar_path, created_date = probe_github(url_path, ctx)
-    if tar_path:
-        for tar_info, tar_file in generate_tarfiles(tar_path):
-            local_path = parse_license_path(tar_info.name)
-            if local_path:
-                file = tar_file.extractfile(tar_info)
-                cp = find_cpy(file.read())
-                if cp:
-                    file.close()
-                    return cp, created_date
-                if file:
-                    file.close()
-    return None, created_date
+    with requests.get(url_path, stream=True) as resp:
+        for fcontents in pick_file_generator(url_path)(resp):
+            if cp := find_cpy(fcontents):
+                return cp
+    return None
 
 
 def find_cpy(data):
@@ -369,7 +381,7 @@ def validate_extra_licenses():
     An integration may use code from an outside source or origin that is not pypi-
     it will have a file in its check directory titled `3rdparty-extra-LICENSE.csv`
     """
-    lines = []
+    lines = set()
     any_errors = False
 
     all_extra_licenses = get_extra_license_files()
@@ -411,7 +423,7 @@ def validate_extra_licenses():
                 annotate_error(license_file, f"Detected invalid license type {license_type}", line=line_no)
                 continue
             if not errors:
-                lines.append(line)
+                lines.add(line)
 
     return lines, any_errors
 
@@ -449,15 +461,13 @@ def licenses(ctx, sync):
 
     package_license_errors = defaultdict(list)
 
-    header_line = "{}\n".format(','.join(HEADERS))
-
-    lines = [header_line]
-    for package_name, data in sorted(package_data.items()):
+    lines = set()
+    for (package_name, _version), data in sorted(package_data.items()):
         if package_name in EXPLICIT_LICENSES:
             for license_id in sorted(EXPLICIT_LICENSES[package_name]):
                 data['licenses'].add(license_id)
                 update_copyrights(package_name, license_id, data, ctx)
-                lines.append(format_attribution_line(package_name, license_id, data['copyright'].get(license_id, '')))
+                lines.add(format_attribution_line(package_name, license_id, data['copyright'].get(license_id, '')))
             continue
 
         license_ids = set()
@@ -495,7 +505,7 @@ def licenses(ctx, sync):
         if license_ids:
             for license_id in sorted(license_ids):
                 update_copyrights(package_name, license_id, data, ctx)
-                lines.append(format_attribution_line(package_name, license_id, data['copyright'].get(license_id, '')))
+                lines.add(format_attribution_line(package_name, license_id, data['copyright'].get(license_id, '')))
         else:
             package_license_errors[package_name].append('no license information')
 
@@ -508,9 +518,12 @@ def licenses(ctx, sync):
         abort()
 
     extra_licenses_lines, any_errors = validate_extra_licenses()
-    lines.extend(extra_licenses_lines)
-    lines.extend(ADDITIONAL_LICENSES)
-    lines.sort()
+    lines |= extra_licenses_lines
+    lines |= ADDITIONAL_LICENSES
+
+    lines = sorted(lines)
+    header_line = "{}\n".format(','.join(HEADERS))
+    lines = [header_line] + lines
     license_attribution_file = get_license_attribution_file()
     if sync:
         write_file_lines(license_attribution_file, lines)

@@ -489,6 +489,9 @@ jobs:
     - checkName: teamcity
       displayName: TeamCity
       os: linux
+    - checkName: temporal
+      displayName: Temporal
+      os: linux
     - checkName: teradata
       displayName: Teradata
       os: linux

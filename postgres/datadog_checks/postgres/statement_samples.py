@@ -6,7 +6,7 @@ import copy
 import re
 import time
 from enum import Enum
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple  # noqa: F401
 
 import psycopg2
 from cachetools import TTLCache
@@ -29,10 +29,11 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
 from .util import DatabaseConfigurationError, warning_with_tags
-from .version_utils import V9_6
+from .version_utils import V9_6, V10
 
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
 # character is 6 bytes
@@ -88,9 +89,9 @@ PG_STAT_ACTIVITY_QUERY = re.sub(
     ' ',
     """
     SELECT {current_time_func} {pg_stat_activity_cols} {pg_blocking_func} FROM {pg_stat_activity_view}
-    WHERE coalesce(TRIM(query), '') != ''
-    AND query_start IS NOT NULL
-    {extra_filters}
+    WHERE
+        {backend_type_predicate}
+        (coalesce(TRIM(query), '') != '' AND pid != pg_backend_pid() AND query_start IS NOT NULL {extra_filters})
 """,
 ).strip()
 
@@ -100,7 +101,7 @@ PG_ACTIVE_CONNECTIONS_QUERY = re.sub(
     """
     SELECT application_name, state, usename, datname, count(*) as connections
     FROM {pg_stat_activity_view}
-    WHERE client_port IS NOT NULL
+    WHERE pid != pg_backend_pid() AND client_port IS NOT NULL
     {extra_filters}
     GROUP BY application_name, state, usename, datname
 """,
@@ -179,6 +180,13 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
+
+        self._conn_pool = MultiDatabaseConnectionPool(check._new_connection)
+
+        def shutdown_cb():
+            self._conn_pool.close_all_connections()
+            return shutdown_callback()
+
         super(PostgresStatementSamples, self).__init__(
             check,
             rate_limit=1 / collection_interval,
@@ -188,11 +196,13 @@ class PostgresStatementSamples(DBMAsyncJob):
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
             job_name="query-samples",
-            shutdown_callback=shutdown_callback,
+            shutdown_callback=shutdown_cb,
         )
         self._check = check
         self._config = config
+        self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
+        self.tags = None
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
@@ -253,7 +263,9 @@ class PostgresStatementSamples(DBMAsyncJob):
         query = PG_ACTIVE_CONNECTIONS_QUERY.format(
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
-        with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
+            cursor_factory=psycopg2.extras.DictCursor
+        ) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
@@ -269,6 +281,9 @@ class PostgresStatementSamples(DBMAsyncJob):
         report_activity = self._report_activity_event()
         cur_time_func = ""
         blocking_func = ""
+        backend_type_predicate = ""
+        if self._check.version.compare(V10) >= 0:
+            backend_type_predicate = "backend_type != 'client backend' OR"
         # minimum version for pg_blocking_pids function is v9.6
         # only call pg_blocking_pids as often as we collect activity snapshots
         if self._check.version >= V9_6 and report_activity:
@@ -276,13 +291,16 @@ class PostgresStatementSamples(DBMAsyncJob):
         if report_activity:
             cur_time_func = CURRENT_TIME_FUNC
         query = PG_STAT_ACTIVITY_QUERY.format(
+            backend_type_predicate=backend_type_predicate,
             current_time_func=cur_time_func,
             pg_stat_activity_cols=', '.join(available_activity_columns),
             pg_blocking_func=blocking_func,
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
         )
-        with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
+            cursor_factory=psycopg2.extras.DictCursor
+        ) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
@@ -299,13 +317,15 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
-        with self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
+            cursor_factory=psycopg2.extras.DictCursor
+        ) as cursor:
             cursor.execute(
                 "select * from {pg_stat_activity_view} LIMIT 0".format(
                     pg_stat_activity_view=self._config.pg_stat_activity_view
                 )
             )
-            all_columns = set([i[0] for i in cursor.description])
+            all_columns = {i[0] for i in cursor.description}
             available_columns = [c for c in all_expected_columns if c in all_columns]
             missing_columns = set(all_expected_columns) - set(available_columns)
             if missing_columns:
@@ -319,15 +339,17 @@ class PostgresStatementSamples(DBMAsyncJob):
         normalized_rows = []
         for row in rows:
             total_count += 1
-            if not row['datname']:
+            if (not row['datname'] or not row['query']) and row.get(
+                'backend_type', 'client backend'
+            ) == 'client backend':
                 continue
             query = row['query']
-            if not query:
-                continue
             if query == '<insufficient privilege>':
                 insufficient_privilege_count += 1
                 continue
-            if self._activity_last_query_start is None or row['query_start'] > self._activity_last_query_start:
+            if self._activity_last_query_start is None or (
+                row['query_start'] and row['query_start'] > self._activity_last_query_start
+            ):
                 self._activity_last_query_start = row['query_start']
             normalized_rows.append(self._normalize_row(row))
         if insufficient_privilege_count > 0:
@@ -340,7 +362,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 insufficient_privilege_count,
-                tags=self._tags + ["error:insufficient-privilege"] + self._check._get_debug_tags(),
+                tags=self.tags + ["error:insufficient-privilege"] + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
             )
         return normalized_rows
@@ -348,14 +370,19 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _normalize_row(self, row):
         normalized_row = dict(copy.copy(row))
         obfuscated_query = None
+        backend_type = normalized_row.get('backend_type', 'client backend')
         try:
-            statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
-            obfuscated_query = statement['query']
-            metadata = statement['metadata']
-            normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
-            normalized_row['dd_tables'] = metadata.get('tables', None)
-            normalized_row['dd_commands'] = metadata.get('commands', None)
-            normalized_row['dd_comments'] = metadata.get('comments', None)
+            if backend_type != 'client backend':
+                obfuscated_query = backend_type
+                normalized_row['query_signature'] = compute_sql_signature(backend_type)
+            else:
+                statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
+                obfuscated_query = statement['query']
+                metadata = statement['metadata']
+                normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
+                normalized_row['dd_tables'] = metadata.get('tables', None)
+                normalized_row['dd_commands'] = metadata.get('commands', None)
+                normalized_row['dd_comments'] = metadata.get('comments', None)
         except Exception as e:
             if self._config.log_unobfuscated_queries:
                 self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
@@ -389,19 +416,22 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._check.histogram(
             "dd.postgres.{}.time".format(method_name),
             (time.time() - start_time) * 1000,
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
         self._check.histogram(
             "dd.postgres.{}.rows".format(method_name),
             row_len,
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
 
     def run_job(self):
-        self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
+        # do not emit any dd.internal metrics for DBM specific check code
+        self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
+        self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
         self._collect_statement_samples()
+        self._conn_pool.prune_connections()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_statement_samples(self):
@@ -422,47 +452,49 @@ class PostgresStatementSamples(DBMAsyncJob):
                 json.dumps(activity_event, default=default_json_event_encoding)
             )
             self._check.histogram(
-                "dd.postgres.collect_activity_snapshot.time", (time.time() - start_time) * 1000, tags=self._tags
+                "dd.postgres.collect_activity_snapshot.time", (time.time() - start_time) * 1000, tags=self.tags
             )
         elapsed_ms = (time.time() - start_time) * 1000
         self._check.histogram(
             "dd.postgres.collect_statement_samples.time",
             elapsed_ms,
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
         self._check.count(
             "dd.postgres.collect_statement_samples.events_submitted.count",
             submitted_count,
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.seen_samples_cache.len",
             len(self._seen_samples_ratelimiter),
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.explained_statements_cache.len",
             len(self._explained_statements_ratelimiter),
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.explain_errors_cache.len",
             len(self._explain_errors_cache),
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
 
     @staticmethod
     def _to_active_session(row, track_activity_query_size):
-        if row['state'] is not None and row['state'] != 'idle':
+        if (row.get('backend_type', 'client backend') != 'client backend') or (
+            row['state'] is not None and row['state'] != 'idle'
+        ):
+            active_row = {key: val for key, val in row.items() if val is not None and key != 'query'}
             # Create an active_row, for each session by
             # 1. Removing all null key/value pairs and the original query
             # 2. if row['statement'] is none, replace with ERROR: failed to obfuscate so we can still collect activity
-            active_row = {key: val for key, val in row.items() if val is not None and key != 'query'}
             active_row['query_truncated'] = PostgresStatementSamples._get_truncation_state(
                 track_activity_query_size, row['query']
             ).value
@@ -548,7 +580,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
-        with self._check._get_db(dbname).cursor() as cursor:
+        with self._conn_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms).cursor() as cursor:
             self._log.debug("Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement)
             cursor.execute(
                 """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
@@ -689,10 +721,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             event = {
                 "host": self._check.resolved_hostname,
+                "dbm_type": "plan",
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(self._dbtags(row['datname'])),
                 "timestamp": time.time() * 1000,
+                "cloud_metadata": self._config.cloud_metadata,
                 "network": {
                     "client": {
                         "ip": row.get('client_addr', None),
@@ -741,7 +775,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         events = []
         for row in rows:
             try:
-                if row['statement'] is None:
+                if row['statement'] is None or row.get('backend_type', 'client backend') != 'client backend':
                     continue
                 event = self._collect_plan_for_statement(row)
                 if event:
@@ -753,7 +787,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 self._check.count(
                     "dd.postgres.statement_samples.error",
                     1,
-                    tags=self._tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
+                    tags=self.tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
                     hostname=self._check.resolved_hostname,
                 )
         return events
@@ -775,6 +809,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "collection_interval": self._activity_coll_interval,
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
+            "cloud_metadata": self._config.cloud_metadata,
             "postgres_activity": active_sessions,
             "postgres_connections": active_connections,
         }

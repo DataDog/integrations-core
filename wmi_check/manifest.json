@@ -12,8 +12,8 @@
     "title": "WMI Check",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Windows",
-      "Category::Monitoring"
+      "Category::OS & System",
+      "Supported OS::Windows"
     ]
   },
   "author": {

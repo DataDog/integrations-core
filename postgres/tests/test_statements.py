@@ -18,6 +18,7 @@ from six import string_types
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.time import UTC
 from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
 
@@ -40,8 +41,6 @@ SAMPLE_QUERIES = [
 ]
 
 dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
-
-DEFAULT_TZ_INFO = psycopg2.tz.FixedOffsetTimezone(offset=0, name=None)
 
 
 @pytest.fixture(autouse=True)
@@ -179,7 +178,6 @@ def test_statement_metrics(
         if not _should_catch_query(dbname):
             assert len(matching_rows) == 0
             continue
-
         # metrics
         assert len(matching_rows) == 1
         row = matching_rows[0]
@@ -225,7 +223,7 @@ def test_statement_metrics(
         {
             'azure': {
                 'deployment_type': 'flexible_server',
-                'database_name': 'test-server',
+                'name': 'test-server',
             },
         },
         {
@@ -234,7 +232,7 @@ def test_statement_metrics(
             },
             'azure': {
                 'deployment_type': 'flexible_server',
-                'database_name': 'test-server',
+                'name': 'test-server',
             },
         },
         {
@@ -351,6 +349,14 @@ def _expected_dbm_instance_tags(dbm_instance):
     return dbm_instance['tags'] + [
         'port:{}'.format(PORT),
         'db:{}'.format(dbm_instance['dbname']),
+    ]
+
+
+def _expected_dbm_job_err_tags(dbm_instance):
+    return dbm_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'db:{}'.format(dbm_instance['dbname']),
+        'dd.internal.resource:database_instance:stubbed.hostname',
     ]
 
 
@@ -917,6 +923,16 @@ def test_activity_snapshot_collection(
         assert bobs_query is not None
         assert blocking_bobs_query is not None
 
+        non_client_backend = [
+            q for q in event['postgres_activity'] if q.get('backend_type', 'client backend') != 'client backend'
+        ]
+
+        if POSTGRES_VERSION.split('.')[0] == "9":
+            assert len(non_client_backend) == 0
+        else:
+            assert len(non_client_backend) > 0
+            assert all(i['backend_type'] == i['statement'] and i['query_signature'] for i in non_client_backend)
+
         for key in expected_out:
             assert expected_out[key] == bobs_query[key]
         if POSTGRES_VERSION.split('.')[0] == "9":
@@ -1013,15 +1029,15 @@ def test_activity_reported_hostname(
 
 
 def new_time():
-    return datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+    return datetime.datetime(2021, 9, 23, 23, 21, 21, 669330, tzinfo=UTC)
 
 
 def old_time():
-    return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+    return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330, tzinfo=UTC)
 
 
 def very_old_time():
-    return datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=DEFAULT_TZ_INFO)
+    return datetime.datetime(2021, 9, 20, 23, 21, 21, 669330, tzinfo=UTC)
 
 
 @pytest.mark.parametrize(
@@ -1244,7 +1260,11 @@ def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
         aggregator.assert_metric(
             "dd.postgres.error",
             tags=_expected_dbm_instance_tags(dbm_instance)
-            + ['error:load-pg-settings', 'agent_hostname:stubbed.hostname'],
+            + [
+                'error:load-pg-settings',
+                'agent_hostname:stubbed.hostname',
+                'dd.internal.resource:database_instance:stubbed.hostname',
+            ],
             hostname='stubbed.hostname',
         )
     else:
@@ -1362,7 +1382,7 @@ def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
             "dd.postgres.async_job.inactive_stop",
-            tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job],
+            tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job],
         )
 
 
@@ -1384,7 +1404,7 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
             "dd.postgres.async_job.cancel",
-            tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job],
+            tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job],
         )
 
 
@@ -1407,7 +1427,7 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     check.statement_samples._job_loop_future.result()
     aggregator.assert_metric(
         "dd.postgres.async_job.error",
-        tags=_expected_dbm_instance_tags(dbm_instance)
+        tags=_expected_dbm_job_err_tags(dbm_instance)
         + [
             'job:query-samples',
             "error:database-<class 'psycopg2.errors.UndefinedTable'>",
