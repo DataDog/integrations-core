@@ -195,45 +195,19 @@ class KafkaClient:
                 filtered_partitions = list(partitions)
 
             elif self.config._consumer_groups_regex:
-                filtered_partitions = list(self._get_regex_filtered_topic_partitions(consumer_group, topic, partitions))
+                filtered_partitions = list(self._filter_partitions_with_regex(consumer_group, topic, partitions))
 
             if self.config._consumer_groups:
-                if consumer_group not in self.config._consumer_groups:
-                    continue
-
-                for partition in partitions:
-                    # Get all topic-partition combinations allowed based on config
-                    # if topics is None => collect all topics and partitions for the consumer group
-                    # if partitions is None => collect all partitions from the consumer group's topic
-                    if self.config._consumer_groups.get(consumer_group):
-                        if (
-                            self.config._consumer_groups[consumer_group]
-                            and topic not in self.config._consumer_groups[consumer_group]
-                        ):
-                            self.log.debug(
-                                "Partition %s skipped because the topic %s is not in the consumer_group.",
-                                partition,
-                                topic,
-                            )
-                            continue
-                        if (
-                            self.config._consumer_groups[consumer_group].get(topic)
-                            and partition not in self.config._consumer_groups[consumer_group][topic]
-                        ):
-                            self.log.debug(
-                                "Partition %s skipped because it is not defined in the consumer group for the topic %s",
-                                partition,
-                                topic,
-                            )
-                            continue
-                    filtered_partitions.append(partition)
+                filtered_partitions.extend(
+                    self._filter_partitions_with_consumer_groups(consumer_group, topic, partitions)
+                )
 
             for partition in filtered_partitions:
                 topic_partition = TopicPartition(topic, partition)
                 self.log.debug("TOPIC PARTITION: %s", topic_partition)
                 yield topic_partition
 
-    def _get_regex_filtered_topic_partitions(self, consumer_group, topic, partitions):
+    def _filter_partitions_with_regex(self, consumer_group, topic, partitions):
         for partition in partitions:
             # Do a regex filtering here for consumer groups
             for consumer_group_compiled_regex in self.config._consumer_groups_compiled_regex:
@@ -268,3 +242,35 @@ class KafkaClient:
                         continue
 
                     yield partition
+
+    def _filter_partitions_with_consumer_groups(self, consumer_group, topic, partitions):
+        if consumer_group not in self.config._consumer_groups:
+            return
+
+        for partition in partitions:
+            # Get all topic-partition combinations allowed based on config
+            # if topics is None => collect all topics and partitions for the consumer group
+            # if partitions is None => collect all partitions from the consumer group's topic
+            if self.config._consumer_groups.get(consumer_group):
+                if (
+                    self.config._consumer_groups[consumer_group]
+                    and topic not in self.config._consumer_groups[consumer_group]
+                ):
+                    self.log.debug(
+                        "Partition %s skipped because the topic %s is not in the consumer_group.",
+                        partition,
+                        topic,
+                    )
+                    continue
+                if (
+                    self.config._consumer_groups[consumer_group].get(topic)
+                    and partition not in self.config._consumer_groups[consumer_group][topic]
+                ):
+                    self.log.debug(
+                        "Partition %s skipped because it is not defined in the consumer group for the topic %s",
+                        partition,
+                        topic,
+                    )
+                    continue
+
+            yield partition
