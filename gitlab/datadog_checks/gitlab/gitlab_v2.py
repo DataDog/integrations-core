@@ -51,13 +51,12 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
             super().check(_)
         finally:
             # Service check to check GitLab's health endpoints
-            if self.config.gitlab_url is not None:
+            if self.config.gitlab_url:
                 for check_type, options in self.ALLOWED_SERVICE_CHECKS.items():
                     self._check_health_endpoint(check_type, **options)
+                self._submit_version()
             else:
-                self.log.debug("gitlab_url not configured, service checks are skipped")
-
-            self._submit_version()
+                self.log.debug("gitlab_url not configured, service checks and version collection are skipped")
 
     def get_default_config(self):
         return {
@@ -69,9 +68,12 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
 
     @AgentCheck.metadata_entrypoint
     def _submit_version(self):
-        if version := get_gitlab_version(self.http, self.log, self.config.gitlab_url, self.config.api_token):
-            self.log.debug("Set version %s for GitLab", version)
-            self.set_metadata("version", version)
+        try:
+            if version := get_gitlab_version(self.http, self.log, self.config.gitlab_url, self.config.api_token):
+                self.log.debug("Set version %s for GitLab", version)
+                self.set_metadata("version", version)
+        except Exception as e:
+            self.log.debug("Could not determine gitlab version: %s", str(e))
 
     def _check_health_endpoint(self, check_type, extra_params=None, response_handler=None):
         # These define which endpoint is hit and which type of check is actually performed

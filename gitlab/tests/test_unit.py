@@ -4,8 +4,8 @@
 import pytest
 from mock.mock import MagicMock
 
-from datadog_checks.base import ConfigurationError
-from datadog_checks.dev.testing import requires_py2
+from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.dev.testing import requires_py2, requires_py3
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab.common import get_gitlab_version
 
@@ -23,6 +23,29 @@ def test_check(dd_run_check, aggregator, mock_data, gitlab_check, get_config, us
     assert_check(aggregator, V2_METRICS if use_openmetrics else V1_METRICS, use_openmetrics)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+    service_checks = ['readiness', 'liveness', 'health']
+    openmetricsv2_service_checks = [
+        'openmetrics.health',
+        'readiness.master',
+        'readiness.database',
+        'readiness.cache',
+        'readiness.database_load_balancing',
+        'readiness.queues',
+        'readiness.rate_limiting',
+        'readiness.repository_cache',
+        'readiness.cluster_rate_limiting',
+        'readiness.sessions',
+        'readiness.shared_state',
+        'readiness.trace_chunks',
+        'readiness.gitaly',
+        'readiness.redis',
+    ]
+    expected_service_checks = service_checks
+    if use_openmetrics:
+        expected_service_checks += openmetricsv2_service_checks
+    for sc in expected_service_checks:
+        aggregator.assert_service_check('gitlab.' + sc, status=AgentCheck.OK)
 
 
 @requires_py2
@@ -55,3 +78,12 @@ def test_get_gitlab_version_without_token():
     version = get_gitlab_version(http, MagicMock(), "http://localhost", None)
     http.get.assert_not_called()
     assert version is None
+
+
+@requires_py3
+def test_no_gitlab_url(dd_run_check, aggregator, mock_data, gitlab_check, get_config):
+    config = get_config(True)
+    del config['instances'][0]['gitlab_url']
+    check = gitlab_check(config)
+    dd_run_check(check)
+    aggregator.assert_service_check('gitlab.openmetrics.health', status=AgentCheck.OK)
