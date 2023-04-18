@@ -323,7 +323,8 @@ def _parse_table_metric(metric, logger):
     for symbol in metric['symbols']:
         if not isinstance(symbol, str) and symbol.get('constant_value_one', False):
             # Ignoring constant_value_one for backward compatibility
-            logger.debug("`constant_value_one` is only available with the core SNMP integration")
+            if logger:
+                logger.debug("`constant_value_one` is only available with the core SNMP integration")
             continue
         parsed_symbol = _parse_symbol(mib, symbol)
         oids_to_resolve.update(parsed_symbol.oids_to_resolve)
