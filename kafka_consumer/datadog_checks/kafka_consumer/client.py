@@ -171,8 +171,12 @@ class KafkaClient:
         return consumer_groups
 
     def _get_consumer_offset_futures(self, consumer_groups):
-        topics = self.kafka_client.list_topics(timeout=self.config._request_timeout)
-        # {(consumer_group, topic, partition): offset}
+        topic_metadata = self.kafka_client.list_topics(timeout=self.config._request_timeout).topics
+        topics = {
+            topic: list(topic_metadata[topic].partitions.keys())
+            for topic in topic_metadata
+            if topic not in KAFKA_INTERNAL_TOPICS
+        }
 
         for consumer_group in consumer_groups:
             self.log.debug('CONSUMER GROUP: %s', consumer_group)
@@ -183,27 +187,15 @@ class KafkaClient:
                 )[consumer_group]
 
     def _get_topic_partitions(self, topics, consumer_group):
-        for topic in topics.topics:
-            if topic in KAFKA_INTERNAL_TOPICS:
-                continue
-
+        for topic, partitions in topics.items():
             self.log.debug('CONFIGURED TOPICS: %s', topic)
 
-            partitions = list(topics.topics[topic].partitions.keys())
-
+            filtered_partitions = []
             if self.config._monitor_unlisted_consumer_groups:
-                for partition in partitions:
-                    topic_partition = TopicPartition(topic, partition)
-                    self.log.debug("TOPIC PARTITION: %s", topic_partition)
-                    yield topic_partition
+                filtered_partitions = list(partitions)
 
             elif self.config._consumer_groups_regex:
-                for filtered_topic_partition in self._get_regex_filtered_topic_partitions(
-                    consumer_group, topic, partitions
-                ):
-                    topic_partition = TopicPartition(filtered_topic_partition[0], filtered_topic_partition[1])
-                    self.log.debug("TOPIC PARTITION: %s", topic_partition)
-                    yield topic_partition
+                filtered_partitions = list(self._get_regex_filtered_topic_partitions(consumer_group, topic, partitions))
 
             if self.config._consumer_groups:
                 if consumer_group not in self.config._consumer_groups:
@@ -234,10 +226,12 @@ class KafkaClient:
                                 topic,
                             )
                             continue
+                    filtered_partitions.append(partition)
 
-                    topic_partition = TopicPartition(topic, partition)
-                    self.log.debug("TOPIC PARTITION: %s", topic_partition)
-                    yield topic_partition
+            for partition in filtered_partitions:
+                topic_partition = TopicPartition(topic, partition)
+                self.log.debug("TOPIC PARTITION: %s", topic_partition)
+                yield topic_partition
 
     def _get_regex_filtered_topic_partitions(self, consumer_group, topic, partitions):
         for partition in partitions:
@@ -252,7 +246,7 @@ class KafkaClient:
 
                 # If topics is empty, return all combinations of topic and partition
                 if not consumer_group_topics_regex:
-                    yield (topic, partition)
+                    yield partition
 
                 # Do a regex filtering here for topics
                 for topic_regex in consumer_group_topics_regex:
@@ -273,4 +267,4 @@ class KafkaClient:
                         )
                         continue
 
-                    yield (topic, partition)
+                    yield partition
