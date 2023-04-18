@@ -60,6 +60,7 @@ def dd_environment():
         conditions=[
             CheckEndpoints(GITLAB_URL, attempts=100, wait=6),
             CheckEndpoints(GITLAB_PROMETHEUS_ENDPOINT, attempts=100, wait=6),
+            CheckEndpoints(PROMETHEUS_ENDPOINT, attempts=100, wait=6),
         ],
     ):
         # run pre-test commands
