@@ -36,7 +36,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.interface.status',
     'snmp.ifInSpeed',
     'snmp.ifOutSpeed',
-    'snmp.peerConnection'   # BGP4 constant metric, not handled by python check
+    'snmp.peerConnection',  # BGP4 constant metric, not handled by python check
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
@@ -354,7 +354,9 @@ def test_e2e_profile_cisco_catalyst(dd_agent_check):
 
 def test_e2e_profile_cisco_csr1000v(dd_agent_check):
     config = common.generate_container_profile_config('cisco-csr1000v')
-    assert_python_vs_core(dd_agent_check, config)
+    assert_python_vs_core(
+        dd_agent_check, config, tags_to_skip=['peer_state', 'admin_status']
+    )  # Ignore tags that have a mapping
 
 
 def test_e2e_profile_cisco_nexus(dd_agent_check):
