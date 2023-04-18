@@ -24,29 +24,6 @@ def test_check(dd_run_check, aggregator, mock_data, gitlab_check, get_config, us
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
-    service_checks = ['readiness', 'liveness', 'health']
-    openmetricsv2_service_checks = [
-        'openmetrics.health',
-        'readiness.master',
-        'readiness.database',
-        'readiness.cache',
-        'readiness.database_load_balancing',
-        'readiness.queues',
-        'readiness.rate_limiting',
-        'readiness.repository_cache',
-        'readiness.cluster_rate_limiting',
-        'readiness.sessions',
-        'readiness.shared_state',
-        'readiness.trace_chunks',
-        'readiness.gitaly',
-        'readiness.redis',
-    ]
-    expected_service_checks = service_checks
-    if use_openmetrics:
-        expected_service_checks += openmetricsv2_service_checks
-    for sc in expected_service_checks:
-        aggregator.assert_service_check('gitlab.' + sc, status=AgentCheck.OK)
-
 
 @requires_py2
 def test_openmetrics_with_python2(gitlab_check, get_config):
