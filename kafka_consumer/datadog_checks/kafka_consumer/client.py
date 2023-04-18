@@ -201,12 +201,10 @@ class KafkaClient:
                 yield topic_partition
 
     def _filter_partitions(self, consumer_group, topic, partitions):
-        filtered_partitions = []
-        if self.config._consumer_groups_regex:
-            filtered_partitions.extend(self._filter_partitions_with_regex(consumer_group, topic, partitions))
-        if self.config._consumer_groups:
-            filtered_partitions.extend(self._filter_partitions_with_consumer_groups(consumer_group, topic, partitions))
-        return filtered_partitions
+        return (
+            self._filter_partitions_with_regex(consumer_group, topic, partitions)
+            | self._filter_partitions_with_consumer_groups(consumer_group, topic, partitions)
+        )  # fmt: skip
 
     def _filter_partitions_with_regex(self, consumer_group, topic, partitions):
         partitions_to_collect = set()
@@ -217,7 +215,7 @@ class KafkaClient:
 
             # No topics specified means we collect all topics and partitions
             if not topic_filters:
-                return partitions
+                return set(partitions)
 
             for topic_regex, topic_partitions in topic_filters.items():
                 if not topic_regex.match(topic):
@@ -225,7 +223,7 @@ class KafkaClient:
 
                 # No partitions specified means we collect all
                 if not topic_partitions:
-                    return partitions
+                    return set(partitions)
 
                 partitions_to_collect.update(topic_partitions)
 
@@ -233,17 +231,17 @@ class KafkaClient:
 
     def _filter_partitions_with_consumer_groups(self, consumer_group, topic, partitions):
         if consumer_group not in self.config._consumer_groups:
-            return []
+            return set()
 
         # No topics specified means we allow all topics and partitions
         if not self.config._consumer_groups[consumer_group]:
-            return partitions
+            return set(partitions)
 
         if topic not in self.config._consumer_groups[consumer_group]:
-            return []
+            return set()
 
         # No partitions specified means we collect all
         if not self.config._consumer_groups[consumer_group][topic]:
-            return partitions
+            return set(partitions)
 
         return set(self.config._consumer_groups[consumer_group][topic]).intersection(partitions)
