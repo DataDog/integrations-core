@@ -1311,7 +1311,10 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     check = integration_check(dbm_instance)
     check._connect()
     sleep_time = 1
-    _check_until_time(check, dbm_instance, sleep_time, collection_interval / 5.0)
+    # We do 5 check per collection interval to make sure we exit
+    # the loop and trigger cancel before another job_loop is triggered
+    check_frequency = collection_interval / 5.0
+    _check_until_time(check, dbm_instance, sleep_time, check_frequency)
     max_collections = int(1 / collection_interval * sleep_time) + 1
     check.cancel()
     metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
@@ -1331,7 +1334,10 @@ def test_activity_collection_rate_limit(aggregator, integration_check, dbm_insta
     check._connect()
     check.check(dbm_instance)
     sleep_time = 1
-    _check_until_time(check, dbm_instance, sleep_time, collection_interval / 5.0)
+    # We do 5 check per collection interval to make sure we exit
+    # the loop and trigger cancel before another job_loop is triggered
+    check_frequency = collection_interval / 5.0
+    _check_until_time(check, dbm_instance, sleep_time, check_frequency)
     max_activity_collections = int(1 / activity_interval * sleep_time) + 1
     check.cancel()
     activity_metrics = aggregator.metrics("dd.postgres.collect_activity_snapshot.time")
