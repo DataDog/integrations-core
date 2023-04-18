@@ -46,9 +46,21 @@ init_config:
 instances:
 
     ## @param openmetrics_endpoint - string - optional - default: http://<GITLAB_URL>/-/metrics
-    ## The URL where GitLab exposes Prometheus metrics.
+    ## To enable GitLab metrics using OpenMetricsBaseCheckV2 you must specify the 
+    ## `openmetrics_endpoint` option.
+    ##
+    ## Either `prometheus_url` or `openmetrics_endpoint` must be specified.
+    ## See documentation: https://docs.datadoghq.com/integrations/gitlab
     #
   - openmetrics_endpoint: http://<GITLAB_URL>/-/metrics
+
+    ## @param prometheus_url - string - optional - default: http://<GITLAB_URL>/-/metrics
+    ## To enable GitLab metrics using the legacy OpenMetricsBaseCheckV1 you must specify the `prometheus_url` option.
+    ##
+    ## Either `prometheus_url` or `openmetrics_endpoint` must be specified.
+    ## See documentation: https://docs.datadoghq.com/integrations/gitlab
+    #
+    # prometheus_url: http://<GITLAB_URL>/-/metrics
 
     ## @param gitlab_url - string - optional
     ## The GitLab external URL to probe for service health status
