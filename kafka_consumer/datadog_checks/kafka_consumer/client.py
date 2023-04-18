@@ -190,17 +190,17 @@ class KafkaClient:
         for topic, partitions in topics.items():
             self.log.debug('CONFIGURED TOPICS: %s', topic)
 
-            filtered_partitions = []
             if self.config._monitor_unlisted_consumer_groups:
-                filtered_partitions = list(partitions)
+                filtered_partitions = partitions
 
-            elif self.config._consumer_groups_regex:
-                filtered_partitions = list(self._filter_partitions_with_regex(consumer_group, topic, partitions))
-
-            if self.config._consumer_groups:
-                filtered_partitions.extend(
-                    self._filter_partitions_with_consumer_groups(consumer_group, topic, partitions)
-                )
+            else:
+                filtered_partitions = []
+                if self.config._consumer_groups_regex:
+                    filtered_partitions.extend(self._filter_partitions_with_regex(consumer_group, topic, partitions))
+                if self.config._consumer_groups:
+                    filtered_partitions.extend(
+                        self._filter_partitions_with_consumer_groups(consumer_group, topic, partitions)
+                    )
 
             for partition in filtered_partitions:
                 topic_partition = TopicPartition(topic, partition)
