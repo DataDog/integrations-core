@@ -87,6 +87,13 @@ class KafkaConfig:
 
         if self._consumer_groups and self._consumer_groups_regex:
             self.log.warning("Using consumer_groups and consumer_groups_regex, will combine the two config options.")
+
+        if not (self._monitor_unlisted_consumer_groups or self._consumer_groups or self._consumer_groups_regex):
+            raise ConfigurationError(
+                "Cannot fetch consumer offsets because no consumer_groups are specified and "
+                "monitor_unlisted_consumer_groups is %s." % self._monitor_unlisted_consumer_groups
+            )
+
         self._validate_consumer_groups()
 
     def _compile_regex(self, consumer_groups_regex):

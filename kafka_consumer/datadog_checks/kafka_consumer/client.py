@@ -4,7 +4,6 @@
 from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
 from confluent_kafka.admin import AdminClient
 
-from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
 
@@ -173,11 +172,6 @@ class KafkaClient:
             return consumer_groups
         elif self.config._consumer_groups:
             return self.config._consumer_groups
-        else:
-            raise ConfigurationError(
-                "Cannot fetch consumer offsets because no consumer_groups are specified and "
-                "monitor_unlisted_consumer_groups is %s." % self.config._monitor_unlisted_consumer_groups
-            )
 
     def _get_consumer_offset_futures(self, consumer_groups):
         topics = self.kafka_client.list_topics(timeout=self.config._request_timeout)
