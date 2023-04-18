@@ -4,8 +4,8 @@
 import pytest
 from mock.mock import MagicMock
 
-from datadog_checks.base import ConfigurationError
-from datadog_checks.dev.testing import requires_py2
+from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.dev.testing import requires_py2, requires_py3
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab.common import get_gitlab_version
 
@@ -55,3 +55,12 @@ def test_get_gitlab_version_without_token():
     version = get_gitlab_version(http, MagicMock(), "http://localhost", None)
     http.get.assert_not_called()
     assert version is None
+
+
+@requires_py3
+def test_no_gitlab_url(dd_run_check, aggregator, mock_data, gitlab_check, get_config):
+    config = get_config(True)
+    del config['instances'][0]['gitlab_url']
+    check = gitlab_check(config)
+    dd_run_check(check)
+    aggregator.assert_service_check('gitlab.openmetrics.health', status=AgentCheck.OK)
