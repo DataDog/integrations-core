@@ -19,3 +19,4 @@ def test_check(aggregator, instance_basic_volume, gauge_metrics, rate_metrics, c
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_no_duplicate_metrics()
