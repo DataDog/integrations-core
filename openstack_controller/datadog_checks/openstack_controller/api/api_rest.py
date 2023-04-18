@@ -33,9 +33,9 @@ class ApiRest(Api):
         self.auth_project_tokens = {}
         self.endpoints = {}
         self.components = {}
-        self.add_microversion_headers()
+        self._add_microversion_headers()
 
-    def add_microversion_headers(self):
+    def _add_microversion_headers(self):
         if self.config.nova_microversion:
             self.log.debug("adding X-OpenStack-Nova-API-Version header to `%s`", self.config.nova_microversion)
             self.http.options['headers']['X-OpenStack-Nova-API-Version'] = self.config.nova_microversion
@@ -129,7 +129,7 @@ class ApiRest(Api):
         return None
 
     def get_compute_services(self, project_id):
-        self.log.debug("getting compute servers")
+        self.log.debug("getting compute services")
         self._post_auth_project(project_id)
         component = self._get_component(project_id, ComponentType.COMPUTE)
         if component:

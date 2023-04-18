@@ -39,6 +39,10 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
+    def get_compute_services(self, project_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
     def get_compute_servers(self, project_id):
         pass  # pragma: no cover
 
@@ -64,4 +68,12 @@ class Api(ABC):
 
     @abstractmethod
     def get_baremetal_response_time(self, project):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_baremetal_conductors(self, project_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_baremetal_nodes(self, project_id):
         pass  # pragma: no cover

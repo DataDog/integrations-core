@@ -18,7 +18,7 @@ class BaremetalRest:
         self.log.debug("response: %s", response.json())
         return response.elapsed.total_seconds() * 1000
 
-    def use_legacy_nodes_resource(self):
+    def _use_legacy_nodes_resource(self):
         if not self.microversion:
             return True
         legacy_microversion = False
@@ -41,7 +41,7 @@ class BaremetalRest:
         return not legacy_microversion
 
     def get_nodes(self):
-        resource = 'nodes/detail' if self.use_legacy_nodes_resource() else '/nodes?detail=True'
+        resource = 'nodes/detail' if self._use_legacy_nodes_resource() else '/nodes?detail=True'
         response = self.http.get('{}/{}'.format(self.endpoint, resource))
         response.raise_for_status()
         self.log.debug("Nodes response: %s", response.json())

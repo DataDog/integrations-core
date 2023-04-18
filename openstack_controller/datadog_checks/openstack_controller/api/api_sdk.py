@@ -29,6 +29,9 @@ class ApiSdk(Api):
     def get_compute_quota_set(self, project_id):
         pass  # pragma: no cover
 
+    def get_compute_services(self, project_id):
+        pass  # pragma: no cover
+
     def get_compute_servers(self, project_id):
         pass  # pragma: no cover
 
@@ -48,4 +51,10 @@ class ApiSdk(Api):
         pass  # pragma: no cover
 
     def get_baremetal_response_time(self, project):
+        pass  # pragma: no cover
+
+    def get_baremetal_conductors(self, project_id):
+        pass  # pragma: no cover
+
+    def get_baremetal_nodes(self, project_id):
         pass  # pragma: no cover
