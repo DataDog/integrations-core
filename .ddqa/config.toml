@@ -18,6 +18,9 @@ jira_statuses = [
   "Done",
 ]
 github_team = "agent-integrations"
+exclude_members = [
+  "hithwen",
+]
 
 [teams."Platform Integrations"]
 jira_project = "PINT"
