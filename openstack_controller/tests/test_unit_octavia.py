@@ -123,7 +123,12 @@ def test_loadbalancers_metrics_default(aggregator, dd_run_check, instance, monke
     ]
 
     demo_loadbalancers = [
-        ['listener_id:de81cbdc-8207-4253-8f21-3eea9870e7a9', 'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115', 'loadbalancer_name:loadbalancer-1', 'pool_id:d0335b34-3115-4b3b-9a1a-7e2363ebfee3']
+        [
+            'listener_id:de81cbdc-8207-4253-8f21-3eea9870e7a9',
+            'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
+            'loadbalancer_name:loadbalancer-1',
+            'pool_id:d0335b34-3115-4b3b-9a1a-7e2363ebfee3',
+        ]
     ]
 
     for loadbalancer_tags in demo_loadbalancers:
@@ -133,6 +138,7 @@ def test_loadbalancers_metrics_default(aggregator, dd_run_check, instance, monke
         aggregator.assert_metric('openstack.octavia.loadbalancer.bytes_out', count=1, tags=tags)
         aggregator.assert_metric('openstack.octavia.loadbalancer.request_errors', count=1, tags=tags)
         aggregator.assert_metric('openstack.octavia.loadbalancer.total_connections', count=1, tags=tags)
+
 
 def test_listeners_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
     http = MockHttp("agent-integrations-openstack-octavia")
@@ -150,7 +156,12 @@ def test_listeners_metrics_default(aggregator, dd_run_check, instance, monkeypat
     ]
 
     demo_listeners = [
-        ['listener_id:de81cbdc-8207-4253-8f21-3eea9870e7a9', 'listener_name:listener-1', 'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115', 'loadbalancer_name:loadbalancer-1']
+        [
+            'listener_id:de81cbdc-8207-4253-8f21-3eea9870e7a9',
+            'listener_name:listener-1',
+            'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
+            'loadbalancer_name:loadbalancer-1',
+        ]
     ]
 
     for listener_tags in demo_listeners:

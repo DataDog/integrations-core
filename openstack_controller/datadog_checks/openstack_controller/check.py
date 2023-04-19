@@ -37,6 +37,7 @@ def _create_hypervisor_metric_tags(hypervisor_id, hypervisor_data, os_aggregates
             tags.append('availability_zone:{}'.format(os_aggregate_value.get("availability_zone")))
     return tags
 
+
 def _create_load_balancer_loadbalancer_tags(loadbalancer_data):
     tags = [
         f'loadbalancer_id:{loadbalancer_data.get("id")}',
@@ -52,8 +53,9 @@ def _create_load_balancer_loadbalancer_tags(loadbalancer_data):
     if pools:
         for pool in pools:
             tags.append(f'pool_id:{pool.get("id")}')
-    
+
     return tags
+
 
 def _create_load_balancer_listener_tags(listener_data, loadbalancer_data):
     tags = [
@@ -481,31 +483,59 @@ class OpenStackControllerCheck(AgentCheck):
             for loadbalancer_data in loadbalancers_data:
                 loadbalancer_id = loadbalancer_data.get("id")
                 loadbalancer_tags = _create_load_balancer_loadbalancer_tags(loadbalancer_data)
-                all_tags = loadbalancer_tags + project_tags # TODO: add loadbalancer api tags
+                all_tags = loadbalancer_tags + project_tags  # TODO: add loadbalancer api tags
 
                 stats = api.get_load_balancer_loadbalancer_statistics(project_id, loadbalancer_id)
                 if stats is not None:
-                    self.gauge('openstack.octavia.loadbalancer.active_connections', value=stats.get("active_connections"), tags=all_tags)
+                    self.gauge(
+                        'openstack.octavia.loadbalancer.active_connections',
+                        value=stats.get("active_connections"),
+                        tags=all_tags,
+                    )
                     self.gauge('openstack.octavia.loadbalancer.bytes_in', value=stats.get("bytes_in"), tags=all_tags)
                     self.gauge('openstack.octavia.loadbalancer.bytes_out', value=stats.get("bytes_out"), tags=all_tags)
-                    self.gauge('openstack.octavia.loadbalancer.request_errors', value=stats.get("request_errors"), tags=all_tags)
-                    self.gauge('openstack.octavia.loadbalancer.total_connections', value=stats.get("total_connections"), tags=all_tags)
+                    self.gauge(
+                        'openstack.octavia.loadbalancer.request_errors',
+                        value=stats.get("request_errors"),
+                        tags=all_tags,
+                    )
+                    self.gauge(
+                        'openstack.octavia.loadbalancer.total_connections',
+                        value=stats.get("total_connections"),
+                        tags=all_tags,
+                    )
 
         listeners_data = api.get_load_balancer_listeners_by_loadbalancer(project_id, loadbalancer_id)
         if listeners_data is not None:
-            for listener_data in  listeners_data:
+            for listener_data in listeners_data:
                 listener_id = listener_data.get("id")
-                listener_tags = _create_load_balancer_listener_tags(
-                    listener_data,
-                    loadbalancer_data
-                )
+                listener_tags = _create_load_balancer_listener_tags(listener_data, loadbalancer_data)
                 all_tags = listener_tags + project_tags
 
                 stats = api.get_load_balancer_listener_statistics(project_id, listener_id)
                 if stats is not None:
-                    self.gauge('openstack.octavia.listener.connection_limit', value=listener_data.get("connection_limit"), tags=all_tags)
-                    self.gauge('openstack.octavia.listener.timeout_client_data', value=listener_data.get("timeout_client_data"), tags=all_tags)
-                    self.gauge('openstack.octavia.listener.timeout_member_connect', value=listener_data.get("timeout_member_connect"), tags=all_tags)
-                    self.gauge('openstack.octavia.listener.timeout_member_data', value=listener_data.get("timeout_member_data"), tags=all_tags)
-                    self.gauge('openstack.octavia.listener.timeout_tcp_inspect', value=listener_data.get("timeout_tcp_inspect"), tags=all_tags)
-
+                    self.gauge(
+                        'openstack.octavia.listener.connection_limit',
+                        value=listener_data.get("connection_limit"),
+                        tags=all_tags,
+                    )
+                    self.gauge(
+                        'openstack.octavia.listener.timeout_client_data',
+                        value=listener_data.get("timeout_client_data"),
+                        tags=all_tags,
+                    )
+                    self.gauge(
+                        'openstack.octavia.listener.timeout_member_connect',
+                        value=listener_data.get("timeout_member_connect"),
+                        tags=all_tags,
+                    )
+                    self.gauge(
+                        'openstack.octavia.listener.timeout_member_data',
+                        value=listener_data.get("timeout_member_data"),
+                        tags=all_tags,
+                    )
+                    self.gauge(
+                        'openstack.octavia.listener.timeout_tcp_inspect',
+                        value=listener_data.get("timeout_tcp_inspect"),
+                        tags=all_tags,
+                    )

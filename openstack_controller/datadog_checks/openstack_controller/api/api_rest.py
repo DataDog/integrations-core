@@ -153,7 +153,7 @@ class ApiRest(Api):
         if component:
             return component.get_response_time()
         return None
-    
+
     def get_load_balancer_loadbalancers(self, project_id):
         self.log.debug("getting load-balancer loadbalancers")
         component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
@@ -216,14 +216,14 @@ class ApiRest(Api):
         if component:
             return component.get_pools_by_loadbalancer(loadbalancer_id)
         return None
-    
+
     def get_load_balancer_healthmonitors_by_pool(self, project_id, pool_id):
         self.log.debug("getting load-balancer healthmonitors by pool")
         component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
         if component:
             return component.get_healthmonitors_by_pool(pool_id)
         return None
-    
+
     def get_load_balancer_amphorae(self, project_id):
         self.log.debug("getting load-balancer amphorae")
         component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
@@ -237,7 +237,7 @@ class ApiRest(Api):
         if component:
             return component.get_amphorae_by_loadbalancer(loadbalancer_id)
         return None
-    
+
     def get_load_balancer_amphora_statistics(self, project_id, amphora_id):
         self.log.debug("getting load-balancer amphora statistics")
         component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
