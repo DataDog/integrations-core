@@ -624,11 +624,11 @@ metrics:
 
 #### Apply mapping to OID value in `metric_tags`
 
-In some cases, you may want to report statuses from your network devices. To do so, you can use the constant metrics feature available in Agent 7.45+.
+To report statuses from your network devices, you can use the constant metrics feature available in Agent 7.45+.
 
-`constant_value_one` will send a constant metric equal to one, that can be tagged by string properties.
+For example: `constant_value_one` sends a constant metric, equal to one, that can be tagged with string properties.
 
-An example use case :
+Example use case:
 
 ```yaml
 metrics:
@@ -647,7 +647,7 @@ metrics:
     # ...
 ```
 
-A `snmp.myDevice` metric will be sent, with a value of 1 and tagged by statuses. This will allow to monitor status changes, number of devices per state, ... in the Datadog app.
+An `snmp.myDevice` metric is sent, with a value of 1 and tagged by statuses. This allows you to monitor status changes, number of devices per state, etc., in Datadog.
 
 ### `metric_tags`
 
