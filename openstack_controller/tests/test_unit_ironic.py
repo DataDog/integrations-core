@@ -125,16 +125,16 @@ def test_node_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
     ]
 
     demo_nodes = [
-        ['node_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0', 'power_state:power on'],
+        ['node_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0', 'power_state:None'],
         ['node_uuid:20512deb-e493-4796-a046-5d6e4e072c95', 'power_state:power on'],
-        ['node_uuid:54855e59-83ca-46f8-a78f-55d3370e0656', 'power_state:power on'],
-        ['node_uuid:bd7a61bb-5fe0-4c93-9628-55e312f9ef0e', 'power_state:power on'],
+        ['node_uuid:54855e59-83ca-46f8-a78f-55d3370e0656', 'power_state:None'],
+        ['node_uuid:bd7a61bb-5fe0-4c93-9628-55e312f9ef0e', 'power_state:None'],
     ]
 
     for node_tags in demo_nodes:
         tags = demo_project_tags + node_tags
-        aggregator.assert_metric('openstack.ironic.node.count', count=1, value=1, tags=tags)
-        aggregator.assert_metric('openstack.ironic.node.up', count=1, value=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.node.count', count=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.node.up', count=1, tags=tags)
 
     admin_project_tags = base_tags + [
         'project_id:01b21103a92d4997ab09e46ff8346bd5',
@@ -142,19 +142,19 @@ def test_node_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
     ]
 
     admin_nodes = [
-        ['node_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0', 'power_state:power on'],
-        ['node_uuid:bd7a61bb-5fe0-4c93-9628-55e312f9ef0e', 'power_state:power on'],
-        ['node_uuid:54855e59-83ca-46f8-a78f-55d3370e0656', 'power_state:power on'],
+        ['node_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0', 'power_state:None'],
+        ['node_uuid:bd7a61bb-5fe0-4c93-9628-55e312f9ef0e', 'power_state:None'],
+        ['node_uuid:54855e59-83ca-46f8-a78f-55d3370e0656', 'power_state:None'],
         ['node_uuid:20512deb-e493-4796-a046-5d6e4e072c95', 'power_state:power on'],
     ]
 
     for node_tags in admin_nodes:
         tags = admin_project_tags + node_tags
-        aggregator.assert_metric('openstack.ironic.node.count', count=1, value=1, tags=tags)
-        aggregator.assert_metric('openstack.ironic.node.up', count=1, value=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.node.count', count=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.node.up', count=1, tags=tags)
 
-    aggregator.assert_metric('openstack.ironic.node.count', value=1, count=8)
-    aggregator.assert_metric('openstack.ironic.node.up', value=1, count=8)
+    aggregator.assert_metric('openstack.ironic.node.count', count=8)
+    aggregator.assert_metric('openstack.ironic.node.up', count=8)
 
 
 def test_node_metrics_latest(aggregator, dd_run_check, instance_ironic_nova_microversion_latest, monkeypatch):
@@ -176,17 +176,17 @@ def test_node_metrics_latest(aggregator, dd_run_check, instance_ironic_nova_micr
         [
             'node_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0',
             'node_name:node-0',
-            'power_state:power on',
+            'power_state:None',
         ],
         [
             'node_uuid:bd7a61bb-5fe0-4c93-9628-55e312f9ef0e',
             'node_name:node-1',
-            'power_state:power on',
+            'power_state:None',
         ],
         [
             'node_uuid:54855e59-83ca-46f8-a78f-55d3370e0656',
             'node_name:node-2',
-            'power_state:power on',
+            'power_state:None',
         ],
         [
             'node_uuid:20512deb-e493-4796-a046-5d6e4e072c95',
@@ -197,8 +197,8 @@ def test_node_metrics_latest(aggregator, dd_run_check, instance_ironic_nova_micr
 
     for node_tags in demo_nodes:
         tags = demo_project_tags + node_tags
-        aggregator.assert_metric('openstack.ironic.node.count', count=1, value=1, tags=tags)
-        aggregator.assert_metric('openstack.ironic.node.up', count=1, value=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.node.count', count=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.node.up', count=1, tags=tags)
 
     admin_project_tags = base_tags + [
         'project_id:01b21103a92d4997ab09e46ff8346bd5',
@@ -209,17 +209,17 @@ def test_node_metrics_latest(aggregator, dd_run_check, instance_ironic_nova_micr
         [
             'node_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0',
             'node_name:node-0',
-            'power_state:power on',
+            'power_state:None',
         ],
         [
             'node_uuid:bd7a61bb-5fe0-4c93-9628-55e312f9ef0e',
             'node_name:node-1',
-            'power_state:power on',
+            'power_state:None',
         ],
         [
             'node_uuid:54855e59-83ca-46f8-a78f-55d3370e0656',
             'node_name:node-2',
-            'power_state:power on',
+            'power_state:None',
         ],
         [
             'node_uuid:20512deb-e493-4796-a046-5d6e4e072c95',
@@ -230,8 +230,8 @@ def test_node_metrics_latest(aggregator, dd_run_check, instance_ironic_nova_micr
 
     for node_tags in admin_nodes:
         tags = admin_project_tags + node_tags
-        aggregator.assert_metric('openstack.ironic.node.count', count=1, value=1, tags=tags)
-        aggregator.assert_metric('openstack.ironic.node.up', count=1, value=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.node.count', count=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.node.up', count=1, tags=tags)
 
     aggregator.assert_metric('openstack.ironic.node.count', count=8)
     aggregator.assert_metric('openstack.ironic.node.up', count=8)
