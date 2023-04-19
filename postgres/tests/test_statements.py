@@ -988,7 +988,7 @@ def test_activity_snapshot_collection(
         # close blocking_bob's tx
         blocking_conn.close()
         # Wait collection interval to make sure dbm events are reported
-        time.sleep(0.2)
+        time.sleep(dbm_instance['query_activity']['collection_interval'])
         check.check(dbm_instance)
         dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
         event = dbm_activity_event[1]
