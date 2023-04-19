@@ -57,3 +57,5 @@ openstack.nova.services.nova_compute.status,gauge,,,,"Reports a value of 1 if th
 openstack.ironic.conductors.up,gauge,,,,"Reports a value of 1 if this conductor is alive, 0 otherwise",0,openstack_controller,ironic conductors,
 openstack.ironic.nodes.up,gauge,,node,,Number of Bare Metal nodes that are not in maintenance mode,0,openstack_controller,ironic nodes ct,
 openstack.ironic.nodes.count,gauge,,node,,Number of Bare Metal nodes,0,openstack_controller,ironic nodes up,
+openstack.keystone.response_time,gauge,,,,Time it takes for the keystone component to respond to a basic request,0,openstack_controller,keystone response time,
+openstack.keystone.domains.count,gauge,,,,Number of domains,0,openstack_controller,keystone domains count,

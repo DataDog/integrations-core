@@ -1,0 +1,108 @@
+{
+  "hypervisors": [
+    {
+      "id": 1,
+      "hypervisor_hostname": "9d72cf53-19c8-4942-9314-005fa5d2a6a0",
+      "state": "up",
+      "status": "enabled",
+      "hypervisor_type": "ironic",
+      "hypervisor_version": 1,
+      "host_ip": "10.164.0.32",
+      "service": {
+        "id": 3,
+        "host": "agent-integrations-openstack-ironic",
+        "disabled_reason": null
+      },
+      "vcpus": 0,
+      "memory_mb": 0,
+      "local_gb": 0,
+      "vcpus_used": 0,
+      "memory_mb_used": 512,
+      "local_gb_used": 0,
+      "free_ram_mb": -512,
+      "free_disk_gb": 0,
+      "current_workload": 0,
+      "running_vms": 0,
+      "disk_available_least": 0,
+      "cpu_info": ""
+    },
+    {
+      "id": 2,
+      "hypervisor_hostname": "54855e59-83ca-46f8-a78f-55d3370e0656",
+      "state": "up",
+      "status": "enabled",
+      "hypervisor_type": "ironic",
+      "hypervisor_version": 1,
+      "host_ip": "10.164.0.32",
+      "service": {
+        "id": 3,
+        "host": "agent-integrations-openstack-ironic",
+        "disabled_reason": null
+      },
+      "vcpus": 0,
+      "memory_mb": 0,
+      "local_gb": 0,
+      "vcpus_used": 0,
+      "memory_mb_used": 512,
+      "local_gb_used": 0,
+      "free_ram_mb": -512,
+      "free_disk_gb": 0,
+      "current_workload": 0,
+      "running_vms": 0,
+      "disk_available_least": 0,
+      "cpu_info": ""
+    },
+    {
+      "id": 3,
+      "hypervisor_hostname": "bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
+      "state": "up",
+      "status": "enabled",
+      "hypervisor_type": "ironic",
+      "hypervisor_version": 1,
+      "host_ip": "10.164.0.32",
+      "service": {
+        "id": 3,
+        "host": "agent-integrations-openstack-ironic",
+        "disabled_reason": null
+      },
+      "vcpus": 0,
+      "memory_mb": 0,
+      "local_gb": 0,
+      "vcpus_used": 0,
+      "memory_mb_used": 512,
+      "local_gb_used": 0,
+      "free_ram_mb": -512,
+      "free_disk_gb": 0,
+      "current_workload": 0,
+      "running_vms": 0,
+      "disk_available_least": 0,
+      "cpu_info": ""
+    },
+    {
+      "id": 4,
+      "hypervisor_hostname": "20512deb-e493-4796-a046-5d6e4e072c95",
+      "state": "up",
+      "status": "enabled",
+      "hypervisor_type": "ironic",
+      "hypervisor_version": 1,
+      "host_ip": "10.164.0.32",
+      "service": {
+        "id": 3,
+        "host": "agent-integrations-openstack-ironic",
+        "disabled_reason": null
+      },
+      "vcpus": 0,
+      "memory_mb": 0,
+      "local_gb": 0,
+      "vcpus_used": 0,
+      "memory_mb_used": 512,
+      "local_gb_used": 0,
+      "free_ram_mb": -512,
+      "free_disk_gb": 0,
+      "current_workload": 0,
+      "running_vms": 0,
+      "disk_available_least": 0,
+      "cpu_info": ""
+    }
+  ]
+}

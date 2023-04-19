@@ -75,6 +75,8 @@ if [ $# -eq 3 ]
     ironic_microversion_header="X-OpenStack-Ironic-API-Version: $3"
 fi
 x_auth_token=""
+echo "$nova_microversion_header"
+echo "$ironic_microversion_header"
 
 data=$(echo "{'auth': {'identity': {'methods': ['password'], 'password': {'user': {'name': 'admin', 'domain': { 'id': 'default' }, 'password': 'password'}}}}}" | sed "s/'/\"/g")
 process_endpoint --method="POST" --endpoint="/identity/v3/auth/tokens" --file_name="unscoped.json" --data="$data"
@@ -91,6 +93,14 @@ process_endpoint --endpoint="/load-balancer"
 process_endpoint --endpoint="/identity/v3/domains"
 process_endpoint --endpoint="/identity/v3/projects"
 process_endpoint --endpoint="/identity/v3/users"
+process_endpoint --endpoint="/identity/v3/groups"
+for group_id in $(echo "$RESPONSE" | jq -r '.groups[]' | jq -r '.id'); do
+  printf "\033[32m%-6s\033[0m Group id: %s\n" "INFO" "$group_id"
+  process_endpoint --endpoint="/identity/v3/groups/$group_id/users"
+done
+process_endpoint --endpoint="/identity/v3/services"
+process_endpoint --endpoint="/identity/v3/registered_limits"
+process_endpoint --endpoint="/identity/v3/limits"
 # Nova
 process_endpoint --endpoint="/identity/v3/auth/projects"
 for project_id in $(echo "$RESPONSE" | jq -r '.projects[]' | jq -r '.id'); do

@@ -110,23 +110,24 @@ NOVA_SERVICE_METRICS = [
 ]
 
 NOVA_HYPERVISOR_METRICS = [
-    'current_workload',  # Available until version 2.87
-    'disk_available_least',  # Available until version 2.87
-    'free_disk_gb',  # Available until version 2.87
-    'free_ram_mb',  # Available until version 2.87
-    'local_gb',  # Available until version 2.87
-    'local_gb_used',  # Available until version 2.87
-    'memory_mb',  # Available until version 2.87
-    'memory_mb_used',  # Available until version 2.87
-    'running_vms',  # Available until version 2.87
-    'vcpus',  # Available until version 2.87
-    'vcpus_used',  # Available until version 2.87
+    'openstack.nova.hypervisor.current_workload',  # Available until version 2.87
+    'openstack.nova.hypervisor.disk_available_least',  # Available until version 2.87
+    'openstack.nova.hypervisor.free_disk_gb',  # Available until version 2.87
+    'openstack.nova.hypervisor.free_ram_mb',  # Available until version 2.87
+    'openstack.nova.hypervisor.local_gb',  # Available until version 2.87
+    'openstack.nova.hypervisor.local_gb_used',  # Available until version 2.87
+    'openstack.nova.hypervisor.memory_mb',  # Available until version 2.87
+    'openstack.nova.hypervisor.memory_mb_used',  # Available until version 2.87
+    'openstack.nova.hypervisor.running_vms',  # Available until version 2.87
+    'openstack.nova.hypervisor.vcpus',  # Available until version 2.87
+    'openstack.nova.hypervisor.vcpus_used',  # Available until version 2.87
+    'openstack.nova.hypervisor.up',
 ]
 
 NOVA_HYPERVISOR_LOAD_METRICS = [
-    'load_1',
-    'load_5',
-    'load_15',
+    'openstack.nova.hypervisor.load_1',
+    'openstack.nova.hypervisor.load_5',
+    'openstack.nova.hypervisor.load_15',
 ]
 
 LEGACY_NOVA_HYPERVISOR_METRICS = [

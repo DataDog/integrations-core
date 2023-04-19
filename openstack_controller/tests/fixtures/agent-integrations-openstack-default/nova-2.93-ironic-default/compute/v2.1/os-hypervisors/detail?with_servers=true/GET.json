@@ -1,0 +1,69 @@
+{
+  "hypervisors": [
+    {
+      "id": "d884b51a-e464-49dc-916c-766da0237661",
+      "hypervisor_hostname": "agent-integrations-openstack-default",
+      "state": "up",
+      "status": "enabled",
+      "hypervisor_type": "QEMU",
+      "hypervisor_version": 4002001,
+      "host_ip": "10.164.0.11",
+      "service": {
+        "id": "7bf08d7e-a939-46c3-bdae-fbe3ebfe78a4",
+        "host": "agent-integrations-openstack-default",
+        "disabled_reason": null
+      },
+      "uptime": " 11:32:41 up 33 days, 23:20,  0 users,  load average: 0.42, 0.42, 0.34\n",
+      "servers": [
+        {
+          "name": "instance-00000004",
+          "uuid": "2c653a68-b520-4582-a05d-41a68067d76c"
+        },
+        {
+          "name": "instance-00000049",
+          "uuid": "954441a8-552a-476c-985e-6564e6fe93d6"
+        },
+        {
+          "name": "instance-0000004a",
+          "uuid": "5102fbbf-7156-48dc-8355-af7ab992266f"
+        },
+        {
+          "name": "instance-0000004b",
+          "uuid": "543043df-27c8-4e01-81b6-ab36c3e60708"
+        },
+        {
+          "name": "instance-0000004c",
+          "uuid": "67ca710a-e73f-4801-a12f-d0c55ccb8955"
+        },
+        {
+          "name": "instance-0000004d",
+          "uuid": "3b27b706-c0ad-4528-a865-7afaf7712130"
+        },
+        {
+          "name": "instance-0000004e",
+          "uuid": "97dec705-edab-4b3a-bbe6-b2121a85a603"
+        },
+        {
+          "name": "instance-0000004f",
+          "uuid": "cca55639-448f-44cc-ae6a-150afe0fa6b3"
+        },
+        {
+          "name": "instance-00000050",
+          "uuid": "4caf78dc-2e5d-40a7-8d56-1c2f7f664283"
+        },
+        {
+          "name": "instance-00000051",
+          "uuid": "7994720d-62a5-4b48-9158-f941d98db5c1"
+        },
+        {
+          "name": "instance-00000052",
+          "uuid": "d34c4531-7cd1-4454-b39e-356463af7700"
+        },
+        {
+          "name": "instance-00000053",
+          "uuid": "9e80aa16-5a28-4ec0-bfce-f83bf56d0c86"
+        }
+      ]
+    }
+  ]
+}

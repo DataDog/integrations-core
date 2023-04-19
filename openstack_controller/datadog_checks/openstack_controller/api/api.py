@@ -23,6 +23,22 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
+    def get_identity_groups(self):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_identity_group_users(self, group_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_identity_services(self):
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_identity_limits(self):
+        pass  # pragma: no cover
+
+    @abstractmethod
     def get_auth_projects(self):
         pass  # pragma: no cover
 

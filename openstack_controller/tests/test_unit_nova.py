@@ -373,7 +373,7 @@ def test_hypervisor_metrics(aggregator, dd_run_check, instance, monkeypatch):
     dd_run_check(check)
     for metric in NOVA_HYPERVISOR_METRICS:
         aggregator.assert_metric(
-            f'openstack.nova.hypervisor.{metric}',
+            metric,
             tags=[
                 'domain_id:default',
                 'keystone_server:{}'.format(instance["keystone_server_url"]),
@@ -396,9 +396,25 @@ def test_latest_hypervisor_metrics(aggregator, dd_run_check, instance_nova_micro
 
     check = OpenStackControllerCheck('test', {}, [instance_nova_microversion_latest])
     dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.nova.hypervisor.up',
+        value=1,
+        tags=[
+            'domain_id:default',
+            'keystone_server:{}'.format(instance_nova_microversion_latest["keystone_server_url"]),
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+            'aggregate:my-aggregate',
+            'availability_zone:availability-zone',
+            'hypervisor:agent-integrations-openstack-default',
+            'hypervisor_id:d884b51a-e464-49dc-916c-766da0237661',
+            'status:enabled',
+            'virt_type:QEMU',
+        ],
+    )
     for metric in NOVA_HYPERVISOR_LOAD_METRICS:
         aggregator.assert_metric(
-            f'openstack.nova.hypervisor.{metric}',
+            metric,
             tags=[
                 'domain_id:default',
                 'keystone_server:{}'.format(instance_nova_microversion_latest["keystone_server_url"]),
