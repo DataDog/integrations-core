@@ -19,7 +19,7 @@ datadog-cassandra-nodetool==1.11.0
 datadog-cassandra==1.16.0
 datadog-ceph==2.7.0; sys_platform != 'win32'
 datadog-cert-manager==3.0.0
-datadog-checks-base==31.0.0
+datadog-checks-base==31.0.1
 datadog-checks-dependency-provider==1.3.0
 datadog-checks-downloader==4.1.0
 datadog-cilium==2.3.0
@@ -53,7 +53,7 @@ datadog-fluentd==2.2.0
 datadog-foundationdb==1.2.0
 datadog-gearmand==2.3.0; sys_platform != 'win32'
 datadog-gitlab-runner==3.3.2
-datadog-gitlab==6.0.0
+datadog-gitlab==6.0.1
 datadog-glusterfs==1.5.0; sys_platform == 'linux2'
 datadog-go-expvar==2.2.0
 datadog-gunicorn==2.3.1; sys_platform != 'win32'
