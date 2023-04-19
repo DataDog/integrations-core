@@ -2,7 +2,7 @@
 
 ## 31.0.1 / 2023-04-19
 
-* [Fixed] Do not add dependency to agent. See [#14393](https://github.com/DataDog/integrations-core/pull/14393).
+* [Fixed] Do not add `freezegun` dependency to agent. See [#14393](https://github.com/DataDog/integrations-core/pull/14393).
 
 ## 31.0.0 / 2023-04-14
 
