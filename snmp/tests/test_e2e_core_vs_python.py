@@ -36,7 +36,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.interface.status',
     'snmp.ifInSpeed',
     'snmp.ifOutSpeed',
-    'snmp.peerConnection',  # BGP4 constant metric, not handled by python check
+    'snmp.peerConnectionByState',  # BGP4 constant metric, not handled by python check
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']

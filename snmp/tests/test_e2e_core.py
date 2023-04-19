@@ -399,6 +399,6 @@ def test_e2e_core_cisco_csr(dd_agent_check):
     for metric in metrics.PEER_RATES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=metric_tags)
 
-    aggregator.assert_metric('snmp.peerConnection', metric_type=aggregator.GAUGE, tags=metric_tags, value=1)
+    aggregator.assert_metric('snmp.peerConnectionByState', metric_type=aggregator.GAUGE, tags=metric_tags, value=1)
 
     aggregator.assert_all_metrics_covered()
