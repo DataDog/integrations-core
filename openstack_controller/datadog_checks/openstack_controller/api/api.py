@@ -103,10 +103,6 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_response_time(self, project_id):
-        pass  # pragma: no cover
-
-    @abstractmethod
     def get_compute_limits(self, project_id):
         pass  # pragma: no cover
 
