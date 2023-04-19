@@ -279,6 +279,7 @@ class OpenStackControllerCheck(AgentCheck):
                             f'server_name:{server_data["name"]}',
                             f'server_status:{server_data["status"]}',
                             f'hypervisor:{server_data["hypervisor_hostname"]}',
+                            f'instance_hostname:{server_data["instance_hostname"]}',
                             f'flavor_name:{server_data["flavor_name"]}',
                         ],
                     )

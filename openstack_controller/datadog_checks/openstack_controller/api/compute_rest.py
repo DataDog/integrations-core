@@ -63,6 +63,7 @@ class ComputeRest:
                 'name': server['name'],
                 'status': server['status'].lower(),
                 'hypervisor_hostname': server['OS-EXT-SRV-ATTR:hypervisor_hostname'],
+                'instance_hostname': server.get('OS-EXT-SRV-ATTR:hostname'),
                 'metrics': {},
             }
             flavor = server.get('flavor')
