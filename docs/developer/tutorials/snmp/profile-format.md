@@ -626,7 +626,7 @@ metrics:
 
 To report statuses from your network devices, you can use the constant metrics feature available in Agent 7.45+.
 
-For example: `constant_value_one` sends a constant metric, equal to one, that can be tagged with string properties.
+`constant_value_one` sends a constant metric, equal to one, that can be tagged with string properties.
 
 Example use case:
 
