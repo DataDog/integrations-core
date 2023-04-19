@@ -137,8 +137,20 @@ process_endpoint --endpoint="/baremetal/conductors"
 # Octavia
 
 process_endpoint --endpoint="/load-balancer/v2/lbaas/loadbalancers"
+for loadbalancer_id in $(echo "$RESPONSE" | jq -r '.loadbalancers[]' | jq -r '.id'); do
+  process_endpoint --endpoint="/load-balancer/v2/lbaas/loadbalancers/$loadbalancer_id/stats/"
+done
+
 process_endpoint --endpoint="/load-balancer/v2/lbaas/listeners"
+for listener_id in $(echo "$RESPONSE" | jq -r '.listeners[]' | jq -r '.id'); do
+  process_endpoint --endpoint="/load-balancer/v2/lbaas/listeners/$listener_id/stats/"
+done
+
 process_endpoint --endpoint="/load-balancer/v2/lbaas/pools"
 process_endpoint --endpoint="/load-balancer/v2/lbaas/healthmonitors"
 process_endpoint --endpoint="/load-balancer/v2/octavia/amphorae"
+for amphora_id in $(echo "$RESPONSE" | jq -r '.amphorae[]' | jq -r '.id'); do
+  process_endpoint --endpoint="/load-balancer/v2/lbaas/amphorae/$amphora_id/stats/"
+done
+
 rm headers
