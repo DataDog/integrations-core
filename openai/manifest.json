@@ -14,8 +14,7 @@
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS",
-      "Category::Log Collection"
+      "Supported OS::macOS"
     ]
   },
   "assets": {
@@ -36,9 +35,6 @@
     },
     "dashboards": {
       "OpenAI Overview Dashboard": "assets/dashboards/openai_overview.json"
-    },
-    "logs": {
-      "source": "openai"
     }
   },
   "author": {
