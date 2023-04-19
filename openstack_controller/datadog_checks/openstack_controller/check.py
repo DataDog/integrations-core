@@ -182,6 +182,12 @@ class OpenStackControllerCheck(AgentCheck):
         identity_limits = api.get_identity_limits()
         self.log.debug("identity_limits: %s", identity_limits)
         for limit_id, limit_data in identity_limits.items():
+            domain_id = limit_data.get('domain_id')
+            project_id = limit_data.get('project_id')
+            optional_tags = [
+                'domain_id:{}'.format(domain_id) if domain_id else None,
+                'project_id:{}'.format(project_id) if project_id else None,
+            ]
             self.gauge(
                 'openstack.keystone.limits',
                 limit_data['limit'],
@@ -191,15 +197,9 @@ class OpenStackControllerCheck(AgentCheck):
                     'resource_name:{}'.format(limit_data['resource_name']),
                     'service_id:{}'.format(limit_data.get('service_id', '')),
                     'region_id:{}'.format(limit_data.get('region_id', '')),
-                    'domain_id:{}'.format(limit_data.get('domain_id', '')),
-                    'project_id:{}'.format(limit_data.get('project_id', '')),
-                ],
+                ]
+                + optional_tags,
             )
-        # self.gauge(
-        #     'openstack.keystone.services.count',
-        #     len(identity_services),
-        #     tags=tags + ['domain_id:{}'.format(self.config.domain_id)],
-        # )
 
     def _report_project_metrics(self, api, project, tags):
         project_id = project.get('id')
