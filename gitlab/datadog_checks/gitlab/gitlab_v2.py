@@ -84,16 +84,18 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
 
         try:
             self.log.debug("checking %s against %s", check_type, check_url)
-            r = self.http.get(check_url)
+            response = self.http.get(check_url)
 
+            # We always want to handle the response even if we do not receive a 200 code.
+            # GitLab will return a 503 with a payload if one of the service is down.
             if response_handler:
-                response_handler(r)
+                response_handler(response)
 
-            if r.status_code != 200:
+            if response.status_code != 200:
                 self.service_check(
                     check_type,
                     OpenMetricsBaseCheckV2.CRITICAL,
-                    message=f"Got {r.status_code} when hitting {check_url}",
+                    message=f"Got {response.status_code} when hitting {check_url}",
                     tags=self._tags,
                 )
             else:
@@ -126,34 +128,44 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         service_checks_sent = set()
 
         if response is not None:
-            for key, value in response.json().items():
-                self.log.trace("Reading key %s", key)
+            try:
+                items = response.json().items()
+            except Exception as e:
+                self.log.debug("Could not read readiness service check payload: %s", str(e))
+            else:
+                for key, value in items:
+                    self.log.trace("Reading key %s", key)
 
-                # Format:
-                # {
-                #     "master_check": [
-                #         {
-                #             "status": "ok"
-                #         }
-                #     ]
-                # }
-                if not key.endswith("_check") or not isinstance(value, list) or not value or not value[0].get("status"):
-                    continue
+                    # Format:
+                    # {
+                    #     "master_check": [
+                    #         {
+                    #             "status": "ok"
+                    #         }
+                    #     ]
+                    # }
+                    if (
+                        not key.endswith("_check")
+                        or not isinstance(value, list)
+                        or not value
+                        or not value[0].get("status")
+                    ):
+                        continue
 
-                if check := self.READINESS_SERVICE_CHECKS.get(key):
-                    gitlab_status = value[0].get("status")
+                    if check := self.READINESS_SERVICE_CHECKS.get(key):
+                        gitlab_status = value[0].get("status")
 
-                    if gitlab_status == "ok":
-                        dd_status = OpenMetricsBaseCheckV2.OK
-                    elif gitlab_status is None:
-                        dd_status = OpenMetricsBaseCheckV2.UNKNOWN
+                        if gitlab_status == "ok":
+                            dd_status = OpenMetricsBaseCheckV2.OK
+                        elif gitlab_status is None:
+                            dd_status = OpenMetricsBaseCheckV2.UNKNOWN
+                        else:
+                            dd_status = OpenMetricsBaseCheckV2.CRITICAL
+                        self.service_check(f"readiness.{check}", dd_status, self._tags)
+
+                        service_checks_sent.add(key)
                     else:
-                        dd_status = OpenMetricsBaseCheckV2.CRITICAL
-                    self.service_check(f"readiness.{check}", dd_status, self._tags)
-
-                    service_checks_sent.add(key)
-                else:
-                    self.log.debug("Unknown service check %s", check)
+                        self.log.debug("Unknown service check %s", check)
 
         # Handle all the declared checks that we did not get from the endpoint
         for missing_service_check in self.READINESS_SERVICE_CHECKS.keys() - service_checks_sent:
