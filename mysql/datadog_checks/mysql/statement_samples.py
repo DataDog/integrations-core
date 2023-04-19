@@ -32,7 +32,7 @@ from .util import DatabaseConfigurationError, StatementTruncationState, get_trun
 
 
 def agent_check_getter(self):
-    return self.check
+    return self._check
 
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})

@@ -47,7 +47,7 @@ METRICS_COLUMNS = {
 
 
 def agent_check_getter(self):
-    return self.check
+    return self._check
 
 
 def _row_key(row):
