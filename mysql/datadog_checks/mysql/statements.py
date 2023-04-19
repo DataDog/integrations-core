@@ -4,6 +4,7 @@
 import copy
 import time
 from contextlib import closing
+from operator import attrgetter
 from typing import Any, Callable, Dict, List, Tuple
 
 import pymysql
@@ -44,10 +45,6 @@ METRICS_COLUMNS = {
     'sum_no_index_used',
     'sum_no_good_index_used',
 }
-
-
-def agent_check_getter(self):
-    return self._check
 
 
 def _row_key(row):
@@ -115,7 +112,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
     def run_job(self):
         self.collect_per_statement_metrics()
 
-    @tracked_method(agent_check_getter=agent_check_getter)
+    @tracked_method(agent_check_getter=attrgetter('_check'))
     def collect_per_statement_metrics(self):
         # Detect a database misconfiguration by checking if the performance schema is enabled since mysql
         # just returns no rows without errors if the performance schema is disabled

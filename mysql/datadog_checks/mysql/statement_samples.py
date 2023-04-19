@@ -7,6 +7,7 @@ import time
 from collections import namedtuple
 from contextlib import closing
 from enum import Enum
+from operator import attrgetter
 
 import pymysql
 from cachetools import TTLCache
@@ -29,10 +30,6 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import DatabaseConfigurationError, StatementTruncationState, get_truncation_state, warning_with_tags
-
-
-def agent_check_getter(self):
-    return self._check
 
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
@@ -321,7 +318,7 @@ class MySQLStatementSamples(DBMAsyncJob):
             )
             raise
 
-    @tracked_method(agent_check_getter=agent_check_getter)
+    @tracked_method(agent_check_getter=attrgetter('_check'))
     def _get_new_events_statements_current(self):
         start = time.time()
         with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
@@ -464,7 +461,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                 'mysql': {k: v for k, v in row.items() if k not in EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS},
             }
 
-    @tracked_method(agent_check_getter=agent_check_getter)
+    @tracked_method(agent_check_getter=attrgetter('_check'))
     def _collect_plans_for_statements(self, rows):
         for row in rows:
             try:
