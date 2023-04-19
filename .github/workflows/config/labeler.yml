@@ -294,6 +294,8 @@ integration/oke:
 - oke/**/*
 integration/oom_kill:
 - oom_kill/**/*
+integration/openai:
+- openai/**/*
 integration/openldap:
 - openldap/**/*
 integration/openmetrics:

@@ -8,14 +8,13 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "Monitor OpenAI through Tracing",
     "title": "OpenAI",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS",
-      "Category::Log Collection"
+      "Supported OS::macOS"
     ]
   },
   "assets": {
@@ -36,10 +35,7 @@
     },
     "dashboards": {
       "OpenAI Overview Dashboard": "assets/dashboards/openai_overview.json"
-    },
-    "monitors": {},
-    "logs": {},
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
