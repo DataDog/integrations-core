@@ -100,7 +100,7 @@ class MySql(AgentCheck):
         self._agent_hostname = None
         self._is_aurora = None
         self._config = MySQLConfig(self.instance)
-        self.tags = copy.copy(self._config.tags)
+        self.tags = self._config.tags
         self.cloud_metadata = self._config.cloud_metadata
 
         # Create a new connection on every check run
@@ -374,7 +374,7 @@ class MySql(AgentCheck):
             server = self._config.mysql_sock if self._config.mysql_sock != '' else self._config.host
         service_check_tags = [
             'port:{}'.format(self._config.port if self._config.port else 'unix_socket'),
-        ] + self._config.tags
+        ] + self.tags
         if not self.disable_generic_tags:
             service_check_tags.append('server:{0}'.format(server))
         return service_check_tags
