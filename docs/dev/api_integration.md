@@ -5,7 +5,9 @@ type: documentation
 
 ## Overview
 
-Use a [Datadog API endpoint][1] to enrich and submit data from your backend, or pull data directly out of Datadog. API integrations work well in building a connector between Datadog and another SaaS platform. This method is ideal for Technology Partners that are SaaS based, and have an existing website for users to log into for authorization purposes.
+Use a [Datadog API endpoint][1] to enrich and submit data from your backend. API integrations work well in building a connector between Datadog and another SaaS platform. Partners will write and host their code within their enviornment.
+
+ This method is ideal for Technology Partners that are SaaS based, and have an existing website for users to log into for authorization purposes.
 
 API integrations send the following types of data to Datadog:
 
@@ -17,23 +19,18 @@ API integrations send the following types of data to Datadog:
 - [Incidents][7]
 - [Security Events][8]
 
-This page provides instructions for creating an API integration. REMOVE: For more information about why you would want to create an API-based integration, see [Creating your own solution][9]. Since API integrations do not use the Datadog Agent to collect data, you need to create an informational tile-only listing once your development work is complete. 
-
+This page provides instructions for creating an API integration.  Since API integrations do not use the Datadog Agent to collect data, you need to create an informational tile-only listing to display your offering on the Integrations page once your development work is complete.
 ## Setup
 
 ### Prerequisites
 
-- You must have an [API key][10] and [application key][11].
+- You must implement OAuth in order to submit data or pull data out of Datadog. 
 - Determine which [Datadog site][12] you want to use.
 
-An API key is required to submit data to a Datadog API endpoint. An application key is required to query data from Datadog or to create resources within the Datadog site. For more information, see [API and Application Key][13].
-
-Create a connection to Datadog in your company's platform using the API key, application key, and site URL. 
-
 ### Create an OAuth client
-Instead of requesting these credentials directly from a user, Datadog recommends using an [OAuth client][14] to handle authorization and access for API-based integrations. For more information, see [OAuth for Integrations][15] and [Authorization Endpoints][16]
+Instead of requesting API and Application keys directly from a user, Datadog requires using an [OAuth client][14] to handle authorization and access for API-based integrations. For more information, see [OAuth for Integrations][15] and [Authorization Endpoints][16]. 
 
-You can explore examples of existing API integrations in the `integrations-extras` repository such as [Vantage][17].
+You can explore examples that use OAuth in the `integrations-extras` repository such as [Vantage][17].
 
 To create an API integration, click here.[24]
 
