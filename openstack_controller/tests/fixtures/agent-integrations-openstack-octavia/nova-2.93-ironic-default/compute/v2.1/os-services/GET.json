@@ -1,0 +1,48 @@
+{
+  "services": [
+    {
+      "binary": "nova-scheduler",
+      "host": "agent-integrations-openstack-octavia",
+      "id": "41fa53fd-176d-4e1d-a446-1279c361538e",
+      "zone": "internal",
+      "status": "enabled",
+      "state": "up",
+      "updated_at": "2023-04-19T17:38:50.000000",
+      "disabled_reason": null,
+      "forced_down": false
+    },
+    {
+      "binary": "nova-conductor",
+      "host": "agent-integrations-openstack-octavia",
+      "id": "ee164757-d6d4-4625-8ddb-05f9de415e53",
+      "zone": "internal",
+      "status": "enabled",
+      "state": "up",
+      "updated_at": "2023-04-19T17:38:49.000000",
+      "disabled_reason": null,
+      "forced_down": false
+    },
+    {
+      "binary": "nova-conductor",
+      "host": "agent-integrations-openstack-octavia",
+      "id": "c90d4253-bcdf-4c91-b442-9e7ca43fb60b",
+      "zone": "internal",
+      "status": "enabled",
+      "state": "up",
+      "updated_at": "2023-04-19T17:38:53.000000",
+      "disabled_reason": null,
+      "forced_down": false
+    },
+    {
+      "binary": "nova-compute",
+      "host": "agent-integrations-openstack-octavia",
+      "id": "760b4c48-b691-47b9-b0ad-25da84e2a4e4",
+      "zone": "nova",
+      "status": "enabled",
+      "state": "up",
+      "updated_at": "2023-04-19T17:38:49.000000",
+      "disabled_reason": null,
+      "forced_down": false
+    }
+  ]
+}

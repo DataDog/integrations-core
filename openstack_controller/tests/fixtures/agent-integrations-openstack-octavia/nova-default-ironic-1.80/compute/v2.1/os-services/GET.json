@@ -1,0 +1,44 @@
+{
+  "services": [
+    {
+      "binary": "nova-scheduler",
+      "host": "agent-integrations-openstack-octavia",
+      "id": 2,
+      "zone": "internal",
+      "status": "enabled",
+      "state": "up",
+      "updated_at": "2023-04-19T17:38:40.000000",
+      "disabled_reason": null
+    },
+    {
+      "binary": "nova-conductor",
+      "host": "agent-integrations-openstack-octavia",
+      "id": 5,
+      "zone": "internal",
+      "status": "enabled",
+      "state": "up",
+      "updated_at": "2023-04-19T17:38:39.000000",
+      "disabled_reason": null
+    },
+    {
+      "binary": "nova-conductor",
+      "host": "agent-integrations-openstack-octavia",
+      "id": 1,
+      "zone": "internal",
+      "status": "enabled",
+      "state": "up",
+      "updated_at": "2023-04-19T17:38:43.000000",
+      "disabled_reason": null
+    },
+    {
+      "binary": "nova-compute",
+      "host": "agent-integrations-openstack-octavia",
+      "id": 3,
+      "zone": "nova",
+      "status": "enabled",
+      "state": "up",
+      "updated_at": "2023-04-19T17:38:39.000000",
+      "disabled_reason": null
+    }
+  ]
+}
