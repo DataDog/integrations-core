@@ -210,7 +210,7 @@ def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
                 display_queue.append((echo_failure, message))
 
     if not success:
-        message = 'Try running `ddev validate ci --fix`'
+        message = 'Try running `ddev validate ci --sync`'
         echo_info(message)
         display_queue.append((echo_failure, message))
         for func, message in display_queue:
@@ -378,7 +378,7 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
             display_queue.append((echo_failure, message))
 
     if not success:
-        message = 'Try running `ddev validate ci --fix`'
+        message = 'Try running `ddev validate ci --sync`'
         display_queue.append((echo_info, message))
         annotate_display_queue(codecov_config_path, display_queue)
         for func, message in display_queue:
@@ -482,7 +482,7 @@ def validate_integration_pr_labels(fix, repo_data, valid_integrations):
                 )
 
     if not success:
-        message = 'Try running `ddev validate ci --fix`'
+        message = 'Try running `ddev validate ci --sync`'
         echo_info(message)
         display_queue.append((echo_failure, message))
         for func, message in display_queue:
