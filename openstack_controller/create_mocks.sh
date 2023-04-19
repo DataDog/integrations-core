@@ -116,6 +116,7 @@ for project_id in $(echo "$RESPONSE" | jq -r '.projects[]' | jq -r '.id'); do
   process_endpoint --port=9696 --endpoint="/networking/v2.0/quotas/$project_id"
 done
 process_endpoint --endpoint="/compute/v2.1/os-aggregates"
+process_endpoint --endpoint="/compute/v2.1/os-services"
 process_endpoint --endpoint="/compute/v2.1/os-hypervisors/detail?with_servers=true"
 num_uptime=$(echo "$RESPONSE" | jq -r '.hypervisors[] | select(.uptime != null) | length')
 if [[ $num_uptime -eq 0 ]]; then

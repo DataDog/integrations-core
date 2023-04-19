@@ -133,8 +133,8 @@ def test_node_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
 
     for node_tags in demo_nodes:
         tags = demo_project_tags + node_tags
-        aggregator.assert_metric('openstack.ironic.nodes.count', count=1, value=1, tags=tags)
-        aggregator.assert_metric('openstack.ironic.nodes.up', count=1, value=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.node.count', count=1, value=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.node.up', count=1, value=1, tags=tags)
 
     admin_project_tags = base_tags + [
         'project_id:01b21103a92d4997ab09e46ff8346bd5',
@@ -150,11 +150,11 @@ def test_node_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
 
     for node_tags in admin_nodes:
         tags = admin_project_tags + node_tags
-        aggregator.assert_metric('openstack.ironic.nodes.count', count=1, value=1, tags=tags)
-        aggregator.assert_metric('openstack.ironic.nodes.up', count=1, value=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.node.count', count=1, value=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.node.up', count=1, value=1, tags=tags)
 
-    aggregator.assert_metric('openstack.ironic.nodes.count', value=1, count=8)
-    aggregator.assert_metric('openstack.ironic.nodes.up', value=1, count=8)
+    aggregator.assert_metric('openstack.ironic.node.count', value=1, count=8)
+    aggregator.assert_metric('openstack.ironic.node.up', value=1, count=8)
 
 
 def test_node_metrics_latest(aggregator, dd_run_check, instance_ironic_nova_microversion_latest, monkeypatch):
@@ -197,8 +197,8 @@ def test_node_metrics_latest(aggregator, dd_run_check, instance_ironic_nova_micr
 
     for node_tags in demo_nodes:
         tags = demo_project_tags + node_tags
-        aggregator.assert_metric('openstack.ironic.nodes.count', count=1, value=1, tags=tags)
-        aggregator.assert_metric('openstack.ironic.nodes.up', count=1, value=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.node.count', count=1, value=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.node.up', count=1, value=1, tags=tags)
 
     admin_project_tags = base_tags + [
         'project_id:01b21103a92d4997ab09e46ff8346bd5',
@@ -230,11 +230,11 @@ def test_node_metrics_latest(aggregator, dd_run_check, instance_ironic_nova_micr
 
     for node_tags in admin_nodes:
         tags = admin_project_tags + node_tags
-        aggregator.assert_metric('openstack.ironic.nodes.count', count=1, value=1, tags=tags)
-        aggregator.assert_metric('openstack.ironic.nodes.up', count=1, value=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.node.count', count=1, value=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.node.up', count=1, value=1, tags=tags)
 
-    aggregator.assert_metric('openstack.ironic.nodes.count', count=8)
-    aggregator.assert_metric('openstack.ironic.nodes.up', count=8)
+    aggregator.assert_metric('openstack.ironic.node.count', count=8)
+    aggregator.assert_metric('openstack.ironic.node.up', count=8)
 
 
 def test_conductor_metrics_default(aggregator, dd_run_check, instance, monkeypatch, caplog):
@@ -247,7 +247,7 @@ def test_conductor_metrics_default(aggregator, dd_run_check, instance, monkeypat
     dd_run_check(check)
     assert "Ironic conductors metrics are not available." in caplog.text
 
-    aggregator.assert_metric('openstack.ironic.conductors.up', count=0)
+    aggregator.assert_metric('openstack.ironic.conductor.up', count=0)
 
 
 def test_conductor_metrics_latest(aggregator, dd_run_check, instance_ironic_nova_microversion_latest, monkeypatch):
@@ -275,7 +275,7 @@ def test_conductor_metrics_latest(aggregator, dd_run_check, instance_ironic_nova
         ],
     ]
 
-    aggregator.assert_metric('openstack.ironic.conductors.up', value=1, count=2)
+    aggregator.assert_metric('openstack.ironic.conductor.up', value=1, count=2)
     for conductor in conductor_tags:
         tags = base_tags + conductor
-        aggregator.assert_metric('openstack.ironic.conductors.up', count=1, value=1, tags=tags)
+        aggregator.assert_metric('openstack.ironic.conductor.up', count=1, value=1, tags=tags)

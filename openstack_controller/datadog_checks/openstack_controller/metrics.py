@@ -103,12 +103,6 @@ NOVA_FLAVOR_METRICS = [
     'openstack.nova.flavor.rxtx_factor',
 ]
 
-NOVA_SERVICE_METRICS = [
-    'nova_compute',
-    'nova_scheduler',
-    'nova_conductor',
-]
-
 NOVA_HYPERVISOR_METRICS = [
     'openstack.nova.hypervisor.current_workload',  # Available until version 2.87
     'openstack.nova.hypervisor.disk_available_least',  # Available until version 2.87

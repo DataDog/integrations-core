@@ -59,17 +59,18 @@ class ComputeRest:
         self.log.debug("response: %s", response.json())
         services = []
         for service in response.json().get('services'):
-            binary = service.get('binary').replace('-', '_')
+            service_name = service.get('binary').replace('-', '_')
             is_down = service.get('state') is not None and service.get('state') == 'down'
             is_enabled = service.get('status') == 'enabled'
             is_up = not (is_down and is_enabled)
             services.append(
                 {
-                    'binary': binary,
+                    'name': service_name,
                     'is_up': is_up,
+                    'zone': service.get('zone'),
                     'host': service.get('host'),
                     'status': service.get('status'),
-                    'service_id': service.get('id'),
+                    'id': service.get('id'),
                     'state': service.get('state'),
                 }
             )
