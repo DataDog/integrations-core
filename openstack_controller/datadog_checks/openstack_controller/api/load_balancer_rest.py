@@ -14,49 +14,49 @@ class LoadBalancerRest:
         return response.elapsed.total_seconds() * 1000
 
     def get_loadbalancers(self):
-        url = f"{self.endpoint}/load-balancer/v2/lbaas/loadbalancers"
+        url = f"{self.endpoint}/v2/lbaas/loadbalancers"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return response.json()['loadbalancers']
     
     def get_listeners(self):
-        url = f"{self.endpoint}/load-balancer/v2/lbaas/listeners"
+        url = f"{self.endpoint}/v2/lbaas/listeners"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return response.json()['listeners']
     
     def get_pools(self):
-        url = f"{self.endpoint}/load-balancer/v2/lbaas/pools"
+        url = f"{self.endpoint}/v2/lbaas/pools"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return response.json()['pools']
     
     def get_members_by_pool(self, pool_id):
-        url = f"{self.endpoint}/load-balancer/v2/lbaas/pools/{pool_id}/members"
+        url = f"{self.endpoint}/v2/lbaas/pools/{pool_id}/members"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return response.json()['members']
     
     def get_healthmonitors(self):
-        url = f"{self.endpoint}/load-balancer/v2/lbaas/healthmonitors"
+        url = f"{self.endpoint}/v2/lbaas/healthmonitors"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return response.json()['healthmonitors']
     
     def get_loadbalancer_statistics(self, loadbalancer_id):
-        url = f"{self.endpoint}/load-balancer/v2/lbaas/loadbalancers/{loadbalancer_id}/stats"
+        url = f"{self.endpoint}/v2/lbaas/loadbalancers/{loadbalancer_id}/stats"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return response.json()['stats']
     
     def get_listener_statistics(self, listener_id):
-        url = f"{self.endpoint}/load-balancer/v2/lbaas/listeners/{listener_id}/stats"
+        url = f"{self.endpoint}/v2/lbaas/listeners/{listener_id}/stats"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
@@ -78,7 +78,7 @@ class LoadBalancerRest:
         return result
     
     def get_amphorae(self):
-        url = f"{self.endpoint}/load-balancer/v2/octavia/amphorae"
+        url = f"{self.endpoint}/v2/octavia/amphorae"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
@@ -90,7 +90,7 @@ class LoadBalancerRest:
         return result
     
     def get_amphora_statistics(self, amphora_id):
-        url = f"{self.endpoint}/load-balancer//v2/octavia/amphorae/{amphora_id}/stats"
+        url = f"{self.endpoint}/v2/octavia/amphorae/{amphora_id}/stats"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
