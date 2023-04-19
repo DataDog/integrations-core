@@ -110,6 +110,7 @@ for project_id in $(echo "$RESPONSE" | jq -r '.projects[]' | jq -r '.id'); do
   process_endpoint --endpoint="/compute/v2.1/limits?tenant_id=$project_id"
   process_endpoint --endpoint="/compute/v2.1/os-quota-sets/$project_id"
   process_endpoint --endpoint="/compute/v2.1/servers/detail?project_id=$project_id"
+
   for server_id in $(echo "$RESPONSE" | jq -r '.servers[]' | jq -r '.id'); do
     process_endpoint --endpoint="/compute/v2.1/servers/$server_id/diagnostics"
   done
@@ -135,4 +136,9 @@ process_endpoint --endpoint="/baremetal/conductors"
 
 # Octavia
 
+process_endpoint --endpoint="/load-balancer/v2/lbaas/loadbalancers"
+process_endpoint --endpoint="/load-balancer/v2/lbaas/listeners"
+process_endpoint --endpoint="/load-balancer/v2/lbaas/pools"
+process_endpoint --endpoint="/load-balancer/v2/lbaas/healthmonitors"
+process_endpoint --endpoint="/load-balancer/v2/octavia/amphorae"
 rm headers

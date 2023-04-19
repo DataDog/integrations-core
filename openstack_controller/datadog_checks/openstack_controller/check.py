@@ -459,6 +459,7 @@ class OpenStackControllerCheck(AgentCheck):
     def _report_load_balancer_metrics(self, api, project_id, project_tags):
         try:
             self._report_load_balancer_response_time(api, project_id, project_tags)
+            self._report_load_balancer_loadbalancers_and_listeners(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting load balancer metrics: %s", e)
@@ -476,7 +477,7 @@ class OpenStackControllerCheck(AgentCheck):
             self.service_check('openstack.octavia.api.up', AgentCheck.UNKNOWN, tags=project_tags)
 
     def _report_load_balancer_loadbalancers_and_listeners(self, api, project_id, project_tags):
-        loadbalancers_data = api.get_loadbalancer_loadbalancers(project_id)
+        loadbalancers_data = api.get_load_balancer_loadbalancers(project_id)
         if loadbalancers_data is not None:
             for loadbalancer_data in loadbalancers_data:
                 loadbalancer_id = loadbalancer_data.get("id")
