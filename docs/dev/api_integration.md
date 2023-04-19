@@ -25,14 +25,26 @@ This page provides instructions for creating an API integration.  Since API inte
 ### Prerequisites
 
 - You must implement OAuth in order to submit data or pull data out of Datadog. 
-- Determine which [Datadog site][12] you want to use.
+- You must support all [Datadog sites][12].
 
 ### Create an OAuth client
 Instead of requesting API and Application keys directly from a user, Datadog requires using an [OAuth client][14] to handle authorization and access for API-based integrations. For more information, see [OAuth for Integrations][15] and [Authorization Endpoints][16]. 
 
 You can explore examples that use OAuth in the `integrations-extras` repository such as [Vantage][17].
 
-To create an API integration, click here.[24]
+## Development Process
+
+You can expect the following process for building an API-based integration:
+1. Meet with the Datadog Technology Partner team to discuss your offering and use cases.
+2. Request a sandbox account for development.
+3. Begin development of your integration, which will include writing and hosting integration code on your end, as well as implementing the OAuth protocol.
+4. Test your integration, as well as your OAuth client, in your sandbox account.
+5. Once your development work is tested and complete, **follow the steps to [create a tile] in order to display your offering on the Marketplace or Integrations page**.
+6. Once your pull requested is submitted and approved, the team will schedule a demo for a final review of your integration.
+7. You'll have the option of testing the tile and integration in your sandbox account before publishing, or immediately publishing the integration for all customers. 
+
+To create an API integration, [click here][24]. 
+
 
 Additional helpful documentation, links, and articles:
 
