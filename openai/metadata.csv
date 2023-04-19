@@ -1,6 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 openai.request.duration,gauge,10,nanosecond,,Request duration distribution,0,openai,openai,
-openai.tokens.prompt,gauge,10,,,Number of tokens used in the prompt of a request to OpenAI,0,openai,openai
+openai.tokens.prompt,gauge,10,,,Number of tokens used in the prompt of a request to OpenAI,0,openai,openai,
 openai.tokens.completion,gauge,10,,,Number of tokens used in the completion of a response from OpenAI,0,openai,openai,
 openai.tokens.total,gauge,10,,,Total number of tokens used in a request to OpenAI,0,openai,openai,
 openai.request.error,count,10,error,,Number of errors,0,openai,openai,
