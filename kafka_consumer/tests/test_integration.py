@@ -148,6 +148,12 @@ def test_monitor_broker_highwatermarks(
             id="One consumer group, one topic, all partitions",
         ),
         pytest.param(
+            {'consumer_groups': {'nonsense': {'marvel': None}}},
+            does_not_raise(),
+            0,
+            id="Nonexistent consumer group, resulting in no metrics",
+        ),
+        pytest.param(
             {'consumer_groups': {'my_consumer': {'marvel': [1]}}},
             does_not_raise(),
             1,
@@ -304,6 +310,18 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             2,
             '',
             id="Specified topic, monitor_unlisted_consumer_groups false",
+        ),
+        pytest.param(
+            {
+                'consumer_groups': {},
+                'consumer_groups_regex': {'foo': {'bar': []}, 'my_consume*': {'dc': []}},
+                'monitor_unlisted_consumer_groups': False,
+            },
+            2,
+            2,
+            2,
+            '',
+            id="Specified topic with an extra nonmatching consumer group regex, monitor_unlisted_consumer_groups false",
         ),
         pytest.param(
             {
