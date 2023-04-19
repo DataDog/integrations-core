@@ -128,16 +128,11 @@ def test_loadbalancers_metrics_default(aggregator, dd_run_check, instance, monke
 
     for loadbalancer_tags in demo_loadbalancers:
         tags = demo_project_tags + loadbalancer_tags
-        aggregator.assert_metric(
-            'openstack.octavia.loadbalancer.active_connections', 
-            value=0.0, 
-            metric_type=aggregator.GAUGE,
-            count=1,
-            tags=tags)
-        # aggregator.assert_metric('openstack.octavia.loadbalancer.bytes_in', count=0, tags=tags)
-        # aggregator.assert_metric('openstack.octavia.loadbalancer.bytes_out', count=0, tags=tags)
-        # aggregator.assert_metric('openstack.octavia.loadbalancer.request_errors', count=0, tags=tags)
-        # aggregator.assert_metric('openstack.octavia.loadbalancer.total_connections', count=0, tags=tags)
+        aggregator.assert_metric('openstack.octavia.loadbalancer.active_connections', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.loadbalancer.bytes_in', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.loadbalancer.bytes_out', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.loadbalancer.request_errors', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.loadbalancer.total_connections', count=1, tags=tags)
 
 def test_listeners_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
     http = MockHttp("agent-integrations-openstack-octavia")
@@ -151,17 +146,17 @@ def test_listeners_metrics_default(aggregator, dd_run_check, instance, monkeypat
 
     demo_project_tags = base_tags + [
         'project_id:4762874c945945c38d820cce29fbb66e',
-        'project_name:demo',
+        'project_name:admin',
     ]
 
     demo_listeners = [
-        ['listener_id:de81cbdc-8207-4253-8f21-3eea9870e7a9', 'listener_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115', 'listener_name:listener-1', 'pool_id:d0335b34-3115-4b3b-9a1a-7e2363ebfee3']
+        ['listener_id:de81cbdc-8207-4253-8f21-3eea9870e7a9', 'listener_name:listener-1', 'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115', 'loadbalancer_name:loadbalancer-1']
     ]
 
     for listener_tags in demo_listeners:
         tags = demo_project_tags + listener_tags
-        # aggregator.assert_metric('openstack.octavia.listener.connection_limit', count=1, tags=tags)
-        # aggregator.assert_metric('openstack.octavia.listener.timeout_client_data', count=0, tags=tags)
-        # aggregator.assert_metric('openstack.octavia.listener.timeout_member_connect', count=0, tags=tags)
-        # aggregator.assert_metric('openstack.octavia.listener.timeout_member_data', count=0, tags=tags)
-        # aggregator.assert_metric('openstack.octavia.listener.timeout_tcp_inspect', count=0, tags=tags)
+        aggregator.assert_metric('openstack.octavia.listener.connection_limit', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.listener.timeout_client_data', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.listener.timeout_member_connect', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.listener.timeout_member_data', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.listener.timeout_tcp_inspect', count=1, tags=tags)
