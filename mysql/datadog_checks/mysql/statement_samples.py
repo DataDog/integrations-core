@@ -31,7 +31,6 @@ from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import DatabaseConfigurationError, StatementTruncationState, get_truncation_state, warning_with_tags
 
-
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
 EVENTS_STATEMENTS_TABLE = 'events_statements_current'
