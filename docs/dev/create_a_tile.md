@@ -24,10 +24,10 @@ further_reading:
 
 This page walks you through how to develop an offering on the Datadog Marketplace. If you have any questions, reach out to <a href="mailto:marketplace@datadoghq.com">marketplace@datadoghq.com</a>.
 
-{{% tab "Paid" %}}
+{{% tab "Marketplace Offerings" %}}
 ## Set up a directory and clone the Marketplace repository
 
-Once you've decided on an offering, set up a directory:
+Set up a directory:
 
 1. Request access to the [Marketplace repository][18] by following the instructions in the [Marketplace documentation][19].
 2. Create a `dd` directory:
@@ -60,7 +60,7 @@ ddev config set repo marketplace
 
 ### Create an informational tile only listing
 
-For Datadog Apps, Datadog REST API integrations, professional services, and standalone SaaS licenses, use the Datadog Development Toolkit to create scaffolding for an informational tile-only listing.
+For API integrations, Datadog Apps, professional services, or standalone SaaS licenses that will be offered for an additional cost on the Datadog Marketplace, use the Datadog Development Toolkit to create scaffolding for an informational tile-only listing.
 
 To create the informational tile-only listing's scaffolding:
 
@@ -71,7 +71,7 @@ To create the informational tile-only listing's scaffolding:
 
 {{% /tab %}}
 
-{{% tab "Free Offering" %}
+{{% tab "Out of the box Offerings" %}}
 
 ## Set up a directory and fork the `integrations-extras` repository
 
@@ -108,7 +108,7 @@ ddev config set repo extras
 
 ## Populate the integration tile scaffolding
 
-Run the `ddev` command to create scaffolding for an informational tile-only listing:
+For Datadog API integrations and Datadog Apps that will be available out-of-the-box on the [Integrations page], use the Datadog Development Toolkit to create scaffolding for an informational tile-only listing.
 
 1. Make sure you're inside the `integrations-extras` directory:
    {{< code-block lang="shell" >}}cd $HOME/dd/integrations-extras{{< /code-block >}}
@@ -131,10 +131,10 @@ Once you have created a `README.md` file, add the following sections as H2s (`##
 
 | Header Name | Header |
 |-------------|--------|
-| Overview | Write a description under an `## Overview` header that describes the value your offering provides to users and benefits to purchasing and installing the integration in the Datadog Marketplace (for example, out-of-the-box dashboards, replays of user sessions, logs, alerts, and more). <br><br>This information is displayed in the **Overview** tab on the integration tile. |
-| Setup | Include all the steps to setting up your Marketplace integration that includes information divided into H3 headings (`###`). Standard topics include:<br><br>- Installing the integration using the in-app integration tile. <br>- Configuring the integration with the appropriate roles and permissions in your Datadog organization.<br>- Accessing out-of-the-box Datadog features that users who purchased and installed the integration can access (such as metrics, events, monitors, logs, dashboards, and more).|
-| Uninstallation | Include all the steps to uninstalling your Marketplace integration. This information is displayed in the **Configure** tab on the integration tile.|
-| Data Collected  | Specify the types of data collected by your Marketplace integration that includes information about out-of-the-box metrics, events, or service checks. <br><br>You can include additional types of data collected such as logs, monitors, dashboards, and more. If your Marketplace integration does not provide any of these, you do not need to add a Data Collected section. |
+| Overview | Write a description under an `## Overview` header that describes the value and benefits your offering provides to users, for example, out-of-the-box dashboards, replays of user sessions, logs, alerts, and more). <br><br>This information is displayed in the **Overview** tab on the integration tile. |
+| Setup | Include all the steps to setting up your offering that includes information divided into H3 headings (`###`). Standard topics include:<br><br>- Installing the integration using the in-app integration tile. <br>- Configuring the integration with the appropriate roles and permissions in your Datadog organization.<br>- Accessing out-of-the-box Datadog features that users who purchased and installed the integration can access (such as metrics, events, monitors, logs, dashboards, and more).|
+| Uninstallation | Include all the steps for uninstalling your offering. This information is displayed in the **Configure** tab on the integration tile.|
+| Data Collected  | Specify the types of data collected by your integration (if applicable) including information about out-of-the-box metrics, events, or service checks. <br><br>You can include additional types of data collected such as logs, monitors, dashboards, and more. If your offering does not provide any of this data, you do not need to add a Data Collected section. |
 | Support | Provide contact information that includes an email to your Support team, a phone number to your company, a link to your company's documentation or blog post, and more help information in a bulleted list format. |
 
 ### Media Carousel
@@ -196,24 +196,24 @@ ddev validate all <INTEGRATION_NAME>
 
 ## Open a pull request
 
-Push up your feature branch and open a pull request that contains your integration tile's asset files (including images) in the [`marketplace` repository][18]. The Marketplace repository does not allow forks. For instructions on creating a clone of the repo, see the [Set up section](#set-up-a-directory-and-clone-the-marketplace-repository). After you've created your pull request, automatic checks run in Azure DevOps pipelines to verify that your pull request is in good shape and contains all the required content to be updated.
-
-To request access to the Azure DevOps pipeline, leave a comment in the pull request requesting access.
+Push up your feature branch and open a pull request that contains your integration tile's asset files (including images) in the [`marketplace`][18] or [`integrations-extras`][number] repository. The Marketplace repository does not allow forks. For instructions on creating a clone of the repo, see the [Set up section](#set-up-a-directory-and-clone-the-marketplace-repository). After you've created your pull request, automatic checks will run to verify that your pull request is in good shape and contains all the required content to be updated.
+`Please note we have stopped using Azure DevOps`
 
 ## Review process
 
-Once your pull request passes all the checks, reviewers from the `Datadog/agent-integrations`, `Datadog/marketplace-review`, and `Datadog/documentation` teams provide suggestions and feedback on best practices.
+Once your pull request passes all checks, reviewers from the `Datadog/agent-integrations`, `Datadog/marketplace-review`, and `Datadog/documentation` teams provide suggestions and feedback on best practices.
 
-Once you have addressed the feedback and re-requested reviews, these reviewers approve your pull request. Contact the Marketplace team if you would like to preview the integration tile in your sandbox account. This allows you to validate and preview additional changes in the integration tile on the Datadog Marketplace before your pull request is merged.
+Once you have addressed the feedback and re-requested reviews, these reviewers approve your pull request. Contact the Marketplace team if you would like to preview the tile in your sandbox account. This allows you to validate and preview additional changes on the tile before your pull request is merged.
 
+### How to resolve common validation errors 
 
-Validation errors
+Out-of-the-box integrations wtihin the integrations-extras repository can run into validation errors when the forked reposiotry is out of date with the origin. Follow the steps below to resolve the validation errors by rebasing. 
 
 Updating the forked repository via the Web App
 
-1. Go to the github webapp
+1. Go to the github.com
 2. Go to your repositories
-3. Select/click on your forked repo of integrations-extras
+3. Select your forked repo of integrations-extras
 4. Go to "sync fork"  in the github web--ui 
 5. Click "update branch" 
 
