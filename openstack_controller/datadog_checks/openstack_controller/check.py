@@ -55,18 +55,17 @@ def _create_load_balancer_loadbalancer_tags(loadbalancer_data):
     
     return tags
 
-def _create_load_balancer_listener_tags(listener_id, listener_data, loadbalancer_id, loadbalancer_data):
+def _create_load_balancer_listener_tags(listener_data, loadbalancer_data):
     tags = [
-        f'listener_id:{listener_id}',
+        f'listener_id:{listener_data.get("id")}',
         f'listener_name:{listener_data.get("name")}',
     ]
 
     loadbalancers = listener_data.get("loadbalancers")
     if loadbalancers:
         for loadbalancer in loadbalancers:
-            if loadbalancer.get("id") == loadbalancer_id:
-                tags.append(f'loadbalancer_id:{loadbalancer.get("id")}')
-                tags.append(f'loadbalancer_name:{loadbalancer_data.get("name")}')
+            tags.append(f'loadbalancer_id:{loadbalancer.get("id")}')
+            tags.append(f'loadbalancer_name:{loadbalancer_data.get("name")}')
 
     return tags
 
@@ -497,8 +496,7 @@ class OpenStackControllerCheck(AgentCheck):
                     for listener_data in  listeners_data:
                         listener_id = listener_data.get("id")
                         listener_tags = _create_load_balancer_listener_tags(
-                            listener_id,
-                            loadbalancer_id,
+                            listener_data,
                             loadbalancer_data
                         )
                         all_tags = listener_tags + project_tags
