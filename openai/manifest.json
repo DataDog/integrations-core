@@ -21,9 +21,7 @@
   "assets": {
     "integration": {
       "source_type_name": "OpenAI",
-      "configuration": {
-        "spec": "assets/configuration/spec.yaml"
-      },
+      "configuration": {},
       "events": {
         "creates_events": false
       },
@@ -37,7 +35,7 @@
       }
     },
     "dashboards": {
-
+      "OpenAI Overview Dashboard": "assets/dashboards/openai_overview.json"
     },
     "monitors": {},
     "logs": {},
