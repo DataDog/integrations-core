@@ -1,0 +1,78 @@
+{
+  "services": [
+    {
+      "name": "nova_legacy",
+      "description": "Nova Compute Service (Legacy 2.0)",
+      "id": "1e4cc6f21f6641c9b329d51992996d87",
+      "type": "compute_legacy",
+      "enabled": true,
+      "links": {
+        "self": "http://10.164.0.42/identity/v3/services/1e4cc6f21f6641c9b329d51992996d87"
+      }
+    },
+    {
+      "name": "nova",
+      "description": "Nova Compute Service",
+      "id": "5885c6123d1a437db688fd394b57a119",
+      "type": "compute",
+      "enabled": true,
+      "links": {
+        "self": "http://10.164.0.42/identity/v3/services/5885c6123d1a437db688fd394b57a119"
+      }
+    },
+    {
+      "name": "placement",
+      "description": "Placement Service",
+      "id": "89c592d4b3424b489e8d2fc3bd8576af",
+      "type": "placement",
+      "enabled": true,
+      "links": {
+        "self": "http://10.164.0.42/identity/v3/services/89c592d4b3424b489e8d2fc3bd8576af"
+      }
+    },
+    {
+      "name": "octavia",
+      "description": "Octavia Load Balancing Service",
+      "id": "953e317ff87c4da980fd8ececa569559",
+      "type": "load-balancer",
+      "enabled": true,
+      "links": {
+        "self": "http://10.164.0.42/identity/v3/services/953e317ff87c4da980fd8ececa569559"
+      }
+    },
+    {
+      "name": "keystone",
+      "id": "c9f952fcc3db4caaba6d752676bc0ce6",
+      "type": "identity",
+      "enabled": true,
+      "links": {
+        "self": "http://10.164.0.42/identity/v3/services/c9f952fcc3db4caaba6d752676bc0ce6"
+      }
+    },
+    {
+      "name": "glance",
+      "description": "Glance Image Service",
+      "id": "ec6a502c50c94e629543c07d61965faa",
+      "type": "image",
+      "enabled": true,
+      "links": {
+        "self": "http://10.164.0.42/identity/v3/services/ec6a502c50c94e629543c07d61965faa"
+      }
+    },
+    {
+      "name": "neutron",
+      "description": "Neutron Service",
+      "id": "f94871fd8014437d899a56a50bf9922b",
+      "type": "network",
+      "enabled": true,
+      "links": {
+        "self": "http://10.164.0.42/identity/v3/services/f94871fd8014437d899a56a50bf9922b"
+      }
+    }
+  ],
+  "links": {
+    "next": null,
+    "self": "http://10.164.0.42/identity/v3/services",
+    "previous": null
+  }
+}

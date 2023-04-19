@@ -1,0 +1,25 @@
+{
+  "hypervisors": [
+    {
+      "id": "4916ccb2-3cd0-4d2a-8d98-30e70aaa2536",
+      "hypervisor_hostname": "agent-integrations-openstack-octavia",
+      "state": "up",
+      "status": "enabled",
+      "hypervisor_type": "QEMU",
+      "hypervisor_version": 4002001,
+      "host_ip": "10.164.0.42",
+      "service": {
+        "id": "760b4c48-b691-47b9-b0ad-25da84e2a4e4",
+        "host": "agent-integrations-openstack-octavia",
+        "disabled_reason": null
+      },
+      "uptime": " 11:34:27 up 22:00,  0 users,  load average: 0.21, 0.13, 0.12\n",
+      "servers": [
+        {
+          "name": "instance-00000001",
+          "uuid": "ace67097-e457-4044-b05c-be7ac830304a"
+        }
+      ]
+    }
+  ]
+}

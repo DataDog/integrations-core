@@ -1,0 +1,100 @@
+{
+  "servers": [
+    {
+      "id": "ace67097-e457-4044-b05c-be7ac830304a",
+      "name": "amphora-a34dc4b7-b608-4a9d-9fbd-2a4e611475c2",
+      "status": "ACTIVE",
+      "tenant_id": "4762874c945945c38d820cce29fbb66e",
+      "user_id": "e6c0017079d04e628f0dae6f90f64cae",
+      "metadata": {},
+      "hostId": "25d45f0c548d72b44924f7e545dd5444d4540b1e0ab9f7440d04d8af",
+      "image": {
+        "id": "5d8ea403-98e0-4009-a950-0b2b4cf7e938",
+        "links": [
+          {
+            "rel": "bookmark",
+            "href": "http://34.91.5.108/compute/4762874c945945c38d820cce29fbb66e/images/5d8ea403-98e0-4009-a950-0b2b4cf7e938"
+          }
+        ]
+      },
+      "flavor": {
+        "vcpus": 1,
+        "ram": 1024,
+        "disk": 2,
+        "ephemeral": 0,
+        "swap": 0,
+        "original_name": "m1.amphora",
+        "extra_specs": {
+          "hw_rng:allowed": "True"
+        }
+      },
+      "created": "2023-04-18T14:55:52Z",
+      "updated": "2023-04-18T14:56:32Z",
+      "addresses": {
+        "lb-mgmt-net": [
+          {
+            "version": 4,
+            "addr": "192.168.0.132",
+            "OS-EXT-IPS:type": "fixed",
+            "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:c7:8b:5d"
+          }
+        ],
+        "public": [
+          {
+            "version": 4,
+            "addr": "172.24.4.50",
+            "OS-EXT-IPS:type": "fixed",
+            "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:a3:bc:4d"
+          }
+        ]
+      },
+      "accessIPv4": "",
+      "accessIPv6": "",
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://34.91.5.108/compute/v2.1/4762874c945945c38d820cce29fbb66e/servers/ace67097-e457-4044-b05c-be7ac830304a"
+        },
+        {
+          "rel": "bookmark",
+          "href": "http://34.91.5.108/compute/4762874c945945c38d820cce29fbb66e/servers/ace67097-e457-4044-b05c-be7ac830304a"
+        }
+      ],
+      "OS-DCF:diskConfig": "MANUAL",
+      "progress": 0,
+      "OS-EXT-AZ:availability_zone": "nova",
+      "config_drive": "True",
+      "key_name": "octavia_ssh_key",
+      "OS-SRV-USG:launched_at": "2023-04-18T14:56:32.000000",
+      "OS-SRV-USG:terminated_at": null,
+      "OS-EXT-SRV-ATTR:host": "agent-integrations-openstack-octavia",
+      "OS-EXT-SRV-ATTR:instance_name": "instance-00000001",
+      "OS-EXT-SRV-ATTR:hypervisor_hostname": "agent-integrations-openstack-octavia",
+      "OS-EXT-SRV-ATTR:reservation_id": "r-v10v65al",
+      "OS-EXT-SRV-ATTR:launch_index": 0,
+      "OS-EXT-SRV-ATTR:hostname": "amphora-a34dc4b7-b608-4a9d-9fbd-2a4e611475c2",
+      "OS-EXT-SRV-ATTR:kernel_id": "",
+      "OS-EXT-SRV-ATTR:ramdisk_id": "",
+      "OS-EXT-SRV-ATTR:root_device_name": "/dev/vda",
+      "OS-EXT-SRV-ATTR:user_data": "I2Nsb3VkLWNvbmZpZwojIHZpbTogc3ludGF4PXlhbWwKIwojIFRoaXMgY29uZmlndXJhdGlvbiB3aXRoIHRha2UgdXNlci1kYXRhIGRpY3QgYW5kIGJ1aWxkIGEgY2xvdWQtaW5pdAojIHNjcmlwdCB1dGlsaXppbmcgdGhlIHdyaXRlX2ZpbGVzIG1vZHVsZS4gVGhlIHVzZXItZGF0YSBkaWN0IHNob3VsZCBiZSBhCiMgS2V5IFZhbHVlIHBhaXIgd2hlcmUgdGhlIEtleSBpcyB0aGUgcGF0aCB0byBzdG9yZSB0aGUgZmlsZSBhbmQgdGhlIFZhbHVlCiMgaXMgdGhlIGRhdGEgdG8gc3RvcmUgYXQgdGhhdCBsb2NhdGlvbgojCiMgRXhhbXBsZToKIyAgICAgeycvcm9vdC9wYXRoL3RvL2ZpbGUuY2ZnJzogJ0knbSBhIGZpbGUsIHdyaXRlIHRoaW5ncyBpbiBtZSd9CgpydW5jbWQ6Ci0gICBzeXN0ZW1jdGwgcmVzdGFydCByc3lzbG9nCgoKdGltZXpvbmU6IEV0Yy9VVEM=",
+      "OS-EXT-STS:task_state": null,
+      "OS-EXT-STS:vm_state": "active",
+      "OS-EXT-STS:power_state": 1,
+      "os-extended-volumes:volumes_attached": [],
+      "locked": false,
+      "locked_reason": null,
+      "description": "amphora-a34dc4b7-b608-4a9d-9fbd-2a4e611475c2",
+      "tags": [],
+      "trusted_image_certificates": null,
+      "host_status": "UP",
+      "security_groups": [
+        {
+          "name": "lb-4bb7bfb1-83c2-45e8-b0e1-ed3022329115"
+        },
+        {
+          "name": "lb-mgmt-sec-grp"
+        }
+      ]
+    }
+  ]
+}

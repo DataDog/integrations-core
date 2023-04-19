@@ -1,0 +1,156 @@
+{
+  "servers": [
+    {
+      "id": "5704d8de-ea4b-4481-bc1c-90c361d6fa19",
+      "name": "x",
+      "status": "ERROR",
+      "tenant_id": "01b21103a92d4997ab09e46ff8346bd5",
+      "user_id": "517865ea51244f87967df7e4ffcf90da",
+      "metadata": {},
+      "hostId": "",
+      "image": {
+        "id": "7f6c9c7b-c415-486e-ae9f-811b2bbabf8f",
+        "links": [
+          {
+            "rel": "bookmark",
+            "href": "http://34.147.101.227/compute/01b21103a92d4997ab09e46ff8346bd5/images/7f6c9c7b-c415-486e-ae9f-811b2bbabf8f"
+          }
+        ]
+      },
+      "flavor": {
+        "vcpus": 1,
+        "ram": 512,
+        "disk": 1,
+        "ephemeral": 0,
+        "swap": 0,
+        "original_name": "m1.tiny",
+        "extra_specs": {
+          "hw_rng:allowed": "True"
+        }
+      },
+      "created": "2023-04-06T16:58:52Z",
+      "updated": "2023-04-06T16:58:52Z",
+      "addresses": {},
+      "accessIPv4": "",
+      "accessIPv6": "",
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://34.147.101.227/compute/v2.1/01b21103a92d4997ab09e46ff8346bd5/servers/5704d8de-ea4b-4481-bc1c-90c361d6fa19"
+        },
+        {
+          "rel": "bookmark",
+          "href": "http://34.147.101.227/compute/01b21103a92d4997ab09e46ff8346bd5/servers/5704d8de-ea4b-4481-bc1c-90c361d6fa19"
+        }
+      ],
+      "OS-DCF:diskConfig": "AUTO",
+      "fault": {
+        "code": 500,
+        "created": "2023-04-06T16:58:52Z",
+        "message": "No valid host was found. ",
+        "details": "Traceback (most recent call last):\n  File \"/opt/stack/nova/nova/conductor/manager.py\", line 1587, in schedule_and_build_instances\n    host_lists = self._schedule_instances(context, request_specs[0],\n  File \"/opt/stack/nova/nova/conductor/manager.py\", line 940, in _schedule_instances\n    host_lists = self.query_client.select_destinations(\n  File \"/opt/stack/nova/nova/scheduler/client/query.py\", line 41, in select_destinations\n    return self.scheduler_rpcapi.select_destinations(context, spec_obj,\n  File \"/opt/stack/nova/nova/scheduler/rpcapi.py\", line 160, in select_destinations\n    return cctxt.call(ctxt, 'select_destinations', **msg_args)\n  File \"/usr/local/lib/python3.8/dist-packages/oslo_messaging/rpc/client.py\", line 189, in call\n    result = self.transport._send(\n  File \"/usr/local/lib/python3.8/dist-packages/oslo_messaging/transport.py\", line 123, in _send\n    return self._driver.send(target, ctxt, message,\n  File \"/usr/local/lib/python3.8/dist-packages/oslo_messaging/_drivers/amqpdriver.py\", line 689, in send\n    return self._send(target, ctxt, message, wait_for_reply, timeout,\n  File \"/usr/local/lib/python3.8/dist-packages/oslo_messaging/_drivers/amqpdriver.py\", line 681, in _send\n    raise result\nnova.exception_Remote.NoValidHost_Remote: No valid host was found. \nTraceback (most recent call last):\n\n  File \"/usr/local/lib/python3.8/dist-packages/oslo_messaging/rpc/server.py\", line 241, in inner\n    return func(*args, **kwargs)\n\n  File \"/opt/stack/nova/nova/scheduler/manager.py\", line 209, in select_destinations\n    raise exception.NoValidHost(reason=\"\")\n\nnova.exception.NoValidHost: No valid host was found. \n\n"
+      },
+      "OS-EXT-AZ:availability_zone": "nova",
+      "config_drive": "",
+      "key_name": null,
+      "OS-SRV-USG:launched_at": null,
+      "OS-SRV-USG:terminated_at": null,
+      "OS-EXT-SRV-ATTR:host": null,
+      "OS-EXT-SRV-ATTR:instance_name": "instance-00000006",
+      "OS-EXT-SRV-ATTR:hypervisor_hostname": null,
+      "OS-EXT-SRV-ATTR:reservation_id": "r-uimjtas0",
+      "OS-EXT-SRV-ATTR:launch_index": 0,
+      "OS-EXT-SRV-ATTR:hostname": "x",
+      "OS-EXT-SRV-ATTR:kernel_id": "",
+      "OS-EXT-SRV-ATTR:ramdisk_id": "",
+      "OS-EXT-SRV-ATTR:root_device_name": null,
+      "OS-EXT-SRV-ATTR:user_data": null,
+      "OS-EXT-STS:task_state": null,
+      "OS-EXT-STS:vm_state": "error",
+      "OS-EXT-STS:power_state": 0,
+      "os-extended-volumes:volumes_attached": [],
+      "locked": false,
+      "locked_reason": null,
+      "description": null,
+      "tags": [],
+      "trusted_image_certificates": null,
+      "host_status": ""
+    },
+    {
+      "id": "2f420022-43d6-4fcb-a757-26466b0f82bd",
+      "name": "a",
+      "status": "ERROR",
+      "tenant_id": "01b21103a92d4997ab09e46ff8346bd5",
+      "user_id": "517865ea51244f87967df7e4ffcf90da",
+      "metadata": {},
+      "hostId": "",
+      "image": {
+        "id": "b337caf8-e011-4e3f-b820-9588f39bd1d1",
+        "links": [
+          {
+            "rel": "bookmark",
+            "href": "http://34.147.101.227/compute/01b21103a92d4997ab09e46ff8346bd5/images/b337caf8-e011-4e3f-b820-9588f39bd1d1"
+          }
+        ]
+      },
+      "flavor": {
+        "vcpus": 1,
+        "ram": 256,
+        "disk": 1,
+        "ephemeral": 0,
+        "swap": 0,
+        "original_name": "cirros256",
+        "extra_specs": {
+          "hw_rng:allowed": "True"
+        }
+      },
+      "created": "2023-04-06T16:57:05Z",
+      "updated": "2023-04-06T16:57:06Z",
+      "addresses": {},
+      "accessIPv4": "",
+      "accessIPv6": "",
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://34.147.101.227/compute/v2.1/01b21103a92d4997ab09e46ff8346bd5/servers/2f420022-43d6-4fcb-a757-26466b0f82bd"
+        },
+        {
+          "rel": "bookmark",
+          "href": "http://34.147.101.227/compute/01b21103a92d4997ab09e46ff8346bd5/servers/2f420022-43d6-4fcb-a757-26466b0f82bd"
+        }
+      ],
+      "OS-DCF:diskConfig": "AUTO",
+      "fault": {
+        "code": 500,
+        "created": "2023-04-06T16:57:06Z",
+        "message": "No valid host was found. ",
+        "details": "Traceback (most recent call last):\n  File \"/opt/stack/nova/nova/conductor/manager.py\", line 1587, in schedule_and_build_instances\n    host_lists = self._schedule_instances(context, request_specs[0],\n  File \"/opt/stack/nova/nova/conductor/manager.py\", line 940, in _schedule_instances\n    host_lists = self.query_client.select_destinations(\n  File \"/opt/stack/nova/nova/scheduler/client/query.py\", line 41, in select_destinations\n    return self.scheduler_rpcapi.select_destinations(context, spec_obj,\n  File \"/opt/stack/nova/nova/scheduler/rpcapi.py\", line 160, in select_destinations\n    return cctxt.call(ctxt, 'select_destinations', **msg_args)\n  File \"/usr/local/lib/python3.8/dist-packages/oslo_messaging/rpc/client.py\", line 189, in call\n    result = self.transport._send(\n  File \"/usr/local/lib/python3.8/dist-packages/oslo_messaging/transport.py\", line 123, in _send\n    return self._driver.send(target, ctxt, message,\n  File \"/usr/local/lib/python3.8/dist-packages/oslo_messaging/_drivers/amqpdriver.py\", line 689, in send\n    return self._send(target, ctxt, message, wait_for_reply, timeout,\n  File \"/usr/local/lib/python3.8/dist-packages/oslo_messaging/_drivers/amqpdriver.py\", line 681, in _send\n    raise result\nnova.exception_Remote.NoValidHost_Remote: No valid host was found. \nTraceback (most recent call last):\n\n  File \"/usr/local/lib/python3.8/dist-packages/oslo_messaging/rpc/server.py\", line 241, in inner\n    return func(*args, **kwargs)\n\n  File \"/opt/stack/nova/nova/scheduler/manager.py\", line 209, in select_destinations\n    raise exception.NoValidHost(reason=\"\")\n\nnova.exception.NoValidHost: No valid host was found. \n\n"
+      },
+      "OS-EXT-AZ:availability_zone": "nova",
+      "config_drive": "",
+      "key_name": null,
+      "OS-SRV-USG:launched_at": null,
+      "OS-SRV-USG:terminated_at": null,
+      "OS-EXT-SRV-ATTR:host": null,
+      "OS-EXT-SRV-ATTR:instance_name": "instance-00000005",
+      "OS-EXT-SRV-ATTR:hypervisor_hostname": null,
+      "OS-EXT-SRV-ATTR:reservation_id": "r-p0mgx5p0",
+      "OS-EXT-SRV-ATTR:launch_index": 0,
+      "OS-EXT-SRV-ATTR:hostname": "a",
+      "OS-EXT-SRV-ATTR:kernel_id": "",
+      "OS-EXT-SRV-ATTR:ramdisk_id": "",
+      "OS-EXT-SRV-ATTR:root_device_name": null,
+      "OS-EXT-SRV-ATTR:user_data": null,
+      "OS-EXT-STS:task_state": null,
+      "OS-EXT-STS:vm_state": "error",
+      "OS-EXT-STS:power_state": 0,
+      "os-extended-volumes:volumes_attached": [],
+      "locked": false,
+      "locked_reason": null,
+      "description": null,
+      "tags": [],
+      "trusted_image_certificates": null,
+      "host_status": ""
+    }
+  ]
+}

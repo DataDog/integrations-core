@@ -1,0 +1,27 @@
+{
+  "groups": [
+    {
+      "id": "4ad7571d2ed240a78dd4bfb3b655943c",
+      "name": "admins",
+      "domain_id": "default",
+      "description": "openstack admin group",
+      "links": {
+        "self": "http://10.164.0.42/identity/v3/groups/4ad7571d2ed240a78dd4bfb3b655943c"
+      }
+    },
+    {
+      "id": "6bb04435ebc7489b977bde9468f4fecb",
+      "name": "nonadmins",
+      "domain_id": "default",
+      "description": "non-admin group",
+      "links": {
+        "self": "http://10.164.0.42/identity/v3/groups/6bb04435ebc7489b977bde9468f4fecb"
+      }
+    }
+  ],
+  "links": {
+    "next": null,
+    "self": "http://10.164.0.42/identity/v3/groups",
+    "previous": null
+  }
+}

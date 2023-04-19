@@ -1,0 +1,24 @@
+{
+  "flavor": {
+    "id": "c1",
+    "name": "cirros256",
+    "ram": 256,
+    "disk": 1,
+    "swap": "",
+    "OS-FLV-EXT-DATA:ephemeral": 0,
+    "OS-FLV-DISABLED:disabled": false,
+    "vcpus": 1,
+    "os-flavor-access:is_public": true,
+    "rxtx_factor": 1,
+    "links": [
+      {
+        "rel": "self",
+        "href": "http://34.91.114.145/compute/v2.1/flavors/c1"
+      },
+      {
+        "rel": "bookmark",
+        "href": "http://34.91.114.145/compute/flavors/c1"
+      }
+    ]
+  }
+}

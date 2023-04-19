@@ -54,22 +54,64 @@ class ApiRest(Api):
         self.log.debug("getting identity domains")
         self._post_auth_domain(self.config.domain_id)
         component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
-        projects = component.get_domains()
-        return projects
+        return component.get_domains()
 
     def get_identity_projects(self):
         self.log.debug("getting identity projects")
         self._post_auth_domain(self.config.domain_id)
         component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
-        projects = component.get_projects()
-        return projects
+        return component.get_projects()
 
     def get_identity_users(self):
         self.log.debug("getting identity users")
         self._post_auth_domain(self.config.domain_id)
         component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
-        users = component.get_users()
-        return users
+        return component.get_users()
+
+    def get_identity_groups(self):
+        self.log.debug("getting identity groups")
+        self._post_auth_domain(self.config.domain_id)
+        component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
+        return component.get_groups()
+
+    def get_identity_group_users(self, group_id):
+        self.log.debug("getting identity group users")
+        self._post_auth_domain(self.config.domain_id)
+        component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
+        return component.get_group_users(group_id)
+
+    def get_identity_services(self):
+        self.log.debug("getting identity services")
+        self._post_auth_domain(self.config.domain_id)
+        component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
+        return component.get_services()
+
+    def get_identity_limits(self):
+        identity_limits = {}
+        self.log.debug("getting identity services")
+        self._post_auth_domain(self.config.domain_id)
+        component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
+        registered_limits = component.get_registered_limits()
+        self.log.debug("registered_limits: %s", registered_limits)
+        for limit in registered_limits:
+            identity_limits[limit['id']] = {
+                'resource_name': limit.get('resource_name'),
+                'service_id': limit.get('service_id'),
+                'region_id': limit.get('region_id'),
+                'limit': limit.get('default_limit'),
+            }
+        limits = component.get_limits()
+        self.log.debug("limits: %s", limits)
+        for limit in limits:
+            identity_limits[limit['id']] = {
+                'resource_name': limit.get('resource_name'),
+                'service_id': limit.get('service_id'),
+                'region_id': limit.get('region_id'),
+                'domain_id': limit.get('domain_id'),
+                'project_id': limit.get('project_id'),
+                'limit': limit.get('resource_limit'),
+            }
+        return identity_limits
 
     def get_auth_projects(self):
         self.log.debug("getting auth projects")

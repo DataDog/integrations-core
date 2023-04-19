@@ -1,0 +1,53 @@
+{
+  "registered_limits": [
+    {
+      "id": "dd4fefa5602a4414b1c0a01ac7514b97",
+      "service_id": "82624ab61fb04f058d043facf315fa3c",
+      "region_id": "RegionOne",
+      "resource_name": "image_size_total",
+      "default_limit": 1000,
+      "description": null,
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/registered_limits/dd4fefa5602a4414b1c0a01ac7514b97"
+      }
+    },
+    {
+      "id": "5e7d44c9d30d47919187a5c1a58a8885",
+      "service_id": "82624ab61fb04f058d043facf315fa3c",
+      "region_id": "RegionOne",
+      "resource_name": "image_stage_total",
+      "default_limit": 1000,
+      "description": null,
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/registered_limits/5e7d44c9d30d47919187a5c1a58a8885"
+      }
+    },
+    {
+      "id": "9f489d63900841f4a70fe58036c81339",
+      "service_id": "82624ab61fb04f058d043facf315fa3c",
+      "region_id": "RegionOne",
+      "resource_name": "image_count_total",
+      "default_limit": 100,
+      "description": null,
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/registered_limits/9f489d63900841f4a70fe58036c81339"
+      }
+    },
+    {
+      "id": "5d26b57b414c4e25848cd34b38f56606",
+      "service_id": "82624ab61fb04f058d043facf315fa3c",
+      "region_id": "RegionOne",
+      "resource_name": "image_count_uploading",
+      "default_limit": 100,
+      "description": null,
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/registered_limits/5d26b57b414c4e25848cd34b38f56606"
+      }
+    }
+  ],
+  "links": {
+    "next": null,
+    "self": "http://10.164.0.11/identity/v3/registered_limits",
+    "previous": null
+  }
+}

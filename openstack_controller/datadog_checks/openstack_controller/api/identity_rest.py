@@ -30,3 +30,33 @@ class IdentityRest:
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return response.json()['users']
+
+    def get_groups(self):
+        response = self.http.get('{}/groups'.format(self.endpoint))
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        return response.json()['groups']
+
+    def get_group_users(self, group_id):
+        response = self.http.get('{}/groups/{}/users'.format(self.endpoint, group_id))
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        return response.json()['users']
+
+    def get_services(self):
+        response = self.http.get('{}/services'.format(self.endpoint))
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        return response.json()['services']
+
+    def get_registered_limits(self):
+        response = self.http.get('{}/registered_limits'.format(self.endpoint))
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        return response.json()['registered_limits']
+
+    def get_limits(self):
+        response = self.http.get('{}/limits'.format(self.endpoint))
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        return response.json()['limits']

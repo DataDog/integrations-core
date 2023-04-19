@@ -62,7 +62,7 @@ def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:9ce326b602c2425ab52d1a6a1cd4a28d',
+            'project_id:cadda9ffc8d44aedbac4c7d6adc43c51',
             'project_name:demo',
         ],
     )
@@ -72,7 +72,7 @@ def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:267659b7998d4bd0b134c15feced0dd1',
+            'project_id:4762874c945945c38d820cce29fbb66e',
             'project_name:admin',
         ],
     )
@@ -91,7 +91,7 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:9ce326b602c2425ab52d1a6a1cd4a28d',
+            'project_id:cadda9ffc8d44aedbac4c7d6adc43c51',
             'project_name:demo',
         ],
     )
@@ -101,7 +101,7 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:267659b7998d4bd0b134c15feced0dd1',
+            'project_id:4762874c945945c38d820cce29fbb66e',
             'project_name:admin',
         ],
     )

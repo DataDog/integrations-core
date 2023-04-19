@@ -44,12 +44,13 @@ def dd_environment():
             private_key = outputs['ssh_private_key']['value']
             instance = {
                 'keystone_server_url': 'http://{}/identity'.format(internal_ip),
-                'domain_id': '03e40b01788d403e98e4b9a20210492e',
-                'username': 'new_admin',
-                # 'username': 'admin',
+                # 'domain_id': '03e40b01788d403e98e4b9a20210492e',
+                # 'username': 'new_admin',
+                'username': 'admin',
                 'password': 'password',
                 'ssl_verify': False,
-                'nova_microversion': 'latest',
+                'nova_microversion': '2.93',
+                'ironic_microversion': '1.80',
             }
             config_file = os.path.join(tempfile.gettempdir(), 'openstack_controller_instance.json')
             with open(config_file, 'wb') as f:

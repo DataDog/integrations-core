@@ -1,0 +1,144 @@
+{
+  "token": {
+    "methods": [
+      "password"
+    ],
+    "user": {
+      "domain": {
+        "id": "default",
+        "name": "Default"
+      },
+      "id": "e6c0017079d04e628f0dae6f90f64cae",
+      "name": "admin",
+      "password_expires_at": null
+    },
+    "audit_ids": [
+      "XAK1yj3hQ2u2_Fp-_ccsQA"
+    ],
+    "expires_at": "2023-04-19T12:34:13.000000Z",
+    "issued_at": "2023-04-19T11:34:13.000000Z",
+    "project": {
+      "domain": {
+        "id": "default",
+        "name": "Default"
+      },
+      "id": "cadda9ffc8d44aedbac4c7d6adc43c51",
+      "name": "demo"
+    },
+    "is_domain": false,
+    "roles": [
+      {
+        "id": "33c9a15341ce47d5a1050e32f46c2e47",
+        "name": "admin"
+      },
+      {
+        "id": "751525f906fb42da959bb5f099ecdd74",
+        "name": "reader"
+      },
+      {
+        "id": "591a2020cc57469b8a3657c61923b1c4",
+        "name": "member"
+      }
+    ],
+    "catalog": [
+      {
+        "endpoints": [
+          {
+            "id": "0a3bf9e6a5ae495fa0677e450e8bd4ee",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://10.164.0.42/compute/v2/cadda9ffc8d44aedbac4c7d6adc43c51",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "1e4cc6f21f6641c9b329d51992996d87",
+        "type": "compute_legacy",
+        "name": "nova_legacy"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "5054d5dd053c41a1b8e21440e28a23ee",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://10.164.0.42/compute/v2.1",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "5885c6123d1a437db688fd394b57a119",
+        "type": "compute",
+        "name": "nova"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "5987b20d512b482f8f03b91a1be16fef",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://10.164.0.42/placement",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "89c592d4b3424b489e8d2fc3bd8576af",
+        "type": "placement",
+        "name": "placement"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "e3cf892a48ff48738025aba7f3b50879",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://10.164.0.42/load-balancer",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "953e317ff87c4da980fd8ececa569559",
+        "type": "load-balancer",
+        "name": "octavia"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "f7be35c58792474794715c536c60daeb",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://10.164.0.42/identity",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "c9f952fcc3db4caaba6d752676bc0ce6",
+        "type": "identity",
+        "name": "keystone"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "3c6d07c5b40e418c983a6dba16b6488f",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://10.164.0.42/image",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "ec6a502c50c94e629543c07d61965faa",
+        "type": "image",
+        "name": "glance"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "f874e431fc9f45e997033b41b21089d7",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://10.164.0.42:9696/networking",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "f94871fd8014437d899a56a50bf9922b",
+        "type": "network",
+        "name": "neutron"
+      }
+    ]
+  }
+}

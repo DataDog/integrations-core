@@ -64,11 +64,14 @@ class OpenStackControllerCheck(AgentCheck):
 
     def _report_identity_metrics(self, api, tags):
         try:
-            if self._report_identity_response_time(api, tags):
-                self._report_identity_domains(api, tags)
-                self._report_identity_projects(api, tags)
-                self._report_identity_users(api, tags)
-                return True
+            self._report_identity_response_time(api, tags)
+            self._report_identity_domains(api, tags)
+            self._report_identity_projects(api, tags)
+            self._report_identity_users(api, tags)
+            self._report_identity_groups(api, tags)
+            self._report_identity_services(api, tags)
+            self._report_identity_limits(api, tags)
+            return True
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting identity metrics: %s", e)
@@ -80,13 +83,8 @@ class OpenStackControllerCheck(AgentCheck):
     def _report_identity_response_time(self, api, tags):
         response_time = api.get_identity_response_time()
         self.log.debug("identity response time: %s", response_time)
-        if response_time is not None:
-            self.gauge('openstack.keystone.response_time', response_time, tags=tags)
-            self.service_check(KEYSTONE_SERVICE_CHECK, AgentCheck.OK, tags=tags)
-            return True
-        else:
-            self.service_check(KEYSTONE_SERVICE_CHECK, AgentCheck.UNKNOWN, tags=tags)
-            return False
+        self.gauge('openstack.keystone.response_time', response_time, tags=tags)
+        self.service_check(KEYSTONE_SERVICE_CHECK, AgentCheck.OK, tags=tags)
 
     def _report_identity_domains(self, api, tags):
         identity_domains = api.get_identity_domains()
@@ -138,6 +136,70 @@ class OpenStackControllerCheck(AgentCheck):
                     + ['domain_id:{}'.format(self.config.domain_id)]
                     + [f"user_id:{user.get('id')}", f"user_name:{user.get('name')}"],
                 )
+
+    def _report_identity_groups(self, api, tags):
+        identity_groups = api.get_identity_groups()
+        self.log.debug("identity_groups: %s", identity_groups)
+        self.gauge(
+            'openstack.keystone.groups.count',
+            len(identity_groups),
+            tags=tags + ['domain_id:{}'.format(self.config.domain_id)],
+        )
+        for group in identity_groups:
+            identity_group_users = api.get_identity_group_users(group.get('id'))
+            self.gauge(
+                'openstack.keystone.groups.users',
+                len(identity_group_users),
+                tags
+                + ['domain_id:{}'.format(self.config.domain_id)]
+                + [f"group_id:{group.get('id')}", f"group_name:{group.get('name')}"],
+            )
+
+    def _report_identity_services(self, api, tags):
+        identity_services = api.get_identity_services()
+        self.log.debug("identity_services: %s", identity_services)
+        self.gauge(
+            'openstack.keystone.services.count',
+            len(identity_services),
+            tags=tags + ['domain_id:{}'.format(self.config.domain_id)],
+        )
+        for service in identity_services:
+            enabled = service.get("enabled")
+            if enabled is not None:
+                self.gauge(
+                    'openstack.keystone.services.enabled',
+                    1 if enabled else 0,
+                    tags
+                    + ['domain_id:{}'.format(self.config.domain_id)]
+                    + [
+                        f"service_id:{service.get('id')}",
+                        f"service_name:{service.get('name')}",
+                        f"service_type:{service.get('type')}",
+                    ],
+                )
+
+    def _report_identity_limits(self, api, tags):
+        identity_limits = api.get_identity_limits()
+        self.log.debug("identity_limits: %s", identity_limits)
+        for limit_id, limit_data in identity_limits.items():
+            self.gauge(
+                'openstack.keystone.limits',
+                limit_data['limit'],
+                tags=tags
+                + [
+                    'limit_id:{}'.format(limit_id),
+                    'resource_name:{}'.format(limit_data['resource_name']),
+                    'service_id:{}'.format(limit_data.get('service_id', '')),
+                    'region_id:{}'.format(limit_data.get('region_id', '')),
+                    'domain_id:{}'.format(limit_data.get('domain_id', '')),
+                    'project_id:{}'.format(limit_data.get('project_id', '')),
+                ],
+            )
+        # self.gauge(
+        #     'openstack.keystone.services.count',
+        #     len(identity_services),
+        #     tags=tags + ['domain_id:{}'.format(self.config.domain_id)],
+        # )
 
     def _report_project_metrics(self, api, project, tags):
         project_id = project.get('id')
@@ -276,15 +338,19 @@ class OpenStackControllerCheck(AgentCheck):
 
     def _report_hypervisor_metrics(self, hypervisor_data, hypervisor_tags):
         for metric, value in hypervisor_data.get('metrics', {}).items():
-            self._report_hypervisor_metric(metric, value, hypervisor_tags)
+            long_metric_name = f'openstack.nova.hypervisor.{metric}'
+            self._report_hypervisor_metric(long_metric_name, value, hypervisor_tags)
             if self.config.report_legacy_metrics:
-                self._report_hypervisor_legacy_metric(metric, value, hypervisor_tags)
+                self._report_hypervisor_legacy_metric(long_metric_name, value, hypervisor_tags)
+        self._report_hypervisor_metric(
+            'openstack.nova.hypervisor.up', 1 if hypervisor_data.get('state') == 'up' else 0, hypervisor_tags
+        )
 
-    def _report_hypervisor_metric(self, metric, value, tags):
-        if metric in NOVA_HYPERVISOR_METRICS:
-            self.gauge(f'openstack.nova.hypervisor.{metric}', value, tags=tags)
-        elif self.config.collect_hypervisor_load and metric in NOVA_HYPERVISOR_LOAD_METRICS:
-            self.gauge(f'openstack.nova.hypervisor.{metric}', value, tags=tags)
+    def _report_hypervisor_metric(self, long_metric_name, value, tags):
+        if long_metric_name in NOVA_HYPERVISOR_METRICS:
+            self.gauge(long_metric_name, value, tags=tags)
+        elif self.config.collect_hypervisor_load and long_metric_name in NOVA_HYPERVISOR_LOAD_METRICS:
+            self.gauge(long_metric_name, value, tags=tags)
 
     def _report_hypervisor_legacy_metric(self, metric, value, tags):
         if metric in LEGACY_NOVA_HYPERVISOR_METRICS:

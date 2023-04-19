@@ -17,6 +17,15 @@ class ApiSdk(Api):
     def get_identity_users(self):
         pass  # pragma: no cover
 
+    def get_identity_groups(self):
+        pass  # pragma: no cover
+
+    def get_identity_group_users(self, group_id):
+        pass  # pragma: no cover
+
+    def get_identity_services(self):
+        pass  # pragma: no cover
+
     def get_auth_projects(self):
         pass  # pragma: no cover
 
