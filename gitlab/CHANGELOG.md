@@ -2,7 +2,7 @@
 
 ## 6.0.1 / 2023-04-19
 
-* [Fixed] Fix gitlab documentation. See [#14400](https://github.com/DataDog/integrations-core/pull/14400).
+* [Fixed] Fix Gitlab documentation in conf.yaml. See [#14400](https://github.com/DataDog/integrations-core/pull/14400).
 * [Fixed] Ensure the check runs correctly if no gitlab url is defined. See [#14403](https://github.com/DataDog/integrations-core/pull/14403).
 
 ## 6.0.0 / 2023-04-14
