@@ -8,8 +8,6 @@ The MySQL integration tracks the performance of your MySQL instances. It collect
 
 Enable [Database Monitoring][32] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, and query explain plans.
 
-**Note:** This integration is also compatible with [MariaDB][2], as it serves as a ["drop-in replacement"][3] for MySQL.
-
 ## Setup
 
 <div class="alert alert-info">This page describes the MySQL Agent standard integration. If you are looking for the Database Monitoring product for MySQL, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>

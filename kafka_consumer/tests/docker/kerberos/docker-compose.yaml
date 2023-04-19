@@ -1,0 +1,131 @@
+services:
+  kdc:
+    hostname: kdc.kerberos-demo.local
+    build: ./kdc
+    container_name: kdc
+    ports:
+      - "88:88"
+      - "749:749"
+    volumes:
+      - ${SECRET_DIR}:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/kdc/krb5.conf
+    healthcheck:
+      test: bash -c "[ -f /var/lib/secret/localhost.key ]"
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  zookeeper:
+    hostname: zookeeper.kerberos-demo.local
+    container_name: zookeeper
+    image: confluentinc/cp-zookeeper:7.3.0
+    depends_on:
+      kdc:
+        condition: service_healthy
+    healthcheck:
+      test: nc -vz localhost 2181 || exit -1
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - ${SECRET_DIR}:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/krb5.conf
+      - ./zookeeper/zookeeper.sasl.jaas.config:/etc/kafka/zookeeper.sasl.jaas.config
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      KAFKA_OPTS: >-
+        -Djava.security.auth.login.config=/etc/kafka/zookeeper.sasl.jaas.config
+        -Djava.security.krb5.conf=/etc/krb5.conf
+        -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+        -Dsun.security.krb5.debug=true
+        -Dzookeeper.allowSaslFailedClients=false
+        -Dzookeeper.requireClientAuthScheme=sasl
+
+  broker:
+    image: confluentinc/cp-server:7.3.0
+    hostname: broker.kerberos-demo.local
+    container_name: broker
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+      - "10000:10000"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    volumes:
+      - ${SECRET_DIR}:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/krb5.conf
+      - ./kafka/broker.sasl.jaas.config:/etc/kafka/broker.sasl.jaas.config
+      - ./client/command.properties:/etc/kafka/command.properties
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper.kerberos-demo.local:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://:29092,SASL_PLAINTEXT://localhost:9092
+      KAFKA_LISTENERS: INTERNAL://:29092,SASL_PLAINTEXT://:9092
+      KAFKA_SASL_ENABLED_MECHANISMS: GSSAPI
+      KAFKA_SASL_KERBEROS_SERVICE_NAME: kafka
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
+      KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=INFO"
+      KAFKA_SUPER_USERS: User:admin;User:kafka;User:schemaregistry;User:connect;User:controlcenter;User:ksqldb;User:conduktor
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/broker.sasl.jaas.config
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: false
+    healthcheck:
+      test: nc -z localhost 9092 || exit -1
+      start_period: 45s
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+  broker2:
+    image: confluentinc/cp-server:7.3.0
+    hostname: broker2.kerberos-demo.local
+    container_name: broker2
+    ports:
+      - "9292:9292"
+      - "29292:29292"
+      - "12000:12000"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    volumes:
+      - ${SECRET_DIR}:/var/lib/secret
+      - ./kdc/krb5.conf:/etc/krb5.conf
+      - ./kafka/broker.sasl.jaas.config:/etc/kafka/broker.sasl.jaas.config
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper.kerberos-demo.local:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT
+      KAFKA_LISTENERS: INTERNAL://:29292,SASL_PLAINTEXT://:9292
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://:29292,SASL_PLAINTEXT://localhost:9292
+      KAFKA_SASL_ENABLED_MECHANISMS: GSSAPI
+      KAFKA_SASL_KERBEROS_SERVICE_NAME: kafka
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
+      KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=INFO"
+      KAFKA_SUPER_USERS: User:admin;User:kafka;User:schemaregistry;User:connect;User:controlcenter;User:ksqldb;User:conduktor
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/broker.sasl.jaas.config
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: false
+    healthcheck:
+      test: nc -z localhost 9292 || exit -1
+      start_period: 45s
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+networks:
+  default:
+    name: kerberos-demo.local

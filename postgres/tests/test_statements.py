@@ -178,7 +178,6 @@ def test_statement_metrics(
         if not _should_catch_query(dbname):
             assert len(matching_rows) == 0
             continue
-
         # metrics
         assert len(matching_rows) == 1
         row = matching_rows[0]
@@ -224,7 +223,7 @@ def test_statement_metrics(
         {
             'azure': {
                 'deployment_type': 'flexible_server',
-                'database_name': 'test-server',
+                'name': 'test-server',
             },
         },
         {
@@ -233,7 +232,7 @@ def test_statement_metrics(
             },
             'azure': {
                 'deployment_type': 'flexible_server',
-                'database_name': 'test-server',
+                'name': 'test-server',
             },
         },
         {
@@ -350,6 +349,14 @@ def _expected_dbm_instance_tags(dbm_instance):
     return dbm_instance['tags'] + [
         'port:{}'.format(PORT),
         'db:{}'.format(dbm_instance['dbname']),
+    ]
+
+
+def _expected_dbm_job_err_tags(dbm_instance):
+    return dbm_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'db:{}'.format(dbm_instance['dbname']),
+        'dd.internal.resource:database_instance:stubbed.hostname',
     ]
 
 
@@ -1253,7 +1260,11 @@ def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
         aggregator.assert_metric(
             "dd.postgres.error",
             tags=_expected_dbm_instance_tags(dbm_instance)
-            + ['error:load-pg-settings', 'agent_hostname:stubbed.hostname'],
+            + [
+                'error:load-pg-settings',
+                'agent_hostname:stubbed.hostname',
+                'dd.internal.resource:database_instance:stubbed.hostname',
+            ],
             hostname='stubbed.hostname',
         )
     else:
@@ -1371,7 +1382,7 @@ def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
             "dd.postgres.async_job.inactive_stop",
-            tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job],
+            tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job],
         )
 
 
@@ -1393,7 +1404,7 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
             "dd.postgres.async_job.cancel",
-            tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job],
+            tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job],
         )
 
 
@@ -1416,7 +1427,7 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     check.statement_samples._job_loop_future.result()
     aggregator.assert_metric(
         "dd.postgres.async_job.error",
-        tags=_expected_dbm_instance_tags(dbm_instance)
+        tags=_expected_dbm_job_err_tags(dbm_instance)
         + [
             'job:query-samples',
             "error:database-<class 'psycopg2.errors.UndefinedTable'>",

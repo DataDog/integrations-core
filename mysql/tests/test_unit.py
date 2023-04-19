@@ -295,7 +295,11 @@ def test__get_is_aurora():
     'disable_generic_tags, hostname, expected_tags',
     [
         (True, None, {'port:unix_socket'}),
-        (False, None, {'port:unix_socket', 'server:localhost'}),
+        (
+            False,
+            None,
+            {'port:unix_socket', 'server:localhost'},
+        ),
         (True, 'foo', {'port:unix_socket'}),
         (False, 'foo', {'port:unix_socket', 'server:foo'}),
     ],

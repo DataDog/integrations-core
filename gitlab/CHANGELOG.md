@@ -1,5 +1,19 @@
 # CHANGELOG - gitlab
 
+## 6.0.1 / 2023-04-19
+
+* [Fixed] Fix Gitlab documentation in conf.yaml. See [#14400](https://github.com/DataDog/integrations-core/pull/14400).
+* [Fixed] Ensure the check runs correctly if no gitlab url is defined. See [#14403](https://github.com/DataDog/integrations-core/pull/14403).
+
+## 6.0.0 / 2023-04-14
+
+* [Added] Add new service checks. See [#14311](https://github.com/DataDog/integrations-core/pull/14311).
+* [Fixed] Fix the `health_service_check` config option. See [#14288](https://github.com/DataDog/integrations-core/pull/14288).
+* [Fixed] Add the `prometheus_endpoint` option to the models. See [#14264](https://github.com/DataDog/integrations-core/pull/14264).
+* [Fixed] Add missing tags when the service check is critical. See [#14262](https://github.com/DataDog/integrations-core/pull/14262).
+* [Changed] Add support for OpenMetricsV2. See [#14273](https://github.com/DataDog/integrations-core/pull/14273).
+* [Changed] Set the `send_distribution_sums_as_monotonic` option to `true` by default. See [#14290](https://github.com/DataDog/integrations-core/pull/14290).
+
 ## 5.3.2 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Update protobuf. See [#13262](https://github.com/DataDog/integrations-core/pull/13262).

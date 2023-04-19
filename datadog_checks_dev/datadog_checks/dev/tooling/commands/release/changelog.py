@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from collections import defaultdict, namedtuple
-from datetime import datetime
+from datetime import date, datetime
 from io import StringIO
 
 import click
@@ -83,9 +83,21 @@ def changelog(
     if not quiet:
         echo_info(f'Found {len(pr_numbers)} PRs merged since tag: {target_tag}')
 
+    # read the old contents
+    if check:
+        changelog_path = os.path.join(get_root(), check, output_file)
+    else:
+        changelog_path = os.path.join(get_root(), output_file)
+    old = list(stream_file_lines(changelog_path))
+
     if initial:
-        # Only use the first one
-        del pr_numbers[:-1]
+        # For initial releases, just keep the ddev generated CHANGELOG but update the date to today
+        for idx, line in enumerate(old):
+            if line.startswith("## 1.0.0"):
+                old[idx] = f"## 1.0.0 / {date.today()}\n"
+                break
+        write_result(dry_run, changelog_path, ''.join(old), num_changes=1)
+        return
 
     user_config = ctx.obj
     entries = defaultdict(list)
@@ -139,13 +151,6 @@ def changelog(
             new_entry.write(f'* {entry.title}{title_period} See [#{entry.number}]({entry.url}).{thanks_note}\n')
     new_entry.write('\n')
 
-    # read the old contents
-    if check:
-        changelog_path = os.path.join(get_root(), check, output_file)
-    else:
-        changelog_path = os.path.join(get_root(), output_file)
-    old = list(stream_file_lines(changelog_path))
-
     # write the new changelog in memory
     changelog_buffer = StringIO()
 
@@ -160,10 +165,14 @@ def changelog(
     # append the rest of the old changelog
     changelog_buffer.write(''.join(old[2:]))
 
+    write_result(dry_run, changelog_path, changelog_buffer.getvalue(), generated_changelogs)
+
+
+def write_result(dry_run, changelog_path, final_output, num_changes):
     # print on the standard out in case of a dry run
     if dry_run:
-        echo_info(changelog_buffer.getvalue())
+        echo_info(final_output)
     else:
         # overwrite the old changelog
-        write_file(changelog_path, changelog_buffer.getvalue())
-        echo_success(f"Successfully generated {generated_changelogs} change{'s' if generated_changelogs > 1 else ''}")
+        write_file(changelog_path, final_output)
+        echo_success(f"Successfully generated {num_changes} change{'s' if num_changes > 1 else ''}")
