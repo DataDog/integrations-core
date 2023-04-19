@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 31.0.1 / 2023-04-19
+
+* [Fixed] Do not add dependency to agent. See [#14393](https://github.com/DataDog/integrations-core/pull/14393).
+
 ## 31.0.0 / 2023-04-14
 
 * [Added] Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).
