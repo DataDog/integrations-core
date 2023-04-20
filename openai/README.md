@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [OpenAI][1] through the Datadog Agent.
+Get cost estimation, prompt sampling, error tracking, performance metrics and more of [OpenAI[1] requests using Datadog metrics, APM and logs.
 
 ## Setup
 
@@ -10,8 +10,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The OpenAI check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+The OpenAI check is included in the [Datadog APM Python library][2] package.
 
 ### Configuration
 
@@ -44,7 +43,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][9].
 
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://openai.com/
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/openai/datadog_checks/openai/data/conf.yaml.example

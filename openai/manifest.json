@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor OpenAI through Tracing",
+    "description": "Cost estimation, prompt sampling, performance metrics and more of OpenAI requests",
     "title": "OpenAI",
     "media": [],
     "classifier_tags": [
