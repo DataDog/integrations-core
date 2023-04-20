@@ -102,12 +102,52 @@ def _create_load_balancer_healthmonitor_tags(healthmonitor_data, pool_data):
         f'provisioning_status:{healthmonitor_data.get("provisioning_status")}',
         f'operating_status:{healthmonitor_data.get("operating_status")}',
         f'type:{healthmonitor_data.get("type")}',
-
     ]
 
     if pool_data:
         tags.append(f'pool_id:{pool_data.get("id")}')
         tags.append(f'pool_name:{pool_data.get("name")}')
+
+    return tags
+
+
+def _create_load_balancer_pool_tags(pool_data, loadbalancers_data, listeners_data, members_data, healthmonitors_data):
+    tags = [
+        f'pool_id:{pool_data.get("id")}',
+        f'pool_name:{pool_data.get("name")}',
+        f'provisioning_status:{pool_data.get("provisioning_status")}',
+        f'operating_status:{pool_data.get("operating_status")}',
+    ]
+
+    loadbalancers = pool_data.get("loadbalancers")
+    if loadbalancers:
+        for loadbalancer in loadbalancers:
+            loadbalancer_id = loadbalancer.get("id")
+            loadbalancer_data = loadbalancers_data.get(loadbalancer_id)
+            tags.append(f'loadbalancer_id:{loadbalancer_id}')
+            tags.append(f'loadbalancer_name:{loadbalancer_data.get("name")}')
+
+    listeners = pool_data.get("listeners")
+    if listeners:
+        for listener in listeners:
+            listener_id = listener.get("id")
+            listener_data = listeners_data.get(listener_id)
+            tags.append(f'listener_id:{listener_id}')
+            tags.append(f'listener_name:{listener_data.get("name")}')
+
+    members = pool_data.get("members")
+    if members:
+        for member in members:
+            member_id = member.get("id")
+            member_data = members_data.get(member_id)
+            tags.append(f'member_id:{member_id}')
+            tags.append(f'member_name:{member_data.get("name")}')
+
+    healthmonitor_id = pool_data.get("healthmonitor_id")
+    if healthmonitor_id:
+        healthmonitor_data = healthmonitors_data.get(healthmonitor_id)
+        tags.append(f'healthmonitor_id:{healthmonitor_id}')
+        tags.append(f'healthmonitor_name:{healthmonitor_data.get("name")}')
 
     return tags
 
@@ -504,6 +544,8 @@ class OpenStackControllerCheck(AgentCheck):
             self._report_load_balancer_listeners(api, project_id, project_tags)
             self._report_load_balancer_members(api, project_id, project_tags)
             self._report_load_balancer_healthmonitors(api, project_id, project_tags)
+            self._report_load_balancer_pools(api, project_id, project_tags)
+
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting load balancer metrics: %s", e)
@@ -643,6 +685,7 @@ class OpenStackControllerCheck(AgentCheck):
         if pools_data:
             for pool_id, pool_data in pools_data.items():
                 healthmonitors_data = api.get_load_balancer_healthmonitors_by_pool(project_id, pool_id)
+
                 if healthmonitors_data is not None:
                     for _, healthmonitor_data in healthmonitors_data.items():
                         healthmonitor_tags = _create_load_balancer_healthmonitor_tags(healthmonitor_data, pool_data)
@@ -675,3 +718,26 @@ class OpenStackControllerCheck(AgentCheck):
                             value=healthmonitor_data.get("timeout"),
                             tags=all_tags,
                         )
+
+    def _report_load_balancer_pools(self, api, project_id, project_tags):
+        loadbalancers_data = api.get_load_balancer_loadbalancers(project_id)
+        listeners_data = api.get_load_balancer_listeners(project_id)
+        pools_data = api.get_load_balancer_pools(project_id)
+
+        if pools_data:
+            for pool_id, pool_data in pools_data.items():
+                healthmonitors_data = api.get_load_balancer_healthmonitors_by_pool(project_id, pool_id)
+                members_data = api.get_load_balancer_members_by_pool(project_id, pool_id)
+
+                pool_tags = _create_load_balancer_pool_tags(
+                    pool_data, loadbalancers_data, listeners_data, members_data, healthmonitors_data
+                )
+
+                all_tags = pool_tags + project_tags
+
+                # report status
+                self.gauge(
+                    'openstack.octavia.pool.admin_state_up',
+                    value=pool_data.get("admin_state_up"),
+                    tags=all_tags,
+                )

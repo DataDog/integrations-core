@@ -251,3 +251,42 @@ def test_healthmonitors_metrics_default(aggregator, dd_run_check, instance, monk
         aggregator.assert_metric('openstack.octavia.healthmonitor.max_retries', count=1, tags=tags)
         aggregator.assert_metric('openstack.octavia.healthmonitor.max_retries_down', count=1, tags=tags)
         aggregator.assert_metric('openstack.octavia.healthmonitor.timeout', count=1, tags=tags)
+
+
+def test_pools_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
+    http = MockHttp("agent-integrations-openstack-octavia")
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['domain_id:default', 'keystone_server:{}'.format(instance["keystone_server_url"])]
+
+    demo_project_tags = base_tags + [
+        'project_id:4762874c945945c38d820cce29fbb66e',
+        'project_name:admin',
+    ]
+
+    demo_pools = [
+        [
+            'pool_id:d0335b34-3115-4b3b-9a1a-7e2363ebfee3',
+            'pool_name:pool-1',
+            'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
+            'loadbalancer_name:loadbalancer-1',
+            'listener_id:de81cbdc-8207-4253-8f21-3eea9870e7a9',
+            'listener_name:listener-1',
+            'healthmonitor_id:268883b7-c057-4e85-b2c5-d8760267dad1',
+            'healthmonitor_name:healthmonitor-1',
+            'member_id:0abcafea-2ad2-44cd-957f-690644ba479c',
+            'member_id:e79e1011-2eb4-486f-84c3-99d2a4aef88d',
+            'member_name:amphora-042bcca4-4d97-47a9-bc04-d88c1e3a4d72',
+            'member_name:amphora-a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
+            'provisioning_status:ACTIVE',
+            'operating_status:ERROR',
+        ],
+    ]
+
+    for pool_tags in demo_pools:
+        tags = demo_project_tags + pool_tags
+        aggregator.assert_metric('openstack.octavia.pool.admin_state_up', count=1, tags=tags)
