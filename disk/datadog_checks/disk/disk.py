@@ -9,6 +9,7 @@ import re
 from xml.etree import ElementTree as ET
 
 import psutil
+import win32file
 from six import iteritems, string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -181,9 +182,15 @@ class Disk(AgentCheck):
         # legacy check names c: vs psutil name C:\\
         if Platform.is_win32():
             device_name = device_name.strip('\\').lower()
+            isNetworkDrive = win32file.GetDriveType('How to get device?') == win32file.DRIVE_REMOTE
+            if isNetworkDrive:
+                device_location = 'remote'
+            else:
+                device_location = 'local'
 
         tags.append('device:{}'.format(device_name))
         tags.append('device_name:{}'.format(_base_device_name(part.device)))
+        tags.append('device_location:{}'.format(device_location))
         return tags
 
     def exclude_disk(self, part):
