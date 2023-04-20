@@ -3,9 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
-
-def convert_metric_name(name):
-    return re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', name).lower().replace("-", "_")
+from datadog_checks.openstack_controller.metrics import get_normalized_metrics
 
 
 def _load_averages_from_uptime(uptime):
@@ -33,11 +31,7 @@ class ComputeRest:
         response = self.http.get('{}/limits?tenant_id={}'.format(self.endpoint, project_id))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        return {
-            convert_metric_name(key): value
-            for key, value in response.json()['limits']['absolute'].items()
-            if isinstance(value, (int, float)) and not isinstance(value, bool)
-        }
+        return get_normalized_metrics(self.log, response.json()['limits'])
 
     def get_quota_set(self, project_id):
         response = self.http.get('{}/os-quota-sets/{}'.format(self.endpoint, project_id))
@@ -45,11 +39,7 @@ class ComputeRest:
         self.log.debug("response: %s", response.json())
         quota_set = {
             'id': response.json()['quota_set']['id'],
-            'metrics': {
-                re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_"): value
-                for key, value in response.json()['quota_set'].items()
-                if isinstance(value, (int, float)) and not isinstance(value, bool)
-            },
+            'metrics': get_normalized_metrics(self.log, response.json()['quota_set']),
         }
         return quota_set
 
@@ -64,7 +54,7 @@ class ComputeRest:
                 'status': server['status'].lower(),
                 'hypervisor_hostname': server['OS-EXT-SRV-ATTR:hypervisor_hostname'],
                 'instance_hostname': server.get('OS-EXT-SRV-ATTR:hostname'),
-                'metrics': {},
+                'metrics': get_normalized_metrics(self.log, server),
             }
             flavor = server.get('flavor')
             if flavor:
@@ -73,31 +63,11 @@ class ComputeRest:
                     flavor_metrics = self._get_flavor_id(flavor_id)
                     server_metrics[server['id']]['flavor_name'] = flavor_metrics[flavor_id]['name']
                     server_metrics[server['id']]['metrics'].update(
-                        {
-                            '{}.{}'.format(
-                                'flavor',
-                                re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key)
-                                .lower()
-                                .replace("-", "_"),
-                            ): value
-                            for key, value in flavor_metrics[flavor_id]['metrics'].items()
-                            if isinstance(value, (int, float)) and not isinstance(value, bool)
-                        }
+                        get_normalized_metrics(self.log, flavor_metrics[flavor_id]['metrics'], 'flavor')
                     )
                 else:
                     server_metrics[server['id']]['flavor_name'] = flavor.get('original_name')
-                    server_metrics[server['id']]['metrics'].update(
-                        {
-                            '{}.{}'.format(
-                                'flavor',
-                                re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key)
-                                .lower()
-                                .replace("-", "_"),
-                            ): value
-                            for key, value in flavor.items()
-                            if isinstance(value, (int, float)) and not isinstance(value, bool)
-                        }
-                    )
+                    server_metrics[server['id']]['metrics'].update(get_normalized_metrics(self.log, flavor, 'flavor'))
             try:
                 response = self.http.get('{}/servers/{}/diagnostics'.format(self.endpoint, server['id']))
                 response.raise_for_status()
@@ -190,11 +160,7 @@ class ComputeRest:
                 'state': hypervisor.get('state'),
                 'type': hypervisor['hypervisor_type'],
                 'status': hypervisor['status'],
-                'metrics': {
-                    re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_"): value
-                    for key, value in hypervisor.items()
-                    if isinstance(value, (int, float)) and not isinstance(value, bool)
-                },
+                'metrics': get_normalized_metrics(self.log, hypervisor),
             }
             uptime = hypervisor.get('uptime')
             load_averages = []

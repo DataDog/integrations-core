@@ -13,11 +13,11 @@
     "links": [
       {
         "rel": "self",
-        "href": "http://34.147.101.227/compute/v2.1/flavors/d2"
+        "href": "http://34.91.6.91/compute/v2.1/flavors/d2"
       },
       {
         "rel": "bookmark",
-        "href": "http://34.147.101.227/compute/flavors/d2"
+        "href": "http://34.91.6.91/compute/flavors/d2"
       }
     ]
   }
