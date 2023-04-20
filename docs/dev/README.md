@@ -15,7 +15,7 @@ further_reading:
 
 ## Overview
 
-This page walks through how Technology Partners building an out-of-the-box integration using the Agent or Datadog's API. 
+This page walks through how Technology Partners build an out-of-the-box integration using the Datadog Agent or Datadog's API. 
 
 Datadog Technology Partners can publish their out-of-the-box integrations on the Integrations page for customers to access. 
 The **Integrations** page includes Agent-based or API-based integrations and Datadog Apps built by Datadog and Technology Partners at no cost. 
