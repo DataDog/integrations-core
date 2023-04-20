@@ -240,6 +240,7 @@ def test_healthmonitors_metrics_default(aggregator, dd_run_check, instance, monk
             'pool_id:d0335b34-3115-4b3b-9a1a-7e2363ebfee3',
             'pool_name:pool-1',
             'provisioning_status:ACTIVE',
+            'type:HTTP',
         ]
     ]
 

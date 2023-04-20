@@ -101,6 +101,8 @@ def _create_load_balancer_healthmonitor_tags(healthmonitor_data, pool_data):
         f'healthmonitor_name:{healthmonitor_data.get("name")}',
         f'provisioning_status:{healthmonitor_data.get("provisioning_status")}',
         f'operating_status:{healthmonitor_data.get("operating_status")}',
+        f'type:{healthmonitor_data.get("type")}',
+
     ]
 
     if pool_data:
