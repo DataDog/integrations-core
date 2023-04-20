@@ -1,6 +1,10 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
+def filter_keys(map, keys_to_filter):
+    return {k: map[k] for k in keys_to_filter}
+
 class LoadBalancerRest:
     def __init__(self, log, http, endpoint):
         self.log = log
@@ -18,7 +22,21 @@ class LoadBalancerRest:
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        return response.json()['loadbalancers']
+
+        metrics_list = [
+            "id",
+            "name",
+            "provisioning_status",
+            "operating_status",
+            "listeners",
+            "pools",
+            "admin_state_up",
+        ]
+        loadbalancers_metrics = {}
+        for loadbalancer in response.json()['loadbalancers']:
+            loadbalancers_metrics[loadbalancer["id"]] = filter_keys(loadbalancer, metrics_list)
+
+        return loadbalancers_metrics
 
     def get_listeners(self):
         url = f"{self.endpoint}/v2/lbaas/listeners"

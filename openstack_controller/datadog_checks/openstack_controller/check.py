@@ -482,8 +482,7 @@ class OpenStackControllerCheck(AgentCheck):
     def _report_load_balancer_loadbalancers_and_listeners(self, api, project_id, project_tags):
         loadbalancers_data = api.get_load_balancer_loadbalancers(project_id)
         if loadbalancers_data is not None:
-            for loadbalancer_data in loadbalancers_data:
-                loadbalancer_id = loadbalancer_data.get("id")
+            for loadbalancer_id, loadbalancer_data in loadbalancers_data.items():
                 loadbalancer_tags = _create_load_balancer_loadbalancer_tags(loadbalancer_data)
                 all_tags = loadbalancer_tags + project_tags  # TODO: add loadbalancer api tags
 
