@@ -72,6 +72,10 @@ EXPECTED_METRICS_COMMON = [
     'kubernetes.kubelet.cpu.usage',
     'kubernetes.kubelet.memory.usage',
     'kubernetes.kubelet.memory.rss',
+    'kubernetes.node.filesystem.usage',
+    'kubernetes.node.filesystem.usage_pct',
+    'kubernetes.node.image.filesystem.usage',
+    'kubernetes.node.image.filesystem.usage_pct',
 ]
 
 EXPECTED_METRICS_PROMETHEUS = [
@@ -178,6 +182,10 @@ EXPECTED_METRICS_PROMETHEUS_1_21 = [
     'kubernetes.runtime.cpu.usage',
     'kubernetes.runtime.memory.usage',
     'kubernetes.runtime.memory.rss',
+    'kubernetes.node.filesystem.usage',
+    'kubernetes.node.filesystem.usage_pct',
+    'kubernetes.node.image.filesystem.usage',
+    'kubernetes.node.image.filesystem.usage_pct',
 ]
 
 COMMON_TAGS = {
@@ -893,6 +901,10 @@ def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
     aggregator.assert_metric('kubernetes.rest.client.latency.count')
     aggregator.assert_metric('kubernetes.rest.client.latency.sum')
     aggregator.assert_metric('kubernetes.rest.client.requests')
+    aggregator.assert_metric('kubernetes.node.filesystem.usage')
+    aggregator.assert_metric('kubernetes.node.filesystem.usage_pct')
+    aggregator.assert_metric('kubernetes.node.image.filesystem.usage')
+    aggregator.assert_metric('kubernetes.node.image.filesystem.usage_pct')
     aggregator.assert_all_metrics_covered()
 
 
@@ -1226,6 +1238,7 @@ def test_process_stats_summary_as_source_filtering_by_namespace(monkeypatch):
     monkeypatch.setattr(check, 'rate', mock.Mock())
     pod_list_utils = PodListUtils(json.loads(mock_from_file('pods_windows.json')))
     stats = json.loads(mock_from_file('stats_summary_windows.json'))
+    del stats['node']
 
     # Namespace is excluded, so it shouldn't report any metrics
     monkeypatch.setattr(pod_list_utils, 'is_namespace_excluded', mock.Mock(return_value=True))
