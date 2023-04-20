@@ -77,9 +77,11 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
 def test_complex_config(aggregator, dd_run_check, instance_complex):
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
     dd_run_check(mysql_check)
+
     _assert_complex_config(
         aggregator,
-        [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname='stubbed.hostname')],
+        tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname='stubbed.hostname')],
+        tags.METRIC_TAGS_WITH_RESOURCE,
     )
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), check_submission_type=True, exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
@@ -89,18 +91,23 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, dd_default_hostname, instance_complex):
     aggregator = dd_agent_check(instance_complex)
-    _assert_complex_config(aggregator, [], hostname=dd_default_hostname)
+    _assert_complex_config(
+        aggregator,
+        tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=dd_default_hostname)],
+        tags.METRIC_TAGS,
+        hostname=dd_default_hostname,
+    )
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
     )
 
 
-def _assert_complex_config(aggregator, expected_internal_tags, hostname='stubbed.hostname'):
+def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname='stubbed.hostname'):
     # Test service check
     aggregator.assert_service_check(
         'mysql.can_connect',
         status=MySql.OK,
-        tags=tags.METRIC_TAGS + ['port:' + str(common.PORT)],
+        tags=service_check_tags,
         hostname=hostname,
         count=1,
     )
@@ -108,7 +115,10 @@ def _assert_complex_config(aggregator, expected_internal_tags, hostname='stubbed
         aggregator.assert_service_check(
             'mysql.replication.slave_running',
             status=MySql.OK,
-            tags=tags.METRIC_TAGS + ['port:' + str(common.PORT), 'replication_mode:source'],
+            tags=service_check_tags
+            + [
+                'replication_mode:source',
+            ],
             hostname=hostname,
             at_least=1,
         )
@@ -132,13 +142,8 @@ def _assert_complex_config(aggregator, expected_internal_tags, hostname='stubbed
         aggregator.assert_service_check(
             'mysql.replication.group.status',
             status=MySql.OK,
-            tags=tags.METRIC_TAGS
-            + [
-                'port:' + str(common.PORT),
-                'channel_name:group_replication_applier',
-                'member_role:PRIMARY',
-                'member_state:ONLINE',
-            ],
+            tags=service_check_tags
+            + ['channel_name:group_replication_applier', 'member_role:PRIMARY', 'member_state:ONLINE'],
             count=1,
         )
 
@@ -163,18 +168,14 @@ def _assert_complex_config(aggregator, expected_internal_tags, hostname='stubbed
             continue
 
         if mname == 'mysql.performance.query_run_time.avg':
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + expected_internal_tags + ['schema:testdb'], count=1)
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + expected_internal_tags + ['schema:mysql'], count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + ['schema:testdb'], count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + ['schema:mysql'], count=1)
         elif mname == 'mysql.info.schema.size':
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + expected_internal_tags + ['schema:testdb'], count=1)
-            aggregator.assert_metric(
-                mname, tags=tags.METRIC_TAGS + expected_internal_tags + ['schema:information_schema'], count=1
-            )
-            aggregator.assert_metric(
-                mname, tags=tags.METRIC_TAGS + expected_internal_tags + ['schema:performance_schema'], count=1
-            )
+            aggregator.assert_metric(mname, tags=metric_tags + ['schema:testdb'], count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + ['schema:information_schema'], count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + ['schema:performance_schema'], count=1)
         else:
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + expected_internal_tags, count=1, at_least=0)
+            aggregator.assert_metric(mname, tags=metric_tags, at_least=0)
 
     # TODO: test this if it is implemented
     # Assert service metadata
@@ -340,6 +341,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     expected_tags = [
         'server:{}'.format(HOST),
         'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(expected_hostname),
     ]
     aggregator.assert_service_check(
         'mysql.can_connect', status=MySql.OK, tags=expected_tags, count=1, hostname=expected_hostname
