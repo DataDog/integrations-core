@@ -213,4 +213,5 @@ def test_members_metrics_default(aggregator, dd_run_check, instance, monkeypatch
 
     for member_tags in demo_members:
         tags = demo_project_tags + member_tags
+        aggregator.assert_metric('openstack.octavia.member.admin_state_up', count=1, tags=tags)
         aggregator.assert_metric('openstack.octavia.member.weight', count=1, tags=tags)

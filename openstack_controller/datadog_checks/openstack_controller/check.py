@@ -607,6 +607,13 @@ class OpenStackControllerCheck(AgentCheck):
                                 )
                                 all_tags = member_tags + project_tags
 
+                                # # report status
+                                self.gauge(
+                                    "openstack.octavia.member.admin_state_up",
+                                    value=member_data.get("admin_state_up"),
+                                    tags=all_tags,
+                                )
+
                                 self.gauge(
                                     'openstack.octavia.member.weight',
                                     value=member_data.get("weight"),
