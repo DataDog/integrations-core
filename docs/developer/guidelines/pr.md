@@ -16,7 +16,7 @@ title with the component being modified e.g. `[openmetrics]` or `[cli]`.
 
 ## Changelog label
 
-Our [labeler](../meta/ci.md#labeler) will automatically detect if changes would not impact shipped code and
+Our [labeler](../meta/ci/labels.md) will automatically detect if changes would not impact shipped code and
 apply `changelog/no-changelog`. In all other cases, you must manually apply `changelog/<TYPE>`.
 
 For changelog types, we adhere to those defined by [Keep a Changelog][keepachangelog-types]:
