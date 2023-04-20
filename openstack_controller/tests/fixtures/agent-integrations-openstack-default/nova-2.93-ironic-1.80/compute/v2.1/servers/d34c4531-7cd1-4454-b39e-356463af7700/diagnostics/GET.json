@@ -3,7 +3,7 @@
   "driver": "libvirt",
   "hypervisor": "qemu",
   "hypervisor_os": "linux",
-  "uptime": 951378,
+  "uptime": 1022435,
   "config_drive": false,
   "num_cpus": 1,
   "num_nics": 1,
@@ -20,22 +20,22 @@
   "cpu_details": [
     {
       "id": 0,
-      "time": 6006970000000,
+      "time": 6461270000000,
       "utilisation": null
     }
   ],
   "nic_details": [
     {
       "mac_address": "fa:16:3e:f5:f8:f2",
-      "rx_octets": 63860,
+      "rx_octets": 66988,
       "rx_errors": 0,
       "rx_drop": 0,
-      "rx_packets": 1063,
+      "rx_packets": 1117,
       "rx_rate": null,
-      "tx_octets": 322301,
+      "tx_octets": 339151,
       "tx_errors": 0,
       "tx_drop": 0,
-      "tx_packets": 7404,
+      "tx_packets": 7798,
       "tx_rate": null
     }
   ],

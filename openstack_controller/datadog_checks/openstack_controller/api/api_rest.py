@@ -212,6 +212,7 @@ class ApiRest(Api):
 
     def get_network_quotas(self, project_id):
         self.log.debug("getting network quotas")
+        self._post_auth_project(project_id)
         component = self._get_component(project_id, ComponentType.NETWORK)
         if component:
             return component.get_quotas(project_id)
@@ -235,6 +236,14 @@ class ApiRest(Api):
                 "Please specify an `ironic_microversion` greater than 1.49 to recieve these metrics"
             )
             return None
+
+    def get_network_agents(self, project_id):
+        self.log.debug("getting network agents")
+        self._post_auth_project(project_id)
+        component = self._get_component(project_id, ComponentType.NETWORK)
+        if component:
+            return component.get_agents()
+        return None
 
     def _post_auth_unscoped(self):
         self.log.debug("getting `X-Subject-Token`")

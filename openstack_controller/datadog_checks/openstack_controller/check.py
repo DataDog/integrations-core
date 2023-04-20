@@ -12,6 +12,10 @@ from datadog_checks.openstack_controller.metrics import (
     KEYSTONE_SERVICE_CHECK,
     LEGACY_NOVA_HYPERVISOR_LOAD_METRICS,
     LEGACY_NOVA_HYPERVISOR_METRICS,
+    NEUTRON_AGENTS_METRICS,
+    NEUTRON_AGENTS_METRICS_PREFIX,
+    NEUTRON_QUOTAS_METRICS,
+    NEUTRON_QUOTAS_METRICS_PREFIX,
     NOVA_FLAVOR_METRICS,
     NOVA_HYPERVISOR_LOAD_METRICS,
     NOVA_HYPERVISOR_METRICS,
@@ -354,6 +358,8 @@ class OpenStackControllerCheck(AgentCheck):
                                 f'flavor_name:{server_data["flavor_name"]}',
                             ],
                         )
+                    # else:
+                    #     self.log.warning("%s metric not reported as nova server metric", long_metric_name)
 
     def _report_compute_flavors(self, api, project_id, project_tags):
         compute_flavors = api.get_compute_flavors(project_id)
@@ -419,6 +425,7 @@ class OpenStackControllerCheck(AgentCheck):
         try:
             self._report_network_response_time(api, project_id, project_tags)
             self._report_network_quotas(api, project_id, project_tags)
+            self._report_network_agents(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting network metrics: %s", e)
@@ -438,9 +445,33 @@ class OpenStackControllerCheck(AgentCheck):
     def _report_network_quotas(self, api, project_id, project_tags):
         network_quotas = api.get_network_quotas(project_id)
         self.log.debug("network_quotas: %s", network_quotas)
-        if network_quotas:
+        if network_quotas is not None:
             for metric, value in network_quotas.items():
-                self.gauge(f'openstack.neutron.quotas.{metric}', value, tags=project_tags)
+                long_metric_name = f'{NEUTRON_QUOTAS_METRICS_PREFIX}.{metric}'
+                if long_metric_name in NEUTRON_QUOTAS_METRICS:
+                    self.gauge(f'{NEUTRON_QUOTAS_METRICS_PREFIX}.{metric}', value, tags=project_tags)
+
+    def _report_network_agents(self, api, project_id, project_tags):
+        network_agents = api.get_network_agents(project_id)
+        self.log.debug("network_agents: %s", network_agents)
+        if network_agents is not None:
+            self.gauge(f'{NEUTRON_AGENTS_METRICS_PREFIX}.count', len(network_agents), tags=project_tags)
+            for agent_id, agent_data in network_agents.items():
+                for metric, value in agent_data['metrics'].items():
+                    long_metric_name = f'{NEUTRON_AGENTS_METRICS_PREFIX}.{metric}'
+                    if long_metric_name in NEUTRON_AGENTS_METRICS:
+                        self.gauge(
+                            long_metric_name,
+                            value,
+                            tags=project_tags
+                            + [
+                                f'agent_id:{agent_id}',
+                                f'agent_name:{agent_data["name"]}',
+                                f'agent_host:{agent_data["host"]}',
+                                f'agent_availability_zone:{agent_data["availability_zone"]}',
+                                f'agent_type:{agent_data["type"]}',
+                            ],
+                        )
 
     def _report_block_storage_metrics(self, api, project_id, project_tags):
         try:

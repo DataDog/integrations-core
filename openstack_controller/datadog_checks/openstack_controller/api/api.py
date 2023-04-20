@@ -83,6 +83,10 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
+    def get_network_agents(self, project_id):
+        pass  # pragma: no cover
+
+    @abstractmethod
     def get_baremetal_response_time(self, project):
         pass  # pragma: no cover
 

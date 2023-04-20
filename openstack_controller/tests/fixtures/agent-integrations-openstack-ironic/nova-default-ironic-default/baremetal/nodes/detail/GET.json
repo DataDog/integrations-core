@@ -34,22 +34,22 @@
       "target_provision_state": null,
       "links": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0",
+          "href": "http://34.91.6.91/baremetal/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0",
           "rel": "bookmark"
         }
       ],
       "chassis_uuid": "64c4893f-6a49-4b2c-b5d8-ab955367b504",
       "ports": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/ports",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/ports",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/ports",
+          "href": "http://34.91.6.91/baremetal/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/ports",
           "rel": "bookmark"
         }
       ]
@@ -88,22 +88,22 @@
       "target_provision_state": null,
       "links": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
+          "href": "http://34.91.6.91/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
           "rel": "bookmark"
         }
       ],
       "chassis_uuid": "64c4893f-6a49-4b2c-b5d8-ab955367b504",
       "ports": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/ports",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/ports",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/ports",
+          "href": "http://34.91.6.91/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/ports",
           "rel": "bookmark"
         }
       ]
@@ -142,22 +142,22 @@
       "target_provision_state": null,
       "links": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/54855e59-83ca-46f8-a78f-55d3370e0656",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/54855e59-83ca-46f8-a78f-55d3370e0656",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/54855e59-83ca-46f8-a78f-55d3370e0656",
+          "href": "http://34.91.6.91/baremetal/nodes/54855e59-83ca-46f8-a78f-55d3370e0656",
           "rel": "bookmark"
         }
       ],
       "chassis_uuid": "64c4893f-6a49-4b2c-b5d8-ab955367b504",
       "ports": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/ports",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/ports",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/ports",
+          "href": "http://34.91.6.91/baremetal/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/ports",
           "rel": "bookmark"
         }
       ]
@@ -184,22 +184,22 @@
       "target_provision_state": null,
       "links": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95",
+          "href": "http://34.91.6.91/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95",
           "rel": "bookmark"
         }
       ],
       "chassis_uuid": null,
       "ports": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95/ports",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95/ports",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95/ports",
+          "href": "http://34.91.6.91/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95/ports",
           "rel": "bookmark"
         }
       ]
