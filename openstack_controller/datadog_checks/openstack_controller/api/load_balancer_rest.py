@@ -2,8 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+
 def filter_keys(map, keys_to_filter):
     return {k: map[k] for k in keys_to_filter}
+
 
 class LoadBalancerRest:
     def __init__(self, log, http, endpoint):
@@ -43,7 +45,6 @@ class LoadBalancerRest:
         self.log.debug("response: %s", response.json())
         return response.json()['stats']
 
-
     def get_listeners(self):
         url = f"{self.endpoint}/v2/lbaas/listeners"
         response = self.http.get(url)
@@ -63,7 +64,6 @@ class LoadBalancerRest:
         for listener in response.json()['listeners']:
             listeners_metrics[listener["id"]] = filter_keys(listener, metrics_list)
         return listeners_metrics
-    
 
     def get_listener_statistics(self, listener_id):
         url = f"{self.endpoint}/v2/lbaas/listeners/{listener_id}/stats"
@@ -74,10 +74,12 @@ class LoadBalancerRest:
 
     def get_listeners_by_loadbalancer(self, loadbalancer_id):
         listeners = self.get_listeners()
-        result = {id:l for id, l in listeners.items() if loadbalancer_id in [lb.get("id") for lb in l.get("loadbalancers")]}
+        result = {
+            id: l for id, l in listeners.items() if loadbalancer_id in [lb.get("id") for lb in l.get("loadbalancers")]
+        }
         self.log.debug("response: %s", result)
         return result
-    
+
     def get_pools(self):
         url = f"{self.endpoint}/v2/lbaas/pools"
         response = self.http.get(url)
@@ -96,7 +98,7 @@ class LoadBalancerRest:
         pools = self.get_pools()
         result = [p for p in pools if loadbalancer_id in [lb.get("id") for lb in p.get("loadbalancers")]]
         return result
-    
+
     def get_healthmonitors(self):
         url = f"{self.endpoint}/v2/lbaas/healthmonitors"
         response = self.http.get(url)
