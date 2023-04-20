@@ -494,6 +494,7 @@ class OpenStackControllerCheck(AgentCheck):
                     tags=all_tags,
                 )
 
+                # loadbalancer statistics
                 stats = api.get_load_balancer_loadbalancer_statistics(project_id, loadbalancer_id)
                 if stats is not None:
                     self.gauge(
@@ -514,6 +515,7 @@ class OpenStackControllerCheck(AgentCheck):
                         tags=all_tags,
                     )
 
+                # listerners by loadbalancer
                 listeners_data = api.get_load_balancer_listeners_by_loadbalancer(project_id, loadbalancer_id)
                 if listeners_data is not None:
                     for listener_data in listeners_data:
@@ -547,6 +549,7 @@ class OpenStackControllerCheck(AgentCheck):
                             tags=all_tags,
                         )
 
+                        # listeners statistics
                         stats = api.get_load_balancer_listener_statistics(project_id, listener_id)
                         if stats is not None:
                             self.gauge(
