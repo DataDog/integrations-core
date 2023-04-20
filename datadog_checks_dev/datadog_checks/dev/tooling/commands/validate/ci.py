@@ -495,6 +495,8 @@ def validate_integration_pr_labels(fix, repo_data, valid_integrations):
         echo_success('Successfully fixed {}'.format(pr_labels_config_relative_path))
 
 
+# This option is now --sync in the newer version of ddev:
+# https://github.com/DataDog/integrations-core/blob/ddev-2.0.0/ddev/src/ddev/cli/validate/ci.py#L15
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate CI infrastructure configuration')
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
 @click.pass_context
