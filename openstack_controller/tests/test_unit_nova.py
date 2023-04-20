@@ -206,31 +206,33 @@ def test_quota_set_metrics(aggregator, dd_run_check, monkeypatch, instance):
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    found = False
-    for metric in aggregator.metric_names:
-        if metric in NOVA_QUOTA_SETS_METRICS:
-            found = True
-            aggregator.assert_metric(
-                metric,
-                tags=[
-                    'domain_id:default',
-                    'keystone_server:{}'.format(instance["keystone_server_url"]),
-                    'project_id:1e6e233e637d4d55a50a62b63398ad15',
-                    'project_name:demo',
-                    'quota_id:1e6e233e637d4d55a50a62b63398ad15',
-                ],
-            )
-            aggregator.assert_metric(
-                metric,
-                tags=[
-                    'domain_id:default',
-                    'keystone_server:{}'.format(instance["keystone_server_url"]),
-                    'project_id:6e39099cccde4f809b003d9e0dd09304',
-                    'project_name:admin',
-                    'quota_id:6e39099cccde4f809b003d9e0dd09304',
-                ],
-            )
-    assert found, "No nova quotas metrics found"
+    not_found_metrics = []
+    for key, value in NOVA_QUOTA_SETS_METRICS.items():
+        if check_microversion(instance, value):
+            if key in aggregator.metric_names:
+                aggregator.assert_metric(
+                    key,
+                    tags=[
+                        'domain_id:default',
+                        'keystone_server:{}'.format(instance["keystone_server_url"]),
+                        'project_id:1e6e233e637d4d55a50a62b63398ad15',
+                        'project_name:demo',
+                        'quota_id:1e6e233e637d4d55a50a62b63398ad15',
+                    ],
+                )
+                aggregator.assert_metric(
+                    key,
+                    tags=[
+                        'domain_id:default',
+                        'keystone_server:{}'.format(instance["keystone_server_url"]),
+                        'project_id:6e39099cccde4f809b003d9e0dd09304',
+                        'project_name:admin',
+                        'quota_id:6e39099cccde4f809b003d9e0dd09304',
+                    ],
+                )
+            else:
+                not_found_metrics.append(key)
+    assert not_found_metrics == [], f"No nova quotas metrics found: {not_found_metrics}"
 
 
 @pytest.mark.parametrize(

@@ -34,22 +34,22 @@ NOVA_LIMITS_METRICS = {
 }
 
 NOVA_QUOTA_SETS_METRICS_PREFIX = "openstack.nova.quota_set"
-NOVA_QUOTA_SETS_METRICS = [
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.cores",
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.fixed_ips",
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.floating_ips",
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.injected_file_content_bytes",
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.injected_file_path_bytes",
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.injected_files",
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.instances",
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.key_pairs",
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.metadata_items",
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.ram",
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.security_group_rules",
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.security_groups",
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.server_group_members",
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.server_groups",
-]
+NOVA_QUOTA_SETS_METRICS = {
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.cores": {},
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.fixed_ips": {"max_version": "2.35"},
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.floating_ips": {"max_version": "2.35"},
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.injected_file_content_bytes": {"max_version": "2.56"},
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.injected_file_path_bytes": {"max_version": "2.56"},
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.injected_files": {"max_version": "2.56"},
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.instances": {},
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.key_pairs": {},
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.metadata_items": {},
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.ram": {},
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.security_group_rules": {"max_version": "2.35"},
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.security_groups": {"max_version": "2.35"},
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.server_group_members": {},
+    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.server_groups": {},
+}
 
 NOVA_SERVER_METRICS_PREFIX = "openstack.nova.server"
 NOVA_SERVER_METRICS = [
