@@ -46,7 +46,7 @@ Configure the `prometheus_plugin` section in your instance configuration. When u
        url: http://<HOST>:15692
        unaggregated_endpoint: detailed?family=queue_coarse_metrics
  ```
- This enables scraping of the [`/metrics/detailed` endpoint][22] and collect `queue coarse metrics`.
+ This enables scraping of the [`/metrics/detailed` endpoint][22] to collect queue coarse metrics.
 
 ##### [RabbitMQ Management Plugin][4].
 
