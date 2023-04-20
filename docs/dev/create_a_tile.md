@@ -114,8 +114,7 @@ For Datadog API integrations and Datadog Apps that will be available out-of-the-
    {{< code-block lang="shell" >}}cd $HOME/dd/integrations-extras{{< /code-block >}}
 2. Run the `ddev` command with the `-t tile` option
    {{< code-block lang="shell" >}}ddev create -t tile "<Offering Name>"{{< /code-block >}}
-   
-The options you use with the `ddev` command are different depending on what type of integration you are developing. For a full list of the files created by the `ddev` command, see [Integrations assets][20].   
+
 
 {{% /tab %}}
 
