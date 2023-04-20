@@ -112,11 +112,16 @@ class LoadBalancerRest:
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        return response.json()['healthmonitors']
+        healthmonitors_metrics = {}
+        for healthmonitor in response.json()['healthmonitors']:
+            healthmonitors_metrics[healthmonitor["id"]] = healthmonitor
+        return healthmonitors_metrics
 
     def get_healthmonitors_by_pool(self, pool_id):
         healthmonitors = self.get_healthmonitors()
-        result = [hm for hm in healthmonitors if pool_id in [pool.get("id") for pool in hm.get("pools")]]
+        result = {
+            id: hm for id, hm in healthmonitors.items() if pool_id in [pool.get("id") for pool in hm.get("pools")]
+        }
         return result
 
     def get_amphorae(self):

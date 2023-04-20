@@ -215,3 +215,38 @@ def test_members_metrics_default(aggregator, dd_run_check, instance, monkeypatch
         tags = demo_project_tags + member_tags
         aggregator.assert_metric('openstack.octavia.member.admin_state_up', count=1, tags=tags)
         aggregator.assert_metric('openstack.octavia.member.weight', count=1, tags=tags)
+
+
+def test_healthmonitors_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
+    http = MockHttp("agent-integrations-openstack-octavia")
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['domain_id:default', 'keystone_server:{}'.format(instance["keystone_server_url"])]
+
+    demo_project_tags = base_tags + [
+        'project_id:4762874c945945c38d820cce29fbb66e',
+        'project_name:admin',
+    ]
+
+    demo_healthmonitors = [
+        [
+            'healthmonitor_id:268883b7-c057-4e85-b2c5-d8760267dad1',
+            'healthmonitor_name:healthmonitor-1',
+            'operating_status:ONLINE',
+            'pool_id:d0335b34-3115-4b3b-9a1a-7e2363ebfee3',
+            'pool_name:pool-1',
+            'provisioning_status:ACTIVE',
+        ]
+    ]
+
+    for healthmonitor_tags in demo_healthmonitors:
+        tags = demo_project_tags + healthmonitor_tags
+        aggregator.assert_metric('openstack.octavia.healthmonitor.admin_state_up', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.healthmonitor.delay', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.healthmonitor.max_retries', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.healthmonitor.max_retries_down', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.healthmonitor.timeout', count=1, tags=tags)

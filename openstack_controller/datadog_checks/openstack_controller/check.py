@@ -80,13 +80,28 @@ def _create_load_balancer_member_tags(member_data, loadbalancer_data, pool_data)
     tags = [
         f'member_id:{member_data.get("id")}',
         f'member_name:{member_data.get("name")}',
-        f'provisioning_status:{loadbalancer_data.get("provisioning_status")}',
+        f'provisioning_status:{loadbalancer_data.get("provisioning_status")}',  # TODO: fix
         f'operating_status:{loadbalancer_data.get("operating_status")}',
     ]
 
     if loadbalancer_data:
         tags.append(f'loadbalancer_id:{loadbalancer_data.get("id")}')
         tags.append(f'loadbalancer_name:{loadbalancer_data.get("name")}')
+
+    if pool_data:
+        tags.append(f'pool_id:{pool_data.get("id")}')
+        tags.append(f'pool_name:{pool_data.get("name")}')
+
+    return tags
+
+
+def _create_load_balancer_healthmonitor_tags(healthmonitor_data, pool_data):
+    tags = [
+        f'healthmonitor_id:{healthmonitor_data.get("id")}',
+        f'healthmonitor_name:{healthmonitor_data.get("name")}',
+        f'provisioning_status:{healthmonitor_data.get("provisioning_status")}',
+        f'operating_status:{healthmonitor_data.get("operating_status")}',
+    ]
 
     if pool_data:
         tags.append(f'pool_id:{pool_data.get("id")}')
@@ -486,6 +501,7 @@ class OpenStackControllerCheck(AgentCheck):
             self._report_load_balancer_loadbalancers(api, project_id, project_tags)
             self._report_load_balancer_listeners(api, project_id, project_tags)
             self._report_load_balancer_members(api, project_id, project_tags)
+            self._report_load_balancer_healthmonitors(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting load balancer metrics: %s", e)
@@ -619,3 +635,41 @@ class OpenStackControllerCheck(AgentCheck):
                                     value=member_data.get("weight"),
                                     tags=all_tags,
                                 )
+
+    def _report_load_balancer_healthmonitors(self, api, project_id, project_tags):
+        pools_data = api.get_load_balancer_pools(project_id)
+        if pools_data:
+            for pool_id, pool_data in pools_data.items():
+                healthmonitors_data = api.get_load_balancer_healthmonitors_by_pool(project_id, pool_id)
+                if healthmonitors_data is not None:
+                    for _, healthmonitor_data in healthmonitors_data.items():
+                        healthmonitor_tags = _create_load_balancer_healthmonitor_tags(healthmonitor_data, pool_data)
+                        all_tags = healthmonitor_tags + project_tags
+
+                        # report status
+                        self.gauge(
+                            'openstack.octavia.healthmonitor.admin_state_up',
+                            value=healthmonitor_data.get("admin_state_up"),
+                            tags=all_tags,
+                        )
+
+                        self.gauge(
+                            'openstack.octavia.healthmonitor.delay',
+                            value=healthmonitor_data.get("delay"),
+                            tags=all_tags,
+                        )
+                        self.gauge(
+                            'openstack.octavia.healthmonitor.max_retries',
+                            value=healthmonitor_data.get("max_retries"),
+                            tags=all_tags,
+                        )
+                        self.gauge(
+                            'openstack.octavia.healthmonitor.max_retries_down',
+                            value=healthmonitor_data.get("max_retries_down"),
+                            tags=all_tags,
+                        )
+                        self.gauge(
+                            'openstack.octavia.healthmonitor.timeout',
+                            value=healthmonitor_data.get("timeout"),
+                            tags=all_tags,
+                        )
