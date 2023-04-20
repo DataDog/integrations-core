@@ -28,6 +28,7 @@ First it [computes the job matrix](https://github.com/DataDog/integrations-core/
     - `tests/**/*`
     - `*.py`
     - `hatch.toml`
+    - `metadata.csv`
     - `pyproject.toml`
 
 !!! warning
