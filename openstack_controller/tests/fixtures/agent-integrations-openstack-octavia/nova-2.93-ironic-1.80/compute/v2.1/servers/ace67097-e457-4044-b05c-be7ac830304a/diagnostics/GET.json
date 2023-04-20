@@ -3,7 +3,7 @@
   "driver": "libvirt",
   "hypervisor": "qemu",
   "hypervisor_os": "linux",
-  "uptime": 173848,
+  "uptime": 184648,
   "config_drive": true,
   "num_cpus": 1,
   "num_nics": 2,
@@ -12,8 +12,8 @@
     {
       "read_bytes": 174453760,
       "read_requests": 7196,
-      "write_bytes": 500298752,
-      "write_requests": 59848,
+      "write_bytes": 529200128,
+      "write_requests": 63362,
       "errors_count": -1
     },
     {
@@ -27,35 +27,35 @@
   "cpu_details": [
     {
       "id": 0,
-      "time": 3400430000000,
+      "time": 3587290000000,
       "utilisation": null
     }
   ],
   "nic_details": [
     {
       "mac_address": "fa:16:3e:c7:8b:5d",
-      "rx_octets": 5658517,
+      "rx_octets": 6084674,
       "rx_errors": 0,
       "rx_drop": 0,
-      "rx_packets": 22156,
+      "rx_packets": 23508,
       "rx_rate": null,
-      "tx_octets": 273835,
+      "tx_octets": 285343,
       "tx_errors": 0,
       "tx_drop": 0,
-      "tx_packets": 4722,
+      "tx_packets": 4996,
       "tx_rate": null
     },
     {
       "mac_address": "fa:16:3e:a3:bc:4d",
-      "rx_octets": 100594,
+      "rx_octets": 351798,
       "rx_errors": 0,
       "rx_drop": 0,
-      "rx_packets": 1413,
+      "rx_packets": 4927,
       "rx_rate": null,
-      "tx_octets": 5996,
+      "tx_octets": 17588,
       "tx_errors": 0,
       "tx_drop": 0,
-      "tx_packets": 132,
+      "tx_packets": 408,
       "tx_rate": null
     }
   ],
