@@ -60,8 +60,12 @@ process_endpoint() {
   fi
 }
 
+echo "Getting mocks from $1 host..."
 os_ip=$(gcloud compute instances describe "$1" --format='get(networkInterfaces[0].accessConfigs[0].natIP)' --project "datadog-integrations-lab" --zone "europe-west4-a")
-root_folder="tests/fixtures/"$1"/nova-${2:-"default"}-ironic-${3:-"default"}"
+echo "IP: $os_ip"
+current_dir=$(pwd)
+root_folder="$current_dir/tests/fixtures/$1/nova-${2:-"default"}-ironic-${3:-"default"}"
+echo "Folder: $root_folder"
 
 nova_microversion_header=""
 ironic_microversion_header=""
@@ -114,6 +118,7 @@ for project_id in $(echo "$RESPONSE" | jq -r '.projects[]' | jq -r '.id'); do
     process_endpoint --endpoint="/compute/v2.1/servers/$server_id/diagnostics"
   done
   process_endpoint --port=9696 --endpoint="/networking/v2.0/quotas/$project_id"
+  process_endpoint --port=9696 --endpoint="/networking/v2.0/agents"
 done
 process_endpoint --endpoint="/compute/v2.1/os-aggregates"
 process_endpoint --endpoint="/compute/v2.1/os-services"

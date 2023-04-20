@@ -56,5 +56,8 @@ class ApiSdk(Api):
     def get_network_quotas(self, project):
         pass  # pragma: no cover
 
+    def get_network_agents(self, project_id):
+        pass  # pragma: no cover
+
     def get_baremetal_response_time(self, project):
         pass  # pragma: no cover

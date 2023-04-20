@@ -5,7 +5,7 @@
     "id": "v1",
     "links": [
       {
-        "href": "http://34.147.101.227/baremetal/v1/",
+        "href": "http://34.91.6.91/baremetal/v1/",
         "rel": "self"
       }
     ],
@@ -18,7 +18,7 @@
       "id": "v1",
       "links": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/",
+          "href": "http://34.91.6.91/baremetal/v1/",
           "rel": "self"
         }
       ],

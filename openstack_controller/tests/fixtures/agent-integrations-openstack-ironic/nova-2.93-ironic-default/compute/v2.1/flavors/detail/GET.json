@@ -14,11 +14,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.147.101.227/compute/v2.1/flavors/1"
+          "href": "http://34.91.6.91/compute/v2.1/flavors/1"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.147.101.227/compute/flavors/1"
+          "href": "http://34.91.6.91/compute/flavors/1"
         }
       ],
       "description": null,
@@ -40,11 +40,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.147.101.227/compute/v2.1/flavors/2"
+          "href": "http://34.91.6.91/compute/v2.1/flavors/2"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.147.101.227/compute/flavors/2"
+          "href": "http://34.91.6.91/compute/flavors/2"
         }
       ],
       "description": null,
@@ -66,11 +66,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.147.101.227/compute/v2.1/flavors/23305e7d-a124-4bc8-a429-e54d35acdcc0"
+          "href": "http://34.91.6.91/compute/v2.1/flavors/23305e7d-a124-4bc8-a429-e54d35acdcc0"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.147.101.227/compute/flavors/23305e7d-a124-4bc8-a429-e54d35acdcc0"
+          "href": "http://34.91.6.91/compute/flavors/23305e7d-a124-4bc8-a429-e54d35acdcc0"
         }
       ],
       "description": null,
@@ -98,11 +98,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.147.101.227/compute/v2.1/flavors/3"
+          "href": "http://34.91.6.91/compute/v2.1/flavors/3"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.147.101.227/compute/flavors/3"
+          "href": "http://34.91.6.91/compute/flavors/3"
         }
       ],
       "description": null,
@@ -124,11 +124,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.147.101.227/compute/v2.1/flavors/4"
+          "href": "http://34.91.6.91/compute/v2.1/flavors/4"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.147.101.227/compute/flavors/4"
+          "href": "http://34.91.6.91/compute/flavors/4"
         }
       ],
       "description": null,
@@ -150,11 +150,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.147.101.227/compute/v2.1/flavors/5"
+          "href": "http://34.91.6.91/compute/v2.1/flavors/5"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.147.101.227/compute/flavors/5"
+          "href": "http://34.91.6.91/compute/flavors/5"
         }
       ],
       "description": null,
@@ -176,11 +176,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.147.101.227/compute/v2.1/flavors/c1"
+          "href": "http://34.91.6.91/compute/v2.1/flavors/c1"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.147.101.227/compute/flavors/c1"
+          "href": "http://34.91.6.91/compute/flavors/c1"
         }
       ],
       "description": null,
@@ -202,11 +202,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.147.101.227/compute/v2.1/flavors/d1"
+          "href": "http://34.91.6.91/compute/v2.1/flavors/d1"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.147.101.227/compute/flavors/d1"
+          "href": "http://34.91.6.91/compute/flavors/d1"
         }
       ],
       "description": null,
@@ -228,11 +228,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.147.101.227/compute/v2.1/flavors/d2"
+          "href": "http://34.91.6.91/compute/v2.1/flavors/d2"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.147.101.227/compute/flavors/d2"
+          "href": "http://34.91.6.91/compute/flavors/d2"
         }
       ],
       "description": null,
@@ -254,11 +254,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.147.101.227/compute/v2.1/flavors/d3"
+          "href": "http://34.91.6.91/compute/v2.1/flavors/d3"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.147.101.227/compute/flavors/d3"
+          "href": "http://34.91.6.91/compute/flavors/d3"
         }
       ],
       "description": null,
@@ -280,11 +280,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.147.101.227/compute/v2.1/flavors/d4"
+          "href": "http://34.91.6.91/compute/v2.1/flavors/d4"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.147.101.227/compute/flavors/d4"
+          "href": "http://34.91.6.91/compute/flavors/d4"
         }
       ],
       "description": null,

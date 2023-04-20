@@ -6,6 +6,8 @@ import json
 import os
 from urllib.parse import urlparse
 
+from packaging import version
+
 from datadog_checks.dev.fs import get_here
 from datadog_checks.dev.http import MockResponse
 
@@ -413,6 +415,13 @@ DEFAULT_METRICS = [
     'openstack.nova.flavor.rxtx_factor',
     'openstack.nova.flavor.vcpus',
 ]
+
+
+def check_microversion(instance, value):
+    nova_microversion = version.parse(instance.get("nova_microversion", "2.1"))
+    min_version = version.parse(value.get("min_version", "2.1"))
+    max_version = version.parse(value.get("max_version", "2.93"))
+    return min_version <= nova_microversion <= max_version
 
 
 def _get_microversion_path(headers):

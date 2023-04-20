@@ -7,7 +7,7 @@
       "zone": "internal",
       "status": "enabled",
       "state": "up",
-      "updated_at": "2023-04-19T17:37:54.000000",
+      "updated_at": "2023-04-20T07:16:52.000000",
       "disabled_reason": null,
       "forced_down": false
     },
@@ -18,7 +18,7 @@
       "zone": "availability-zone",
       "status": "enabled",
       "state": "up",
-      "updated_at": "2023-04-19T17:37:59.000000",
+      "updated_at": "2023-04-20T07:16:52.000000",
       "disabled_reason": null,
       "forced_down": false
     },
@@ -29,7 +29,7 @@
       "zone": "internal",
       "status": "enabled",
       "state": "up",
-      "updated_at": "2023-04-19T17:37:54.000000",
+      "updated_at": "2023-04-20T07:16:52.000000",
       "disabled_reason": null,
       "forced_down": false
     },
@@ -40,7 +40,7 @@
       "zone": "internal",
       "status": "enabled",
       "state": "up",
-      "updated_at": "2023-04-19T17:37:54.000000",
+      "updated_at": "2023-04-20T07:16:52.000000",
       "disabled_reason": null,
       "forced_down": false
     }

@@ -88,11 +88,11 @@
       "vendor_interface": "ipmitool",
       "links": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0",
+          "href": "http://34.91.6.91/baremetal/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0",
           "rel": "bookmark"
         }
       ],
@@ -101,41 +101,41 @@
       "chassis_uuid": "64c4893f-6a49-4b2c-b5d8-ab955367b504",
       "ports": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/ports",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/ports",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/ports",
+          "href": "http://34.91.6.91/baremetal/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/ports",
           "rel": "bookmark"
         }
       ],
       "states": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/states",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/states",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/states",
+          "href": "http://34.91.6.91/baremetal/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/states",
           "rel": "bookmark"
         }
       ],
       "portgroups": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/portgroups",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/portgroups",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/portgroups",
+          "href": "http://34.91.6.91/baremetal/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/portgroups",
           "rel": "bookmark"
         }
       ],
       "volume": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/volume",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/volume",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/volume",
+          "href": "http://34.91.6.91/baremetal/nodes/9d72cf53-19c8-4942-9314-005fa5d2a6a0/volume",
           "rel": "bookmark"
         }
       ]
@@ -228,11 +228,11 @@
       "vendor_interface": "ipmitool",
       "links": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
+          "href": "http://34.91.6.91/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
           "rel": "bookmark"
         }
       ],
@@ -241,41 +241,41 @@
       "chassis_uuid": "64c4893f-6a49-4b2c-b5d8-ab955367b504",
       "ports": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/ports",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/ports",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/ports",
+          "href": "http://34.91.6.91/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/ports",
           "rel": "bookmark"
         }
       ],
       "states": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/states",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/states",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/states",
+          "href": "http://34.91.6.91/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/states",
           "rel": "bookmark"
         }
       ],
       "portgroups": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/portgroups",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/portgroups",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/portgroups",
+          "href": "http://34.91.6.91/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/portgroups",
           "rel": "bookmark"
         }
       ],
       "volume": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/volume",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/volume",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/volume",
+          "href": "http://34.91.6.91/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/volume",
           "rel": "bookmark"
         }
       ]
@@ -368,11 +368,11 @@
       "vendor_interface": "ipmitool",
       "links": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/54855e59-83ca-46f8-a78f-55d3370e0656",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/54855e59-83ca-46f8-a78f-55d3370e0656",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/54855e59-83ca-46f8-a78f-55d3370e0656",
+          "href": "http://34.91.6.91/baremetal/nodes/54855e59-83ca-46f8-a78f-55d3370e0656",
           "rel": "bookmark"
         }
       ],
@@ -381,41 +381,41 @@
       "chassis_uuid": "64c4893f-6a49-4b2c-b5d8-ab955367b504",
       "ports": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/ports",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/ports",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/ports",
+          "href": "http://34.91.6.91/baremetal/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/ports",
           "rel": "bookmark"
         }
       ],
       "states": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/states",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/states",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/states",
+          "href": "http://34.91.6.91/baremetal/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/states",
           "rel": "bookmark"
         }
       ],
       "portgroups": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/portgroups",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/portgroups",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/portgroups",
+          "href": "http://34.91.6.91/baremetal/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/portgroups",
           "rel": "bookmark"
         }
       ],
       "volume": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/volume",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/volume",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/volume",
+          "href": "http://34.91.6.91/baremetal/nodes/54855e59-83ca-46f8-a78f-55d3370e0656/volume",
           "rel": "bookmark"
         }
       ]
@@ -479,11 +479,11 @@
       "vendor_interface": "fake",
       "links": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95",
+          "href": "http://34.91.6.91/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95",
           "rel": "bookmark"
         }
       ],
@@ -492,41 +492,41 @@
       "chassis_uuid": null,
       "ports": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95/ports",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95/ports",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95/ports",
+          "href": "http://34.91.6.91/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95/ports",
           "rel": "bookmark"
         }
       ],
       "states": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95/states",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95/states",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95/states",
+          "href": "http://34.91.6.91/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95/states",
           "rel": "bookmark"
         }
       ],
       "portgroups": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95/portgroups",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95/portgroups",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95/portgroups",
+          "href": "http://34.91.6.91/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95/portgroups",
           "rel": "bookmark"
         }
       ],
       "volume": [
         {
-          "href": "http://34.147.101.227/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95/volume",
+          "href": "http://34.91.6.91/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95/volume",
           "rel": "self"
         },
         {
-          "href": "http://34.147.101.227/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95/volume",
+          "href": "http://34.91.6.91/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95/volume",
           "rel": "bookmark"
         }
       ]

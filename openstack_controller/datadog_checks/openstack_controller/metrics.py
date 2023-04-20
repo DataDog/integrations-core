@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
+
 from datadog_checks.base import AgentCheck
 
 HYPERVISOR_SERVICE_CHECK = {'up': AgentCheck.OK, 'down': AgentCheck.CRITICAL}
@@ -9,27 +11,27 @@ KEYSTONE_SERVICE_CHECK = "openstack.keystone.api.up"
 
 NOVA_SERVICE_CHECK = "openstack.nova.api.up"
 NOVA_LIMITS_METRICS_PREFIX = "openstack.nova.limits"
-NOVA_LIMITS_METRICS = [
-    f"{NOVA_LIMITS_METRICS_PREFIX}.max_total_instances",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.max_total_cores",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.max_total_ram_size",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.max_server_meta",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.max_image_meta",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.max_personality",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.max_personality_size",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.max_total_keypairs",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.max_server_groups",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.max_server_group_members",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.max_total_floating_ips",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.max_security_groups",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.max_security_group_rules",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.total_ram_used",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.total_cores_used",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.total_instances_used",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.total_floating_ips_used",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.total_security_groups_used",
-    f"{NOVA_LIMITS_METRICS_PREFIX}.total_server_groups_used",
-]
+NOVA_LIMITS_METRICS = {
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_total_instances": {},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_total_cores": {},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_total_ram_size": {},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_server_meta": {},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_image_meta": {"max_version": "2.38"},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_personality": {"max_version": "2.56"},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_personality_size": {"max_version": "2.56"},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_total_keypairs": {},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_server_groups": {},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_server_group_members": {},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_total_floating_ips": {"max_version": "2.35"},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_security_groups": {"max_version": "2.35"},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_security_group_rules": {"max_version": "2.35"},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.total_ram_used": {},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.total_cores_used": {},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.total_instances_used": {},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.total_floating_ips_used": {"max_version": "2.35"},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.total_security_groups_used": {"max_version": "2.35"},
+    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.total_server_groups_used": {},
+}
 
 NOVA_QUOTA_SETS_METRICS_PREFIX = "openstack.nova.quota_set"
 NOVA_QUOTA_SETS_METRICS = [
@@ -49,49 +51,50 @@ NOVA_QUOTA_SETS_METRICS = [
     f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.server_groups",
 ]
 
+NOVA_SERVER_METRICS_PREFIX = "openstack.nova.server"
 NOVA_SERVER_METRICS = [
-    "openstack.nova.server.count",
-    "openstack.nova.server.active",
-    "openstack.nova.server.error",
-    "openstack.nova.server.cpu0_time",
-    "openstack.nova.server.vda_read_req",
-    "openstack.nova.server.vda_read",
-    "openstack.nova.server.vda_write_req",
-    "openstack.nova.server.vda_write",
-    "openstack.nova.server.vda_errors",
-    "openstack.nova.server.memory",
-    "openstack.nova.server.memory_actual",
-    "openstack.nova.server.memory_swap_in",
-    "openstack.nova.server.memory_swap_out",
-    "openstack.nova.server.memory_major_fault",
-    "openstack.nova.server.memory_minor_fault",
-    "openstack.nova.server.memory_unused",
-    "openstack.nova.server.memory_available",
-    "openstack.nova.server.memory_usable",
-    "openstack.nova.server.memory_last_update",
-    "openstack.nova.server.memory_disk_caches",
-    "openstack.nova.server.memory_hugetlb_pgalloc",
-    "openstack.nova.server.memory_hugetlb_pgfail",
-    "openstack.nova.server.memory_rss",
-    "openstack.nova.server.flavor.vcpus",
-    "openstack.nova.server.flavor.ram",
-    "openstack.nova.server.flavor.disk",
-    "openstack.nova.server.flavor.os_flv_ext_data:ephemeral",
-    "openstack.nova.server.flavor.ephemeral",
-    "openstack.nova.server.flavor.swap",
-    "openstack.nova.server.flavor.rxtx_factor",
-    "openstack.nova.server.disk_details.read_bytes",
-    "openstack.nova.server.disk_details.read_requests",
-    "openstack.nova.server.disk_details.write_bytes",
-    "openstack.nova.server.disk_details.write_requests",
-    "openstack.nova.server.disk_details.errors_count",
-    "openstack.nova.server.cpu_details.id",
-    "openstack.nova.server.cpu_details.time",
-    "openstack.nova.server.cpu_details.utilisation",
-    "openstack.nova.server.uptime",
-    "openstack.nova.server.num_cpus",
-    "openstack.nova.server.num_nics",
-    "openstack.nova.server.num_disks",
+    f"{NOVA_SERVER_METRICS_PREFIX}.count",
+    f"{NOVA_SERVER_METRICS_PREFIX}.active",
+    f"{NOVA_SERVER_METRICS_PREFIX}.error",
+    f"{NOVA_SERVER_METRICS_PREFIX}.cpu0_time",
+    f"{NOVA_SERVER_METRICS_PREFIX}.vda_read_req",
+    f"{NOVA_SERVER_METRICS_PREFIX}.vda_read",
+    f"{NOVA_SERVER_METRICS_PREFIX}.vda_write_req",
+    f"{NOVA_SERVER_METRICS_PREFIX}.vda_write",
+    f"{NOVA_SERVER_METRICS_PREFIX}.vda_errors",
+    f"{NOVA_SERVER_METRICS_PREFIX}.memory",
+    f"{NOVA_SERVER_METRICS_PREFIX}.memory_actual",
+    f"{NOVA_SERVER_METRICS_PREFIX}.memory_swap_in",
+    f"{NOVA_SERVER_METRICS_PREFIX}.memory_swap_out",
+    f"{NOVA_SERVER_METRICS_PREFIX}.memory_major_fault",
+    f"{NOVA_SERVER_METRICS_PREFIX}.memory_minor_fault",
+    f"{NOVA_SERVER_METRICS_PREFIX}.memory_unused",
+    f"{NOVA_SERVER_METRICS_PREFIX}.memory_available",
+    f"{NOVA_SERVER_METRICS_PREFIX}.memory_usable",
+    f"{NOVA_SERVER_METRICS_PREFIX}.memory_last_update",
+    f"{NOVA_SERVER_METRICS_PREFIX}.memory_disk_caches",
+    f"{NOVA_SERVER_METRICS_PREFIX}.memory_hugetlb_pgalloc",
+    f"{NOVA_SERVER_METRICS_PREFIX}.memory_hugetlb_pgfail",
+    f"{NOVA_SERVER_METRICS_PREFIX}.memory_rss",
+    f"{NOVA_SERVER_METRICS_PREFIX}.flavor.vcpus",
+    f"{NOVA_SERVER_METRICS_PREFIX}.flavor.ram",
+    f"{NOVA_SERVER_METRICS_PREFIX}.flavor.disk",
+    f"{NOVA_SERVER_METRICS_PREFIX}.flavor.os_flv_ext_data:ephemeral",
+    f"{NOVA_SERVER_METRICS_PREFIX}.flavor.ephemeral",
+    f"{NOVA_SERVER_METRICS_PREFIX}.flavor.swap",
+    f"{NOVA_SERVER_METRICS_PREFIX}.flavor.rxtx_factor",
+    f"{NOVA_SERVER_METRICS_PREFIX}.disk_details.read_bytes",
+    f"{NOVA_SERVER_METRICS_PREFIX}.disk_details.read_requests",
+    f"{NOVA_SERVER_METRICS_PREFIX}.disk_details.write_bytes",
+    f"{NOVA_SERVER_METRICS_PREFIX}.disk_details.write_requests",
+    f"{NOVA_SERVER_METRICS_PREFIX}.disk_details.errors_count",
+    f"{NOVA_SERVER_METRICS_PREFIX}.cpu_details.id",
+    f"{NOVA_SERVER_METRICS_PREFIX}.cpu_details.time",
+    f"{NOVA_SERVER_METRICS_PREFIX}.cpu_details.utilisation",
+    f"{NOVA_SERVER_METRICS_PREFIX}.uptime",
+    f"{NOVA_SERVER_METRICS_PREFIX}.num_cpus",
+    f"{NOVA_SERVER_METRICS_PREFIX}.num_nics",
+    f"{NOVA_SERVER_METRICS_PREFIX}.num_disks",
 ]
 
 NOVA_FLAVOR_METRICS = [
@@ -143,3 +146,42 @@ LEGACY_NOVA_HYPERVISOR_LOAD_METRICS = {
     'load_5': 'hypervisor_load.5',
     'load_15': 'hypervisor_load.15',
 }
+
+NEUTRON_QUOTAS_METRICS_PREFIX = "openstack.neutron.quotas"
+NEUTRON_QUOTAS_METRICS = [
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.floatingip",
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.network",
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.port",
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.rbac_policy",
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.router",
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.security_group",
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.security_group_rule",
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.subnet",
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.subnetpool",
+]
+
+NEUTRON_AGENTS_METRICS_PREFIX = "openstack.neutron.agents"
+NEUTRON_AGENTS_METRICS = [
+    f"{NEUTRON_AGENTS_METRICS_PREFIX}.count",
+    f"{NEUTRON_AGENTS_METRICS_PREFIX}.alive",
+    f"{NEUTRON_AGENTS_METRICS_PREFIX}.admin_state_up",
+]
+
+
+def get_normalized_key(key):
+    return re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_")
+
+
+def get_normalized_metrics(log, metrics, parent=None):
+    normalized_metrics = {}
+    for key, value in metrics.items():
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            log.debug("get_normalized_metrics: %s", key)
+            normalized_metrics[f'{parent}.{get_normalized_key(key)}' if parent else get_normalized_key(key)] = value
+        elif isinstance(value, bool):
+            normalized_metrics[f'{parent}.{get_normalized_key(key)}' if parent else get_normalized_key(key)] = (
+                1 if value else 0
+            )
+        elif isinstance(value, dict):
+            normalized_metrics.update(get_normalized_metrics(log, value, get_normalized_key(key)))
+    return normalized_metrics

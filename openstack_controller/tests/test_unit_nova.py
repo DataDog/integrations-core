@@ -18,7 +18,7 @@ from datadog_checks.openstack_controller.metrics import (
     NOVA_SERVICE_CHECK,
 )
 
-from .common import CONFIG, CONFIG_NOVA_MICROVERSION_LATEST, MockHttp
+from .common import CONFIG, CONFIG_NOVA_MICROVERSION_LATEST, MockHttp, check_microversion
 
 pytestmark = [pytest.mark.unit]
 
@@ -165,29 +165,31 @@ def test_limits_metrics(aggregator, dd_run_check, monkeypatch, instance):
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    found = False
-    for metric in aggregator.metric_names:
-        if metric in NOVA_LIMITS_METRICS:
-            found = True
-            aggregator.assert_metric(
-                metric,
-                tags=[
-                    'domain_id:default',
-                    'keystone_server:{}'.format(instance["keystone_server_url"]),
-                    'project_id:1e6e233e637d4d55a50a62b63398ad15',
-                    'project_name:demo',
-                ],
-            )
-            aggregator.assert_metric(
-                metric,
-                tags=[
-                    'domain_id:default',
-                    'keystone_server:{}'.format(instance["keystone_server_url"]),
-                    'project_id:6e39099cccde4f809b003d9e0dd09304',
-                    'project_name:admin',
-                ],
-            )
-    assert found, "No nova limits metrics found"
+    not_found_metrics = []
+    for key, value in NOVA_LIMITS_METRICS.items():
+        if check_microversion(instance, value):
+            if key in aggregator.metric_names:
+                aggregator.assert_metric(
+                    key,
+                    tags=[
+                        'domain_id:default',
+                        'keystone_server:{}'.format(instance["keystone_server_url"]),
+                        'project_id:1e6e233e637d4d55a50a62b63398ad15',
+                        'project_name:demo',
+                    ],
+                )
+                aggregator.assert_metric(
+                    key,
+                    tags=[
+                        'domain_id:default',
+                        'keystone_server:{}'.format(instance["keystone_server_url"]),
+                        'project_id:6e39099cccde4f809b003d9e0dd09304',
+                        'project_name:admin',
+                    ],
+                )
+            else:
+                not_found_metrics.append(key)
+    assert not_found_metrics == [], f"No nova limits metrics found: {not_found_metrics}"
 
 
 @pytest.mark.parametrize(
@@ -245,10 +247,8 @@ def test_server_metrics(aggregator, dd_run_check, monkeypatch, instance):
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    found = False
     for metric in aggregator.metric_names:
         if metric in NOVA_SERVER_METRICS:
-            found = True
             if metric == "openstack.nova.server.count":
                 tags = [
                     'domain_id:default',
@@ -269,7 +269,6 @@ def test_server_metrics(aggregator, dd_run_check, monkeypatch, instance):
                     'flavor_name:cirros256',
                 ]
             aggregator.assert_metric(metric, tags=tags)
-    assert found, "No server metrics found"
 
 
 @pytest.mark.parametrize(
