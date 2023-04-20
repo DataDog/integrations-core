@@ -128,6 +128,8 @@ def test_loadbalancers_metrics_default(aggregator, dd_run_check, instance, monke
             'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
             'loadbalancer_name:loadbalancer-1',
             'pool_id:d0335b34-3115-4b3b-9a1a-7e2363ebfee3',
+            'provisioning_status:ACTIVE',
+            'operating_status:ONLINE',
         ]
     ]
 

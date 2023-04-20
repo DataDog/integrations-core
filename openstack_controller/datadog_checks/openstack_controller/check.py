@@ -42,6 +42,8 @@ def _create_load_balancer_loadbalancer_tags(loadbalancer_data):
     tags = [
         f'loadbalancer_id:{loadbalancer_data.get("id")}',
         f'loadbalancer_name:{loadbalancer_data.get("name")}',
+        f'provisioning_status:{loadbalancer_data.get("provisioning_status")}',
+        f'operating_status:{loadbalancer_data.get("operating_status")}',
     ]
 
     listeners = loadbalancer_data.get("listeners")
