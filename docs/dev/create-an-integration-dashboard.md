@@ -21,8 +21,8 @@ Follow the best practices in this guide when adding elements to your dashboard.
 
 ### Export your dashboard
 
-Export your dashboard to JSON using the settings cog (upper right) and choosing **Export dashboard JSON**.
-Name the file according to your dashboard title: for example, `you_integration_name_overview.json`.
+Export your dashboard to JSON using the export button (upper right) and choosing **Export dashboard JSON**.
+Name the file according to your dashboard title: for example, `your_integration_name_overview.json`.
 
 Save this file to your integration's `assets/dashboards` folder.  Add the asset to your `manifest.json` file. See [Integrations Assets Reference][11] for more information about your integration's file structure and manifest file.
 
