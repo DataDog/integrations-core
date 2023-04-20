@@ -18,7 +18,7 @@ from datadog_checks.openstack_controller.metrics import (
     NOVA_SERVICE_CHECK,
 )
 
-from .common import CONFIG, CONFIG_NOVA_MICROVERSION_LATEST, MockHttp, check_microversion
+from .common import CONFIG, CONFIG_NOVA_MICROVERSION_LATEST, MockHttp, check_microversion, is_mandatory
 
 pytestmark = [pytest.mark.unit]
 
@@ -230,7 +230,7 @@ def test_quota_set_metrics(aggregator, dd_run_check, monkeypatch, instance):
                         'quota_id:6e39099cccde4f809b003d9e0dd09304',
                     ],
                 )
-            else:
+            elif is_mandatory(value):
                 not_found_metrics.append(key)
     assert not_found_metrics == [], f"No nova quotas metrics found: {not_found_metrics}"
 
@@ -249,28 +249,33 @@ def test_server_metrics(aggregator, dd_run_check, monkeypatch, instance):
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    for metric in aggregator.metric_names:
-        if metric in NOVA_SERVER_METRICS:
-            if metric == "openstack.nova.server.count":
-                tags = [
-                    'domain_id:default',
-                    'keystone_server:{}'.format(instance["keystone_server_url"]),
-                    'project_id:6e39099cccde4f809b003d9e0dd09304',
-                    'project_name:admin',
-                ]
-            else:
-                tags = [
-                    'domain_id:default',
-                    'keystone_server:{}'.format(instance["keystone_server_url"]),
-                    'project_id:6e39099cccde4f809b003d9e0dd09304',
-                    'project_name:admin',
-                    'server_id:2c653a68-b520-4582-a05d-41a68067d76c',
-                    'server_name:server',
-                    'server_status:active',
-                    'hypervisor:agent-integrations-openstack-default',
-                    'flavor_name:cirros256',
-                ]
-            aggregator.assert_metric(metric, tags=tags)
+    not_found_metrics = []
+    for key, value in NOVA_SERVER_METRICS.items():
+        if check_microversion(instance, value):
+            if key in aggregator.metric_names:
+                if key == "openstack.nova.server.count":
+                    tags = [
+                        'domain_id:default',
+                        'keystone_server:{}'.format(instance["keystone_server_url"]),
+                        'project_id:6e39099cccde4f809b003d9e0dd09304',
+                        'project_name:admin',
+                    ]
+                else:
+                    tags = [
+                        'domain_id:default',
+                        'keystone_server:{}'.format(instance["keystone_server_url"]),
+                        'project_id:6e39099cccde4f809b003d9e0dd09304',
+                        'project_name:admin',
+                        'server_id:2c653a68-b520-4582-a05d-41a68067d76c',
+                        'server_name:server',
+                        'server_status:active',
+                        'hypervisor:agent-integrations-openstack-default',
+                        'flavor_name:cirros256',
+                    ]
+                aggregator.assert_metric(key, tags=tags)
+            elif is_mandatory(value):
+                not_found_metrics.append(key)
+    assert not_found_metrics == [], f"No nova server metrics found: {not_found_metrics}"
 
 
 @pytest.mark.parametrize(

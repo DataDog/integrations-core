@@ -417,11 +417,15 @@ DEFAULT_METRICS = [
 ]
 
 
-def check_microversion(instance, value):
+def check_microversion(instance, metric):
     nova_microversion = version.parse(instance.get("nova_microversion", "2.1"))
-    min_version = version.parse(value.get("min_version", "2.1"))
-    max_version = version.parse(value.get("max_version", "2.93"))
+    min_version = version.parse(metric.get("min_version", "2.1"))
+    max_version = version.parse(metric.get("max_version", "2.93"))
     return min_version <= nova_microversion <= max_version
+
+
+def is_mandatory(metric):
+    return not metric.get("optional", False)
 
 
 def _get_microversion_path(headers):
