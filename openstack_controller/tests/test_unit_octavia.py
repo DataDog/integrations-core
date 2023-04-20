@@ -181,3 +181,38 @@ def test_listeners_metrics_default(aggregator, dd_run_check, instance, monkeypat
         aggregator.assert_metric('openstack.octavia.listener.bytes_out', count=1, tags=tags)
         aggregator.assert_metric('openstack.octavia.listener.request_errors', count=1, tags=tags)
         aggregator.assert_metric('openstack.octavia.listener.total_connections', count=1, tags=tags)
+
+
+
+def test_members_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
+    http = MockHttp("agent-integrations-openstack-octavia")
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['domain_id:default', 'keystone_server:{}'.format(instance["keystone_server_url"])]
+
+    demo_project_tags = base_tags + [
+        'project_id:4762874c945945c38d820cce29fbb66e',
+        'project_name:admin',
+    ]
+
+    demo_members = [
+        [
+            'member_id:0abcafea-2ad2-44cd-957f-690644ba479c', 
+            'member_name:amphora-042bcca4-4d97-47a9-bc04-d88c1e3a4d72',
+            'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
+            'loadbalancer_name:loadbalancer-1',
+            'pool_id:d0335b34-3115-4b3b-9a1a-7e2363ebfee3',
+            'pool_name:pool-1',
+            'provisioning_status:ACTIVE',
+            'operating_status:ERROR',
+        ]
+    ]
+
+    for member_tags in demo_members:
+        tags = demo_project_tags + member_tags
+        aggregator.assert_metric('openstack.octavia.member.weight', count=1, tags=tags)
+

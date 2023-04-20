@@ -75,6 +75,24 @@ def _create_load_balancer_listener_tags(listener_data, loadbalancers_data):
 
     return tags
 
+def _create_load_balancer_member_tags(member_data, loadbalancer_data, pool_data):
+    tags = [
+        f'member_id:{member_data.get("id")}',
+        f'member_name:{member_data.get("name")}',
+        f'provisioning_status:{loadbalancer_data.get("provisioning_status")}',
+        f'operating_status:{loadbalancer_data.get("operating_status")}',
+    ]
+
+    if loadbalancer_data:
+        tags.append(f'loadbalancer_id:{loadbalancer_data.get("id")}')
+        tags.append(f'loadbalancer_name:{loadbalancer_data.get("name")}')
+
+    if pool_data:
+        tags.append(f'pool_id:{pool_data.get("id")}')
+        tags.append(f'pool_name:{pool_data.get("name")}')
+
+    return tags
+
 
 def _create_project_tags(project):
     return [f"project_id:{project.get('id')}", f"project_name:{project.get('name')}"]
@@ -466,6 +484,7 @@ class OpenStackControllerCheck(AgentCheck):
             self._report_load_balancer_response_time(api, project_id, project_tags)
             self._report_load_balancer_loadbalancers(api, project_id, project_tags)
             self._report_load_balancer_listeners(api, project_id, project_tags)
+            self._report_load_balancer_members(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting load balancer metrics: %s", e)
@@ -575,3 +594,22 @@ class OpenStackControllerCheck(AgentCheck):
                         value=stats.get("total_connections"),
                         tags=all_tags,
                     )
+    
+    def _report_load_balancer_members(self, api, project_id, project_tags):
+        loadbalancers_data = api.get_load_balancer_loadbalancers(project_id)
+        if loadbalancers_data is not None:
+            for loadbalancer_id, loadbalancer_data in loadbalancers_data.items():
+                pools_data = api.get_load_balancer_pools_by_loadbalancer(project_id, loadbalancer_id)
+                if pools_data:
+                    for pool_id, pool_data in pools_data.items():
+                        members_data = api.get_load_balancer_members_by_pool(project_id, pool_id)
+                        if members_data is not None:
+                            for member_id, member_data in members_data.items():
+                                member_tags = _create_load_balancer_member_tags(member_data, loadbalancer_data, pool_data)
+                                all_tags = member_tags + project_tags
+
+                                self.gauge(
+                                    'openstack.octavia.member.weight',
+                                    value=member_data.get("weight"),
+                                    tags=all_tags,
+                                )
