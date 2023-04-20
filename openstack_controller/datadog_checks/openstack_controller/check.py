@@ -80,8 +80,8 @@ def _create_load_balancer_member_tags(member_data, loadbalancer_data, pool_data)
     tags = [
         f'member_id:{member_data.get("id")}',
         f'member_name:{member_data.get("name")}',
-        f'provisioning_status:{loadbalancer_data.get("provisioning_status")}',  # TODO: fix
-        f'operating_status:{loadbalancer_data.get("operating_status")}',
+        f'provisioning_status:{member_data.get("provisioning_status")}',
+        f'operating_status:{member_data.get("operating_status")}',
     ]
 
     if loadbalancer_data:
