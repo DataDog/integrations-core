@@ -150,7 +150,7 @@ process_endpoint --endpoint="/load-balancer/v2/lbaas/pools"
 process_endpoint --endpoint="/load-balancer/v2/lbaas/healthmonitors"
 process_endpoint --endpoint="/load-balancer/v2/octavia/amphorae"
 for amphora_id in $(echo "$RESPONSE" | jq -r '.amphorae[]' | jq -r '.id'); do
-  process_endpoint --endpoint="/load-balancer/v2/lbaas/amphorae/$amphora_id/stats/"
+  process_endpoint --endpoint="/load-balancer/v2/octavia/amphorae/$amphora_id/stats/"
 done
 
 rm headers
