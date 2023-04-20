@@ -232,13 +232,13 @@ def test_quota_set_metrics(aggregator, dd_run_check, monkeypatch, instance):
 
 
 @pytest.mark.parametrize(
-    "instance",
+    "instance, has_instance_hostname",
     [
-        pytest.param(CONFIG, id="default"),
-        pytest.param(CONFIG_NOVA_MICROVERSION_LATEST, id="latest"),
+        pytest.param(CONFIG, False, id="default"),
+        pytest.param(CONFIG_NOVA_MICROVERSION_LATEST, True, id="latest"),
     ],
 )
-def test_server_metrics(aggregator, dd_run_check, monkeypatch, instance):
+def test_server_metrics(aggregator, dd_run_check, monkeypatch, instance, has_instance_hostname):
     http = MockHttp("agent-integrations-openstack-default")
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
@@ -268,6 +268,8 @@ def test_server_metrics(aggregator, dd_run_check, monkeypatch, instance):
                     'hypervisor:agent-integrations-openstack-default',
                     'flavor_name:cirros256',
                 ]
+                if has_instance_hostname:
+                    tags.append('instance_hostname:server')
             aggregator.assert_metric(metric, tags=tags)
     assert found, "No server metrics found"
 

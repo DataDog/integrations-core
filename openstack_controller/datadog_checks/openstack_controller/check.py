@@ -42,6 +42,20 @@ def _create_project_tags(project):
     return [f"project_id:{project.get('id')}", f"project_name:{project.get('name')}"]
 
 
+def _create_nova_server_tags(server_id, server_name, server_status, hypervisor, instance_hostname, flavor_name):
+    tags = [
+        f'server_id:{server_id}',
+        f'server_name:{server_name}',
+        f'server_status:{server_status}',
+        f'hypervisor:{hypervisor}',
+        f'flavor_name:{flavor_name}',
+    ]
+    if instance_hostname is not None:
+        tags.append(f'instance_hostname:{instance_hostname}')
+
+    return tags
+
+
 class OpenStackControllerCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(OpenStackControllerCheck, self).__init__(name, init_config, instances)
@@ -274,14 +288,14 @@ class OpenStackControllerCheck(AgentCheck):
                         f'openstack.nova.server.{server_data["status"]}',
                         1,
                         tags=project_tags
-                        + [
-                            f'server_id:{server_id}',
-                            f'server_name:{server_data["name"]}',
-                            f'server_status:{server_data["status"]}',
-                            f'hypervisor:{server_data["hypervisor_hostname"]}',
-                            f'instance_hostname:{server_data["instance_hostname"]}',
-                            f'flavor_name:{server_data["flavor_name"]}',
-                        ],
+                        + _create_nova_server_tags(
+                            server_id,
+                            server_data["name"],
+                            server_data["status"],
+                            server_data["hypervisor_hostname"],
+                            server_data["instance_hostname"],
+                            server_data["flavor_name"],
+                        ),
                     )
                 for metric, value in server_data['metrics'].items():
                     long_metric_name = f'openstack.nova.server.{metric}'
@@ -290,13 +304,14 @@ class OpenStackControllerCheck(AgentCheck):
                             long_metric_name,
                             value,
                             tags=project_tags
-                            + [
-                                f'server_id:{server_id}',
-                                f'server_name:{server_data["name"]}',
-                                f'server_status:{server_data["status"]}',
-                                f'hypervisor:{server_data["hypervisor_hostname"]}',
-                                f'flavor_name:{server_data["flavor_name"]}',
-                            ],
+                            + _create_nova_server_tags(
+                                server_id,
+                                server_data["name"],
+                                server_data["status"],
+                                server_data["hypervisor_hostname"],
+                                server_data["instance_hostname"],
+                                server_data["flavor_name"],
+                            ),
                         )
 
     def _report_compute_flavors(self, api, project_id, project_tags):
