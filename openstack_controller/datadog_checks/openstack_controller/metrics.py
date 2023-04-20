@@ -97,14 +97,15 @@ NOVA_SERVER_METRICS = {
     f"{NOVA_SERVER_METRICS_PREFIX}.num_disks": {"min_version": "2.48"},
 }
 
-NOVA_FLAVOR_METRICS = [
-    'openstack.nova.flavor.ram',
-    'openstack.nova.flavor.disk',
-    'openstack.nova.flavor.swap',
-    'openstack.nova.flavor.os_flv_ext_data:ephemeral',
-    'openstack.nova.flavor.vcpus',
-    'openstack.nova.flavor.rxtx_factor',
-]
+NOVA_FLAVOR_METRICS_PREFIX = "openstack.nova.flavor"
+NOVA_FLAVOR_METRICS = {
+    f"{NOVA_FLAVOR_METRICS_PREFIX}.vcpus": {},
+    f"{NOVA_FLAVOR_METRICS_PREFIX}.ram": {},
+    f"{NOVA_FLAVOR_METRICS_PREFIX}.disk": {},
+    f"{NOVA_FLAVOR_METRICS_PREFIX}.os_flv_ext_data:ephemeral": {"optional": True},
+    f"{NOVA_FLAVOR_METRICS_PREFIX}.swap": {"optional": True},
+    f"{NOVA_FLAVOR_METRICS_PREFIX}.rxtx_factor": {"optional": True},
+}
 
 NOVA_HYPERVISOR_METRICS = [
     'openstack.nova.hypervisor.current_workload',  # Available until version 2.87

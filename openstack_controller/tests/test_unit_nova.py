@@ -292,22 +292,24 @@ def test_flavor_metrics(aggregator, dd_run_check, monkeypatch, instance):
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    found = False
-    for metric in aggregator.metric_names:
-        if metric in NOVA_FLAVOR_METRICS:
-            found = True
-            aggregator.assert_metric(
-                metric,
-                tags=[
-                    'domain_id:default',
-                    'keystone_server:{}'.format(instance["keystone_server_url"]),
-                    'project_id:6e39099cccde4f809b003d9e0dd09304',
-                    'project_name:admin',
-                    'flavor_id:1',
-                    'flavor_name:m1.tiny',
-                ],
-            )
-    assert found, "No flavor metrics found"
+    not_found_metrics = []
+    for key, value in NOVA_FLAVOR_METRICS.items():
+        if check_microversion(instance, value):
+            if key in aggregator.metric_names:
+                aggregator.assert_metric(
+                    key,
+                    tags=[
+                        'domain_id:default',
+                        'keystone_server:{}'.format(instance["keystone_server_url"]),
+                        'project_id:6e39099cccde4f809b003d9e0dd09304',
+                        'project_name:admin',
+                        'flavor_id:1',
+                        'flavor_name:m1.tiny',
+                    ],
+                )
+            elif is_mandatory(value):
+                not_found_metrics.append(key)
+    assert not_found_metrics == [], f"No nova flavor metrics found: {not_found_metrics}"
 
 
 def test_hypervisor_service_check_up(aggregator, dd_run_check, instance, monkeypatch):
