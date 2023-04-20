@@ -155,7 +155,6 @@ def _create_load_balancer_pool_tags(pool_data, loadbalancers_data, listeners_dat
 def _create_load_balancer_amphora_tags(amphora_data, amphora_stats, loadbalancers_data, listeners_data):
     tags = [
         f'amphora_id:{amphora_data.get("id")}',
-        f'amphora_name:{amphora_data.get("name")}',
         f'amphora_compute_id:{amphora_data.get("compute_id")}',
         f'status:{amphora_data.get("status")}',
     ]

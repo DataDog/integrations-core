@@ -85,9 +85,20 @@ class LoadBalancerRest:
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
+        metrics_list = [
+            "id",
+            "name",
+            "provisioning_status",
+            "operating_status",
+            "listeners",
+            "loadbalancers",
+            "members",
+            "healthmonitor_id",
+            "admin_state_up",
+        ]
         pools_metrics = {}
         for pool in response.json()['pools']:
-            pools_metrics[pool["id"]] = pool
+            pools_metrics[pool["id"]] = filter_keys(pool, metrics_list)
         return pools_metrics
 
     def get_pools_by_loadbalancer(self, loadbalancer_id):
@@ -102,9 +113,17 @@ class LoadBalancerRest:
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
+        metrics_list = [
+            "id",
+            "name",
+            "provisioning_status",
+            "operating_status",
+            "admin_state_up",
+            "weight",
+        ]
         members_metrics = {}
         for member in response.json()['members']:
-            members_metrics[member["id"]] = member
+            members_metrics[member["id"]] = filter_keys(member, metrics_list)
         return members_metrics
 
     def get_healthmonitors(self):
@@ -112,9 +131,22 @@ class LoadBalancerRest:
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
+        metrics_list = [
+            "id",
+            "name",
+            "provisioning_status",
+            "operating_status",
+            "type",
+            "admin_state_up",
+            "delay",
+            "max_retries",
+            "pools",
+            "max_retries_down",
+            "timeout",
+        ]
         healthmonitors_metrics = {}
         for healthmonitor in response.json()['healthmonitors']:
-            healthmonitors_metrics[healthmonitor["id"]] = healthmonitor
+            healthmonitors_metrics[healthmonitor["id"]] = filter_keys(healthmonitor, metrics_list)
         return healthmonitors_metrics
 
     def get_healthmonitors_by_pool(self, pool_id):
@@ -129,14 +161,20 @@ class LoadBalancerRest:
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
+        metrics_list = [
+            "id",
+            "compute_id",
+            "status",
+            "loadbalancer_id",
+        ]
         amphorae_metrics = {}
         for amphora in response.json()['amphorae']:
-            amphorae_metrics[amphora["id"]] = amphora
+            amphorae_metrics[amphora["id"]] = filter_keys(amphora, metrics_list)
         return amphorae_metrics
 
     def get_amphorae_by_loadbalancer(self, loadbalancer_id):
         amphorae = self.get_amphorae()
-        result = {id: a for id, a in amphorae.items() if a.get("load_balancer_id") == loadbalancer_id}
+        result = {id: a for id, a in amphorae.items() if a.get("loadbalancer_id") == loadbalancer_id}
         return result
 
     def get_amphora_statistics(self, amphora_id):
@@ -144,7 +182,17 @@ class LoadBalancerRest:
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
+        metrics_list = [
+            "active_connections",
+            "bytes_in",
+            "bytes_out",
+            "id",
+            "listener_id",
+            "loadbalancer_id",
+            "request_errors",
+            "total_connections",
+        ]
         amphorae_stats_metrics = {}
         for stats in response.json()['amphora_stats']:
-            amphorae_stats_metrics[stats["id"]] = stats
+            amphorae_stats_metrics[stats["id"]] = filter_keys(stats, metrics_list)
         return amphorae_stats_metrics

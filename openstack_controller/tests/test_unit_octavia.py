@@ -310,7 +310,6 @@ def test_amphora_metrics_default(aggregator, dd_run_check, instance, monkeypatch
     demo_amphora = [
         [
             'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
-            'amphora_name:None',
             'amphora_compute_id:ace67097-e457-4044-b05c-be7ac830304a',
             'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
             'loadbalancer_name:loadbalancer-1',
