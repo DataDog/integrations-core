@@ -162,7 +162,7 @@ def test_listeners_metrics_default(aggregator, dd_run_check, instance, monkeypat
     demo_listeners = [
         [
             'listener_id:9da03992-77a4-4b65-b39a-0e106961f577',
-            'listener_name:listener-1',
+            'listener_name:listener-3',
             'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
             'loadbalancer_name:loadbalancer-1',
         ]

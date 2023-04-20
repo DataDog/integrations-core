@@ -22,7 +22,6 @@ class LoadBalancerRest:
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-
         metrics_list = [
             "id",
             "name",
@@ -35,16 +34,50 @@ class LoadBalancerRest:
         loadbalancers_metrics = {}
         for loadbalancer in response.json()['loadbalancers']:
             loadbalancers_metrics[loadbalancer["id"]] = filter_keys(loadbalancer, metrics_list)
-
         return loadbalancers_metrics
+
+    def get_loadbalancer_statistics(self, loadbalancer_id):
+        url = f"{self.endpoint}/v2/lbaas/loadbalancers/{loadbalancer_id}/stats"
+        response = self.http.get(url)
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        return response.json()['stats']
+
 
     def get_listeners(self):
         url = f"{self.endpoint}/v2/lbaas/listeners"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        return response.json()['listeners']
+        metrics_list = [
+            "id",
+            "name",
+            "loadbalancers",
+            "connection_limit",
+            "timeout_client_data",
+            "timeout_member_connect",
+            "timeout_member_data",
+            "timeout_tcp_inspect",
+        ]
+        listeners_metrics = {}
+        for listener in response.json()['listeners']:
+            listeners_metrics[listener["id"]] = filter_keys(listener, metrics_list)
+        return listeners_metrics
+    
 
+    def get_listener_statistics(self, listener_id):
+        url = f"{self.endpoint}/v2/lbaas/listeners/{listener_id}/stats"
+        response = self.http.get(url)
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        return response.json()['stats']
+
+    def get_listeners_by_loadbalancer(self, loadbalancer_id):
+        listeners = self.get_listeners()
+        result = {id:l for id, l in listeners.items() if loadbalancer_id in [lb.get("id") for lb in l.get("loadbalancers")]}
+        self.log.debug("response: %s", result)
+        return result
+    
     def get_pools(self):
         url = f"{self.endpoint}/v2/lbaas/pools"
         response = self.http.get(url)
@@ -59,36 +92,17 @@ class LoadBalancerRest:
         self.log.debug("response: %s", response.json())
         return response.json()['members']
 
+    def get_pools_by_loadbalancer(self, loadbalancer_id):
+        pools = self.get_pools()
+        result = [p for p in pools if loadbalancer_id in [lb.get("id") for lb in p.get("loadbalancers")]]
+        return result
+    
     def get_healthmonitors(self):
         url = f"{self.endpoint}/v2/lbaas/healthmonitors"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return response.json()['healthmonitors']
-
-    def get_loadbalancer_statistics(self, loadbalancer_id):
-        url = f"{self.endpoint}/v2/lbaas/loadbalancers/{loadbalancer_id}/stats"
-        response = self.http.get(url)
-        response.raise_for_status()
-        self.log.debug("response: %s", response.json())
-        return response.json()['stats']
-
-    def get_listener_statistics(self, listener_id):
-        url = f"{self.endpoint}/v2/lbaas/listeners/{listener_id}/stats"
-        response = self.http.get(url)
-        response.raise_for_status()
-        self.log.debug("response: %s", response.json())
-        return response.json()['stats']
-
-    def get_listeners_by_loadbalancer(self, loadbalancer_id):
-        listeners = self.get_listeners()
-        result = [l for l in listeners if loadbalancer_id in [lb.get("id") for lb in l.get("loadbalancers")]]
-        return result
-
-    def get_pools_by_loadbalancer(self, loadbalancer_id):
-        pools = self.get_pools()
-        result = [p for p in pools if loadbalancer_id in [lb.get("id") for lb in p.get("loadbalancers")]]
-        return result
 
     def get_healthmonitors_by_pool(self, pool_id):
         healthmonitors = self.get_healthmonitors()

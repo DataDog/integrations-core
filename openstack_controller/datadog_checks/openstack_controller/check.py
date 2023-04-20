@@ -517,8 +517,7 @@ class OpenStackControllerCheck(AgentCheck):
                 # listerners by loadbalancer
                 listeners_data = api.get_load_balancer_listeners_by_loadbalancer(project_id, loadbalancer_id)
                 if listeners_data is not None:
-                    for listener_data in listeners_data:
-                        listener_id = listener_data.get("id")
+                    for listener_id, listener_data in listeners_data.items():
                         listener_tags = _create_load_balancer_listener_tags(listener_data, loadbalancer_data)
                         all_tags = listener_tags + project_tags
 
