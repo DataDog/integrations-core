@@ -206,6 +206,7 @@ class InnoDBMetrics(object):
                 if len(row) == 4:
                     # Pending flushes (fsync): 0
                     results['Innodb_pending_buffer_pool_flushes'] = long(row[3])
+                    # Assume in new format that 0 means 0 for both pool flushes and log flushes
                     results['Innodb_pending_log_flushes'] = long(row[3])
                 else:
                     # Pending flushes (fsync) log: 0; buffer pool: 0
