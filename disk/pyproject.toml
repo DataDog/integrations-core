@@ -6,7 +6,6 @@ requires = [
 ]
 build-backend = "hatchling.build"
 
-
 [project]
 name = "datadog-disk"
 description = "The Disk check"

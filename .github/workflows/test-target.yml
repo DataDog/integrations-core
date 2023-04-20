@@ -119,10 +119,19 @@ jobs:
       with:
         python-version: "2.7"
 
+    - name: echo
+      run: echo "$SKIP_ENV_NAME"
+
+    - name: echo
+      run: echo $PATH
+
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@v4
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
+
+    - name: echo
+      run: echo $PATH
 
     - name: Restore cache
       if: inputs.repo == 'core'
