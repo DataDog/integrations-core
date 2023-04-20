@@ -125,11 +125,12 @@ def test_loadbalancers_metrics_default(aggregator, dd_run_check, instance, monke
     demo_loadbalancers = [
         [
             'listener_id:de81cbdc-8207-4253-8f21-3eea9870e7a9',
+            'listener_id:9da03992-77a4-4b65-b39a-0e106961f577',
             'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
             'loadbalancer_name:loadbalancer-1',
             'pool_id:d0335b34-3115-4b3b-9a1a-7e2363ebfee3',
             'provisioning_status:ACTIVE',
-            'operating_status:ONLINE',
+            'operating_status:ERROR',
         ]
     ]
 
@@ -160,7 +161,7 @@ def test_listeners_metrics_default(aggregator, dd_run_check, instance, monkeypat
 
     demo_listeners = [
         [
-            'listener_id:de81cbdc-8207-4253-8f21-3eea9870e7a9',
+            'listener_id:9da03992-77a4-4b65-b39a-0e106961f577',
             'listener_name:listener-1',
             'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
             'loadbalancer_name:loadbalancer-1',
@@ -174,3 +175,9 @@ def test_listeners_metrics_default(aggregator, dd_run_check, instance, monkeypat
         aggregator.assert_metric('openstack.octavia.listener.timeout_member_connect', count=1, tags=tags)
         aggregator.assert_metric('openstack.octavia.listener.timeout_member_data', count=1, tags=tags)
         aggregator.assert_metric('openstack.octavia.listener.timeout_tcp_inspect', count=1, tags=tags)
+
+        aggregator.assert_metric('openstack.octavia.listener.active_connections', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.listener.bytes_in', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.listener.bytes_out', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.listener.request_errors', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.listener.total_connections', count=1, tags=tags)
