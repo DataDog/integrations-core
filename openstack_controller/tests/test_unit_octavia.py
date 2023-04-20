@@ -290,3 +290,41 @@ def test_pools_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
     for pool_tags in demo_pools:
         tags = demo_project_tags + pool_tags
         aggregator.assert_metric('openstack.octavia.pool.admin_state_up', count=1, tags=tags)
+
+
+def test_amphora_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
+    http = MockHttp("agent-integrations-openstack-octavia")
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['domain_id:default', 'keystone_server:{}'.format(instance["keystone_server_url"])]
+
+    demo_project_tags = base_tags + [
+        'project_id:4762874c945945c38d820cce29fbb66e',
+        'project_name:admin',
+    ]
+
+    demo_amphora = [
+        [
+            'amphora_id:a34dc4b7-b608-4a9d-9fbd-2a4e611475c2',
+            'amphora_name:None',
+            'amphora_compute_id:ace67097-e457-4044-b05c-be7ac830304a',
+            'loadbalancer_id:4bb7bfb1-83c2-45e8-b0e1-ed3022329115',
+            'loadbalancer_name:loadbalancer-1',
+            'listener_id:de81cbdc-8207-4253-8f21-3eea9870e7a9',
+            'listener_name:listener-1',
+            'status:ALLOCATED',
+        ],
+    ]
+
+    for amphora_tags in demo_amphora:
+        tags = demo_project_tags + amphora_tags
+
+        aggregator.assert_metric('openstack.octavia.amphora.active_connections', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.amphora.bytes_in', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.amphora.bytes_out', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.amphora.request_errors', count=1, tags=tags)
+        aggregator.assert_metric('openstack.octavia.amphora.total_connections', count=1, tags=tags)

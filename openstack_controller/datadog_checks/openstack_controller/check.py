@@ -152,6 +152,27 @@ def _create_load_balancer_pool_tags(pool_data, loadbalancers_data, listeners_dat
     return tags
 
 
+def _create_load_balancer_amphora_tags(amphora_data, amphora_stats, loadbalancers_data, listeners_data):
+    tags = [
+        f'amphora_id:{amphora_data.get("id")}',
+        f'amphora_name:{amphora_data.get("name")}',
+        f'amphora_compute_id:{amphora_data.get("compute_id")}',
+        f'status:{amphora_data.get("status")}',
+    ]
+
+    loadbalancer_id = amphora_stats.get("loadbalancer_id")
+    if loadbalancer_id:
+        tags.append(f'loadbalancer_id:{loadbalancer_id}')
+        tags.append(f'loadbalancer_name:{loadbalancers_data.get(loadbalancer_id).get("name")}')
+
+    listener_id = amphora_stats.get("listener_id")
+    if listener_id:
+        tags.append(f'listener_id:{listener_id}')
+        tags.append(f'listener_name:{listeners_data.get(listener_id).get("name")}')
+
+    return tags
+
+
 def _create_project_tags(project):
     return [f"project_id:{project.get('id')}", f"project_name:{project.get('name')}"]
 
@@ -545,6 +566,7 @@ class OpenStackControllerCheck(AgentCheck):
             self._report_load_balancer_members(api, project_id, project_tags)
             self._report_load_balancer_healthmonitors(api, project_id, project_tags)
             self._report_load_balancer_pools(api, project_id, project_tags)
+            self._report_load_balancer_amphorae(api, project_id, project_tags)
 
         except HTTPError as e:
             self.warning(e)
@@ -741,3 +763,38 @@ class OpenStackControllerCheck(AgentCheck):
                     value=pool_data.get("admin_state_up"),
                     tags=all_tags,
                 )
+
+    def _report_load_balancer_amphorae(self, api, project_id, project_tags):
+        loadbalancers_data = api.get_load_balancer_loadbalancers(project_id)
+        listeners_data = api.get_load_balancer_listeners(project_id)
+        amphorae_data = api.get_load_balancer_amphorae(project_id)
+
+        if amphorae_data:
+            for amphora_id, amphora_data in amphorae_data.items():
+                stats = api.get_load_balancer_amphora_statistics(project_id, amphora_id)
+                for _, amphora_stat in stats.items():
+                    amphora_tags = _create_load_balancer_amphora_tags(
+                        amphora_data, amphora_stat, loadbalancers_data, listeners_data
+                    )
+
+                    all_tags = amphora_tags + project_tags
+
+                    self.gauge(
+                        'openstack.octavia.amphora.active_connections',
+                        value=amphora_stat.get("active_connections"),
+                        tags=all_tags,
+                    )
+                    self.gauge('openstack.octavia.amphora.bytes_in', value=amphora_stat.get("bytes_in"), tags=all_tags)
+                    self.gauge(
+                        'openstack.octavia.amphora.bytes_out', value=amphora_stat.get("bytes_out"), tags=all_tags
+                    )
+                    self.gauge(
+                        'openstack.octavia.amphora.request_errors',
+                        value=amphora_stat.get("request_errors"),
+                        tags=all_tags,
+                    )
+                    self.gauge(
+                        'openstack.octavia.amphora.total_connections',
+                        value=amphora_stat.get("total_connections"),
+                        tags=all_tags,
+                    )

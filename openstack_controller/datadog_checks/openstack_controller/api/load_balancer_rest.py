@@ -129,11 +129,14 @@ class LoadBalancerRest:
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        return response.json()['amphorae']
+        amphorae_metrics = {}
+        for amphora in response.json()['amphorae']:
+            amphorae_metrics[amphora["id"]] = amphora
+        return amphorae_metrics
 
     def get_amphorae_by_loadbalancer(self, loadbalancer_id):
         amphorae = self.get_amphorae()
-        result = [a for a in amphorae if a.get("load_balancer_id") == loadbalancer_id]
+        result = {id: a for id, a in amphorae.items() if a.get("load_balancer_id") == loadbalancer_id}
         return result
 
     def get_amphora_statistics(self, amphora_id):
@@ -141,4 +144,7 @@ class LoadBalancerRest:
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        return response.json()['amphora_stats']
+        amphorae_stats_metrics = {}
+        for stats in response.json()['amphora_stats']:
+            amphorae_stats_metrics[stats["id"]] = stats
+        return amphorae_stats_metrics
