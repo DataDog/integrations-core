@@ -485,6 +485,9 @@ class OpenStackControllerCheck(AgentCheck):
                 loadbalancer_tags = _create_load_balancer_loadbalancer_tags(loadbalancer_data)
                 all_tags = loadbalancer_tags + project_tags  # TODO: add loadbalancer api tags
 
+                # report status
+                self.gauge("openstack.octavia.loadbalancer.admin_state_up", value=loadbalancer_data.get("admin_state_up"), tags=all_tags)
+
                 stats = api.get_load_balancer_loadbalancer_statistics(project_id, loadbalancer_id)
                 if stats is not None:
                     self.gauge(

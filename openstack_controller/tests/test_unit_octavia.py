@@ -133,6 +133,7 @@ def test_loadbalancers_metrics_default(aggregator, dd_run_check, instance, monke
 
     for loadbalancer_tags in demo_loadbalancers:
         tags = demo_project_tags + loadbalancer_tags
+        aggregator.assert_metric('openstack.octavia.loadbalancer.admin_state_up', count=1, tags=tags)
         aggregator.assert_metric('openstack.octavia.loadbalancer.active_connections', count=1, tags=tags)
         aggregator.assert_metric('openstack.octavia.loadbalancer.bytes_in', count=1, tags=tags)
         aggregator.assert_metric('openstack.octavia.loadbalancer.bytes_out', count=1, tags=tags)
