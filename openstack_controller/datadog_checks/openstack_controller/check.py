@@ -75,6 +75,7 @@ def _create_load_balancer_listener_tags(listener_data, loadbalancers_data):
 
     return tags
 
+
 def _create_load_balancer_member_tags(member_data, loadbalancer_data, pool_data):
     tags = [
         f'member_id:{member_data.get("id")}',
@@ -578,12 +579,8 @@ class OpenStackControllerCheck(AgentCheck):
                         value=stats.get("active_connections"),
                         tags=all_tags,
                     )
-                    self.gauge(
-                        'openstack.octavia.listener.bytes_in', value=stats.get("bytes_in"), tags=all_tags
-                    )
-                    self.gauge(
-                        'openstack.octavia.listener.bytes_out', value=stats.get("bytes_out"), tags=all_tags
-                    )
+                    self.gauge('openstack.octavia.listener.bytes_in', value=stats.get("bytes_in"), tags=all_tags)
+                    self.gauge('openstack.octavia.listener.bytes_out', value=stats.get("bytes_out"), tags=all_tags)
                     self.gauge(
                         'openstack.octavia.listener.request_errors',
                         value=stats.get("request_errors"),
@@ -594,7 +591,7 @@ class OpenStackControllerCheck(AgentCheck):
                         value=stats.get("total_connections"),
                         tags=all_tags,
                     )
-    
+
     def _report_load_balancer_members(self, api, project_id, project_tags):
         loadbalancers_data = api.get_load_balancer_loadbalancers(project_id)
         if loadbalancers_data is not None:
@@ -604,8 +601,10 @@ class OpenStackControllerCheck(AgentCheck):
                     for pool_id, pool_data in pools_data.items():
                         members_data = api.get_load_balancer_members_by_pool(project_id, pool_id)
                         if members_data is not None:
-                            for member_id, member_data in members_data.items():
-                                member_tags = _create_load_balancer_member_tags(member_data, loadbalancer_data, pool_data)
+                            for _, member_data in members_data.items():
+                                member_tags = _create_load_balancer_member_tags(
+                                    member_data, loadbalancer_data, pool_data
+                                )
                                 all_tags = member_tags + project_tags
 
                                 self.gauge(
