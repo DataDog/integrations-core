@@ -85,19 +85,25 @@ class LoadBalancerRest:
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        return response.json()['pools']
+        pools_metrics = {}
+        for pool in response.json()['pools']:
+            pools_metrics[pool["id"]] = pool
+        return pools_metrics
+    
+    def get_pools_by_loadbalancer(self, loadbalancer_id):
+        pools = self.get_pools()
+        result = {id: p for id, p in pools.items() if loadbalancer_id in [lb.get("id") for lb in p.get("loadbalancers")]}
+        return result
 
     def get_members_by_pool(self, pool_id):
         url = f"{self.endpoint}/v2/lbaas/pools/{pool_id}/members"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        return response.json()['members']
-
-    def get_pools_by_loadbalancer(self, loadbalancer_id):
-        pools = self.get_pools()
-        result = [p for p in pools if loadbalancer_id in [lb.get("id") for lb in p.get("loadbalancers")]]
-        return result
+        members_metrics = {}
+        for member in response.json()['members']:
+            members_metrics[member["id"]] = member
+        return members_metrics
 
     def get_healthmonitors(self):
         url = f"{self.endpoint}/v2/lbaas/healthmonitors"
