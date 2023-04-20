@@ -1,0 +1,14 @@
+{
+  "amphora_stats": [
+    {
+      "active_connections": 0,
+      "bytes_in": 0,
+      "bytes_out": 0,
+      "id": "042bcca4-4d97-47a9-bc04-d88c1e3a4d72",
+      "listener_id": "243decd9-3370-4fc1-b163-80c4155bda04",
+      "loadbalancer_id": "ae54877c-b186-4b90-b71c-d331b9e732bc",
+      "request_errors": 0,
+      "total_connections": 0
+    }
+  ]
+}
