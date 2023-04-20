@@ -14,4 +14,3 @@
 ./create_mocks.sh "agent-integrations-openstack-octavia" "" 1.80
 ./create_mocks.sh "agent-integrations-openstack-octavia" 2.93 ""
 ./create_mocks.sh "agent-integrations-openstack-octavia" 2.93 1.80
-
