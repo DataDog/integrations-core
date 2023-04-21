@@ -39,6 +39,15 @@ CONFIG_NOVA_MICROVERSION_LATEST = {
     'nova_microversion': '2.93',
 }
 
+
+CONFIG_NOVA_IRONIC_MICROVERSION_LATEST = {
+    'keystone_server_url': 'http://127.0.0.1:8080/identity',
+    'username': 'admin',
+    'password': 'password',
+    'nova_microversion': '2.93',
+    'ironic_microversion': '1.80',
+}
+
 KEYSTONE_INSTANCE = {
     'name': 'test_name',
     'keystone_server_url': 'http://10.0.2.15:5000',

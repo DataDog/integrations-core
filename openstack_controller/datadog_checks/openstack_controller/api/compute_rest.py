@@ -53,6 +53,29 @@ class ComputeRest:
         }
         return quota_set
 
+    def get_services(self):
+        response = self.http.get('{}/os-services'.format(self.endpoint))
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        services = []
+        for service in response.json().get('services'):
+            service_name = service.get('binary').replace('-', '_')
+            is_down = service.get('state') is not None and service.get('state') == 'down'
+            is_enabled = service.get('status') == 'enabled'
+            is_up = not (is_down and is_enabled)
+            services.append(
+                {
+                    'name': service_name,
+                    'is_up': is_up,
+                    'zone': service.get('zone'),
+                    'host': service.get('host'),
+                    'status': service.get('status'),
+                    'id': service.get('id'),
+                    'state': service.get('state'),
+                }
+            )
+        return services
+
     def get_servers(self, project_id):
         response = self.http.get('{}/servers/detail?project_id={}'.format(self.endpoint, project_id))
         response.raise_for_status()
@@ -92,7 +115,12 @@ class ComputeRest:
                     get_normalized_metrics(response.json(), NOVA_SERVER_METRICS_PREFIX, NOVA_SERVER_METRICS)
                 )
             except Exception as e:
-                self.log.error("Exception: %s", e)
+                self.log.info(
+                    "Could not query the server diagnostics endpoint for server %s, "
+                    "perhaps it is a bare metal machine: %s",
+                    server.get("id", None),
+                    e,
+                )
         return server_metrics
 
     def get_flavors(self):
@@ -143,12 +171,22 @@ class ComputeRest:
             if uptime:
                 load_averages = _load_averages_from_uptime(uptime)
             else:
-                response_uptime = self.http.get('{}/os-hypervisors/{}/uptime'.format(self.endpoint, hypervisor['id']))
-                if 200 <= response_uptime.status_code < 300:
-                    self.log.debug("response uptime: %s", response_uptime.json())
-                    uptime = response_uptime.json().get('hypervisor', {}).get('uptime')
-                    if uptime:
-                        load_averages = _load_averages_from_uptime(uptime)
+                try:
+                    response_uptime = self.http.get(
+                        '{}/os-hypervisors/{}/uptime'.format(self.endpoint, hypervisor['id'])
+                    )
+                    if 200 <= response_uptime.status_code < 300:
+                        self.log.debug("response uptime: %s", response_uptime.json())
+                        uptime = response_uptime.json().get('hypervisor', {}).get('uptime')
+                        if uptime:
+                            load_averages = _load_averages_from_uptime(uptime)
+                except Exception as e:
+                    self.log.info(
+                        "Could not query the uptime for hypervisor %s, perhaps it is a bare metal: %s",
+                        hypervisor.get('id'),
+                        e,
+                    )
+
             if load_averages and len(load_averages) == 3:
                 for i, avg in enumerate([1, 5, 15]):
                     hypervisors_detail_metrics[str(hypervisor['id'])]['metrics'][

@@ -37,6 +37,45 @@ def _create_hypervisor_metric_tags(hypervisor_id, hypervisor_data, os_aggregates
     return tags
 
 
+def _create_baremetal_nodes_metric_tags(node_name, node_uuid, conductor_group, power_state):
+    tags = [
+        f'power_state:{power_state}',
+    ]
+    if node_name:
+        tags.append(f'node_name:{node_name}')
+    if node_uuid:
+        tags.append(f'node_uuid:{node_uuid}')
+    if conductor_group:
+        tags.append(f'conductor_group:{conductor_group}')
+    return tags
+
+
+def _create_baremetal_conductors_metric_tags(hostname, conductor_group):
+    tags = [
+        f'conductor_hostname:{hostname}',
+    ]
+    if conductor_group != "":
+        tags.append(f'conductor_group:{conductor_group}')
+    return tags
+
+
+def _create_nova_services_metric_tags(name, host, state, nova_id, status, zone):
+    tags = [
+        f'service_name:{name}',
+        f'service_host:{host}',
+        f'service_status:{status}',
+    ]
+    if nova_id:
+        tags.append(f'service_id:{nova_id}')
+
+    if state:
+        tags.append(f'service_state:{state}')
+
+    if zone:
+        tags.append(f'availability_zone:{zone}')
+    return tags
+
+
 def _create_project_tags(project):
     return [f"project_id:{project.get('id')}", f"project_name:{project.get('name')}"]
 
@@ -233,6 +272,7 @@ class OpenStackControllerCheck(AgentCheck):
             self._report_compute_servers(api, project_id, project_tags)
             self._report_compute_flavors(api, project_id, project_tags)
             self._report_compute_hypervisors(api, project_id, project_tags)
+            self._report_compute_services(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting compute metrics: %s", e)
@@ -270,6 +310,23 @@ class OpenStackControllerCheck(AgentCheck):
                     self.gauge(metric, value, tags=tags)
                 else:
                     self.log.warning("%s metric not reported as nova quota metric", metric)
+
+    def _report_compute_services(self, api, project_id, project_tags):
+        compute_services = api.get_compute_services(project_id)
+        self.log.debug("compute_services: %s", compute_services)
+        if compute_services is not None:
+            for compute_service in compute_services:
+                service_tags = _create_nova_services_metric_tags(
+                    compute_service.get('name'),
+                    compute_service.get('host'),
+                    compute_service.get('state'),
+                    compute_service.get('id'),
+                    compute_service.get('status'),
+                    compute_service.get('zone'),
+                )
+                all_tags = project_tags + service_tags
+                is_up = compute_service.get('is_up')
+                self.gauge('openstack.nova.service.up', is_up, tags=all_tags)
 
     def _report_compute_servers(self, api, project_id, project_tags):
         compute_servers = api.get_compute_servers(project_id)
@@ -437,6 +494,8 @@ class OpenStackControllerCheck(AgentCheck):
     def _report_baremetal_metrics(self, api, project_id, project_tags):
         try:
             self._report_baremetal_response_time(api, project_id, project_tags)
+            self._report_baremetal_nodes(api, project_id, project_tags)
+            self._report_baremetal_conductors(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting baremetal metrics: %s", e)
@@ -452,6 +511,32 @@ class OpenStackControllerCheck(AgentCheck):
             self.service_check('openstack.ironic.api.up', AgentCheck.OK, tags=project_tags)
         else:
             self.service_check('openstack.ironic.api.up', AgentCheck.UNKNOWN, tags=project_tags)
+
+    def _report_baremetal_nodes(self, api, project_id, project_tags):
+        nodes_data = api.get_baremetal_nodes(project_id)
+        if nodes_data is not None:
+            for node_data in nodes_data:
+                is_up = node_data.get('is_up')
+                node_tags = _create_baremetal_nodes_metric_tags(
+                    node_data.get('node_name'),
+                    node_data.get('node_uuid'),
+                    node_data.get('conductor_group'),
+                    node_data.get('power_state'),
+                )
+                all_tags = node_tags + project_tags
+                self.gauge('openstack.ironic.node.up', value=is_up, tags=all_tags)
+                self.gauge('openstack.ironic.node.count', value=1, tags=all_tags)
+
+    def _report_baremetal_conductors(self, api, project_id, project_tags):
+        conductors_data = api.get_baremetal_conductors(project_id)
+        if conductors_data:
+            for conductor_data in conductors_data:
+                conductor_tags = _create_baremetal_conductors_metric_tags(
+                    conductor_data.get('hostname'),
+                    conductor_data.get('conductor_group'),
+                )
+                all_tags = conductor_tags + project_tags
+                self.gauge('openstack.ironic.conductor.up', value=conductor_data.get('alive'), tags=all_tags)
 
     def _report_load_balancer_metrics(self, api, project_id, project_tags):
         try:

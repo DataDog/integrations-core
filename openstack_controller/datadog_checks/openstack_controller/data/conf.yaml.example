@@ -115,6 +115,15 @@ instances:
     #
     # paginated_limit: 1000
 
+    ## @param ironic_microversion - string - optional - default: 1.8
+    ## The microversion of the Ironic (Bare Metal) API to call.
+    ## It is recommended to set this parameter to the latest Ironic microversion supported by your Openstack version.
+    ##
+    ## View this page for more about Ironic microvoersion compatibility:
+    ##    https://docs.openstack.org/ironic/latest/contributor/webapi-version-history.html
+    #
+    ironic_microversion: '1.8'
+
     ## @param nova_microversion - string - optional
     ## The microversion of the Nova (Compute) API to call.
     ## It is recommended to set this parameter to the latest Compute microversion supported by your Openstack version.

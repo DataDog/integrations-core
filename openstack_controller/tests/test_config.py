@@ -2,6 +2,7 @@
 # # All rights reserved
 # # Licensed under a 3-clause BSD style license (see LICENSE)
 # import logging
+import logging
 import re
 
 import pytest
@@ -78,6 +79,34 @@ pytestmark = [pytest.mark.unit]
         pytest.param(
             {
                 'keystone_server_url': 'http://localhost',
+                'user': {'name': 'my_name', 'password': 'my_password', 'domain': {'id': 'my_domain_id'}},
+                'nova_microversion': 'test',
+            },
+            'Invalid `nova_microversion`: test; please specify a valid version',
+            id='invalid nova_microversion',
+        ),
+        pytest.param(
+            {
+                'keystone_server_url': 'http://localhost',
+                'user': {'name': 'my_name', 'password': 'my_password', 'domain': {'id': 'my_domain_id'}},
+                'ironic_microversion': 'tests',
+            },
+            'Invalid `ironic_microversion`: tests; please specify a valid version',
+            id='invalid ironic_microversion',
+        ),
+        pytest.param(
+            {
+                'keystone_server_url': 'http://localhost',
+                'user': {'name': 'my_name', 'password': 'my_password', 'domain': {'id': 'my_domain_id'}},
+                'ironic_microversion': 'tests',
+                'nova_microversion': 'tests',
+            },
+            'Invalid `nova_microversion`: tests; please specify a valid version',
+            id='invalid nova_microversion and ironic_microversion',
+        ),
+        pytest.param(
+            {
+                'keystone_server_url': 'http://localhost',
                 'user': {'name': 'my_name', 'password': 'my_password', 'domain': {}},
             },
             'The user should look like: '
@@ -89,6 +118,45 @@ pytestmark = [pytest.mark.unit]
 def test_config_exceptions(instance, exception_msg):
     with pytest.raises(Exception, match=exception_msg):
         OpenStackControllerCheck('test', {}, [instance])
+
+
+@pytest.mark.parametrize(
+    'instance, warning_msg',
+    [
+        pytest.param(
+            {
+                'keystone_server_url': 'http://localhost',
+                'user': {'name': 'my_name', 'password': 'my_password', 'domain': {'id': 'my_domain_id'}},
+                'ironic_microversion': 'latest',
+            },
+            'Setting `ironic_microversion` to `latest` is not recommended',
+            id='latest ironic_microversion',
+        ),
+        pytest.param(
+            {
+                'keystone_server_url': 'http://localhost',
+                'user': {'name': 'my_name', 'password': 'my_password', 'domain': {'id': 'my_domain_id'}},
+                'ironic_microversion': 'LATEST',
+            },
+            'Setting `ironic_microversion` to `latest` is not recommended',
+            id='capital latest ironic_microversion',
+        ),
+        pytest.param(
+            {
+                'keystone_server_url': 'http://localhost',
+                'user': {'name': 'my_name', 'password': 'my_password', 'domain': {'id': 'my_domain_id'}},
+                'nova_microversion': 'LATEST',
+            },
+            'Setting `nova_microversion` to `latest` is not recommended',
+            id='capital latest nova_microversion',
+        ),
+    ],
+)
+def test_config_warnings(instance, warning_msg, caplog):
+    caplog.set_level(logging.WARNING)
+
+    OpenStackControllerCheck('test', {}, [instance])
+    assert warning_msg in caplog.text
 
 
 def test_legacy_config_ok():

@@ -33,9 +33,9 @@ class ApiRest(Api):
         self.auth_project_tokens = {}
         self.endpoints = {}
         self.components = {}
-        self.add_microversion_headers()
+        self._add_microversion_headers()
 
-    def add_microversion_headers(self):
+    def _add_microversion_headers(self):
         if self.config.nova_microversion:
             self.log.debug("adding X-OpenStack-Nova-API-Version header to `%s`", self.config.nova_microversion)
             self.http.options['headers']['X-OpenStack-Nova-API-Version'] = self.config.nova_microversion
@@ -170,6 +170,14 @@ class ApiRest(Api):
             return component.get_quota_set(project_id)
         return None
 
+    def get_compute_services(self, project_id):
+        self.log.debug("getting compute services")
+        self._post_auth_project(project_id)
+        component = self._get_component(project_id, ComponentType.COMPUTE)
+        if component:
+            return component.get_services()
+        return None
+
     def get_compute_servers(self, project_id):
         self.log.debug("getting compute servers")
         self._post_auth_project(project_id)
@@ -209,6 +217,25 @@ class ApiRest(Api):
         if component:
             return component.get_quotas(project_id)
         return None
+
+    def get_baremetal_nodes(self, project_id):
+        self.log.debug("getting baremetal nodes")
+        component = self._get_component(project_id, ComponentType.BAREMETAL)
+        if component:
+            return component.get_nodes()
+        return None
+
+    def get_baremetal_conductors(self, project_id):
+        self.log.debug("getting baremetal conductors")
+        component = self._get_component(project_id, ComponentType.BAREMETAL)
+        if component and component.collect_conductor_metrics():
+            return component.get_conductors()
+        else:
+            self.log.info(
+                "Ironic conductors metrics are not available. "
+                "Please specify an `ironic_microversion` greater than 1.49 to recieve these metrics"
+            )
+            return None
 
     def get_network_agents(self, project_id):
         self.log.debug("getting network agents")
@@ -318,7 +345,7 @@ class ApiRest(Api):
         elif endpoint_type == ComponentType.BLOCK_STORAGE:
             return BlockStorageRest(self.log, self.http, endpoint)
         elif endpoint_type == ComponentType.BAREMETAL:
-            return BaremetalRest(self.log, self.http, endpoint)
+            return BaremetalRest(self.log, self.http, endpoint, self.config.ironic_microversion)
         elif endpoint_type == ComponentType.LOAD_BALANCER:
             return LoadBalancerRest(self.log, self.http, endpoint)
         return None
