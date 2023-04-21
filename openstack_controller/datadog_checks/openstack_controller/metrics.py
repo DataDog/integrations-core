@@ -10,48 +10,48 @@ HYPERVISOR_SERVICE_CHECK = {'up': AgentCheck.OK, 'down': AgentCheck.CRITICAL}
 KEYSTONE_SERVICE_CHECK = "openstack.keystone.api.up"
 
 NOVA_SERVICE_CHECK = "openstack.nova.api.up"
-NOVA_LIMITS_METRICS_PREFIX = "openstack.nova.limits"
+NOVA_METRICS_PREFIX = "openstack.nova"
+
 NOVA_LIMITS_METRICS = {
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_total_instances": {},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_total_cores": {},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_total_ram_size": {},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_server_meta": {},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_image_meta": {"max_version": "2.38"},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_personality": {"max_version": "2.56"},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_personality_size": {"max_version": "2.56"},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_total_keypairs": {},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_server_groups": {},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_server_group_members": {},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_total_floating_ips": {"max_version": "2.35"},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_security_groups": {"max_version": "2.35"},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.max_security_group_rules": {"max_version": "2.35"},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.total_ram_used": {},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.total_cores_used": {},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.total_instances_used": {},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.total_floating_ips_used": {"max_version": "2.35"},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.total_security_groups_used": {"max_version": "2.35"},
-    f"{NOVA_LIMITS_METRICS_PREFIX}.absolute.total_server_groups_used": {},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.max_total_instances": {},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.max_total_cores": {},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.max_total_ram_size": {},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.max_server_meta": {},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.max_image_meta": {"max_version": "2.38"},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.max_personality": {"max_version": "2.56"},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.max_personality_size": {"max_version": "2.56"},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.max_total_keypairs": {},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.max_server_groups": {},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.max_server_group_members": {},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.max_total_floating_ips": {"max_version": "2.35"},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.max_security_groups": {"max_version": "2.35"},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.max_security_group_rules": {"max_version": "2.35"},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.total_ram_used": {},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.total_cores_used": {},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.total_instances_used": {},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.total_floating_ips_used": {"max_version": "2.35"},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.total_security_groups_used": {"max_version": "2.35"},
+    f"{NOVA_METRICS_PREFIX}.limits.absolute.total_server_groups_used": {},
 }
 
-NOVA_QUOTA_SETS_METRICS_PREFIX = "openstack.nova.quota_set"
 NOVA_QUOTA_SETS_METRICS = {
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.cores": {},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.fixed_ips": {"max_version": "2.35"},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.floating_ips": {"max_version": "2.35"},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.injected_file_content_bytes": {"max_version": "2.56"},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.injected_file_path_bytes": {"max_version": "2.56"},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.injected_files": {"max_version": "2.56"},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.instances": {},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.key_pairs": {},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.metadata_items": {},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.ram": {},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.security_group_rules": {"max_version": "2.35"},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.security_groups": {"max_version": "2.35"},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.server_group_members": {},
-    f"{NOVA_QUOTA_SETS_METRICS_PREFIX}.server_groups": {},
+    f"{NOVA_METRICS_PREFIX}.quota_set.cores": {},
+    f"{NOVA_METRICS_PREFIX}.quota_set.fixed_ips": {"max_version": "2.35"},
+    f"{NOVA_METRICS_PREFIX}.quota_set.floating_ips": {"max_version": "2.35"},
+    f"{NOVA_METRICS_PREFIX}.quota_set.injected_file_content_bytes": {"max_version": "2.56"},
+    f"{NOVA_METRICS_PREFIX}.quota_set.injected_file_path_bytes": {"max_version": "2.56"},
+    f"{NOVA_METRICS_PREFIX}.quota_set.injected_files": {"max_version": "2.56"},
+    f"{NOVA_METRICS_PREFIX}.quota_set.instances": {},
+    f"{NOVA_METRICS_PREFIX}.quota_set.key_pairs": {},
+    f"{NOVA_METRICS_PREFIX}.quota_set.metadata_items": {},
+    f"{NOVA_METRICS_PREFIX}.quota_set.ram": {},
+    f"{NOVA_METRICS_PREFIX}.quota_set.security_group_rules": {"max_version": "2.35"},
+    f"{NOVA_METRICS_PREFIX}.quota_set.security_groups": {"max_version": "2.35"},
+    f"{NOVA_METRICS_PREFIX}.quota_set.server_group_members": {},
+    f"{NOVA_METRICS_PREFIX}.quota_set.server_groups": {},
 }
 
-NOVA_SERVER_METRICS_PREFIX = "openstack.nova.server"
+NOVA_SERVER_METRICS_PREFIX = f"{NOVA_METRICS_PREFIX}.server"
 NOVA_SERVER_METRICS = {
     f"{NOVA_SERVER_METRICS_PREFIX}.count": {},
     f"{NOVA_SERVER_METRICS_PREFIX}.active": {"optional": True},
@@ -90,99 +90,97 @@ NOVA_SERVER_METRICS = {
     f"{NOVA_SERVER_METRICS_PREFIX}.disk_details.errors_count": {"min_version": "2.48"},
     f"{NOVA_SERVER_METRICS_PREFIX}.cpu_details.id": {"min_version": "2.48"},
     f"{NOVA_SERVER_METRICS_PREFIX}.cpu_details.time": {"min_version": "2.48"},
-    f"{NOVA_SERVER_METRICS_PREFIX}.cpu_details.utilisation": {"min_version": "2.48", "optional": True},
+    f"{NOVA_SERVER_METRICS_PREFIX}.cpu_details.utilisation": {"min_version": "2.48"},
+    f"{NOVA_SERVER_METRICS_PREFIX}.nic_details.rx_drop": {"min_version": "2.48"},
+    f"{NOVA_SERVER_METRICS_PREFIX}.nic_details.rx_errors": {"min_version": "2.48"},
+    f"{NOVA_SERVER_METRICS_PREFIX}.nic_details.rx_octets": {"min_version": "2.48"},
+    f"{NOVA_SERVER_METRICS_PREFIX}.nic_details.rx_packets": {"min_version": "2.48"},
+    f"{NOVA_SERVER_METRICS_PREFIX}.nic_details.rx_rate": {"min_version": "2.48"},
+    f"{NOVA_SERVER_METRICS_PREFIX}.nic_details.tx_drop": {"min_version": "2.48"},
+    f"{NOVA_SERVER_METRICS_PREFIX}.nic_details.tx_errors": {"min_version": "2.48"},
+    f"{NOVA_SERVER_METRICS_PREFIX}.nic_details.tx_octets": {"min_version": "2.48"},
+    f"{NOVA_SERVER_METRICS_PREFIX}.nic_details.tx_packets": {"min_version": "2.48"},
+    f"{NOVA_SERVER_METRICS_PREFIX}.nic_details.tx_rate": {"min_version": "2.48"},
     f"{NOVA_SERVER_METRICS_PREFIX}.uptime": {"min_version": "2.48"},
     f"{NOVA_SERVER_METRICS_PREFIX}.num_cpus": {"min_version": "2.48"},
     f"{NOVA_SERVER_METRICS_PREFIX}.num_nics": {"min_version": "2.48"},
     f"{NOVA_SERVER_METRICS_PREFIX}.num_disks": {"min_version": "2.48"},
 }
 
-NOVA_FLAVOR_METRICS_PREFIX = "openstack.nova.flavor"
 NOVA_FLAVOR_METRICS = {
-    f"{NOVA_FLAVOR_METRICS_PREFIX}.vcpus": {},
-    f"{NOVA_FLAVOR_METRICS_PREFIX}.ram": {},
-    f"{NOVA_FLAVOR_METRICS_PREFIX}.disk": {},
-    f"{NOVA_FLAVOR_METRICS_PREFIX}.os_flv_ext_data:ephemeral": {"optional": True},
-    f"{NOVA_FLAVOR_METRICS_PREFIX}.swap": {"optional": True},
-    f"{NOVA_FLAVOR_METRICS_PREFIX}.rxtx_factor": {"optional": True},
+    f"{NOVA_METRICS_PREFIX}.flavor.vcpus": {},
+    f"{NOVA_METRICS_PREFIX}.flavor.ram": {},
+    f"{NOVA_METRICS_PREFIX}.flavor.disk": {},
+    f"{NOVA_METRICS_PREFIX}.flavor.os_flv_ext_data:ephemeral": {"optional": True},
+    f"{NOVA_METRICS_PREFIX}.flavor.swap": {"optional": True},
+    f"{NOVA_METRICS_PREFIX}.flavor.rxtx_factor": {"optional": True},
 }
 
-NOVA_HYPERVISOR_METRICS = [
-    'openstack.nova.hypervisor.current_workload',  # Available until version 2.87
-    'openstack.nova.hypervisor.disk_available_least',  # Available until version 2.87
-    'openstack.nova.hypervisor.free_disk_gb',  # Available until version 2.87
-    'openstack.nova.hypervisor.free_ram_mb',  # Available until version 2.87
-    'openstack.nova.hypervisor.local_gb',  # Available until version 2.87
-    'openstack.nova.hypervisor.local_gb_used',  # Available until version 2.87
-    'openstack.nova.hypervisor.memory_mb',  # Available until version 2.87
-    'openstack.nova.hypervisor.memory_mb_used',  # Available until version 2.87
-    'openstack.nova.hypervisor.running_vms',  # Available until version 2.87
-    'openstack.nova.hypervisor.vcpus',  # Available until version 2.87
-    'openstack.nova.hypervisor.vcpus_used',  # Available until version 2.87
-    'openstack.nova.hypervisor.up',
-]
-
-NOVA_HYPERVISOR_LOAD_METRICS = [
-    'openstack.nova.hypervisor.load_1',
-    'openstack.nova.hypervisor.load_5',
-    'openstack.nova.hypervisor.load_15',
-]
-
-LEGACY_NOVA_HYPERVISOR_METRICS = [
-    'current_workload',
-    'disk_available_least',
-    'free_disk_gb',
-    'free_ram_mb',
-    'local_gb',
-    'local_gb_used',
-    'memory_mb',
-    'memory_mb_used',
-    'running_vms',
-    'vcpus',
-    'vcpus_used',
-]
-
-LEGACY_NOVA_HYPERVISOR_LOAD_METRICS = {
-    'load_1': 'hypervisor_load.1',
-    'load_5': 'hypervisor_load.5',
-    'load_15': 'hypervisor_load.15',
+NOVA_HYPERVISOR_METRICS_PREFIX = f"{NOVA_METRICS_PREFIX}.hypervisor"
+NOVA_HYPERVISOR_SERVICE_CHECK = f"{NOVA_HYPERVISOR_METRICS_PREFIX}.up"
+NOVA_HYPERVISOR_METRICS = {
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.current_workload": {"max_version": "2.87"},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.disk_available_least": {"max_version": "2.87"},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.free_disk_gb": {"max_version": "2.87"},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.free_ram_mb": {"max_version": "2.87"},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.local_gb": {"max_version": "2.87"},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.local_gb_used": {"max_version": "2.87"},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.memory_mb": {"max_version": "2.87"},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.memory_mb_used": {"max_version": "2.87"},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.running_vms": {"max_version": "2.87"},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.vcpus": {"max_version": "2.87"},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.vcpus_used": {"max_version": "2.87"},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.up": {},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.load_1": {"min_version": "2.88"},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.load_5": {"min_version": "2.88"},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.load_15": {"min_version": "2.88"},
 }
 
-NEUTRON_QUOTAS_METRICS_PREFIX = "openstack.neutron.quotas"
-NEUTRON_QUOTAS_METRICS = [
-    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.floatingip",
-    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.network",
-    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.port",
-    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.rbac_policy",
-    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.router",
-    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.security_group",
-    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.security_group_rule",
-    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.subnet",
-    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.subnetpool",
-]
+NEUTRON_METRICS_PREFIX = "openstack.nova"
 
-NEUTRON_AGENTS_METRICS_PREFIX = "openstack.neutron.agents"
-NEUTRON_AGENTS_METRICS = [
-    f"{NEUTRON_AGENTS_METRICS_PREFIX}.count",
-    f"{NEUTRON_AGENTS_METRICS_PREFIX}.alive",
-    f"{NEUTRON_AGENTS_METRICS_PREFIX}.admin_state_up",
-]
+NEUTRON_QUOTAS_METRICS_PREFIX = f"{NEUTRON_METRICS_PREFIX}.quotas"
+NEUTRON_QUOTAS_METRICS = {
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.floatingip": {},
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.network": {},
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.port": {},
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.rbac_policy": {},
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.router": {},
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.security_group": {},
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.security_group_rule": {},
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.subnet": {},
+    f"{NEUTRON_QUOTAS_METRICS_PREFIX}.subnetpool": {},
+}
+
+NEUTRON_AGENTS_METRICS_PREFIX = f"{NEUTRON_METRICS_PREFIX}.agents"
+NEUTRON_AGENTS_METRICS = {
+    f"{NEUTRON_AGENTS_METRICS_PREFIX}.count": {},
+    f"{NEUTRON_AGENTS_METRICS_PREFIX}.alive": {},
+    f"{NEUTRON_AGENTS_METRICS_PREFIX}.admin_state_up": {},
+}
 
 
 def get_normalized_key(key):
     return re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_")
 
 
-def get_normalized_metrics(log, metrics, parent=None):
+def get_normalized_metrics(metrics, prefix, reference_metrics):
     normalized_metrics = {}
-    for key, value in metrics.items():
-        if isinstance(value, (int, float)) and not isinstance(value, bool):
-            log.debug("get_normalized_metrics: %s", key)
-            normalized_metrics[f'{parent}.{get_normalized_key(key)}' if parent else get_normalized_key(key)] = value
-        elif isinstance(value, bool):
-            normalized_metrics[f'{parent}.{get_normalized_key(key)}' if parent else get_normalized_key(key)] = (
-                1 if value else 0
-            )
-        elif isinstance(value, dict):
-            normalized_metrics.update(get_normalized_metrics(log, value, get_normalized_key(key)))
+    if isinstance(metrics, dict):
+        for key, value in metrics.items():
+            long_metric_name = f'{prefix}.{get_normalized_key(key)}'
+            referenced_metric = reference_metrics.get(long_metric_name)
+            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                if referenced_metric is not None:
+                    normalized_metrics[long_metric_name] = value
+            elif isinstance(value, bool):
+                if referenced_metric is not None:
+                    normalized_metrics[long_metric_name] = 1 if value else 0
+            elif isinstance(value, list):
+                for item in value:
+                    normalized_metrics.update(get_normalized_metrics(item, long_metric_name, reference_metrics))
+            elif isinstance(value, type(None)):
+                if referenced_metric is not None and not referenced_metric.get("optional", False):
+                    normalized_metrics[long_metric_name] = 0
+            else:
+                normalized_metrics.update(get_normalized_metrics(value, long_metric_name, reference_metrics))
     return normalized_metrics

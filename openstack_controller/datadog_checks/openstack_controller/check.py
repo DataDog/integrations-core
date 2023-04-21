@@ -10,19 +10,14 @@ from datadog_checks.openstack_controller.config import OpenstackConfig
 from datadog_checks.openstack_controller.metrics import (
     HYPERVISOR_SERVICE_CHECK,
     KEYSTONE_SERVICE_CHECK,
-    LEGACY_NOVA_HYPERVISOR_LOAD_METRICS,
-    LEGACY_NOVA_HYPERVISOR_METRICS,
     NEUTRON_AGENTS_METRICS,
     NEUTRON_AGENTS_METRICS_PREFIX,
     NEUTRON_QUOTAS_METRICS,
-    NEUTRON_QUOTAS_METRICS_PREFIX,
     NOVA_FLAVOR_METRICS,
-    NOVA_HYPERVISOR_LOAD_METRICS,
     NOVA_HYPERVISOR_METRICS,
+    NOVA_HYPERVISOR_SERVICE_CHECK,
     NOVA_LIMITS_METRICS,
-    NOVA_LIMITS_METRICS_PREFIX,
     NOVA_QUOTA_SETS_METRICS,
-    NOVA_QUOTA_SETS_METRICS_PREFIX,
     NOVA_SERVER_METRICS,
     NOVA_SERVICE_CHECK,
 )
@@ -259,23 +254,22 @@ class OpenStackControllerCheck(AgentCheck):
         self.log.debug("compute_limits: %s", compute_limits)
         if compute_limits:
             for metric, value in compute_limits.items():
-                long_metric_name = f'{NOVA_LIMITS_METRICS_PREFIX}.{metric}'
-                if long_metric_name in NOVA_LIMITS_METRICS:
-                    self.gauge(long_metric_name, value, tags=project_tags)
+                if metric in NOVA_LIMITS_METRICS:
+                    self.gauge(metric, value, tags=project_tags)
                 else:
-                    self.log.warning("%s metric not reported as nova limits metric", long_metric_name)
+                    self.log.warning("%s metric not reported as nova limits metric", metric)
 
     def _report_compute_quotas(self, api, project_id, project_tags):
         compute_quotas = api.get_compute_quota_set(project_id)
         self.log.debug("compute_quotas: %s", compute_quotas)
         if compute_quotas:
             for metric, value in compute_quotas['metrics'].items():
-                long_metric_name = f'{NOVA_QUOTA_SETS_METRICS_PREFIX}.{metric}'
+                # long_metric_name = f'{NOVA_QUOTA_SETS_METRICS_PREFIX}.{metric}'
                 tags = project_tags + [f'quota_id:{compute_quotas["id"]}']
-                if long_metric_name in NOVA_QUOTA_SETS_METRICS:
-                    self.gauge(long_metric_name, value, tags=tags)
+                if metric in NOVA_QUOTA_SETS_METRICS:
+                    self.gauge(metric, value, tags=tags)
                 else:
-                    self.log.warning("%s metric not reported as nova quota metric", long_metric_name)
+                    self.log.warning("%s metric not reported as nova quota metric", metric)
 
     def _report_compute_servers(self, api, project_id, project_tags):
         compute_servers = api.get_compute_servers(project_id)
@@ -302,10 +296,9 @@ class OpenStackControllerCheck(AgentCheck):
                         ),
                     )
                 for metric, value in server_data['metrics'].items():
-                    long_metric_name = f'openstack.nova.server.{metric}'
-                    if long_metric_name in NOVA_SERVER_METRICS:
+                    if metric in NOVA_SERVER_METRICS:
                         self.gauge(
-                            long_metric_name,
+                            metric,
                             value,
                             tags=project_tags
                             + _create_nova_server_tags(
@@ -317,8 +310,8 @@ class OpenStackControllerCheck(AgentCheck):
                                 server_data["flavor_name"],
                             ),
                         )
-                    # else:
-                    #     self.log.warning("%s metric not reported as nova server metric", long_metric_name)
+                    else:
+                        self.log.warning("%s metric not reported as nova server metric", metric)
 
     def _report_compute_flavors(self, api, project_id, project_tags):
         compute_flavors = api.get_compute_flavors(project_id)
@@ -326,10 +319,10 @@ class OpenStackControllerCheck(AgentCheck):
         if compute_flavors:
             for flavor_id, flavor_data in compute_flavors.items():
                 for metric, value in flavor_data['metrics'].items():
-                    long_metric_name = f'openstack.nova.flavor.{metric}'
-                    if long_metric_name in NOVA_FLAVOR_METRICS:
+                    # long_metric_name = f'openstack.nova.flavor.{metric}'
+                    if metric in NOVA_FLAVOR_METRICS:
                         self.gauge(
-                            long_metric_name,
+                            metric,
                             value,
                             tags=project_tags + [f'flavor_id:{flavor_id}', f'flavor_name:{flavor_data["name"]}'],
                         )
@@ -352,7 +345,7 @@ class OpenStackControllerCheck(AgentCheck):
 
     def _report_hypervisor_service_check(self, state, name, hypervisor_tags):
         self.service_check(
-            'openstack.nova.hypervisor.up',
+            NOVA_HYPERVISOR_SERVICE_CHECK,
             HYPERVISOR_SERVICE_CHECK.get(state, AgentCheck.UNKNOWN),
             hostname=name,
             tags=hypervisor_tags,
@@ -360,25 +353,15 @@ class OpenStackControllerCheck(AgentCheck):
 
     def _report_hypervisor_metrics(self, hypervisor_data, hypervisor_tags):
         for metric, value in hypervisor_data.get('metrics', {}).items():
-            long_metric_name = f'openstack.nova.hypervisor.{metric}'
-            self._report_hypervisor_metric(long_metric_name, value, hypervisor_tags)
-            if self.config.report_legacy_metrics:
-                self._report_hypervisor_legacy_metric(long_metric_name, value, hypervisor_tags)
+            if metric in NOVA_HYPERVISOR_METRICS:
+                self._report_hypervisor_metric(metric, value, hypervisor_tags)
         self._report_hypervisor_metric(
-            'openstack.nova.hypervisor.up', 1 if hypervisor_data.get('state') == 'up' else 0, hypervisor_tags
+            NOVA_HYPERVISOR_SERVICE_CHECK, 1 if hypervisor_data.get('state') == 'up' else 0, hypervisor_tags
         )
 
     def _report_hypervisor_metric(self, long_metric_name, value, tags):
         if long_metric_name in NOVA_HYPERVISOR_METRICS:
             self.gauge(long_metric_name, value, tags=tags)
-        elif self.config.collect_hypervisor_load and long_metric_name in NOVA_HYPERVISOR_LOAD_METRICS:
-            self.gauge(long_metric_name, value, tags=tags)
-
-    def _report_hypervisor_legacy_metric(self, metric, value, tags):
-        if metric in LEGACY_NOVA_HYPERVISOR_METRICS:
-            self.gauge(f'openstack.nova.{metric}', value, tags=tags)
-        elif self.config.collect_hypervisor_load and metric in LEGACY_NOVA_HYPERVISOR_LOAD_METRICS:
-            self.gauge(f'openstack.nova.{LEGACY_NOVA_HYPERVISOR_LOAD_METRICS[metric]}', value, tags=tags)
 
     def _report_network_metrics(self, api, project_id, project_tags):
         try:
@@ -406,9 +389,10 @@ class OpenStackControllerCheck(AgentCheck):
         self.log.debug("network_quotas: %s", network_quotas)
         if network_quotas is not None:
             for metric, value in network_quotas.items():
-                long_metric_name = f'{NEUTRON_QUOTAS_METRICS_PREFIX}.{metric}'
-                if long_metric_name in NEUTRON_QUOTAS_METRICS:
-                    self.gauge(f'{NEUTRON_QUOTAS_METRICS_PREFIX}.{metric}', value, tags=project_tags)
+                if metric in NEUTRON_QUOTAS_METRICS:
+                    self.gauge(metric, value, tags=project_tags)
+                else:
+                    self.log.warning("%s metric not reported as neutron quotas metric", metric)
 
     def _report_network_agents(self, api, project_id, project_tags):
         network_agents = api.get_network_agents(project_id)
@@ -417,10 +401,9 @@ class OpenStackControllerCheck(AgentCheck):
             self.gauge(f'{NEUTRON_AGENTS_METRICS_PREFIX}.count', len(network_agents), tags=project_tags)
             for agent_id, agent_data in network_agents.items():
                 for metric, value in agent_data['metrics'].items():
-                    long_metric_name = f'{NEUTRON_AGENTS_METRICS_PREFIX}.{metric}'
-                    if long_metric_name in NEUTRON_AGENTS_METRICS:
+                    if metric in NEUTRON_AGENTS_METRICS:
                         self.gauge(
-                            long_metric_name,
+                            metric,
                             value,
                             tags=project_tags
                             + [

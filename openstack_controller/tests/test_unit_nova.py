@@ -10,7 +10,6 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 from datadog_checks.openstack_controller.metrics import (
     NOVA_FLAVOR_METRICS,
-    NOVA_HYPERVISOR_LOAD_METRICS,
     NOVA_HYPERVISOR_METRICS,
     NOVA_LIMITS_METRICS,
     NOVA_QUOTA_SETS_METRICS,
@@ -187,7 +186,7 @@ def test_limits_metrics(aggregator, dd_run_check, monkeypatch, instance):
                         'project_name:admin',
                     ],
                 )
-            else:
+            elif is_mandatory(value):
                 not_found_metrics.append(key)
     assert not_found_metrics == [], f"No nova limits metrics found: {not_found_metrics}"
 
@@ -375,67 +374,39 @@ def test_hypervisor_service_check_down(aggregator, dd_run_check, instance, monke
     aggregator.assert_service_check('openstack.nova.hypervisor.up', status=AgentCheck.CRITICAL, tags=tags)
 
 
-def test_hypervisor_metrics(aggregator, dd_run_check, instance, monkeypatch):
+@pytest.mark.parametrize(
+    "instance, hypervisor_id",
+    [
+        pytest.param(CONFIG, '1', id="default"),
+        pytest.param(CONFIG_NOVA_MICROVERSION_LATEST, 'd884b51a-e464-49dc-916c-766da0237661', id="latest"),
+    ],
+)
+def test_hypervisor_metrics(aggregator, dd_run_check, instance, hypervisor_id, monkeypatch):
     http = MockHttp("agent-integrations-openstack-default")
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    for metric in NOVA_HYPERVISOR_METRICS:
-        aggregator.assert_metric(
-            metric,
-            tags=[
-                'domain_id:default',
-                'keystone_server:{}'.format(instance["keystone_server_url"]),
-                'project_id:6e39099cccde4f809b003d9e0dd09304',
-                'project_name:admin',
-                'aggregate:my-aggregate',
-                'availability_zone:availability-zone',
-                'hypervisor:agent-integrations-openstack-default',
-                'hypervisor_id:1',
-                'status:enabled',
-                'virt_type:QEMU',
-            ],
-        )
-
-
-def test_latest_hypervisor_metrics(aggregator, dd_run_check, instance_nova_microversion_latest, monkeypatch):
-    http = MockHttp("agent-integrations-openstack-default")
-    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
-    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
-    check = OpenStackControllerCheck('test', {}, [instance_nova_microversion_latest])
-    dd_run_check(check)
-    aggregator.assert_metric(
-        'openstack.nova.hypervisor.up',
-        value=1,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance_nova_microversion_latest["keystone_server_url"]),
-            'project_id:6e39099cccde4f809b003d9e0dd09304',
-            'project_name:admin',
-            'aggregate:my-aggregate',
-            'availability_zone:availability-zone',
-            'hypervisor:agent-integrations-openstack-default',
-            'hypervisor_id:d884b51a-e464-49dc-916c-766da0237661',
-            'status:enabled',
-            'virt_type:QEMU',
-        ],
-    )
-    for metric in NOVA_HYPERVISOR_LOAD_METRICS:
-        aggregator.assert_metric(
-            metric,
-            tags=[
-                'domain_id:default',
-                'keystone_server:{}'.format(instance_nova_microversion_latest["keystone_server_url"]),
-                'project_id:6e39099cccde4f809b003d9e0dd09304',
-                'project_name:admin',
-                'aggregate:my-aggregate',
-                'availability_zone:availability-zone',
-                'hypervisor:agent-integrations-openstack-default',
-                'hypervisor_id:d884b51a-e464-49dc-916c-766da0237661',
-                'status:enabled',
-                'virt_type:QEMU',
-            ],
-        )
+    not_found_metrics = []
+    for key, value in NOVA_HYPERVISOR_METRICS.items():
+        if check_microversion(instance, value):
+            if key in aggregator.metric_names:
+                aggregator.assert_metric(
+                    key,
+                    tags=[
+                        'domain_id:default',
+                        'keystone_server:{}'.format(instance["keystone_server_url"]),
+                        'project_id:6e39099cccde4f809b003d9e0dd09304',
+                        'project_name:admin',
+                        'aggregate:my-aggregate',
+                        'availability_zone:availability-zone',
+                        'hypervisor:agent-integrations-openstack-default',
+                        'hypervisor_id:{}'.format(hypervisor_id),
+                        'status:enabled',
+                        'virt_type:QEMU',
+                    ],
+                )
+            elif is_mandatory(value):
+                not_found_metrics.append(key)
+    assert not_found_metrics == [], f"No nova hypervisor metrics found: {not_found_metrics}"
