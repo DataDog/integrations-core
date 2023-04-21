@@ -107,7 +107,7 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
     )
 
 
-def test_loadbalancers_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
+def test_loadbalancers_metrics(aggregator, dd_run_check, instance, monkeypatch):
     http = MockHttp("agent-integrations-openstack-octavia")
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
@@ -144,7 +144,7 @@ def test_loadbalancers_metrics_default(aggregator, dd_run_check, instance, monke
         aggregator.assert_metric('openstack.octavia.loadbalancer.total_connections', count=1, tags=tags)
 
 
-def test_listeners_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
+def test_listeners_metrics(aggregator, dd_run_check, instance, monkeypatch):
     http = MockHttp("agent-integrations-openstack-octavia")
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
@@ -183,7 +183,7 @@ def test_listeners_metrics_default(aggregator, dd_run_check, instance, monkeypat
         aggregator.assert_metric('openstack.octavia.listener.total_connections', count=1, tags=tags)
 
 
-def test_members_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
+def test_members_metrics(aggregator, dd_run_check, instance, monkeypatch):
     http = MockHttp("agent-integrations-openstack-octavia")
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
@@ -217,7 +217,7 @@ def test_members_metrics_default(aggregator, dd_run_check, instance, monkeypatch
         aggregator.assert_metric('openstack.octavia.member.weight', count=1, tags=tags)
 
 
-def test_healthmonitors_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
+def test_healthmonitors_metrics(aggregator, dd_run_check, instance, monkeypatch):
     http = MockHttp("agent-integrations-openstack-octavia")
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
@@ -253,7 +253,7 @@ def test_healthmonitors_metrics_default(aggregator, dd_run_check, instance, monk
         aggregator.assert_metric('openstack.octavia.healthmonitor.timeout', count=1, tags=tags)
 
 
-def test_pools_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
+def test_pools_metrics(aggregator, dd_run_check, instance, monkeypatch):
     http = MockHttp("agent-integrations-openstack-octavia")
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
@@ -292,7 +292,7 @@ def test_pools_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
         aggregator.assert_metric('openstack.octavia.pool.admin_state_up', count=1, tags=tags)
 
 
-def test_amphora_metrics_default(aggregator, dd_run_check, instance, monkeypatch):
+def test_amphora_metrics(aggregator, dd_run_check, instance, monkeypatch):
     http = MockHttp("agent-integrations-openstack-octavia")
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
