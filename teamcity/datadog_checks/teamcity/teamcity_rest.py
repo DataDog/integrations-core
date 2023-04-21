@@ -127,7 +127,9 @@ class TeamCityRest(AgentCheck):
                 if build_configs and build_configs.get('buildType'):
                     build_configs_list = [build_config['id'] for build_config in build_configs['buildType']]
 
-                for project_pattern in filtered_projects.get(project_id):
+                else:
+                    build_configs_list = []
+                for project_pattern in build_configs_list:
                     """
                     Handle case where the `include` build_config element is a string. Assign `{}` as its filter config.
                     # projects:
