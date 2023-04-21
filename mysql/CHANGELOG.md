@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 10.2.1 / 2023-04-21
+
+* [Fixed] Fix resources not sent on service check metrics. See [#14422](https://github.com/DataDog/integrations-core/pull/14422).
+
 ## 10.2.0 / 2023-04-14
 
 * [Added] Send resource_type/name for mysql integration metrics. See [#14333](https://github.com/DataDog/integrations-core/pull/14333).
