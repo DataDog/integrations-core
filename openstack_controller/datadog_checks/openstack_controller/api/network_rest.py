@@ -1,7 +1,8 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import re
+
+from datadog_checks.openstack_controller.metrics import get_normalized_metrics
 
 
 class NetworkRest:
@@ -20,8 +21,19 @@ class NetworkRest:
         response = self.http.get('{}/v2.0/quotas/{}'.format(self.endpoint, project_id))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        return {
-            re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_"): value
-            for key, value in response.json()['quota'].items()
-            if isinstance(value, (int, float))
-        }
+        return get_normalized_metrics(self.log, response.json()['quota'])
+
+    def get_agents(self):
+        response = self.http.get('{}/v2.0/agents'.format(self.endpoint))
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        agents_metrics = {}
+        for agent in response.json()['agents']:
+            agents_metrics[agent['id']] = {
+                'name': agent['binary'],
+                'host': agent['host'],
+                'availability_zone': agent['availability_zone'],
+                'type': agent['agent_type'],
+                'metrics': get_normalized_metrics(self.log, agent),
+            }
+        return agents_metrics
