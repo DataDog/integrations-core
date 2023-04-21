@@ -104,7 +104,7 @@ class OpenStackControllerCheck(AgentCheck):
             'keystone_server:{}'.format(self.config.keystone_server_url),
         ] + self.instance.get('tags', [])
         api = make_api(self.config, self.log, self.http)
-        self.gauge("openstack.controller", 1)
+        self.gauge("openstack.controller", 1, tags=tags)
         self._report_metrics(api, tags)
 
     def _report_metrics(self, api, tags):
