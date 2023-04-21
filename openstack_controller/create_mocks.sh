@@ -60,12 +60,8 @@ process_endpoint() {
   fi
 }
 
-echo "Getting mocks from $1 host..."
 os_ip=$(gcloud compute instances describe "$1" --format='get(networkInterfaces[0].accessConfigs[0].natIP)' --project "datadog-integrations-lab" --zone "europe-west4-a")
-echo "IP: $os_ip"
-current_dir=$(pwd)
-root_folder="$current_dir/tests/fixtures/$1/nova-${2:-"default"}-ironic-${3:-"default"}"
-echo "Folder: $root_folder"
+root_folder="tests/fixtures/"$1"/nova-${2:-"default"}-ironic-${3:-"default"}"
 
 nova_microversion_header=""
 ironic_microversion_header=""
@@ -114,14 +110,13 @@ for project_id in $(echo "$RESPONSE" | jq -r '.projects[]' | jq -r '.id'); do
   process_endpoint --endpoint="/compute/v2.1/limits?tenant_id=$project_id"
   process_endpoint --endpoint="/compute/v2.1/os-quota-sets/$project_id"
   process_endpoint --endpoint="/compute/v2.1/servers/detail?project_id=$project_id"
+
   for server_id in $(echo "$RESPONSE" | jq -r '.servers[]' | jq -r '.id'); do
     process_endpoint --endpoint="/compute/v2.1/servers/$server_id/diagnostics"
   done
   process_endpoint --port=9696 --endpoint="/networking/v2.0/quotas/$project_id"
-  process_endpoint --port=9696 --endpoint="/networking/v2.0/agents"
 done
 process_endpoint --endpoint="/compute/v2.1/os-aggregates"
-process_endpoint --endpoint="/compute/v2.1/os-services"
 process_endpoint --endpoint="/compute/v2.1/os-hypervisors/detail?with_servers=true"
 num_uptime=$(echo "$RESPONSE" | jq -r '.hypervisors[] | select(.uptime != null) | length')
 if [[ $num_uptime -eq 0 ]]; then
@@ -140,5 +135,26 @@ process_endpoint --endpoint="/baremetal/nodes/detail"
 process_endpoint --endpoint="/baremetal/conductors"
 
 # Octavia
+process_endpoint --endpoint="/load-balancer/v2/lbaas/loadbalancers"
+for loadbalancer_id in $(echo "$RESPONSE" | jq -r '.loadbalancers[]' | jq -r '.id'); do
+  process_endpoint --endpoint="/load-balancer/v2/lbaas/loadbalancers/$loadbalancer_id/stats/"
+done
+
+process_endpoint --endpoint="/load-balancer/v2/lbaas/listeners"
+for listener_id in $(echo "$RESPONSE" | jq -r '.listeners[]' | jq -r '.id'); do
+  process_endpoint --endpoint="/load-balancer/v2/lbaas/listeners/$listener_id/stats/"
+done
+
+process_endpoint --endpoint="/load-balancer/v2/lbaas/pools"
+for pool_id in $(echo "$RESPONSE" | jq -r '.pools[]' | jq -r '.id'); do
+  process_endpoint --endpoint="/load-balancer/v2/lbaas/pools/$pool_id/members/"
+done
+
+process_endpoint --endpoint="/load-balancer/v2/lbaas/healthmonitors"
+
+process_endpoint --endpoint="/load-balancer/v2/octavia/amphorae"
+for amphora_id in $(echo "$RESPONSE" | jq -r '.amphorae[]' | jq -r '.id'); do
+  process_endpoint --endpoint="/load-balancer/v2/octavia/amphorae/$amphora_id/stats/"
+done
 
 rm headers
