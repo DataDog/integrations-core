@@ -2,7 +2,6 @@
 	"name": "[kubernetes] Monitor Kubernetes Pods Restarting",
 	"type": "query alert",
 	"query": "change(sum(last_5m),last_5m):avg:kubernetes.containers.restarts{*} by {kube_cluster_name,pod_name} > 5",
-avg:kubernetes.containers.restarts{*} by {kube_cluster_name,pod_name}
 	"message": "Pod {{pod_name.name}} restarted multiple times in the last five minutes.",
 	"tags": [
 		"integration:kubernetes"
