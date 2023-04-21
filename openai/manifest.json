@@ -35,6 +35,10 @@
     },
     "dashboards": {
       "OpenAI Overview Dashboard": "assets/dashboards/openai_overview.json"
+    },
+    "monitors": {
+      "Request Limits": "assets/recommended_monitors/request_limits.json",
+      "Token per min Limits": "assets/recommended_monitors/tokens_limits.json"
     }
   },
   "author": {
