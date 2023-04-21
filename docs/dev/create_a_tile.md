@@ -22,7 +22,7 @@ further_reading:
 
 ## Overview
 
-This page walks you through how to develop an offering that will be displayed in a tile on the Datadog Integrations page or on the Datadog Marketplace. For all offerings that do not use the Datadog Agent, including API-based integrations, professional services listings, software licenses, and Datadog Apps, a tile-only listing is required. This means that there is no Agent code attached to the tile, but it serves as an informative point of entry where customers can learn more about your offering, learn how to set it up, as well as install or purchase your offering to unlock out-of-the-box dashboards and other assets.
+This page walks you through how to develop an offering that will be displayed in a tile on the Datadog Integrations page or on the Datadog Marketplace. For all offerings that do not use the Datadog Agent, including API-based integrations, professional services listings, software licenses, and custom dashboard widgets, a tile-only listing is required. This means that there is no Agent code attached to the tile, but it serves as an informative point of entry where customers can learn more about your offering, learn how to set it up, as well as install or purchase your offering to unlock out-of-the-box dashboards and other assets.
 
 {{% tab "Marketplace Offerings" %}}
 ## Set up a directory and clone the Marketplace repository
@@ -58,9 +58,9 @@ ddev config set marketplace <PATH/TO/MARKETPLACE>
 ddev config set repo marketplace
 {{< /code-block >}}
 
-### Create an informational tile only listing
+## Populate the integration tile scaffolding
 
-For API integrations, Datadog Apps, professional services, or standalone SaaS licenses that will be offered for an additional cost on the Datadog Marketplace, use the Datadog Development Toolkit to create scaffolding for an informational tile-only listing.
+For API integrations, custom dashboard widgets, professional services, or standalone SaaS licenses that will be offered for an additional cost on the Datadog Marketplace, use the Datadog Development Toolkit to create scaffolding for an informational tile-only listing.
 
 To create the informational tile-only listing's scaffolding:
 
@@ -71,7 +71,7 @@ To create the informational tile-only listing's scaffolding:
 
 {{% /tab %}}
 
-{{% tab "Out of the box Offerings" %}}
+{{% tab "Out-of-the-box Offerings" %}}
 
 ## Set up a directory and fork the `integrations-extras` repository
 
@@ -108,7 +108,7 @@ ddev config set repo extras
 
 ## Populate the integration tile scaffolding
 
-For Datadog API integrations and Datadog Apps that will be available out-of-the-box on the [Integrations page], use the Datadog Development Toolkit to create scaffolding for an informational tile-only listing.
+For Datadog API integrations and custom dashboard widgets that will be available out-of-the-box on the [Integrations page][26], use the Datadog Development Toolkit to create scaffolding for an informational tile-only listing.
 
 1. Make sure you're inside the `integrations-extras` directory:
    {{< code-block lang="shell" >}}cd $HOME/dd/integrations-extras{{< /code-block >}}
@@ -126,21 +126,21 @@ Make sure that the following required assets for your integration are complete:
 
 ### README
 
-Once you have created a `README.md` file, add the following sections as H2s (`##`) and fill out the content that is displayed in the Marketplace tile:
+Once you have created a `README.md` file, add the following sections as H2s (`##`) and fill out the content accordingly:
 
 | Header Name | Header |
 |-------------|--------|
-| Overview | Write a description under an `## Overview` header that describes the value and benefits your offering provides to users, for example, out-of-the-box dashboards, replays of user sessions, logs, alerts, and more). <br><br>This information is displayed in the **Overview** tab on the integration tile. |
-| Setup | Include all the steps to setting up your offering that includes information divided into H3 headings (`###`). Standard topics include:<br><br>- Installing the integration using the in-app integration tile. <br>- Configuring the integration with the appropriate roles and permissions in your Datadog organization.<br>- Accessing out-of-the-box Datadog features that users who purchased and installed the integration can access (such as metrics, events, monitors, logs, dashboards, and more).|
-| Uninstallation | Include all the steps for uninstalling your offering. This information is displayed in the **Configure** tab on the integration tile.|
-| Data Collected  | Specify the types of data collected by your integration (if applicable) including information about out-of-the-box metrics, events, or service checks. <br><br>You can include additional types of data collected such as logs, monitors, dashboards, and more. If your offering does not provide any of this data, you do not need to add a Data Collected section. |
+| Overview | Write a description under an `## Overview` header that describes the value and benefits your offering provides to users, for example, out-of-the-box dashboards, replays of user sessions, logs, alerts, and more). <br><br>This information is displayed in the **Overview** tab on the tile. |
+| Setup | Include all the steps required to set up your offering that includes information divided into H3 headings (`###`). Standard topics include:<br><br>- Installing the integration using the in-app integration tile. <br>- Configuring the integration with the appropriate roles and permissions in your Datadog organization.<br>- Accessing out-of-the-box Datadog features that users who purchased and installed the integration can access (such as metrics, events, monitors, logs, dashboards, and more).|
+| Uninstallation | Include all the steps for uninstalling your offering. This information is displayed in the **Configure** tab on the tile.|
+| Data Collected  | Specify the types of data collected by your integration (if applicable), including events, service checks, logs, etc. Metrics added to the `metadata.csv` file will automatically appear in this tab.  <br><br> If your offering does not provide any of this data, you do not need to add a Data Collected section. |
 | Support | Provide contact information that includes an email to your Support team, a phone number to your company, a link to your company's documentation or blog post, and more help information in a bulleted list format. |
 
 ### Media Carousel
 
-A media carousel of images and a video is included in your integration tile.
+A media carousel of images and a video is displayed on each tile, allowing users to better understand the functionality and value of your offering through visual aids.
 
-Technology Partners can add a video to an integration tile. Do not upload the video in your pull request. Instead, send a copy or a download link of your video to <a href="mailto:marketplace@datadoghq.com">marketplace@datadoghq.com</a>. The Marketplace team replies with a `vimeo_link` which you can add in the `manifest.json` file to include the video in the media carousel.
+To add a video to your tile, do not upload the video in your pull request. Instead, send a copy or a download link of your video to <a href="mailto:marketplace@datadoghq.com">marketplace@datadoghq.com</a>. The Marketplace team uploads the video and provides a `vimeo_link` that should be added to the `manifest.json` file.
 
 The video must meet the following requirements:
 
@@ -153,7 +153,7 @@ The video must meet the following requirements:
 | Video Length       | The maximum video length is 60 seconds.                                               |
 | Description        | The maximum number of characters allowed is 300.                                      |
 
-Technology Partners can add up to eight images (seven if you are including a video) in an integration tile's media carousel.
+Technology Partners can add up to eight images (seven if you are including a video) in a tile's media carousel.
 
 The images must meet the following requirements:
 
@@ -167,7 +167,7 @@ The images must meet the following requirements:
 | Color Profile      | sRGB                                                                                                                                              |
 | Description        | The maximum number of characters allowed is 300.                                                                                                  |
 
-Follow this template to define the `media` object in the media carousel which includes an image, a video thumbnail, and a video:
+Follow this template to define the `media` object in the `manifest.json` file which includes an image, a video thumbnail, and a video:
 
 {{< code-block lang="json" filename="manifest.json" collapsible="true" >}}
 "media": [
@@ -195,8 +195,7 @@ ddev validate all <INTEGRATION_NAME>
 
 ## Open a pull request
 
-Push up your feature branch and open a pull request that contains your integration tile's asset files (including images) in the [`marketplace`][18] or [`integrations-extras`][number] repository. The Marketplace repository does not allow forks. For instructions on creating a clone of the repo, see the [Set up section](#set-up-a-directory-and-clone-the-marketplace-repository). After you've created your pull request, automatic checks will run to verify that your pull request is in good shape and contains all the required content to be updated.
-`Please note we have stopped using Azure DevOps`
+Push up your feature branch and open a pull request that contains your integration tile's asset files (including images) in the [`marketplace`][18] or [`integrations-extras`][number] repository. After you've created your pull request, automatic checks will run to verify that your pull request is in good shape and contains all the required content to be updated.
 
 ## Review process
 
@@ -206,25 +205,25 @@ Once you have addressed the feedback and re-requested reviews, these reviewers a
 
 ### How to resolve common validation errors 
 
-Out-of-the-box integrations wtihin the integrations-extras repository can run into validation errors when the forked reposiotry is out of date with the origin. Follow the steps below to resolve the validation errors by rebasing. 
+Out-of-the-box integrations wtihin the integrations-extras repository can run into validation errors when the forked repository is out of date with the origin. Follow the steps below to resolve the validation errors by rebasing. 
 
 Updating the forked repository via the Web App
 
-1. Go to the github.com
+1. Go to github.com
 2. Go to your repositories
 3. Select your forked repo of integrations-extras
-4. Go to "sync fork"  in the github web--ui 
+4. Go to "sync fork" in the top right corner 
 5. Click "update branch" 
 
 To rebase and push changes:
 
-1. git checkout <your working branch>
+1. `git checkout <your working branch>`
 
-2. git rebase master
+2. `git rebase master`
 
 -  If there are any merge conflicts, you'd resolve them here
 
-3. git push origin <working branch> -f
+3. `git push origin <working branch> -f`
 
 ## Further Reading
 
@@ -255,3 +254,4 @@ To rebase and push changes:
 [23]: https://datadoghq.com/blog/
 [24]: https://github.com/DataDog/integrations-extras/tree/master/vantage
 [25]: https://docs.datadoghq.com/developers/integrations/python
+[26]: Integrations page

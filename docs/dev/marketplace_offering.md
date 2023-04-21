@@ -21,43 +21,41 @@ further_reading:
 
 ## Overview
 
-The Datadog Marketplace is a digital marketplace where Datadog Technology Partners can list their paid offerings to Datadog users. Datadog customers can access paid integration tiles on the [**Marketplace** page][2]. 
+The Datadog Marketplace is a digital marketplace where Datadog Technology Partners can list their paid offerings to Datadog users.  
 
-While the **Integrations** page includes integrations and Datadog Apps built by Datadog and Technology Partners at no cost, the **Marketplace** page is a commercial platform for Datadog customers and Technology Partners to buy and sell a variety of offerings including Agent-based or API-based integrations, Datadog Apps, software subscriptions/licenses, and professional services.
+While the **Integrations** page includes integrations and custom dashboard widgets built by both Datadog and Technology Partners at no cost, the **Marketplace** page is a commercial platform for Datadog customers and Technology Partners to buy and sell a variety of offerings including Agent-based or API-based integrations, custom dashboard widgets, software subscriptions/licenses, and professional services.
 
-## List an offering on Marketplace
+## List an offering 
 
-All Technology Partners can list a free integration on the **Integrations** page or a commercial offering on the **Marketplace** page. Additional offerings on Datadog Marketplace may include:
+All Technology Partners can list an out-of-the-box integration on the **Integrations** page, or a commercial paid offering on the **Marketplace** page. The following types of offerings are supported on the Datadog Marketplace:
 
-Integrations
-: Marketplace integrations that submit or pull third-party data through the [Datadog Agent][15] or the [Datadog API][16]. These integrations contain out-of-the-box metrics, events, or service checks.
+### Integrations
+Marketplace integrations that submit third-party data or pull data from a user's Datadog account through the [Datadog Agent][15] or the [Datadog API][16]. These integrations can contain a variety of data such as out-of-the-box metrics, events, logs, and more.
 
-Software licenses
-: SaaS licenses enable you to deliver and license software solutions to customers through the Datadog Marketplace.
+### Software licenses
+Software licenses, or subscriptions to SaaS solutions, enable you to deliver and license software solutions to customers through the Datadog Marketplace.
 
-Datadog Apps
-: A custom dashboard widget that adds visual functionality to existing integration data (or other data within Datadog).
+### Custom dashboard widgets
+A custom dashboard widget that adds visual functionality to existing integration data (or other data within Datadog).
 
-Professional services
-: [Professional services][18] enable you to offer your team's services for implementation, support, or management for a set period of time.
+### Professional services
+[Professional services][18] enable you to offer your team's services for implementation, support, or management for a set period of time.
 
-### Why join? 
+## Why join the Datadog Marketplace? 
 
-Marketplace Partners have many benefits that bring value to their business such as:
+Marketplace Partners have unique benefits that are not available to partners who list out-of-the-box integrations:
  
-  Go-To-Market support with access to dedicated sales and marketing resources focused on accelerating partner growth. 
+  - Go-to-Market motions, including a blog post, quote for a press release, and social media amplification, with access to dedicated sales and marketing resources, focused on accelerating partner growth. 
 
-  Training and Support for sales enablement in the form of on-demand courses to quickly onboard sales and technical teams.
+  - Training and Support for sales enablement in the form of on-demand courses to quickly onboard sales and technical teams.
 
-  Partner Portal that has everything a partner needs to grow their business with Datadog.
-
-  Exclusive opportunities to sponsor conferences and events (such as Datadog DASH) at a discounted rate
+  - Exclusive opportunities to sponsor conferences and events (such as Datadog DASH) at a discounted rate.
 
 {{< img src="developers/marketplace/marketplace_overview.png" alt="The Datadog Marketplace page" style="width:100%" >}}
 
 ## Join the Datadog partner network
 
-Before requesting access to the Datadog Marketplace, first apply to join the [Datadog Partner Network's][3] **Technology Partners** track.
+Before listing an offering on the Datadog Marketplace, you will first need to apply to the [Datadog Partner Network's][3] **Technology Partner** track. Once your application has been approved, you can begin to develop your offering.
 
 ## Request a sandbox account
 
@@ -75,10 +73,10 @@ Creating a developer sandbox may take up to one or two business days. Once your 
 
 ## Explore learning resources
 
-Once you've joined the Technology Partners track and requested a sandbox account, you can start learning about developing offerings by:
+Once you've joined the Technology Partner track and requested a sandbox account, you can start learning about developing offerings by:
 
 * Completing the on-demand [**Introduction to Datadog Integrations**][8] course on the [Datadog Learning Center][9].
-* Reading the documentation about setting up an [OAuth 2.0 client][11] for Agent-based or API-based integrations and Datadog Apps.
+* Reading the documentation about setting up an [OAuth 2.0 client][11] for API-based integrations.
 
 
 ### Request access to Marketplace

@@ -22,6 +22,8 @@ The required Datadog Agent integration development tools include:
 - [Docker][4] to run the full test suite.
 - The git [command-line][5] or [GitHub desktop client][19].
 
+You can list an Agent integration for a price in the Datadog Marketplace, or list it out-of-the-box on the Integrations page.
+
 {{% tab "Marketplace integrations" %}}
 ## Set up a directory and clone the Marketplace repository
 
@@ -322,9 +324,9 @@ The set of assets created by the `ddev` scaffolding must be populated:
 `service_check.json`
 : This contains the list of all Service Checks collected by your Agent Check. For more information, see the [Service check file reference][15].
 
-{{< tabs >}}
+For more information on the `README.md` and `manifest.json` files, see [Create a Tile][20].
 
-For more information on the README.md and manifest.json files, see create a tile LINK
+{{< tabs >}}
 
 {{% tab "Configuration template" %}}
 
@@ -420,9 +422,9 @@ sudo datadog-agent integration install -w /path/to/wheel.whl
   ```
 </details>
 
-## Review the checklist to publishing your integration
+## Create a tile and publish your integration
 
-After you've created your Agent-based integration, populate the remainder of the required assets that will appear throughout your integration tile by following the instructions in [Create a Tile].
+After you've created your Agent-based integration, populate the remainder of the required assets that will appear throughout your integration tile by following the instructions in [Create a Tile][20].
 
 Finally, open a pull request with your code on [integrations-extras] or [marketplace]. After you've created your pull request, automatic checks run to verify that your pull request is in good shape and contains all the required content to be updated.
 
@@ -452,3 +454,4 @@ Additional helpful documentation, links, and articles:
 [17]: https://docs.datadoghq.com/agent/
 [18]: https://www.datadoghq.com/blog/programmatically-manage-your-datadog-integrations/
 [19]: https://desktop.github.com/
+[20]: Create a tile 
