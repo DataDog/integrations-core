@@ -326,8 +326,7 @@ The set of assets created by the `ddev` scaffolding must be populated:
 
 For more information on the `README.md` and `manifest.json` files, see [Create a Tile][20].
 
-{{% /tab %}}
-
+{{< tabs >}}
 {{% tab "Configuration template" %}}
 
 For this example, the `awesome/assets/configuration/spec.yaml` used to generate `awesome/datadog_checks/awesome/data/conf.yaml.example` appears in the following format:
@@ -371,13 +370,12 @@ ddev validate config --sync awesome
 ```
 
 {{% /tab %}}
-
 {{% tab "Metadata" %}}
 
 For this example, the Awesome integration doesn't provide any metrics, so in this case, the generated `awesome/metadata.csv` only contains only a row with the column names.
 
 {{% /tab %}}
-{{< tabs >}}
+{{< /tabs >}}
 
 ## Build the wheel
 
