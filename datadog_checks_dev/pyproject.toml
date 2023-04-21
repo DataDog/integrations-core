@@ -86,7 +86,7 @@ cli = [
     "tomli-w>=1.0.0",
     "tox>=3.12.1, <4.0.0",
     "twine>=1.11.0",
-    "virtualenv",
+    "virtualenv<20.22.0",
     # TODO: Remove once every check has a pyproject.toml
     "setuptools>=66; python_version > '3.0'",
     "setuptools; python_version < '3.0'",
