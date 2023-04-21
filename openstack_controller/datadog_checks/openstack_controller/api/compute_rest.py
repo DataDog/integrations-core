@@ -3,7 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
-from datadog_checks.openstack_controller.metrics import get_normalized_metrics
+from datadog_checks.openstack_controller.metrics import (
+    NOVA_FLAVOR_METRICS,
+    NOVA_HYPERVISOR_METRICS,
+    NOVA_HYPERVISOR_METRICS_PREFIX,
+    NOVA_LIMITS_METRICS,
+    NOVA_METRICS_PREFIX,
+    NOVA_QUOTA_SETS_METRICS,
+    NOVA_SERVER_METRICS,
+    NOVA_SERVER_METRICS_PREFIX,
+    get_normalized_metrics,
+)
 
 
 def _load_averages_from_uptime(uptime):
@@ -31,7 +41,7 @@ class ComputeRest:
         response = self.http.get('{}/limits?tenant_id={}'.format(self.endpoint, project_id))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        return get_normalized_metrics(self.log, response.json()['limits'])
+        return get_normalized_metrics(response.json(), NOVA_METRICS_PREFIX, NOVA_LIMITS_METRICS)
 
     def get_quota_set(self, project_id):
         response = self.http.get('{}/os-quota-sets/{}'.format(self.endpoint, project_id))
@@ -39,7 +49,7 @@ class ComputeRest:
         self.log.debug("response: %s", response.json())
         quota_set = {
             'id': response.json()['quota_set']['id'],
-            'metrics': get_normalized_metrics(self.log, response.json()['quota_set']),
+            'metrics': get_normalized_metrics(response.json(), NOVA_METRICS_PREFIX, NOVA_QUOTA_SETS_METRICS),
         }
         return quota_set
 
@@ -54,7 +64,7 @@ class ComputeRest:
                 'status': server['status'].lower(),
                 'hypervisor_hostname': server['OS-EXT-SRV-ATTR:hypervisor_hostname'],
                 'instance_hostname': server.get('OS-EXT-SRV-ATTR:hostname'),
-                'metrics': get_normalized_metrics(self.log, server),
+                'metrics': get_normalized_metrics(server, NOVA_SERVER_METRICS_PREFIX, NOVA_SERVER_METRICS),
             }
             flavor = server.get('flavor')
             if flavor:
@@ -63,53 +73,23 @@ class ComputeRest:
                     flavor_metrics = self._get_flavor_id(flavor_id)
                     server_metrics[server['id']]['flavor_name'] = flavor_metrics[flavor_id]['name']
                     server_metrics[server['id']]['metrics'].update(
-                        get_normalized_metrics(self.log, flavor_metrics[flavor_id]['metrics'], 'flavor')
+                        get_normalized_metrics(
+                            flavor_metrics[flavor_id]['metrics'],
+                            f'{NOVA_SERVER_METRICS_PREFIX}.flavor',
+                            NOVA_SERVER_METRICS,
+                        )
                     )
                 else:
                     server_metrics[server['id']]['flavor_name'] = flavor.get('original_name')
-                    server_metrics[server['id']]['metrics'].update(get_normalized_metrics(self.log, flavor, 'flavor'))
+                    server_metrics[server['id']]['metrics'].update(
+                        get_normalized_metrics(flavor, f'{NOVA_SERVER_METRICS_PREFIX}.flavor', NOVA_SERVER_METRICS)
+                    )
             try:
                 response = self.http.get('{}/servers/{}/diagnostics'.format(self.endpoint, server['id']))
                 response.raise_for_status()
                 self.log.debug("response: %s", response.json())
-                disk_details = response.json().get('disk_details')
-                if disk_details:
-                    for disk_detail in disk_details:
-                        server_metrics[server['id']]['metrics'].update(
-                            {
-                                '{}.{}'.format(
-                                    'disk_details',
-                                    re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key)
-                                    .lower()
-                                    .replace("-", "_"),
-                                ): value
-                                for key, value in disk_detail.items()
-                                if isinstance(value, (int, float)) and not isinstance(value, bool)
-                            }
-                        )
-                cpu_details = response.json().get('cpu_details')
-                if cpu_details:
-                    for cpu_detail in cpu_details:
-                        server_metrics[server['id']]['metrics'].update(
-                            {
-                                '{}.{}'.format(
-                                    'cpu_details',
-                                    re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key)
-                                    .lower()
-                                    .replace("-", "_"),
-                                ): value
-                                for key, value in cpu_detail.items()
-                                if isinstance(value, (int, float)) and not isinstance(value, bool)
-                            }
-                        )
                 server_metrics[server['id']]['metrics'].update(
-                    {
-                        re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key)
-                        .lower()
-                        .replace("-", "_"): value
-                        for key, value in response.json().items()
-                        if isinstance(value, (int, float)) and not isinstance(value, bool)
-                    }
+                    get_normalized_metrics(response.json(), NOVA_SERVER_METRICS_PREFIX, NOVA_SERVER_METRICS)
                 )
             except Exception as e:
                 self.log.error("Exception: %s", e)
@@ -123,11 +103,7 @@ class ComputeRest:
         for flavor in response.json()['flavors']:
             flavor_metrics[flavor['id']] = {
                 'name': flavor['name'],
-                'metrics': {
-                    re.sub(r'((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1', key).lower().replace("-", "_"): value
-                    for key, value in flavor.items()
-                    if isinstance(value, (int, float)) and not isinstance(value, bool)
-                },
+                'metrics': get_normalized_metrics(flavor, f'{NOVA_METRICS_PREFIX}.flavor', NOVA_FLAVOR_METRICS),
             }
         return flavor_metrics
 
@@ -160,7 +136,7 @@ class ComputeRest:
                 'state': hypervisor.get('state'),
                 'type': hypervisor['hypervisor_type'],
                 'status': hypervisor['status'],
-                'metrics': get_normalized_metrics(self.log, hypervisor),
+                'metrics': get_normalized_metrics(hypervisor, NOVA_HYPERVISOR_METRICS_PREFIX, NOVA_HYPERVISOR_METRICS),
             }
             uptime = hypervisor.get('uptime')
             load_averages = []
@@ -175,9 +151,9 @@ class ComputeRest:
                         load_averages = _load_averages_from_uptime(uptime)
             if load_averages and len(load_averages) == 3:
                 for i, avg in enumerate([1, 5, 15]):
-                    hypervisors_detail_metrics[str(hypervisor['id'])]['metrics']['load_{}'.format(avg)] = load_averages[
-                        i
-                    ]
+                    hypervisors_detail_metrics[str(hypervisor['id'])]['metrics'][
+                        f"{NOVA_HYPERVISOR_METRICS_PREFIX}.load_{avg}"
+                    ] = load_averages[i]
         return hypervisors_detail_metrics
 
     def get_os_aggregates(self):
