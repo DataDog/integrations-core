@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-from six import PY2
 
 from datadog_checks.openmetrics import OpenMetricsCheck
 
@@ -17,12 +16,6 @@ instance = {
     'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1_total'],
     'send_histograms_buckets': True,
     'send_monotonic_counter': True,
-}
-instance_new = {
-    'openmetrics_endpoint': 'http://localhost:10249/metrics',
-    'namespace': 'openmetrics',
-    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1', 'counter2'],
-    'collect_histogram_buckets': True,
 }
 
 
@@ -98,37 +91,3 @@ def test_openmetrics_wildcard(dd_run_check, aggregator):
         metric_type=aggregator.GAUGE,
     )
     aggregator.assert_all_metrics_covered()
-
-
-@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
-def test_linkerd_v2_new(aggregator, dd_run_check):
-    from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
-
-    check = OpenMetricsCheck('openmetrics', {}, [instance_new])
-    scraper = OpenMetricsScraper(check, instance_new)
-    dd_run_check(check)
-
-    aggregator.assert_metric(
-        '{}.renamed.metric1'.format(CHECK_NAME),
-        tags=['endpoint:http://localhost:10249/metrics', 'node:host1', 'flavor:test', 'matched_label:foobar'],
-        metric_type=aggregator.GAUGE,
-    )
-    aggregator.assert_metric(
-        '{}.metric2'.format(CHECK_NAME),
-        tags=['endpoint:http://localhost:10249/metrics', 'timestamp:123', 'node:host2', 'matched_label:foobar'],
-        metric_type=aggregator.GAUGE,
-    )
-    aggregator.assert_metric(
-        '{}.counter1.count'.format(CHECK_NAME),
-        tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
-        metric_type=aggregator.MONOTONIC_COUNT,
-    )
-    aggregator.assert_metric(
-        '{}.counter2.count'.format(CHECK_NAME),
-        tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
-        metric_type=aggregator.MONOTONIC_COUNT,
-    )
-    aggregator.assert_all_metrics_covered()
-
-    assert check.http.options['headers']['Accept'] == '*/*'
-    assert scraper.http.options['headers']['Accept'] == 'text/plain'
