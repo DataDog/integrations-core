@@ -16,14 +16,14 @@
       "vcpus": 4,
       "memory_mb": 14990,
       "local_gb": 96,
-      "vcpus_used": 1,
-      "memory_mb_used": 1536,
-      "local_gb_used": 2,
-      "free_ram_mb": 13454,
-      "free_disk_gb": 94,
+      "vcpus_used": 2,
+      "memory_mb_used": 2560,
+      "local_gb_used": 4,
+      "free_ram_mb": 12430,
+      "free_disk_gb": 92,
       "current_workload": 0,
-      "running_vms": 1,
-      "disk_available_least": 83,
+      "running_vms": 2,
+      "disk_available_least": 80,
       "cpu_info": "{\"arch\": \"x86_64\", \"model\": \"Westmere-IBRS\", \"vendor\": \"Intel\", \"topology\": {\"cells\": 1, \"sockets\": 1, \"cores\": 2, \"threads\": 2}, \"features\": [\"invpcid\", \"cx16\", \"pat\", \"3dnowprefetch\", \"pni\", \"sse\", \"aes\", \"xsaves\", \"fpu\", \"smap\", \"adx\", \"apic\", \"sse4.2\", \"rdtscp\", \"mpx\", \"pclmuldq\", \"tsc\", \"pse\", \"arat\", \"ss\", \"mca\", \"fma\", \"syscall\", \"smep\", \"rdseed\", \"stibp\", \"pae\", \"bmi2\", \"mmx\", \"pse36\", \"fsgsbase\", \"clwb\", \"clflush\", \"lm\", \"msr\", \"nx\", \"avx512cd\", \"avx512f\", \"bmi1\", \"lahf_lm\", \"sse4.1\", \"avx\", \"ht\", \"invtsc\", \"xsave\", \"md-clear\", \"avx512vl\", \"pcid\", \"avx2\", \"xsavec\", \"cx8\", \"xsaveopt\", \"ssse3\", \"fxsr\", \"abm\", \"vme\", \"tsc_adjust\", \"mtrr\", \"avx512dq\", \"rdrand\", \"xgetbv1\", \"hle\", \"popcnt\", \"de\", \"rtm\", \"sep\", \"cmov\", \"avx512bw\", \"f16c\", \"arch-capabilities\", \"movbe\", \"x2apic\", \"clflushopt\", \"pdpe1gb\", \"ssbd\", \"mce\", \"sse2\", \"spec-ctrl\", \"erms\", \"hypervisor\", \"pge\"]}"
     }
   ]

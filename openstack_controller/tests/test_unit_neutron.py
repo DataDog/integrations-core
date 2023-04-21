@@ -6,7 +6,7 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 from datadog_checks.openstack_controller.metrics import NEUTRON_AGENTS_METRICS, NEUTRON_QUOTAS_METRICS
 
-from .common import MockHttp
+from .common import MockHttp, check_microversion, is_mandatory
 
 pytestmark = [pytest.mark.unit]
 
@@ -128,28 +128,30 @@ def test_quotas_metrics(aggregator, dd_run_check, monkeypatch, instance):
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    not_found_metrics = NEUTRON_QUOTAS_METRICS
-    for metric in aggregator.metric_names:
-        if metric in NEUTRON_QUOTAS_METRICS:
-            not_found_metrics.remove(metric)
-            aggregator.assert_metric(
-                metric,
-                tags=[
-                    'domain_id:default',
-                    'keystone_server:{}'.format(instance["keystone_server_url"]),
-                    'project_id:1e6e233e637d4d55a50a62b63398ad15',
-                    'project_name:demo',
-                ],
-            )
-            aggregator.assert_metric(
-                metric,
-                tags=[
-                    'domain_id:default',
-                    'keystone_server:{}'.format(instance["keystone_server_url"]),
-                    'project_id:6e39099cccde4f809b003d9e0dd09304',
-                    'project_name:admin',
-                ],
-            )
+    not_found_metrics = []
+    for key, value in NEUTRON_QUOTAS_METRICS.items():
+        if check_microversion(instance, value):
+            if key in aggregator.metric_names:
+                aggregator.assert_metric(
+                    key,
+                    tags=[
+                        'domain_id:default',
+                        'keystone_server:{}'.format(instance["keystone_server_url"]),
+                        'project_id:1e6e233e637d4d55a50a62b63398ad15',
+                        'project_name:demo',
+                    ],
+                )
+                aggregator.assert_metric(
+                    key,
+                    tags=[
+                        'domain_id:default',
+                        'keystone_server:{}'.format(instance["keystone_server_url"]),
+                        'project_id:6e39099cccde4f809b003d9e0dd09304',
+                        'project_name:admin',
+                    ],
+                )
+            elif is_mandatory(value):
+                not_found_metrics.append(key)
     assert not_found_metrics == [], f"No neutron quotas metrics found: {not_found_metrics}"
 
 
@@ -160,7 +162,6 @@ def test_agents_metrics(aggregator, dd_run_check, monkeypatch, instance):
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    not_found_metrics = NEUTRON_AGENTS_METRICS
     agent_tags = [
         'agent_availability_zone:',
         'agent_host:agent-integrations-openstack-default',
@@ -168,30 +169,33 @@ def test_agents_metrics(aggregator, dd_run_check, monkeypatch, instance):
         'agent_name:ovn-controller',
         'agent_type:OVN Controller Gateway agent',
     ]
-    for metric in aggregator.metric_names:
-        if metric in NEUTRON_AGENTS_METRICS:
-            not_found_metrics.remove(metric)
-            aggregator.assert_metric(
-                metric,
-                tags=[]
-                if 'openstack.neutron.agents.count'
-                else agent_tags
-                + [
-                    'keystone_server:{}'.format(instance["keystone_server_url"]),
-                    'project_id:1e6e233e637d4d55a50a62b63398ad15',
-                    'project_name:demo',
-                ],
-            )
-            aggregator.assert_metric(
-                metric,
-                tags=[]
-                if 'openstack.neutron.agents.count'
-                else agent_tags
-                + [
-                    'domain_id:default',
-                    'keystone_server:{}'.format(instance["keystone_server_url"]),
-                    'project_id:6e39099cccde4f809b003d9e0dd09304',
-                    'project_name:admin',
-                ],
-            )
+    not_found_metrics = []
+    for key, value in NEUTRON_AGENTS_METRICS.items():
+        if check_microversion(instance, value):
+            if key in aggregator.metric_names:
+                aggregator.assert_metric(
+                    key,
+                    tags=[]
+                    if 'openstack.neutron.agents.count'
+                    else agent_tags
+                    + [
+                        'keystone_server:{}'.format(instance["keystone_server_url"]),
+                        'project_id:1e6e233e637d4d55a50a62b63398ad15',
+                        'project_name:demo',
+                    ],
+                )
+                aggregator.assert_metric(
+                    key,
+                    tags=[]
+                    if 'openstack.neutron.agents.count'
+                    else agent_tags
+                    + [
+                        'domain_id:default',
+                        'keystone_server:{}'.format(instance["keystone_server_url"]),
+                        'project_id:6e39099cccde4f809b003d9e0dd09304',
+                        'project_name:admin',
+                    ],
+                )
+            elif is_mandatory(value):
+                not_found_metrics.append(key)
     assert not_found_metrics == [], f"No neutron agents metrics found: {not_found_metrics}"
