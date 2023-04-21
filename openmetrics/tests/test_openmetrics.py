@@ -29,9 +29,11 @@ instance_new_strict = {
 }
 
 
-@pytest.mark.usefixtures("poll_mock")
-def test_linkerd_v2_new(aggregator, dd_run_check):
+@pytest.mark.parametrize('poll_mock_fixture', ['poll_mock', 'strict_poll_mock'])
+def test_openmetrics(aggregator, dd_run_check, request, poll_mock_fixture):
     from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
+
+    request.getfixturevalue(poll_mock_fixture)
 
     check = OpenMetricsCheck('openmetrics', {}, [instance_new])
     scraper = OpenMetricsScraper(check, instance_new)
@@ -60,11 +62,14 @@ def test_linkerd_v2_new(aggregator, dd_run_check):
     aggregator.assert_all_metrics_covered()
 
     assert check.http.options['headers']['Accept'] == '*/*'
-    assert scraper.http.options['headers']['Accept'] == 'text/plain'
+    assert scraper.http.options['headers']['Accept'] == (
+        'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,'
+        'text/plain;version=0.0.4;q=0.5,*/*;q=0.1'
+    )
 
 
 @pytest.mark.usefixtures("strict_poll_mock")
-def test_linkerd_v2_new_strict(aggregator, dd_run_check, caplog):
+def test_openmetrics_strict(aggregator, dd_run_check, caplog):
     from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
 
     check = OpenMetricsCheck('openmetrics', {}, [instance_new_strict])
@@ -89,5 +94,7 @@ def test_linkerd_v2_new_strict(aggregator, dd_run_check, caplog):
     aggregator.assert_all_metrics_covered()
 
     assert check.http.options['headers']['Accept'] == '*/*'
-    assert scraper.http.options['headers']['Accept'] == 'application/openmetrics-text; version=0.0.1; charset=utf-8'
     assert caplog.text == ''
+    assert scraper.http.options['headers']['Accept'] == (
+        'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
+    )
