@@ -640,7 +640,7 @@ class OpenStackControllerCheck(AgentCheck):
                 # report status
                 self.gauge(
                     "openstack.octavia.loadbalancer.admin_state_up",
-                    value=loadbalancer_data.get("admin_state_up"),
+                    value=int(loadbalancer_data.get("admin_state_up")),
                     tags=all_tags,
                 )
 
@@ -738,7 +738,7 @@ class OpenStackControllerCheck(AgentCheck):
                                 # # report status
                                 self.gauge(
                                     "openstack.octavia.member.admin_state_up",
-                                    value=member_data.get("admin_state_up"),
+                                    value=int(member_data.get("admin_state_up")),
                                     tags=all_tags,
                                 )
 
@@ -762,7 +762,7 @@ class OpenStackControllerCheck(AgentCheck):
                         # report status
                         self.gauge(
                             'openstack.octavia.healthmonitor.admin_state_up',
-                            value=healthmonitor_data.get("admin_state_up"),
+                            value=int(healthmonitor_data.get("admin_state_up")),
                             tags=all_tags,
                         )
 
@@ -806,7 +806,7 @@ class OpenStackControllerCheck(AgentCheck):
                 # report status
                 self.gauge(
                     'openstack.octavia.pool.admin_state_up',
-                    value=pool_data.get("admin_state_up"),
+                    value=int(pool_data.get("admin_state_up")),
                     tags=all_tags,
                 )
 
