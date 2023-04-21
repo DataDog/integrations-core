@@ -13,7 +13,7 @@ from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.log import get_check_logger
 
 try:
-    from typing import Dict, List, Pattern
+    from typing import Dict, List, Pattern  # noqa: F401
 except ImportError:
     pass
 

@@ -211,7 +211,7 @@ class TrelloClient:
                         counts[team][self.progress_columns[id_list]] += 1
                     team_found = True
             if not team_found and len(labels) >= 1 and card['idList'] != self.RC_BUILDS_COLUMN:
-                label_names = list(map(lambda label: label['name'], labels))
+                label_names = [label['name'] for label in labels]
                 raise Exception(
                     f'{card["url"]}: Cannot find a team from the labels {label_names}. Was a label updated?'
                 )

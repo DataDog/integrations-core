@@ -168,7 +168,7 @@ class WindowsService(AgentCheck):
             wmi_compat = False
 
         service_filters = [ServiceFilter.from_config(item, wmi_compat=wmi_compat) for item in services]
-        services_unseen = set(f.name for f in service_filters if f.name is not None)
+        services_unseen = {f.name for f in service_filters if f.name is not None}
 
         try:
             scm_handle = win32service.OpenSCManager(None, None, win32service.SC_MANAGER_ENUMERATE_SERVICE)

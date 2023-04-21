@@ -12,9 +12,10 @@
     "title": "Container",
     "media": [],
     "classifier_tags": [
+      "Category::Containers",
+      "Category::Kubernetes",
       "Supported OS::Linux",
-      "Supported OS::Windows",
-      "Category::Containers"
+      "Supported OS::Windows"
     ]
   },
   "author": {

@@ -906,7 +906,7 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
 
 
 DEFAULT_PERFORMANCE_TABLE = "sys.dm_os_performance_counters"
-VALID_TABLES = set(cls.TABLE for cls in BaseSqlServerMetric.__subclasses__() if cls.CUSTOM_QUERIES_AVAILABLE)
+VALID_TABLES = {cls.TABLE for cls in BaseSqlServerMetric.__subclasses__() if cls.CUSTOM_QUERIES_AVAILABLE}
 TABLE_MAPPING = {
     cls.TABLE: (cls.DEFAULT_METRIC_TYPE, cls)
     for cls in BaseSqlServerMetric.__subclasses__()

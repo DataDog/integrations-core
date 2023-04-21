@@ -239,7 +239,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
     def _get_available_query_metrics_columns(self, cursor, all_expected_columns):
         cursor.execute("select top 0 * from sys.dm_exec_query_stats")
-        all_columns = set([i[0] for i in cursor.description])
+        all_columns = {i[0] for i in cursor.description}
         available_columns = [c for c in all_expected_columns if c in all_columns]
         missing_columns = set(all_expected_columns) - set(available_columns)
         if missing_columns:

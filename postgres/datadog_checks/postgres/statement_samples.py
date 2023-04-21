@@ -6,7 +6,7 @@ import copy
 import re
 import time
 from enum import Enum
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple  # noqa: F401
 
 import psycopg2
 from cachetools import TTLCache
@@ -202,6 +202,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._config = config
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
+        self.tags = None
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
@@ -324,7 +325,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     pg_stat_activity_view=self._config.pg_stat_activity_view
                 )
             )
-            all_columns = set([i[0] for i in cursor.description])
+            all_columns = {i[0] for i in cursor.description}
             available_columns = [c for c in all_expected_columns if c in all_columns]
             missing_columns = set(all_expected_columns) - set(available_columns)
             if missing_columns:
@@ -361,7 +362,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 insufficient_privilege_count,
-                tags=self._tags + ["error:insufficient-privilege"] + self._check._get_debug_tags(),
+                tags=self.tags + ["error:insufficient-privilege"] + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
             )
         return normalized_rows
@@ -415,18 +416,20 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._check.histogram(
             "dd.postgres.{}.time".format(method_name),
             (time.time() - start_time) * 1000,
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
         self._check.histogram(
             "dd.postgres.{}.rows".format(method_name),
             row_len,
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
 
     def run_job(self):
-        self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
+        # do not emit any dd.internal metrics for DBM specific check code
+        self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
+        self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
         self._collect_statement_samples()
         self._conn_pool.prune_connections()
 
@@ -449,37 +452,37 @@ class PostgresStatementSamples(DBMAsyncJob):
                 json.dumps(activity_event, default=default_json_event_encoding)
             )
             self._check.histogram(
-                "dd.postgres.collect_activity_snapshot.time", (time.time() - start_time) * 1000, tags=self._tags
+                "dd.postgres.collect_activity_snapshot.time", (time.time() - start_time) * 1000, tags=self.tags
             )
         elapsed_ms = (time.time() - start_time) * 1000
         self._check.histogram(
             "dd.postgres.collect_statement_samples.time",
             elapsed_ms,
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
         self._check.count(
             "dd.postgres.collect_statement_samples.events_submitted.count",
             submitted_count,
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.seen_samples_cache.len",
             len(self._seen_samples_ratelimiter),
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.explained_statements_cache.len",
             len(self._explained_statements_ratelimiter),
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.explain_errors_cache.len",
             len(self._explain_errors_cache),
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
 
@@ -718,10 +721,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             event = {
                 "host": self._check.resolved_hostname,
+                "dbm_type": "plan",
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(self._dbtags(row['datname'])),
                 "timestamp": time.time() * 1000,
+                "cloud_metadata": self._config.cloud_metadata,
                 "network": {
                     "client": {
                         "ip": row.get('client_addr', None),
@@ -782,7 +787,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 self._check.count(
                     "dd.postgres.statement_samples.error",
                     1,
-                    tags=self._tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
+                    tags=self.tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
                     hostname=self._check.resolved_hostname,
                 )
         return events
@@ -804,6 +809,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "collection_interval": self._activity_coll_interval,
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
+            "cloud_metadata": self._config.cloud_metadata,
             "postgres_activity": active_sessions,
             "postgres_connections": active_connections,
         }

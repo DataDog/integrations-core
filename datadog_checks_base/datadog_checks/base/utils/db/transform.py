@@ -6,10 +6,10 @@ from __future__ import division
 import re
 import time
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
-from datadog_checks.base.types import ServiceCheckStatus
-from datadog_checks.base.utils.db.types import Transformer, TransformerFactory
+from datadog_checks.base.types import ServiceCheckStatus  # noqa: F401
+from datadog_checks.base.utils.db.types import Transformer, TransformerFactory  # noqa: F401
 
 from ... import is_affirmative
 from ...constants import ServiceCheck

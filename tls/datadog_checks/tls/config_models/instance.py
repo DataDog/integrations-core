@@ -49,7 +49,7 @@ class InstanceConfig(BaseModel):
     server: str
     server_hostname: Optional[str]
     service: Optional[str]
-    start_tls: Optional[Literal['postgres']]
+    start_tls: Optional[Literal['postgres', 'mysql']]
     tags: Optional[Sequence[str]]
     timeout: Optional[int]
     tls_ca_cert: Optional[str]

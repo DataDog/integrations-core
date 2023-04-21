@@ -122,5 +122,10 @@ commit;
     aggregator.assert_metric(
         'postgresql.deadlocks.count',
         value=deadlocks_before + 1,
-        tags=pg_instance["tags"] + ["db:{}".format(DB_NAME), "port:{}".format(PORT)],
+        tags=pg_instance["tags"]
+        + [
+            "db:{}".format(DB_NAME),
+            "port:{}".format(PORT),
+            'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+        ],
     )

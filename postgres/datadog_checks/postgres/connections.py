@@ -40,7 +40,7 @@ class MultiDatabaseConnectionPool(object):
     def __init__(self, connect_fn):
         self._stats = self.Stats()
         self._mu = threading.Lock()
-        self._conns = dict()
+        self._conns = {}
 
         if hasattr(inspect, 'signature'):
             connect_sig = inspect.signature(connect_fn)

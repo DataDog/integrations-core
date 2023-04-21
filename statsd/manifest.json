@@ -12,11 +12,10 @@
     "title": "StatsD",
     "media": [],
     "classifier_tags": [
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Monitoring",
-      "Category::Log Collection"
+      "Supported OS::macOS"
     ]
   },
   "author": {

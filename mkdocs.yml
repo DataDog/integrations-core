@@ -22,15 +22,11 @@ theme:
   palette:
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: deep purple
-      accent: deep purple
       toggle:
         icon: material/weather-night
         name: Switch to light mode
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: deep purple
-      accent: deep purple
       toggle:
         icon: material/weather-sunny
         name: Switch to dark mode
@@ -68,7 +64,10 @@ nav:
     - Dashboards: guidelines/dashboards.md
     - Conventions: guidelines/conventions.md
   - Meta:
-    - CI: meta/ci.md
+    - CI:
+      - meta/ci/testing.md
+      - meta/ci/validation.md
+      - meta/ci/labels.md
     - CD: meta/cd.md
     - Docs: meta/docs.md
     - Config specs: meta/config-specs.md

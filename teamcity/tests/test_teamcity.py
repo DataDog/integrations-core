@@ -72,15 +72,15 @@ def test_config(dd_run_check, extra_config, expected_http_kwargs):
     with patch('datadog_checks.base.utils.http.requests.get') as r:
         dd_run_check(check)
 
-        http_wargs = dict(
-            auth=ANY,
-            cert=ANY,
-            headers=ANY,
-            proxies=ANY,
-            timeout=ANY,
-            verify=ANY,
-            allow_redirects=ANY,
-        )
+        http_wargs = {
+            'auth': ANY,
+            'cert': ANY,
+            'headers': ANY,
+            'proxies': ANY,
+            'timeout': ANY,
+            'verify': ANY,
+            'allow_redirects': ANY,
+        }
         http_wargs.update(expected_http_kwargs)
 
         r.assert_called_with(ANY, **http_wargs)

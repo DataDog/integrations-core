@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import TYPE_CHECKING
 
-from datadog_checks.ibm_mq.config import IBMMQConfig
+from datadog_checks.ibm_mq.config import IBMMQConfig  # noqa: F401
 
 try:
     import pymqi
@@ -11,7 +11,7 @@ except ImportError:
     pymqi = None
 
 if TYPE_CHECKING:
-    from datadog_checks.base.log import CheckLoggingAdapter
+    from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 
 
 def get_queue_manager_connection(config, logger):

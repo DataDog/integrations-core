@@ -62,6 +62,10 @@ def instance_pid(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_pid_cache_duration(field, value):
+    return 120
+
+
 def instance_pid_file(field, value):
     return get_default_field_value(field, value)
 

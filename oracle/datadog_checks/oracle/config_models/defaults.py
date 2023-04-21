@@ -18,6 +18,10 @@ def shared_service(field, value):
     return get_default_field_value(field, value)
 
 
+def shared_use_instant_client(field, value):
+    return False
+
+
 def instance_custom_queries(field, value):
     return get_default_field_value(field, value)
 

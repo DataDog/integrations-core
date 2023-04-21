@@ -1,5 +1,9 @@
 # CHANGELOG - Silk
 
+## 1.2.2 / 2023-04-14
+
+* [Fixed] Fix duplicate events bug. See [#14020](https://github.com/DataDog/integrations-core/pull/14020).
+
 ## 1.2.1 / 2023-03-03
 
 * [Fixed] Improve Silk service check tagging. See [#13816](https://github.com/DataDog/integrations-core/pull/13816).

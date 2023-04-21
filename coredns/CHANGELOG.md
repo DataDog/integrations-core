@@ -1,5 +1,9 @@
 # CHANGELOG - CoreDNS
 
+## 2.3.1 / 2023-04-14
+
+* [Fixed] Fix the url descriptions in the config file. See [#14280](https://github.com/DataDog/integrations-core/pull/14280).
+
 ## 2.3.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).

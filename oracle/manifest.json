@@ -12,10 +12,12 @@
     "title": "Oracle",
     "media": [],
     "classifier_tags": [
+      "Category::Data Store",
+      "Category::Network",
+      "Category::Oracle",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store"
+      "Supported OS::macOS"
     ]
   },
   "author": {

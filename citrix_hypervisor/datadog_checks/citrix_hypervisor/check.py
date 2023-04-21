@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict, List
+from typing import Any, Dict, List  # noqa: F401
 
 import yaml
 from six.moves import xmlrpc_client as xmlrpclib

@@ -197,7 +197,7 @@ class SqlserverActivity(DBMAsyncJob):
 
     def _get_available_requests_columns(self, cursor, all_expected_columns):
         cursor.execute("select TOP 0 * from sys.dm_exec_requests")
-        all_columns = set([i[0] for i in cursor.description])
+        all_columns = {i[0] for i in cursor.description}
         available_columns = [c for c in all_expected_columns if c in all_columns]
         missing_columns = set(all_expected_columns) - set(available_columns)
         if missing_columns:

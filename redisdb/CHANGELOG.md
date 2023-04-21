@@ -1,5 +1,9 @@
 # CHANGELOG - redisdb
 
+## 4.6.0 / 2023-03-31
+
+* [Added] Update redis to 4.5.4. See [#14270](https://github.com/DataDog/integrations-core/pull/14270).
+
 ## 4.5.3 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Stop using deprecated `distutils.version` classes. See [#13408](https://github.com/DataDog/integrations-core/pull/13408).

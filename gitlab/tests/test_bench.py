@@ -15,8 +15,9 @@ def test_legacy_run(benchmark, dd_run_check, gitlab_check, legacy_config):
     benchmark(check.check, None)
 
 
-def test_run(benchmark, dd_run_check, gitlab_check, config):
-    check = gitlab_check(config)
+@pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
+def test_run(benchmark, dd_run_check, gitlab_check, get_config, use_openmetrics):
+    check = gitlab_check(get_config(use_openmetrics))
 
     # Run once to get any initialization out of the way.
     dd_run_check(check)
