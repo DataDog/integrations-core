@@ -46,7 +46,7 @@ To create an Agent-based integration, [click here][2].
 
 {{< partial name="whats-next/whats-next.html" >}}
 
-[1]: API Based link
-[2]: Agent based link 
-[3]: Integrations page link
-[4]: Marketplace link
+[1]: https://docs.datadoghq.com/developers/integrations/api_integration/
+[2]: https://docs.datadoghq.com/developers/integrations/agent_integration/
+[3]: https://docs.datadoghq.com/integrations/
+[4]: https://docs.datadoghq.com/developers/integrations/marketplace_offering/

@@ -426,7 +426,7 @@ sudo datadog-agent integration install -w /path/to/wheel.whl
 
 After you've created your Agent-based integration, populate the remainder of the required assets that will appear throughout your integration tile by following the instructions in [Create a Tile][20].
 
-Finally, open a pull request with your code on [integrations-extras] or [marketplace]. After you've created your pull request, automatic checks run to verify that your pull request is in good shape and contains all the required content to be updated.
+Finally, open a pull request with your code on the [`integrations-extras`][21] or [`marketplace`][22] repository. After you've created your pull request, automatic checks run to verify that your pull request is in good shape and contains all the required content to be updated.
 
 ## Further Reading
 
@@ -454,4 +454,6 @@ Additional helpful documentation, links, and articles:
 [17]: https://docs.datadoghq.com/agent/
 [18]: https://www.datadoghq.com/blog/programmatically-manage-your-datadog-integrations/
 [19]: https://desktop.github.com/
-[20]: Create a tile 
+[20]: https://docs.datadoghq.com/developers/integrations/create_a_tile
+[21]: https://github.com/Datadog/integrations-extras
+[22]: https://github.com/Datadog/marketplace

@@ -77,4 +77,4 @@ Additional helpful documentation, links, and articles:
 [21]: https://github.com/DataDog/integrations-extras/
 [22]: https://app.datadoghq.com/integrations
 [23]: /developers/integrations/python
-[24]: Create a tile link
+[24]: https://docs.datadoghq.com/developers/integrations/create_a_tile

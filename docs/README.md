@@ -21,6 +21,6 @@ Going forward, you, as the author of the code, are the active maintainer of the 
 All of the details-including prerequisites, code examples, and more-are in the [Create a new integration][2] documentation.
 
 [1]: https://docs.datadoghq.com/developers/write_agent_check/
-[2]: https://docs.datadoghq.com/developers/integrations/new_check_howto/
+[2]: https://docs.datadoghq.com/developers/integrations/agent_integration/
 [3]: https://github.com/DataDog/integrations-extras
 [4]: https://docs.datadoghq.com/developers/office_hours/

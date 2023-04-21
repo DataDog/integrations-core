@@ -195,7 +195,7 @@ ddev validate all <INTEGRATION_NAME>
 
 ## Open a pull request
 
-Push up your feature branch and open a pull request that contains your integration tile's asset files (including images) in the [`marketplace`][18] or [`integrations-extras`][number] repository. After you've created your pull request, automatic checks will run to verify that your pull request is in good shape and contains all the required content to be updated.
+Push up your feature branch and open a pull request that contains your integration tile's asset files (including images) in the [`marketplace`][18] or [`integrations-extras`][26] repository. After you've created your pull request, automatic checks will run to verify that your pull request is in good shape and contains all the required content to be updated.
 
 ## Review process
 
@@ -254,4 +254,4 @@ To rebase and push changes:
 [23]: https://datadoghq.com/blog/
 [24]: https://github.com/DataDog/integrations-extras/tree/master/vantage
 [25]: https://docs.datadoghq.com/developers/integrations/python
-[26]: Integrations page
+[26]: https://github.com/Datadog/integrations-extras
