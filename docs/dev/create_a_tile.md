@@ -22,7 +22,7 @@ further_reading:
 
 ## Overview
 
-This page walks you through how to develop an offering on the Datadog Marketplace. If you have any questions, reach out to <a href="mailto:marketplace@datadoghq.com">marketplace@datadoghq.com</a>.
+This page walks you through how to develop an offering that will be displayed in a tile on the Datadog Integrations page or on the Datadog Marketplace. For all offerings that do not use the Datadog Agent, including API-based integrations, professional services listings, software licenses, and Datadog Apps, a tile-only listing is required. This means that there is no Agent code attached to the tile, but it serves as an informative point of entry where customers can learn more about your offering, learn how to set it up, as well as install or purchase your offering to unlock out-of-the-box dashboards and other assets.
 
 {{% tab "Marketplace Offerings" %}}
 ## Set up a directory and clone the Marketplace repository
@@ -218,13 +218,13 @@ Updating the forked repository via the Web App
 
 To rebase and push changes:
 
-git checkout <your working branch>
+1. git checkout <your working branch>
 
-git rebase master
+2. git rebase master
 
-   If there are any merge conflicts, you'd resolve them here
+-  If there are any merge conflicts, you'd resolve them here
 
-git push origin <working branch> -f
+3. git push origin <working branch> -f
 
 ## Further Reading
 

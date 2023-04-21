@@ -28,7 +28,7 @@ The [Datadog Marketplace][3] is a commercial platform for Technology Partners to
 API-based integrations enrich a customer's Datadog account by submitting data from your platform via the Datadog API. Customers authorize API integrations through OAuth, and partners write and host their own code that make up the integration. API integrations work well for partners building a connector between Datadog and another SaaS platform.
 
 [Agent-based Integration][2]
-Agent-based integrations are a full data integration that includes code and uses the Datadog Agent to collect data. Agent integrations are best suited for general use-cases such as application frameworks, open source projects, or commonly used software. Writing an integration requires you to publish and deploy your solution as a Python wheel (.whl)
+Agent-based integrations are a full data integration that includes code and uses the Datadog Agent to collect data. Agent integrations are best suited for general use-cases such as application frameworks, open source projects, or commonly used software. Writing an integration requires you to publish and deploy your solution as a Python wheel (.whl).
 
 ## Why create an integration?
 

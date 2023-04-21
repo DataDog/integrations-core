@@ -19,7 +19,7 @@ API integrations send the following types of data to Datadog:
 - [Incidents][7]
 - [Security Events][8]
 
-This page provides instructions for creating an API integration.  Since API integrations do not use the Datadog Agent to collect data, you need to create an informational tile-only listing to display your offering on the Integrations page once your development work is complete.
+This page provides instructions for creating an API integration. Since API integrations do not use the Datadog Agent to collect data, you need to create an informational tile-only listing to display your offering on the Integrations page once your development work is complete.
 ## Setup
 
 ### Prerequisites
