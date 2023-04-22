@@ -1,0 +1,17 @@
+{
+   "hits":[
+      {
+         "event_id":1,
+         "id":1,
+         "labels":"REPLICATION, CONFIGURE",
+         "level":"INFO",
+         "message":"Event 1",
+         "name":"START_REPLICATION",
+         "timestamp":1326412800.725384,
+         "user":"Internal"
+      }
+   ],
+   "limit":100,
+   "offset":0,
+   "total":1
+}

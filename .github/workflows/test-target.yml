@@ -86,7 +86,6 @@ jobs:
     runs-on: ${{ fromJson(inputs.runner) }}
 
     env:
-      FORCE_COLOR: "1"
       PYTHON_VERSION: "${{ inputs.python-version || '3.8' }}"
       SKIP_ENV_NAME: "${{ (inputs.test-py2 && !inputs.test-py3) && 'py3.*' || (!inputs.test-py2 && inputs.test-py3) && 'py2.*' || '' }}"
       # Windows E2E requires Windows containers

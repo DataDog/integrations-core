@@ -25,7 +25,6 @@ class SharedConfig(BaseModel):
 
     kafka_timeout: Optional[int]
     service: Optional[str]
-    zk_timeout: Optional[int]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

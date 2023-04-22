@@ -34,25 +34,12 @@ files:
         openmetrics_endpoint.enabled: true
         openmetrics_endpoint.display_priority: 4
         openmetrics_endpoint.value.example: http://<GITLAB_URL>/-/metrics
-        openmetrics_endpoint.description: |
-          To enable GitLab metrics using OpenMetricsBaseCheckV2 you must specify the 
-          `openmetrics_endpoint` option.
-
-          Either `prometheus_url` or `openmetrics_endpoint` must be specified.
-          See documentation: https://docs.datadoghq.com/integrations/gitlab
+        openmetrics_endpoint.description: The URL where GitLab exposes Prometheus metrics.
         tags.display_priority: 1
     - template: instances/openmetrics_legacy_base
       hidden: true
       overrides:
         prometheus_url.required: false
-        prometheus_url.hidden: false
-        prometheus_url.display_priority: 3
-        prometheus_url.value.example: http://<GITLAB_URL>/-/metrics
-        prometheus_url.description: |
-          To enable GitLab metrics using the legacy OpenMetricsBaseCheckV1 you must specify the `prometheus_url` option.
-
-          Either `prometheus_url` or `openmetrics_endpoint` must be specified.
-          See documentation: https://docs.datadoghq.com/integrations/gitlab
         health_service_check.value.example: false
         health_service_check.value.default: false
   - template: logs
