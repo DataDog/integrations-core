@@ -4,7 +4,6 @@
 import fnmatch
 import inspect
 import re
-from collections import defaultdict
 from copy import copy, deepcopy
 from itertools import chain
 from math import isinf, isnan
@@ -218,20 +217,13 @@ class OpenMetricsScraper:
 
         self.http = RequestsWrapper(config, self.check.init_config, self.check.HTTP_CONFIG_REMAPPER, self.check.log)
 
-        # Configure dynamic parser selection
         self._content_type = ''
-        # Setting `use_latest_spec` forces the use of OpenMetrics format, otherwise
-        # the format will be chosen based on the media type specified in the response's content-header.
+        self._use_latest_spec = is_affirmative(config.get('use_latest_spec', False))
         # Accept headers are taken from:
         # https://github.com/prometheus/prometheus/blob/v2.43.0/scrape/scrape.go#L787
-        if is_affirmative(config.get('use_latest_spec', False)):
-            self._parsers = defaultdict(lambda: parse_openmetrics)
+        if self._use_latest_spec:
             accept_header = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
         else:
-            # This parser selection is based on what Prometheus does:
-            # https://github.com/prometheus/prometheus/blob/v2.43.0/model/textparse/interface.go#L83-L90
-            self._parsers = defaultdict(lambda: parse_prometheus)
-            self._parsers['application/openmetrics-text'] = parse_openmetrics
             accept_header = (
                 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,'
                 'text/plain;version=0.0.4;q=0.5,*/*;q=0.1'
@@ -308,7 +300,15 @@ class OpenMetricsScraper:
     @property
     def parse_metric_families(self):
         media_type = self._content_type.split(';')[0]
-        return self._parsers[media_type]
+        # Setting `use_latest_spec` forces the use of the OpenMetrics format, otherwise
+        # the format will be chosen based on the media type specified in the response's content-header.
+        # The selection is based on what Prometheus does:
+        # https://github.com/prometheus/prometheus/blob/v2.43.0/model/textparse/interface.go#L83-L90
+        return (
+            parse_openmetrics
+            if self._use_latest_spec or media_type == 'application/openmetrics-text'
+            else parse_prometheus
+        )
 
     def generate_sample_data(self, metric):
         """
