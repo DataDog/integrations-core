@@ -6,6 +6,7 @@ import os
 
 import pytest
 from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
+from prometheus_client.exposition import CONTENT_TYPE_LATEST as PROMETHEUS_CONTENT_TYPE
 from prometheus_client.openmetrics.exposition import CONTENT_TYPE_LATEST as OPENMETRICS_CONTENT_TYPE
 from prometheus_client.openmetrics.exposition import generate_latest as generate_latest_strict
 
@@ -38,7 +39,11 @@ def poll_mock(mock_http_response):
     g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
     g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
 
-    mock_http_response(ensure_unicode(generate_latest(registry)), normalize_content=False)
+    mock_http_response(
+        ensure_unicode(generate_latest(registry)),
+        normalize_content=False,
+        headers={'Content-Type': PROMETHEUS_CONTENT_TYPE},
+    )
 
 
 @pytest.fixture
