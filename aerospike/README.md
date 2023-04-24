@@ -9,7 +9,7 @@ Get metrics from Aerospike Database in real time to:
 
 ## Setup
 
-NOTE: The current aerospike integration is only compatible with Aerospike server v4.9 or above, see Aerospike's [Python Client Library Release Notes][1] for more info.
+NOTE: The current aerospike integration is only compatible with Aerospike server v4.9 or above, see Aerospike's [Python Client Library Release Notes]1] for more info.
 If you use an older Aerospike server version, it is still possible to monitor it with version 7.29.0 or lower of the Datadog Agent.
 
 ### Installation

@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any
 
 from datadog_checks.base import AgentCheck
 
@@ -35,7 +34,6 @@ class StrimziCheck(AgentCheck):
         # self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):
-        # type: (Any) -> None
         # The following are useful bits of code to help new users get started.
 
         # Perform HTTP Requests with our HTTP wrapper.
