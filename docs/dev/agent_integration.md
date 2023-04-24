@@ -24,12 +24,13 @@ The required Datadog Agent integration development tools include:
 
 You can list an Agent integration for a price in the Datadog Marketplace, or list it out-of-the-box on the Integrations page.
 
-{{% tab "Marketplace integrations" %}}
+{{< tabs >}}
+{{% tab "Marketplace Integrations" %}}
 ## Set up a directory and clone the Marketplace repository
 
 Set up a directory:
 
-1. Request access to the [Marketplace repository][18] by following the instructions in the [Marketplace documentation][19].
+1. Request access to the [Marketplace repository][101] by following the instructions in the [Marketplace documentation][102].
 2. Create a `dd` directory:
    {{< code-block lang="shell" >}}mkdir $HOME/dd{{< /code-block >}}
 
@@ -37,11 +38,11 @@ Set up a directory:
 3. Once you have been granted access to the Marketplace repository, create the `dd` directory and clone the `marketplace` repo:
    {{< code-block lang="shell" >}}git clone git@github.com:DataDog/marketplace.git{{< /code-block >}}
 4. Create a feature branch to work in.
-    git switch -c <YOUR INTEGRATION NAME> origin/master
+    {{< code-block lang="shell" >}}git switch -c <YOUR INTEGRATION NAME> origin/master{{< /code-block >}}
 
 ## Install and configure the Datadog development toolkit
 
-The Agent Integration Developer Tool allows you to create scaffolding when you are developing an integration by generating a skeleton of your integration tile's assets and metadata. For instructions on installing the tool, see [Install the Datadog Agent Integration Developer Tool][25].
+The Agent Integration Developer Tool allows you to create scaffolding when you are developing an integration by generating a skeleton of your integration tile's assets and metadata. For instructions on installing the tool, see [Install the Datadog Agent Integration Developer Tool][103].
 
 After you install the Developer tool, configure it for the `marketplace` repo:
 
@@ -59,9 +60,14 @@ ddev config set marketplace <PATH/TO/MARKETPLACE>
 ddev config set repo marketplace
 {{< /code-block >}}
 
+[101]: https://github.com/Datadog/marketplace
+[102]: https://docs.datadoghq.com/developers/integrations/marketplace_offering
+[103]: https://docs.datadoghq.com/developers/integrations/python
+
 {{% /tab %}}
 
-{{% tab "Out of the box Integrations" %}}
+{{% tab "Out-of-the-box Integrations" %}}
+
 ## Set up your integrations-extra repo
 
 Follow these instructions to set up your repo for integration development:
@@ -75,7 +81,7 @@ Follow these instructions to set up your repo for integration development:
    mkdir $HOME/dd && cd $HOME/dd
    ```
 
-1. Fork the [`integrations-extras` repo][6].
+1. Fork the [`integrations-extras` repo][101].
 
 1. Clone your fork into the `dd` directory:
    ```
@@ -89,7 +95,7 @@ Follow these instructions to set up your repo for integration development:
 
 ## Configure the developer tool
 
-Assuming you've installed [the Agent Integration Developer Tool][3], configure the tool for the `integrations-extras` repo:
+Assuming you've installed [the Agent Integration Developer Tool][102], configure the tool for the `integrations-extras` repo:
 
 1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
    ```
@@ -100,7 +106,12 @@ Assuming you've installed [the Agent Integration Developer Tool][3], configure t
    ```
    ddev config set repo extras
    ```
+
+[101]: https://github.com/Datadog/integrations-extras
+[102]: https://docs.datadoghq.com/developers/integrations/python
+
 {{% /tab %}}
+{{< /tabs >}}
 
 ## Create your integration
 

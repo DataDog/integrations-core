@@ -24,12 +24,14 @@ further_reading:
 
 This page walks you through how to develop an offering that will be displayed in a tile on the Datadog Integrations page or on the Datadog Marketplace. For all offerings that do not use the Datadog Agent, including API-based integrations, professional services listings, software licenses, and custom dashboard widgets, a tile-only listing is required. This means that there is no Agent code attached to the tile, but it serves as an informative point of entry where customers can learn more about your offering, learn how to set it up, as well as install or purchase your offering to unlock out-of-the-box dashboards and other assets.
 
+{{< tabs >}}
 {{% tab "Marketplace Offerings" %}}
+
 ## Set up a directory and clone the Marketplace repository
 
 Set up a directory:
 
-1. Request access to the [Marketplace repository][18] by following the instructions in the [Marketplace documentation][19].
+1. Request access to the [Marketplace repository][101] by following the instructions in the [Marketplace documentation][102].
 2. Create a `dd` directory:
    {{< code-block lang="shell" >}}mkdir $HOME/dd{{< /code-block >}}
 
@@ -40,7 +42,7 @@ Set up a directory:
 
 ## Install and configure the Datadog development toolkit
 
-The Agent Integration Developer Tool allows you to create scaffolding when you are developing an integration by generating a skeleton of your integration tile's assets and metadata. For instructions on installing the tool, see [Install the Datadog Agent Integration Developer Tool][25].
+The Agent Integration Developer Tool allows you to create scaffolding when you are developing an integration by generating a skeleton of your integration tile's assets and metadata. For instructions on installing the tool, see [Install the Datadog Agent Integration Developer Tool][103].
 
 After you install the Developer tool, configure it for the `marketplace` repo:
 
@@ -69,6 +71,10 @@ To create the informational tile-only listing's scaffolding:
 2. Run the `ddev` command with the `-t tile` option:
    {{< code-block lang="shell" >}}ddev create -t tile "<Offering Name>"{{< /code-block >}}
 
+[101]: https://github.com/Datadog/marketplace
+[102]: https://docs.datadoghq.com/developers/integrations/marketplace_offering
+[103]: https://docs.datadoghq.com/developers/integrations/python
+
 {{% /tab %}}
 
 {{% tab "Out-of-the-box Offerings" %}}
@@ -88,7 +94,7 @@ To create the informational tile-only listing's scaffolding:
 
 ## Install and configure the Datadog development toolkit
 
-The Agent Integration Developer Tool allows you to create scaffolding when you are developing an integration by generating a skeleton of your integration tile's assets and metadata. For instructions on installing the tool, see [Install the Datadog Agent Integration Developer Tool][23].
+The Agent Integration Developer Tool allows you to create scaffolding when you are developing an integration by generating a skeleton of your integration tile's assets and metadata. For instructions on installing the tool, see [Install the Datadog Agent Integration Developer Tool][101].
 
 After you install the Developer tool, configure it for the `integrations-extras` repo:
 
@@ -108,15 +114,18 @@ ddev config set repo extras
 
 ## Populate the integration tile scaffolding
 
-For Datadog API integrations and custom dashboard widgets that will be available out-of-the-box on the [Integrations page][26], use the Datadog Development Toolkit to create scaffolding for an informational tile-only listing.
+For Datadog API integrations and custom dashboard widgets that will be available out-of-the-box on the [Integrations page][102], use the Datadog Development Toolkit to create scaffolding for an informational tile-only listing.
 
 1. Make sure you're inside the `integrations-extras` directory:
    {{< code-block lang="shell" >}}cd $HOME/dd/integrations-extras{{< /code-block >}}
 2. Run the `ddev` command with the `-t tile` option
    {{< code-block lang="shell" >}}ddev create -t tile "<Offering Name>"{{< /code-block >}}
 
+[101]: https://docs.datadoghq.com/developers/integrations/python
+[102]: https://github.com/Datadog/integrations-extras
 
 {{% /tab %}}
+{{< /tabs >}}
 
 ## Complete the necessary integration asset files
 
@@ -205,7 +214,7 @@ Once you have addressed the feedback and re-requested reviews, these reviewers a
 
 ### How to resolve common validation errors 
 
-Out-of-the-box integrations wtihin the integrations-extras repository can run into validation errors when the forked repository is out of date with the origin. Follow the steps below to resolve the validation errors by rebasing. 
+Out-of-the-box integrations in the `integrations-extras` repository can run into validation errors when the forked repository is out of date with the origin. Follow the steps below to resolve the validation errors by rebasing. 
 
 Updating the forked repository via the Web App
 
