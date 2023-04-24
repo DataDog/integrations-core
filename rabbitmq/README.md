@@ -171,7 +171,7 @@ Additional helpful documentation, links, and articles:
 
 When migrating from the *Management Plugin* to the *Prometheus Plugin* check the metrics that you rely on most. Some may have new names, some may not be available anymore.
 
-Look up your metrics in [this table](23). If a metric's description contains an `[OpenMetricsV2]` tag, then it is available in the *Prometheus Plugin*.
+Look up your metrics in [this table][23]. If a metric's description contains an `[OpenMetricsV2]` tag, then it is available in the *Prometheus Plugin*.
 
 
 ### FAQ
