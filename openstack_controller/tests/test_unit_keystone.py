@@ -64,3 +64,9 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
             'keystone_server:{}'.format(instance["keystone_server_url"]),
         ],
     )
+    aggregator.assert_metric(
+        'openstack.keystone.response_time',
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+        ],
+    )
