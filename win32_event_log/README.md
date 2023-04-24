@@ -38,7 +38,9 @@ Depending on the collection method, the channel name can be used for the followi
 
 To find the channel name for an Event Log in the Windows Event Viewer, open the Event Log Properties window and refer to the `Full Name` field. In the following example, the channel name is `Microsoft-Windows-Windows Defender/Operational`.
 
-{{< img alt="Windows Defender Operational Event Log properties" src="https://raw.githubusercontent.com/DataDog/integrations-core/branden.clark/win32_event_log_screenshot/win32_event_log/images/windows-defender-operational-event-log-properties.png" >}}
+<p align="center">
+<img alt="Windows Defender Operational Event Log properties" src="https://raw.githubusercontent.com/DataDog/integrations-core/master/win32_event_log/images/windows-defender-operational-event-log-properties.png"/>
+</p>
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "PowerShell" xxx -->
