@@ -219,20 +219,19 @@ class OpenMetricsScraper:
         self.http = RequestsWrapper(config, self.check.init_config, self.check.HTTP_CONFIG_REMAPPER, self.check.log)
 
         # Configure dynamic parser selection
+        self._content_type = ''
         # Setting `use_latest_spec` forces the use of OpenMetrics format, otherwise
         # the format will be chosen based on the media type specified in the response's content-header.
         # Accept headers are taken from:
         # https://github.com/prometheus/prometheus/blob/v2.43.0/scrape/scrape.go#L787
         if is_affirmative(config.get('use_latest_spec', False)):
             self._parsers = defaultdict(lambda: parse_openmetrics)
-            self.parse_metric_families = parse_openmetrics
             accept_header = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
         else:
             # This parser selection is based on what Prometheus does:
             # https://github.com/prometheus/prometheus/blob/v2.43.0/model/textparse/interface.go#L83-L90
             self._parsers = defaultdict(lambda: parse_prometheus)
             self._parsers['application/openmetrics-text'] = parse_openmetrics
-            self.parse_metric_families = parse_prometheus
             accept_header = (
                 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,'
                 'text/plain;version=0.0.4;q=0.5,*/*;q=0.1'
@@ -306,6 +305,11 @@ class OpenMetricsScraper:
 
             yield metric
 
+    @property
+    def parse_metric_families(self):
+        media_type = self._content_type.split(';')[0]
+        return self._parsers[media_type]
+
     def generate_sample_data(self, metric):
         """
         Yield a sample of processed data.
@@ -358,7 +362,8 @@ class OpenMetricsScraper:
         """
 
         with self.get_connection() as connection:
-            self._select_parser(connection.headers.get('Content-Type', ''))
+            # Media type will be used to select parser dynamically
+            self._content_type = connection.headers.get('Content-Type', '')
             for line in connection.iter_lines(decode_unicode=True):
                 yield line
 
@@ -450,10 +455,6 @@ class OpenMetricsScraper:
         attribute = getattr(self.check, name)
         setattr(self, name, attribute)
         return attribute
-
-    def _select_parser(self, content_type):
-        media_type = content_type.split(';')[0]
-        self.parse_metric_families = self._parsers[media_type]
 
 
 class OpenMetricsCompatibilityScraper(OpenMetricsScraper):
