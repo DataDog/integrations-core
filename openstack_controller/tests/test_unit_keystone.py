@@ -316,3 +316,40 @@ def test_users_metrics(aggregator, dd_run_check, instance, monkeypatch):
             'user_name:demo_reader',
         ],
     )
+
+
+def test_groups_metrics(aggregator, dd_run_check, instance, monkeypatch):
+    http = MockHttp("agent-integrations-openstack-default")
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.keystone.groups.count',
+        value=2,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.groups.users',
+        value=1,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+            'group_id:89b36a4c32c44b0ea8856b6357f101ea',
+            'group_name:admins',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.groups.users',
+        value=0,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+            'group_id:9acda6caf16e4828935f4f681ee8b3e5',
+            'group_name:nonadmins',
+        ],
+    )
