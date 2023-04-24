@@ -882,6 +882,5 @@
     }],
     "layout_type": "ordered",
     "notify_list": [],
-    "reflow_type": "fixed",
-    "id": "tvp-ixr-7ua"
+    "reflow_type": "fixed"
 }
