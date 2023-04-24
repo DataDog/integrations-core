@@ -173,6 +173,8 @@ When migrating from the *Management Plugin* to the *Prometheus Plugin* check the
 
 Look up your metrics in [this table][23]. If a metric's description contains an `[OpenMetricsV2]` tag, then it is available in the *Prometheus Plugin*.
 
+Metrics only available in the *Management Plugin* have no tags in their descriptions.
+
 
 ### FAQ
 
