@@ -26,7 +26,25 @@ Both methods are configured in `win32_event_log.d/conf.yaml` in the `conf.d/` fo
 
 #### List Windows Event channels
 
-First, identify the Windows Event Log channels you want to monitor. To see a list of channels, run the following command in PowerShell:
+First, identify the Windows Event Log channels you want to monitor.
+
+Depending on collection method, the channel name can be used for the following configuration parameters:
+- Datadog Logs: `channel_path`
+- Datadog Events: `path`
+- Datadog Events (legacy): `log_file`
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Event Viewer" xxx -->
+
+To find the channel name for an Event Log in Windows Event Viewer, open the Event Log Properties window and refer to the `Full Name` field. In the following example, the channel name is `Microsoft-Windows-Windows Defender/Operational`.
+
+<p align="center">
+<img alt="Windows Defender Operational Event Log properties" src="https://raw.githubusercontent.com/DataDog/integrations-core/master/win32_event_log/images/windows-defender-operational-event-log-properties.png"/>
+</p>
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "PowerShell" xxx -->
+To see a list of channels, run the following command in PowerShell:
 
 ```powershell
 Get-WinEvent -ListLog *
@@ -48,10 +66,8 @@ Circular            5242880        2932 <CHANNEL_2>
 
 The value under the column `LogName` is the name of the channel. In the above example, the channel name is `Security`.
 
-Depending on collection method, the channel name can be used for the following configuration parameters:
-- `log_file`
-- `path`
-- `channel_path`
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Events" xxx -->
@@ -67,11 +83,6 @@ This example shows entries for the `Security` and `<CHANNEL_2>` channels:
 ```yaml
 init_config:
 instances:
-  - # WMI - Legacy mode (default)
-    legacy_mode: true
-    log_file:
-      - Security
-
   - # Event Log API (better performance)
     path: Security
     legacy_mode: false
@@ -80,6 +91,11 @@ instances:
   - path: "<CHANNEL_2>" 
     legacy_mode: false
     filters: {}
+
+  - # WMI - Legacy mode (default)
+    legacy_mode: true
+    log_file:
+      - Security
 ```
 
 <!-- xxz tab xxx -->
@@ -145,6 +161,13 @@ Configure one or more filters for the event log. A filter allows you to choose w
   Double-check your filters' values with <code>Get-WmiObject</code> if the integration doesn't capture the events you set up.
   </div>
 
+  Example filters:
+
+  - `path`: `Application`, `System`, `Setup`, `Security`
+  - `type`: `Critical`, `Error`, `Warning`, `Information`, `Success Audit`, `Failure Audit`
+  - `source`: Any available source name
+  - `id`: event_id: Windows EventLog ID
+
   Example legacy mode filters:
 
   - `log_file`: `Application`, `System`, `Setup`, `Security`
@@ -152,16 +175,27 @@ Configure one or more filters for the event log. A filter allows you to choose w
   - `source_name`: Any available source name
   - `event_id`: Windows EventLog ID
 
-  Example non-legacy mode filters:
-
-  - `path`: `Application`, `System`, `Setup`, `Security`
-  - `type`: `Critical`, `Error`, `Warning`, `Information`, `Success Audit`, `Failure Audit`
-  - `source`: Any available source name
-  - `id`: event_id: Windows EventLog ID
-
   See the [sample win32_event_log.d/conf.yaml][3] for all available filter options for respective modes.
 
   Some example filters:
+
+  ```yaml
+  instances:
+    - legacy_mode: false
+      path: System
+      filters:
+        source:
+        - Microsoft-Windows-Ntfs
+        - Service Control Manager
+        type:
+        - Error
+        - Warning
+        - Information
+        - Success Audit
+        - Failure Audit
+        id:
+        - 7036
+  ```
 
   ```yaml
   instances:
@@ -185,25 +219,6 @@ Configure one or more filters for the event log. A filter allows you to choose w
         - Error
       log_file:
         - System
-  ```
-
-  ```yaml
-  instances:
-    # NON-LEGACY MODE
-    - legacy_mode: false
-      path: System
-      filters:
-        source:
-        - Microsoft-Windows-Ntfs
-        - Service Control Manager
-        type:
-        - Error
-        - Warning
-        - Information
-        - Success Audit
-        - Failure Audit
-        id:
-        - 7036
   ```
 
 <!-- xxz tab xxx -->
