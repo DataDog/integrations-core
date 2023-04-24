@@ -26,7 +26,7 @@ def dd_environment():
 
 
 @pytest.fixture
-def poll_mock(mock_http_response):
+def example_metrics_registry():
     registry = CollectorRegistry()
     g1 = Gauge('metric1', 'processor usage', ['matched_label', 'node', 'flavor'], registry=registry)
     g1.labels(matched_label="foobar", node="host1", flavor="test").set(99.9)
@@ -38,30 +38,32 @@ def poll_mock(mock_http_response):
     c2.labels(node="host2").inc(42)
     g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
     g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
+    return registry
 
+
+@pytest.fixture
+def prometheus_payload(example_metrics_registry):
+    return ensure_unicode(generate_latest(example_metrics_registry))
+
+
+@pytest.fixture
+def openmetrics_payload(example_metrics_registry):
+    return ensure_unicode(generate_latest_strict(example_metrics_registry))
+
+
+@pytest.fixture
+def poll_mock(mock_http_response, prometheus_payload):
     mock_http_response(
-        ensure_unicode(generate_latest(registry)),
+        prometheus_payload,
         normalize_content=False,
         headers={'Content-Type': PROMETHEUS_CONTENT_TYPE},
     )
 
 
 @pytest.fixture
-def strict_poll_mock(mock_http_response):
-    registry = CollectorRegistry()
-    g1 = Gauge('metric1', 'processor usage', ['matched_label', 'node', 'flavor'], registry=registry)
-    g1.labels(matched_label="foobar", node="host1", flavor="test").set(99.9)
-    g2 = Gauge('metric2', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
-    g2.labels(matched_label="foobar", node="host2", timestamp="123").set(12.2)
-    c1 = Counter('counter1', 'hits', ['node'], registry=registry)
-    c1.labels(node="host2").inc(42)
-    c2 = Counter('counter2_total', 'hits total', ['node'], registry=registry)
-    c2.labels(node="host2").inc(42)
-    g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
-    g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
-
+def strict_poll_mock(mock_http_response, openmetrics_payload):
     mock_http_response(
-        ensure_unicode(generate_latest_strict(registry)),
+        openmetrics_payload,
         normalize_content=False,
         headers={'Content-Type': OPENMETRICS_CONTENT_TYPE},
     )
