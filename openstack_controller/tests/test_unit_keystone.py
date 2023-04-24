@@ -458,3 +458,56 @@ def test_services_metrics(aggregator, dd_run_check, instance, monkeypatch):
             'service_type:compute',
         ],
     )
+
+
+def test_limits_metrics(aggregator, dd_run_check, instance, monkeypatch):
+    http = MockHttp("agent-integrations-openstack-default")
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.keystone.limits',
+        value=1000,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'limit_id:dd4fefa5602a4414b1c0a01ac7514b97',
+            'region_id:RegionOne',
+            'resource_name:image_size_total',
+            'service_id:82624ab61fb04f058d043facf315fa3c',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.limits',
+        value=1000,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'limit_id:5e7d44c9d30d47919187a5c1a58a8885',
+            'region_id:RegionOne',
+            'resource_name:image_stage_total',
+            'service_id:82624ab61fb04f058d043facf315fa3c',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.limits',
+        value=100,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'limit_id:9f489d63900841f4a70fe58036c81339',
+            'region_id:RegionOne',
+            'resource_name:image_count_total',
+            'service_id:82624ab61fb04f058d043facf315fa3c',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.limits',
+        value=100,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'limit_id:5d26b57b414c4e25848cd34b38f56606',
+            'region_id:RegionOne',
+            'resource_name:image_count_uploading',
+            'service_id:82624ab61fb04f058d043facf315fa3c',
+        ],
+    )
