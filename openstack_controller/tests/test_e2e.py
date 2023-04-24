@@ -8,6 +8,7 @@ import tempfile
 import pytest
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 
 # from . import common
 
@@ -39,3 +40,4 @@ def test_connect_with_invalid_user(dd_agent_check):
     aggregator.assert_service_check('openstack.neutron.api.up', status=AgentCheck.UNKNOWN)
     aggregator.assert_service_check('openstack.ironic.api.up', status=AgentCheck.UNKNOWN)
     aggregator.assert_service_check('openstack.octavia.api.up', status=AgentCheck.UNKNOWN)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

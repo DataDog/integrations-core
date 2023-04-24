@@ -18,7 +18,13 @@ from datadog_checks.dev.fs import get_here
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
-from .common import CHECK_NAME, CONFIG, CONFIG_NOVA_MICROVERSION_LATEST, USE_OPENSTACK_SANDBOX
+from .common import (
+    CHECK_NAME,
+    CONFIG,
+    CONFIG_NOVA_IRONIC_MICROVERSION_LATEST,
+    CONFIG_NOVA_MICROVERSION_LATEST,
+    USE_OPENSTACK_SANDBOX,
+)
 from .ssh_tunnel import socks_proxy
 from .terraform import terraform_run
 
@@ -92,6 +98,11 @@ def instance():
 @pytest.fixture
 def instance_nova_microversion_latest():
     return deepcopy(CONFIG_NOVA_MICROVERSION_LATEST)
+
+
+@pytest.fixture
+def instance_ironic_nova_microversion_latest():
+    return deepcopy(CONFIG_NOVA_IRONIC_MICROVERSION_LATEST)
 
 
 @pytest.fixture
