@@ -28,7 +28,7 @@ Both methods are configured in `win32_event_log.d/conf.yaml` in the `conf.d/` fo
 
 First, identify the Windows Event Log channels you want to monitor.
 
-Depending on collection method, the channel name can be used for the following configuration parameters:
+Depending on the collection method, the channel name can be used for the following configuration parameters:
 - Datadog Logs: `channel_path`
 - Datadog Events: `path`
 - Datadog Events (legacy): `log_file`
@@ -36,11 +36,9 @@ Depending on collection method, the channel name can be used for the following c
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Event Viewer" xxx -->
 
-To find the channel name for an Event Log in Windows Event Viewer, open the Event Log Properties window and refer to the `Full Name` field. In the following example, the channel name is `Microsoft-Windows-Windows Defender/Operational`.
+To find the channel name for an Event Log in the Windows Event Viewer, open the Event Log Properties window and refer to the `Full Name` field. In the following example, the channel name is `Microsoft-Windows-Windows Defender/Operational`.
 
-<p align="center">
-<img alt="Windows Defender Operational Event Log properties" src="https://raw.githubusercontent.com/DataDog/integrations-core/master/win32_event_log/images/windows-defender-operational-event-log-properties.png"/>
-</p>
+{{< img alt="Windows Defender Operational Event Log properties" src="https://raw.githubusercontent.com/DataDog/integrations-core/branden.clark/win32_event_log_screenshot/win32_event_log/images/windows-defender-operational-event-log-properties.png" >}}
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "PowerShell" xxx -->
@@ -156,11 +154,6 @@ Configure one or more filters for the event log. A filter allows you to choose w
 
   The values listed in the output of the command can be set in `win32_event_log.d/conf.yaml` to capture the same kind of events.
 
-  <div class="alert alert-info">
-  The information given by the  <code>Get-EventLog</code> PowerShell command or the Windows Event ViewerGUI may slightly differ from <code>Get-WmiObject</code>.<br>
-  Double-check your filters' values with <code>Get-WmiObject</code> if the integration doesn't capture the events you set up.
-  </div>
-
   Example filters:
 
   - `path`: `Application`, `System`, `Setup`, `Security`
@@ -174,6 +167,11 @@ Configure one or more filters for the event log. A filter allows you to choose w
   - `type`: `Critical`, `Error`, `Warning`, `Information`, `Audit Success`, `Audit Failure`
   - `source_name`: Any available source name
   - `event_id`: Windows EventLog ID
+
+  <div class="alert alert-info">
+  The information given by the  <code>Get-EventLog</code> PowerShell command or the Windows Event Viewer may slightly differ from <code>Get-WmiObject</code>.<br>
+  Double-check your filters' values with <code>Get-WmiObject</code> if the integration doesn't capture the events you set up.
+  </div>
 
   See the [sample win32_event_log.d/conf.yaml][3] for all available filter options for respective modes.
 
@@ -287,7 +285,7 @@ Configure one or more filters for the event log. A filter allows you to choose w
   #### Legacy events
   _Applies to Agent versions less than 7.41_
 
-  Legacy Provider EventIDs have a `Qualifiers` attribute that changes the format of the log, as seen in the [Windows Event Schema][14]. These events have the following XML format, visible in Windows Event Viewer:
+  Legacy Provider EventIDs have a `Qualifiers` attribute that changes the format of the log, as seen in the [Windows Event Schema][14]. These events have the following XML format, visible in the Windows Event Viewer:
   ```xml
   <EventID Qualifiers="16384">3</EventID>
   ```
