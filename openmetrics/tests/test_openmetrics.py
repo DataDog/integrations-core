@@ -68,9 +68,12 @@ def test_openmetrics(aggregator, dd_run_check, request, poll_mock_fixture):
     )
 
 
-@pytest.mark.usefixtures("openmetrics_poll_mock")
-def test_openmetrics_strict(aggregator, dd_run_check, caplog):
+def test_openmetrics_use_latest_spec(aggregator, dd_run_check, mock_http_response, openmetrics_payload, caplog):
     from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
+
+    # We want to make sure that when `use_latest_spec` is enabled, we use the OpenMetrics parser
+    # even when the response's `Content-Type` doesn't declare the appropriate media type.
+    mock_http_response(openmetrics_payload, normalize_content=False)
 
     check = OpenMetricsCheck('openmetrics', {}, [instance_new_strict])
     scraper = OpenMetricsScraper(check, instance_new_strict)
