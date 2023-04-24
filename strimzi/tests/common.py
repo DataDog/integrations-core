@@ -4,3 +4,4 @@
 import os
 
 STRIMZI_VERSION = os.environ["STRIMZI_VERSION"]
+HERE = os.path.abspath(os.path.dirname(__file__))
