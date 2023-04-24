@@ -37,6 +37,137 @@ def _create_hypervisor_metric_tags(hypervisor_id, hypervisor_data, os_aggregates
     return tags
 
 
+def _create_load_balancer_loadbalancer_tags(loadbalancer_data):
+    tags = [
+        f'loadbalancer_id:{loadbalancer_data.get("id")}',
+        f'loadbalancer_name:{loadbalancer_data.get("name")}',
+        f'provisioning_status:{loadbalancer_data.get("provisioning_status")}',
+        f'operating_status:{loadbalancer_data.get("operating_status")}',
+    ]
+
+    listeners = loadbalancer_data.get("listeners")
+    if listeners:
+        for listener in listeners:
+            tags.append(f'listener_id:{listener.get("id")}')
+
+    pools = loadbalancer_data.get("pools")
+    if pools:
+        for pool in pools:
+            tags.append(f'pool_id:{pool.get("id")}')
+
+    return tags
+
+
+def _create_load_balancer_listener_tags(listener_data, loadbalancers_data):
+    tags = [
+        f'listener_id:{listener_data.get("id")}',
+        f'listener_name:{listener_data.get("name")}',
+    ]
+
+    loadbalancers = listener_data.get("loadbalancers")
+    if loadbalancers:
+        for loadbalancer in loadbalancers:
+            loadbalancer_id = loadbalancer.get("id")
+            loadbalancer_data = loadbalancers_data.get(loadbalancer_id)
+            tags.append(f'loadbalancer_id:{loadbalancer_id}')
+            tags.append(f'loadbalancer_name:{loadbalancer_data.get("name")}')
+
+    return tags
+
+
+def _create_load_balancer_member_tags(member_data, loadbalancer_data, pool_data):
+    tags = [
+        f'member_id:{member_data.get("id")}',
+        f'member_name:{member_data.get("name")}',
+        f'provisioning_status:{member_data.get("provisioning_status")}',
+        f'operating_status:{member_data.get("operating_status")}',
+    ]
+
+    if loadbalancer_data:
+        tags.append(f'loadbalancer_id:{loadbalancer_data.get("id")}')
+        tags.append(f'loadbalancer_name:{loadbalancer_data.get("name")}')
+
+    if pool_data:
+        tags.append(f'pool_id:{pool_data.get("id")}')
+        tags.append(f'pool_name:{pool_data.get("name")}')
+
+    return tags
+
+
+def _create_load_balancer_healthmonitor_tags(healthmonitor_data, pool_data):
+    tags = [
+        f'healthmonitor_id:{healthmonitor_data.get("id")}',
+        f'healthmonitor_name:{healthmonitor_data.get("name")}',
+        f'provisioning_status:{healthmonitor_data.get("provisioning_status")}',
+        f'operating_status:{healthmonitor_data.get("operating_status")}',
+        f'type:{healthmonitor_data.get("type")}',
+    ]
+
+    if pool_data:
+        tags.append(f'pool_id:{pool_data.get("id")}')
+        tags.append(f'pool_name:{pool_data.get("name")}')
+
+    return tags
+
+
+def _create_load_balancer_pool_tags(pool_data, loadbalancers_data, listeners_data, members_data, healthmonitors_data):
+    tags = [
+        f'pool_id:{pool_data.get("id")}',
+        f'pool_name:{pool_data.get("name")}',
+        f'provisioning_status:{pool_data.get("provisioning_status")}',
+        f'operating_status:{pool_data.get("operating_status")}',
+    ]
+
+    loadbalancers = pool_data.get("loadbalancers")
+    if loadbalancers:
+        for loadbalancer in loadbalancers:
+            loadbalancer_id = loadbalancer.get("id")
+            loadbalancer_data = loadbalancers_data.get(loadbalancer_id)
+            tags.append(f'loadbalancer_id:{loadbalancer_id}')
+            tags.append(f'loadbalancer_name:{loadbalancer_data.get("name")}')
+
+    listeners = pool_data.get("listeners")
+    if listeners:
+        for listener in listeners:
+            listener_id = listener.get("id")
+            listener_data = listeners_data.get(listener_id)
+            tags.append(f'listener_id:{listener_id}')
+            tags.append(f'listener_name:{listener_data.get("name")}')
+
+    members = pool_data.get("members")
+    if members:
+        for member in members:
+            member_id = member.get("id")
+            member_data = members_data.get(member_id)
+            tags.append(f'member_id:{member_id}')
+            tags.append(f'member_name:{member_data.get("name")}')
+
+    healthmonitor_id = pool_data.get("healthmonitor_id")
+    if healthmonitor_id:
+        healthmonitor_data = healthmonitors_data.get(healthmonitor_id)
+        tags.append(f'healthmonitor_id:{healthmonitor_id}')
+        tags.append(f'healthmonitor_name:{healthmonitor_data.get("name")}')
+
+    return tags
+
+
+def _create_load_balancer_amphora_tags(amphora_data, amphora_stats, loadbalancers_data, listeners_data):
+    tags = [
+        f'amphora_id:{amphora_data.get("id")}',
+        f'amphora_compute_id:{amphora_data.get("compute_id")}',
+        f'status:{amphora_data.get("status")}',
+    ]
+
+    loadbalancer_id = amphora_stats.get("loadbalancer_id")
+    if loadbalancer_id:
+        tags.append(f'loadbalancer_id:{loadbalancer_id}')
+        tags.append(f'loadbalancer_name:{loadbalancers_data.get(loadbalancer_id).get("name")}')
+
+    listener_id = amphora_stats.get("listener_id")
+    if listener_id:
+        tags.append(f'listener_id:{listener_id}')
+        tags.append(f'listener_name:{listeners_data.get(listener_id).get("name")}')
+
 def _create_baremetal_nodes_metric_tags(node_name, node_uuid, conductor_group, power_state):
     tags = [
         f'power_state:{power_state}',
@@ -541,6 +672,13 @@ class OpenStackControllerCheck(AgentCheck):
     def _report_load_balancer_metrics(self, api, project_id, project_tags):
         try:
             self._report_load_balancer_response_time(api, project_id, project_tags)
+            self._report_load_balancer_loadbalancers(api, project_id, project_tags)
+            self._report_load_balancer_listeners(api, project_id, project_tags)
+            self._report_load_balancer_members(api, project_id, project_tags)
+            self._report_load_balancer_healthmonitors(api, project_id, project_tags)
+            self._report_load_balancer_pools(api, project_id, project_tags)
+            self._report_load_balancer_amphorae(api, project_id, project_tags)
+
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting load balancer metrics: %s", e)
@@ -556,3 +694,218 @@ class OpenStackControllerCheck(AgentCheck):
             self.service_check('openstack.octavia.api.up', AgentCheck.OK, tags=project_tags)
         else:
             self.service_check('openstack.octavia.api.up', AgentCheck.UNKNOWN, tags=project_tags)
+
+    def _report_load_balancer_loadbalancers(self, api, project_id, project_tags):
+        loadbalancers_data = api.get_load_balancer_loadbalancers(project_id)
+        if loadbalancers_data is not None:
+            for loadbalancer_id, loadbalancer_data in loadbalancers_data.items():
+                loadbalancer_tags = _create_load_balancer_loadbalancer_tags(loadbalancer_data)
+                all_tags = loadbalancer_tags + project_tags  # TODO: add loadbalancer api tags
+
+                # report status
+                self.gauge(
+                    "openstack.octavia.loadbalancer.admin_state_up",
+                    value=int(loadbalancer_data.get("admin_state_up")),
+                    tags=all_tags,
+                )
+
+                # loadbalancer statistics
+                stats = api.get_load_balancer_loadbalancer_statistics(project_id, loadbalancer_id)
+                if stats is not None:
+                    self.gauge(
+                        'openstack.octavia.loadbalancer.active_connections',
+                        value=stats.get("active_connections"),
+                        tags=all_tags,
+                    )
+                    self.gauge('openstack.octavia.loadbalancer.bytes_in', value=stats.get("bytes_in"), tags=all_tags)
+                    self.gauge('openstack.octavia.loadbalancer.bytes_out', value=stats.get("bytes_out"), tags=all_tags)
+                    self.gauge(
+                        'openstack.octavia.loadbalancer.request_errors',
+                        value=stats.get("request_errors"),
+                        tags=all_tags,
+                    )
+                    self.gauge(
+                        'openstack.octavia.loadbalancer.total_connections',
+                        value=stats.get("total_connections"),
+                        tags=all_tags,
+                    )
+
+    def _report_load_balancer_listeners(self, api, project_id, project_tags):
+        loadbalancers_data = api.get_load_balancer_loadbalancers(project_id)
+        listeners_data = api.get_load_balancer_listeners(project_id)
+        if listeners_data is not None:
+            for listener_id, listener_data in listeners_data.items():
+                listener_tags = _create_load_balancer_listener_tags(listener_data, loadbalancers_data)
+                all_tags = listener_tags + project_tags
+
+                self.gauge(
+                    'openstack.octavia.listener.connection_limit',
+                    value=listener_data.get("connection_limit"),
+                    tags=all_tags,
+                )
+                self.gauge(
+                    'openstack.octavia.listener.timeout_client_data',
+                    value=listener_data.get("timeout_client_data"),
+                    tags=all_tags,
+                )
+                self.gauge(
+                    'openstack.octavia.listener.timeout_member_connect',
+                    value=listener_data.get("timeout_member_connect"),
+                    tags=all_tags,
+                )
+                self.gauge(
+                    'openstack.octavia.listener.timeout_member_data',
+                    value=listener_data.get("timeout_member_data"),
+                    tags=all_tags,
+                )
+                self.gauge(
+                    'openstack.octavia.listener.timeout_tcp_inspect',
+                    value=listener_data.get("timeout_tcp_inspect"),
+                    tags=all_tags,
+                )
+
+                # listeners statistics
+                stats = api.get_load_balancer_listener_statistics(project_id, listener_id)
+                if stats is not None:
+                    self.gauge(
+                        'openstack.octavia.listener.active_connections',
+                        value=stats.get("active_connections"),
+                        tags=all_tags,
+                    )
+                    self.gauge('openstack.octavia.listener.bytes_in', value=stats.get("bytes_in"), tags=all_tags)
+                    self.gauge('openstack.octavia.listener.bytes_out', value=stats.get("bytes_out"), tags=all_tags)
+                    self.gauge(
+                        'openstack.octavia.listener.request_errors',
+                        value=stats.get("request_errors"),
+                        tags=all_tags,
+                    )
+                    self.gauge(
+                        'openstack.octavia.listener.total_connections',
+                        value=stats.get("total_connections"),
+                        tags=all_tags,
+                    )
+
+    def _report_load_balancer_members(self, api, project_id, project_tags):
+        loadbalancers_data = api.get_load_balancer_loadbalancers(project_id)
+        if loadbalancers_data is not None:
+            for loadbalancer_id, loadbalancer_data in loadbalancers_data.items():
+                pools_data = api.get_load_balancer_pools_by_loadbalancer(project_id, loadbalancer_id)
+                if pools_data:
+                    for pool_id, pool_data in pools_data.items():
+                        members_data = api.get_load_balancer_members_by_pool(project_id, pool_id)
+                        if members_data is not None:
+                            for _, member_data in members_data.items():
+                                member_tags = _create_load_balancer_member_tags(
+                                    member_data, loadbalancer_data, pool_data
+                                )
+                                all_tags = member_tags + project_tags
+
+                                # # report status
+                                self.gauge(
+                                    "openstack.octavia.member.admin_state_up",
+                                    value=int(member_data.get("admin_state_up")),
+                                    tags=all_tags,
+                                )
+
+                                self.gauge(
+                                    'openstack.octavia.member.weight',
+                                    value=member_data.get("weight"),
+                                    tags=all_tags,
+                                )
+
+    def _report_load_balancer_healthmonitors(self, api, project_id, project_tags):
+        pools_data = api.get_load_balancer_pools(project_id)
+        if pools_data:
+            for pool_id, pool_data in pools_data.items():
+                healthmonitors_data = api.get_load_balancer_healthmonitors_by_pool(project_id, pool_id)
+
+                if healthmonitors_data is not None:
+                    for _, healthmonitor_data in healthmonitors_data.items():
+                        healthmonitor_tags = _create_load_balancer_healthmonitor_tags(healthmonitor_data, pool_data)
+                        all_tags = healthmonitor_tags + project_tags
+
+                        # report status
+                        self.gauge(
+                            'openstack.octavia.healthmonitor.admin_state_up',
+                            value=int(healthmonitor_data.get("admin_state_up")),
+                            tags=all_tags,
+                        )
+
+                        self.gauge(
+                            'openstack.octavia.healthmonitor.delay',
+                            value=healthmonitor_data.get("delay"),
+                            tags=all_tags,
+                        )
+                        self.gauge(
+                            'openstack.octavia.healthmonitor.max_retries',
+                            value=healthmonitor_data.get("max_retries"),
+                            tags=all_tags,
+                        )
+                        self.gauge(
+                            'openstack.octavia.healthmonitor.max_retries_down',
+                            value=healthmonitor_data.get("max_retries_down"),
+                            tags=all_tags,
+                        )
+                        self.gauge(
+                            'openstack.octavia.healthmonitor.timeout',
+                            value=healthmonitor_data.get("timeout"),
+                            tags=all_tags,
+                        )
+
+    def _report_load_balancer_pools(self, api, project_id, project_tags):
+        loadbalancers_data = api.get_load_balancer_loadbalancers(project_id)
+        listeners_data = api.get_load_balancer_listeners(project_id)
+        pools_data = api.get_load_balancer_pools(project_id)
+
+        if pools_data:
+            for pool_id, pool_data in pools_data.items():
+                healthmonitors_data = api.get_load_balancer_healthmonitors_by_pool(project_id, pool_id)
+                members_data = api.get_load_balancer_members_by_pool(project_id, pool_id)
+
+                pool_tags = _create_load_balancer_pool_tags(
+                    pool_data, loadbalancers_data, listeners_data, members_data, healthmonitors_data
+                )
+
+                all_tags = pool_tags + project_tags
+
+                # report status
+                self.gauge(
+                    'openstack.octavia.pool.admin_state_up',
+                    value=int(pool_data.get("admin_state_up")),
+                    tags=all_tags,
+                )
+
+    def _report_load_balancer_amphorae(self, api, project_id, project_tags):
+        loadbalancers_data = api.get_load_balancer_loadbalancers(project_id)
+        listeners_data = api.get_load_balancer_listeners(project_id)
+        amphorae_data = api.get_load_balancer_amphorae(project_id)
+
+        if amphorae_data:
+            for amphora_id, amphora_data in amphorae_data.items():
+                stats = api.get_load_balancer_amphora_statistics(project_id, amphora_id)
+                for _, amphora_stat in stats.items():
+                    amphora_tags = _create_load_balancer_amphora_tags(
+                        amphora_data, amphora_stat, loadbalancers_data, listeners_data
+                    )
+
+                    all_tags = amphora_tags + project_tags
+
+                    self.gauge(
+                        'openstack.octavia.amphora.active_connections',
+                        value=amphora_stat.get("active_connections"),
+                        tags=all_tags,
+                    )
+                    self.gauge('openstack.octavia.amphora.bytes_in', value=amphora_stat.get("bytes_in"), tags=all_tags)
+                    self.gauge(
+                        'openstack.octavia.amphora.bytes_out', value=amphora_stat.get("bytes_out"), tags=all_tags
+                    )
+                    self.gauge(
+                        'openstack.octavia.amphora.request_errors',
+                        value=amphora_stat.get("request_errors"),
+                        tags=all_tags,
+                    )
+                    self.gauge(
+                        'openstack.octavia.amphora.total_connections',
+                        value=amphora_stat.get("total_connections"),
+                        tags=all_tags,
+                    )
