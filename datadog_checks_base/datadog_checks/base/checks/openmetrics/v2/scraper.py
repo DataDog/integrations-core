@@ -10,8 +10,8 @@ from itertools import chain
 from math import isinf, isnan
 from typing import List  # noqa: F401
 
-from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_metric_families_strict
-from prometheus_client.parser import text_fd_to_metric_families as parse_metric_families
+from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
+from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
 
 from ....config import is_affirmative
 from ....constants import ServiceCheck
@@ -224,15 +224,15 @@ class OpenMetricsScraper:
         # Accept headers are taken from:
         # https://github.com/prometheus/prometheus/blob/v2.43.0/scrape/scrape.go#L787
         if is_affirmative(config.get('use_latest_spec', False)):
-            self._parsers = defaultdict(lambda: parse_metric_families_strict)
-            self.parse_metric_families = parse_metric_families_strict
+            self._parsers = defaultdict(lambda: parse_openmetrics)
+            self.parse_metric_families = parse_openmetrics
             accept_header = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
         else:
             # This parser selection is based on what Prometheus does:
             # https://github.com/prometheus/prometheus/blob/v2.43.0/model/textparse/interface.go#L83-L90
-            self._parsers = defaultdict(lambda: parse_metric_families)
-            self._parsers['application/openmetrics-text'] = parse_metric_families_strict
-            self.parse_metric_families = parse_metric_families
+            self._parsers = defaultdict(lambda: parse_prometheus)
+            self._parsers['application/openmetrics-text'] = parse_openmetrics
+            self.parse_metric_families = parse_prometheus
             accept_header = (
                 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,'
                 'text/plain;version=0.0.4;q=0.5,*/*;q=0.1'
