@@ -24,7 +24,7 @@ def setup_strimzi():
             "kubectl",
             "apply",
             "-f",
-            os.path.join(HERE, "kind", STRIMZI_VERSION, "kafka-persistent-single.yaml"),
+            os.path.join(HERE, "kind", STRIMZI_VERSION, "kafka.yaml"),
             "-n",
             "kafka",
         ]
@@ -35,6 +35,12 @@ def setup_strimzi():
 @pytest.fixture(scope='session')
 def dd_environment():
     with kind_run(conditions=[setup_strimzi]):
+        # TODO forward the ports
+        # with ExitStack() as stack:
+        # app_controller_host, app_controller_port = stack.enter_context(
+        #     port_forward(kubeconfig, 'kafka', 8082, 'service', 'my-service')
+        # )
+
         yield {
             "openmetrics_endpoint": f"http://{get_docker_hostname()}:1234/metrics",
         }
