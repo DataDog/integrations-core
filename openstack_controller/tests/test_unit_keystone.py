@@ -353,3 +353,108 @@ def test_groups_metrics(aggregator, dd_run_check, instance, monkeypatch):
             'group_name:nonadmins',
         ],
     )
+
+
+def test_services_metrics(aggregator, dd_run_check, instance, monkeypatch):
+    http = MockHttp("agent-integrations-openstack-default")
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.keystone.services.count',
+        value=8,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.services.enabled',
+        value=1,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+            'service_id:155d28a57a054d5fae86410b566ffca1',
+            'service_name:placement',
+            'service_type:placement',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.services.enabled',
+        value=1,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+            'service_id:17d8088bf93b41b19ae971eb6f2aa7a5',
+            'service_name:nova_legacy',
+            'service_type:compute_legacy',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.services.enabled',
+        value=1,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+            'service_id:271afc4cc62e493592b6be9b87bfb108',
+            'service_name:keystone',
+            'service_type:identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.services.enabled',
+        value=1,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+            'service_id:3ef836a26c2c40acabb07a6415384f20',
+            'service_name:cinderv3',
+            'service_type:volumev3',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.services.enabled',
+        value=1,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+            'service_id:55b21161725a461793a2222749229306',
+            'service_name:cinder',
+            'service_type:block-storage',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.services.enabled',
+        value=1,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+            'service_id:7dca0a2e55d74d66995f3105ed69608f',
+            'service_name:neutron',
+            'service_type:network',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.services.enabled',
+        value=1,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+            'service_id:82624ab61fb04f058d043facf315fa3c',
+            'service_name:glance',
+            'service_type:image',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.services.enabled',
+        value=1,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+            'service_id:9aca42df11e84366924013b2f1a1259b',
+            'service_name:nova',
+            'service_type:compute',
+        ],
+    )
