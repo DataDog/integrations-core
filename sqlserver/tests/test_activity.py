@@ -209,8 +209,8 @@ def test_collect_load_activity(
             {'tables': ['ϑings'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
         ),
         (
-            {'tables_csv': '', 'commands': None, 'comments': None},
-            {'tables': None, 'commands': None, 'comments': None},
+            {'tables_csv': '', 'commands': None, 'comments': ['-- Test comment']},
+            {'tables': None, 'commands': None, 'comments': ['-- Test comment']},
         ),
     ],
 )
