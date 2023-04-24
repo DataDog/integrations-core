@@ -513,7 +513,7 @@ coverage:
       Strimzi:
         target: 75
         flags:
-          - strimzi
+        - strimzi
       Supervisord:
         target: 75
         flags:
@@ -1278,6 +1278,11 @@ flags:
     paths:
     - statsd/datadog_checks/statsd
     - statsd/tests
+  strimzi:
+    carryforward: true
+    paths:
+    - strimzi/datadog_checks/strimzi
+    - strimzi/tests
   supervisord:
     carryforward: true
     paths:

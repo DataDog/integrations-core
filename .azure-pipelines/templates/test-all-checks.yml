@@ -471,6 +471,9 @@ jobs:
     - checkName: statsd
       displayName: StatsD
       os: linux
+    - checkName: strimzi
+      displayName: Strimzi
+      os: linux
     - checkName: supervisord
       displayName: Supervisord
       os: linux
