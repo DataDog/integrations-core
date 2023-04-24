@@ -5,7 +5,7 @@ import os.path
 
 import pytest
 
-from datadog_checks.dev import get_here, run_command
+from datadog_checks.dev import get_docker_hostname, get_here, run_command
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.strimzi import StrimziCheck
 
@@ -35,12 +35,16 @@ def setup_strimzi():
 @pytest.fixture(scope='session')
 def dd_environment():
     with kind_run(conditions=[setup_strimzi]):
-        yield {}
+        yield {
+            "openmetrics_endpoint": f"http://{get_docker_hostname()}:1234/metrics",
+        }
 
 
 @pytest.fixture
 def instance():
-    return {}
+    return {
+        "openmetrics_endpoint": f"http://{get_docker_hostname()}:1234/metrics",
+    }
 
 
 @pytest.fixture()
