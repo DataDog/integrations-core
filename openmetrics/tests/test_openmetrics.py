@@ -29,7 +29,7 @@ instance_new_strict = {
 }
 
 
-@pytest.mark.parametrize('poll_mock_fixture', ['poll_mock', 'strict_poll_mock'])
+@pytest.mark.parametrize('poll_mock_fixture', ['prometheus_poll_mock', 'openmetrics_poll_mock'])
 def test_openmetrics(aggregator, dd_run_check, request, poll_mock_fixture):
     from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
 
@@ -68,7 +68,7 @@ def test_openmetrics(aggregator, dd_run_check, request, poll_mock_fixture):
     )
 
 
-@pytest.mark.usefixtures("strict_poll_mock")
+@pytest.mark.usefixtures("openmetrics_poll_mock")
 def test_openmetrics_strict(aggregator, dd_run_check, caplog):
     from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
 

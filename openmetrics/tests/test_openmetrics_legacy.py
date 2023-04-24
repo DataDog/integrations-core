@@ -8,7 +8,7 @@ from datadog_checks.openmetrics import OpenMetricsCheck
 
 from .common import CHECK_NAME
 
-pytestmark = pytest.mark.usefixtures("poll_mock")
+pytestmark = pytest.mark.usefixtures("prometheus_poll_mock")
 
 instance = {
     'prometheus_url': 'http://localhost:10249/metrics',

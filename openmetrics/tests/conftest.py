@@ -5,10 +5,11 @@
 import os
 
 import pytest
-from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
+from prometheus_client import CollectorRegistry, Counter, Gauge
+from prometheus_client import generate_latest as generate_prometheus
 from prometheus_client.exposition import CONTENT_TYPE_LATEST as PROMETHEUS_CONTENT_TYPE
 from prometheus_client.openmetrics.exposition import CONTENT_TYPE_LATEST as OPENMETRICS_CONTENT_TYPE
-from prometheus_client.openmetrics.exposition import generate_latest as generate_latest_strict
+from prometheus_client.openmetrics.exposition import generate_latest as generate_openmetrics
 
 from datadog_checks.base import ensure_unicode
 from datadog_checks.dev import docker_run
@@ -43,16 +44,16 @@ def example_metrics_registry():
 
 @pytest.fixture
 def prometheus_payload(example_metrics_registry):
-    return ensure_unicode(generate_latest(example_metrics_registry))
+    return ensure_unicode(generate_prometheus(example_metrics_registry))
 
 
 @pytest.fixture
 def openmetrics_payload(example_metrics_registry):
-    return ensure_unicode(generate_latest_strict(example_metrics_registry))
+    return ensure_unicode(generate_openmetrics(example_metrics_registry))
 
 
 @pytest.fixture
-def poll_mock(mock_http_response, prometheus_payload):
+def prometheus_poll_mock(mock_http_response, prometheus_payload):
     mock_http_response(
         prometheus_payload,
         normalize_content=False,
@@ -61,7 +62,7 @@ def poll_mock(mock_http_response, prometheus_payload):
 
 
 @pytest.fixture
-def strict_poll_mock(mock_http_response, openmetrics_payload):
+def openmetrics_poll_mock(mock_http_response, openmetrics_payload):
     mock_http_response(
         openmetrics_payload,
         normalize_content=False,
