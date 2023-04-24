@@ -102,3 +102,70 @@ def test_domains_metrics(aggregator, dd_run_check, instance, monkeypatch):
             'domain_id:03e40b01788d403e98e4b9a20210492e',
         ],
     )
+
+
+def test_projects_metrics(aggregator, dd_run_check, instance, monkeypatch):
+    http = MockHttp("agent-integrations-openstack-default")
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.keystone.projects.count',
+        value=5,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.projects.enabled',
+        value=1,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.projects.enabled',
+        value=1,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_name:admin',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.projects.enabled',
+        value=1,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+            'project_id:b0700d860b244dcbb038541976cd8f32',
+            'project_name:alt_demo',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.projects.enabled',
+        value=1,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+            'project_id:e9e405ed5811407db982e3113e52d26b',
+            'project_name:service',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.projects.enabled',
+        value=0,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+            'project_id:c1147335eac0402ea9cabaae59c267e1',
+            'project_name:invisible_to_admin',
+        ],
+    )
