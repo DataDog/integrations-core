@@ -6,5 +6,5 @@ openai.tokens.total,gauge,10,,,Total number of tokens used in a request to OpenA
 openai.request.error,count,10,error,,Number of errors,0,openai,openai,
 openai.organization.ratelimit.requests.remaining,gauge,10,,,Number of requests remaining in the rate limit,0,openai,openai,
 openai.organization.ratelimit.tokens.remaining,gauge,10,,,Number of tokens remaining in the rate limit,0,openai,openai,
-openai.ratelimit.requests,gauge,10,10,,,Number of requests in the rate limit,0,openai,openai,
+openai.ratelimit.requests,gauge,10,,,Number of requests in the rate limit,0,openai,openai,
 openai.ratelimit.tokens,gauge,10,,,Number of tokens in the rate limit,0,openai,openai,
