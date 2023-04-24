@@ -25,6 +25,8 @@ pip install ddtrace
 DD_SERVICE="my-openai-service" DD_ENV="staging" DD_API_KEY=<DATADOG_API_KEY> ddtrace-run python <your-app>.py
 ```
 
+Note: if the Agent is using a specified hostname/port, set `DD_AGENT_HOST` and `DD_TRACE_AGENT_PORT`.
+
 See the [APM Python library documentation][12] for more advanced usage.
 
 
@@ -41,6 +43,8 @@ containing the prompts and completions.
 
 To adjust the log sample rate see the [APM library documentation][10].
 
+Note: logs submission requires `DD_API_KEY` to be specified when running
+`ddtrace-run`.
 
 ### Validation
 
