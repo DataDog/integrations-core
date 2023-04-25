@@ -6,7 +6,7 @@ Extract custom metrics from any OpenMetrics or Prometheus endpoints.
 
 <div class="alert alert-warning">All the metrics retrieved by this integration are considered <a href="https://docs.datadoghq.com/developers/metrics/custom_metrics">custom metrics</a>.</div>
 
-The integration is compatible with both the [Prometheus exposition format][12] (by default) as well as with the [OpenMetrics specification][13] (via configuration).
+The integration is compatible with both the [Prometheus exposition format][12] as well as with the [OpenMetrics specification][13].
 
 ## Setup
 
@@ -27,8 +27,6 @@ For each instance the following parameters are required:
 | `openmetrics_endpoint` | The URL where your application metrics are exposed in Prometheus or OpenMetrics format (must be unique).                                                                                                                         |
 | `namespace`      | The namespace to prepend to all metrics.                                                                                                                                                                                                                                 |
 | `metrics`        | A list of metrics to retrieve as custom metrics. Add each metric to the list as `metric_name` or `metric_name: renamed` to rename it. The metrics are interpreted as regular expressions. Use `.*` as a wildcard (`metric.*`) to fetch all matching metrics. **Note**: Regular expressions can potentially send a lot of custom metrics. |
-
-The integration assumes the metrics to be exposed in the [Prometheus exposition format][12] by default. Set the `use_latest_spec` option to `true` if the metrics you want to retrieve follow the [OpenMetrics specification][13] instead.
 
 **Note**: This is a new default OpenMetrics check example as of Datadog Agent version 7.32.0. If you previously implemented this integration, see the [legacy example][5].
 
