@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Get cost estimation, prompt sampling, performance metrics, and more out of OpenAI usage.",
+    "description": "Optimize OpenAI usage: cost estimates, prompt sampling and performance metrics.",
     "title": "OpenAI",
     "media": [],
     "classifier_tags": [
