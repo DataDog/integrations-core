@@ -21,7 +21,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.sqlserver.utils import is_statement_proc
+from datadog_checks.sqlserver.utils import extract_sql_comments, is_statement_proc
 
 try:
     import datadog_agent
@@ -305,6 +305,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 )
                 continue
             obfuscated_statement = statement['query']
+            comments = extract_sql_comments(row['text'])
+            row['dd_comments'] = comments
             # update 'text' field to be obfuscated stmt
             row['text'] = obfuscated_statement
             if procedure_statement:
@@ -319,7 +321,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             metadata = statement['metadata']
             row['dd_tables'] = metadata.get('tables', None)
             row['dd_commands'] = metadata.get('commands', None)
-            row['dd_comments'] = metadata.get('comments', None)
+            if not comments:
+                row['dd_comments'] = metadata.get('comments', None)
             normalized_rows.append(row)
         return normalized_rows
 
@@ -335,8 +338,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     @staticmethod
     def _to_metrics_payload_row(row):
         row = {k: v for k, v in row.items()}
-        if 'dd_comments' in row:
-            del row['dd_comments']
         # remove the statement_text field, so we do not forward deobfuscated text
         # to the backend
         if 'statement_text' in row:
