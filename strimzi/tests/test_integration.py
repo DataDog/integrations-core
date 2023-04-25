@@ -10,6 +10,7 @@ from tests.common import METRICS
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
+@pytest.mark.skip('integration tests faial on tear down when using `port_forward`')
 def test_check(dd_run_check, aggregator, check, instance, tags):
     dd_run_check(check(instance))
 
