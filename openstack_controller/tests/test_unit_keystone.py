@@ -472,6 +472,7 @@ def test_limits_metrics(aggregator, dd_run_check, instance, monkeypatch):
         value=1000,
         tags=[
             'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
             'limit_id:dd4fefa5602a4414b1c0a01ac7514b97',
             'region_id:RegionOne',
             'resource_name:image_size_total',
@@ -483,6 +484,7 @@ def test_limits_metrics(aggregator, dd_run_check, instance, monkeypatch):
         value=1000,
         tags=[
             'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
             'limit_id:5e7d44c9d30d47919187a5c1a58a8885',
             'region_id:RegionOne',
             'resource_name:image_stage_total',
@@ -494,6 +496,7 @@ def test_limits_metrics(aggregator, dd_run_check, instance, monkeypatch):
         value=100,
         tags=[
             'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
             'limit_id:9f489d63900841f4a70fe58036c81339',
             'region_id:RegionOne',
             'resource_name:image_count_total',
@@ -505,6 +508,7 @@ def test_limits_metrics(aggregator, dd_run_check, instance, monkeypatch):
         value=100,
         tags=[
             'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
             'limit_id:5d26b57b414c4e25848cd34b38f56606',
             'region_id:RegionOne',
             'resource_name:image_count_uploading',
