@@ -120,6 +120,7 @@ class InstanceConfig(BaseModel):
     exclude_metrics_by_labels: Optional[Mapping[str, Union[bool, Sequence[str]]]]
     extra_headers: Optional[Mapping[str, Any]]
     extra_metrics: Optional[Sequence[Union[str, Mapping[str, Union[str, ExtraMetric]]]]]
+    gitaly_server_endpoint: Optional[str]
     gitlab_url: Optional[str]
     headers: Optional[Mapping[str, Any]]
     health_service_check: Optional[bool]

@@ -343,7 +343,9 @@
     type: boolean
 - name: use_latest_spec
   description: |
-    Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
+    Whether or not the parser will strictly adhere to the OpenMetrics specification,
+    regardless of the received `Content-Type` header.
+  hidden: true
   value:
     example: false
     type: boolean
