@@ -2,13 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os.path
+from contextlib import ExitStack
+from copy import deepcopy
 
 import pytest
 
-from datadog_checks.dev import get_docker_hostname, get_here, run_command
+from datadog_checks.dev import get_here, run_command
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.strimzi import StrimziCheck
 
+from datadog_checks.dev.kube_port_forward import port_forward
 from .common import STRIMZI_VERSION
 
 HERE = get_here()
@@ -33,24 +36,26 @@ def setup_strimzi():
 
 
 @pytest.fixture(scope='session')
-def dd_environment():
-    with kind_run(conditions=[setup_strimzi]):
-        # TODO forward the ports
-        # with ExitStack() as stack:
-        # app_controller_host, app_controller_port = stack.enter_context(
-        #     port_forward(kubeconfig, 'kafka', 8082, 'service', 'my-service')
-        # )
+def dd_environment(dd_save_state):
+    with kind_run(conditions=[setup_strimzi]) as kubeconfig:
+        with ExitStack() as stack:
+            host, port = stack.enter_context(
+                port_forward(kubeconfig, 'kafka', 8080, 'deployment', 'strimzi-cluster-operator')
+            )
 
-        yield {
-            "openmetrics_endpoint": f"http://{get_docker_hostname()}:1234/metrics",
-        }
+            instance = {
+                "openmetrics_endpoint": f"http://{host}:{port}/metrics",
+            }
+
+            # save this instance since the endpoint is different each run
+            dd_save_state("strimzi_instance", instance)
+
+            yield instance
 
 
 @pytest.fixture
-def instance():
-    return {
-        "openmetrics_endpoint": f"http://{get_docker_hostname()}:1234/metrics",
-    }
+def instance(dd_get_state):
+    return deepcopy(dd_get_state('strimzi_instance', default={}))
 
 
 @pytest.fixture()
