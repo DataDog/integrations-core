@@ -168,6 +168,8 @@ def _create_load_balancer_amphora_tags(amphora_data, amphora_stats, loadbalancer
         tags.append(f'listener_id:{listener_id}')
         tags.append(f'listener_name:{listeners_data.get(listener_id).get("name")}')
 
+    return tags
+
 
 def _create_baremetal_nodes_metric_tags(node_name, node_uuid, conductor_group, power_state):
     tags = [
