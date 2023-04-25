@@ -1,9 +1,0 @@
----
-fixes:
-  - | 
-    Update dashboards to synchronize with global time. 
-    * Kubernetes Nodes Overview: Unlock time scope for Disk I/O & Network panels, 
-    events graph, and CPU & memory request graphs
-    * Kubernetes - Overview: Unlock time scope for Most CPU & memory intensive pods, pods status 
-    panels, network panels, CPU & memory request graphs, and disk panels. 
-    * Kubernetes Pods Overview: Unlock time scope for CPU & memory intensive pods panels.
