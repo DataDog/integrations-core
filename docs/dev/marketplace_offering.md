@@ -84,7 +84,7 @@ Once you've joined the Technology Partner track and requested a sandbox account,
 To request access to the private Marketplace repository, email <a href="mailto:marketplace@datadoghq.com">marketplace@datadoghq.com</a>. Once you have been granted access, you can review an [example pull request][12] in the Marketplace repository with annotations and best practices.
 
 ## Getting Started
-To get started with creating an offering, see [Create a Tile][13].
+To get started with creating an offering, see [Create a Tile][13]. If you're interesting in building an Agent-based integration and selling it on the Datadog Marketplace, see [Create an Agent-based Integration][19].
 
 ## Further Reading
 
@@ -108,3 +108,4 @@ To get started with creating an offering, see [Create a Tile][13].
 [16]: https://docs.datadoghq.com/integrations/create_a_tile/#rest-api-integrations
 [17]: https://docs.datadoghq.com/integrations/create_a_tile/#datadog-apps
 [18]: https://docs.datadoghq.com/integrations/create_a_tile/#saas-license-or-professional-service-offerings
+[19]: https://docs.datadoghq.com/developers/integrations/agent_integration

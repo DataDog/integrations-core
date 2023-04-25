@@ -17,7 +17,7 @@ further_reading:
 
 This page walks through how Technology Partners can build an out-of-the-box integration using the Datadog Agent or Datadog API. 
 
-The [Integrations page][3] includes integrations and Datadog Apps built by both Datadog and our Technology Partners, available at no cost to Datadog customers. 
+The [Integrations page][3] includes integrations and custom dashboard widgets built by both Datadog and our Technology Partners, available at no cost to Datadog customers. 
 
 The [Datadog Marketplace][4], on the other hand, is a commercial platform for Technology Partners to _sell_ a variety of offerings, including integrations, custom dashboard widgets, software subscriptions/licenses, and professional services to Datadog customers.
 
