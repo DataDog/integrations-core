@@ -58,6 +58,10 @@ def instance_cache_shared_labels(field, value):
     return True
 
 
+def instance_cluster_operator_endpoint(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_collect_counters_with_distributions(field, value):
     return False
 
@@ -182,6 +186,10 @@ def instance_ntlm_domain(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_openmetrics_endpoint(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_password(field, value):
     return get_default_field_value(field, value)
 
@@ -270,6 +278,10 @@ def instance_tls_verify(field, value):
     return True
 
 
+def instance_topic_operator_endpoint(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_use_latest_spec(field, value):
     return False
 
@@ -280,6 +292,10 @@ def instance_use_legacy_auth_encoding(field, value):
 
 def instance_use_process_start_time(field, value):
     return False
+
+
+def instance_user_operator_endpoint(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_username(field, value):

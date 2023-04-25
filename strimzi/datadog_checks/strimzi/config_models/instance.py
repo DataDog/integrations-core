@@ -82,6 +82,7 @@ class InstanceConfig(BaseModel):
     aws_service: Optional[str]
     cache_metric_wildcards: Optional[bool]
     cache_shared_labels: Optional[bool]
+    cluster_operator_endpoint: Optional[str]
     collect_counters_with_distributions: Optional[bool]
     collect_histogram_buckets: Optional[bool]
     connect_timeout: Optional[float]
@@ -113,7 +114,7 @@ class InstanceConfig(BaseModel):
     namespace: Optional[str] = Field(None, regex='\\w*')
     non_cumulative_histogram_buckets: Optional[bool]
     ntlm_domain: Optional[str]
-    openmetrics_endpoint: str
+    openmetrics_endpoint: Optional[str]
     password: Optional[str]
     persist_connections: Optional[bool]
     proxy: Optional[Proxy]
@@ -136,9 +137,11 @@ class InstanceConfig(BaseModel):
     tls_protocols_allowed: Optional[Sequence[str]]
     tls_use_host_header: Optional[bool]
     tls_verify: Optional[bool]
+    topic_operator_endpoint: Optional[str]
     use_latest_spec: Optional[bool]
     use_legacy_auth_encoding: Optional[bool]
     use_process_start_time: Optional[bool]
+    user_operator_endpoint: Optional[str]
     username: Optional[str]
 
     @root_validator(pre=True)

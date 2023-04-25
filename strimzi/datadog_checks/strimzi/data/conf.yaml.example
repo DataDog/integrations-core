@@ -45,10 +45,21 @@ init_config:
 #
 instances:
 
-    ## @param openmetrics_endpoint - string - required
-    ## The URL exposing metrics in the OpenMetrics format.
+  -
+    ## @param cluster_operator_endpoint - string - optional
+    ## Endpoint exposing the Cluster Operator's Prometheus metrics.
     #
-  - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
+    # cluster_operator_endpoint: http://cluster-operator-metrics:8080/metrics
+
+    ## @param topic_operator_endpoint - string - optional
+    ## Endpoint exposing the Topic Operator's Prometheus metrics.
+    #
+    # topic_operator_endpoint: http://topic-operator-server:8080/metrics
+
+    ## @param user_operator_endpoint - string - optional
+    ## Endpoint exposing the User Operator's Prometheus metrics.
+    #
+    # user_operator_endpoint: http://user-operator-metrics:8081/metrics
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.
