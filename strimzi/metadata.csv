@@ -1,1 +1,2 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+strimzi.jvm.gc.memory_promoted_bytes.count,count,,byte,,Count of positive increases in the size of the old generation memory pool before GC to after GC.,1,strimzi,jvm gc memory promoted bytes count,

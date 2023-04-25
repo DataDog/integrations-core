@@ -2,16 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os.path
-from contextlib import ExitStack
 from copy import deepcopy
 
 import pytest
 
 from datadog_checks.dev import get_here, run_command
 from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.strimzi import StrimziCheck
 
-from datadog_checks.dev.kube_port_forward import port_forward
 from .common import STRIMZI_VERSION
 
 HERE = get_here()
@@ -38,11 +37,7 @@ def setup_strimzi():
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
     with kind_run(conditions=[setup_strimzi]) as kubeconfig:
-        with ExitStack() as stack:
-            host, port = stack.enter_context(
-                port_forward(kubeconfig, 'kafka', 8080, 'deployment', 'strimzi-cluster-operator')
-            )
-
+        with port_forward(kubeconfig, 'kafka', 8080, 'deployment', 'strimzi-cluster-operator') as (host, port):
             instance = {
                 "openmetrics_endpoint": f"http://{host}:{port}/metrics",
             }
@@ -55,7 +50,13 @@ def dd_environment(dd_save_state):
 
 @pytest.fixture
 def instance(dd_get_state):
-    return deepcopy(dd_get_state('strimzi_instance', default={}))
+    # We define a default value for unit tests, which are using a mock
+    return deepcopy(dd_get_state('strimzi_instance', default={"openmetrics_endpoint": "http://strimzi:8080/metrics"}))
+
+
+@pytest.fixture
+def tags(instance):
+    return [f'endpoint:{instance["openmetrics_endpoint"]}']
 
 
 @pytest.fixture()
