@@ -10,22 +10,37 @@ Datadog metrics, APM and logs.
 
 ### Installation
 
-1. Enable APM in the Agent using the instructions [here][11].
+1. Enable APM and Statsd in your Datadog Agent. For example in Docker:
+
+```
+docker run -d --cgroupns host \
+              --pid host \
+              -v /var/run/docker.sock:/var/run/docker.sock:ro \
+              -v /proc/:/host/proc/:ro \
+              -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+              -e DD_API_KEY=<DATADOG_API_KEY> \
+              -p 127.0.0.1:8126:8126/tcp \
+              -p 127.0.0.1:8125:8125/udp \
+              -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
+              -e DD_APM_ENABLED=true \
+              gcr.io/datadoghq/agent:latest
+```
 
 2. Install the Datadog APM Python library.
 
 ```
-pip install ddtrace
+pip install ddtrace>=1.13
 ```
 
 
-3. Prefix your Python application command with `ddtrace-run`.
+3. Prefix your OpenAI Python application command with `ddtrace-run`.
 
 ```
-DD_SERVICE="my-openai-service" DD_ENV="staging" DD_API_KEY=<DATADOG_API_KEY> ddtrace-run python <your-app>.py
+DD_SERVICE="my-service" DD_ENV="staging" DD_API_KEY=<DATADOG_API_KEY> ddtrace-run python <your-app>.py
 ```
 
-Note: if the Agent is using a specified hostname/port, set `DD_AGENT_HOST` and `DD_TRACE_AGENT_PORT`.
+Note: if the Agent is using a non-default hostname/port, be sure to also set
+`DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
 
 See the [APM Python library documentation][12] for more advanced usage.
 
@@ -38,7 +53,7 @@ See the [APM Python library documentation][10] for all the available configurati
 #### Log Prompt & Completion Sampling
 
 To enable log prompt and completion sampling set the environment variable
-`DD_OPENAI_LOGS_ENABLED=1`. By default, 10% of requests will emit logs
+`DD_OPENAI_LOGS_ENABLED=1`. By default, 10% of traced requests will emit logs
 containing the prompts and completions.
 
 To adjust the log sample rate see the [APM library documentation][10].
@@ -46,9 +61,10 @@ To adjust the log sample rate see the [APM library documentation][10].
 Note: logs submission requires `DD_API_KEY` to be specified when running
 `ddtrace-run`.
 
+
 ### Validation
 
-Validate that the APM Python library can communicate with the Agent using:
+Validate that the APM Python library can communicate with your Agent using:
 
 ```
 ddtrace-run --info
