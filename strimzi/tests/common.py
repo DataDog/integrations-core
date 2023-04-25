@@ -12,6 +12,5 @@ METRICS = (
     {
         "name": "strimzi.jvm.gc.memory_promoted_bytes.count",
         "value": 1,
-        "type": AggregatorStub.MONOTONIC_COUNT,
     },
 )

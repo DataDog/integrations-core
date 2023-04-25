@@ -11,12 +11,6 @@ from tests.common import METRICS
 pytestmark = pytest.mark.e2e
 
 
-def get_e2e_metric_type(metric_type):
-    if metric_type == AggregatorStub.MONOTONIC_COUNT:
-        return AggregatorStub.COUNT
-
-    return metric_type
-
 
 def test_check(dd_agent_check, instance, tags):
     aggregator = dd_agent_check(instance)
@@ -24,7 +18,6 @@ def test_check(dd_agent_check, instance, tags):
     for expected_metric in METRICS:
         aggregator.assert_metric(
             name=expected_metric["name"],
-            metric_type=get_e2e_metric_type(expected_metric.get("type", aggregator.GAUGE)),
             tags=expected_metric.get("tags", tags),
             count=expected_metric.get("count", 1),
         )

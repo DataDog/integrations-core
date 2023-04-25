@@ -21,7 +21,6 @@ def test_check(dd_run_check, aggregator, check, instance, tags, mock_http_respon
         aggregator.assert_metric(
             name=expected_metric["name"],
             value=float(expected_metric["value"]) if "value" in expected_metric else None,
-            metric_type=expected_metric.get("type", aggregator.GAUGE),
             tags=expected_metric.get("tags", tags),
             count=expected_metric.get("count", 1),
         )

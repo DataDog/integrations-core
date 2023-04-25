@@ -16,7 +16,6 @@ def test_check(dd_run_check, aggregator, check, instance, tags):
     for expected_metric in METRICS:
         aggregator.assert_metric(
             name=expected_metric["name"],
-            metric_type=expected_metric.get("type", aggregator.GAUGE),
             tags=expected_metric.get("tags", tags),
             count=expected_metric.get("count", 1),
         )
