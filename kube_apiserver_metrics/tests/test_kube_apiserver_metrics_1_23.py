@@ -63,6 +63,7 @@ class TestKubeAPIServerMetrics:
         'storage_list_evaluated_objects_total',
         'storage_list_returned_objects_total',
         'requested_deprecated_apis',
+        'aggregator_unavailable_apiservice',
     ]
     COUNT_METRICS = [
         'audit_event.count',

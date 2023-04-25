@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_apiserver_metrics
 
+# 3.6.0 / 2023-04-25
+
+* [Added] Add new metric `aggregator_unavailable_apiservice`.
+
 ## 3.5.0 / 2023-04-14
 
 * [Added] Adds new metric `kubernetes_feature_enabled`. See [#14147](https://github.com/DataDog/integrations-core/pull/14147).

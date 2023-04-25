@@ -64,6 +64,7 @@ class TestKubeAPIServerMetrics:
         'apiserver_admission_webhook_fail_open_count',
         'admission_webhook_admission_latencies_seconds.sum',
         'admission_webhook_admission_latencies_seconds.count',
+        'aggregator_unavailable_apiservice',
     ]
     COUNT_METRICS = [
         'audit_event.count',
