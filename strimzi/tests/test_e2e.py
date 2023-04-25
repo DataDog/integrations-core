@@ -22,10 +22,9 @@ def test_check(dd_agent_check, instance, tags):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    aggregator.assert_no_duplicate_all()
     aggregator.assert_service_check(
         "strimzi.openmetrics.health",
         status=StrimziCheck.OK,
         tags=tags,
-        count=1,
+        count=2,  # because rate=True
     )
