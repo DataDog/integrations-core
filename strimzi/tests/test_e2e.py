@@ -11,7 +11,7 @@ pytestmark = pytest.mark.e2e
 
 
 def test_check(dd_agent_check, instance, tags):
-    aggregator = dd_agent_check(instance)
+    aggregator = dd_agent_check(instance, rate=True)
 
     for expected_metric in METRICS:
         aggregator.assert_metric(
