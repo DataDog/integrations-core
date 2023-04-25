@@ -12,9 +12,9 @@
     "title": "OpenAI",
     "media": [],
     "classifier_tags": [
-      "Supported Data Type::Metrics",
-      "Supported Data Type::Logs",
-      "Supported Data Type::Traces",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Traces",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"
