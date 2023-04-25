@@ -28,7 +28,7 @@
       },
       "metrics": {
         "prefix": "strimzi.",
-        "check": "",
+        "check": "strimzi.jvm.gc.memory_promoted_bytes.count",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
