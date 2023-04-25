@@ -1,5 +1,10 @@
 # CHANGELOG - kafka_consumer
 
+## 3.0.1 / 2023-04-21
+
+* [Fixed] Fix errors related to filtering based on user-specified consumer groups filters. See [#14406](https://github.com/DataDog/integrations-core/pull/14406).
+* [Fixed] Move all configuration validation to config class. See [#14405](https://github.com/DataDog/integrations-core/pull/14405).
+
 ## 3.0.0 / 2023-04-14
 
 * [Added] Implement regex for consumer_groups. See [#14382](https://github.com/DataDog/integrations-core/pull/14382).

@@ -1257,6 +1257,5 @@
   "layout_type": "ordered",
   "is_read_only": false,
   "notify_list": [],
-  "reflow_type": "fixed",
-  "id": "sez-d3r-yhk"
+  "reflow_type": "fixed"
 }

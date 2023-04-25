@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab
 
+## 6.0.2 / 2023-04-21
+
+* [Fixed] Collect the readiness service checks even if the readiness payload is malformed. See [#14411](https://github.com/DataDog/integrations-core/pull/14411).
+
 ## 6.0.1 / 2023-04-19
 
 * [Fixed] Fix Gitlab documentation in conf.yaml. See [#14400](https://github.com/DataDog/integrations-core/pull/14400).

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 from collections import ChainMap
 
 import requests
@@ -10,7 +11,7 @@ from datadog_checks.gitlab.config_models import ConfigMixin
 
 from ..base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 from .common import get_gitlab_version, get_tags
-from .metrics import METRICS_MAP, construct_metrics_config
+from .metrics import GITALY_METRICS_MAP, METRICS_MAP, construct_metrics_config
 
 
 class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
@@ -64,7 +65,18 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         }
 
     def create_scraper(self, config):
-        return OpenMetricsCompatibilityScraper(self, ChainMap({"tags": self._tags}, config, self.get_default_config()))
+        scraper = OpenMetricsCompatibilityScraper(
+            self, ChainMap({"tags": self._tags}, config, self.get_default_config())
+        )
+
+        # If we scrape the Gitaly metrics, we have two configs that are mostly the same except for the
+        # `openmetrics_endpoint` and `metrics` options. Our only way to know this is the config for Gitaly is to check
+        # if the `openmetrics_endpoint` is the same as the `gitaly_server_endpoint` option,
+        # as defined in the `parse_config` method.
+        # There's no other option AFAIK to override the service check name.
+        if config['openmetrics_endpoint'] == config.get('gitaly_server_endpoint'):
+            scraper.SERVICE_CHECK_HEALTH = f"gitaly.{scraper.SERVICE_CHECK_HEALTH}"
+        return scraper
 
     @AgentCheck.metadata_entrypoint
     def _submit_version(self):
@@ -122,6 +134,16 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
 
         if self.is_metadata_collection_enabled() and not self.instance.get("api_token"):
             self.warning("GitLab token not found; please add one in your config to enable version metadata collection.")
+
+        gitaly_server_endpoint = self.instance.get("gitaly_server_endpoint")
+
+        if gitaly_server_endpoint:
+            # We create another config to scrape Gitaly metrics, so we have two different scrapers:
+            # one for the main GitLab and another one for the Gitaly endpoint.
+            config = copy.deepcopy(self.instance)
+            config['openmetrics_endpoint'] = gitaly_server_endpoint
+            config['metrics'] = [GITALY_METRICS_MAP]
+            self.scraper_configs.append(config)
 
     def parse_readiness_service_checks(self, response):
         self.log.debug("Parsing readiness output")
