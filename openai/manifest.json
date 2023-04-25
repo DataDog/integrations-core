@@ -8,10 +8,13 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Cost estimation, prompt sampling, performance metrics and more of OpenAI usage",
+    "description": "Get cost estimation, prompt sampling, performance metrics, and more out of OpenAI usage.",
     "title": "OpenAI",
     "media": [],
     "classifier_tags": [
+      "Supported Data Type::Metrics",
+      "Supported Data Type::Logs",
+      "Supported Data Type::Traces",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"

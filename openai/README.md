@@ -2,15 +2,13 @@
 
 ## Overview
 
-Get cost estimation, prompt and completion sampling, error tracking,
-performance metrics and more of [OpenAI][1] Python library requests using
-Datadog metrics, APM and logs.
+Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [OpenAI][1] Python library requests using Datadog metrics, APM, and logs.
 
 ## Setup
 
 ### Installation
 
-1. Enable APM and Statsd in your Datadog Agent. For example in Docker:
+1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
 
 ```
 docker run -d --cgroupns host \
@@ -39,8 +37,7 @@ pip install ddtrace>=1.13
 DD_SERVICE="my-service" DD_ENV="staging" DD_API_KEY=<DATADOG_API_KEY> ddtrace-run python <your-app>.py
 ```
 
-Note: if the Agent is using a non-default hostname/port, be sure to also set
-`DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
+**Note**: If the Agent is using a non-default hostname or port, be sure to also set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
 
 See the [APM Python library documentation][12] for more advanced usage.
 
@@ -52,14 +49,11 @@ See the [APM Python library documentation][10] for all the available configurati
 
 #### Log Prompt & Completion Sampling
 
-To enable log prompt and completion sampling set the environment variable
-`DD_OPENAI_LOGS_ENABLED=1`. By default, 10% of traced requests will emit logs
-containing the prompts and completions.
+To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED=1` environment variable. By default, 10% of traced requests will emit logs containing the prompts and completions.
 
-To adjust the log sample rate see the [APM library documentation][10].
+To adjust the log sample rate, see the [APM library documentation][10].
 
-Note: logs submission requires `DD_API_KEY` to be specified when running
-`ddtrace-run`.
+**Note**: Logs submission requires `DD_API_KEY` to be specified when running `ddtrace-run`.
 
 
 ### Validation
@@ -70,7 +64,7 @@ Validate that the APM Python library can communicate with your Agent using:
 ddtrace-run --info
 ```
 
-Should show
+You should see the following output:
 
 ```
     Agent error: None
@@ -84,7 +78,7 @@ Pass the `--debug` flag to `ddtrace-run` to enable debug logging.
 ddtrace-run --debug
 ```
 
-This will show any errors sending data:
+This displays any errors sending data:
 
 ```
 ERROR:ddtrace.internal.writer.writer:failed to send, dropping 1 traces to intake at http://localhost:8126/v0.5/traces after 3 retries ([Errno 61] Connection refused)
@@ -106,7 +100,6 @@ The OpenAI integration does not include any events.
 
 The OpenAI integration does not include any service checks.
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -120,7 +113,6 @@ Need help? Contact [Datadog support][9].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/openai/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/openai/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://ddtrace.readthedocs.io/en/stable/integrations.html#openai
 [11]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/python/?tab=containers#configure-the-datadog-agent-for-apm
