@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import string
 from enum import Enum
-from typing import Any, List, Tuple
+from typing import Any, List, Tuple  # noqa: F401
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
@@ -58,6 +58,13 @@ def get_schema_field(descriptors):
 
 
 fmt = PartialFormatter()
+
+AWS_RDS_HOSTNAME_SUFFIX = ".rds.amazonaws.com"
+AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE = {
+    "flexible_server": "azure_postgresql_flexible_server",
+    "single_server": "azure_postgresql_server",
+    "virtual_machine": "azure_virtual_machine_instance",
+}
 
 DBM_MIGRATED_METRICS = {
     'numbackends': ('postgresql.connections', AgentCheck.gauge),

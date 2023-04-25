@@ -5,7 +5,7 @@
 Helpers for parsing the `metrics` section of a config file.
 """
 import re
-from logging import Logger
+from logging import Logger  # noqa: F401
 from typing import Dict, List, NamedTuple, Optional, Pattern, Sequence, TypedDict, Union, cast
 
 import six
@@ -14,17 +14,17 @@ from datadog_checks.base import ConfigurationError
 
 from ..models import OID
 from ..pysnmp_types import ObjectIdentity
-from ..resolver import OIDResolver
+from ..resolver import OIDResolver  # noqa: F401
 from .metric_tags import MetricTag, parse_metric_tag
 from .metrics_types import (
     ColumnTableMetricTag,
     IndexTableMetricTag,
-    Metric,
+    Metric,  # noqa: F401
     OIDMetric,
-    Symbol,
+    Symbol,  # noqa: F401
     SymbolMetric,
     TableMetric,
-    TableMetricTag,
+    TableMetricTag,  # noqa: F401
 )
 from .parsed_metrics import ParsedMetric, ParsedMetricTag, ParsedSymbolMetric, ParsedTableMetric
 

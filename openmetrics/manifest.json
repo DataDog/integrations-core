@@ -13,9 +13,9 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Monitoring"
+      "Category::Metrics",
+      "Supported OS::macOS"
     ]
   },
   "author": {

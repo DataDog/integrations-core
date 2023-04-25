@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import Any, Tuple
+from typing import Any, Tuple  # noqa: F401
 
 import pytest
 
@@ -157,7 +157,7 @@ def test_as_metric_with_forced_type(input_string, forced_type, expected):
 @pytest.mark.parametrize(
     'src_index, transform_rules, expected_dst_index',
     [
-        pytest.param(('10', '11', '12', '13'), [], tuple(), id='no_transform_rules'),
+        pytest.param(('10', '11', '12', '13'), [], (), id='no_transform_rules'),
         pytest.param(('10', '11', '12', '13'), [slice(2, 4)], ('12', '13'), id='one'),
         pytest.param(('10', '11', '12', '13'), [slice(2, 3), slice(0, 2)], ('12', '10', '11'), id='multi'),
         pytest.param(('10', '11', '12', '13'), [slice(2, 1000)], None, id='out_of_index_end'),

@@ -8,7 +8,7 @@ from contextlib import closing
 import oracledb
 from six import PY2
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
@@ -62,6 +62,7 @@ class Oracle(AgentCheck):
         self._password = self.instance.get('password')
         self._service = self.instance.get('service_name')
         self._protocol = self.instance.get("protocol", PROTOCOL_TCP)
+        self._use_instant_client = is_affirmative(self.init_config.get("use_instant_client"))
         self._jdbc_driver = self.instance.get('jdbc_driver_path')
         self._jdbc_truststore_path = self.instance.get('jdbc_truststore_path')
         self._jdbc_truststore_type = self.instance.get('jdbc_truststore_type')
@@ -156,8 +157,22 @@ class Oracle(AgentCheck):
                     self.log.error("The JDBC connection failed with the following error: %s", str(e))
                     self._connection_errors += 1
             else:
+                if self._use_instant_client:
+                    self.init_instant_client()
+                else:
+                    self.log.debug('Connecting to Oracle using the native client')
                 self._cached_connection = self._oracle_connect()
         return self._cached_connection
+
+    def init_instant_client(self):
+        try:
+            oracledb.init_oracle_client()
+        except oracledb.DatabaseError as e:
+            self.log.error('Oracle Instant Client is unavailable: %s', str(e))
+            self._connection_errors += 1
+            raise
+        else:
+            self.log.debug('Oracle Instant Client version %s', oracledb.clientversion())
 
     def can_use_jdbc(self):
         if self._jdbc_driver:

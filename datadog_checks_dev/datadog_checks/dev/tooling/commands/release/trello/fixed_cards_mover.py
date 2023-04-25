@@ -76,7 +76,7 @@ class FixedCardsMover:
         return '', ''
 
     def __get_github_pull_requests_urls(self, card_id: str) -> List[str]:
-        urls = set([])
+        urls = set()
         attachments = self.__client.get_attachments(card_id)
         for attachment in attachments:
             if 'idMember' in attachment and attachment['idMember'] == self.GITHUB_TRELLO_ACTION_ID:
@@ -84,7 +84,7 @@ class FixedCardsMover:
         return list(urls)
 
     def __get_github_pull_requests_urls_from_comments(self, card_id: str) -> List[str]:
-        urls = set([])
+        urls = set()
         actions = self.__client.get_actions(card_id)
         for action in actions:
             if action['type'] == 'commentCard':

@@ -12,9 +12,8 @@
     "title": "IIS",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Windows",
-      "Category::Web",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Supported OS::Windows"
     ]
   },
   "author": {

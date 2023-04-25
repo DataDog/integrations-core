@@ -12,14 +12,14 @@
     "title": "nginx-ingress-controller",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Orchestration",
       "Category::Containers",
+      "Category::Kubernetes",
       "Category::Log Collection",
-      "Category::Web",
-      "Category::Network"
+      "Category::Network",
+      "Category::Orchestration",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

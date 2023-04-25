@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
     - master
+    paths-ignore:
+    - datadog_checks_base/datadog_checks/**
+    - datadog_checks_dev/datadog_checks/dev/*.py
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}

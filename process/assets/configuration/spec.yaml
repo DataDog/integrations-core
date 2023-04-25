@@ -132,4 +132,12 @@ files:
         value:
           type: boolean
           example: false
+      - name: pid_cache_duration
+        description: |
+          Changes the check refresh rate of the matching pid list every X seconds except if it
+          detects a change before. You might want to set it low if you want to
+          alert on process service checks.
+        value:
+          type: integer
+          example: 120
       - template: instances/default

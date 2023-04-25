@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict
+from typing import Any, Dict  # noqa: F401
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 

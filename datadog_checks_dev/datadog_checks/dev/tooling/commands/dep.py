@@ -191,7 +191,7 @@ async def scrape_version_data(urls):
             latest_py3 = None
 
             versions = []
-            for parsed_version, artifacts in reversed(sorted(filter_releases(releases))):
+            for parsed_version, artifacts in sorted(filter_releases(releases), reverse=True):
                 version = str(parsed_version)
                 versions.append(version)
 

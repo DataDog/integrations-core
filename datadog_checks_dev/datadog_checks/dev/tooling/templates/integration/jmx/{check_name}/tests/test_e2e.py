@@ -1,10 +1,10 @@
 {license_header}
-from typing import Any
+from typing import Any  # noqa: F401
 
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 
 from .common import CHECK_CONFIG
 from .metrics import METRICS

@@ -40,6 +40,7 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float]
     name: str
     pid: Optional[int]
+    pid_cache_duration: Optional[int]
     pid_file: Optional[str]
     search_string: Optional[Sequence[str]]
     service: Optional[str]

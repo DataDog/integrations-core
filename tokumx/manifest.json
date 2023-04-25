@@ -12,10 +12,11 @@
     "title": "TokuMX",
     "media": [],
     "classifier_tags": [
+      "Category::Caching",
+      "Category::Data Store",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store"
+      "Supported OS::macOS"
     ]
   },
   "author": {

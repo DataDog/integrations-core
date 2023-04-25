@@ -7,6 +7,12 @@ RATE = "rate"
 COUNT = "count"
 MONOTONIC = "monotonic_count"
 PROC_NAME = 'mysqld'
+AWS_RDS_HOSTNAME_SUFFIX = ".rds.amazonaws.com"
+AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE = {
+    "flexible_server": "azure_mysql_flexible_server",
+    "single_server": "azure_mysql_server",
+    "virtual_machine": "azure_virtual_machine_instance",
+}
 
 # Vars found in "SHOW STATUS;"
 STATUS_VARS = {

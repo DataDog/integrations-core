@@ -186,7 +186,7 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
     # Check that those pooled connections do exist on the database
     rows = get_activity()
     assert len(rows) == 50
-    assert len(set(row['datname'] for row in rows)) == 50
+    assert len({row['datname'] for row in rows}) == 50
     assert all(row['state'] == 'idle' for row in rows)
 
     pool._stats.reset()
@@ -201,9 +201,9 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
         # The test can be considered successful as long as the backend is eventually terminated.
         for attempt in range(attempts_to_verify):
             rows = get_activity()
-            server_pids = set(row['pid'] for row in rows)
-            conn_pids = set(db.info.backend_pid for db, _ in pool._conns.values())
-            leaked_rows = list(row for row in rows if row['pid'] in server_pids - conn_pids)
+            server_pids = {row['pid'] for row in rows}
+            conn_pids = {db.info.backend_pid for db, _ in pool._conns.values()}
+            leaked_rows = [row for row in rows if row['pid'] in server_pids - conn_pids]
             if not leaked_rows:
                 break
             if attempt < attempts_to_verify - 1:
@@ -211,7 +211,7 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
                 continue
             assert len(leaked_rows) == 0, 'Found leaked rows on the server not in the connection pool'
 
-        assert len(set(row['datname'] for row in rows)) == 51
+        assert len({row['datname'] for row in rows}) == 51
         assert len(rows) == 51, 'Possible leaked connections'
         assert all(row['state'] == 'idle' for row in rows)
     assert pool._stats.connection_opened == 1
