@@ -82,10 +82,10 @@ def extract_sql_comments(text):
 
     for i in range(len(text)):
         if in_multi_line_comment:
-            if i < len(text)-1 and text[i:i+2] == '*/':
+            if i < len(text) - 1 and text[i : i + 2] == '*/':
                 in_multi_line_comment = False
                 # strip all non-space/newline chars from mult-line comments
-                lines = [line.strip() for line in text[comment_start:i+2].split('\n')]
+                lines = [line.strip() for line in text[comment_start : i + 2].split('\n')]
                 result.append(' '.join(lines))
         elif in_single_line_comment:
             if text[i] == '\n':
@@ -94,10 +94,10 @@ def extract_sql_comments(text):
                 # of the single line comment
                 result.append(text[comment_start:i].rstrip())
         else:
-            if i < len(text)-1 and text[i:i+2] == '--':
+            if i < len(text) - 1 and text[i : i + 2] == '--':
                 in_single_line_comment = True
                 comment_start = i
-            elif i < len(text)-1 and text[i:i+2] == '/*':
+            elif i < len(text) - 1 and text[i : i + 2] == '/*':
                 in_multi_line_comment = True
                 comment_start = i
 

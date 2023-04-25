@@ -560,7 +560,7 @@ def test_is_statement_procedure(query, is_proc, expected_name):
         ],
         [
             """\
-            /* a comment */ 
+            /* a comment */
             -- Single comment
             """,
             ["/* a comment */", "-- Single comment"],
@@ -579,28 +579,28 @@ def test_is_statement_procedure(query, is_proc, expected_name):
         ],
         [
             """\
-            -- My Comment 
+            -- My Comment
             CREATE PROCEDURE bobProcedure
             BEGIN
                 SELECT name FROM bob
             END;
             """,
-            ["-- My Comment"]
+            ["-- My Comment"],
         ],
         [
             """\
-            -- My Comment 
+            -- My Comment
             CREATE PROCEDURE bobProcedure
             -- In the middle
             BEGIN
                 SELECT name FROM bob
             END;
             """,
-            ["-- My Comment", "-- In the middle"]
+            ["-- My Comment", "-- In the middle"],
         ],
         [
             """\
-            -- My Comment 
+            -- My Comment
             CREATE PROCEDURE bobProcedure
             -- In the middle
             BEGIN
@@ -608,11 +608,11 @@ def test_is_statement_procedure(query, is_proc, expected_name):
             END;
             -- And at the end
             """,
-            ["-- My Comment", "-- In the middle", "-- And at the end"]
+            ["-- My Comment", "-- In the middle", "-- And at the end"],
         ],
         [
             """\
-            -- My Comment 
+            -- My Comment
             CREATE PROCEDURE bobProcedure
             -- In the middle
             /*mixed with mult-line foo*/
@@ -621,7 +621,7 @@ def test_is_statement_procedure(query, is_proc, expected_name):
             END;
             -- And at the end
             """,
-            ["-- My Comment", "-- In the middle", "/*mixed with mult-line foo*/", "-- And at the end"]
+            ["-- My Comment", "-- In the middle", "/*mixed with mult-line foo*/", "-- And at the end"],
         ],
         [
             """\
@@ -639,14 +639,18 @@ def test_is_statement_procedure(query, is_proc, expected_name):
             END;
             -- And at the end
             """,
-            ["/* hello this is a mult-line-comment tag=foo,blah=tag */", "/* second multi-line comment */", "-- And at the end"]
+            [
+                "/* hello this is a mult-line-comment tag=foo,blah=tag */",
+                "/* second multi-line comment */",
+                "-- And at the end",
+            ],
         ],
         [
             """\
             /* hello
             this is a mult-line-commet
             tag=foo,blah=tag
-            */ 
+            */
             CREATE PROCEDURE bobProcedure
             -- In the middle
             /*mixed with mult-line foo*/
@@ -655,7 +659,12 @@ def test_is_statement_procedure(query, is_proc, expected_name):
             END;
             -- And at the end
             """,
-            ["/* hello this is a mult-line-commet tag=foo,blah=tag */", "-- In the middle", "/*mixed with mult-line foo*/", "-- And at the end"]
+            [
+                "/* hello this is a mult-line-commet tag=foo,blah=tag */",
+                "-- In the middle",
+                "/*mixed with mult-line foo*/",
+                "-- And at the end",
+            ],
         ],
     ],
 )
