@@ -150,9 +150,14 @@ This is if you cloned [integrations-core][] and want to always use the version b
 === "macOS"
     Remove any executables shown in the output of `which -a ddev` and make sure that there is no active virtual environment, then run:
 
-    ```
-    pipx install -e /path/to/integrations-core/ddev --python /usr/local/opt/python@3.8/bin/python3.8
-    ```
+    === "ARM"
+        ```
+        pipx install -e /path/to/integrations-core/ddev --python /opt/homebrew/opt/python@3.8/bin/python3.8
+        ```
+    === "Intel"
+        ```
+        pipx install -e /path/to/integrations-core/ddev --python /usr/local/opt/python@3.8/bin/python3.8
+        ```
 
 === "Windows"
     Run:
