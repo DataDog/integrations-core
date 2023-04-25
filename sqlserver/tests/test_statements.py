@@ -321,7 +321,7 @@ def test_statement_metrics_and_plans(
             )
 
     instance_tags = dbm_instance.get('tags', [])
-    expected_instance_tags = set([t for t in instance_tags if not t.startswith('dd.internal')])
+    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
     expected_instance_tags_with_db = expected_instance_tags | {"db:{}".format(database)}
 
     # dbm-metrics

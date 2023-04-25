@@ -132,7 +132,7 @@ def test_collect_load_activity(
     executor.shutdown(wait=True)
 
     instance_tags = set(dbm_instance.get('tags', []))
-    expected_instance_tags = set([t for t in instance_tags if not t.startswith('dd.internal')])
+    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert len(dbm_activity) == 1, "should have collected exactly one dbm-activity payload"
