@@ -101,6 +101,8 @@ NOVA_SERVER_METRICS = {
     f"{NOVA_SERVER_METRICS_PREFIX}.nic_details.tx_octets": {"min_version": "2.48"},
     f"{NOVA_SERVER_METRICS_PREFIX}.nic_details.tx_packets": {"min_version": "2.48"},
     f"{NOVA_SERVER_METRICS_PREFIX}.nic_details.tx_rate": {"min_version": "2.48"},
+    f"{NOVA_SERVER_METRICS_PREFIX}.memory_details.maximum": {"min_version": "2.48"},
+    f"{NOVA_SERVER_METRICS_PREFIX}.memory_details.used": {"min_version": "2.48"},
     f"{NOVA_SERVER_METRICS_PREFIX}.uptime": {"min_version": "2.48"},
     f"{NOVA_SERVER_METRICS_PREFIX}.num_cpus": {"min_version": "2.48"},
     f"{NOVA_SERVER_METRICS_PREFIX}.num_nics": {"min_version": "2.48"},
