@@ -376,9 +376,9 @@ def test_detailed_index_stats(dd_environment, aggregator):
     es_version = elastic_check._get_es_version()
     elastic_check.check(None)
     pshard_stats_metrics = pshard_stats_for_version(es_version)
-    for m_name, desc in iteritems(pshard_stats_metrics):
-        if desc[0] == 'gauge' and desc[1].startswith('_all.'):
-            aggregator.assert_metric(m_name)
+    for dd_name, (mtype, es_name, *_) in iteritems(pshard_stats_metrics):
+        if mtype == 'gauge' and es_name.startswith('_all.'):
+            aggregator.assert_metric(dd_name)
 
     aggregator.assert_metric_has_tag('elasticsearch.primaries.docs.count', tag='index_name:_all')
     aggregator.assert_metric_has_tag('elasticsearch.primaries.docs.count', tag='index_name:testindex')
