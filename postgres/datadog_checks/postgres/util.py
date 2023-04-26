@@ -347,6 +347,43 @@ SELECT name, {metrics_columns}
 """,
 }
 
+SNAPSHOT_TXID_METRICS = {
+    'name': 'pg_snapshot',
+    # Use CTE to only do a single call to pg_current_snapshot
+    # FROM LATERAL was necessary given that pg_snapshot_xip returns a setof xid8
+    'query': """
+WITH snap AS (
+    SELECT * from pg_current_snapshot()
+), xip_count AS (
+    SELECT COUNT(xip_list) FROM LATERAL (SELECT pg_snapshot_xip(pg_current_snapshot) FROM snap) as xip_list
+)
+select pg_snapshot_xmin(pg_current_snapshot), pg_snapshot_xmax(pg_current_snapshot), count from snap, xip_count;
+""",
+    'columns': [
+        {'name': 'postgresql.snapshot.xmin', 'type': 'gauge'},
+        {'name': 'postgresql.snapshot.xmax', 'type': 'gauge'},
+        {'name': 'postgresql.snapshot.xip_count', 'type': 'gauge'},
+    ],
+}
+
+# Use txid_current_snapshot for PG < 13
+SNAPSHOT_TXID_METRICS_LT_13 = {
+    'name': 'pg_snapshot_lt_13',
+    'query': """
+WITH snap AS (
+    SELECT * from txid_current_snapshot()
+), xip_count AS (
+    SELECT COUNT(xip_list) FROM LATERAL (SELECT txid_snapshot_xip(txid_current_snapshot) FROM snap) as xip_list
+)
+select txid_snapshot_xmin(txid_current_snapshot), txid_snapshot_xmax(txid_current_snapshot), count from snap, xip_count;
+""",
+    'columns': [
+        {'name': 'postgresql.snapshot.xmin', 'type': 'gauge'},
+        {'name': 'postgresql.snapshot.xmax', 'type': 'gauge'},
+        {'name': 'postgresql.snapshot.xip_count', 'type': 'gauge'},
+    ],
+}
+
 FUNCTION_METRICS = {
     'descriptors': [('schemaname', 'schema'), ('funcname', 'function')],
     'metrics': {
