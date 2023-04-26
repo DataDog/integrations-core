@@ -302,6 +302,46 @@ ADDITIONAL_METRICS_POST_7_9_0 = {
         'gauge',
         'indexing_pressure.memory.current.replica_in_bytes',
     ),
+    'elasticsearch.indexing_pressure.memory.current.all_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.all_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.current.combined_coordinating_and_primary_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.current.combined_coordinating_and_primary_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.total.coordinating_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.total.coordinating_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.total.primary_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.total.primary_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.total.replica_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.total.replica_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.total.all_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.total.all_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.total.combined_coordinating_and_primary_in_bytes': (
+        'gauge',
+        'indexing_pressure.memory.total.combined_coordinating_and_primary_in_bytes',
+    ),
+    'elasticsearch.indexing_pressure.memory.total.coordinating_rejections': (
+        'gauge',
+        'indexing_pressure.memory.total.coordinating_rejections',
+    ),
+    'elasticsearch.indexing_pressure.memory.total.primary_rejections': (
+        'gauge',
+        'indexing_pressure.memory.total.primary_rejections',
+    ),
+    'elasticsearch.indexing_pressure.memory.total.replica_rejections': (
+        'gauge',
+        'indexing_pressure.memory.total.replica_rejections',
+    ),
 }
 
 ADDITIONAL_METRICS_POST_7_2_0 = {
