@@ -2,11 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os.path
-from copy import deepcopy
+from contextlib import ExitStack
 
 import pytest
 
 from datadog_checks.dev import get_here, run_command
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.strimzi import StrimziCheck
@@ -37,28 +38,40 @@ def setup_strimzi():
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
     with kind_run(conditions=[setup_strimzi]) as kubeconfig:
-        with port_forward(kubeconfig, 'kafka', 8080, 'deployment', 'strimzi-cluster-operator') as (host, port):
-            instance = {
-                "openmetrics_endpoint": f"http://{host}:{port}/metrics",
+        with ExitStack() as stack:
+            cluster_operator_ip, cluster_operator_port = stack.enter_context(
+                port_forward(kubeconfig, 'kafka', 8080, 'deployment', 'strimzi-cluster-operator')
+            )
+            topic_operator_ip, topic_operator_port = stack.enter_context(
+                port_forward(kubeconfig, 'kafka', 8080, 'deployment', 'my-cluster-entity-operator')
+            )
+            user_operator_ip, user_operator_port = stack.enter_context(
+                port_forward(kubeconfig, 'kafka', 8081, 'deployment', 'my-cluster-entity-operator')
+            )
+
+            yield {
+                "cluster_operator_endpoint": f"http://{cluster_operator_ip}:{cluster_operator_port}/metrics",
+                "topic_operator_endpoint": f"http://{topic_operator_ip}:{topic_operator_port}/metrics",
+                "user_operator_endpoint": f"http://{user_operator_ip}:{user_operator_port}/metrics",
             }
-
-            # save this instance since the endpoint is different each run
-            dd_save_state("strimzi_instance", instance)
-
-            yield instance
-
-
-@pytest.fixture
-def instance(dd_get_state):
-    # We define a default value for unit tests, which are using a mock
-    return deepcopy(dd_get_state('strimzi_instance', default={"openmetrics_endpoint": "http://strimzi:8080/metrics"}))
-
-
-@pytest.fixture
-def tags(instance):
-    return [f'endpoint:{instance["openmetrics_endpoint"]}']
 
 
 @pytest.fixture()
 def check():
     return lambda instance: StrimziCheck('strimzi', {}, [instance])
+
+
+def mock_http_responses(url, **_params):
+    mapping = {
+        'http://cluster-operator:8080/metrics': 'cluster_operator_metrics.txt',
+        'http://entity-operator:8080/metrics': 'topic_operator_metrics.txt',
+        'http://entity-operator:8081/metrics': 'user_operator_metrics.txt',
+    }
+
+    metrics_file = mapping.get(url)
+
+    if not metrics_file:
+        pytest.fail(f"url `{url}` not registered")
+
+    with open(os.path.join(HERE, 'fixtures', STRIMZI_VERSION, metrics_file)) as f:
+        return MockResponse(content=f.read())
