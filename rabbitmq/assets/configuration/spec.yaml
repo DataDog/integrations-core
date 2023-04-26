@@ -119,8 +119,8 @@ files:
           For example, if you have a vhost named "myvhost" and a queue named "myqueue", your
           pattern is compared to:
             - myqueue
-            - /myvhost/myqueue
-          If you have no vhost defined in this example, your pattern is compared to "//myqueue".
+            - myvhost/myqueue
+          If you have no vhost defined in this example, your pattern is compared to "/myqueue".
         value:
           type: array
           items:
@@ -149,8 +149,8 @@ files:
           For example, if you have a vhost named "myvhost" and a exchange named "myexchange", your
           pattern is compared to:
             - myexchange
-            - /myvhost/myexchange
-          If you have no vhost defined in this example, your pattern is compared to "//myexchange".
+            - myvhost/myexchange
+          If you have no vhost defined in this example, your pattern is compared to "/myexchange".
         value:
           type: array
           items:
