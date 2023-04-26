@@ -113,12 +113,13 @@ class TerraformDown(LazyFunction):
         self.directory = directory
 
     def __call__(self):
-        with TempDir('terraform') as temp_dir:
-            terraform_dir = os.path.join(temp_dir, 'terraform')
-            with chdir(terraform_dir):
-                env = construct_env_vars()
-                # env['TF_VAR_user'] = getpass.getuser()
-                env['TF_VAR_desired_status'] = "TERMINATED"
-                run_command(['terraform', 'apply', '-auto-approve', '-input=false', '-no-color'], check=True, env=env)
-                output = run_command(['terraform', 'output', '-json'], capture='stdout', check=True, env=env).stdout
-                return json.loads(output)
+        pass
+        # with TempDir('terraform') as temp_dir:
+        #     terraform_dir = os.path.join(temp_dir, 'terraform')
+        #     with chdir(terraform_dir):
+        #         env = construct_env_vars()
+        #         # env['TF_VAR_user'] = getpass.getuser()
+        #         env['TF_VAR_desired_status'] = "TERMINATED"
+        #         run_command(['terraform', 'apply', '-auto-approve', '-input=false', '-no-color'], check=True, env=env)
+        #         output = run_command(['terraform', 'output', '-json'], capture='stdout', check=True, env=env).stdout
+        #         return json.loads(output)
