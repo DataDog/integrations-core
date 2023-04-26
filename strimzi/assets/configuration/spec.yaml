@@ -12,21 +12,21 @@ files:
         Endpoint exposing the Cluster Operator's Prometheus metrics.
       value:
         display_default: null
-        example: http://cluster-operator-metrics:8080/metrics
+        example: http://cluster-operator-address:8080/metrics
         type: string
     - name: topic_operator_endpoint
       description: |
         Endpoint exposing the Topic Operator's Prometheus metrics.
       value:
         display_default: null
-        example: http://topic-operator-server:8080/metrics
+        example: http://topic-operator-address:8080/metrics
         type: string
     - name: user_operator_endpoint
       description: |
         Endpoint exposing the User Operator's Prometheus metrics.
       value:
         display_default: null
-        example: http://user-operator-metrics:8081/metrics
+        example: http://user-operator-address:8081/metrics
         type: string
     - template: instances/openmetrics
       overrides:
