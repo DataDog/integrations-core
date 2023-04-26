@@ -68,16 +68,12 @@ from .metrics import (
 
 pytestmark = common.snmp_integration_only
 
-IGNORED_PROFILES_PYTHON_INTEGRATION_TESTS = {"cisco-catalyst-wlc", "cisco-legacy-wlc"}
-
 
 def test_load_profiles(caplog):
     instance = common.generate_instance_config([])
     check = SnmpCheck('snmp', {}, [instance])
     caplog.at_level(logging.WARNING)
     for name, profile in check.profiles.items():
-        if name in IGNORED_PROFILES_PYTHON_INTEGRATION_TESTS:
-            continue
         try:
             check._config.refresh_with_profile(profile)
         except ConfigurationError as e:
