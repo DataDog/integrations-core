@@ -30,7 +30,6 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         'gitaly_check': 'gitaly',
         'redis_check': 'redis',
     }
-    __NAMESPACE__ = 'gitlab'
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
@@ -62,21 +61,11 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
     def get_default_config(self):
         return {
             "metrics": construct_metrics_config(METRICS_MAP),
+            "namespace": "gitlab",
         }
 
     def create_scraper(self, config):
-        scraper = OpenMetricsCompatibilityScraper(
-            self, ChainMap({"tags": self._tags}, config, self.get_default_config())
-        )
-
-        # If we scrape the Gitaly metrics, we have two configs that are mostly the same except for the
-        # `openmetrics_endpoint` and `metrics` options. Our only way to know this is the config for Gitaly is to check
-        # if the `openmetrics_endpoint` is the same as the `gitaly_server_endpoint` option,
-        # as defined in the `parse_config` method.
-        # There's no other option AFAIK to override the service check name.
-        if config['openmetrics_endpoint'] == config.get('gitaly_server_endpoint'):
-            scraper.SERVICE_CHECK_HEALTH = f"gitaly.{scraper.SERVICE_CHECK_HEALTH}"
-        return scraper
+        return OpenMetricsCompatibilityScraper(self, ChainMap({"tags": self._tags}, config, self.get_default_config()))
 
     @AgentCheck.metadata_entrypoint
     def _submit_version(self):
@@ -90,6 +79,7 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
     def _check_health_endpoint(self, check_type, extra_params=None, response_handler=None):
         # These define which endpoint is hit and which type of check is actually performed
         check_url = f'{self.config.gitlab_url}/-/{check_type}'
+        service_check_name = f"gitlab.{check_type}"
 
         if extra_params:
             check_url = f'{check_url}{extra_params}'
@@ -105,23 +95,23 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
 
             if response.status_code != 200:
                 self.service_check(
-                    check_type,
+                    service_check_name,
                     OpenMetricsBaseCheckV2.CRITICAL,
                     message=f"Got {response.status_code} when hitting {check_url}",
                     tags=self._tags,
                 )
             else:
-                self.service_check(check_type, OpenMetricsBaseCheckV2.OK, self._tags)
+                self.service_check(service_check_name, OpenMetricsBaseCheckV2.OK, self._tags)
         except requests.exceptions.Timeout:
             self.service_check(
-                check_type,
+                service_check_name,
                 OpenMetricsBaseCheckV2.CRITICAL,
                 message=f"Timeout when hitting {check_url}",
                 tags=self._tags,
             )
         except Exception as e:
             self.service_check(
-                check_type,
+                service_check_name,
                 OpenMetricsBaseCheckV2.CRITICAL,
                 message=f"Error hitting {check_url}. Error: {e}",
                 tags=self._tags,
@@ -143,6 +133,7 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
             config = copy.deepcopy(self.instance)
             config['openmetrics_endpoint'] = gitaly_server_endpoint
             config['metrics'] = [GITALY_METRICS_MAP]
+            config['namespace'] = 'gitlab.gitaly'
             self.scraper_configs.append(config)
 
     def parse_readiness_service_checks(self, response):
@@ -183,7 +174,7 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                             dd_status = OpenMetricsBaseCheckV2.UNKNOWN
                         else:
                             dd_status = OpenMetricsBaseCheckV2.CRITICAL
-                        self.service_check(f"readiness.{check}", dd_status, self._tags)
+                        self.service_check(f"gitlab.readiness.{check}", dd_status, self._tags)
 
                         service_checks_sent.add(key)
                     else:
@@ -192,7 +183,7 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         # Handle all the declared checks that we did not get from the endpoint
         for missing_service_check in self.READINESS_SERVICE_CHECKS.keys() - service_checks_sent:
             self.service_check(
-                f"readiness.{self.READINESS_SERVICE_CHECKS[missing_service_check]}",
+                f"gitlab.readiness.{self.READINESS_SERVICE_CHECKS[missing_service_check]}",
                 OpenMetricsBaseCheckV2.UNKNOWN,
                 self._tags,
             )
