@@ -632,9 +632,6 @@ class SQLServer(AgentCheck):
                 )
             except SQLConnectionError:
                 raise
-            except (ProgrammingError, DatabaseError) as permissions_error:
-                self.log.warning("The agent cannot execute this query due to missing permissions: %s", permissions_error)
-                raise
             except Exception:
                 self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
                 continue
