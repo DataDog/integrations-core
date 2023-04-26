@@ -90,3 +90,19 @@ def test_check_all_operators(dd_run_check, aggregator, check, mocker):
             status=StrimziCheck.OK,
             count=1,
         )
+
+
+@pytest.mark.parametrize(
+    'instance',
+    [
+        {},
+        {'openmetrics_endpoint': 'http://cluster-operator:8080/metrics'},
+    ],
+)
+def test_instance_without_operator_endpoint(dd_run_check, check, instance):
+    with pytest.raises(
+        Exception,
+        match="Must specify at least one of the following:"
+        "`cluster_operator_endpoint`, `topic_operator_endpoint` or `user_operator_endpoint`.",
+    ):
+        dd_run_check(check(instance))
