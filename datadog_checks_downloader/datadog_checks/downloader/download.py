@@ -125,7 +125,7 @@ class TUFDownloader:
 
         return tuf_target_path, target_abspath
 
-    def _download_without_tuf(self, target_relpath):
+    def _download_without_tuf_in_toto(self, target_relpath):
         assert isinstance(self.__updater._target_base_url, str), self.__updater._target_base_url
 
         tuf_target_path, target_abspath = self.__compute_target_paths(target_relpath)
@@ -311,7 +311,7 @@ class TUFDownloader:
             return the complete filepath to the desired target.
         """
         if self.__disable_verification:
-            target_abspath = self._download_without_tuf(target_relpath)
+            target_abspath = self._download_without_tuf_in_toto(target_relpath)
         else:
             target_abspath = self._download_with_tuf_in_toto(target_relpath)
         # Always return the posix version of the path for consistency across platforms
@@ -326,7 +326,7 @@ class TUFDownloader:
         wheels = collections.defaultdict(dict)
 
         if self.__disable_verification:
-            index_abspath = self._download_without_tuf(index_relpath)
+            index_abspath = self._download_without_tuf_in_toto(index_relpath)
         else:
             try:
                 # NOTE: We do not perform in-toto inspection for simple indices; only for wheels.

@@ -90,15 +90,18 @@ def test_download(capfd, distribution_name, distribution_version, temporary_loca
         tuf_downloader, standard_distribution_name, version, ignore_python_version = instantiate_downloader()
 
         spy_with_tuf = mocker.spy(tuf_downloader, '_download_with_tuf')
-        spy_without_tuf = mocker.spy(tuf_downloader, '_download_without_tuf')
+        spy_with_tuf_in_toto = mocker.spy(tuf_downloader, '_download_with_tuf_in_toto')
+        spy_without_tuf_in_toto = mocker.spy(tuf_downloader, '_download_without_tuf_in_toto')
 
         run_downloader(tuf_downloader, standard_distribution_name, version, ignore_python_version)
 
         if disable_verification:
             spy_with_tuf.assert_not_called()
-            spy_without_tuf.assert_called()
+            spy_with_tuf_in_toto.assert_not_called()
+            spy_without_tuf_in_toto.assert_called()
         else:
-            spy_without_tuf.assert_not_called()
+            spy_without_tuf_in_toto.assert_not_called()
+            spy_with_tuf_in_toto.assert_called()
             spy_with_tuf.assert_called()
 
     stdout, stderr = capfd.readouterr()
