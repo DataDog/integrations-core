@@ -116,7 +116,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -175,7 +175,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -255,7 +255,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -313,7 +313,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -449,7 +449,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -589,7 +589,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -760,7 +760,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -845,7 +845,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -912,7 +912,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -979,7 +979,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -1054,7 +1054,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -1112,7 +1112,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -1170,7 +1170,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -1228,7 +1228,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -1286,7 +1286,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -1333,15 +1333,14 @@
           "default":"*",
           "prefix":"service",
           "available_values":[
-             
+
           ]
        }
     ],
     "layout_type":"ordered",
     "is_read_only":false,
     "notify_list":[
-       
+
     ],
-    "reflow_type":"fixed",
-    "id":"6vn-5wq-k3i"
+    "reflow_type":"fixed"
  }

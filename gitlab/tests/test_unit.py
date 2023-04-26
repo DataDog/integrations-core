@@ -9,7 +9,15 @@ from datadog_checks.dev.testing import requires_py2, requires_py3
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab.common import get_gitlab_version
 
-from .common import CUSTOM_TAGS, GITLAB_TAGS, V1_METRICS, V2_METRICS, assert_check
+from .common import (
+    CUSTOM_TAGS,
+    GITALY_METRICS,
+    GITLAB_GITALY_PROMETHEUS_ENDPOINT,
+    GITLAB_TAGS,
+    V1_METRICS,
+    V2_METRICS,
+    assert_check,
+)
 
 pytestmark = [pytest.mark.unit]
 
@@ -23,6 +31,29 @@ def test_check(dd_run_check, aggregator, mock_data, gitlab_check, get_config, us
     assert_check(aggregator, V2_METRICS if use_openmetrics else V1_METRICS, use_openmetrics)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@requires_py3
+def test_check_gitaly(dd_run_check, aggregator, mock_data, gitlab_check, get_config):
+    from datadog_checks.gitlab.gitlab_v2 import GitlabCheckV2
+
+    config = get_config(True)
+    instance = config['instances'][0]
+    instance["openmetrics_endpoint"] = instance["prometheus_url"]
+    instance["gitaly_server_endpoint"] = GITLAB_GITALY_PROMETHEUS_ENDPOINT
+
+    check = gitlab_check(config)
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert_check(aggregator, V2_METRICS + GITALY_METRICS, True)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_service_check(
+        'gitlab.gitaly.openmetrics.health',
+        status=GitlabCheckV2.OK,
+        tags=GITLAB_TAGS + CUSTOM_TAGS + ['endpoint:{}'.format(GITLAB_GITALY_PROMETHEUS_ENDPOINT)],
+    )
 
 
 @requires_py2

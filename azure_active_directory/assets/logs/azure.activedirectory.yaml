@@ -66,12 +66,12 @@ facets:
     path: network.client.geoip.country.name
     groups:
       - Geoip
-  - name: Subdivison ISO Code
+  - name: Subdivision ISO Code
     source: log
     path: network.client.geoip.subdivision.iso_code
     groups:
       - Geoip
-  - name: Subdivison Name
+  - name: Subdivision Name
     source: log
     path: network.client.geoip.subdivision.name
     groups:
