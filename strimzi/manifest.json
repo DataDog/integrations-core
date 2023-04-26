@@ -30,8 +30,8 @@
         "prefix": "strimzi.",
         "check": [
           "strimzi.cluster_operator.jvm.gc.memory_promoted_bytes.count",
-          "strimzi.topic_operatorjvm.gc.memory_promoted_bytes.count",
-          "strimzi.user_operatorjvm.gc.memory_promoted_bytes.count"
+          "strimzi.topic_operator.jvm.gc.memory_promoted_bytes.count",
+          "strimzi.user_operator.jvm.gc.memory_promoted_bytes.count"
         ],
         "metadata_path": "metadata.csv"
       },
