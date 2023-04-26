@@ -403,8 +403,8 @@ def test_e2e_core_cisco_csr(dd_agent_check):
 
     aggregator.assert_all_metrics_covered()
  
- 
- def test_e2e_cisco_legacy_wlc(dd_agent_check):
+
+def test_e2e_cisco_legacy_wlc(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
     instance.update(
@@ -514,5 +514,5 @@ def test_e2e_core_cisco_csr(dd_agent_check):
     aggregator.assert_metric("snmp.wlan".format(), metric_type=aggregator.GAUGE, tags=wlan_status_tags, value=1)
 
     aggregator.assert_metric('snmp.bsnDot11EssNumberOfMobileStations', metric_type=aggregator.GAUGE, tags=wlan_tags)
-    
+
     aggregator.assert_all_metrics_covered()
