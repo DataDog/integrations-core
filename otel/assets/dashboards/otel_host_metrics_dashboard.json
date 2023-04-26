@@ -2040,6 +2040,5 @@
     "layout_type": "ordered",
     "is_read_only": false,
     "notify_list": [],
-    "reflow_type": "fixed",
-    "id": "ug8-pcw-jfd"
+    "reflow_type": "fixed"
 }

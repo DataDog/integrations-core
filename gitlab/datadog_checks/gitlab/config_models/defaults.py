@@ -118,6 +118,10 @@ def instance_extra_metrics(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_gitaly_server_endpoint(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_gitlab_url(field, value):
     return get_default_field_value(field, value)
 

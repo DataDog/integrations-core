@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 from collections import ChainMap
 
 import requests
@@ -10,7 +11,7 @@ from datadog_checks.gitlab.config_models import ConfigMixin
 
 from ..base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 from .common import get_gitlab_version, get_tags
-from .metrics import METRICS_MAP, construct_metrics_config
+from .metrics import GITALY_METRICS_MAP, METRICS_MAP, construct_metrics_config
 
 
 class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
@@ -64,7 +65,18 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         }
 
     def create_scraper(self, config):
-        return OpenMetricsCompatibilityScraper(self, ChainMap({"tags": self._tags}, config, self.get_default_config()))
+        scraper = OpenMetricsCompatibilityScraper(
+            self, ChainMap({"tags": self._tags}, config, self.get_default_config())
+        )
+
+        # If we scrape the Gitaly metrics, we have two configs that are mostly the same except for the
+        # `openmetrics_endpoint` and `metrics` options. Our only way to know this is the config for Gitaly is to check
+        # if the `openmetrics_endpoint` is the same as the `gitaly_server_endpoint` option,
+        # as defined in the `parse_config` method.
+        # There's no other option AFAIK to override the service check name.
+        if config['openmetrics_endpoint'] == config.get('gitaly_server_endpoint'):
+            scraper.SERVICE_CHECK_HEALTH = f"gitaly.{scraper.SERVICE_CHECK_HEALTH}"
+        return scraper
 
     @AgentCheck.metadata_entrypoint
     def _submit_version(self):
@@ -84,16 +96,18 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
 
         try:
             self.log.debug("checking %s against %s", check_type, check_url)
-            r = self.http.get(check_url)
+            response = self.http.get(check_url)
 
+            # We always want to handle the response even if we do not receive a 200 code.
+            # GitLab will return a 503 with a payload if one of the service is down.
             if response_handler:
-                response_handler(r)
+                response_handler(response)
 
-            if r.status_code != 200:
+            if response.status_code != 200:
                 self.service_check(
                     check_type,
                     OpenMetricsBaseCheckV2.CRITICAL,
-                    message=f"Got {r.status_code} when hitting {check_url}",
+                    message=f"Got {response.status_code} when hitting {check_url}",
                     tags=self._tags,
                 )
             else:
@@ -121,39 +135,59 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         if self.is_metadata_collection_enabled() and not self.instance.get("api_token"):
             self.warning("GitLab token not found; please add one in your config to enable version metadata collection.")
 
+        gitaly_server_endpoint = self.instance.get("gitaly_server_endpoint")
+
+        if gitaly_server_endpoint:
+            # We create another config to scrape Gitaly metrics, so we have two different scrapers:
+            # one for the main GitLab and another one for the Gitaly endpoint.
+            config = copy.deepcopy(self.instance)
+            config['openmetrics_endpoint'] = gitaly_server_endpoint
+            config['metrics'] = [GITALY_METRICS_MAP]
+            self.scraper_configs.append(config)
+
     def parse_readiness_service_checks(self, response):
         self.log.debug("Parsing readiness output")
         service_checks_sent = set()
 
         if response is not None:
-            for key, value in response.json().items():
-                self.log.trace("Reading key %s", key)
+            try:
+                items = response.json().items()
+            except Exception as e:
+                self.log.debug("Could not read readiness service check payload: %s", str(e))
+            else:
+                for key, value in items:
+                    self.log.trace("Reading key %s", key)
 
-                # Format:
-                # {
-                #     "master_check": [
-                #         {
-                #             "status": "ok"
-                #         }
-                #     ]
-                # }
-                if not key.endswith("_check") or not isinstance(value, list) or not value or not value[0].get("status"):
-                    continue
+                    # Format:
+                    # {
+                    #     "master_check": [
+                    #         {
+                    #             "status": "ok"
+                    #         }
+                    #     ]
+                    # }
+                    if (
+                        not key.endswith("_check")
+                        or not isinstance(value, list)
+                        or not value
+                        or not value[0].get("status")
+                    ):
+                        continue
 
-                if check := self.READINESS_SERVICE_CHECKS.get(key):
-                    gitlab_status = value[0].get("status")
+                    if check := self.READINESS_SERVICE_CHECKS.get(key):
+                        gitlab_status = value[0].get("status")
 
-                    if gitlab_status == "ok":
-                        dd_status = OpenMetricsBaseCheckV2.OK
-                    elif gitlab_status is None:
-                        dd_status = OpenMetricsBaseCheckV2.UNKNOWN
+                        if gitlab_status == "ok":
+                            dd_status = OpenMetricsBaseCheckV2.OK
+                        elif gitlab_status is None:
+                            dd_status = OpenMetricsBaseCheckV2.UNKNOWN
+                        else:
+                            dd_status = OpenMetricsBaseCheckV2.CRITICAL
+                        self.service_check(f"readiness.{check}", dd_status, self._tags)
+
+                        service_checks_sent.add(key)
                     else:
-                        dd_status = OpenMetricsBaseCheckV2.CRITICAL
-                    self.service_check(f"readiness.{check}", dd_status, self._tags)
-
-                    service_checks_sent.add(key)
-                else:
-                    self.log.debug("Unknown service check %s", check)
+                        self.log.debug("Unknown service check %s", check)
 
         # Handle all the declared checks that we did not get from the endpoint
         for missing_service_check in self.READINESS_SERVICE_CHECKS.keys() - service_checks_sent:
