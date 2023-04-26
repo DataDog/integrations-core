@@ -3,8 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+from datadog_checks.dev import get_here
+
 STRIMZI_VERSION = os.environ["STRIMZI_VERSION"]
-HERE = os.path.abspath(os.path.dirname(__file__))
+HERE = get_here()
 
 MOCKED_CLUSTER_OPERATOR_INSTANCE = {'cluster_operator_endpoint': 'http://cluster-operator:8080/metrics'}
 
