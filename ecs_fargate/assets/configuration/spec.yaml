@@ -13,7 +13,7 @@ files:
             overrides:
               min_collection_interval.display_default: 20
               min_collection_interval.value.example: 20
-              min_collection_interval.enabled: 20
+              min_collection_interval.enabled: true
   - name: default.yaml
     example_name: conf.yaml.default
     options:
@@ -32,4 +32,4 @@ files:
             overrides:
               min_collection_interval.display_default: 20
               min_collection_interval.value.example: 20
-              min_collection_interval.enabled: 20
+              min_collection_interval.enabled: true
