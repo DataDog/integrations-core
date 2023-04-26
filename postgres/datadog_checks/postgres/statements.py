@@ -131,6 +131,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
             'pg_stat_statements_max_warning_threshold', 10000
         )
         self._config = config
+        self._tags_no_db = None
+        self.tags = None
         self._state = StatementMetrics()
         self._stat_column_cache = []
         self._track_io_timing_cache = None
@@ -173,7 +175,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
         return col_names
 
     def run_job(self):
-        self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
+        # do not emit any dd.internal metrics for DBM specific check code
+        self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
+        self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
         self.collect_per_statement_metrics()
 
     def _payload_pg_version(self):
@@ -226,7 +230,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 self._check.count(
                     "dd.postgres.statement_metrics.error",
                     1,
-                    tags=self._tags
+                    tags=self.tags
                     + [
                         "error:database-missing_pg_stat_statements_required_columns",
                     ]
@@ -339,7 +343,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._check.count(
                 "dd.postgres.statement_metrics.error",
                 1,
-                tags=self._tags + [error_tag] + self._check._get_debug_tags(),
+                tags=self.tags + [error_tag] + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
             )
 
@@ -359,13 +363,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._check.gauge(
                 "postgresql.pg_stat_statements.max",
                 self._check.pg_settings.get("pg_stat_statements.max", 0),
-                tags=self._tags,
+                tags=self.tags,
                 hostname=self._check.resolved_hostname,
             )
             self._check.count(
                 "postgresql.pg_stat_statements.count",
                 count,
-                tags=self._tags,
+                tags=self.tags,
                 hostname=self._check.resolved_hostname,
             )
         except psycopg2.Error as e:
@@ -386,7 +390,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._check.gauge(
             'dd.postgres.queries.query_rows_raw',
             len(rows),
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
         return rows

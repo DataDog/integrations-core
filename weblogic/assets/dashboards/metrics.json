@@ -1368,6 +1368,5 @@
   "layout_type": "ordered",
   "is_read_only": false,
   "notify_list": [],
-  "reflow_type": "fixed",
-  "id": "7zv-2yb-g8j"
+  "reflow_type": "fixed"
 }

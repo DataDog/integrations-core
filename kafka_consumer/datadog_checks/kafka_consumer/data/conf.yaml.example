@@ -3,11 +3,6 @@
 ## WARNING: To avoid blindly collecting offsets and lag for an unbounded number
 ## of partitions (as could be the case after enabling monitor_unlisted_consumer_groups
 ## or monitor_all_broker_highwatermarks) the check collects metrics for at most 500 partitions.
-##
-## DEPRECATION NOTICE: In the early days of Kafka, consumer offsets were stored in Zookeeper.
-## So this check currently supports fetching consumer offsets from both Kafka and Zookeeper.
-## However, Kafka 0.9 (released in 2015) deprecated Zookeeper storage. As a result, we have also
-## deprecated fetching consumer offsets from Zookeeper.
 #
 init_config:
 
@@ -15,11 +10,6 @@ init_config:
     ## Customizes the Kafka connection timeout.
     #
     # kafka_timeout: 5
-
-    ## @param zk_timeout - integer - optional - default: 5
-    ## DEPRECATED: Customizes the ZooKeeper connection timeout.
-    #
-    # zk_timeout: 5
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
@@ -66,11 +56,13 @@ instances:
 
     ## @param consumer_groups - mapping - optional
     ## Each level is optional. Any empty values are fetched from the Kafka cluster.
-    ## You can have empty partitions (example: <CONSUMER_NAME_2>), topics (example: <CONSUMER_NAME_3>),
-    ## and even consumer_groups. If you omit consumer_groups, you must set `monitor_unlisted_consumer_groups` to true.
+    ## You can have empty partitions (example: <CONSUMER_NAME_2>), topics
+    ## (example: <CONSUMER_NAME_3>),
+    ## and even consumer_groups. If you do not specify `consumer_groups`,
+    ## you must set `monitor_unlisted_consumer_groups` to true. 
     ##
-    ## Deprecation notice: Omitting various levels works for zookeeper-based consumers. However, all
-    ## functionality related to fetching offsets from Zookeeper is deprecated.
+    ## If both `consumer_groups` and `monitor_unlisted_consumer_groups` are used,
+    ## then `consumer_groups` is ignored.
     #
     # consumer_groups:
     #   <CONSUMER_NAME_1>:
@@ -83,16 +75,32 @@ instances:
     #     <TOPIC_NAME_2>: []
     #   <CONSUMER_NAME_3>: {}
 
+    ## @param consumer_groups_regex - mapping - optional
+    ## Set consumer groups and topics as regex strings.
+    ## If both `consumer_groups_regex` and `consumer_groups` are filled out,
+    ## both configuration options will be used. 
+    ## If `monitor_unlisted_consumer_groups` is enabled, then
+    ## `consumer_groups_regex` is ignored.
+    #
+    # consumer_groups_regex:
+    #   <CONSUMER_NAME_1>:
+    #     <TOPIC_NAME_1>:
+    #     - 0
+    #     - 1
+    #     - 4
+    #     - 12
+    #   <CONSUMER_NAME_2>:
+    #     <TOPIC_NAME_2>: []
+    #   <CONSUMER_NAME_3>: {}
+
     ## @param monitor_unlisted_consumer_groups - boolean - optional - default: false
-    ## Setting monitor_unlisted_consumer_groups to `true` tells the check to discover all consumer groups
-    ## and fetch all their known offsets. If this is not set to true, you must specify consumer_groups.
+    ## Setting `monitor_unlisted_consumer_groups` to `true` tells the check to discover all consumer groups
+    ## and fetch all their known offsets. If this is not set to true, you must specify `consumer_groups`.
     ##
     ## WARNING: This feature requires that your Kafka brokers be version >= 0.10.2. It is impossible to
     ## support this feature on older brokers because they do not provide a way to determine the mapping
     ## of consumer groups to topics. For details, see KIP-88. For older Kafka brokers, the consumer groups
     ## must be specified. This requirement only applies to the brokers, not the consumers--they can be any version.
-    ##
-    ## Deprecation notice: Functionality related to consumers fetching offsets from Zookeeper is deprecated.
     #
     # monitor_unlisted_consumer_groups: false
 
@@ -127,6 +135,20 @@ instances:
     ## Password for sasl PLAIN or SCRAM authentication.
     #
     # sasl_plain_password: <PASSWORD>
+
+    ## @param sasl_kerberos_keytab - string - optional
+    ## Path to Kerberos keytab file.
+    ## Note: If this config option is not used, the check will attempt to find
+    ## the keytab file using the environment variable KRB5_CLIENT_KTNAME.
+    ## Using `sasl_kerberos_keytab` will eventually be required and using the
+    ## environment variable directly will be deprecated.
+    #
+    # sasl_kerberos_keytab: <SASL_KERBEROS_KEYTAB>
+
+    ## @param sasl_kerberos_principal - string - optional - default: kafkaclient
+    ## Kerberos principal to use.
+    #
+    # sasl_kerberos_principal: kafkaclient
 
     ## @param sasl_kerberos_service_name - string - optional - default: kafka
     ## Service name to include in GSSAPI sasl mechanism handshake.
@@ -208,14 +230,6 @@ instances:
     #
     # tls_crlfile: <SSL_FILE_PATH>
 
-    ## @param broker_requests_batch_size - integer - optional - default: 30
-    ## The OffsetRequests sent to each broker are batched by the kafka_consumer check in groups of 30 by default.
-    ## If the batch size is too big, you may see KafkaTimeoutError exceptions in the logs while
-    ## running the wakeup calls.
-    ## If the batch size is too small, the check will take longer to run.
-    #
-    # broker_requests_batch_size: 30
-
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -255,48 +269,3 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
-
-    ## @param zk_connect_str - string or list of strings - optional
-    ## DEPRECATION NOTICE: This option is only used for fetching consumer offsets
-    ## from Zookeeper and is deprecated.
-    ## Zookeeper endpoints and port to connect to.
-    ## In a production environment, it's often useful to specify multiple
-    ## Zookeeper nodes for a single check instance. This way you
-    ## only generate a single check process, but if one host goes down,
-    ## KafkaClient / KazooClient tries contacting the next host.
-    ## Details: https://github.com/DataDog/dd-agent/issues/2943
-    ##
-    ## You may specify a single server like:
-    ##
-    ##   zk_connect_str: localhost:2181
-    ##
-    ## or multiple servers like:
-    ##
-    ##   zk_connect_str:
-    ##   - server1:2181
-    ##   - server2:2181
-    #
-    # zk_connect_str: <ZK_CONNECT_STR>
-
-    ## @param zk_prefix - string - optional
-    ## DEPRECATION NOTICE: This option is only used for fetching consumer offsets
-    ## from Zookeeper and is deprecated.
-    ## Zookeeper chroot prefix under which kafka data is living in zookeeper.
-    ## If kafka is connecting to `my-zookeeper:2181/kafka` then the `zk_prefix` is `/kafka`.
-    #
-    # zk_prefix: <ZK_PREFIX>
-
-    ## @param kafka_consumer_offsets - boolean - optional - default: false
-    ## DEPRECATION NOTICE: This option is only used for fetching consumer offsets
-    ## from Zookeeper and is deprecated.
-    ## This setting only applies if `zk_connect_str` is set and cannot work with
-    ## `monitor_unlisted_consumer_groups` since the generated list comes from Zookeeper.
-    ## Set to true to fetch consumer offsets from both Zookeeper and Kafka
-    ## Set to false to fetch consumer offsets only from Zookeeper.
-    #
-    # kafka_consumer_offsets: false
-
-    ## @param data_streams_enabled - boolean - optional - default: false
-    ## Beta feature to get a lag metric in Seconds. It's part of the Data Streams Monitoring Product
-    #
-    # data_streams_enabled: false

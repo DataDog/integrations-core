@@ -1383,6 +1383,5 @@
 	"layout_type": "ordered",
 	"is_read_only": false,
 	"notify_list": [],
-	"reflow_type": "fixed",
-	"id": "3tp-feu-jgd"
+	"reflow_type": "fixed"
 }

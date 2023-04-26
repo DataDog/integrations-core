@@ -1,5 +1,14 @@
 # CHANGELOG - postgres
 
+## 13.5.0 / 2023-04-14
+
+* [Added] Send resource_type/name for postgres integration metrics. See [#14338](https://github.com/DataDog/integrations-core/pull/14338).
+* [Added] Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).
+* [Added] Add cloud_metadata to DBM event payloads. See [#14313](https://github.com/DataDog/integrations-core/pull/14313).
+* [Added] Add PostgreSQL replication conflict metrics from `pg_stat_database_conflicts`. See [#13542](https://github.com/DataDog/integrations-core/pull/13542).
+* [Added] Add new sessions metrics from PG14. See [#13723](https://github.com/DataDog/integrations-core/pull/13723).
+* [Fixed] Reduce the number of idle connections opened when running explain plans across databases. See [#14164](https://github.com/DataDog/integrations-core/pull/14164).
+
 ## 13.4.0 / 2023-03-03
 
 * [Added] Add resolved_hostname to metadata. See [#14092](https://github.com/DataDog/integrations-core/pull/14092).
