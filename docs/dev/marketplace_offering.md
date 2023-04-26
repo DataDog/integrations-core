@@ -23,17 +23,17 @@ further_reading:
 
 The Datadog Marketplace is a digital marketplace where Datadog Technology Partners can list their paid offerings to Datadog users.  
 
-While the **Integrations** page includes integrations and custom dashboard widgets built by both Datadog and Technology Partners at no cost, the **Marketplace** page is a commercial platform for Datadog customers and Technology Partners to buy and sell a variety of offerings including Agent-based or API-based integrations, custom dashboard widgets, software subscriptions/licenses, and professional services.
+While the **Integrations** page includes integrations and custom dashboard widgets built by both Datadog and Technology Partners at no cost, the **Marketplace** page is a commercial platform for Datadog customers and Technology Partners to buy and sell a variety of offerings including Agent-based or API-based integrations, custom dashboard widgets, software licenses, and professional services.
 
 ## List an offering 
 
 All Technology Partners can list an out-of-the-box integration on the **Integrations** page, or a commercial paid offering on the **Marketplace** page. The following types of offerings are supported on the Datadog Marketplace:
 
 ### Integrations
-Marketplace integrations that submit third-party data or pull data from a user's Datadog account through the [Datadog Agent][15] or the [Datadog API][16]. These integrations can contain a variety of data such as out-of-the-box metrics, events, logs, and more.
+Marketplace integrations that submit third-party data or pull data from a user's Datadog account through the [Datadog Agent][15] or the [Datadog API][16]. These integrations can contain a variety of data types, such as metrics, events, logs, traces, and more.
 
 ### Software licenses
-Software licenses, or subscriptions to SaaS solutions, enable you to deliver and license software solutions to customers through the Datadog Marketplace.
+Software licenses to SaaS solutions, enable you to deliver and license software solutions to customers through the Datadog Marketplace.
 
 ### Custom dashboard widgets
 A custom dashboard widget that adds visual functionality to existing integration data (or other data within Datadog).
@@ -50,6 +50,8 @@ Marketplace Partners have unique benefits that are not available to partners who
   - Training and Support for sales enablement in the form of on-demand courses to quickly onboard sales and technical teams.
 
   - Exclusive opportunities to sponsor conferences and events (such as Datadog DASH) at a discounted rate.
+  
+  - Generating new leads from user discovery
 
 {{< img src="developers/marketplace/marketplace_overview.png" alt="The Datadog Marketplace page" style="width:100%" >}}
 
@@ -85,6 +87,14 @@ To request access to the private Marketplace repository, email <a href="mailto:m
 
 ## Getting Started
 To get started with creating an offering, see [Create a Tile][13]. If you're interesting in building an Agent-based integration and selling it on the Datadog Marketplace, see [Create an Agent-based Integration][19].
+
+## Coordinate GTM opportunities
+
+Once a Marketplace tile is live, Technology Partners can meet with Datadog's Partner Marketing team to coordinate a joint go-to-market (GTM) strategy, which includes the following:
+
+- A Datadog quote for partner press releases
+- A blog post on the [Datadog Monitor][23]
+- Amplification of social media posts
 
 ## Further Reading
 

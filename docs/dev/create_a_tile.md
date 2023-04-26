@@ -143,7 +143,7 @@ Once you have created a `README.md` file, add the following sections as H2s (`##
 | Setup | Include all the steps required to set up your offering that includes information divided into H3 headings (`###`). Standard topics include:<br><br>- Installing the integration using the in-app integration tile. <br>- Configuring the integration with the appropriate roles and permissions in your Datadog organization.<br>- Accessing out-of-the-box Datadog features that users who purchased and installed the integration can access (such as metrics, events, monitors, logs, dashboards, and more).|
 | Uninstallation | Include all the steps for uninstalling your offering. This information is displayed in the **Configure** tab on the tile.|
 | Data Collected  | Specify the types of data collected by your integration (if applicable), including events, service checks, logs, etc. Metrics added to the `metadata.csv` file will automatically appear in this tab.  <br><br> If your offering does not provide any of this data, you do not need to add a Data Collected section. |
-| Support | Provide contact information that includes an email to your Support team, a phone number to your company, a link to your company's documentation or blog post, and more help information in a bulleted list format. |
+| Support | Provide contact information that includes an email to your Support team, a link to your company's documentation or blog post, and more help information in a bulleted list format. |
 
 ### Media Carousel
 
@@ -204,13 +204,13 @@ ddev validate all <INTEGRATION_NAME>
 
 ## Open a pull request
 
-Push up your feature branch and open a pull request that contains your integration tile's asset files (including images) in the [`marketplace`][18] or [`integrations-extras`][26] repository. After you've created your pull request, automatic checks will run to verify that your pull request is in good shape and contains all the required content to be updated.
+Commit changes to your feature branch and push your changes to the remote repository. Open a pull request that contains your integration tile's asset files (including images) in the [`marketplace`][18] or [`integrations-extras`][26] repository. After you've created your pull request, automatic checks will run to verify that your pull request is in good shape and contains all the required content to be updated.
 
 ## Review process
 
 Once your pull request passes all checks, reviewers from the `Datadog/agent-integrations`, `Datadog/marketplace-review`, and `Datadog/documentation` teams provide suggestions and feedback on best practices.
 
-Once you have addressed the feedback and re-requested reviews, these reviewers approve your pull request. Contact the Marketplace team if you would like to preview the tile in your sandbox account. This allows you to validate and preview additional changes on the tile before your pull request is merged.
+Once you have addressed the feedback and re-requested reviews, these reviewers approve your pull request. Contact the Marketplace team if you would like to preview the tile in your sandbox account. This allows you to validate and preview your tile before your tile is live to all customers.
 
 ### How to resolve common validation errors 
 
@@ -233,6 +233,11 @@ To rebase and push changes:
 -  If there are any merge conflicts, you'd resolve them here
 
 3. `git push origin <working branch> -f`
+
+
+### GTM Opportunities
+
+If you would like to publish this on the Datadog Marketplace, check out our Go-To-Market opportunities here.
 
 ## Further Reading
 
