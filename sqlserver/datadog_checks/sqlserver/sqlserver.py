@@ -630,15 +630,15 @@ class SQLServer(AgentCheck):
                         cfg_inst=cfg, table=DEFAULT_PERFORMANCE_TABLE, base_name=base_name, sql_type=sql_type
                     )
                 )
+
             except SQLConnectionError:
                 raise
 
-            except (pyodbc.ProgrammingError, adodbapi.DatabaseError) as permissions_error:
-                self.log.warning("The agent cannot execute this query due to missing permissions: %s", permissions_error)
-                raise
-
-            except Exception:
-                self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
+            except Exception as e:
+                if e.args[0] == '42000':
+                    self.log.warning("Can't load the metric %s.The configured user is missing the VIEW SERVER STATE permissions or ##MS_ServerStateReader## server role.", name)
+                else:
+                    self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
                 continue
 
     def get_sql_type(self, counter_name):
@@ -787,8 +787,12 @@ class SQLServer(AgentCheck):
                             rows, cols = getattr(metrics, cls).fetch_all_values(
                                 cursor, list(metric_names), self.log, databases=db_names
                             )
+
                         except Exception as e:
-                            self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
+                            if e.args[0] == '42000':
+                                self.log.warning("Cannot run `fetch_all` for metrics %s The configured user is missing the VIEW SERVER STATE permissions or ##MS_ServerStateReader## server role.", cls)
+                            else:
+                                self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
                             rows, cols = None, None
 
                         instance_results[cls] = rows, cols
