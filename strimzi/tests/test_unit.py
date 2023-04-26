@@ -61,6 +61,7 @@ def test_check_unique_operator(
         tags=tags,
         count=1,
     )
+    assert len(aggregator.service_check_names) == 1
 
 
 def test_check_all_operators(dd_run_check, aggregator, check, mocker):
@@ -90,6 +91,7 @@ def test_check_all_operators(dd_run_check, aggregator, check, mocker):
             status=StrimziCheck.OK,
             count=1,
         )
+    assert len(aggregator.service_check_names) == 3
 
 
 @pytest.mark.parametrize(
