@@ -22,7 +22,11 @@ from datadog_checks.base.utils.time import UTC
 from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
 
-from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
+from .common import DB_NAME, HOST, PORT, PORT_REPLICA2, POSTGRES_VERSION
+from .utils import _get_conn, _get_superconn, requires_over_10
+
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
+
 
 SAMPLE_QUERIES = [
     # (username, password, dbname, query, arg)
@@ -341,6 +345,18 @@ def dbm_instance(pg_instance):
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.1}
+    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    return pg_instance
+
+
+@pytest.fixture
+def dbm_instance_replica2(pg_instance):
+    pg_instance['dbm'] = True
+    pg_instance['port'] = PORT_REPLICA2
+    pg_instance['min_collection_interval'] = 1
+    pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
+    pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
+    pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     return pg_instance
 
@@ -1641,3 +1657,46 @@ def test_pg_stat_statements_max_warning(
     check.check(dbm_instance)
 
     assert check.warnings == expected_warnings
+
+
+# This test relies on replica so we need PG>10
+@requires_over_10
+def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_replica2):
+    dbm_instance_replica2['query_samples'] = {'enabled': False}
+    with _get_superconn(dbm_instance_replica2) as superconn:
+        with superconn.cursor() as cur:
+            cur.execute("select pg_stat_statements_reset();")
+
+    check = integration_check(dbm_instance_replica2)
+    check.check(dbm_instance_replica2)
+
+    conn = _get_conn(dbm_instance_replica2)
+    count_statements = 0
+    with conn.cursor() as cur:
+        cur.execute("SELECT COUNT(*) FROM pg_stat_statements(false);")
+        count_statements = cur.fetchall()[0][0]
+
+    expected_tags = dbm_instance_replica2['tags'] + [
+        'port:{}'.format(PORT_REPLICA2),
+        'db:{}'.format(DB_NAME),
+    ]
+    aggregator.assert_metric("postgresql.pg_stat_statements.max", value=100, tags=expected_tags)
+    if float(POSTGRES_VERSION) >= 14.0:
+        aggregator.assert_metric("postgresql.pg_stat_statements.dealloc", value=0, tags=expected_tags)
+    # count value will be modified by agent's queries itself so it's hard to
+    # test a specific number...
+    aggregator.assert_metric("postgresql.pg_stat_statements.count", tags=expected_tags)
+
+    with conn.cursor() as cur:
+        # pg_stat_statements_reset should be tracked
+        # Do enough queries to reach the maximum
+        for i in range(101 - count_statements):
+            parameters = ','.join([str(a) for a in range(i)])
+            cur.execute("select {};".format(parameters))
+
+    aggregator.reset()
+    check.check(dbm_instance_replica2)
+    aggregator.assert_metric("postgresql.pg_stat_statements.max", value=100, tags=expected_tags)
+    if float(POSTGRES_VERSION) >= 14.0:
+        aggregator.assert_metric("postgresql.pg_stat_statements.dealloc", value=1, tags=expected_tags)
+    aggregator.assert_metric("postgresql.pg_stat_statements.count", tags=expected_tags)
