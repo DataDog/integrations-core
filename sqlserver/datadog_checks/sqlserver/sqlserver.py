@@ -821,10 +821,18 @@ class SQLServer(AgentCheck):
             try:
                 # Server state queries require VIEW SERVER STATE permissions, which some managed database
                 # versions do not support.
-                if self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION) not in [
-                    ENGINE_EDITION_SQL_DATABASE,
-                ]:
+                # Update 04/2023 - This info might be incorrect because you can use the ##MS_ServerStateReader## server role as well.
+                # to double check and potentially remove compltely.
+
+                try:
                     self.server_state_queries.execute()
+                except Exception as e:
+                    if e.args[0] == '42000':
+                        #To Do: improve QueryManager exception to raise so that we can send these logs. (core:80)
+                        #Leaving for now since they could potentially trigger should there be a real exception raised.
+                        self.log.warning("Cannot get Server State information. The configured user is missing the VIEW SERVER STATE permissions or ##MS_ServerStateReader## server role.")
+                    else:
+                        self.log.error("Cannot execute query:%s",e)
 
                 if self.dynamic_queries:
                     self.dynamic_queries.execute()
