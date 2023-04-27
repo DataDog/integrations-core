@@ -143,13 +143,13 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_baremetal_response_time(self, project):
+    def get_baremetal_response_time(self):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_baremetal_conductors(self, project_id):
+    def get_baremetal_conductors(self):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_baremetal_nodes(self, project_id):
+    def get_baremetal_nodes(self):
         pass  # pragma: no cover

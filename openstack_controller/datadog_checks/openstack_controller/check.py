@@ -248,6 +248,7 @@ class OpenStackControllerCheck(AgentCheck):
     def _report_metrics(self, api, tags):
         api._post_auth_domain(self.config.domain_id)
         if self._report_identity_metrics(api, tags):
+            self._report_domain_metrics(api, tags + ['domain_id:{}'.format(self.config.domain_id)])
             auth_projects = api.get_auth_projects()
             self.log.debug("auth_projects: %s", auth_projects)
             for project in auth_projects:
@@ -415,8 +416,10 @@ class OpenStackControllerCheck(AgentCheck):
         self._report_compute_metrics(api, project_id, tags + project_tags)
         self._report_network_metrics(api, project_id, tags + project_tags)
         self._report_block_storage_metrics(api, project_id, tags + project_tags)
-        self._report_baremetal_metrics(api, project_id, tags + project_tags)
         self._report_load_balancer_metrics(api, project_id, tags + project_tags)
+
+    def _report_domain_metrics(self, api, tags):
+        self._report_baremetal_metrics(api, tags)
 
     def _report_compute_metrics(self, api, project_id, project_tags):
         try:
@@ -645,29 +648,29 @@ class OpenStackControllerCheck(AgentCheck):
         else:
             self.service_check('openstack.cinder.api.up', AgentCheck.UNKNOWN, tags=project_tags)
 
-    def _report_baremetal_metrics(self, api, project_id, project_tags):
+    def _report_baremetal_metrics(self, api, tags):
         try:
-            self._report_baremetal_response_time(api, project_id, project_tags)
-            self._report_baremetal_nodes(api, project_id, project_tags)
-            self._report_baremetal_conductors(api, project_id, project_tags)
+            self._report_baremetal_response_time(api, tags)
+            self._report_baremetal_nodes(api, tags)
+            self._report_baremetal_conductors(api, tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting baremetal metrics: %s", e)
-            self.service_check('openstack.ironic.api.up', AgentCheck.CRITICAL, tags=project_tags)
+            self.service_check('openstack.ironic.api.up', AgentCheck.CRITICAL, tags)
         except Exception as e:
             self.warning("Exception while reporting baremetal metrics: %s", e)
 
-    def _report_baremetal_response_time(self, api, project_id, project_tags):
-        response_time = api.get_baremetal_response_time(project_id)
+    def _report_baremetal_response_time(self, api, tags):
+        response_time = api.get_baremetal_response_time()
         self.log.debug("baremetal response time: %s", response_time)
         if response_time is not None:
-            self.gauge('openstack.ironic.response_time', response_time, tags=project_tags)
-            self.service_check('openstack.ironic.api.up', AgentCheck.OK, tags=project_tags)
+            self.gauge('openstack.ironic.response_time', response_time, tags=tags)
+            self.service_check('openstack.ironic.api.up', AgentCheck.OK, tags=tags)
         else:
-            self.service_check('openstack.ironic.api.up', AgentCheck.UNKNOWN, tags=project_tags)
+            self.service_check('openstack.ironic.api.up', AgentCheck.UNKNOWN, tags=tags)
 
-    def _report_baremetal_nodes(self, api, project_id, project_tags):
-        nodes_data = api.get_baremetal_nodes(project_id)
+    def _report_baremetal_nodes(self, api, tags):
+        nodes_data = api.get_baremetal_nodes()
         if nodes_data is not None:
             for node_data in nodes_data:
                 is_up = node_data.get('is_up')
@@ -677,19 +680,19 @@ class OpenStackControllerCheck(AgentCheck):
                     node_data.get('conductor_group'),
                     node_data.get('power_state'),
                 )
-                all_tags = node_tags + project_tags
+                all_tags = node_tags + tags
                 self.gauge('openstack.ironic.node.up', value=is_up, tags=all_tags)
                 self.gauge('openstack.ironic.node.count', value=1, tags=all_tags)
 
-    def _report_baremetal_conductors(self, api, project_id, project_tags):
-        conductors_data = api.get_baremetal_conductors(project_id)
+    def _report_baremetal_conductors(self, api, tags):
+        conductors_data = api.get_baremetal_conductors()
         if conductors_data:
             for conductor_data in conductors_data:
                 conductor_tags = _create_baremetal_conductors_metric_tags(
                     conductor_data.get('hostname'),
                     conductor_data.get('conductor_group'),
                 )
-                all_tags = conductor_tags + project_tags
+                all_tags = conductor_tags + tags
                 self.gauge('openstack.ironic.conductor.up', value=conductor_data.get('alive'), tags=all_tags)
 
     def _report_load_balancer_metrics(self, api, project_id, project_tags):

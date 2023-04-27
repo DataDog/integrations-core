@@ -62,11 +62,11 @@ class ApiSdk(Api):
     def get_network_agents(self, project_id):
         pass  # pragma: no cover
 
-    def get_baremetal_response_time(self, project):
+    def get_baremetal_response_time(self):
         pass  # pragma: no cover
 
-    def get_baremetal_conductors(self, project_id):
+    def get_baremetal_conductors(self):
         pass  # pragma: no cover
 
-    def get_baremetal_nodes(self, project_id):
+    def get_baremetal_nodes(self):
         pass  # pragma: no cover

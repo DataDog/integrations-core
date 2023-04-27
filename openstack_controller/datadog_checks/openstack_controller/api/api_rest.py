@@ -133,9 +133,9 @@ class ApiRest(Api):
             return component.get_response_time(project_id)
         return None
 
-    def get_baremetal_response_time(self, project_id):
+    def get_baremetal_response_time(self):
         self.log.debug("getting baremetal response time")
-        component = self._get_component(ComponentType.BAREMETAL, project_id=project_id)
+        component = self._get_component(ComponentType.BAREMETAL)
         if component:
             return component.get_response_time()
         return None
@@ -294,16 +294,16 @@ class ApiRest(Api):
             return component.get_quotas(project_id)
         return None
 
-    def get_baremetal_nodes(self, project_id):
+    def get_baremetal_nodes(self):
         self.log.debug("getting baremetal nodes")
-        component = self._get_component(ComponentType.BAREMETAL, project_id=project_id)
+        component = self._get_component(ComponentType.BAREMETAL)
         if component:
             return component.get_nodes()
         return None
 
-    def get_baremetal_conductors(self, project_id):
+    def get_baremetal_conductors(self):
         self.log.debug("getting baremetal conductors")
-        component = self._get_component(ComponentType.BAREMETAL, project_id=project_id)
+        component = self._get_component(ComponentType.BAREMETAL)
         if component and component.collect_conductor_metrics():
             return component.get_conductors()
         else:
@@ -386,17 +386,19 @@ class ApiRest(Api):
                 return self.project_components[project_id][endpoint_type]
             return None
         else:
-            if endpoint_type in self.domain_components[self.config.domain_id]:
-                self.log.debug("cached component of type %s", endpoint_type)
-                return self.domain_components[self.config.domain_id][endpoint_type]
+            if self.config.domain_id in self.domain_components:
+                if endpoint_type in self.domain_components[self.config.domain_id]:
+                    self.log.debug("cached component of type %s", endpoint_type)
+                    return self.domain_components[self.config.domain_id][endpoint_type]
             else:
-                self.domain_components[self.config.domain_id][endpoint_type] = None
-                endpoint = self._get_endpoint(endpoint_type)
-                if endpoint:
-                    self.domain_components[self.config.domain_id][endpoint_type] = self._make_component(
-                        endpoint_type, endpoint
-                    )
+                self.domain_components[self.config.domain_id] = {}
+            endpoint = self._get_endpoint(endpoint_type)
+            if endpoint:
+                self.domain_components[self.config.domain_id][endpoint_type] = self._make_component(
+                    endpoint_type, endpoint
+                )
                 return self.domain_components[self.config.domain_id][endpoint_type]
+            return None
 
     def _get_endpoint(self, endpoint_type, project_id=None):
         if project_id is not None:
@@ -414,16 +416,20 @@ class ApiRest(Api):
                             return self.project_endpoints[project_id][endpoint_type]
             return None
         else:
-            if endpoint_type in self.domain_endpoints[self.config.domain_id]:
-                self.log.debug("cached endpoint of type %s", endpoint_type)
-                return self.domain_endpoints[self.config.domain_id][endpoint_type]
+            if self.config.domain_id in self.domain_endpoints:
+                if endpoint_type in self.domain_endpoints[self.config.domain_id]:
+                    self.log.debug("cached endpoint of type %s", endpoint_type)
+                    return self.domain_endpoints[self.config.domain_id][endpoint_type]
             else:
-                self.domain_endpoints[self.config.domain_id][endpoint_type] = None
-                for item in self.auth_domain_id_tokens[self.config.domain_id]['catalog']:
+                self.project_endpoints[self.config.domain_id] = {}
+
+            for item in self.auth_domain_id_tokens[self.config.domain_id]['catalog']:
+                if item['type'] == endpoint_type:
                     for endpoint in item['endpoints']:
                         if endpoint['interface'] == 'public':
                             self.auth_domain_id_tokens[self.config.domain_id][endpoint_type] = endpoint['url']
                             return self.auth_domain_id_tokens[self.config.domain_id][endpoint_type]
+            return None
 
     def _make_component(self, endpoint_type, endpoint):
         if endpoint_type == ComponentType.COMPUTE:
