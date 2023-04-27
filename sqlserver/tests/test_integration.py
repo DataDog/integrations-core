@@ -5,13 +5,23 @@ import logging
 from copy import copy, deepcopy
 
 import pytest
+import mock
 
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import SQLConnectionError
-from datadog_checks.sqlserver.const import INSTANCE_METRICS_DATABASE
+from datadog_checks.sqlserver.const import (
+    ENGINE_EDITION_SQL_DATABASE,
+    ENGINE_EDITION_STANDARD,
+    INSTANCE_METRICS_DATABASE,
+    STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_MAJOR_VERSION,
+    STATIC_INFO_VERSION,
+)
 
 from .common import CHECK_NAME, CUSTOM_METRICS, EXPECTED_DEFAULT_METRICS, assert_metrics
 from .utils import not_windows_ci, windows_ci
+from .mock_connection import MockConnection
+from .mock_cursor import MockStaticInfoCursor
 
 try:
     import pyodbc
@@ -353,77 +363,6 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker, custom_query,
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize(
-    "cloud_metadata,metric_names",
-    [
-        (
-            {},
-            [],
-        ),
-        (
-            {
-                'azure': {
-                    'deployment_type': 'managed_instance',
-                    'name': 'my-instance',
-                },
-            },
-            ["dd.internal.resource:azure_sql_server_managed_instance:my-instance"],
-        ),
-        (
-            {
-                'aws': {
-                    'instance_endpoint': 'foo.aws.com',
-                },
-            },
-            [
-                "dd.internal.resource:aws_rds_instance:foo.aws.com",
-            ],
-        ),
-        (
-            {
-                'gcp': {
-                    'project_id': 'foo-project',
-                    'instance_id': 'bar',
-                    'extra_field': 'included',
-                },
-            },
-            [
-                "dd.internal.resource:gcp_sql_database_instance:foo-project:bar",
-            ],
-        ),
-        (
-            {
-                'aws': {
-                    'instance_endpoint': 'foo.aws.com',
-                },
-                'azure': {
-                    'deployment_type': 'sql_database',
-                    'name': 'my-instance',
-                },
-            },
-            [
-                "dd.internal.resource:aws_rds_instance:foo.aws.com",
-                "dd.internal.resource:azure_sql_server_database:my-instance",
-                "dd.internal.resource:azure_sql_server:my-instance",
-            ],
-        ),
-    ],
-)
-def test_set_resources(aggregator, dd_run_check, instance_docker, cloud_metadata, metric_names):
-    if cloud_metadata:
-        for k, v in cloud_metadata.items():
-            instance_docker[k] = v
-    check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    dd_run_check(check)
-    for m in metric_names:
-        aggregator.assert_metric_has_tag("sqlserver.stats.connections", m)
-    aggregator.assert_metric_has_tag(
-        "sqlserver.stats.connections", "dd.internal.resource:database_instance:{}".format(check.resolved_hostname)
-    )
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_load_static_information(aggregator, dd_run_check, instance_docker):
     instance = copy(instance_docker)
     check = SQLServer(CHECK_NAME, {}, [instance])
@@ -463,3 +402,189 @@ def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, 
     assert 'master' in seen_databases
     if database_autodiscovery:
         assert 'datadog_test' in seen_databases
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "dbm_enabled, database, reported_hostname, engine_edition, expected_hostname, cloud_metadata, metric_names",
+    [
+        (
+            True,
+            None,
+            '',
+            None,
+            'stubbed.hostname',
+            {},
+            [],
+        ),
+        (
+            False,
+            None,
+            '',
+            ENGINE_EDITION_STANDARD,
+            'stubbed.hostname',
+            {
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance',
+                },
+            },
+            ["dd.internal.resource:azure_sql_server_managed_instance:my-instance"],
+        ),
+        (
+            True,
+            None,
+            '',
+            ENGINE_EDITION_STANDARD,
+            'stubbed.hostname',
+            {
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance',
+                },
+            },
+            ["dd.internal.resource:azure_sql_server_managed_instance:my-instance"],
+        ),
+        (
+            True,
+            None,
+            'forced_hostname',
+            None,
+            'forced_hostname',
+            {},
+            [],
+        ),
+        (
+            False,
+            None,
+            'forced_hostname',
+            None,
+            'forced_hostname',
+            {},
+            [],
+        ),
+        (
+            True,
+            'datadog_test',
+            'forced_hostname',
+            ENGINE_EDITION_SQL_DATABASE,
+            'forced_hostname',
+            {
+                'azure': {
+                    'deployment_type': 'sql_database',
+                    'name': 'my-instance',
+                },
+            },
+            [
+                "dd.internal.resource:azure_sql_server_database:forced_hostname",
+                "dd.internal.resource:azure_sql_server:forced_hostname",
+            ],
+        ),
+        (
+            True,
+            'datadog_test',
+            None,
+            ENGINE_EDITION_SQL_DATABASE,
+            'localhost/datadog_test',
+            {
+                'azure': {
+                    'deployment_type': 'sql_database',
+                    'name': 'my-instance',
+                },
+            },
+            [
+                "dd.internal.resource:azure_sql_server_database:localhost/datadog_test",
+                "dd.internal.resource:azure_sql_server:localhost/datadog_test",
+            ],
+        ),
+        (
+            True,
+            'master',
+            None,
+            ENGINE_EDITION_SQL_DATABASE,
+            'localhost/master',
+            {},
+            [],
+        ),
+        (
+            False,
+            'master',
+            None,
+            ENGINE_EDITION_SQL_DATABASE,
+            'stubbed.hostname',
+            {},
+            [],
+        ),
+        (
+            False,
+            '',
+            None,
+            ENGINE_EDITION_SQL_DATABASE,
+            'stubbed.hostname',
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+                'azure': {
+                    'deployment_type': 'sql_database',
+                    'name': 'my-instance',
+                },
+            },
+            [
+                "dd.internal.resource:aws_rds_instance:foo.aws.com",
+                "dd.internal.resource:azure_sql_server_database:my-instance",
+                "dd.internal.resource:azure_sql_server:my-instance",
+            ],
+        ),
+        (
+            False,
+            'master',
+            None,
+            None,
+            'stubbed.hostname',
+            {
+                'gcp': {
+                    'project_id': 'foo-project',
+                    'instance_id': 'bar',
+                    'extra_field': 'included',
+                },
+            },
+            [
+                "dd.internal.resource:gcp_sql_database_instance:foo-project:bar",
+            ],
+        ),
+    ],
+)
+@pytest.mark.integration
+def test_resolved_hostname_set(
+    aggregator,
+    dd_run_check,
+    instance_docker,
+    dbm_enabled,
+    database,
+    reported_hostname,
+    engine_edition,
+    expected_hostname,
+    cloud_metadata,
+    metric_names,
+):
+    if cloud_metadata:
+        for k, v in cloud_metadata.items():
+            instance_docker[k] = v
+    instance_docker['dbm'] = dbm_enabled
+    if database:
+        instance_docker['database'] = database
+    if reported_hostname:
+        instance_docker['reported_hostname'] = reported_hostname
+    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    if engine_edition:
+        sqlserver_check.static_info_cache[STATIC_INFO_VERSION] = "Microsoft SQL Server 2019"
+        sqlserver_check.static_info_cache[STATIC_INFO_MAJOR_VERSION] = 2019
+        sqlserver_check.static_info_cache[STATIC_INFO_ENGINE_EDITION] = engine_edition
+    dd_run_check(sqlserver_check)
+    assert sqlserver_check.resolved_hostname == expected_hostname
+    for m in metric_names:
+        aggregator.assert_metric_has_tag("sqlserver.stats.batch_requests", m)
+    aggregator.assert_metric_has_tag(
+        "sqlserver.stats.batch_requests", "dd.internal.resource:database_instance:{}".format(expected_hostname)
+    )

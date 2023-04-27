@@ -162,7 +162,7 @@ class SQLServer(AgentCheck):
             # cache these for a full day
             ttl=60 * 60 * 24,
         )
-
+        self.check_initializations.append(self.set_resolved_hostname)
         self.check_initializations.append(self.set_resolved_hostname_metadata)
 
         # Query declarations
@@ -178,8 +178,6 @@ class SQLServer(AgentCheck):
 
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self._query_manager.compile_queries)
-        self.check_initializations.append(self.initialize_connection)
-        self.set_resource_tags()
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -221,18 +219,19 @@ class SQLServer(AgentCheck):
                     self.cloud_metadata.get("aws")["instance_endpoint"],
                 )
             )
-        elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
+        elif AWS_RDS_HOSTNAME_SUFFIX in self._resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
-            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
+            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self._resolved_hostname))
         if self.cloud_metadata.get("azure") is not None:
             deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
             name = self.cloud_metadata.get("azure")["name"]
             if "sql_database" in deployment_type and self.dbm_enabled:
+                self.log.warning("im here")
                 # azure sql databases have a special format, which is set for DBM
                 # customers in the resolved_hostname.
                 # If user is not DBM customer, the resource_name should just be set to the `name`
-                name = self.resolved_hostname
+                name = self._resolved_hostname
             # some `deployment_type`s map to multiple `resource_type`s
             resource_types = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES.get(deployment_type).split(",")
             for r_type in resource_types:
@@ -240,12 +239,14 @@ class SQLServer(AgentCheck):
         # finally, emit a `database_instance` resource for this instance
         self.tags.append(
             "dd.internal.resource:database_instance:{}".format(
-                self.resolved_hostname,
+                self._resolved_hostname,
             )
         )
 
-    @property
-    def resolved_hostname(self):
+    def set_resolved_hostname(self):
+        # initialize connection & load static information cache
+        self.initialize_connection()
+        self.load_static_information()
         if self._resolved_hostname is None:
             if self.reported_hostname:
                 self._resolved_hostname = self.reported_hostname
@@ -275,6 +276,11 @@ class SQLServer(AgentCheck):
                     self._resolved_hostname = "{}/{}".format(host, configured_database)
             else:
                 self._resolved_hostname = self.agent_hostname
+        # set resource tags to properly tag with updated hostname
+        self.set_resource_tags()
+
+    @property
+    def resolved_hostname(self):
         return self._resolved_hostname
 
     def load_static_information(self):
@@ -702,7 +708,6 @@ class SQLServer(AgentCheck):
 
     def check(self, _):
         if self.do_check:
-            self.load_static_information()
             if self.proc:
                 self.do_stored_procedure_check()
             else:
