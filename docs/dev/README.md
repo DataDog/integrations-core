@@ -17,9 +17,9 @@ further_reading:
 
 This page walks through how Technology Partners can build an out-of-the-box integration using the Datadog Agent or Datadog API. 
 
-The [Integrations page][3] includes integrations and custom dashboard widgets built by both Datadog and our Technology Partners, available at no cost to Datadog customers. 
+The [Integrations page][3] includes integrations built by both Datadog and our Technology Partners, available at no cost to Datadog customers. 
 
-The [Datadog Marketplace][4], on the other hand, is a commercial platform for Technology Partners to _sell_ a variety of offerings, including integrations, custom dashboard widgets, software licenses, and professional services to Datadog customers.
+The [Datadog Marketplace][4], on the other hand, is a commercial platform for Technology Partners to _sell_ a variety of offerings, including integrations, software licenses, and professional services to Datadog customers.
 
 ## Datadog Integrations
 
@@ -31,22 +31,24 @@ API-based integrations can enrich a customer's Datadog environment by submitting
 
 ## Why create an integration?
 
-Adoption - Ensuring native support for Datadog reduces friction to adoption and incentivizes Datadog customers to build out their technology stack with partner technologies.
+**Correlate your data with user observability data** - Leverage Datadog to increase the value of your platform by  allowing customers to see the data from your platform alongside the rest of their technology stack.
 
-Added Visibility - Partners integrations appear on the Integrations page alongside all Datadog-built integrations, providing key visibility to all of Datadog's customers.
+**Increase MTTR for customers** - When a customer's account is enriched with data from an integration, they are able to see a broader view of their entire stack, allowing them to debug and remediate issues more quickly. 
 
-Out-of-the-box Metrics - Metrics reported from official Datadog integrations (unless the integration is sending in potentially unlimited metrics) are not counted as custom metrics, and therefore won't impact a customer's custom metric allocation.
+**Increase Adoption and Visibility** - Ensuring native support for Datadog reduces friction to adoption, and displaying a tile on our Integrations page provides key visibility to all of Datadog's customers.
+
+**Submit out-of-the-box metrics at no extra cost** - Metrics reported from official Datadog integrations (unless the integration is sending in potentially unlimited metrics) are not counted as custom metrics, and therefore won't impact a customer's custom metric allocation.
 
 ### Responsibilities
 Going forward, you, as the author of the integration, are the active maintainer of the integration. You are responsible for maintaining the code and ensuring the integration’s functionality. Datadog extends support on a best-effort basis for partner-built integrations, so please reach out to Datadog support if help is needed.
 
 ## Join the Datadog partner network
 
-Before listing an offering on the Datadog Marketplace, you will first need to apply to the [Datadog Partner Network's][3] **Technology Partner** track. Once your application has been approved, you can begin to develop your offering.
+Before listing an integration on Datadog, you will first need to apply to the [Datadog Partner Network's][3] **Technology Partner** track. Once your application has been approved, you can begin to develop your integration.
 
 ## Request a sandbox account
 
-All Technology Partners can request a dedicated sandbox Datadog account to aid in their development.
+All Technology Partners can request a dedicated sandbox Datadog account to aid in their development. This sandbox account has a free license that you can use to send in data, build out dashboards, and more. 
 
 To request a sandbox account:
 
@@ -57,28 +59,6 @@ To request a sandbox account:
 <div class="alert alert-info">If you are already a member of a Datadog organization (including a trial org), you may need to switch to your newly created sandbox. For more information, see the <a href="https://docs.datadoghq.com/account_management/org_switching/">Account Management documentation</a>.</div>
 
 Creating a developer sandbox may take up to one or two business days. Once your sandbox is created, you can [invite new members from your organization][7] to collaborate with.
-
-## Explore learning resources
-
-Once you've joined the Technology Partner track and requested a sandbox account, you can start learning about developing offerings by:
-
-* Completing the on-demand [**Introduction to Datadog Integrations**][8] course on the [Datadog Learning Center][9].
-* Reading the documentation about setting up an [OAuth 2.0 client][11] for API-based integrations.
-
-
-### Request access to Marketplace
-
-To request access to the private Marketplace repository, email <a href="mailto:marketplace@datadoghq.com">marketplace@datadoghq.com</a>. Once you have been granted access, you can review an [example pull request][12] in the Marketplace repository with annotations and best practices.
-
-## Getting Started
-To get started with creating an offering, see [Create a Tile][13]. If you're interesting in building an Agent-based integration and selling it on the Datadog Marketplace, see [Create an Agent-based Integration][19].
-
-## Coordinate GTM opportunities
-
-Once a Marketplace tile is live, Technology Partners can meet with Datadog's Partner Marketing team to coordinate a joint go-to-market (GTM) strategy, which includes the following:
-- A Datadog quote for partner press releases
-- A blog post on the [Datadog Monitor][23]
-- Amplification of social media posts
 
 ## Let's Get Started 
 To create an Agent-based integration, [click here][2].

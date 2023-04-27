@@ -22,10 +22,12 @@ further_reading:
 
 ## Overview
 
-This page walks you through how to develop an offering that will be displayed in a tile on the Datadog Integrations page or on the Datadog Marketplace. For all offerings that do not use the Datadog Agent, including API-based integrations, professional services listings, software licenses, and custom dashboard widgets, a tile-only listing is required. This means that there is no Agent code attached to the tile, but it serves as an informative point of entry where customers can learn more about your offering, learn how to set it up, as well as install or purchase your offering to unlock out-of-the-box dashboards and other assets.
+This page walks you through how to develop an offering that will be displayed in a tile on the Datadog Integrations page or on the Datadog Marketplace. For all offerings that do not use the Datadog Agent, including API-based integrations, professional services listings, and software licenses, a tile-only listing is required. This means that there is no Agent code attached to the tile, but it serves as an informative point of entry where customers can learn more about your offering, learn how to set it up, as well as install or purchase your offering to unlock out-of-the-box dashboards and other assets.
+
+**Select an option below to get started and create a tile on either the Marketplace or Integrations page:** 
 
 {{< tabs >}}
-{{% tab "Marketplace Offerings" %}}
+{{% tab "Build a tile on the Marketplace" %}}
 
 ## Set up a directory and clone the Marketplace repository
 
@@ -62,9 +64,9 @@ ddev config set repo marketplace
 
 ## Populate the integration tile scaffolding
 
-For API integrations, custom dashboard widgets, professional services, or standalone SaaS licenses that will be offered for an additional cost on the Datadog Marketplace, use the Datadog Development Toolkit to create scaffolding for an informational tile-only listing.
+Use the Datadog Development Toolkit to create scaffolding for a tile-only listing.
 
-To create the informational tile-only listing's scaffolding:
+To create the tile-only listing's scaffolding:
 
 1. Make sure you're inside the `marketplace` directory:
    {{< code-block lang="shell" >}}cd $HOME/dd/marketplace{{< /code-block >}}
@@ -77,7 +79,7 @@ To create the informational tile-only listing's scaffolding:
 
 {{% /tab %}}
 
-{{% tab "Out-of-the-box Offerings" %}}
+{{% tab "Build a tile on the Integrations page" %}}
 
 ## Set up a directory and fork the `integrations-extras` repository
 
@@ -114,7 +116,7 @@ ddev config set repo extras
 
 ## Populate the integration tile scaffolding
 
-For Datadog API integrations and custom dashboard widgets that will be available out-of-the-box on the [Integrations page][102], use the Datadog Development Toolkit to create scaffolding for an informational tile-only listing.
+For Datadog API integrations that will be available out-of-the-box on the [Integrations page][102], use the Datadog Development Toolkit to create scaffolding for a tile-only listing.
 
 1. Make sure you're inside the `integrations-extras` directory:
    {{< code-block lang="shell" >}}cd $HOME/dd/integrations-extras{{< /code-block >}}
@@ -149,7 +151,7 @@ Once you have created a `README.md` file, add the following sections as H2s (`##
 
 A media carousel of images and a video is displayed on each tile, allowing users to better understand the functionality and value of your offering through visual aids.
 
-To add a video to your tile, do not upload the video in your pull request. Instead, send a copy or a download link of your video to <a href="mailto:marketplace@datadoghq.com">marketplace@datadoghq.com</a>. The Marketplace team uploads the video and provides a `vimeo_link` that should be added to the `manifest.json` file.
+To add a video to your tile, send a copy or a download link of your video to <a href="mailto:marketplace@datadoghq.com">marketplace@datadoghq.com</a>. The Marketplace team uploads the video and provides a `vimeo_link` that should be added to the `manifest.json` file.
 
 The video must meet the following requirements:
 
@@ -196,15 +198,15 @@ Follow this template to define the `media` object in the `manifest.json` file wh
 
 For more information, see [Integrations Assets Reference][22].
 
+
+## Open a pull request
+
 Before you open a pull request, run the following command to catch any problems with your integration:
 ```
 ddev validate all <INTEGRATION_NAME>
 ```
 
-
-## Open a pull request
-
-Commit changes to your feature branch and push your changes to the remote repository. Open a pull request that contains your integration tile's asset files (including images) in the [`marketplace`][18] or [`integrations-extras`][26] repository. After you've created your pull request, automatic checks will run to verify that your pull request is in good shape and contains all the required content to be updated.
+Next, commit all changes to your feature branch and push your changes to the remote repository. Open a pull request that contains your integration tile's asset files (including images) in the [`marketplace`][18] or [`integrations-extras`][26] repository. After you've created your pull request, automatic checks will run to verify that your pull request is in good shape and contains all the required content to be updated.
 
 ## Review process
 
@@ -235,9 +237,9 @@ To rebase and push changes:
 3. `git push origin <working branch> -f`
 
 
-### GTM Opportunities
+### Go-to-Market (GTM) Opportunities
 
-If you would like to publish this on the Datadog Marketplace, check out our Go-To-Market opportunities here.
+Datadog offers GTM support for Marketplace listings only. To learn more about the Datadog Marketplace, see [Create a Marketplace Offering][NEEDS LINK].
 
 ## Further Reading
 

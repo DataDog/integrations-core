@@ -12,14 +12,14 @@ dependencies: "https://github.com/DataDog/integrations-core/blob/alai97/add-mark
 
 ## Overview
 
-This guide provides instructions for creating a Datadog Agent integration. You can list an Agent integration for a price in the Datadog Marketplace, or list it out-of-the-box on the Integrations page. To get started, select one of the options below for steps to build an integration in the Marketplace or an out-of-the-box integration.
+This guide provides instructions for creating a Datadog Agent integration. You can list an Agent integration for a price on the Datadog Marketplace, or list it out-of-the-box on the Integrations page. 
 
 ## Development Process
 
-You can expect the following process for building an API-based integration:
+You can expect the following process for building an Agent-based integration:
 1. Meet with the Datadog Technology Partner team to discuss your offering and use cases.
 2. Request a sandbox account for development.
-3. Begin development of your integration, which will include writing the integration code on your end as well as build and install a python wheel (.whl).
+3. Begin development of your integration, which will include writing the integration code on your end as well as building and installing a python wheel (.whl).
 4. Test your integration in your sandbox account.
 5. Once your development work is tested and complete, follow the steps to [Create a Tile][24] in order to display your offering on the Marketplace or Integrations page.
 6. Once your pull request is submitted and approved, the team will schedule a demo for a final review of your integration.
@@ -33,10 +33,10 @@ The required Datadog Agent integration development tools include:
 - [Docker][4] to run the full test suite.
 - The git [command-line][5] or [GitHub desktop client][19].
 
-You can list an Agent integration for a price in the Datadog Marketplace, or list it out-of-the-box on the Integrations page.
+**To get started, select either tab below for instructions on building an out-of-the-box Agent-based integration or an Agent-based integration on the Marketplace.** 
 
 {{< tabs >}}
-{{% tab "Build Marketplace Integrations" %}}
+{{% tab "Build a Marketplace Integration" %}}
 ## Set up a directory and clone the Marketplace repository
 
 Set up a directory:
@@ -78,7 +78,7 @@ ddev config set repo marketplace
 
 {{% /tab %}}
 
-{{% tab "Build Out-of-the-box Integrations" %}}
+{{% tab "Build an Out-of-the-box Integration" %}}
 
 ## Set up your integrations-extra repo
 
