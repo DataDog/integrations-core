@@ -4,7 +4,7 @@
 
 * [Added] Adds new metric `kubernetes_feature_enabled`. See [#14147](https://github.com/DataDog/integrations-core/pull/14147).
 
-## 3.4.0 / 2023-03-03
+## 3.4.0 / 2023-03-03 / Agent 7.44.0
 
 * [Added] Add metric `apiserver_admission_webhook_fail_open_count`. See [#13750](https://github.com/DataDog/integrations-core/pull/13750).
 

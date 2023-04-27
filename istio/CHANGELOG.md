@@ -1,6 +1,6 @@
 # CHANGELOG - istio
 
-## 4.3.1 / 2023-03-03
+## 4.3.1 / 2023-03-03 / Agent 7.44.0
 
 * [Fixed] Add port for merged telemetry endpoint in Istio auto_conf. See [#13204](https://github.com/DataDog/integrations-core/pull/13204).
 

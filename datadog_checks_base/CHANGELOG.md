@@ -15,7 +15,7 @@
 * [Fixed] Fix duplicate events bug. See [#14020](https://github.com/DataDog/integrations-core/pull/14020).
 * [Changed] Replace `kafka-python` dependency with `confluent-kafka-python`. See [#13918](https://github.com/DataDog/integrations-core/pull/13918).
 
-## 30.2.0 / 2023-03-07
+## 30.2.0 / 2023-03-07 / Agent 7.44.0
 
 * [Added] Upgrade openstacksdk dependency. See [#14109](https://github.com/DataDog/integrations-core/pull/14109).
 
