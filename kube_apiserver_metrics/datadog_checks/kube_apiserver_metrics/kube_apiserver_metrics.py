@@ -40,6 +40,7 @@ METRICS = {
     # fmt: on
     # For Kubernetes >= 1.14
     # (https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.14.md#deprecated-metrics)
+    'aggregator_unavailable_apiservice': 'aggregator_unavailable_apiservice',
     'rest_client_request_duration_seconds': 'rest_client_request_latency_seconds',
     'apiserver_admission_webhook_admission_duration_seconds': 'admission_webhook_admission_latencies_seconds',
     'apiserver_admission_step_admission_duration_seconds': 'admission_step_admission_latencies_seconds',

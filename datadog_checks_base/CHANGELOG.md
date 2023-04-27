@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 32.0.0 / 2023-04-25
+
+* [Changed] Implement automatic exposition format detection. See [#14445](https://github.com/DataDog/integrations-core/pull/14445).
+
 ## 31.0.1 / 2023-04-19
 
 * [Fixed] Do not add `freezegun` dependency to agent. See [#14393](https://github.com/DataDog/integrations-core/pull/14393).

@@ -64,7 +64,6 @@ class TestKubeAPIServerMetrics:
         'apiserver_flowcontrol_request_concurrency_limit',
         'apiserver_flowcontrol_current_executing_requests',
         'apiserver_flowcontrol_rejected_requests_total',
-        
     ]
     COUNT_METRICS = [
         'audit_event.count',

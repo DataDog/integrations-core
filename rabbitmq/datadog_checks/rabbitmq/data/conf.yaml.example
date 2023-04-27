@@ -694,8 +694,8 @@ instances:
     ## For example, if you have a vhost named "myvhost" and a queue named "myqueue", your
     ## pattern is compared to:
     ##   - myqueue
-    ##   - /myvhost/myqueue
-    ## If you have no vhost defined in this example, your pattern is compared to "//myqueue".
+    ##   - myvhost/myqueue
+    ## If you have no vhost defined in this example, your pattern is compared to "/myqueue".
     #
     # queues_regexes:
     #   - <REGEX>
@@ -718,8 +718,8 @@ instances:
     ## For example, if you have a vhost named "myvhost" and a exchange named "myexchange", your
     ## pattern is compared to:
     ##   - myexchange
-    ##   - /myvhost/myexchange
-    ## If you have no vhost defined in this example, your pattern is compared to "//myexchange".
+    ##   - myvhost/myexchange
+    ## If you have no vhost defined in this example, your pattern is compared to "/myexchange".
     #
     # exchanges_regexes:
     #   - <REGEX>
