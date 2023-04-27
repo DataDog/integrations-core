@@ -38,7 +38,7 @@
                 "x": 0,
                 "y": 0,
                 "width": 4,
-                "height": 5
+                "height": 7
             }
         },
         {
@@ -364,6 +364,56 @@
                             "width": 2,
                             "height": 2
                         }
+                    },
+                    {
+                        "id": 2487021508874280,
+                        "definition": {
+                            "title": "Service status",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:kube_apiserver.aggregator_unavailable_apiservice{$cluster,$scope} by {kube_namespace,name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<",
+                                            "value": 0.5,
+                                            "palette": "white_on_green"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 0.5,
+                                            "palette": "white_on_red"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 8,
+                            "height": 2
+                        }
                     }
                 ]
             },
@@ -371,7 +421,7 @@
                 "x": 4,
                 "y": 0,
                 "width": 8,
-                "height": 5
+                "height": 7
             }
         },
         {
@@ -479,7 +529,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 5,
+                "y": 7,
                 "width": 12,
                 "height": 5
             }
@@ -589,7 +639,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 10,
+                "y": 12,
                 "width": 12,
                 "height": 5
             }
@@ -703,7 +753,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 15,
+                "y": 17,
                 "width": 12,
                 "height": 5
             }
@@ -1302,7 +1352,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 40,
+                "y": 20,
                 "width": 12,
                 "height": 4
             }
