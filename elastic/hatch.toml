@@ -24,7 +24,7 @@ matrix.version.env-vars = [
     { key = "ELASTIC_IMAGE", value = "7.7.0", if = ["7.7"] },
     # EOL 2021-12-09
     { key = "ELASTIC_IMAGE", value = "7.9.0", if = ["7.9"] },
-    { key = "ELASTIC_IMAGE", value = "7.10.0", if = ["7.10"] },
+    { key = "ELASTIC_IMAGE", value = "7.10.2", if = ["7.10"] },
 ]
 matrix.flavor.env-vars = [
     { key = "ELASTIC_REGISTRY", value = "docker.elastic.co/elasticsearch/elasticsearch", if = ["elasticsearch"] },
