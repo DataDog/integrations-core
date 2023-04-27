@@ -29,6 +29,7 @@ class IdentityRest:
         for domain in response.json()['domains']:
             domain_metrics[domain['id']] = {
                 'name': domain['name'],
+                'tags': domain['tags'],
                 'metrics': get_normalized_metrics(domain, KEYSTONE_DOMAINS_METRICS_PREFIX, KEYSTONE_DOMAINS_METRICS),
             }
         return domain_metrics

@@ -5,7 +5,7 @@
       "name": "New domain",
       "description": "",
       "enabled": true,
-      "tags": [],
+      "tags": ["foo", "bar"],
       "options": {},
       "links": {
         "self": "http://10.164.0.11/identity/v3/domains/03e40b01788d403e98e4b9a20210492e"

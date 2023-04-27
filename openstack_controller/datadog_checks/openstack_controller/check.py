@@ -280,13 +280,16 @@ class OpenStackControllerCheck(AgentCheck):
         self.gauge(KEYSTONE_DOMAINS_COUNT, len(identity_domains), tags=tags)
         if identity_domains:
             for domain_id, domain_data in identity_domains.items():
+                domain_tags = [
+                    'domain_id:{}'.format(domain_id),
+                    'domain_name:{}'.format(domain_data['name']),
+                ] + domain_data['tags']
                 for metric, value in domain_data['metrics'].items():
                     if metric in KEYSTONE_DOMAINS_METRICS:
                         self.gauge(
                             metric,
                             value,
-                            tags=tags
-                            + ['domain_id:{}'.format(domain_id), 'domain_name:{}'.format(domain_data['name'])],
+                            tags=tags + domain_tags,
                         )
                     else:
                         self.log.warning("%s metric not reported as identity domain metric", metric)
