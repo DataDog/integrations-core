@@ -574,7 +574,7 @@ class PostgreSql(AgentCheck):
                     try:
                         db.close()
                     except Exception:
-                        self._log.exception("failed to close DB connection for db=%s", dbname)
+                        self.log.exception("failed to close DB connection for db=%s", dbname)
                 self._db_pool[dbname] = None
 
     def _collect_custom_queries(self, tags):
