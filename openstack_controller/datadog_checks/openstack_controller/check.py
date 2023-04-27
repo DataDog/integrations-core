@@ -414,12 +414,13 @@ class OpenStackControllerCheck(AgentCheck):
         self.log.debug("reporting metrics from project: [id:%s][name:%s]", project_id, project_name)
         project_tags = _create_project_tags(project)
         self._report_compute_project_metrics(api, project_id, tags + project_tags)
-        self._report_network_metrics(api, project_id, tags + project_tags)
+        self._report_network_project_metrics(api, project_id, tags + project_tags)
         self._report_block_storage_metrics(api, project_id, tags + project_tags)
         self._report_load_balancer_metrics(api, project_id, tags + project_tags)
 
     def _report_domain_metrics(self, api, tags):
         self._report_compute_domain_metrics(api, tags)
+        self._report_network_domain_metrics(api, tags)
         self._report_baremetal_domain_metrics(api, tags)
 
     def _report_compute_project_metrics(self, api, project_id, project_tags):
@@ -586,26 +587,35 @@ class OpenStackControllerCheck(AgentCheck):
         if long_metric_name in NOVA_HYPERVISOR_METRICS:
             self.gauge(long_metric_name, value, tags=tags)
 
-    def _report_network_metrics(self, api, project_id, project_tags):
+    def _report_network_project_metrics(self, api, project_id, project_tags):
         try:
-            self._report_network_response_time(api, project_id, project_tags)
             self._report_network_quotas(api, project_id, project_tags)
-            self._report_network_agents(api, project_id, project_tags)
+
         except HTTPError as e:
             self.warning(e)
-            self.log.error("HTTPError while reporting network metrics: %s", e)
-            self.service_check('openstack.neutron.api.up', AgentCheck.CRITICAL, tags=project_tags)
+            self.log.error("HTTPError while reporting network project metrics: %s", e)
         except Exception as e:
-            self.warning("Exception while reporting network metrics: %s", e)
+            self.warning("Exception while reporting network project metrics: %s", e)
 
-    def _report_network_response_time(self, api, project_id, project_tags):
-        response_time = api.get_network_response_time(project_id)
+    def _report_network_domain_metrics(self, api, tags):
+        try:
+            self._report_network_response_time(api, tags)
+            self._report_network_agents(api, tags)
+        except HTTPError as e:
+            self.warning(e)
+            self.log.error("HTTPError while reporting network domain metrics: %s", e)
+            self.service_check('openstack.neutron.api.up', AgentCheck.CRITICAL, tags=tags)
+        except Exception as e:
+            self.warning("Exception while reporting network domain metrics: %s", e)
+
+    def _report_network_response_time(self, api, tags):
+        response_time = api.get_network_response_time()
         self.log.debug("network response time: %s", response_time)
         if response_time is not None:
-            self.gauge('openstack.neutron.response_time', response_time, tags=project_tags)
-            self.service_check('openstack.neutron.api.up', AgentCheck.OK, tags=project_tags)
+            self.gauge('openstack.neutron.response_time', response_time, tags=tags)
+            self.service_check('openstack.neutron.api.up', AgentCheck.OK, tags=tags)
         else:
-            self.service_check('openstack.neutron.api.up', AgentCheck.UNKNOWN, tags=project_tags)
+            self.service_check('openstack.neutron.api.up', AgentCheck.UNKNOWN, tags=tags)
 
     def _report_network_quotas(self, api, project_id, project_tags):
         network_quotas = api.get_network_quotas(project_id)
@@ -617,23 +627,23 @@ class OpenStackControllerCheck(AgentCheck):
                 else:
                     self.log.warning("%s metric not reported as neutron quotas metric", metric)
 
-    def _report_network_agents(self, api, project_id, project_tags):
-        network_agents = api.get_network_agents(project_id)
+    def _report_network_agents(self, api, tags):
+        network_agents = api.get_network_agents()
         self.log.debug("network_agents: %s", network_agents)
         if network_agents is not None:
-            self.gauge(f'{NEUTRON_AGENTS_METRICS_PREFIX}.count', len(network_agents), tags=project_tags)
+            self.gauge(f'{NEUTRON_AGENTS_METRICS_PREFIX}.count', len(network_agents), tags=tags)
             for agent_id, agent_data in network_agents.items():
                 for metric, value in agent_data['metrics'].items():
                     if metric in NEUTRON_AGENTS_METRICS:
                         self.gauge(
                             metric,
                             value,
-                            tags=project_tags
+                            tags=tags
                             + [
                                 f'agent_id:{agent_id}',
                                 f'agent_name:{agent_data["name"]}',
                                 f'agent_host:{agent_data["host"]}',
-                                f'agent_availability_zone:{agent_data["availability_zone"]}',
+                                f'agent_availability_zone:{agent_data.get("availability_zone", None)}',
                                 f'agent_type:{agent_data["type"]}',
                             ],
                         )

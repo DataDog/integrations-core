@@ -119,9 +119,9 @@ class ApiRest(Api):
             return component.get_response_time()
         return None
 
-    def get_network_response_time(self, project_id):
+    def get_network_response_time(self):
         self.log.debug("getting network response time")
-        component = self._get_component(ComponentType.NETWORK, project_id=project_id)
+        component = self._get_component(ComponentType.NETWORK)
         if component:
             return component.get_response_time()
         return None
@@ -313,9 +313,9 @@ class ApiRest(Api):
             )
             return None
 
-    def get_network_agents(self, project_id):
+    def get_network_agents(self):
         self.log.debug("getting network agents")
-        component = self._get_component(ComponentType.NETWORK, project_id=project_id)
+        component = self._get_component(ComponentType.NETWORK)
         if component:
             return component.get_agents()
         return None

@@ -131,7 +131,7 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_network_response_time(self, project):
+    def get_network_response_time(self):
         pass  # pragma: no cover
 
     @abstractmethod
