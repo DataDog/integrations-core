@@ -31,8 +31,10 @@ class ApiRest(Api):
         self.auth_projects = {}
         self.auth_domain_id_tokens = {}
         self.auth_project_tokens = {}
-        self.endpoints = {}
-        self.components = {}
+        self.project_endpoints = {}
+        self.domain_endpoints = {}
+        self.domain_components = {}
+        self.project_components = {}
         self._add_microversion_headers()
 
     def _add_microversion_headers(self):
@@ -112,196 +114,196 @@ class ApiRest(Api):
 
     def get_compute_response_time(self, project_id):
         self.log.debug("getting compute response time")
-        component = self._get_component(project_id, ComponentType.COMPUTE)
+        component = self._get_component(ComponentType.COMPUTE, project_id=project_id)
         if component:
             return component.get_response_time()
         return None
 
     def get_network_response_time(self, project_id):
         self.log.debug("getting network response time")
-        component = self._get_component(project_id, ComponentType.NETWORK)
+        component = self._get_component(ComponentType.NETWORK, project_id=project_id)
         if component:
             return component.get_response_time()
         return None
 
     def get_block_storage_response_time(self, project_id):
         self.log.debug("getting block-storage response time")
-        component = self._get_component(project_id, ComponentType.BLOCK_STORAGE)
+        component = self._get_component(ComponentType.BLOCK_STORAGE, project_id=project_id)
         if component:
             return component.get_response_time(project_id)
         return None
 
     def get_baremetal_response_time(self, project_id):
         self.log.debug("getting baremetal response time")
-        component = self._get_component(project_id, ComponentType.BAREMETAL)
+        component = self._get_component(ComponentType.BAREMETAL, project_id=project_id)
         if component:
             return component.get_response_time()
         return None
 
     def get_load_balancer_response_time(self, project_id):
         self.log.debug("getting load-balancer response time")
-        component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
+        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
             return component.get_response_time()
         return None
 
     def get_load_balancer_loadbalancers(self, project_id):
         self.log.debug("getting load-balancer loadbalancers")
-        component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
+        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
             return component.get_loadbalancers()
         return None
 
     def get_load_balancer_listeners(self, project_id):
         self.log.debug("getting load-balancer listeners")
-        component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
+        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
             return component.get_listeners()
         return None
 
     def get_load_balancer_pools(self, project_id):
         self.log.debug("getting load-balancer pools")
-        component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
+        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
             return component.get_pools()
         return None
 
     def get_load_balancer_members_by_pool(self, project_id, pool_id):
         self.log.debug("getting load-balancer members by pool")
-        component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
+        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
             return component.get_members_by_pool(pool_id)
         return None
 
     def get_load_balancer_healthmonitors(self, project_id):
         self.log.debug("getting load-balancer healthmonitors")
-        component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
+        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
             return component.get_healthmonitors()
         return None
 
     def get_load_balancer_loadbalancer_statistics(self, project_id, loadbalancer_id):
         self.log.debug("getting load-balancer loadbalancer statistics")
-        component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
+        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
             return component.get_loadbalancer_statistics(loadbalancer_id)
         return None
 
     def get_load_balancer_listener_statistics(self, project_id, listener_id):
         self.log.debug("getting load-balancer listener statistics")
-        component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
+        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
             return component.get_listener_statistics(listener_id)
         return None
 
     def get_load_balancer_listeners_by_loadbalancer(self, project_id, loadbalancer_id):
         self.log.debug("getting load-balancer listeners by loadbalancer")
-        component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
+        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
             return component.get_listeners_by_loadbalancer(loadbalancer_id)
         return None
 
     def get_load_balancer_pools_by_loadbalancer(self, project_id, loadbalancer_id):
         self.log.debug("getting load-balancer pools by loadbalancer")
-        component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
+        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
             return component.get_pools_by_loadbalancer(loadbalancer_id)
         return None
 
     def get_load_balancer_healthmonitors_by_pool(self, project_id, pool_id):
         self.log.debug("getting load-balancer healthmonitors by pool")
-        component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
+        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
             return component.get_healthmonitors_by_pool(pool_id)
         return None
 
     def get_load_balancer_amphorae(self, project_id):
         self.log.debug("getting load-balancer amphorae")
-        component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
+        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
             return component.get_amphorae()
         return None
 
     def get_load_balancer_amphorae_by_loadbalancer(self, project_id, loadbalancer_id):
         self.log.debug("getting load-balancer amphorae by loadbalancer")
-        component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
+        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
             return component.get_amphorae_by_loadbalancer(loadbalancer_id)
         return None
 
     def get_load_balancer_amphora_statistics(self, project_id, amphora_id):
         self.log.debug("getting load-balancer amphora statistics")
-        component = self._get_component(project_id, ComponentType.LOAD_BALANCER)
+        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
             return component.get_amphora_statistics(amphora_id)
         return None
 
     def get_compute_limits(self, project_id):
         self.log.debug("getting compute limits")
-        component = self._get_component(project_id, ComponentType.COMPUTE)
+        component = self._get_component(ComponentType.COMPUTE, project_id=project_id)
         if component:
             return component.get_limits(project_id)
         return None
 
     def get_compute_quota_set(self, project_id):
         self.log.debug("getting compute quotas")
-        component = self._get_component(project_id, ComponentType.COMPUTE)
+        component = self._get_component(ComponentType.COMPUTE, project_id=project_id)
         if component:
             return component.get_quota_set(project_id)
         return None
 
     def get_compute_services(self, project_id):
         self.log.debug("getting compute services")
-        component = self._get_component(project_id, ComponentType.COMPUTE)
+        component = self._get_component(ComponentType.COMPUTE, project_id=project_id)
         if component:
             return component.get_services()
         return None
 
     def get_compute_servers(self, project_id):
         self.log.debug("getting compute servers")
-        component = self._get_component(project_id, ComponentType.COMPUTE)
+        component = self._get_component(ComponentType.COMPUTE, project_id=project_id)
         if component:
             return component.get_servers(project_id)
         return None
 
     def get_compute_flavors(self, project_id):
         self.log.debug("getting compute flavors")
-        component = self._get_component(project_id, ComponentType.COMPUTE)
+        component = self._get_component(ComponentType.COMPUTE, project_id=project_id)
         if component:
             return component.get_flavors()
         return None
 
     def get_compute_hypervisors(self, project_id):
         self.log.debug("getting compute hypervisors")
-        component = self._get_component(project_id, ComponentType.COMPUTE)
+        component = self._get_component(ComponentType.COMPUTE, project_id=project_id)
         if component:
             return component.get_hypervisors()
         return None
 
     def get_compute_os_aggregates(self, project_id):
         self.log.debug("getting compute os-aggregates")
-        component = self._get_component(project_id, ComponentType.COMPUTE)
+        component = self._get_component(ComponentType.COMPUTE, project_id=project_id)
         if component:
             return component.get_os_aggregates()
         return None
 
     def get_network_quotas(self, project_id):
         self.log.debug("getting network quotas")
-        component = self._get_component(project_id, ComponentType.NETWORK)
+        component = self._get_component(ComponentType.NETWORK, project_id=project_id)
         if component:
             return component.get_quotas(project_id)
         return None
 
     def get_baremetal_nodes(self, project_id):
         self.log.debug("getting baremetal nodes")
-        component = self._get_component(project_id, ComponentType.BAREMETAL)
+        component = self._get_component(ComponentType.BAREMETAL, project_id=project_id)
         if component:
             return component.get_nodes()
         return None
 
     def get_baremetal_conductors(self, project_id):
         self.log.debug("getting baremetal conductors")
-        component = self._get_component(project_id, ComponentType.BAREMETAL)
+        component = self._get_component(ComponentType.BAREMETAL, project_id=project_id)
         if component and component.collect_conductor_metrics():
             return component.get_conductors()
         else:
@@ -313,7 +315,7 @@ class ApiRest(Api):
 
     def get_network_agents(self, project_id):
         self.log.debug("getting network agents")
-        component = self._get_component(project_id, ComponentType.NETWORK)
+        component = self._get_component(ComponentType.NETWORK, project_id=project_id)
         if component:
             return component.get_agents()
         return None
@@ -370,33 +372,58 @@ class ApiRest(Api):
             }
         self.http.options['headers']['X-Auth-Token'] = self.auth_project_tokens[project_id]['auth_token']
 
-    def _get_component(self, project_id, endpoint_type):
-        if project_id in self.components:
-            if endpoint_type in self.components[project_id]:
+    def _get_component(self, endpoint_type, project_id=None):
+        if project_id is not None:
+            if project_id in self.project_components:
+                if endpoint_type in self.project_components[project_id]:
+                    self.log.debug("cached component of type %s", endpoint_type)
+                    return self.project_components[project_id][endpoint_type]
+            else:
+                self.project_components[project_id] = {}
+            endpoint = self._get_endpoint(endpoint_type, project_id=project_id)
+            if endpoint:
+                self.project_components[project_id][endpoint_type] = self._make_component(endpoint_type, endpoint)
+                return self.project_components[project_id][endpoint_type]
+            return None
+        else:
+            if endpoint_type in self.domain_components[self.config.domain_id]:
                 self.log.debug("cached component of type %s", endpoint_type)
-                return self.components[project_id][endpoint_type]
-        else:
-            self.components[project_id] = {}
-        endpoint = self._get_endpoint(project_id, endpoint_type)
-        if endpoint:
-            self.components[project_id][endpoint_type] = self._make_component(endpoint_type, endpoint)
-            return self.components[project_id][endpoint_type]
-        return None
+                return self.domain_components[self.config.domain_id][endpoint_type]
+            else:
+                self.domain_components[self.config.domain_id][endpoint_type] = None
+                endpoint = self._get_endpoint(endpoint_type)
+                if endpoint:
+                    self.domain_components[self.config.domain_id][endpoint_type] = self._make_component(
+                        endpoint_type, endpoint
+                    )
+                return self.domain_components[self.config.domain_id][endpoint_type]
 
-    def _get_endpoint(self, project_id, endpoint_type):
-        if project_id in self.endpoints:
-            if endpoint_type in self.endpoints[project_id]:
-                self.log.debug("cached endpoint of type %s", endpoint_type)
-                return self.endpoints[project_id][endpoint_type]
+    def _get_endpoint(self, endpoint_type, project_id=None):
+        if project_id is not None:
+            if project_id in self.project_endpoints:
+                if endpoint_type in self.project_endpoints[project_id]:
+                    self.log.debug("cached endpoint of type %s", endpoint_type)
+                    return self.project_endpoints[project_id][endpoint_type]
+            else:
+                self.project_endpoints[project_id] = {}
+            for item in self.auth_project_tokens[project_id]['catalog']:
+                if item['type'] == endpoint_type:
+                    for endpoint in item['endpoints']:
+                        if endpoint['interface'] == 'public':
+                            self.project_endpoints[project_id][endpoint_type] = endpoint['url']
+                            return self.project_endpoints[project_id][endpoint_type]
+            return None
         else:
-            self.endpoints[project_id] = {}
-        for item in self.auth_project_tokens[project_id]['catalog']:
-            if item['type'] == endpoint_type:
-                for endpoint in item['endpoints']:
-                    if endpoint['interface'] == 'public':
-                        self.endpoints[project_id][endpoint_type] = endpoint['url']
-                        return self.endpoints[project_id][endpoint_type]
-        return None
+            if endpoint_type in self.domain_endpoints[self.config.domain_id]:
+                self.log.debug("cached endpoint of type %s", endpoint_type)
+                return self.domain_endpoints[self.config.domain_id][endpoint_type]
+            else:
+                self.domain_endpoints[self.config.domain_id][endpoint_type] = None
+                for item in self.auth_domain_id_tokens[self.config.domain_id]['catalog']:
+                    for endpoint in item['endpoints']:
+                        if endpoint['interface'] == 'public':
+                            self.auth_domain_id_tokens[self.config.domain_id][endpoint_type] = endpoint['url']
+                            return self.auth_domain_id_tokens[self.config.domain_id][endpoint_type]
 
     def _make_component(self, endpoint_type, endpoint):
         if endpoint_type == ComponentType.COMPUTE:
