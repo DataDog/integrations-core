@@ -29,6 +29,7 @@ from .common import (
     check_replication_slots,
     check_slru_metrics,
     check_stat_replication,
+    check_uptime_metrics,
     check_wal_receiver_metrics,
     requires_static_version,
 )
@@ -55,6 +56,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check_slru_metrics(aggregator, expected_tags=expected_tags)
     check_stat_replication(aggregator, expected_tags=expected_tags)
     check_wal_receiver_metrics(aggregator, expected_tags=expected_tags, connected=0)
+    check_uptime_metrics(aggregator, expected_tags=expected_tags)
 
     replication_slot_tags = expected_tags + [
         'slot_name:replication_slot',
