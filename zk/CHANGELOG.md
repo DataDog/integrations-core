@@ -1,6 +1,6 @@
 # CHANGELOG - zk
 
-## 4.2.2 / 2023-02-13
+## 4.2.2 / 2023-02-13 / Agent 7.44.0
 
 * [Fixed] Ensure Zookeeper command execution in proxy environments. See [#13935](https://github.com/DataDog/integrations-core/pull/13935).
 

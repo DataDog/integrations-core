@@ -1,6 +1,6 @@
 # CHANGELOG - supervisord
 
-## 2.4.0 / 2023-03-03
+## 2.4.0 / 2023-03-03 / Agent 7.44.0
 
 * [Added] Update kubernetes and supervisor dependencies. See [#14093](https://github.com/DataDog/integrations-core/pull/14093).
 

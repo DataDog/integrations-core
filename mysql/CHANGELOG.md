@@ -12,7 +12,7 @@
 * [Fixed] Fix MariaDB InnoDB pending flush metric parsing. See [#13658](https://github.com/DataDog/integrations-core/pull/13658). Thanks [Jack97](https://github.com/Jack97).
 * [Fixed] Set self._check instance variables to make tracking work. See [#14146](https://github.com/DataDog/integrations-core/pull/14146).
 
-## 10.1.0 / 2023-03-03
+## 10.1.0 / 2023-03-03 / Agent 7.44.0
 
 * [Added] Add resolved_hostname to metadata. See [#14092](https://github.com/DataDog/integrations-core/pull/14092).
 

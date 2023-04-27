@@ -1,6 +1,6 @@
 # CHANGELOG - rabbitmq
 
-## 4.0.1 / 2023-03-07
+## 4.0.1 / 2023-03-07 / Agent 7.44.0
 
 * [Fixed] Fix autodiscovery config instances. See [#14112](https://github.com/DataDog/integrations-core/pull/14112).
 
