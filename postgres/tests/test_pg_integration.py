@@ -84,6 +84,22 @@ def test_common_metrics_without_size(aggregator, integration_check, pg_instance)
     assert 'postgresql.database_size' not in aggregator.metric_names
 
 
+def test_uptime(aggregator, integration_check, pg_instance):
+    conn = _get_conn(pg_instance)
+    with conn.cursor() as cur:
+        cur.execute("SELECT FLOOR(EXTRACT(EPOCH FROM current_timestamp - pg_postmaster_start_time()))")
+        uptime = cur.fetchall()[0][0]
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
+    assert_metric_at_least(
+        aggregator, 'postgresql.uptime', count=1, lower_bound=uptime, higher_bound=uptime + 1, tags=expected_tags
+    )
+
+
 @requires_over_14
 def test_session_number(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
