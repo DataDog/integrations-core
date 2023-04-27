@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
-openstack.nova.response_time,gauge,,millisecond,,"The response time of the Nova API in milliseconds [Legacy]",0,openstack_controller,nova response,
+openstack.nova.response_time,gauge,,millisecond,,"The response time of the Nova API in milliseconds.",0,openstack_controller,nova response,
 openstack.nova.current_workload,gauge,,,,Current workload on the Nova hypervisor [Legacy],-1,openstack_controller,nova workload,
 openstack.nova.disk_available_least,gauge,,gibibyte,,Disk available for the Nova hypervisor [Legacy],1,openstack_controller,nova disk available,
 openstack.nova.free_disk_gb,gauge,,gibibyte,,Free disk on the Nova hypervisor [Legacy],1,openstack_controller,nova free disk,
