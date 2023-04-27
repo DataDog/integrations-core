@@ -419,11 +419,11 @@ class OpenStackControllerCheck(AgentCheck):
         self._report_load_balancer_metrics(api, project_id, tags + project_tags)
 
     def _report_domain_metrics(self, api, tags):
+        self._report_domain_compute_metrics(api, tags)
         self._report_baremetal_metrics(api, tags)
 
     def _report_compute_metrics(self, api, project_id, project_tags):
         try:
-            self._report_compute_response_time(api, project_id, project_tags)
             self._report_compute_limits(api, project_id, project_tags)
             self._report_compute_quotas(api, project_id, project_tags)
             self._report_compute_servers(api, project_id, project_tags)
@@ -432,19 +432,28 @@ class OpenStackControllerCheck(AgentCheck):
             self._report_compute_services(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
-            self.log.error("HTTPError while reporting compute metrics: %s", e)
-            self.service_check(NOVA_SERVICE_CHECK, AgentCheck.CRITICAL, tags=project_tags)
+            self.log.error("HTTPError while reporting compute project metrics: %s", e)
         except Exception as e:
-            self.warning("Exception while reporting compute metrics: %s", e)
+            self.warning("Exception while reporting compute project metrics: %s", e)
 
-    def _report_compute_response_time(self, api, project_id, project_tags):
-        response_time = api.get_compute_response_time(project_id)
+    def _report_domain_compute_metrics(self, api, tags):
+        try:
+            self._report_compute_response_time(api, tags)
+        except HTTPError as e:
+            self.warning(e)
+            self.log.error("HTTPError while reporting compute domain metrics: %s", e)
+            self.service_check(NOVA_SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
+        except Exception as e:
+            self.warning("Exception while reporting compute domain metrics: %s", e)
+
+    def _report_compute_response_time(self, api, tags):
+        response_time = api.get_compute_response_time()
         self.log.debug("compute response time: %s", response_time)
         if response_time is not None:
-            self.gauge('openstack.nova.response_time', response_time, tags=project_tags)
-            self.service_check(NOVA_SERVICE_CHECK, AgentCheck.OK, tags=project_tags)
+            self.gauge('openstack.nova.response_time', response_time, tags=tags)
+            self.service_check(NOVA_SERVICE_CHECK, AgentCheck.OK, tags=tags)
         else:
-            self.service_check(NOVA_SERVICE_CHECK, AgentCheck.UNKNOWN, tags=project_tags)
+            self.service_check(NOVA_SERVICE_CHECK, AgentCheck.UNKNOWN, tags=tags)
 
     def _report_compute_limits(self, api, project_id, project_tags):
         compute_limits = api.get_compute_limits(project_id)

@@ -29,7 +29,7 @@ def test_exception(aggregator, dd_run_check, instance, caplog, monkeypatch):
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    assert 'Exception while reporting compute metrics' in caplog.text
+    assert 'Exception while reporting compute domain metrics' in caplog.text
 
 
 def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch):
@@ -58,18 +58,6 @@ def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'project_name:demo',
-        ],
-    )
-    aggregator.assert_service_check(
-        NOVA_SERVICE_CHECK,
-        status=AgentCheck.UNKNOWN,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:6e39099cccde4f809b003d9e0dd09304',
-            'project_name:admin',
         ],
     )
 
@@ -87,18 +75,6 @@ def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'project_name:demo',
-        ],
-    )
-    aggregator.assert_service_check(
-        NOVA_SERVICE_CHECK,
-        status=AgentCheck.CRITICAL,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:6e39099cccde4f809b003d9e0dd09304',
-            'project_name:admin',
         ],
     )
 
@@ -116,18 +92,6 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'project_name:demo',
-        ],
-    )
-    aggregator.assert_service_check(
-        NOVA_SERVICE_CHECK,
-        status=AgentCheck.OK,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:6e39099cccde4f809b003d9e0dd09304',
-            'project_name:admin',
         ],
     )
     aggregator.assert_metric(
@@ -135,17 +99,6 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'project_name:demo',
-        ],
-    )
-    aggregator.assert_metric(
-        'openstack.nova.response_time',
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:6e39099cccde4f809b003d9e0dd09304',
-            'project_name:admin',
         ],
     )
 

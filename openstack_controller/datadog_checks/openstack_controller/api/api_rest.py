@@ -112,9 +112,9 @@ class ApiRest(Api):
         self._get_auth_projects()
         return [{'id': project_id, 'name': project_name} for project_id, project_name in self.auth_projects.items()]
 
-    def get_compute_response_time(self, project_id):
+    def get_compute_response_time(self):
         self.log.debug("getting compute response time")
-        component = self._get_component(ComponentType.COMPUTE, project_id=project_id)
+        component = self._get_component(ComponentType.COMPUTE)
         if component:
             return component.get_response_time()
         return None
