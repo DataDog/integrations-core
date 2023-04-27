@@ -139,6 +139,14 @@ QUERY_PG_STAT_DATABASE_CONFLICTS = {
     ],
 }
 
+QUERY_PG_UPTIME = {
+    'name': 'pg_uptime',
+    'query': "SELECT FLOOR(EXTRACT(EPOCH FROM current_timestamp - pg_postmaster_start_time()))",
+    'columns': [
+        {'name': 'postgresql.uptime', 'type': 'gauge'},
+    ],
+}
+
 COMMON_BGW_METRICS = {
     'checkpoints_timed': ('postgresql.bgwriter.checkpoints_timed', AgentCheck.monotonic_count),
     'checkpoints_req': ('postgresql.bgwriter.checkpoints_requested', AgentCheck.monotonic_count),
