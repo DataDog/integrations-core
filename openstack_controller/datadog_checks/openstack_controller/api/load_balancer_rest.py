@@ -19,8 +19,8 @@ class LoadBalancerRest:
         self.log.debug("response: %s", response.json())
         return response.elapsed.total_seconds() * 1000
 
-    def get_loadbalancers(self):
-        url = f"{self.endpoint}/v2/lbaas/loadbalancers"
+    def get_loadbalancers(self, project_id):
+        url = f"{self.endpoint}/v2/lbaas/loadbalancers?project_id={project_id}"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
@@ -45,8 +45,8 @@ class LoadBalancerRest:
         self.log.debug("response: %s", response.json())
         return response.json()['stats']
 
-    def get_listeners(self):
-        url = f"{self.endpoint}/v2/lbaas/listeners"
+    def get_listeners(self, project_id):
+        url = f"{self.endpoint}/v2/lbaas/listeners?project_id={project_id}"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
@@ -72,16 +72,16 @@ class LoadBalancerRest:
         self.log.debug("response: %s", response.json())
         return response.json()['stats']
 
-    def get_listeners_by_loadbalancer(self, loadbalancer_id):
-        listeners = self.get_listeners()
+    def get_listeners_by_loadbalancer(self, loadbalancer_id, project_id):
+        listeners = self.get_listeners(project_id)
         result = {
             id: l for id, l in listeners.items() if loadbalancer_id in [lb.get("id") for lb in l.get("loadbalancers")]
         }
         self.log.debug("response: %s", result)
         return result
 
-    def get_pools(self):
-        url = f"{self.endpoint}/v2/lbaas/pools"
+    def get_pools(self, project_id):
+        url = f"{self.endpoint}/v2/lbaas/pools?project_id={project_id}"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
@@ -101,15 +101,15 @@ class LoadBalancerRest:
             pools_keys[pool["id"]] = filter_keys(pool, keys_list)
         return pools_keys
 
-    def get_pools_by_loadbalancer(self, loadbalancer_id):
-        pools = self.get_pools()
+    def get_pools_by_loadbalancer(self, loadbalancer_id, project_id):
+        pools = self.get_pools(project_id)
         result = {
             id: p for id, p in pools.items() if loadbalancer_id in [lb.get("id") for lb in p.get("loadbalancers")]
         }
         return result
 
-    def get_members_by_pool(self, pool_id):
-        url = f"{self.endpoint}/v2/lbaas/pools/{pool_id}/members"
+    def get_members_by_pool(self, pool_id, project_id):
+        url = f"{self.endpoint}/v2/lbaas/pools/{pool_id}/members?project_id={project_id}"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
@@ -126,8 +126,8 @@ class LoadBalancerRest:
             members_keys[member["id"]] = filter_keys(member, keys_list)
         return members_keys
 
-    def get_healthmonitors(self):
-        url = f"{self.endpoint}/v2/lbaas/healthmonitors"
+    def get_healthmonitors(self, project_id):
+        url = f"{self.endpoint}/v2/lbaas/healthmonitors?project_id={project_id}"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
@@ -149,15 +149,15 @@ class LoadBalancerRest:
             healthmonitors_keys[healthmonitor["id"]] = filter_keys(healthmonitor, keys_list)
         return healthmonitors_keys
 
-    def get_healthmonitors_by_pool(self, pool_id):
-        healthmonitors = self.get_healthmonitors()
+    def get_healthmonitors_by_pool(self, pool_id, project_id):
+        healthmonitors = self.get_healthmonitors(project_id)
         result = {
             id: hm for id, hm in healthmonitors.items() if pool_id in [pool.get("id") for pool in hm.get("pools")]
         }
         return result
 
-    def get_amphorae(self):
-        url = f"{self.endpoint}/v2/octavia/amphorae"
+    def get_amphorae(self, project_id):
+        url = f"{self.endpoint}/v2/octavia/amphorae?project_id={project_id}"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
@@ -172,8 +172,8 @@ class LoadBalancerRest:
             amphorae_keys[amphora["id"]] = filter_keys(amphora, keys_list)
         return amphorae_keys
 
-    def get_amphorae_by_loadbalancer(self, loadbalancer_id):
-        amphorae = self.get_amphorae()
+    def get_amphorae_by_loadbalancer(self, loadbalancer_id, project_id):
+        amphorae = self.get_amphorae(project_id)
         result = {id: a for id, a in amphorae.items() if a.get("loadbalancer_id") == loadbalancer_id}
         return result
 

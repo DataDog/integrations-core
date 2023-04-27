@@ -151,35 +151,35 @@ class ApiRest(Api):
         self.log.debug("getting load-balancer loadbalancers")
         component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
-            return component.get_loadbalancers()
+            return component.get_loadbalancers(project_id)
         return None
 
     def get_load_balancer_listeners(self, project_id):
         self.log.debug("getting load-balancer listeners")
         component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
-            return component.get_listeners()
+            return component.get_listeners(project_id)
         return None
 
     def get_load_balancer_pools(self, project_id):
         self.log.debug("getting load-balancer pools")
         component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
-            return component.get_pools()
+            return component.get_pools(project_id)
         return None
 
     def get_load_balancer_members_by_pool(self, project_id, pool_id):
         self.log.debug("getting load-balancer members by pool")
         component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
-            return component.get_members_by_pool(pool_id)
+            return component.get_members_by_pool(pool_id, project_id)
         return None
 
     def get_load_balancer_healthmonitors(self, project_id):
         self.log.debug("getting load-balancer healthmonitors")
         component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
-            return component.get_healthmonitors()
+            return component.get_healthmonitors(project_id)
         return None
 
     def get_load_balancer_loadbalancer_statistics(self, project_id, loadbalancer_id):
@@ -200,35 +200,35 @@ class ApiRest(Api):
         self.log.debug("getting load-balancer listeners by loadbalancer")
         component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
-            return component.get_listeners_by_loadbalancer(loadbalancer_id)
+            return component.get_listeners_by_loadbalancer(loadbalancer_id, project_id)
         return None
 
     def get_load_balancer_pools_by_loadbalancer(self, project_id, loadbalancer_id):
         self.log.debug("getting load-balancer pools by loadbalancer")
         component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
-            return component.get_pools_by_loadbalancer(loadbalancer_id)
+            return component.get_pools_by_loadbalancer(loadbalancer_id, project_id)
         return None
 
     def get_load_balancer_healthmonitors_by_pool(self, project_id, pool_id):
         self.log.debug("getting load-balancer healthmonitors by pool")
         component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
-            return component.get_healthmonitors_by_pool(pool_id)
+            return component.get_healthmonitors_by_pool(pool_id, project_id)
         return None
 
     def get_load_balancer_amphorae(self, project_id):
         self.log.debug("getting load-balancer amphorae")
         component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
-            return component.get_amphorae()
+            return component.get_amphorae(project_id)
         return None
 
     def get_load_balancer_amphorae_by_loadbalancer(self, project_id, loadbalancer_id):
         self.log.debug("getting load-balancer amphorae by loadbalancer")
         component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
-            return component.get_amphorae_by_loadbalancer(loadbalancer_id)
+            return component.get_amphorae_by_loadbalancer(loadbalancer_id, project_id)
         return None
 
     def get_load_balancer_amphora_statistics(self, project_id, amphora_id):

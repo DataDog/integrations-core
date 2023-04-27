@@ -33,7 +33,7 @@ def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_id:4996fcaef89a43b48f8a13f279544eb3',
             'project_name:demo',
         ],
     )
@@ -43,7 +43,7 @@ def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'project_id:98e1866031c04c5db8463c69cea9bc90',
             'project_name:admin',
         ],
     )
