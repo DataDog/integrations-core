@@ -46,50 +46,42 @@ class ApiRest(Api):
 
     def get_identity_response_time(self):
         self.log.debug("getting identity response time")
-        self._post_auth_unscoped()
         component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
         return component.get_response_time()
 
     def get_identity_domains(self):
         self.log.debug("getting identity domains")
-        self._post_auth_domain(self.config.domain_id)
         component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
         return component.get_domains()
 
     def get_identity_projects(self):
         self.log.debug("getting identity projects")
-        self._post_auth_domain(self.config.domain_id)
         component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
         return component.get_projects()
 
     def get_identity_users(self):
         self.log.debug("getting identity users")
-        self._post_auth_domain(self.config.domain_id)
         component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
         return component.get_users()
 
     def get_identity_groups(self):
         self.log.debug("getting identity groups")
-        self._post_auth_domain(self.config.domain_id)
         component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
         return component.get_groups()
 
     def get_identity_group_users(self, group_id):
         self.log.debug("getting identity group users")
-        self._post_auth_domain(self.config.domain_id)
         component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
         return component.get_group_users(group_id)
 
     def get_identity_services(self):
         self.log.debug("getting identity services")
-        self._post_auth_domain(self.config.domain_id)
         component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
         return component.get_services()
 
     def get_identity_limits(self):
         identity_limits = {}
         self.log.debug("getting identity services")
-        self._post_auth_domain(self.config.domain_id)
         component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
         registered_limits = component.get_registered_limits()
         self.log.debug("registered_limits: %s", registered_limits)
@@ -120,7 +112,6 @@ class ApiRest(Api):
 
     def get_compute_response_time(self, project_id):
         self.log.debug("getting compute response time")
-        self._post_auth_project(project_id)
         component = self._get_component(project_id, ComponentType.COMPUTE)
         if component:
             return component.get_response_time()
@@ -247,7 +238,6 @@ class ApiRest(Api):
 
     def get_compute_limits(self, project_id):
         self.log.debug("getting compute limits")
-        self._post_auth_project(project_id)
         component = self._get_component(project_id, ComponentType.COMPUTE)
         if component:
             return component.get_limits(project_id)
@@ -255,7 +245,6 @@ class ApiRest(Api):
 
     def get_compute_quota_set(self, project_id):
         self.log.debug("getting compute quotas")
-        self._post_auth_project(project_id)
         component = self._get_component(project_id, ComponentType.COMPUTE)
         if component:
             return component.get_quota_set(project_id)
@@ -263,7 +252,6 @@ class ApiRest(Api):
 
     def get_compute_services(self, project_id):
         self.log.debug("getting compute services")
-        self._post_auth_project(project_id)
         component = self._get_component(project_id, ComponentType.COMPUTE)
         if component:
             return component.get_services()
@@ -271,7 +259,6 @@ class ApiRest(Api):
 
     def get_compute_servers(self, project_id):
         self.log.debug("getting compute servers")
-        self._post_auth_project(project_id)
         component = self._get_component(project_id, ComponentType.COMPUTE)
         if component:
             return component.get_servers(project_id)
@@ -279,7 +266,6 @@ class ApiRest(Api):
 
     def get_compute_flavors(self, project_id):
         self.log.debug("getting compute flavors")
-        self._post_auth_project(project_id)
         component = self._get_component(project_id, ComponentType.COMPUTE)
         if component:
             return component.get_flavors()
@@ -287,7 +273,6 @@ class ApiRest(Api):
 
     def get_compute_hypervisors(self, project_id):
         self.log.debug("getting compute hypervisors")
-        self._post_auth_project(project_id)
         component = self._get_component(project_id, ComponentType.COMPUTE)
         if component:
             return component.get_hypervisors()
@@ -295,7 +280,6 @@ class ApiRest(Api):
 
     def get_compute_os_aggregates(self, project_id):
         self.log.debug("getting compute os-aggregates")
-        self._post_auth_project(project_id)
         component = self._get_component(project_id, ComponentType.COMPUTE)
         if component:
             return component.get_os_aggregates()
@@ -303,7 +287,6 @@ class ApiRest(Api):
 
     def get_network_quotas(self, project_id):
         self.log.debug("getting network quotas")
-        self._post_auth_project(project_id)
         component = self._get_component(project_id, ComponentType.NETWORK)
         if component:
             return component.get_quotas(project_id)
@@ -330,7 +313,6 @@ class ApiRest(Api):
 
     def get_network_agents(self, project_id):
         self.log.debug("getting network agents")
-        self._post_auth_project(project_id)
         component = self._get_component(project_id, ComponentType.NETWORK)
         if component:
             return component.get_agents()
