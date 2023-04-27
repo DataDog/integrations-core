@@ -1,21 +1,35 @@
 {
   "projects": [
     {
-      "id": "1e6e233e637d4d55a50a62b63398ad15",
+      "id": "119e0e428e7e4a498ad8d411abf62c3f",
+      "name": "invisible_to_admin",
+      "domain_id": "default",
+      "description": "",
+      "enabled": true,
+      "parent_id": "default",
+      "is_domain": false,
+      "tags": [],
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.71/identity/v3/projects/119e0e428e7e4a498ad8d411abf62c3f"
+      }
+    },
+    {
+      "id": "4996fcaef89a43b48f8a13f279544eb3",
       "name": "demo",
       "domain_id": "default",
       "description": "",
       "enabled": true,
       "parent_id": "default",
       "is_domain": false,
-      "tags": ["foo", "bar"],
+      "tags": [],
       "options": {},
       "links": {
-        "self": "http://10.164.0.11/identity/v3/projects/1e6e233e637d4d55a50a62b63398ad15"
+        "self": "http://10.164.0.71/identity/v3/projects/4996fcaef89a43b48f8a13f279544eb3"
       }
     },
     {
-      "id": "6e39099cccde4f809b003d9e0dd09304",
+      "id": "98e1866031c04c5db8463c69cea9bc90",
       "name": "admin",
       "domain_id": "default",
       "description": "Bootstrap project for initializing the cloud.",
@@ -25,11 +39,11 @@
       "tags": [],
       "options": {},
       "links": {
-        "self": "http://10.164.0.11/identity/v3/projects/6e39099cccde4f809b003d9e0dd09304"
+        "self": "http://10.164.0.71/identity/v3/projects/98e1866031c04c5db8463c69cea9bc90"
       }
     },
     {
-      "id": "b0700d860b244dcbb038541976cd8f32",
+      "id": "afffaf9d07134c42948b18309bfd0b86",
       "name": "alt_demo",
       "domain_id": "default",
       "description": "",
@@ -39,25 +53,11 @@
       "tags": [],
       "options": {},
       "links": {
-        "self": "http://10.164.0.11/identity/v3/projects/b0700d860b244dcbb038541976cd8f32"
+        "self": "http://10.164.0.71/identity/v3/projects/afffaf9d07134c42948b18309bfd0b86"
       }
     },
     {
-      "id": "c1147335eac0402ea9cabaae59c267e1",
-      "name": "invisible_to_admin",
-      "domain_id": "default",
-      "description": "",
-      "enabled": false,
-      "parent_id": "default",
-      "is_domain": false,
-      "tags": [],
-      "options": {},
-      "links": {
-        "self": "http://10.164.0.11/identity/v3/projects/c1147335eac0402ea9cabaae59c267e1"
-      }
-    },
-    {
-      "id": "e9e405ed5811407db982e3113e52d26b",
+      "id": "b15fce6546dd4d56997acf0428b498db",
       "name": "service",
       "domain_id": "default",
       "description": "",
@@ -67,13 +67,13 @@
       "tags": [],
       "options": {},
       "links": {
-        "self": "http://10.164.0.11/identity/v3/projects/e9e405ed5811407db982e3113e52d26b"
+        "self": "http://10.164.0.71/identity/v3/projects/b15fce6546dd4d56997acf0428b498db"
       }
     }
   ],
   "links": {
     "next": null,
-    "self": "http://10.164.0.11/identity/v3/projects",
+    "self": "http://10.164.0.71/identity/v3/projects",
     "previous": null
   }
 }

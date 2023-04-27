@@ -4,6 +4,6 @@
     "hypervisor_hostname": "agent-integrations-openstack-octavia",
     "state": "up",
     "status": "enabled",
-    "uptime": " 12:20:11 up 2 days, 22:46,  0 users,  load average: 0.22, 0.17, 0.17\n"
+    "uptime": " 22:07:03 up 9 days,  8:33,  1 user,  load average: 0.56, 0.36, 0.24\n"
   }
 }

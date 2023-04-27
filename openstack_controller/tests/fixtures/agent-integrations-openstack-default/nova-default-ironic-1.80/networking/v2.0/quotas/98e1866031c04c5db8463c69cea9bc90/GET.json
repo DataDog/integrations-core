@@ -1,0 +1,13 @@
+{
+  "quota": {
+    "network": 100,
+    "subnet": 100,
+    "subnetpool": -1,
+    "port": 500,
+    "router": 10,
+    "floatingip": 50,
+    "rbac_policy": 10,
+    "security_group": 10,
+    "security_group_rule": 100
+  }
+}

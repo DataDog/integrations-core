@@ -14,11 +14,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.91.114.145/compute/v2.1/flavors/1"
+          "href": "http://34.91.117.188/compute/v2.1/flavors/1"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.91.114.145/compute/flavors/1"
+          "href": "http://34.91.117.188/compute/flavors/1"
         }
       ]
     },
@@ -36,11 +36,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.91.114.145/compute/v2.1/flavors/2"
+          "href": "http://34.91.117.188/compute/v2.1/flavors/2"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.91.114.145/compute/flavors/2"
+          "href": "http://34.91.117.188/compute/flavors/2"
         }
       ]
     },
@@ -58,11 +58,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.91.114.145/compute/v2.1/flavors/3"
+          "href": "http://34.91.117.188/compute/v2.1/flavors/3"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.91.114.145/compute/flavors/3"
+          "href": "http://34.91.117.188/compute/flavors/3"
         }
       ]
     },
@@ -80,11 +80,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.91.114.145/compute/v2.1/flavors/4"
+          "href": "http://34.91.117.188/compute/v2.1/flavors/4"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.91.114.145/compute/flavors/4"
+          "href": "http://34.91.117.188/compute/flavors/4"
         }
       ]
     },
@@ -102,11 +102,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.91.114.145/compute/v2.1/flavors/42"
+          "href": "http://34.91.117.188/compute/v2.1/flavors/42"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.91.114.145/compute/flavors/42"
+          "href": "http://34.91.117.188/compute/flavors/42"
         }
       ]
     },
@@ -124,11 +124,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.91.114.145/compute/v2.1/flavors/5"
+          "href": "http://34.91.117.188/compute/v2.1/flavors/5"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.91.114.145/compute/flavors/5"
+          "href": "http://34.91.117.188/compute/flavors/5"
         }
       ]
     },
@@ -146,11 +146,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.91.114.145/compute/v2.1/flavors/84"
+          "href": "http://34.91.117.188/compute/v2.1/flavors/84"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.91.114.145/compute/flavors/84"
+          "href": "http://34.91.117.188/compute/flavors/84"
         }
       ]
     },
@@ -168,11 +168,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.91.114.145/compute/v2.1/flavors/c1"
+          "href": "http://34.91.117.188/compute/v2.1/flavors/c1"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.91.114.145/compute/flavors/c1"
+          "href": "http://34.91.117.188/compute/flavors/c1"
         }
       ]
     },
@@ -190,11 +190,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.91.114.145/compute/v2.1/flavors/d1"
+          "href": "http://34.91.117.188/compute/v2.1/flavors/d1"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.91.114.145/compute/flavors/d1"
+          "href": "http://34.91.117.188/compute/flavors/d1"
         }
       ]
     },
@@ -212,11 +212,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.91.114.145/compute/v2.1/flavors/d2"
+          "href": "http://34.91.117.188/compute/v2.1/flavors/d2"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.91.114.145/compute/flavors/d2"
+          "href": "http://34.91.117.188/compute/flavors/d2"
         }
       ]
     },
@@ -234,11 +234,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.91.114.145/compute/v2.1/flavors/d3"
+          "href": "http://34.91.117.188/compute/v2.1/flavors/d3"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.91.114.145/compute/flavors/d3"
+          "href": "http://34.91.117.188/compute/flavors/d3"
         }
       ]
     },
@@ -256,11 +256,11 @@
       "links": [
         {
           "rel": "self",
-          "href": "http://34.91.114.145/compute/v2.1/flavors/d4"
+          "href": "http://34.91.117.188/compute/v2.1/flavors/d4"
         },
         {
           "rel": "bookmark",
-          "href": "http://34.91.114.145/compute/flavors/d4"
+          "href": "http://34.91.117.188/compute/flavors/d4"
         }
       ]
     }

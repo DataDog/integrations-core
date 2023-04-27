@@ -1,0 +1,12 @@
+{
+  "quota_set": {
+    "id": "4996fcaef89a43b48f8a13f279544eb3",
+    "cores": 20,
+    "instances": 10,
+    "key_pairs": 100,
+    "metadata_items": 128,
+    "ram": 51200,
+    "server_group_members": 10,
+    "server_groups": 10
+  }
+}
