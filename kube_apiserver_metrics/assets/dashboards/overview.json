@@ -1,12 +1,12 @@
 {
     "title": "Kubernetes API Server Overview",
-	"description": "The core of Kubernetes' control plane is the API server. The API server exposes an HTTP API that lets end users, different parts of your cluster, and external components communicate with one another.\n\nThe Datadog Kubernetes API Server Overview dashboard gives you broad visibility into the status of the API server and the number of requests the server is handling.\n\nFurther reading around the Kubernetes API Server:\n\n- [Datadog Kubernetes API Server integration documentation](https://docs.datadoghq.com/integrations/kube_apiserver_metrics/)\n\n- [Kubernetes API official documentation](https://kubernetes.io/docs/concepts/overview/kubernetes-api/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\nCheck [the agent documentation](https://docs.datadoghq.com/agent/kubernetes/) if some of the graphs are empty.\nClone this template dashboard to make changes and add your own graph widgets. ",
+    "description": "The core of Kubernetes' control plane is the API server. The API server exposes an HTTP API that lets end users, different parts of your cluster, and external components communicate with one another.\n\nThe Datadog Kubernetes API Server Overview dashboard gives you broad visibility into the status of the API server and the number of requests the server is handling.\n\nFurther reading around the Kubernetes API Server:\n\n- [Datadog Kubernetes API Server integration documentation](https://docs.datadoghq.com/integrations/kube_apiserver_metrics/)\n\n- [Kubernetes API official documentation](https://kubernetes.io/docs/concepts/overview/kubernetes-api/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\nCheck [the agent documentation](https://docs.datadoghq.com/agent/kubernetes/) if some of the graphs are empty.\nClone this template dashboard to make changes and add your own graph widgets. ",
     "widgets": [
         {
             "id": 895563546267612,
             "definition": {
                 "title": "New group",
-				"type": "group",
+                "type": "group",
                 "banner_img": "/static/images/integration_dashboard/kubernetes_hero_2.jpeg",
                 "show_title": false,
                 "layout_type": "ordered",
@@ -46,7 +46,7 @@
             "definition": {
                 "title": "Kubernetes API Server Health",
                 "title_align": "left",
-				"type": "group",
+                "type": "group",
                 "background_color": "blue",
                 "show_title": true,
                 "layout_type": "ordered",
@@ -88,7 +88,7 @@
                                 "value",
                                 "sum"
                             ],
-							"time": {},
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -154,7 +154,7 @@
                                 "value",
                                 "sum"
                             ],
-							"time": {},
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -428,7 +428,7 @@
             "id": 2358358132143955,
             "definition": {
                 "title": "REST Client Requests",
-				"type": "group",
+                "type": "group",
                 "background_color": "vivid_green",
                 "show_title": true,
                 "layout_type": "ordered",
@@ -538,7 +538,7 @@
             "id": 198604149898351,
             "definition": {
                 "title": "etcd",
-				"type": "group",
+                "type": "group",
                 "background_color": "orange",
                 "show_title": true,
                 "layout_type": "ordered",
@@ -1093,7 +1093,7 @@
             "id": 4643450728041347,
             "definition": {
                 "title": "gRPC Requests",
-				"type": "group",
+                "type": "group",
                 "background_color": "green",
                 "show_title": true,
                 "layout_type": "ordered",
@@ -1214,21 +1214,21 @@
                             "title": "Kubernetes API Server Logs",
                             "title_size": "16",
                             "title_align": "left",
-							"type": "log_stream",
+                            "type": "log_stream",
                             "indexes": [],
-							"query": "source:kube-apiserver",
+                            "query": "source:kube-apiserver",
                             "sort": {
-								"column": "time",
-								"order": "desc"
-							},
-                                    "columns": [
-										"host",
-										"service"
-									],
-									"show_date_column": true,
-									"show_message_column": true,
-									"message_display": "expanded-md"
-								},
+                                "column": "time",
+                                "order": "desc"
+                            },
+                            "columns": [
+                                "host",
+                                "service"
+                            ],
+                            "show_date_column": true,
+                            "show_message_column": true,
+                            "message_display": "expanded-md"
+                        },
                         "layout": {
                             "x": 0,
                             "y": 0,
@@ -1372,7 +1372,7 @@
                             "title": "Feature Gates",
                             "title_size": "16",
                             "title_align": "left",
-							"time": {},
+                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -1401,7 +1401,10 @@
                                             "cell_display_mode": "number",
                                             "alias": "Enabled",
                                             "formula": "query1",
-											"limit": { "count": 500, "order": "desc" }
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -1409,29 +1412,39 @@
                             ],
                             "has_search_bar": "auto"
                         },
-						"layout": { "x": 0, "y": 0, "width": 7, "height": 4 }
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 7,
+                            "height": 4
+                        }
                     }
                 ]
             },
-			"layout": { "x": 0, "y": 0, "width": 7, "height": 5 }
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 7,
+                "height": 5
+            }
         }
     ],
     "template_variables": [
         {
             "name": "scope",
-			"default": "*",
-			"prefix": "",
-			"available_values": []
+            "default": "*",
+            "prefix": "",
+            "available_values": []
         },
         {
             "name": "cluster",
-			"default": "*",
+            "default": "*",
             "prefix": "kube_cluster_name",
             "available_values": []
         }
     ],
     "layout_type": "ordered",
-	"is_read_only": false,
+    "is_read_only": false,
     "notify_list": [],
     "reflow_type": "fixed"
 }
