@@ -5,6 +5,8 @@
 from datadog_checks.openstack_controller.metrics import (
     KEYSTONE_DOMAINS_METRICS,
     KEYSTONE_DOMAINS_METRICS_PREFIX,
+    KEYSTONE_PROJECTS_METRICS,
+    KEYSTONE_PROJECTS_METRICS_PREFIX,
     get_normalized_metrics,
 )
 
@@ -38,7 +40,14 @@ class IdentityRest:
         response = self.http.get('{}/projects'.format(self.endpoint))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        return response.json()['projects']
+        project_metrics = {}
+        for project in response.json()['projects']:
+            project_metrics[project['id']] = {
+                'name': project['name'],
+                'tags': project['tags'],
+                'metrics': get_normalized_metrics(project, KEYSTONE_PROJECTS_METRICS_PREFIX, KEYSTONE_PROJECTS_METRICS),
+            }
+        return project_metrics
 
     def get_users(self):
         response = self.http.get('{}/users'.format(self.endpoint))

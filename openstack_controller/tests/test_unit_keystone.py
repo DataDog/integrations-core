@@ -131,6 +131,8 @@ def test_projects_metrics(aggregator, dd_run_check, instance, monkeypatch):
             'domain_id:default',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'project_name:demo',
+            'foo',
+            'bar',
         ],
     )
     aggregator.assert_metric(

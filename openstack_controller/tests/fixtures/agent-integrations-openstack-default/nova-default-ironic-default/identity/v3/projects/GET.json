@@ -8,7 +8,7 @@
       "enabled": true,
       "parent_id": "default",
       "is_domain": false,
-      "tags": [],
+      "tags": ["foo", "bar"],
       "options": {},
       "links": {
         "self": "http://10.164.0.11/identity/v3/projects/1e6e233e637d4d55a50a62b63398ad15"

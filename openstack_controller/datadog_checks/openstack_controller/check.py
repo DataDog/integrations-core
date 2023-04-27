@@ -11,6 +11,8 @@ from datadog_checks.openstack_controller.metrics import (
     HYPERVISOR_SERVICE_CHECK,
     KEYSTONE_DOMAINS_COUNT,
     KEYSTONE_DOMAINS_METRICS,
+    KEYSTONE_PROJECTS_COUNT,
+    KEYSTONE_PROJECTS_METRICS,
     KEYSTONE_SERVICE_CHECK,
     NEUTRON_AGENTS_METRICS,
     NEUTRON_AGENTS_METRICS_PREFIX,
@@ -298,20 +300,26 @@ class OpenStackControllerCheck(AgentCheck):
         identity_projects = api.get_identity_projects()
         self.log.debug("identity_projects: %s", identity_projects)
         self.gauge(
-            'openstack.keystone.projects.count',
+            KEYSTONE_PROJECTS_COUNT,
             len(identity_projects),
             tags=tags + ['domain_id:{}'.format(self.config.domain_id)],
         )
-        for project in identity_projects:
-            enabled = project.get("enabled")
-            if enabled is not None:
-                self.gauge(
-                    'openstack.keystone.projects.enabled',
-                    1 if enabled else 0,
-                    tags
-                    + ['domain_id:{}'.format(self.config.domain_id)]
-                    + [f"project_id:{project.get('id')}", f"project_name:{project.get('name')}"],
-                )
+        if identity_projects:
+            for project_id, project_data in identity_projects.items():
+                project_tags = [
+                    'domain_id:{}'.format(self.config.domain_id),
+                    'project_id:{}'.format(project_id),
+                    'project_name:{}'.format(project_data['name']),
+                ] + project_data['tags']
+                for metric, value in project_data['metrics'].items():
+                    if metric in KEYSTONE_PROJECTS_METRICS:
+                        self.gauge(
+                            metric,
+                            value,
+                            tags=tags + project_tags,
+                        )
+                    else:
+                        self.log.warning("%s metric not reported as identity project metric", metric)
 
     def _report_identity_users(self, api, tags):
         identity_users = api.get_identity_users()
