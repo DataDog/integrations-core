@@ -9,6 +9,8 @@ from datadog_checks.openstack_controller.api.factory import make_api
 from datadog_checks.openstack_controller.config import OpenstackConfig
 from datadog_checks.openstack_controller.metrics import (
     HYPERVISOR_SERVICE_CHECK,
+    KEYSTONE_DOMAINS_COUNT,
+    KEYSTONE_DOMAINS_METRICS,
     KEYSTONE_SERVICE_CHECK,
     NEUTRON_AGENTS_METRICS,
     NEUTRON_AGENTS_METRICS_PREFIX,
@@ -275,15 +277,19 @@ class OpenStackControllerCheck(AgentCheck):
     def _report_identity_domains(self, api, tags):
         identity_domains = api.get_identity_domains()
         self.log.debug("identity_domains: %s", identity_domains)
-        self.gauge('openstack.keystone.domains.count', len(identity_domains), tags=tags)
-        for domain in identity_domains:
-            enabled = domain.get("enabled")
-            if enabled is not None:
-                self.gauge(
-                    'openstack.keystone.domains.enabled',
-                    1 if enabled else 0,
-                    tags + ['domain_id:{}'.format(domain.get("id"))],
-                )
+        self.gauge(KEYSTONE_DOMAINS_COUNT, len(identity_domains), tags=tags)
+        if identity_domains:
+            for domain_id, domain_data in identity_domains.items():
+                for metric, value in domain_data['metrics'].items():
+                    if metric in KEYSTONE_DOMAINS_METRICS:
+                        self.gauge(
+                            metric,
+                            value,
+                            tags=tags
+                            + ['domain_id:{}'.format(domain_id), 'domain_name:{}'.format(domain_data['name'])],
+                        )
+                    else:
+                        self.log.warning("%s metric not reported as identity domain metric", metric)
 
     def _report_identity_projects(self, api, tags):
         identity_projects = api.get_identity_projects()

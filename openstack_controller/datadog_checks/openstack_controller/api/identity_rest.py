@@ -1,6 +1,14 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
+from datadog_checks.openstack_controller.metrics import (
+    KEYSTONE_DOMAINS_METRICS,
+    KEYSTONE_DOMAINS_METRICS_PREFIX,
+    get_normalized_metrics,
+)
+
+
 class IdentityRest:
     def __init__(self, log, http, endpoint):
         self.log = log
@@ -17,7 +25,13 @@ class IdentityRest:
         response = self.http.get('{}/domains'.format(self.endpoint))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        return response.json()['domains']
+        domain_metrics = {}
+        for domain in response.json()['domains']:
+            domain_metrics[domain['id']] = {
+                'name': domain['name'],
+                'metrics': get_normalized_metrics(domain, KEYSTONE_DOMAINS_METRICS_PREFIX, KEYSTONE_DOMAINS_METRICS),
+            }
+        return domain_metrics
 
     def get_projects(self):
         response = self.http.get('{}/projects'.format(self.endpoint))

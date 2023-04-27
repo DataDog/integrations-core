@@ -8,6 +8,13 @@ from datadog_checks.base import AgentCheck
 HYPERVISOR_SERVICE_CHECK = {'up': AgentCheck.OK, 'down': AgentCheck.CRITICAL}
 
 KEYSTONE_SERVICE_CHECK = "openstack.keystone.api.up"
+KEYSTONE_METRICS_PREFIX = "openstack.keystone"
+
+KEYSTONE_DOMAINS_METRICS_PREFIX = f"{KEYSTONE_METRICS_PREFIX}.domains"
+KEYSTONE_DOMAINS_COUNT = f"{KEYSTONE_DOMAINS_METRICS_PREFIX}.count"
+KEYSTONE_DOMAINS_METRICS = {
+    f"{KEYSTONE_DOMAINS_METRICS_PREFIX}.enabled": {},
+}
 
 NOVA_SERVICE_CHECK = "openstack.nova.api.up"
 NOVA_METRICS_PREFIX = "openstack.nova"

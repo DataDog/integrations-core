@@ -92,6 +92,7 @@ def test_domains_metrics(aggregator, dd_run_check, instance, monkeypatch):
         tags=[
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'domain_id:default',
+            'domain_name:Default',
         ],
     )
     aggregator.assert_metric(
@@ -100,6 +101,7 @@ def test_domains_metrics(aggregator, dd_run_check, instance, monkeypatch):
         tags=[
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'domain_id:03e40b01788d403e98e4b9a20210492e',
+            'domain_name:New domain'
         ],
     )
 
