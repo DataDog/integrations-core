@@ -60,12 +60,12 @@ class TestKubeAPIServerMetrics:
         'storage_list_evaluated_objects_total',
         'storage_list_returned_objects_total',
         'requested_deprecated_apis',
-        'kubernetes_feature_enabled', 
-        'apiserver_envelope_encryption_dek_cache_fill_percent',
+        'kubernetes_feature_enabled',
         'aggregator_unavailable_apiservice',
+        'apiserver_envelope_encryption_dek_cache_fill_percent',
         'apiserver_flowcontrol_request_concurrency_limit',
         'apiserver_flowcontrol_current_executing_requests',
-        'apiserver_flowcontrol_rejected_requests_total', 
+        'apiserver_flowcontrol_rejected_requests_total',
     ]
     COUNT_METRICS = [
         'audit_event.count',
