@@ -413,16 +413,16 @@ class OpenStackControllerCheck(AgentCheck):
         api._post_auth_project(project_id)
         self.log.debug("reporting metrics from project: [id:%s][name:%s]", project_id, project_name)
         project_tags = _create_project_tags(project)
-        self._report_compute_metrics(api, project_id, tags + project_tags)
+        self._report_compute_project_metrics(api, project_id, tags + project_tags)
         self._report_network_metrics(api, project_id, tags + project_tags)
         self._report_block_storage_metrics(api, project_id, tags + project_tags)
         self._report_load_balancer_metrics(api, project_id, tags + project_tags)
 
     def _report_domain_metrics(self, api, tags):
-        self._report_domain_compute_metrics(api, tags)
+        self._report_compute_domain_metrics(api, tags)
         self._report_baremetal_metrics(api, tags)
 
-    def _report_compute_metrics(self, api, project_id, project_tags):
+    def _report_compute_project_metrics(self, api, project_id, project_tags):
         try:
             self._report_compute_limits(api, project_id, project_tags)
             self._report_compute_quotas(api, project_id, project_tags)
@@ -436,7 +436,7 @@ class OpenStackControllerCheck(AgentCheck):
         except Exception as e:
             self.warning("Exception while reporting compute project metrics: %s", e)
 
-    def _report_domain_compute_metrics(self, api, tags):
+    def _report_compute_domain_metrics(self, api, tags):
         try:
             self._report_compute_response_time(api, tags)
         except HTTPError as e:
