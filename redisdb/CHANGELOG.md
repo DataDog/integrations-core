@@ -1,6 +1,6 @@
 # CHANGELOG - redisdb
 
-## 4.6.0 / 2023-03-31
+## 4.6.0 / 2023-03-31 / Agent 7.44.0
 
 * [Added] Update redis to 4.5.4. See [#14270](https://github.com/DataDog/integrations-core/pull/14270).
 

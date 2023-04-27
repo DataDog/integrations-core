@@ -13,7 +13,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.sqlserver.utils import is_statement_proc
+from datadog_checks.sqlserver.utils import extract_sql_comments, is_statement_proc
 
 try:
     import datadog_agent
@@ -113,6 +113,8 @@ class SqlserverActivity(DBMAsyncJob):
 
     def __init__(self, check):
         self.check = check
+        # do not emit any dd.internal metrics for DBM specific check code
+        self.tags = [t for t in self.check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         collection_interval = float(check.activity_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL))
         if collection_interval <= 0:
@@ -224,7 +226,7 @@ class SqlserverActivity(DBMAsyncJob):
             metadata = statement['metadata']
             row['dd_commands'] = metadata.get('commands', None)
             row['dd_tables'] = metadata.get('tables', None)
-            row['dd_comments'] = metadata.get('comments', None)
+            row['dd_comments'] = extract_sql_comments(row['text'])
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             # procedure_signature is used to link this activity event with
             # its related plan events
@@ -271,8 +273,9 @@ class SqlserverActivity(DBMAsyncJob):
             "ddsource": "sqlserver",
             "dbm_type": "activity",
             "collection_interval": self.collection_interval,
-            "ddtags": self.check.tags,
+            "ddtags": self.tags,
             "timestamp": time.time() * 1000,
+            "cloud_metadata": self.check.cloud_metadata,
             "sqlserver_activity": active_sessions,
             "sqlserver_connections": active_connections,
         }

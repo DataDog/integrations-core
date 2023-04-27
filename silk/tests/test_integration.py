@@ -4,10 +4,11 @@
 import mock
 import pytest
 
-from datadog_checks.base import ConfigurationError
 from datadog_checks.silk import SilkCheck
 
-from .common import BASE_TAGS, BLOCKSIZE_METRICS, HOST, METRICS, READ_WRITE_METRICS, SYSTEM_TAGS
+from .common import BASE_TAGS, BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS, SYSTEM_TAGS
+
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
 
 
 @pytest.mark.parametrize(
@@ -19,8 +20,6 @@ from .common import BASE_TAGS, BLOCKSIZE_METRICS, HOST, METRICS, READ_WRITE_METR
         pytest.param(True, False, METRICS[0:] + READ_WRITE_METRICS[0:], id="rw enabled"),
     ],
 )
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_check(dd_run_check, aggregator, instance, enable_rw, enable_bs, expected_metrics):
     instance['enable_read_write_statistics'] = enable_rw
     instance['enable_blocksize_statistics'] = enable_bs
@@ -34,8 +33,6 @@ def test_check(dd_run_check, aggregator, instance, enable_rw, enable_bs, expecte
             aggregator.assert_metric_has_tag(metric, tag)
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_error_msg_response(dd_run_check, aggregator, instance):
     error_response = {"error_msg": "Statistics data is unavailable while system is OFFLINE"}
     with mock.patch('datadog_checks.base.utils.http.requests.Response.json') as g:
@@ -47,24 +44,6 @@ def test_error_msg_response(dd_run_check, aggregator, instance):
         )
 
 
-@pytest.mark.integration
-def test_incorrect_config(dd_run_check):
-    invalid_instance = {'host_addres': 'localhost'}  # misspelled required parameter
-    with pytest.raises(ConfigurationError):
-        SilkCheck('silk', {}, [invalid_instance])
-
-
-@pytest.mark.integration
-def test_unreachable_endpoint(dd_run_check, aggregator):
-    invalid_instance = {'host_address': 'http://{}:81'.format(HOST)}
-    check = SilkCheck('silk', {}, [invalid_instance])
-
-    with pytest.raises(Exception):
-        dd_run_check(check)
-    aggregator.assert_service_check('silk.can_connect', SilkCheck.CRITICAL)
-
-
-@pytest.mark.usefixtures("dd_environment")
 def test_submit_system_state(instance, datadog_agent):
     check = SilkCheck('silk', {}, [instance])
     check.check_id = 'test:123'
