@@ -318,18 +318,6 @@ class ApiRest(Api):
             return component.get_agents()
         return None
 
-    def _post_auth_unscoped(self):
-        self.log.debug("getting `X-Subject-Token`")
-        data = '{{"auth": {{"identity": {{"methods": ["password"], ' '"password": {{"user": {}}}}}}}}}'.format(
-            json.dumps(self.config.user),
-        )
-        url = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
-        self.log.debug("POST %s data: %s", url, data)
-        response = self.http.post('{}/v3/auth/tokens'.format(self.config.keystone_server_url), data=data)
-        response.raise_for_status()
-        self.log.debug("response: %s", response.json())
-        self.http.options['headers']['X-Auth-Token'] = response.headers['X-Subject-Token']
-
     def _post_auth_domain(self, domain_id):
         if domain_id not in self.auth_domain_id_tokens:
             data = (
