@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 19.2.0 / 2023-04-27
+
+* [Added] Remove Azure Pipelines from validation. See [#14475](https://github.com/DataDog/integrations-core/pull/14475).
+* [Fixed] Deprecate `use_latest_spec` option. See [#14446](https://github.com/DataDog/integrations-core/pull/14446).
+* [Fixed] Drop some kafka_consumer old dependencies from the `licenses` command. See [#14244](https://github.com/DataDog/integrations-core/pull/14244).
+
 ## 19.1.0 / 2023-04-20
 
 * [Added] Introduce initial entry in CHANGELOG during ddev create. See [#14148](https://github.com/DataDog/integrations-core/pull/14148).
