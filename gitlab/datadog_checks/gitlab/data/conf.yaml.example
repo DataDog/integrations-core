@@ -50,6 +50,11 @@ instances:
     #
   - openmetrics_endpoint: http://<GITLAB_URL>/-/metrics
 
+    ## @param gitaly_server_endpoint - string - optional
+    ## Endpoint exposing the Gitaly server's Prometheus metrics (only available when `openmetrics_endpoint` is used).
+    #
+    # gitaly_server_endpoint: http://<GITALY-URL>:9236/metrics
+
     ## @param gitlab_url - string - optional
     ## The GitLab external URL to probe for service health status
     ## If authentication is required, use this URL with
@@ -276,11 +281,6 @@ instances:
     ## than the full metric name.
     #
     # cache_metric_wildcards: true
-
-    ## @param use_latest_spec - boolean - optional - default: false
-    ## Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
-    #
-    # use_latest_spec: false
 
     ## @param telemetry - boolean - optional - default: false
     ## Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.

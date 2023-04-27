@@ -1,6 +1,6 @@
 # CHANGELOG - haproxy
 
-## 4.5.0 / 2023-03-03
+## 4.5.0 / 2023-03-03 / Agent 7.44.0
 
 * [Added] Bump versions and update metrics. See [#13925](https://github.com/DataDog/integrations-core/pull/13925). Thanks [wdauchy](https://github.com/wdauchy).
 

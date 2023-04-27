@@ -1,6 +1,6 @@
 # CHANGELOG - CockroachDB
 
-## 2.6.0 / 2023-03-03
+## 2.6.0 / 2023-03-03 / Agent 7.44.0
 
 * [Added] Collect schedules_BACKUP_last_completed_time metric. See [#13825](https://github.com/DataDog/integrations-core/pull/13825).
 
