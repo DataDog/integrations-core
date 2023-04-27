@@ -636,7 +636,11 @@ class SQLServer(AgentCheck):
 
             except Exception as e:
                 if e.args[0] == '42000':
-                    self.log.warning("Can't load the metric %s.The configured user is missing the VIEW SERVER STATE permissions or ##MS_ServerStateReader## server role.", name)
+                    self.log.warning(
+                        "Can't load the metric %s.The configured user is missing the \
+                        VIEW SERVER STATE permissions or ##MS_ServerStateReader## server role.",
+                        name,
+                    )
                 else:
                     self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
                 continue
@@ -790,12 +794,19 @@ class SQLServer(AgentCheck):
 
                         except Exception as e:
                             if e.args[0] == '42000':
-                                self.log.warning("Cannot run `fetch_all` for metrics %s \
+                                self.log.warning(
+                                    "Cannot run `fetch_all` for metrics %s \
                                     The configured user is missing the VIEW SERVER STATE permissions or \
-                                    ##MS_ServerStateReader## server role.", cls)
+                                    ##MS_ServerStateReader## server role.",
+                                    cls,
+                                )
                             else:
-                                self.log.error("Error running `fetch_all` for metrics %s - skipping.  \
-                                    Error: %s", cls, e)
+                                self.log.error(
+                                    "Error running `fetch_all` for metrics %s - skipping.  \
+                                    Error: %s",
+                                    cls,
+                                    e,
+                                )
                             rows, cols = None, None
 
                         instance_results[cls] = rows, cols
@@ -824,7 +835,7 @@ class SQLServer(AgentCheck):
             try:
                 # Server state queries require VIEW SERVER STATE permissions, which some managed database
                 # versions do not support.
-                # Update 04/2023 - This info might be incorrect because you can use the 
+                # Update 04/2023 - This info might be incorrect because you can use the
                 # ##MS_ServerStateReader## server role as well.
                 # to double check and potentially remove compltely.
 
@@ -832,12 +843,14 @@ class SQLServer(AgentCheck):
                     self.server_state_queries.execute()
                 except Exception as e:
                     if e.args[0] == '42000':
-                        #To Do: improve QueryManager exception to raise so that we can send these logs. (core:80)
-                        #Leaving for now since they could potentially trigger should there be a real exception raised.
-                        self.log.warning("Cannot get Server State information. The configured user is missing the \
-                            VIEW SERVER STATE permissions or ##MS_ServerStateReader## server role.")
+                        # To Do: improve QueryManager exception to raise so that we can send these logs. (core:80)
+                        # Leaving for now since they could potentially trigger should there be a real exception raised.
+                        self.log.warning(
+                            "Cannot get Server State information. The configured user is missing the \
+                            VIEW SERVER STATE permissions or ##MS_ServerStateReader## server role."
+                        )
                     else:
-                        self.log.error("Cannot execute query:%s",e)
+                        self.log.error("Cannot execute query:%s", e)
 
                 if self.dynamic_queries:
                     self.dynamic_queries.execute()
