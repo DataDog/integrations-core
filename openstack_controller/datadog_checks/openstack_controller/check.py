@@ -420,7 +420,7 @@ class OpenStackControllerCheck(AgentCheck):
 
     def _report_domain_metrics(self, api, tags):
         self._report_compute_domain_metrics(api, tags)
-        self._report_baremetal_metrics(api, tags)
+        self._report_baremetal_domain_metrics(api, tags)
 
     def _report_compute_project_metrics(self, api, project_id, project_tags):
         try:
@@ -657,7 +657,7 @@ class OpenStackControllerCheck(AgentCheck):
         else:
             self.service_check('openstack.cinder.api.up', AgentCheck.UNKNOWN, tags=project_tags)
 
-    def _report_baremetal_metrics(self, api, tags):
+    def _report_baremetal_domain_metrics(self, api, tags):
         try:
             self._report_baremetal_response_time(api, tags)
             self._report_baremetal_nodes(api, tags)
