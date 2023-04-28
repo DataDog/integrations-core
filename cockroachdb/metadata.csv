@@ -609,4 +609,4 @@ cockroachdb.txn.restarts.txnaborted.count,count,,,,Number of restarts due to an 
 cockroachdb.txn.restarts.txnpush.count,count,,,,Number of restarts due to a transaction push failure,0,cockroachdb,,
 cockroachdb.txn.restarts.writetoooldmulti.count,count,,,,Number of restarts due to multiple concurrent writers committing first,0,cockroachdb,,
 cockroachdb.txn.restarts.unknown.count,count,,,,Number of restarts due to a unknown reasons,0,cockroachdb,,
-cockroachdb.txnwaitqueue.deadlocks.total.count,count,,,,Number of deadlocks detected by the txn wait queue,0,cockroachdb,,
+cockroachdb.txnwaitqueue.deadlocks.count,count,,,,Number of deadlocks detected by the txn wait queue,0,cockroachdb,,
