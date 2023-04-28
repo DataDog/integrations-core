@@ -142,7 +142,7 @@ for project_id in $(echo "$RESPONSE" | jq -r '.projects[]' | jq -r '.id'); do
   process_endpoint --endpoint="/load-balancer/v2/lbaas/healthmonitors?project_id=$project_id"
 
   # amphorae
-  process_endpoint --endpoint="/load-balancer/v2/octavia/amphorae?project_id=$project_id"
+  process_endpoint --endpoint="/load-balancer/v2/octavia/amphorae"
   for amphora_id in $(echo "$RESPONSE" | jq -r '.amphorae[]' | jq -r '.id'); do
     # stats
     process_endpoint --endpoint="/load-balancer/v2/octavia/amphorae/$amphora_id/stats/"

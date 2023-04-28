@@ -156,8 +156,8 @@ class LoadBalancerRest:
         }
         return result
 
-    def get_amphorae(self, project_id):
-        url = f"{self.endpoint}/v2/octavia/amphorae?project_id={project_id}"
+    def get_amphorae(self):
+        url = f"{self.endpoint}/v2/octavia/amphorae"
         response = self.http.get(url)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
@@ -172,8 +172,8 @@ class LoadBalancerRest:
             amphorae_keys[amphora["id"]] = filter_keys(amphora, keys_list)
         return amphorae_keys
 
-    def get_amphorae_by_loadbalancer(self, loadbalancer_id, project_id):
-        amphorae = self.get_amphorae(project_id)
+    def get_amphorae_by_loadbalancer(self, loadbalancer_id):
+        amphorae = self.get_amphorae()
         result = {id: a for id, a in amphorae.items() if a.get("loadbalancer_id") == loadbalancer_id}
         return result
 

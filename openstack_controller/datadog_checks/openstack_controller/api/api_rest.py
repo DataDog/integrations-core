@@ -221,14 +221,14 @@ class ApiRest(Api):
         self.log.debug("getting load-balancer amphorae")
         component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
-            return component.get_amphorae(project_id)
+            return component.get_amphorae()
         return None
 
     def get_load_balancer_amphorae_by_loadbalancer(self, project_id, loadbalancer_id):
         self.log.debug("getting load-balancer amphorae by loadbalancer")
         component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
         if component:
-            return component.get_amphorae_by_loadbalancer(loadbalancer_id, project_id)
+            return component.get_amphorae_by_loadbalancer(loadbalancer_id)
         return None
 
     def get_load_balancer_amphora_statistics(self, project_id, amphora_id):
