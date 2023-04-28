@@ -245,9 +245,9 @@ class ApiRest(Api):
             return component.get_quota_set(project_id)
         return None
 
-    def get_compute_services(self, project_id):
+    def get_compute_services(self):
         self.log.debug("getting compute services")
-        component = self._get_component(ComponentType.COMPUTE, project_id=project_id)
+        component = self._get_component(ComponentType.COMPUTE)
         if component:
             return component.get_services()
         return None

@@ -10,17 +10,16 @@ create_file() {
   file_path="$dir_path/$file_name"
 
   # Check if the directory exists, and create it if it doesn't
-  if [ ! -d $dir_path ]; then
-    mkdir -p $dir_path
+  if [ ! -d "$dir_path" ]; then
+    mkdir -p "$dir_path"
   fi
 
   # Check if the file exists, and create it if it doesn't
-  if [ ! -f $file_path ]; then
-    touch $file_path
+  if [ ! -f "$file_path" ]; then
+    touch "$file_path"
+    # Write the content to the file
+    echo "$content" > "$file_path"
   fi
-
-  # Write the content to the file
-  echo "$content" > $file_path
 }
 
 process_endpoint() {
@@ -149,6 +148,7 @@ for project_id in $(echo "$RESPONSE" | jq -r '.projects[]' | jq -r '.id'); do
   done
 
 done
+process_endpoint --endpoint="/compute/v2.1/os-services"
 process_endpoint --endpoint="/compute/v2.1/os-aggregates"
 process_endpoint --endpoint="/compute/v2.1/os-hypervisors/detail?with_servers=true"
 num_uptime=$(echo "$RESPONSE" | jq -r '.hypervisors[] | select(.uptime != null) | length')

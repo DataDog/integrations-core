@@ -111,7 +111,7 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_services(self, project_id):
+    def get_compute_services(self):
         pass  # pragma: no cover
 
     @abstractmethod

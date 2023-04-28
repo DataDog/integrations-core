@@ -428,6 +428,7 @@ class OpenStackControllerCheck(AgentCheck):
         try:
             self._report_compute_response_time(api, tags)
             self._report_compute_limits(api, tags)
+            self._report_compute_services(api, tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting compute domain metrics: %s", e)
@@ -441,7 +442,6 @@ class OpenStackControllerCheck(AgentCheck):
             self._report_compute_servers(api, project_id, project_tags)
             self._report_compute_flavors(api, project_id, project_tags)
             self._report_compute_hypervisors(api, project_id, project_tags)
-            self._report_compute_services(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting compute project metrics: %s", e)
@@ -479,8 +479,8 @@ class OpenStackControllerCheck(AgentCheck):
                 else:
                     self.log.warning("%s metric not reported as nova quota metric", metric)
 
-    def _report_compute_services(self, api, project_id, project_tags):
-        compute_services = api.get_compute_services(project_id)
+    def _report_compute_services(self, api, tags):
+        compute_services = api.get_compute_services()
         self.log.debug("compute_services: %s", compute_services)
         if compute_services is not None:
             for compute_service in compute_services:
@@ -492,7 +492,7 @@ class OpenStackControllerCheck(AgentCheck):
                     compute_service.get('status'),
                     compute_service.get('zone'),
                 )
-                all_tags = project_tags + service_tags
+                all_tags = tags + service_tags
                 is_up = compute_service.get('is_up')
                 self.gauge('openstack.nova.service.up', is_up, tags=all_tags)
 

@@ -38,7 +38,7 @@ class ApiSdk(Api):
     def get_compute_quota_set(self, project_id):
         pass  # pragma: no cover
 
-    def get_compute_services(self, project_id):
+    def get_compute_services(self):
         pass  # pragma: no cover
 
     def get_compute_servers(self, project_id):
