@@ -9,6 +9,7 @@ from datadog_checks.kafka_consumer.config import KafkaConfig
 
 
 class KafkaCheck(AgentCheck):
+    # Test comment to trigger CI
 
     __NAMESPACE__ = 'kafka'
 
