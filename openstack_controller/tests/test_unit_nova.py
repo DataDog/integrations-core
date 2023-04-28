@@ -126,17 +126,6 @@ def test_limits_metrics(aggregator, dd_run_check, monkeypatch, instance):
                     tags=[
                         'domain_id:default',
                         'keystone_server:{}'.format(instance["keystone_server_url"]),
-                        'project_id:1e6e233e637d4d55a50a62b63398ad15',
-                        'project_name:demo',
-                    ],
-                )
-                aggregator.assert_metric(
-                    key,
-                    tags=[
-                        'domain_id:default',
-                        'keystone_server:{}'.format(instance["keystone_server_url"]),
-                        'project_id:6e39099cccde4f809b003d9e0dd09304',
-                        'project_name:admin',
                     ],
                 )
             elif is_mandatory(value):

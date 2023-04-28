@@ -103,11 +103,11 @@ process_endpoint --endpoint="/identity/v3/registered_limits"
 process_endpoint --endpoint="/identity/v3/limits"
 # Nova
 process_endpoint --endpoint="/identity/v3/auth/projects"
+process_endpoint --endpoint="/compute/v2.1/limits"
 for project_id in $(echo "$RESPONSE" | jq -r '.projects[]' | jq -r '.id'); do
   printf "\033[32m%-6s\033[0m Project id: %s\n" "INFO" "$project_id"
   data=$(echo "{'auth': {'identity': {'methods': ['password'], 'password': {'user': {'name': 'admin', 'domain': { 'id': 'default' }, 'password': 'password'}}}, 'scope': {'project': {'id': '$project_id'}}}}" | sed "s/'/\"/g")
   process_endpoint --method="POST" --endpoint="/identity/v3/auth/tokens" --file_name="project_$project_id.json" --data="$data"
-  process_endpoint --endpoint="/compute/v2.1/limits?tenant_id=$project_id"
   process_endpoint --endpoint="/compute/v2.1/os-quota-sets/$project_id"
   process_endpoint --endpoint="/compute/v2.1/servers/detail?project_id=$project_id"
 

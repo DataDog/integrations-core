@@ -32,7 +32,7 @@ class ApiSdk(Api):
     def get_compute_response_time(self):
         pass  # pragma: no cover
 
-    def get_compute_limits(self, project_id):
+    def get_compute_limits(self):
         pass  # pragma: no cover
 
     def get_compute_quota_set(self, project_id):

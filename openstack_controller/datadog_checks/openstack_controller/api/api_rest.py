@@ -231,11 +231,11 @@ class ApiRest(Api):
             return component.get_amphora_statistics(amphora_id)
         return None
 
-    def get_compute_limits(self, project_id):
+    def get_compute_limits(self):
         self.log.debug("getting compute limits")
-        component = self._get_component(ComponentType.COMPUTE, project_id=project_id)
+        component = self._get_component(ComponentType.COMPUTE)
         if component:
-            return component.get_limits(project_id)
+            return component.get_limits()
         return None
 
     def get_compute_quota_set(self, project_id):

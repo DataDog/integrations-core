@@ -424,9 +424,19 @@ class OpenStackControllerCheck(AgentCheck):
         self._report_block_storage_metrics(api, project_id, tags + project_tags)
         self._report_load_balancer_project_metrics(api, project_id, tags + project_tags)
 
+    def _report_compute_domain_metrics(self, api, tags):
+        try:
+            self._report_compute_response_time(api, tags)
+            self._report_compute_limits(api, tags)
+        except HTTPError as e:
+            self.warning(e)
+            self.log.error("HTTPError while reporting compute domain metrics: %s", e)
+            self.service_check(NOVA_SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
+        except Exception as e:
+            self.warning("Exception while reporting compute domain metrics: %s", e)
+
     def _report_compute_project_metrics(self, api, project_id, project_tags):
         try:
-            self._report_compute_limits(api, project_id, project_tags)
             self._report_compute_quotas(api, project_id, project_tags)
             self._report_compute_servers(api, project_id, project_tags)
             self._report_compute_flavors(api, project_id, project_tags)
@@ -438,16 +448,6 @@ class OpenStackControllerCheck(AgentCheck):
         except Exception as e:
             self.warning("Exception while reporting compute project metrics: %s", e)
 
-    def _report_compute_domain_metrics(self, api, tags):
-        try:
-            self._report_compute_response_time(api, tags)
-        except HTTPError as e:
-            self.warning(e)
-            self.log.error("HTTPError while reporting compute domain metrics: %s", e)
-            self.service_check(NOVA_SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
-        except Exception as e:
-            self.warning("Exception while reporting compute domain metrics: %s", e)
-
     def _report_compute_response_time(self, api, tags):
         response_time = api.get_compute_response_time()
         self.log.debug("compute response time: %s", response_time)
@@ -457,13 +457,13 @@ class OpenStackControllerCheck(AgentCheck):
         else:
             self.service_check(NOVA_SERVICE_CHECK, AgentCheck.UNKNOWN, tags=tags)
 
-    def _report_compute_limits(self, api, project_id, project_tags):
-        compute_limits = api.get_compute_limits(project_id)
+    def _report_compute_limits(self, api, tags):
+        compute_limits = api.get_compute_limits()
         self.log.debug("compute_limits: %s", compute_limits)
         if compute_limits:
             for metric, value in compute_limits.items():
                 if metric in NOVA_LIMITS_METRICS:
-                    self.gauge(metric, value, tags=project_tags)
+                    self.gauge(metric, value, tags=tags)
                 else:
                     self.log.warning("%s metric not reported as nova limits metric", metric)
 
