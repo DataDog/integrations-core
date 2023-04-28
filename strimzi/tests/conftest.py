@@ -32,27 +32,27 @@ def setup_strimzi():
     )
     run_command(["kubectl", "wait", "kafka/my-cluster", "--for=condition=Ready", "--timeout=300s", "-n", "kafka"])
 
-    run_command(
-        [
-            "kubectl",
-            "apply",
-            "-f",
-            os.path.join(HERE, "kind", STRIMZI_VERSION, "topic.yaml"),
-            "-n",
-            "kafka",
-        ]
-    )
+    for file in ("topic.yaml", "user.yaml", "connect.yaml", "connectors.yaml"):
+        run_command(
+            [
+                "kubectl",
+                "apply",
+                "-f",
+                os.path.join(HERE, "kind", STRIMZI_VERSION, file),
+                "-n",
+                "kafka",
+            ]
+        )
 
-    run_command(
-        [
-            "kubectl",
-            "apply",
-            "-f",
-            os.path.join(HERE, "kind", STRIMZI_VERSION, "user.yaml"),
-            "-n",
-            "kafka",
-        ]
-    )
+    # for deployment in ("hello-world-consumer", "hello-world-producer"):
+    #     run_command(["kubectl", "wait", "kafka/my-cluster", "--for=condition=Ready", "--timeout=300s", "-n", "kafka"])
+
+    # kubectl
+    # wait
+    # deployment - n
+    # default
+    # golang - hello - world - web - -
+    # for condition=Available=True --timeout=90s
 
 
 @pytest.fixture(scope='session')
