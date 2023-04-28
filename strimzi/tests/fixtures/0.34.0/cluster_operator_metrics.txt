@@ -1,96 +1,104 @@
 # HELP jvm_gc_memory_promoted_bytes_total Count of positive increases in the size of the old generation memory pool before GC to after GC
 # TYPE jvm_gc_memory_promoted_bytes_total counter
 jvm_gc_memory_promoted_bytes_total 1
+# HELP strimzi_resource_state Current state of the resource: 1 ready, 0 fail
+# TYPE strimzi_resource_state gauge
+strimzi_resource_state{kind="Kafka",name="my-cluster",reason="none",resource_namespace="kafka",} 1.0
 # HELP vertx_http_server_bytes_written_total Number of bytes sent by the server
 # TYPE vertx_http_server_bytes_written_total counter
-vertx_http_server_bytes_written_total 30344.0
+vertx_http_server_bytes_written_total 1609813.0
 # HELP jvm_buffer_memory_used_bytes An estimate of the memory that the Java virtual machine is using for this buffer pool
 # TYPE jvm_buffer_memory_used_bytes gauge
 jvm_buffer_memory_used_bytes{id="mapped - 'non-volatile memory'",} 0.0
 jvm_buffer_memory_used_bytes{id="mapped",} 0.0
-jvm_buffer_memory_used_bytes{id="direct",} 8484872.0
+jvm_buffer_memory_used_bytes{id="direct",} 8464007.0
 # HELP jvm_memory_used_bytes The amount of used memory
 # TYPE jvm_memory_used_bytes gauge
-jvm_memory_used_bytes{area="heap",id="Tenured Gen",} 3.7908528E7
-jvm_memory_used_bytes{area="nonheap",id="CodeHeap 'profiled nmethods'",} 1.7125888E7
-jvm_memory_used_bytes{area="heap",id="Eden Space",} 1.2637552E7
-jvm_memory_used_bytes{area="nonheap",id="Metaspace",} 6.9497368E7
+jvm_memory_used_bytes{area="heap",id="Tenured Gen",} 4.0171928E7
+jvm_memory_used_bytes{area="nonheap",id="CodeHeap 'profiled nmethods'",} 2.4062336E7
+jvm_memory_used_bytes{area="heap",id="Eden Space",} 1822352.0
+jvm_memory_used_bytes{area="nonheap",id="Metaspace",} 7.273236E7
 jvm_memory_used_bytes{area="nonheap",id="CodeHeap 'non-nmethods'",} 1429248.0
-jvm_memory_used_bytes{area="heap",id="Survivor Space",} 1966072.0
-jvm_memory_used_bytes{area="nonheap",id="Compressed Class Space",} 7963536.0
-jvm_memory_used_bytes{area="nonheap",id="CodeHeap 'non-profiled nmethods'",} 4231168.0
+jvm_memory_used_bytes{area="heap",id="Survivor Space",} 0.0
+jvm_memory_used_bytes{area="nonheap",id="Compressed Class Space",} 8201648.0
+jvm_memory_used_bytes{area="nonheap",id="CodeHeap 'non-profiled nmethods'",} 7974656.0
 # HELP vertx_pool_completed_total Number of elements done with the resource
 # TYPE vertx_pool_completed_total counter
-vertx_pool_completed_total{pool_type="worker",} 301.0
+vertx_pool_completed_total{pool_type="worker",} 1273.0
 # HELP vertx_http_server_active_requests Number of requests being processed
 # TYPE vertx_http_server_active_requests gauge
-vertx_http_server_active_requests{method="GET",} 5.0
+vertx_http_server_active_requests{method="GET",} 6.0
 # HELP jvm_gc_live_data_size_bytes Size of long-lived heap memory pool after reclamation
 # TYPE jvm_gc_live_data_size_bytes gauge
-jvm_gc_live_data_size_bytes 3.787956E7
+jvm_gc_live_data_size_bytes 4.0171928E7
 # HELP jvm_classes_loaded_classes The number of classes that are currently loaded in the Java virtual machine
 # TYPE jvm_classes_loaded_classes gauge
-jvm_classes_loaded_classes 12102.0
+jvm_classes_loaded_classes 12532.0
 # HELP jvm_memory_committed_bytes The amount of memory in bytes that is committed for the Java virtual machine to use
 # TYPE jvm_memory_committed_bytes gauge
 jvm_memory_committed_bytes{area="heap",id="Tenured Gen",} 4.0566784E7
-jvm_memory_committed_bytes{area="nonheap",id="CodeHeap 'profiled nmethods'",} 1.7170432E7
+jvm_memory_committed_bytes{area="nonheap",id="CodeHeap 'profiled nmethods'",} 2.4117248E7
 jvm_memory_committed_bytes{area="heap",id="Eden Space",} 1.6318464E7
-jvm_memory_committed_bytes{area="nonheap",id="Metaspace",} 7.0516736E7
+jvm_memory_committed_bytes{area="nonheap",id="Metaspace",} 7.4121216E7
 jvm_memory_committed_bytes{area="nonheap",id="CodeHeap 'non-nmethods'",} 2555904.0
 jvm_memory_committed_bytes{area="heap",id="Survivor Space",} 1966080.0
-jvm_memory_committed_bytes{area="nonheap",id="Compressed Class Space",} 8454144.0
-jvm_memory_committed_bytes{area="nonheap",id="CodeHeap 'non-profiled nmethods'",} 4259840.0
+jvm_memory_committed_bytes{area="nonheap",id="Compressed Class Space",} 8912896.0
+jvm_memory_committed_bytes{area="nonheap",id="CodeHeap 'non-profiled nmethods'",} 7995392.0
 # HELP vertx_http_server_requests_total Number of processed requests
 # TYPE vertx_http_server_requests_total counter
-vertx_http_server_requests_total{code="200",method="GET",route="",} 10.0
+vertx_http_server_requests_total{code="200",method="GET",route="",} 167.0
 vertx_http_server_requests_total{code="400",method="GET",route="",} 4.0
 # HELP jvm_gc_pause_seconds Time spent in GC pause
 # TYPE jvm_gc_pause_seconds summary
 jvm_gc_pause_seconds_count{action="end of major GC",cause="Metadata GC Threshold",} 1.0
 jvm_gc_pause_seconds_sum{action="end of major GC",cause="Metadata GC Threshold",} 0.079
-jvm_gc_pause_seconds_count{action="end of major GC",cause="Allocation Failure",} 4.0
-jvm_gc_pause_seconds_sum{action="end of major GC",cause="Allocation Failure",} 0.236
-jvm_gc_pause_seconds_count{action="end of minor GC",cause="Allocation Failure",} 24.0
-jvm_gc_pause_seconds_sum{action="end of minor GC",cause="Allocation Failure",} 0.21
+jvm_gc_pause_seconds_count{action="end of major GC",cause="Allocation Failure",} 44.0
+jvm_gc_pause_seconds_sum{action="end of major GC",cause="Allocation Failure",} 2.949
+jvm_gc_pause_seconds_count{action="end of minor GC",cause="Allocation Failure",} 51.0
+jvm_gc_pause_seconds_sum{action="end of minor GC",cause="Allocation Failure",} 0.213
 # HELP jvm_gc_pause_seconds_max Time spent in GC pause
 # TYPE jvm_gc_pause_seconds_max gauge
-jvm_gc_pause_seconds_max{action="end of major GC",cause="Metadata GC Threshold",} 0.079
-jvm_gc_pause_seconds_max{action="end of major GC",cause="Allocation Failure",} 0.086
-jvm_gc_pause_seconds_max{action="end of minor GC",cause="Allocation Failure",} 0.066
+jvm_gc_pause_seconds_max{action="end of major GC",cause="Metadata GC Threshold",} 0.0
+jvm_gc_pause_seconds_max{action="end of major GC",cause="Allocation Failure",} 0.101
+jvm_gc_pause_seconds_max{action="end of minor GC",cause="Allocation Failure",} 0.0
 # HELP process_cpu_usage The "recent cpu usage" for the Java Virtual Machine process
 # TYPE process_cpu_usage gauge
-process_cpu_usage 0.08333333333333333
+process_cpu_usage 0.0
 # HELP vertx_http_server_request_bytes_max Size of requests in bytes
 # TYPE vertx_http_server_request_bytes_max gauge
 vertx_http_server_request_bytes_max{method="GET",} 0.0
 # HELP vertx_http_server_request_bytes Size of requests in bytes
 # TYPE vertx_http_server_request_bytes summary
-vertx_http_server_request_bytes_count{method="GET",} 10.0
+vertx_http_server_request_bytes_count{method="GET",} 188.0
 vertx_http_server_request_bytes_sum{method="GET",} 0.0
-# HELP strimzi_resource_state Current state of the resource: 1 ready, 0 fail
-# TYPE strimzi_resource_state gauge
-strimzi_resource_state{kind="Kafka",name="my-cluster",reason="none",resource_namespace="kafka",} 1.0
 # HELP strimzi_reconciliations_successful_total Number of reconciliations done by the operator for individual resources which were successful
 # TYPE strimzi_reconciliations_successful_total counter
 strimzi_reconciliations_successful_total{kind="StrimziPodSet",namespace="kafka",selector="",} 12.0
-strimzi_reconciliations_successful_total{kind="Kafka",namespace="kafka",selector="",} 2.0
+strimzi_reconciliations_successful_total{kind="Kafka",namespace="kafka",selector="",} 11.0
+# HELP strimzi_reconciliations_periodical_total Number of periodical reconciliations done by the operator
+# TYPE strimzi_reconciliations_periodical_total counter
+strimzi_reconciliations_periodical_total{kind="KafkaConnect",namespace="kafka",selector="",} 9.0
+strimzi_reconciliations_periodical_total{kind="Kafka",namespace="kafka",selector="",} 9.0
+strimzi_reconciliations_periodical_total{kind="KafkaMirrorMaker",namespace="kafka",selector="",} 9.0
+strimzi_reconciliations_periodical_total{kind="KafkaBridge",namespace="kafka",selector="",} 9.0
+strimzi_reconciliations_periodical_total{kind="KafkaRebalance",namespace="kafka",selector="",} 9.0
+strimzi_reconciliations_periodical_total{kind="KafkaMirrorMaker2",namespace="kafka",selector="",} 9.0
 # HELP jvm_gc_memory_allocated_bytes_total Incremented for an increase in the size of the (young) heap memory pool after one GC to before the next
 # TYPE jvm_gc_memory_allocated_bytes_total counter
-jvm_gc_memory_allocated_bytes_total 3.2291208E8
+jvm_gc_memory_allocated_bytes_total 9.8968508E8
 # HELP jvm_threads_daemon_threads The current number of live daemon threads
 # TYPE jvm_threads_daemon_threads gauge
-jvm_threads_daemon_threads 15.0
+jvm_threads_daemon_threads 14.0
 # HELP vertx_pool_ratio Pool usage ratio, only present if maximum pool size could be determined
 # TYPE vertx_pool_ratio gauge
 vertx_pool_ratio{pool_type="worker",} 0.0
 # HELP system_cpu_usage The "recent cpu usage" of the system the application is running in
 # TYPE system_cpu_usage gauge
-system_cpu_usage 0.07266
+system_cpu_usage 0.0
 # HELP strimzi_reconciliations_total Number of reconciliations done by the operator for individual resources
 # TYPE strimzi_reconciliations_total counter
 strimzi_reconciliations_total{kind="StrimziPodSet",namespace="kafka",selector="",} 12.0
-strimzi_reconciliations_total{kind="Kafka",namespace="kafka",selector="",} 3.0
+strimzi_reconciliations_total{kind="Kafka",namespace="kafka",selector="",} 12.0
 # HELP vertx_pool_in_use Number of resources used
 # TYPE vertx_pool_in_use gauge
 vertx_pool_in_use{pool_type="worker",} 0.0
@@ -98,22 +106,22 @@ vertx_pool_in_use{pool_type="worker",} 0.0
 # TYPE jvm_buffer_count_buffers gauge
 jvm_buffer_count_buffers{id="mapped - 'non-volatile memory'",} 0.0
 jvm_buffer_count_buffers{id="mapped",} 0.0
-jvm_buffer_count_buffers{id="direct",} 19.0
+jvm_buffer_count_buffers{id="direct",} 22.0
 # HELP jvm_buffer_total_capacity_bytes An estimate of the total capacity of the buffers in this pool
 # TYPE jvm_buffer_total_capacity_bytes gauge
 jvm_buffer_total_capacity_bytes{id="mapped - 'non-volatile memory'",} 0.0
 jvm_buffer_total_capacity_bytes{id="mapped",} 0.0
-jvm_buffer_total_capacity_bytes{id="direct",} 8484871.0
+jvm_buffer_total_capacity_bytes{id="direct",} 8464006.0
 # HELP vertx_pool_queue_pending Number of pending elements in queue
 # TYPE vertx_pool_queue_pending gauge
 vertx_pool_queue_pending{pool_type="worker",} 0.0
 # HELP vertx_pool_queue_time_seconds_max Time spent in queue before being processed
 # TYPE vertx_pool_queue_time_seconds_max gauge
-vertx_pool_queue_time_seconds_max{pool_type="worker",} 0.919910626
+vertx_pool_queue_time_seconds_max{pool_type="worker",} 0.074030333
 # HELP vertx_pool_queue_time_seconds Time spent in queue before being processed
 # TYPE vertx_pool_queue_time_seconds summary
-vertx_pool_queue_time_seconds_count{pool_type="worker",} 301.0
-vertx_pool_queue_time_seconds_sum{pool_type="worker",} 6.092990131
+vertx_pool_queue_time_seconds_count{pool_type="worker",} 1273.0
+vertx_pool_queue_time_seconds_sum{pool_type="worker",} 7.347672632
 # HELP jvm_memory_max_bytes The maximum amount of memory in bytes that can be used for memory management
 # TYPE jvm_memory_max_bytes gauge
 jvm_memory_max_bytes{area="heap",id="Tenured Gen",} 4.0566784E7
@@ -129,12 +137,12 @@ jvm_memory_max_bytes{area="nonheap",id="CodeHeap 'non-profiled nmethods'",} 1.22
 system_cpu_count 1.0
 # HELP vertx_http_server_response_bytes_max Size of responses in bytes
 # TYPE vertx_http_server_response_bytes_max gauge
-vertx_http_server_response_bytes_max{code="200",method="GET",route="",} 15618.0
+vertx_http_server_response_bytes_max{code="200",method="GET",route="",} 17820.0
 vertx_http_server_response_bytes_max{code="400",method="GET",route="",} 0.0
 # HELP vertx_http_server_response_bytes Size of responses in bytes
 # TYPE vertx_http_server_response_bytes summary
-vertx_http_server_response_bytes_count{code="200",method="GET",route="",} 10.0
-vertx_http_server_response_bytes_sum{code="200",method="GET",route="",} 30344.0
+vertx_http_server_response_bytes_count{code="200",method="GET",route="",} 167.0
+vertx_http_server_response_bytes_sum{code="200",method="GET",route="",} 1609813.0
 vertx_http_server_response_bytes_count{code="400",method="GET",route="",} 4.0
 vertx_http_server_response_bytes_sum{code="400",method="GET",route="",} 0.0
 # HELP strimzi_reconciliations_already_enqueued_total Number of reconciliations skipped because another reconciliation for the same resource was still running
@@ -143,31 +151,50 @@ strimzi_reconciliations_already_enqueued_total{kind="StrimziPodSet",namespace="k
 # HELP strimzi_resources Number of custom resources the operator sees
 # TYPE strimzi_resources gauge
 strimzi_resources{kind="StrimziPodSet",namespace="kafka",selector="",} 2.0
+strimzi_resources{kind="KafkaConnect",namespace="kafka",selector="",} 0.0
+strimzi_resources{kind="KafkaConnector",namespace="kafka",selector="",} 0.0
+strimzi_resources{kind="Kafka",namespace="kafka",selector="",} 1.0
+strimzi_resources{kind="KafkaMirrorMaker",namespace="kafka",selector="",} 0.0
+strimzi_resources{kind="KafkaBridge",namespace="kafka",selector="",} 0.0
+strimzi_resources{kind="KafkaRebalance",namespace="kafka",selector="",} 0.0
+strimzi_resources{kind="KafkaMirrorMaker2",namespace="kafka",selector="",} 0.0
 # HELP jvm_classes_unloaded_classes_total The total number of classes unloaded since the Java virtual machine has started execution
 # TYPE jvm_classes_unloaded_classes_total counter
-jvm_classes_unloaded_classes_total 137.0
+jvm_classes_unloaded_classes_total 194.0
 # HELP jvm_threads_states_threads The current number of threads
 # TYPE jvm_threads_states_threads gauge
 jvm_threads_states_threads{state="runnable",} 8.0
 jvm_threads_states_threads{state="blocked",} 0.0
-jvm_threads_states_threads{state="waiting",} 23.0
-jvm_threads_states_threads{state="timed-waiting",} 10.0
+jvm_threads_states_threads{state="waiting",} 33.0
+jvm_threads_states_threads{state="timed-waiting",} 9.0
 jvm_threads_states_threads{state="new",} 0.0
 jvm_threads_states_threads{state="terminated",} 0.0
+# HELP vertx_http_server_request_resets_total Number of request resets
+# TYPE vertx_http_server_request_resets_total counter
+vertx_http_server_request_resets_total{method="GET",} 20.0
 # HELP strimzi_reconciliations_locked_total Number of reconciliations skipped because another reconciliation for the same resource was still running
 # TYPE strimzi_reconciliations_locked_total counter
 strimzi_reconciliations_locked_total{kind="Kafka",namespace="kafka",selector="",} 1.0
+# HELP strimzi_resources_paused Number of custom resources the operator sees but does not reconcile due to paused reconciliations
+# TYPE strimzi_resources_paused gauge
+strimzi_resources_paused{kind="KafkaConnect",namespace="kafka",selector="",} 0.0
+strimzi_resources_paused{kind="KafkaConnector",namespace="kafka",selector="",} 0.0
+strimzi_resources_paused{kind="Kafka",namespace="kafka",selector="",} 0.0
+strimzi_resources_paused{kind="KafkaMirrorMaker",namespace="kafka",selector="",} 0.0
+strimzi_resources_paused{kind="KafkaBridge",namespace="kafka",selector="",} 0.0
+strimzi_resources_paused{kind="KafkaRebalance",namespace="kafka",selector="",} 0.0
+strimzi_resources_paused{kind="KafkaMirrorMaker2",namespace="kafka",selector="",} 0.0
 # HELP jvm_threads_live_threads The current number of live threads including both daemon and non-daemon threads
 # TYPE jvm_threads_live_threads gauge
-jvm_threads_live_threads 41.0
+jvm_threads_live_threads 50.0
 # HELP vertx_http_server_response_time_seconds_max Request processing time
 # TYPE vertx_http_server_response_time_seconds_max gauge
-vertx_http_server_response_time_seconds_max{code="200",method="GET",route="",} 0.038838584
-vertx_http_server_response_time_seconds_max{code="400",method="GET",route="",} 0.001282291
+vertx_http_server_response_time_seconds_max{code="200",method="GET",route="",} 0.061503542
+vertx_http_server_response_time_seconds_max{code="400",method="GET",route="",} 0.0
 # HELP vertx_http_server_response_time_seconds Request processing time
 # TYPE vertx_http_server_response_time_seconds summary
-vertx_http_server_response_time_seconds_count{code="200",method="GET",route="",} 10.0
-vertx_http_server_response_time_seconds_sum{code="200",method="GET",route="",} 0.054247166
+vertx_http_server_response_time_seconds_count{code="200",method="GET",route="",} 167.0
+vertx_http_server_response_time_seconds_sum{code="200",method="GET",route="",} 0.277198831
 vertx_http_server_response_time_seconds_count{code="400",method="GET",route="",} 4.0
 vertx_http_server_response_time_seconds_sum{code="400",method="GET",route="",} 0.002201917
 # HELP jvm_gc_max_data_size_bytes Max size of long-lived heap memory pool
@@ -175,7 +202,7 @@ vertx_http_server_response_time_seconds_sum{code="400",method="GET",route="",} 0
 jvm_gc_max_data_size_bytes 4.0566784E7
 # HELP system_load_average_1m The sum of the number of runnable entities queued to available processors and the number of runnable entities running on the available processors averaged over a period of time
 # TYPE system_load_average_1m gauge
-system_load_average_1m 0.47
+system_load_average_1m 0.1
 # HELP strimzi_reconciliations_duration_seconds The time the reconciliation takes to complete
 # TYPE strimzi_reconciliations_duration_seconds histogram
 strimzi_reconciliations_duration_seconds_bucket{kind="StrimziPodSet",namespace="kafka",selector="",le="1.0",} 12.0
@@ -189,32 +216,32 @@ strimzi_reconciliations_duration_seconds_bucket{kind="StrimziPodSet",namespace="
 strimzi_reconciliations_duration_seconds_count{kind="StrimziPodSet",namespace="kafka",selector="",} 12.0
 strimzi_reconciliations_duration_seconds_sum{kind="StrimziPodSet",namespace="kafka",selector="",} 0.241120376
 strimzi_reconciliations_duration_seconds_bucket{kind="Kafka",namespace="kafka",selector="",le="1.0",} 0.0
-strimzi_reconciliations_duration_seconds_bucket{kind="Kafka",namespace="kafka",selector="",le="5.0",} 1.0
-strimzi_reconciliations_duration_seconds_bucket{kind="Kafka",namespace="kafka",selector="",le="10.0",} 1.0
-strimzi_reconciliations_duration_seconds_bucket{kind="Kafka",namespace="kafka",selector="",le="30.0",} 1.0
-strimzi_reconciliations_duration_seconds_bucket{kind="Kafka",namespace="kafka",selector="",le="60.0",} 1.0
-strimzi_reconciliations_duration_seconds_bucket{kind="Kafka",namespace="kafka",selector="",le="120.0",} 2.0
-strimzi_reconciliations_duration_seconds_bucket{kind="Kafka",namespace="kafka",selector="",le="300.0",} 2.0
-strimzi_reconciliations_duration_seconds_bucket{kind="Kafka",namespace="kafka",selector="",le="+Inf",} 2.0
-strimzi_reconciliations_duration_seconds_count{kind="Kafka",namespace="kafka",selector="",} 2.0
-strimzi_reconciliations_duration_seconds_sum{kind="Kafka",namespace="kafka",selector="",} 91.009006834
+strimzi_reconciliations_duration_seconds_bucket{kind="Kafka",namespace="kafka",selector="",le="5.0",} 10.0
+strimzi_reconciliations_duration_seconds_bucket{kind="Kafka",namespace="kafka",selector="",le="10.0",} 10.0
+strimzi_reconciliations_duration_seconds_bucket{kind="Kafka",namespace="kafka",selector="",le="30.0",} 10.0
+strimzi_reconciliations_duration_seconds_bucket{kind="Kafka",namespace="kafka",selector="",le="60.0",} 10.0
+strimzi_reconciliations_duration_seconds_bucket{kind="Kafka",namespace="kafka",selector="",le="120.0",} 11.0
+strimzi_reconciliations_duration_seconds_bucket{kind="Kafka",namespace="kafka",selector="",le="300.0",} 11.0
+strimzi_reconciliations_duration_seconds_bucket{kind="Kafka",namespace="kafka",selector="",le="+Inf",} 11.0
+strimzi_reconciliations_duration_seconds_count{kind="Kafka",namespace="kafka",selector="",} 11.0
+strimzi_reconciliations_duration_seconds_sum{kind="Kafka",namespace="kafka",selector="",} 107.47751484
 # HELP strimzi_reconciliations_duration_seconds_max The time the reconciliation takes to complete
 # TYPE strimzi_reconciliations_duration_seconds_max gauge
-strimzi_reconciliations_duration_seconds_max{kind="StrimziPodSet",namespace="kafka",selector="",} 0.177433751
-strimzi_reconciliations_duration_seconds_max{kind="Kafka",namespace="kafka",selector="",} 88.709140041
+strimzi_reconciliations_duration_seconds_max{kind="StrimziPodSet",namespace="kafka",selector="",} 0.0
+strimzi_reconciliations_duration_seconds_max{kind="Kafka",namespace="kafka",selector="",} 1.847405834
 # HELP vertx_http_server_active_connections Number of opened connections to the server
 # TYPE vertx_http_server_active_connections gauge
-vertx_http_server_active_connections 1.0
+vertx_http_server_active_connections 3.0
 # HELP jvm_threads_peak_threads The peak live thread count since the Java virtual machine started or peak was reset
 # TYPE jvm_threads_peak_threads gauge
-jvm_threads_peak_threads 45.0
+jvm_threads_peak_threads 55.0
 # HELP vertx_http_server_errors_total Number of errors
 # TYPE vertx_http_server_errors_total counter
 vertx_http_server_errors_total 4.0
 # HELP vertx_pool_usage_seconds Time using a resource
 # TYPE vertx_pool_usage_seconds summary
-vertx_pool_usage_seconds_count{pool_type="worker",} 301.0
-vertx_pool_usage_seconds_sum{pool_type="worker",} 4.815006703
+vertx_pool_usage_seconds_count{pool_type="worker",} 1273.0
+vertx_pool_usage_seconds_sum{pool_type="worker",} 10.683748336
 # HELP vertx_pool_usage_seconds_max Time using a resource
 # TYPE vertx_pool_usage_seconds_max gauge
-vertx_pool_usage_seconds_max{pool_type="worker",} 0.9891565
+vertx_pool_usage_seconds_max{pool_type="worker",} 0.104492167
