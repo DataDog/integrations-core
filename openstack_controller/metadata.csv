@@ -164,7 +164,7 @@ openstack.keystone.services.enabled,gauge,,service,,"Number of web services enab
 openstack.keystone.users.count,gauge,,user,,"Number of users",0,openstack_controller,keystone users,
 openstack.keystone.users.enabled,gauge,,user,,"Number of enabled users",0,openstack_controller,keystone users enabled,
 openstack.neutron.response_time,gauge,,millisecond,,"The response time of the Neutron API in milliseconds",0,openstack_controller,neutron response,
-openstack.neutron.agents.admin_state_up,gauge,,,,"The administrative state of the agent, which is 1 if up, and 0 otherwise",0,openstack_controller,neutron agents state,
+openstack.neutron.agents.admin_state_up,gauge,,,,"The administrative state of the agent, which is 1 if up, 0 otherwise",0,openstack_controller,neutron agents state,
 openstack.neutron.agents.alive,gauge,,,,"Whether the agent is alive and running, which is 1 if alive, and 0 otherwise",0,openstack_controller,neutron agents alive,
 openstack.neutron.agents.count,gauge,,,,"Number of network agents",0,openstack_controller,neutron agents alive,
 openstack.neutron.quotas.floatingip,gauge,,,,"The number of floating IP addresses allowed for each project, -1 means no limit.",0,openstack_controller,neutron quota ip,
