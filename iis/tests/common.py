@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from datadog_checks.iis.iis import DEFAULT_COUNTERS
 from datadog_checks.iis.metrics import METRICS_CONFIG
+from datadog_checks.iis.service_check import IIS_APPLICATION_POOL_STATE
 
 CHECK_NAME = 'iis'
 MINIMAL_INSTANCE = {'host': '.'}
@@ -48,8 +49,12 @@ SITE_METRICS = [counter_data[3] for counter_data in DEFAULT_COUNTERS if counter_
 APP_POOL_METRICS = [counter_data[3] for counter_data in DEFAULT_COUNTERS if counter_data[0] == 'APP_POOL_WAS']
 
 PERFORMANCE_OBJECTS = {}
+# Set arbitrary values for the counters
 for object_name, instances in (('APP_POOL_WAS', ['foo-pool', 'bar-pool']), ('Web Service', ['foo.site', 'bar.site'])):
     PERFORMANCE_OBJECTS[object_name] = (
         instances,
         {counter: [9000, 0] for counter in METRICS_CONFIG[object_name]['counters'][0]},
     )
+# Set a specific value for the app pool service check counter
+# \APP_POOL_WAS(<INSTANCE>)\Current Application Pool State
+PERFORMANCE_OBJECTS['APP_POOL_WAS'][1]['Current Application Pool State'] = [IIS_APPLICATION_POOL_STATE['Running'], 0]

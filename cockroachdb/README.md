@@ -77,7 +77,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | -------------------- | -------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `cockroachdb`                                            |
 | `<INIT_CONFIG>`      | blank or `{}`                                            |
-| `<INSTANCE_CONFIG>`  | `{"prometheus_url":"http://%%host%%:8080/_status/vars"}` |
+| `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint":"http://%%host%%:8080/_status/vars"}` |
 
 ##### Log collection
 

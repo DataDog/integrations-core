@@ -124,6 +124,8 @@ integration/datadog_checks_tests_helper:
 - datadog_checks_tests_helper/**/*
 integration/datadog_cluster_agent:
 - datadog_cluster_agent/**/*
+integration/datadog_operator:
+- datadog_operator/**/*
 integration/directory:
 - directory/**/*
 integration/disk:
@@ -356,14 +358,30 @@ integration/singlestore:
 - singlestore/**/*
 integration/snmp:
 - snmp/**/*
+integration/snmp_american_power_conversion:
+- snmp_american_power_conversion/**/*
+integration/snmp_arista:
+- snmp_arista/**/*
+integration/snmp_aruba:
+- snmp_aruba/**/*
+integration/snmp_chatsworth_products:
+- snmp_chatsworth_products/**/*
+integration/snmp_check_point:
+- snmp_check_point/**/*
 integration/snmp_cisco:
 - snmp_cisco/**/*
 integration/snmp_dell:
 - snmp_dell/**/*
 integration/snmp_f5:
 - snmp_f5/**/*
+integration/snmp_fortinet:
+- snmp_fortinet/**/*
+integration/snmp_hewlett_packard_enterprise:
+- snmp_hewlett_packard_enterprise/**/*
 integration/snmp_juniper:
 - snmp_juniper/**/*
+integration/snmp_netapp:
+- snmp_netapp/**/*
 integration/snowflake:
 - snowflake/**/*
 integration/solr:
@@ -394,6 +412,8 @@ integration/tcp_queue_length:
 - tcp_queue_length/**/*
 integration/teamcity:
 - teamcity/**/*
+integration/temporal:
+- temporal/**/*
 integration/tenable:
 - tenable/**/*
 integration/teradata:

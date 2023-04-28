@@ -17,7 +17,7 @@ Configure the Spark integration to monitor your Apache Spark Cluster on Databric
 1. Determine the best init script below for your Databricks cluster environment. 
 
 2. Copy and run the contents into a notebook. The notebook creates an init script that installs a Datadog Agent on your clusters.
-    The notebook only needs to be run once to save the script as a global configuration. For more information about the Databricks Datadog Init scripts, see [Apache Spark Cluster Monitoring with Databricks and Datadog][3].
+    The notebook only needs to be run once to save the script as a global configuration. 
     - Set `<init-script-folder>` path to where you want your init scripts to be saved in.
         
 3. Configure a new Databricks cluster with the cluster-scoped init script path using the UI, Databricks CLI, or invoking the Clusters API.
@@ -31,7 +31,7 @@ Configure the Spark integration to monitor your Apache Spark Cluster on Databric
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Driver only" xxx -->
 ##### Install the Datadog Agent on Driver
-Install the Datadog Agent on the driver node of the cluster. This is a updated version of the [Datadog Init Script][5] Databricks notebook example.
+Install the Datadog Agent on the driver node of the cluster. 
 
 After creating the `datadog-install-driver-only.sh` script, add the init script path in the [cluster configuration page][6].
 
@@ -201,7 +201,11 @@ else
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
   DD_INSTALL_ONLY=true DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
-
+  
+  # CONFIGURE HOSTNAME EXPLICITLY IN datadog.yaml TO PREVENT AGENT FROM FAILING ON VERSION 7.40+
+  # SEE https://github.com/DataDog/datadog-agent/issues/14152 FOR CHANGE
+  hostname=\$(hostname | xargs)
+  echo "hostname: \$hostname" >> /etc/datadog-agent/datadog.yaml
 fi
 
   # RESTARTING AGENT
@@ -317,7 +321,6 @@ fi
 
 See the [Spark integration documentation][8] for a list of metrics collected.
 
-
 ### Service Checks
 
 See the [Spark integration documentation][9] for the list of service checks collected.
@@ -328,6 +331,22 @@ The Databricks integration does not include any events.
 
 ## Troubleshooting
 
+### Failed to bind port 6062
+
+[`ipywidgets`][14] are available in Databricks Runtime 11.0 and above. By default, `ipywidgets` occupies port `6062`, 
+which is also the default Datadog Agent port for [the debug endpoint][13]. Because of that, you can run into this issue:
+
+```
+23/02/28 17:07:31 ERROR DriverDaemon$: XXX Fatal uncaught exception. Terminating driver.
+java.io.IOException: Failed to bind to 0.0.0.0/0.0.0.0:6062
+```
+
+To fix this issue, you have several options: 
+
+1. With Databricks Runtime 11.2 and above, you can change the port using the Spark `spark.databricks.driver.ipykernel.commChannelPort` option. Find more information in [the Databricks documentation][12].
+2. You can configure the port used by the Datadog Agent with the `process_config.expvar_port` in your [`datadog.yaml`][13] configuration file. 
+3. Alternatively, you can set the `DD_PROCESS_CONFIG_EXPVAR_PORT` environment variable to configure the port used by the Datadog Agent.
+
 Need help? Contact [Datadog support][10].
 
 ## Further Reading
@@ -336,12 +355,14 @@ Need help? Contact [Datadog support][10].
 
 [1]: https://databricks.com/
 [2]: https://docs.datadoghq.com/integrations/spark/?tab=host
-[3]: https://databricks.com/blog/2017/06/01/apache-spark-cluster-monitoring-with-databricks-and-datadog.html
+[3]: https://app.datadoghq.com/integrations/spark
 [4]: https://app.datadoghq.com/account/settings#agent
-[5]: https://docs.databricks.com/_static/notebooks/datadog-init-script.html
 [6]: https://docs.databricks.com/clusters/init-scripts.html#configure-a-cluster-scoped-init-script-using-the-ui
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
 [8]: https://docs.datadoghq.com/integrations/spark/#metrics
 [9]: https://docs.datadoghq.com/integrations/spark/#service-checks
 [10]: https://docs.datadoghq.com/help/
 [11]: https://docs.datadoghq.com/getting_started/site/
+[12]: https://docs.databricks.com/notebooks/ipywidgets.html#requirements
+[13]: https://github.com/DataDog/datadog-agent/blob/7.43.x/pkg/config/config_template.yaml#L1262-L1266
+[14]: https://docs.databricks.com/notebooks/ipywidgets.html

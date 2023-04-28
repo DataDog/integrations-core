@@ -69,8 +69,12 @@ def test_basic_check(aggregator, dd_run_check):
 
     for _, namespace, values in namespace_data:
         for value in values:
+            status = IIS.OK
+            if namespace == 'app_pool':
+                # Expect failure b/c pdh mock doesn't support setting values for counters
+                status = IIS.CRITICAL
             aggregator.assert_service_check(
-                'iis.{}_up'.format(namespace), IIS.OK, tags=['{}:{}'.format(namespace, value), iis_host], count=1
+                'iis.{}_up'.format(namespace), status, tags=['{}:{}'.format(namespace, value), iis_host], count=1
             )
 
     aggregator.assert_all_metrics_covered()
@@ -93,8 +97,12 @@ def test_check_on_specific_websites_and_app_pools(aggregator, dd_run_check):
 
     for _, namespace, values in namespace_data:
         for value in values:
+            status = IIS.OK
+            if namespace == 'app_pool':
+                # Expect failure b/c pdh mock doesn't support setting values for counters
+                status = IIS.CRITICAL
             aggregator.assert_service_check(
-                'iis.{}_up'.format(namespace), IIS.OK, tags=['{}:{}'.format(namespace, value), iis_host], count=1
+                'iis.{}_up'.format(namespace), status, tags=['{}:{}'.format(namespace, value), iis_host], count=1
             )
 
     aggregator.assert_service_check('iis.site_up', IIS.CRITICAL, tags=['site:Non_Existing_Website', iis_host], count=1)
@@ -144,9 +152,13 @@ def test_check(aggregator, dd_run_check):
     for _, namespace, values in namespace_data_ok:
         # Exclude `Total`
         for value in values[1:]:
+            status = IIS.OK
+            if namespace == 'app_pool':
+                # Expect failure b/c pdh mock doesn't support setting values for counters
+                status = IIS.CRITICAL
             aggregator.assert_service_check(
                 'iis.{}_up'.format(namespace),
-                IIS.OK,
+                status,
                 tags=['mytag1', 'mytag2', '{}:{}'.format(namespace, value), iis_host],
                 count=1,
             )
@@ -185,9 +197,13 @@ def test_check_without_sites_specified(aggregator, dd_run_check):
 
     for _, namespace, values in namespace_data:
         for value in values:
+            status = IIS.OK
+            if namespace == 'app_pool':
+                # Expect failure b/c pdh mock doesn't support setting values for counters
+                status = IIS.CRITICAL
             aggregator.assert_service_check(
                 'iis.{}_up'.format(namespace),
-                IIS.OK,
+                status,
                 tags=['mytag1', 'mytag2', '{}:{}'.format(namespace, value), iis_host],
                 count=1,
             )
@@ -210,9 +226,13 @@ def test_legacy_check_version(aggregator, dd_run_check):
 
     for _, namespace, values in namespace_data:
         for value in values:
+            status = IIS.OK
+            if namespace == 'app_pool':
+                # Expect failure b/c pdh mock doesn't support setting values for counters
+                status = IIS.CRITICAL
             aggregator.assert_service_check(
                 'iis.{}_up'.format(namespace),
-                IIS.OK,
+                status,
                 tags=['{}:{}'.format(namespace, value), iis_host],
                 count=1,
             )

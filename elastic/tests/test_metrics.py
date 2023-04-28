@@ -41,7 +41,7 @@ from datadog_checks.elastic.metrics import (
         pytest.param([5, 0, 0], True, 254, id='jmx-rate-v5'),
         pytest.param([6, 3, 0], True, 254, id='jmx-rate-v6.3.0'),
         pytest.param([7, 2, 0], True, 248, id='jmx-rate-v7.2.0'),
-        pytest.param([7, 9, 0], True, 251, id='jmx-rate-v7.9.0'),
+        pytest.param([7, 9, 0], True, 261, id='jmx-rate-v7.9.0'),
     ],
 )
 def test_stats_for_version(version, jvm_rate, expected_metric_count):

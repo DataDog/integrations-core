@@ -4,7 +4,6 @@
 from __future__ import division
 
 import bmemcached
-import pkg_resources
 from six import iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, ConfigurationError
@@ -104,10 +103,6 @@ class Memcache(AgentCheck):
     OPTIONAL_STATS = {"items": [ITEMS_RATES, ITEMS_GAUGES, None], "slabs": [SLABS_RATES, SLABS_GAUGES, None]}
 
     SERVICE_CHECK = 'memcache.can_connect'
-
-    @classmethod
-    def get_library_versions(cls):
-        return {"memcache": pkg_resources.get_distribution("python-binary-memcached").version}
 
     def _process_response(self, response):
         """

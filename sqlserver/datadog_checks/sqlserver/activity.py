@@ -13,7 +13,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.sqlserver.utils import is_statement_proc
+from datadog_checks.sqlserver.utils import extract_sql_comments, is_statement_proc
 
 try:
     import datadog_agent
@@ -61,6 +61,7 @@ SELECT
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
+    sess.program_name as program_name,
     {exec_request_columns}
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
@@ -112,6 +113,8 @@ class SqlserverActivity(DBMAsyncJob):
 
     def __init__(self, check):
         self.check = check
+        # do not emit any dd.internal metrics for DBM specific check code
+        self.tags = [t for t in self.check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         collection_interval = float(check.activity_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL))
         if collection_interval <= 0:
@@ -196,7 +199,7 @@ class SqlserverActivity(DBMAsyncJob):
 
     def _get_available_requests_columns(self, cursor, all_expected_columns):
         cursor.execute("select TOP 0 * from sys.dm_exec_requests")
-        all_columns = set([i[0] for i in cursor.description])
+        all_columns = {i[0] for i in cursor.description}
         available_columns = [c for c in all_expected_columns if c in all_columns]
         missing_columns = set(all_expected_columns) - set(available_columns)
         if missing_columns:
@@ -223,7 +226,7 @@ class SqlserverActivity(DBMAsyncJob):
             metadata = statement['metadata']
             row['dd_commands'] = metadata.get('commands', None)
             row['dd_tables'] = metadata.get('tables', None)
-            row['dd_comments'] = metadata.get('comments', None)
+            row['dd_comments'] = extract_sql_comments(row['text'])
             row['query_signature'] = compute_sql_signature(obfuscated_statement)
             # procedure_signature is used to link this activity event with
             # its related plan events
@@ -270,8 +273,9 @@ class SqlserverActivity(DBMAsyncJob):
             "ddsource": "sqlserver",
             "dbm_type": "activity",
             "collection_interval": self.collection_interval,
-            "ddtags": self.check.tags,
+            "ddtags": self.tags,
             "timestamp": time.time() * 1000,
+            "cloud_metadata": self.check.cloud_metadata,
             "sqlserver_activity": active_sessions,
             "sqlserver_connections": active_connections,
         }

@@ -7,10 +7,8 @@ python = ["2.7", "3.8"]
 dependencies = [
   "datadog_checks_tests_helper @ {root:uri}/../datadog_checks_tests_helper",
 ]
-e2e-env = false
+e2e-env = true
 platforms = [
   "windows",
 ]
 
-[envs.default.overrides]
-matrix.python.e2e-env = { value = true, if = ["3.8"] }

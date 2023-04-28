@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "## Argo CD Overview\n\n### The Argo CD dashboard gives you broad visibility into your Argo CD Clusters\n\nThis dashboard provides a high-level overview of your Argo CD clusters so that you can monitor the deployments, performance, and overall health of a cluster.\n\n### Useful Links\n\n- [Datadog Argo CD Integration Documentation](https://docs.datadoghq.com/integrations/argocd/)\n- [Argo CD Official Documentation](https://argo-cd.readthedocs.io/en/latest/)\n\nClone this template dashboard to make changes and add your own graph widgets. (cloned)",
+    "description": "## Argo CD Overview\n\n### The Argo CD dashboard gives you broad visibility into your Argo CD Clusters\n\nThis dashboard provides a high-level overview of your Argo CD clusters so that you can monitor the deployments, performance, and overall health of a cluster.\n\n### Useful Links\n\n- [Datadog Argo CD Integration Documentation](https://docs.datadoghq.com/integrations/argocd/)\n- [Argo CD Official Documentation](https://argo-cd.readthedocs.io/en/latest/)\n- [Monitoring Argo CD Blogpost](https://www.datadoghq.com/blog/argo-cd-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -68,7 +68,7 @@
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "\n### Useful Links\n- [Datadog ArgoCD Integration Documentation](https://docs.datadoghq.com/integrations/argocd/)\n- [ArgoCD Official Documentation](https://argo-cd.readthedocs.io/en/latest/)",
+                            "content": "\n### Useful Links\n- [Datadog Argo CD Integration Documentation](https://docs.datadoghq.com/integrations/argocd/)\n- [Argo CD Official Documentation](https://argo-cd.readthedocs.io/en/latest/)\n- [Monitor Argo CD Blogpost](https://www.datadoghq.com/blog/argo-cd-datadog/)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -139,7 +139,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Number of Applications",
                             "title_align": "left",
                             "title_size": "16",
@@ -169,7 +168,7 @@
                                             "aggregator": "max",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:argocd.api_server.go.goroutines{$host,$kube_cluster_name,$kube_namespace}"
+                                            "query": "count:argocd.app_controller.go.goroutines{$host,$kube_cluster_name,$kube_namespace}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -1029,7 +1028,7 @@
             },
             "id": 8970831812548910,
             "layout": {
-                "height": 1,
+                "height": 10,
                 "width": 12,
                 "x": 0,
                 "y": 23
@@ -1596,10 +1595,10 @@
             },
             "id": 2661663506447074,
             "layout": {
-                "height": 1,
+                "height": 17,
                 "width": 12,
                 "x": 0,
-                "y": 24
+                "y": 33
             }
         },
         {
@@ -2061,10 +2060,10 @@
             },
             "id": 444244913319832,
             "layout": {
-                "height": 1,
+                "height": 14,
                 "width": 12,
                 "x": 0,
-                "y": 25
+                "y": 50
             }
         },
         {
@@ -2271,11 +2270,11 @@
             },
             "id": 5257189791506674,
             "layout": {
-                "height": 1,
+                "height": 7,
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 26
+                "y": 64
             }
         },
         {
@@ -2345,7 +2344,7 @@
                 "height": 4,
                 "width": 12,
                 "x": 0,
-                "y": 27
+                "y": 71
             }
         }
     ]

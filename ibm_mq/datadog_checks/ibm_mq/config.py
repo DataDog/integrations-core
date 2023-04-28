@@ -13,7 +13,7 @@ from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.log import get_check_logger
 
 try:
-    from typing import Dict, List, Pattern
+    from typing import Dict, List, Pattern  # noqa: F401
 except ImportError:
     pass
 
@@ -168,7 +168,7 @@ class IBMMQConfig:
             self.queue_manager_process_pattern = re.compile(pattern)
 
             # Implied immunity to IBM MQ's memory leak
-            self.try_basic_auth = False
+            self.try_basic_auth = is_affirmative(instance.get('try_basic_auth', False))  # type: bool
         else:
             self.queue_manager_process_pattern = None
 

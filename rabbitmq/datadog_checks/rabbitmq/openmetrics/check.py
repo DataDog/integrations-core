@@ -26,6 +26,9 @@ class RabbitMQOpenMetrics(OpenMetricsBaseCheckV2):
                     **self.instance,
                     'openmetrics_endpoint': base_url + ep,
                     **ep_config,
+                    # Due to performance considerations, shared labels may not be applied to all metrics in the very
+                    # first run of the check after an agent (re)start. This is not a problem for subsequent runs
+                    # of the check as long as `cache_shared_labels` is True.
                     'share_labels': {'rabbitmq_identity_info': True},
                 }
             )

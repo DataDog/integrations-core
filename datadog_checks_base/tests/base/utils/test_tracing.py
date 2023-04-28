@@ -87,8 +87,8 @@ def test_traced_class(integration_tracing, integration_tracing_exhaustive, datad
             check.run()
 
         if integration_tracing:
-            called_services = set([c.kwargs['service'] for c in tracer.trace.mock_calls if 'service' in c.kwargs])
-            called_methods = set([c.args[0] for c in tracer.trace.mock_calls if c.args])
+            called_services = {c.kwargs['service'] for c in tracer.trace.mock_calls if 'service' in c.kwargs}
+            called_methods = {c.args[0] for c in tracer.trace.mock_calls if c.args}
 
             assert called_services == {INTEGRATION_TRACING_SERVICE_NAME}
             for m in AGENT_CHECK_DEFAULT_TRACED_METHODS:

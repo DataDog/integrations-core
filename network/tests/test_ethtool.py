@@ -11,6 +11,7 @@ import mock
 import pytest
 from six import PY3, iteritems
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.network import ethtool
 
 from . import common
@@ -540,6 +541,7 @@ def test_submit_ena(is_linux, is_bsd, send_ethtool_ioctl, check, aggregator):
         aggregator.assert_metric(
             m, count=1, value=0, tags=['device:eth0', 'driver_name:ena', 'driver_version:5.11.0-1022-aws']
         )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
@@ -562,6 +564,7 @@ def test_submit_ena_ethtool_metrics(is_linux, is_bsd, send_ethtool_ioctl, check,
                 value=value,
                 tags=['device:eth0', 'driver_name:ena', 'driver_version:5.11.0-1022-aws', tag],
             )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
@@ -584,6 +587,7 @@ def test_submit_hv_netvsc_ethtool_metrics(is_linux, is_bsd, send_ethtool_ioctl, 
                 value=value,
                 tags=['device:hv_netvsc', 'driver_name:hv_netvsc', 'driver_version:5.8.0-1042-azure', tag],
             )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
@@ -606,6 +610,7 @@ def test_submit_gve_ethtool_metrics(is_linux, is_bsd, send_ethtool_ioctl, check,
                 value=value,
                 tags=['device:gve', 'driver_name:gve', 'driver_version:1.0.0', tag],
             )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")

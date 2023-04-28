@@ -1,119 +1,110 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
 import os
 import time
 
 import pytest
-from datadog_test_libs.utils.mock_dns import mock_local
-from kafka import KafkaConsumer
+from confluent_kafka.admin import AdminClient
+from confluent_kafka.cimpl import NewTopic
 
-from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.dev import TempDir, WaitFor, docker_run
+from datadog_checks.dev._env import e2e_testing
+from datadog_checks.dev.ci import running_on_ci
+from datadog_checks.kafka_consumer import KafkaCheck
 
-from .common import DOCKER_IMAGE_PATH, HOST_IP, KAFKA_CONNECT_STR, PARTITIONS, TOPICS, ZK_CONNECT_STR
-from .runners import KConsumer, Producer, ZKConsumer
-
-
-def find_topics():
-    consumer = KafkaConsumer(bootstrap_servers=KAFKA_CONNECT_STR, request_timeout_ms=1000)
-    topics = consumer.topics()
-
-    # We expect to find 2 topics: `marvel` and `dc`
-    return len(topics) == 2
-
-
-def initialize_topics():
-    flavor = os.environ.get('KAFKA_OFFSETS_STORAGE')
-    if flavor == 'zookeeper':
-        consumer = ZKConsumer(TOPICS, PARTITIONS)
-    else:
-        consumer = KConsumer(TOPICS)
-
-    with Producer():
-        with consumer:
-            time.sleep(5)
+from . import common
+from .runners import Consumer, Producer
 
 
 @pytest.fixture(scope='session')
-def mock_local_kafka_hosts_dns():
-    mapping = {'kafka1': ('127.0.0.1', 9092), 'kafka2': ('127.0.0.1', 9093)}
-    with mock_local(mapping):
-        yield
-
-
-@pytest.fixture(scope='session')
-def dd_environment(mock_local_kafka_hosts_dns, e2e_instance):
+def dd_environment():
     """
     Start a kafka cluster and wait for it to be up and running.
     """
-    with docker_run(
-        DOCKER_IMAGE_PATH,
-        conditions=[WaitFor(find_topics, attempts=60, wait=3), WaitFor(initialize_topics)],
-        env_vars={
-            # Advertising the hostname doesn't work on docker:dind so we manually
-            # resolve the IP address. This seems to also work outside docker:dind
-            # so we got that goin for us.
-            'KAFKA_HOST': HOST_IP
-        },
-    ):
-        yield e2e_instance, E2E_METADATA
+    with TempDir() as secret_dir:
+        os.chmod(secret_dir, 0o777)
+        conditions = []
+
+        if common.AUTHENTICATION == "kerberos":
+            common.INSTANCE["sasl_kerberos_keytab"] = common.INSTANCE["sasl_kerberos_keytab"].format(secret_dir)
+            conditions.append(WaitFor(wait_for_cp_kafka_topics, attempts=10, wait=10))
+            common.E2E_METADATA["docker_volumes"].append(f"{secret_dir}:/var/lib/secret")
+
+        conditions.extend(
+            [
+                WaitFor(create_topics, attempts=60, wait=3),
+                WaitFor(initialize_topics),
+            ]
+        )
+
+        with docker_run(
+            common.DOCKER_IMAGE_PATH,
+            conditions=conditions,
+            env_vars={
+                "KRB5_CONFIG": f"{common.HERE}/docker/kerberos/kdc/krb5_agent.conf"
+                if running_on_ci()
+                else f"{common.HERE}/docker/kerberos/kdc/krb5_local.conf",
+                "SECRET_DIR": secret_dir,
+            },
+            build=True,
+        ):
+            yield {
+                'instances': [common.E2E_INSTANCE],
+                'init_config': {'kafka_timeout': 30},
+            }, common.E2E_METADATA
 
 
-E2E_METADATA = {
-    'custom_hosts': [('kafka1', '127.0.0.1'), ('kafka2', '127.0.0.1')],
-    'start_commands': [
-        'apt-get update',
-        'apt-get install -y build-essential',
-    ],
-}
+@pytest.fixture
+def check():
+    return lambda instance, init_config=None: KafkaCheck('kafka_consumer', init_config or {}, [instance])
 
 
-@pytest.fixture(scope='session')
-def zk_instance():
-    return {
-        'kafka_connect_str': KAFKA_CONNECT_STR,
-        'zk_connect_str': ZK_CONNECT_STR,
-        'consumer_groups': {'my_consumer': {'marvel': [0]}},
-    }
-
-
-@pytest.fixture(scope='session')
+@pytest.fixture
 def kafka_instance():
-    return {
-        'kafka_connect_str': KAFKA_CONNECT_STR,
-        'kafka_consumer_offsets': True,
-        'tags': ['optional:tag1'],
-        'consumer_groups': {'my_consumer': {'marvel': [0]}},
-        'broker_requests_batch_size': 1,
+    return copy.deepcopy(common.E2E_INSTANCE if e2e_testing() else common.INSTANCE)
+
+
+def create_topics():
+    client = _create_admin_client()
+
+    if set(common.TOPICS).issubset(set(client.list_topics(timeout=1).topics.keys())):
+        return True
+
+    for topic in common.TOPICS:
+        client.create_topics([NewTopic(topic, 2, 1)])
+        time.sleep(1)
+
+    # Make sure the topics in `TOPICS` are created. Brokers may have more topics (such as internal topics)
+    # so we only check if it contains the topic we need.
+    return set(common.TOPICS).issubset(set(client.list_topics(timeout=1).topics.keys()))
+
+
+def wait_for_cp_kafka_topics():
+    client = _create_admin_client()
+    topics = {
+        '_confluent_balancer_partition_samples',
+        '_confluent_balancer_api_state',
+        '_confluent_balancer_broker_samples',
+        '_confluent-telemetry-metrics',
+        '_confluent-command',
     }
+    return topics.issubset(set(client.list_topics(timeout=1).topics.keys()))
 
 
-# Dummy TLS certs
-CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
-cert = os.path.join(CERTIFICATE_DIR, 'cert.cert')
-private_key = os.path.join(CERTIFICATE_DIR, 'server.pem')
+def initialize_topics():
+    with Producer(common.INSTANCE):
+        with Consumer(common.INSTANCE, common.TOPICS):
+            time.sleep(5)
 
 
-@pytest.fixture(scope='session')
-def kafka_instance_tls():
-    return {
-        'kafka_connect_str': KAFKA_CONNECT_STR,
-        'kafka_consumer_offsets': True,
-        'tags': ['optional:tag1'],
-        'consumer_groups': {'my_consumer': {'marvel': [0]}},
-        'broker_requests_batch_size': 1,
-        'use_tls': True,
-        'tls_validate_hostname': True,
-        'tls_cert': cert,
-        'tls_private_key': private_key,
-        'tls_ca_cert': CERTIFICATE_DIR,
+def _create_admin_client():
+    config = {
+        "bootstrap.servers": common.INSTANCE['kafka_connect_str'],
+        "socket.timeout.ms": 1000,
+        "topic.metadata.refresh.interval.ms": 2000,
     }
+    config.update(common.get_authentication_configuration(common.INSTANCE))
 
-
-@pytest.fixture(scope='session')
-def e2e_instance(kafka_instance, zk_instance):
-    flavor = os.environ.get('KAFKA_OFFSETS_STORAGE')
-    if flavor == 'kafka':
-        return kafka_instance
-    elif flavor == 'zookeeper':
-        return zk_instance
+    return AdminClient(config)

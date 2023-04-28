@@ -12,13 +12,58 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 #### Prerequisite
 
-To use the Oracle integration you can either use the native client (no additional install steps required) or download the Oracle JDBC driver (Linux only). To use the Oracle integration with JDBC, download the Oracle JDBC driver. If not using the JDBC method, the minimun [supported version][2] is Oracle 12c.
+To use the Oracle integration you can either use the native client (no additional install steps required), the Oracle Instant Client, or download the Oracle JDBC driver (Linux only). To use the Oracle integration with JDBC, download the Oracle JDBC driver. If you are not using the JDBC method, the minimum [supported version][2] is Oracle 12c.
 Due to licensing restrictions, the JDBC library is not included in the Datadog Agent, but can be downloaded directly from Oracle.
-
-With Agent v7.42.x, the Agent no longer requires or supports installing the Instant Client libraries. If you're on an older version of the Agent and want to use the Instant Client, refer to the [Oracle Instant Client][3] setup instructions.
 
 *NOTE*: Starting in v7.42.x, the Oracle integration only supports Python 3.
 
+##### Oracle Instant Client
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Linux" xxx -->
+###### Linux
+
+1. Follow the [Oracle Instant Client installation for Linux][17].
+
+2. Verify the following:
+    - Both the *Instant Client Basic* and *SDK* packages are installed. Find them on Oracle's [download page][18].
+
+        After the Instant Client libraries are installed, ensure the runtime linker can find the libraries. For example, using `ldconfig`:
+    
+       ```shell
+       # Put the library location in an ld configuration file.
+    
+       sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > \
+           /etc/ld.so.conf.d/oracle-instantclient.conf"
+    
+       # Update the bindings.
+    
+       sudo ldconfig
+       ```
+
+    - Both packages are decompressed into a single directory that is available to all users on the given machine (for example, `/opt/oracle`):
+       ```shell
+       mkdir -p /opt/oracle/ && cd /opt/oracle/
+       unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
+       unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
+       ```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Windows" xxx -->
+###### Windows
+
+1. Follow the [Oracle Windows installation guide][19] to configure your Oracle Instant Client.
+
+2. Verify the following:
+    - The [Microsoft Visual Studio 2017 Redistributable][20] or the appropriate version is installed for the Oracle Instant Client.
+
+    - Both the *Instant Client Basic* and *SDK* packages from Oracle's [download page][18] are installed.
+
+    - Both packages are extracted into a single directory that is available to all users on the given machine (for example, `C:\oracle`).
+
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ##### JDBC driver
 
@@ -207,6 +252,11 @@ If you are not using JDBC, verify that the Datadog Agent is able to connect to y
 sqlplus <USER>/<PASSWORD>@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCPS)(HOST=<HOST>)(PORT=<PORT>))(SERVICE_NAME=<SERVICE_NAME>)))
 ```
 
+When using the [Oracle Instant Client][16] connection, move three files to the `network/admin` directory of the client libraries used by your application:
+  * `tnsnames.ora`: Maps net service names used for application connection strings to your database services.
+  * `sqlnet.ora`: Configures Oracle Network settings.
+  * `cwallet.sso`: Enables SSL or TLS connections. Keep this file secure.
+
 ##### TCPS through JDBC
 
 If you are connecting to Oracle Database using JDBC, you also need to specify `jdbc_truststore_path`, `jdbc_truststore_type`, and `jdbc_truststore_password` (optional) if there is a password on the truststore. 
@@ -378,7 +428,58 @@ See [service_checks.json][12] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
-### JDBC driver (Linux only)
+### Common problems
+
+#### Oracle Native Client
+- If you encounter a `DPY-6000: cannot connect to database`:
+  ```text
+  Failed to connect to Oracle DB, error: DPY-6000: cannot connect to database. Listener refused connection. (Similar to ORA-12660)
+  ```
+ - Ensure Native Network Encryption or Checksumming are not enabled. If they are enabled, you must use the Instant Client method by setting `use_instant_client: true`.
+
+For more information about setting up the Oracle Instant Client, see the [Oracle integration documentation][3].
+
+#### Oracle Instant Client
+- Verify that both the Oracle Instant Client and SDK files are located in the same directory.
+The structure of the directory should look similar:
+  ```text
+  |___ BASIC_LITE_LICENSE
+  |___ BASIC_LITE_README
+  |___ adrci
+  |___ genezi
+  |___ libclntsh.so -> libclntsh.so.19.1
+  |___ libclntsh.so.10.1 -> libclntsh.so.19.1
+  |___ libclntsh.so.11.1 -> libclntsh.so.19.1
+  |___ libclntsh.so.12.1 -> libclntsh.so.19.1
+  |___ libclntsh.so.18.1 -> libclntsh.so.19.1
+  |___ libclntsh.so.19.1
+  |___ libclntshcore.so.19.1
+  |___ libipc1.so
+  |___ libmql1.so
+  |___ libnnz19.so
+  |___ libocci.so -> libocci.so.19.1
+  |___ libocci.so.10.1 -> libocci.so.19.1
+  |___ libocci.so.11.1 -> libocci.so.19.1
+  |___ libocci.so.12.1 -> libocci.so.19.1
+  |___ libocci.so.18.1 -> libocci.so.19.1
+  |___ libocci.so.19.1
+  |___ libociicus.so
+  |___ libocijdbc19.so
+  |___ liboramysql19.so
+  |___ listener.ora
+  |___ network
+  |   `___ admin
+  |       |___ README
+  |       |___ cwallet.sso
+  |       |___ sqlnet.ora
+  |       `___ tnsnames.ora
+  |___ ojdbc8.jar
+  |___ ucp.jar
+  |___ uidrvci
+  `___ xstreams.jar
+  ```
+
+#### JDBC driver (Linux only)
 - If you encounter a `JVMNotFoundException`:
 
     ```text
@@ -420,3 +521,8 @@ Need help? Contact [Datadog support][14].
 [13]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
 [14]: https://docs.datadoghq.com/help/
 [15]: https://www.oracle.com/technetwork/topics/wp-oracle-jdbc-thin-ssl-130128.pdf
+[16]: https://python-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#install-the-wallet-and-network-configuration-files
+[17]: https://docs.oracle.com/en/database/oracle/oracle-database/21/lacli/install-instant-client-using-zip.html
+[18]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
+[19]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html#ic_winx64_inst
+[20]: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0

@@ -82,30 +82,6 @@ def instance_service(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_ssl(field, value):
-    return False
-
-
-def instance_ssl_ca_certs(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_ssl_cert_reqs(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_ssl_certfile(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_ssl_keyfile(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_ssl_match_hostname(field, value):
-    return True
-
-
 def instance_tags(field, value):
     return get_default_field_value(field, value)
 

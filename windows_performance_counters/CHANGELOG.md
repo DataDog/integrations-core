@@ -1,6 +1,6 @@
 # CHANGELOG - Windows performance counters
 
-## 1.5.0 / 2022-12-09
+## 1.5.0 / 2022-12-09 / Agent 7.42.0
 
 * [Added] Implement multi-instance counters without Windows PdhEnumObjects API. See [#13243](https://github.com/DataDog/integrations-core/pull/13243).
 

@@ -509,7 +509,7 @@ class Authenticator(object):
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError):
             safe_identity = copy.deepcopy(identity)
             safe_identity['password']['user']['password'] = '********'
-            msg = "Failed keystone auth with identity:{identity} scope:{scope} @{url}".format(
+            msg = "Failed Keystone auth with identity:{identity} scope:{scope} @{url}".format(
                 identity=safe_identity, scope=scope, url=auth_url
             )
             logger.debug(msg)
@@ -527,7 +527,7 @@ class Authenticator(object):
             projects = jresp.get('projects')
             return projects
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
-            msg = "unable to retrieve project list from keystone auth with identity: @{url}: {ex}".format(
+            msg = "unable to retrieve project list from Keystone auth with identity: @{url}: {ex}".format(
                 url=auth_url, ex=e
             )
             logger.debug(msg)

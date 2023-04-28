@@ -18,6 +18,7 @@
         - event
         - set_metadata
         - metadata_entrypoint
+        - warning
 
 ## Stubs
 

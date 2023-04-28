@@ -29,6 +29,7 @@ from .common import (
     YARN_CLUSTER_METRICS_VALUES,
     YARN_CLUSTER_TAG,
     YARN_COLLECT_APPS_ALL_STATES_CONFIG,
+    YARN_COLLECT_APPS_KILLED_INSTANCE_CONFIG,
     YARN_CONFIG,
     YARN_CONFIG_EXCLUDING_APP,
     YARN_CONFIG_SPLIT_APPLICATION_TAGS,
@@ -358,3 +359,17 @@ def test_collect_apps_states_list(dd_run_check, aggregator, mocked_request, conf
                     aggregator.assert_metric(metric, value=value, tags=app['tags'] + EXPECTED_TAGS, count=1)
                 else:
                     aggregator.assert_metric(metric, tags=app['tags'] + EXPECTED_TAGS, count=0)
+
+
+def test_collect_apps_killed_instance_state(dd_run_check, aggregator, mocked_request):
+    instance = YARN_COLLECT_APPS_KILLED_INSTANCE_CONFIG['instances'][0]
+    yarn = YarnCheck('yarn', YARN_COLLECT_APPS_KILLED_INSTANCE_CONFIG['init_config'], [instance])
+
+    dd_run_check(yarn)
+
+    for app in YARN_APPS_ALL_STATES:
+        for metric, value in iteritems(app['metric_values']):
+            if app['tags'] == "KILLED":
+                aggregator.assert_metric(metric, value=value, tags=app['tags'] + EXPECTED_TAGS, count=1)
+            else:
+                aggregator.assert_metric(metric, value=value, tags=app['tags'] + EXPECTED_TAGS, count=0)

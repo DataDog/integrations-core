@@ -409,18 +409,13 @@ def unaggregated_renames_and_exclusions(endpoint):
     """
     exclude_from_agg = set()
     metric_renames = {}
-    if 'detailed' in endpoint:
-        exclude_from_agg = set()
-        for metric_fam in re.findall(r"family=([^&\s]+)", endpoint):
-            exclude_from_agg |= _DETAILED_FAMILIES.get(metric_fam, set())
-        metric_renames = {
-            (re.sub("^rabbitmq_", "rabbitmq_detailed_", k) if k not in _INFO else k): v
-            for k, v in _RENAME_RABBITMQ_TO_DATADOG.items()
-        }
-
-    if 'per-object' in endpoint:
-        metric_renames = _RENAME_RABBITMQ_TO_DATADOG
-
+    exclude_from_agg = set()
+    for metric_fam in re.findall(r"family=([^&\s]+)", endpoint):
+        exclude_from_agg |= _DETAILED_FAMILIES.get(metric_fam, set())
+    metric_renames = {
+        (re.sub("^rabbitmq_", "rabbitmq_detailed_", k) if k not in _INFO else k): v
+        for k, v in _RENAME_RABBITMQ_TO_DATADOG.items()
+    }
     return metric_renames, exclude_from_agg
 
 

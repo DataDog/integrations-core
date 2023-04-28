@@ -12,12 +12,13 @@
     "title": "Kubernetes Scheduler",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Orchestration",
       "Category::Containers",
-      "Category::Log Collection"
+      "Category::Kubernetes",
+      "Category::Log Collection",
+      "Category::Orchestration",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

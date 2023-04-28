@@ -21,7 +21,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.sqlserver.utils import is_statement_proc
+from datadog_checks.sqlserver.utils import extract_sql_comments, is_statement_proc
 
 try:
     import datadog_agent
@@ -30,7 +30,7 @@ except ImportError:
 
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 
-DEFAULT_COLLECTION_INTERVAL = 10
+DEFAULT_COLLECTION_INTERVAL = 60
 
 SQL_SERVER_QUERY_METRICS_COLUMNS = [
     "execution_count",
@@ -185,6 +185,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
     def __init__(self, check):
         self.check = check
+        # do not emit any dd.internal metrics for DBM specific check code
+        self.tags = [t for t in self.check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         collection_interval = float(
             check.statement_metrics_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
@@ -239,7 +241,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
     def _get_available_query_metrics_columns(self, cursor, all_expected_columns):
         cursor.execute("select top 0 * from sys.dm_exec_query_stats")
-        all_columns = set([i[0] for i in cursor.description])
+        all_columns = {i[0] for i in cursor.description}
         available_columns = [c for c in all_expected_columns if c in all_columns]
         missing_columns = set(all_expected_columns) - set(available_columns)
         if missing_columns:
@@ -305,6 +307,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 )
                 continue
             obfuscated_statement = statement['query']
+            comments = extract_sql_comments(row['text'])
+            row['dd_comments'] = comments
             # update 'text' field to be obfuscated stmt
             row['text'] = obfuscated_statement
             if procedure_statement:
@@ -319,7 +323,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             metadata = statement['metadata']
             row['dd_tables'] = metadata.get('tables', None)
             row['dd_commands'] = metadata.get('commands', None)
-            row['dd_comments'] = metadata.get('comments', None)
+            if not comments:
+                row['dd_comments'] = metadata.get('comments', None)
             normalized_rows.append(row)
         return normalized_rows
 
@@ -335,8 +340,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     @staticmethod
     def _to_metrics_payload_row(row):
         row = {k: v for k, v in row.items()}
-        if 'dd_comments' in row:
-            del row['dd_comments']
         # remove the statement_text field, so we do not forward deobfuscated text
         # to the backend
         if 'statement_text' in row:
@@ -348,7 +351,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'host': self.check.resolved_hostname,
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
-            'tags': self.check.tags,
+            'tags': self.tags,
             'cloud_metadata': self.check.cloud_metadata,
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
@@ -401,7 +404,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
-            tags = list(self.check.tags)
+            tags = list(self.tags)
             if 'database_name' in row:
                 tags += ["db:{}".format(row['database_name'])]
             yield {
@@ -475,7 +478,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         1,
                         **self.check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))])
                     )
-                tags = list(self.check.tags)
+                tags = list(self.tags)
 
                 # for stored procedures, we want to send the plan
                 # events with the full procedure text, not the text
@@ -497,6 +500,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "ddtags": ",".join(tags),
                     "timestamp": time.time() * 1000,
                     "dbm_type": "plan",
+                    "cloud_metadata": self.check.cloud_metadata,
                     "db": {
                         "instance": row.get("database_name", None),
                         "plan": {

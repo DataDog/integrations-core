@@ -12,14 +12,12 @@
     "title": "SNMP",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Monitoring",
-      "Category::Notification",
       "Category::Network",
-      "Category::Autodiscovery",
-      "Category::SNMP"
+      "Category::Notification",
+      "Category::SNMP",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {
@@ -52,7 +50,8 @@
       "Datacenter Overview": "assets/dashboards/datacenter_overview.json"
     },
     "monitors": {
-      "[SNMP] Device Down Alert": "assets/monitors/device_down.json"
+      "[SNMP] Device Down Alert": "assets/monitors/device_down.json",
+      "[SNMP] Device Unreachable Alert": "assets/monitors/device_unreachable.json"
     }
   }
 }

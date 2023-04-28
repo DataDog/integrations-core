@@ -4,6 +4,7 @@
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 
 from .common import FLAVOR, HOST
@@ -293,3 +294,4 @@ def test_e2e(dd_agent_check):
             aggregator.assert_metric(metric, at_least=0)
     # We can't assert all covered, as some aren't received every time
     aggregator.assert_service_check('envoy.can_connect', Envoy.OK)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

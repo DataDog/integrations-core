@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "GKE is a platform for running and orchestrating containerized applications.",
-    "title": "Google Kubernetes Engine",
+    "title": "Google Kubernetes Engine, Agent Integration",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",

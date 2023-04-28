@@ -1,0 +1,46 @@
+## @param ad_identifiers - list of strings - required
+## A list of container identifiers that are used by Autodiscovery to identify
+## which container the check should be run against. For more information, see:
+## https://docs.datadoghq.com/agent/guide/ad_identifiers/
+#
+ad_identifiers:
+  - rabbitmq
+
+## All options defined here are available to all instances.
+#
+init_config:
+
+## Every instance is scheduled independently of the others.
+#
+instances:
+
+    ## RabbitMQ Prometheus Plugin Example
+  -
+    ## Settings for talking to the Prometheus plugin of RabbitMQ.
+    ## Specify this section to trigger metric collection from the Prometheus plugin endpoints.
+    #
+    prometheus_plugin:
+
+        ## @param url - string - required
+        ## Base URL for OpenMetrics endpoints.
+        #
+        url: http://%%host%%:15692
+
+        ## @param include_aggregated_endpoint - boolean - optional - default: true
+        ## Whether or not to include metrics from the aggregated endpoint (/metrics).
+        ##
+        ## Note: This option must be set to true when 'unaggregated_endpoint' is unspecified.
+        #
+        # include_aggregated_endpoint: true
+
+        ## @param unaggregated_endpoint - string - optional - default: detailed
+        ## Which  unaggregated endpoint to use.
+        ## The choices are:
+        ##   - If the field is left unspecified, no endpoint is used.
+        ##   - "detailed" means the /metrics/detailed endpoint is used.
+        ##     You can also provide a query for this option, exactly as if you were making an HTTP request
+        ##     to this endpoint. For example, `detailed?family=queue_consumer_count`.
+        ##     You can specify this and the aggregated endpoint. In that case any duplicate metrics will
+        ##     be taken from this endpoint and the corresponding aggregated ones dropped.
+        #
+        # unaggregated_endpoint: detailed

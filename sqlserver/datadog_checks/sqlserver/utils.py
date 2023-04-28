@@ -10,6 +10,25 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
 
 
+# Database is used to store both the name and physical_database_name
+# for a database, which is discovered via autodiscovery
+class Database:
+    def __init__(self, name, physical_db_name=None):
+        self.name = name
+        self.physical_db_name = physical_db_name
+
+    def __hash__(self):
+        return hash((self.name, self.physical_db_name))
+
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.name == other.name and self.physical_db_name == other.physical_db_name
+
+    def __str__(self):
+        return "name:{}, physical_db_name:{}".format(self.name, self.physical_db_name)
+
+
 def set_default_driver_conf():
     if Platform.is_containerized():
         # Use default `./driver_config/odbcinst.ini` when Agent is running in docker.
@@ -51,6 +70,38 @@ def _get_index_for_keyword(text, keyword):
         return text.index(keyword)
     except ValueError:
         return -1
+
+
+def extract_sql_comments(text):
+    if not text:
+        return []
+    in_single_line_comment = False
+    in_multi_line_comment = False
+    comment_start = None
+    result = []
+
+    for i in range(len(text)):
+        if in_multi_line_comment:
+            if i < len(text) - 1 and text[i : i + 2] == '*/':
+                in_multi_line_comment = False
+                # strip all non-space/newline chars from multi-line comments
+                lines = [line.strip() for line in text[comment_start : i + 2].split('\n')]
+                result.append(' '.join(lines))
+        elif in_single_line_comment:
+            if text[i] == '\n':
+                in_single_line_comment = False
+                # strip any extra whitespace at the end
+                # of the single line comment
+                result.append(text[comment_start:i].rstrip())
+        else:
+            if i < len(text) - 1 and text[i : i + 2] == '--':
+                in_single_line_comment = True
+                comment_start = i
+            elif i < len(text) - 1 and text[i : i + 2] == '/*':
+                in_multi_line_comment = True
+                comment_start = i
+
+    return result
 
 
 def parse_sqlserver_major_version(version):

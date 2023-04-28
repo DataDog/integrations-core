@@ -1,11 +1,25 @@
 # CHANGELOG - mongo
 
+## 5.0.0 / 2023-03-03 / Agent 7.44.0
+
+* [Added] Mongo Date types support in custom queries. See [#13516](https://github.com/DataDog/integrations-core/pull/13516).
+* [Fixed] Exception is thrown when items of a list in a custom query are not iterable. See [#13895](https://github.com/DataDog/integrations-core/pull/13895).
+* [Changed] remove ssl params from mongo integration. See [#13881](https://github.com/DataDog/integrations-core/pull/13881).
+
+## 4.3.0 / 2023-02-07 / Agent 7.43.0
+
+* [Fixed] Exception is thrown when items of a list in a custom query are not iterable. See [#13895](https://github.com/DataDog/integrations-core/pull/13895).
+
+## 4.2.0 / 2023-02-01
+
+* [Added] Mongo Date types support in custom queries. See [#13516](https://github.com/DataDog/integrations-core/pull/13516).
+
 ## 4.1.2 / 2023-01-20
 
 * [Fixed] Update dependencies. See [#13726](https://github.com/DataDog/integrations-core/pull/13726).
 * [Fixed] Skip checking database names when replica is recovering. See [#13535](https://github.com/DataDog/integrations-core/pull/13535).
 
-## 4.1.1 / 2022-12-09
+## 4.1.1 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Stop using deprecated `distutils.version` classes. See [#13408](https://github.com/DataDog/integrations-core/pull/13408).
 

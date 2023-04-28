@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import SQLConnectionError
+from datadog_checks.sqlserver.const import INSTANCE_METRICS_DATABASE
 
 from .common import CHECK_NAME, CUSTOM_METRICS, EXPECTED_DEFAULT_METRICS, assert_metrics
 from .utils import not_windows_ci, windows_ci
@@ -23,6 +24,7 @@ except ImportError:
 def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_docker):
     instance_docker['password'] = 'FOO'
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
+    instance_tags = instance_docker.get('tags', [])
 
     with pytest.raises(SQLConnectionError) as excinfo:
         sqlserver_check.initialize_connection()
@@ -30,16 +32,28 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
     aggregator.assert_service_check(
         'sqlserver.can_connect',
         status=sqlserver_check.CRITICAL,
-        tags=['sqlserver_host:{}'.format(sqlserver_check.resolved_hostname), 'db:master', 'optional:tag1'],
+        tags=['sqlserver_host:{}'.format(sqlserver_check.resolved_hostname), 'db:master'] + instance_tags,
         message=str(excinfo.value),
     )
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize('database_autodiscovery', [True, False])
-def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, database_autodiscovery):
+@pytest.mark.parametrize(
+    'database_autodiscovery,dbm_enabled', [(True, True), (True, False), (False, True), (False, False)]
+)
+def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, database_autodiscovery, dbm_enabled):
     instance_docker['database_autodiscovery'] = database_autodiscovery
+    # test that all default integration metrics are sent regardless of
+    # if dbm is enabled or not.
+    instance_docker['dbm'] = dbm_enabled
+    # no need to assert metrics that are emitted from the dbm portion of the
+    # integration in this check as they are all internal
+    instance_docker['query_metrics'] = {'enabled': False}
+    instance_docker['query_activity'] = {'enabled': False}
+    autodiscovery_dbs = ['master', 'msdb', 'datadog_test']
+    if database_autodiscovery:
+        instance_docker['autodiscovery_include'] = autodiscovery_dbs
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
     expected_tags = instance_docker.get('tags', []) + [
@@ -48,9 +62,12 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
     ]
     assert_metrics(
         aggregator,
-        expected_tags,
+        check_tags=instance_docker.get('tags', []),
+        service_tags=expected_tags,
+        dbm_enabled=dbm_enabled,
         hostname=sqlserver_check.resolved_hostname,
         database_autodiscovery=database_autodiscovery,
+        dbs=autodiscovery_dbs,
     )
 
 
@@ -90,11 +107,10 @@ def test_check_stored_procedure_proc_if(aggregator, dd_run_check, init_config, i
 def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object_name, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config_object_name, [instance_docker])
     dd_run_check(sqlserver_check)
+    instance_tags = instance_docker.get('tags', []) + ['optional_tag:tag1']
 
-    aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
-    aggregator.assert_metric(
-        'sqlserver.broker_activation.tasks_running', tags=['optional:tag1', 'optional_tag:tag1'], count=1
-    )
+    aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=instance_tags, count=1)
+    aggregator.assert_metric('sqlserver.broker_activation.tasks_running', tags=instance_tags, count=1)
 
 
 @pytest.mark.integration
@@ -104,17 +120,18 @@ def test_custom_metrics_alt_tables(aggregator, dd_run_check, init_config_alt_tab
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config_alt_tables, [instance_docker])
     dd_run_check(sqlserver_check)
+    instance_tags = instance_docker.get('tags', [])
 
-    aggregator.assert_metric('sqlserver.LCK_M_S.max_wait_time_ms', tags=['optional:tag1'], count=1)
-    aggregator.assert_metric('sqlserver.LCK_M_S.signal_wait_time_ms', tags=['optional:tag1'], count=1)
+    aggregator.assert_metric('sqlserver.LCK_M_S.max_wait_time_ms', tags=instance_tags, count=1)
+    aggregator.assert_metric('sqlserver.LCK_M_S.signal_wait_time_ms', tags=instance_tags, count=1)
     aggregator.assert_metric(
         'sqlserver.MEMORYCLERK_SQLGENERAL.virtual_memory_committed_kb',
-        tags=['memory_node_id:0', 'optional:tag1'],
+        tags=['memory_node_id:0'] + instance_tags,
         count=1,
     )
     aggregator.assert_metric(
         'sqlserver.MEMORYCLERK_SQLGENERAL.virtual_memory_reserved_kb',
-        tags=['memory_node_id:0', 'optional:tag1'],
+        tags=['memory_node_id:0'] + instance_tags,
         count=1,
     )
 
@@ -132,6 +149,7 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
     instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
+    instance_tags = instance_autodiscovery.get('tags', [])
 
     master_tags = [
         'database:master',
@@ -139,16 +157,14 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
         'file_id:1',
         'file_location:/var/opt/mssql/data/master.mdf',
         'file_type:data',
-        'optional:tag1',
-    ]
+    ] + instance_tags
     msdb_tags = [
         'database:msdb',
         'database_files_state_desc:ONLINE',
         'file_id:1',
         'file_location:/var/opt/mssql/data/MSDBData.mdf',
         'file_type:data',
-        'optional:tag1',
-    ]
+    ] + instance_tags
     aggregator.assert_metric('sqlserver.database.files.size', tags=master_tags)
     aggregator.assert_metric('sqlserver.database.files.size', tags=msdb_tags)
     aggregator.assert_metric('sqlserver.database.files.state', tags=master_tags)
@@ -168,11 +184,12 @@ def test_autodiscovery_db_service_checks(
     instance_autodiscovery['autodiscovery_db_service_check'] = service_check_enabled
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
+    instance_tags = instance_autodiscovery.get('tags', [])
 
     # verify that the old status check returns OK
     aggregator.assert_service_check(
         'sqlserver.can_connect',
-        tags=['db:master', 'optional:tag1', 'sqlserver_host:localhost,1433'],
+        tags=['db:master', 'sqlserver_host:localhost,1433'] + instance_tags,
         status=SQLServer.OK,
     )
 
@@ -180,13 +197,13 @@ def test_autodiscovery_db_service_checks(
     aggregator.assert_service_check(
         'sqlserver.database.can_connect',
         count=default_count,
-        tags=['db:master', 'optional:tag1', 'sqlserver_host:localhost,1433'],
+        tags=['db:master', 'sqlserver_host:localhost,1433'] + instance_tags,
         status=SQLServer.OK,
     )
     aggregator.assert_service_check(
         'sqlserver.database.can_connect',
         count=extra_count,
-        tags=['db:msdb', 'optional:tag1', 'sqlserver_host:localhost,1433'],
+        tags=['db:msdb', 'sqlserver_host:localhost,1433'] + instance_tags,
         status=SQLServer.OK,
     )
     # unavailable_db is an 'offline' database which prevents connections, so we expect this service check to be
@@ -195,13 +212,11 @@ def test_autodiscovery_db_service_checks(
     # to match against, so this assertion does not require the exact string
     sc = aggregator.service_checks('sqlserver.database.can_connect')
     db_critical_exists = False
+    critical_tags = instance_tags + ['db:unavailable_db', 'sqlserver_host:{}'.format(check.resolved_hostname)]
     for c in sc:
         if c.status == SQLServer.CRITICAL:
             db_critical_exists = True
-            assert (
-                c.tags.sort()
-                == ['db:unavailable_db', 'optional:tag1', 'sqlserver_host:{}'.format(check.resolved_hostname)].sort()
-            )
+            assert c.tags.sort() == critical_tags.sort()
     if service_check_enabled:
         assert db_critical_exists
 
@@ -212,19 +227,20 @@ def test_autodiscovery_exclude_db_service_checks(aggregator, dd_run_check, insta
     instance_autodiscovery['autodiscovery_include'] = ['master']
     instance_autodiscovery['autodiscovery_exclude'] = ['msdb']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    instance_tags = instance_autodiscovery.get('tags', [])
 
     dd_run_check(check)
 
     # assert no connection is created for an excluded database
     aggregator.assert_service_check(
         'sqlserver.database.can_connect',
-        tags=['db:msdb', 'optional:tag1', 'sqlserver_host:localhost,1433'],
+        tags=['db:msdb', 'sqlserver_host:localhost,1433'] + instance_tags,
         status=SQLServer.OK,
         count=0,
     )
     aggregator.assert_service_check(
         'sqlserver.database.can_connect',
-        tags=['db:master', 'optional:tag1', 'sqlserver_host:localhost,1433'],
+        tags=['db:master', 'sqlserver_host:localhost,1433'] + instance_tags,
         status=SQLServer.OK,
     )
 
@@ -245,29 +261,14 @@ def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodisc
     instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
+    instance_tags = instance_autodiscovery.get('tags', [])
 
-    expected_metrics = [
-        'sqlserver.database.backup_restore_throughput',
-        'sqlserver.database.log_bytes_flushed',
-        'sqlserver.database.log_flushes',
-        'sqlserver.database.log_flush_wait',
-        'sqlserver.database.transactions',
-        'sqlserver.database.write_transactions',
-        'sqlserver.database.active_transactions',
-    ]
-    master_tags = [
-        'database:master',
-        'optional:tag1',
-    ]
-    msdb_tags = [
-        'database:msdb',
-        'optional:tag1',
-    ]
-    base_tags = ['optional:tag1']
+    expected_metrics = [m[0] for m in INSTANCE_METRICS_DATABASE]
+    master_tags = ['database:master'] + instance_tags
+    msdb_tags = ['database:msdb'] + instance_tags
     for metric in expected_metrics:
         aggregator.assert_metric(metric, tags=master_tags)
         aggregator.assert_metric(metric, tags=msdb_tags)
-        aggregator.assert_metric(metric, tags=base_tags)
 
 
 @pytest.mark.integration
@@ -352,6 +353,77 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker, custom_query,
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "cloud_metadata,metric_names",
+    [
+        (
+            {},
+            [],
+        ),
+        (
+            {
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance',
+                },
+            },
+            ["dd.internal.resource:azure_sql_server_managed_instance:my-instance"],
+        ),
+        (
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+            },
+            [
+                "dd.internal.resource:aws_rds_instance:foo.aws.com",
+            ],
+        ),
+        (
+            {
+                'gcp': {
+                    'project_id': 'foo-project',
+                    'instance_id': 'bar',
+                    'extra_field': 'included',
+                },
+            },
+            [
+                "dd.internal.resource:gcp_sql_database_instance:foo-project:bar",
+            ],
+        ),
+        (
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+                'azure': {
+                    'deployment_type': 'sql_database',
+                    'name': 'my-instance',
+                },
+            },
+            [
+                "dd.internal.resource:aws_rds_instance:foo.aws.com",
+                "dd.internal.resource:azure_sql_server_database:my-instance",
+                "dd.internal.resource:azure_sql_server:my-instance",
+            ],
+        ),
+    ],
+)
+def test_set_resources(aggregator, dd_run_check, instance_docker, cloud_metadata, metric_names):
+    if cloud_metadata:
+        for k, v in cloud_metadata.items():
+            instance_docker[k] = v
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    dd_run_check(check)
+    for m in metric_names:
+        aggregator.assert_metric_has_tag("sqlserver.stats.connections", m)
+    aggregator.assert_metric_has_tag(
+        "sqlserver.stats.connections", "dd.internal.resource:database_instance:{}".format(check.resolved_hostname)
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_load_static_information(aggregator, dd_run_check, instance_docker):
     instance = copy(instance_docker)
     check = SQLServer(CHECK_NAME, {}, [instance])
@@ -384,7 +456,7 @@ def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, 
     dd_run_check(sqlserver_check)
     seen_databases = set()
     for m in aggregator.metrics("sqlserver.database.avg_fragmentation_in_percent"):
-        tags_by_key = {k: v for k, v in [t.split(':') for t in m.tags]}
+        tags_by_key = {k: v for k, v in [t.split(':') for t in m.tags if not t.startswith('dd.internal')]}
         seen_databases.add(tags_by_key['database_name'])
         assert tags_by_key['object_name'].lower() != 'none'
 

@@ -1,7 +1,22 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import Any, Dict, List, Union
+
+# ===================================== DEPRECATION NOTICE =====================================
+# This module is pending deprecation. For authors and contributors: additional queries should be
+# declared using the QueryExecutor and QueryManager APIs.
+
+# Reason for deprecation:
+# Many of the metrics in this module filter on relations and require customers to explicitly
+# connect to every database on their instance via configuration. This is untenable for customers
+# with many databases and a maintenance pain for most; it is also unnecessary for views which
+# can retrieve all data from all databases when connected to the default database
+# (e.g. pg_locks). So to improve the customer experience and usability of configuration APIs,
+# future implementations of these metrics should support autodiscovery, eliminating the need
+# to connect to a specific database.
+# =============================================================================================
+
+from typing import Any, Dict, List, Union  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger

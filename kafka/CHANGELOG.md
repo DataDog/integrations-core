@@ -1,6 +1,6 @@
 # CHANGELOG - kafka
 
-## 2.13.1 / 2022-12-09
+## 2.13.1 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Fix kafka request metrics due to KIP 272. See [#13232](https://github.com/DataDog/integrations-core/pull/13232).
 

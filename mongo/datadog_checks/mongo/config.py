@@ -16,28 +16,23 @@ class MongoConfig(object):
 
         # x.509 authentication
 
-        cacert_cert_dir = instance.get('ssl_ca_certs')
+        cacert_cert_dir = instance.get('tls_ca_file')
         if cacert_cert_dir is None and (
-            is_affirmative(instance.get('options', {}).get("ssl")) or is_affirmative(instance.get('ssl'))
+            is_affirmative(instance.get('options', {}).get("tls")) or is_affirmative(instance.get('tls'))
         ):
             cacert_cert_dir = certifi.where()
 
-        self.ssl_params = exclude_undefined_keys(
+        self.tls_params = exclude_undefined_keys(
             {
-                'ssl': instance.get('ssl', None),
-                'ssl_keyfile': instance.get('ssl_keyfile', None),
-                'ssl_certfile': instance.get('ssl_certfile', None),
-                'ssl_cert_reqs': instance.get('ssl_cert_reqs', None),
-                'ssl_ca_certs': cacert_cert_dir,
-                'ssl_match_hostname': instance.get('ssl_match_hostname', None),
-                'tls': instance.get('tls', None),
-                'tlsCertificateKeyFile': instance.get('tls_certificate_key_file', None),
-                'tlsCAFile': instance.get('tls_ca_file', None),
-                'tlsAllowInvalidHostnames': instance.get('tls_allow_invalid_hostnames', None),
-                'tlsAllowInvalidCertificates': instance.get('tls_allow_invalid_certificates', None),
+                'tls': instance.get('tls'),
+                'tlsCertificateKeyFile': instance.get('tls_certificate_key_file'),
+                'tlsCAFile': cacert_cert_dir,
+                'tlsAllowInvalidHostnames': instance.get('tls_allow_invalid_hostnames'),
+                'tlsAllowInvalidCertificates': instance.get('tls_allow_invalid_certificates'),
             }
         )
-        self.log.debug('ssl_params: %s', self.ssl_params)
+
+        self.log.debug('tls_params: %s', self.tls_params)
 
         if 'server' in instance:
             self.server = instance['server']
@@ -48,7 +43,7 @@ class MongoConfig(object):
                 self.hosts,
                 _,
                 self.auth_source,
-            ) = parse_mongo_uri(self.server, sanitize_username=bool(self.ssl_params))
+            ) = parse_mongo_uri(self.server, sanitize_username=bool(self.tls_params))
             self.scheme = None
             self.additional_options = {}
             self.hosts = ["%s:%s" % (host[0], host[1]) for host in self.hosts]
@@ -82,7 +77,7 @@ class MongoConfig(object):
 
         # Authenticate
         self.do_auth = True
-        self.use_x509 = self.ssl_params and not self.password
+        self.use_x509 = self.tls_params and not self.password
         if not self.username:
             self.log.info("Disabling authentication because a username was not provided.")
             self.do_auth = False
@@ -112,7 +107,7 @@ class MongoConfig(object):
                 server = self.server
 
             self.log.debug("Parsing mongo uri with server: %s", server)
-            return parse_mongo_uri(server, sanitize_username=bool(self.ssl_params))[4]
+            return parse_mongo_uri(server, sanitize_username=bool(self.tls_params))[4]
         except Exception as e:
             raise ConfigurationError(
                 "Could not build a mongo uri with the given hosts: %s. Error: %s" % (self.hosts, repr(e))

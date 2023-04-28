@@ -1,10 +1,14 @@
 # CHANGELOG - http_check
 
-## 8.2.0 / 2023-01-20
+## 8.2.1 / 2023-03-03 / Agent 7.44.0
+
+* [Fixed] Support case-insensitive header fields. See [#13876](https://github.com/DataDog/integrations-core/pull/13876).
+
+## 8.2.0 / 2023-01-20 / Agent 7.43.0
 
 * [Added] Allow certificate expiration checks no matter what ssl/tls verification settings are. See [#13527](https://github.com/DataDog/integrations-core/pull/13527). Thanks [scott-shields-github](https://github.com/scott-shields-github).
 
-## 8.1.1 / 2022-12-09
+## 8.1.1 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Update cryptography dependency. See [#13367](https://github.com/DataDog/integrations-core/pull/13367).
 

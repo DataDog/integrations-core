@@ -25,7 +25,7 @@ def setup(checks, changed):
     Run CI setup scripts
     """
     cur_platform = platform.system().lower()
-    scripts_path = os.path.join(get_root(), '.azure-pipelines', 'scripts')
+    scripts_path = os.path.join(get_root(), '.ddev', 'ci', 'scripts')
     echo_info("Run CI setup scripts")
     if checks:
         if checks[0] == 'skip':

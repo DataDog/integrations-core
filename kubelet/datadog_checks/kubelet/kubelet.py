@@ -278,15 +278,21 @@ class KubeletCheck(
             if not kube_ns:
                 continue
 
-            # get volumes
-            volumes = pod.get('spec', {}).get('volumes')
-            if not volumes:
-                continue
-
             # get pod id
             pod_id = pod.get('metadata', {}).get('uid')
             if not pod_id:
                 self.log.debug('skipping pod with no uid')
+                continue
+
+            # get pod name
+            pod_name = pod.get('metadata', {}).get('name')
+            if not pod_name:
+                self.log.debug('skipping pod with no name')
+                continue
+
+            # get volumes
+            volumes = pod.get('spec', {}).get('volumes')
+            if not volumes:
                 continue
 
             # get tags from tagger
@@ -298,11 +304,19 @@ class KubeletCheck(
             for excluded_tag in self.VOLUME_TAG_KEYS_TO_EXCLUDE:
                 tags = [t for t in tags if not t.startswith(excluded_tag + ':')]
 
-            # get PVC
             for v in volumes:
+                # get PVC
                 pvc_name = v.get('persistentVolumeClaim', {}).get('claimName')
                 if pvc_name:
                     pod_tags_by_pvc['{}/{}'.format(kube_ns, pvc_name)].update(tags)
+
+                # get standalone PVC associated to potential EVC
+                # when a generic ephemeral volume is created, an associated pvc named <pod_name>-<volume_name>
+                # is created (https://docs.openshift.com/container-platform/4.11/storage/generic-ephemeral-vols.html).
+                evc = v.get('ephemeral', {}).get('volumeClaimTemplate')
+                volume_name = v.get('name')
+                if evc and volume_name:
+                    pod_tags_by_pvc['{}/{}-{}'.format(kube_ns, pod_name, volume_name)].update(tags)
 
         return pod_tags_by_pvc
 

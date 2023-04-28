@@ -1,3 +1,6 @@
+# TYPE rabbitmq_identity_info untyped
+# HELP rabbitmq_identity_info RabbitMQ node & cluster identity info
+rabbitmq_identity_info{rabbitmq_node="rabbit@54cfac2199f1",rabbitmq_cluster="rabbit@54cfac2199f1",rabbitmq_cluster_permanent_id="rabbitmq-cluster-id-cyw_z6c4UMIBoK51iVq9rw"} 1
 # TYPE erlang_vm_dirty_cpu_schedulers gauge
 # HELP erlang_vm_dirty_cpu_schedulers The number of scheduler dirty CPU scheduler threads used by the emulator.
 erlang_vm_dirty_cpu_schedulers 5
@@ -1596,9 +1599,6 @@ rabbitmq_queues 3
 # TYPE rabbitmq_build_info untyped
 # HELP rabbitmq_build_info RabbitMQ & Erlang/OTP version info
 rabbitmq_build_info{rabbitmq_version="3.11.3",prometheus_plugin_version="3.11.3",prometheus_client_version="4.9.1",erlang_version="25.1.2"} 1
-# TYPE rabbitmq_identity_info untyped
-# HELP rabbitmq_identity_info RabbitMQ node & cluster identity info
-rabbitmq_identity_info{rabbitmq_node="rabbit@54cfac2199f1",rabbitmq_cluster="rabbit@54cfac2199f1",rabbitmq_cluster_permanent_id="rabbitmq-cluster-id-cyw_z6c4UMIBoK51iVq9rw"} 1
 # TYPE rabbitmq_global_consumers gauge
 # HELP rabbitmq_global_consumers Current number of consumers
 rabbitmq_global_consumers{protocol="amqp091"} 0

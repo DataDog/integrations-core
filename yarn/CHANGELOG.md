@@ -1,6 +1,6 @@
 # CHANGELOG - yarn
 
-## 4.3.0 / 2023-01-20
+## 4.3.0 / 2023-01-20 / Agent 7.43.0
 
 * [Added] Collect metrics from all application states. See [#13697](https://github.com/DataDog/integrations-core/pull/13697).
 

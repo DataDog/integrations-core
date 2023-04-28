@@ -55,7 +55,7 @@ def instance_azure(field, value):
 
 
 def instance_command_timeout(field, value):
-    return 5
+    return 10
 
 
 def instance_connection_string(field, value):

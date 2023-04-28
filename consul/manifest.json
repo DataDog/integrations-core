@@ -12,15 +12,15 @@
     "title": "Consul",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Containers",
-      "Category::Orchestration",
       "Category::Configuration & Deployment",
-      "Category::Notification",
+      "Category::Containers",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Network",
+      "Category::Notification",
+      "Category::Orchestration",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

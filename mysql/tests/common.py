@@ -5,7 +5,7 @@ import os
 from sys import maxsize
 
 import pytest
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 
 from datadog_checks.dev import get_docker_hostname
 

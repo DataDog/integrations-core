@@ -12,12 +12,13 @@
     "title": "Azure Active Directory",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::Azure",
+      "Category::Cloud",
       "Category::Log Collection",
-      "Category::Security"
+      "Category::Security",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

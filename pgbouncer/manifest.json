@@ -15,8 +15,7 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Category::Data Store",
-      "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Log Collection"
     ]
   },
   "author": {

@@ -19,7 +19,7 @@ parameters:
 jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux'
   displayName: '${{ parameters.display }}'
-  timeoutInMinutes: 90
+  timeoutInMinutes: 180
 
   services:
     ${{ if eq(parameters.ddtrace_flag, '--ddtrace') }}:

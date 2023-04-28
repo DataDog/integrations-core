@@ -5,12 +5,12 @@ import pytest
 
 from datadog_checks.dev import docker_run
 
-from .common import COMPOSE_FILE, INSTANCE, INSTANCE_BAD_URL, INSTANCE_NO_URL
+from .common import COMPOSE_FILE, INSTANCE, INSTANCE_BAD_URL, INSTANCE_NO_URL, TRAFFIC_SERVER_URL
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with docker_run(COMPOSE_FILE):
+    with docker_run(COMPOSE_FILE, endpoints=[TRAFFIC_SERVER_URL]):
         yield INSTANCE
 
 

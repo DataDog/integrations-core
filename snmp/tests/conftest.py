@@ -34,6 +34,8 @@ E2E_METADATA = {
     ],
 }
 
+EXPECTED_AUTODISCOVERY_CHECKS = 6
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
@@ -83,8 +85,7 @@ def _autodiscovery_ready():
             autodiscovery_checks.append(result_line)
 
     # assert subnets discovered by `snmp_listener` config from datadog.yaml
-    expected_autodiscovery_checks = 5
-    assert len(autodiscovery_checks) == expected_autodiscovery_checks
+    assert len(autodiscovery_checks) == EXPECTED_AUTODISCOVERY_CHECKS
 
 
 def create_datadog_conf_file(tmp_dir):
@@ -123,6 +124,7 @@ def create_datadog_conf_file(tmp_dir):
                 },
                 {
                     'network': '{}.0/27'.format(prefix),
+                    'namespace': 'test-auth-proto-sha',
                     'port': PORT,
                     'version': 3,
                     'timeout': 1,
@@ -132,6 +134,22 @@ def create_datadog_conf_file(tmp_dir):
                     'authentication_protocol': 'sha',
                     'privacy_key': 'doggiePRIVkey',
                     'privacy_protocol': 'des',
+                    'context_name': 'public',
+                    'ignored_ip_addresses': {'{}.2'.format(prefix): True},
+                    'loader': 'core',
+                },
+                {
+                    'network': '{}.0/27'.format(prefix),
+                    'namespace': 'test-auth-proto-sha256',
+                    'port': PORT,
+                    'version': 3,
+                    'timeout': 1,
+                    'retries': 2,
+                    'user': 'datadogSHA256AES',
+                    'authentication_key': 'doggiepass',
+                    'authentication_protocol': 'SHA256',
+                    'privacy_key': 'doggiePRIVkey',
+                    'privacy_protocol': 'AES',
                     'context_name': 'public',
                     'ignored_ip_addresses': {'{}.2'.format(prefix): True},
                     'loader': 'core',

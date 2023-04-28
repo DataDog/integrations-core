@@ -35,7 +35,7 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "datadog_cluster_agent.",
+        "prefix": "datadog.cluster_agent.",
         "check": "datadog.cluster_agent.api_requests",
         "metadata_path": "metadata.csv"
       },

@@ -3,9 +3,9 @@ title: OAuth for Integrations
 kind: documentation
 ---
 
-{{< beta-callout btn_hidden="true" >}}
+{{< callout btn_hidden="true" >}}
   The Datadog Developer Platform is currently in beta. If you don't have access, contact apps@datadoghq.com.
-{{< /beta-callout >}} 
+{{< /callout >}} 
 
 ## Overview
 

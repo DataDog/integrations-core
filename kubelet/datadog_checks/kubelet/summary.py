@@ -125,6 +125,10 @@ class SummaryScraperMixin(object):
             if working_set:
                 self.gauge(self.NAMESPACE + '.memory.working_set', working_set, container_tags)
 
+            memory_usage = container.get('memory', {}).get('usageBytes')
+            if memory_usage:
+                self.gauge(self.NAMESPACE + '.memory.usage', memory_usage, container_tags)
+
             # TODO: Review meaning of these metrics as capacity != available + used
             # availableBytes = container.get('rootfs', {}).get('availableBytes')
             capacity_bytes = container.get('rootfs', {}).get('capacityBytes')
@@ -145,6 +149,9 @@ class SummaryScraperMixin(object):
                 cpu_usage = ctr.get('cpu', {}).get('usageNanoCores')
                 if cpu_usage:
                     self.gauge(self.NAMESPACE + '.runtime.cpu.usage', cpu_usage, instance_tags)
+                memory_usage = ctr.get('memory', {}).get('usageBytes')
+                if memory_usage:
+                    self.gauge(self.NAMESPACE + '.runtime.memory.usage', memory_usage, instance_tags)
             if ctr.get('name') == 'kubelet':
                 mem_rss = ctr.get('memory', {}).get('rssBytes')
                 if mem_rss:
@@ -152,3 +159,6 @@ class SummaryScraperMixin(object):
                 cpu_usage = ctr.get('cpu', {}).get('usageNanoCores')
                 if cpu_usage:
                     self.gauge(self.NAMESPACE + '.kubelet.cpu.usage', cpu_usage, instance_tags)
+                memory_usage = ctr.get('memory', {}).get('usageBytes')
+                if memory_usage:
+                    self.gauge(self.NAMESPACE + '.kubelet.memory.usage', memory_usage, instance_tags)

@@ -1,11 +1,25 @@
 # CHANGELOG - kafka_consumer
 
-## 2.16.3 / 2023-01-20
+## 3.0.1 / 2023-04-21
+
+* [Fixed] Fix errors related to filtering based on user-specified consumer groups filters. See [#14406](https://github.com/DataDog/integrations-core/pull/14406).
+* [Fixed] Move all configuration validation to config class. See [#14405](https://github.com/DataDog/integrations-core/pull/14405).
+
+## 3.0.0 / 2023-04-14
+
+* [Added] Implement regex for consumer_groups. See [#14382](https://github.com/DataDog/integrations-core/pull/14382).
+* [Changed] Revamp Kafka consumer check. See [#13918](https://github.com/DataDog/integrations-core/pull/13918).
+
+## 2.16.4 / 2023-03-03 / Agent 7.44.0
+
+* [Fixed] Do not install gssapi and dtrace on py2 on arm macs. See [#13749](https://github.com/DataDog/integrations-core/pull/13749).
+
+## 2.16.3 / 2023-01-20 / Agent 7.43.0
 
 * [Fixed] Add kafka consumer logs for more visibility. See [#13679](https://github.com/DataDog/integrations-core/pull/13679).
 * [Fixed] Disable socket wakeups for coordinate ID and consumer group offsets. See [#13505](https://github.com/DataDog/integrations-core/pull/13505).
 
-## 2.16.2 / 2022-11-22
+## 2.16.2 / 2022-11-22 / Agent 7.42.0
 
 * [Fixed] Disable socket wakeup when sending requests. See [#13221](https://github.com/DataDog/integrations-core/pull/13221).
 

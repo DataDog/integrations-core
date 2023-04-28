@@ -46,6 +46,7 @@
     },
     "dashboards": {
       "SQLServer-Overview": "assets/dashboards/SQLServer-Overview_dashboard.json",
+      "SQLServer-AlwaysOn": "assets/dashboards/SQLServer-AlwaysOn_dashboard.json",
       "sqlserver": "assets/dashboards/sqlserver_dashboard.json"
     },
     "monitors": {

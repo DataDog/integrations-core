@@ -1,9 +1,11 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 
 from datadog_checks.dev import get_docker_hostname, get_here
+from datadog_checks.dev.fs import read_file
 
 HERE = get_here()
 HOST = get_docker_hostname()
@@ -14,6 +16,16 @@ INSTANCE = {
     'enable_read_write_statistics': True,
 }
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
+
+BASE_TAGS = ['silk_host:localhost:80', 'test:silk']
+SYSTEM_TAGS = ['system_id:5501', 'system_name:K2-5501']
+
+
+def mock_get_data(url):
+    file_contents = read_file(os.path.join(HERE, 'fixtures', 'stats', url))
+    response = json.loads(file_contents)
+    return [(response, 200)]
+
 
 METRICS = [
     'silk.system.views_count',

@@ -1,6 +1,8 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 haproxy.backend.active.servers,gauge,,,,[OpenMetrics V1 and V2] Current number of active servers.,0,haproxy,,
-haproxy.backend.agg.server.check.status,gauge,,,,[OpenMetrics V1 and V2] Backend's aggregated gauge of servers' state check status (since >= 2.4).,0,haproxy,,
+haproxy.backend.agg.server.check.status,gauge,,,,[OpenMetrics V1 and V2] Backend's aggregated gauge of servers' state check status (deprecated).,0,haproxy,,
+haproxy.backend.agg.check.status,gauge,,,,[OpenMetrics V1 and V2] Backend's aggregated gauge of servers' state check status (since >= 2.4).,0,haproxy,,
+haproxy.backend.agg.server.status,gauge,,,,[OpenMetrics V1 and V2] Backend's aggregated gauge of servers' status (since >= 2.4).,0,haproxy,,
 haproxy.backend.backup.servers,gauge,,,,[OpenMetrics V1 and V2] Current number of backup servers.,0,haproxy,,
 haproxy.backend.bytes.in.total,count,,byte,,[OpenMetrics V1] Current total of incoming bytes. By default submitted as count if using prometheus,0,haproxy,,
 haproxy.backend.bytes.in.count,count,,byte,,[OpenMetrics V2] Current total of incoming bytes. By default submitted as count if using prometheus,0,haproxy,,

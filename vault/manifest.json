@@ -12,13 +12,11 @@
     "title": "Vault",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Security",
-      "Category::Configuration & Deployment",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Security",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

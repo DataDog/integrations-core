@@ -1,6 +1,6 @@
 # CHANGELOG - kubernetes_state
 
-## 7.4.2 / 2022-12-09
+## 7.4.2 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Update protobuf. See [#13262](https://github.com/DataDog/integrations-core/pull/13262).
 

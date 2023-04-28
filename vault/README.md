@@ -31,7 +31,7 @@ The Vault integration requires the following capabilities:
    }
    ```
 
-      Setup policy and role:
+Setup policy and role:
 
    ```text
    $ vault policy write metrics /path/to/metrics_policy.hcl
@@ -41,7 +41,8 @@ The Vault integration requires the following capabilities:
    $ vault agent -config=/path/to/agent_config.hcl
    ```
 
-   Content of `agent_config.hcl`:
+Content of `agent_config.hcl`:
+   
    ```
    exit_after_auth = true
    pid_file = "/tmp/agent_pid"

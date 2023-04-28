@@ -21,7 +21,7 @@ There is [a gem][7] and a set of scripts to help you get set up, ease developmen
 
 Once the required Ruby gems have been installed by Bundler, create a Python environment.
 
-1. Run `rake setup_env`. This installs a Python virtual environment along with all the components necessary for integration development (including the core agent used by the integrations). Some basic software might be needed to install the python dependencies like `gcc` and `libssl-dev`.
+1. Run `rake setup_env`. This installs a Python virtual environment along with all the components necessary for integration development (including the core Agent used by the integrations). Some basic software might be needed to install the python dependencies like `gcc` and `libssl-dev`.
 
 2. Run `source venv/bin/activate` to activate the installed Python virtual environment. To exit the virtual environment, run `deactivate`. Learn more about the Python virtual environment on the [Virtualenv documentation][9].
 

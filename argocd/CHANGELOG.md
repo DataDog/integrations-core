@@ -1,6 +1,6 @@
 # CHANGELOG - Argo CD
 
-## 1.0.1 / 2022-12-09
+## 1.0.1 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Fix error that was triggered by including configuration parameters not ending in `_endpoint`. See [#13409](https://github.com/DataDog/integrations-core/pull/13409).
 

@@ -12,11 +12,11 @@
     "title": "Airflow",
     "media": [],
     "classifier_tags": [
+      "Category::Automation",
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Processing",
-      "Category::Log Collection"
+      "Supported OS::macOS"
     ]
   },
   "author": {
@@ -42,7 +42,10 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "airflow"
+      ]
     },
     "dashboards": {
       "Airflow Overview": "assets/dashboards/overview.json"

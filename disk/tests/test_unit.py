@@ -10,6 +10,7 @@ from six import iteritems
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.timeout import TimeoutException
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.disk import Disk
 from datadog_checks.disk.disk import IGNORE_CASE
 
@@ -124,6 +125,7 @@ def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics
         )
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.usefixtures('psutil_mocks')
@@ -161,6 +163,7 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics, count_metrics, 
         )
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_get_devices_label():
@@ -244,6 +247,7 @@ def test_min_disk_size(aggregator, gauge_metrics, rate_metrics, count_metrics, d
         aggregator.assert_metric_has_tag(name, 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME))
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.skipif(not Platform.is_linux(), reason='disk labels are only available on Linux')
@@ -265,6 +269,7 @@ def test_labels_from_blkid_cache_file(
         aggregator.assert_metric(
             metric, tags=['device:/dev/sda1', 'device_name:sda1', 'label:MYLABEL', 'device_label:MYLABEL']
         )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.skipif(not Platform.is_linux(), reason='disk labels are only available on Linux')
@@ -284,6 +289,7 @@ def test_blkid_cache_file_contains_no_labels(
     dd_run_check(c)
     for metric in chain(gauge_metrics, rate_metrics, count_metrics):
         aggregator.assert_metric(metric, tags=['device:/dev/sda1', 'device_name:sda1'])
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.usefixtures('psutil_mocks')
@@ -342,6 +348,7 @@ def test_timeout_warning(aggregator, gauge_metrics, rate_metrics, count_metrics,
         aggregator.assert_metric_has_tag(name, 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME))
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.usefixtures('psutil_mocks')

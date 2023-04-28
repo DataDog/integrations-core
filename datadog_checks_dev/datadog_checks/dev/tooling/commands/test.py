@@ -31,7 +31,7 @@ from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_succes
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
 @click.option('--latest', is_flag=True, help='Only verify support of new product versions')
 @click.option('--e2e', is_flag=True, help='Run only end-to-end tests')
-@click.option('--ddtrace', is_flag=True, help='Run tests using dd-trace-py')
+@click.option('--ddtrace', is_flag=True, envvar='DDEV_TEST_ENABLE_TRACING', help='Run tests using dd-trace-py')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
 @click.option('--cov-missing', '-cm', is_flag=True, help='Show line numbers of statements that were not executed')
 @click.option('--junit', '-j', 'junit', is_flag=True, help='Generate junit reports')

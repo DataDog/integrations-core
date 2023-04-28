@@ -1,10 +1,18 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["3.8"]
+
+[[envs.default.matrix]]
+python = ["3.8"]
+setup = ["sandbox"]
+
+[envs.default.overrides]
+name."^py3.8$".e2e-env = { value = true }
+matrix.setup.e2e-env = { value = true, if = ["sandbox"], env = ["TF_VAR_google_credentials_file", "TF_VAR_google_compute_instance_name"] }
+matrix.setup.env-vars = [
+  { key = "USE_OPENSTACK_SANDBOX", value = "true", if = ["sandbox"] },
+]
 
 [envs.default]
 e2e-env = false
-
-[envs.default.overrides]
-env.TF_VAR_account_json.e2e-env = { value = true }

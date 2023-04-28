@@ -19,7 +19,9 @@ instances:
     ## socket. Specify as many hosts as appropriate for your deployment topology:
     ##
     ##   - For a standalone, specify the hostname of the standalone mongod instance.
-    ##   - For a replica set, specify the hostname of the mongod instance on that replica.
+    ##   - For a replica set, specify the hostname of a mongod instance as listed in
+    ##     the replica set configuration. You need one check instance per mongod instance
+    ##     in order to collect replication metrics and events.
     ##   - For a sharded cluster, you need one check instance for each mongod instance in
     ##     each shard (including the configsvr shard) as well as one additional check instance
     ##     that connects to one (or more) mongos node.
@@ -89,41 +91,6 @@ instances:
     ## see http://api.mongodb.com/python/3.4.0/api/pymongo/mongo_client.html
     #
     # timeout: 30
-
-    ## @param ssl - boolean - optional - default: false
-    ## If `True`, create the connection to the server using SSL.
-    #
-    # ssl: false
-
-    ## @param ssl_keyfile - string - optional
-    ## Path to the private key file used to identify the local connection against Mongodb.
-    #
-    # ssl_keyfile: <SSL_KEYFILE>
-
-    ## @param ssl_certfile - string - optional
-    ## Path to the certificate file used to identify the local connection against Mongodb.
-    #
-    # ssl_certfile: <SSL_CERTFILE>
-
-    ## @param ssl_cert_reqs - integer - optional
-    ## Specifies whether a certificate is required from the other side of the connection, and whether it will be
-    ## validated if provided.
-    ## Possible values:
-    ##   * 0 for ssl.CERT_NONE (certificates ignored)
-    ##   * 1 for ssl.CERT_OPTIONAL (not required, but validated if provided)
-    ##   * 2 for ssl.CERT_REQUIRED (required and validated)
-    #
-    # ssl_cert_reqs: <SSL_CERT_REQS>
-
-    ## @param ssl_ca_certs - string - optional
-    ## Path to the ca_certs file.
-    #
-    # ssl_ca_certs: <SSL_CA_CERTS>
-
-    ## @param ssl_match_hostname - boolean - optional - default: true
-    ## If `False`, disables SSL hostname verification.
-    #
-    # ssl_match_hostname: true
 
     ## @param tls - boolean - optional - default: false
     ## If `True`, create the connection to the server using transport layer security.
@@ -195,6 +162,11 @@ instances:
     ## Note: Custom queries are ignored by default when the mongo node is a secondary of a replica set.
     ## You can add `run_on_secondary: true` for each query that you want to run on both primaries and secondaries.
     ## See https://docs.datadoghq.com/integrations/guide/mongo-custom-query-collection to learn more.
+    ## Note: For MongoDB date types you can use functions matching any of these regular expressions:
+    ## "ISODate\(\s*\'(.*?)\'\s*\)" (e.g. "ISODate('2022-12-15T08:26:00.969Z')")
+    ## "ISODate\(\s*\)|Date\(\s*\)" (e.g. "Date()")
+    ## "new\s*Date\(ISODate\(\s*\)\.getTime\(\s*\)((\s*[+\-*\/]\s*(\d+))*)\s*\)" 
+    ##   (e.g. "new Date(ISODate().getTime() - 60 * 1000)")
     #
     # custom_queries:
     #   - metric_prefix: mongo

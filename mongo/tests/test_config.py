@@ -21,10 +21,10 @@ def test_empty_hosts():
         MongoConfig(instance, mock.Mock())
 
 
-def test_default_ssl_params():
+def test_default_tls_params():
     instance = {'hosts': ['test.mongodb.com']}
     config = MongoConfig(instance, mock.Mock())
-    assert config.ssl_params == {}
+    assert config.tls_params == {}
 
 
 def test_default_scheme(instance):

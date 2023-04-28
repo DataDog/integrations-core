@@ -12,13 +12,17 @@
     "title": "Amazon ECS on AWS Fargate",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::AWS",
+      "Category::Cloud",
       "Category::Containers",
       "Category::Log Collection",
-      "Category::Orchestration"
+      "Category::Network",
+      "Category::Orchestration",
+      "Category::Provisioning",
+      "Category::Tracing",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {
