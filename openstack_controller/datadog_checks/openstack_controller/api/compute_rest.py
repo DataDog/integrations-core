@@ -37,8 +37,8 @@ class ComputeRest:
         self.log.debug("response: %s", response.json())
         return response.elapsed.total_seconds() * 1000
 
-    def get_limits(self, project_id):
-        response = self.http.get('{}/limits?tenant_id={}'.format(self.endpoint, project_id))
+    def get_limits(self):
+        response = self.http.get('{}/limits'.format(self.endpoint))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         return get_normalized_metrics(response.json(), NOVA_METRICS_PREFIX, NOVA_LIMITS_METRICS)

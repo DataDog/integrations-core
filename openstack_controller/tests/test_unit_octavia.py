@@ -33,20 +33,9 @@ def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'project_name:demo',
         ],
     )
-    aggregator.assert_service_check(
-        'openstack.octavia.api.up',
-        status=AgentCheck.UNKNOWN,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:6e39099cccde4f809b003d9e0dd09304',
-            'project_name:admin',
-        ],
-    )
+    aggregator.assert_service_check('openstack.octavia.api.up', count=1)
 
 
 def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
@@ -62,20 +51,9 @@ def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:cadda9ffc8d44aedbac4c7d6adc43c51',
-            'project_name:demo',
         ],
     )
-    aggregator.assert_service_check(
-        'openstack.octavia.api.up',
-        status=AgentCheck.CRITICAL,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:4762874c945945c38d820cce29fbb66e',
-            'project_name:admin',
-        ],
-    )
+    aggregator.assert_service_check('openstack.octavia.api.up', count=1)
 
 
 def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
@@ -91,20 +69,9 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:cadda9ffc8d44aedbac4c7d6adc43c51',
-            'project_name:demo',
         ],
     )
-    aggregator.assert_service_check(
-        'openstack.octavia.api.up',
-        status=AgentCheck.OK,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:4762874c945945c38d820cce29fbb66e',
-            'project_name:admin',
-        ],
-    )
+    aggregator.assert_service_check('openstack.octavia.api.up', count=1)
 
 
 def test_loadbalancers_metrics(aggregator, dd_run_check, instance, monkeypatch):

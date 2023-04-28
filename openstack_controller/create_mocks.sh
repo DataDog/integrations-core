@@ -10,17 +10,16 @@ create_file() {
   file_path="$dir_path/$file_name"
 
   # Check if the directory exists, and create it if it doesn't
-  if [ ! -d $dir_path ]; then
-    mkdir -p $dir_path
+  if [ ! -d "$dir_path" ]; then
+    mkdir -p "$dir_path"
   fi
 
   # Check if the file exists, and create it if it doesn't
-  if [ ! -f $file_path ]; then
-    touch $file_path
+  if [ ! -f "$file_path" ]; then
+    touch "$file_path"
+    # Write the content to the file
+    echo "$content" > "$file_path"
   fi
-
-  # Write the content to the file
-  echo "$content" > $file_path
 }
 
 process_endpoint() {
@@ -103,11 +102,11 @@ process_endpoint --endpoint="/identity/v3/registered_limits"
 process_endpoint --endpoint="/identity/v3/limits"
 # Nova
 process_endpoint --endpoint="/identity/v3/auth/projects"
+process_endpoint --endpoint="/compute/v2.1/limits"
 for project_id in $(echo "$RESPONSE" | jq -r '.projects[]' | jq -r '.id'); do
   printf "\033[32m%-6s\033[0m Project id: %s\n" "INFO" "$project_id"
   data=$(echo "{'auth': {'identity': {'methods': ['password'], 'password': {'user': {'name': 'admin', 'domain': { 'id': 'default' }, 'password': 'password'}}}, 'scope': {'project': {'id': '$project_id'}}}}" | sed "s/'/\"/g")
   process_endpoint --method="POST" --endpoint="/identity/v3/auth/tokens" --file_name="project_$project_id.json" --data="$data"
-  process_endpoint --endpoint="/compute/v2.1/limits?tenant_id=$project_id"
   process_endpoint --endpoint="/compute/v2.1/os-quota-sets/$project_id"
   process_endpoint --endpoint="/compute/v2.1/servers/detail?project_id=$project_id"
 
@@ -115,7 +114,41 @@ for project_id in $(echo "$RESPONSE" | jq -r '.projects[]' | jq -r '.id'); do
     process_endpoint --endpoint="/compute/v2.1/servers/$server_id/diagnostics"
   done
   process_endpoint --port=9696 --endpoint="/networking/v2.0/quotas/$project_id"
+
+  # Octavia
+  # loadbalancers
+  process_endpoint --endpoint="/load-balancer/v2/lbaas/loadbalancers?project_id=$project_id"
+  for loadbalancer_id in $(echo "$RESPONSE" | jq -r '.loadbalancers[]' | jq -r '.id'); do
+    # stats
+    process_endpoint --endpoint="/load-balancer/v2/lbaas/loadbalancers/$loadbalancer_id/stats/"
+  done
+
+  # listeners
+  process_endpoint --endpoint="/load-balancer/v2/lbaas/listeners?project_id=$project_id"
+  for listener_id in $(echo "$RESPONSE" | jq -r '.listeners[]' | jq -r '.id'); do
+    # stats
+    process_endpoint --endpoint="/load-balancer/v2/lbaas/listeners/$listener_id/stats/"
+  done
+
+  # pools
+  process_endpoint --endpoint="/load-balancer/v2/lbaas/pools?project_id=$project_id"
+  for pool_id in $(echo "$RESPONSE" | jq -r '.pools[]' | jq -r '.id'); do
+    # members
+    process_endpoint --endpoint="/load-balancer/v2/lbaas/pools/$pool_id/members?project_id=$project_id"
+  done
+
+  # healthmonitors
+  process_endpoint --endpoint="/load-balancer/v2/lbaas/healthmonitors?project_id=$project_id"
+
+  # amphorae
+  process_endpoint --endpoint="/load-balancer/v2/octavia/amphorae"
+  for amphora_id in $(echo "$RESPONSE" | jq -r '.amphorae[]' | jq -r '.id'); do
+    # stats
+    process_endpoint --endpoint="/load-balancer/v2/octavia/amphorae/$amphora_id/stats/"
+  done
+
 done
+process_endpoint --endpoint="/compute/v2.1/os-services"
 process_endpoint --endpoint="/compute/v2.1/os-aggregates"
 process_endpoint --endpoint="/compute/v2.1/os-hypervisors/detail?with_servers=true"
 num_uptime=$(echo "$RESPONSE" | jq -r '.hypervisors[] | select(.uptime != null) | length')
@@ -134,27 +167,5 @@ process_endpoint --endpoint="/baremetal/nodes?detail=True"
 process_endpoint --endpoint="/baremetal/nodes/detail"
 process_endpoint --endpoint="/baremetal/conductors"
 
-# Octavia
-process_endpoint --endpoint="/load-balancer/v2/lbaas/loadbalancers"
-for loadbalancer_id in $(echo "$RESPONSE" | jq -r '.loadbalancers[]' | jq -r '.id'); do
-  process_endpoint --endpoint="/load-balancer/v2/lbaas/loadbalancers/$loadbalancer_id/stats/"
-done
-
-process_endpoint --endpoint="/load-balancer/v2/lbaas/listeners"
-for listener_id in $(echo "$RESPONSE" | jq -r '.listeners[]' | jq -r '.id'); do
-  process_endpoint --endpoint="/load-balancer/v2/lbaas/listeners/$listener_id/stats/"
-done
-
-process_endpoint --endpoint="/load-balancer/v2/lbaas/pools"
-for pool_id in $(echo "$RESPONSE" | jq -r '.pools[]' | jq -r '.id'); do
-  process_endpoint --endpoint="/load-balancer/v2/lbaas/pools/$pool_id/members/"
-done
-
-process_endpoint --endpoint="/load-balancer/v2/lbaas/healthmonitors"
-
-process_endpoint --endpoint="/load-balancer/v2/octavia/amphorae"
-for amphora_id in $(echo "$RESPONSE" | jq -r '.amphorae[]' | jq -r '.id'); do
-  process_endpoint --endpoint="/load-balancer/v2/octavia/amphorae/$amphora_id/stats/"
-done
 
 rm headers

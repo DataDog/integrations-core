@@ -43,7 +43,7 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_load_balancer_response_time(self, project_id):
+    def get_load_balancer_response_time(self):
         pass  # pragma: no cover
 
     @abstractmethod
@@ -103,7 +103,7 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_limits(self, project_id):
+    def get_compute_limits(self):
         pass  # pragma: no cover
 
     @abstractmethod
@@ -111,7 +111,7 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_services(self, project_id):
+    def get_compute_services(self):
         pass  # pragma: no cover
 
     @abstractmethod
@@ -119,7 +119,7 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_flavors(self, project_id):
+    def get_compute_flavors(self):
         pass  # pragma: no cover
 
     @abstractmethod
@@ -131,7 +131,7 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_network_response_time(self, project):
+    def get_network_response_time(self):
         pass  # pragma: no cover
 
     @abstractmethod
@@ -143,13 +143,13 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_baremetal_response_time(self, project):
+    def get_baremetal_response_time(self):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_baremetal_conductors(self, project_id):
+    def get_baremetal_conductors(self):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_baremetal_nodes(self, project_id):
+    def get_baremetal_nodes(self):
         pass  # pragma: no cover

@@ -18,7 +18,7 @@ def test_exception(aggregator, dd_run_check, instance, caplog, monkeypatch):
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    assert 'Exception while reporting network metrics' in caplog.text
+    assert 'Exception while reporting network domain metrics' in caplog.text
 
 
 def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch):
@@ -47,18 +47,6 @@ def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'project_name:demo',
-        ],
-    )
-    aggregator.assert_service_check(
-        'openstack.neutron.api.up',
-        status=AgentCheck.UNKNOWN,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:6e39099cccde4f809b003d9e0dd09304',
-            'project_name:admin',
         ],
     )
 
@@ -76,18 +64,6 @@ def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'project_name:demo',
-        ],
-    )
-    aggregator.assert_service_check(
-        'openstack.neutron.api.up',
-        status=AgentCheck.CRITICAL,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:6e39099cccde4f809b003d9e0dd09304',
-            'project_name:admin',
         ],
     )
 
@@ -105,18 +81,6 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'project_name:demo',
-        ],
-    )
-    aggregator.assert_service_check(
-        'openstack.neutron.api.up',
-        status=AgentCheck.OK,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:6e39099cccde4f809b003d9e0dd09304',
-            'project_name:admin',
         ],
     )
 
@@ -162,8 +126,10 @@ def test_agents_metrics(aggregator, dd_run_check, monkeypatch, instance):
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
+
+    default_tags = ['keystone_server:{}'.format(instance["keystone_server_url"]), 'domain_id:default']
     agent_tags = [
-        'agent_availability_zone:',
+        'agent_availability_zone:None',
         'agent_host:agent-integrations-openstack-default',
         'agent_id:203083d6-ddae-4023-aa83-ab679c9f4d2d',
         'agent_name:ovn-controller',
@@ -171,31 +137,9 @@ def test_agents_metrics(aggregator, dd_run_check, monkeypatch, instance):
     ]
     not_found_metrics = []
     for key, value in NEUTRON_AGENTS_METRICS.items():
-        if check_microversion(instance, value):
-            if key in aggregator.metric_names:
-                aggregator.assert_metric(
-                    key,
-                    tags=[]
-                    if 'openstack.neutron.agents.count'
-                    else agent_tags
-                    + [
-                        'keystone_server:{}'.format(instance["keystone_server_url"]),
-                        'project_id:1e6e233e637d4d55a50a62b63398ad15',
-                        'project_name:demo',
-                    ],
-                )
-                aggregator.assert_metric(
-                    key,
-                    tags=[]
-                    if 'openstack.neutron.agents.count'
-                    else agent_tags
-                    + [
-                        'domain_id:default',
-                        'keystone_server:{}'.format(instance["keystone_server_url"]),
-                        'project_id:6e39099cccde4f809b003d9e0dd09304',
-                        'project_name:admin',
-                    ],
-                )
-            elif is_mandatory(value):
-                not_found_metrics.append(key)
+        if key in aggregator.metric_names:
+            tags = default_tags if key == 'openstack.neutron.agents.count' else agent_tags + default_tags
+            aggregator.assert_metric(key, tags=tags)
+        elif is_mandatory(value):
+            not_found_metrics.append(key)
     assert not_found_metrics == [], f"No neutron agents metrics found: {not_found_metrics}"

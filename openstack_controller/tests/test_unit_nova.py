@@ -29,7 +29,7 @@ def test_exception(aggregator, dd_run_check, instance, caplog, monkeypatch):
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    assert 'Exception while reporting compute metrics' in caplog.text
+    assert 'Exception while reporting compute domain metrics' in caplog.text
 
 
 def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch):
@@ -58,18 +58,6 @@ def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'project_name:demo',
-        ],
-    )
-    aggregator.assert_service_check(
-        NOVA_SERVICE_CHECK,
-        status=AgentCheck.UNKNOWN,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:6e39099cccde4f809b003d9e0dd09304',
-            'project_name:admin',
         ],
     )
 
@@ -87,18 +75,6 @@ def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'project_name:demo',
-        ],
-    )
-    aggregator.assert_service_check(
-        NOVA_SERVICE_CHECK,
-        status=AgentCheck.CRITICAL,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:6e39099cccde4f809b003d9e0dd09304',
-            'project_name:admin',
         ],
     )
 
@@ -116,18 +92,6 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'project_name:demo',
-        ],
-    )
-    aggregator.assert_service_check(
-        NOVA_SERVICE_CHECK,
-        status=AgentCheck.OK,
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:6e39099cccde4f809b003d9e0dd09304',
-            'project_name:admin',
         ],
     )
     aggregator.assert_metric(
@@ -135,17 +99,6 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
         tags=[
             'domain_id:default',
             'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'project_name:demo',
-        ],
-    )
-    aggregator.assert_metric(
-        'openstack.nova.response_time',
-        tags=[
-            'domain_id:default',
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-            'project_id:6e39099cccde4f809b003d9e0dd09304',
-            'project_name:admin',
         ],
     )
 
@@ -173,17 +126,6 @@ def test_limits_metrics(aggregator, dd_run_check, monkeypatch, instance):
                     tags=[
                         'domain_id:default',
                         'keystone_server:{}'.format(instance["keystone_server_url"]),
-                        'project_id:1e6e233e637d4d55a50a62b63398ad15',
-                        'project_name:demo',
-                    ],
-                )
-                aggregator.assert_metric(
-                    key,
-                    tags=[
-                        'domain_id:default',
-                        'keystone_server:{}'.format(instance["keystone_server_url"]),
-                        'project_id:6e39099cccde4f809b003d9e0dd09304',
-                        'project_name:admin',
                     ],
                 )
             elif is_mandatory(value):
@@ -303,8 +245,6 @@ def test_flavor_metrics(aggregator, dd_run_check, monkeypatch, instance):
                     tags=[
                         'domain_id:default',
                         'keystone_server:{}'.format(instance["keystone_server_url"]),
-                        'project_id:6e39099cccde4f809b003d9e0dd09304',
-                        'project_name:admin',
                         'flavor_id:1',
                         'flavor_name:m1.tiny',
                     ],
@@ -319,13 +259,9 @@ def test_hypervisor_service_check_up(aggregator, dd_run_check, instance, monkeyp
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
-    project_tags = [
+    tags = [
         'domain_id:default',
         'keystone_server:{}'.format(instance["keystone_server_url"]),
-        'project_id:6e39099cccde4f809b003d9e0dd09304',
-        'project_name:admin',
-    ]
-    tags = project_tags + [
         'aggregate:my-aggregate',
         'availability_zone:availability-zone',
         'hypervisor:agent-integrations-openstack-default',
@@ -355,13 +291,9 @@ def test_hypervisor_service_check_down(aggregator, dd_run_check, instance, monke
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
-    project_tags = [
+    tags = [
         'domain_id:default',
         'keystone_server:{}'.format(instance["keystone_server_url"]),
-        'project_id:6e39099cccde4f809b003d9e0dd09304',
-        'project_name:admin',
-    ]
-    tags = project_tags + [
         'aggregate:my-aggregate',
         'availability_zone:availability-zone',
         'hypervisor:agent-integrations-openstack-default',
@@ -397,8 +329,6 @@ def test_hypervisor_metrics(aggregator, dd_run_check, instance, hypervisor_id, m
                     tags=[
                         'domain_id:default',
                         'keystone_server:{}'.format(instance["keystone_server_url"]),
-                        'project_id:6e39099cccde4f809b003d9e0dd09304',
-                        'project_name:admin',
                         'aggregate:my-aggregate',
                         'availability_zone:availability-zone',
                         'hypervisor:agent-integrations-openstack-default',
@@ -453,26 +383,16 @@ def test_latest_service_metrics(aggregator, dd_run_check, instance_nova_microver
     check = OpenStackControllerCheck('test', {}, [instance_nova_microversion_latest])
     dd_run_check(check)
 
-    base_tags = [
+    tags = [
         'domain_id:default',
         'keystone_server:{}'.format(instance_nova_microversion_latest["keystone_server_url"]),
     ]
 
-    admin_project_tags = base_tags + [
-        'project_id:6e39099cccde4f809b003d9e0dd09304',
-        'project_name:admin',
-    ]
-
-    demo_project_tags = base_tags + [
-        'project_id:1e6e233e637d4d55a50a62b63398ad15',
-        'project_name:demo',
-    ]
-
     aggregator.assert_metric(
         "openstack.nova.service.up",
         count=1,
         value=1,
-        tags=demo_project_tags
+        tags=tags
         + [
             'service_name:nova_compute',
             'service_state:up',
@@ -486,22 +406,7 @@ def test_latest_service_metrics(aggregator, dd_run_check, instance_nova_microver
         "openstack.nova.service.up",
         count=1,
         value=1,
-        tags=admin_project_tags
-        + [
-            'service_name:nova_compute',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-default',
-            'service_id:7bf08d7e-a939-46c3-bdae-fbe3ebfe78a4',
-            'service_status:enabled',
-            'availability_zone:availability-zone',
-        ],
-    )
-
-    aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=demo_project_tags
+        tags=tags
         + [
             'service_name:nova_conductor',
             'service_state:up',
@@ -515,22 +420,7 @@ def test_latest_service_metrics(aggregator, dd_run_check, instance_nova_microver
         "openstack.nova.service.up",
         count=1,
         value=1,
-        tags=admin_project_tags
-        + [
-            'service_name:nova_conductor',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-default',
-            'service_id:df55f706-a60e-4d3d-8cd6-30f5b33d79ce',
-            'service_status:enabled',
-            'availability_zone:internal',
-        ],
-    )
-
-    aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=admin_project_tags
+        tags=tags
         + [
             'service_name:nova_conductor',
             'service_state:up',
@@ -544,36 +434,7 @@ def test_latest_service_metrics(aggregator, dd_run_check, instance_nova_microver
         "openstack.nova.service.up",
         count=1,
         value=1,
-        tags=admin_project_tags
-        + [
-            'service_name:nova_conductor',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-default',
-            'service_id:aadbda65-f523-419a-b3df-c287d196a2c1',
-            'service_status:enabled',
-            'availability_zone:internal',
-        ],
-    )
-
-    aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=admin_project_tags
-        + [
-            'service_name:nova_scheduler',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-default',
-            'service_id:2ec2027d-ac70-4e2b-95ed-fb1756d24996',
-            'service_status:enabled',
-            'availability_zone:internal',
-        ],
-    )
-    aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=admin_project_tags
+        tags=tags
         + [
             'service_name:nova_scheduler',
             'service_state:up',
@@ -593,23 +454,13 @@ def test_default_service_metrics(aggregator, dd_run_check, instance, monkeypatch
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
 
-    base_tags = ['domain_id:default', 'keystone_server:{}'.format(instance["keystone_server_url"])]
-
-    admin_project_tags = base_tags + [
-        'project_id:6e39099cccde4f809b003d9e0dd09304',
-        'project_name:admin',
-    ]
-
-    demo_project_tags = base_tags + [
-        'project_id:1e6e233e637d4d55a50a62b63398ad15',
-        'project_name:demo',
-    ]
+    tags = ['domain_id:default', 'keystone_server:{}'.format(instance["keystone_server_url"])]
 
     aggregator.assert_metric(
         "openstack.nova.service.up",
         count=1,
         value=1,
-        tags=demo_project_tags
+        tags=tags
         + [
             'service_name:nova_compute',
             'service_state:up',
@@ -623,22 +474,7 @@ def test_default_service_metrics(aggregator, dd_run_check, instance, monkeypatch
         "openstack.nova.service.up",
         count=1,
         value=1,
-        tags=admin_project_tags
-        + [
-            'service_name:nova_compute',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-default',
-            'service_id:3',
-            'service_status:enabled',
-            'availability_zone:availability-zone',
-        ],
-    )
-
-    aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=demo_project_tags
+        tags=tags
         + [
             'service_name:nova_conductor',
             'service_state:up',
@@ -652,22 +488,7 @@ def test_default_service_metrics(aggregator, dd_run_check, instance, monkeypatch
         "openstack.nova.service.up",
         count=1,
         value=1,
-        tags=admin_project_tags
-        + [
-            'service_name:nova_conductor',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-default',
-            'service_id:5',
-            'service_status:enabled',
-            'availability_zone:internal',
-        ],
-    )
-
-    aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=admin_project_tags
+        tags=tags
         + [
             'service_name:nova_conductor',
             'service_state:up',
@@ -681,36 +502,7 @@ def test_default_service_metrics(aggregator, dd_run_check, instance, monkeypatch
         "openstack.nova.service.up",
         count=1,
         value=1,
-        tags=admin_project_tags
-        + [
-            'service_name:nova_conductor',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-default',
-            'service_id:1',
-            'service_status:enabled',
-            'availability_zone:internal',
-        ],
-    )
-
-    aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=admin_project_tags
-        + [
-            'service_name:nova_scheduler',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-default',
-            'service_id:2',
-            'service_status:enabled',
-            'availability_zone:internal',
-        ],
-    )
-    aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=admin_project_tags
+        tags=tags
         + [
             'service_name:nova_scheduler',
             'service_state:up',
@@ -730,23 +522,13 @@ def test_default_ironic_service_metrics(aggregator, dd_run_check, instance, monk
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
 
-    base_tags = ['domain_id:default', 'keystone_server:{}'.format(instance["keystone_server_url"])]
-
-    admin_project_tags = base_tags + [
-        'project_id:01b21103a92d4997ab09e46ff8346bd5',
-        'project_name:admin',
-    ]
-
-    demo_project_tags = base_tags + [
-        'project_id:18a64e25fb53453ebd10a45fd974b816',
-        'project_name:demo',
-    ]
+    tags = ['domain_id:default', 'keystone_server:{}'.format(instance["keystone_server_url"])]
 
     aggregator.assert_metric(
         "openstack.nova.service.up",
         count=1,
         value=1,
-        tags=demo_project_tags
+        tags=tags
         + [
             'service_name:nova_compute',
             'service_state:up',
@@ -760,22 +542,7 @@ def test_default_ironic_service_metrics(aggregator, dd_run_check, instance, monk
         "openstack.nova.service.up",
         count=1,
         value=1,
-        tags=admin_project_tags
-        + [
-            'service_name:nova_compute',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-ironic',
-            'service_id:3',
-            'service_status:enabled',
-            'availability_zone:nova',
-        ],
-    )
-
-    aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=demo_project_tags
+        tags=tags
         + [
             'service_name:nova_conductor',
             'service_state:up',
@@ -789,22 +556,7 @@ def test_default_ironic_service_metrics(aggregator, dd_run_check, instance, monk
         "openstack.nova.service.up",
         count=1,
         value=1,
-        tags=admin_project_tags
-        + [
-            'service_name:nova_conductor',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-ironic',
-            'service_id:5',
-            'service_status:enabled',
-            'availability_zone:internal',
-        ],
-    )
-
-    aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=admin_project_tags
+        tags=tags
         + [
             'service_name:nova_conductor',
             'service_state:up',
@@ -818,36 +570,7 @@ def test_default_ironic_service_metrics(aggregator, dd_run_check, instance, monk
         "openstack.nova.service.up",
         count=1,
         value=1,
-        tags=admin_project_tags
-        + [
-            'service_name:nova_conductor',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-ironic',
-            'service_id:1',
-            'service_status:enabled',
-            'availability_zone:internal',
-        ],
-    )
-
-    aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=admin_project_tags
-        + [
-            'service_name:nova_scheduler',
-            'service_state:up',
-            'service_host:agent-integrations-openstack-ironic',
-            'service_id:2',
-            'service_status:enabled',
-            'availability_zone:internal',
-        ],
-    )
-    aggregator.assert_metric(
-        "openstack.nova.service.up",
-        count=1,
-        value=1,
-        tags=admin_project_tags
+        tags=tags
         + [
             'service_name:nova_scheduler',
             'service_state:up',

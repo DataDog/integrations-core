@@ -8,7 +8,7 @@ class ApiSdk(Api):
     def __init__(self, config, logger, http):
         pass
 
-    def get_identity_response_time(self, project_id):
+    def get_identity_response_time(self):
         pass  # pragma: no cover
 
     def get_identity_projects(self):
@@ -29,22 +29,22 @@ class ApiSdk(Api):
     def get_auth_projects(self):
         pass  # pragma: no cover
 
-    def get_compute_response_time(self, project_id):
+    def get_compute_response_time(self):
         pass  # pragma: no cover
 
-    def get_compute_limits(self, project_id):
+    def get_compute_limits(self):
         pass  # pragma: no cover
 
     def get_compute_quota_set(self, project_id):
         pass  # pragma: no cover
 
-    def get_compute_services(self, project_id):
+    def get_compute_services(self):
         pass  # pragma: no cover
 
     def get_compute_servers(self, project_id):
         pass  # pragma: no cover
 
-    def get_compute_flavors(self, project_id):
+    def get_compute_flavors(self):
         pass  # pragma: no cover
 
     def get_compute_hypervisors(self, project_id):
@@ -53,20 +53,20 @@ class ApiSdk(Api):
     def get_compute_os_aggregates(self, project_id):
         pass  # pragma: no cover
 
-    def get_network_response_time(self, project):
+    def get_network_response_time(self):
         pass  # pragma: no cover
 
     def get_network_quotas(self, project):
         pass  # pragma: no cover
 
-    def get_network_agents(self, project_id):
+    def get_network_agents(self):
         pass  # pragma: no cover
 
-    def get_baremetal_response_time(self, project):
+    def get_baremetal_response_time(self):
         pass  # pragma: no cover
 
-    def get_baremetal_conductors(self, project_id):
+    def get_baremetal_conductors(self):
         pass  # pragma: no cover
 
-    def get_baremetal_nodes(self, project_id):
+    def get_baremetal_nodes(self):
         pass  # pragma: no cover

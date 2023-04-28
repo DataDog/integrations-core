@@ -13,7 +13,7 @@
         "host": "agent-integrations-openstack-octavia",
         "disabled_reason": null
       },
-      "uptime": " 12:20:33 up 2 days, 22:47,  0 users,  load average: 0.20, 0.17, 0.17\n",
+      "uptime": " 07:57:34 up 9 days, 18:24,  0 users,  load average: 0.41, 0.37, 0.31\n",
       "servers": [
         {
           "name": "instance-00000001",

@@ -35,10 +35,11 @@ class NetworkRest:
         self.log.debug("response: %s", response.json())
         agents_metrics = {}
         for agent in response.json()['agents']:
+            availability_zone = agent.get('availability_zone') if agent.get('availability_zone') != "" else None
             agents_metrics[agent['id']] = {
                 'name': agent['binary'],
                 'host': agent['host'],
-                'availability_zone': agent['availability_zone'],
+                'availability_zone': availability_zone,
                 'type': agent['agent_type'],
                 'metrics': get_normalized_metrics(agent, NEUTRON_AGENTS_METRICS_PREFIX, NEUTRON_AGENTS_METRICS),
             }
