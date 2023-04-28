@@ -53,7 +53,7 @@ No additional installation is needed on your server.
 
 _Available for Agent >6.0_
 
-1. Flink uses the `log4j` logger by default. To activate logging to a file and customize the format edit the `log4j*.properties` configuration files in the `conf/` directory of the Flink distribution. See the [Flink logging documentation][13] for which configuration file is relevant for your setup. See [Flink's repository][6] for default configurations.
+1. Flink uses the `log4j` logger by default. To enable logging to a file, customize the format by editing the `log4j*.properties` configuration files in the `conf/` directory of the Flink distribution. See the [Flink logging documentation][13] for information on which configuration file is relevant for your setup. See [Flink's repository][6] for default configurations.
 
 2. By default, the integration pipeline supports the following layout pattern:
 
