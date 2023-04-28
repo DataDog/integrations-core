@@ -44,7 +44,7 @@ class ApiSdk(Api):
     def get_compute_servers(self, project_id):
         pass  # pragma: no cover
 
-    def get_compute_flavors(self, project_id):
+    def get_compute_flavors(self):
         pass  # pragma: no cover
 
     def get_compute_hypervisors(self, project_id):

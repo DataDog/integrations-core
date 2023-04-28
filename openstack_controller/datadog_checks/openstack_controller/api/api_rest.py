@@ -259,9 +259,9 @@ class ApiRest(Api):
             return component.get_servers(project_id)
         return None
 
-    def get_compute_flavors(self, project_id):
+    def get_compute_flavors(self):
         self.log.debug("getting compute flavors")
-        component = self._get_component(ComponentType.COMPUTE, project_id=project_id)
+        component = self._get_component(ComponentType.COMPUTE)
         if component:
             return component.get_flavors()
         return None

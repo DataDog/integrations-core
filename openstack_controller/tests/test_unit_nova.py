@@ -245,8 +245,6 @@ def test_flavor_metrics(aggregator, dd_run_check, monkeypatch, instance):
                     tags=[
                         'domain_id:default',
                         'keystone_server:{}'.format(instance["keystone_server_url"]),
-                        'project_id:6e39099cccde4f809b003d9e0dd09304',
-                        'project_name:admin',
                         'flavor_id:1',
                         'flavor_name:m1.tiny',
                     ],

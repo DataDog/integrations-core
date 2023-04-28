@@ -119,7 +119,7 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_compute_flavors(self, project_id):
+    def get_compute_flavors(self):
         pass  # pragma: no cover
 
     @abstractmethod

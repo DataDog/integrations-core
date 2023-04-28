@@ -429,6 +429,7 @@ class OpenStackControllerCheck(AgentCheck):
             self._report_compute_response_time(api, tags)
             self._report_compute_limits(api, tags)
             self._report_compute_services(api, tags)
+            self._report_compute_flavors(api, tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting compute domain metrics: %s", e)
@@ -440,7 +441,6 @@ class OpenStackControllerCheck(AgentCheck):
         try:
             self._report_compute_quotas(api, project_id, project_tags)
             self._report_compute_servers(api, project_id, project_tags)
-            self._report_compute_flavors(api, project_id, project_tags)
             self._report_compute_hypervisors(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
@@ -538,8 +538,8 @@ class OpenStackControllerCheck(AgentCheck):
                     else:
                         self.log.warning("%s metric not reported as nova server metric", metric)
 
-    def _report_compute_flavors(self, api, project_id, project_tags):
-        compute_flavors = api.get_compute_flavors(project_id)
+    def _report_compute_flavors(self, api, tags):
+        compute_flavors = api.get_compute_flavors()
         self.log.debug("compute_flavors: %s", compute_flavors)
         if compute_flavors:
             for flavor_id, flavor_data in compute_flavors.items():
@@ -549,7 +549,7 @@ class OpenStackControllerCheck(AgentCheck):
                         self.gauge(
                             metric,
                             value,
-                            tags=project_tags + [f'flavor_id:{flavor_id}', f'flavor_name:{flavor_data["name"]}'],
+                            tags=tags + [f'flavor_id:{flavor_id}', f'flavor_name:{flavor_data["name"]}'],
                         )
 
     def _report_compute_hypervisors(self, api, project_id, project_tags):
