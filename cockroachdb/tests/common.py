@@ -154,11 +154,14 @@ KNOWN_COUNTERS = {
     'txn_restarts_possiblereplay',
     'txn_restarts_serializable',
     'txn_restarts_writetooold',
+    'txn_restarts_writetoooldmulti',
+    'txnwaitqueue_deadlocks_total',
     'admission_wait_sum_kv',
     'admission_wait_sum_kv_stores',
     'admission_wait_sum_sql_kv_response',
     'admission_wait_sum_sql_sql_response',
     'changefeed_emitted_messages',
+    'changefeed_emitted_bytes',
     'changefeed_error_retries',
     'changefeed_failures',
     'jobs_changefeed_resume_retry_error',
@@ -196,6 +199,8 @@ KNOWN_COUNTERS = {
     'jobs_backup_resume_failed',
     'jobs_backup_resume_retry_error',
     'jobs_backup_resume_completed',
+    'jobs_auto_create_stats_resume_failed',
+    'jobs_row_level_ttl_resume_completed',
 }
 
 EXPECTED_METRICS = []
