@@ -21,7 +21,7 @@ instance = {
 
 @pytest.fixture()
 def mock_get():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_1.25.0.txt')
+    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_1.25.3.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
     with mock.patch(
@@ -85,10 +85,10 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.admission_webhook_admission_latencies_seconds.count',
         NAMESPACE + '.kubernetes_feature_enabled',
         NAMESPACE + '.aggregator_unavailable_apiservice',
-        NAMESPACE + '.apiserver_envelope_encryption_dek_cache_fill_percent',
-        NAMESPACE + '.apiserver_flowcontrol_request_concurrency_limit',
-        NAMESPACE + '.apiserver_flowcontrol_current_executing_requests',
-        NAMESPACE + '.apiserver_flowcontrol_rejected_requests_total',
+        NAMESPACE + '.envelope_encryption_dek_cache_fill_percent',
+        NAMESPACE + '.flowcontrol_request_concurrency_limit',
+        NAMESPACE + '.flowcontrol_current_executing_requests',
+        NAMESPACE + '.flowcontrol_rejected_requests_total',
     ]
     COUNT_METRICS = [
         NAMESPACE + '.audit_event.count',
