@@ -35,7 +35,7 @@ files:
            User expects username, password, and user domain id
            `user` should resolve to a structure like
            {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
-           The check uses the Unscoped token method to collect information about all available projects to the user.
+           The check uses the Domain and Project Scope token method to collect information about all available projects to the user.
           value:
             example:
               password: <PASSWORD>
@@ -223,7 +223,10 @@ files:
         - template: instances/http
           overrides:
             username.display_priority: 6
-            username.description: The username used to connect to Openstack.
+            username.description: |
+              The username used to connect to Openstack.
+              The check uses the Domain and Project Scope token method to collect information
+              about all available projects to the user.
             password.display_priority: 5
             password.description: |
               The password used to connect to Openstack.

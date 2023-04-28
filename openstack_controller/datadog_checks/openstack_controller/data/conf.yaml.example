@@ -36,6 +36,8 @@ instances:
   -
     ## @param username - string - optional
     ## The username used to connect to Openstack.
+    ## The check uses the Domain and Project Scope token method to collect information
+    ## about all available projects to the user.
     #
     # username: <USERNAME>
 
