@@ -266,16 +266,16 @@ class ApiRest(Api):
             return component.get_flavors()
         return None
 
-    def get_compute_hypervisors(self, project_id):
+    def get_compute_hypervisors(self):
         self.log.debug("getting compute hypervisors")
-        component = self._get_component(ComponentType.COMPUTE, project_id=project_id)
+        component = self._get_component(ComponentType.COMPUTE)
         if component:
             return component.get_hypervisors()
         return None
 
-    def get_compute_os_aggregates(self, project_id):
+    def get_compute_os_aggregates(self):
         self.log.debug("getting compute os-aggregates")
-        component = self._get_component(ComponentType.COMPUTE, project_id=project_id)
+        component = self._get_component(ComponentType.COMPUTE)
         if component:
             return component.get_os_aggregates()
         return None

@@ -430,6 +430,7 @@ class OpenStackControllerCheck(AgentCheck):
             self._report_compute_limits(api, tags)
             self._report_compute_services(api, tags)
             self._report_compute_flavors(api, tags)
+            self._report_compute_hypervisors(api, tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting compute domain metrics: %s", e)
@@ -441,7 +442,6 @@ class OpenStackControllerCheck(AgentCheck):
         try:
             self._report_compute_quotas(api, project_id, project_tags)
             self._report_compute_servers(api, project_id, project_tags)
-            self._report_compute_hypervisors(api, project_id, project_tags)
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting compute project metrics: %s", e)
@@ -552,14 +552,14 @@ class OpenStackControllerCheck(AgentCheck):
                             tags=tags + [f'flavor_id:{flavor_id}', f'flavor_name:{flavor_data["name"]}'],
                         )
 
-    def _report_compute_hypervisors(self, api, project_id, project_tags):
-        compute_hypervisors = api.get_compute_hypervisors(project_id)
+    def _report_compute_hypervisors(self, api, tags):
+        compute_hypervisors = api.get_compute_hypervisors()
         self.log.debug("compute_hypervisors: %s", compute_hypervisors)
-        compute_os_aggregates = api.get_compute_os_aggregates(project_id)
+        compute_os_aggregates = api.get_compute_os_aggregates()
         self.log.debug("compute_os_aggregates: %s", compute_os_aggregates)
         if compute_hypervisors:
             for hypervisor_id, hypervisor_data in compute_hypervisors.items():
-                hypervisor_tags = project_tags + _create_hypervisor_metric_tags(
+                hypervisor_tags = tags + _create_hypervisor_metric_tags(
                     hypervisor_id, hypervisor_data, compute_os_aggregates
                 )
                 self._report_hypervisor_service_check(

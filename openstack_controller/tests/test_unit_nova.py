@@ -259,13 +259,9 @@ def test_hypervisor_service_check_up(aggregator, dd_run_check, instance, monkeyp
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
-    project_tags = [
+    tags = [
         'domain_id:default',
         'keystone_server:{}'.format(instance["keystone_server_url"]),
-        'project_id:6e39099cccde4f809b003d9e0dd09304',
-        'project_name:admin',
-    ]
-    tags = project_tags + [
         'aggregate:my-aggregate',
         'availability_zone:availability-zone',
         'hypervisor:agent-integrations-openstack-default',
@@ -295,13 +291,9 @@ def test_hypervisor_service_check_down(aggregator, dd_run_check, instance, monke
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
-    project_tags = [
+    tags = [
         'domain_id:default',
         'keystone_server:{}'.format(instance["keystone_server_url"]),
-        'project_id:6e39099cccde4f809b003d9e0dd09304',
-        'project_name:admin',
-    ]
-    tags = project_tags + [
         'aggregate:my-aggregate',
         'availability_zone:availability-zone',
         'hypervisor:agent-integrations-openstack-default',
@@ -337,8 +329,6 @@ def test_hypervisor_metrics(aggregator, dd_run_check, instance, hypervisor_id, m
                     tags=[
                         'domain_id:default',
                         'keystone_server:{}'.format(instance["keystone_server_url"]),
-                        'project_id:6e39099cccde4f809b003d9e0dd09304',
-                        'project_name:admin',
                         'aggregate:my-aggregate',
                         'availability_zone:availability-zone',
                         'hypervisor:agent-integrations-openstack-default',
