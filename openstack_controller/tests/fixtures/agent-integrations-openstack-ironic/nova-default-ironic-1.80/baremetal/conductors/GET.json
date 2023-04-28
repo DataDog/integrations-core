@@ -5,11 +5,11 @@
       "conductor_group": "",
       "links": [
         {
-          "href": "http://35.204.0.46/baremetal/v1/conductors/agent-integrations-openstack-ironic",
+          "href": "http://34.141.226.224/baremetal/v1/conductors/agent-integrations-openstack-ironic",
           "rel": "self"
         },
         {
-          "href": "http://35.204.0.46/baremetal/conductors/agent-integrations-openstack-ironic",
+          "href": "http://34.141.226.224/baremetal/conductors/agent-integrations-openstack-ironic",
           "rel": "bookmark"
         }
       ],

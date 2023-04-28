@@ -1,53 +1,53 @@
 {
   "registered_limits": [
     {
-      "id": "c549c7dffc804b28a8d82e5815b5a949",
-      "service_id": "61634d7ac40b44e78513367277ee4faa",
+      "id": "dd4fefa5602a4414b1c0a01ac7514b97",
+      "service_id": "82624ab61fb04f058d043facf315fa3c",
       "region_id": "RegionOne",
       "resource_name": "image_size_total",
       "default_limit": 1000,
       "description": null,
       "links": {
-        "self": "http://10.164.0.71/identity/v3/registered_limits/c549c7dffc804b28a8d82e5815b5a949"
+        "self": "http://10.164.0.11/identity/v3/registered_limits/dd4fefa5602a4414b1c0a01ac7514b97"
       }
     },
     {
-      "id": "64e142439c7c440e844d06dc205488e6",
-      "service_id": "61634d7ac40b44e78513367277ee4faa",
+      "id": "5e7d44c9d30d47919187a5c1a58a8885",
+      "service_id": "82624ab61fb04f058d043facf315fa3c",
       "region_id": "RegionOne",
       "resource_name": "image_stage_total",
       "default_limit": 1000,
       "description": null,
       "links": {
-        "self": "http://10.164.0.71/identity/v3/registered_limits/64e142439c7c440e844d06dc205488e6"
+        "self": "http://10.164.0.11/identity/v3/registered_limits/5e7d44c9d30d47919187a5c1a58a8885"
       }
     },
     {
-      "id": "08460636ffef4cceaafca283ab1d39a1",
-      "service_id": "61634d7ac40b44e78513367277ee4faa",
+      "id": "9f489d63900841f4a70fe58036c81339",
+      "service_id": "82624ab61fb04f058d043facf315fa3c",
       "region_id": "RegionOne",
       "resource_name": "image_count_total",
       "default_limit": 100,
       "description": null,
       "links": {
-        "self": "http://10.164.0.71/identity/v3/registered_limits/08460636ffef4cceaafca283ab1d39a1"
+        "self": "http://10.164.0.11/identity/v3/registered_limits/9f489d63900841f4a70fe58036c81339"
       }
     },
     {
-      "id": "a345d69f5df84829bfd0917b4e6b134d",
-      "service_id": "61634d7ac40b44e78513367277ee4faa",
+      "id": "5d26b57b414c4e25848cd34b38f56606",
+      "service_id": "82624ab61fb04f058d043facf315fa3c",
       "region_id": "RegionOne",
       "resource_name": "image_count_uploading",
       "default_limit": 100,
       "description": null,
       "links": {
-        "self": "http://10.164.0.71/identity/v3/registered_limits/a345d69f5df84829bfd0917b4e6b134d"
+        "self": "http://10.164.0.11/identity/v3/registered_limits/5d26b57b414c4e25848cd34b38f56606"
       }
     }
   ],
   "links": {
     "next": null,
-    "self": "http://10.164.0.71/identity/v3/registered_limits",
+    "self": "http://10.164.0.11/identity/v3/registered_limits",
     "previous": null
   }
 }

@@ -1,27 +1,27 @@
 {
   "groups": [
     {
-      "id": "030465495f65438d84757a3070bce075",
+      "id": "89b36a4c32c44b0ea8856b6357f101ea",
       "name": "admins",
       "domain_id": "default",
       "description": "openstack admin group",
       "links": {
-        "self": "http://10.164.0.71/identity/v3/groups/030465495f65438d84757a3070bce075"
+        "self": "http://10.164.0.11/identity/v3/groups/89b36a4c32c44b0ea8856b6357f101ea"
       }
     },
     {
-      "id": "1667fa768c044205a228b72179542962",
+      "id": "9acda6caf16e4828935f4f681ee8b3e5",
       "name": "nonadmins",
       "domain_id": "default",
       "description": "non-admin group",
       "links": {
-        "self": "http://10.164.0.71/identity/v3/groups/1667fa768c044205a228b72179542962"
+        "self": "http://10.164.0.11/identity/v3/groups/9acda6caf16e4828935f4f681ee8b3e5"
       }
     }
   ],
   "links": {
     "next": null,
-    "self": "http://10.164.0.71/identity/v3/groups",
+    "self": "http://10.164.0.11/identity/v3/groups",
     "previous": null
   }
 }

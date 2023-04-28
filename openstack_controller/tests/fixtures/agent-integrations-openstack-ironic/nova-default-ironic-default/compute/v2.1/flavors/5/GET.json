@@ -13,11 +13,11 @@
     "links": [
       {
         "rel": "self",
-        "href": "http://35.204.0.46/compute/v2.1/flavors/5"
+        "href": "http://34.141.226.224/compute/v2.1/flavors/5"
       },
       {
         "rel": "bookmark",
-        "href": "http://35.204.0.46/compute/flavors/5"
+        "href": "http://34.141.226.224/compute/flavors/5"
       }
     ]
   }
