@@ -111,7 +111,6 @@ vertx_http_server_request_bytes_sum{method="GET",} 0.0
 # HELP jvm_gc_memory_promoted_bytes_total Count of positive increases in the size of the old generation memory pool before GC to after GC
 # TYPE jvm_gc_memory_promoted_bytes_total counter
 jvm_gc_memory_promoted_bytes_total 1
-jvm_gc_memory_promoted_bytes_total 1
 # HELP vertx_http_client_queue_time_seconds_max Time spent in queue before being processed
 # TYPE vertx_http_client_queue_time_seconds_max gauge
 vertx_http_client_queue_time_seconds_max 0.117905
