@@ -44,16 +44,6 @@ def setup_strimzi():
             ]
         )
 
-    # for deployment in ("hello-world-consumer", "hello-world-producer"):
-    #     run_command(["kubectl", "wait", "kafka/my-cluster", "--for=condition=Ready", "--timeout=300s", "-n", "kafka"])
-
-    # kubectl
-    # wait
-    # deployment - n
-    # default
-    # golang - hello - world - web - -
-    # for condition=Available=True --timeout=90s
-
 
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
