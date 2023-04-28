@@ -1,0 +1,16 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: custome-user
+  labels:
+    strimzi.io/cluster: my-cluster
+spec:
+  authorization:
+    type: simple
+    acls:
+      - resource:
+          type: topic
+          name: connect-cluster-offsets
+          patternType: literal
+        operation: Write
+        host: "*"

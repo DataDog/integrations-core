@@ -32,6 +32,28 @@ def setup_strimzi():
     )
     run_command(["kubectl", "wait", "kafka/my-cluster", "--for=condition=Ready", "--timeout=300s", "-n", "kafka"])
 
+    run_command(
+        [
+            "kubectl",
+            "apply",
+            "-f",
+            os.path.join(HERE, "kind", STRIMZI_VERSION, "topic.yaml"),
+            "-n",
+            "kafka",
+        ]
+    )
+
+    run_command(
+        [
+            "kubectl",
+            "apply",
+            "-f",
+            os.path.join(HERE, "kind", STRIMZI_VERSION, "user.yaml"),
+            "-n",
+            "kafka",
+        ]
+    )
+
 
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
