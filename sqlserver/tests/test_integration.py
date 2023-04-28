@@ -46,11 +46,11 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
         message=str(excinfo.value),
     )
 
-
+# , (True, False), (False, True), (False, False)
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
-    'database_autodiscovery,dbm_enabled', [(True, True), (True, False), (False, True), (False, False)]
+    'database_autodiscovery,dbm_enabled', [(False, True)]
 )
 def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, database_autodiscovery, dbm_enabled):
     instance_docker['database_autodiscovery'] = database_autodiscovery

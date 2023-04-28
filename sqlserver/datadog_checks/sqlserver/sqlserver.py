@@ -166,18 +166,10 @@ class SQLServer(AgentCheck):
         self.check_initializations.append(self.set_resolved_hostname_metadata)
 
         # Query declarations
-        self.server_state_queries = self._new_query_executor([QUERY_SERVER_STATIC_INFO])
-        self.check_initializations.append(self.server_state_queries.compile_queries)
-
-        # use QueryManager to process custom queries
-        self._query_manager = QueryManager(
-            self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
-        )
-
+        self._query_manager = None
         self._dynamic_queries = None
-
+        self.server_state_queries = None
         self.check_initializations.append(self.config_checks)
-        self.check_initializations.append(self._query_manager.compile_queries)
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -708,6 +700,17 @@ class SQLServer(AgentCheck):
 
     def check(self, _):
         if self.do_check:
+            # configure custom queries for the check
+            if self._query_manager is None:
+                # use QueryManager to process custom queries
+                self.log.warning("setting hostname to {}".format(self.resolved_hostname))
+                self._query_manager = QueryManager(
+                    self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
+                )
+                self._query_manager.compile_queries()
+            if self.server_state_queries is None:
+                self.server_state_queries = self._new_query_executor([QUERY_SERVER_STATIC_INFO])
+                self.server_state_queries.compile_queries()
             if self.proc:
                 self.do_stored_procedure_check()
             else:

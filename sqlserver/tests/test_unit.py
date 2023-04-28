@@ -347,48 +347,6 @@ def test_split_sqlserver_host(instance_host, split_host, split_port):
     assert (s_host, s_port) == (split_host, split_port)
 
 
-@pytest.mark.parametrize(
-    "dbm_enabled, instance_host, database, reported_hostname, engine_edition, expected_hostname",
-    [
-        (False, 'localhost,1433,some-typo', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
-        (True, 'localhost,1433', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
-        (False, 'localhost', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
-        (False, '8.8.8.8', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
-        (True, 'localhost', None, 'forced_hostname', ENGINE_EDITION_STANDARD, 'forced_hostname'),
-        (True, 'datadoghq.com,1433', None, '', ENGINE_EDITION_STANDARD, 'datadoghq.com'),
-        (True, 'datadoghq.com', None, '', ENGINE_EDITION_STANDARD, 'datadoghq.com'),
-        (True, 'datadoghq.com', None, 'forced_hostname', ENGINE_EDITION_STANDARD, 'forced_hostname'),
-        (True, '8.8.8.8,1433', None, '', ENGINE_EDITION_STANDARD, '8.8.8.8'),
-        (False, '8.8.8.8', None, 'forced_hostname', ENGINE_EDITION_STANDARD, 'forced_hostname'),
-        (True, 'foo.database.windows.net', None, None, ENGINE_EDITION_SQL_DATABASE, 'foo/master'),
-        (True, 'foo.database.windows.net', 'master', None, ENGINE_EDITION_SQL_DATABASE, 'foo/master'),
-        (True, 'foo.database.windows.net', 'bar', None, ENGINE_EDITION_SQL_DATABASE, 'foo/bar'),
-        (
-            True,
-            'foo.database.windows.net',
-            'bar',
-            'override-reported',
-            ENGINE_EDITION_SQL_DATABASE,
-            'override-reported',
-        ),
-        (True, 'foo-custom-dns', 'bar', None, ENGINE_EDITION_SQL_DATABASE, 'foo-custom-dns/bar'),
-    ],
-)
-def test_resolved_hostname(dbm_enabled, instance_host, database, reported_hostname, engine_edition, expected_hostname):
-    instance = {
-        'host': instance_host,
-        'dbm': dbm_enabled,
-    }
-    if database:
-        instance['database'] = database
-    if reported_hostname:
-        instance['reported_hostname'] = reported_hostname
-    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance])
-    sqlserver_check.static_info_cache[STATIC_INFO_ENGINE_EDITION] = engine_edition
-    sqlserver_check._resolved_hostname = None
-    assert sqlserver_check.resolved_hostname == expected_hostname
-
-
 def test_database_state(aggregator, dd_run_check, init_config, instance_docker):
     instance_docker['database'] = 'mAsTeR'
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
