@@ -246,7 +246,7 @@ class OpenStackControllerCheck(AgentCheck):
         self._report_metrics(api, tags)
 
     def _report_metrics(self, api, tags):
-        api._post_auth_domain(self.config.domain_id)
+        api.post_auth_domain(self.config.domain_id)
         if self._report_identity_metrics(api, tags):
             self._report_domain_metrics(api, tags + ['domain_id:{}'.format(self.config.domain_id)])
             auth_projects = api.get_auth_projects()
@@ -416,7 +416,7 @@ class OpenStackControllerCheck(AgentCheck):
     def _report_project_metrics(self, api, project, tags):
         project_id = project.get('id')
         project_name = project.get('name')
-        api._post_auth_project(project_id)
+        api.post_auth_project(project_id)
         self.log.debug("reporting metrics from project: [id:%s][name:%s]", project_id, project_name)
         project_tags = _create_project_tags(project)
         self._report_compute_project_metrics(api, project_id, tags + project_tags)

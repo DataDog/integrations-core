@@ -320,7 +320,7 @@ class ApiRest(Api):
             return component.get_agents()
         return None
 
-    def _post_auth_domain(self, domain_id):
+    def post_auth_domain(self, domain_id):
         if domain_id not in self.auth_domain_id_tokens:
             data = (
                 '{{"auth": {{"identity": {{"methods": ["password"], '
@@ -352,7 +352,7 @@ class ApiRest(Api):
             self.auth_projects[project['id']] = project['name']
         self.log.debug("auth_projects: %s", self.auth_projects)
 
-    def _post_auth_project(self, project_id):
+    def post_auth_project(self, project_id):
         if project_id not in self.auth_project_tokens:
             data = (
                 '{{"auth": {{"identity": {{"methods": ["password"], '
