@@ -35,6 +35,7 @@ def test_endpoint_not_in_catalog(aggregator, dd_run_check, instance, monkeypatch
             'keystone_server:{}'.format(instance["keystone_server_url"]),
         ],
     )
+    aggregator.assert_service_check('openstack.octavia.api.up', count=1)
 
 
 def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
@@ -52,6 +53,7 @@ def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
             'keystone_server:{}'.format(instance["keystone_server_url"]),
         ],
     )
+    aggregator.assert_service_check('openstack.octavia.api.up', count=1)
 
 
 def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
@@ -69,6 +71,7 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
             'keystone_server:{}'.format(instance["keystone_server_url"]),
         ],
     )
+    aggregator.assert_service_check('openstack.octavia.api.up', count=1)
 
 
 def test_loadbalancers_metrics(aggregator, dd_run_check, instance, monkeypatch):

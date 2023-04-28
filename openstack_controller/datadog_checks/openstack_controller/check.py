@@ -727,7 +727,6 @@ class OpenStackControllerCheck(AgentCheck):
         except HTTPError as e:
             self.warning(e)
             self.log.error("HTTPError while reporting load balancer metrics: %s", e)
-            self.service_check('openstack.octavia.api.up', AgentCheck.CRITICAL, tags=project_tags)
         except Exception as e:
             self.warning("Exception while reporting load balancer metrics: %s", e)
 
