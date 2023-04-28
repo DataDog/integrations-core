@@ -271,7 +271,7 @@ class OpenStackControllerCheck(AgentCheck):
         except Exception as e:
             self.warning("Exception while reporting identity metrics: %s", e)
         return False
-    
+
     def _report_identity_response_time(self, api, tags):
         response_time = api.get_identity_response_time()
         self.log.debug("identity response time: %s", response_time)
@@ -741,7 +741,7 @@ class OpenStackControllerCheck(AgentCheck):
         except Exception as e:
             self.warning("Exception while reporting load balancer metrics: %s", e)
 
-    def _report_load_balancer_response_time(self, api,tags):
+    def _report_load_balancer_response_time(self, api, tags):
         response_time = api.get_load_balancer_response_time()
         self.log.debug("load balancer response time: %s", response_time)
         if response_time is not None:

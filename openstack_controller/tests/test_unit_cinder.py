@@ -73,7 +73,6 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
             'keystone_server:{}'.format(instance["keystone_server_url"]),
             'project_id:6e39099cccde4f809b003d9e0dd09304',
             'project_name:admin',
-            'domain_id:default']
+            'domain_id:default',
+        ],
     )
-
-
