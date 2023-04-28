@@ -271,7 +271,7 @@ class OpenStackControllerCheck(AgentCheck):
         except Exception as e:
             self.warning("Exception while reporting identity metrics: %s", e)
         return False
-
+    
     def _report_identity_response_time(self, api, tags):
         response_time = api.get_identity_response_time()
         self.log.debug("identity response time: %s", response_time)
@@ -407,6 +407,12 @@ class OpenStackControllerCheck(AgentCheck):
                 + optional_tags,
             )
 
+    def _report_domain_metrics(self, api, tags):
+        self._report_compute_domain_metrics(api, tags)
+        self._report_network_domain_metrics(api, tags)
+        self._report_baremetal_domain_metrics(api, tags)
+        self._report_load_balancer_domain_metrics(api, tags)
+
     def _report_project_metrics(self, api, project, tags):
         project_id = project.get('id')
         project_name = project.get('name')
@@ -416,12 +422,7 @@ class OpenStackControllerCheck(AgentCheck):
         self._report_compute_project_metrics(api, project_id, tags + project_tags)
         self._report_network_project_metrics(api, project_id, tags + project_tags)
         self._report_block_storage_metrics(api, project_id, tags + project_tags)
-        self._report_load_balancer_metrics(api, project_id, tags + project_tags)
-
-    def _report_domain_metrics(self, api, tags):
-        self._report_compute_domain_metrics(api, tags)
-        self._report_network_domain_metrics(api, tags)
-        self._report_baremetal_domain_metrics(api, tags)
+        self._report_load_balancer_project_metrics(api, project_id, tags + project_tags)
 
     def _report_compute_project_metrics(self, api, project_id, project_tags):
         try:
@@ -714,9 +715,8 @@ class OpenStackControllerCheck(AgentCheck):
                 all_tags = conductor_tags + tags
                 self.gauge('openstack.ironic.conductor.up', value=conductor_data.get('alive'), tags=all_tags)
 
-    def _report_load_balancer_metrics(self, api, project_id, project_tags):
+    def _report_load_balancer_project_metrics(self, api, project_id, project_tags):
         try:
-            self._report_load_balancer_response_time(api, project_id, project_tags)
             self._report_load_balancer_loadbalancers(api, project_id, project_tags)
             self._report_load_balancer_listeners(api, project_id, project_tags)
             self._report_load_balancer_members(api, project_id, project_tags)
@@ -731,14 +731,24 @@ class OpenStackControllerCheck(AgentCheck):
         except Exception as e:
             self.warning("Exception while reporting load balancer metrics: %s", e)
 
-    def _report_load_balancer_response_time(self, api, project_id, project_tags):
-        response_time = api.get_load_balancer_response_time(project_id)
+    def _report_load_balancer_domain_metrics(self, api, tags):
+        try:
+            self._report_load_balancer_response_time(api, tags)
+        except HTTPError as e:
+            self.warning(e)
+            self.log.error("HTTPError while reporting load balancer metrics: %s", e)
+            self.service_check('openstack.octavia.api.up', AgentCheck.CRITICAL, tags=tags)
+        except Exception as e:
+            self.warning("Exception while reporting load balancer metrics: %s", e)
+
+    def _report_load_balancer_response_time(self, api,tags):
+        response_time = api.get_load_balancer_response_time()
         self.log.debug("load balancer response time: %s", response_time)
         if response_time is not None:
-            self.gauge('openstack.octavia.response_time', response_time, tags=project_tags)
-            self.service_check('openstack.octavia.api.up', AgentCheck.OK, tags=project_tags)
+            self.gauge('openstack.octavia.response_time', response_time, tags=tags)
+            self.service_check('openstack.octavia.api.up', AgentCheck.OK, tags=tags)
         else:
-            self.service_check('openstack.octavia.api.up', AgentCheck.UNKNOWN, tags=project_tags)
+            self.service_check('openstack.octavia.api.up', AgentCheck.UNKNOWN, tags=tags)
 
     def _report_load_balancer_loadbalancers(self, api, project_id, project_tags):
         loadbalancers_data = api.get_load_balancer_loadbalancers(project_id)

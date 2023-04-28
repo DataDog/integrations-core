@@ -43,7 +43,7 @@ class Api(ABC):
         pass  # pragma: no cover
 
     @abstractmethod
-    def get_load_balancer_response_time(self, project_id):
+    def get_load_balancer_response_time(self):
         pass  # pragma: no cover
 
     @abstractmethod
