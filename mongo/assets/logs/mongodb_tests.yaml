@@ -331,4 +331,62 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1576492246476
+ -
+  sample: |-
+    {
+      "msg" : "Access control is not enabled for the database. Read and write access to data and configuration is unrestricted",
+      "s" : "W",
+      "c" : "CONTROL",
+      "t" : {
+        "$date" : "2023-04-07T12:08:24.679+00:00"
+      },
+      "ctx" : "initandlisten",
+      "id" : 22120,
+      "tags" : [ "startupWarnings" ]
+    }
+  result:
+    custom:
+      c: "CONTROL"
+      ctx: "initandlisten"
+      id: 22120
+      s: "W"
+      t:
+        $date: "2023-04-07T12:08:24.679+00:00"
+      tags:
+       - "startupWarnings"
+    message: "Access control is not enabled for the database. Read and write access to data and configuration is unrestricted"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1680869304679
+ -
+  sample: |-
+    {
+      "msg" : "Waiting for connections",
+      "s" : "I",
+      "c" : "NETWORK",
+      "t" : {
+        "$date" : "2023-04-07T12:08:24.800+00:00"
+      },
+      "ctx" : "listener",
+      "id" : 23016,
+      "attr" : {
+        "port" : 27017,
+        "ssl" : "off"
+      }
+    }
+  result:
+    custom:
+      attr:
+        port: 27017
+        ssl: "off"
+      c: "NETWORK"
+      ctx: "listener"
+      id: 23016
+      s: "I"
+      t:
+        $date: "2023-04-07T12:08:24.800+00:00"
+    message: "Waiting for connections"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1680869304800
 

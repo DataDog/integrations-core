@@ -15,7 +15,7 @@
         "description": "Returns `CRITICAL` if the check cannot access the Prometheus metrics endpoint of the Gitlab instance."
 	},
     {
-        "agent_version": "7.44.0",
+        "agent_version": "7.45.0",
         "integration": "Gitlab",
         "check": "gitlab.openmetrics.health",
         "statuses": [
@@ -30,7 +30,7 @@
         "description": "Returns `CRITICAL` if the check cannot access the Prometheus metrics endpoint of the Gitlab instance."
     },
         {
-        "agent_version": "7.44.0",
+        "agent_version": "7.46.0",
         "integration": "Gitlab",
         "check": "gitlab.gitaly.openmetrics.health",
         "statuses": [
@@ -90,7 +90,7 @@
         "description": "Returns `CRITICAL` if the Gitlab instance is unable to accept traffic via Rails Controllers."
     },
     {
-        "agent_version": "7.44.0",
+        "agent_version": "7.45.0",
         "integration": "Gitlab",
         "check": "gitlab.readiness.master",
         "statuses": [
@@ -106,7 +106,7 @@
         "description": "Returns `CRITICAL` if master is not ready."
     },
     {
-        "agent_version": "7.44.0",
+        "agent_version": "7.45.0",
         "integration": "Gitlab",
         "check": "gitlab.readiness.database",
         "statuses": [
@@ -122,7 +122,7 @@
         "description": "Returns `CRITICAL` if the database is not ready."
     },
     {
-        "agent_version": "7.44.0",
+        "agent_version": "7.45.0",
         "integration": "Gitlab",
         "check": "gitlab.readiness.cache",
         "statuses": [
@@ -138,7 +138,7 @@
         "description": "Returns `CRITICAL` if the cache is not ready."
     },
     {
-        "agent_version": "7.44.0",
+        "agent_version": "7.45.0",
         "integration": "Gitlab",
         "check": "gitlab.readiness.database_load_balancing",
         "statuses": [
@@ -154,7 +154,7 @@
         "description": "Returns `CRITICAL` if the database load balancing is not ready."
     },
     {
-        "agent_version": "7.44.0",
+        "agent_version": "7.45.0",
         "integration": "Gitlab",
         "check": "gitlab.readiness.queues",
         "statuses": [
@@ -170,7 +170,7 @@
         "description": "Returns `CRITICAL` if the queues are not ready."
     },
     {
-        "agent_version": "7.44.0",
+        "agent_version": "7.45.0",
         "integration": "Gitlab",
         "check": "gitlab.readiness.rate_limiting",
         "statuses": [
@@ -186,7 +186,7 @@
         "description": "Returns `CRITICAL` if the rate limiting is not ready."
     },
     {
-        "agent_version": "7.44.0",
+        "agent_version": "7.45.0",
         "integration": "Gitlab",
         "check": "gitlab.readiness.repository_cache",
         "statuses": [
@@ -202,7 +202,7 @@
         "description": "Returns `CRITICAL` if the repository cache is not ready."
     },
     {
-        "agent_version": "7.44.0",
+        "agent_version": "7.45.0",
         "integration": "Gitlab",
         "check": "gitlab.readiness.cluster_rate_limiting",
         "statuses": [
@@ -218,7 +218,7 @@
         "description": "Returns `CRITICAL` if the cluster rate limiting is not ready."
     },
     {
-        "agent_version": "7.44.0",
+        "agent_version": "7.45.0",
         "integration": "Gitlab",
         "check": "gitlab.readiness.sessions",
         "statuses": [
@@ -234,7 +234,7 @@
         "description": "Returns `CRITICAL` if the sessions are not ready."
     },
     {
-        "agent_version": "7.44.0",
+        "agent_version": "7.45.0",
         "integration": "Gitlab",
         "check": "gitlab.readiness.shared_state",
         "statuses": [
@@ -250,7 +250,7 @@
         "description": "Returns `CRITICAL` if the shared state is not ready."
     },
     {
-        "agent_version": "7.44.0",
+        "agent_version": "7.45.0",
         "integration": "Gitlab",
         "check": "gitlab.readiness.trace_chunks",
         "statuses": [
@@ -266,7 +266,7 @@
         "description": "Returns `CRITICAL` if the trace chunks are not ready."
     },
     {
-        "agent_version": "7.44.0",
+        "agent_version": "7.45.0",
         "integration": "Gitlab",
         "check": "gitlab.readiness.gitaly",
         "statuses": [
@@ -282,7 +282,7 @@
         "description": "Returns `CRITICAL` if gitaly is not ready."
     },
     {
-        "agent_version": "7.44.0",
+        "agent_version": "7.45.0",
         "integration": "Gitlab",
         "check": "gitlab.readiness.redis",
         "statuses": [
