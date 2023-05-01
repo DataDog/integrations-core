@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
 
-import psycopg2
 import pytest
 
 from .common import (
@@ -17,32 +16,9 @@ from .common import (
     check_slru_metrics,
     check_wal_receiver_metrics,
 )
-from .utils import requires_over_10
+from .utils import _get_superconn, _wait_for_value, requires_over_10
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
-
-
-def _get_superconn(db_instance, application_name='test'):
-    conn = psycopg2.connect(
-        host=db_instance['host'],
-        dbname=db_instance['dbname'],
-        user='postgres',
-        password='datad0g',
-        port=db_instance['port'],
-        application_name=application_name,
-    )
-    return conn
-
-
-def _wait_for_value(db_instance, lower_threshold, query):
-    value = 0
-    with _get_superconn(db_instance) as conn:
-        conn.autocommit = True
-        while value <= lower_threshold:
-            with conn.cursor() as cur:
-                cur.execute(query)
-                value = cur.fetchall()[0][0]
-            time.sleep(0.1)
 
 
 @requires_over_10

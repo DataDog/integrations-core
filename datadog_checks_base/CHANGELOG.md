@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 32.0.0 / 2023-04-25
+
+* [Changed] Implement automatic exposition format detection. See [#14445](https://github.com/DataDog/integrations-core/pull/14445).
+
 ## 31.0.1 / 2023-04-19
 
 * [Fixed] Do not add `freezegun` dependency to agent. See [#14393](https://github.com/DataDog/integrations-core/pull/14393).
@@ -11,7 +15,7 @@
 * [Fixed] Fix duplicate events bug. See [#14020](https://github.com/DataDog/integrations-core/pull/14020).
 * [Changed] Replace `kafka-python` dependency with `confluent-kafka-python`. See [#13918](https://github.com/DataDog/integrations-core/pull/13918).
 
-## 30.2.0 / 2023-03-07
+## 30.2.0 / 2023-03-07 / Agent 7.44.0
 
 * [Added] Upgrade openstacksdk dependency. See [#14109](https://github.com/DataDog/integrations-core/pull/14109).
 

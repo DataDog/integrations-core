@@ -320,8 +320,9 @@ def test_statement_metrics_and_plans(
                 cursor, SQL_SERVER_QUERY_METRICS_COLUMNS
             )
 
-    expected_instance_tags = set(dbm_instance.get('tags', []))
-    expected_instance_tags_with_db = set(dbm_instance.get('tags', [])) | {"db:{}".format(database)}
+    instance_tags = dbm_instance.get('tags', [])
+    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
+    expected_instance_tags_with_db = expected_instance_tags | {"db:{}".format(database)}
 
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
@@ -331,7 +332,9 @@ def test_statement_metrics_and_plans(
     assert payload['sqlserver_version'].startswith("Microsoft SQL Server"), "invalid version"
     assert payload['host'] == "stubbed.hostname", "wrong hostname"
     assert payload['ddagenthostname'] == datadog_agent.get_hostname()
-    assert set(payload['tags']) == expected_instance_tags, "wrong instance tags for dbm-metrics event"
+    tags = set(payload['tags'])
+    assert tags == expected_instance_tags, "wrong instance tags for dbm-metrics event"
+    assert not any("dd.internal" in m for m in tags), "emitted dd.internal metrics from check"
     assert type(payload['min_collection_interval']) in (float, int), "invalid min_collection_interval"
     # metrics rows
     sqlserver_rows = payload.get('sqlserver_rows', [])
@@ -505,7 +508,7 @@ def test_statement_metadata(
         {
             'azure': {
                 'deployment_type': 'managed_instance',
-                'database_name': 'my-instance',
+                'name': 'my-instance',
             },
         },
         {
@@ -514,7 +517,7 @@ def test_statement_metadata(
             },
             'azure': {
                 'deployment_type': 'managed_instance',
-                'database_name': 'my-instance',
+                'name': 'my-instance',
             },
         },
         {
@@ -560,7 +563,7 @@ def test_statement_cloud_metadata(aggregator, dd_run_check, dbm_instance, bob_co
     # cloud metadata
     assert payload['cloud_metadata'] == cloud_metadata, "wrong cloud_metadata"
     # test that we're reading the edition out of the db instance. Note that this edition is what
-    # is running in our test docker containers so it's not expected to match the test cloud metadata
+    # is running in our test docker containers, so it's not expected to match the test cloud metadata
     assert payload['sqlserver_engine_edition'] in SELF_HOSTED_ENGINE_EDITIONS, "wrong edition"
 
 
