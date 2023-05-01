@@ -22,7 +22,9 @@ further_reading:
 
 ## Overview
 
-This page walks you through how to develop an offering that will be displayed in a tile on the Datadog Integrations page or on the Datadog Marketplace. For all offerings that do not use the Datadog Agent, including API-based integrations, professional services listings, and software licenses, a tile-only listing is required. This means that there is no Agent code attached to the tile, but it serves as an informative point of entry where customers can learn more about your offering, learn how to set it up, as well as install or purchase your offering to unlock out-of-the-box dashboards and other assets.
+This page walks you through how to develop an offering that will be displayed in a tile on the Datadog Integrations page or on the Datadog Marketplace. For all offerings that do not use the Datadog Agent, including API-based integrations, professional services listings, and software licenses, a tile-only listing is required. This means that there is no Agent code attached to the tile, but it serves as an informative point of entry where customers can learn more about your offering, learn how to set it up, as well as install or purchase your offering to unlock out-of-the-box dashboards and other assets. You can see an example of a tile below:
+
+{{< img src="developers/marketplace/marketplace-tile-example.png" alt="Example Marketplace tile" style="width:30%" >}}
 
 **Select an option below to get started and create a tile on either the Marketplace or Integrations page:** 
 
