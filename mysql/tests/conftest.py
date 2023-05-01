@@ -406,7 +406,7 @@ def _add_dog_user(conn):
     cur.execute("GRANT SELECT ON performance_schema.* TO 'dog'@'%'")
     if MYSQL_FLAVOR == 'mysql' and MYSQL_VERSION == '8.0':
         cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
-    elif MYSQL_FLAVOR == 'mariadb' and MYSQL_VERSION == '10.5':
+    elif MYSQL_FLAVOR == 'mariadb' and MYSQL_VERSION >= '10.5':
         cur.execute("GRANT SLAVE MONITOR ON *.* TO 'dog'@'%'")
         cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
     else:

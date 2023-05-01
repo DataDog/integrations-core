@@ -29,6 +29,7 @@ from .common import (
     check_replication_slots,
     check_slru_metrics,
     check_stat_replication,
+    check_uptime_metrics,
     check_wal_receiver_metrics,
     requires_static_version,
 )
@@ -55,6 +56,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check_slru_metrics(aggregator, expected_tags=expected_tags)
     check_stat_replication(aggregator, expected_tags=expected_tags)
     check_wal_receiver_metrics(aggregator, expected_tags=expected_tags, connected=0)
+    check_uptime_metrics(aggregator, expected_tags=expected_tags)
 
     replication_slot_tags = expected_tags + [
         'slot_name:replication_slot',
@@ -80,6 +82,22 @@ def test_common_metrics_without_size(aggregator, integration_check, pg_instance)
     check = integration_check(pg_instance)
     check.check(pg_instance)
     assert 'postgresql.database_size' not in aggregator.metric_names
+
+
+def test_uptime(aggregator, integration_check, pg_instance):
+    conn = _get_conn(pg_instance)
+    with conn.cursor() as cur:
+        cur.execute("SELECT FLOOR(EXTRACT(EPOCH FROM current_timestamp - pg_postmaster_start_time()))")
+        uptime = cur.fetchall()[0][0]
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
+    assert_metric_at_least(
+        aggregator, 'postgresql.uptime', count=1, lower_bound=uptime, higher_bound=uptime + 1, tags=expected_tags
+    )
 
 
 @requires_over_14
