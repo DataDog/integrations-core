@@ -220,16 +220,19 @@ class SQLServer(AgentCheck):
         if self.cloud_metadata.get("azure") is not None:
             deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
             name = self.cloud_metadata.get("azure")["name"]
+            db_instance = None
             if "sql_database" in deployment_type and self.dbm_enabled:
-                self.log.warning("im here")
                 # azure sql databases have a special format, which is set for DBM
                 # customers in the resolved_hostname.
                 # If user is not DBM customer, the resource_name should just be set to the `name`
-                name = self._resolved_hostname
+                db_instance = self._resolved_hostname
             # some `deployment_type`s map to multiple `resource_type`s
             resource_types = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES.get(deployment_type).split(",")
             for r_type in resource_types:
-                self.tags.append("dd.internal.resource:{}:{}".format(r_type, name))
+                if 'azure_sql_server_database' in r_type and db_instance:
+                    self.tags.append("dd.internal.resource:{}:{}".format(r_type, db_instance))
+                else:
+                    self.tags.append("dd.internal.resource:{}:{}".format(r_type, name))
         # finally, emit a `database_instance` resource for this instance
         self.tags.append(
             "dd.internal.resource:database_instance:{}".format(

@@ -468,7 +468,7 @@ def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, 
             },
             [
                 "dd.internal.resource:azure_sql_server_database:forced_hostname",
-                "dd.internal.resource:azure_sql_server:forced_hostname",
+                "dd.internal.resource:azure_sql_server:my-instance",
             ],
         ),
         (
@@ -485,7 +485,7 @@ def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, 
             },
             [
                 "dd.internal.resource:azure_sql_server_database:localhost/datadog_test",
-                "dd.internal.resource:azure_sql_server:localhost/datadog_test",
+                "dd.internal.resource:azure_sql_server:my-instance",
             ],
         ),
         (
