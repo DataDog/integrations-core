@@ -5,7 +5,6 @@ import logging
 from copy import copy, deepcopy
 
 import pytest
-import mock
 
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import SQLConnectionError
@@ -20,8 +19,6 @@ from datadog_checks.sqlserver.const import (
 
 from .common import CHECK_NAME, CUSTOM_METRICS, EXPECTED_DEFAULT_METRICS, assert_metrics
 from .utils import not_windows_ci, windows_ci
-from .mock_connection import MockConnection
-from .mock_cursor import MockStaticInfoCursor
 
 try:
     import pyodbc
@@ -46,11 +43,11 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
         message=str(excinfo.value),
     )
 
-# , (True, False), (False, True), (False, False)
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
-    'database_autodiscovery,dbm_enabled', [(False, True)]
+    'database_autodiscovery,dbm_enabled', [(True, True), (True, False), (False, True), (False, False)]
 )
 def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, database_autodiscovery, dbm_enabled):
     instance_docker['database_autodiscovery'] = database_autodiscovery
@@ -206,12 +203,6 @@ def test_autodiscovery_db_service_checks(
     # verify all databases in autodiscovery have a service check
     aggregator.assert_service_check(
         'sqlserver.database.can_connect',
-        count=default_count,
-        tags=['db:master', 'sqlserver_host:localhost,1433'] + instance_tags,
-        status=SQLServer.OK,
-    )
-    aggregator.assert_service_check(
-        'sqlserver.database.can_connect',
         count=extra_count,
         tags=['db:msdb', 'sqlserver_host:localhost,1433'] + instance_tags,
         status=SQLServer.OK,
@@ -277,8 +268,8 @@ def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodisc
     master_tags = ['database:master'] + instance_tags
     msdb_tags = ['database:msdb'] + instance_tags
     for metric in expected_metrics:
-        aggregator.assert_metric(metric, tags=master_tags)
-        aggregator.assert_metric(metric, tags=msdb_tags)
+        aggregator.assert_metric(metric, tags=master_tags, hostname=check.resolved_hostname)
+        aggregator.assert_metric(metric, tags=msdb_tags, hostname=check.resolved_hostname)
 
 
 @pytest.mark.integration

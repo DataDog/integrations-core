@@ -12,11 +12,6 @@ from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
-from datadog_checks.sqlserver.const import (
-    ENGINE_EDITION_SQL_DATABASE,
-    ENGINE_EDITION_STANDARD,
-    STATIC_INFO_ENGINE_EDITION,
-)
 from datadog_checks.sqlserver.metrics import SqlMasterDatabaseFileStats
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import Database, parse_sqlserver_major_version, set_default_driver_conf
@@ -46,11 +41,13 @@ def test_missing_db(instance_docker, dd_run_check):
         with pytest.raises(ConfigurationError):
             check = SQLServer(CHECK_NAME, {}, [instance])
             check.initialize_connection()
+            check.make_metric_list_to_collect()
 
     instance['ignore_missing_database'] = True
     with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
         check = SQLServer(CHECK_NAME, {}, [instance])
         check.initialize_connection()
+        check.make_metric_list_to_collect()
         dd_run_check(check)
         assert check.do_check is False
 
@@ -80,24 +77,28 @@ def test_db_exists(get_cursor, mock_connect, instance_docker_defaults, dd_run_ch
     # check base case of lowercase for lowercase and case-insensitive db
     check = SQLServer(CHECK_NAME, {}, [instance])
     check.initialize_connection()
+    check.make_metric_list_to_collect()
     assert check.do_check is True
 
     # check all caps for case insensitive db
     instance['database'] = 'MASTER'
     check = SQLServer(CHECK_NAME, {}, [instance])
     check.initialize_connection()
+    check.make_metric_list_to_collect()
     assert check.do_check is True
 
     # check mixed case against mixed case but case-insensitive db
     instance['database'] = 'AdventureWORKS2017'
     check = SQLServer(CHECK_NAME, {}, [instance])
     check.initialize_connection()
+    check.make_metric_list_to_collect()
     assert check.do_check is True
 
     # check case sensitive but matched db
     instance['database'] = 'CaseSensitive2018'
     check = SQLServer(CHECK_NAME, {}, [instance])
     check.initialize_connection()
+    check.make_metric_list_to_collect()
     assert check.do_check is True
 
     # check case sensitive but mismatched db
@@ -105,11 +106,13 @@ def test_db_exists(get_cursor, mock_connect, instance_docker_defaults, dd_run_ch
     check = SQLServer(CHECK_NAME, {}, [instance])
     with pytest.raises(ConfigurationError):
         check.initialize_connection()
+        check.make_metric_list_to_collect()
 
     # check offline but exists db
     instance['database'] = 'Offlinedb'
     check = SQLServer(CHECK_NAME, {}, [instance])
     check.initialize_connection()
+    check.make_metric_list_to_collect()
     assert check.do_check is True
 
 

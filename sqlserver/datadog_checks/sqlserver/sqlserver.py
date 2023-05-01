@@ -162,14 +162,16 @@ class SQLServer(AgentCheck):
             # cache these for a full day
             ttl=60 * 60 * 24,
         )
+        self.check_initializations.append(self.initialize_connection)
         self.check_initializations.append(self.set_resolved_hostname)
         self.check_initializations.append(self.set_resolved_hostname_metadata)
+        self.check_initializations.append(self.config_checks)
+        self.check_initializations.append(self.make_metric_list_to_collect)
 
         # Query declarations
         self._query_manager = None
         self._dynamic_queries = None
         self.server_state_queries = None
-        self.check_initializations.append(self.config_checks)
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -236,8 +238,7 @@ class SQLServer(AgentCheck):
         )
 
     def set_resolved_hostname(self):
-        # initialize connection & load static information cache
-        self.initialize_connection()
+        # load static information cache
         self.load_static_information()
         if self._resolved_hostname is None:
             if self.reported_hostname:
@@ -325,11 +326,11 @@ class SQLServer(AgentCheck):
     def initialize_connection(self):
         self.connection = Connection(self, self.init_config, self.instance, self.handle_service_check)
 
+    def make_metric_list_to_collect(self):
         # Pre-process the list of metrics to collect
         try:
             # check to see if the database exists before we try any connections to it
             db_exists, context = self.connection.check_database()
-
             if db_exists:
                 if self.instance.get('stored_procedure') is None:
                     with self.connection.open_managed_default_connection():
@@ -703,7 +704,6 @@ class SQLServer(AgentCheck):
             # configure custom queries for the check
             if self._query_manager is None:
                 # use QueryManager to process custom queries
-                self.log.warning("setting hostname to {}".format(self.resolved_hostname))
                 self._query_manager = QueryManager(
                     self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
                 )
