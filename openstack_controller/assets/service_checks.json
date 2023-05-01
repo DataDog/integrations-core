@@ -101,7 +101,9 @@
         "name": "OpenStack Ironic API Up",
         "groups": [
             "host",
-            "keystone_server"
+            "keystone_server",
+            "domain_id"
+
         ],
         "description": "Returns `CRITICAL` if the Agent is unable to query the Ironic API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
     },
@@ -117,7 +119,8 @@
         "name": "OpenStack Octavia API Up",
         "groups": [
             "host",
-            "keystone_server"
+            "keystone_server",
+            "domain_id"
         ],
         "description": "Returns `CRITICAL` if the Agent is unable to query the Octavia API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
     },
@@ -135,7 +138,8 @@
             "host",
             "keystone_server",
             "project_name",
-            "project_id"
+            "project_id",
+            "domain_id"
         ],
         "description": "Returns `CRITICAL` if the Agent is unable to query the Cinder API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
     }
