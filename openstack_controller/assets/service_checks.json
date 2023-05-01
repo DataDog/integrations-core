@@ -12,8 +12,7 @@
         "groups": [
             "host",
             "keystone_server",
-            "project_id",
-            "project_name"
+            "domain_id"
         ],
         "description": "Returns `CRITICAL` if the Agent is unable to query the Neutron API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
     },
@@ -30,8 +29,7 @@
         "groups": [
             "host",
             "keystone_server",
-            "project_id",
-            "project_name"
+            "domain_id"
         ],
         "description": "Returns `CRITICAL` if the Agent is unable to query the Nova API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
     },
@@ -65,9 +63,11 @@
             "hypervisor",
             "hypervisor_id",
             "virt_type",
-            "project_id",
-            "project_name",
-            "status"
+            "status",
+            "domain_id",
+            "keystone_server",
+            "aggregate",
+            "availability_zone"
         ],
         "description": "Returns `UNKNOWN` if the Agent is unable to get the Hypervisor state, `CRITICAL` if the Hypervisor is down. Returns `OK` otherwise."
     },
@@ -101,9 +101,7 @@
         "name": "OpenStack Ironic API Up",
         "groups": [
             "host",
-            "keystone_server",
-            "project_name",
-            "project_id"
+            "keystone_server"
         ],
         "description": "Returns `CRITICAL` if the Agent is unable to query the Ironic API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
     },
@@ -119,10 +117,26 @@
         "name": "OpenStack Octavia API Up",
         "groups": [
             "host",
+            "keystone_server"
+        ],
+        "description": "Returns `CRITICAL` if the Agent is unable to query the Octavia API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.46.0",
+        "check": "openstack.cinder.api.up",
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "integration": "OpenStack",
+        "name": "OpenStack Cinder API Up",
+        "groups": [
+            "host",
             "keystone_server",
             "project_name",
             "project_id"
         ],
-        "description": "Returns `CRITICAL` if the Agent is unable to query the Octavia API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent is unable to query the Cinder API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise."
     }
 ]
