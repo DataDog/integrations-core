@@ -23,7 +23,6 @@ def test_metrics(aggregator, instance, dd_run_check):
 
 def test_security_metrics(aggregator, instance, dd_run_check, mock_http_response):
 
-    get_metadata_metrics()
     mock_http_response(file_path=get_fixture_path('security_metrics.txt'))
 
     check = CockroachdbCheck('cockroachdb', {}, [instance])
