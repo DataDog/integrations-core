@@ -363,6 +363,12 @@ METRIC_MAP = {
     'jobs_row_level_ttl_rows_selected': 'jobs.row.level.ttl.rows_selected',
     'schedules_BACKUP_last_completed_time': 'schedules.backup.last_completed_time',
     'schedules_scheduled_row_level_ttl_executor_failed': 'schedules.scheduled.row.level.ttl.executor_failed',
+    'security_certificate_expiration_ca': 'security.certificate_expiration.ca',
+    'security_certificate_expiration_client_ca': 'security.certificate_expiration.client_ca',
+    'security_certificate_expiration_ui': 'security.certificate_expiration.ui',
+    'security_certificate_expiration_ui_ca': 'security.certificate_expiration.ui_ca',
+    'security_certificate_expiration_node': 'security.certificate_expiration.node',
+    'security_certificate_expiration_node_client': 'security.certificate_expiration.node_client',
 }
 
 

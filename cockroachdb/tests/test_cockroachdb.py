@@ -4,10 +4,13 @@
 import pytest
 from six import itervalues
 
+from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.cockroachdb import CockroachdbCheck
 from datadog_checks.cockroachdb.metrics import METRIC_MAP
+from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import COCKROACHDB_VERSION
+from .common import COCKROACHDB_VERSION, assert_metrics
+from .utils import get_fixture_path
 
 
 @pytest.mark.integration
@@ -17,6 +20,22 @@ def test_integration(aggregator, instance_legacy, dd_run_check):
     dd_run_check(check)
 
     _test_check(aggregator)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_security_metrics(aggregator, instance, dd_run_check, mock_http_response):
+
+    get_metadata_metrics()
+    mock_http_response(file_path=get_fixture_path('security_metrics.txt'))
+
+    check = CockroachdbCheck('cockroachdb', {}, [instance])
+    dd_run_check(check)
+
+    assert_metrics(aggregator)
+
+    aggregator.assert_service_check('cockroachdb.openmetrics.health', ServiceCheck.OK)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.integration
