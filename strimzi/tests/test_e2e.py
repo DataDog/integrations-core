@@ -15,10 +15,7 @@ def test_check(dd_agent_check):
 
     for endpoint_metrics in (CLUSTER_OPERATOR_METRICS, TOPIC_OPERATOR_METRICS, USER_OPERATOR_METRICS):
         for expected_metric in endpoint_metrics:
-            aggregator.assert_metric(
-                name=expected_metric["name"],
-                count=expected_metric.get("count", 1),
-            )
+            aggregator.assert_metric(expected_metric)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
