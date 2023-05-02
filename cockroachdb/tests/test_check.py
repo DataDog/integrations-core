@@ -24,11 +24,11 @@ def test_metrics(aggregator, instance, dd_run_check):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
-# The test below is designed to collect metrics that are not exposed in our e2e environment. 
-# To collect security metrics, we need to enable TLS and provide certificates. In the future, 
+# The test below is designed to collect metrics that are not exposed in our e2e environment.
+# To collect security metrics, we need to enable TLS and provide certificates. In the future,
 # we should create a new environment with TLS enabled.
-# The unstable metrics are only available in version 23 of CockroachDB, and as of writing, 
-# that version is marked as unstable. Once this version is officially released, 
+# The unstable metrics are only available in version 23 of CockroachDB, and as of writing,
+# that version is marked as unstable. Once this version is officially released,
 # we can remove the fixture and create a new environment for version 23.
 # Both fixture files were obtained from a manual setup of CockroachDB.
 @pytest.mark.parametrize(
