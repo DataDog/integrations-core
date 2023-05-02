@@ -253,14 +253,14 @@ To rebase and push changes:
 
 2. `git rebase master`
 
--  If there are any merge conflicts, you'd resolve them here
+If there are any merge conflicts, you'd resolve them here
 
 3. `git push origin <working branch> -f`
 
 
 ### Go-to-Market (GTM) opportunities
 
-Datadog offers GTM support for Marketplace listings only. To learn more about the Datadog Marketplace, see [Create a Marketplace Offering][NEEDS LINK].
+Datadog offers GTM support for Marketplace listings only. To learn more about the Datadog Marketplace, see [Create a Marketplace Offering][28].
 
 ## Further reading
 
@@ -293,3 +293,4 @@ Datadog offers GTM support for Marketplace listings only. To learn more about th
 [25]: https://docs.datadoghq.com/developers/integrations/python
 [26]: https://github.com/Datadog/integrations-extras
 [27]: https://docs.datadoghq.com/developers/integrations/agent_integration/
+[28]: https://docs.datadoghq.com/developers/integrations/marketplace_offering/

@@ -20,7 +20,7 @@ API integrations can send the following types of data to Datadog:
 
 You can also include out-of-the-box assets like Monitors, Dashboards, and Log Pipelines with your integration. When a user clicks "Install" on your integration tile, they will be guided to your setup instructions, and all out-of-the-box dashboards and recommended monitors packaged with your integration will appear in the user's account.
 
-Since API integrations do not use the Datadog Agent to collect data, you need to create an informational tile (pictured below) to display your offering on the Integrations page once your development work is complete.
+Since API integrations do not use the Datadog Agent to collect data, you need to create a tile (pictured below) to display your offering on the Integrations page once your development work is complete.
 
 {{< img src="developers/marketplace/marketplace-tile-example.png" alt="Example Marketplace tile" style="width:30%" >}}
 
@@ -34,7 +34,7 @@ You can explore examples that use OAuth in the `integrations-extras` repository 
 ### Build your integration
 
 You can expect the following process for building an API-based integration:
-1. Meet with the Datadog Technology Partner team to discuss your integration and use cases.
+1. Once you've been accepted to the Datadog Partner Network, you'll meet with the Datadog Technology Partner team to discuss your integration and use cases.
 2. Request a sandbox account for development.
 3. Begin development of your integration, which will include writing and hosting integration code on your end, as well as implementing the OAuth protocol.
 4. Test your integration, as well as your OAuth client, in your sandbox account.

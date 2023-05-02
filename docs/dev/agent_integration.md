@@ -23,11 +23,11 @@ You can also include out-of-the-box assets like Monitors, Dashboards, and Log Pi
 ## Development process
 
 You can expect the following process for building an Agent-based integration:
-1. Once you've been accepted to the Datadog partner network, you'll meet with the Datadog Technology Partner team to discuss your offering and use cases.
+1. Once you've been accepted to the Datadog Partner Network, you'll meet with the Datadog Technology Partner team to discuss your offering and use cases.
 2. Request a sandbox account for development.
 3. Begin development of your integration, which will include writing the integration code on your end as well as building and installing a python wheel (.whl).
 4. Test your integration in your sandbox account.
-5. Once your development work is tested and complete, follow the steps to [Create a Tile][24] in order to display your offering on the Marketplace or Integrations page.
+5. Once your development work is tested and complete, follow the steps to [Create a Tile][20] in order to display your offering on the Marketplace or Integrations page.
 6. Once your pull request is submitted and approved, the team will schedule a demo for a final review of your integration.
 7. You'll have the option of testing the tile and integration in your sandbox account before publishing, or immediately publishing the integration for all customers.  
 
@@ -44,9 +44,9 @@ The required Datadog Agent integration development tools include:
 {{< tabs >}}
 {{% tab "Build an Out-of-the-box Integration" %}}
 
-## Set up an integrations-extras directory
+## Set up a directory and fork the `integrations-extras` repository
 
-Follow these instructions to set up your remote repository for integration development:
+Set up a directory:
 
 1. Create the `dd` directory:
 

@@ -25,32 +25,33 @@ The Datadog Marketplace is a digital marketplace where Datadog Technology Partne
 
 While the **Integrations** page includes integrations built by both Datadog and Technology Partners at no cost, the **Marketplace**  is a commercial platform for Datadog customers and Technology Partners to buy and sell a variety of offerings including Agent-based or API-based integrations, software licenses, and professional services.
 
+{{< img src="developers/marketplace/marketplace_overview.png" alt="The Datadog Marketplace page" style="width:100%" >}}
+
 ## List an offering 
 
 The following types of offerings are supported on the Datadog Marketplace:
 
 ### Integrations
-Marketplace integrations that submit third-party data or pull data from a user's Datadog account through the [Datadog Agent][15] or the [Datadog API][16]. These integrations can contain a variety of data types, such as metrics, events, logs, traces, and more.
+Marketplace integrations that submit third-party data to (or pull data from) a user's Datadog account through the [Datadog Agent][15] or the [Datadog API][16]. These integrations can contain a variety of data types, such as metrics, events, logs, traces, and more.
 
 ### Software licenses
 Software licenses enable you to deliver and license software solutions to customers through the Datadog Marketplace.
 
 ### Professional services
-[Professional services][18] enable you to offer your team's services for implementation, support, or management for a set period of time.
+Professional services enable you to offer your team's services for implementation, support, or management for a set period of time.
 
 ## Why join the Datadog Marketplace? 
 
 Marketplace Partners have unique benefits that are not available to partners who list out-of-the-box integrations:
  
-  - **Go-to-Market collaboration**, including a blog post, a quote for a press release, and social media amplification, with access to dedicated sales and marketing resources focused on accelerating partner growth. 
+  - **Go-to-market collaboration**, including a blog post, a quote for a press release, and social media amplification, with access to dedicated sales and marketing resources focused on accelerating partner growth. 
 
   - **Training and support** for sales enablement in the form of on-demand courses to quickly onboard sales and technical teams.
 
   - **Exclusive opportunities to sponsor** conferences and events (such as Datadog DASH) at a discounted rate.
   
-  - **Generate new leads** from user discovery
+  - **Generate new leads** from user discovery.
 
-{{< img src="developers/marketplace/marketplace_overview.png" alt="The Datadog Marketplace page" style="width:100%" >}}
 
 ## Join the Datadog partner network
 
