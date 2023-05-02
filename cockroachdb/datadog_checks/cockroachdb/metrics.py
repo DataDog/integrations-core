@@ -373,11 +373,11 @@ METRIC_MAP = {
     # New metrics in v23:
     'admission_io_overload': 'admission.io.overload',
     'queue_replicate_replacedecommissioningreplica_error': 'queue.replicate.replacedecommissioningreplica.error',
-    'jobs_auto_create_stats_currently_paused': 'jobs.auto_create_stats.currently_paused',
+    'jobs_auto_create_stats_currently_paused': 'jobs.auto.create.stats.currently_paused',
     'jobs_backup_currently_paused': 'jobs.backup.currently_paused',
     'jobs_changefeed_currently_paused': 'jobs.changefeed.currently_paused',
     'jobs_changefeed_protected_age_sec': 'jobs.changefeed.protected_age_sec',
-    'jobs_row_level_ttl_currently_paused': 'jobs.row_level_ttl.currently_paused',
+    'jobs_row_level_ttl_currently_paused': 'jobs.row.level.ttl.currently_paused',
 }
 
 
