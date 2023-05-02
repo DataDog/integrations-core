@@ -14,10 +14,16 @@ dependencies: "https://github.com/DataDog/integrations-core/blob/alai97/add-mark
 
 This guide provides instructions for creating a Datadog Agent integration. You can list an Agent integration for a price on the Datadog Marketplace, or list it out-of-the-box on the Integrations page. 
 
-## Development Process
+Agent-based integrations use the Datadog Agent to submit data via checks written by the partner. Checks can emit metrics, events, and service checks into a customer's Datadog account. The Agent itself can submit logs as well, but that is configured outside of the check itself. 
+
+The implementation code for these integrations is hosted by Datadog. Agent Integrations are best suited for collecting data from systems or applications that live in a local area network (LAN) or virtual private cloud (VPC). Writing an Agent integration requires you to publish and deploy your solution as a Python wheel (.whl).
+
+You can also include out-of-the-box assets like Monitors, Dashboards, and Log Pipelines with your Agent-based integration. When a user clicks "Install" on your integration tile, they will be guided to your setup instructions, and all out-of-the-box dashboards and recommended monitors packaged with your integration will appear in the user's account.
+
+## Development process
 
 You can expect the following process for building an Agent-based integration:
-1. Meet with the Datadog Technology Partner team to discuss your offering and use cases.
+1. Once you've been accepted to the Datadog partner network, you'll meet with the Datadog Technology Partner team to discuss your offering and use cases.
 2. Request a sandbox account for development.
 3. Begin development of your integration, which will include writing the integration code on your end as well as building and installing a python wheel (.whl).
 4. Test your integration in your sandbox account.
@@ -36,7 +42,54 @@ The required Datadog Agent integration development tools include:
 **To get started, select either tab below for instructions on building an out-of-the-box Agent-based integration or an Agent-based integration on the Marketplace.** 
 
 {{< tabs >}}
+{{% tab "Build an Out-of-the-box Integration" %}}
+
+## Set up an integrations-extras directory
+
+Follow these instructions to set up your remote repository for integration development:
+
+1. Create the `dd` directory:
+
+   The Datadog Development Toolkit expects you to work in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps.
+
+   To create the `dd` directory and clone the `integrations-extras` repo:
+   ```
+   mkdir $HOME/dd && cd $HOME/dd
+   ```
+
+1. Fork the [`integrations-extras` repo][101].
+
+1. Clone your fork into the `dd` directory:
+   ```
+   git clone git@github.com:<YOUR USERNAME>/integrations-extras.git
+   ```
+
+1. Create a feature branch to work in:
+   ```
+   git switch -c <YOUR INTEGRATION NAME> origin/master
+   ```
+
+## Configure the developer tool
+
+Assuming you've installed [the Agent Integration Developer Tool][102], configure the tool for the `integrations-extras` repo:
+
+1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
+   ```
+   ddev config set extras "/path/to/integrations-extras"
+   ```
+
+1. Set `integrations-extras` as the default working repository:
+   ```
+   ddev config set repo extras
+   ```
+
+[101]: https://github.com/Datadog/integrations-extras
+[102]: https://docs.datadoghq.com/developers/integrations/python
+
+{{% /tab %}}
+
 {{% tab "Build a Marketplace Integration" %}}
+
 ## Set up a directory and clone the Marketplace repository
 
 Set up a directory:
@@ -78,56 +131,11 @@ ddev config set repo marketplace
 
 {{% /tab %}}
 
-{{% tab "Build an Out-of-the-box Integration" %}}
-
-## Set up your integrations-extra repo
-
-Follow these instructions to set up your repo for integration development:
-
-1. Create the `dd` directory:
-
-   The Datadog Development Toolkit expects you to work in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps.
-
-   To create the `dd` directory and clone the `integrations-extras` repo:
-   ```
-   mkdir $HOME/dd && cd $HOME/dd
-   ```
-
-1. Fork the [`integrations-extras` repo][101].
-
-1. Clone your fork into the `dd` directory:
-   ```
-   git clone git@github.com:<YOUR USERNAME>/integrations-extras.git
-   ```
-
-1. Create a feature branch to work in:
-   ```
-   git switch -c <YOUR INTEGRATION NAME> origin/master
-   ```
-
-## Configure the developer tool
-
-Assuming you've installed [the Agent Integration Developer Tool][102], configure the tool for the `integrations-extras` repo:
-
-1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
-   ```
-   ddev config set extras "/path/to/integrations-extras"
-   ```
-
-1. Set `integrations-extras` as the default working repository:
-   ```
-   ddev config set repo extras
-   ```
-
-[101]: https://github.com/Datadog/integrations-extras
-[102]: https://docs.datadoghq.com/developers/integrations/python
-
-{{% /tab %}}
 {{< /tabs >}}
 
 ## Create your integration
 
-Once you've downloaded Docker, installed an appropriate version of Python, and prepared your development environment, you can get started with creating an Agent-based integration. The instructions below use an example integration called `Awesome`. Follow along using the code from Awesome, or replace Awesome with your own code.
+Once you've downloaded Docker, installed an appropriate version of Python, and prepared your development environment, you can get started with creating an Agent-based integration. The instructions below use an example integration called `Awesome`. Follow along using the code from Awesome, or replace Awesome with your own code, as well as the name of your integration within the commands, i.e. use `ddev create <your-integration-name>`, rather than `ddev create Awesome`. 
 
 ### Create scaffolding for your integration
 
@@ -141,11 +149,14 @@ The `ddev create` command runs an interactive tool that creates the basic file a
    This command displays the path where the files would have been written, as well as the structure itself. Make sure the path in the first line of output matches your `integrations-extras` or `marketplace` repository location.
 
 1. Run the command without the `-n` flag. The tool asks you for an email and name and then creates the files you need to get started with an integration.
+
+    <div class="alert alert-info">If you are creating an integration for the Datadog Marketplace, ensure that your directory follows the pattern of {partner name}_{integration name}.</div>
+
    ```
    ddev create Awesome
    ```
 
-## Write an Agent Check
+## Write an Agent check
 
 At the core of each Agent-based integration is an *Agent Check* that periodically collects information and sends it to Datadog. Checks inherit their logic from the `AgentCheck` base class and have the the following requirements:
 
@@ -355,56 +366,6 @@ The set of assets created by the `ddev` scaffolding must be populated:
 
 For more information on the `README.md` and `manifest.json` files, see [Create a Tile][20].
 
-{{< tabs >}}
-{{% tab "Configuration template" %}}
-
-For this example, the `awesome/assets/configuration/spec.yaml` used to generate `awesome/datadog_checks/awesome/data/conf.yaml.example` appears in the following format:
-```yaml
-name: Awesome
-files:
-- name: awesome.yaml
-  options:
-  - template: init_config
-    options:
-    - template: init_config/default
-  - template: instances
-    options:
-    - name: url
-      required: true
-      description: The URL to check.
-      value:
-        type: string
-        example: http://example.org
-    - name: search_string
-      required: true
-      description: The string to search for.
-      value:
-        type: string
-        example: Example Domain
-    - name: flag_follow_redirects
-      # required: false is implicit; comment it to see what happens!
-      required: false
-      description: Follow 301 redirects.
-      value:
-        type: boolean
-        example: false
-    # Try transposing these templates to see what happens!
-    #- template: instances/http
-    - template: instances/default
-```
-
-To generate `conf.yaml.example` using `ddev`, run:
-```bash
-ddev validate config --sync awesome
-```
-
-{{% /tab %}}
-{{% tab "Metadata" %}}
-
-For this example, the Awesome integration doesn't provide any metrics, so in this case, the generated `awesome/metadata.csv` only contains only a row with the column names.
-
-{{% /tab %}}
-{{< /tabs >}}
 
 ## Build the wheel
 
@@ -456,7 +417,7 @@ After you've created your Agent-based integration, populate the remainder of the
 
 Finally, open a pull request with your code on the [`integrations-extras`][21] or [`marketplace`][22] repository. After you've created your pull request, automatic checks run to verify that your pull request is in good shape and contains all the required content to be updated.
 
-## Further Reading
+## Further reading
 
 Additional helpful documentation, links, and articles:
 

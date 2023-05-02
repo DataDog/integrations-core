@@ -27,7 +27,7 @@ While the **Integrations** page includes integrations built by both Datadog and 
 
 ## List an offering 
 
-All Technology Partners can list an out-of-the-box integration on the **Integrations** page, or a commercial paid offering on the **Marketplace** page. The following types of offerings are supported on the Datadog Marketplace:
+The following types of offerings are supported on the Datadog Marketplace:
 
 ### Integrations
 Marketplace integrations that submit third-party data or pull data from a user's Datadog account through the [Datadog Agent][15] or the [Datadog API][16]. These integrations can contain a variety of data types, such as metrics, events, logs, traces, and more.
@@ -42,13 +42,13 @@ Software licenses enable you to deliver and license software solutions to custom
 
 Marketplace Partners have unique benefits that are not available to partners who list out-of-the-box integrations:
  
-  - Go-to-Market collaboration, including a blog post, a quote for a press release, and social media amplification, with access to dedicated sales and marketing resources focused on accelerating partner growth. 
+  - **Go-to-Market collaboration**, including a blog post, a quote for a press release, and social media amplification, with access to dedicated sales and marketing resources focused on accelerating partner growth. 
 
-  - Training and Support for sales enablement in the form of on-demand courses to quickly onboard sales and technical teams.
+  - **Training and support** for sales enablement in the form of on-demand courses to quickly onboard sales and technical teams.
 
-  - Exclusive opportunities to sponsor conferences and events (such as Datadog DASH) at a discounted rate.
+  - **Exclusive opportunities to sponsor** conferences and events (such as Datadog DASH) at a discounted rate.
   
-  - Generating new leads from user discovery
+  - **Generate new leads** from user discovery
 
 {{< img src="developers/marketplace/marketplace_overview.png" alt="The Datadog Marketplace page" style="width:100%" >}}
 
@@ -70,19 +70,12 @@ To request a sandbox account:
 
 Creating a developer sandbox may take up to one or two business days. Once your sandbox is created, you can [invite new members from your organization][7] to collaborate with.
 
-## Explore learning resources
-
-Once you've joined the Technology Partner track and requested a sandbox account, you can start learning about developing offerings by:
-
-* Completing the on-demand [**Introduction to Datadog Integrations**][8] course on the [Datadog Learning Center][9].
-* Reading the documentation about setting up an [OAuth 2.0 client][11] for API-based integrations.
-
 
 ### Request access to Marketplace
 
 To request access to the private Marketplace repository, email <a href="mailto:marketplace@datadoghq.com">marketplace@datadoghq.com</a>. Once you have been granted access, you can review an [example pull request][12] in the Marketplace repository with annotations and best practices.
 
-## Coordinate GTM opportunities
+## Coordinate go-to-market opportunities
 
 Once a Marketplace tile is live, Technology Partners can meet with Datadog's Partner Marketing team to coordinate a joint go-to-market (GTM) strategy, which includes the following:
 
@@ -91,7 +84,7 @@ Once a Marketplace tile is live, Technology Partners can meet with Datadog's Par
 - Amplification of social media posts
 
 ## Getting Started
-To get started with creating an offering, see [Create a Tile][13]. If you're interesting in building an Agent-based integration and selling it on the Datadog Marketplace, see [Create an Agent-based Integration][19].
+To get started with creating an API-based integration, software license, or professional service, see [Create a Tile][13]. If you're interesting in building an Agent-based integration and selling it on the Datadog Marketplace, see [Create an Agent-based Integration][19].
 
 ## Further Reading
 

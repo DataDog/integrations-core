@@ -5,7 +5,7 @@ type: documentation
 
 ## Overview
 
-Use [Datadog API endpoints][1] to enrich a customer's experience by submitting data from your backend and pulling data from a user's Datadog account. API integrations work well in building a connector between Datadog and another SaaS platform. Partners write and host their code within their environment.
+Use [Datadog API endpoints][1] to enrich a customer's experience by submitting data from your backend and pulling data from a user's Datadog account. API integrations work well for building a connector between Datadog and another SaaS platform. Partners write and host their code within their environment.
 
 This method is ideal for Technology Partners that are SaaS based, and have an existing platform that authenticates users.
 
@@ -20,25 +20,18 @@ API integrations can send the following types of data to Datadog:
 
 You can also include out-of-the-box assets like Monitors, Dashboards, and Log Pipelines with your integration. When a user clicks "Install" on your integration tile, they will be guided to your setup instructions, and all out-of-the-box dashboards and recommended monitors packaged with your integration will appear in the user's account.
 
-This page provides instructions for creating an API integration. Since API integrations do not use the Datadog Agent to collect data, you need to create an informational tile (pictured below) to display your offering on the Integrations page once your development work is complete.
+Since API integrations do not use the Datadog Agent to collect data, you need to create an informational tile (pictured below) to display your offering on the Integrations page once your development work is complete.
 
 {{< img src="developers/marketplace/marketplace-tile-example.png" alt="Example Marketplace tile" style="width:30%" >}}
 
-When a user clicks "Install" on your integration tile, they will be guided to your setup instructions, and all out-of-the-box dashboards and recommended monitors packaged with your integration will appear in the user's account.
-
-## Setup
-
-### Prerequisites
-
-- You must implement OAuth in order to submit data or pull data out of Datadog. 
-- You must support all [Datadog sites][12].
+## Development process
 
 ### OAuth
-Instead of requesting API and Application keys directly from a user, Datadog requires using an [OAuth client][14] to handle authorization and access for API-based integrations. For more information, see [OAuth for Integrations][15] and [Authorization Endpoints][16]. 
+Instead of requesting API and Application keys directly from a user, Datadog requires using an [OAuth client][14] to handle authorization and access for API-based integrations. For more information, see [OAuth for Integrations][15] and [Authorization Endpoints][16]. Note that OAuth implementations must support all [Datadog sites][12].
 
 You can explore examples that use OAuth in the `integrations-extras` repository such as [Vantage][17].
 
-## Development Process
+### Build your integration
 
 You can expect the following process for building an API-based integration:
 1. Meet with the Datadog Technology Partner team to discuss your integration and use cases.
@@ -49,7 +42,7 @@ You can expect the following process for building an API-based integration:
 6. Once your pull request is submitted and approved, the team will schedule a demo for a final review of your integration.
 7. You'll have the option of testing the tile and integration in your sandbox account before publishing, or immediately publishing the integration for all customers. 
 
-### To get started building a tile, [click here][24]. 
+**To get started building a tile, [click here][24]**. 
 
 
 Additional helpful documentation, links, and articles:

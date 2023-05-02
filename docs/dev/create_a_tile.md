@@ -22,64 +22,20 @@ further_reading:
 
 ## Overview
 
-This page walks you through how to develop an offering that will be displayed in a tile on the Datadog Integrations page or on the Datadog Marketplace. For all offerings that do not use the Datadog Agent, including API-based integrations, professional services listings, and software licenses, a tile-only listing is required. This means that there is no Agent code attached to the tile, but it serves as an informative point of entry where customers can learn more about your offering, learn how to set it up, as well as install or purchase your offering to unlock out-of-the-box dashboards and other assets. You can see an example of a tile below:
+This page walks you through how to create the tile that represents your offering. This tile will appear on the Datadog Integrations page or on the Datadog Marketplace, and you can see an example of a tile below: 
 
 {{< img src="developers/marketplace/marketplace-tile-example.png" alt="Example Marketplace tile" style="width:30%" >}}
+
+The tile serves as an informative point of entry where customers can learn more about your offering, learn how to set it up, as well as install or purchase your offering to unlock out-of-the-box dashboards and other assets. 
+
+For **any offerings that do not use the Datadog Agent**, including API-based integrations, professional services listings, and software licenses, you will only need to create a tile, and submit the tile-related files, in order to publish your offering. This is called a **tile-only-listing**. Only a tile is needed in this scenario because Datadog does not host any of the code associated with API-based integrations, and the other types of offerings we support do not require any code. 
+
+For **Agent-based integrations**, however, you will need to create a tile, and _additionally_ submit all of your integration-related code (as well as your tile-related files) in one pull request, as described in [Create an Agent-based integration][27].
+
 
 **Select an option below to get started and create a tile on either the Marketplace or Integrations page:** 
 
 {{< tabs >}}
-{{% tab "Build a tile on the Marketplace" %}}
-
-## Set up a directory and clone the Marketplace repository
-
-Set up a directory:
-
-1. Request access to the [Marketplace repository][101] by following the instructions in the [Marketplace documentation][102].
-2. Create a `dd` directory:
-   {{< code-block lang="shell" >}}mkdir $HOME/dd{{< /code-block >}}
-
-   The Datadog Development Toolkit command expects you to be working in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps.
-3. Once you have been granted access to the Marketplace repository, create the `dd` directory and clone the `marketplace` repo:
-   {{< code-block lang="shell" >}}git clone git@github.com:DataDog/marketplace.git{{< /code-block >}}
-4. Create a feature branch to work in.
-
-## Install and configure the Datadog development toolkit
-
-The Agent Integration Developer Tool allows you to create scaffolding when you are developing an integration by generating a skeleton of your integration tile's assets and metadata. For instructions on installing the tool, see [Install the Datadog Agent Integration Developer Tool][103].
-
-After you install the Developer tool, configure it for the `marketplace` repo:
-
-Set `marketplace` as the default working repository:
-
-{{< code-block lang="shell" >}}
-ddev config set marketplace $HOME/dd/marketplace
-ddev config set repo marketplace
-{{< /code-block >}}
-
-If you used a directory other than `$HOME/dd` to clone the marketplace directory, use the following command to set your working repository:
-
-{{< code-block lang="shell" >}}
-ddev config set marketplace <PATH/TO/MARKETPLACE>
-ddev config set repo marketplace
-{{< /code-block >}}
-
-## Populate the integration tile scaffolding
-
-Use the Datadog Development Toolkit to create scaffolding for a tile-only listing.
-
-To create the tile-only listing's scaffolding:
-
-1. Make sure you're inside the `marketplace` directory:
-   {{< code-block lang="shell" >}}cd $HOME/dd/marketplace{{< /code-block >}}
-2. Run the `ddev` command with the `-t tile` option:
-   {{< code-block lang="shell" >}}ddev create -t tile "<Offering Name>"{{< /code-block >}}
-
-[101]: https://github.com/Datadog/marketplace
-[102]: https://docs.datadoghq.com/developers/integrations/marketplace_offering
-[103]: https://docs.datadoghq.com/developers/integrations/python
-
-{{% /tab %}}
 
 {{% tab "Build a tile on the Integrations page" %}}
 
@@ -129,6 +85,64 @@ For Datadog API integrations that will be available out-of-the-box on the [Integ
 [102]: https://github.com/Datadog/integrations-extras
 
 {{% /tab %}}
+
+{{% tab "Build a tile on the Marketplace" %}}
+
+## Set up a directory and clone the Marketplace repository
+
+Set up a directory:
+
+1. Request access to the [Marketplace repository][101] by following the instructions in the [Marketplace documentation][102].
+
+2. Create a `dd` directory:
+   
+   {{< code-block lang="shell" >}}mkdir $HOME/dd{{< /code-block >}}
+
+   The Datadog Development Toolkit command expects you to be working in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps.
+
+3. Once you have been granted access to the Marketplace repository, create the `dd` directory and clone the `marketplace` repo:
+   
+   {{< code-block lang="shell" >}}git clone git@github.com:DataDog/marketplace.git{{< /code-block >}}
+
+4. Create a feature branch to work in.
+
+
+## Install and configure the Datadog development toolkit
+
+The Agent Integration Developer Tool allows you to create scaffolding when you are developing an integration by generating a skeleton of your integration tile's assets and metadata. For instructions on installing the tool, see [Install the Datadog Agent Integration Developer Tool][103].
+
+After you install the Developer tool, configure it for the `marketplace` repo:
+
+Set `marketplace` as the default working repository:
+
+{{< code-block lang="shell" >}}
+ddev config set marketplace $HOME/dd/marketplace
+ddev config set repo marketplace
+{{< /code-block >}}
+
+If you used a directory other than `$HOME/dd` to clone the marketplace directory, use the following command to set your working repository:
+
+{{< code-block lang="shell" >}}
+ddev config set marketplace <PATH/TO/MARKETPLACE>
+ddev config set repo marketplace
+{{< /code-block >}}
+
+## Populate the integration tile scaffolding
+
+Use the Datadog Development Toolkit to create scaffolding for a tile-only listing.
+
+To create the tile-only listing's scaffolding:
+
+1. Make sure you're inside the `marketplace` directory:
+   {{< code-block lang="shell" >}}cd $HOME/dd/marketplace{{< /code-block >}}
+2. Run the `ddev` command with the `-t tile` option:
+   {{< code-block lang="shell" >}}ddev create -t tile "<Offering Name>"{{< /code-block >}}
+
+[101]: https://github.com/Datadog/marketplace
+[102]: https://docs.datadoghq.com/developers/integrations/marketplace_offering
+[103]: https://docs.datadoghq.com/developers/integrations/python
+
+{{% /tab %}}
 {{< /tabs >}}
 
 ## Complete the necessary integration asset files
@@ -149,7 +163,7 @@ Once you have created a `README.md` file, add the following sections as H2s (`##
 | Data Collected  | Specify the types of data collected by your integration (if applicable), including events, service checks, logs, etc. Metrics added to the `metadata.csv` file will automatically appear in this tab.  <br><br> If your offering does not provide any of this data, you do not need to add a Data Collected section. |
 | Support | Provide contact information that includes an email to your Support team, a link to your company's documentation or blog post, and more help information in a bulleted list format. |
 
-### Media Carousel
+### Media carousel
 
 A media carousel of images and a video is displayed on each tile, allowing users to better understand the functionality and value of your offering through visual aids.
 
@@ -208,7 +222,12 @@ Before you open a pull request, run the following command to catch any problems 
 ddev validate all <INTEGRATION_NAME>
 ```
 
-Next, commit all changes to your feature branch and push your changes to the remote repository. Open a pull request that contains your integration tile's asset files (including images) in the [`marketplace`][18] or [`integrations-extras`][26] repository. After you've created your pull request, automatic checks will run to verify that your pull request is in good shape and contains all the required content to be updated.
+Next, complete the following steps:
+
+1. Commit all changes to your feature branch.
+2. Push your changes to the remote repository. 
+3. Open a pull request that contains your integration tile's asset files (including images) in the [`marketplace`][18] or [`integrations-extras`][26] repository. 
+4. After you've created your pull request, automatic checks will run to verify that your pull request is in good shape and contains all the required content to be updated.
 
 ## Review process
 
@@ -239,11 +258,11 @@ To rebase and push changes:
 3. `git push origin <working branch> -f`
 
 
-### Go-to-Market (GTM) Opportunities
+### Go-to-Market (GTM) opportunities
 
 Datadog offers GTM support for Marketplace listings only. To learn more about the Datadog Marketplace, see [Create a Marketplace Offering][NEEDS LINK].
 
-## Further Reading
+## Further reading
 
 {{< partial name="whats-next/whats-next.html" >}}
 
@@ -273,3 +292,4 @@ Datadog offers GTM support for Marketplace listings only. To learn more about th
 [24]: https://github.com/DataDog/integrations-extras/tree/master/vantage
 [25]: https://docs.datadoghq.com/developers/integrations/python
 [26]: https://github.com/Datadog/integrations-extras
+[27]: https://docs.datadoghq.com/developers/integrations/agent_integration/
