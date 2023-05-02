@@ -11,7 +11,9 @@ resource "google_compute_instance" "openstack" {
   }
   network_interface {
     network = "default"
+    network_ip = "10.164.0.71"
     access_config {
+      nat_ip = "34.91.117.188"
     }
   }
   metadata = {
