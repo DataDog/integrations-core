@@ -285,7 +285,11 @@ class OpenMetricsScraper:
         # Since we determine `self.parse_metric_families` dynamically from the response and that's done as a
         # side effect inside the `line_streamer` generator, we need to consume the first line in order to
         # trigger that side effect.
-        line_streamer = chain([next(line_streamer)], line_streamer)
+        try:
+            line_streamer = chain([next(line_streamer)], line_streamer)
+        except StopIteration:
+            # If line_streamer is an empty iterator, next(line_streamer) fails.
+            return
 
         for metric in self.parse_metric_families(line_streamer):
             self.submit_telemetry_number_of_total_metric_samples(metric)
