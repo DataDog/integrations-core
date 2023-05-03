@@ -491,6 +491,7 @@ COLUMN_TRANSFORMERS = {
     'temporal_percent': get_temporal_percent,
     'monotonic_gauge': get_monotonic_gauge,
     'tag': get_tag,
+    'tag_none': get_tag,
     'tag_list': get_tag_list,
     'match': get_match,
     'service_check': get_service_check,

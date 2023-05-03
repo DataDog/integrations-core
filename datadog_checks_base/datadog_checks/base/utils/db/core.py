@@ -105,6 +105,9 @@ class QueryExecutor(object):
                         continue
                     elif column_type == 'tag':
                         tags.append(transformer(None, column_value))  # get_tag transformer
+                    elif column_type == 'tag_none':
+                        if column_value:
+                            tags.append(transformer(None, column_value))  # get_tag transformer
                     elif column_type == 'tag_list':
                         tags.extend(transformer(None, column_value))  # get_tag_list transformer
                     else:
