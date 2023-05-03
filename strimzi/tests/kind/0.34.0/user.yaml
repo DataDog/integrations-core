@@ -14,3 +14,11 @@ spec:
           patternType: literal
         operation: Write
         host: "*"
+      - resource:
+          type: topic
+          name: connect-topic
+          patternType: literal
+        operations:
+          - Describe
+          - Read
+        host: "*"
