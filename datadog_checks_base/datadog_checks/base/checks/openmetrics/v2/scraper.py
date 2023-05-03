@@ -81,6 +81,7 @@ class OpenMetricsScraper:
             raise ConfigurationError('Setting `raw_metric_prefix` must be a string')
 
         self.enable_health_service_check = is_affirmative(config.get('enable_health_service_check', True))
+        self.ignore_connection_errors = is_affirmative(config.get('ignore_connection_errors', False))
 
         self.hostname_label = config.get('hostname_label', '')
         if not isinstance(self.hostname_label, str):
@@ -365,11 +366,17 @@ class OpenMetricsScraper:
         Yield the connection line.
         """
 
-        with self.get_connection() as connection:
-            # Media type will be used to select parser dynamically
-            self._content_type = connection.headers.get('Content-Type', '')
-            for line in connection.iter_lines(decode_unicode=True):
-                yield line
+        try:
+            with self.get_connection() as connection:
+                # Media type will be used to select parser dynamically
+                self._content_type = connection.headers.get('Content-Type', '')
+                for line in connection.iter_lines(decode_unicode=True):
+                    yield line
+        except ConnectionError as e:
+            if self.ignore_connection_errors:
+                self.warning("OpenMetrics endpoint is not accessible")
+            else:
+                raise e
 
     def filter_connection_lines(self, line_streamer):
         """
@@ -473,6 +480,7 @@ class OpenMetricsCompatibilityScraper(OpenMetricsScraper):
     def __init__(self, check, config):
         new_config = deepcopy(config)
         new_config.setdefault('enable_health_service_check', new_config.pop('health_service_check', True))
+        new_config.setdefault('ignore_connection_errors', new_config.pop('ignore_connection_errors', False))
         new_config.setdefault('collect_histogram_buckets', new_config.pop('send_histograms_buckets', True))
         new_config.setdefault('non_cumulative_histogram_buckets', new_config.pop('non_cumulative_buckets', False))
         new_config.setdefault('histogram_buckets_as_distributions', new_config.pop('send_distribution_buckets', False))
