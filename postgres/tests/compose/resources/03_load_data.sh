@@ -19,6 +19,18 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO blocking_bob;
 EOSQL
 
+if [[ "$PG_MAJOR" != "9" && "$PG_MAJOR" != "10" ]]; then
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
+    CREATE TABLE test_part (id SERIAL PRIMARY KEY, filler text) PARTITION BY RANGE (id);
+    CREATE TABLE test_part1 PARTITION OF test_part FOR VALUES FROM (MINVALUE) TO (500);
+    CREATE TABLE test_part2 PARTITION OF test_part FOR VALUES FROM (500) TO (MAXVALUE);
+    CREATE INDEX test_part_id ON test_part(id);
+    INSERT INTO test_part (filler) SELECT * FROM generate_series(1, 2000);
+    INSERT INTO test_part (filler) SELECT array_to_string(ARRAY(SELECT chr((65 + round(random() * 50)) :: integer) FROM generate_series(1,3000)), '');
+    VACUUM ANALYZE test_part;
+EOSQL
+fi
+
 for DBNAME in dogs dogs_noschema dogs_nofunc; do
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-EOSQL
