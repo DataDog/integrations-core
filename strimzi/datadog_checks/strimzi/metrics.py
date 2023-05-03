@@ -33,6 +33,7 @@ COMMON_METRICS_MAP = {
     "system_cpu_count": gauge("system.cpu_count"),
     "system_cpu_usage": "system.cpu_usage",
     "system_load_average_1m": "system.load_average_1m",
+    "strimzi_reconciliations": "reconciliations",
     "strimzi_reconciliations_duration_seconds": "reconciliations.duration_seconds",
     "strimzi_reconciliations_duration_seconds_max": "reconciliations.duration_seconds.max",
     "strimzi_reconciliations_periodical": "reconciliations.periodical",
@@ -40,7 +41,6 @@ COMMON_METRICS_MAP = {
 }
 
 CLUSTER_OPERATOR_METRICS_MAP = {
-    "strimzi_reconciliations": "reconciliations",
     "strimzi_reconciliations_already_enqueued": "reconciliations.already_enqueued",
     "strimzi_reconciliations_locked": "reconciliations.locked",
     "strimzi_reconciliations_successful": "reconciliations.successful",
