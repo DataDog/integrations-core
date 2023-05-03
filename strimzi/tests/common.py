@@ -132,7 +132,7 @@ TOPIC_OPERATOR_METRICS = (
     "strimzi.topic_operator.reconciliations.locked.count",
     "strimzi.topic_operator.reconciliations.periodical.count",
     "strimzi.topic_operator.reconciliations.successful.count",
-    "strimzi.topic_operator.resource.paused",
+    "strimzi.topic_operator.resources.paused",
     "strimzi.topic_operator.resource.state",
     "strimzi.topic_operator.resources",
     "strimzi.topic_operator.system.cpu_count",

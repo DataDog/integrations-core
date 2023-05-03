@@ -90,7 +90,7 @@ TOPIC_OPERATOR_METRICS_MAP = {
     "strimzi_reconciliations_locked": "reconciliations.locked",
     "strimzi_reconciliations_successful": "reconciliations.successful",
     "strimzi_resource_state": "resource.state",
-    "strimzi_resources_paused": "resource.paused",
+    "strimzi_resources_paused": "resources.paused",
     "vertx_http_server_active_connections": "vertx.http_server.active_connections",
     "vertx_http_server_active_requests": "vertx.http_server.active_requests",
     "vertx_http_server_bytes_written": "vertx.http_server.bytes_written",

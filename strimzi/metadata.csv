@@ -108,7 +108,7 @@ strimzi.topic_operator.reconciliations.failed.count,count,,,,description,0,strim
 strimzi.topic_operator.reconciliations.locked.count,count,,,,description,0,strimzi,,
 strimzi.topic_operator.reconciliations.periodical.count,count,,,,description,0,strimzi,,
 strimzi.topic_operator.reconciliations.successful.count,count,,,,description,0,strimzi,,
-strimzi.topic_operator.resource.paused,gauge,,,,description,0,strimzi,,
+strimzi.topic_operator.resources.paused,gauge,,,,description,0,strimzi,,
 strimzi.topic_operator.resource.state,gauge,,,,description,0,strimzi,,
 strimzi.topic_operator.resources,gauge,,,,description,0,strimzi,,
 strimzi.topic_operator.system.cpu_count,gauge,,,,description,0,strimzi,,
