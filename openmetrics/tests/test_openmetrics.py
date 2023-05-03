@@ -101,3 +101,12 @@ def test_openmetrics_use_latest_spec(aggregator, dd_run_check, mock_http_respons
     assert scraper.http.options['headers']['Accept'] == (
         'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
     )
+
+
+def test_openmetrics_empty_response(aggregator, dd_run_check, mock_http_response, openmetrics_payload, caplog):
+    mock_http_response("")
+
+    check = OpenMetricsCheck('openmetrics', {}, [instance_new])
+    dd_run_check(check)
+
+    aggregator.assert_all_metrics_covered()
