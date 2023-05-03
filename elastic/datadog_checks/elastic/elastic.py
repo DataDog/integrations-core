@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import re
 import time
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from copy import deepcopy
 
 import requests
@@ -25,6 +25,13 @@ from .metrics import (
 )
 
 REGEX = r'(?<!\\)\.'  # This regex string is used to traverse through nested dictionaries for JSON responses
+
+DatadogESHealth = namedtuple('DatadogESHealth', ['status', 'reverse_status', 'tag'])
+ES_HEALTH_TO_DD_STATUS = {
+    'green': DatadogESHealth(AgentCheck.OK, AgentCheck.CRITICAL, 'OK'),
+    'yellow': DatadogESHealth(AgentCheck.WARNING, AgentCheck.WARNING, 'WARN'),
+    'red': DatadogESHealth(AgentCheck.CRITICAL, AgentCheck.OK, 'ALERT'),
+}
 
 
 class AuthenticationError(requests.exceptions.HTTPError):
@@ -202,14 +209,8 @@ class ESCheck(AgentCheck):
             return urljoin(self._config.url, url)
 
     def _get_index_metrics(self, admin_forwarder, version, base_tags):
-        cat_url = '/_cat/indices?format=json&bytes=b'
-        index_url = self._join_url(cat_url, admin_forwarder)
-        index_resp = self._get_data(index_url)
-        index_stats_metrics = index_stats_for_version(version)
-        health_stat = {'green': 0, 'yellow': 1, 'red': 2}
-        reversed_health_stat = {'red': 0, 'yellow': 1, 'green': 2}
+        index_resp = self._get_data(self._join_url('/_cat/indices?format=json&bytes=b', admin_forwarder))
         for idx in index_resp:
-            tags = base_tags + ['index_name:' + idx['index']]
             # we need to remap metric names because the ones from elastic
             # contain dots and that would confuse `_process_metric()` (sic)
             index_data = {
@@ -222,11 +223,11 @@ class ESCheck(AgentCheck):
                 'health': idx.get('health'),
             }
 
-            # Convert the health status value
+            # Convert Elastic health to Datadog status.
             if index_data['health'] is not None:
-                status = index_data['health'].lower()
-                index_data['health'] = health_stat[status]
-                index_data['health_reverse'] = reversed_health_stat[status]
+                dd_health = ES_HEALTH_TO_DD_STATUS[index_data['health'].lower()]
+                index_data['health'] = dd_health.status
+                index_data['health_reverse'] = dd_health.reverse_status
 
             # Ensure that index_data does not contain None values
             for key, value in list(iteritems(index_data)):
@@ -234,9 +235,8 @@ class ESCheck(AgentCheck):
                     del index_data[key]
                     self.log.debug("The index %s has no metric data for %s", idx['index'], key)
 
-            for metric in index_stats_metrics:
-                # metric description
-                desc = index_stats_metrics[metric]
+            tags = base_tags + ['index_name:' + idx['index']]
+            for metric, desc in iteritems(index_stats_for_version(version)):
                 self._process_metric(index_data, metric, *desc, tags=tags)
 
     def _get_urls(self, version):
@@ -400,16 +400,7 @@ class ESCheck(AgentCheck):
             self._process_metric(data, metric, *desc, tags=base_tags)
 
         # Process the service check
-        if cluster_status == 'green':
-            status = AgentCheck.OK
-            data['tag'] = "OK"
-        elif cluster_status == 'yellow':
-            status = AgentCheck.WARNING
-            data['tag'] = "WARN"
-        else:
-            status = AgentCheck.CRITICAL
-            data['tag'] = "ALERT"
-
+        dd_health = ES_HEALTH_TO_DD_STATUS.get(cluster_status, ES_HEALTH_TO_DD_STATUS['red'])
         msg = (
             "{tag} on cluster \"{cluster_name}\" "
             "| active_shards={active_shards} "
@@ -417,7 +408,7 @@ class ESCheck(AgentCheck):
             "| relocating_shards={relocating_shards} "
             "| unassigned_shards={unassigned_shards} "
             "| timed_out={timed_out}".format(
-                tag=data.get('tag'),
+                tag=dd_health.tag,
                 cluster_name=data.get('cluster_name'),
                 active_shards=data.get('active_shards'),
                 initializing_shards=data.get('initializing_shards'),
@@ -426,8 +417,7 @@ class ESCheck(AgentCheck):
                 timed_out=data.get('timed_out'),
             )
         )
-
-        self.service_check(self.SERVICE_CHECK_CLUSTER_STATUS, status, message=msg, tags=service_check_tags)
+        self.service_check(self.SERVICE_CHECK_CLUSTER_STATUS, dd_health.status, message=msg, tags=service_check_tags)
 
     def _process_policy_data(self, data, version, base_tags):
         for policy, policy_data in iteritems(data):
