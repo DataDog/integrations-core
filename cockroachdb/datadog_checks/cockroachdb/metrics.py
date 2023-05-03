@@ -363,12 +363,21 @@ METRIC_MAP = {
     'jobs_row_level_ttl_rows_selected': 'jobs.row.level.ttl.rows_selected',
     'schedules_BACKUP_last_completed_time': 'schedules.backup.last_completed_time',
     'schedules_scheduled_row_level_ttl_executor_failed': 'schedules.scheduled.row.level.ttl.executor_failed',
+    # Metrics that require secure mode:
     'security_certificate_expiration_ca': 'security.certificate_expiration.ca',
     'security_certificate_expiration_client_ca': 'security.certificate_expiration.client_ca',
     'security_certificate_expiration_ui': 'security.certificate_expiration.ui',
     'security_certificate_expiration_ui_ca': 'security.certificate_expiration.ui_ca',
     'security_certificate_expiration_node': 'security.certificate_expiration.node',
     'security_certificate_expiration_node_client': 'security.certificate_expiration.node_client',
+    # New metrics in v23:
+    'admission_io_overload': 'admission.io.overload',
+    'queue_replicate_replacedecommissioningreplica_error': 'queue.replicate.replacedecommissioningreplica.error',
+    'jobs_auto_create_stats_currently_paused': 'jobs.auto.create.stats.currently_paused',
+    'jobs_backup_currently_paused': 'jobs.backup.currently_paused',
+    'jobs_changefeed_currently_paused': 'jobs.changefeed.currently_paused',
+    'jobs_changefeed_protected_age_sec': 'jobs.changefeed.protected_age_sec',
+    'jobs_row_level_ttl_currently_paused': 'jobs.row.level.ttl.currently_paused',
 }
 
 
