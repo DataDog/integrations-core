@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+
 def metric_with_type(name, type):
     return {"name": name, "type": type}
 
@@ -112,7 +113,5 @@ TOPIC_OPERATOR_METRICS_MAP = {
 }
 TOPIC_OPERATOR_METRICS_MAP.update(COMMON_METRICS_MAP)
 
-USER_OPERATOR_METRICS_MAP = {
-    "strimzi_reconciliations_failed": "reconciliations.failed"
-}
+USER_OPERATOR_METRICS_MAP = {"strimzi_reconciliations_failed": "reconciliations.failed"}
 USER_OPERATOR_METRICS_MAP.update(COMMON_METRICS_MAP)
