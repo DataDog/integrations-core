@@ -15,6 +15,7 @@ from datadog_checks.elastic.config import from_instance
 from datadog_checks.elastic.metrics import (
     CAT_ALLOCATION_METRICS,
     CLUSTER_PENDING_TASKS,
+    INDEX_SEARCH_STATS,
     STATS_METRICS,
     ADDITIONAL_METRICS_1_x,
     health_stats_for_version,
@@ -413,7 +414,8 @@ def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
         pytest.skip("Index metrics are only tested in version 1.0.0+")
 
     elastic_check.check(None)
-    for m_name in index_stats_for_version(es_version):
+    expected_metrics = list(index_stats_for_version(es_version)) + [name for name, _ in INDEX_SEARCH_STATS]
+    for m_name in expected_metrics:
         aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:testindex'])
         aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:.testindex'])
     aggregator.assert_metrics_using_metadata(
