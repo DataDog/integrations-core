@@ -416,6 +416,7 @@ def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
     for m_name in index_stats_for_version(es_version):
         aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:testindex'])
         aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:.testindex'])
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=['elasticsearch.custom.metric'])
 
 
 @pytest.mark.integration
