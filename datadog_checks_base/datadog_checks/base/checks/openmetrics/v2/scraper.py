@@ -8,6 +8,7 @@ from copy import copy, deepcopy
 from itertools import chain
 from math import isinf, isnan
 from typing import List  # noqa: F401
+from requests.exceptions import ConnectionError
 
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
@@ -374,7 +375,7 @@ class OpenMetricsScraper:
                     yield line
         except ConnectionError as e:
             if self.ignore_connection_errors:
-                self.warning("OpenMetrics endpoint is not accessible")
+                self.log.warning(f"OpenMetrics endpoint {self.endpoint} is not accessible")
             else:
                 raise e
 
