@@ -28,6 +28,7 @@ from .util import (
     QUERY_PG_STAT_DATABASE,
     QUERY_PG_STAT_DATABASE_CONFLICTS,
     QUERY_PG_STAT_WAL_RECEIVER,
+    QUERY_PG_UPTIME,
     REPLICATION_METRICS,
     SLRU_METRICS,
     DatabaseConfigurationError,  # noqa: F401
@@ -153,7 +154,7 @@ class PostgreSql(AgentCheck):
                 q_pg_stat_database["query"] += " AND datname in('{}')".format(self._config.dbname)
                 q_pg_stat_database_conflicts["query"] += " AND datname in('{}')".format(self._config.dbname)
 
-            queries.extend([q_pg_stat_database, q_pg_stat_database_conflicts])
+            queries.extend([q_pg_stat_database, q_pg_stat_database_conflicts, QUERY_PG_UPTIME])
 
         if self.version >= V10:
             queries.append(QUERY_PG_STAT_WAL_RECEIVER)
@@ -574,7 +575,7 @@ class PostgreSql(AgentCheck):
                     try:
                         db.close()
                     except Exception:
-                        self._log.exception("failed to close DB connection for db=%s", dbname)
+                        self.log.exception("failed to close DB connection for db=%s", dbname)
                 self._db_pool[dbname] = None
 
     def _collect_custom_queries(self, tags):

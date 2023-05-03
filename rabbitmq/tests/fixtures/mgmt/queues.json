@@ -341,7 +341,7 @@
         "rate": 0.0
     },
     "messages_unacknowledged_ram": 0,
-    "name": "config/aliveness-test",
+    "name": "aliveness-test",
     "node": "rabbit@dd2fdf37013a",
     "operator_policy": null,
     "policy": null,
@@ -353,7 +353,7 @@
     "single_active_consumer_tag": null,
     "state": "running",
     "type": "classic",
-    "vhost": "/"
+    "vhost": "config"
 }, {
     "arguments": {},
     "auto_delete": false,
@@ -422,7 +422,7 @@
         "rate": 0.0
     },
     "messages_unacknowledged_ram": 0,
-    "name": "config/foo.updated-configs.2023-01-18",
+    "name": "updated-configs.2023-01-18",
     "node": "rabbit@dd2fdf37013a",
     "operator_policy": null,
     "policy": null,
@@ -434,7 +434,7 @@
     "single_active_consumer_tag": null,
     "state": "running",
     "type": "classic",
-    "vhost": "/"
+    "vhost": "config"
 }, {
     "arguments": {},
     "auto_delete": false,

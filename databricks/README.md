@@ -19,11 +19,15 @@ Configure the Spark integration to monitor your Apache Spark Cluster on Databric
 2. Copy and run the contents into a notebook. The notebook creates an init script that installs a Datadog Agent on your clusters.
     The notebook only needs to be run once to save the script as a global configuration. 
     - Set `<init-script-folder>` path to where you want your init scripts to be saved in.
-        
+<!-- partial
+{{% site-region region="us,us3,us5,eu,gov,ap1" %}}
+
 3. Configure a new Databricks cluster with the cluster-scoped init script path using the UI, Databricks CLI, or invoking the Clusters API.
     - Set the `DD_API_KEY` environment variable in the cluster's Advanced Options with your Datadog API key.
     - Add `DD_ENV` environment variable under Advanced Options to add a global environment tag to better identify your clusters.
-    - Set `DD_SITE` to your [site URL][11].
+    - Set `DD_SITE` to your site: {{< region-param key="dd_site" code="true" >}}.
+{{% /site-region %}}
+partial -->
 
 
 #### Standard cluster
@@ -362,7 +366,6 @@ Need help? Contact [Datadog support][10].
 [8]: https://docs.datadoghq.com/integrations/spark/#metrics
 [9]: https://docs.datadoghq.com/integrations/spark/#service-checks
 [10]: https://docs.datadoghq.com/help/
-[11]: https://docs.datadoghq.com/getting_started/site/
 [12]: https://docs.databricks.com/notebooks/ipywidgets.html#requirements
 [13]: https://github.com/DataDog/datadog-agent/blob/7.43.x/pkg/config/config_template.yaml#L1262-L1266
 [14]: https://docs.databricks.com/notebooks/ipywidgets.html

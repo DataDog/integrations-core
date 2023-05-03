@@ -275,6 +275,7 @@ class SqlserverActivity(DBMAsyncJob):
             "collection_interval": self.collection_interval,
             "ddtags": self.tags,
             "timestamp": time.time() * 1000,
+            "cloud_metadata": self.check.cloud_metadata,
             "sqlserver_activity": active_sessions,
             "sqlserver_connections": active_connections,
         }

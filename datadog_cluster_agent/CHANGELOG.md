@@ -5,7 +5,7 @@
 * [Added] Add `external_metrics.api_elapsed` and `external_metrics.api_requests` metrics. See [#14369](https://github.com/DataDog/integrations-core/pull/14369).
 * [Added] Add `admission_webhooks.response_duration` metric. See [#14287](https://github.com/DataDog/integrations-core/pull/14287).
 
-## 2.5.0 / 2023-03-03
+## 2.5.0 / 2023-03-03 / Agent 7.44.0
 
 * [Added] Add rc and patcher metrics. See [#13911](https://github.com/DataDog/integrations-core/pull/13911).
 

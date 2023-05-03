@@ -9,7 +9,7 @@
 * [Added] Add new sessions metrics from PG14. See [#13723](https://github.com/DataDog/integrations-core/pull/13723).
 * [Fixed] Reduce the number of idle connections opened when running explain plans across databases. See [#14164](https://github.com/DataDog/integrations-core/pull/14164).
 
-## 13.4.0 / 2023-03-03
+## 13.4.0 / 2023-03-03 / Agent 7.44.0
 
 * [Added] Add resolved_hostname to metadata. See [#14092](https://github.com/DataDog/integrations-core/pull/14092).
 * [Added] Add `postgresql.replication_slot.*` metrics. See [#14013](https://github.com/DataDog/integrations-core/pull/14013).
