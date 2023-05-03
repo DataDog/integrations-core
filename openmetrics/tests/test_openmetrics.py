@@ -28,13 +28,12 @@ instance_new_strict = {
     'use_latest_spec': True,
 }
 
-instance_unavailable =  {
+instance_unavailable = {
     'openmetrics_endpoint': 'http://127.0.0.1:4243/metrics',
     'namespace': 'openmetrics',
     'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1'],
     'ignore_connection_errors': True,
 }
-
 
 
 @pytest.mark.parametrize('poll_mock_fixture', ['prometheus_poll_mock', 'openmetrics_poll_mock'])
