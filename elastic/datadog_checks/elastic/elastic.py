@@ -398,25 +398,19 @@ class ESCheck(AgentCheck):
             self.log.debug("Metric not found: %s -> %s", path, metric)
 
     def _process_health_data(self, data, version, base_tags, service_check_tags):
-        cluster_status = data.get('status')
-        if not self.cluster_status.get(self._config.url):
-            self.cluster_status[self._config.url] = cluster_status
-            if cluster_status in ["yellow", "red"]:
-                event = self._create_event(cluster_status, tags=base_tags)
-                self.event(event)
+        prev_status = self.cluster_status.get(self._config.url)
+        self.cluster_status[self._config.url] = current_status = data.get('status')
+        if self._config.submit_events and (
+            (prev_status is None and current_status in ["yellow", "red"])  # Cluster starts in bad status.
+            or current_status != prev_status
+        ):
+            self.event(self._create_event(current_status, tags=base_tags))
 
-        if cluster_status != self.cluster_status.get(self._config.url):
-            self.cluster_status[self._config.url] = cluster_status
-            event = self._create_event(cluster_status, tags=base_tags)
-            self.event(event)
-
-        cluster_health_metrics = health_stats_for_version(version)
-
-        for metric, desc in iteritems(cluster_health_metrics):
+        for metric, desc in iteritems(health_stats_for_version(version)):
             self._process_metric(data, metric, *desc, tags=base_tags)
 
         # Process the service check
-        dd_health = ES_HEALTH_TO_DD_STATUS.get(cluster_status, ES_HEALTH_TO_DD_STATUS['red'])
+        dd_health = ES_HEALTH_TO_DD_STATUS.get(current_status, ES_HEALTH_TO_DD_STATUS['red'])
         msg = (
             "{tag} on cluster \"{cluster_name}\" "
             "| active_shards={active_shards} "

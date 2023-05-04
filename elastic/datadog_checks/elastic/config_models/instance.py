@@ -110,6 +110,7 @@ class InstanceConfig(BaseModel):
     service: Optional[str]
     skip_proxy: Optional[bool]
     slm_stats: Optional[bool]
+    submit_events: Optional[bool]
     tags: Optional[Sequence[str]]
     timeout: Optional[float]
     tls_ca_cert: Optional[str]

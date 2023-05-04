@@ -453,6 +453,32 @@ def test_health_event(dd_environment, aggregator):
 
 
 @pytest.mark.integration
+def test_health_event_disabled(dd_environment, aggregator):
+    """
+    Don't submit an event if user disables event submission.
+    """
+    dummy_tags = ['elastique:recherche']
+    instance = {
+        'url': URL,
+        'username': USER,
+        'password': PASSWORD,
+        'tags': dummy_tags,
+        'tls_verify': False,
+        'submit_events': False,
+    }
+    elastic_check = ESCheck('elastic', {}, instances=[instance])
+    elastic_check._get_es_version()
+
+    # Should be yellow at first
+    requests.put(URL + '/_settings', data='{"index": {"number_of_replicas": 100}', verify=False)
+
+    elastic_check.check(None)
+
+    assert not aggregator.events
+    aggregator.assert_service_check('elasticsearch.cluster_health')
+
+
+@pytest.mark.integration
 def test_metadata(dd_environment, aggregator, elastic_check, instance, version_metadata, datadog_agent):
     elastic_check.check_id = 'test:123'
     elastic_check.check(None)
