@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.strimzi import StrimziCheck
-from tests.common import CLUSTER_OPERATOR_METRICS, TOPIC_OPERATOR_METRICS, USER_OPERATOR_METRICS, FLAKY_E2E_METRICS
+from tests.common import CLUSTER_OPERATOR_METRICS, FLAKY_E2E_METRICS, TOPIC_OPERATOR_METRICS, USER_OPERATOR_METRICS
 
 pytestmark = pytest.mark.e2e
 
