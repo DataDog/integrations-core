@@ -197,3 +197,9 @@ USER_OPERATOR_METRICS = (
     "strimzi.user_operator.system.cpu_usage",
     "strimzi.user_operator.system.load_average_1m",
 )
+
+FLAKY_E2E_METRICS = (
+    "strimzi.cluster_operator.vertx.http_server.errors.count",
+    "strimzi.cluster_operator.vertx.http_server.request_resets.count",
+    "strimzi.topic_operator.vertx.http_server.errors.count",
+)
