@@ -19,6 +19,8 @@ logger = logging.getLogger(__name__)
 
 MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR')
 MYSQL_VERSION = os.getenv('MYSQL_VERSION')
+print(f'Version: {MYSQL_VERSION}, Flavor: {MYSQL_FLAVOR}')
+logger.debug(f'Version: {MYSQL_VERSION}, Flavor: {MYSQL_FLAVOR}')
 COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
 
@@ -404,14 +406,15 @@ def _add_dog_user(conn):
     cur.execute("GRANT PROCESS ON *.* TO 'dog'@'%'")
     cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%'")
     cur.execute("GRANT SELECT ON performance_schema.* TO 'dog'@'%'")
-    if MYSQL_FLAVOR == 'mysql' and MYSQL_VERSION == '8.0':
-        cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
-    elif MYSQL_FLAVOR == 'mariadb' and MYSQL_VERSION >= '10.5':
+    
+    #refactor try older mysql.user table first. if this fails, go to newer ALTER USER
+    try:
+        cur.execute("UPDATE mysql.user SET max_user_connections = 0 WHERE user='dog' AND host='%'")
+        if MYSQL_FLAVOR == 'mysql' and MYSQL_VERSION != '8.0':
+            cur.execute("FLUSH PRIVILEGES")
+    except Exception:
         cur.execute("GRANT SLAVE MONITOR ON *.* TO 'dog'@'%'")
         cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
-    else:
-        cur.execute("UPDATE mysql.user SET max_user_connections = 0 WHERE user='dog' AND host='%'")
-        cur.execute("FLUSH PRIVILEGES")
 
 
 def _add_bob_user(conn):
