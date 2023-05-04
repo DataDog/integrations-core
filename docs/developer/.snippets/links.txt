@@ -79,6 +79,7 @@
 [gitlab-home]: https://gitlab.com
 [gofmt-docs]: https://golang.org/cmd/gofmt
 [homebrew-home]: https://brew.sh
+[hatch]: https://hatch.pypa.io/latest/
 [icons-fontawesome]: https://fontawesome.com/icons
 [icons-material]: https://google.github.io/material-design-icons/
 [icons-octicons]: https://primer.style/octicons/
