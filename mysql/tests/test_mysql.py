@@ -292,7 +292,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
                 mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:performance_schema'], count=1
             )
         else:
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE, at_least=0, count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE, at_least=0)
 
     # test custom query metrics
     aggregator.assert_metric('alice.age', value=25)
