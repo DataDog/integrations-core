@@ -124,7 +124,7 @@ class Query(object):
                 # this we set the context to None. https://www.python.org/dev/peps/pep-0409/
                 raise_from(type(e)(error), None)
             else:
-                if column_type in ('tag', 'tag_list', 'tag_none'):
+                if column_type in ('tag', 'tag_list', 'tag_not_none'):
                     column_data.append((column_name, (column_type, transformer)))
                 else:
                     # All these would actually submit data. As that is the default case, we represent it as
@@ -134,7 +134,7 @@ class Query(object):
         submission_transformers = column_transformers.copy()  # type: Dict[str, Transformer]
         submission_transformers.pop('tag')
         submission_transformers.pop('tag_list')
-        submission_transformers.pop('tag_none')
+        submission_transformers.pop('tag_not_none')
 
         extras = self.query_data.get('extras', [])  # type: List[Dict[str, Any]]
         if not isinstance(extras, list):
