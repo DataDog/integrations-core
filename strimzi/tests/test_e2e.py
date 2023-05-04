@@ -12,7 +12,6 @@ pytestmark = pytest.mark.e2e
 
 def test_check(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
-
     for endpoint_metrics in (CLUSTER_OPERATOR_METRICS, TOPIC_OPERATOR_METRICS, USER_OPERATOR_METRICS):
         for expected_metric in endpoint_metrics:
             if expected_metric in FLAKY_E2E_METRICS:

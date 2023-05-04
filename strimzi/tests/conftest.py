@@ -43,6 +43,7 @@ def setup_strimzi():
                 "kafka",
             ]
         )
+    
 
 
 @pytest.fixture(scope='session')
