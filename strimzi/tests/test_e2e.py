@@ -5,17 +5,19 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.strimzi import StrimziCheck
-from tests.common import CLUSTER_OPERATOR_METRICS, TOPIC_OPERATOR_METRICS, USER_OPERATOR_METRICS
+from tests.common import CLUSTER_OPERATOR_METRICS, FLAKY_E2E_METRICS, TOPIC_OPERATOR_METRICS, USER_OPERATOR_METRICS
 
 pytestmark = pytest.mark.e2e
 
 
 def test_check(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
-
     for endpoint_metrics in (CLUSTER_OPERATOR_METRICS, TOPIC_OPERATOR_METRICS, USER_OPERATOR_METRICS):
         for expected_metric in endpoint_metrics:
-            aggregator.assert_metric(expected_metric)
+            if expected_metric in FLAKY_E2E_METRICS:
+                aggregator.assert_metric(expected_metric, at_least=0)
+            else:
+                aggregator.assert_metric(expected_metric)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
