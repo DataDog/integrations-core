@@ -82,14 +82,3 @@ def test_openmetrics_validate_repo(repo, expected_message, ddev, helpers, config
     result = ddev("validate", "openmetrics")
 
     assert expected_message in helpers.remove_trailing_spaces(result.output)
-
-
-@pytest.mark.parametrize(
-    "integrations",
-    [
-        pytest.param("", id="Empty integrations parameter"),
-        pytest.param("all", id="All integrations parameter"),
-    ],
-)
-def test_openmetrics_validate_all_integrations(integrations):
-    pass
