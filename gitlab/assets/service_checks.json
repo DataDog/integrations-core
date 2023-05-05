@@ -102,7 +102,7 @@
             "host",
             "endpoint"
         ],
-        "name": "GitLab readiness - master",
+        "name": "GitLab readiness - Master",
         "description": "Returns `CRITICAL` if master is not ready."
     },
     {
@@ -118,7 +118,7 @@
             "host",
             "endpoint"
         ],
-        "name": "GitLab readiness - database",
+        "name": "GitLab readiness - Database",
         "description": "Returns `CRITICAL` if the database is not ready."
     },
     {
@@ -134,7 +134,7 @@
             "host",
             "endpoint"
         ],
-        "name": "GitLab readiness - cache",
+        "name": "GitLab readiness - Cache",
         "description": "Returns `CRITICAL` if the cache is not ready."
     },
     {
@@ -150,7 +150,7 @@
             "host",
             "endpoint"
         ],
-        "name": "GitLab readiness - database_load_balancing",
+        "name": "GitLab readiness - Database load balancing",
         "description": "Returns `CRITICAL` if the database load balancing is not ready."
     },
     {
@@ -166,7 +166,7 @@
             "host",
             "endpoint"
         ],
-        "name": "GitLab readiness - queues",
+        "name": "GitLab readiness - Queues",
         "description": "Returns `CRITICAL` if the queues are not ready."
     },
     {
@@ -182,7 +182,7 @@
             "host",
             "endpoint"
         ],
-        "name": "GitLab readiness - rate_limiting",
+        "name": "GitLab readiness - Rate limiting",
         "description": "Returns `CRITICAL` if the rate limiting is not ready."
     },
     {
@@ -198,7 +198,7 @@
             "host",
             "endpoint"
         ],
-        "name": "GitLab readiness - repository_cache",
+        "name": "GitLab readiness - Repository cache",
         "description": "Returns `CRITICAL` if the repository cache is not ready."
     },
     {
@@ -214,7 +214,7 @@
             "host",
             "endpoint"
         ],
-        "name": "GitLab readiness - cluster_rate_limiting",
+        "name": "GitLab readiness - Cluster rate limiting",
         "description": "Returns `CRITICAL` if the cluster rate limiting is not ready."
     },
     {
@@ -230,7 +230,7 @@
             "host",
             "endpoint"
         ],
-        "name": "GitLab readiness - sessions",
+        "name": "GitLab readiness - Sessions",
         "description": "Returns `CRITICAL` if the sessions are not ready."
     },
     {
@@ -246,7 +246,7 @@
             "host",
             "endpoint"
         ],
-        "name": "GitLab readiness - shared_state",
+        "name": "GitLab readiness - Shared state",
         "description": "Returns `CRITICAL` if the shared state is not ready."
     },
     {
@@ -262,7 +262,7 @@
             "host",
             "endpoint"
         ],
-        "name": "GitLab readiness - trace_chunks",
+        "name": "GitLab readiness - Trace chunks",
         "description": "Returns `CRITICAL` if the trace chunks are not ready."
     },
     {
@@ -278,7 +278,7 @@
             "host",
             "endpoint"
         ],
-        "name": "GitLab readiness - gitaly",
+        "name": "GitLab readiness - Gitaly",
         "description": "Returns `CRITICAL` if gitaly is not ready."
     },
     {
@@ -294,7 +294,7 @@
             "host",
             "endpoint"
         ],
-        "name": "GitLab readiness - redis",
+        "name": "GitLab readiness - Redis",
         "description": "Returns `CRITICAL` if redis is not ready."
     }
 ]
