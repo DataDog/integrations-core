@@ -72,7 +72,7 @@ def dd_environment():
             requests.get(GITLAB_URL)
         sleep(2)
 
-        yield CONFIG
+        yield to_omv2_config(CONFIG)
 
 
 @pytest.fixture()
@@ -221,9 +221,10 @@ def get_auth_config():
 
 
 def to_omv2_config(config):
-    instance = config['instances'][0]
+    new_config = copy.deepcopy(config)
+    instance = new_config['instances'][0]
     instance["openmetrics_endpoint"] = instance["prometheus_url"]
-    return config
+    return new_config
 
 
 @pytest.fixture
