@@ -453,7 +453,10 @@ def test_additional_status(aggregator, dd_run_check, instance_additional_status)
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_additional_status])
     dd_run_check(mysql_check)
 
-    aggregator.assert_metric('mysql.innodb.rows_read', metric_type=1, tags=tags.METRIC_TAGS_WITH_RESOURCE)
+    #MariaDB 10.10 seems to take out the information that we use for gathering this metric if they're at 0
+    #Removing this from the test (the metric is optional) for the time being
+    if (MYSQL_FLAVOR.lower() == 'mariadb' and MYSQL_VERSION_PARSED < parse_version('10.10')) or MYSQL_FLAVOR.lower() == 'mysql':
+        aggregator.assert_metric('mysql.innodb.rows_read', metric_type=1, tags=tags.METRIC_TAGS_WITH_RESOURCE) 
     aggregator.assert_metric('mysql.innodb.row_lock_time', metric_type=1, tags=tags.METRIC_TAGS_WITH_RESOURCE)
 
 
