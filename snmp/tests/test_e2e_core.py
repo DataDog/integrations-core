@@ -481,14 +481,14 @@ def test_e2e_cisco_legacy_wlc(dd_agent_check):
         'ap_location:default location',
         'ap_name:DD-AP-1',
         'ap_ip_address:1.1.1.1',
-        'mac_address:  00 00 00 00 00 01',
+        'ap_mac_address:  00 00 00 00 00 01',
     ] + tags
 
     ap_status_tags = ['ap_oper_status:associated', 'ap_admin_status:enable'] + ap_tags
 
     aggregator.assert_metric("snmp.accessPoints".format(), metric_type=aggregator.GAUGE, tags=ap_status_tags, value=1)
 
-    if_ap_tags = ["slot_id:0"] + ap_tags
+    if_ap_tags = ["ap_if_slot_id:0"] + ap_tags
     if_ap_status_tags = ['ap_if_oper_status:up', 'ap_if_admin_status:enable'] + if_ap_tags
 
     AP_IF_GAUGE_METRICS = [
@@ -502,7 +502,7 @@ def test_e2e_cisco_legacy_wlc(dd_agent_check):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_ap_tags)
 
     aggregator.assert_metric(
-        "snmp.accessPointsIf".format(), metric_type=aggregator.GAUGE, tags=if_ap_status_tags, value=1
+        "snmp.accessPointInterface".format(), metric_type=aggregator.GAUGE, tags=if_ap_status_tags, value=1
     )
 
     aggregator.assert_metric('snmp.bsnApIfNoOfUsers', metric_type=aggregator.GAUGE, tags=if_ap_tags)
