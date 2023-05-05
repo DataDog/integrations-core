@@ -1,39 +1,14 @@
 import pytest
-# calico = v2
-# cilium has v1 and v2
-# maybe create a fake check without DEFAULT_METRIC_LIMIT?
 
-'''
-class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
-    __NAMESPACE__ = 'arangodb'
-    def __init__(self, name, init_config, instances):
-        super(ArangodbCheck, self).__init__(name, init_config, instances)
-'''
-
-# Test cases
-# If core or extras, should do validation
-# if openmetrics v1 or v2, then should have DEFAULT_METRIC_LIMIT = 0
-# if there are no DEFAULT_METRIC_LIMIT, then should output error
-    # Error for single integration
-    # error for multiple integrations
-# if "ddev validate openmetrics", should include all integrations
-# if "ddev validate openmetrics all", should include all integrations
-# if "ddev validate openmetrics cilium", should include only arangodb
 
 @pytest.mark.parametrize(
-    "check_name", 
+    "check_name, check_count",
     [
-        pytest.param(
-            "aerospike",
-            id="Aerospike check.py OpenMetricsV2"
-        ),
-        pytest.param(
-            "amazon_msk",
-            id="Amazon MSK amazon_msk.py OpenMetricsV1"
-        ),
-    ]
+        pytest.param("aerospike", 1, id="Aerospike check.py OpenMetricsV2"),
+        pytest.param("amazon_msk", 2, id="Amazon MSK amazon_msk.py OpenMetricsV1 and V2"),
+    ],
 )
-def test_openmetrics_pass_single_parameter(ddev, check_name, helpers, network_replay):
+def test_openmetrics_pass_single_parameter(ddev, check_name, check_count, helpers, network_replay):
     # Not completely sure what this is doing
     network_replay('fixtures/openmetrics/metric_limit/success.yaml', record_mode='none')
     result = ddev("validate", "openmetrics", check_name)
@@ -41,46 +16,80 @@ def test_openmetrics_pass_single_parameter(ddev, check_name, helpers, network_re
     assert result.exit_code == 0, result.output
 
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Validating DEFAULT_METRIC_LIMIT = 0 for OpenMetrics integrations ...
         OpenMetrics Metric limit
 
-        Passed: 1
+        Passed: {check_count}
         """
     )
 
-@pytest.mark.parametrize(
-    "check_name, display_name, check_file", 
-    [
-        pytest.param(
-            "arangodb",
-            "ArangoDB",
-            "check.py",
-            id="Aerospike check.py OpenMetricsV2"
-        ),
-        pytest.param(
-            "amazon_msk",
-            "Amazon MSK",
-            "amazon_msk.py",
-            id="Amazon MSK amazon_msk.py OpenMetricsV1"
-        ),
-    ]
-)
-def test_openmetrics_fail_single_parameter(ddev, check_name, display_name, check_file, helpers, network_replay):
+
+def test_openmetrics_fail_single_parameter(ddev, helpers, repository, network_replay):
+    missing_metric_limit = '''
+            class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
+            __NAMESPACE__ = 'arangodb'
+            def __init__(self, name, init_config, instances):
+                super(ArangodbCheck, self).__init__(name, init_config, instances)
+        '''
     network_replay('fixtures/openmetrics/metric_limit/fail.yaml', record_mode='none')
-    result = ddev("validate", "openmetrics", check_name)
+
+    check = "arangodb"
+    check_file = repository.path / check / "datadog_checks" / check / "check.py"
+
+    with open(check_file, "w") as f:
+        f.write(missing_metric_limit)
+
+    result = ddev("validate", "openmetrics", "arangodb")
 
     assert result.exit_code == 1, result.output
 
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        f"""
+        """
         Validating DEFAULT_METRIC_LIMIT = 0 for OpenMetrics integrations ...
         OpenMetrics Metric limit
-        └── {display_name}
+        └── ArangoDB
             └── check.py
-                
+
                 `DEFAULT_METRIC_LIMIT = 0` is missing
 
         Errors: 1
         """
     )
+
+
+@pytest.mark.parametrize(
+    "repo, expected_message",
+    [
+        pytest.param("core", "Passed:", id="Core integrations"),
+        pytest.param("extras", "Passed:", id="Extras integrations"),
+        pytest.param(
+            "marketplace",
+            "OpenMetrics validations is only enabled for core or extras integrations",
+            id="Marketplace integrations",
+        ),
+        pytest.param(
+            "internal",
+            "OpenMetrics validations is only enabled for core or extras integrations",
+            id="Internal integrations",
+        ),
+    ],
+)
+def test_openmetrics_validate_repo(repo, expected_message, ddev, helpers, config_file):
+    config_file.model.repo = repo
+    config_file.save()
+
+    result = ddev("validate", "openmetrics")
+
+    assert expected_message in helpers.remove_trailing_spaces(result.output)
+
+
+@pytest.mark.parametrize(
+    "integrations",
+    [
+        pytest.param("", id="Empty integrations parameter"),
+        pytest.param("all", id="All integrations parameter"),
+    ],
+)
+def test_openmetrics_validate_all_integrations(integrations):
+    pass
