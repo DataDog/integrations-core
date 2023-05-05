@@ -9,7 +9,7 @@ from .metrics import METRIC_MAP
 
 class CalicoCheck(OpenMetricsBaseCheckV2):
     DEFAULT_METRIC_LIMIT = 0
-    
+
     def __init__(self, name, init_config, instances=None):
 
         super(CalicoCheck, self).__init__(

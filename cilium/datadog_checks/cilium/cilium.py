@@ -14,7 +14,7 @@ class CiliumCheck(OpenMetricsBaseCheck):
     """
 
     DEFAULT_METRIC_LIMIT = 0
-    
+
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
