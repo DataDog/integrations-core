@@ -5,6 +5,7 @@ from __future__ import division
 
 import re
 import time
+import timeit
 from collections import Counter, defaultdict
 from copy import deepcopy
 
@@ -21,6 +22,9 @@ REPL_KEY = 'master_link_status'
 LINK_DOWN_KEY = 'master_link_down_since_seconds'
 
 DEFAULT_CLIENT_NAME = "unknown"
+
+# perf_counter, which gives us the most precise monotonic timer, is only available on python > 3.3
+timer = time.time if PY2 else time.perf_counter
 
 
 class Redis(AgentCheck):
@@ -194,19 +198,21 @@ class Redis(AgentCheck):
         return tags
 
     def _check_db(self):
+        tags = list(self.tags)
         conn = self._get_conn(self.instance)
+
         # Ping the database for info, and track the latency.
         # Process the service check: the check passes if we can connect to Redis
-        start = (
-            time.time() if PY2 else time.process_time()
-        )  # New in python 3.3: time.process_time (It does not include time elapsed during sleep)
-        tags = list(self.tags)
         try:
+            start = timer()
             info = conn.info()
-            cur_time = (
-                time.time() if PY2 else time.process_time()
-            )  # New in python 3.3: time.process_time (It does not include time elapsed during sleep)
-            latency_ms = round_value((cur_time - start) * 1000, 2)
+            cur_time = timer()
+            info_latency_ms = round_value((cur_time - start) * 1000, 2)
+
+            # Execute ping 10 times and record the average time
+            ping_latency = timeit.timeit('conn.ping()', globals=locals(), number=10) / 10
+            ping_latency_ms = round_value(ping_latency * 1000, 2)
+
             self._collect_metadata(info)
         except ValueError as e:
             self.service_check('redis.can_connect', AgentCheck.CRITICAL, message=str(e), tags=self.tags)
@@ -222,7 +228,8 @@ class Redis(AgentCheck):
         else:
             self.log.debug("Redis role was not found")
 
-        self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
+        self.gauge('redis.info.latency_ms', info_latency_ms, tags=tags)
+        self.gauge('redis.ping.latency_ms', ping_latency_ms, tags=tags)
 
         try:
             config = conn.config_get("maxclients")
