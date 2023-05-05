@@ -359,10 +359,33 @@ files:
         - name: collection_interval
           description: |
             Set the query sample collection interval (in seconds). Each collection involves a single query to
-            `pg_stat_activity` followed by at most one `EXPLAIN` query per unique normalized query seen.
+            `pg_stat_activity` followed by at most one `EXPLAIN` query per unique normalized query seen if 
+            collect_explains is activated.
           value:
             type: number
             example: 1
+        - name: samples_per_hour_per_query
+          description: |
+            Set the rate limit for how many query sample events will be ingested per hour per normalized execution
+            plan.
+          value:
+            type: integer
+            example: 15
+        - name: seen_samples_cache_maxsize
+          description: |
+            Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
+            for databases with a very large number of unique normalized execution plans which exceed the cache's limit.
+          value:
+            type: integer
+            example: 10000
+    - name: explain_plans
+      description: |
+        Enable collection of explain plans for each unique normalized query. Calls explain_function for the query
+        in order to return the plan.
+      options:
+        - name: enabled
+          type: boolean
+          example: true
         - name: explain_function
           description: |
             Override the default function used to collect execution plans for queries.
@@ -375,13 +398,6 @@ files:
           value:
             type: integer
             example: 60
-        - name: samples_per_hour_per_query
-          description: |
-            Set the rate limit for how many query sample events will be ingested per hour per normalized execution
-            plan.
-          value:
-            type: integer
-            example: 15
         - name: explained_queries_cache_maxsize
           description: |
             Set the max size of the cache used for the explained_queries_per_hour_per_query rate limit. This should
@@ -390,13 +406,6 @@ files:
           value:
             type: integer
             example: 5000
-        - name: seen_samples_cache_maxsize
-          description: |
-            Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
-            for databases with a very large number of unique normalized execution plans which exceed the cache's limit.
-          value:
-            type: integer
-            example: 10000
         - name: explain_parameterized_queries
           description: |
             This option will enable the ability to explain parameterized queries.
