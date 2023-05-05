@@ -134,6 +134,10 @@ def instance_hostname_label(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_ignore_connection_errors(field, value):
+    return False
+
+
 def instance_ignore_metrics(field, value):
     return get_default_field_value(field, value)
 
@@ -235,7 +239,7 @@ def instance_prometheus_metrics_prefix(field, value):
 
 
 def instance_prometheus_url(field, value):
-    return 'http://%%host%%:9153/metrics'
+    return get_default_field_value(field, value)
 
 
 def instance_proxy(field, value):

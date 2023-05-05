@@ -500,6 +500,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "ddtags": ",".join(tags),
                     "timestamp": time.time() * 1000,
                     "dbm_type": "plan",
+                    "cloud_metadata": self.check.cloud_metadata,
+                    'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+                    'sqlserver_engine_edition': self.check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
                     "db": {
                         "instance": row.get("database_name", None),
                         "plan": {

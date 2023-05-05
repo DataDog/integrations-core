@@ -13,6 +13,7 @@ from datadog_checks.postgres.util import (
     NEWER_14_METRICS,
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_STAT_WAL_RECEIVER,
+    QUERY_PG_UPTIME,
     REPLICATION_STATS_METRICS,
     SLRU_METRICS,
 )
@@ -206,6 +207,11 @@ def check_replication_delay(aggregator, metrics_cache, expected_tags, count=1):
     replication_metrics = metrics_cache.get_replication_metrics(VersionUtils.parse_version(POSTGRES_VERSION), False)
     for (metric_name, _) in replication_metrics.values():
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_uptime_metrics(aggregator, expected_tags, count=1):
+    for column in QUERY_PG_UPTIME['columns']:
+        aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
 
 
 def check_conflict_metrics(aggregator, expected_tags, count=1):

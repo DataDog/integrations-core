@@ -59,6 +59,7 @@ class TestKubeAPIServerMetrics:
         'authentication_duration_seconds.count',
         'authentication_attempts',
         'requested_deprecated_apis',
+        'aggregator_unavailable_apiservice',
     ]
     COUNT_METRICS = [
         'audit_event.count',
