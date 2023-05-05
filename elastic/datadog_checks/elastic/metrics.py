@@ -401,8 +401,8 @@ ADDITIONAL_METRICS_BY_VERSION = {
         # Some of these may very well exist in previous ES versions, but not worth the time/effort
         # to find where they were introduced
         'elasticsearch.indices.query_cache.cache_size': ('gauge', 'indices.query_cache.cache_size'),
-        'elasticsearch.indices.query_cache.cache_count': ('rate', 'indices.query_cache.cache_count'),
-        'elasticsearch.indices.query_cache.total_count': ('rate', 'indices.query_cache.total_count'),
+        'elasticsearch.indices.query_cache.cache_count': ('monotonic_count', 'indices.query_cache.cache_count'),
+        'elasticsearch.indices.query_cache.total_count': ('monotonic_count', 'indices.query_cache.total_count'),
         'elasticsearch.indices.segments.doc_values_memory_in_bytes': (
             'gauge',
             'indices.segments.doc_values_memory_in_bytes',
@@ -591,6 +591,11 @@ INDEX_STATS_METRICS = {
     'elasticsearch.index.primary_store_size': ('gauge', 'primary_store_size'),
     'elasticsearch.index.store_size': ('gauge', 'store_size'),
 }
+INDEX_SEARCH_STATS = [
+    ('elasticsearch.index.search.query.total', 'total.search.query_total'),
+    ('elasticsearch.index.search.query.time', 'total.search.query_time_in_millis'),
+]
+
 
 JVM_METRICS_POST_0_90_10 = {
     'jvm.gc.collectors.young.count': ('gauge', 'jvm.gc.collectors.young.collection_count'),

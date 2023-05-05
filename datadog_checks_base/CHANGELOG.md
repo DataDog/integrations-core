@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 32.1.0 / 2023-05-04
+
+* [Added] Create `tag_not_null` type which doesn't set the tag when tag value is none. See [#14503](https://github.com/DataDog/integrations-core/pull/14503).
+* [Fixed] Fix bug on empty openmetrics scrape response. See [#14508](https://github.com/DataDog/integrations-core/pull/14508).
+
 ## 32.0.0 / 2023-04-25
 
 * [Changed] Implement automatic exposition format detection. See [#14445](https://github.com/DataDog/integrations-core/pull/14445).

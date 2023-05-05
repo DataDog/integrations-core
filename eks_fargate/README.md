@@ -63,6 +63,7 @@ rules:
     resources:
     - nodes
     - namespaces
+    - endpoints
     verbs:
     - get
     - list
