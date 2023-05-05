@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 32.2.0 / 2023-05-05
+
+* [Added] Add an ignore_connection_errors option to the openmetrics check. See [#14504](https://github.com/DataDog/integrations-core/pull/14504).
+
 ## 32.1.0 / 2023-05-04
 
 * [Added] Create `tag_not_null` type which doesn't set the tag when tag value is none. See [#14503](https://github.com/DataDog/integrations-core/pull/14503).
