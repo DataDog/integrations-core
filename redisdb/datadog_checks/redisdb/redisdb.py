@@ -5,7 +5,6 @@ from __future__ import division
 
 import re
 import time
-import timeit
 from collections import Counter, defaultdict
 from copy import deepcopy
 
@@ -22,9 +21,6 @@ REPL_KEY = 'master_link_status'
 LINK_DOWN_KEY = 'master_link_down_since_seconds'
 
 DEFAULT_CLIENT_NAME = "unknown"
-
-# perf_counter, which gives us the most precise monotonic timer, is only available on python > 3.3
-timer = time.time if PY2 else time.perf_counter
 
 
 class Redis(AgentCheck):
@@ -204,14 +200,8 @@ class Redis(AgentCheck):
         # Ping the database for info, and track the latency.
         # Process the service check: the check passes if we can connect to Redis
         try:
-            start = timer()
-            info = conn.info()
-            cur_time = timer()
-            info_latency_ms = round_value((cur_time - start) * 1000, 2)
-
-            # Execute ping 10 times and record the average time
-            ping_latency = timeit.timeit('conn.ping()', globals=locals(), number=10) / 10
-            ping_latency_ms = round_value(ping_latency * 1000, 2)
+            info, info_latency_ms = _call_and_time(conn.info)
+            _, ping_latency_ms = _call_and_time(conn.ping)
 
             self._collect_metadata(info)
         except ValueError as e:
@@ -566,3 +556,13 @@ class Redis(AgentCheck):
     def _collect_metadata(self, info):
         if info and 'redis_version' in info:
             self.set_metadata('version', info['redis_version'])
+
+
+_timer = time.time if PY2 else time.perf_counter
+
+
+def _call_and_time(func):
+    start_time = _timer()
+    rv = func()
+    end_time = _timer()
+    return rv, round_value((end_time - start_time) * 1000, 2)
