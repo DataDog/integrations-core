@@ -404,7 +404,7 @@ def _add_dog_user(conn):
     cur.execute("GRANT PROCESS ON *.* TO 'dog'@'%'")
     cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%'")
     cur.execute("GRANT SELECT ON performance_schema.* TO 'dog'@'%'")
-    
+
     #refactor try older mysql.user table first. if this fails, go to newer ALTER USER
     try:
         cur.execute("UPDATE mysql.user SET max_user_connections = 0 WHERE user='dog' AND host='%'")
