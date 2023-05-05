@@ -316,6 +316,8 @@ integration/pgbouncer:
 - pgbouncer/**/*
 integration/php_fpm:
 - php_fpm/**/*
+integration/pinecone:
+- pinecone/**/*
 integration/pivotal_pks:
 - pivotal_pks/**/*
 integration/podman:

@@ -418,6 +418,10 @@ coverage:
         target: 75
         flags:
         - php_fpm
+      Pinecone:
+        target: 75
+        flags:
+        - pinecone
       Postfix:
         target: 75
         flags:
@@ -1154,6 +1158,11 @@ flags:
     paths:
     - php_fpm/datadog_checks/php_fpm
     - php_fpm/tests
+  pinecone:
+    carryforward: true
+    paths:
+    - pinecone/datadog_checks/pinecone
+    - pinecone/tests
   postfix:
     carryforward: true
     paths:
