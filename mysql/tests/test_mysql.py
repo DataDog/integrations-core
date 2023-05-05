@@ -28,7 +28,7 @@ from datadog_checks.mysql.const import (
 )
 
 from . import common, tags, variables
-from .common import HOST, MYSQL_REPLICATION, MYSQL_FLAVOR, MYSQL_VERSION_PARSED, PORT,requires_static_version
+from .common import HOST, MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT,requires_static_version
 
 
 @pytest.mark.integration
