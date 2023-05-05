@@ -205,7 +205,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self.tags = None
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
-        self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
+        self._explain_function = config.explain_plan_config.get('explain_function', 'datadog.explain_statement')
         self._explain_parameterized_queries = ExplainParameterizedQueries(check, config)
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
 
@@ -215,15 +215,15 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
         self._explain_errors_cache = TTLCache(
-            maxsize=config.statement_samples_config.get('explain_errors_cache_maxsize', 5000),
+            maxsize=config.explain_plan_config.get('explain_errors_cache_maxsize', 5000),
             # only try to re-explain invalid statements once per day
-            ttl=config.statement_samples_config.get('explain_errors_cache_ttl', 24 * 60 * 60),
+            ttl=config.explain_plan_config.get('explain_errors_cache_ttl', 24 * 60 * 60),
         )
 
         # explained_statements_ratelimiter: limit how often we try to re-explain the same query
         self._explained_statements_ratelimiter = RateLimitingTTLCache(
-            maxsize=int(config.statement_samples_config.get('explained_queries_cache_maxsize', 5000)),
-            ttl=60 * 60 / int(config.statement_samples_config.get('explained_queries_per_hour_per_query', 60)),
+            maxsize=int(config.explain_plan_config.get('explained_queries_cache_maxsize', 5000)),
+            ttl=60 * 60 / int(config.explain_plan_config.get('explained_queries_per_hour_per_query', 60)),
         )
 
         # seen_samples_ratelimiter: limit the ingestion rate per (query_signature, plan_signature)
@@ -645,7 +645,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
                 repr(e),
             )
-            if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', False)):
+            if is_affirmative(self._config.explain_plan_config.get('explain_parameterized_queries', False)):
                 plan = self._explain_parameterized_queries.explain_statement(dbname, statement, obfuscated_statement)
                 if plan:
                     return plan, DBExplainError.explained_with_prepared_statement, None
@@ -695,27 +695,30 @@ class PostgresStatementSamples(DBMAsyncJob):
         # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the raw sql text to match query metrics
-        plan_dict, explain_err_code, err_msg = self._run_and_track_explain(
-            row['datname'], row['query'], row['statement'], row['query_signature']
-        )
-        collection_errors = None
-        if explain_err_code:
-            collection_errors = [{'code': explain_err_code.value, 'message': err_msg if err_msg else None}]
+        
+        #Start decoupling with this part. Logic to control explain plan collection could stop us from running the actual explain
+        if is_affirmative(config.explain_plan_config.get(enabled, True)):
+            plan_dict, explain_err_code, err_msg = self._run_and_track_explain(
+                row['datname'], row['query'], row['statement'], row['query_signature']
+            )
+            collection_errors = None
+            if explain_err_code:
+                collection_errors = [{'code': explain_err_code.value, 'message': err_msg if err_msg else None}]
 
-        plan, normalized_plan, obfuscated_plan, plan_signature = None, None, None, None
-        if plan_dict:
-            plan = json.dumps(plan_dict)
-            # if we're using the orjson implementation then json.dumps returns bytes
-            plan = plan.decode('utf-8') if isinstance(plan, bytes) else plan
-            try:
-                normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
-                obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
-            except Exception as e:
-                if self._config.log_unobfuscated_plans:
-                    self._log.warning("Failed to obfuscate plan=[%s] | err=[%s]", plan, e)
-                raise e
+            plan, normalized_plan, obfuscated_plan, plan_signature = None, None, None, None
+            if plan_dict:
+                plan = json.dumps(plan_dict)
+                # if we're using the orjson implementation then json.dumps returns bytes
+                plan = plan.decode('utf-8') if isinstance(plan, bytes) else plan
+                try:
+                    normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
+                    obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
+                except Exception as e:
+                    if self._config.log_unobfuscated_plans:
+                        self._log.warning("Failed to obfuscate plan=[%s] | err=[%s]", plan, e)
+                    raise e
 
-            plan_signature = compute_exec_plan_signature(normalized_plan)
+                plan_signature = compute_exec_plan_signature(normalized_plan)
 
         statement_plan_sig = (row['query_signature'], plan_signature)
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):

@@ -126,7 +126,7 @@ class ExplainParameterizedQueries:
             return self._execute_query_and_fetch_rows(
                 dbname,
                 EXPLAIN_QUERY.format(
-                    explain_function=self._config.statement_samples_config.get(
+                    explain_function=self._config.explain_plan_config.get(
                         'explain_function', 'datadog.explain_statement'
                     ),
                     statement=execute_prepared_statement_query,
