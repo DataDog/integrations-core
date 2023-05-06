@@ -185,8 +185,8 @@ files:
     - name: submit_events
       description: |
         By default we submit events to Datadog if the cluster starts unhealthy or anytime its health changes.
-        Some customers find this too noisy and prefer to define their own custom alerts based on metrics only.
-        For those cases submitting events can be disabled by setting this option to 'false'.
+        You can set this option to `false` to disable submitting the events in case you already implemented
+        your own custom alerts based on metrics.
       value:
         type: boolean
         example: true
