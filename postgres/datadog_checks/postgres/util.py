@@ -302,7 +302,7 @@ QUERY_PG_REPLICATION_SLOTS = {
         pg_wal_lsn_diff(cur.lsn, a.confirmed_flush_lsn)
     FROM pg_replication_slots as a
     CROSS JOIN (
-        SELECT 
+        SELECT
         CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END) as cur(lsn);
     """.strip(),
     'columns': [
