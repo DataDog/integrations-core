@@ -83,6 +83,6 @@ def test_openmetrics_validate_repo(repo, repository, expected_message, ddev, hel
     config_file.model.repo = repo
     config_file.save()
 
-    result = ddev("validate", "openmetrics")
+    result = ddev("validate", "openmetrics", "all")
 
     assert expected_message in helpers.remove_trailing_spaces(result.output)

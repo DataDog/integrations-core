@@ -40,9 +40,6 @@ def openmetrics(ctx: click.Context, integrations: tuple[str, ...]):
     app: Application = ctx.obj
     validation_tracker = app.create_validation_tracker('OpenMetrics Metric limit')
 
-    if not integrations:
-        integrations = "all"
-
     app.display_info("Validating DEFAULT_METRIC_LIMIT = 0 for OpenMetrics integrations ...")
     if app.repo.name not in ('core', 'extras'):
         app.display_info(
