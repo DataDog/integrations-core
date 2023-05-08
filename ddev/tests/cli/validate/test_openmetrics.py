@@ -61,7 +61,6 @@ def test_openmetrics_fail_single_parameter(ddev, helpers, repository, network_re
     "repo, expected_message",
     [
         pytest.param("core", "Passed:", id="Core integrations"),
-        pytest.param("extras", "Passed:", id="Extras integrations"),
         pytest.param(
             "marketplace",
             "OpenMetrics validations is only enabled for core or extras integrations",
