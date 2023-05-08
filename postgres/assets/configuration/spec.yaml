@@ -504,6 +504,8 @@ files:
         - name: fully_qualified_domain_name
           description: |
             Equal to the full qualified domain name of the Azure PostgreSQL database.
+            
+            This value is optional if the value of `host` is already configured to the fully qualified domain name.
           value:
             type: string
             example: my-postgres-database.database.windows.net

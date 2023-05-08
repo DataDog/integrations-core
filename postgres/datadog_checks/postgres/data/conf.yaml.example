@@ -414,6 +414,8 @@ instances:
 
         ## @param fully_qualified_domain_name - string - optional - default: my-postgres-database.database.windows.net
         ## Equal to the full qualified domain name of the Azure PostgreSQL database.
+        ##
+        ## This value is optional if the value of `host` is already configured to the fully qualified domain name.
         #
         # fully_qualified_domain_name: my-postgres-database.database.windows.net
 
