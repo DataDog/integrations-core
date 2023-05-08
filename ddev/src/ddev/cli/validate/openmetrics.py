@@ -47,27 +47,25 @@ def openmetrics(ctx: click.Context, integrations):
         integrations = "all"
 
     app.display_info("Validating DEFAULT_METRIC_LIMIT = 0 for OpenMetrics integrations ...")
-    if is_core or is_extras:
-        integrations = app.repo.integrations.iter(integrations)
-        for integration in integrations:
-            if integration.is_package:
-                package_files = os.listdir(integration.package_directory)
-                for package_file in package_files:
-                    check_file = integration.package_directory / package_file
-                    if os.path.isfile(check_file) and check_file.name.endswith(".py"):
-                        try:
-                            f = open(check_file)
-                            contents = f.read()
-                        except Exception:
-                            app.display_info(f"Could not open or read file {check_file}, skipping")
-                        else:
-                            _filter_openmetrics(contents, integration, package_file, validation_tracker)
-    else:
+    if app.repo.name not in ('core', 'extras'):
         app.display_info(
-            "OpenMetrics validations is only enabled for core or "
-            "extras integrations, skipping for repo {app.repo.name}"
+            f"OpenMetrics validations is only enabled for core or "
+            f"extras integrations, skipping for repo {app.repo.name}"
         )
         app.abort()
+
+    for integration in app.repo.integrations.iter_packages(integrations):
+        package_files = os.listdir(integration.package_directory)
+        for package_file in package_files:
+            check_file = integration.package_directory / package_file
+            if os.path.isfile(check_file) and check_file.name.endswith(".py"):
+                try:
+                    f = open(check_file)
+                    contents = f.read()
+                except Exception:
+                    app.display_info(f"Could not open or read file {check_file}, skipping")
+                else:
+                    _filter_openmetrics(contents, integration, package_file, validation_tracker)
 
     if validation_tracker.errors:
         validation_tracker.display()
