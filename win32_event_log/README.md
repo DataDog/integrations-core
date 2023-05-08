@@ -62,7 +62,7 @@ To collect Windows Event Logs as Datadog Events, configure channels under the `i
 
 The agent can be configured to collect Windows Event Logs as Datadog Events in two ways. Each method has its own configuration syntax for channels and for filters (see [Filtering Events](?tab=events#filtering-events)). The legacy method uses WMI and is the default mode for an instance. The newer method uses the Event Log API. We recommend using the Event Log API because it has better performance. To use the Event Log API collection method, set `legacy_mode: false` in each instance. 
 
-If `legacy_mode: false` is set, the `path` is required to be set in the `\win32_event_log.d\conf.yaml` file. If `legacy_mode` is not set or set to `true`, then at least on of the following filters must be set: `source_name`, `event_id`, `message_filters`, or `log_file, type`.
+If `legacy_mode: false` is set, the `path` is required to be set in the `\win32_event_log.d\conf.yaml` file. If `legacy_mode` is not set or set to `true`, then at least one of the following filters must be set: `source_name`, `event_id`, `message_filters`, `log_file`, or `type`.
 
 This example shows entries for the `Security` and `<CHANNEL_2>` channels:
 
