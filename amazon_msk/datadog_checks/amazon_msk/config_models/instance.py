@@ -100,6 +100,7 @@ class InstanceConfig(BaseModel):
     histogram_buckets_as_distributions: Optional[bool]
     hostname_format: Optional[str]
     hostname_label: Optional[str]
+    ignore_connection_errors: Optional[bool]
     ignore_tags: Optional[Sequence[str]]
     include_labels: Optional[Sequence[str]]
     jmx_exporter_port: Optional[int]

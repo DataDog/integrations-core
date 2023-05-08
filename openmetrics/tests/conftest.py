@@ -5,8 +5,11 @@
 import os
 
 import pytest
-from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
-from prometheus_client.openmetrics.exposition import generate_latest as generate_latest_strict
+from prometheus_client import CollectorRegistry, Counter, Gauge
+from prometheus_client import generate_latest as generate_prometheus
+from prometheus_client.exposition import CONTENT_TYPE_LATEST as PROMETHEUS_CONTENT_TYPE
+from prometheus_client.openmetrics.exposition import CONTENT_TYPE_LATEST as OPENMETRICS_CONTENT_TYPE
+from prometheus_client.openmetrics.exposition import generate_latest as generate_openmetrics
 
 from datadog_checks.base import ensure_unicode
 from datadog_checks.dev import docker_run
@@ -24,7 +27,7 @@ def dd_environment():
 
 
 @pytest.fixture
-def poll_mock(mock_http_response):
+def example_metrics_registry():
     registry = CollectorRegistry()
     g1 = Gauge('metric1', 'processor usage', ['matched_label', 'node', 'flavor'], registry=registry)
     g1.labels(matched_label="foobar", node="host1", flavor="test").set(99.9)
@@ -36,20 +39,32 @@ def poll_mock(mock_http_response):
     c2.labels(node="host2").inc(42)
     g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
     g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
-
-    mock_http_response(ensure_unicode(generate_latest(registry)), normalize_content=False)
+    return registry
 
 
 @pytest.fixture
-def strict_poll_mock(mock_http_response):
-    registry = CollectorRegistry()
-    g1 = Gauge('metric1', 'processor usage', ['matched_label', 'node', 'flavor'], registry=registry)
-    g1.labels(matched_label="foobar", node="host1", flavor="test").set(99.9)
-    g2 = Gauge('metric2', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
-    g2.labels(matched_label="foobar", node="host2", timestamp="123").set(12.2)
-    c1 = Counter('counter1', 'hits', ['node'], registry=registry)
-    c1.labels(node="host2").inc(42)
-    g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
-    g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
+def prometheus_payload(example_metrics_registry):
+    return ensure_unicode(generate_prometheus(example_metrics_registry))
 
-    mock_http_response(ensure_unicode(generate_latest_strict(registry)), normalize_content=False)
+
+@pytest.fixture
+def openmetrics_payload(example_metrics_registry):
+    return ensure_unicode(generate_openmetrics(example_metrics_registry))
+
+
+@pytest.fixture
+def prometheus_poll_mock(mock_http_response, prometheus_payload):
+    mock_http_response(
+        prometheus_payload,
+        normalize_content=False,
+        headers={'Content-Type': PROMETHEUS_CONTENT_TYPE},
+    )
+
+
+@pytest.fixture
+def openmetrics_poll_mock(mock_http_response, openmetrics_payload):
+    mock_http_response(
+        openmetrics_payload,
+        normalize_content=False,
+        headers={'Content-Type': OPENMETRICS_CONTENT_TYPE},
+    )

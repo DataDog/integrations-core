@@ -1,6 +1,6 @@
 # CHANGELOG - Datadog Checks Downloader
 
-## 4.1.0 / 2023-03-03
+## 4.1.0 / 2023-03-03 / Agent 7.44.0
 
 * [Added] Prevent Alphas, Betas and RC versions of checks from being installed unless specified. See [#13837](https://github.com/DataDog/integrations-core/pull/13837).
 * [Fixed] Remove the use of the deprecated `pkg_resources` package. See [#13842](https://github.com/DataDog/integrations-core/pull/13842).
