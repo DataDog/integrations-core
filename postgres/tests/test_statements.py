@@ -259,7 +259,7 @@ def test_statement_metrics(
                 },
                 'azure': {
                     'deployment_type': 'flexible_server',
-                    'name': 'test-server',
+                    'name': 'test-server.database.windows.net',
                 },
             },
             {
@@ -268,7 +268,7 @@ def test_statement_metrics(
                 },
                 'azure': {
                     'deployment_type': 'flexible_server',
-                    'name': 'test-server',
+                    'name': 'test-server.database.windows.net',
                 },
             },
         ),
