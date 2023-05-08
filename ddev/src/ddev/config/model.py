@@ -136,7 +136,6 @@ class RootConfig(LazilyParsedConfig):
                     'core': os.path.join('~', 'dd', 'integrations-core'),
                     'extras': os.path.join('~', 'dd', 'integrations-extras'),
                     'marketplace': os.path.join('~', 'dd', 'marketplace'),
-                    'internal': os.path.join('~', 'dd', 'integrations-internal'),
                     'agent': os.path.join('~', 'dd', 'datadog-agent'),
                 }
 
