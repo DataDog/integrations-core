@@ -752,6 +752,5 @@
     "layout_type": "ordered",
     "is_read_only": false,
     "notify_list": [],
-    "reflow_type": "fixed",
-    "id": "ge2-uba-mu8"
+    "reflow_type": "fixed"
   }

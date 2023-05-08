@@ -23,6 +23,7 @@ check-postgres,"https://github.com/bucardo/",BSD-2-Clause,Copyright 2007 - 2023 
 clickhouse-cityhash,PyPI,MIT,"Copyright (c) 2011, Alexander Marshalov <alone.amper@gmail.com>"
 clickhouse-driver,PyPI,MIT,Copyright (c) 2017 by Konstantin Lebedev.
 cm-client,PyPI,Apache-2.0,
+confluent-kafka,PyPI,Apache-2.0,Copyright (C) 1995-1998 Jean-loup Gailly and Mark Adler
 contextlib2,PyPI,PSF,Copyright (c) 2016 Nick Coghlan
 cryptography,PyPI,Apache-2.0,Copyright (c) Individual contributors.
 cryptography,PyPI,BSD-3-Clause,Copyright (c) Individual contributors.
@@ -36,14 +37,11 @@ flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.
 foundationdb,PyPI,Apache-2.0,Copyright 2017 FoundationDB
 futures,PyPI,PSF,Copyright (c) 2015 Brian Quinlan
 gearman,PyPI,Apache-2.0,Copyright 2010 Yelp
-gssapi,PyPI,ISC,"Copyright (c) 2014, The Python GSSAPI Team"
 immutables,PyPI,Apache-2.0,Copyright 2018-present Contributors to the immutables project.
 importlib-metadata,PyPI,Apache-2.0,"Copyright 2017-2019 Jason R. Coombs, Barry Warsaw"
 in-toto,PyPI,Apache-2.0,Copyright 2018 New York University
 ipaddress,PyPI,PSF,Copyright (c) 2013 Philipp Hagemeister
 jellyfish,PyPI,MIT,Copyright (c) 2015 James Turk
-kafka-python,PyPI,Apache-2.0,Copyright 2015 David Arthur
-kazoo,PyPI,Apache-2.0,Copyright 2012 Kazoo team
 kubernetes,PyPI,Apache-2.0,Copyright 2014 The Kubernetes Authors.
 ldap3,PyPI,LGPL-3.0-only,Copyright 2013 - 2020 Giovanni Cannata
 lxml,PyPI,BSD-3-Clause,Copyright (c) 2004 Infrae. All rights reserved.

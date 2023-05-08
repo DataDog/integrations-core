@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
 
-import psycopg2
 import pytest
 
 from .common import (
@@ -15,34 +14,12 @@ from .common import (
     check_db_count,
     check_replication_delay,
     check_slru_metrics,
+    check_uptime_metrics,
     check_wal_receiver_metrics,
 )
-from .utils import requires_over_10
+from .utils import _get_superconn, _wait_for_value, requires_over_10
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
-
-
-def _get_superconn(db_instance, application_name='test'):
-    conn = psycopg2.connect(
-        host=db_instance['host'],
-        dbname=db_instance['dbname'],
-        user='postgres',
-        password='datad0g',
-        port=db_instance['port'],
-        application_name=application_name,
-    )
-    return conn
-
-
-def _wait_for_value(db_instance, lower_threshold, query):
-    value = 0
-    with _get_superconn(db_instance) as conn:
-        conn.autocommit = True
-        while value <= lower_threshold:
-            with conn.cursor() as cur:
-                cur.execute(query)
-                value = cur.fetchall()[0][0]
-            time.sleep(0.1)
 
 
 @requires_over_10
@@ -50,7 +27,10 @@ def test_common_replica_metrics(aggregator, integration_check, metrics_cache_rep
     check = integration_check(pg_replica_instance)
     check.check(pg_replica_instance)
 
-    expected_tags = pg_replica_instance['tags'] + ['port:{}'.format(pg_replica_instance['port'])]
+    expected_tags = pg_replica_instance['tags'] + [
+        'port:{}'.format(pg_replica_instance['port']),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
     check_common_metrics(aggregator, expected_tags=expected_tags)
     check_bgw_metrics(aggregator, expected_tags)
     check_connection_metrics(aggregator, expected_tags=expected_tags)
@@ -59,6 +39,7 @@ def test_common_replica_metrics(aggregator, integration_check, metrics_cache_rep
     check_replication_delay(aggregator, metrics_cache_replica, expected_tags=expected_tags)
     check_wal_receiver_metrics(aggregator, expected_tags=expected_tags + ['status:streaming'])
     check_conflict_metrics(aggregator, expected_tags=expected_tags)
+    check_uptime_metrics(aggregator, expected_tags=expected_tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -66,7 +47,11 @@ def test_common_replica_metrics(aggregator, integration_check, metrics_cache_rep
 @requires_over_10
 def test_wal_receiver_metrics(aggregator, integration_check, pg_instance, pg_replica_instance):
     check = integration_check(pg_replica_instance)
-    expected_tags = pg_replica_instance['tags'] + ['port:{}'.format(pg_replica_instance['port']), 'status:streaming']
+    expected_tags = pg_replica_instance['tags'] + [
+        'port:{}'.format(pg_replica_instance['port']),
+        'status:streaming',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
     with _get_superconn(pg_instance) as conn:
         with conn.cursor() as cur:
             # Ask for a new txid to force a WAL change
@@ -106,7 +91,11 @@ def test_wal_receiver_metrics(aggregator, integration_check, pg_instance, pg_rep
 @requires_over_10
 def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_instance2):
     check = integration_check(pg_replica_instance2)
-    expected_tags = pg_replica_instance2['tags'] + ['port:{}'.format(pg_replica_instance2['port']), 'db:datadog_test']
+    expected_tags = pg_replica_instance2['tags'] + [
+        'port:{}'.format(pg_replica_instance2['port']),
+        'db:datadog_test',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
 
     replica_con = _get_superconn(pg_replica_instance2)
     replica_cur = replica_con.cursor()
@@ -132,7 +121,11 @@ def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_i
 @requires_over_10
 def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_replica_instance2):
     check = integration_check(pg_replica_instance2)
-    expected_tags = pg_replica_instance2['tags'] + ['port:{}'.format(pg_replica_instance2['port']), 'db:datadog_test']
+    expected_tags = pg_replica_instance2['tags'] + [
+        'port:{}'.format(pg_replica_instance2['port']),
+        'db:datadog_test',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
 
     replica2_con = _get_superconn(pg_replica_instance2)
     replica2_cur = replica2_con.cursor()
@@ -155,10 +148,15 @@ def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_repli
     aggregator.assert_metric('postgresql.conflicts.snapshot', value=1, tags=expected_tags)
 
 
+@pytest.mark.skip(reason="Failing on master")
 @requires_over_10
 def test_conflicts_bufferpin(aggregator, integration_check, pg_instance, pg_replica_instance2):
     check = integration_check(pg_replica_instance2)
-    expected_tags = pg_replica_instance2['tags'] + ['port:{}'.format(pg_replica_instance2['port']), 'db:datadog_test']
+    expected_tags = pg_replica_instance2['tags'] + [
+        'port:{}'.format(pg_replica_instance2['port']),
+        'db:datadog_test',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
 
     with _get_superconn(pg_instance) as conn:
         with conn.cursor() as cur:

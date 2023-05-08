@@ -24,6 +24,7 @@ ESInstanceConfig = namedtuple(
         'pending_task_stats',
         'cat_allocation_stats',
         'custom_queries',
+        'submit_events',
     ],
 )
 
@@ -63,6 +64,8 @@ def from_instance(instance):
 
     custom_queries = instance.get('custom_queries', [])
 
+    submit_events = is_affirmative(instance.get('submit_events', True))
+
     # Tag by URL so we can differentiate the metrics
     # from multiple instances
     tags = ['url:{}'.format(url)]
@@ -83,5 +86,6 @@ def from_instance(instance):
         pending_task_stats=pending_task_stats,
         cat_allocation_stats=cat_allocation_stats,
         custom_queries=custom_queries,
+        submit_events=submit_events,
     )
     return config

@@ -836,6 +836,5 @@
     }
   ],
   "layout_type": "ordered",
-  "is_read_only": true,
-  "id": 21
+  "is_read_only": true
 }
