@@ -28,6 +28,7 @@ class ClickhouseCheck(AgentCheck):
         self._compression = self.instance.get('compression', False)
         self._tls_verify = is_affirmative(self.instance.get('tls_verify', False))
         self._tags = self.instance.get('tags', [])
+        self._clustername = self.instance.get('clustername', '')
 
         # Add global tags
         self._tags.append('server:{}'.format(self._server))
@@ -43,14 +44,7 @@ class ClickhouseCheck(AgentCheck):
         self._query_manager = QueryManager(
             self,
             self.execute_query_raw,
-            queries=[
-                queries.SystemMetrics,
-                queries.SystemEvents,
-                queries.SystemAsynchronousMetrics,
-                queries.SystemParts,
-                queries.SystemReplicas,
-                queries.SystemDictionaries,
-            ],
+            queries=queries.QueryBuilder.get_queries(self._clustername),
             tags=self._tags,
             error_handler=self._error_sanitizer.clean,
         )

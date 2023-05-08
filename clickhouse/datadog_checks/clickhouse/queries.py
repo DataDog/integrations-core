@@ -3,10 +3,32 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .utils import compact_query
 
+class QueryBuilder(object):
+    def get_queries(self, cluster_name):
+        queries = [
+                queries.SystemMetrics,
+                queries.SystemEvents,
+                queries.SystemAsynchronousMetrics,
+                queries.SystemParts,
+                queries.SystemReplicas,
+                queries.SystemDictionaries,
+            ]
+        if not (cluster_name and cluster_name.strip()):
+            return queries
+        else: 
+            updatedQueries = []
+            for q in queries:
+                nq = q
+                nq['query'] = nq['clusterQueryFormat'].format(cluster_name)
+                updatedQueries.append(nq)
+            return updatedQueries
+
+
 # https://clickhouse.yandex/docs/en/operations/system_tables/#system_tables-metrics
 SystemMetrics = {
     'name': 'system.metrics',
     'query': 'SELECT value, metric FROM system.metrics',
+    'clusterQueryFormat': 'SELECT value, metric FROM clusterAllReplicas(\'{}\', system.metrics)',
     'columns': [
         {'name': 'value', 'type': 'source'},
         {
@@ -117,6 +139,7 @@ SystemMetrics = {
 SystemEvents = {
     'name': 'system.events',
     'query': 'SELECT value, event FROM system.events',
+    'clusterQueryFormat': 'SELECT value, event FROM clusterAllReplicas(\'{}\', system.events)',
     'columns': [
         {'name': 'value', 'type': 'source'},
         {
@@ -406,6 +429,7 @@ SystemEvents = {
 SystemAsynchronousMetrics = {
     'name': 'system.asynchronous_metrics',
     'query': 'SELECT value, metric FROM system.asynchronous_metrics',
+    'clusterQueryFormat': 'SELECT value, metric FROM clusterAllReplicas(\'{}\', system.asynchronous_metrics)',
     'columns': [
         {'name': 'value', 'type': 'source'},
         {
@@ -473,6 +497,21 @@ SystemParts = {
               table
             """
     ),
+    'clusterQueryFormat': compact_query(
+        """
+            SELECT
+              database,
+              table,
+              sum(bytes_on_disk) AS bytes,
+              count() AS parts,
+              sum(rows) AS rows
+            FROM clusterAllReplicas(\'{}\', system.parts)
+            WHERE active = 1
+            GROUP BY
+              database,
+              table
+            """
+    ),
     'columns': [
         {'name': 'database', 'type': 'tag'},
         {'name': 'table', 'type': 'tag'},
@@ -507,6 +546,27 @@ SystemReplicas = {
             FROM system.replicas
             """
     ),
+    'clusterQueryFormat': compact_query(
+        """
+            SELECT
+              database,
+              table,
+              is_leader,
+              is_readonly,
+              is_session_expired,
+              future_parts,
+              parts_to_check,
+              columns_version,
+              queue_size,
+              inserts_in_queue,
+              merges_in_queue,
+              log_max_index,
+              log_pointer,
+              total_replicas,
+              active_replicas
+            FROM clusterAllReplicas(\'{}\', system.replicas)
+            """
+    ),
     'columns': [
         {'name': 'database', 'type': 'tag'},
         {'name': 'table', 'type': 'tag'},
@@ -538,6 +598,16 @@ SystemDictionaries = {
               element_count,
               load_factor
             FROM system.dictionaries
+            """
+    ),
+    'clusterQueryFormat': compact_query(
+        """
+            SELECT
+              name,
+              bytes_allocated,
+              element_count,
+              load_factor
+            FROM clusterAllReplicas(\'{}\', system.dictionaries)
             """
     ),
     'columns': [
