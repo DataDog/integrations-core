@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 def _filter_openmetrics(contents, integration, package_file, validation_tracker):
     # Skip applying metric limit to custom OpenMetricsCheck
-    if 'OpenMetricsCheck(OpenMetricsBaseCheck)' in contents:
+    if integration.display_name == "OpenMetrics":
         return
 
     # Note: can't include the closing parenthesis since some may include ConfigMixin
@@ -30,7 +30,7 @@ def _filter_openmetrics(contents, integration, package_file, validation_tracker)
 @click.command(short_help='Validate OpenMetrics')
 @click.argument('integrations', nargs=-1)
 @click.pass_context
-def openmetrics(ctx: click.Context, integrations):
+def openmetrics(ctx: click.Context, integrations: tuple[str, ...]):
     """Validate OpenMetrics metric limit.
 
     If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
@@ -39,9 +39,6 @@ def openmetrics(ctx: click.Context, integrations):
 
     app: Application = ctx.obj
     validation_tracker = app.create_validation_tracker('OpenMetrics Metric limit')
-
-    is_core = app.repo.name == 'core'
-    is_extras = app.repo.name == 'extras'
 
     if not integrations:
         integrations = "all"

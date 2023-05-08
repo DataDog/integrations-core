@@ -57,13 +57,24 @@ def test_openmetrics_fail_single_parameter(ddev, helpers, repository, network_re
     )
 
 
+def test_openmetrics_skip_openmetrics(ddev, helpers, repository, network_replay):
+    network_replay('fixtures/openmetrics/metric_limit/skip_openmetrics.yaml', record_mode='none')
+
+    result = ddev("validate", "openmetrics", "openmetrics")
+
+    assert result.exit_code == 0, result.output
+
+    assert "Passed" not in helpers.remove_trailing_spaces(result.output)
+    assert "Errors" not in helpers.remove_trailing_spaces(result.output)
+
+
 @pytest.mark.parametrize(
     "repo, expected_message",
     [
         pytest.param("core", "Passed:", id="Core integrations"),
         pytest.param(
             "marketplace",
-            "OpenMetrics validations is only enabled for core or extras integrations",
+            "OpenMetrics validations is only enabled for core or extras integrations, skipping for repo marketplace",
             id="Marketplace integrations",
         ),
     ],
