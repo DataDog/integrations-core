@@ -8,8 +8,7 @@ import pytest
         pytest.param("amazon_msk", 2, id="Amazon MSK amazon_msk.py OpenMetricsV1 and V2"),
     ],
 )
-def test_openmetrics_pass_single_parameter(ddev, check_name, check_count, helpers, network_replay):
-    # Not completely sure what this is doing
+def test_openmetrics_pass_single_parameter(ddev, repository, check_name, check_count, helpers, network_replay):
     network_replay('fixtures/openmetrics/metric_limit/success.yaml', record_mode='none')
     result = ddev("validate", "openmetrics", check_name)
 
@@ -70,7 +69,7 @@ def test_openmetrics_fail_single_parameter(ddev, helpers, repository, network_re
         ),
     ],
 )
-def test_openmetrics_validate_repo(repo, expected_message, ddev, helpers, config_file):
+def test_openmetrics_validate_repo(repo, repository, expected_message, ddev, helpers, config_file):
     config_file.model.repo = repo
     config_file.save()
 
