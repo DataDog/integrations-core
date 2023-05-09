@@ -100,7 +100,7 @@ Creating a developer sandbox may take up to one or two business days. Once your 
 Once you've joined the **Technology Partner** track and requested a sandbox account, you can learn more about developing an offering by:
 
 * Completing the on-demand [**Introduction to Datadog Integrations**][7] course on the [Datadog Learning Center][8].
-* Reading the documentation about setting up an [OAuth 2.0 client for API-based integrations][9] and creating [API-based integrations][1].
+* Reading the documentation about creating [API-based integrations][1] and setting up an [OAuth 2.0 client for API-based integrations][9].
 * Reading the documentation about creating [Agent-based integrations][2].
 
 For more information about selling a Datadog integration or other type of offering, see [Build a Marketplace Offering][4].

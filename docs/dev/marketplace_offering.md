@@ -40,9 +40,9 @@ Software licenses
 Professional services
 : Professional services enable you to offer your team's services for implementation, support, or management for a set period of time.
 
-## Why join the Datadog Marketplace? 
+## Join the Datadog Marketplace 
 
-Marketplace Partners have unique benefits that are not available to partners who list out-of-the-box integrations:
+Marketplace Partners have unique benefits that are not available to Technology Partners who list out-of-the-box integrations:
  
 - **Go-to-market collaboration** including a blog post, a quote for a press release, and social media amplification, with access to dedicated sales and marketing resources focused on accelerating partner growth. 
 - **Training and support** for sales enablement in the form of on-demand courses to quickly onboard sales and technical teams.
