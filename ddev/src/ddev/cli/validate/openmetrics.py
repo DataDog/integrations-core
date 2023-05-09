@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import glob
+import os
 from typing import TYPE_CHECKING
 
 import click
@@ -11,11 +11,16 @@ import click
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
+SKIPPED_INTEGRATIONS = [
+    "OpenMetrics",
+    "Datadog Checks Base",
+    "Datadog Checks Dev",
+]
+
 
 def _validate_openmetrics_integrations(contents, integration, package_file, validation_tracker):
-    # Skip applying metric limit to custom OpenMetricsCheck
-    if integration.display_name == "OpenMetrics":
-        return
+    if integration.display_name in SKIPPED_INTEGRATIONS:
+        return False
 
     # Note: can't include the closing parenthesis since some may include ConfigMixin
     if '(OpenMetricsBaseCheckV2' in contents or '(OpenMetricsBaseCheck' in contents:
@@ -26,6 +31,15 @@ def _validate_openmetrics_integrations(contents, integration, package_file, vali
         else:
             return True
     return False
+
+
+def _get_python_files(directory):
+    python_files = []
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.endswith(".py"):
+                python_files.append(os.path.join(root, file))
+    return python_files
 
 
 @click.command(short_help='Validate OpenMetrics')
@@ -51,9 +65,7 @@ def openmetrics(ctx: click.Context, integrations: tuple[str, ...]):
 
     for integration in app.repo.integrations.iter_packages(integrations):
         pass_validation = False
-        python_files = glob.glob(str(integration.package_directory) + "**/*.py") + glob.glob(
-            str(integration.package_directory) + "/**/*.py"
-        )
+        python_files = _get_python_files(integration.package_directory)
 
         for file in python_files:
             try:
