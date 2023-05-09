@@ -225,36 +225,80 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
-    "cloud_metadata",
+    "input_cloud_metadata,output_cloud_metadata",
     [
-        {},
-        {
-            'azure': {
-                'deployment_type': 'flexible_server',
-                'name': 'test-server',
+        ({}, {}),
+        (
+            {
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'name': 'test-server.database.windows.net',
+                },
             },
-        },
-        {
-            'aws': {
-                'instance_endpoint': 'foo.aws.com',
+            {
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'name': 'test-server.database.windows.net',
+                },
             },
-            'azure': {
-                'deployment_type': 'flexible_server',
-                'name': 'test-server',
+        ),
+        (
+            {
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'fully_qualified_domain_name': 'test-server.database.windows.net',
+                },
             },
-        },
-        {
-            'gcp': {
-                'project_id': 'foo-project',
-                'instance_id': 'bar',
-                'extra_field': 'included',
+            {
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'name': 'test-server.database.windows.net',
+                },
             },
-        },
+        ),
+        (
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'name': 'test-server.database.windows.net',
+                },
+            },
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'name': 'test-server.database.windows.net',
+                },
+            },
+        ),
+        (
+            {
+                'gcp': {
+                    'project_id': 'foo-project',
+                    'instance_id': 'bar',
+                    'extra_field': 'included',
+                },
+            },
+            {
+                'gcp': {
+                    'project_id': 'foo-project',
+                    'instance_id': 'bar',
+                    'extra_field': 'included',
+                },
+            },
+        ),
     ],
 )
-def test_statement_metrics_cloud_metadata(aggregator, dd_run_check, dbm_instance, cloud_metadata, datadog_agent):
-    if cloud_metadata:
-        for k, v in cloud_metadata.items():
+def test_statement_metrics_cloud_metadata(
+    aggregator, dd_run_check, dbm_instance, input_cloud_metadata, output_cloud_metadata, datadog_agent
+):
+    if input_cloud_metadata:
+        for k, v in input_cloud_metadata.items():
             dbm_instance[k] = v
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
@@ -282,7 +326,7 @@ def test_statement_metrics_cloud_metadata(aggregator, dd_run_check, dbm_instance
     assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['mysql_version'] == mysql_check.version.version + '+' + mysql_check.version.build
     assert event['mysql_flavor'] == mysql_check.version.flavor
-    assert event['cloud_metadata'] == cloud_metadata, "wrong cloud_metadata"
+    assert event['cloud_metadata'] == output_cloud_metadata, "wrong cloud_metadata"
 
 
 @pytest.mark.integration

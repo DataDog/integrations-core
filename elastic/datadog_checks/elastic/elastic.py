@@ -5,6 +5,7 @@ import re
 import time
 from collections import defaultdict, namedtuple
 from copy import deepcopy
+from itertools import product
 
 import requests
 from six import iteritems, itervalues
@@ -16,6 +17,7 @@ from .config import from_instance
 from .metrics import (
     CAT_ALLOCATION_METRICS,
     CLUSTER_PENDING_TASKS,
+    INDEX_SEARCH_STATS,
     health_stats_for_version,
     index_stats_for_version,
     node_system_stats_for_version,
@@ -238,6 +240,20 @@ class ESCheck(AgentCheck):
             tags = base_tags + ['index_name:' + idx['index']]
             for metric, desc in iteritems(index_stats_for_version(version)):
                 self._process_metric(index_data, metric, *desc, tags=tags)
+        self._get_index_search_stats(admin_forwarder, base_tags)
+
+    def _get_index_search_stats(self, admin_forwarder, base_tags):
+        """
+        Stats for searches in every index.
+        """
+        # NOTE: Refactor this if we discover we are making too many requests.
+        # This endpoint can return more data, all of what the /_cat/indices endpoint returns except index health.
+        # The health we can get from /_cluster/health if we pass level=indices query param. Reference:
+        # https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html#cluster-health-api-query-params # noqa: E501
+        indices = self._get_data(self._join_url('/_stats/search', admin_forwarder))['indices']
+        for (idx_name, data), (m_name, path) in product(iteritems(indices), INDEX_SEARCH_STATS):
+            tags = base_tags + ['index_name:' + idx_name]
+            self._process_metric(data, m_name, 'gauge', path, tags=tags)
 
     def _get_urls(self, version):
         """
@@ -382,25 +398,19 @@ class ESCheck(AgentCheck):
             self.log.debug("Metric not found: %s -> %s", path, metric)
 
     def _process_health_data(self, data, version, base_tags, service_check_tags):
-        cluster_status = data.get('status')
-        if not self.cluster_status.get(self._config.url):
-            self.cluster_status[self._config.url] = cluster_status
-            if cluster_status in ["yellow", "red"]:
-                event = self._create_event(cluster_status, tags=base_tags)
-                self.event(event)
+        prev_status = self.cluster_status.get(self._config.url)
+        self.cluster_status[self._config.url] = current_status = data.get('status')
+        if self._config.submit_events and (
+            (prev_status is None and current_status in ["yellow", "red"])  # Cluster starts in bad status.
+            or current_status != prev_status
+        ):
+            self.event(self._create_event(current_status, tags=base_tags))
 
-        if cluster_status != self.cluster_status.get(self._config.url):
-            self.cluster_status[self._config.url] = cluster_status
-            event = self._create_event(cluster_status, tags=base_tags)
-            self.event(event)
-
-        cluster_health_metrics = health_stats_for_version(version)
-
-        for metric, desc in iteritems(cluster_health_metrics):
+        for metric, desc in iteritems(health_stats_for_version(version)):
             self._process_metric(data, metric, *desc, tags=base_tags)
 
         # Process the service check
-        dd_health = ES_HEALTH_TO_DD_STATUS.get(cluster_status, ES_HEALTH_TO_DD_STATUS['red'])
+        dd_health = ES_HEALTH_TO_DD_STATUS.get(current_status, ES_HEALTH_TO_DD_STATUS['red'])
         msg = (
             "{tag} on cluster \"{cluster_name}\" "
             "| active_shards={active_shards} "

@@ -536,12 +536,14 @@ files:
                 value:
                   type: string
                   example: flexible_server
-              - name: name
+              - name: fully_qualified_domain_name
                 description: |
-                  Equal to the name of the Azure MySQL database instance.
+                  Equal to the full qualified domain name of the Azure MySQL database.
+                  
+                  This value is optional if the value of `host` is already configured to the fully qualified domain name.
                 value:
                   type: string
-                  example: mysql-database
+                  example: mysql-database.database.windows.net
 
           - name: obfuscator_options
             description: |

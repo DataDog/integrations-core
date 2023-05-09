@@ -57,6 +57,8 @@ DEFAULT_METRICS = {
 
 
 class DatadogClusterAgentCheck(OpenMetricsBaseCheck):
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, name, init_config, instances):
         super(DatadogClusterAgentCheck, self).__init__(
             name,

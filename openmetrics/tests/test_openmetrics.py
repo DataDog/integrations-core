@@ -28,6 +28,13 @@ instance_new_strict = {
     'use_latest_spec': True,
 }
 
+instance_unavailable = {
+    'openmetrics_endpoint': 'http://127.0.0.1:4243/metrics',
+    'namespace': 'openmetrics',
+    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1'],
+    'ignore_connection_errors': True,
+}
+
 
 @pytest.mark.parametrize('poll_mock_fixture', ['prometheus_poll_mock', 'openmetrics_poll_mock'])
 def test_openmetrics(aggregator, dd_run_check, request, poll_mock_fixture):
@@ -109,4 +116,12 @@ def test_openmetrics_empty_response(aggregator, dd_run_check, mock_http_response
     check = OpenMetricsCheck('openmetrics', {}, [instance_new])
     dd_run_check(check)
 
+    aggregator.assert_all_metrics_covered()
+
+
+def test_openmetrics_endpoint_unavailable(aggregator, dd_run_check):
+    check = OpenMetricsCheck('openmetrics', {}, [instance_unavailable])
+    dd_run_check(check)
+
+    # Collects no metrics without error.
     aggregator.assert_all_metrics_covered()
