@@ -2,73 +2,124 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-"""
-defined in
-    datadog-agent\\pkg\\diagnose\\diagnosis\\loader.go and
-    datadog-agent\\rtloader\\include\\rtloader_types.h
+from collections import namedtuple
 
-// Use explicit constant instead of iota because the same numbers are used
-// in Python/CGO calls.
-const (
-    DiagnosisSuccess         DiagnosisResult = 0
-    DiagnosisNotEnable       DiagnosisResult = 1
-    DiagnosisFail            DiagnosisResult = 2
-    DiagnosisWarning         DiagnosisResult = 3
-    DiagnosisUnexpectedError DiagnosisResult = 4
-    DiagnosisResultMIN                       = DiagnosisSuccess
-    DiagnosisResultMAX                       = DiagnosisUnexpectedError
-)
-"""
-DIAGNOSIS_SUCCESS = 0
-DIAGNOSIS_NOT_ENABLE = 1
-DIAGNOSIS_FAIL = 2
-DIAGNOSIS_WARNING = 3
-DIAGNOSIS_UNEXPECTED_ERROR = 4
-DIAGNOSIS_RESULT_MAX = DIAGNOSIS_UNEXPECTED_ERROR
 
-class Diagnosis(object):
+class Diagnosis:
     """
-    Class encapsulated Agent's
-        // Diagnose result (diagnosis)
-        type Diagnosis struct {
-            // --------------------------
-            // required fields
-
-            // run-time (pass, fail etc)
-            Result DiagnosisResult
-            // static-time (meta typically)
-            Name string
-            // run-time (actual diagnosis consumable by a user)
-            Diagnosis string
-
-            // --------------------------
-            // optional fields
-
-            // static-time (meta typically)
-            Category string
-            // static-time (meta typically, description of what being tested)
-            Description string
-            // run-time (what can be done of what docs need to be consulted to address the issue)
-            Remediation string
-            // run-time
-            RawError error
-        }
-
-    defined in datadog-agent\\pkg\\diagnose\\diagnosis\\loader.go
-
-    The list of this class instances is used as return value of check instance
-    get_diagnoses() method. By default base get_diagnoses() class returns empty
-    list (see integrations-core\\datadog_checks_base\\datadog_checks\\base\\checks\\base.py)
+    A class used to register explicit diagnostics and record diagnoses on integrations.
     """
 
-    def __init__(self, result, name, diagnosis, category=None, description=None, remedeition=None, raw_error=None):
-        # Required fields
-        self.result = result        # e.g. DIAGNOSIS_SUCCESS, DIAGNOSIS_FAIL
-        self.name = name            # short diagnosis name
-        self.diagnosis = diagnosis  # actual diangosis string
+    # // Diagnose result (diagnosis)
+    # type Diagnosis struct {
+    #     // --------------------------
+    #     // required fields
 
-        # Optional fields
-        self.category = category        # category of the diagnosis (e.g DBM)
-        self.description = description  # description of this particular diagnose test
-        self.remedeition = remedeition  # if available steps to fix the problem and or reference to the documentation
-        self.raw_error = raw_error      # actual error reported by diagnose method
+    #     // run-time (pass, fail etc)
+    #     Result DiagnosisResult
+    #     // static-time (meta typically)
+    #     Name string
+    #     // run-time (actual diagnosis consumable by a user)
+    #     Diagnosis string
+
+    #     // --------------------------
+    #     // optional fields
+
+    #     // static-time (meta typically)
+    #     Category string
+    #     // static-time (meta typically, description of what being tested)
+    #     Description string
+    #     // run-time (what can be done of what docs need to be consulted to address the issue)
+    #     Remediation string
+    #     // run-time
+    #     RawError error
+    # }
+    # defined in datadog-agent\\pkg\\diagnose\\diagnosis\\loader.go
+    Result = namedtuple(
+        'Result', ['result', 'name', 'diagnosis', 'category', 'description', 'remediation', 'raw_error']
+    )
+
+    # defined in
+    # datadog-agent\\pkg\\diagnose\\diagnosis\\loader.go and
+    # datadog-agent\\rtloader\\include\\rtloader_types.h
+    DIAGNOSIS_SUCCESS = 0
+    DIAGNOSIS_NOT_ENABLE = 1
+    DIAGNOSIS_FAIL = 2
+    DIAGNOSIS_WARNING = 3
+    DIAGNOSIS_UNEXPECTED_ERROR = 4
+
+    def __init__(self):
+        # Holds results
+        self._diagnoses = []
+        # Holds explicit diagnostic routines (callables)
+        self._diagnostics = []
+
+    def clear(self):
+        """Remove all cached diagnoses."""
+        self._diagnoses = []
+
+    def success(self, name, diagnosis, category=None, description=None, remediation=None, raw_error=None):
+        """Register a successful diagnostic result."""
+        self._diagnoses.append(
+            self._result(
+                self.DIAGNOSIS_SUCCESS,
+                name,
+                diagnosis,
+                category=None,
+                description=None,
+                remediation=None,
+                raw_error=None,
+            )
+        )
+
+    def fail(self, name, diagnosis, category=None, description=None, remediation=None, raw_error=None):
+        """Register a failing diagnostic result."""
+        self._diagnoses.append(
+            self._result(
+                self.DIAGNOSIS_FAIL, name, diagnosis, category=None, description=None, remediation=None, raw_error=None
+            )
+        )
+
+    def warning(self, name, diagnosis, category=None, description=None, remediation=None, raw_error=None):
+        """Register a warning for a diagnostic result."""
+        self._diagnoses.append(
+            self._result(
+                self.DIAGNOSIS_WARNING,
+                name,
+                diagnosis,
+                category=None,
+                description=None,
+                remediation=None,
+                raw_error=None,
+            )
+        )
+
+    def register(self, *diagnostics):
+        """Register one or many explicit diagnostic functions.
+
+        Diagnostic functions are called when diagnoses are requested by the agent to the integration via
+        the base check's `get_diagnoses()` function. They are called in the order of registration."""
+        self._diagnostics.extend(diagnostics)
+
+    def run_explicit(self):
+        """Run registered explicit diagnostics and return their results.
+
+        Diagnosis results produced within will not be stored in the `Diagnosis` object."""
+        # Keep a reference to existing cached results, to be restored at the end,
+        # and start from an empty list to collect explicit diagnoses (to be returned later)
+        cached_results, self._diagnoses = self._diagnoses, []
+        for diagnostic in self._diagnostics:
+            diagnostic()
+
+        explicit_results, self._diagnoses = self._diagnoses, cached_results
+        return explicit_results
+
+    @property
+    def diagnoses(self):
+        """The list of cached diagnostics."""
+        return self._diagnoses
+
+    @classmethod
+    def _result(cls, result, name, diagnosis, category=None, description=None, remediation=None, raw_error=None):
+        # Note: Once we drop py2 we can use `defaults` in the `namedtuple` instead of this constructor
+        return cls.Result(result, name, diagnosis, category, description, remediation, raw_error)

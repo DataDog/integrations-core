@@ -44,6 +44,7 @@ from ..types import (
 )
 from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, to_native_string
+from ..utils.diagnose import Diagnosis
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
@@ -51,7 +52,6 @@ from ..utils.secrets import SecretsSanitizer
 from ..utils.tagging import GENERIC_TAGS
 from ..utils.tls import TlsContextWrapper
 from ..utils.tracing import traced_class
-from ..utils.diagnose import Diagnosis, DIAGNOSIS_FAIL, DIAGNOSIS_SUCCESS
 
 try:
     import datadog_agent
@@ -388,6 +388,16 @@ class AgentCheck(object):
             self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
+
+    @property
+    def diagnosis(self):
+        # type: () -> Diagnosis
+        """
+        A Diagnosis object to register explicit diagnostics and record diagnoses.
+        """
+        if not hasattr(self, '_diagnosis'):
+            self._diagnosis = Diagnosis()
+        return self._diagnosis
 
     def get_tls_context(self, refresh=False, overrides=None):
         # type: (bool, Dict[AnyStr, Any]) -> ssl.SSLContext
@@ -1004,7 +1014,7 @@ class AgentCheck(object):
         self.warnings.append(warning_message)
 
     def get_warnings(self):
-        # type: () -> List[Diagnosis]
+        # type: () -> List[str]
         """
         Return the list of warnings messages to be displayed in the info page
         """
@@ -1013,33 +1023,14 @@ class AgentCheck(object):
         return warnings
 
     def get_diagnoses(self):
-        # type: () -> List[Diagnosis]
+        # type: () -> List[Diagnosis.Result]
         """
-        Return the list of diagnosis
+        Return the list of diagnosis.
+
+        The agent calls this method to retrieve diagnostics from integrations. This method
+        runs explicit diagnostics if available.
         """
-
-        # This is a temporary dummy return diagnoses to end-to-end early implementation versions.
-        # When implementation is completed this method should return empty list ([]) because
-        # it is base and default method to be overridden by a specific check's get_diagnoses()
-        # method.
-        #
-        # get_diagnoses() if implemented in derived checks can
-        #     * ... return diagnostic errors collected and cached (only latest version) during regular run
-        #           or if the collection is too slow to run during each run() then ...
-        #     * ... run it immediately and inline or ...
-        #     * ... use combinations of both
-        diagnoses = [
-            Diagnosis(DIAGNOSIS_SUCCESS,
-                       'foo_check_instance_a', 'All looks good', 'foo_check',
-                         'This is description of the diagnose 1',
-                         'No need to fix', 'Strange error 1'),
-            Diagnosis(DIAGNOSIS_FAIL,
-                       'foo_check_instance_b', 'All looks bad', 'foo_check',
-                         'This is description of the diagnose 2',
-                         'Fix it', 'Strange error 2'),
-        ]
-
-        return diagnoses
+        return self.diagnosis.diagnoses + self.diagnosis.run_explicit()
 
     def _get_requests_proxy(self):
         # type: () -> ProxySettings
@@ -1122,6 +1113,7 @@ class AgentCheck(object):
     def run(self):
         # type: () -> str
         try:
+            self.diagnosis.clear()
             # Ignore check initializations if running in a separate process
             if is_affirmative(self.instance.get('process_isolation', self.init_config.get('process_isolation', False))):
                 from ..utils.replay.execute import run_with_isolation
