@@ -31,7 +31,7 @@ class Azure(BaseModel):
         allow_mutation = False
 
     deployment_type: Optional[str]
-    name: Optional[str]
+    fully_qualified_domain_name: Optional[str]
 
 
 class CustomQuery(BaseModel):

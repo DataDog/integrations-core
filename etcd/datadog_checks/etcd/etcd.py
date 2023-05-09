@@ -11,6 +11,7 @@ from .metrics import METRIC_MAP
 
 
 class Etcd(OpenMetricsBaseCheck):
+    DEFAULT_METRIC_LIMIT = 0
 
     DEFAULT_TIMEOUT = 5
 
