@@ -93,6 +93,7 @@ class PostgresMetricsCache:
             'relation': False,
         }
 
+        # TODO: check to see if these are actually populated
         res["query"] += " WHERE " + " AND ".join(
             "psd.datname not ilike '{}'".format(db) for db in self.config.ignore_databases
         )

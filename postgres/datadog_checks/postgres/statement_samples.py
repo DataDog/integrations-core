@@ -38,6 +38,7 @@ from .version_utils import V9_6, V10
 # according to https://unicodebook.readthedocs.io/unicode_encodings.html, the max supported size of a UTF-8 encoded
 # character is 6 bytes
 MAX_CHARACTER_SIZE_IN_BYTES = 6
+DEFAULT_PLAN_PERCENT_INCREASE = 10
 
 TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE = -1
 
@@ -244,6 +245,10 @@ class PostgresStatementSamples(DBMAsyncJob):
         # Keep track of last time we sent an activity event
         self._time_since_last_activity_event = 0
         self._pg_stat_activity_cols = None
+
+        self._percent_increase_emit_plan_log = self._config.statement_samples_config.get(
+            'percent_increase_emit_plan_log', DEFAULT_PLAN_PERCENT_INCREASE
+        )
 
     def _dbtags(self, db, *extra_tags):
         """
@@ -710,6 +715,53 @@ class PostgresStatementSamples(DBMAsyncJob):
             try:
                 normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True)
                 obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
+                plan_size = len(bytes(plan, encoding='utf-8'))
+                normalized_plan_size = len(bytes(normalized_plan, encoding='utf-8'))
+                obfuscated_plan_size = len(bytes(obfuscated_plan, encoding='utf-8'))
+                try:
+                    self._check.histogram(
+                        "dd.postgres.plan.size",
+                        plan_size,
+                        tags=self._check._get_debug_tags(),
+                        hostname=self._check.resolved_hostname,
+                    )
+                    self._check.histogram(
+                        "dd.postgres.normalized.size",
+                        normalized_plan_size,
+                        tags=self._check._get_debug_tags(),
+                        hostname=self._check.resolved_hostname,
+                    )
+                    self._check.histogram(
+                        "dd.postgres.obfuscated.size",
+                        obfuscated_plan_size,
+                        tags=self._check._get_debug_tags(),
+                        hostname=self._check.resolved_hostname,
+                    )
+                    if normalized_plan_size > plan_size * (1 + self._percent_increase_emit_plan_log / 100.0):
+                        self._log.debug(
+                            "detected plan where % increase from plan to normalized plan was above {} percent\n"
+                            "original plan size in bytes: {}\n"
+                            "normalized plan size in bytes{}\n".format(
+                                self._percent_increase_emit_plan_log,
+                                plan_size,
+                                normalized_plan_size,
+                            )
+                        )
+                        self._log.debug(json.dumps({"plan": plan}))
+                    if obfuscated_plan_size > plan_size * (1 + self._percent_increase_emit_plan_log / 100.0):
+                        self._log.debug(
+                            "detected plan where % increase from plan to obfuscated plan was above {} percent\n"
+                            "original plan size in bytes: {}\n"
+                            "obfuscated plan size in bytes{}\n".format(
+                                self._percent_increase_emit_plan_log,
+                                plan_size,
+                                obfuscated_plan_size,
+                            )
+                        )
+                        self._log.debug(json.dumps({"plan": plan}))
+                except Exception as e:
+                    self._log.warning("ERROR: couldn't get plan/obfuscated plan sizes")
+                    pass
             except Exception as e:
                 if self._config.log_unobfuscated_plans:
                     self._log.warning("Failed to obfuscate plan=[%s] | err=[%s]", plan, e)
