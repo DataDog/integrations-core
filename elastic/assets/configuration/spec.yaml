@@ -122,7 +122,8 @@ files:
 
         2. data_path - The JSON path up to, but not including, the metric. For example, if querying for size of parent
                        circuit breaker, the full path is 'breakers.parent.estimated_size_in_bytes', which means the
-                       `data_path` is 'breakers.parent'.
+                       `data_path` is 'breakers.parent'. `data_path` cannot contain any wildcards, so accessing data
+                       indexed by ID (e.g. node or index) is not possible.
 
         3. columns - The list representing the data to be collected from the JSON query. There are two required pieces
                      of data:
