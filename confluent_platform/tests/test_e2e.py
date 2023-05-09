@@ -26,6 +26,7 @@ def test_e2e(dd_agent_check):
     # type: (Any) -> None
     aggregator = dd_agent_check(CHECK_CONFIG, rate=True)  # type: AggregatorStub
 
+
     # Skip default `jvm.*` metrics by marking them as asserted
     for metric_name in aggregator._metrics:
         if metric_name.startswith('jvm.'):

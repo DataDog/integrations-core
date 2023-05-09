@@ -400,6 +400,8 @@ class DockerInterface(object):
         # The chosen tag
         command.append(self.agent_build)
 
+        print(command)
+
         return run_command(command, capture=True)
 
     def stop_agent(self):
