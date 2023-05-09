@@ -66,7 +66,7 @@ By creating an integration, you can achieve the following benefits:
 Correlate your data with user observability data
 : Leverage Datadog to increase the value of your platform by allowing customers to see the data from your platform alongside the rest of their technology stack.
 
-Increase mean-time-to-resolution (MTTR) for customers 
+Decrease mean-time-to-resolution (MTTR) for customers 
 : When a customer's account is enriched with data from an integration, they are able to see a broader view of their entire stack, allowing them to debug and remediate issues more quickly. 
 
 Increase adoption and visibility 
