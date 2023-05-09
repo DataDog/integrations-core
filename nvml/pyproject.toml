@@ -43,7 +43,7 @@ deps = [
 ]
 
 [project.urls]
-Source = "https://github.com/DataDog/integrations-extras"
+Source = "https://github.com/DataDog/integrations-core"
 
 [tool.hatch.version]
 path = "datadog_checks/nvml/__about__.py"

@@ -21,7 +21,7 @@
   },
   "author": {
     "support_email": "help@datadoghq.com",
-    "homepage": "https://github.com/DataDog/integrations-extras",
+    "homepage": "https://github.com/DataDog/integrations-core",
     "sales_email": "help@datadoghq.com",
     "name": "Community"
   },
