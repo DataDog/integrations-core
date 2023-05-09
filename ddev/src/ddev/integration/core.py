@@ -75,12 +75,10 @@ class Integration:
 
     @cached_property
     def package_files(self) -> list:
-        package_files = []
         for root, _, files in os.walk(self.package_directory):
             for file in files:
                 if file.endswith(".py"):
-                    package_files.append(os.path.join(root, file))
-        return package_files
+                    yield os.path.join(root, file)
 
     @cached_property
     def is_valid(self) -> bool:
