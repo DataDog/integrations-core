@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+import glob
 from typing import TYPE_CHECKING
 
 import click
@@ -40,7 +41,7 @@ def openmetrics(ctx: click.Context, integrations: tuple[str, ...]):
     app: Application = ctx.obj
     validation_tracker = app.create_validation_tracker('OpenMetrics Metric limit')
 
-    app.display_info("Validating DEFAULT_METRIC_LIMIT = 0 for OpenMetrics integrations ...")
+    app.display_waiting("Validating default metric limit for OpenMetrics integrations ...")
     if app.repo.name not in ('core', 'extras'):
         app.display_info(
             f"OpenMetrics validations is only enabled for core or "
@@ -49,17 +50,16 @@ def openmetrics(ctx: click.Context, integrations: tuple[str, ...]):
         app.abort()
 
     for integration in app.repo.integrations.iter_packages(integrations):
-        package_files = os.listdir(integration.package_directory)
-        for package_file in package_files:
-            check_file = integration.package_directory / package_file
-            if os.path.isfile(check_file) and check_file.name.endswith(".py"):
-                try:
-                    f = open(check_file)
-                    contents = f.read()
-                except Exception:
-                    app.display_info(f"Could not open or read file {check_file}, skipping")
-                else:
-                    _filter_openmetrics(contents, integration, package_file, validation_tracker)
+        python_files = glob.glob(str(integration.package_directory) + "/**/*.py")
+        # package_files = os.listdir(integration.package_directory)
+        for file in python_files:
+            try:
+                f = open(file)
+                contents = f.read()
+            except Exception:
+                app.display_info(f"Could not open or read file {file}, skipping")
+            else:
+                _filter_openmetrics(contents, integration, file, validation_tracker)
 
     if validation_tracker.errors:
         validation_tracker.display()
