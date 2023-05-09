@@ -34,7 +34,7 @@ The [Integrations page][101] includes integrations built by both Datadog and our
 
 The [Marketplace page][101] is a commercial platform for Technology Partners to _sell_ a variety of offerings, including integrations, software licenses, and professional services to Datadog customers.
 
-{{< img src="developers/marketplace/marketplace_overview.png" alt="The Datadog Marketplace page" style="width:100%" >}}
+{{< img src="developers/marketplace/marketplace_updated_overview.png" alt="The Datadog Marketplace page" style="width:100%" >}}
 
 [101]: https://app.datadoghq.com/marketplace
 
