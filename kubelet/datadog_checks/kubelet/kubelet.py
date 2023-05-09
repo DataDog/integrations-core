@@ -238,7 +238,8 @@ class KubeletCheck(
         This is so the base class can create a scraper_config with the proper values.
         """
         kubelet_conn_info = get_connection_info()
-        endpoint = kubelet_conn_info.get('url')
+
+        endpoint = kubelet_conn_info.get('url') if kubelet_conn_info is not None else "dummy_url/kubelet" # dummy needed in case kubelet isn't running when the check is first accessed
 
         kubelet_instance = deepcopy(instance)
         kubelet_instance.update(
