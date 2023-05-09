@@ -65,9 +65,9 @@ def openmetrics(ctx: click.Context, integrations: tuple[str, ...]):
 
     for integration in app.repo.integrations.iter_packages(integrations):
         pass_validation = False
-        python_files = _get_python_files(integration.package_directory)
+        package_files = integration.package_files
 
-        for file in python_files:
+        for file in package_files:
             try:
                 f = open(file)
                 contents = f.read()

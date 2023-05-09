@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import os
 from functools import cached_property
 from typing import TYPE_CHECKING
 
@@ -71,6 +72,15 @@ class Integration:
             return name
         else:
             return self.manifest.get('/assets/integration/source_type_name', self.name)
+
+    @cached_property
+    def package_files(self) -> list:
+        package_files = []
+        for root, _, files in os.walk(self.package_directory):
+            for file in files:
+                if file.endswith(".py"):
+                    package_files.append(os.path.join(root, file))
+        return package_files
 
     @cached_property
     def is_valid(self) -> bool:

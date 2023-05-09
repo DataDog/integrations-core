@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 from ddev.repo.core import Repository
 
 
@@ -187,3 +189,25 @@ class TestPackageDirectory:
         integration = repo.integrations.get('go-metro')
 
         assert integration.package_directory == local_repo / integration.name / 'datadog_checks' / 'go_metro'
+
+
+class TestPackageFiles:
+    def test_base_package_file(self, local_repo):
+        repo = Repository(local_repo.name, str(local_repo))
+        integration = repo.integrations.get('datadog_checks_base')
+
+        expected_files = []
+        for root, _, files in os.walk(integration.package_directory):
+            for file in files:
+                if file.endswith(".py"):
+                    expected_files.append(os.path.join(root, file))
+
+        assert integration.package_files == expected_files
+
+    def test_tile_only_package_file(self, local_repo):
+        repo = Repository(local_repo.name, str(local_repo))
+        integration = repo.integrations.get('agent_metrics')
+
+        expected_files = []
+
+        assert integration.package_files == expected_files
