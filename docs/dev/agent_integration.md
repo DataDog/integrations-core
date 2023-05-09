@@ -8,56 +8,64 @@ aliases:
   - /guides/new_integration/
   - /developers/integrations/new_check_howto/
 dependencies: "https://github.com/DataDog/integrations-core/blob/alai97/add-marketplace-documentation/docs/dev/agent_integration.md"
+further_reading:
+- link: "https://www.datadoghq.com/blog/programmatically-manage-your-datadog-integrations/"
+  tag: "Blog"
+  text: "Programmatically manage your Datadog integrations"
+- link: "/developers/integrations/python/"
+  tag: "Documentation"
+  text: "Python for Agent-based Integration Development"
+- link: "/developers/"
+  tag: "Documentation"
+  text: "Learn how to develop on the Datadog platform"
 ---
 
 ## Overview
 
-This guide provides instructions for creating a Datadog Agent integration. You can list an Agent integration for a price on the Datadog Marketplace, or list it out-of-the-box on the Integrations page. 
+This page walks Technology Partners through how to create a Datadog Agent integration, which you can list as out-of-the-box on the [Integrations page][23], or for a price on the [Marketplace page][24]. 
 
-Agent-based integrations use the Datadog Agent to submit data via checks written by the partner. Checks can emit metrics, events, and service checks into a customer's Datadog account. The Agent itself can submit logs as well, but that is configured outside of the check itself. 
+## Agent-based integrations
 
-The implementation code for these integrations is hosted by Datadog. Agent Integrations are best suited for collecting data from systems or applications that live in a local area network (LAN) or virtual private cloud (VPC). Writing an Agent integration requires you to publish and deploy your solution as a Python wheel (.whl).
+Agent-based integrations use the [Datadog Agent][17] to submit data through checks written by Technology Partners. Checks can emit [metrics][23], [events][24], and [service checks][25] into a customer's Datadog account. The Agent itself can submit [logs][26] as well, but that is configured outside of the check itself. 
 
-You can also include out-of-the-box assets like Monitors, Dashboards, and Log Pipelines with your Agent-based integration. When a user clicks "Install" on your integration tile, they will be guided to your setup instructions, and all out-of-the-box dashboards and recommended monitors packaged with your integration will appear in the user's account.
+The implementation code for these integrations is hosted by Datadog. Agent integrations are best suited for collecting data from systems or applications that live in a local area network (LAN) or virtual private cloud (VPC). Creating an Agent integration requires you to publish and deploy your solution as a Python wheel (`.whl`).
+
+You can include out-of-the-box assets such as [monitors][27], [dashboards][28], and [log pipelines][29] with your Agent-based integration. When a user clicks **Install** on your integration tile, they are prompted to follow the setup instructions, and all out-of-the-box dashboards and recommended monitors packaged with your integration will appear in the their account.
 
 ## Development process
 
-You can expect the following process for building an Agent-based integration:
-1. Once you've been accepted to the Datadog Partner Network, you'll meet with the Datadog Technology Partner team to discuss your offering and use cases.
-2. Request a sandbox account for development.
-3. Begin development of your integration, which will include writing the integration code on your end as well as building and installing a python wheel (.whl).
-4. Test your integration in your sandbox account.
-5. Once your development work is tested and complete, follow the steps to [Create a Tile][20] in order to display your offering on the Marketplace or Integrations page.
-6. Once your pull request is submitted and approved, the team will schedule a demo for a final review of your integration.
-7. You'll have the option of testing the tile and integration in your sandbox account before publishing, or immediately publishing the integration for all customers.  
+The process to build an Agent-based integration looks like the following: 
+
+1. Once you've been accepted to the Datadog Partner Network, you will meet with the Datadog Technology Partner team to discuss your offering and use cases.
+2. Request a Datadog sandbox account for development.
+3. Begin development of your integration, which includes writing the integration code on your end as well as building and installing a Python wheel (`.whl`).
+4. Test your integration in your Datadog sandbox account.
+5. Once your development work is tested and complete, follow the steps in [Create a Tile][20] to display your offering on the **Integrations** or **Marketplace** page.
+6. Once your pull request is submitted and approved, the Datadog Technology Partner team will schedule a demo for a final review of your integration.
+7. You will have the option of testing the tile and integration in your Datadog sandbox account before publishing, or immediately publishing the integration for all customers.  
 
 ## Prerequisites
 
-The required Datadog Agent integration development tools include:
+The required Datadog Agent integration development tools include the following:
 
-- Python v3.8, [pipx][2] and the Agent Integration Developer Tool (`ddev`). For installation instructions, see [Install the Datadog Agent Integration Developer Tool][3].
+- Python v3.8, [pipx][2], and the Agent Integration Developer Tool (`ddev`). For installation instructions, see [Install the Datadog Agent Integration Developer Tool][3].
 - [Docker][4] to run the full test suite.
-- The git [command-line][5] or [GitHub desktop client][19].
+- The git [command line][5] or [GitHub Desktop client][19].
 
-**To get started, select either tab below for instructions on building an out-of-the-box Agent-based integration or an Agent-based integration on the Marketplace.** 
+<div class="alert alert-info">Select a tab for instructions on building an out-of-the-box Agent-based integration on the Integrations page, or an Agent-based integration on the Marketplace page.</div>
 
 {{< tabs >}}
-{{% tab "Build an Out-of-the-box Integration" %}}
+{{% tab "Build an out-of-the-box integration" %}}
 
-## Set up a directory and fork the `integrations-extras` repository
+To build an out-of-the-box integration:
 
-Set up a directory:
+1. Set up a `dd` directory:
+   
+   {{< code-block lang="shell" >}}mkdir $HOME/dd && cd $HOME/dd{{< /code-block >}}
 
-1. Create the `dd` directory:
+   The Datadog Development Toolkit expects you to work in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps. 
 
-   The Datadog Development Toolkit expects you to work in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps.
-
-   To create the `dd` directory and clone the `integrations-extras` repo:
-   ```
-   mkdir $HOME/dd && cd $HOME/dd
-   ```
-
-1. Fork the [`integrations-extras` repo][101].
+1. Fork the [`integrations-extras` repository][101].
 
 1. Clone your fork into the `dd` directory:
    ```
@@ -71,7 +79,7 @@ Set up a directory:
 
 ## Configure the developer tool
 
-Assuming you've installed [the Agent Integration Developer Tool][102], configure the tool for the `integrations-extras` repo:
+Assuming you've installed [the Agent Integration Developer Tool][102], configure the tool for the `integrations-extras` repository.
 
 1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
    ```
@@ -88,42 +96,44 @@ Assuming you've installed [the Agent Integration Developer Tool][102], configure
 
 {{% /tab %}}
 
-{{% tab "Build a Marketplace Integration" %}}
+{{% tab "Build a Marketplace integration" %}}
 
-## Set up a directory and clone the Marketplace repository
+To build an integration:
 
-Set up a directory:
+1. See [Build a Marketplace Offering][102] to request access to the [Marketplace repository][101].
+1. Create a `dd` directory:
 
-1. Request access to the [Marketplace repository][101] by following the instructions in the [Marketplace documentation][102].
-2. Create a `dd` directory:
    {{< code-block lang="shell" >}}mkdir $HOME/dd{{< /code-block >}}
 
    The Datadog Development Toolkit command expects you to be working in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps.
 
-3. Once you have been granted access to the Marketplace repository, create the `dd` directory and clone the `marketplace` repo:
+1. Once you have been granted access to the Marketplace repository, create the `dd` directory and clone the `marketplace` repository:
+
    {{< code-block lang="shell" >}}git clone git@github.com:DataDog/marketplace.git{{< /code-block >}}
-4. Create a feature branch to work in.
-    {{< code-block lang="shell" >}}git switch -c <YOUR INTEGRATION NAME> origin/master{{< /code-block >}}
+
+1. Create a feature branch to work in:
+
+   {{< code-block lang="shell" >}}git switch -c <YOUR INTEGRATION NAME> origin/master{{< /code-block >}}
 
 ## Install and configure the Datadog development toolkit
 
 The Agent Integration Developer Tool allows you to create scaffolding when you are developing an integration by generating a skeleton of your integration tile's assets and metadata. For instructions on installing the tool, see [Install the Datadog Agent Integration Developer Tool][103].
 
-After you install the Developer tool, configure it for the marketplace repo by following the instructions below.
+Once you have installed the Agent Integration Developer Tool, configure it for the Marketplace repository.
 
-Set `marketplace` as the default working repository:
+1. Set `marketplace` as the default working repository:
 
-{{< code-block lang="shell" >}}
-ddev config set marketplace $HOME/dd/marketplace
-ddev config set repo marketplace
-{{< /code-block >}}
+   {{< code-block lang="shell" >}}
+   ddev config set marketplace $HOME/dd/marketplace
+   ddev config set repo marketplace
+   {{< /code-block >}}
 
-If you used a directory other than `$HOME/dd` to clone the marketplace directory, use the following command to set your working repository:
+1. If you used a directory other than `$HOME/dd` to clone the `marketplace` directory, use the following command to set your working repository:
 
-{{< code-block lang="shell" >}}
-ddev config set marketplace <PATH/TO/MARKETPLACE>
-ddev config set repo marketplace
-{{< /code-block >}}
+   {{< code-block lang="shell" >}}
+   ddev config set marketplace <PATH/TO/MARKETPLACE>
+   ddev config set repo marketplace
+   {{< /code-block >}}
 
 [101]: https://github.com/Datadog/marketplace
 [102]: https://docs.datadoghq.com/developers/integrations/marketplace_offering
@@ -135,18 +145,20 @@ ddev config set repo marketplace
 
 ## Create your integration
 
-Once you've downloaded Docker, installed an appropriate version of Python, and prepared your development environment, you can get started with creating an Agent-based integration. The instructions below use an example integration called `Awesome`. Follow along using the code from Awesome, or replace Awesome with your own code, as well as the name of your integration within the commands, i.e. use `ddev create <your-integration-name>`, rather than `ddev create Awesome`. 
+Once you've downloaded Docker, installed an appropriate version of Python, and prepared your development environment, you can start creating an Agent-based integration. 
+
+The following instructions use an example integration called `Awesome`. Follow along using the code from Awesome, or replace Awesome with your own code, as well as the name of your integration within the commands. For example, use `ddev create <your-integration-name>` instead of `ddev create Awesome`. 
 
 ### Create scaffolding for your integration
 
-The `ddev create` command runs an interactive tool that creates the basic file and path structure (or "scaffolding") necessary for a new Agent-based integration.
+The `ddev create` command runs an interactive tool that creates the basic file and path structure (or scaffolding) necessary for an Agent-based integration.
 
 1. Before you create your first integration directory, try a dry-run using the `-n/--dry-run` flag, which doesn't write anything to the disk:
    ```
    ddev create -n Awesome
    ```
 
-   This command displays the path where the files would have been written, as well as the structure itself. Make sure the path in the first line of output matches your `integrations-extras` or `marketplace` repository location.
+   This command displays the path where the files would have been written, as well as the structure itself. Make sure the path in the first line of output matches your `marketplace` repository location.
 
 1. Run the command without the `-n` flag. The tool asks you for an email and name and then creates the files you need to get started with an integration.
 
@@ -158,9 +170,11 @@ The `ddev create` command runs an interactive tool that creates the basic file a
 
 ## Write an Agent check
 
-At the core of each Agent-based integration is an *Agent Check* that periodically collects information and sends it to Datadog. Checks inherit their logic from the `AgentCheck` base class and have the the following requirements:
+At the core of each Agent-based integration is an *Agent Check* that periodically collects information and sends it to Datadog. 
 
-- Integrations running on the Datadog Agent v7 and later must be compatible with Python 3; however, Agents v5 and v6 still use Python 2.7.
+[Checks][30] inherit their logic from the `AgentCheck` base class and have the following requirements:
+
+- Integrations running on the Datadog Agent v7 or later must be compatible with Python 3. Integrations running on the Datadog Agent v5 and v6 still use Python 2.7.
 - Checks must derive from `AgentCheck`.
 - Checks must provide a method with this signature: `check(self, instance)`.
 - Checks are organized in regular Python packages under the `datadog_checks` namespace. For example, the code for Awesome lives in the `awesome/datadog_checks/awesome/` directory.
@@ -169,7 +183,9 @@ At the core of each Agent-based integration is an *Agent Check* that periodicall
 
 ### Implement check logic
 
-For Awesome, the Agent Check is composed of a Service Check named `awesome.search` that searches for a string on a web page. It results in `OK` if the string is present, `WARNING` if the page is accessible but the string was not found, and `CRITICAL` if the page is inaccessible. To learn how to submit metrics with your Agent Check, see [Custom Agent Check][7].
+For Awesome, the Agent Check is composed of a [service check][25] named `awesome.search` that searches for a string on a web page. It results in `OK` if the string is present, `WARNING` if the page is accessible but the string was not found, and `CRITICAL` if the page is inaccessible. 
+
+To learn how to submit metrics with your Agent Check, see [Custom Agent Check][7].
 
 The code contained within `awesome/datadog_checks/awesome/check.py` looks something like this:
 
@@ -215,14 +231,16 @@ To learn more about the base Python class, see [Anatomy of a Python Check][8].
 
 There are two basic types of tests:
 
-- [Unit tests for specific functionality.](#write-a-unit-test)
-- [Integration tests that execute the `check` method and verify proper metrics collection.](#write-an-integration-test)
+- [Unit tests for specific functionality](#write-a-unit-test)
+- [Integration tests that execute the `check` method and verify proper metrics collection](#write-an-integration-test)
 
-[pytest][9] and [hatch][10] are used to run the tests. Tests are required if you want your integration to be included in the `integrations-extras` repository.
+[pytest][9] and [hatch][10] are used to run the tests. Tests are **required** in order to include your integration in the `integrations-extras` repository.
 
 ### Write a unit test
 
-The first part of the `check` method for Awesome retrieves and verifies two elements from the configuration file. This is a good candidate for a unit test. Open the file at `awesome/tests/test_awesome.py` and replace the contents with the following:
+The first part of the `check` method for Awesome retrieves and verifies two elements from the configuration file. This is a good candidate for a unit test. 
+
+Open the file at `awesome/tests/test_awesome.py` and replace the contents with the following:
 
 {{< code-block lang="python" filename="test_awesome.py" collapsible="true" >}}
 import pytest
@@ -256,20 +274,18 @@ def test_config():
 
 `pytest` has the concept of markers that can be used to group tests into categories. Notice that `test_config` is marked as a `unit` test.
 
-The scaffolding is set up to run all the tests located in `awesome/tests`.
-
-To run the tests, run:
+The scaffolding is set up to run all the tests located in `awesome/tests`. To run the tests, run the following command:
 ```
 ddev test awesome
 ```
 
 ### Write an integration test
 
-The [unit test above](#write-a-unit-test) doesn't check the collection logic. To test the logic, you need to create an environment for an integration test and write an integration test.
+The [unit test above](#write-a-unit-test) doesn't check the collection logic. To test the logic, you need to [create an environment for an integration test](#create-an-environment-for-the-integration-test) and [write an integration test](#add-an-integration-test).
 
 #### Create an environment for the integration test
 
-The toolkit uses `docker` to spin up an Nginx container and lets the check retrieve the welcome page.
+The toolkit uses `docker` to spin up an NGINX container and lets the check retrieve the welcome page.
 
 To create an environment for the integration test, create a docker-compose file at `awesome/tests/docker-compose.yml` with the following contents:
 
@@ -344,43 +360,44 @@ Your integration is almost complete. Next, add the necessary check assets.
 
 ## Create the check assets
 
-The set of assets created by the `ddev` scaffolding must be populated:
+The following set of assets created by the `ddev` scaffolding **must** be populated:
 
 `README.md`
 : This contains the documentation for your Agent Check, how to set it up, which data it collects, and support information.
 
 `spec.yaml`
-: This is used to generate the `conf.yaml.example` using the `ddev` tooling (see the **Configuration template** tab below). For more information, see [Configuration specification][11].
+: This is used to generate the `conf.yaml.example` using the `ddev` tooling. For more information, see [Configuration Specification][11].
 
 `conf.yaml.example`
-: This contains default (or example) configuration options for your Agent Check. **Do not edit this file by hand** It is generated from the contents of `spec.yaml`. For more information, see the [Configuration file reference][12].
+: This contains default (or example) configuration options for your Agent Check. **Do not edit this file by hand**. It is generated from the contents of `spec.yaml`. For more information, see the [Configuration file reference documentation][12].
 
 `manifest.json`
-: This contains the metadata for your Agent Check such as the title and categories. For more information, see the [Manifest file reference][13].
+: This contains the metadata for your Agent Check such as the title and categories. For more information, see the [Manifest file reference documentation][13].
 
 `metadata.csv`
-: This contains the list of all metrics collected by your Agent Check. For more information, see the [Metrics metadata file reference][14].
+: This contains the list of all metrics collected by your Agent Check. For more information, see the [Metrics metadata file reference documentation][14].
 
 `service_check.json`
-: This contains the list of all Service Checks collected by your Agent Check. For more information, see the [Service check file reference][15].
+: This contains the list of all Service Checks collected by your Agent Check. For more information, see the [Service check file reference documentation][15].
 
-For more information on the `README.md` and `manifest.json` files, see [Create a Tile][20].
-
+For more information about the `README.md` and `manifest.json` files, see [Create a Tile][20].
 
 ## Build the wheel
 
-The `pyproject.toml` file provides the metadata that is used to package and build the wheel. The wheel contains the files necessary for the functioning of the integration itself, which includes the Check, configuration example file, and artifacts generated during the build of the wheel.
+The `pyproject.toml` file provides the metadata that is used to package and build the wheel. The wheel contains the files necessary for the functioning of the integration itself, which includes the Agent Check, configuration example file, and artifacts generated during the build of the wheel.
 
-All additional elements, including the metadata files, are not meant to be contained within the wheel, and are used elsewhere by the Datadog platform and ecosystem. To learn more about Python packaging, see [Packaging Python Projects][16].
+All additional elements, including the metadata files, are not meant to be contained within the wheel, and are used elsewhere by the Datadog platform and ecosystem. 
 
-Once your `pyproject.toml` is ready, create a wheel:
+To learn more about Python packaging, see [Packaging Python Projects][16].
+
+Once your `pyproject.toml` is ready, create a wheel using one of the following options:
 
 - (Recommended) With the `ddev` tooling: `ddev release build <INTEGRATION_NAME>`.
 - Without the `ddev` tooling: `cd <INTEGRATION_DIR> && pip wheel . --no-deps --wheel-dir dist`.
 
 ## Install the wheel
 
-The wheel is installed using the Agent `integration` command, available in [Agent v6.10.0 and up][17]. Depending on your environment, you may need to execute this command as a specific user or with specific privileges:
+The wheel is installed using the Agent `integration` command, available in [Agent v6.10.0 or later][17]. Depending on your environment, you may need to execute this command as a specific user or with specific privileges:
 
 **Linux** (as `dd-agent`):
 ```bash
@@ -413,20 +430,17 @@ sudo datadog-agent integration install -w /path/to/wheel.whl
 
 ## Create a tile and publish your integration
 
-After you've created your Agent-based integration, populate the remainder of the required assets that will appear throughout your integration tile by following the instructions in [Create a Tile][20].
+Once you have created your Agent-based integration, populate the remaining [required assets][31] that  appear on your integration tile by following the instructions in [Create a Tile][20].
 
 Finally, open a pull request with your code on the [`integrations-extras`][21] or [`marketplace`][22] repository. After you've created your pull request, automatic checks run to verify that your pull request is in good shape and contains all the required content to be updated.
 
 ## Further reading
 
-Additional helpful documentation, links, and articles:
-
-- [Manage integrations via API calls][18]
-- [Python for Agent-based Integration Development][3]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://docs.datadoghq.com/developers/#creating-your-own-solution
 [2]: https://github.com/pypa/pipx
-[3]: /developers/integrations/python/
+[3]: https://docs.datadoghq.com/metrics/
 [4]: https://docs.docker.com/get-docker/
 [5]: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
 [6]: https://github.com/datadog/integrations-extras
@@ -441,8 +455,17 @@ Additional helpful documentation, links, and articles:
 [15]: /developers/integrations/check_references/#service-check-file
 [16]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
 [17]: https://docs.datadoghq.com/agent/
-[18]: https://www.datadoghq.com/blog/programmatically-manage-your-datadog-integrations/
+[18]: https://docs.datadoghq.com/events/
 [19]: https://desktop.github.com/
 [20]: https://docs.datadoghq.com/developers/integrations/create_a_tile
 [21]: https://github.com/Datadog/integrations-extras
 [22]: https://github.com/Datadog/marketplace
+[23]: https://app.datadoghq.com/integrations
+[24]: https://app.datadoghq.com/marketplace
+[25]: https://docs.datadoghq.com/developers/service_checks/
+[26]: https://docs.datadoghq.com/logs/
+[27]: https://docs.datadoghq.com/monitors/
+[28]: https://docs.datadoghq.com/dashboards/
+[29]: https://docs.datadoghq.com/logs/log_configuration/pipelines/
+[30]: https://docs.datadoghq.com/glossary/#check/
+[31]: https://docs.datadoghq.com/developers/integrations/create_a_tile/#complete-the-necessary-integration-asset-files

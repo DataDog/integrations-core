@@ -8,6 +8,9 @@ aliases:
 - /developers/agent_checks/
 dependencies: "https://github.com/DataDog/integrations-core/blob/alai97/add-marketplace-documentation/docs/dev/README.md"
 further_reading:
+- link: "/developers/integrations/marketplace_offering/"
+  tag: "Documentation"
+  text: "Learn how to sell an integration on the Datadog Marketplace"
 - link: "/developers/"
   tag: "Documentation"
   text: "Learn how to develop on the Datadog platform"
@@ -15,71 +18,94 @@ further_reading:
 
 ## Overview
 
-This page walks through how Technology Partners can build an out-of-the-box integration using the Datadog Agent or Datadog API. 
+This page walks you through how Technology Partners can [build an out-of-the-box integration](#create-a-datadog-integration) using the [Datadog Agent][11] or the [Datadog API][12], and list their offering on the **Integrations** or **Marketplace** page. 
 
-The [Integrations page][3] includes integrations built by both Datadog and our Technology Partners, available at no cost to Datadog customers. 
+{{< tabs >}}
+{{% tab "Integrations" %}}
 
-The [Datadog Marketplace][4], on the other hand, is a commercial platform for Technology Partners to _sell_ a variety of offerings, including integrations, software licenses, and professional services to Datadog customers.
+The [Integrations page][101] includes integrations built by both Datadog and our Technology Partners, available at _no cost_ to Datadog customers. 
+
+{{< img src="developers/integrations/integrations_overview.png" alt="The Datadog Integrations page" style="width:100%;" >}}
+
+[101]: https://app.datadoghq.com/integrations
+
+{{% /tab %}}
+{{% tab "Marketplace" %}}
+
+The [Marketplace page][101] is a commercial platform for Technology Partners to _sell_ a variety of offerings, including integrations, software licenses, and professional services to Datadog customers.
+
+{{< img src="developers/marketplace/marketplace_overview.png" alt="The Datadog Marketplace page" style="width:100%" >}}
+
+[101]: https://app.datadoghq.com/marketplace
+
+{{% /tab %}}
+{{< /tabs >}}
 
 ## Join the Datadog partner network
 
-Before listing an integration on Datadog, you will first need to apply to the [Datadog Partner Network's][5] **Technology Partner** track. Once your application has been approved, you can begin to develop your integration.
+Before listing an integration on Datadog, first apply to the [Datadog Partner Network's][5] **Technology Partner** track. Once your application has been approved, you can begin developing your integration.
 
-## Why create an integration?
+## Create a Datadog integration
 
-**Correlate your data with user observability data** - Leverage Datadog to increase the value of your platform by  allowing customers to see the data from your platform alongside the rest of their technology stack.
+### Agent-based integrations
 
-**Increase mean-time-to-resolution (MTTR) for customers** - When a customer's account is enriched with data from an integration, they are able to see a broader view of their entire stack, allowing them to debug and remediate issues more quickly. 
+Agent-based integrations use the [Datadog Agent][11] to submit data through checks written by Technology Partners. The implementation code for these integrations is hosted by Datadog. 
 
-**Increase adoption and visibility** - Ensuring native functionality for Datadog reduces friction to adoption, and displaying a tile on our Integrations page provides key visibility to all of Datadog's customers.
+Agent integrations are best suited for collecting data from systems or applications that live in a local area network (LAN) or virtual private cloud (VPC). [Creating an Agent integration][2] requires you to publish and deploy your solution as a Python wheel (`.whl`).
 
-**Submit out-of-the-box metrics at no extra cost** - Metrics reported from official Datadog integrations (unless the integration is sending in potentially unlimited metrics) are not counted as custom metrics, and therefore won't impact a customer's billing through custom metric allocation.
+### API-based integrations
 
-## Datadog integrations
+API-based integrations can submit telemetry—such as metrics, traces, logs, and more—from external platforms using the [Datadog API][12]. Customers can then visualize and correlate this data alongside data from the rest of their stack, allowing them to quickly analyze and remediate issues. API-based integrations may also read data out of Datadog once customers [authorize access using OAuth][13]. 
 
-### [Agent-based Integration][2]
-Agent-based integrations use the Datadog Agent to submit data via checks written by the partner. The implementation code for these integrations is hosted by Datadog. Agent Integrations are best suited for collecting data from systems or applications that live in a local area network (LAN) or virtual private cloud (VPC). Writing an Agent integration requires you to publish and deploy your solution as a Python wheel (.whl).
+Technology Partners write and host the implementation code that makes up the integration. [Creating an API integration][1] work well for Technology Partners building a connector between Datadog and another SaaS platform.
 
-### [API-based Integration][1]
-API-based integrations can submit telemetry, such as metrics, traces, logs, and more, from external platforms via the Datadog API. Customers can then visualize and correlate this data alongside data from the rest of their stack, allowing them to quickly analyze and remediate issues. API-based integrations may also read data out of Datadog, once authorized for access by customers via OAuth. Partners write and host the implementation code that makes up the integration. API integrations work well for partners building a connector between Datadog and another SaaS platform.
+### Benefits
+
+By creating an integration, you can achieve the following benefits:
+
+Correlate your data with user observability data
+: Leverage Datadog to increase the value of your platform by allowing customers to see the data from your platform alongside the rest of their technology stack.
+
+Increase mean-time-to-resolution (MTTR) for customers 
+: When a customer's account is enriched with data from an integration, they are able to see a broader view of their entire stack, allowing them to debug and remediate issues more quickly. 
+
+Increase adoption and visibility 
+: Ensuring native functionality for Datadog reduces friction to adoption, and displaying a tile on the [Integrations page][10] provides key visibility to all of Datadog's customers.
+
+Submit out-of-the-box metrics at no extra cost 
+: Metrics reported from official Datadog integrations are not counted as [custom metrics][14] (unless the integration is sending in potentially unlimited metrics), and do not impact a customer's billing through custom metric allocation.
 
 ### Responsibilities
-As the author of the integration, you are responsible for maintaining the code and ensuring the integration functions properly across Datadog's regions. Please reach out to Datadog's Support team if help is needed.
+
+As the author of the integration, you are responsible for maintaining the code and ensuring the integration functions properly across all [Datadog sites][15]. If you encounter any setup issues, [contact Support][16].
 
 ## Get started 
 
 ### Request a sandbox account
 
-All Technology Partners can request a dedicated sandbox Datadog account to aid in their development. This sandbox account has a free license that you can use to send in data, build out dashboards, and more. 
+All Technology Partners can request a dedicated Datadog sandbox account to help develop their integration. This sandbox account has a free license that you can use to send in data, build out dashboards, and more. 
+
+<div class="alert alert-info">If you are already a member of a Datadog organization (including a trial org), you may need to switch to your newly created sandbox. For more information, see the <a href="https://docs.datadoghq.com/account_management/org_switching/">Account Management documentation</a>.</div>
 
 To request a sandbox account:
 
-1. Log into the [Datadog Partner Portal][5].
+1. Login to the [Datadog Partner Portal][5].
 2. On your personal homepage, click on the **Learn More** button under **Sandbox Access**.
 3. Select **Request Sandbox Upgrade**.
-
-<div class="alert alert-info">If you are already a member of a Datadog organization (including a trial org), you may need to switch to your newly created sandbox. For more information, see the <a href="https://docs.datadoghq.com/account_management/org_switching/">Account Management documentation</a>.</div>
 
 Creating a developer sandbox may take up to one or two business days. Once your sandbox is created, you can [invite new members from your organization][6] to collaborate with.
 
 ### Explore learning resources
 
-Once you've joined the Technology Partner track and requested a sandbox account, you can start learning about developing offerings by:
+Once you've joined the **Technology Partner** track and requested a sandbox account, you can learn more about developing an offering by:
 
 * Completing the on-demand [**Introduction to Datadog Integrations**][7] course on the [Datadog Learning Center][8].
-* Reading the documentation about setting up an [OAuth 2.0 client][9] for API-based integrations.
+* Reading the documentation about setting up an [OAuth 2.0 client for API-based integrations][9] and creating [API-based integrations][1].
+* Reading the documentation about creating [Agent-based integrations][2].
 
-### Build your integration
+For more information about sell a Datadog integration, see [Build a Marketplace Offering][4].
 
-To create an Agent-based integration, [click here][2].
-
-To create an API integration, [click here][1].
-
-To sell an integration on the Datadog Marketplace, [click here][4].
-
-
-
-
+## Further reading
 
 {{< partial name="whats-next/whats-next.html" >}}
 
@@ -88,7 +114,14 @@ To sell an integration on the Datadog Marketplace, [click here][4].
 [3]: https://docs.datadoghq.com/integrations/
 [4]: https://docs.datadoghq.com/developers/integrations/marketplace_offering/
 [5]: https://partners.datadoghq.com/
-[6]: /account_management/users/#add-new-members-and-manage-invites
+[6]: https://docs.datadoghq.com/account_management/users/#add-new-members-and-manage-invites
 [7]: https://learn.datadoghq.com/courses/intro-to-integrations
 [8]: https://learn.datadoghq.com/
 [9]: https://docs.datadoghq.com/developers/authorization/
+[10]: https://app.datadoghq.com/integrations
+[11]: https://docs.datadoghq.com/agent/
+[12]: https://docs.datadoghq.com/api/latest/
+[13]: https://docs.datadoghq.com/developers/authorization/
+[14]: https://docs.datadoghq.com/metrics/custom_metrics/
+[15]: https://docs.datadoghq.com/getting_started/site/
+[16]: https://docs.datadoghq.com/help/
