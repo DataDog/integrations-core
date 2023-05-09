@@ -139,6 +139,11 @@ class PostgreSql(AgentCheck):
         if self._dynamic_queries:
             return self._dynamic_queries
 
+        if self._version is None:
+            self.log.debug("Version set to None due to incorrect identified version, aborting dynamic queries")
+            return None
+
+        self.log.debug("Generating dynamic queries")
         queries = []
         if self.version >= V9_2:
             q_pg_stat_database = copy.deepcopy(QUERY_PG_STAT_DATABASE)
@@ -157,7 +162,11 @@ class PostgreSql(AgentCheck):
             queries.extend([q_pg_stat_database, q_pg_stat_database_conflicts, QUERY_PG_UPTIME])
 
         if self.version >= V10:
-            queries.append(QUERY_PG_STAT_WAL_RECEIVER)
+            # Wal receiver is not supported on aurora
+            # select * from pg_stat_wal_receiver;
+            # ERROR:  Function pg_stat_get_wal_receiver() is currently not supported in Aurora
+            if self.is_aurora is False:
+                queries.append(QUERY_PG_STAT_WAL_RECEIVER)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
 
         if not queries:
@@ -166,7 +175,7 @@ class PostgreSql(AgentCheck):
 
         self._dynamic_queries = self._new_query_executor(queries)
         self._dynamic_queries.compile_queries()
-        self.log.debug("initialized {cnt} dynamic querie(s)", extra={"cnt": str(len(queries))})
+        self.log.debug("initialized %s dynamic querie(s)", len(queries))
 
         return self._dynamic_queries
 
@@ -179,6 +188,7 @@ class PostgreSql(AgentCheck):
         self._version = None
         self._is_aurora = None
         self.metrics_cache.clean_state()
+        self._dynamic_queries = None
 
     def _get_debug_tags(self):
         return ['agent_hostname:{}'.format(self.agent_hostname)]

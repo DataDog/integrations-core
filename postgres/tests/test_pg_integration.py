@@ -26,11 +26,13 @@ from .common import (
     check_conflict_metrics,
     check_connection_metrics,
     check_db_count,
-    check_replication_slots,
+    check_logical_replication_slots,
+    check_physical_replication_slots,
     check_slru_metrics,
     check_stat_replication,
     check_uptime_metrics,
     check_wal_receiver_metrics,
+    get_expected_instance_tags,
     requires_static_version,
 )
 from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_14
@@ -40,14 +42,16 @@ CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_co
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
-def test_common_metrics(aggregator, integration_check, pg_instance):
+@pytest.mark.parametrize(
+    'is_aurora',
+    [True, False],
+)
+def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check = integration_check(pg_instance)
+    check._is_aurora = is_aurora
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + [
-        'port:{}'.format(PORT),
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
-    ]
+    expected_tags = get_expected_instance_tags(check, pg_instance)
     check_common_metrics(aggregator, expected_tags=expected_tags)
     check_bgw_metrics(aggregator, expected_tags)
     check_connection_metrics(aggregator, expected_tags=expected_tags)
@@ -55,24 +59,12 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check_db_count(aggregator, expected_tags=expected_tags)
     check_slru_metrics(aggregator, expected_tags=expected_tags)
     check_stat_replication(aggregator, expected_tags=expected_tags)
-    check_wal_receiver_metrics(aggregator, expected_tags=expected_tags, connected=0)
+    if is_aurora is False:
+        check_wal_receiver_metrics(aggregator, expected_tags=expected_tags, connected=0)
     check_uptime_metrics(aggregator, expected_tags=expected_tags)
 
-    replication_slot_tags = expected_tags + [
-        'slot_name:replication_slot',
-        'slot_persistence:permanent',
-        'slot_state:active',
-        'slot_type:physical',
-    ]
-    check_replication_slots(aggregator, expected_tags=replication_slot_tags)
-
-    logical_replication_slot_tags = expected_tags + [
-        'slot_name:logical_slot',
-        'slot_persistence:permanent',
-        'slot_state:inactive',
-        'slot_type:logical',
-    ]
-    check_replication_slots(aggregator, expected_tags=logical_replication_slot_tags)
+    check_logical_replication_slots(aggregator, expected_tags)
+    check_physical_replication_slots(aggregator, expected_tags)
 
     aggregator.assert_all_metrics_covered()
 
