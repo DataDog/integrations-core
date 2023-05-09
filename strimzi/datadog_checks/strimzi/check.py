@@ -17,6 +17,8 @@ USER_OPERATOR_NAMESPACE = "strimzi.user_operator"
 
 
 class StrimziCheck(OpenMetricsBaseCheckV2, ConfigMixin):
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, name, init_config, instances):
         super(StrimziCheck, self).__init__(name, init_config, instances)
         self.check_initializations.appendleft(self.parse_config)
