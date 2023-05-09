@@ -15,7 +15,7 @@ def test_openmetrics_pass_single_parameter(ddev, repository, check_name, helpers
     assert result.exit_code == 0, result.output
 
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        f"""
+        """
         Validating default metric limit for OpenMetrics integrations ...
         OpenMetrics Metric limit
 

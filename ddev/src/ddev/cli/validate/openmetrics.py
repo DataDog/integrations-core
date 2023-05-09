@@ -51,8 +51,9 @@ def openmetrics(ctx: click.Context, integrations: tuple[str, ...]):
 
     for integration in app.repo.integrations.iter_packages(integrations):
         pass_validation = False
-        python_files = glob.glob(str(integration.package_directory) + "**/*.py") \
-            + glob.glob(str(integration.package_directory) + "/**/*.py")
+        python_files = glob.glob(str(integration.package_directory) + "**/*.py") + glob.glob(
+            str(integration.package_directory) + "/**/*.py"
+        )
 
         for file in python_files:
             try:
@@ -61,7 +62,9 @@ def openmetrics(ctx: click.Context, integrations: tuple[str, ...]):
             except Exception:
                 app.display_info(f"Could not open or read file {file}, skipping")
             else:
-                pass_validation = pass_validation or _validate_openmetrics_integrations(contents, integration, file, validation_tracker)
+                pass_validation = pass_validation or _validate_openmetrics_integrations(
+                    contents, integration, file, validation_tracker
+                )
 
         if pass_validation:
             validation_tracker.success()
