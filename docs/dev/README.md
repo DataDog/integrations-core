@@ -18,7 +18,7 @@ further_reading:
 
 ## Overview
 
-This page walks you through how Technology Partners can [build an out-of-the-box integration](#create-a-datadog-integration) using the [Datadog Agent][11] or the [Datadog API][12], and list their offering on the **Integrations** or **Marketplace** page. 
+This page walks you through how Technology Partners can [build an integration](#create-a-datadog-integration) using the [Datadog Agent][11] or the [Datadog API][12], and list their offering on the **Integrations** or **Marketplace** page. 
 
 {{< tabs >}}
 {{% tab "Integrations" %}}
@@ -70,7 +70,7 @@ Increase mean-time-to-resolution (MTTR) for customers
 : When a customer's account is enriched with data from an integration, they are able to see a broader view of their entire stack, allowing them to debug and remediate issues more quickly. 
 
 Increase adoption and visibility 
-: Ensuring native functionality for Datadog reduces friction to adoption, and displaying a tile on the [Integrations page][10] provides key visibility to all of Datadog's customers.
+: Ensuring native functionality for Datadog reduces friction to adoption, and displaying a tile on the [Integrations page][10] or the [Marketplace page][17] provides key visibility to all of Datadog's customers.
 
 Submit out-of-the-box metrics at no extra cost 
 : Metrics reported from official Datadog integrations are not counted as [custom metrics][14] (unless the integration is sending in potentially unlimited metrics), and do not impact a customer's billing through custom metric allocation.
@@ -103,7 +103,7 @@ Once you've joined the **Technology Partner** track and requested a sandbox acco
 * Reading the documentation about setting up an [OAuth 2.0 client for API-based integrations][9] and creating [API-based integrations][1].
 * Reading the documentation about creating [Agent-based integrations][2].
 
-For more information about sell a Datadog integration, see [Build a Marketplace Offering][4].
+For more information about selling a Datadog integration or other type of offering, see [Build a Marketplace Offering][4].
 
 ## Further reading
 
@@ -125,3 +125,4 @@ For more information about sell a Datadog integration, see [Build a Marketplace 
 [14]: https://docs.datadoghq.com/metrics/custom_metrics/
 [15]: https://docs.datadoghq.com/getting_started/site/
 [16]: https://docs.datadoghq.com/help/
+[17]: https://app.datadoghq.com/marketplace

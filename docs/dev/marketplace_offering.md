@@ -76,7 +76,7 @@ To request access to the private Marketplace repository, email <a href="mailto:m
 Once a Marketplace tile is live, Technology Partners can meet with Datadog's Partner Marketing team to coordinate a joint go-to-market (GTM) strategy, which includes the following:
 
 - A Datadog quote for partner press releases
-- A blog post on the [Datadog Monitor][23]
+- A blog post on the [Datadog Monitor][21]
 - Amplification of social media posts
 
 ## Get started
@@ -107,3 +107,4 @@ To get started with creating an API-based integration, software license, or prof
 [18]: https://docs.datadoghq.com/integrations/create_a_tile/#saas-license-or-professional-service-offerings
 [19]: https://docs.datadoghq.com/developers/integrations/agent_integration
 [20]: https://www.dashcon.io/
+[21]: https://www.datadoghq.com/blog/

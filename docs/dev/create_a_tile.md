@@ -24,7 +24,7 @@ The tile serves as a point of entry where customers can learn about your offerin
 
 {{< img src="developers/marketplace/marketplace-tile-example.png" alt="Example Marketplace tile" style="width:30%" >}}
 
-* For any offerings that **do not use** the Datadog Agent—including API-based integrations, professional services listings, and software licenses—you will only need to create a tile and submit the tile-related files in order to publish your offering. This is called a _tile-only-listing_. Tile-ony listings apply in situations where Datadog does not host any of the code associated with the API-based integrations, and the supported offering types do not require any code. 
+* For any offerings that **do not use** the Datadog Agent—including API-based integrations, professional services listings, and software licenses—you will only need to create a tile and submit the tile-related files in order to publish your offering. This is called a _tile-only-listing_. Tile-ony listings apply in situations where Datadog does not host any of the code associated with the API-based integrations, and the other supported offering types do not require any code. 
 
 * For **Agent-based integrations**, however, you will need to create a tile, and additionally, submit all of your integration-related code (as well as your tile-related files) in one pull request. For more information, see [Create an Agent-based integration][27].
 

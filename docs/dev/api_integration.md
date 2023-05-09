@@ -15,7 +15,7 @@ further_reading:
 
 ## Overview
 
-This page walks Technology Partners through how to create a Datadog API integration on the [**Integrations** page][22]. 
+This page walks Technology Partners through how to create a Datadog API integration. 
 
 ## API integrations
 
@@ -60,7 +60,7 @@ The process to build an API-based integration looks like the following:
 6. Once your pull request is submitted and approved, the Datadog Technology Partner team will schedule a demo for a final review of your integration.
 7. You will have the option of testing the tile and integration in your Datadog sandbox account before publishing, or immediately publishing the integration for all customers.  
 
-To learn about creating a tile for your offering, see [Create a Tile][24].
+Start building your API integration by [creating a tile][24].
 
 ## Further reading
 

@@ -26,7 +26,7 @@ This page walks Technology Partners through how to create a Datadog Agent integr
 
 ## Agent-based integrations
 
-Agent-based integrations use the [Datadog Agent][17] to submit data through checks written by Technology Partners. Checks can emit [metrics][23], [events][24], and [service checks][25] into a customer's Datadog account. The Agent itself can submit [logs][26] as well, but that is configured outside of the check itself. 
+Agent-based integrations use the [Datadog Agent][17] to submit data through checks written by the developer. Checks can emit [metrics][23], [events][24], and [service checks][25] into a customer's Datadog account. The Agent itself can submit [logs][26] as well, but that is configured outside of the check itself. 
 
 The implementation code for these integrations is hosted by Datadog. Agent integrations are best suited for collecting data from systems or applications that live in a local area network (LAN) or virtual private cloud (VPC). Creating an Agent integration requires you to publish and deploy your solution as a Python wheel (`.whl`).
 
@@ -158,7 +158,7 @@ The `ddev create` command runs an interactive tool that creates the basic file a
    ddev create -n Awesome
    ```
 
-   This command displays the path where the files would have been written, as well as the structure itself. Make sure the path in the first line of output matches your `marketplace` repository location.
+   This command displays the path where the files would have been written, as well as the structure itself. Make sure the path in the first line of output matches your `integrations-extras` or `marketplace` repository location.
 
 1. Run the command without the `-n` flag. The tool asks you for an email and name and then creates the files you need to get started with an integration.
 
