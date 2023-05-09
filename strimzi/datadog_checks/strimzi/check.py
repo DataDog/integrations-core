@@ -21,10 +21,10 @@ class StrimziCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     def __init__(self, name, init_config, instances):
         super(StrimziCheck, self).__init__(name, init_config, instances)
+        self.scraper_configs = []
         self.check_initializations.appendleft(self.parse_config)
 
     def parse_config(self):
-        self.scraper_configs = []
         cluster_operator_endpoint = self.instance.get("cluster_operator_endpoint")
         topic_operator_endpoint = self.instance.get("topic_operator_endpoint")
         user_operator_endpoint = self.instance.get("user_operator_endpoint")
