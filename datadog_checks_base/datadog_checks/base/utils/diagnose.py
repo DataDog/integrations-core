@@ -103,12 +103,18 @@ class Diagnosis:
     def run_explicit(self):
         """Run registered explicit diagnostics and return their results.
 
-        Diagnosis results produced within will not be stored in the `Diagnosis` object."""
+        Diagnosis results produced within this function will not be stored in the `Diagnosis` object.
+        Exceptions raised within explicit diagnostic functions will be caught and returned as a special diagnose
+        of type `DIAGNOSIS_UNEXPECTED_ERROR`.
+        """
         # Keep a reference to existing cached results, to be restored at the end,
         # and start from an empty list to collect explicit diagnoses (to be returned later)
         cached_results, self._diagnoses = self._diagnoses, []
         for diagnostic in self._diagnostics:
-            diagnostic()
+            try:
+                diagnostic()
+            except Exception as e:
+                self._diagnoses.append(self._result(self.DIAGNOSIS_UNEXPECTED_ERROR, "", "", raw_error=str(e)))
 
         explicit_results, self._diagnoses = self._diagnoses, cached_results
         return explicit_results

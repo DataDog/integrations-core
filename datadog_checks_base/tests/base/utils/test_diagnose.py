@@ -77,3 +77,29 @@ def test_check_subclasses_reporting_diagnoses():
         Diagnosis.Result(Diagnosis.DIAGNOSIS_SUCCESS, "foo check", "in-check diagnosis", None, None, None, None),
         Diagnosis.Result(Diagnosis.DIAGNOSIS_FAIL, "foo check", "explicit diagnosis", None, None, None, None),
     ]
+
+
+def test_exceptions_during_explicit_diagnoses_are_converted_into_unexpected_errors():
+    class Foo(AgentCheck):
+        def __init__(self, name, init_config, instances):
+            super(Foo, self).__init__(name, init_config, instances)
+
+            self.diagnosis.register(self.bad_diagnostic, self.good_diagnostic)
+
+        def check(self, _):
+            self.diagnosis.success("foo check", "in-check diagnosis")
+
+        def bad_diagnostic(self):
+            raise Exception("something went wrong")
+
+        def good_diagnostic(self):
+            self.diagnosis.success("foo check", "explicit diagnosis")
+
+    check = Foo("foo", {}, [{}])
+    check.run()
+
+    assert check.get_diagnoses() == [
+        Diagnosis.Result(Diagnosis.DIAGNOSIS_SUCCESS, "foo check", "in-check diagnosis", None, None, None, None),
+        Diagnosis.Result(Diagnosis.DIAGNOSIS_UNEXPECTED_ERROR, "", "", None, None, None, "something went wrong"),
+        Diagnosis.Result(Diagnosis.DIAGNOSIS_SUCCESS, "foo check", "explicit diagnosis", None, None, None, None),
+    ]
