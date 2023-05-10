@@ -499,6 +499,7 @@ def test_failed_explain_handling(
     dbname = "datadog_test"
     # Don't need metrics for this one
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_samples']['explain_parameterized_queries'] = False
     if explain_function_override:
         dbm_instance['query_samples']['explain_function'] = explain_function_override
     check = integration_check(dbm_instance)
@@ -1192,19 +1193,28 @@ def test_truncate_activity_rows(integration_check, dbm_instance, active_rows, ex
 
 
 @pytest.mark.parametrize(
-    "query,expected_err_tag,expected_explain_err_code,expected_err",
+    "query,expected_err_tag,expected_explain_err_code,expected_err,explain_param_query",
     [
         (
             "select * from fake_table",
             "error:explain-undefined_table-<class 'psycopg2.errors.UndefinedTable'>",
             DBExplainError.undefined_table,
             "<class 'psycopg2.errors.UndefinedTable'>",
+            False,
         ),
         (
             "select * from pg_settings where name = $1",
             "error:explain-parameterized_query-<class 'psycopg2.errors.UndefinedParameter'>",
             DBExplainError.parameterized_query,
             "<class 'psycopg2.errors.UndefinedParameter'>",
+            False,
+        ),
+        (
+            "select * from pg_settings where name = $1",
+            "",
+            DBExplainError.explained_with_prepared_statement,
+            None,
+            True,
         ),
         (
             "SELECT city as city0, city as city1, city as city2, city as city3, "
@@ -1222,6 +1232,7 @@ def test_truncate_activity_rows(integration_check, dbm_instance, active_rows, ex
             "error:explain-query_truncated-track_activity_query_size=1024",
             DBExplainError.query_truncated,
             "track_activity_query_size=1024",
+            False,
         ),
     ],
 )
@@ -1233,9 +1244,11 @@ def test_statement_run_explain_errors(
     expected_err_tag,
     expected_explain_err_code,
     expected_err,
+    explain_param_query,
 ):
     dbm_instance['query_activity']['enabled'] = False
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_samples']['explain_parameterized_queries'] = explain_param_query
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1252,12 +1265,13 @@ def test_statement_run_explain_errors(
         'agent_hostname:stubbed.hostname',
     ]
 
-    aggregator.assert_metric(
-        'dd.postgres.statement_samples.error',
-        count=1,
-        tags=expected_tags + [expected_err_tag],
-        hostname='stubbed.hostname',
-    )
+    if expected_explain_err_code != DBExplainError.explained_with_prepared_statement:
+        aggregator.assert_metric(
+            'dd.postgres.statement_samples.error',
+            count=1,
+            tags=expected_tags + [expected_err_tag],
+            hostname='stubbed.hostname',
+        )
 
     if expected_explain_err_code == DBExplainError.database_error:
         aggregator.assert_metric(
