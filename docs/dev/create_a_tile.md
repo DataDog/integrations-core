@@ -22,12 +22,11 @@ This page walks Technology Partners through how to create the tile that represen
 
 The tile serves as a point of entry where customers can learn about your offering, see setup instructions, and install or purchase your offering to unlock out-of-the-box dashboards and additional assets. 
 
-{{< img src="developers/marketplace/marketplace-tile-example.png" alt="Example Marketplace tile" style="width:30%" >}}
+{{< img src="developers/integrations/marketplace_or_integrations_tile.png" alt="An expanded tile modal of an example offering on the Integrations or Marketplace page" style="width:100%" >}}
 
 * For any offerings that **do not use** the Datadog Agent—including API-based integrations, professional services listings, and software licenses—you will only need to create a tile and submit the tile-related files in order to publish your offering. This is called a _tile-only-listing_. Tile-ony listings apply in situations where Datadog does not host any of the code associated with the API-based integrations, and the other supported offering types do not require any code. 
 
 * For **Agent-based integrations**, however, you will need to create a tile, and additionally, submit all of your integration-related code (as well as your tile-related files) in one pull request. For more information, see [Create an Agent-based integration][27].
-
 
 <div class="alert alert-info">Select a tab for instructions on creating a tile on the Integrations or Marketplace page.</div>
 
@@ -35,17 +34,23 @@ The tile serves as a point of entry where customers can learn about your offerin
 
 {{% tab "Build a tile on the Integrations page" %}}
 
+{{< img src="developers/integrations/integration_tile.png" alt="A tile representing an example offering on the Integrations page" style="width:25%" >}}
+
 To build a tile on the [**Integrations** page][103]:
 
 1. Create a `dd` directory:
 
-   {{< code-block lang="shell" >}}mkdir $HOME/dd{{< /code-block >}}
+   ```shell
+   mkdir $HOME/dd
+   ```
    
    The Datadog Development Toolkit expects you to be working in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps.
 
 2. Clone the `integrations-extras` repository:
 
-   {{< code-block lang="shell" >}}git clone git@github.com:DataDog/integrations-extras.git{{< /code-block >}}
+   ```shell
+   git clone git@github.com:DataDog/integrations-extras.git
+   ```
 
 ## Install and configure the Datadog development toolkit
 
@@ -73,11 +78,15 @@ For Datadog API integrations that will be available out-of-the-box on the [Integ
 
 1. Make sure you're inside the `integrations-extras` directory:
 
-   {{< code-block lang="shell" >}}cd $HOME/dd/integrations-extras{{< /code-block >}}
+   ```shell
+   cd $HOME/dd/integrations-extras
+   ```
 
 1. Run the `ddev` command with the `-t tile` option:
 
-   {{< code-block lang="shell" >}}ddev create -t tile "<Offering Name>"{{< /code-block >}}
+   ```shell
+   ddev create -t tile "<Offering Name>"
+   ```
 
 [101]: https://docs.datadoghq.com/developers/integrations/python
 [102]: https://github.com/Datadog/integrations-extras
@@ -87,23 +96,31 @@ For Datadog API integrations that will be available out-of-the-box on the [Integ
 
 {{% tab "Build a tile on the Marketplace" %}}
 
+{{< img src="developers/integrations/marketplace_tile.png" alt="A tile representing an example offering on the Marketplace page" style="width:30%" >}}
+
 To build a tile on the [**Marketplace** page][104]: 
 
 1. See [Build a Marketplace Offering][102] to request access to the [Marketplace repository][101].
 
 1. Create a `dd` directory:
    
-   {{< code-block lang="shell" >}}mkdir $HOME/dd{{< /code-block >}}
+   ```shell
+   mkdir $HOME/dd
+   ```
 
    The Datadog Development Toolkit command expects you to be working in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps.
 
 1. Once you have been granted access to the Marketplace repository, create the `dd` directory and clone the `marketplace` repository:
    
-   {{< code-block lang="shell" >}}git clone git@github.com:DataDog/marketplace.git{{< /code-block >}}
+   ```shell
+   git clone git@github.com:DataDog/marketplace.git
+   ```
 
 1. Create a feature branch to work in:
 
-    {{< code-block lang="shell" >}}git switch -c <YOUR INTEGRATION NAME> origin/master{{< /code-block >}}
+    ```shell
+    git switch -c <YOUR INTEGRATION NAME> origin/master
+    ```
 
 ## Install and configure the Datadog development toolkit
 
@@ -133,11 +150,15 @@ To create the tile-only listing's scaffolding:
 
 1. Make sure you're inside the `marketplace` directory:
 
-   {{< code-block lang="shell" >}}cd $HOME/dd/marketplace{{< /code-block >}}
+   ```shell
+   cd $HOME/dd/marketplace
+   ```
 
 2. Run the `ddev` command with the `-t tile` option:
 
-   {{< code-block lang="shell" >}}ddev create -t tile "<Offering Name>"{{< /code-block >}}
+   ```shell
+   ddev create -t tile "<Offering Name>"
+   ```
 
 [101]: https://github.com/Datadog/marketplace
 [102]: https://docs.datadoghq.com/developers/integrations/marketplace_offering
