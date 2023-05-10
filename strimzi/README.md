@@ -77,8 +77,8 @@ spec:
       pod:
         metadata:
           annotations:
-            ad.datadoghq.com/topic-operator.checks: '{"openmetrics": {"instances":[{"topic_operator_endpoint": "http://%%host%%:8080/metrics"}]}}' 
-            ad.datadoghq.com/user-operator.checks: '{"openmetrics": {"instances":[{"user_operator_endpoint": "http://%%host%%:8081/metrics"}]}}' 
+            ad.datadoghq.com/topic-operator.checks: '{"strimzi": {"instances":[{"topic_operator_endpoint": "http://%%host%%:8080/metrics"}]}}' 
+            ad.datadoghq.com/user-operator.checks: '{"strimzi": {"instances":[{"user_operator_endpoint": "http://%%host%%:8081/metrics"}]}}' 
 ...
 ```
 **Note**: Template used as the basis for this example can be found [here][14].
@@ -135,7 +135,7 @@ spec:
 
 _Available for Agent versions >6.0_
 
-Argo CD logs can be collected from the different Argo CD pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][16].
+Strimzi logs can be collected from the different Strimzi pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][16].
 
 See the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
 
