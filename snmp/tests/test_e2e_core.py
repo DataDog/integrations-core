@@ -486,7 +486,7 @@ def test_e2e_cisco_legacy_wlc(dd_agent_check):
 
     ap_status_tags = ['ap_oper_status:associated', 'ap_admin_status:enable'] + ap_tags
 
-    aggregator.assert_metric("snmp.accessPoints".format(), metric_type=aggregator.GAUGE, tags=ap_status_tags, value=1)
+    aggregator.assert_metric("snmp.accessPoint".format(), metric_type=aggregator.GAUGE, tags=ap_status_tags, value=1)
 
     if_ap_tags = ["ap_if_slot_id:0"] + ap_tags
     if_ap_status_tags = ['ap_if_oper_status:up', 'ap_if_admin_status:enable'] + if_ap_tags
