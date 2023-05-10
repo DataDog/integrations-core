@@ -109,7 +109,22 @@ spec:
       pod:
         metadata:  
           annotations:
-            ad.datadoghq.com/kafka.checks: '{"kafka": {"init_config": {"is_jmx": "true", "collect_default_metrics": "true", "new_gc_metrics": "true"},"instances":[{"host": "%%host%%","port": "9999"}]}}'           
+            ad.datadoghq.com/kafka.checks: |
+              {
+                "kafka": {
+                  "init_config": {
+                    "is_jmx": true, 
+                    "collect_default_metrics": true, 
+                    "new_gc_metrics": true
+                  },
+                  "instances":[
+                    {
+                      "host": "%%host%%",
+                      "port": "9999"
+                    }
+                  ]
+                }
+              }        
     config:
       offsets.topic.replication.factor: 1
       transaction.state.log.replication.factor: 1
