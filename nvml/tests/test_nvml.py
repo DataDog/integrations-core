@@ -7,8 +7,8 @@ from types import SimpleNamespace
 import mock
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nvml import NvmlCheck
-
 
 class MockNvml:
     @staticmethod
@@ -102,5 +102,6 @@ def test_check(aggregator, instance):
     aggregator.assert_metric('nvml.temperature', tags=expected_tags, count=1)
     aggregator.assert_metric('nvml.fan_speed', tags=expected_tags, count=1)
     aggregator.assert_metric('nvml.compute_running_process', tags=expected_tags + ["pid:1"], count=1)
-
+    
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
