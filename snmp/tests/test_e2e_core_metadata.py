@@ -172,8 +172,8 @@ def test_e2e_core_metadata_cisco_3850(dd_agent_check):
 
     events = get_events(aggregator)
 
-    # since there are >100 resources (device+interfaces), the interfaces are split into 2 events
-    assert len(events) == 2
+    # since there are >100 resources (device+interfaces+links), the metadata is split into 3 events
+    assert len(events) == 3
     event1 = events[0]
 
     # assert device (there is only one device)
