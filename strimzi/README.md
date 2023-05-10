@@ -30,7 +30,7 @@ Follow the instructions below to enable and configure this check for an Agent. T
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions. Here's an example of how to configure this on the different Operator manifests:
+For containerized environments, refer to the [Autodiscovery Integration Templates][3] for guidance on applying these instructions. Here's an example of how to configure this on the different Operator manifests using pod annotations:
 
 Cluster Operator:
 ```yaml
@@ -69,6 +69,7 @@ kind: Kafka
 metadata:
   name: my-cluster
 spec:
+...
   entityOperator:
     topicOperator: {}
     userOperator: {}
@@ -82,17 +83,65 @@ spec:
 ```
 **Note**: Template used as the basis for this example can be found [here][14].
 
+#### Kafka and Zookeeper
+
+The Kafka and Zookeeper components of Strimzi can be monitored using the [Kafka][11] and [Zookeeper][12] checks, respectively. Kafka metrics are collected via JMX. For more information on enabling JMX, please refer to this [link][15]. Here's an example of how to configure the Kafka and Zookeeper checks using Pod annotations:
+```yaml
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: my-cluster
+spec:
+  kafka:
+    jmxOptions: {}
+    version: 3.4.0
+    replicas: 1
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+      - name: tls
+        port: 9093
+        type: internal
+        tls: true
+    template:
+      pod:
+        metadata:  
+          annotations:
+            ad.datadoghq.com/kafka.checks: '{"kafka": {"init_config": {"is_jmx": "true", "collect_default_metrics": "true", "new_gc_metrics": "true"},"instances":[{"host": "%%host%%","port": "9999"}]}}'           
+    config:
+      offsets.topic.replication.factor: 1
+      transaction.state.log.replication.factor: 1
+      transaction.state.log.min.isr: 1
+      inter.broker.protocol.version: "3.4"
+    storage:
+      type: ephemeral
+  zookeeper:
+    replicas: 1
+    storage:
+      type: ephemeral
+    template:
+      pod:
+        metadata:
+          annotations:
+            key1: label3
+            key2: label4
+            ad.datadoghq.com/zookeeper.checks: '{"zk": {"instances":[{"host":"%%host%%","port":"2181"}]}}' 
+```
+**Note**: Template used as the basis for this example can be found [here][14].
+
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-Argo CD logs can be collected from the different Argo CD pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][5].
+Argo CD logs can be collected from the different Argo CD pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][16].
 
 See the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
 
 | Parameter      | Value                                                |
 | -------------- | ---------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "argocd", "service": "<SERVICE_NAME>"}`   |
+| `<LOG_CONFIG>` | `{"source": "strimzi", "service": "<SERVICE_NAME>"}`   |
 
 ### Validation
 
@@ -132,4 +181,6 @@ Need help? Contact [Datadog support][9].
 [11]: https://docs.datadoghq.com/integrations/kafka/
 [12]: https://docs.datadoghq.com/integrations/zk/
 [13]: https://github.com/strimzi/strimzi-kafka-operator/blob/release-0.34.x/install/cluster-operator/060-Deployment-strimzi-cluster-operator.yaml
-[14]: https://github.com/strimzi/strimzi-kafka-operator/blob/release-0.34.x/api/src/test/resources/io/strimzi/api/kafka/model/Kafka-with-template.yaml
+[14]: https://github.com/strimzi/strimzi-kafka-operator/blob/release-0.34.x/examples/kafka/kafka-ephemeral-single.yaml
+[15]: https://strimzi.io/docs/operators/0.20.0/full/using.html#assembly-jmx-options-deployment-configuration-kafka
+[16]: https://docs.datadoghq.com/agent/kubernetes/log/
