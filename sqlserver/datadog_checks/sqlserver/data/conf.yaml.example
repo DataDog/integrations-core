@@ -335,10 +335,12 @@ instances:
         #
         # deployment_type: sql_database
 
-        ## @param name - string - optional - default: my-sqlserver-instance
+        ## @param fully_qualified_domain_name - string - optional - default: my-sqlserver-database.database.windows.net
         ## Equal to the name of the SQL Database, Managed Instance (SQL MI) or virtual machine.
+        ##
+        ## This value is optional if the value of `host` is already configured to the fully qualified domain name.
         #
-        # name: my-sqlserver-instance
+        # fully_qualified_domain_name: my-sqlserver-database.database.windows.net
 
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
