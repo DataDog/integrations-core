@@ -18,7 +18,7 @@ The Strimzi check collects Prometheus-formatted metrics on the following operato
    - Topic
    - User
 
-Follow the instructions below to enable and configure this check for an Agent. This check will only collect metrics from the above listed operators. For monitoring Kafka and Zookeeper, please use the Kafka[11] and Zookeeper[12] checks respectively.
+Follow the instructions below to enable and configure this check for an Agent. This check will only collect metrics from the above listed operators. For monitoring Kafka and Zookeeper, please use the [Kafka][11] and [Zookeeper][12] checks respectively.
 
 #### Host
 
@@ -59,7 +59,7 @@ spec:
 ...
 
 ```
-**Note**: Full template used for this example can be found here[13].
+**Note**: Full template used for this example can be found [here][13].
 
 
 Topic and User Operators:
@@ -80,7 +80,7 @@ spec:
             ad.datadoghq.com/user-operator.checks: '{"openmetrics": {"instances":[{"user_operator_endpoint": "http://%%host%%:8081/metrics"}]}}' 
 ...
 ```
-**Note**: Template used as the basis for this example can be found here[14].
+**Note**: Template used as the basis for this example can be found [here][14].
 
 ##### Log collection
 
