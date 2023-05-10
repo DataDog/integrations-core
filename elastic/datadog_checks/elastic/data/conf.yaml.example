@@ -182,6 +182,13 @@ instances:
     #
     # custom_queries: []
 
+    ## @param submit_events - boolean - optional - default: true
+    ## By default we submit events to Datadog if the cluster starts unhealthy or anytime its health changes.
+    ## You can set this option to `false` to disable submitting the events in case you already implemented
+    ## your own custom alerts based on metrics.
+    #
+    # submit_events: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

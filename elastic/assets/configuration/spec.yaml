@@ -61,7 +61,7 @@ files:
         type: boolean
         example: false
     - name: slm_stats
-      description: | 
+      description: |
         Set "slm_stats" to true to collect statistics about Snapshot Lifcycle Management.
         The user must have the `read_slm` cluster privilege to get these metrics.
       value:
@@ -182,6 +182,14 @@ files:
               type: array
               items:
                 type: string
+    - name: submit_events
+      description: |
+        By default we submit events to Datadog if the cluster starts unhealthy or anytime its health changes.
+        You can set this option to `false` to disable submitting the events in case you already implemented
+        your own custom alerts based on metrics.
+      value:
+        type: boolean
+        example: true
     - template: instances/default
     - template: instances/http
   - template: logs
