@@ -384,8 +384,11 @@ files:
         in order to return the plan.
       options:
         - name: enabled
-          type: boolean
-          example: true
+          description: |
+            Enables or disables collecting explan plans. Requires `dbm: true` and `.query_samples.enabled: true`
+          value:
+            type: boolean
+            example: true
         - name: explain_function
           description: |
             Override the default function used to collect execution plans for queries.

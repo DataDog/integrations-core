@@ -285,9 +285,32 @@ instances:
 
         ## @param collection_interval - number - optional - default: 1
         ## Set the query sample collection interval (in seconds). Each collection involves a single query to
-        ## `pg_stat_activity` followed by at most one `EXPLAIN` query per unique normalized query seen.
+        ## `pg_stat_activity` followed by at most one `EXPLAIN` query per unique normalized query seen if 
+        ## collect_explains is activated.
         #
         # collection_interval: 1
+
+        ## @param samples_per_hour_per_query - integer - optional - default: 15
+        ## Set the rate limit for how many query sample events will be ingested per hour per normalized execution
+        ## plan.
+        #
+        # samples_per_hour_per_query: 15
+
+        ## @param seen_samples_cache_maxsize - integer - optional - default: 10000
+        ## Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
+        ## for databases with a very large number of unique normalized execution plans which exceed the cache's limit.
+        #
+        # seen_samples_cache_maxsize: 10000
+
+    ## Enable collection of explain plans for each unique normalized query. Calls explain_function for the query
+    ## in order to return the plan.
+    #
+    # explain_plans:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enables or disables collecting explan plans. Requires `dbm: true` and `.query_samples.enabled: true`
+        #
+        # enabled: true
 
         ## @param explain_function - string - optional - default: datadog.explain_statement
         ## Override the default function used to collect execution plans for queries.
@@ -298,12 +321,6 @@ instances:
         ## Set the rate limit for how many execution plans will be collected per hour per normalized query.
         #
         # explained_queries_per_hour_per_query: 60
-
-        ## @param samples_per_hour_per_query - integer - optional - default: 15
-        ## Set the rate limit for how many query sample events will be ingested per hour per normalized execution
-        ## plan.
-        #
-        # samples_per_hour_per_query: 15
 
         ## @param explained_queries_cache_maxsize - integer - optional - default: 5000
         ## Set the max size of the cache used for the explained_queries_per_hour_per_query rate limit. This should

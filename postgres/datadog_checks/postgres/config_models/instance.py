@@ -34,6 +34,17 @@ class Azure(BaseModel):
     fully_qualified_domain_name: Optional[str]
 
 
+class ExplainPlans(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    enabled: Optional[bool]
+    explain_function: Optional[str]
+    explain_parameterized_queries: Optional[bool]
+    explained_queries_cache_maxsize: Optional[int]
+    explained_queries_per_hour_per_query: Optional[int]
+
+
 class Gcp(BaseModel):
     class Config:
         allow_mutation = False
@@ -87,10 +98,6 @@ class QuerySamples(BaseModel):
 
     collection_interval: Optional[float]
     enabled: Optional[bool]
-    explain_function: Optional[str]
-    explain_parameterized_queries: Optional[bool]
-    explained_queries_cache_maxsize: Optional[int]
-    explained_queries_per_hour_per_query: Optional[int]
     samples_per_hour_per_query: Optional[int]
     seen_samples_cache_maxsize: Optional[int]
 
@@ -128,6 +135,7 @@ class InstanceConfig(BaseModel):
     dbstrict: Optional[bool]
     disable_generic_tags: Optional[bool]
     empty_default_hostname: Optional[bool]
+    explain_plans: Optional[ExplainPlans]
     gcp: Optional[Gcp]
     host: str
     idle_connection_timeout: Optional[int]

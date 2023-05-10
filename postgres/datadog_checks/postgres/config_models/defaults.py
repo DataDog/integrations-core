@@ -86,6 +86,10 @@ def instance_empty_default_hostname(field, value):
     return False
 
 
+def instance_explain_plans(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_gcp(field, value):
     return get_default_field_value(field, value)
 

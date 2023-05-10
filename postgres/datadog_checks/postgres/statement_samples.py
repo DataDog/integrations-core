@@ -697,7 +697,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         # - `query_signature` - hash computed from the raw sql text to match query metrics
         
         #Start decoupling with this part. Logic to control explain plan collection could stop us from running the actual explain
-        if is_affirmative(config.explain_plan_config.get(enabled, True)):
+        if is_affirmative(self._config.explain_plan_config.get('enabled', True)):
             plan_dict, explain_err_code, err_msg = self._run_and_track_explain(
                 row['datname'], row['query'], row['statement'], row['query_signature']
             )
@@ -720,7 +720,10 @@ class PostgresStatementSamples(DBMAsyncJob):
 
                 plan_signature = compute_exec_plan_signature(normalized_plan)
 
-        statement_plan_sig = (row['query_signature'], plan_signature)
+                statement_plan_sig = (row['query_signature'], plan_signature)
+        else:
+            collection_errors, plan, normalized_plan, obfuscated_plan, plan_signature = None, None, None, None, None
+            statement_plan_sig = (row['query_signature'])
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             event = {
                 "host": self._check.resolved_hostname,
