@@ -499,6 +499,7 @@ def test_failed_explain_handling(
     dbname = "datadog_test"
     # Don't need metrics for this one
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_samples']['explain_parameterized_queries'] = False
     if explain_function_override:
         dbm_instance['query_samples']['explain_function'] = explain_function_override
     check = integration_check(dbm_instance)
@@ -1236,6 +1237,7 @@ def test_statement_run_explain_errors(
 ):
     dbm_instance['query_activity']['enabled'] = False
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_samples']['explain_parameterized_queries'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
