@@ -43,10 +43,9 @@ class Diagnosis:
     # datadog-agent\\pkg\\diagnose\\diagnosis\\loader.go and
     # datadog-agent\\rtloader\\include\\rtloader_types.h
     DIAGNOSIS_SUCCESS = 0
-    DIAGNOSIS_NOT_ENABLE = 1
-    DIAGNOSIS_FAIL = 2
-    DIAGNOSIS_WARNING = 3
-    DIAGNOSIS_UNEXPECTED_ERROR = 4
+    DIAGNOSIS_FAIL = 1
+    DIAGNOSIS_WARNING = 2
+    DIAGNOSIS_UNEXPECTED_ERROR = 3
 
     def __init__(self):
         # Holds results
