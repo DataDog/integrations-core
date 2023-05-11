@@ -107,13 +107,7 @@ Need help? Contact [Datadog support][9].
 
 
 [1]: https://openai.com/
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[4]: https://github.com/DataDog/integrations-core/blob/master/openai/datadog_checks/openai/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/openai/metadata.csv
 [9]: https://docs.datadoghq.com/help/
 [10]: https://ddtrace.readthedocs.io/en/stable/integrations.html#openai
-[11]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/python/?tab=containers#configure-the-datadog-agent-for-apm
 [12]: https://ddtrace.readthedocs.io/en/stable/installation_quickstart.html
