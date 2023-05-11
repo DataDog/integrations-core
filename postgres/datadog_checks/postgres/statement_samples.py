@@ -720,10 +720,11 @@ class PostgresStatementSamples(DBMAsyncJob):
 
                 plan_signature = compute_exec_plan_signature(normalized_plan)
 
-                statement_plan_sig = (row['query_signature'], plan_signature)
+            statement_plan_sig = (row['query_signature'], plan_signature)
         else:
             collection_errors, plan, normalized_plan, obfuscated_plan, plan_signature = None, None, None, None, None
             statement_plan_sig = (row['query_signature'])
+        
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             event = {
                 "host": self._check.resolved_hostname,
