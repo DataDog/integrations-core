@@ -184,6 +184,37 @@ class VSphereAPI(object):
                 property_spec.pathSet.append("runtime.powerState")
                 property_spec.pathSet.append("runtime.host")
                 property_spec.pathSet.append("guest.hostName")
+                if self.config.collect_property_metrics:
+                    property_spec.pathSet.append("summary.config.numCpu")
+                    property_spec.pathSet.append("summary.config.memorySizeMB")
+                    property_spec.pathSet.append("summary.config.numEthernetCards")
+                    property_spec.pathSet.append("summary.config.numVirtualDisks")
+                    property_spec.pathSet.append("summary.quickStats.uptimeSeconds")
+                    property_spec.pathSet.append("guest.guestFullName")
+                    property_spec.pathSet.append("guest.disk")
+                    property_spec.pathSet.append("guest.net")
+                    property_spec.pathSet.append("guest.ipStack")
+                    property_spec.pathSet.append("guest.toolsRunningStatus")
+                    property_spec.pathSet.append("guest.toolsVersion")
+                    property_spec.pathSet.append("config.hardware.numCoresPerSocket")
+            if resource == vim.HostSystem:
+                if self.config.collect_property_metrics:
+                    property_spec.pathSet.append("hardware.cpuPowerManagementInfo.currentPolicy")
+                    property_spec.pathSet.append("summary.runtime.connectionState")
+                    property_spec.pathSet.append("summary.runtime.powerState")
+                    property_spec.pathSet.append("summary.runtime.inMaintenanceMode")
+                    property_spec.pathSet.append("config.service")
+            if resource == vim.Datastore:
+                if self.config.collect_property_metrics:
+                    property_spec.pathSet.append("summary.capacity")
+                    property_spec.pathSet.append("summary.freeSpace")
+            if resource == vim.ClusterComputeResource:
+                if self.config.collect_property_metrics:
+                    property_spec.pathSet.append("configuration.drsConfig.enabled")
+                    property_spec.pathSet.append("configuration.drsConfig.defaultVmBehavior")
+                    property_spec.pathSet.append("configuration.drsConfig.vmotionRate")
+                    property_spec.pathSet.append("configuration.dasConfig.enabled")
+
             property_specs.append(property_spec)
 
         # Specify the attribute of the root object to traverse to obtain all the attributes

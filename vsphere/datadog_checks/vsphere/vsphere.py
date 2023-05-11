@@ -207,10 +207,12 @@ class VSphereCheck(AgentCheck):
         self.log.debug("Refreshing the infrastructure cache...")
         t0 = Timer()
         infrastructure_data = self.api.get_infrastructure()
+        collect_property_metrics = self._config.collect_property_metrics
+        self.log.debug("infra data: %s", infrastructure_data)
         self.gauge(
             "datadog.vsphere.refresh_infrastructure_cache.time",
             t0.total(),
-            tags=self._config.base_tags,
+            tags=self._config.base_tags + [f'collect_property_metrics:{collect_property_metrics}'],
             raw=True,
             hostname=self._hostname,
         )
@@ -606,6 +608,98 @@ class VSphereCheck(AgentCheck):
             # OR something bad happened (which might happen again indefinitely).
             self.latest_event_query = collect_start_time
 
+    def submit_property_metrics(self, resource_type, mor, mor_props, resource_tags):
+        self.log.debug("resource type is %s", resource_type)
+        if resource_type == vim.VirtualMachine:
+            self.log.debug("submitting metrics is %s", mor)
+            mor.summary.guest.guestFullName
+            nics = mor.guest.net
+            for nic in nics:
+                mac_address = nic.macAddress
+                for ip_address in nic.ipAddress:
+                    nic_tags = [f'nic_ip_address:{ip_address}', f'nic_mac_address:{mac_address}']
+                    self.count(
+                        'vm.guest.nic.address', 1, tags=self._config.base_tags + resource_tags + nic_tags, hostname=None
+                    )
+
+            ip_stacks = mor.guest.ipStack
+            for ip_stack in ip_stacks:
+                host_name = ip_stack.dnsConfig.hostName
+                ip_routes = ip_stack.ipRouteConfig.ipRoute
+                for ip_route in ip_routes:
+                    prefix_length = ip_route.prefixLength
+                    gateway_address = ip_route.gateway.ipAddress
+                    # network
+                    device = ip_route.gateway.device
+                    route_tags = [f'device:{device}', f'route_hostname:{host_name}']
+                    if gateway_address is not None:
+                        route_tags.append(f'gateway_address:{gateway_address}')
+                    self.count(
+                        'vm.guest.ipStack.ipRoute.prefixLength',
+                        prefix_length,
+                        tags=self._config.base_tags + resource_tags + route_tags,
+                        hostname=None,
+                    )
+
+            disks = mor.guest.disk
+            for disk in disks:
+                disk_path = disk.diskPath
+                file_system_type = disk.filesystemType
+                free_space = disk.freeSpace
+                capacity = disk.capacity
+                disk_tags = [f'disk_path:{disk_path}']
+                if file_system_type is not None:
+                    disk_tags.append(f'file_system_type:{file_system_type}')
+
+                self.gauge(
+                    'vm.guest.disk.freeSpace',
+                    free_space,
+                    tags=self._config.base_tags + resource_tags + disk_tags,
+                    hostname=None,
+                )
+                self.gauge(
+                    'vm.guest.disk.capacity',
+                    capacity,
+                    tags=self._config.base_tags + resource_tags + disk_tags,
+                    hostname=None,
+                )
+
+            cores_per_socket = mor.config.hardware.numCoresPerSocket
+            self.gauge(
+                'vm.hardware.numCoresPerSocket',
+                cores_per_socket,
+                tags=self._config.base_tags + resource_tags,
+                hostname=None,
+            )
+
+            config = mor.summary.config
+            num_cpu = config.numCpu
+            self.gauge('vm.numCpu', num_cpu, tags=self._config.base_tags + resource_tags, hostname=None)
+
+            memory_size = config.memorySizeMB
+            self.gauge('vm.memorySizeMB', memory_size, tags=self._config.base_tags + resource_tags, hostname=None)
+
+            ethernet_cards = config.numEthernetCards
+            self.gauge(
+                'vm.numEthernetCards', ethernet_cards, tags=self._config.base_tags + resource_tags, hostname=None
+            )
+
+            virtual_disks = config.numVirtualDisks
+            self.gauge('vm.numVirtualDisks', virtual_disks, tags=self._config.base_tags + resource_tags, hostname=None)
+
+            uptime = mor.summary.quickStats.uptimeSeconds
+            self.gauge('vm.uptime', uptime, tags=self._config.base_tags + resource_tags, hostname=None)
+
+            tools_version = mor.guest.toolsVersion
+            tools_status = mor.guest.toolsRunningStatus
+            tools_tags = [f'tools_status:{tools_status}']
+            self.gauge(
+                'vm.guest.toolsVersion',
+                tools_version,
+                tags=self._config.base_tags + resource_tags + tools_tags,
+                hostname=None,
+            )
+
     def check(self, _):
         # type: (Any) -> None
         self._hostname = datadog_agent.get_hostname()
@@ -671,12 +765,14 @@ class VSphereCheck(AgentCheck):
             # Submit host tags as soon as we have fresh data
             self.submit_external_host_tags()
 
-        # Submit the number of VMs that are monitored
+        # Submit the number of resources that are monitored and property metrics
         for resource_type in self._config.collected_resource_types:
             for mor in self.infrastructure_cache.get_mors(resource_type):
                 mor_props = self.infrastructure_cache.get_mor_props(mor)
                 # Explicitly do not attach any host to those metrics.
                 resource_tags = mor_props.get('tags', [])
+                if self._config.collect_property_metrics:
+                    self.submit_property_metrics(resource_type, mor, mor_props, resource_tags)
                 self.count(
                     '{}.count'.format(MOR_TYPE_AS_STRING[resource_type]),
                     1,
