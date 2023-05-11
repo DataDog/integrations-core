@@ -329,12 +329,6 @@ instances:
         #
         # explained_queries_cache_maxsize: 5000
 
-        ## @param seen_samples_cache_maxsize - integer - optional - default: 10000
-        ## Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
-        ## for databases with a very large number of unique normalized execution plans which exceed the cache's limit.
-        #
-        # seen_samples_cache_maxsize: 10000
-
         ## @param explain_parameterized_queries - boolean - optional - default: true
         ## This option will enable the ability to explain parameterized queries.
         ## This is useful if your SQL clients are using the extended query protocol or prepared statements.
