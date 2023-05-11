@@ -1,0 +1,222 @@
+-- ==================================================================
+-- Copyright (c) 2004-2012 Hangzhou H3C Tech. Co., Ltd. All rights reserved.
+--
+-- Description: Lan Switch trap MIB
+-- Reference:
+-- Version: V1.2
+-- History:
+-- V1.0 Created by Zhangshilin, 2001.06.29
+-- V1.1 Modified by lifengguang 2008.11.10, add trap node hwBootImageUpdated
+-- V1.2 2011-11-26 updated by duyanbing
+--      Add hwDevMFirstTrapTime to powerfailure and hwPowerNormal.
+-- ==================================================================
+
+-- ==================================================================
+--
+-- Variables and types be imported
+--
+-- ==================================================================
+A3COM-HUAWEI-LswTRAP-MIB DEFINITIONS ::= BEGIN
+IMPORTS
+    MODULE-IDENTITY,NOTIFICATION-TYPE
+        FROM SNMPv2-SMI
+
+    lswCommon
+        FROM A3COM-HUAWEI-OID-MIB
+
+    hwDevMPowerNum, hwDevMFanNum, hwDevMFirstTrapTime
+        FROM A3COM-HUAWEI-LswDEVM-MIB
+
+    hwLswFrameIndex, hwLswSlotIndex, hwLswSubslotIndex
+        FROM A3COM-HUAWEI-DEVICE-MIB;
+
+-- ==================================================================
+--
+-- ======================= definition begin =========================
+--
+-- ==================================================================
+
+    hwsLswTrapMib MODULE-IDENTITY
+            LAST-UPDATED "201111260000Z"
+            ORGANIZATION ""
+            CONTACT-INFO
+            ""
+            DESCRIPTION
+            ""
+            REVISION "201111260000Z"
+            DESCRIPTION
+            ""
+            ::= { lswCommon 12 }
+
+    hwsLswTRAPMibObject OBJECT IDENTIFIER ::= { hwsLswTrapMib 1 }
+
+    powerfailure NOTIFICATION-TYPE
+      OBJECTS { hwDevMPowerNum, hwDevMFirstTrapTime }
+      STATUS  current
+      DESCRIPTION
+              "Power supply failure"
+      ::= { hwsLswTRAPMibObject 1 }
+
+    hwPowerNormal NOTIFICATION-TYPE
+      OBJECTS { hwDevMPowerNum, hwDevMFirstTrapTime }
+      STATUS  current
+      DESCRIPTION
+              "Power supply normal"
+      ::= { hwsLswTRAPMibObject 2 }
+
+    hwMasterPowerNormal NOTIFICATION-TYPE
+      OBJECTS { hwDevMPowerNum }
+      STATUS  current
+      DESCRIPTION
+              "Master power supply normal"
+      ::= { hwsLswTRAPMibObject 3 }
+
+    hwSlavePowerNormal NOTIFICATION-TYPE
+      OBJECTS { hwDevMPowerNum }
+      STATUS  current
+      DESCRIPTION
+              "Slave power supply normal"
+      ::= { hwsLswTRAPMibObject 4 }
+
+    hwPowerRemoved NOTIFICATION-TYPE
+      OBJECTS { hwDevMPowerNum }
+      STATUS  current
+      DESCRIPTION
+              "Power removed"
+      ::= { hwsLswTRAPMibObject 5 }
+
+    fanfailure NOTIFICATION-TYPE
+      OBJECTS { hwDevMFanNum }
+      STATUS  current
+      DESCRIPTION
+              "Fan failure"
+      ::= { hwsLswTRAPMibObject 6 }
+
+    hwFanNormal NOTIFICATION-TYPE
+      OBJECTS { hwDevMFanNum }
+      STATUS  current
+      DESCRIPTION
+              "Fan normal"
+      ::= { hwsLswTRAPMibObject 7 }
+
+    hwBoardRemoved NOTIFICATION-TYPE
+      OBJECTS { hwLswFrameIndex, hwLswSlotIndex }
+      STATUS  current
+      DESCRIPTION
+              "Board removed"
+      ::= { hwsLswTRAPMibObject 8 }
+
+    hwBoardInserted NOTIFICATION-TYPE
+      OBJECTS { hwLswFrameIndex,hwLswSlotIndex }
+      STATUS  current
+      DESCRIPTION
+              "Board inserted"
+      ::= { hwsLswTRAPMibObject 9 }
+
+    hwBoardFailure NOTIFICATION-TYPE
+      OBJECTS { hwLswFrameIndex, hwLswSlotIndex }
+      STATUS  current
+      DESCRIPTION
+              "Board failed"
+      ::= { hwsLswTRAPMibObject 10 }
+
+    hwBoardNormal NOTIFICATION-TYPE
+      OBJECTS { hwLswFrameIndex, hwLswSlotIndex }
+      STATUS  current
+      DESCRIPTION
+              "Board normal"
+      ::= { hwsLswTRAPMibObject 11 }
+
+    hwSubcardRemove NOTIFICATION-TYPE
+      OBJECTS { hwLswFrameIndex, hwLswSlotIndex, hwLswSubslotIndex }
+      STATUS  current
+      DESCRIPTION
+              "Sub card removeed"
+      ::= { hwsLswTRAPMibObject 12 }
+
+    hwSubcardInsert NOTIFICATION-TYPE
+      OBJECTS { hwLswFrameIndex, hwLswSlotIndex, hwLswSubslotIndex }
+      STATUS  current
+      DESCRIPTION
+              "Sub card inserted"
+      ::= { hwsLswTRAPMibObject 13 }
+
+    hwBoaardTemperatureLower NOTIFICATION-TYPE
+      OBJECTS { hwLswFrameIndex, hwLswSlotIndex }
+      STATUS  current
+      DESCRIPTION
+              "Board temperature low"
+      ::= { hwsLswTRAPMibObject 14 }
+
+    hwBoaardTemperatureFromLowerToNormal NOTIFICATION-TYPE
+      OBJECTS { hwLswFrameIndex, hwLswSlotIndex }
+      STATUS  current
+      DESCRIPTION
+              "Board temperature form lower to normal"
+      ::= { hwsLswTRAPMibObject 15 }
+
+    hwBoaardTemperatureHigher NOTIFICATION-TYPE
+      OBJECTS { hwLswFrameIndex, hwLswSlotIndex }
+      STATUS  current
+      DESCRIPTION
+              "Board temperature high"
+      ::= { hwsLswTRAPMibObject 16 }
+
+    hwBoaardTemperatureFormHigherToNormal NOTIFICATION-TYPE
+      OBJECTS { hwLswFrameIndex, hwLswSlotIndex }
+      STATUS  current
+      DESCRIPTION
+              "Board temperature from higher to normal"
+      ::= { hwsLswTRAPMibObject 17 }
+
+    hwRequestLoading NOTIFICATION-TYPE
+      OBJECTS { hwLswFrameIndex, hwLswSlotIndex }
+      STATUS  current
+      DESCRIPTION
+              "Board request load"
+      ::= { hwsLswTRAPMibObject 18 }
+
+    hwLoadFailure NOTIFICATION-TYPE
+      OBJECTS { hwLswFrameIndex, hwLswSlotIndex }
+      STATUS  current
+      DESCRIPTION
+              "Board load failure"
+      ::= { hwsLswTRAPMibObject 19 }
+
+    hwLoadFinished NOTIFICATION-TYPE
+      OBJECTS { hwLswFrameIndex, hwLswSlotIndex }
+      STATUS  current
+      DESCRIPTION
+              "Board load finished"
+      ::= { hwsLswTRAPMibObject 20 }
+
+    hwBackBoardModeSetFuilure NOTIFICATION-TYPE
+      OBJECTS { hwLswFrameIndex }
+      STATUS  current
+      DESCRIPTION
+              "Back board mode set failure"
+      ::= { hwsLswTRAPMibObject 21 }
+
+    hwBackBoardModeSetOK NOTIFICATION-TYPE
+      OBJECTS { hwLswFrameIndex }
+      STATUS  current
+      DESCRIPTION
+              "Back board mode set OK"
+      ::= { hwsLswTRAPMibObject 22 }
+
+    hwPowerInserted NOTIFICATION-TYPE
+      OBJECTS { hwDevMPowerNum }
+      STATUS  current
+      DESCRIPTION
+              "Power inserted"
+      ::= { hwsLswTRAPMibObject 23 }
+
+    hwBootImageUpdated NOTIFICATION-TYPE
+      OBJECTS { hwLswFrameIndex, hwLswSlotIndex }
+      STATUS  current
+      DESCRIPTION
+              "This trap node indicates that the boot image of specified board
+              is updated."
+      ::= { hwsLswTRAPMibObject 24 }
+
+END

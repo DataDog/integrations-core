@@ -10,7 +10,7 @@ from datadog_checks.exchange_server.metrics import METRICS_CONFIG
 
 
 def get_exchange_server_metrics():
-    exchange_server_metrics = list([])
+    exchange_server_metrics = []
     metric_namespace = 'exchange'
     for object_name, config in METRICS_CONFIG.items():
         if object_name.startswith("MSExchange"):

@@ -26,7 +26,7 @@ class Gearman(AgentCheck):
         return {"gearman": gearman.__version__}
 
     def _get_client(self, host, port):
-        if not (host, port) in self.gearman_clients:
+        if (host, port) not in self.gearman_clients:
             self.log.debug("Connecting to gearman at address %s:%s", host, port)
             self.gearman_clients[(host, port)] = gearman.GearmanAdminClient(["%s:%s" % (host, port)])
 

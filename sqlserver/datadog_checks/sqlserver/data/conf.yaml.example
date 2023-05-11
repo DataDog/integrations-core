@@ -335,10 +335,12 @@ instances:
         #
         # deployment_type: sql_database
 
-        ## @param name - string - optional - default: my-sqlserver-instance
+        ## @param fully_qualified_domain_name - string - optional - default: my-sqlserver-database.database.windows.net
         ## Equal to the name of the SQL Database, Managed Instance (SQL MI) or virtual machine.
+        ##
+        ## This value is optional if the value of `host` is already configured to the fully qualified domain name.
         #
-        # name: my-sqlserver-instance
+        # fully_qualified_domain_name: my-sqlserver-database.database.windows.net
 
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.
@@ -384,10 +386,10 @@ instances:
         #
         # keep_sql_alias: true
 
-    ## @param command_timeout - integer - optional - default: 5
+    ## @param command_timeout - integer - optional - default: 10
     ## Timeout in seconds for the connection and each command run
     #
-    # command_timeout: 5
+    # command_timeout: 10
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
@@ -489,7 +491,7 @@ instances:
 
     ## @param disable_generic_tags - boolean - optional - default: false
     ## Generic tags such as `host` are replaced by `sqlserver_host` to avoid
-    ## getting mixed with other integraton tags.
+    ## getting mixed with other integration tags.
     #
     disable_generic_tags: true
 

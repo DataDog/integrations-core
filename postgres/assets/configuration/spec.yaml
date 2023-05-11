@@ -136,6 +136,15 @@ files:
       value:
         type: integer
         example: 5000
+    - name: idle_connection_timeout
+      description: |
+        Sets the timeout (in ms) a connection used in the connection pool will be idle until it is closed by the pooler.
+        This value should be configured to a lower value if you are observing connection buildup on the Postgres server,
+        or a higher value if connections are getting prematurely closed.
+      hidden: true
+      value:
+        type: integer
+        example: 60000
     - name: relations
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
@@ -390,11 +399,11 @@ files:
             example: 10000
         - name: explain_parameterized_queries
           description: |
-            Note, this is a BETA feature. This option will enable the ability to explain parameterized queries.
+            This option will enable the ability to explain parameterized queries.
             This is useful if your SQL clients are using the extended query protocol or prepared statements.
           value:
             type: boolean
-            example: false
+            example: true
     - name: query_activity
       description: Configure collection of query activity
       options:
@@ -492,12 +501,14 @@ files:
           value:
             type: string
             example: flexible_server
-        - name: name
+        - name: fully_qualified_domain_name
           description: |
-            Equal to the name of the Azure PostgreSQL database.
+            Equal to the full qualified domain name of the Azure PostgreSQL database.
+            
+            This value is optional if the value of `host` is already configured to the fully qualified domain name.
           value:
             type: string
-            example: my-postgres-database
+            example: my-postgres-database.database.windows.net
 
     - name: obfuscator_options
       description: |

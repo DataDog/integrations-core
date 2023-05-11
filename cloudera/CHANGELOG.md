@@ -1,6 +1,6 @@
 # CHANGELOG - Cloudera
 
-## 1.1.0 / 2023-03-03
+## 1.1.0 / 2023-03-03 / Agent 7.44.0
 
 * [Added] Add autodiscover hosts feature to cloudera integration. See [#13738](https://github.com/DataDog/integrations-core/pull/13738).
 

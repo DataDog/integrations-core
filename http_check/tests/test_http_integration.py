@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 import sys
 from collections import OrderedDict
 
@@ -174,7 +175,7 @@ def test_check_cert_expiration_self_signed(http_check):
     if PY2:
         assert "certificate verify failed" in msg
     else:
-        assert "certificate verify failed: self signed certificate" in msg
+        assert re.search("certificate verify failed: self[- ]signed certificate", msg)
 
 
 @pytest.mark.usefixtures("dd_environment")

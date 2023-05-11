@@ -4,7 +4,7 @@
 
 The entrypoint for testing any integration is the command `ddev test`, which accepts an arbitrary number of integrations as arguments.
 
-Under the hood, we use [tox][tox-github] for environment management and [pytest][pytest-github] as our test framework.
+Under the hood, we use [hatch][hatch] for environment management and [pytest][pytest-github] as our test framework.
 
 ## Discovery
 

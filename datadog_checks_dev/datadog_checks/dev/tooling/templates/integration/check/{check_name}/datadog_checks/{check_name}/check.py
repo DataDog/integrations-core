@@ -1,7 +1,7 @@
 {license_header}
-from typing import Any
+from typing import Any  # noqa: F401
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck  # noqa: F401
 
 # from datadog_checks.base.utils.db import QueryManager
 # from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout

@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
+
 from tests.metrics import (
     IF_BANDWIDTH_USAGE,
     IF_COUNTS,

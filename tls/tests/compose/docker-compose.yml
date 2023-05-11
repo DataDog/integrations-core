@@ -58,5 +58,19 @@ services:
     depends_on:
       - cert-builder
 
+  # mysql serving valid.mysql.mock
+  starttls-mysql:
+    container_name: mysql-valid
+    image: mysql
+    volumes:
+      - certs:/var/lib/certs/:ro
+    ports:
+      - "3306:3306"
+    command: --default-authentication-plugin=mysql_native_password --ssl-cert=/var/lib/certs/mysql.valid.mock.crt --ssl-key=/var/lib/certs/mysql.valid.mock.key
+    environment:
+      - MYSQL_ROOT_PASSWORD=MysqlR00tpass
+    depends_on:
+      - cert-builder
+
 volumes:
   certs:

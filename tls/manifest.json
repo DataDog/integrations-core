@@ -12,11 +12,11 @@
     "title": "TLS",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
+      "Category::Developer Tools",
       "Category::Network",
-      "Category::Web"
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

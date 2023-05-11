@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from contextlib import contextmanager
-from typing import Iterator
+from typing import Iterator  # noqa: F401
 
 from six import string_types
 from six.moves.urllib.parse import urlparse
@@ -229,7 +229,8 @@ class ComposeFileUp(LazyFunction):
             self.command.append(self.service_name)
 
     def __call__(self):
-        return run_command(self.command, check=True)
+        # Capture stderr from docker compose up to make debugging easier.
+        return run_command(self.command, check=True, capture='err')
 
 
 class ComposeFileLogs(LazyFunction):

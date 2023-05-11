@@ -5,7 +5,7 @@ import json
 import re
 from contextlib import closing, contextmanager
 from copy import deepcopy
-from typing import Any, AnyStr, Iterable, Iterator, Sequence
+from typing import Any, AnyStr, Iterable, Iterator, Sequence  # noqa: F401
 
 try:
     import teradatasql

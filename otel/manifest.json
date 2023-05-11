@@ -12,10 +12,12 @@
     "title": "OpenTelemetry",
     "media": [],
     "classifier_tags": [
+      "Category::Developer Tools",
+      "Category::Network",
+      "Category::OS & System",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::OS & System"
+      "Supported OS::macOS"
     ]
   },
   "author": {

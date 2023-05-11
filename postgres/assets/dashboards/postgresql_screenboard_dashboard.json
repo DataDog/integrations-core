@@ -1545,24 +1545,27 @@
   "template_variables": [
     {
       "name": "scope",
-      "default": "*"
+      "default": "*",
+      "prefix": "scope"
     },
     {
       "name": "table",
-      "default": "*"
+      "default": "*",
+      "prefix": "table"
     },
     {
       "name": "db",
-      "default": "*"
+      "default": "*",
+      "prefix": "db"
     },
     {
       "name": "host",
-      "default": "*"
+      "default": "*",
+      "prefix": "host"
     }
   ],
   "layout_type": "ordered",
   "is_read_only": true,
   "notify_list": [],
-  "reflow_type": "fixed",
-  "id": "exk-fsj-54w"
+  "reflow_type": "fixed"
 }

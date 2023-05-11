@@ -101,6 +101,7 @@ class AmazonMskCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                             scrapers[url] = self.scrapers[url]
                             continue
 
+                        self.log.debug("OpenMetricsV2 prometheus endpoint: %s", url)
                         scraper = self.create_scraper(
                             {'openmetrics_endpoint': url, 'metrics': metrics, **self.instance}
                         )

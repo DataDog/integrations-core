@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import closing, contextmanager
-from typing import Any, AnyStr, Dict, Iterable, Iterator, List, Sequence, cast
+from typing import Any, AnyStr, Dict, Iterable, Iterator, List, Sequence, cast  # noqa: F401
 
 import pymysql
 

@@ -5,7 +5,6 @@ import click
 from datadog_checks.dev.tooling.commands.validate.agent_reqs import agent_reqs
 from datadog_checks.dev.tooling.commands.validate.agent_signature import legacy_signature
 from datadog_checks.dev.tooling.commands.validate.all_validations import all
-from datadog_checks.dev.tooling.commands.validate.ci import ci
 from datadog_checks.dev.tooling.commands.validate.codeowners import codeowners
 from datadog_checks.dev.tooling.commands.validate.config import config
 from datadog_checks.dev.tooling.commands.validate.dashboards import dashboards
@@ -26,7 +25,9 @@ from datadog_checks.dev.tooling.commands.validate.saved_views import saved_views
 from datadog_checks.dev.tooling.commands.validate.service_checks import service_checks
 from datadog_checks.dev.tooling.commands.validate.typos import typos
 
+from ddev.cli.validate.ci import ci
 from ddev.cli.validate.manifest import manifest
+from ddev.cli.validate.openmetrics import openmetrics
 
 
 @click.group(short_help='Verify certain aspects of the repo')
@@ -54,6 +55,7 @@ validate.add_command(licenses)
 validate.add_command(manifest)
 validate.add_command(metadata)
 validate.add_command(models)
+validate.add_command(openmetrics)
 validate.add_command(package)
 validate.add_command(readmes)
 validate.add_command(recommended_monitors)

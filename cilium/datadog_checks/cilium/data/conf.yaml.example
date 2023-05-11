@@ -58,7 +58,7 @@ instances:
     ## By default, the Cilium integration collects `cilium-agent` metrics.
     ## One of agent_endpoint or operator_endpoint must be provided.
     #
-    agent_endpoint: http://localhost:9090/metrics
+    agent_endpoint: http://localhost:9962/metrics
 
     ## @param operator_endpoint - string - optional
     ## Provide instead of `agent_endpoint` to collect `cilium-operator` metrics.
@@ -176,6 +176,11 @@ instances:
     #
     # enable_health_service_check: true
 
+    ## @param ignore_connection_errors - boolean - optional - default: false
+    ## Whether or not to ignore connection errors when scraping `openmetrics_endpoint`.
+    #
+    # ignore_connection_errors: false
+
     ## @param hostname_label - string - optional
     ## Override the hostname for every metric submission with the value of one of its labels.
     #
@@ -270,11 +275,6 @@ instances:
     ## than the full metric name.
     #
     # cache_metric_wildcards: true
-
-    ## @param use_latest_spec - boolean - optional - default: false
-    ## Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
-    #
-    # use_latest_spec: false
 
     ## @param telemetry - boolean - optional - default: false
     ## Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.

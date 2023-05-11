@@ -1,6 +1,30 @@
 # CHANGELOG - datadog_checks_base
 
-## 30.2.0 / 2023-03-07
+## 32.2.0 / 2023-05-05
+
+* [Added] Add an ignore_connection_errors option to the openmetrics check. See [#14504](https://github.com/DataDog/integrations-core/pull/14504).
+
+## 32.1.0 / 2023-05-04
+
+* [Added] Create `tag_not_null` type which doesn't set the tag when tag value is none. See [#14503](https://github.com/DataDog/integrations-core/pull/14503).
+* [Fixed] Fix bug on empty openmetrics scrape response. See [#14508](https://github.com/DataDog/integrations-core/pull/14508).
+
+## 32.0.0 / 2023-04-25
+
+* [Changed] Implement automatic exposition format detection. See [#14445](https://github.com/DataDog/integrations-core/pull/14445).
+
+## 31.0.1 / 2023-04-19
+
+* [Fixed] Do not add `freezegun` dependency to agent. See [#14393](https://github.com/DataDog/integrations-core/pull/14393).
+
+## 31.0.0 / 2023-04-14
+
+* [Added] Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).
+* [Added] Update redis to 4.5.4. See [#14270](https://github.com/DataDog/integrations-core/pull/14270).
+* [Fixed] Fix duplicate events bug. See [#14020](https://github.com/DataDog/integrations-core/pull/14020).
+* [Changed] Replace `kafka-python` dependency with `confluent-kafka-python`. See [#13918](https://github.com/DataDog/integrations-core/pull/13918).
+
+## 30.2.0 / 2023-03-07 / Agent 7.44.0
 
 * [Added] Upgrade openstacksdk dependency. See [#14109](https://github.com/DataDog/integrations-core/pull/14109).
 

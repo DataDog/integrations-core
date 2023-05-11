@@ -1284,6 +1284,5 @@
   "layout_type": "ordered",
   "is_read_only": true,
   "notify_list": [],
-  "reflow_type": "fixed",
-  "id": "hee-hag-gye"
+  "reflow_type": "fixed"
 }

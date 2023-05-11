@@ -292,14 +292,14 @@ def test_config(test_case, extra_config, expected_http_kwargs, dd_run_check):
 
         dd_run_check(check)
 
-        http_wargs = dict(
-            auth=mock.ANY,
-            cert=mock.ANY,
-            headers=mock.ANY,
-            proxies=mock.ANY,
-            timeout=mock.ANY,
-            verify=mock.ANY,
-            allow_redirects=mock.ANY,
-        )
+        http_wargs = {
+            'auth': mock.ANY,
+            'cert': mock.ANY,
+            'headers': mock.ANY,
+            'proxies': mock.ANY,
+            'timeout': mock.ANY,
+            'verify': mock.ANY,
+            'allow_redirects': mock.ANY,
+        }
         http_wargs.update(expected_http_kwargs)
         r.get.assert_called_with('http://169.254.170.2/v2/metadata', **http_wargs)

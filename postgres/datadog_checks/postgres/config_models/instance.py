@@ -31,7 +31,7 @@ class Azure(BaseModel):
         allow_mutation = False
 
     deployment_type: Optional[str]
-    name: Optional[str]
+    fully_qualified_domain_name: Optional[str]
 
 
 class Gcp(BaseModel):
@@ -130,6 +130,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool]
     gcp: Optional[Gcp]
     host: str
+    idle_connection_timeout: Optional[int]
     ignore_databases: Optional[Sequence[str]]
     log_unobfuscated_plans: Optional[bool]
     log_unobfuscated_queries: Optional[bool]

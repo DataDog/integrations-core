@@ -9,7 +9,6 @@ services:
         - STATSD_VERSION=${STATSD_VERSION}
     ports:
       - "8125:8125"
-      - "8126:8126"
+      - "8128:8126"
     volumes:
       - ${DD_LOG_1}:/usr/src/app/statsd.log
-    
