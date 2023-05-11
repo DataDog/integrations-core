@@ -53,7 +53,16 @@ spec:
         name: strimzi-cluster-operator
         strimzi.io/kind: cluster-operator
       annotations:
-        ad.datadoghq.com/strimzi-cluster-operator.checks: '{"strimzi": {"instances":[{"cluster_operator_endpoint": "http://%%host%%:8080/metrics"}]}}'
+        ad.datadoghq.com/strimzi-cluster-operator.checks: |
+          {
+            "strimzi": {
+              "instances":[
+                {
+                  "topic_operator_endpoint": "http://%%host%%:8080/metrics"
+                }
+              ]
+            }
+          }
       spec:
         serviceAccountName: strimzi-cluster-operator
 ...
@@ -77,8 +86,26 @@ spec:
       pod:
         metadata:
           annotations:
-            ad.datadoghq.com/topic-operator.checks: '{"strimzi": {"instances":[{"topic_operator_endpoint": "http://%%host%%:8080/metrics"}]}}' 
-            ad.datadoghq.com/user-operator.checks: '{"strimzi": {"instances":[{"user_operator_endpoint": "http://%%host%%:8081/metrics"}]}}' 
+            ad.datadoghq.com/topic-operator.checks: |
+              {
+                "strimzi": {
+                  "instances":[
+                    {
+                      "topic_operator_endpoint": "http://%%host%%:8080/metrics"
+                    }
+                  ]
+                }
+              }
+            ad.datadoghq.com/user-operator.checks: |
+            {
+              "strimzi": {
+                "instances":[
+                  {
+                    "user_operator_endpoint": "http://%%host%%:8081/metrics"
+                  }
+                ]
+              }
+            } 
 ...
 ```
 **Note**: Template used as the basis for this example can be found [here][14].
@@ -142,7 +169,16 @@ spec:
           annotations:
             key1: label3
             key2: label4
-            ad.datadoghq.com/zookeeper.checks: '{"zk": {"instances":[{"host":"%%host%%","port":"2181"}]}}' 
+            ad.datadoghq.com/zookeeper.checks: |
+              {
+                "zk": {
+                  "instances":[
+                    {
+                      "host":"%%host%%","port":"2181"
+                    }
+                  ]
+                }
+              } 
 ```
 **Note**: Template used as the basis for this example can be found [here][14].
 
