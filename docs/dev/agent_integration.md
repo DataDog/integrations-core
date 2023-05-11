@@ -9,9 +9,9 @@ aliases:
   - /developers/integrations/new_check_howto/
 dependencies: "https://github.com/DataDog/integrations-core/blob/alai97/add-marketplace-documentation/docs/dev/agent_integration.md"
 further_reading:
-- link: "https://www.datadoghq.com/blog/programmatically-manage-your-datadog-integrations/"
-  tag: "Blog"
-  text: "Programmatically manage your Datadog integrations"
+- link: "/developers/integration/create_a_tile/"
+  tag: "Documentation"
+  text: "Create a tile"
 - link: "/developers/integrations/python/"
   tag: "Documentation"
   text: "Python for Agent-based Integration Development"
