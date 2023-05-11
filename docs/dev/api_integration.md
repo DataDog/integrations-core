@@ -34,9 +34,9 @@ API integrations can send the following types of data to Datadog:
 
 You can also include out-of-the-box assets such as [monitors][25], [dashboards][26], and [log pipelines][27] with your integration. When a user clicks **Install** on your integration tile, they are prompted to follow the setup instructions, and all out-of-the-box dashboards and recommended monitors packaged with your integration will appear in the their account.
 
-Since API integrations do not use the Datadog Agent to collect data, you need to create a tile (pictured below) to display your offering on the **Integrations** page once your development work is complete.
+To display your offering on the **Integrations** or **Marketplace page**, you need to create a tile (pictured below). This tile will include instructions on how to set up your offering, as well as general information on what the integration does and how to use it. 
 
-{{< img src="developers/marketplace/marketplace-tile-example.png" alt="Example Marketplace tile" style="width:30%" >}}
+{{< img src="developers/integrations/integration_tile.png" alt="A tile representing an example offering on the Integrations page" style="width:25%" >}}
 
 ## Development process
 
@@ -52,7 +52,7 @@ To get started, you can explore examples that use OAuth in the `integrations-ext
 
 The process to build an API-based integration looks like the following:
 
-1. Once you've been accepted to the Datadog Partner Network, you will meet with the Datadog Technology Partner team to discuss your offering and use cases.
+1. Once you've been accepted to the [Datadog Partner Network][29], you will meet with the Datadog Technology Partner team to discuss your offering and use cases.
 2. Request a Datadog sandbox account for development.
 3. Begin development of your integration, which includes writing and hosting the integration code on your end as well as implementing the [OAuth protocol][28].
 4. Test your integration, as well as your OAuth client, in your Datadog sandbox account.
@@ -94,3 +94,4 @@ Start building your API integration by [creating a tile][24].
 [26]: https://docs.datadoghq.com/dashboards/
 [27]: https://docs.datadoghq.com/logs/log_configuration/pipelines/
 [28]: /developers/authorization/oauth2_in_datadog/
+[29]: https://partners.datadoghq.com/

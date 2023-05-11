@@ -45,7 +45,7 @@ Professional services
 Marketplace Partners have unique benefits that are not available to Technology Partners who list out-of-the-box integrations:
  
 - **Go-to-market collaboration** including a blog post, a quote for a press release, and social media amplification, with access to dedicated sales and marketing resources focused on accelerating partner growth. 
-- **Training and support** for sales enablement in the form of on-demand courses to quickly onboard sales and technical teams.
+- **Training and support** for internal sales enablement.
 - **Exclusive opportunities to sponsor** conferences and events (such as [Datadog DASH][20]) at a discounted rate.
 - **Generate new leads** from user discovery.
 

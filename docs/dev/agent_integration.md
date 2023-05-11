@@ -26,18 +26,18 @@ This page walks Technology Partners through how to create a Datadog Agent integr
 
 ## Agent-based integrations
 
-Agent-based integrations use the [Datadog Agent][17] to submit data through checks written by the developer. Checks can emit [metrics][23], [events][24], and [service checks][25] into a customer's Datadog account. The Agent itself can submit [logs][26] as well, but that is configured outside of the check itself. 
+Agent-based integrations use the [Datadog Agent][17] to submit data through checks written by the developer. Checks can emit [metrics][23], [events][24], and [service checks][25] into a customer's Datadog account. The Agent itself can submit [logs][26] as well, but that is configured outside of the check. 
 
 The implementation code for these integrations is hosted by Datadog. Agent integrations are best suited for collecting data from systems or applications that live in a local area network (LAN) or virtual private cloud (VPC). Creating an Agent integration requires you to publish and deploy your solution as a Python wheel (`.whl`).
 
-You can include out-of-the-box assets such as [monitors][27], [dashboards][28], and [log pipelines][29] with your Agent-based integration. When a user clicks **Install** on your integration tile, they are prompted to follow the setup instructions, and all out-of-the-box dashboards and recommended monitors packaged with your integration will appear in the their account.
+You can include out-of-the-box assets such as [monitors][27], [dashboards][28], and [log pipelines][29] with your Agent-based integration. When a user clicks **Install** on your integration tile, they are prompted to follow the setup instructions, and all out-of-the-box dashboards will appear in their account. Other assets, such as log pipelines, will appear for users after proper installation and configuration of the integration.
 
 ## Development process
 
 The process to build an Agent-based integration looks like the following: 
 
-1. Once you've been accepted to the Datadog Partner Network, you will meet with the Datadog Technology Partner team to discuss your offering and use cases.
-2. Request a Datadog sandbox account for development.
+1. Once you've been accepted to the [Datadog Partner Network][32], you will meet with the Datadog Technology Partner team to discuss your offering and use cases.
+2. Request a Datadog sandbox account for development through the Datadog Partner Network portal.
 3. Begin development of your integration, which includes writing the integration code on your end as well as building and installing a Python wheel (`.whl`).
 4. Test your integration in your Datadog sandbox account.
 5. Once your development work is tested and complete, follow the steps in [Create a Tile][20] to display your offering on the **Integrations** or **Marketplace** page.
@@ -358,9 +358,9 @@ To speed up development, use the `-m/--marker` option to run integration tests o
    ```
 Your integration is almost complete. Next, add the necessary check assets.
 
-## Create the check assets
+## Populate integration assets
 
-The following set of assets created by the `ddev` scaffolding **must** be populated:
+The following set of assets created by the `ddev` scaffolding **must** be populated with relevant information to your integration:
 
 `README.md`
 : This contains the documentation for your Agent Check, how to set it up, which data it collects, and support information.
@@ -380,7 +380,7 @@ The following set of assets created by the `ddev` scaffolding **must** be popula
 `service_check.json`
 : This contains the list of all Service Checks collected by your Agent Check. For more information, see the [Service check file reference documentation][15].
 
-For more information about the `README.md` and `manifest.json` files, see [Create a Tile][20].
+For more information about the `README.md` and `manifest.json` files, see [Create a Tile][20] and [Integrations Asset Reference][33].
 
 ## Build the wheel
 
@@ -428,9 +428,9 @@ sudo datadog-agent integration install -w /path/to/wheel.whl
   ```
 </details>
 
-## Create a tile and publish your integration
+## Populate your tile and publish your integration
 
-Once you have created your Agent-based integration, populate the remaining [required assets][31] that  appear on your integration tile by following the instructions in [Create a Tile][20].
+Once you have created your Agent-based integration, populate the remaining [required assets][31] that  appear on your integration tile. For more information on populating these assets and best practices, see [Create a Tile][20].
 
 Finally, open a pull request with your code on the [`integrations-extras`][21] or [`marketplace`][22] repository. After you've created your pull request, automatic checks run to verify that your pull request is in good shape and contains all the required content to be updated.
 
@@ -469,3 +469,5 @@ Finally, open a pull request with your code on the [`integrations-extras`][21] o
 [29]: https://docs.datadoghq.com/logs/log_configuration/pipelines/
 [30]: https://docs.datadoghq.com/glossary/#check/
 [31]: https://docs.datadoghq.com/developers/integrations/create_a_tile/#complete-the-necessary-integration-asset-files
+[32]: https://partners.datadoghq.com/
+[33]: https://docs.datadoghq.com/developers/integrations/check_references/

@@ -72,9 +72,6 @@ Decrease mean-time-to-resolution (MTTR) for customers
 Increase adoption and visibility 
 : Ensuring native functionality for Datadog reduces friction to adoption, and displaying a tile on the [Integrations page][10] or the [Marketplace page][17] provides key visibility to all of Datadog's customers.
 
-Submit out-of-the-box metrics at no extra cost 
-: Metrics reported from official Datadog integrations are not counted as [custom metrics][14] (unless the integration is sending in potentially unlimited metrics), and do not impact a customer's billing through custom metric allocation.
-
 ### Responsibilities
 
 As the author of the integration, you are responsible for maintaining the code and ensuring the integration functions properly across all [Datadog sites][15]. If you encounter any setup issues, [contact Support][16].

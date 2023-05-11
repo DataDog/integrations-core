@@ -26,7 +26,7 @@ The tile serves as a point of entry where customers can learn about your offerin
 
 * For any offerings that **do not use** the Datadog Agent—including API-based integrations, professional services listings, and software licenses—you will only need to create a tile and submit the tile-related files in order to publish your offering. This is called a _tile-only-listing_. Tile-ony listings apply in situations where Datadog does not host any of the code associated with the API-based integrations, and the other supported offering types do not require any code. 
 
-* For **Agent-based integrations**, however, you will need to create a tile, and additionally, submit all of your integration-related code (as well as your tile-related files) in one pull request. For more information, see [Create an Agent-based integration][27].
+* For **Agent-based integrations**, you will need to create a tile, and additionally, submit all of your integration-related code (as well as your tile-related files) in one pull request. For more information, see [Create an Agent-based integration][27].
 
 <div class="alert alert-info">Select a tab for instructions on creating a tile on the Integrations or Marketplace page.</div>
 
@@ -37,6 +37,9 @@ The tile serves as a point of entry where customers can learn about your offerin
 {{< img src="developers/integrations/integration_tile.png" alt="A tile representing an example offering on the Integrations page" style="width:25%" >}}
 
 To build a tile on the [**Integrations** page][103]:
+
+<div class="alert alert-warning">If you have already gone through the steps to create an Agent integration and have built out a scaffolding, you can skip directly to [completing the necessary integration asset files](#complete-the-necessary-integration-asset-files). 
+</div>
 
 1. Create a `dd` directory:
 
@@ -99,6 +102,9 @@ For Datadog API integrations that will be available out-of-the-box on the [Integ
 {{< img src="developers/integrations/marketplace_tile.png" alt="A tile representing an example offering on the Marketplace page" style="width:30%" >}}
 
 To build a tile on the [**Marketplace** page][104]: 
+
+<div class="alert alert-warning">If you have already gone through the steps to create an Agent integration and have built out a scaffolding, you can skip directly to [completing the necessary integration asset files](#complete-the-necessary-integration-asset-files). 
+</div>
 
 1. See [Build a Marketplace Offering][102] to request access to the [Marketplace repository][101].
 
