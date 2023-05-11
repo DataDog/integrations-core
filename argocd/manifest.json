@@ -12,10 +12,11 @@
     "title": "Argo CD",
     "media": [],
     "classifier_tags": [
+      "Category::Developer Tools",
+      "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS",
-      "Category::Log Collection"
+      "Supported OS::macOS"
     ]
   },
   "assets": {

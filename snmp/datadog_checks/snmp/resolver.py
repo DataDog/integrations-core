@@ -3,10 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 from collections import defaultdict
-from typing import DefaultDict, Dict, List, Optional, Tuple
+from typing import DefaultDict, Dict, List, Optional, Tuple  # noqa: F401
 
-from .models import OID
-from .pysnmp_types import MibViewController
+from .models import OID  # noqa: F401
+from .pysnmp_types import MibViewController  # noqa: F401
 from .types import OIDMatch
 
 

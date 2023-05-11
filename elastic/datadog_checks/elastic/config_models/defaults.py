@@ -194,6 +194,10 @@ def instance_slm_stats(field, value):
     return False
 
 
+def instance_submit_events(field, value):
+    return True
+
+
 def instance_tags(field, value):
     return get_default_field_value(field, value)
 

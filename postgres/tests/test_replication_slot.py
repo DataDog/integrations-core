@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import time
-
 import psycopg2
 import pytest
 
@@ -24,8 +22,6 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
             cur.execute("select * from pg_create_physical_replication_slot('phys_1');")
             cur.execute("select * from pg_create_physical_replication_slot('phys_2', true);")
             cur.execute("select * from pg_create_physical_replication_slot('phys_3', true, true);")
-
-    time.sleep(0.2)
     check.check(pg_instance)
 
     #     slot_name     | slot_type | temporary | active | active_pid | xmin | restart_lsn
@@ -42,6 +38,7 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
         'slot_persistence:permanent',
         'slot_state:inactive',
         'slot_type:physical',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
     expected_phys3_tags = pg_instance['tags'] + [
         'port:{}'.format(pg_instance['port']),
@@ -49,6 +46,7 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
         'slot_persistence:temporary',
         'slot_state:active',
         'slot_type:physical',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
     expected_repslot_tags = pg_instance['tags'] + [
         'port:{}'.format(pg_instance['port']),
@@ -56,6 +54,7 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
         'slot_persistence:permanent',
         'slot_state:active',
         'slot_type:physical',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
 
     assert_metric_at_least(
@@ -73,7 +72,13 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
         tags=expected_phys3_tags,
         count=1,
     )
-    aggregator.assert_metric('postgresql.replication_slot.xmin_age', count=1, value=0, tags=expected_repslot_tags)
+    assert_metric_at_least(
+        aggregator,
+        'postgresql.replication_slot.xmin_age',
+        higher_bound=1,
+        tags=expected_repslot_tags,
+        count=1,
+    )
 
 
 @requires_over_10
@@ -92,6 +97,7 @@ def test_logical_replication_slots(aggregator, integration_check, pg_instance):
         'slot_persistence:permanent',
         'slot_state:inactive',
         'slot_type:logical',
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
     # Both should be in the past
     assert_metric_at_least(

@@ -4,6 +4,7 @@
 
 import json
 import os
+import pathlib
 from collections import namedtuple
 from enum import Enum
 from functools import lru_cache
@@ -75,7 +76,12 @@ VarMetadata = namedtuple('VarMetadata', ['oid', 'description', 'enum', 'bits'])
     '--no-descr', help='Removes descriptions from the generated file(s) when set (more compact).', is_flag=True
 )
 @click.option('--debug', '-d', help='Include debug output', is_flag=True)
-@click.argument('mib-files', nargs=-1, required=True, type=click.Path(exists=True, dir_okay=False, resolve_path=True))
+@click.argument(
+    'mib-files',
+    nargs=-1,
+    required=True,
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
+)
 def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_descr, debug, mib_files):
     """Generate yaml or json formatted documents containing various information about traps. These files can be used by
     the Datadog Agent to enrich trap data.
@@ -127,16 +133,14 @@ def generate_traps_db(mib_sources, output_dir, output_file, output_format, no_de
         if not os.path.isdir(mibs_sources_dir):
             os.mkdir(mibs_sources_dir)
 
-        mib_sources = (
-            sorted(set([os.path.abspath(os.path.dirname(x)) for x in mib_files if os.path.sep in x])) + mib_sources
-        )
+        mib_sources = sorted({pathlib.Path(x).parent.as_uri() for x in mib_files if os.path.sep in x}) + mib_sources
 
         mib_files = [os.path.basename(x) for x in mib_files]
         searchers = [AnyFileSearcher(compiled_mibs_sources).setOptions(exts=['.json'])]
         code_generator = JsonCodeGen()
         file_writer = FileWriter(compiled_mibs_sources).setOptions(suffix='.json')
         mib_compiler = MibCompiler(SmiV1CompatParser(tempdir=''), code_generator, file_writer)
-        mib_compiler.addSources(*getReadersFromUrls(*mib_sources, **dict(fuzzyMatching=True)))
+        mib_compiler.addSources(*getReadersFromUrls(*mib_sources, **{'fuzzyMatching': True}))
         mib_compiler.addSearchers(*searchers)
 
         compiled_mibs, compiled_dependencies_mibs = compile_and_report_status(mib_files, mib_compiler)
@@ -204,7 +208,7 @@ def compile_and_report_status(mib_files, mib_compiler):
 
     # These MIBs were compiled but where not explicitly requested by the user. They will be moved
     # to a different folder.
-    dependencies_only_mibs = set([x for x in all_compiled_mibs if x not in child_compiled_mibs])
+    dependencies_only_mibs = {x for x in all_compiled_mibs if x not in child_compiled_mibs}
 
     return child_compiled_mibs, dependencies_only_mibs
 
@@ -249,8 +253,7 @@ def write_compact_trap_db(trap_db_per_mib, output_file, use_json=False):
                     )
                 )
                 conflict_oids.add(trap_oid)
-            compact_db["traps"][trap_oid] = {"mib": mib}
-            compact_db["traps"][trap_oid].update(trap)
+            compact_db["traps"][trap_oid] = trap
         for var_oid, var in trap_db["vars"].items():
             if var_oid in compact_db["vars"] and var["name"] != compact_db["vars"][var_oid]["name"]:
                 echo_warning(
@@ -288,6 +291,7 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
         with open(compiled_mib_file, 'r') as f:
             file_content = json.load(f)
 
+        file_mib_name = file_content['meta']['module']
         trap_db = {"traps": {}, "vars": {}}
 
         traps = {k: v for k, v in file_content.items() if v.get('class') == NOTIFICATION_TYPE}
@@ -295,7 +299,7 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
             trap_name = trap['name']
             trap_oid = trap['oid']
             trap_descr = trap.get('description', '')
-            trap_db["traps"][trap_oid] = {"name": trap_name}
+            trap_db["traps"][trap_oid] = {"name": trap_name, "mib": file_mib_name}
             if not no_descr:
                 trap_db["traps"][trap_oid]["descr"] = trap_descr
             for trap_var in trap.get('objects', []):
@@ -329,8 +333,7 @@ def generate_trap_db(compiled_mibs, compiled_mibs_sources, no_descr):
                     trap_db["vars"][var_metadata.oid]["bits"] = var_metadata.bits
 
         if trap_db['traps']:
-            mib_name = file_content['meta']['module']
-            trap_db_per_mib[mib_name] = trap_db
+            trap_db_per_mib[file_mib_name] = trap_db
 
     return trap_db_per_mib
 

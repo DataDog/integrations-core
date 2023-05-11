@@ -5,7 +5,7 @@ import re
 import socket
 import time
 from contextlib import closing
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Tuple, Union  # noqa: F401
 
 from six import string_types
 from six.moves.urllib.request import urlopen
@@ -64,7 +64,7 @@ class CheckEndpoints(LazyFunction):
     def __init__(
         self,
         endpoints,  # type: Union[str, List[str]]
-        timeout=1,  # type: int,
+        timeout=1,  # type: int
         attempts=60,  # type: int
         wait=1,  # type: int
     ):
@@ -189,7 +189,7 @@ class CheckDockerLogs(CheckCommandOutput):
         matches=1,  # type: Union[str, int]
         stdout=True,  # type: bool
         stderr=True,  # type: bool
-        attempts=60,  # type: int,
+        attempts=60,  # type: int
         wait=1,  # type: int
     ):
         """

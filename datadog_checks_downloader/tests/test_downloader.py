@@ -13,6 +13,7 @@ import string
 import subprocess
 import sys
 from collections import defaultdict, namedtuple
+from contextlib import contextmanager
 from datetime import datetime
 from urllib.parse import urljoin
 
@@ -21,13 +22,13 @@ import requests
 from freezegun import freeze_time
 from packaging.version import parse as parse_version
 from tenacity import retry, stop_after_attempt, wait_exponential
-from tests.local_http import local_http_server, local_http_server_local_dir
 from tuf.api.exceptions import DownloadError, ExpiredMetadataError, RepositoryError, UnsignedMetadataError
 
 import datadog_checks.downloader
-from datadog_checks.downloader.cli import download
+from datadog_checks.downloader.cli import download, instantiate_downloader, run_downloader
 from datadog_checks.downloader.download import REPOSITORY_URL_PREFIX
 from datadog_checks.downloader.exceptions import NonDatadogPackage, NoSuchDatadogPackage
+from tests.local_http import local_http_server, local_http_server_local_dir
 
 _LOGGER = logging.getLogger("test_downloader")
 
@@ -59,23 +60,50 @@ EXCLUDED_INTEGRATION_VERSION = [
 ]
 
 
-def _do_run_downloader(argv):
-    """Run the Datadog checks downloader."""
+@contextmanager
+def modified_args(argv):
     old_sys_argv = sys.argv
 
     sys.argv = ["datadog_checks_downloader"] + argv  # Make sure argv[0] (program name) is prepended.
-    try:
+
+    yield
+
+    sys.argv = old_sys_argv
+
+
+def _do_run_downloader(argv):
+    """Run the Datadog checks downloader."""
+
+    with modified_args(argv):
         download()
-    finally:
-        sys.argv = old_sys_argv
 
 
 @pytest.mark.online
-def test_download(capfd, distribution_name, distribution_version, temporary_local_repo):
+def test_download(capfd, distribution_name, distribution_version, temporary_local_repo, disable_verification, mocker):
     """Test datadog-checks-downloader successfully downloads and validates a wheel file."""
     argv = [distribution_name, "--version", distribution_version]
 
-    _do_run_downloader(argv)
+    if disable_verification:
+        argv.append('--unsafe-disable-verification')
+
+    with modified_args(argv):
+        tuf_downloader, standard_distribution_name, version, ignore_python_version = instantiate_downloader()
+
+        spy_with_tuf = mocker.spy(tuf_downloader, '_download_with_tuf')
+        spy_with_tuf_in_toto = mocker.spy(tuf_downloader, '_download_with_tuf_in_toto')
+        spy_without_tuf_in_toto = mocker.spy(tuf_downloader, '_download_without_tuf_in_toto')
+
+        run_downloader(tuf_downloader, standard_distribution_name, version, ignore_python_version)
+
+        if disable_verification:
+            spy_with_tuf.assert_not_called()
+            spy_with_tuf_in_toto.assert_not_called()
+            spy_without_tuf_in_toto.assert_called()
+        else:
+            spy_without_tuf_in_toto.assert_not_called()
+            spy_with_tuf_in_toto.assert_called()
+            spy_with_tuf.assert_called()
+
     stdout, stderr = capfd.readouterr()
 
     assert not stderr, "No standard error expected, got: {}".format(stderr)
@@ -123,7 +151,7 @@ def test_non_datadog_distribution():
     ],
 )
 @freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP)
-def test_local_download(capfd, distribution_name, distribution_version, target):
+def test_local_download(capfd, distribution_name, distribution_version, target, disable_verification):
     """Test local verification of a wheel file."""
 
     with local_http_server("{}-{}".format(distribution_name, distribution_version)) as http_url:
@@ -134,6 +162,10 @@ def test_local_download(capfd, distribution_name, distribution_version, target):
             "--repository",
             http_url,
         ]
+
+        if disable_verification:
+            argv.append('--unsafe-disable-verification')
+
         _do_run_downloader(argv)
 
     stdout, _ = capfd.readouterr()
@@ -246,7 +278,6 @@ def test_local_wheels_signer_signature_leaf_error(distribution_name, distributio
 @pytest.mark.offline
 @freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP)
 def test_local_tampered_target_triggers_failure():
-
     distribution_name = "datadog-active-directory"
     distribution_version = "1.10.0"
 

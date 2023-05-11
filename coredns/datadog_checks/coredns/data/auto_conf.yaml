@@ -19,7 +19,7 @@ instances:
     ## and enable the plugin within coredns.
     ## See: https://coredns.io/plugins/metrics/
     ##
-    ## Either `prometheus_url` or `openmetrics_url` must be specified.
+    ## Either `prometheus_url` or `openmetrics_endpoint` must be specified.
     ## See documentation: https://docs.datadoghq.com/integrations/coredns
     #
   - prometheus_url: http://%%host%%:9153/metrics
@@ -59,7 +59,7 @@ instances:
     ## and enable the plugin within coredns.
     ## See: https://coredns.io/plugins/metrics/
     ##
-    ## Either `prometheus_url` or `openmetrics_url` must be specified.
+    ## Either `prometheus_url` or `openmetrics_endpoint` must be specified.
     ## See documentation: https://docs.datadoghq.com/integrations/coredns
     #
     # openmetrics_endpoint: http://%%host%%:9153/metrics

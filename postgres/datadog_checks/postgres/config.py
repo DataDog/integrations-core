@@ -44,6 +44,7 @@ class PostgresConfig:
             raise ConfigurationError("Application name can include only ASCII characters: %s", self.application_name)
 
         self.query_timeout = int(instance.get('query_timeout', 5000))
+        self.idle_connection_timeout = instance.get('idle_connection_timeout', 60000)
         self.relations = instance.get('relations', [])
         if self.relations and not self.dbname:
             raise ConfigurationError('"dbname" parameter must be set when using the "relations" parameter.')
@@ -95,6 +96,8 @@ class PostgresConfig:
         aws = instance.get('aws', {})
         gcp = instance.get('gcp', {})
         azure = instance.get('azure', {})
+        # Remap fully_qualified_domain_name to name
+        azure = {k if k != 'fully_qualified_domain_name' else 'name': v for k, v in azure.items()}
         if aws:
             self.cloud_metadata.update({'aws': aws})
         if gcp:

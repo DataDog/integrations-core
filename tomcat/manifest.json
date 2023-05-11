@@ -12,11 +12,11 @@
     "title": "Tomcat",
     "media": [],
     "classifier_tags": [
+      "Category::Caching",
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Web",
-      "Category::Log Collection"
+      "Supported OS::macOS"
     ]
   },
   "author": {

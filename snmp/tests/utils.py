@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import contextlib
-from typing import Iterator
+from typing import Iterator  # noqa: F401
 
 import mock
 

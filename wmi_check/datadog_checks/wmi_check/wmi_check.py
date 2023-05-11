@@ -1,10 +1,10 @@
 # (C) Datadog, Inc. 2013-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import Any, Dict, List
+from typing import Any, Dict, List  # noqa: F401
 
-from datadog_checks.base.checks.win.wmi import WinWMICheck, WMISampler
-from datadog_checks.base.checks.win.wmi.types import TagQuery, WMIFilter, WMIMetric, WMIProperties
+from datadog_checks.base.checks.win.wmi import WinWMICheck, WMISampler  # noqa: F401
+from datadog_checks.base.checks.win.wmi.types import TagQuery, WMIFilter, WMIMetric, WMIProperties  # noqa: F401
 from datadog_checks.base.utils.timeout import TimeoutException
 
 

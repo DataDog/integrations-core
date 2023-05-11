@@ -44,7 +44,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      }, 
+      "process_signatures": [
+        "cilium-operator-generic",
+        "cilium-agent",
+        "cilium-health-responder"
+      ]
     },
     "dashboards": {
       "Cilium Overview": "assets/dashboards/overview.json"

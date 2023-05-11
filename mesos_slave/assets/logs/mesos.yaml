@@ -1,0 +1,80 @@
+id: mesos
+metric_id: mesos
+facets:
+  - name: Method
+    source: log
+    path: http.method
+    groups:
+      - Web Access
+  - name: URL Host
+    source: log
+    path: http.url_details.host
+    groups:
+      - Web Access
+  - name: URL Path
+    source: log
+    path: http.url_details.path
+    groups:
+      - Web Access
+  - name: URL Port
+    source: log
+    path: http.url_details.port
+    groups:
+      - Web Access
+  - name: URL scheme
+    source: log
+    path: http.url_details.scheme
+    groups:
+      - Web Access
+  - name: Logger Name
+    source: log
+    path: logger.name
+    groups:
+      - Source Code
+  - name: Client IP
+    source: log
+    path: network.client.ip
+    groups:
+      - Web Access
+pipeline:
+  type: pipeline
+  name: Mesos
+  enabled: true
+  filter:
+    query: source:mesos
+  processors:
+    - type: grok-parser
+      name: Parsing Mesos logs
+      source: message
+      enabled: true
+      samples:
+        - I0301 09:55:21.503362    15 http.cpp:391] HTTP GET for /master/roles.json from 172.28.0.1:59406 with User-Agent='Datadog Agent/7.27.0'
+        - 'I0301 14:47:46.959683 89194 group.cpp:831] Syncing group operations: queue size (joins, cancels, datas) = (0, 0, 0)'
+      grok:
+        supportRules: |
+          _date %{date("MMdd HH:mm:ss.SSSSSS"):timestamp}
+          _start (?<level>.)%{_date}\s+%{integer:pid} %{notSpace:logger.name}:%{integer:line}\]
+        matchRules: |
+          mesos_http %{_start} HTTP %{word:http.method} for %{notSpace:http.url} from %{ipOrHost:network.client.ip}(:%{integer:network.client.port})?.*
+          mesos_default %{_start} %{data:message}
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: message-remapper
+      name: Define `message` as the official message of the log
+      enabled: true
+      sources:
+        - message
+    - type: status-remapper
+      name: Define `level` as the official status of the log
+      enabled: true
+      sources:
+        - level
+    - type: url-parser
+      name: Parse http.url
+      enabled: true
+      sources:
+        - http.url
+      target: http.url_details

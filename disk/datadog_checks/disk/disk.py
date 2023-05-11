@@ -432,7 +432,7 @@ class Disk(AgentCheck):
         """
         Get device labels using the `lsblk` command. Returns a map of device name to label:value
         """
-        devices_labels = dict()
+        devices_labels = {}
         try:
             # Use raw output mode (space-separated fields encoded in UTF-8).
             # We want to be compatible with lsblk version 2.19 since

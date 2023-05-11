@@ -1,5 +1,11 @@
 # CHANGELOG - oracle
 
+## 4.1.0 / 2023-04-14
+
+* [Added] Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).
+* [Added] Add thick mode for oracledb. See [#14166](https://github.com/DataDog/integrations-core/pull/14166).
+* [Fixed] Update GV$PROCESS query. See [#14143](https://github.com/DataDog/integrations-core/pull/14143). Thanks [jake-condello](https://github.com/jake-condello).
+
 ## 4.0.1 / 2023-01-20 / Agent 7.43.0
 
 * [Fixed] Do not add `can_use_jdbc` to `check_initializations`. See [#13521](https://github.com/DataDog/integrations-core/pull/13521).

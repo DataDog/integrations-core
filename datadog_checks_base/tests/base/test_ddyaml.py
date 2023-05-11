@@ -57,8 +57,8 @@ def test_load():
         assert yaml_config_native is not None
         assert yaml_config_native == yaml_config_safe
 
-        yaml_config_safe = [entry for entry in safe_yaml_load_all(stream)]
-        yaml_config_native = [entry for entry in yaml.load_all(stream)]
+        yaml_config_safe = list(safe_yaml_load_all(stream))
+        yaml_config_native = list(yaml.load_all(stream))
         assert yaml_config_safe is not []
         assert yaml_config_native is not []
         assert len(yaml_config_safe) == len(yaml_config_native)

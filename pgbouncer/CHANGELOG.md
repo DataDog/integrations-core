@@ -1,6 +1,6 @@
 # CHANGELOG - pgbouncer
 
-## 4.4.1 / 2023-02-16
+## 4.4.1 / 2023-02-16 / Agent 7.44.0
 
 * [Changed] Add `pgbouncer_db` tag into pgbouncer metrics and remove `name` tag from pool metrics. See [#13976](https://github.com/DataDog/integrations-core/pull/13976).
 

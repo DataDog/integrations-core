@@ -288,7 +288,7 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory, sou
     # use source_mib_directories as mibs source
     sources = [source]
     sources.extend(source_mib_directories)
-    mib_compiler.addSources(*getReadersFromUrls(*sources, **dict(fuzzyMatching=True)))
+    mib_compiler.addSources(*getReadersFromUrls(*sources, **{'fuzzyMatching': True}))
 
     searchers = [AnyFileSearcher(destination_directory).setOptions(exts=['.json']), StubSearcher(*mib_stubs)]
     mib_compiler.addSearchers(*searchers)
@@ -296,22 +296,22 @@ def _compile_mib_to_json(mib, source_mib_directories, destination_directory, sou
     # borrowers, aka compiled mibs source
     borrowers = [
         AnyFileBorrower(borrower_reader, genTexts=True).setOptions(exts=['.json'])
-        for borrower_reader in getReadersFromUrls(*[compiled_mibs_path], **dict(lowcaseMatching=False))
+        for borrower_reader in getReadersFromUrls(*[compiled_mibs_path], **{'lowcaseMatching': False})
     ]
     mib_compiler.addBorrowers(borrowers)
 
     processed = mib_compiler.compile(
         mib,
-        **dict(
-            noDeps=False,
-            rebuild=False,
-            dryRun=False,
-            dstTemplate=None,
-            genTexts=compile_documentation,
-            textFilter=False and (lambda symbol, text: text) or None,
-            writeMibs=True,
-            ignoreErrors=False,
-        )
+        **{
+            'noDeps': False,
+            'rebuild': False,
+            'dryRun': False,
+            'dstTemplate': None,
+            'genTexts': compile_documentation,
+            'textFilter': False and (lambda symbol, text: text) or None,
+            'writeMibs': True,
+            'ignoreErrors': False,
+        }
     )
 
     return processed

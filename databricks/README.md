@@ -19,11 +19,15 @@ Configure the Spark integration to monitor your Apache Spark Cluster on Databric
 2. Copy and run the contents into a notebook. The notebook creates an init script that installs a Datadog Agent on your clusters.
     The notebook only needs to be run once to save the script as a global configuration. 
     - Set `<init-script-folder>` path to where you want your init scripts to be saved in.
-        
+<!-- partial
+{{% site-region region="us,us3,us5,eu,gov,ap1" %}}
+
 3. Configure a new Databricks cluster with the cluster-scoped init script path using the UI, Databricks CLI, or invoking the Clusters API.
     - Set the `DD_API_KEY` environment variable in the cluster's Advanced Options with your Datadog API key.
     - Add `DD_ENV` environment variable under Advanced Options to add a global environment tag to better identify your clusters.
-    - Set `DD_SITE` to your [site URL][11].
+    - Set `DD_SITE` to your site: {{< region-param key="dd_site" code="true" >}}.
+{{% /site-region %}}
+partial -->
 
 
 #### Standard cluster
@@ -201,7 +205,11 @@ else
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
   DD_INSTALL_ONLY=true DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
-
+  
+  # CONFIGURE HOSTNAME EXPLICITLY IN datadog.yaml TO PREVENT AGENT FROM FAILING ON VERSION 7.40+
+  # SEE https://github.com/DataDog/datadog-agent/issues/14152 FOR CHANGE
+  hostname=\$(hostname | xargs)
+  echo "hostname: \$hostname" >> /etc/datadog-agent/datadog.yaml
 fi
 
   # RESTARTING AGENT
@@ -327,6 +335,22 @@ The Databricks integration does not include any events.
 
 ## Troubleshooting
 
+### Failed to bind port 6062
+
+[`ipywidgets`][14] are available in Databricks Runtime 11.0 and above. By default, `ipywidgets` occupies port `6062`, 
+which is also the default Datadog Agent port for [the debug endpoint][13]. Because of that, you can run into this issue:
+
+```
+23/02/28 17:07:31 ERROR DriverDaemon$: XXX Fatal uncaught exception. Terminating driver.
+java.io.IOException: Failed to bind to 0.0.0.0/0.0.0.0:6062
+```
+
+To fix this issue, you have several options: 
+
+1. With Databricks Runtime 11.2 and above, you can change the port using the Spark `spark.databricks.driver.ipykernel.commChannelPort` option. Find more information in [the Databricks documentation][12].
+2. You can configure the port used by the Datadog Agent with the `process_config.expvar_port` in your [`datadog.yaml`][13] configuration file. 
+3. Alternatively, you can set the `DD_PROCESS_CONFIG_EXPVAR_PORT` environment variable to configure the port used by the Datadog Agent.
+
 Need help? Contact [Datadog support][10].
 
 ## Further Reading
@@ -342,4 +366,6 @@ Need help? Contact [Datadog support][10].
 [8]: https://docs.datadoghq.com/integrations/spark/#metrics
 [9]: https://docs.datadoghq.com/integrations/spark/#service-checks
 [10]: https://docs.datadoghq.com/help/
-[11]: https://docs.datadoghq.com/getting_started/site/
+[12]: https://docs.databricks.com/notebooks/ipywidgets.html#requirements
+[13]: https://github.com/DataDog/datadog-agent/blob/7.43.x/pkg/config/config_template.yaml#L1262-L1266
+[14]: https://docs.databricks.com/notebooks/ipywidgets.html

@@ -1,1794 +1,1727 @@
 {
-    "title": "CockroachDB Overview",
-    "description": "## CockroachDB Overview\n\nThis dashboard provides a high-level view of your CockroachDB cluster, including:\n- A high-level view of SQL performance & latency.\n- Information about resource consumption to help aid in capacity planning.\nFurther reading on CockroachDB monitoring:\n\n- [Monitor CockroachDB with Datadog](https://www.datadoghq.com/blog/monitor-cockroachdb-performance-metrics-with-datadog/)\n\n- [Datadog's CockroachDB docs](https://docs.datadoghq.com/integrations/cockroachdb/).\n\nClone this template dashboard to make changes and add your own graphs and widgets.",
-    "widgets": [
-        {
-            "id": 8635810201263258,
+  "title": "CockroachDB Overview",
+  "description": "## CockroachDB Overview\n\nThis dashboard provides a high-level view of your CockroachDB cluster, including:\n- A high-level view of SQL performance & latency.\n- Information about resource consumption to help aid in capacity planning.\nFurther reading on CockroachDB monitoring:\n\n- [Monitor CockroachDB with Datadog](https://www.datadoghq.com/blog/monitor-cockroachdb-performance-metrics-with-datadog/)\n\n- [Datadog's CockroachDB docs](https://docs.datadoghq.com/integrations/cockroachdb/).\n\nClone this template dashboard to make changes and add your own graphs and widgets.",
+  "widgets": [
+    {
+      "id": 8635810201263258,
+      "definition": {
+        "title": "New group",
+        "banner_img": "",
+        "show_title": false,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8678663509436212,
             "definition": {
-                "title": "New group",
-                "banner_img": "/static/images/logos/cockroachdb_large.svg",
-                "show_title": false,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 7027263531960678,
-                        "definition": {
-                            "type": "note",
-                            "content": "This dashboard provides a high-level view of your CockroachDB cluster, including:\n- A high-level view of SQL performance & latency.\n- Information about resource consumption to help aid in capacity planning.",
-                            "background_color": "transparent",
-                            "font_size": "14",
-                            "text_align": "left",
-                            "vertical_align": "center",
-                            "show_tick": false,
-                            "tick_pos": "50%",
-                            "tick_edge": "left",
-                            "has_padding": false
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 8131082657770196,
-                        "definition": {
-                            "type": "note",
-                            "content": "#### Optimize your CockroachDB integration configuration for monitoring\n1. Configure `cluster`, `node`, and `region` tags in your `cockroachdb.d/conf.yaml` [file](https://github.com/DataDog/integrations-core/blob/7f091cbd40dfa13ec713d00d53caa2273a6cc7f6/cockroachdb/datadog_checks/cockroachdb/data/conf.yaml.example#L583-L591):\n\n    ```\n    instances:\n      - openmetrics_endpoint: http://localhost:8080/_status/vars\n        tags: [\"cluster:prod\", \"node:1\", \"region:us-east-1\"]\n      - openmetrics_endpoint: http://localhost:8082/_status/vars\n        tags: [\"cluster:prod\", \"node:2\", \"region:us-east-2\"]\n    ```",
-                            "background_color": "yellow",
-                            "font_size": "14",
-                            "text_align": "left",
-                            "vertical_align": "center",
-                            "show_tick": false,
-                            "tick_pos": "50%",
-                            "tick_edge": "left",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 0,
-                            "width": 6,
-                            "height": 3
-                        }
-                    }
-                ]
+              "type": "image",
+              "url": "/static/images/logos/cockroachdb_large.svg",
+              "url_dark_theme": "/static/images/logos/cockroachdb_reversed_large.svg",
+              "sizing": "cover",
+              "has_background": true,
+              "has_border": true,
+              "vertical_align": "center",
+              "horizontal_align": "center"
             },
             "layout": {
-                "x": 0,
-                "y": 0,
-                "width": 12,
-                "height": 6
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
             }
-        },
-        {
-            "id": 8533260048455964,
+          },
+          {
+            "id": 7027263531960678,
             "definition": {
-                "title": "SQL Latency",
-                "background_color": "blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 7598242480084802,
-                        "definition": {
-                            "type": "note",
-                            "content": "Nodes executed 99% of SQL statements within this time. This time only includes SELECT, INSERT, UPDATE and DELETE statements and does not include network latency between the node and client.",
-                            "background_color": "yellow",
-                            "font_size": "16",
-                            "text_align": "left",
-                            "vertical_align": "center",
-                            "show_tick": false,
-                            "tick_pos": "50%",
-                            "tick_edge": "top",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 3,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 4951811637444188,
-                        "definition": {
-                            "title": "Service Latency: SQL Statements, 99th Percentile (ms)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 / 1000000"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "p99:cockroachdb.sql.service.latency{$host,$store,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "purple",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 0,
-                            "width": 7,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 1992826900855292,
-                        "definition": {
-                            "title": " ",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 / 1000000"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "query": "p99:cockroachdb.sql.service.latency{$store,$host,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "aggregator": "percentile"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": false,
-                            "custom_unit": "ms",
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 10,
-                            "y": 0,
-                            "width": 2,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 2691136264396718,
-                        "definition": {
-                            "type": "note",
-                            "content": "Nodes executed 99% of transactions within this time.This time does not include network latency between the node and client.",
-                            "background_color": "yellow",
-                            "font_size": "16",
-                            "text_align": "left",
-                            "vertical_align": "center",
-                            "show_tick": false,
-                            "tick_pos": "50%",
-                            "tick_edge": "top",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 3,
-                            "width": 3,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 6375983941304400,
-                        "definition": {
-                            "title": "Transaction Latency: 99th Percentile (ms)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 / 1000000"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "p99:cockroachdb.sql.txn.latency{$host,$store,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "purple",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 3,
-                            "width": 7,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 5915700157674750,
-                        "definition": {
-                            "title": " ",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 / 1000000"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "query": "p99:cockroachdb.sql.txn.latency{$store,$host,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "aggregator": "percentile"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": false,
-                            "custom_unit": "ms",
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 10,
-                            "y": 3,
-                            "width": 2,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 2516390308198196,
-                        "definition": {
-                            "type": "note",
-                            "content": "Nodes established and authenticated 99% of connections within this time.",
-                            "background_color": "yellow",
-                            "font_size": "16",
-                            "text_align": "left",
-                            "vertical_align": "center",
-                            "show_tick": false,
-                            "tick_pos": "50%",
-                            "tick_edge": "top",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 6,
-                            "width": 3,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 6827499129241152,
-                        "definition": {
-                            "title": "Connection Latency: 99th Percentile (ms)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1) / 1000000"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "p99:cockroachdb.sql.conn.latency{$store,$host,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "purple",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 6,
-                            "width": 7,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 4398962085175410,
-                        "definition": {
-                            "title": " ",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 / 1000000"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "query": "p99:cockroachdb.sql.conn.latency{$store,$host,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "aggregator": "percentile"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": false,
-                            "custom_unit": "ms",
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 10,
-                            "y": 6,
-                            "width": 2,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 3441793203761396,
-                        "definition": {
-                            "type": "note",
-                            "content": "To populate these widgets, 1) configure `histogram_buckets_as_distributions: true` in the `cockroachdb.d/conf.yaml` and 2) enable [Advanced Query Functionality](https://docs.datadoghq.com/metrics/distributions/#enabling-advanced-query-functionality): Go to the [Metrics Summary](/metric/summary) page and for each distribution metric, click `Advanced` > `Enable percentiles and threshold queries`.",
-                            "background_color": "vivid_blue",
-                            "font_size": "14",
-                            "text_align": "left",
-                            "vertical_align": "center",
-                            "show_tick": false,
-                            "tick_pos": "50%",
-                            "tick_edge": "top",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 9,
-                            "width": 12,
-                            "height": 1
-                        }
-                    }
-                ]
+              "type": "note",
+              "content": "This dashboard provides a high-level view of your CockroachDB cluster, including:\n- A high-level view of SQL performance & latency.\n- Information about resource consumption to help aid in capacity planning.",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": false
             },
             "layout": {
-                "x": 0,
-                "y": 6,
-                "width": 12,
-                "height": 11
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 1
             }
-        },
-        {
-            "id": 6847880046439812,
+          },
+          {
+            "id": 8131082657770196,
             "definition": {
-                "title": "SQL",
-                "background_color": "blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 7977558114644004,
-                        "definition": {
-                            "title": "Open SQL Sessions",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {},
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Connections",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "avg:cockroachdb.sql.conns{$host,$store,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "purple",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 8387088883894436,
-                        "definition": {
-                            "title": "SQL Statements",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Inserts",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "Selects",
-                                            "formula": "query2"
-                                        },
-                                        {
-                                            "alias": "Updates",
-                                            "formula": "query3"
-                                        },
-                                        {
-                                            "alias": "Deletes",
-                                            "formula": "query4"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "sum:cockroachdb.sql.insert.count{$store,$host,$cluster,$node,$region}.as_count().rollup(sum, 30)",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        },
-                                        {
-                                            "query": "sum:cockroachdb.sql.select.count{$store,$host,$cluster,$node,$region}.as_count().rollup(sum, 30)",
-                                            "data_source": "metrics",
-                                            "name": "query2"
-                                        },
-                                        {
-                                            "query": "sum:cockroachdb.sql.update.count{$store,$host,$cluster,$node,$region}.as_count().rollup(sum, 30)",
-                                            "data_source": "metrics",
-                                            "name": "query3"
-                                        },
-                                        {
-                                            "query": "sum:cockroachdb.sql.delete.count{$store,$host,$cluster,$node,$region}.as_count().rollup(sum, 30)",
-                                            "data_source": "metrics",
-                                            "name": "query4"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "purple",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 0,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 7673446507943830,
-                        "definition": {
-                            "title": "SQL Statement Errors",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Errors",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "sum:cockroachdb.sql.failure.count{$host,$store,$cluster,$node,$region}.as_count().rollup(sum, 30)",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "red",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 3,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 2229729034987790,
-                        "definition": {
-                            "title": "WoW SQL Errors Change",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "change",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "week_before(query1)"
-                                        },
-                                        {
-                                            "formula": "query1",
-                                            "alias": "Errors"
-                                        }
-                                    ],
-                                    "order_by": "change",
-                                    "order_dir": "desc",
-                                    "compare_to": "hour_before",
-                                    "response_format": "scalar",
-                                    "show_present": true,
-                                    "increase_good": false,
-                                    "queries": [
-                                        {
-                                            "query": "sum:cockroachdb.sql.failure.count{$host,$store,$cluster,$node,$region}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "change_type": "absolute"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 3,
-                            "width": 6,
-                            "height": 3
-                        }
-                    }
-                ]
+              "type": "note",
+              "content": "#### Optimize your CockroachDB integration configuration for monitoring\n1. Configure `cluster`, `node`, and `region` tags in your `cockroachdb.d/conf.yaml` [file](https://github.com/DataDog/integrations-core/blob/7f091cbd40dfa13ec713d00d53caa2273a6cc7f6/cockroachdb/datadog_checks/cockroachdb/data/conf.yaml.example#L583-L591):\n\n    ```\n    instances:\n      - openmetrics_endpoint: http://localhost:8080/_status/vars\n        tags: [\"cluster:prod\", \"node:1\", \"region:us-east-1\"]\n      - openmetrics_endpoint: http://localhost:8082/_status/vars\n        tags: [\"cluster:dev\", \"node:1\", \"region:us-east-2\"]\n    ```",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
             },
             "layout": {
-                "x": 0,
-                "y": 17,
-                "width": 12,
-                "height": 7
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 3
             }
-        },
-        {
-            "id": 782550878758906,
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 7
+      }
+    },
+    {
+      "id": 782550878758906,
+      "definition": {
+        "title": "Activity Summary",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3023253906623898,
             "definition": {
-                "title": "Activity Summary",
-                "background_color": "blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
+              "title": "Capacity Available by Node",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "id": 3023253906623898,
-                        "definition": {
-                            "title": "Capacity Available by Node",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Capacity Available",
-                                            "formula": "query1",
-                                            "limit": {
-                                                "order": "asc"
-                                            }
-                                        },
-                                        {
-                                            "alias": "Capacity Used",
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "query": "sum:cockroachdb.capacity.available{$store,$host,$cluster,$node,$region} by {store,node}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "aggregator": "last"
-                                        },
-                                        {
-                                            "query": "sum:cockroachdb.capacity.used{$store,$host,$cluster,$node,$region} by {store,node}",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "aggregator": "last"
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 8,
-                            "height": 3
-                        }
+                      "alias": "Capacity Available",
+                      "formula": "query1",
+                      "limit": {
+                        "count": 500,
+                        "order": "asc"
+                      }
                     },
                     {
-                        "id": 2526915054656628,
-                        "definition": {
-                            "title": "SQL Statements, P99",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 / 1000000"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "query": "p99:cockroachdb.sql.service.latency{$host,$store,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "aggregator": "percentile"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": false,
-                            "custom_unit": "ms",
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
-                            "width": 2,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 7104684486572514,
-                        "definition": {
-                            "title": "Live Nodes",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "query": "min:cockroachdb.liveness.livenodes{$store,$host,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "aggregator": "last"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 10,
-                            "y": 0,
-                            "width": 2,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 3890787200641298,
-                        "definition": {
-                            "title": "SQL Connections",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "query": "sum:cockroachdb.sql.conns{$store,$host,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "aggregator": "last"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 2,
-                            "width": 2,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 8974363951604526,
-                        "definition": {
-                            "title": "Available Capacity",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "query": "sum:cockroachdb.capacity.available{$store,$host,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "aggregator": "last"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 10,
-                            "y": 2,
-                            "width": 2,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 6020863025887252,
-                        "definition": {
-                            "title": "Alerts",
-                            "title_size": "13",
-                            "title_align": "left",
-                            "type": "manage_status",
-                            "display_format": "countsAndList",
-                            "color_preference": "text",
-                            "hide_zero_counts": false,
-                            "query": "metric:cockroachdb.* $store $host $cluster $node $region",
-                            "sort": "status,asc",
-                            "count": 50,
-                            "start": 0,
-                            "summary_type": "monitors",
-                            "show_priority": false,
-                            "show_last_triggered": false
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 3,
-                            "width": 8,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 8376588921321148,
-                        "definition": {
-                            "title": "Avg. Node CPU Usage (%)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 * 100"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "query": "avg:cockroachdb.sys.cpu.combined.percent.normalized{$store,$host,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "aggregator": "avg"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "custom_unit": "%",
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 4,
-                            "width": 2,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 8691970345518376,
-                        "definition": {
-                            "title": "Avg. Node Memory Usage (Bytes)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "query": "avg:cockroachdb.sys.rss{$store,$host,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "aggregator": "avg"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 10,
-                            "y": 4,
-                            "width": 2,
-                            "height": 2
-                        }
+                      "alias": "Capacity Used",
+                      "formula": "query2"
                     }
-                ]
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.capacity.available{$store,$host,$cluster,$node,$region} by {store}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "last"
+                    },
+                    {
+                      "query": "sum:cockroachdb.capacity.used{$store,$host,$cluster,$node,$region} by {store}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ]
             },
             "layout": {
-                "x": 0,
-                "y": 0,
-                "width": 12,
-                "height": 7,
-                "is_column_break": true
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 3
             }
-        },
-        {
-            "id": 6591265783499330,
+          },
+          {
+            "id": 2526915054656628,
             "definition": {
-                "title": "CPU & Memory",
-                "background_color": "blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
+              "title": "SQL Statements, P99",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "id": 8340626193460600,
-                        "definition": {
-                            "title": "Node CPU Usage (%)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 * 100"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "sum:cockroachdb.sys.cpu.combined.percent.normalized{$host,$store,$cluster,$node,$region} by {node}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "purple",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 2666744055507272,
-                        "definition": {
-                            "title": "Node Memory Usage (Bytes)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "sum:cockroachdb.sys.rss{$host,$store,$cluster,$node,$region} by {node}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "purple",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 1925760011272712,
-                        "definition": {
-                            "title": "Cluster Memory Usage (Bytes)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Total Memory (RSS)",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "Go Allocated",
-                                            "formula": "query2"
-                                        },
-                                        {
-                                            "alias": "Go Total",
-                                            "formula": "query3"
-                                        },
-                                        {
-                                            "alias": "CGo Allocated",
-                                            "formula": "query4"
-                                        },
-                                        {
-                                            "alias": "CGo Total",
-                                            "formula": "query5"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "sum:cockroachdb.sys.rss{$host,$store,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        },
-                                        {
-                                            "query": "sum:cockroachdb.sys.go.allocbytes{$host,$store,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query2"
-                                        },
-                                        {
-                                            "query": "sum:cockroachdb.sys.go.totalbytes{$host,$store,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query3"
-                                        },
-                                        {
-                                            "query": "sum:cockroachdb.sys.cgo.allocbytes{$host,$store,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query4"
-                                        },
-                                        {
-                                            "query": "sum:cockroachdb.sys.cgo.totalbytes{$host,$store,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query5"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "purple",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
-                            "width": 4,
-                            "height": 4
-                        }
+                      "formula": "query1 / 1000000"
                     }
-                ]
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "p99:cockroachdb.sql.service.latency{$host,$store,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "percentile"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "custom_unit": "ms",
+              "precision": 2
             },
             "layout": {
-                "x": 0,
-                "y": 7,
-                "width": 12,
-                "height": 5
+              "x": 4,
+              "y": 0,
+              "width": 2,
+              "height": 1
             }
-        },
-        {
-            "id": 3407183437618004,
+          },
+          {
+            "id": 7104684486572514,
             "definition": {
-                "title": "Storage",
-                "background_color": "blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
+              "title": "Live Nodes",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "id": 31802363661794,
-                        "definition": {
-                            "title": "Available Node Disk Capacity",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Available Capacity",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "sum:cockroachdb.capacity.available{$store,$host,$cluster,$node,$region} by {node}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "purple",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 744270196132394,
-                        "definition": {
-                            "title": "Storage Capacity (Bytes)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Max",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "Available",
-                                            "formula": "query2"
-                                        },
-                                        {
-                                            "alias": "Used",
-                                            "formula": "query3"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:cockroachdb.capacity{$store,$host,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        },
-                                        {
-                                            "query": "sum:cockroachdb.capacity.available{$store,$host,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query2"
-                                        },
-                                        {
-                                            "query": "sum:cockroachdb.capacity.used{$store,$host,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query3"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "purple",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 87592881022260,
-                        "definition": {
-                            "title": "Live Bytes",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Live",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "System",
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "sum:cockroachdb.livebytes{$store,$host,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        },
-                                        {
-                                            "query": "sum:cockroachdb.sysbytes{$store,$host,$cluster,$node,$region}",
-                                            "data_source": "metrics",
-                                            "name": "query2"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
-                            "width": 4,
-                            "height": 4
-                        }
+                      "formula": "query1"
                     }
-                ]
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "min:cockroachdb.liveness.livenodes{$store,$host,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
             },
             "layout": {
-                "x": 0,
-                "y": 12,
-                "width": 12,
-                "height": 5
+              "x": 4,
+              "y": 1,
+              "width": 2,
+              "height": 1
             }
-        },
-        {
-            "id": 3445756485155866,
+          },
+          {
+            "id": 3890787200641298,
             "definition": {
-                "title": "Replication & Admission Control",
-                "background_color": "blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
+              "title": "SQL Connections",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "id": 6606630716516508,
-                        "definition": {
-                            "title": "Replicas per node",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Replicas",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "sum:cockroachdb.replicas.total{$store,$host,$cluster,$node,$region} by {node}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "purple",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 5,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 7569433224542696,
-                        "definition": {
-                            "title": "Admission Delay Rate (micros/sec)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "KV",
-                                            "formula": "default_zero(query1)"
-                                        },
-                                        {
-                                            "alias": "KV Write",
-                                            "formula": "default_zero(query2)"
-                                        },
-                                        {
-                                            "alias": "SQL-KV Response",
-                                            "formula": "default_zero(query3)"
-                                        },
-                                        {
-                                            "alias": "SQL-SQL Response",
-                                            "formula": "default_zero(query4)"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "sum:cockroachdb.admission.wait.sum.kv.count{$host,$store,$cluster,$node,$region}.as_rate()",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        },
-                                        {
-                                            "query": "sum:cockroachdb.admission.wait.sum.kv_stores.count{$host,$store,$cluster,$node,$region}.as_rate()",
-                                            "data_source": "metrics",
-                                            "name": "query2"
-                                        },
-                                        {
-                                            "query": "sum:cockroachdb.admission.wait.sum.sql_kv.response.count{$host,$store,$cluster,$node,$region}.as_rate()",
-                                            "data_source": "metrics",
-                                            "name": "query3"
-                                        },
-                                        {
-                                            "query": "sum:cockroachdb.admission.wait.sum.sql_sql.response.count{$host,$store,$cluster,$node,$region}.as_rate()",
-                                            "data_source": "metrics",
-                                            "name": "query4"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "purple",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 5,
-                            "y": 0,
-                            "width": 5,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 922315040936546,
-                        "definition": {
-                            "type": "note",
-                            "content": "This graph shows the latency when admitting operations to the work queues within the admission control system. There are lines for requests within the KV layer, write requests within the KV layer, responses between the KV and SQL layer, and responses within the SQL layer when receiving DistSQL responses. This graph shows the rate of latency within the work queues on each node.\n\nPositive admission delay rates may be an indicator that the cluster is having to throttle the current workload in order to remain operational.",
-                            "background_color": "yellow",
-                            "font_size": "14",
-                            "text_align": "left",
-                            "vertical_align": "center",
-                            "show_tick": true,
-                            "tick_pos": "50%",
-                            "tick_edge": "left",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 10,
-                            "y": 0,
-                            "width": 2,
-                            "height": 4
-                        }
+                      "formula": "query1"
                     }
-                ]
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.sql.conns{$store,$host,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
             },
             "layout": {
-                "x": 0,
-                "y": 17,
-                "width": 12,
-                "height": 5
+              "x": 4,
+              "y": 2,
+              "width": 2,
+              "height": 1
             }
-        },
-        {
-            "id": 6936793776790172,
+          },
+          {
+            "id": 6020863025887252,
             "definition": {
-                "title": "Backup Jobs",
-                "background_color": "blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 1951712127010452,
-                        "definition": {
-                            "title": "Scheduled Backups by Status",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Started",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "Succeeded",
-                                            "formula": "query2"
-                                        },
-                                        {
-                                            "alias": "Failed",
-                                            "formula": "query3"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:cockroachdb.schedules.backup.started.count{$region,$cluster,$node,$store,$host}.as_count()"
-                                        },
-                                        {
-                                            "name": "query2",
-                                            "data_source": "metrics",
-                                            "query": "sum:cockroachdb.schedules.backup.succeeded.count{$region,$cluster,$node,$store,$host}.as_count()"
-                                        },
-                                        {
-                                            "name": "query3",
-                                            "data_source": "metrics",
-                                            "query": "sum:cockroachdb.schedules.backup.failed.count{$region,$cluster,$node,$store,$host}.as_count()"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 6749913918399388,
-                        "definition": {
-                            "title": "Backup Jobs Idle vs Running",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Idle",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "Running",
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:cockroachdb.jobs.backup.currently_idle{$region,$cluster,$node,$store,$host}"
-                                        },
-                                        {
-                                            "name": "query2",
-                                            "data_source": "metrics",
-                                            "query": "sum:cockroachdb.jobs.backup.currently_running{$region,$cluster,$node,$store,$host}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 0,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 7864659143685208,
-                        "definition": {
-                            "title": "Backup Job Retry Errors",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Fail/Cancel Retry Errors",
-                                            "formula": "query5"
-                                        },
-                                        {
-                                            "alias": "Resume Retry Errors",
-                                            "formula": "query3"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query5",
-                                            "data_source": "metrics",
-                                            "query": "sum:cockroachdb.jobs.backup.fail_or_cancel_retry_error.count{$region,$cluster,$node,$store,$host}.as_count()"
-                                        },
-                                        {
-                                            "name": "query3",
-                                            "data_source": "metrics",
-                                            "query": "sum:cockroachdb.jobs.backup.resume_retry_error.count{$region,$cluster,$node,$store,$host}.as_count()"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 3,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 3309085939113140,
-                        "definition": {
-                            "title": "Backup Job Failures",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Resume Failures",
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query2",
-                                            "data_source": "metrics",
-                                            "query": "sum:cockroachdb.jobs.backup.resume_failed.count{$region,$cluster,$node,$store,$host}.as_count()"
-                                        },
-                                        {
-                                            "name": "query4",
-                                            "data_source": "metrics",
-                                            "query": "sum:cockroachdb.jobs.backup.fail_or_cancel_failed.count{$region,$cluster,$node,$store,$host}.as_count()"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 3,
-                            "width": 6,
-                            "height": 3
-                        }
-                    }
-                ]
+              "title": "Alerts",
+              "title_size": "13",
+              "title_align": "left",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": false,
+              "query": "metric:cockroachdb.* $store $host $cluster $node $region",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
             },
             "layout": {
-                "x": 0,
-                "y": 22,
-                "width": 12,
-                "height": 7
+              "x": 0,
+              "y": 3,
+              "width": 4,
+              "height": 3
             }
-        }
-    ],
-    "template_variables": [
-        {
-            "name": "region",
-            "prefix": "region",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "cluster",
-            "prefix": "cluster",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "node",
-            "prefix": "node",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "store",
-            "prefix": "store",
-            "available_values": [],
-            "default": "*"
-        },
-        {
-            "name": "host",
-            "prefix": "host",
-            "available_values": [],
-            "default": "*"
-        }
-    ],
-    "layout_type": "ordered",
-    "notify_list": [],
-    "reflow_type": "fixed",
-    "id": "ii2-cx8-5gy"
+          },
+          {
+            "id": 8974363951604526,
+            "definition": {
+              "title": "Available Capacity",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.capacity.available{$store,$host,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 4,
+              "y": 3,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 8376588921321148,
+            "definition": {
+              "title": "Avg. Node CPU Usage (%)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 * 100"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:cockroachdb.sys.cpu.combined.percent.normalized{$store,$host,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_unit": "%",
+              "precision": 2
+            },
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 8691970345518376,
+            "definition": {
+              "title": "Avg. Node Memory Usage (Bytes)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:cockroachdb.sys.rss{$store,$host,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 4,
+              "y": 5,
+              "width": 2,
+              "height": 1
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 7
+      }
+    },
+    {
+      "id": 8533260048455964,
+      "definition": {
+        "title": "SQL Latency",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7598242480084802,
+            "definition": {
+              "type": "note",
+              "content": "Nodes executed 99% of SQL statements within this time. This time only includes SELECT, INSERT, UPDATE and DELETE statements and does not include network latency between the node and client.",
+              "background_color": "yellow",
+              "font_size": "16",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 4951811637444188,
+            "definition": {
+              "title": "Service Latency: SQL Statements, 99th Percentile (ms)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 / 1000000"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "p99:cockroachdb.sql.service.latency{$host,$store,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 7,
+              "height": 3
+            }
+          },
+          {
+            "id": 1992826900855292,
+            "definition": {
+              "title": " ",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 / 1000000"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "p99:cockroachdb.sql.service.latency{$store,$host,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "percentile"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "custom_unit": "ms",
+              "precision": 2
+            },
+            "layout": {
+              "x": 10,
+              "y": 0,
+              "width": 2,
+              "height": 3
+            }
+          },
+          {
+            "id": 2691136264396718,
+            "definition": {
+              "type": "note",
+              "content": "Nodes executed 99% of transactions within this time.This time does not include network latency between the node and client.",
+              "background_color": "yellow",
+              "font_size": "16",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 6375983941304400,
+            "definition": {
+              "title": "Transaction Latency: 99th Percentile (ms)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 / 1000000"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "p99:cockroachdb.sql.txn.latency.bucket{$host,$store,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 3,
+              "width": 7,
+              "height": 3
+            }
+          },
+          {
+            "id": 5915700157674750,
+            "definition": {
+              "title": " ",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 / 1000000"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "p99:cockroachdb.sql.txn.latency{$store,$host,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "percentile"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "custom_unit": "ms",
+              "precision": 2
+            },
+            "layout": {
+              "x": 10,
+              "y": 3,
+              "width": 2,
+              "height": 3
+            }
+          },
+          {
+            "id": 2516390308198196,
+            "definition": {
+              "type": "note",
+              "content": "Nodes established and authenticated 99% of connections within this time.",
+              "background_color": "yellow",
+              "font_size": "16",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 6827499129241152,
+            "definition": {
+              "title": "Connection Latency: 99th Percentile (ms)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "default_zero(query1) / 1000000"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "p99:cockroachdb.sql.conn.latency{$store,$host,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 6,
+              "width": 7,
+              "height": 3
+            }
+          },
+          {
+            "id": 4398962085175410,
+            "definition": {
+              "title": " ",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 / 1000000"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "p99:cockroachdb.sql.conn.latency{$store,$host,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "percentile"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "custom_unit": "ms",
+              "precision": 2
+            },
+            "layout": {
+              "x": 10,
+              "y": 6,
+              "width": 2,
+              "height": 3
+            }
+          },
+          {
+            "id": 3441793203761396,
+            "definition": {
+              "type": "note",
+              "content": "To populate these widgets, 1) configure `histogram_buckets_as_distributions: true` in the `cockroachdb.d/conf.yaml` and 2) enable [Advanced Query Functionality](https://docs.datadoghq.com/metrics/distributions/#enabling-advanced-query-functionality): Go to the [Metrics Summary](/metric/summary) page and for each distribution metric, click `Advanced` > `Enable percentiles and threshold queries`.",
+              "background_color": "vivid_blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 5439704336861078,
+            "definition": {
+              "title": "Service Latency: SQL Statements, 99th Percentile (ms)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 / 1000000"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "p99:cockroachdb.sql.service.latency{$host,$store,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 7,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 7,
+        "width": 12,
+        "height": 14
+      }
+    },
+    {
+      "id": 6847880046439812,
+      "definition": {
+        "title": "SQL",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7977558114644004,
+            "definition": {
+              "title": "Open SQL Sessions",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "avg:cockroachdb.sql.conns{$host,$store,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 8387088883894436,
+            "definition": {
+              "title": "SQL Statements",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Inserts",
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.sql.insert.count{$store,$host,$cluster,$node,$region}.as_rate().rollup(sum, 30)",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "alias": "Selects",
+                      "formula": "query0"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.sql.select.count{$store,$host,$cluster,$node,$region}.as_rate().rollup(sum, 30)",
+                      "data_source": "metrics",
+                      "name": "query0"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "alias": "Updates",
+                      "formula": "query0"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.sql.update.count{$store,$host,$cluster,$node,$region}.as_rate().rollup(sum, 30)",
+                      "data_source": "metrics",
+                      "name": "query0"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "alias": "Deletes",
+                      "formula": "query0"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.sql.delete.count{$store,$host,$cluster,$node,$region}.as_rate().rollup(sum, 30)",
+                      "data_source": "metrics",
+                      "name": "query0"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7673446507943830,
+            "definition": {
+              "title": "SQL Statement Errors",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Errors",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.sql.failure.count{$host,$store,$cluster,$node,$region}.as_rate().rollup(sum, 30)",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 2229729034987790,
+            "definition": {
+              "title": "WoW SQL Errors Change",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "change",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "week_before(query1)"
+                    },
+                    {
+                      "formula": "query1",
+                      "alias": "Errors"
+                    }
+                  ],
+                  "order_by": "change",
+                  "order_dir": "desc",
+                  "compare_to": "hour_before",
+                  "response_format": "scalar",
+                  "show_present": true,
+                  "increase_good": false,
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.sql.failure.count{$host,$store,$cluster,$node,$region}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "change_type": "absolute"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 21,
+        "width": 12,
+        "height": 7
+      }
+    },
+    {
+      "id": 6591265783499330,
+      "definition": {
+        "title": "CPU & Memory",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8340626193460600,
+            "definition": {
+              "title": "Node CPU Usage (%)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 * 100"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.sys.cpu.combined.percent.normalized{$host,$store,$cluster,$node,$region} by {node}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 2666744055507272,
+            "definition": {
+              "title": "Node Memory Usage (Bytes)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.sys.rss{$host,$store,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 1925760011272712,
+            "definition": {
+              "title": "Cluster Memory Usage (Bytes)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Total Memory (RSS)",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Go Allocated",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Go Total",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "CGo Allocated",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "CGo Total",
+                      "formula": "query5"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.sys.rss{$host,$store,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:cockroachdb.sys.go.allocbytes{$host,$store,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:cockroachdb.sys.go.totalbytes{$host,$store,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    },
+                    {
+                      "query": "sum:cockroachdb.sys.cgo.allocbytes{$host,$store,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    },
+                    {
+                      "query": "sum:cockroachdb.sys.cgo.totalbytes{$host,$store,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query5"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 5,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 3407183437618004,
+      "definition": {
+        "title": "Storage",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 31802363661794,
+            "definition": {
+              "title": "Available Node Disk Capacity",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.capacity.available{$store,$host,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 744270196132394,
+            "definition": {
+              "title": "Storage Capacity (Bytes)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Max",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Available",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Used",
+                      "formula": "query3"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.capacity{$store,$host,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:cockroachdb.capacity.available{$store,$host,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:cockroachdb.capacity.used{$store,$host,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 87592881022260,
+            "definition": {
+              "title": "Live Bytes",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Live",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "System",
+                      "formula": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.livebytes{$store,$host,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:cockroachdb.sysbytes{$store,$host,$cluster,$node,$region}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 3445756485155866,
+      "definition": {
+        "title": "Replication & Admission Control",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6606630716516508,
+            "definition": {
+              "title": "Replicas per store",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.replicas.total{$store,$host,$cluster,$node,$region} by {store}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 5,
+              "height": 4
+            }
+          },
+          {
+            "id": 7569433224542696,
+            "definition": {
+              "title": "Admission Delay Rate (micros/sec)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "KV",
+                      "formula": "default_zero(query1)"
+                    },
+                    {
+                      "alias": "KV Write",
+                      "formula": "default_zero(query2)"
+                    },
+                    {
+                      "alias": "SQL-KV Response",
+                      "formula": "default_zero(query3)"
+                    },
+                    {
+                      "alias": "SQL-SQL Response",
+                      "formula": "default_zero(query4)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:cockroachdb.admission.wait.sum.kv.count{$host,$store,$cluster,$node,$region}.as_rate()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:cockroachdb.admission.wait.sum.kv_stores.count{$host,$store,$cluster,$node,$region}.as_rate()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:cockroachdb.admission.wait.sum.sql_kv.response.count{$host,$store,$cluster,$node,$region}.as_rate()",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    },
+                    {
+                      "query": "sum:cockroachdb.admission.wait.sum.sql_sql.response.count{$host,$store,$cluster,$node,$region}.as_rate()",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 5,
+              "y": 0,
+              "width": 5,
+              "height": 4
+            }
+          },
+          {
+            "id": 922315040936546,
+            "definition": {
+              "type": "note",
+              "content": "This graph shows the latency when admitting operations to the work queues within the admission control system. There are lines for requests within the KV layer, write requests within the KV layer, responses between the KV and SQL layer, and responses within the SQL layer when receiving DistSQL responses. This graph shows the rate of latency within the work queues on each node.\n\nPositive admission delay rates may be an indicator that the cluster is having to throttle the current workload in order to remain operational.",
+              "background_color": "yellow",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 10,
+              "y": 0,
+              "width": 2,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 10,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 5620009348475824,
+      "definition": {
+        "title": " ",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1 / 1000000"
+              }
+            ],
+            "response_format": "scalar",
+            "queries": [
+              {
+                "query": "p99:cockroachdb.sql.conn.latency{$store,$host,$cluster,$node,$region}",
+                "data_source": "metrics",
+                "name": "query1",
+                "aggregator": "percentile"
+              }
+            ]
+          }
+        ],
+        "autoscale": false,
+        "custom_unit": "ms",
+        "precision": 2
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 2,
+        "height": 3
+      }
+    },
+    {
+      "id": 7582096449033742,
+      "definition": {
+        "title": "Service Latency: SQL Statements, 99th Percentile (ms)",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1 / 1000000"
+              }
+            ],
+            "queries": [
+              {
+                "query": "p99:cockroachdb.sql.service.latency{$host,$store,$cluster,$node,$region}",
+                "data_source": "metrics",
+                "name": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "purple",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 2,
+        "y": 0,
+        "width": 7,
+        "height": 3
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "region",
+      "prefix": "region",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "cluster",
+      "prefix": "cluster",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "node",
+      "prefix": "node",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "store",
+      "prefix": "store",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "host",
+      "prefix": "host",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
 }

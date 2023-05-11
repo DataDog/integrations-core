@@ -318,11 +318,11 @@ instances:
         #
         # seen_samples_cache_maxsize: 10000
 
-        ## @param explain_parameterized_queries - boolean - optional - default: false
-        ## Note, this is a BETA feature. This option will enable the ability to explain parameterized queries.
+        ## @param explain_parameterized_queries - boolean - optional - default: true
+        ## This option will enable the ability to explain parameterized queries.
         ## This is useful if your SQL clients are using the extended query protocol or prepared statements.
         #
-        # explain_parameterized_queries: false
+        # explain_parameterized_queries: true
 
     ## Configure collection of query activity
     #
@@ -412,10 +412,12 @@ instances:
         #
         # deployment_type: flexible_server
 
-        ## @param name - string - optional - default: my-postgres-database
-        ## Equal to the name of the Azure PostgreSQL database.
+        ## @param fully_qualified_domain_name - string - optional - default: my-postgres-database.database.windows.net
+        ## Equal to the full qualified domain name of the Azure PostgreSQL database.
+        ##
+        ## This value is optional if the value of `host` is already configured to the fully qualified domain name.
         #
-        # name: my-postgres-database
+        # fully_qualified_domain_name: my-postgres-database.database.windows.net
 
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.

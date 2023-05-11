@@ -68,7 +68,7 @@ def dbm_instance(instance_complex):
         ),
     ],
 )
-def test_collect_activity(aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated):
+def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated):
     check = MySql(CHECK_NAME, {}, [dbm_instance])
 
     blocking_query = 'SELECT id FROM testdb.users FOR UPDATE'
@@ -398,7 +398,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     check._query_activity._job_loop_future.result()
     aggregator.assert_metric(
         "dd.mysql.async_job.inactive_stop",
-        tags=_expected_dbm_instance_tags(dbm_instance),
+        tags=_expected_dbm_job_err_tags(dbm_instance),
         hostname='',
     )
 
@@ -417,12 +417,18 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     # be created in the first place
     aggregator.assert_metric(
         "dd.mysql.async_job.cancel",
-        tags=_expected_dbm_instance_tags(dbm_instance),
+        tags=_expected_dbm_job_err_tags(dbm_instance),
     )
 
 
-def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance['tags'] + ['job:query-activity', 'port:{}'.format(PORT)]
+# the inactive job metrics are emitted from the main integrations
+# directly to metrics-intake, so they should also be properly tagged with a resource
+def _expected_dbm_job_err_tags(dbm_instance):
+    return dbm_instance['tags'] + [
+        'job:query-activity',
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:stubbed.hostname',
+    ]
 
 
 def _get_conn_for_user(user, _autocommit=False):

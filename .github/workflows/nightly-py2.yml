@@ -1,0 +1,26 @@
+name: Nightly Python 2 tests
+
+on:
+  schedule:
+  # 4 AM UTC
+  - cron: "0 4 * * *"
+
+jobs:
+  test:
+    uses: ./.github/workflows/test-all.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: true
+      test-py3: false
+    secrets: inherit
+
+  submit-traces:
+    needs:
+    - test
+    if: success() || failure()
+
+    uses: ./.github/workflows/submit-traces.yml
+    secrets: inherit

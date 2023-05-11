@@ -12,13 +12,16 @@
     "title": "Amazon EKS Anywhere",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::AWS",
+      "Category::Cloud",
       "Category::Containers",
+      "Category::Kubernetes",
+      "Category::Log Collection",
       "Category::Orchestration",
-      "Category::Log Collection"
+      "Category::Provisioning",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

@@ -275,6 +275,30 @@ External table indexes must be a subset of the indexes of the current table, or 
                 end: 6
     ```
 
+##### Mapping column to tag string value
+You can use the following syntax to map OID values to tag string values. In the example below, the submitted metrics will be `snmp.ifInOctets` with tags like `if_type:regular1822`. Available in Agent 7.45+.
+
+```yaml
+metrics:
+  - MIB: IP-MIB
+    table:
+      OID: 1.3.6.1.2.1.2.2
+      name: ifTable
+    symbols:
+      - OID: 1.3.6.1.2.1.2.2.1.10
+        name: ifInOctets
+    metric_tags:
+      - tag: if_type
+        column:
+          OID: 1.3.6.1.2.1.2.2.1.3
+          name: ifType
+        mapping:
+          1: other
+          2: regular1822
+          3: hdh1822
+          4: ddn-x25
+          29: ultra
+```
 
 ##### Using an index
 
@@ -353,6 +377,56 @@ metrics:
 
 See meaning of index as used here in [Using an index](#using-an-index) section.
 
+##### Formatting MAC Addresses
+
+If you see MAC Address in tags being encoded as `0x000000000000` instead of `00:00:00:00:00:00`,
+then you can use `format: mac_address` to format the MAC Address to `00:00:00:00:00:00` format.
+
+Example:
+
+```yaml
+metrics:
+  - MIB: MERAKI-CLOUD-CONTROLLER-MIB
+    table:
+      OID: 1.3.6.1.4.1.29671.1.1.4
+      name: devTable
+    symbols:
+      - OID: 1.3.6.1.4.1.29671.1.1.4.1.5
+        name: devClientCount
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.29671.1.1.4.1.1
+          name: devMac
+          format: mac_address
+        tag: mac_address
+```
+
+In this case, the metrics will be tagged with `mac_address:00:00:00:00:00:00`.
+
+##### Formatting IP Addresses
+
+If you see IP Address in tags being encoded as `0x0a430007` instead of `10.67.0.7`,
+then you can use `format: ip_address` to format the IP Address to `10.67.0.7` format.
+
+Example:
+
+```yaml
+metrics:
+  - MIB: MY-MIB
+    symbols:
+      - OID: 1.2.3.4.6.7.1.2
+        name: myOidSymbol
+    metric_tags:
+      - column:
+          OID: 1.2.3.4.6.7.1.3
+          name: oidValueWithIpAsBytes
+          format: ip_address
+        tag: connected_device
+```
+
+In this case, the metrics `snmp.myOidSymbol` will be tagged like this: `connected_device:10.67.0.7`.
+
+This `format: ip_address` formatter also works for IPv6 when the input bytes represent IPv6. 
 
 ##### Tagging tips
 
@@ -568,6 +642,12 @@ metric_tags:
     tags:
         device_type: \1
         host: \2
+  - # With value mapping
+    OID: 1.3.6.1.2.1.1.7
+    symbol: sysServices
+    mapping:
+      4: routing
+      72: application
 ```
 
 ### `metadata`

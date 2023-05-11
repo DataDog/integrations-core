@@ -12,11 +12,9 @@
     "title": "MapR",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
       "Category::Data Store",
-      "Category::OS & System",
-      "Category::Processing",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Supported OS::Linux"
     ]
   },
   "author": {
