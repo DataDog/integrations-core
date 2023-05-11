@@ -22,7 +22,7 @@ Follow the instructions below to enable and configure this check for an Agent. T
 
 #### Host
 
-1. Edit the `strimzi.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your strimzi performance data. See the [sample strimzi.d/conf.yaml][4] for all available configuration options.
+1. Edit the `strimzi.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Strimzi performance data. See the [sample strimzi.d/conf.yaml][4] for all available configuration options.
 
 **Note**: This check uses [OpenMetrics][10] for metric collection, which requires Python 3.
 
