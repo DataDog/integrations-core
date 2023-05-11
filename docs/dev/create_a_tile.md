@@ -38,7 +38,7 @@ The tile serves as a point of entry where customers can learn about your offerin
 
 To build a tile on the [**Integrations** page][103]:
 
-<div class="alert alert-warning">If you have already gone through the steps to create an Agent integration and have built out a scaffolding, you can skip directly to [completing the necessary integration asset files](#complete-the-necessary-integration-asset-files). 
+<div class="alert alert-warning">If you have already gone through the steps to create an Agent integration and have built out a scaffolding, you can skip directly to <a href="https://docs.datadoghq.com/developers/integrations/create_a_tile/#complete-the-necessary-integration-asset-files">completing the necessary integration asset files</a>. 
 </div>
 
 1. Create a `dd` directory:
@@ -103,7 +103,7 @@ For Datadog API integrations that will be available out-of-the-box on the [Integ
 
 To build a tile on the [**Marketplace** page][104]: 
 
-<div class="alert alert-warning">If you have already gone through the steps to create an Agent integration and have built out a scaffolding, you can skip directly to [completing the necessary integration asset files](#complete-the-necessary-integration-asset-files). 
+<div class="alert alert-warning">If you have already gone through the steps to create an Agent integration and have built out a scaffolding, you can skip directly to <a href="https://docs.datadoghq.com/developers/integrations/create_a_tile/#complete-the-necessary-integration-asset-files">completing the necessary integration asset files</a>. 
 </div>
 
 1. See [Build a Marketplace Offering][102] to request access to the [Marketplace repository][101].
