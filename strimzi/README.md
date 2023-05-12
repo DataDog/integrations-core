@@ -110,6 +110,8 @@ spec:
 ```
 **Note**: Template used as the basis for this example can be found [here][14].
 
+See the [sample strimzi.d/conf.yaml][4] for all available configuration options.
+
 #### Kafka and Zookeeper
 
 The Kafka and Zookeeper components of Strimzi can be monitored using the [Kafka][11] and [Zookeeper][12] checks, respectively. Kafka metrics are collected via JMX. For more information on enabling JMX, please refer to this [link][15]. Here's an example of how to configure the Kafka and Zookeeper checks using Pod annotations:
