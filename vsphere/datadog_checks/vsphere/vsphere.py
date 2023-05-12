@@ -629,9 +629,10 @@ class VSphereCheck(AgentCheck):
                 for ip_route in ip_routes:
                     prefix_length = ip_route.prefixLength
                     gateway_address = ip_route.gateway.ipAddress
+                    network = ip_route.network
                     # network
                     device = ip_route.gateway.device
-                    route_tags = [f'device:{device}', f'route_hostname:{host_name}']
+                    route_tags = [f'device:{device}', f'route_hostname:{host_name}', f'network_dest_ip:{network}']
                     if gateway_address is not None:
                         route_tags.append(f'gateway_address:{gateway_address}')
                     self.count(
