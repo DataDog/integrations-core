@@ -114,7 +114,7 @@ class Subscription(ABC):
 
     def disconnect(self):
         if self._sub is not None:
-            self._sub.close(sub_close_options=pymqi.CMQC.MQCO_KEEP_SUB, close_sub_queue=True)
+            self._sub.close(sub_close_options=pymqi.CMQC.MQCO_REMOVE_SUB, close_sub_queue=True)
             self._sub = None
 
     def _submit_health_status(self, status, tags, message=None):
