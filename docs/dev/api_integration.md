@@ -32,7 +32,7 @@ API integrations can send the following types of data to Datadog:
 - [Traces][6]
 - [Incidents][7]
 
-You can also include out-of-the-box assets such as [monitors][25], [dashboards][26], and [log pipelines][27] with your integration. When a user clicks **Install** on your integration tile, they are prompted to follow the setup instructions, and all out-of-the-box dashboards and recommended monitors packaged with your integration will appear in the their account.
+You can include out-of-the-box assets such as [monitors][25], [dashboards][26], and [log pipelines][27] with your Agent-based integration. When a user clicks **Install** on your integration tile, they are prompted to follow the setup instructions, and all out-of-the-box dashboards will appear in their account. Other assets, such as log pipelines, will appear for users after proper installation and configuration of the integration.
 
 To display your offering on the **Integrations** or **Marketplace page**, you need to create a tile (pictured below). This tile will include instructions on how to set up your offering, as well as general information on what the integration does and how to use it. 
 

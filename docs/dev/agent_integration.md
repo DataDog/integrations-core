@@ -40,7 +40,7 @@ The process to build an Agent-based integration looks like the following:
 2. Request a Datadog sandbox account for development through the Datadog Partner Network portal.
 3. Begin development of your integration, which includes writing the integration code on your end as well as building and installing a Python wheel (`.whl`).
 4. Test your integration in your Datadog sandbox account.
-5. Once your development work is tested and complete, follow the steps in [Create a Tile][20] to display your offering on the **Integrations** or **Marketplace** page.
+5. Once your development work is tested and complete, populate your tile assets by providing information like setup instructions, images, support information, and more that will make up your integration tile that's displayed on the **Integrations** or **Marketplace** page.
 6. Once your pull request is submitted and approved, the Datadog Technology Partner team will schedule a demo for a final review of your integration.
 7. You will have the option of testing the tile and integration in your Datadog sandbox account before publishing, or immediately publishing the integration for all customers.  
 
