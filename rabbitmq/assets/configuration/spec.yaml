@@ -53,8 +53,7 @@ files:
               You can also provide a query exactly as if you were making an HTTP request
               to this endpoint. For example, `detailed?family=queue_consumer_count`.
 
-              You can specify both this and the aggregated endpoint. In that case in case of name clashes
-              metrics from this endpoint will be preferred over the ones from the aggregated endpoint.
+              You can specify both this and the aggregated endpoint. If you specify both endpoints, metrics from the unaggregated endpoint are prioritized over metrics from the aggregated endpoint.
             value:
               type: string
               example: "detailed"

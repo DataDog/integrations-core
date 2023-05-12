@@ -38,7 +38,7 @@ Configure the `prometheus_plugin` section in your instance configuration. When u
        url: http://<HOST>:15692
  ```
 
- This enables scraping of the [`/metrics` endpoint][20] on one RabbitMQ node. We can also collect data from the [`/metrics/detailed` endpoint][22].
+ This enables scraping of the [`/metrics` endpoint][20] on one RabbitMQ node. Datadog can also collect data from the [`/metrics/detailed` endpoint][22].
 
  ```yaml
  instances:
@@ -177,14 +177,14 @@ Additional helpful documentation, links, and articles:
 ### Migrating to Prometheus Plugin
 
 The Prometheus Plugin exposes a different set of metrics from the Management Plugin.
-Here is what you should be aware of as you migrate from the Management to the Prometheus Plugin.
+Here is what to be aware of as you migrate from the Management to the Prometheus Plugin.
 
 - Look up your metrics in [this table][23]. If a metric's description contains an `[OpenMetricsV2]` tag, then it is available in the Prometheus Plugin. Metrics available only in the Management Plugin do not have any tags in their descriptions.
-- The old dashboards and monitors **will not work** anymore, please switch to the dashboards and monitors marked as *OpenMetrics Version*.
-- The default configuration collects aggregated metrics. This means, for example, that you won't see metrics tagged by queue. Configure the option `prometheus_plugin.unaggregated_endpoint` to get metrics without aggregation.
-- The `rabbitmq.status` service check is replaced by `rabbitmq.openmetrics.health` one. The service check `rabbit.aliveness` has no equivalent in the Prometheus Plugin, but it doesn't add much on top of the other checks.
+- Any dashboards and monitors using Management Plugin metrics do not function. Switch to the dashboards and monitors marked as *OpenMetrics Version*.
+- The default configuration collects aggregated metrics. This means, for example, that there are no metrics tagged by queue. Configure the option `prometheus_plugin.unaggregated_endpoint` to get metrics without aggregation.
+- The `rabbitmq.status` service check is replaced by `rabbitmq.openmetrics.health`. The service check `rabbit.aliveness` has no equivalent in the Prometheus Plugin.
 
-Some tags also changed in the Prometheus Plugin. The table below describes the changes to the more common tags.
+The Prometheus Plugin changes some tags. The table below describes the changes to the more common tags.
 
 | Management          | Prometheus                               |
 |:--------------------|:-----------------------------------------|
