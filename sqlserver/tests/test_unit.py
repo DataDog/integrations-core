@@ -253,7 +253,6 @@ def _mock_database_list():
     fetchall_results = [
         Row('master'),
         Row('tempdb'),
-        Row('model'),
         Row('msdb'),
         Row('AdventureWorks2017'),
         Row('CaseSensitive2018'),
@@ -271,7 +270,6 @@ def _mock_database_list_azure():
     fetchall_results = [
         Row('master', 'master'),
         Row('tempdb', 'tempdb'),
-        Row('model', 'model'),
         Row('msdb', 'msdb'),
         Row('AdventureWorks2017', 'fce04774'),
         Row('CaseSensitive2018', 'jub3j8kh'),

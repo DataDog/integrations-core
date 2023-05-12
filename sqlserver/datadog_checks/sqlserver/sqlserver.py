@@ -103,7 +103,7 @@ class SQLServer(AgentCheck):
         self.reported_hostname = self.instance.get('reported_hostname')
         self.autodiscovery = is_affirmative(self.instance.get('database_autodiscovery'))
         self.autodiscovery_include = self.instance.get('autodiscovery_include', ['.*'])
-        self.autodiscovery_exclude = self.instance.get('autodiscovery_exclude', [])
+        self.autodiscovery_exclude = self.instance.get('autodiscovery_exclude', ['model'])
         self.autodiscovery_db_service_check = is_affirmative(self.instance.get('autodiscovery_db_service_check', True))
         self.min_collection_interval = self.instance.get('min_collection_interval', 15)
         self._compile_patterns()
