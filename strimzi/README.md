@@ -58,7 +58,7 @@ spec:
             "strimzi": {
               "instances":[
                 {
-                  "topic_operator_endpoint": "http://%%host%%:8080/metrics"
+                  "cluster_operator_endpoint": "http://%%host%%:8080/metrics"
                 }
               ]
             }
