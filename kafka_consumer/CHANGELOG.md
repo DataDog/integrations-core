@@ -10,7 +10,7 @@
 * [Added] Implement regex for consumer_groups. See [#14382](https://github.com/DataDog/integrations-core/pull/14382).
 * [Changed] Revamp Kafka consumer check. See [#13918](https://github.com/DataDog/integrations-core/pull/13918).
 
-## 2.16.4 / 2023-03-03
+## 2.16.4 / 2023-03-03 / Agent 7.44.0
 
 * [Fixed] Do not install gssapi and dtrace on py2 on arm macs. See [#13749](https://github.com/DataDog/integrations-core/pull/13749).
 

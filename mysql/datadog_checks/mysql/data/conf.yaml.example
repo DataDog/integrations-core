@@ -492,10 +492,12 @@ instances:
         #
         # deployment_type: flexible_server
 
-        ## @param name - string - optional - default: mysql-database
-        ## Equal to the name of the Azure MySQL database instance.
+        ## @param fully_qualified_domain_name - string - optional - default: mysql-database.database.windows.net
+        ## Equal to the full qualified domain name of the Azure MySQL database.
+        ##
+        ## This value is optional if the value of `host` is already configured to the fully qualified domain name.
         #
-        # name: mysql-database
+        # fully_qualified_domain_name: mysql-database.database.windows.net
 
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.

@@ -123,7 +123,7 @@
     `promhttp_metric_handler_requests`. This submits to Datadog the metric name appended with `.count`.
     For more information, see:
     https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
-    
+
     Regular expressions may be used to match the exposed metric names, for example:
 
       extra_metrics:
@@ -222,6 +222,12 @@
     the health of the `openmetrics_endpoint`.
   value:
     example: true
+    type: boolean
+- name: ignore_connection_errors
+  description: |
+    Whether or not to ignore connection errors when scraping `openmetrics_endpoint`.
+  value:
+    example: false
     type: boolean
 - name: hostname_label
   description: |
@@ -343,7 +349,9 @@
     type: boolean
 - name: use_latest_spec
   description: |
-    Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
+    Whether or not the parser will strictly adhere to the OpenMetrics specification,
+    regardless of the received `Content-Type` header.
+  hidden: true
   value:
     example: false
     type: boolean

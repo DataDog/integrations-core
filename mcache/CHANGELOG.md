@@ -1,6 +1,6 @@
 # CHANGELOG - mcache
 
-## 3.3.1 / 2023-03-03
+## 3.3.1 / 2023-03-03 / Agent 7.44.0
 
 * [Fixed] Remove the use of the deprecated `pkg_resources` package. See [#13842](https://github.com/DataDog/integrations-core/pull/13842).
 
