@@ -221,41 +221,85 @@ def test_statement_metrics(
 
 
 @pytest.mark.parametrize(
-    "cloud_metadata",
+    "input_cloud_metadata,output_cloud_metadata",
     [
-        {},
-        {
-            'azure': {
-                'deployment_type': 'flexible_server',
-                'name': 'test-server',
+        ({}, {}),
+        (
+            {
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'name': 'test-server.database.windows.net',
+                },
             },
-        },
-        {
-            'aws': {
-                'instance_endpoint': 'foo.aws.com',
+            {
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'name': 'test-server.database.windows.net',
+                },
             },
-            'azure': {
-                'deployment_type': 'flexible_server',
-                'name': 'test-server',
+        ),
+        (
+            {
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'fully_qualified_domain_name': 'test-server.database.windows.net',
+                },
             },
-        },
-        {
-            'gcp': {
-                'project_id': 'foo-project',
-                'instance_id': 'bar',
-                'extra_field': 'included',
+            {
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'name': 'test-server.database.windows.net',
+                },
             },
-        },
+        ),
+        (
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'name': 'test-server.database.windows.net',
+                },
+            },
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'name': 'test-server.database.windows.net',
+                },
+            },
+        ),
+        (
+            {
+                'gcp': {
+                    'project_id': 'foo-project',
+                    'instance_id': 'bar',
+                    'extra_field': 'included',
+                },
+            },
+            {
+                'gcp': {
+                    'project_id': 'foo-project',
+                    'instance_id': 'bar',
+                    'extra_field': 'included',
+                },
+            },
+        ),
     ],
 )
-def test_statement_metrics_cloud_metadata(aggregator, integration_check, dbm_instance, cloud_metadata, datadog_agent):
+def test_statement_metrics_cloud_metadata(
+    aggregator, integration_check, dbm_instance, input_cloud_metadata, output_cloud_metadata, datadog_agent
+):
     dbm_instance['pg_stat_statements_view'] = "pg_stat_statements"
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     # very low collection interval for test purposes
     dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
-    if cloud_metadata:
-        for k, v in cloud_metadata.items():
+    if input_cloud_metadata:
+        for k, v in input_cloud_metadata.items():
             dbm_instance[k] = v
     connections = {}
 
@@ -283,7 +327,7 @@ def test_statement_metrics_cloud_metadata(aggregator, integration_check, dbm_ins
     assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
-    assert event['cloud_metadata'] == cloud_metadata, "wrong cloud_metadata"
+    assert event['cloud_metadata'] == output_cloud_metadata, "wrong cloud_metadata"
 
     for conn in connections.values():
         conn.close()
@@ -455,6 +499,7 @@ def test_failed_explain_handling(
     dbname = "datadog_test"
     # Don't need metrics for this one
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_samples']['explain_parameterized_queries'] = False
     if explain_function_override:
         dbm_instance['query_samples']['explain_function'] = explain_function_override
     check = integration_check(dbm_instance)
@@ -1192,6 +1237,7 @@ def test_statement_run_explain_errors(
 ):
     dbm_instance['query_activity']['enabled'] = False
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_samples']['explain_parameterized_queries'] = False
     check = integration_check(dbm_instance)
     check._connect()
 

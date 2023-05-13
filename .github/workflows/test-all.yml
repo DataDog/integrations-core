@@ -1132,10 +1132,10 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
-  j0860f26:
+  j4f2c848:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: fluentd
+      job-name: Fluentd
       target: fluentd
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2519,10 +2519,10 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
-  je00811b:
+  j5987374:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: pulsar
+      job-name: Pulsar
       target: pulsar
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -3279,10 +3279,10 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
-  j72589e8:
+  j70c9219:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Win32
+      job-name: Windows Event Log
       target: win32_event_log
       platform: windows
       runner: '["windows-2022"]'
