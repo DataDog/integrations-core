@@ -17,7 +17,7 @@ def test_exception(aggregator, dd_run_check, instance, caplog, monkeypatch):
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    assert 'Exception while reporting identity metrics' in caplog.text
+    assert 'Exception while reporting identity response time' in caplog.text
 
 
 def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
@@ -70,6 +70,42 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
             'keystone_server:{}'.format(instance["keystone_server_url"]),
         ],
     )
+
+
+def test_auth_error(aggregator, dd_run_check, instance, caplog, monkeypatch):
+    http = MockHttp(
+        "agent-integrations-openstack-default", defaults={'identity/v3/auth/tokens/unscoped': MockResponse(status_code=500)}
+    )
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    assert 'HTTPError while authenticating user unscoped' in caplog.text
+
+
+def test_auth_domain_error(aggregator, dd_run_check, instance, caplog, monkeypatch):
+    http = MockHttp(
+        "agent-integrations-openstack-default", defaults={'identity/v3/auth/tokens/domain': MockResponse(status_code=500)}
+    )
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    assert 'HTTPError while authenticating domain scoped' in caplog.text
+
+
+def test_auth_project_error(aggregator, dd_run_check, instance, caplog, monkeypatch):
+    http = MockHttp(
+        "agent-integrations-openstack-default", defaults={'identity/v3/auth/tokens/project': MockResponse(status_code=500)}
+    )
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    assert 'HTTPError while authenticating project scoped' in caplog.text
 
 
 def test_domains_metrics(aggregator, dd_run_check, instance, monkeypatch):

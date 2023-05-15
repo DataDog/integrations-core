@@ -496,6 +496,8 @@ class MockHttp:
             data = json.loads(kwargs['data'])
             project_id = data.get('auth', {}).get('scope', {}).get('project', {}).get('id')
             if project_id:
+                if self._defaults and f'{subpath}/project' in self._defaults:
+                    return self._defaults[f'{subpath}/project']
                 file_path = os.path.join(
                     get_here(),
                     'fixtures',
@@ -508,6 +510,8 @@ class MockHttp:
             else:
                 domain_id = data.get('auth', {}).get('scope', {}).get('domain', {}).get('id')
                 if domain_id:
+                    if self._defaults and f'{subpath}/domain' in self._defaults:
+                        return self._defaults[f'{subpath}/domain']
                     file_path = os.path.join(
                         get_here(),
                         'fixtures',
@@ -518,6 +522,8 @@ class MockHttp:
                     )
                     headers = {'X-Subject-Token': f'token_{domain_id}'}
                 else:
+                    if self._defaults and f'{subpath}/unscoped' in self._defaults:
+                        return self._defaults[f'{subpath}/unscoped']
                     file_path = os.path.join(
                         get_here(),
                         'fixtures',
@@ -534,6 +540,7 @@ class MockHttp:
                 self._host,
                 microversion_path,
                 subpath,
+                'post.json',
             )
         response = MockResponse(file_path=file_path, status_code=200).json()
         if self._replace and subpath in self._replace:

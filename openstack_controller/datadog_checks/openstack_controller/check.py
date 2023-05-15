@@ -243,40 +243,78 @@ class OpenStackControllerCheck(AgentCheck):
         ] + self.instance.get('tags', [])
         api = make_api(self.config, self.log, self.http)
         self.gauge("openstack.controller", 1, tags=tags)
-        self._report_metrics(api, tags)
+        if self._report_identity_response_time(api, tags):
+            if self._authenticate_user(api, tags):
+                self._report_metrics(api, tags)
+
+    def _authenticate_user(self, api, tags):
+        self.log.debug("authenticating user unscoped")
+        try:
+            api.post_auth_unscoped()
+            self.log.debug("authentication ok")
+            return True
+        except HTTPError as e:
+            self.warning(e)
+            self.log.error("HTTPError while authenticating user unscoped: %s", e)
+        except Exception as e:
+            self.warning("Exception while authenticating user unscoped: %s", e)
+        return False
 
     def _report_metrics(self, api, tags):
-        api.post_auth_domain(self.config.domain_id)
-        if self._report_identity_metrics(api, tags):
+        auth_projects = api.get_auth_projects()
+        self.log.debug("auth_projects: %s", auth_projects)
+        reported_global_metrics = False
+        if self._authenticate_domain(api):
+            self._report_identity_metrics(api, tags)
             self._report_domain_metrics(api, tags + ['domain_id:{}'.format(self.config.domain_id)])
-            auth_projects = api.get_auth_projects()
-            self.log.debug("auth_projects: %s", auth_projects)
-            for project in auth_projects:
+            reported_global_metrics = True
+        for project in auth_projects:
+            if self._authenticate_project(api, project):
+                if not reported_global_metrics:
+                    self._report_identity_metrics(api, tags)
+                    self._report_domain_metrics(api, tags + ['domain_id:{}'.format(self.config.domain_id)])
+                    reported_global_metrics = True
                 self._report_project_metrics(api, project, tags + ['domain_id:{}'.format(self.config.domain_id)])
+
+    def _authenticate_domain(self, api):
+        self.log.debug("authenticating user domain scope")
+        try:
+            api.post_auth_domain(self.config.domain_id)
+            self.log.debug("authentication ok")
+            return True
+        except HTTPError as e:
+            self.log.error("HTTPError while authenticating domain scoped: %s", e)
+        except Exception as e:
+            self.warning("Exception while authenticating domain scoped: %s", e)
+        return False
 
     def _report_identity_metrics(self, api, tags):
         try:
-            self._report_identity_response_time(api, tags)
             self._report_identity_domains(api, tags)
             self._report_identity_projects(api, tags)
             self._report_identity_users(api, tags)
             self._report_identity_groups(api, tags)
             self._report_identity_services(api, tags)
             self._report_identity_limits(api, tags)
+        except HTTPError as e:
+            self.log.error("HTTPError while reporting identity metrics: %s", e)
+        except Exception as e:
+            self.warning("Exception while reporting identity metrics: %s", e)
+
+    def _report_identity_response_time(self, api, tags):
+        try:
+            response_time = api.get_identity_response_time()
+            self.log.debug("identity response time: %s", response_time)
+            self.gauge('openstack.keystone.response_time', response_time, tags=tags)
+            self.service_check(KEYSTONE_SERVICE_CHECK, AgentCheck.OK, tags=tags)
             return True
         except HTTPError as e:
             self.warning(e)
-            self.log.error("HTTPError while reporting identity metrics: %s", e)
+            self.log.error("HTTPError while reporting identity response time: %s", e)
             self.service_check(KEYSTONE_SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
         except Exception as e:
-            self.warning("Exception while reporting identity metrics: %s", e)
+            self.warning("Exception while reporting identity response time: %s", e)
         return False
-
-    def _report_identity_response_time(self, api, tags):
-        response_time = api.get_identity_response_time()
-        self.log.debug("identity response time: %s", response_time)
-        self.gauge('openstack.keystone.response_time', response_time, tags=tags)
-        self.service_check(KEYSTONE_SERVICE_CHECK, AgentCheck.OK, tags=tags)
 
     def _report_identity_domains(self, api, tags):
         identity_domains = api.get_identity_domains()
@@ -413,10 +451,21 @@ class OpenStackControllerCheck(AgentCheck):
         self._report_baremetal_domain_metrics(api, tags)
         self._report_load_balancer_domain_metrics(api, tags)
 
+    def _authenticate_project(self, api, project):
+        self.log.debug("authenticating user project scope")
+        try:
+            api.post_auth_project(project.get('id'))
+            self.log.debug("authentication ok")
+            return True
+        except HTTPError as e:
+            self.log.error("HTTPError while authenticating project scoped: %s", e)
+        except Exception as e:
+            self.warning("Exception while authenticating project scoped: %s", e)
+        return False
+
     def _report_project_metrics(self, api, project, tags):
         project_id = project.get('id')
         project_name = project.get('name')
-        api.post_auth_project(project_id)
         self.log.debug("reporting metrics from project: [id:%s][name:%s]", project_id, project_name)
         project_tags = _create_project_tags(project)
         self._report_compute_project_metrics(api, project_id, tags + project_tags)

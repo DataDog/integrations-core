@@ -29,13 +29,9 @@ class ApiRest(Api):
         self.config = config
         self.http = http
         self._identity_component = IdentityRest(self.log, self.http, '{}/v3'.format(self.config.keystone_server_url))
-        self.auth_projects = {}
-        self.auth_domain_id_tokens = {}
-        self.auth_project_tokens = {}
-        self.project_endpoints = {}
-        self.domain_endpoints = {}
-        self.domain_components = {}
-        self.project_components = {}
+        self._catalog = {}
+        self._components = {}
+        self._endpoints = {}
         self._add_microversion_headers()
 
     def _add_microversion_headers(self):
@@ -102,8 +98,17 @@ class ApiRest(Api):
 
     def get_auth_projects(self):
         self.log.debug("getting auth projects")
-        self._get_auth_projects()
-        return [{'id': project_id, 'name': project_name} for project_id, project_name in self.auth_projects.items()]
+        url = '{}/v3/auth/projects'.format(self.config.keystone_server_url)
+        self.log.debug("GET %s", url)
+        response = self.http.get('{}/v3/auth/projects'.format(self.config.keystone_server_url))
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        json_resp = response.json()
+        auth_projects = {}
+        for project in json_resp['projects']:
+            auth_projects[project['id']] = project['name']
+        self.log.debug("auth_projects: %s", auth_projects)
+        return [{'id': project_id, 'name': project_name} for project_id, project_name in auth_projects.items()]
 
     def get_compute_response_time(self):
         self.log.debug("getting compute response time")
@@ -121,7 +126,7 @@ class ApiRest(Api):
 
     def get_block_storage_response_time(self, project_id):
         self.log.debug("getting block-storage response time")
-        component = self._get_component(ComponentType.BLOCK_STORAGE, project_id=project_id)
+        component = self._get_component(ComponentType.BLOCK_STORAGE)
         if component:
             return component.get_response_time(project_id)
         return None
@@ -142,91 +147,91 @@ class ApiRest(Api):
 
     def get_load_balancer_loadbalancers(self, project_id):
         self.log.debug("getting load-balancer loadbalancers")
-        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
+        component = self._get_component(ComponentType.LOAD_BALANCER)
         if component:
             return component.get_loadbalancers(project_id)
         return None
 
     def get_load_balancer_listeners(self, project_id):
         self.log.debug("getting load-balancer listeners")
-        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
+        component = self._get_component(ComponentType.LOAD_BALANCER)
         if component:
             return component.get_listeners(project_id)
         return None
 
     def get_load_balancer_pools(self, project_id):
         self.log.debug("getting load-balancer pools")
-        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
+        component = self._get_component(ComponentType.LOAD_BALANCER)
         if component:
             return component.get_pools(project_id)
         return None
 
     def get_load_balancer_members_by_pool(self, project_id, pool_id):
         self.log.debug("getting load-balancer members by pool")
-        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
+        component = self._get_component(ComponentType.LOAD_BALANCER)
         if component:
             return component.get_members_by_pool(pool_id, project_id)
         return None
 
     def get_load_balancer_healthmonitors(self, project_id):
         self.log.debug("getting load-balancer healthmonitors")
-        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
+        component = self._get_component(ComponentType.LOAD_BALANCER)
         if component:
             return component.get_healthmonitors(project_id)
         return None
 
     def get_load_balancer_loadbalancer_statistics(self, project_id, loadbalancer_id):
         self.log.debug("getting load-balancer loadbalancer statistics")
-        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
+        component = self._get_component(ComponentType.LOAD_BALANCER)
         if component:
             return component.get_loadbalancer_statistics(loadbalancer_id)
         return None
 
     def get_load_balancer_listener_statistics(self, project_id, listener_id):
         self.log.debug("getting load-balancer listener statistics")
-        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
+        component = self._get_component(ComponentType.LOAD_BALANCER)
         if component:
             return component.get_listener_statistics(listener_id)
         return None
 
     def get_load_balancer_listeners_by_loadbalancer(self, project_id, loadbalancer_id):
         self.log.debug("getting load-balancer listeners by loadbalancer")
-        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
+        component = self._get_component(ComponentType.LOAD_BALANCER)
         if component:
             return component.get_listeners_by_loadbalancer(loadbalancer_id, project_id)
         return None
 
     def get_load_balancer_pools_by_loadbalancer(self, project_id, loadbalancer_id):
         self.log.debug("getting load-balancer pools by loadbalancer")
-        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
+        component = self._get_component(ComponentType.LOAD_BALANCER)
         if component:
             return component.get_pools_by_loadbalancer(loadbalancer_id, project_id)
         return None
 
     def get_load_balancer_healthmonitors_by_pool(self, project_id, pool_id):
         self.log.debug("getting load-balancer healthmonitors by pool")
-        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
+        component = self._get_component(ComponentType.LOAD_BALANCER)
         if component:
             return component.get_healthmonitors_by_pool(pool_id, project_id)
         return None
 
     def get_load_balancer_amphorae(self, project_id):
         self.log.debug("getting load-balancer amphorae")
-        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
+        component = self._get_component(ComponentType.LOAD_BALANCER)
         if component:
             return component.get_amphorae()
         return None
 
     def get_load_balancer_amphorae_by_loadbalancer(self, project_id, loadbalancer_id):
         self.log.debug("getting load-balancer amphorae by loadbalancer")
-        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
+        component = self._get_component(ComponentType.LOAD_BALANCER)
         if component:
             return component.get_amphorae_by_loadbalancer(loadbalancer_id)
         return None
 
     def get_load_balancer_amphora_statistics(self, project_id, amphora_id):
         self.log.debug("getting load-balancer amphora statistics")
-        component = self._get_component(ComponentType.LOAD_BALANCER, project_id=project_id)
+        component = self._get_component(ComponentType.LOAD_BALANCER)
         if component:
             return component.get_amphora_statistics(amphora_id)
         return None
@@ -240,7 +245,7 @@ class ApiRest(Api):
 
     def get_compute_quota_set(self, project_id):
         self.log.debug("getting compute quotas")
-        component = self._get_component(ComponentType.COMPUTE, project_id=project_id)
+        component = self._get_component(ComponentType.COMPUTE)
         if component:
             return component.get_quota_set(project_id)
         return None
@@ -254,7 +259,7 @@ class ApiRest(Api):
 
     def get_compute_servers(self, project_id):
         self.log.debug("getting compute servers")
-        component = self._get_component(ComponentType.COMPUTE, project_id=project_id)
+        component = self._get_component(ComponentType.COMPUTE)
         if component:
             return component.get_servers(project_id)
         return None
@@ -282,7 +287,7 @@ class ApiRest(Api):
 
     def get_network_quotas(self, project_id):
         self.log.debug("getting network quotas")
-        component = self._get_component(ComponentType.NETWORK, project_id=project_id)
+        component = self._get_component(ComponentType.NETWORK)
         if component:
             return component.get_quotas(project_id)
         return None
@@ -313,116 +318,78 @@ class ApiRest(Api):
             return component.get_agents()
         return None
 
-    def post_auth_domain(self, domain_id):
-        if domain_id not in self.auth_domain_id_tokens:
-            data = (
-                '{{"auth": {{"identity": {{"methods": ["password"], '
-                '"password": {{"user": {}}}}}, '
-                '"scope": {{"domain": {{"id": "{}"}}}}}}}}'.format(
-                    json.dumps(self.config.user),
-                    domain_id,
-                )
+    def post_auth_unscoped(self):
+        data = (
+            '{{"auth": {{"identity": {{"methods": ["password"], '
+            '"password": {{"user": {}}}}}}}}}'.format(
+                json.dumps(self.config.user)
             )
-            url = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
-            self.log.debug("POST %s data: %s", url, data)
-            response = self.http.post('{}/v3/auth/tokens'.format(self.config.keystone_server_url), data=data)
-            self.log.debug("response: %s", response.json())
-            self.auth_domain_id_tokens[domain_id] = {
-                'auth_token': response.headers['X-Subject-Token'],
-                'catalog': response.json()['token']['catalog'],
-            }
-        self.http.options['headers']['X-Auth-Token'] = self.auth_domain_id_tokens[domain_id]['auth_token']
-
-    def _get_auth_projects(self):
-        self.log.debug("getting auth/projects")
-        url = '{}/v3/auth/projects'.format(self.config.keystone_server_url)
-        self.log.debug("GET %s", url)
-        response = self.http.get('{}/v3/auth/projects'.format(self.config.keystone_server_url))
+        )
+        url = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
+        self.log.debug("POST %s data: %s", url, data)
+        response = self.http.post('{}/v3/auth/tokens'.format(self.config.keystone_server_url), data=data)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
-        json_resp = response.json()
-        for project in json_resp['projects']:
-            self.auth_projects[project['id']] = project['name']
-        self.log.debug("auth_projects: %s", self.auth_projects)
+        self.http.options['headers']['X-Auth-Token'] = response.headers['X-Subject-Token']
+
+    def post_auth_domain(self, domain_id):
+        data = (
+            '{{"auth": {{"identity": {{"methods": ["password"], '
+            '"password": {{"user": {}}}}}, '
+            '"scope": {{"domain": {{"id": "{}"}}}}}}}}'.format(
+                json.dumps(self.config.user),
+                domain_id,
+            )
+        )
+        url = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
+        self.log.debug("POST %s data: %s", url, data)
+        response = self.http.post('{}/v3/auth/tokens'.format(self.config.keystone_server_url), data=data)
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        self._catalog = response.json()['token']['catalog']
+        self.http.options['headers']['X-Auth-Token'] = response.headers['X-Subject-Token']
 
     def post_auth_project(self, project_id):
-        if project_id not in self.auth_project_tokens:
-            data = (
-                '{{"auth": {{"identity": {{"methods": ["password"], '
-                '"password": {{"user": {}}}}}, '
-                '"scope": {{"project": {{"id": "{}"}}}}}}}}'.format(
-                    json.dumps(self.config.user),
-                    project_id,
-                )
+        self._catalog = {}
+        self._components = {}
+        self._endpoints = {}
+        data = (
+            '{{"auth": {{"identity": {{"methods": ["password"], '
+            '"password": {{"user": {}}}}}, '
+            '"scope": {{"project": {{"id": "{}"}}}}}}}}'.format(
+                json.dumps(self.config.user),
+                project_id,
             )
-            url = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
-            self.log.debug("POST %s data: %s", url, data)
-            response = self.http.post('{}/v3/auth/tokens'.format(self.config.keystone_server_url), data=data)
-            self.log.debug("response: %s", response.json())
-            self.auth_project_tokens[project_id] = {
-                'auth_token': response.headers['X-Subject-Token'],
-                'catalog': response.json()['token']['catalog'],
-            }
-        self.http.options['headers']['X-Auth-Token'] = self.auth_project_tokens[project_id]['auth_token']
+        )
+        url = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
+        self.log.debug("POST %s data: %s", url, data)
+        response = self.http.post('{}/v3/auth/tokens'.format(self.config.keystone_server_url), data=data)
+        response.raise_for_status()
+        self.log.debug("response: %s", response.json())
+        self._catalog = response.json()['token']['catalog']
+        self.http.options['headers']['X-Auth-Token'] = response.headers['X-Subject-Token']
 
-    def _get_component(self, endpoint_type, project_id=None):
-        if project_id is not None:
-            if project_id in self.project_components:
-                if endpoint_type in self.project_components[project_id]:
-                    self.log.debug("cached component of type %s", endpoint_type)
-                    return self.project_components[project_id][endpoint_type]
-            else:
-                self.project_components[project_id] = {}
-            endpoint = self._get_endpoint(endpoint_type, project_id=project_id)
-            if endpoint:
-                self.project_components[project_id][endpoint_type] = self._make_component(endpoint_type, endpoint)
-                return self.project_components[project_id][endpoint_type]
-            return None
-        else:
-            if self.config.domain_id in self.domain_components:
-                if endpoint_type in self.domain_components[self.config.domain_id]:
-                    self.log.debug("cached component of type %s", endpoint_type)
-                    return self.domain_components[self.config.domain_id][endpoint_type]
-            else:
-                self.domain_components[self.config.domain_id] = {}
-            endpoint = self._get_endpoint(endpoint_type)
-            if endpoint:
-                self.domain_components[self.config.domain_id][endpoint_type] = self._make_component(
-                    endpoint_type, endpoint
-                )
-                return self.domain_components[self.config.domain_id][endpoint_type]
-            return None
+    def _get_component(self, endpoint_type):
+        if endpoint_type in self._components:
+            self.log.debug("cached component of type %s", endpoint_type)
+            return self._components[endpoint_type]
+        endpoint = self._get_endpoint(endpoint_type)
+        if endpoint:
+            self._components[endpoint_type] = self._make_component(endpoint_type, endpoint)
+            return self._components[endpoint_type]
+        return None
 
-    def _get_endpoint(self, endpoint_type, project_id=None):
-        if project_id is not None:
-            if project_id in self.project_endpoints:
-                if endpoint_type in self.project_endpoints[project_id]:
-                    self.log.debug("cached endpoint of type %s", endpoint_type)
-                    return self.project_endpoints[project_id][endpoint_type]
-            else:
-                self.project_endpoints[project_id] = {}
-            for item in self.auth_project_tokens[project_id]['catalog']:
-                if item['type'] == endpoint_type:
-                    for endpoint in item['endpoints']:
-                        if endpoint['interface'] == 'public':
-                            self.project_endpoints[project_id][endpoint_type] = endpoint['url']
-                            return self.project_endpoints[project_id][endpoint_type]
-            return None
-        else:
-            if self.config.domain_id in self.domain_endpoints:
-                if endpoint_type in self.domain_endpoints[self.config.domain_id]:
-                    self.log.debug("cached endpoint of type %s", endpoint_type)
-                    return self.domain_endpoints[self.config.domain_id][endpoint_type]
-            else:
-                self.project_endpoints[self.config.domain_id] = {}
-
-            for item in self.auth_domain_id_tokens[self.config.domain_id]['catalog']:
-                if item['type'] == endpoint_type:
-                    for endpoint in item['endpoints']:
-                        if endpoint['interface'] == 'public':
-                            self.auth_domain_id_tokens[self.config.domain_id][endpoint_type] = endpoint['url']
-                            return self.auth_domain_id_tokens[self.config.domain_id][endpoint_type]
-            return None
+    def _get_endpoint(self, endpoint_type):
+        if endpoint_type in self._endpoints:
+            self.log.debug("cached endpoint of type %s", endpoint_type)
+            return self._endpoints[endpoint_type]
+        for item in self._catalog:
+            if item['type'] == endpoint_type:
+                for endpoint in item['endpoints']:
+                    if endpoint['interface'] == 'public':
+                        self._endpoints[endpoint_type] = endpoint['url']
+                        return self._endpoints[endpoint_type]
+        return None
 
     def _make_component(self, endpoint_type, endpoint):
         if endpoint_type == ComponentType.COMPUTE:
