@@ -270,7 +270,7 @@ class ESCheck(AgentCheck):
                     '.deprecation',
                 )
             ):
-               template_resp.pop(idx)
+                template_resp.pop(idx)
 
         for metric, desc in iteritems(TEMPLATE_METRICS):
             self._process_metric({'templates': template_resp}, metric, *desc, tags=base_tags)

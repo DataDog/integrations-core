@@ -763,6 +763,7 @@ TEMPLATE_METRICS = {
     'elasticsearch.templates.count': ('gauge', 'templates', lambda templates: len(templates)),
 }
 
+
 def stats_for_version(version, jvm_rate=False):
     """
     Get the proper set of stats metrics for the specified ES version
