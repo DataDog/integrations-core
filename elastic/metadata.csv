@@ -22,6 +22,7 @@ elasticsearch.cache.filter.size,gauge,,byte,,The size of the filter cache [pre 2
 elasticsearch.cluster_status,gauge,,,,"The elasticsearch cluster health as a number: red = 0, yellow = 1, green = 2",0,elasticsearch,cluster status,
 elasticsearch.docs.count,gauge,,document,,The total number of documents in the cluster across all shards.,0,elasticsearch,docs count,
 elasticsearch.docs.deleted,gauge,,document,,The total number of documents deleted from the cluster across all shards.,0,elasticsearch,docs deleted,
+elasticsearch.templates.count,gauge,,document,,The total number of templates in the cluster.,0,elasticsearch,templates count,
 elasticsearch.disk.avail,gauge,,byte,,The free disk space available to Elasticsearch.,0,elasticsearch,disk avail,
 elasticsearch.disk.indices,gauge,,byte,,The disk space used by the node's shards.,0,elasticsearch,disk indices,
 elasticsearch.disk.percent,gauge,,percent,,The total percentage of disk space in use. Calculated as disk.used / disk.total.,0,elasticsearch,disk percent,
