@@ -1468,6 +1468,7 @@ def test_probe_metrics(monkeypatch, aggregator, tagger):
         ['kube_container_name:kubedns', 'kube_namespace:kube-system', 'pod_name:kube-dns-c598bd956-wgf4n'],
     )
 
+
 @pytest.fixture()
 def mock_request():
     with requests_mock.Mocker() as m:
