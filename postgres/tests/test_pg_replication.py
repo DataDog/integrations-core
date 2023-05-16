@@ -104,7 +104,7 @@ def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_i
     replica_cur.fetchall()
 
     with _get_superconn(pg_instance) as conn:
-        conn.autocommit = True
+        conn.set_session(autocommit=True)
         with conn.cursor() as cur:
             cur.execute('update persons SET personid = 1 where personid = 1;')
             cur.execute('vacuum full persons')
@@ -133,7 +133,7 @@ def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_repli
     replica2_cur.execute('select * from persons;')
 
     with _get_superconn(pg_instance) as conn:
-        conn.autocommit = True
+        conn.set_session(autocommit=True)
         with conn.cursor() as cur:
             cur.execute('update persons SET personid = 1 where personid = 1;')
             time.sleep(0.2)
@@ -172,7 +172,7 @@ def test_conflicts_bufferpin(aggregator, integration_check, pg_instance, pg_repl
     replica2_cur.fetchall()
 
     with _get_superconn(pg_instance) as conn:
-        conn.autocommit = True
+        conn.set_session(autocommit=True)
         with conn.cursor() as cur:
             cur.execute('vacuum verbose persons;')
 

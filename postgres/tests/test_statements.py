@@ -962,7 +962,7 @@ def test_activity_snapshot_collection(
     # pg_stat_activity
     try:
         # first lock the table, which will cause the test query to be blocked
-        blocking_conn.autocommit = False
+        blocking_conn.set_session(autocommit=False)
         blocking_conn.cursor().execute(blocking_query)
         # ... now execute the test query
         wait(conn)
