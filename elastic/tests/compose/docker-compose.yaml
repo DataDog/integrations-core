@@ -3,6 +3,8 @@ version: '3.5'
 services:
   elastic:
     image: "${ELASTIC_REGISTRY}:${ELASTIC_IMAGE}"
+    volumes:
+      - "elastic-backup:/backup/my_backup_location:rw"
     environment:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
@@ -10,6 +12,9 @@ services:
       - "node.name=test-node"
       - "discovery.type=single-node"
       - "path.repo=[\"/backup/my_backup_location\"]"
+      - "xpack.security.enabled=false"
+      - "xpack.security.transport.ssl.enabled=false"
+      - "xpack.security.http.ssl.enabled=false"
       - "ELASTIC_PASSWORD=admin"
       - "ELASTIC_USERNAME=admin"
       - "DISABLE_SECURITY_PLUGIN=true"
@@ -20,3 +25,5 @@ services:
       memlock:
         soft: -1
         hard: -1
+volumes:
+  elastic-backup:
