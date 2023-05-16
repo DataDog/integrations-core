@@ -17,6 +17,7 @@ from .common import CLUSTER_TAG, ELASTIC_CLUSTER_TAG, ELASTIC_VERSION, HERE, PAS
 
 CUSTOM_TAGS = ['foo:bar', 'baz']
 COMPOSE_FILES_MAP = {
+    '1.1.0': 'opensearch-docker-compose.yaml',  # opensearch doesn't play well with xpack env vars
     'elasticsearch_0_90': 'elasticsearch_0_90.yaml',
     '1-alpine': 'legacy.yaml',
     '2-alpine': 'legacy.yaml',
