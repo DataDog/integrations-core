@@ -3,15 +3,13 @@ version: '3.5'
 services:
   elastic:
     image: "${ELASTIC_REGISTRY}:${ELASTIC_IMAGE}"
-    volumes:
-      - "elastic-backup:/backup/my_backup_location:rw"
     environment:
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
       - "cluster.name=test-cluster"
       - "node.name=test-node"
       - "discovery.type=single-node"
-      - "path.repo=[\"/backup/my_backup_location\"]"
+      - "path.repo=[\"/usr/share/elasticsearch/data\"]"
       - "xpack.security.enabled=false"
       - "xpack.security.transport.ssl.enabled=false"
       - "xpack.security.http.ssl.enabled=false"
@@ -25,5 +23,3 @@ services:
       memlock:
         soft: -1
         hard: -1
-volumes:
-  elastic-backup:

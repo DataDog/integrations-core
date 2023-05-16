@@ -360,12 +360,6 @@ ADDITIONAL_METRICS_BY_VERSION = {
         ),
         'elasticsearch.breakers.request.overhead': ('gauge', 'breakers.request.overhead'),
         'elasticsearch.breakers.request.tripped': ('rate', 'breakers.request.tripped'),
-        'elasticsearch.thread_pool.listener.active': ('gauge', 'thread_pool.listener.active'),
-        'elasticsearch.thread_pool.listener.threads': ('gauge', 'thread_pool.listener.threads'),
-        'elasticsearch.thread_pool.listener.threads.count': ('monotonic_count', 'thread_pool.listener.threads'),
-        'elasticsearch.thread_pool.listener.queue': ('gauge', 'thread_pool.listener.queue'),
-        'elasticsearch.thread_pool.listener.rejected': ('rate', 'thread_pool.listener.rejected'),
-        'elasticsearch.thread_pool.listener.rejected.count': ('monotonic_count', 'thread_pool.listener.rejected'),
     },
     (1, 5, 0): {
         'elasticsearch.indices.recovery.current_as_source': ('gauge', 'indices.recovery.current_as_source'),
@@ -455,12 +449,6 @@ ADDITIONAL_METRICS_BY_VERSION = {
         'elasticsearch.fs.total.disk_writes': ('rate', 'fs.io_stats.total.write_operations'),
         'elasticsearch.fs.total.disk_read_size_in_bytes': ('gauge', 'fs.io_stats.total.read_kilobytes'),
         'elasticsearch.fs.total.disk_write_size_in_bytes': ('gauge', 'fs.io_stats.total.write_kilobytes'),
-        'elasticsearch.breakers.inflight_requests.tripped': ('gauge', 'breakers.in_flight_requests.tripped'),
-        'elasticsearch.breakers.inflight_requests.overhead': ('gauge', 'breakers.in_flight_requests.overhead'),
-        'elasticsearch.breakers.inflight_requests.estimated_size_in_bytes': (
-            'gauge',
-            'breakers.in_flight_requests.estimated_size_in_bytes',
-        ),
         'elasticsearch.search.scroll.total': ('gauge', 'indices.search.scroll_total'),
         'elasticsearch.search.scroll.total.count': ('monotonic_count', 'indices.search.scroll_total'),
         'elasticsearch.search.scroll.time': (
@@ -555,6 +543,21 @@ ADDITIONAL_METRICS_BY_VERSION = {
     },
 }
 VERSIONS_THAT_ADD_METRICS = sorted(ADDITIONAL_METRICS_BY_VERSION)
+
+ADDITIONAL_METRIC_PRE_8_0_0 = {
+    'elasticsearch.thread_pool.listener.active': ('gauge', 'thread_pool.listener.active'),
+    'elasticsearch.thread_pool.listener.threads': ('gauge', 'thread_pool.listener.threads'),
+    'elasticsearch.thread_pool.listener.threads.count': ('monotonic_count', 'thread_pool.listener.threads'),
+    'elasticsearch.thread_pool.listener.queue': ('gauge', 'thread_pool.listener.queue'),
+    'elasticsearch.thread_pool.listener.rejected': ('rate', 'thread_pool.listener.rejected'),
+    'elasticsearch.thread_pool.listener.rejected.count': ('monotonic_count', 'thread_pool.listener.rejected'),
+    'elasticsearch.breakers.inflight_requests.tripped': ('gauge', 'breakers.in_flight_requests.tripped'),
+    'elasticsearch.breakers.inflight_requests.overhead': ('gauge', 'breakers.in_flight_requests.overhead'),
+    'elasticsearch.breakers.inflight_requests.estimated_size_in_bytes': (
+        'gauge',
+        'breakers.in_flight_requests.estimated_size_in_bytes',
+    ),
+}
 
 ADDITIONAL_METRICS_PRE_7_0_0 = {
     'elasticsearch.thread_pool.index.active': ('gauge', 'thread_pool.index.active'),
@@ -791,6 +794,8 @@ def stats_for_version(version, jvm_rate=False):
         metrics.update(ADDITIONAL_METRICS_PRE_6_3)
     if version < [7, 0, 0]:
         metrics.update(ADDITIONAL_METRICS_PRE_7_0_0)
+    if version < [8, 0, 0]:
+        metrics.update(ADDITIONAL_METRIC_PRE_8_0_0)
 
     for ver in VERSIONS_THAT_ADD_METRICS[: bisect(VERSIONS_THAT_ADD_METRICS, tuple(version))]:
         metrics.update(ADDITIONAL_METRICS_BY_VERSION[ver])

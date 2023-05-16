@@ -64,7 +64,7 @@ def create_slm():
     if version.parse(ELASTIC_VERSION) < version.parse('7.4.0'):
         return
 
-    create_backup_body = {"type": "fs", "settings": {"location": "my_backup_location"}}
+    create_backup_body = {"type": "fs", "settings": {"location": "data"}}
     response = requests.put(
         '{}/_snapshot/my_repository?pretty'.format(INSTANCE['url']),
         json=create_backup_body,
