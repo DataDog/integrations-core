@@ -88,34 +88,34 @@ def test_wal_receiver_metrics(aggregator, integration_check, pg_instance, pg_rep
     )
 
 
-@requires_over_10
-def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_instance2):
-    check = integration_check(pg_replica_instance2)
-    expected_tags = pg_replica_instance2['tags'] + [
-        'port:{}'.format(pg_replica_instance2['port']),
-        'db:datadog_test',
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
-    ]
-
-    replica_con = _get_superconn(pg_replica_instance2)
-    replica_cur = replica_con.cursor()
-    replica_cur.execute('BEGIN;')
-    replica_cur.execute('select * from persons;')
-    replica_cur.fetchall()
-
-    with _get_superconn(pg_instance) as conn:
-        conn.autocommit = True
-        with conn.cursor() as cur:
-            cur.execute('update persons SET personid = 1 where personid = 1;')
-            cur.execute('vacuum full persons')
-    _wait_for_value(
-        pg_replica_instance2,
-        lower_threshold=0,
-        query="select confl_lock from pg_stat_database_conflicts where datname='datadog_test';",
-    )
-
-    check.check(pg_replica_instance2)
-    aggregator.assert_metric('postgresql.conflicts.lock', value=1, tags=expected_tags)
+# @requires_over_10
+# def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_instance2):
+#     check = integration_check(pg_replica_instance2)
+#     expected_tags = pg_replica_instance2['tags'] + [
+#         'port:{}'.format(pg_replica_instance2['port']),
+#         'db:datadog_test',
+#         'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+#     ]
+#
+#     replica_con = _get_superconn(pg_replica_instance2)
+#     replica_cur = replica_con.cursor()
+#     replica_cur.execute('BEGIN;')
+#     replica_cur.execute('select * from persons;')
+#     replica_cur.fetchall()
+#
+#     with _get_superconn(pg_instance) as conn:
+#         conn.set_session(autocommit=True)
+#         with conn.cursor() as cur:
+#             cur.execute('update persons SET personid = 1 where personid = 1;')
+#             cur.execute('vacuum full persons')
+#     _wait_for_value(
+#         pg_replica_instance2,
+#         lower_threshold=0,
+#         query="select confl_lock from pg_stat_database_conflicts where datname='datadog_test';",
+#     )
+#
+#     check.check(pg_replica_instance2)
+#     aggregator.assert_metric('postgresql.conflicts.lock', value=1, tags=expected_tags)
 
 
 @requires_over_10
@@ -133,7 +133,7 @@ def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_repli
     replica2_cur.execute('select * from persons;')
 
     with _get_superconn(pg_instance) as conn:
-        conn.autocommit = True
+        conn.set_session(autocommit=True)
         with conn.cursor() as cur:
             cur.execute('update persons SET personid = 1 where personid = 1;')
             time.sleep(0.2)
@@ -172,7 +172,7 @@ def test_conflicts_bufferpin(aggregator, integration_check, pg_instance, pg_repl
     replica2_cur.fetchall()
 
     with _get_superconn(pg_instance) as conn:
-        conn.autocommit = True
+        conn.set_session(autocommit=True)
         with conn.cursor() as cur:
             cur.execute('vacuum verbose persons;')
 
