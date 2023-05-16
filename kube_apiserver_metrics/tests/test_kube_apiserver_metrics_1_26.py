@@ -62,6 +62,9 @@ class TestKubeAPIServerMetrics:
         'requested_deprecated_apis',
         'kubernetes_feature_enabled',
         'aggregator_unavailable_apiservice',
+        'envelope_encryption_dek_cache_fill_percent',
+        'flowcontrol_current_executing_requests',
+        'flowcontrol_request_concurrency_limit',
     ]
     COUNT_METRICS = [
         'audit_event.count',
