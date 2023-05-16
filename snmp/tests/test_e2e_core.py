@@ -403,6 +403,7 @@ def test_e2e_core_cisco_csr(dd_agent_check):
 
     aggregator.assert_all_metrics_covered()
 
+
 def test_e2e_cisco_nexus(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
@@ -416,7 +417,7 @@ def test_e2e_cisco_nexus(dd_agent_check):
         'device_vendor:cisco',
         'device_namespace:default',
         "snmp_device:{}".format(instance['ip_address']),
-        'snmp_host:Nexus-eu1.companyname.managed'
+        'snmp_host:Nexus-eu1.companyname.managed',
     ]
 
     common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
@@ -431,9 +432,7 @@ def test_e2e_cisco_nexus(dd_agent_check):
     for interface in interfaces:
         tags = ['interface:{}'.format(interface), 'interface_alias:'] + common_tags
         for metric in metrics.IF_COUNTS:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1
-            )
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
         for metric in metrics.IF_RATES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
         for metric in metrics.IF_GAUGES:
@@ -447,17 +446,13 @@ def test_e2e_cisco_nexus(dd_agent_check):
             )
 
     for metric in metrics.TCP_COUNTS:
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=common_tags, count=1
-        )
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=common_tags, count=1)
 
     for metric in metrics.TCP_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
 
     for metric in metrics.UDP_COUNTS:
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=common_tags, count=1
-        )
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=common_tags, count=1)
 
     sensors = [1, 9, 11, 12, 12, 14, 17, 26, 29, 31]
     for sensor in sensors:
@@ -510,7 +505,9 @@ def test_e2e_cisco_nexus(dd_agent_check):
 
     cpu_ids = [6692, 3173, 54474, 63960, 11571, 38253, 30674, 52063]
     for cpu in cpu_ids:
-        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + ['cpu:{}'.format(cpu)])
+        aggregator.assert_metric(
+            'snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + ['cpu:{}'.format(cpu)]
+        )
 
     nexus_mem_metrics = ["memory.free", "memory.used", "memory.usage"]
     for metric in nexus_mem_metrics:
