@@ -34,7 +34,7 @@ You can include out-of-the-box assets such as [monitors][27], [dashboards][28], 
 
 ## Development process
 
-The process to build an Agent-based integration looks like the following: 
+The process to build an Agent-based integration looks like this: 
 
 1. Once you've been accepted to the [Datadog Partner Network][32], you will meet with the Datadog Technology Partner team to discuss your offering and use cases.
 2. Request a Datadog sandbox account for development through the Datadog Partner Network portal.
@@ -59,9 +59,11 @@ The required Datadog Agent integration development tools include the following:
 
 To build an out-of-the-box integration:
 
-1. Set up a `dd` directory:
+Create a `dd` directory:
    
-   {{< code-block lang="shell" >}}mkdir $HOME/dd && cd $HOME/dd{{< /code-block >}}
+```shell
+mkdir $HOME/dd && cd $HOME/dd
+```
 
    The Datadog Development Toolkit expects you to work in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps. 
 
@@ -79,7 +81,9 @@ To build an out-of-the-box integration:
 
 ## Configure the developer tool
 
-Assuming you've installed [the Agent Integration Developer Tool][102], configure the tool for the `integrations-extras` repository.
+The Agent Integration Developer Tool allows you to create scaffolding when you are developing an integration by generating a skeleton of your integration tile's assets and metadata. For instructions on installing the tool, see [Install the Datadog Agent Integration Developer Tool][102].
+
+To configure the tool for the `integrations-extras` repository:
 
 1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
    ```
@@ -158,7 +162,7 @@ The `ddev create` command runs an interactive tool that creates the basic file a
    ddev create -n Awesome
    ```
 
-   This command displays the path where the files would have been written, as well as the structure itself. Make sure the path in the first line of output matches your `integrations-extras` or `marketplace` repository location.
+   This command displays the path where the files would have been written, as well as the structure itself. Make sure the path in the first line of output matches your repository location.
 
 1. Run the command without the `-n` flag. The tool asks you for an email and name and then creates the files you need to get started with an integration.
 
@@ -229,12 +233,12 @@ To learn more about the base Python class, see [Anatomy of a Python Check][8].
 
 ## Write validation tests
 
-There are two basic types of tests:
+There are two types of tests:
 
 - [Unit tests for specific functionality](#write-a-unit-test)
 - [Integration tests that execute the `check` method and verify proper metrics collection](#write-an-integration-test)
 
-[pytest][9] and [hatch][10] are used to run the tests. Tests are **required** in order to include your integration in the `integrations-extras` repository.
+[pytest][9] and [hatch][10] are used to run the tests. Tests are required in order to publish your integration.
 
 ### Write a unit test
 
@@ -384,7 +388,7 @@ For more information about the `README.md` and `manifest.json` files, see [Creat
 
 ## Build the wheel
 
-The `pyproject.toml` file provides the metadata that is used to package and build the wheel. The wheel contains the files necessary for the functioning of the integration itself, which includes the Agent Check, configuration example file, and artifacts generated during the build of the wheel.
+The `pyproject.toml` file provides the metadata that is used to package and build the wheel. The wheel contains the files necessary for the functioning of the integration itself, which includes the Agent Check, configuration example file, and artifacts generated during the wheel build.
 
 All additional elements, including the metadata files, are not meant to be contained within the wheel, and are used elsewhere by the Datadog platform and ecosystem. 
 
@@ -430,9 +434,8 @@ sudo datadog-agent integration install -w /path/to/wheel.whl
 
 ## Populate your tile and publish your integration
 
-Once you have created your Agent-based integration, populate the remaining [required assets][31] that  appear on your integration tile. For more information on populating these assets and best practices, see [Create a Tile][20].
+Once you have created your Agent-based integration, see the [Create a tile][20] documentation for information on populating the remaining [required assets][31] that appear on your integration tile, and opening a pull request.
 
-Finally, open a pull request with your code on the [`integrations-extras`][21] or [`marketplace`][22] repository. After you've created your pull request, automatic checks run to verify that your pull request is in good shape and contains all the required content to be updated.
 
 ## Further reading
 
@@ -440,7 +443,7 @@ Finally, open a pull request with your code on the [`integrations-extras`][21] o
 
 [1]: https://docs.datadoghq.com/developers/#creating-your-own-solution
 [2]: https://github.com/pypa/pipx
-[3]: https://docs.datadoghq.com/metrics/
+[3]: https://docs.datadoghq.com/developers/integrations/python/
 [4]: https://docs.docker.com/get-docker/
 [5]: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
 [6]: https://github.com/datadog/integrations-extras
@@ -467,7 +470,7 @@ Finally, open a pull request with your code on the [`integrations-extras`][21] o
 [27]: https://docs.datadoghq.com/monitors/
 [28]: https://docs.datadoghq.com/dashboards/
 [29]: https://docs.datadoghq.com/logs/log_configuration/pipelines/
-[30]: https://docs.datadoghq.com/glossary/#check/
+[30]: https://docs.datadoghq.com/glossary/#check
 [31]: https://docs.datadoghq.com/developers/integrations/create_a_tile/#complete-the-necessary-integration-asset-files
 [32]: https://partners.datadoghq.com/
 [33]: https://docs.datadoghq.com/developers/integrations/check_references/

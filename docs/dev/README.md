@@ -8,6 +8,12 @@ aliases:
 - /developers/agent_checks/
 dependencies: "https://github.com/DataDog/integrations-core/blob/alai97/add-marketplace-documentation/docs/dev/README.md"
 further_reading:
+- link: "/developers/integrations/agent_integration/"
+  tag: "Documentation"
+  text: "Create an Agent integration"
+- link: "/developers/integrations/api_integration/"
+  tag: "Documentation"
+  text: "Create an API integration"
 - link: "/developers/integrations/marketplace_offering/"
   tag: "Documentation"
   text: "Learn how to sell an integration on the Datadog Marketplace"
@@ -57,7 +63,7 @@ Agent integrations are best suited for collecting data from systems or applicati
 
 API-based integrations can submit telemetry—such as metrics, traces, logs, and more—from external platforms using the [Datadog API][12]. Customers can then visualize and correlate this data alongside data from the rest of their stack, allowing them to quickly analyze and remediate issues. API-based integrations may also read data out of Datadog once customers [authorize access using OAuth][13]. 
 
-Technology Partners write and host the implementation code that makes up the integration. [Creating an API integration][1] work well for Technology Partners building a connector between Datadog and another SaaS platform.
+Technology Partners write and host the implementation code that makes up the integration. [Creating an API integration][1] works well for Technology Partners building a connector between Datadog and another SaaS platform.
 
 ### Benefits
 

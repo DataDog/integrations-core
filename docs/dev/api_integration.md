@@ -15,7 +15,7 @@ further_reading:
 
 ## Overview
 
-This page walks Technology Partners through how to create a Datadog API integration. 
+This page walks Technology Partners through creating a Datadog API integration. 
 
 ## API integrations
 

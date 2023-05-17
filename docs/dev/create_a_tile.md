@@ -16,7 +16,7 @@ further_reading:
 
 ## Overview
 
-This page walks Technology Partners through how to create the tile that represents an offering that will appear on the **Integrations** or **Marketplace** page.
+This page walks Technology Partners through creating the tile that represents an offering that will appear on the **Integrations** or **Marketplace** page.
 
 ## Integration tiles
 
@@ -24,9 +24,9 @@ The tile serves as a point of entry where customers can learn about your offerin
 
 {{< img src="developers/integrations/marketplace_or_integrations_tile.png" alt="An expanded tile modal of an example offering on the Integrations or Marketplace page" style="width:100%" >}}
 
-* For any offerings that **do not use** the Datadog Agent—including API-based integrations, professional services listings, and software licenses—you will only need to create a tile and submit the tile-related files in order to publish your offering. This is called a _tile-only-listing_. Tile-ony listings apply in situations where Datadog does not host any of the code associated with the API-based integrations, and the other supported offering types do not require any code. 
+* For any offerings that **do not use** the Datadog Agent—including API-based integrations, professional services listings, and software licenses—you only need to create a tile and submit the tile-related files in order to publish your offering. This is called a _tile-only-listing_. Tile-ony listings apply in situations where Datadog does not host any of the code associated with the API-based integrations, and the other supported offering types do not require any code. 
 
-* For **Agent-based integrations**, you will need to create a tile, and additionally, submit all of your integration-related code (as well as your tile-related files) in one pull request. For more information, see [Create an Agent-based integration][27].
+* For **Agent-based integrations**, you must create a tile, and additionally, submit all of your integration-related code (as well as your tile-related files) in one pull request. For more information, see [Create an Agent-based integration][27].
 
 <div class="alert alert-info">Select a tab for instructions on creating a tile on the Integrations or Marketplace page.</div>
 
@@ -38,7 +38,7 @@ The tile serves as a point of entry where customers can learn about your offerin
 
 To build a tile on the [**Integrations** page][103]:
 
-<div class="alert alert-warning">If you have already gone through the steps to create an Agent integration and have built out a scaffolding, you can skip directly to <a href="https://docs.datadoghq.com/developers/integrations/create_a_tile/#complete-the-necessary-integration-asset-files">completing the necessary integration asset files</a>. 
+<div class="alert alert-warning">If you have already gone through the steps to create an Agent integration and have built out the scaffolding, you can skip directly to <a href="#complete-the-necessary-integration-asset-files">completing the necessary integration asset files</a>. 
 </div>
 
 1. Create a `dd` directory:
@@ -265,7 +265,7 @@ After you've created your pull request, automatic checks run to verify that your
 
 Once your pull request passes all checks, reviewers from the `Datadog/agent-integrations`, `Datadog/marketplace-review`, and `Datadog/documentation` teams provide suggestions and feedback on best practices.
 
-Once you have addressed the feedback and re-requested reviews, these reviewers approve your pull request. Contact the Marketplace team if you would like to preview the tile in your sandbox account. This allows you to validate and preview your tile before your tile is live to all customers.
+Once you have addressed the feedback and re-requested reviews, these reviewers approve your pull request. Contact the Marketplace team if you would like to preview the tile in your sandbox account. This allows you to validate and preview your tile before your tile goes live to all customers.
 
 ## Troubleshoot errors
 

@@ -16,7 +16,7 @@ further_reading:
 
 ## Overview
 
-This page walks you through the files that you will need to populate in order to create an offering on the [**Integrations** page][12] or the [**Marketplace** page][9]. 
+This page walks you through the files that you need to populate in order to create an offering on the [**Integrations** page][12] or the [**Marketplace** page][9]. 
 
 ## Configuration file
 
