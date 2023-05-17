@@ -85,7 +85,7 @@ class ComputeRest:
             server_metrics[server['id']] = {
                 'name': server['name'],
                 'status': server['status'].lower(),
-                'hypervisor_hostname': server['OS-EXT-SRV-ATTR:hypervisor_hostname'],
+                'hypervisor_hostname': server.get('OS-EXT-SRV-ATTR:hypervisor_hostname'),
                 'instance_hostname': server.get('OS-EXT-SRV-ATTR:hostname'),
                 'metrics': get_normalized_metrics(server, NOVA_SERVER_METRICS_PREFIX, NOVA_SERVER_METRICS),
             }

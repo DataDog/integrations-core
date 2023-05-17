@@ -7,6 +7,7 @@ from requests.exceptions import HTTPError
 from datadog_checks.base import AgentCheck
 from datadog_checks.openstack_controller.api.factory import make_api
 from datadog_checks.openstack_controller.config import OpenstackConfig
+from datadog_checks.openstack_controller.http_error import http_error
 from datadog_checks.openstack_controller.metrics import (
     HYPERVISOR_SERVICE_CHECK,
     KEYSTONE_DOMAINS_COUNT,
@@ -296,8 +297,6 @@ class OpenStackControllerCheck(AgentCheck):
             self._report_identity_groups(api, tags)
             self._report_identity_services(api, tags)
             self._report_identity_limits(api, tags)
-        except HTTPError as e:
-            self.log.error("HTTPError while reporting identity metrics: %s", e)
         except Exception as e:
             self.warning("Exception while reporting identity metrics: %s", e)
 
@@ -316,26 +315,27 @@ class OpenStackControllerCheck(AgentCheck):
             self.warning("Exception while reporting identity response time: %s", e)
         return False
 
+    @http_error("HTTPError while reporting identity domains metrics")
     def _report_identity_domains(self, api, tags):
         identity_domains = api.get_identity_domains()
         self.log.debug("identity_domains: %s", identity_domains)
         self.gauge(KEYSTONE_DOMAINS_COUNT, len(identity_domains), tags=tags)
-        if identity_domains:
-            for domain_id, domain_data in identity_domains.items():
-                domain_tags = [
-                    'domain_id:{}'.format(domain_id),
-                    'domain_name:{}'.format(domain_data['name']),
-                ] + domain_data['tags']
-                for metric, value in domain_data['metrics'].items():
-                    if metric in KEYSTONE_DOMAINS_METRICS:
-                        self.gauge(
-                            metric,
-                            value,
-                            tags=tags + domain_tags,
-                        )
-                    else:
-                        self.log.warning("%s metric not reported as identity domain metric", metric)
+        for domain_id, domain_data in identity_domains.items():
+            domain_tags = [
+                'domain_id:{}'.format(domain_id),
+                'domain_name:{}'.format(domain_data['name']),
+            ] + domain_data['tags']
+            for metric, value in domain_data['metrics'].items():
+                if metric in KEYSTONE_DOMAINS_METRICS:
+                    self.gauge(
+                        metric,
+                        value,
+                        tags=tags + domain_tags,
+                    )
+                else:
+                    self.log.warning("%s metric not reported as identity domain metric", metric)
 
+    @http_error("HTTPError while reporting identity projects metrics")
     def _report_identity_projects(self, api, tags):
         identity_projects = api.get_identity_projects()
         self.log.debug("identity_projects: %s", identity_projects)
@@ -361,6 +361,7 @@ class OpenStackControllerCheck(AgentCheck):
                     else:
                         self.log.warning("%s metric not reported as identity project metric", metric)
 
+    @http_error("HTTPError while reporting identity users metrics")
     def _report_identity_users(self, api, tags):
         identity_users = api.get_identity_users()
         self.log.debug("identity_users: %s", identity_users)
@@ -380,6 +381,7 @@ class OpenStackControllerCheck(AgentCheck):
                     + [f"user_id:{user.get('id')}", f"user_name:{user.get('name')}"],
                 )
 
+    @http_error("HTTPError while reporting identity groups metrics")
     def _report_identity_groups(self, api, tags):
         identity_groups = api.get_identity_groups()
         self.log.debug("identity_groups: %s", identity_groups)
@@ -398,6 +400,7 @@ class OpenStackControllerCheck(AgentCheck):
                 + [f"group_id:{group.get('id')}", f"group_name:{group.get('name')}"],
             )
 
+    @http_error("HTTPError while reporting identity services metrics")
     def _report_identity_services(self, api, tags):
         identity_services = api.get_identity_services()
         self.log.debug("identity_services: %s", identity_services)
@@ -421,6 +424,7 @@ class OpenStackControllerCheck(AgentCheck):
                     ],
                 )
 
+    @http_error("HTTPError while reporting identity limits metrics")
     def _report_identity_limits(self, api, tags):
         identity_limits = api.get_identity_limits()
         self.log.debug("identity_limits: %s", identity_limits)

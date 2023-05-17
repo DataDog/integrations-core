@@ -319,11 +319,8 @@ class ApiRest(Api):
         return None
 
     def post_auth_unscoped(self):
-        data = (
-            '{{"auth": {{"identity": {{"methods": ["password"], '
-            '"password": {{"user": {}}}}}}}}}'.format(
-                json.dumps(self.config.user)
-            )
+        data = '{{"auth": {{"identity": {{"methods": ["password"], ' '"password": {{"user": {}}}}}}}}}'.format(
+            json.dumps(self.config.user)
         )
         url = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
         self.log.debug("POST %s data: %s", url, data)

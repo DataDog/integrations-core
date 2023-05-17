@@ -34,13 +34,6 @@ def test_endpoint_down(aggregator, dd_run_check, instance, monkeypatch):
             'keystone_server:{}'.format(instance["keystone_server_url"]),
         ],
     )
-    aggregator.assert_service_check(
-        'openstack.keystone.api.up',
-        status=AgentCheck.CRITICAL,
-        tags=[
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-        ],
-    )
 
 
 def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
@@ -50,13 +43,6 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
 
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    aggregator.assert_service_check(
-        'openstack.keystone.api.up',
-        status=AgentCheck.OK,
-        tags=[
-            'keystone_server:{}'.format(instance["keystone_server_url"]),
-        ],
-    )
     aggregator.assert_service_check(
         'openstack.keystone.api.up',
         status=AgentCheck.OK,
@@ -74,7 +60,8 @@ def test_endpoint_up(aggregator, dd_run_check, instance, monkeypatch):
 
 def test_auth_error(aggregator, dd_run_check, instance, caplog, monkeypatch):
     http = MockHttp(
-        "agent-integrations-openstack-default", defaults={'identity/v3/auth/tokens/unscoped': MockResponse(status_code=500)}
+        "agent-integrations-openstack-default",
+        defaults={'identity/v3/auth/tokens/unscoped': MockResponse(status_code=500)},
     )
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
@@ -86,7 +73,8 @@ def test_auth_error(aggregator, dd_run_check, instance, caplog, monkeypatch):
 
 def test_auth_domain_error(aggregator, dd_run_check, instance, caplog, monkeypatch):
     http = MockHttp(
-        "agent-integrations-openstack-default", defaults={'identity/v3/auth/tokens/domain': MockResponse(status_code=500)}
+        "agent-integrations-openstack-default",
+        defaults={'identity/v3/auth/tokens/domain': MockResponse(status_code=500)},
     )
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
@@ -94,11 +82,40 @@ def test_auth_domain_error(aggregator, dd_run_check, instance, caplog, monkeypat
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
     assert 'HTTPError while authenticating domain scoped' in caplog.text
+    # Anyway domain metrics are reported in the projects loop, and we need to check it
+    aggregator.assert_metric(
+        'openstack.keystone.domains.count',
+        value=2,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.domains.enabled',
+        value=1,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:default',
+            'domain_name:Default',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.keystone.domains.enabled',
+        value=1,
+        tags=[
+            'keystone_server:{}'.format(instance["keystone_server_url"]),
+            'domain_id:03e40b01788d403e98e4b9a20210492e',
+            'domain_name:New domain',
+            'foo',
+            'bar',
+        ],
+    )
 
 
 def test_auth_project_error(aggregator, dd_run_check, instance, caplog, monkeypatch):
     http = MockHttp(
-        "agent-integrations-openstack-default", defaults={'identity/v3/auth/tokens/project': MockResponse(status_code=500)}
+        "agent-integrations-openstack-default",
+        defaults={'identity/v3/auth/tokens/project': MockResponse(status_code=500)},
     )
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
@@ -106,6 +123,20 @@ def test_auth_project_error(aggregator, dd_run_check, instance, caplog, monkeypa
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
     assert 'HTTPError while authenticating project scoped' in caplog.text
+
+
+def test_domains_metrics_error(aggregator, dd_run_check, instance, caplog, monkeypatch):
+    http = MockHttp(
+        "agent-integrations-openstack-default", defaults={'identity/v3/domains': MockResponse(status_code=500)}
+    )
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('openstack.keystone.domains.count', count=0)
+    aggregator.assert_metric('openstack.keystone.domains.enabled', count=0)
+    assert 'HTTPError while reporting identity domains metrics' in caplog.text
 
 
 def test_domains_metrics(aggregator, dd_run_check, instance, monkeypatch):
@@ -142,6 +173,20 @@ def test_domains_metrics(aggregator, dd_run_check, instance, monkeypatch):
             'bar',
         ],
     )
+
+
+def test_projects_metrics_error(aggregator, dd_run_check, instance, caplog, monkeypatch):
+    http = MockHttp(
+        "agent-integrations-openstack-default", defaults={'identity/v3/projects': MockResponse(status_code=500)}
+    )
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('openstack.keystone.projects.count', count=0)
+    aggregator.assert_metric('openstack.keystone.projects.enabled', count=0)
+    assert 'HTTPError while reporting identity projects metrics' in caplog.text
 
 
 def test_projects_metrics(aggregator, dd_run_check, instance, monkeypatch):
@@ -211,6 +256,20 @@ def test_projects_metrics(aggregator, dd_run_check, instance, monkeypatch):
             'project_name:invisible_to_admin',
         ],
     )
+
+
+def test_users_metrics_error(aggregator, dd_run_check, instance, caplog, monkeypatch):
+    http = MockHttp(
+        "agent-integrations-openstack-default", defaults={'identity/v3/users': MockResponse(status_code=500)}
+    )
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('openstack.keystone.users.count', count=0)
+    aggregator.assert_metric('openstack.keystone.users.enabled', count=0)
+    assert 'HTTPError while reporting identity users metrics' in caplog.text
 
 
 def test_users_metrics(aggregator, dd_run_check, instance, monkeypatch):
@@ -360,6 +419,20 @@ def test_users_metrics(aggregator, dd_run_check, instance, monkeypatch):
     )
 
 
+def test_groups_metrics_error(aggregator, dd_run_check, instance, caplog, monkeypatch):
+    http = MockHttp(
+        "agent-integrations-openstack-default", defaults={'identity/v3/groups': MockResponse(status_code=500)}
+    )
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('openstack.keystone.groups.count', count=0)
+    aggregator.assert_metric('openstack.keystone.groups.users', count=0)
+    assert 'HTTPError while reporting identity groups metrics' in caplog.text
+
+
 def test_groups_metrics(aggregator, dd_run_check, instance, monkeypatch):
     http = MockHttp("agent-integrations-openstack-default")
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
@@ -395,6 +468,20 @@ def test_groups_metrics(aggregator, dd_run_check, instance, monkeypatch):
             'group_name:nonadmins',
         ],
     )
+
+
+def test_services_metrics_error(aggregator, dd_run_check, instance, caplog, monkeypatch):
+    http = MockHttp(
+        "agent-integrations-openstack-default", defaults={'identity/v3/services': MockResponse(status_code=500)}
+    )
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('openstack.keystone.services.count', count=0)
+    aggregator.assert_metric('openstack.keystone.services.enabled', count=0)
+    assert 'HTTPError while reporting identity services metrics' in caplog.text
 
 
 def test_services_metrics(aggregator, dd_run_check, instance, monkeypatch):
@@ -500,6 +587,19 @@ def test_services_metrics(aggregator, dd_run_check, instance, monkeypatch):
             'service_type:compute',
         ],
     )
+
+
+def test_limits_metrics_error(aggregator, dd_run_check, instance, caplog, monkeypatch):
+    http = MockHttp(
+        "agent-integrations-openstack-default", defaults={'identity/v3/limits': MockResponse(status_code=500)}
+    )
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    check = OpenStackControllerCheck('test', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('openstack.keystone.limits', count=0)
+    assert 'HTTPError while reporting identity limits metrics' in caplog.text
 
 
 def test_limits_metrics(aggregator, dd_run_check, instance, monkeypatch):
