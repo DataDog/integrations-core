@@ -127,7 +127,6 @@ class ESCheck(AgentCheck):
             service_check_tags.extend(cluster_tags)
         self._process_stats_data(stats_data, stats_metrics, base_tags)
 
-        # Process templates information
         self._get_template_metrics(admin_forwarder, base_tags)
 
         # Load cluster-wise data
