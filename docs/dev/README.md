@@ -6,7 +6,6 @@ aliases:
 - /guides/agent_checks/
 - /agent/agent_checks
 - /developers/agent_checks/
-dependencies: "https://github.com/DataDog/integrations-core/blob/alai97/add-marketplace-documentation/docs/dev/README.md"
 further_reading:
 - link: "/developers/integrations/agent_integration/"
   tag: "Documentation"

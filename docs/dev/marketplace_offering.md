@@ -3,7 +3,6 @@ title: Build A Marketplace Offering
 type: documentation
 aliases: 
 - 'developers/marketplace/'
-dependencies: "https://github.com/DataDog/integrations-core/blob/alai97/add-marketplace-documentation/docs/dev/marketplace_offering.md"
 further_reading:
 - link: "https://www.datadoghq.com/partner/"
   tag: "Partner Network"

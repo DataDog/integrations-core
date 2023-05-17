@@ -4,7 +4,6 @@ type: documentation
 description: Learn how to develop and publish an integration tile.
 aliases:
 - 'developers/marketplace/offering'
-dependencies: "https://github.com/DataDog/integrations-core/blob/alai97/add-marketplace-documentation/docs/dev/create_a_tile.md"
 further_reading:
 - link: "https://www.datadoghq.com/blog/datadog-marketplace/"
   tag: "Blog"
@@ -99,7 +98,7 @@ For Datadog API integrations that will be available out-of-the-box on the [Integ
 
 {{% tab "Build a tile on the Marketplace" %}}
 
-{{< img src="developers/integrations/marketplace_tile.png" alt="A tile representing an example offering on the Marketplace page" style="width:30%" >}}
+{{< img src="developers/integrations/marketplace_tile.png" alt="A tile representing an example offering on the Marketplace page" style="width:25%" >}}
 
 To build a tile on the [**Marketplace** page][104]: 
 
