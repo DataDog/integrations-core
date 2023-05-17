@@ -759,6 +759,10 @@ CAT_ALLOCATION_METRICS = {
     'elasticsearch.disk.percent': ('gauge', 'disk_percent'),
 }
 
+TEMPLATE_METRICS = {
+    'elasticsearch.templates.count': ('gauge', 'templates', lambda templates: len(templates)),
+}
+
 
 def stats_for_version(version, jvm_rate=False):
     """
