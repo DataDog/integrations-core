@@ -1,29 +1,9 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import datetime
-import re
-import select
-import time
-from collections import Counter
 from concurrent.futures.thread import ThreadPoolExecutor
-
-import mock
-import psycopg2
 import pytest
-from dateutil import parser
-from semver import VersionInfo
-from six import string_types
-
-from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
-from datadog_checks.base.utils.serialization import json
-from datadog_checks.base.utils.time import UTC
-from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState
-from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
-
-from .common import DB_NAME, HOST, PORT, PORT_REPLICA2, POSTGRES_VERSION
-from .utils import _get_conn, _get_superconn, requires_over_10
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
