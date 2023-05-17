@@ -44,6 +44,6 @@ def test_collect_metadata(
     event = dbm_metadata[0]
     assert event['host'] == "stubbed.hostname"
     assert event['dbms'] == "postgres"
-    assert event['kind'] == "metadata"
+    assert event['kind'] == "pg_settings"
     assert len(event["metadata"]) > 0
 

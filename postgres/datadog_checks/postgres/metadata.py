@@ -99,7 +99,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "host": self._check.resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "postgres",
-                "kind": "metadata",
+                "kind": "pg_settings",
                 "tags": self._tags_no_db,
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
