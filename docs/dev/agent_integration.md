@@ -70,12 +70,12 @@ mkdir $HOME/dd && cd $HOME/dd
 1. Fork the [`integrations-extras` repository][101].
 
 1. Clone your fork into the `dd` directory:
-   ```
+   ```shell
    git clone git@github.com:<YOUR USERNAME>/integrations-extras.git
    ```
 
 1. Create a feature branch to work in:
-   ```
+   ```shell
    git switch -c <YOUR INTEGRATION NAME> origin/master
    ```
 
@@ -86,12 +86,12 @@ The Agent Integration Developer Tool allows you to create scaffolding when you a
 To configure the tool for the `integrations-extras` repository:
 
 1. Optionally, if your `integrations-extras` repo is somewhere other than `$HOME/dd/`, adjust the `ddev` configuration file:
-   ```
+   ```shell
    ddev config set extras "/path/to/integrations-extras"
    ```
 
 1. Set `integrations-extras` as the default working repository:
-   ```
+   ```shell
    ddev config set repo extras
    ```
 
@@ -107,17 +107,20 @@ To build an integration:
 1. See [Build a Marketplace Offering][102] to request access to the [Marketplace repository][101].
 1. Create a `dd` directory:
 
-   {{< code-block lang="shell" >}}mkdir $HOME/dd{{< /code-block >}}
+   ```shell
+   mkdir $HOME/dd```
 
    The Datadog Development Toolkit command expects you to be working in the `$HOME/dd/` directory. This is not mandatory, but working in a different directory requires additional configuration steps.
 
 1. Once you have been granted access to the Marketplace repository, create the `dd` directory and clone the `marketplace` repository:
 
-   {{< code-block lang="shell" >}}git clone git@github.com:DataDog/marketplace.git{{< /code-block >}}
+   ```shell
+   git clone git@github.com:DataDog/marketplace.git```
 
 1. Create a feature branch to work in:
 
-   {{< code-block lang="shell" >}}git switch -c <YOUR INTEGRATION NAME> origin/master{{< /code-block >}}
+   ```shell
+   git switch -c <YOUR INTEGRATION NAME> origin/master```
 
 ## Install and configure the Datadog development toolkit
 
@@ -127,17 +130,19 @@ Once you have installed the Agent Integration Developer Tool, configure it for t
 
 1. Set `marketplace` as the default working repository:
 
-   {{< code-block lang="shell" >}}
+   ```shell
+
    ddev config set marketplace $HOME/dd/marketplace
    ddev config set repo marketplace
-   {{< /code-block >}}
+   ```
 
 1. If you used a directory other than `$HOME/dd` to clone the `marketplace` directory, use the following command to set your working repository:
 
-   {{< code-block lang="shell" >}}
+   ```shell
+
    ddev config set marketplace <PATH/TO/MARKETPLACE>
    ddev config set repo marketplace
-   {{< /code-block >}}
+   ```
 
 [101]: https://github.com/Datadog/marketplace
 [102]: https://docs.datadoghq.com/developers/integrations/marketplace_offering
