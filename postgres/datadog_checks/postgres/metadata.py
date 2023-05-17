@@ -33,6 +33,7 @@ SELECT name, setting, category, short_desc FROM pg_settings
 def agent_check_getter(self):
     return self._check
 
+
 class PostgresMetadata(DBMAsyncJob):
     """
     Collects statement samples and execution plans.
@@ -96,17 +97,17 @@ class PostgresMetadata(DBMAsyncJob):
         if rows:
             event = {
                 "host": self._check.resolved_hostname,
-                "ddagentversion": datadog_agent.get_version(),
-                "ddsource": "postgres",
-                "dbm_type": "metadata",
-                "ddtags": self._tags_no_db,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "postgres",
+                "kind": "metadata",
+                "tags": self._tags_no_db,
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
-                "pg_settings": rows,
+                "metadata": rows,
             }
-        self._check.database_monitoring_metadata(
-            json.dumps(event, default=default_json_event_encoding)
-        )
+            self._check.database_monitoring_metadata(
+                json.dumps(event, default=default_json_event_encoding)
+            )
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
