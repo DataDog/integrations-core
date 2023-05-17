@@ -1121,6 +1121,10 @@ def test_cisco_nexus(aggregator):
             'snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=['fru:{}'.format(fru)] + common_tags
         )
 
+    nexus_mem_metrics = ["memory.free", "memory.used"]
+    for metric in nexus_mem_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags + ['mem:1'])
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 

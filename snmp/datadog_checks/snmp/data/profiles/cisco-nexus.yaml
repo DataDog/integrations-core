@@ -25,3 +25,17 @@ metrics:
         tag: sensor_type
       - index: 1
         tag: sensor_id
+  - MIB: CISCO-ENHANCED-MEMPOOL-MIB  # Overrides generic cisco defaults from _cisco-cpu-memory.yaml
+    table:
+      OID: 1.3.6.1.4.1.9.9.221.1.1.1
+      name: cempMemPoolTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.221.1.1.1.1.7
+        # core check only
+        name: memory.used
+      - OID: 1.3.6.1.4.1.9.9.221.1.1.1.1.8
+        # core check only
+        name: memory.free
+    metric_tags:
+      - tag: mem
+        index: 1
