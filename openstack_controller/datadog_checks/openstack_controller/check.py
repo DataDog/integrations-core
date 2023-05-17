@@ -273,7 +273,7 @@ class OpenStackControllerCheck(AgentCheck):
         for project in auth_projects:
             if self._authenticate_project(api, project):
                 if not reported_global_metrics:
-                    self.log.debug("Authenticated user for projects, reporting metrics using project scope")
+                    self.log.debug("Authenticated user for project %s, reporting metrics using project scope", project)
                     self._report_identity_metrics(api, tags)
                     self._report_domain_metrics(api, tags + ['domain_id:{}'.format(self.config.domain_id)])
                     reported_global_metrics = True

@@ -116,8 +116,7 @@ class ComputeRest:
                 )
             except Exception as e:
                 self.log.info(
-                    "Could not query the server diagnostics endpoint for server %s, "
-                    "perhaps it is a bare metal machine: %s",
+                    "Could not query the server diagnostics endpoint for server %s: %s",
                     server.get("id", None),
                     e,
                 )

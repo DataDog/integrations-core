@@ -84,7 +84,7 @@ def test_auth_domain_error(aggregator, dd_run_check, instance, caplog, monkeypat
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
     assert 'HTTPError while authenticating domain scoped' in caplog.text
-    assert 'Authenticated user for projects, reporting metrics using project scope' in caplog.text
+    assert 'Authenticated user for project' in caplog.text
 
     # Anyway domain metrics are reported in the projects loop, and we need to check it
     aggregator.assert_metric(
