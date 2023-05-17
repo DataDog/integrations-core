@@ -1,3 +1,5 @@
+import logging
+
 import mock
 import pytest
 
@@ -78,10 +80,12 @@ def test_auth_domain_error(aggregator, dd_run_check, instance, caplog, monkeypat
     )
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
+    caplog.set_level(logging.DEBUG)
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
     assert 'HTTPError while authenticating domain scoped' in caplog.text
+    assert 'Authenticated user for projects, reporting metrics using project scope' in caplog.text
+
     # Anyway domain metrics are reported in the projects loop, and we need to check it
     aggregator.assert_metric(
         'openstack.keystone.domains.count',
@@ -131,7 +135,7 @@ def test_domains_metrics_error(aggregator, dd_run_check, instance, caplog, monke
     )
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
+    caplog.set_level(logging.DEBUG)
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
     aggregator.assert_metric('openstack.keystone.domains.count', count=0)
@@ -139,11 +143,11 @@ def test_domains_metrics_error(aggregator, dd_run_check, instance, caplog, monke
     assert 'HTTPError while reporting identity domains metrics' in caplog.text
 
 
-def test_domains_metrics(aggregator, dd_run_check, instance, monkeypatch):
+def test_domains_metrics(aggregator, dd_run_check, instance, caplog, monkeypatch):
     http = MockHttp("agent-integrations-openstack-default")
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
-
+    caplog.set_level(logging.DEBUG)
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
     aggregator.assert_metric(
@@ -173,6 +177,7 @@ def test_domains_metrics(aggregator, dd_run_check, instance, monkeypatch):
             'bar',
         ],
     )
+    assert "Authenticated user for domain, reporting metrics using domain scope" in caplog.text
 
 
 def test_projects_metrics_error(aggregator, dd_run_check, instance, caplog, monkeypatch):
