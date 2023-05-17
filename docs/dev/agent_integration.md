@@ -163,7 +163,7 @@ The following instructions use an example integration called `Awesome`. Follow a
 The `ddev create` command runs an interactive tool that creates the basic file and path structure (or scaffolding) necessary for an Agent-based integration.
 
 1. Before you create your first integration directory, try a dry-run using the `-n/--dry-run` flag, which doesn't write anything to the disk:
-   ```
+   ```shell
    ddev create -n Awesome
    ```
 
@@ -173,7 +173,7 @@ The `ddev create` command runs an interactive tool that creates the basic file a
 
     <div class="alert alert-info">If you are creating an integration for the Datadog Marketplace, ensure that your directory follows the pattern of {partner name}_{integration name}.</div>
 
-   ```
+   ```shell
    ddev create Awesome
    ```
 

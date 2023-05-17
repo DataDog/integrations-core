@@ -63,17 +63,17 @@ Once you have installed the Agent Integration Developer Tool, configure it for t
 
 Set `integrations-extras` as the default working repository:
 
-{{< code-block lang="shell" >}}
+```shell
 ddev config set extras $HOME/dd/integrations-extras
 ddev config set repo extras
-{{< /code-block >}}
+```
 
 If you used a directory other than `$HOME/dd` to clone the `integrations-extras` directory, use the following command to set your working repository:
 
-{{< code-block lang="shell" >}}
+```shell
 ddev config set extras <PATH/TO/INTEGRATIONS_EXTRAS>
 ddev config set repo extras
-{{< /code-block >}}
+```
 
 ## Populate the integration tile scaffolding
 
@@ -103,7 +103,7 @@ For Datadog API integrations that will be available out-of-the-box on the [Integ
 
 To build a tile on the [**Marketplace** page][104]: 
 
-<div class="alert alert-warning">If you have already gone through the steps to create an Agent integration and have built out a scaffolding, you can skip directly to <a href="https://docs.datadoghq.com/developers/integrations/create_a_tile/#complete-the-necessary-integration-asset-files">completing the necessary integration asset files</a>. 
+<div class="alert alert-warning">If you have already gone through the steps to create an Agent integration and have built out the scaffolding, you can skip directly to <a href="#complete-the-necessary-integration-asset-files">completing the necessary integration asset files</a>. 
 </div>
 
 1. See [Build a Marketplace Offering][102] to request access to the [Marketplace repository][101].
@@ -136,17 +136,17 @@ Once you have installed the Agent Integration Developer Tool, configure it for t
 
 Set `marketplace` as the default working repository:
 
-{{< code-block lang="shell" >}}
+```shell
 ddev config set marketplace $HOME/dd/marketplace
 ddev config set repo marketplace
-{{< /code-block >}}
+```
 
 If you used a directory other than `$HOME/dd` to clone the `marketplace` directory, use the following command to set your working repository:
 
-{{< code-block lang="shell" >}}
+```shell
 ddev config set marketplace <PATH/TO/MARKETPLACE>
 ddev config set repo marketplace
-{{< /code-block >}}
+```
 
 ## Populate the integration tile scaffolding
 
@@ -274,13 +274,21 @@ Out-of-the-box integrations in the `integrations-extras` repository can run into
 To resolve validation errors, update the forked repository on the GitHub web app: 
 
 1. In [GitHub][29], navigate to your forked `integrations-extras` repository.
-1. Click **Sync fork** under the green **Code** dropdown menu and click **Update branch**.
+1. Click **Sync fork** and click **Update branch**.
 
 To rebase and push changes:
 
-1. Run `git checkout <your working branch>`.
-1. Run `git rebase master`.
-1. If there are any merge conflicts, resolve them. Then, run `git push origin <working branch> -f`.
+1. Update your local `master` branch:
+   ```shell
+   git checkout master
+   git pull origin master
+   ```
+1. Merge `master` into your feature branch:
+   ```shell
+   git checkout <your working branch>
+   git merge master
+   ```
+1. If there are any merge conflicts, resolve them. Then, run `git push origin <your working branch>`.
 
 ## Go-to-Market (GTM) opportunities
 
