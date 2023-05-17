@@ -544,6 +544,8 @@ ADDITIONAL_METRICS_BY_VERSION = {
 }
 VERSIONS_THAT_ADD_METRICS = sorted(ADDITIONAL_METRICS_BY_VERSION)
 
+# These metrics have been deleted on ES8
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html
 ADDITIONAL_METRIC_PRE_8_0_0 = {
     'elasticsearch.thread_pool.listener.active': ('gauge', 'thread_pool.listener.active'),
     'elasticsearch.thread_pool.listener.threads': ('gauge', 'thread_pool.listener.threads'),

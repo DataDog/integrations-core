@@ -10,7 +10,7 @@ services:
       - "node.name=test-node"
       - "discovery.type=single-node"
       - "path.repo=[\"/usr/share/elasticsearch/data\"]"
-      - "xpack.security.enabled=false"
+      - "xpack.security.enabled=false" # xpack settings to disable security as ES8 doesn't use opendistro anymore.
       - "xpack.security.transport.ssl.enabled=false"
       - "xpack.security.http.ssl.enabled=false"
       - "ELASTIC_PASSWORD=admin"
