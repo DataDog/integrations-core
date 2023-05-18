@@ -98,7 +98,6 @@ To get started with creating an API-based integration, software license, or prof
 [11]: https://docs.datadoghq.com/developers/authorization/
 [12]: https://github.com/DataDog/marketplace/pull/107
 [13]: https://docs.datadoghq.com/developers/integrations/create_a_tile
-[14]: https://docs.datadoghq.com/developers/integrations/api_integration/
 [15]: https://docs.datadoghq.com/developers/integrations/api_integration
 [19]: https://docs.datadoghq.com/developers/integrations/agent_integration
 [20]: https://www.dashcon.io/
