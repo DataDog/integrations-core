@@ -85,16 +85,17 @@ class PostgresMetricsCache:
             metrics = self.instance_metrics
 
         res = {
-            'descriptors': [('psd.datname', 'db')],
-            'metrics': metrics,
-            'query': "SELECT psd.datname, {metrics_columns} "
+            "descriptors": [("psd.datname", "db")],
+            "metrics": metrics,
+            "query": "SELECT psd.datname, {metrics_columns} "
             "FROM pg_stat_database psd "
             "JOIN pg_database pd ON psd.datname = pd.datname",
-            'relation': False,
+            "relation": False,
         }
 
         res["query"] += " WHERE " + " AND ".join(
-            "psd.datname not ilike '{}'".format(db) for db in self.config.ignore_databases
+            "psd.datname not ilike '{}'".format(db)
+            for db in self.config.ignore_databases
         )
 
         if self.config.dbstrict:
@@ -120,18 +121,19 @@ class PostgresMetricsCache:
             return None
 
         return {
-            'descriptors': [],
-            'metrics': self.bgw_metrics,
-            'query': "select {metrics_columns} FROM pg_stat_bgwriter",
-            'relation': False,
+            "descriptors": [],
+            "metrics": self.bgw_metrics,
+            "query": "select {metrics_columns} FROM pg_stat_bgwriter",
+            "relation": False,
         }
 
     def get_count_metrics(self):
         if self._count_metrics is not None:
             return self._count_metrics
         metrics = dict(COUNT_METRICS)
-        metrics['query'] = COUNT_METRICS['query'].format(
-            metrics_columns="{metrics_columns}", table_count_limit=self.config.table_count_limit
+        metrics["query"] = COUNT_METRICS["query"].format(
+            metrics_columns="{metrics_columns}",
+            table_count_limit=self.config.table_count_limit,
         )
         self._count_metrics = metrics
         return metrics
@@ -150,10 +152,10 @@ class PostgresMetricsCache:
             return None
 
         return {
-            'descriptors': [],
-            'metrics': self.archiver_metrics,
-            'query': "select {metrics_columns} FROM pg_stat_archiver",
-            'relation': False,
+            "descriptors": [],
+            "metrics": self.archiver_metrics,
+            "query": "select {metrics_columns} FROM pg_stat_archiver",
+            "relation": False,
         }
 
     def get_replication_metrics(self, version, is_aurora):
@@ -166,7 +168,9 @@ class PostgresMetricsCache:
             return self.replication_metrics
 
         if is_aurora:
-            logger.debug("Detected Aurora %s. Won't collect replication metrics", version)
+            logger.debug(
+                "Detected Aurora %s. Won't collect replication metrics", version
+            )
             self.replication_metrics = {}
         elif version >= V10:
             self.replication_metrics = dict(REPLICATION_METRICS_10)
@@ -191,24 +195,34 @@ class PostgresMetricsCache:
         if metrics_data is None:
             excluded_aggregations = self.config.activity_metrics_excluded_aggregations
             if version < V9:
-                excluded_aggregations.append('application_name')
+                excluded_aggregations.append("application_name")
 
-            default_descriptors = [('application_name', 'app'), ('datname', 'db'), ('usename', 'user')]
+            default_descriptors = [
+                ("application_name", "app"),
+                ("datname", "db"),
+                ("usename", "user"),
+            ]
             default_aggregations = [d[0] for d in default_descriptors]
 
-            aggregation_columns = [a for a in default_aggregations if a not in excluded_aggregations]
-            descriptors = [d for d in default_descriptors if d[0] not in excluded_aggregations]
+            aggregation_columns = [
+                a for a in default_aggregations if a not in excluded_aggregations
+            ]
+            descriptors = [
+                d for d in default_descriptors if d[0] not in excluded_aggregations
+            ]
 
             if version < V10:
                 query = ACTIVITY_QUERY_LT_10
             else:
                 query = ACTIVITY_QUERY_10
             if not aggregation_columns:
-                query = query.format(aggregation_columns_select='', aggregation_columns_group='')
+                query = query.format(
+                    aggregation_columns_select="", aggregation_columns_group=""
+                )
             else:
                 query = query.format(
-                    aggregation_columns_select=', '.join(aggregation_columns) + ',',
-                    aggregation_columns_group=',' + ', '.join(aggregation_columns),
+                    aggregation_columns_select=", ".join(aggregation_columns) + ",",
+                    aggregation_columns_group="," + ", ".join(aggregation_columns),
                 )
 
             if version >= V9_6:
@@ -221,17 +235,17 @@ class PostgresMetricsCache:
                 metrics_query = ACTIVITY_METRICS_LT_8_3
 
             for i, q in enumerate(metrics_query):
-                if '{dd__user}' in q:
+                if "{dd__user}" in q:
                     metrics_query[i] = q.format(dd__user=self.config.user)
 
-            metrics = {k: v for k, v in zip(metrics_query, ACTIVITY_DD_METRICS)}
+            metrics = dict(zip(metrics_query, ACTIVITY_DD_METRICS))
             self.activity_metrics = (metrics, query, descriptors)
         else:
             metrics, query, descriptors = metrics_data
 
         return {
-            'descriptors': descriptors,
-            'metrics': metrics,
-            'query': query,
-            'relation': False,
+            "descriptors": descriptors,
+            "metrics": metrics,
+            "query": query,
+            "relation": False,
         }

@@ -4,8 +4,10 @@
 
 
 def initialize_instance(values, **kwargs):
-    if values.get('collect_wal_metrics'):
-        if 'data_directory' not in values:
-            raise ValueError('Field `data_directory` is required when `collect_wal_metrics` is enabled')
+    if values.get("collect_wal_metrics"):
+        if "data_directory" not in values:
+            raise ValueError(
+                "Field `data_directory` is required when `collect_wal_metrics` is enabled"
+            )
 
     return values

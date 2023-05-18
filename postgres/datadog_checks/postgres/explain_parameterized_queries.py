@@ -13,15 +13,15 @@ from .version_utils import V12
 
 logger = logging.getLogger(__name__)
 
-PREPARE_STATEMENT_QUERY = 'PREPARE dd_{query_signature} AS {statement}'
+PREPARE_STATEMENT_QUERY = "PREPARE dd_{query_signature} AS {statement}"
 
-PARAM_TYPES_COUNT_QUERY = '''\
+PARAM_TYPES_COUNT_QUERY = """\
 SELECT CARDINALITY(parameter_types) FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'
-'''
+"""
 
-EXECUTE_PREPARED_STATEMENT_QUERY = 'EXECUTE dd_{prepared_statement}({generic_values})'
+EXECUTE_PREPARED_STATEMENT_QUERY = "EXECUTE dd_{prepared_statement}({generic_values})"
 
-EXPLAIN_QUERY = 'SELECT {explain_function}($stmt${statement}$stmt$)'
+EXPLAIN_QUERY = "SELECT {explain_function}($stmt${statement}$stmt$)"
 
 
 def agent_check_getter(self):
@@ -29,7 +29,7 @@ def agent_check_getter(self):
 
 
 class ExplainParameterizedQueries:
-    '''
+    """
     ExplainParameterizedQueries will attempt to use a workaround to explain a parameterized query.
 
     High-level explanation:
@@ -62,7 +62,7 @@ class ExplainParameterizedQueries:
             and provide generic values (null).
             4. Execute and explain: `EXPLAIN EXECUTE dd_products(null);`
                 Returns: (plan)
-    '''
+    """
 
     def __init__(self, check, config):
         self._check = check
@@ -75,10 +75,14 @@ class ExplainParameterizedQueries:
         self._set_plan_cache_mode(dbname)
 
         query_signature = compute_sql_signature(obfuscated_statement)
-        if not self._create_prepared_statement(dbname, statement, obfuscated_statement, query_signature):
+        if not self._create_prepared_statement(
+            dbname, statement, obfuscated_statement, query_signature
+        ):
             return None
 
-        result = self._explain_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
+        result = self._explain_prepared_statement(
+            dbname, statement, obfuscated_statement, query_signature
+        )
         self._deallocate_prepared_statement(dbname, query_signature)
         if result:
             return result[0][0][0]
@@ -88,11 +92,15 @@ class ExplainParameterizedQueries:
         self._execute_query(dbname, "SET plan_cache_mode = force_generic_plan")
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _create_prepared_statement(self, dbname, statement, obfuscated_statement, query_signature):
+    def _create_prepared_statement(
+        self, dbname, statement, obfuscated_statement, query_signature
+    ):
         try:
             self._execute_query(
                 dbname,
-                PREPARE_STATEMENT_QUERY.format(query_signature=query_signature, statement=statement),
+                PREPARE_STATEMENT_QUERY.format(
+                    query_signature=query_signature, statement=statement
+                ),
             )
             return True
         except Exception as e:
@@ -100,7 +108,7 @@ class ExplainParameterizedQueries:
             if self._config.log_unobfuscated_plans:
                 logged_statement = statement
             logger.warning(
-                'Failed to create prepared statement when explaining statement(%s)=[%s] | err=[%s]',
+                "Failed to create prepared statement when explaining statement(%s)=[%s] | err=[%s]",
                 query_signature,
                 logged_statement,
                 e,
@@ -115,9 +123,16 @@ class ExplainParameterizedQueries:
         return rows[0][0] if rows else 0
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _explain_prepared_statement(self, dbname, statement, obfuscated_statement, query_signature):
-        null_parameter = ','.join(
-            'null' for _ in range(self._get_number_of_parameters_for_prepared_statement(dbname, query_signature))
+    def _explain_prepared_statement(
+        self, dbname, statement, obfuscated_statement, query_signature
+    ):
+        null_parameter = ",".join(
+            "null"
+            for _ in range(
+                self._get_number_of_parameters_for_prepared_statement(
+                    dbname, query_signature
+                )
+            )
         )
         execute_prepared_statement_query = EXECUTE_PREPARED_STATEMENT_QUERY.format(
             prepared_statement=query_signature, generic_values=null_parameter
@@ -127,7 +142,7 @@ class ExplainParameterizedQueries:
                 dbname,
                 EXPLAIN_QUERY.format(
                     explain_function=self._config.explain_plan_config.get(
-                        'explain_function', 'datadog.explain_statement'
+                        "explain_function", "datadog.explain_statement"
                     ),
                     statement=execute_prepared_statement_query,
                 ),
@@ -137,7 +152,7 @@ class ExplainParameterizedQueries:
             if self._config.log_unobfuscated_plans:
                 logged_statement = statement
             logger.warning(
-                'Failed to explain parameterized statement(%s)=[%s] | err=[%s]',
+                "Failed to explain parameterized statement(%s)=[%s] | err=[%s]",
                 query_signature,
                 logged_statement,
                 e,
@@ -147,22 +162,29 @@ class ExplainParameterizedQueries:
     def _deallocate_prepared_statement(self, dbname, query_signature):
         try:
             self._execute_query(
-                dbname, "DEALLOCATE PREPARE dd_{query_signature}".format(query_signature=query_signature)
+                dbname,
+                "DEALLOCATE PREPARE dd_{query_signature}".format(
+                    query_signature=query_signature
+                ),
             )
         except Exception as e:
             logger.warning(
-                'Failed to deallocate prepared statement query_signature=[%s] | err=[%s]',
+                "Failed to deallocate prepared statement query_signature=[%s] | err=[%s]",
                 query_signature,
                 e,
             )
 
     def _execute_query(self, dbname, query):
-        with self._check._get_db(dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-            logger.debug('Executing query=[%s]', query)
+        with self._check._get_db(dbname).cursor(
+            cursor_factory=psycopg2.extras.DictCursor
+        ) as cursor:
+            logger.debug("Executing query=[%s]", query)
             cursor.execute(query)
 
     def _execute_query_and_fetch_rows(self, dbname, query):
-        with self._check._get_db(dbname).cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-            logger.debug('Executing query=[%s] and fetching rows', query)
+        with self._check._get_db(dbname).cursor(
+            cursor_factory=psycopg2.extras.DictCursor
+        ) as cursor:
+            logger.debug("Executing query=[%s] and fetching rows", query)
             cursor.execute(query)
             return cursor.fetchall()

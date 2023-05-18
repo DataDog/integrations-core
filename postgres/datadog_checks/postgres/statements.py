@@ -14,7 +14,11 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
+from datadog_checks.base.utils.db.utils import (
+    DBMAsyncJob,
+    default_json_event_encoding,
+    obfuscate_sql_with_metadata,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
@@ -46,32 +50,32 @@ PG_STAT_STATEMENTS_DEALLOC = "SELECT dealloc FROM pg_stat_statements_info"
 
 
 # Required columns for the check to run
-PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({'calls', 'query', 'rows'})
+PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({"calls", "query", "rows"})
 
 PG_STAT_STATEMENTS_TIMING_COLUMNS = frozenset(
     {
-        'blk_read_time',
-        'blk_write_time',
+        "blk_read_time",
+        "blk_write_time",
     }
 )
 
 PG_STAT_STATEMENTS_METRICS_COLUMNS = (
     frozenset(
         {
-            'calls',
-            'rows',
-            'total_time',
-            'total_exec_time',
-            'shared_blks_hit',
-            'shared_blks_read',
-            'shared_blks_dirtied',
-            'shared_blks_written',
-            'local_blks_hit',
-            'local_blks_read',
-            'local_blks_dirtied',
-            'local_blks_written',
-            'temp_blks_read',
-            'temp_blks_written',
+            "calls",
+            "rows",
+            "total_time",
+            "total_exec_time",
+            "shared_blks_hit",
+            "shared_blks_read",
+            "shared_blks_dirtied",
+            "shared_blks_written",
+            "local_blks_hit",
+            "local_blks_read",
+            "local_blks_dirtied",
+            "local_blks_written",
+            "temp_blks_read",
+            "temp_blks_written",
         }
     )
     | PG_STAT_STATEMENTS_TIMING_COLUMNS
@@ -79,16 +83,18 @@ PG_STAT_STATEMENTS_METRICS_COLUMNS = (
 
 PG_STAT_STATEMENTS_TAG_COLUMNS = frozenset(
     {
-        'datname',
-        'rolname',
-        'query',
+        "datname",
+        "rolname",
+        "query",
     }
 )
 
-PG_STAT_STATEMENTS_OPTIONAL_COLUMNS = frozenset({'queryid'})
+PG_STAT_STATEMENTS_OPTIONAL_COLUMNS = frozenset({"queryid"})
 
 PG_STAT_ALL_DESIRED_COLUMNS = (
-    PG_STAT_STATEMENTS_METRICS_COLUMNS | PG_STAT_STATEMENTS_TAG_COLUMNS | PG_STAT_STATEMENTS_OPTIONAL_COLUMNS
+    PG_STAT_STATEMENTS_METRICS_COLUMNS
+    | PG_STAT_STATEMENTS_TAG_COLUMNS
+    | PG_STAT_STATEMENTS_OPTIONAL_COLUMNS
 )
 
 
@@ -101,7 +107,7 @@ def _row_key(row):
     :param row: a normalized row from pg_stat_statements
     :return: a tuple uniquely identifying this row
     """
-    return row['query_signature'], row['datname'], row['rolname']
+    return row["query_signature"], row["datname"], row["rolname"]
 
 
 DEFAULT_COLLECTION_INTERVAL = 10
@@ -112,14 +118,20 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
     def __init__(self, check, config, shutdown_callback):
         collection_interval = float(
-            config.statement_metrics_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
+            config.statement_metrics_config.get(
+                "collection_interval", DEFAULT_COLLECTION_INTERVAL
+            )
         )
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
         super(PostgresStatementMetrics, self).__init__(
             check,
-            run_sync=is_affirmative(config.statement_metrics_config.get('run_sync', False)),
-            enabled=is_affirmative(config.statement_metrics_config.get('enabled', True)),
+            run_sync=is_affirmative(
+                config.statement_metrics_config.get("run_sync", False)
+            ),
+            enabled=is_affirmative(
+                config.statement_metrics_config.get("enabled", True)
+            ),
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
             min_collection_interval=config.min_collection_interval,
             dbms="postgres",
@@ -129,8 +141,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
         )
         self._check = check
         self._metrics_collection_interval = collection_interval
-        self._pg_stat_statements_max_warning_threshold = config.statement_metrics_config.get(
-            'pg_stat_statements_max_warning_threshold', 10000
+        self._pg_stat_statements_max_warning_threshold = (
+            config.statement_metrics_config.get(
+                "pg_stat_statements_max_warning_threshold", 10000
+            )
         )
         self._config = config
         self._tags_no_db = None
@@ -138,7 +152,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._state = StatementMetrics()
         self._stat_column_cache = []
         self._track_io_timing_cache = None
-        self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
+        self._obfuscate_options = to_native_string(
+            json.dumps(self._config.obfuscator_options)
+        )
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
             maxsize=config.full_statement_text_cache_max_size,
@@ -168,25 +184,32 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
         # Querying over '*' with limit 0 allows fetching only the column names from the cursor without data
         query = STATEMENTS_QUERY.format(
-            cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, extra_clauses="LIMIT 0", filters=""
+            cols="*",
+            pg_stat_statements_view=self._config.pg_stat_statements_view,
+            extra_clauses="LIMIT 0",
+            filters="",
         )
         cursor = self._check._get_db(self._config.dbname).cursor()
         self._execute_query(cursor, query, params=(self._config.dbname,))
-        col_names = [desc[0] for desc in cursor.description] if cursor.description else []
+        col_names = (
+            [desc[0] for desc in cursor.description] if cursor.description else []
+        )
         self._stat_column_cache = col_names
         return col_names
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
-        self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
-        self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
+        self.tags = [t for t in self._tags if not t.startswith("dd.internal")]
+        self._tags_no_db = [t for t in self.tags if not t.startswith("db:")]
         self.collect_per_statement_metrics()
 
     def _payload_pg_version(self):
         version = self._check.version
         if not version:
             return ""
-        return 'v{major}.{minor}.{patch}'.format(major=version.major, minor=version.minor, patch=version.patch)
+        return "v{major}.{minor}.{patch}".format(
+            major=version.major, minor=version.minor, patch=version.patch
+        )
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_per_statement_metrics(self):
@@ -198,21 +221,25 @@ class PostgresStatementMetrics(DBMAsyncJob):
             if not rows:
                 return
             for event in self._rows_to_fqt_events(rows):
-                self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+                self._check.database_monitoring_query_sample(
+                    json.dumps(event, default=default_json_event_encoding)
+                )
             payload = {
-                'host': self._check.resolved_hostname,
-                'timestamp': time.time() * 1000,
-                'min_collection_interval': self._metrics_collection_interval,
-                'tags': self._tags_no_db,
-                'cloud_metadata': self._config.cloud_metadata,
-                'postgres_rows': rows,
-                'postgres_version': self._payload_pg_version(),
-                'ddagentversion': datadog_agent.get_version(),
+                "host": self._check.resolved_hostname,
+                "timestamp": time.time() * 1000,
+                "min_collection_interval": self._metrics_collection_interval,
+                "tags": self._tags_no_db,
+                "cloud_metadata": self._config.cloud_metadata,
+                "postgres_rows": rows,
+                "postgres_version": self._payload_pg_version(),
+                "ddagentversion": datadog_agent.get_version(),
                 "ddagenthostname": self._check.agent_hostname,
             }
-            self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+            self._check.database_monitoring_query_metrics(
+                json.dumps(payload, default=default_json_event_encoding)
+            )
         except Exception:
-            self._log.exception('Unable to collect statement metrics due to an error')
+            self._log.exception("Unable to collect statement metrics due to an error")
             return []
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
@@ -224,7 +251,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 self._check.warning(
                     warning_with_tags(
                         "Unable to collect statement metrics because required fields are unavailable: %s.",
-                        ', '.join(sorted(missing_columns)),
+                        ", ".join(sorted(missing_columns)),
                         host=self._check.resolved_hostname,
                         dbname=self._config.dbname,
                     ),
@@ -246,7 +273,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
             if self._check.pg_settings.get("track_io_timing") != "on":
                 desired_columns -= PG_STAT_STATEMENTS_TIMING_COLUMNS
 
-            pg_stat_statements_max = int(self._check.pg_settings.get("pg_stat_statements.max"))
+            pg_stat_statements_max = int(
+                self._check.pg_settings.get("pg_stat_statements.max")
+            )
             if pg_stat_statements_max > self._pg_stat_statements_max_warning_threshold:
                 self._check.record_warning(
                     DatabaseConfigurationError.high_pg_stat_statements_max,
@@ -280,13 +309,16 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 params = (self._config.dbname,)
             elif self._config.ignore_databases:
                 filters = " AND " + " AND ".join(
-                    "pg_database.datname NOT ILIKE %s" for _ in self._config.ignore_databases
+                    "pg_database.datname NOT ILIKE %s"
+                    for _ in self._config.ignore_databases
                 )
                 params = params + tuple(self._config.ignore_databases)
             return self._execute_query(
-                self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor),
+                self._check._get_db(self._config.dbname).cursor(
+                    cursor_factory=psycopg2.extras.DictCursor
+                ),
                 STATEMENTS_QUERY.format(
-                    cols=', '.join(query_columns),
+                    cols=", ".join(query_columns),
                     pg_stat_statements_view=self._config.pg_stat_statements_view,
                     filters=filters,
                     extra_clauses="",
@@ -298,8 +330,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
             if (
                 isinstance(e, psycopg2.errors.ObjectNotInPrerequisiteState)
-            ) and 'pg_stat_statements must be loaded' in str(e.pgerror):
-                error_tag = "error:database-{}-pg_stat_statements_not_loaded".format(type(e).__name__)
+            ) and "pg_stat_statements must be loaded" in str(e.pgerror):
+                error_tag = "error:database-{}-pg_stat_statements_not_loaded".format(
+                    type(e).__name__
+                )
                 self._check.record_warning(
                     DatabaseConfigurationError.pg_stat_statements_not_loaded,
                     warning_with_tags(
@@ -314,8 +348,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         code=DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
                     ),
                 )
-            elif isinstance(e, psycopg2.errors.UndefinedTable) and 'pg_stat_statements' in str(e.pgerror):
-                error_tag = "error:database-{}-pg_stat_statements_not_created".format(type(e).__name__)
+            elif isinstance(
+                e, psycopg2.errors.UndefinedTable
+            ) and "pg_stat_statements" in str(e.pgerror):
+                error_tag = "error:database-{}-pg_stat_statements_not_created".format(
+                    type(e).__name__
+                )
                 self._check.record_warning(
                     DatabaseConfigurationError.pg_stat_statements_not_created,
                     warning_with_tags(
@@ -356,7 +394,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
             return
         try:
             rows = self._execute_query(
-                self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor),
+                self._check._get_db(self._config.dbname).cursor(
+                    cursor_factory=psycopg2.extras.DictCursor
+                ),
                 PG_STAT_STATEMENTS_DEALLOC,
             )
             if rows:
@@ -372,10 +412,16 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _emit_pg_stat_statements_metrics(self):
-        query = PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 if self._check.version < V9_4 else PG_STAT_STATEMENTS_COUNT_QUERY
+        query = (
+            PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4
+            if self._check.version < V9_4
+            else PG_STAT_STATEMENTS_COUNT_QUERY
+        )
         try:
             rows = self._execute_query(
-                self._check._get_db(self._config.dbname).cursor(cursor_factory=psycopg2.extras.DictCursor),
+                self._check._get_db(self._config.dbname).cursor(
+                    cursor_factory=psycopg2.extras.DictCursor
+                ),
                 query,
             )
             count = 0
@@ -410,7 +456,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
         rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
         self._check.gauge(
-            'dd.postgres.queries.query_rows_raw',
+            "dd.postgres.queries.query_rows_raw",
             len(rows),
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
@@ -422,20 +468,24 @@ class PostgresStatementMetrics(DBMAsyncJob):
         for row in rows:
             normalized_row = dict(copy.copy(row))
             try:
-                statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
+                statement = obfuscate_sql_with_metadata(
+                    row["query"], self._obfuscate_options
+                )
             except Exception as e:
                 if self._config.log_unobfuscated_queries:
-                    self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
+                    self._log.warning(
+                        "Failed to obfuscate query=[%s] | err=[%s]", row["query"], e
+                    )
                 else:
                     self._log.debug("Failed to obfuscate query | err=[%s]", e)
                 continue
 
-            obfuscated_query = statement['query']
-            normalized_row['query'] = obfuscated_query
-            normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
-            metadata = statement['metadata']
-            normalized_row['dd_tables'] = metadata.get('tables', None)
-            normalized_row['dd_commands'] = metadata.get('commands', None)
+            obfuscated_query = statement["query"]
+            normalized_row["query"] = obfuscated_query
+            normalized_row["query_signature"] = compute_sql_signature(obfuscated_query)
+            metadata = statement["metadata"]
+            normalized_row["dd_tables"] = metadata.get("tables", None)
+            normalized_row["dd_commands"] = metadata.get("commands", None)
             normalized_rows.append(normalized_row)
 
         return normalized_rows
@@ -447,8 +497,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 continue
             self._full_statement_text_cache[query_cache_key] = True
             row_tags = self._tags_no_db + [
-                "db:{}".format(row['datname']),
-                "rolname:{}".format(row['rolname']),
+                "db:{}".format(row["datname"]),
+                "rolname:{}".format(row["rolname"]),
             ]
             yield {
                 "timestamp": time.time() * 1000,
@@ -458,12 +508,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",
                 "db": {
-                    "instance": row['datname'],
-                    "query_signature": row['query_signature'],
-                    "statement": row['query'],
+                    "instance": row["datname"],
+                    "query_signature": row["query_signature"],
+                    "statement": row["query"],
                     "metadata": {
-                        "tables": row['dd_tables'],
-                        "commands": row['dd_commands'],
+                        "tables": row["dd_tables"],
+                        "commands": row["dd_commands"],
                     },
                 },
                 "postgres": {

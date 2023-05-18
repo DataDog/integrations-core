@@ -27,22 +27,26 @@ class SharedConfig(BaseModel):
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):
-        return validation.core.initialize_config(getattr(validators, 'initialize_shared', identity)(values))
+        return validation.core.initialize_config(
+            getattr(validators, "initialize_shared", identity)(values)
+        )
 
-    @validator('*', pre=True, always=True)
+    @validator("*", pre=True, always=True)
     def _ensure_defaults(cls, v, field):
         if v is not None or field.required:
             return v
 
-        return getattr(defaults, f'shared_{field.name}')(field, v)
+        return getattr(defaults, f"shared_{field.name}")(field, v)
 
-    @validator('*')
+    @validator("*")
     def _run_validations(cls, v, field):
         if not v:
             return v
 
-        return getattr(validators, f'shared_{field.name}', identity)(v, field=field)
+        return getattr(validators, f"shared_{field.name}", identity)(v, field=field)
 
     @root_validator(pre=False)
     def _final_validation(cls, values):
-        return validation.core.finalize_config(getattr(validators, 'finalize_shared', identity)(values))
+        return validation.core.finalize_config(
+            getattr(validators, "finalize_shared", identity)(values)
+        )
