@@ -242,13 +242,13 @@ def test_statement_metrics(
             {
                 'azure': {
                     'deployment_type': 'flexible_server',
-                    'name': 'test-server.database.windows.net',
+                    'fully_qualified_domain_name': 'test-server.database.windows.net',
                 },
             },
             {
                 'azure': {
                     'deployment_type': 'flexible_server',
-                    'fully_qualified_domain_name': 'test-server.database.windows.net',
+                    'name': 'test-server.database.windows.net',
                 },
             },
         ),
