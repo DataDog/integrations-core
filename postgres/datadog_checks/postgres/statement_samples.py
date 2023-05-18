@@ -696,7 +696,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the raw sql text to match query metrics
         
-        #Start decoupling with this part. Logic to control explain plan collection could stop us from running the actual explain
+        # Logic to control explain plan collection
         if is_affirmative(self._config.explain_plan_config.get('enabled', True)):
             plan_dict, explain_err_code, err_msg = self._run_and_track_explain(
                 row['datname'], row['query'], row['statement'], row['query_signature']

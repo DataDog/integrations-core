@@ -248,7 +248,7 @@ def test_statement_metrics(
             {
                 'azure': {
                     'deployment_type': 'flexible_server',
-                    'name': 'test-server.database.windows.net',
+                    'fully_qualified_domain_name': 'test-server.database.windows.net',
                 },
             },
         ),
@@ -387,9 +387,10 @@ def dbm_instance(pg_instance):
     pg_instance['dbm'] = True
     pg_instance['min_collection_interval'] = 0.1
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
-    pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    pg_instance['statement_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    pg_instance['explain_plans'] = {'enabled': True}
     return pg_instance
 
 
@@ -499,9 +500,9 @@ def test_failed_explain_handling(
     dbname = "datadog_test"
     # Don't need metrics for this one
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['query_samples']['explain_parameterized_queries'] = False
+    dbm_instance['explain_plans']['explain_parameterized_queries'] = False
     if explain_function_override:
-        dbm_instance['query_samples']['explain_function'] = explain_function_override
+        dbm_instance['explain_plans']['explain_function'] = explain_function_override
     check = integration_check(dbm_instance)
     check._connect()
 
