@@ -90,7 +90,7 @@ class PostgresConfig:
         # statement samples & execution plans
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
-        self.metadata_config = instance.get('query_metadata', {}) or {}
+        self.metadata_config = instance.get('database_metadata', {}) or {}
         self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         self.cloud_metadata = {}

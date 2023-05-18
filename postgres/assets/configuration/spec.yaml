@@ -427,6 +427,22 @@ files:
           value:
             type: number
             example: 3500
+    - name: database_metadata
+      description: Configure collection of database metadata
+      options:
+        - name: collect_settings
+          description: |
+            Enable collection of pg_settings. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: settings_collection_interval
+          description: |
+            Set the database settings collection interval (in minutes). Each collection involves a single query to
+            `pg_settings`.
+          value:
+            type: number
+            example: 5
 
     - name: aws
       description: |
