@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2023-present
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from concurrent.futures.thread import ThreadPoolExecutor
 import pytest
 from datadog_checks.base.utils.db.utils import DBMAsyncJob

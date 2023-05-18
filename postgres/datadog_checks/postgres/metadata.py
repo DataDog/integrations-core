@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2020-present
+# (C) Datadog, Inc. 2023-present
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Dict, Optional, Tuple  # noqa: F401
 
 import time
