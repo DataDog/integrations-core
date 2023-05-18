@@ -42,14 +42,12 @@ class MultiDatabaseConnectionPool(object):
         self._mu = threading.Lock()
         self._conns = {}
 
-        if hasattr(inspect, "signature"):
+        if hasattr(inspect, 'signature'):
             connect_sig = inspect.signature(connect_fn)
             if len(connect_sig.parameters) != 1:
                 raise ValueError(
                     "Invalid signature for the connection function. "
-                    "A single parameter for dbname is expected, got signature: {}".format(
-                        connect_sig
-                    )
+                    "A single parameter for dbname is expected, got signature: {}".format(connect_sig)
                 )
         self.connect_fn = connect_fn
 

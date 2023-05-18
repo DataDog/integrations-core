@@ -22,22 +22,22 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
 
 ALL_SCHEMAS = object()
-RELATION_NAME = "relation_name"
-RELATION_REGEX = "relation_regex"
-SCHEMAS = "schemas"
-RELKIND = "relkind"
+RELATION_NAME = 'relation_name'
+RELATION_REGEX = 'relation_regex'
+SCHEMAS = 'schemas'
+RELKIND = 'relkind'
 
 # The view pg_locks provides access to information about the locks held by active processes within the database server.
 LOCK_METRICS = {
-    "descriptors": [
-        ("mode", "lock_mode"),
-        ("locktype", "lock_type"),
-        ("nspname", "schema"),
-        ("datname", "db"),
-        ("relname", "table"),
+    'descriptors': [
+        ('mode', 'lock_mode'),
+        ('locktype', 'lock_type'),
+        ('nspname', 'schema'),
+        ('datname', 'db'),
+        ('relname', 'table'),
     ],
-    "metrics": {"lock_count": ("postgresql.locks", AgentCheck.gauge)},
-    "query": """
+    'metrics': {'lock_count': ('postgresql.locks', AgentCheck.gauge)},
+    'query': """
 SELECT mode,
        locktype,
        pn.nspname,
@@ -52,35 +52,35 @@ SELECT mode,
    AND l.mode IS NOT NULL
    AND pc.relname NOT LIKE 'pg^_%%' ESCAPE '^'
  GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode""",
-    "relation": True,
+    'relation': True,
 }
 
 # The pg_stat_all_tables contain one row for each table in the current database,
 # showing statistics about accesses to that specific table.
 # pg_stat_user_tables contains the same as pg_stat_all_tables, except that only user tables are shown.
 REL_METRICS = {
-    "descriptors": [("relname", "table"), ("schemaname", "schema")],
-    "metrics": {
-        "seq_scan": ("postgresql.seq_scans", AgentCheck.rate),
-        "seq_tup_read": ("postgresql.seq_rows_read", AgentCheck.rate),
-        "idx_scan": ("postgresql.index_rel_scans", AgentCheck.rate),
-        "idx_tup_fetch": ("postgresql.index_rel_rows_fetched", AgentCheck.rate),
-        "n_tup_ins": ("postgresql.rows_inserted", AgentCheck.rate),
-        "n_tup_upd": ("postgresql.rows_updated", AgentCheck.rate),
-        "n_tup_del": ("postgresql.rows_deleted", AgentCheck.rate),
-        "n_tup_hot_upd": ("postgresql.rows_hot_updated", AgentCheck.rate),
-        "n_live_tup": ("postgresql.live_rows", AgentCheck.gauge),
-        "n_dead_tup": ("postgresql.dead_rows", AgentCheck.gauge),
-        "vacuum_count": ("postgresql.vacuumed", AgentCheck.monotonic_count),
-        "autovacuum_count": ("postgresql.autovacuumed", AgentCheck.monotonic_count),
-        "analyze_count": ("postgresql.analyzed", AgentCheck.monotonic_count),
-        "autoanalyze_count": ("postgresql.autoanalyzed", AgentCheck.monotonic_count),
+    'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
+    'metrics': {
+        'seq_scan': ('postgresql.seq_scans', AgentCheck.rate),
+        'seq_tup_read': ('postgresql.seq_rows_read', AgentCheck.rate),
+        'idx_scan': ('postgresql.index_rel_scans', AgentCheck.rate),
+        'idx_tup_fetch': ('postgresql.index_rel_rows_fetched', AgentCheck.rate),
+        'n_tup_ins': ('postgresql.rows_inserted', AgentCheck.rate),
+        'n_tup_upd': ('postgresql.rows_updated', AgentCheck.rate),
+        'n_tup_del': ('postgresql.rows_deleted', AgentCheck.rate),
+        'n_tup_hot_upd': ('postgresql.rows_hot_updated', AgentCheck.rate),
+        'n_live_tup': ('postgresql.live_rows', AgentCheck.gauge),
+        'n_dead_tup': ('postgresql.dead_rows', AgentCheck.gauge),
+        'vacuum_count': ('postgresql.vacuumed', AgentCheck.monotonic_count),
+        'autovacuum_count': ('postgresql.autovacuumed', AgentCheck.monotonic_count),
+        'analyze_count': ('postgresql.analyzed', AgentCheck.monotonic_count),
+        'autoanalyze_count': ('postgresql.autoanalyzed', AgentCheck.monotonic_count),
     },
-    "query": """
+    'query': """
 SELECT relname,schemaname,{metrics_columns}
   FROM pg_stat_user_tables
  WHERE {relations}""",
-    "relation": True,
+    'relation': True,
 }
 
 
@@ -88,47 +88,34 @@ SELECT relname,schemaname,{metrics_columns}
 # showing statistics about accesses to that specific index.
 # The pg_stat_user_indexes view contain the same information, but filtered to only show user indexes.
 IDX_METRICS = {
-    "descriptors": [
-        ("relname", "table"),
-        ("schemaname", "schema"),
-        ("indexrelname", "index"),
-    ],
-    "metrics": {
-        "idx_scan": ("postgresql.index_scans", AgentCheck.rate),
-        "idx_tup_read": ("postgresql.index_rows_read", AgentCheck.rate),
-        "idx_tup_fetch": ("postgresql.index_rows_fetched", AgentCheck.rate),
+    'descriptors': [('relname', 'table'), ('schemaname', 'schema'), ('indexrelname', 'index')],
+    'metrics': {
+        'idx_scan': ('postgresql.index_scans', AgentCheck.rate),
+        'idx_tup_read': ('postgresql.index_rows_read', AgentCheck.rate),
+        'idx_tup_fetch': ('postgresql.index_rows_fetched', AgentCheck.rate),
     },
-    "query": """
+    'query': """
 SELECT relname,
        schemaname,
        indexrelname,
        {metrics_columns}
   FROM pg_stat_user_indexes
  WHERE {relations}""",
-    "relation": True,
+    'relation': True,
 }
 
 
 # The catalog pg_class catalogs tables and most everything else that has columns or is otherwise similar to a table.
 # For this integration we are restricting the query to ordinary tables.
 SIZE_METRICS = {
-    "descriptors": [("nspname", "schema"), ("relname", "table")],
-    "metrics": {
-        "pg_table_size(C.oid) as table_size": (
-            "postgresql.table_size",
-            AgentCheck.gauge,
-        ),
-        "pg_indexes_size(C.oid) as index_size": (
-            "postgresql.index_size",
-            AgentCheck.gauge,
-        ),
-        "pg_total_relation_size(C.oid) as total_size": (
-            "postgresql.total_size",
-            AgentCheck.gauge,
-        ),
+    'descriptors': [('nspname', 'schema'), ('relname', 'table')],
+    'metrics': {
+        'pg_table_size(C.oid) as table_size': ('postgresql.table_size', AgentCheck.gauge),
+        'pg_indexes_size(C.oid) as index_size': ('postgresql.index_size', AgentCheck.gauge),
+        'pg_total_relation_size(C.oid) as total_size': ('postgresql.total_size', AgentCheck.gauge),
     },
-    "relation": True,
-    "query": """
+    'relation': True,
+    'query': """
 SELECT
   N.nspname,
   relname,
@@ -145,24 +132,24 @@ WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
 # showing statistics about I/O on that specific table. The pg_statio_user_tables views contain the same information,
 # but filtered to only show user tables.
 STATIO_METRICS = {
-    "descriptors": [("relname", "table"), ("schemaname", "schema")],
-    "metrics": {
-        "heap_blks_read": ("postgresql.heap_blocks_read", AgentCheck.rate),
-        "heap_blks_hit": ("postgresql.heap_blocks_hit", AgentCheck.rate),
-        "idx_blks_read": ("postgresql.index_blocks_read", AgentCheck.rate),
-        "idx_blks_hit": ("postgresql.index_blocks_hit", AgentCheck.rate),
-        "toast_blks_read": ("postgresql.toast_blocks_read", AgentCheck.rate),
-        "toast_blks_hit": ("postgresql.toast_blocks_hit", AgentCheck.rate),
-        "tidx_blks_read": ("postgresql.toast_index_blocks_read", AgentCheck.rate),
-        "tidx_blks_hit": ("postgresql.toast_index_blocks_hit", AgentCheck.rate),
+    'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
+    'metrics': {
+        'heap_blks_read': ('postgresql.heap_blocks_read', AgentCheck.rate),
+        'heap_blks_hit': ('postgresql.heap_blocks_hit', AgentCheck.rate),
+        'idx_blks_read': ('postgresql.index_blocks_read', AgentCheck.rate),
+        'idx_blks_hit': ('postgresql.index_blocks_hit', AgentCheck.rate),
+        'toast_blks_read': ('postgresql.toast_blocks_read', AgentCheck.rate),
+        'toast_blks_hit': ('postgresql.toast_blocks_hit', AgentCheck.rate),
+        'tidx_blks_read': ('postgresql.toast_index_blocks_read', AgentCheck.rate),
+        'tidx_blks_hit': ('postgresql.toast_index_blocks_hit', AgentCheck.rate),
     },
-    "query": """
+    'query': """
 SELECT relname,
        schemaname,
        {metrics_columns}
   FROM pg_statio_user_tables
  WHERE {relations}""",
-    "relation": True,
+    'relation': True,
 }
 # adapted from https://wiki.postgresql.org/wiki/Show_database_bloat and https://github.com/bucardo/check_postgres/
 TABLE_BLOAT_QUERY = """
@@ -208,12 +195,12 @@ FROM (
 
 # The estimated table bloat
 TABLE_BLOAT = {
-    "descriptors": [("schemaname", "schema"), ("relname", "table")],
-    "metrics": {
-        "tbloat": ("postgresql.table_bloat", AgentCheck.gauge),
+    'descriptors': [('schemaname', 'schema'), ('relname', 'table')],
+    'metrics': {
+        'tbloat': ('postgresql.table_bloat', AgentCheck.gauge),
     },
-    "query": TABLE_BLOAT_QUERY,
-    "relation": True,
+    'query': TABLE_BLOAT_QUERY,
+    'relation': True,
 }
 
 
@@ -263,21 +250,15 @@ FROM (
 
 # The estimated table bloat
 INDEX_BLOAT = {
-    "descriptors": [("schemaname", "schema"), ("relname", "table"), ("iname", "index")],
-    "metrics": {
-        "ibloat": ("postgresql.index_bloat", AgentCheck.gauge),
+    'descriptors': [('schemaname', 'schema'), ('relname', 'table'), ('iname', 'index')],
+    'metrics': {
+        'ibloat': ('postgresql.index_bloat', AgentCheck.gauge),
     },
-    "query": INDEX_BLOAT_QUERY,
-    "relation": True,
+    'query': INDEX_BLOAT_QUERY,
+    'relation': True,
 }
 
-RELATION_METRICS = [
-    LOCK_METRICS,
-    REL_METRICS,
-    IDX_METRICS,
-    SIZE_METRICS,
-    STATIO_METRICS,
-]
+RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
 
 
 class RelationsManager(object):
@@ -301,29 +282,19 @@ class RelationsManager(object):
                 relation_filter.append("( relname ~ '{}'".format(r[RELATION_REGEX]))
 
             if ALL_SCHEMAS not in r[SCHEMAS]:
-                schema_filter = ",".join("'{}'".format(s) for s in r[SCHEMAS])
-                relation_filter.append(
-                    "AND {} = ANY(array[{}]::text[])".format(
-                        schema_field, schema_filter
-                    )
-                )
+                schema_filter = ','.join("'{}'".format(s) for s in r[SCHEMAS])
+                relation_filter.append('AND {} = ANY(array[{}]::text[])'.format(schema_field, schema_filter))
 
             # TODO: explicitly declare `relkind` compatiblity in the query rather than implicitly checking query text
-            if r.get(RELKIND) and "FROM pg_locks" in query:
-                relkind_filter = ",".join("'{}'".format(s) for s in r[RELKIND])
-                relation_filter.append(
-                    "AND relkind = ANY(array[{}])".format(relkind_filter)
-                )
+            if r.get(RELKIND) and 'FROM pg_locks' in query:
+                relkind_filter = ','.join("'{}'".format(s) for s in r[RELKIND])
+                relation_filter.append('AND relkind = ANY(array[{}])'.format(relkind_filter))
 
-            relation_filter.append(")")
-            relations_filter.append(" ".join(relation_filter))
+            relation_filter.append(')')
+            relations_filter.append(' '.join(relation_filter))
 
-        relations_filter = "(" + " OR ".join(relations_filter) + ")"
-        self.log.debug(
-            "Running query: %s with relations matching: %s",
-            str(query),
-            relations_filter,
-        )
+        relations_filter = '(' + ' OR '.join(relations_filter) + ')'
+        self.log.debug("Running query: %s with relations matching: %s", str(query), relations_filter)
         return query.format(relations=relations_filter)
 
     @staticmethod
@@ -346,15 +317,11 @@ class RelationsManager(object):
                         element,
                     )
                 if not isinstance(element.get(SCHEMAS, []), list):
-                    raise ConfigurationError(
-                        "Expected '%s' to be a list for %s", SCHEMAS, element
-                    )
+                    raise ConfigurationError("Expected '%s' to be a list for %s", SCHEMAS, element)
                 if not isinstance(element.get(RELKIND, []), list):
-                    raise ConfigurationError(
-                        "Expected '%s' to be a list for %s", RELKIND, element
-                    )
+                    raise ConfigurationError("Expected '%s' to be a list for %s", RELKIND, element)
             elif not isinstance(element, str):
-                raise ConfigurationError("Unhandled relations config type: %s", element)
+                raise ConfigurationError('Unhandled relations config type: %s', element)
 
     @staticmethod
     def _build_relations_config(yamlconfig):

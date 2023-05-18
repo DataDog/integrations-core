@@ -26,7 +26,7 @@ class VersionUtils(object):
     @staticmethod
     def get_raw_version(db):
         cursor = db.cursor()
-        cursor.execute("SHOW SERVER_VERSION;")
+        cursor.execute('SHOW SERVER_VERSION;')
         raw_version = cursor.fetchone()[0]
         return raw_version
 
@@ -34,13 +34,10 @@ class VersionUtils(object):
         cursor = db.cursor()
         try:
             # This query will pollute PG logs in non aurora versions but is the only reliable way of detecting aurora
-            cursor.execute("select AURORA_VERSION();")
+            cursor.execute('select AURORA_VERSION();')
             return True
         except Exception as e:
-            self.log.debug(
-                "Captured exception %s while determining if the DB is aurora. Assuming is not",
-                str(e),
-            )
+            self.log.debug("Captured exception %s while determining if the DB is aurora. Assuming is not", str(e))
             db.rollback()
             return False
 
@@ -53,17 +50,17 @@ class VersionUtils(object):
             pass
         try:
             # Version may be missing minor eg: 10.0
-            version = raw_version.split(" ")[0].split(".")
+            version = raw_version.split(' ')[0].split('.')
             version = [int(part) for part in version]
             while len(version) < 3:
                 version.append(0)
             return VersionInfo(*version)
         except ValueError:
             # Postgres might be in development, with format \d+[beta|rc]\d+
-            match = re.match(r"(\d+)([a-zA-Z]+)(\d+)", raw_version)
+            match = re.match(r'(\d+)([a-zA-Z]+)(\d+)', raw_version)
             if match:
                 version = list(match.groups())
-                return VersionInfo.parse("{}.0.0-{}.{}".format(*version))
+                return VersionInfo.parse('{}.0.0-{}.{}'.format(*version))
         raise Exception("Cannot determine which version is {}".format(raw_version))
 
     @staticmethod
@@ -74,12 +71,12 @@ class VersionUtils(object):
         """
         version = VersionUtils.parse_version(raw_version)
         transformed = {
-            "version.major": str(version.major),
-            "version.minor": str(version.minor),
-            "version.patch": str(version.patch),
-            "version.raw": raw_version,
-            "version.scheme": "semver",
+            'version.major': str(version.major),
+            'version.minor': str(version.minor),
+            'version.patch': str(version.patch),
+            'version.raw': raw_version,
+            'version.scheme': 'semver',
         }
         if version.prerelease:
-            transformed["version.release"] = version.prerelease
+            transformed['version.release'] = version.prerelease
         return transformed

@@ -19,7 +19,7 @@ def instance_activity_metrics_excluded_aggregations(field, value):
 
 
 def instance_application_name(field, value):
-    return "datadog-agent"
+    return 'datadog-agent'
 
 
 def instance_aws(field, value):
@@ -63,7 +63,7 @@ def instance_custom_queries(field, value):
 
 
 def instance_data_directory(field, value):
-    return "/usr/local/pgsql/data"
+    return '/usr/local/pgsql/data'
 
 
 def instance_dbm(field, value):
@@ -71,7 +71,7 @@ def instance_dbm(field, value):
 
 
 def instance_dbname(field, value):
-    return "postgres"
+    return 'postgres'
 
 
 def instance_dbstrict(field, value):
@@ -99,7 +99,7 @@ def instance_idle_connection_timeout(field, value):
 
 
 def instance_ignore_databases(field, value):
-    return ["template%", "rdsadmin", "azure_maintenance"]
+    return ['template%', 'rdsadmin', 'azure_maintenance']
 
 
 def instance_log_unobfuscated_plans(field, value):
@@ -131,7 +131,7 @@ def instance_password(field, value):
 
 
 def instance_pg_stat_statements_view(field, value):
-    return "show_pg_stat_statements()"
+    return 'show_pg_stat_statements()'
 
 
 def instance_port(field, value):

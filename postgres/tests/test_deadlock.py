@@ -28,7 +28,7 @@ def wait_on_result(cursor=None, sql=None, binds=None, expected_value=None):
 
 @pytest.mark.skipif(
     POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 9.2,
-    reason="Deadlock test requires version 9.2 or higher (make sure POSTGRES_VERSION is set)",
+    reason='Deadlock test requires version 9.2 or higher (make sure POSTGRES_VERSION is set)',
 )
 def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
     check = integration_check(pg_instance)
@@ -48,7 +48,7 @@ def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
                 raise psycopg2.OperationalError("poll() returned %s" % state)
             time.sleep(0.1)
 
-    conn_args = {"host": HOST, "dbname": DB_NAME, "user": "bob", "password": "bob"}
+    conn_args = {'host': HOST, 'dbname': DB_NAME, 'user': "bob", 'password': "bob"}
     conn_args_async = copy.copy(conn_args)
     conn_args_async["async_"] = 1
     conn1 = psycopg2.connect(**conn_args)
@@ -57,9 +57,9 @@ def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
     conn2 = psycopg2.connect(**conn_args_async)
     wait(conn2)
 
-    appname = "deadlock sess"
-    appname1 = appname + "1"
-    appname2 = appname + "2"
+    appname = 'deadlock sess'
+    appname1 = appname + '1'
+    appname2 = appname + '2'
     appname_sql = "SET application_name=%s"
     update_sql = "update personsdup1 set address = 'changed' where personid = %s"
 
@@ -104,14 +104,10 @@ commit;
     AND blocking_activity.application_name = %s
     AND blocked_activity.application_name = %s """
 
-    is_locked = wait_on_result(
-        cursor=cursor, sql=lock_count_sql, binds=(appname1, appname2), expected_value=1
-    )
+    is_locked = wait_on_result(cursor=cursor, sql=lock_count_sql, binds=(appname1, appname2), expected_value=1)
 
     if not is_locked:
-        raise Exception(
-            "ERROR: Couldn't reproduce a deadlock. That can happen on an extremely overloaded system."
-        )
+        raise Exception("ERROR: Couldn't reproduce a deadlock. That can happen on an extremely overloaded system.")
 
     try:
         cur1.execute(update_sql, (2,))
@@ -121,20 +117,15 @@ commit;
 
     dd_run_check(check)
 
-    wait_on_result(
-        cursor=cursor,
-        sql=deadlock_count_sql,
-        binds=(DB_NAME,),
-        expected_value=deadlocks_before + 1,
-    )
+    wait_on_result(cursor=cursor, sql=deadlock_count_sql, binds=(DB_NAME,), expected_value=deadlocks_before + 1)
 
     aggregator.assert_metric(
-        "postgresql.deadlocks.count",
+        'postgresql.deadlocks.count',
         value=deadlocks_before + 1,
         tags=pg_instance["tags"]
         + [
             "db:{}".format(DB_NAME),
             "port:{}".format(PORT),
-            "dd.internal.resource:database_instance:{}".format(check.resolved_hostname),
+            'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
         ],
     )

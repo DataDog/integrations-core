@@ -19,7 +19,7 @@ COMMON_AND_MAIN_CHECK_METRICS = dict(COMMON_METRICS, **DBM_MIGRATED_METRICS)
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "version, is_aurora, expected_metrics",
+    'version, is_aurora, expected_metrics',
     [
         pytest.param(V10, False, REPLICATION_METRICS_10),
         pytest.param(V10, True, {}),
@@ -36,26 +36,20 @@ def test_aurora_replication_metrics(pg_instance, version, is_aurora, expected_me
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "version, is_dbm_enabled, expected_metrics",
+    'version, is_dbm_enabled, expected_metrics',
     [
         pytest.param(V10, True, dict(COMMON_METRICS, **NEWER_92_METRICS)),
-        pytest.param(
-            V10, False, dict(COMMON_AND_MAIN_CHECK_METRICS, **NEWER_92_METRICS)
-        ),
+        pytest.param(V10, False, dict(COMMON_AND_MAIN_CHECK_METRICS, **NEWER_92_METRICS)),
         pytest.param(V9_1, True, COMMON_METRICS),
         pytest.param(V9_1, False, COMMON_AND_MAIN_CHECK_METRICS),
         pytest.param(V9_2, True, dict(COMMON_METRICS, **NEWER_92_METRICS)),
-        pytest.param(
-            V9_2, False, dict(COMMON_AND_MAIN_CHECK_METRICS, **NEWER_92_METRICS)
-        ),
+        pytest.param(V9_2, False, dict(COMMON_AND_MAIN_CHECK_METRICS, **NEWER_92_METRICS)),
     ],
 )
-def test_dbm_enabled_conn_metric(
-    pg_instance, version, is_dbm_enabled, expected_metrics
-):
-    pg_instance["dbm"] = is_dbm_enabled
-    pg_instance["collect_database_size_metrics"] = False
+def test_dbm_enabled_conn_metric(pg_instance, version, is_dbm_enabled, expected_metrics):
+    pg_instance['dbm'] = is_dbm_enabled
+    pg_instance['collect_database_size_metrics'] = False
     config = PostgresConfig(pg_instance)
     cache = PostgresMetricsCache(config)
     instance_metrics = cache.get_instance_metrics(version)
-    assert instance_metrics["metrics"] == expected_metrics
+    assert instance_metrics['metrics'] == expected_metrics
