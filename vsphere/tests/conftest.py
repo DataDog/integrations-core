@@ -51,6 +51,7 @@ def historical_instance():
 @pytest.fixture()
 def events_only_instance():
     return {
+        'empty_default_hostname': True,
         'use_legacy_check_version': False,
         'host': os.environ.get('VSPHERE_URL', 'FAKE'),
         'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
