@@ -404,6 +404,119 @@ def test_e2e_core_cisco_csr(dd_agent_check):
     aggregator.assert_all_metrics_covered()
 
 
+def test_e2e_cisco_nexus(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update({'community_string': 'cisco-nexus'})
+    config['init_config']['loader'] = 'core'
+    instance = config['instances'][0]
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
+
+    common_tags = [
+        'snmp_profile:cisco-nexus',
+        'device_vendor:cisco',
+        'device_namespace:default',
+        "snmp_device:{}".format(instance['ip_address']),
+        'snmp_host:Nexus-eu1.companyname.managed',
+    ]
+
+    common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
+
+    interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
+    for metric in metrics.IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface)] + common_tags
+        aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.COUNT, tags=tags, count=1)
+
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface), 'interface_alias:'] + common_tags
+        for metric in metrics.IF_COUNTS:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
+        for metric in metrics.IF_RATES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        for metric in metrics.IF_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+        for metric in metrics.IF_BANDWIDTH_USAGE:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        custom_speed_tags = tags + ['speed_source:device']
+        for metric in metrics.IF_CUSTOM_SPEED_GAUGES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=custom_speed_tags, count=2
+            )
+
+    for metric in metrics.TCP_COUNTS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=common_tags, count=1)
+
+    for metric in metrics.TCP_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
+
+    for metric in metrics.UDP_COUNTS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=common_tags, count=1)
+
+    sensors = [1, 9, 11, 12, 12, 14, 17, 26, 29, 31]
+    for sensor in sensors:
+        tags = ['sensor_id:{}'.format(sensor), 'sensor_type:8'] + common_tags
+        aggregator.assert_metric('snmp.entSensorValue', metric_type=aggregator.GAUGE, tags=tags, count=2)
+
+    frus = [6, 7, 15, 16, 19, 27, 30, 31]
+    for fru in frus:
+        tags = ['fru:{}'.format(fru)] + common_tags
+        for metric in metrics.FRU_METRICS:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+
+    cpus = [3173, 6692, 11571, 19529, 30674, 38253, 52063, 54474, 55946, 63960]
+    for cpu in cpus:
+        tags = ['cpu:{}'.format(cpu)] + common_tags
+        for metric in metrics.CPU_METRICS:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+
+    for index, state in [(3, 3), (6, 6), (8, 6), (11, 6), (13, 3), (14, 6), (20, 6), (21, 4), (31, 5)]:
+        aggregator.assert_metric(
+            'snmp.ciscoEnvMonTemperatureStatusValue',
+            metric_type=aggregator.GAUGE,
+            tags=['temp_state:{}'.format(state), 'temp_index:{}'.format(index)] + common_tags,
+        )
+
+    power_supply_tags = ['power_source:1', 'power_status_descr:Jaded driving their their their'] + common_tags
+    aggregator.assert_metric('snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=power_supply_tags)
+
+    fan_indices = [4, 6, 7, 16, 21, 22, 25, 27]
+    for index in fan_indices:
+        tags = ['fan_status_index:{}'.format(index)] + common_tags
+        aggregator.assert_metric('snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags)
+
+    aggregator.assert_metric(
+        'snmp.cswStackPortOperStatus',
+        metric_type=aggregator.GAUGE,
+        tags=common_tags + ['interface:GigabitEthernet1/0/1'],
+    )
+
+    aggregator.assert_metric(
+        'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:0xffffffffffff'] + common_tags
+    )
+
+    frus = [2, 7, 8, 21, 26, 27, 30, 31]
+    for fru in frus:
+        tags = ['fru:{}'.format(fru)] + common_tags
+        aggregator.assert_metric(
+            'snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=['fru:{}'.format(fru)] + common_tags
+        )
+
+    cpu_ids = [6692, 3173, 54474, 63960, 11571, 38253, 30674, 52063]
+    for cpu in cpu_ids:
+        aggregator.assert_metric(
+            'snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + ['cpu:{}'.format(cpu)]
+        )
+
+    nexus_mem_metrics = ["memory.free", "memory.used", "memory.usage"]
+    for metric in nexus_mem_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags + ['mem:1'])
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=2)
+    aggregator.assert_all_metrics_covered()
+
+
 def test_e2e_cisco_legacy_wlc(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
