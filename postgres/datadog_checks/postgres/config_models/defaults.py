@@ -66,6 +66,10 @@ def instance_data_directory(field, value):
     return '/usr/local/pgsql/data'
 
 
+def instance_database_metadata(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_dbm(field, value):
     return False
 

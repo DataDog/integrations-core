@@ -34,6 +34,14 @@ class Azure(BaseModel):
     fully_qualified_domain_name: Optional[str]
 
 
+class DatabaseMetadata(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collect_settings: Optional[bool]
+    settings_collection_interval: Optional[float]
+
+
 class Gcp(BaseModel):
     class Config:
         allow_mutation = False
@@ -123,6 +131,7 @@ class InstanceConfig(BaseModel):
     collect_wal_metrics: Optional[bool]
     custom_queries: Optional[Sequence[Mapping[str, Any]]]
     data_directory: Optional[str]
+    database_metadata: Optional[DatabaseMetadata]
     dbm: Optional[bool]
     dbname: Optional[str]
     dbstrict: Optional[bool]
