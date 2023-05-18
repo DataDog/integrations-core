@@ -695,7 +695,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         # - `plan_signature` - hash computed from the normalized JSON plan to group identical plan trees
         # - `resource_hash` - hash computed off the raw sql text to match apm resources
         # - `query_signature` - hash computed from the raw sql text to match query metrics
-        
+
         # Logic to control explain plan collection
         if is_affirmative(self._config.explain_plan_config.get('enabled', True)):
             plan_dict, explain_err_code, err_msg = self._run_and_track_explain(
@@ -723,8 +723,8 @@ class PostgresStatementSamples(DBMAsyncJob):
             statement_plan_sig = (row['query_signature'], plan_signature)
         else:
             collection_errors, plan, normalized_plan, obfuscated_plan, plan_signature = None, None, None, None, None
-            statement_plan_sig = (row['query_signature'])
-        
+            statement_plan_sig = (row['query_signature'], row['query_signature'])
+
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             event = {
                 "host": self._check.resolved_hostname,
