@@ -737,7 +737,7 @@ def test_statement_metadata(
 ):
     """Tests for metadata in both samples and metrics"""
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
-    dbm_instance['query_samples']['run_sync'] = True
+    dbm_instance['statement_samples']['run_sync'] = True
     dbm_instance['query_metrics']['run_sync'] = True
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
@@ -821,7 +821,7 @@ def test_statement_reported_hostname(
     reported_hostname,
     expected_hostname,
 ):
-    dbm_instance['query_samples']['run_sync'] = True
+    dbm_instance['statement_samples']['run_sync'] = True
     dbm_instance['query_metrics']['run_sync'] = True
     dbm_instance['reported_hostname'] = reported_hostname
 
@@ -1238,7 +1238,7 @@ def test_statement_run_explain_errors(
 ):
     dbm_instance['query_activity']['enabled'] = False
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['query_samples']['explain_parameterized_queries'] = False
+    dbm_instance['explain_plans']['explain_parameterized_queries'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1378,8 +1378,8 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     # Don't need query metrics or activity for this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
-    dbm_instance['query_samples']['collection_interval'] = collection_interval
-    dbm_instance['query_samples']['run_sync'] = False
+    dbm_instance['statement_samples']['collection_interval'] = collection_interval
+    dbm_instance['statement_samples']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
     sleep_time = 1
@@ -1399,9 +1399,9 @@ def test_activity_collection_rate_limit(aggregator, integration_check, dbm_insta
     activity_interval = 0.2  # double the main loop
     # Don't need query metrics on this one
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['query_samples']['collection_interval'] = collection_interval
+    dbm_instance['statement_samples']['collection_interval'] = collection_interval
     dbm_instance['query_activity']['collection_interval'] = activity_interval
-    dbm_instance['query_samples']['run_sync'] = False
+    dbm_instance['statement_samples']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
@@ -1467,7 +1467,7 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
 
 
 def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
-    dbm_instance['query_samples']['run_sync'] = False
+    dbm_instance['statement_samples']['run_sync'] = False
     dbm_instance['query_metrics']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
@@ -1483,7 +1483,7 @@ def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
 
 
 def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
-    dbm_instance['query_samples']['run_sync'] = False
+    dbm_instance['statement_samples']['run_sync'] = False
     dbm_instance['query_metrics']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
@@ -1648,7 +1648,7 @@ def test_statement_metrics_database_errors(
     aggregator, integration_check, dbm_instance, error, metric_columns, expected_error_tag, expected_warnings
 ):
     # don't need samples for this test
-    dbm_instance['query_samples']['enabled'] = False
+    dbm_instance['statement_samples']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1697,7 +1697,7 @@ def test_pg_stat_statements_max_warning(
     integration_check, dbm_instance, pg_stat_statements_max_threshold, expected_warnings
 ):
     # don't need samples for this test
-    dbm_instance['query_samples']['enabled'] = False
+    dbm_instance['statement_samples']['enabled'] = False
     dbm_instance['query_metrics']['pg_stat_statements_max_warning_threshold'] = pg_stat_statements_max_threshold
     check = integration_check(dbm_instance)
     check._connect()
