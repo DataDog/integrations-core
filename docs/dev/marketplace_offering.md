@@ -31,7 +31,7 @@ While the **Integrations** page includes integrations built by both Datadog and 
 The following types of offerings are supported on the Datadog Marketplace:
 
 Integrations
-: Marketplace integrations that submit third-party data to (or pull data from) a user's Datadog account through the [Datadog Agent][15] or the [Datadog API][16]. These integrations can contain a variety of data types, such as metrics, events, logs, traces, and more.
+: Marketplace integrations that submit third-party data to (or pull data from) a user's Datadog account through the [Datadog Agent][19] or the [Datadog API][15]. These integrations can contain a variety of data types, such as metrics, events, logs, traces, and more.
 
 Software licenses
 : Software licenses enable you to deliver and license software solutions to customers through the Datadog Marketplace.
