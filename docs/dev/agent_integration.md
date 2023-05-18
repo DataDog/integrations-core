@@ -8,7 +8,7 @@ aliases:
   - /guides/new_integration/
   - /developers/integrations/new_check_howto/
 further_reading:
-- link: "/developers/integration/create_a_tile/"
+- link: "/developers/integrations/create_a_tile/"
   tag: "Documentation"
   text: "Create a tile"
 - link: "/developers/integrations/python/"
