@@ -89,7 +89,6 @@ To get started with creating an API-based integration, software license, or prof
 [1]: https://app.datadoghq.com/integrations
 [2]: https://app.datadoghq.com/marketplace
 [3]: https://partners.datadoghq.com/
-[4]: https://docs.datadoghq.com/developers/integrations/new_check_howto/
 [5]: https://docs.datadoghq.com/developers/datadog_apps
 [6]: https://partners.datadoghq.com/English/
 [7]: /account_management/users/#add-new-members-and-manage-invites
@@ -100,10 +99,10 @@ To get started with creating an API-based integration, software license, or prof
 [12]: https://github.com/DataDog/marketplace/pull/107
 [13]: https://docs.datadoghq.com/developers/integrations/create_a_tile
 [14]: https://docs.datadoghq.com/developers/integrations/api_integration/
-[15]: https://docs.datadoghq.com/integrations/create_a_tile/#agent-based-integrations
-[16]: https://docs.datadoghq.com/integrations/create_a_tile/#rest-api-integrations
-[17]: https://docs.datadoghq.com/integrations/create_a_tile/#datadog-apps
-[18]: https://docs.datadoghq.com/integrations/create_a_tile/#saas-license-or-professional-service-offerings
+[15]: https://docs.datadoghq.com/developers/integrations/create_a_tile/#agent-based-integrations
+[16]: https://docs.datadoghq.com/developers/integrations/create_a_tile/#rest-api-integrations
+[17]: https://docs.datadoghq.com/developers/integrations/create_a_tile/#datadog-apps
+[18]: https://docs.datadoghq.com/developers/integrations/create_a_tile/#saas-license-or-professional-service-offerings
 [19]: https://docs.datadoghq.com/developers/integrations/agent_integration
 [20]: https://www.dashcon.io/
 [21]: https://www.datadoghq.com/blog/
