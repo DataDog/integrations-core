@@ -4,7 +4,7 @@
 import logging
 
 import pytest
-from mock import MagicMock
+from mock import MagicMock, patch
 from pyVmomi import vim
 
 from datadog_checks.vsphere import VSphereCheck
@@ -32,6 +32,25 @@ def test_get_resource_tags(realtime_instance):
         vim.ClusterComputeResource: {},
     }
     assert expected_resource_tags == resource_tags
+
+
+@pytest.mark.usefixtures("mock_rest_api", "mock_type")
+def test_get_tags_exception(realtime_instance):
+    config = VSphereConfig(realtime_instance, {}, logger)
+    mock_api = build_rest_api_client(config, logger)
+    mock_mors = [MagicMock(spec=vim.VirtualMachine, _moId="foo")]
+
+    with patch('datadog_checks.vsphere.api_rest.VSphereRestClient.tagging_tags_get', side_effect=Exception("test")):
+        resource_tags = mock_api.get_resource_tags_for_mors(mock_mors)
+
+        expected_resource_tags = {
+            vim.HostSystem: {},
+            vim.VirtualMachine: {},
+            vim.Datacenter: {},
+            vim.Datastore: {},
+            vim.ClusterComputeResource: {},
+        }
+        assert expected_resource_tags == resource_tags
 
 
 @pytest.mark.parametrize(
