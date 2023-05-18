@@ -345,6 +345,21 @@ instances:
         #
         # payload_row_limit: 3500
 
+    ## Configure collection of database metadata
+    #
+    # database_metadata:
+
+        ## @param collect_settings - boolean - optional - default: true
+        ## Enable collection of pg_settings. Requires `dbm: true`.
+        #
+        # collect_settings: true
+
+        ## @param settings_collection_interval - number - optional - default: 5
+        ## Set the database settings collection interval (in minutes). Each collection involves a single query to
+        ## `pg_settings`.
+        #
+        # settings_collection_interval: 5
+
     ## This block defines the configuration for AWS RDS and Aurora instances. 
     ##
     ## Complete this section if you have installed the Datadog AWS Integration 
