@@ -10,6 +10,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 
 import mock
 import psycopg2
+import psycopg2.tz
 import pytest
 from dateutil import parser
 from semver import VersionInfo
