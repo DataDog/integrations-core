@@ -1534,16 +1534,16 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
 
 
 @pytest.mark.parametrize(
-    "number_key",
+    "attribute,number_key",
     [
-        "explained_queries_cache_maxsize",
-        "explained_queries_per_hour_per_query",
-        "seen_samples_cache_maxsize",
-        "collection_interval",
+        ("explain_plans", "explained_queries_cache_maxsize"),
+        ("explain_plans","explained_queries_per_hour_per_query"),
+        ("statement_samples","seen_samples_cache_maxsize"),
+        ("statement_samples","collection_interval"),
     ],
 )
-def test_statement_samples_config_invalid_number(integration_check, pg_instance, number_key):
-    pg_instance['query_samples'] = {
+def test_statement_samples_config_invalid_number(integration_check, pg_instance, attribute, number_key):
+    pg_instance[attribute] = {
         number_key: "not-a-number",
     }
     with pytest.raises(ValueError):
