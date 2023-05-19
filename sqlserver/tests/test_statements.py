@@ -502,36 +502,80 @@ def test_statement_metadata(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
-    "cloud_metadata",
+    "input_cloud_metadata,output_cloud_metadata",
     [
-        {},
-        {
-            'azure': {
-                'deployment_type': 'managed_instance',
-                'name': 'my-instance',
+        ({}, {}),
+        (
+            {
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance.abcea3661b20.database.windows.net',
+                },
             },
-        },
-        {
-            'aws': {
-                'instance_endpoint': 'foo.aws.com',
+            {
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance.abcea3661b20.database.windows.net',
+                },
             },
-            'azure': {
-                'deployment_type': 'managed_instance',
-                'name': 'my-instance',
+        ),
+        (
+            {
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'fully_qualified_domain_name': 'my-instance.abcea3661b20.database.windows.net',
+                },
             },
-        },
-        {
-            'gcp': {
-                'project_id': 'foo-project',
-                'instance_id': 'bar',
-                'extra_field': 'included',
+            {
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance.abcea3661b20.database.windows.net',
+                },
             },
-        },
+        ),
+        (
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance.abcea3661b20.database.windows.net',
+                },
+            },
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance.abcea3661b20.database.windows.net',
+                },
+            },
+        ),
+        (
+            {
+                'gcp': {
+                    'project_id': 'foo-project',
+                    'instance_id': 'bar',
+                    'extra_field': 'included',
+                },
+            },
+            {
+                'gcp': {
+                    'project_id': 'foo-project',
+                    'instance_id': 'bar',
+                    'extra_field': 'included',
+                },
+            },
+        ),
     ],
 )
-def test_statement_cloud_metadata(aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, cloud_metadata):
-    if cloud_metadata:
-        for k, v in cloud_metadata.items():
+def test_statement_cloud_metadata(
+    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, input_cloud_metadata, output_cloud_metadata
+):
+    if input_cloud_metadata:
+        for k, v in input_cloud_metadata.items():
             dbm_instance[k] = v
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
@@ -561,7 +605,7 @@ def test_statement_cloud_metadata(aggregator, dd_run_check, dbm_instance, bob_co
     assert payload['host'] == "stubbed.hostname", "wrong hostname"
     assert payload['ddagenthostname'] == datadog_agent.get_hostname()
     # cloud metadata
-    assert payload['cloud_metadata'] == cloud_metadata, "wrong cloud_metadata"
+    assert payload['cloud_metadata'] == output_cloud_metadata, "wrong cloud_metadata"
     # test that we're reading the edition out of the db instance. Note that this edition is what
     # is running in our test docker containers, so it's not expected to match the test cloud metadata
     assert payload['sqlserver_engine_edition'] in SELF_HOSTED_ENGINE_EDITIONS, "wrong edition"
