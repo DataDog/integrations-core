@@ -842,6 +842,7 @@ def test_statement_reported_hostname(
     assert metrics, "should have collected metrics"
     assert metrics[0]['host'] == expected_hostname
 
+
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
     "user,password,dbname,query,arg,",
@@ -881,11 +882,6 @@ def test_explain_plan_disable(
     check = integration_check(dbm_instance)
     check._connect()
 
-    tags = dbm_instance['tags'] + [
-        'port:{}'.format(PORT),
-        'db:{}'.format(dbname),
-    ]
-
     conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
     # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
     # the simple query protocol, sending the whole query as a plain string to postgres.
@@ -922,6 +918,7 @@ def test_explain_plan_disable(
 
     finally:
         conn.close()
+
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
