@@ -9,10 +9,27 @@ from scandir import scandir
 
 
 def _walk(top, onerror=None, followlinks=False):
-    """Modified version of https://docs.python.org/3/library/os.html#os.scandir
-    that returns https://docs.python.org/3/library/os.html#os.DirEntry for files
-    directly to take advantage of possible cached os.stat calls.
+    """A simplified and modified version of stdlib's `os.walk` that yields the
+    `os.DirEntry` objects that `scandir` produces during traversal instead of paths as
+    strings.
     """
+    # This implementation is based on https://github.com/python/cpython/blob/3.8/Lib/os.py#L280.
+
+    # This is a significant optimization for our use case (particularly on Windows) that
+    # justifies maintaining our own version of the function instead of using the
+    # stdlib's one directly. We need to stat every file to collect useful data, and the
+    # following quote from the docs
+    # (https://docs.python.org/3.8/library/os.html#os.scandir) explains very well why we
+    # want to keep those `os.DirEntry` objects:
+
+    # Using `scandir()` instead of `listdir()` can significantly increase the performance of
+    # code that also needs file type or file attribute information, because os.DirEntry
+    # objects expose this information if the operating system provides it when scanning a
+    # directory. All `os.DirEntry` methods may perform a system call, but is_dir() and
+    # is_file() usually only require a system call for symbolic links; os.DirEntry.stat()
+    # always requires a system call on Unix but only requires one for symbolic links on
+    # Windows.
+
     dirs = []
     nondirs = []
 
