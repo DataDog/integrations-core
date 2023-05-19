@@ -349,12 +349,7 @@ class OpenMetricsScraperMixin(object):
         # INTERNAL FEATURE, might be removed in future versions
         config['_text_filter_blacklist'] = []
 
-        # Whether or not to use the service account bearer token for authentication.
-        # Can be explicitly set to true or false to send or not the bearer token.
-        # If set to the `tls_only` value, the bearer token will be sent only to https endpoints.
-        # If 'bearer_token_path' is not set, we use /var/run/secrets/kubernetes.io/serviceaccount/token
-        # as a default path to get the token.
-        self.log.info("found bearer token of " + str(_get_setting('bearer_token_auth', False)))
+        # Set the bearer token authorization to customer value, then get the bearer token 
         config['bearer_token_auth'] = _get_setting('bearer_token_auth', False)
         self.set_bearer_token(config)
 
