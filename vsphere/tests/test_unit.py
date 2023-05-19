@@ -205,6 +205,22 @@ def test_event_alarm_status_changed_wrong_to(aggregator, dd_run_check, events_on
         aggregator.assert_event("""vCenter monitor status changed on this alarm, it was green and it's now yellow.""", count=0)
 
 
+def test_event_task(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.TaskEvent()
+        event.createdTime = get_current_datetime()
+        event.fullFormattedMessage = "Task completed successfully"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event("""@@@\nTask completed successfully\n@@@""")
+
+
 def test_event_vm_powered_on(aggregator, dd_run_check, events_only_instance):
     mock_connect = mock.MagicMock()
     with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
