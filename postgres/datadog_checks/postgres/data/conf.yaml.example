@@ -345,7 +345,7 @@ instances:
         #
         # payload_row_limit: 3500
 
-    ## Configure collection of database metadata
+    ## Configure collection of pg_settings. This is an alpha feature.
     #
     # database_metadata:
 
@@ -354,11 +354,11 @@ instances:
         #
         # collect_settings: true
 
-        ## @param settings_collection_interval - number - optional - default: 5
-        ## Set the database settings collection interval (in minutes). Each collection involves a single query to
+        ## @param settings_collection_interval - number - optional - default: 600
+        ## Set the database settings collection interval (in seconds). Each collection involves a single query to
         ## `pg_settings`.
         #
-        # settings_collection_interval: 5
+        # settings_collection_interval: 600
 
     ## This block defines the configuration for AWS RDS and Aurora instances. 
     ##

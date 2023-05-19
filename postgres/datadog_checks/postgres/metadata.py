@@ -20,8 +20,8 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.base.utils.tracking import tracked_method
 
-# default collection interval in minutes
-DEFAULT_COLLECTION_INTERVAL = 5
+# default pg_settings collection interval in seconds
+DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
 
 PG_SETTINGS_QUERY = """
 SELECT name, setting FROM pg_settings
@@ -40,16 +40,13 @@ class PostgresMetadata(DBMAsyncJob):
     """
 
     def __init__(self, check, config, shutdown_callback):
-        collection_interval = float(
-            config.metadata_config.get('settings_collection_interval', DEFAULT_COLLECTION_INTERVAL)
+        # convert settings collection interval from minutes to seconds
+        self.pg_settings_collection_interval = config.metadata_config.get(
+            'settings_collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )
-        if collection_interval <= 0:
-            collection_interval = DEFAULT_COLLECTION_INTERVAL
 
-        # convert collection interval from minutes to seconds
-        collection_interval = collection_interval * 60
-        self.collection_interval = collection_interval
-
+        # by default, send resources every 5 minutes
+        self.collection_interval = min(300, self.pg_settings_collection_interval)
         self._conn_pool = MultiDatabaseConnectionPool(check._new_connection)
 
         def shutdown_cb():
@@ -70,6 +67,8 @@ class PostgresMetadata(DBMAsyncJob):
         self._check = check
         self._config = config
         self._collect_pg_settings_enabled = is_affirmative(config.metadata_config.get('collect_settings', False))
+        self._pg_settings_cached = None
+        self._time_since_last_settings_query = 0
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
         self.tags = None
@@ -95,8 +94,12 @@ class PostgresMetadata(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_postgres_metadata(self):
         rows = []
-        if self._collect_pg_settings_enabled:
+        # Only query for settings if configured to do so &&
+        # don't report more often than the configured collection interval
+        elapsed_s = time.time() - self._time_since_last_settings_query
+        if elapsed_s >= self.pg_settings_collection_interval and self._collect_pg_settings_enabled:
             rows = self._collect_postgres_settings()
+            self._pg_settings_cached = rows
         if rows:
             event = {
                 "host": self._check.resolved_hostname,
@@ -108,7 +111,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "tags": self._tags_no_db,
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
-                "metadata": rows,
+                "metadata": self._pg_settings_cached,
             }
             self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
@@ -124,6 +127,7 @@ class PostgresMetadata(DBMAsyncJob):
             cursor_factory=psycopg2.extras.DictCursor
         ) as cursor:
             self._log.debug("Running query [%s] %s", PG_SETTINGS_QUERY)
+            self._time_since_last_settings_query = time.time()
             cursor.execute(PG_SETTINGS_QUERY)
             rows = cursor.fetchall()
             self._log.debug("Loaded %s rows from pg_settings", len(rows))

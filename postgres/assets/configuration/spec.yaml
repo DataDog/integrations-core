@@ -428,7 +428,7 @@ files:
             type: number
             example: 3500
     - name: database_metadata
-      description: Configure collection of database metadata
+      description: Configure collection of pg_settings. This is an alpha feature.
       options:
         - name: collect_settings
           description: |
@@ -438,11 +438,11 @@ files:
             example: true
         - name: settings_collection_interval
           description: |
-            Set the database settings collection interval (in minutes). Each collection involves a single query to
+            Set the database settings collection interval (in seconds). Each collection involves a single query to
             `pg_settings`.
           value:
             type: number
-            example: 5
+            example: 600
 
     - name: aws
       description: |
