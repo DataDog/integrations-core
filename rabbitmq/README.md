@@ -182,7 +182,7 @@ Here is what to be aware of as you migrate from the Management to the Prometheus
 - Look up your metrics in [this table][23]. If a metric's description contains an `[OpenMetricsV2]` tag, then it is available in the Prometheus Plugin. Metrics available only in the Management Plugin do not have any tags in their descriptions.
 - Any dashboards and monitors using Management Plugin metrics do not function. Switch to the dashboards and monitors marked as *OpenMetrics Version*.
 - The default configuration collects aggregated metrics. This means, for example, that there are no metrics tagged by queue. Configure the option `prometheus_plugin.unaggregated_endpoint` to get metrics without aggregation.
-- The `rabbitmq.status` service check is replaced by `rabbitmq.openmetrics.health`. The service check `rabbit.aliveness` has no equivalent in the Prometheus Plugin.
+- The `rabbitmq.status` service check is replaced by `rabbitmq.openmetrics.health`. The service check `rabbitmq.aliveness` has no equivalent in the Prometheus Plugin.
 
 The Prometheus Plugin changes some tags. The table below describes the changes to the more common tags.
 
