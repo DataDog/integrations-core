@@ -150,7 +150,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
         if endpoint is None:
             raise CheckException("Unable to find prometheus URL in config file.")
-        
+
         # If we've already created the corresponding scraper configuration, return it
         if endpoint in self.config_map:
             return self.config_map[endpoint]
