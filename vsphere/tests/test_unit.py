@@ -55,11 +55,35 @@ def test_metadata(datadog_agent, aggregator, dd_run_check, events_only_instance)
         datadog_agent.assert_metadata('test:123', version_metadata)
 
 
-def test_event_powered_on(aggregator, dd_run_check, events_only_instance):
+def test_event_alarm_status_changed(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.AlarmStatusChangedEvent()
+        event.createdTime = get_current_datetime()
+        event.entity = vim.event.ManagedEntityEventArgument()
+        event.entity.entity = vim.VirtualMachine(moId="vm1")
+        event.entity.name = "vm1"
+        event.alarm = vim.event.AlarmEventArgument()
+        event.alarm.name = "alarm1"
+        setattr(event, 'from', 'green')
+        event.to = 'yellow'
+        event.datacenter = vim.event.DatacenterEventArgument()
+        event.datacenter.name = "dc1"
+        event.fullFormattedMessage = "Green to Yellow"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event("""vCenter monitor status changed on this alarm, it was green and it's now yellow.""")
+
+
+def test_event_vm_powered_on(aggregator, dd_run_check, events_only_instance):
     mock_connect = mock.MagicMock()
     with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
         event = vim.event.VmPoweredOnEvent()
-        event.key = 1
         event.createdTime = get_current_datetime()
         event.userName = "datadog"
         event.host = vim.event.HostEventArgument()
@@ -84,11 +108,10 @@ def test_event_powered_on(aggregator, dd_run_check, events_only_instance):
         )
 
 
-def test_event_powered_off(aggregator, dd_run_check, events_only_instance):
+def test_event_vm_powered_off(aggregator, dd_run_check, events_only_instance):
     mock_connect = mock.MagicMock()
     with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
         event = vim.event.VmPoweredOffEvent()
-        event.key = 2
         event.userName = "datadog"
         event.createdTime = get_current_datetime()
         event.host = vim.event.HostEventArgument()
