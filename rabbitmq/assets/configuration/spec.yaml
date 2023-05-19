@@ -51,7 +51,7 @@ files:
 
               For brevity, you only need to specify "detailed" to start using this endpoint.
               You can also provide a query exactly as if you were making an HTTP request
-              to this endpoint. For example, `detailed?family=queue_consumer_count`.
+              to this endpoint. For example, `detailed?family=queue_consumer_count&family=node_metrics&vhost=myvhost`.
 
               You can specify both this and the aggregated endpoint.
               If you specify both endpoints, metrics from the unaggregated endpoint are prioritized
