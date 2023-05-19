@@ -331,31 +331,6 @@ def test_non_existent_directory_ignore_missing(aggregator):
     aggregator.assert_service_check('system.disk.directory.exists', DirectoryCheck.WARNING, tags=expected_tags)
 
 
-def test_os_error_mid_walk_emits_error(aggregator, monkeypatch, caplog):
-    caplog.set_level(logging.WARNING)
-
-    def mock_walk(folder, *args, **kwargs):
-        from datadog_checks.directory.traverse import walk
-
-        walker = walk(folder, *args, **kwargs)
-        yield next(walker)
-        raise OSError('Permission denied')
-
-    monkeypatch.setattr('datadog_checks.directory.directory.walk', mock_walk)
-
-    with temp_directory() as tdir:
-
-        # Create folder
-        mkdir(os.path.join(tdir, 'a_folder'))
-
-        # Run Check
-        instance = {'directory': tdir, 'recursive': True}
-        check = DirectoryCheck('directory', {}, [instance])
-        check.check(instance)
-
-    assert 'Permission denied' in caplog.text
-
-
 def test_os_error_mid_walk_emits_error_and_continues(aggregator, caplog):
     caplog.set_level(logging.WARNING)
 

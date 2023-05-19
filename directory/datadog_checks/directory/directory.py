@@ -206,8 +206,6 @@ class DirectoryCheck(AgentCheck):
                 yield next(walker)
             except StopIteration:
                 break
-            except OSError as e:
-                log_error(e)
 
             # Only visit the first directory when we don't want recursive search
             if not self._config.recursive:
