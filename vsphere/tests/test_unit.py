@@ -2,9 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import mock
 import pytest
 from datadog_checks.base import AgentCheck
-import mock
+from datadog_checks.base.utils.time import get_current_datetime
+from pyVmomi import vim
 
 from datadog_checks.vsphere import VSphereCheck
 
@@ -51,3 +53,61 @@ def test_metadata(datadog_agent, aggregator, dd_run_check, events_only_instance)
             'version.raw': '{}+123456789'.format(VSPHERE_VERSION),
         }
         datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+def test_event_powered_on(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.VmPoweredOnEvent()
+        event.key = 1
+        event.createdTime = get_current_datetime()
+        event.userName = "datadog"
+        event.host = vim.event.HostEventArgument()
+        event.host.name = "host1"
+        event.datacenter = vim.event.DatacenterEventArgument()
+        event.datacenter.name = "dc1"
+        event.vm = vim.event.VmEventArgument()
+        event.vm.name = "vm1"
+        event.fullFormattedMessage = "Virtual machine powered on"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event(
+            """datadog has powered on this virtual machine. It is running on:
+- datacenter: dc1
+- host: host1
+"""
+        )
+
+
+def test_event_powered_off(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.VmPoweredOffEvent()
+        event.key = 2
+        event.userName = "datadog"
+        event.createdTime = get_current_datetime()
+        event.host = vim.event.HostEventArgument()
+        event.host.name = "host1"
+        event.datacenter = vim.event.DatacenterEventArgument()
+        event.datacenter.name = "dc1"
+        event.vm = vim.event.VmEventArgument()
+        event.vm.name = "vm1"
+        event.fullFormattedMessage = "Virtual machine powered off"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event(
+            """datadog has powered off this virtual machine. It was running on:
+- datacenter: dc1
+- host: host1
+"""
+        )
