@@ -1,6 +1,6 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under 3-clause BSD License (see LICENSE)
 
 import mock
 import pytest
