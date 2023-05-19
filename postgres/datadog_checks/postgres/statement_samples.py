@@ -722,6 +722,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
             statement_plan_sig = (row['query_signature'], plan_signature)
         else:
+            self._log.debug("Explain plan collection disabled. Proceeding to send samples only.")
             collection_errors, plan, normalized_plan, obfuscated_plan, plan_signature = None, None, None, None, None
             statement_plan_sig = (row['query_signature'], row['query_signature'])
 
