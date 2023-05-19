@@ -80,7 +80,9 @@ instances:
         ## You can also provide a query exactly as if you were making an HTTP request
         ## to this endpoint. For example, `detailed?family=queue_consumer_count`.
         ##
-        ## You can specify both this and the aggregated endpoint. If you specify both endpoints, metrics from the unaggregated endpoint are prioritized over metrics from the aggregated endpoint in case of name clashes.
+        ## You can specify both this and the aggregated endpoint.
+        ## If you specify both endpoints, metrics from the unaggregated endpoint are prioritized
+        ## over metrics from the aggregated endpoint in case of name clashes.
         #
         # unaggregated_endpoint: detailed
 
