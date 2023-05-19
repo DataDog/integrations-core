@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
 import logging
 
 import pytest
@@ -34,23 +35,61 @@ def test_get_resource_tags(realtime_instance):
     assert expected_resource_tags == resource_tags
 
 
-@pytest.mark.usefixtures("mock_rest_api", "mock_type")
-def test_get_tags_exception(realtime_instance):
-    config = VSphereConfig(realtime_instance, {}, logger)
-    mock_api = build_rest_api_client(config, logger)
-    mock_mors = [MagicMock(spec=vim.VirtualMachine, _moId="foo")]
+@pytest.mark.usefixtures("mock_rest_api", "mock_type", "mock_api")
+def test_tagging_tags_get_exception(realtime_instance, dd_run_check, caplog):
+    mock_connect = MagicMock()
+    with patch('pyVim.connect.SmartConnect', new=mock_connect):
 
-    with patch('datadog_checks.vsphere.api_rest.VSphereRestClient.tagging_tags_get', side_effect=Exception("test")):
-        resource_tags = mock_api.get_resource_tags_for_mors(mock_mors)
+        instance = copy.deepcopy(realtime_instance)
+        instance['collect_tags'] = True
+        check = VSphereCheck('vsphere', {}, [instance])
 
-        expected_resource_tags = {
-            vim.HostSystem: {},
-            vim.VirtualMachine: {},
-            vim.Datacenter: {},
-            vim.Datastore: {},
-            vim.ClusterComputeResource: {},
-        }
-        assert expected_resource_tags == resource_tags
+        with patch('datadog_checks.vsphere.api_rest.VSphereRestClient.tagging_tags_get', side_effect=Exception("test")):
+            dd_run_check(check)
+        assert "Exception in get_tags for `tag_id_1`: test" in caplog.text
+        assert "Result resource tags: {<class 'pyVmomi.VmomiSupport.vim.VirtualMachine'>: "
+        "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.HostSystem'>: "
+        "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.Datacenter'>: "
+        "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.Datastore'>: "
+        "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.ClusterComputeResource'>: "
+        "defaultdict(<class 'list'>, {})}" in caplog.text
+
+
+@pytest.mark.usefixtures("mock_rest_api", "mock_type", "mock_api")
+def test_tagging_category_get_exception(realtime_instance, dd_run_check, caplog):
+    mock_connect = MagicMock()
+    with patch('pyVim.connect.SmartConnect', new=mock_connect):
+
+        instance = copy.deepcopy(realtime_instance)
+        instance['collect_tags'] = True
+        check = VSphereCheck('vsphere', {}, [instance])
+
+        with patch(
+            'datadog_checks.vsphere.api_rest.VSphereRestClient.tagging_category_get', side_effect=Exception("test")
+        ):
+            dd_run_check(check)
+        assert "Exception in get_tags for `tag_id_1`: test" in caplog.text
+        assert "Result resource tags: {<class 'pyVmomi.VmomiSupport.vim.VirtualMachine'>: "
+        "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.HostSystem'>: "
+        "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.Datacenter'>: "
+        "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.Datastore'>: "
+        "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.ClusterComputeResource'>: "
+        "defaultdict(<class 'list'>, {})}" in caplog.text
+
+
+@pytest.mark.usefixtures("mock_rest_api", "mock_type", "mock_api")
+def test_get_tags_log(realtime_instance, dd_run_check, caplog):
+    mock_connect = MagicMock()
+    with patch('pyVim.connect.SmartConnect', new=mock_connect):
+
+        instance = copy.deepcopy(realtime_instance)
+        instance['collect_tags'] = True
+        check = VSphereCheck('vsphere', {}, [instance])
+
+        dd_run_check(check)
+        assert "Result resource tags: {<class 'pyVmomi.VmomiSupport.vim.VirtualMachine'>: "
+        "defaultdict(<class 'list'>, {'VM4-4-1': ['my_cat_name_1:my_tag_name_1', "
+        "'my_cat_name_2:my_tag_name_2']})" in caplog.text
 
 
 @pytest.mark.parametrize(
