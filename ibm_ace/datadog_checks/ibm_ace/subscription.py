@@ -105,7 +105,7 @@ class Subscription(ABC):
                 sub_name=self.name,
                 topic_string=self.TOPIC_STRING,
                 sub_opts=(
-                    pymqi.CMQC.MQSO_CREATE + pymqi.CMQC.MQSO_RESUME + pymqi.CMQC.MQSO_DURABLE + pymqi.CMQC.MQSO_MANAGED
+                    pymqi.CMQC.MQSO_CREATE + pymqi.CMQC.MQSO_RESUME + pymqi.CMQC.MQSO_NON_DURABLE + pymqi.CMQC.MQSO_MANAGED
                 ),
             )
             self._sub = sub
