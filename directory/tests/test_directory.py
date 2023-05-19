@@ -331,7 +331,7 @@ def test_non_existent_directory_ignore_missing(aggregator):
     aggregator.assert_service_check('system.disk.directory.exists', DirectoryCheck.WARNING, tags=expected_tags)
 
 
-def test_os_error_mid_walk_emits_error_and_continues(aggregator, monkeypatch, caplog):
+def test_os_error_mid_walk_emits_error(aggregator, monkeypatch, caplog):
     caplog.set_level(logging.WARNING)
 
     def mock_walk(folder, *args, **kwargs):
@@ -354,6 +354,42 @@ def test_os_error_mid_walk_emits_error_and_continues(aggregator, monkeypatch, ca
         check.check(instance)
 
     assert 'Permission denied' in caplog.text
+
+
+def test_os_error_mid_walk_emits_error_and_continues(aggregator, caplog):
+    caplog.set_level(logging.WARNING)
+
+    # Test that we continue on traversal by having more than a single error-producing entry.
+    # The stdlib's tests rename a file mid-walk to simulate this, but we can't do that since
+    # we're testing the walk function indirectly and can't control it.
+    #
+    # At least we can generate an error on folders by creating them without read permissions.
+    # This does leave one of the code paths untested (getting the next item from a folder,
+    # precisely, the scenario that the stdlib simulates).
+    #
+    # Finally, the order of traversal is not guaranteed. We get around that by introducing two
+    # problematic folders and checking that both errors are indeed logged.
+
+    with temp_directory() as tdir:
+        # Create two folders with no read permission
+        os.makedirs(os.path.join(tdir, 'bad_folder_a'), mode=0o377)
+        os.makedirs(os.path.join(tdir, 'bad_folder_b'), mode=0o377)
+        # Create a folder with normal permissions, and a file inside
+        os.makedirs(os.path.join(tdir, 'ok'))
+        with open(os.path.join(tdir, 'ok', 'file'), 'w') as f:
+            f.write('')
+
+        # Run Check
+        instance = {'directory': tdir, 'recursive': True}
+        check = DirectoryCheck('directory', {}, [instance])
+        check.check(instance)
+
+    aggregator.assert_metric("system.disk.directory.files", count=1, value=1)
+
+    permission_denied_log_lines = [line for line in caplog.text.splitlines() if 'Permission denied' in line]
+    assert len(permission_denied_log_lines) == 2
+    assert 'bad_folder_a' in caplog.text
+    assert 'bad_folder_b' in caplog.text
 
 
 def test_no_recursive_symlink_loop(aggregator):

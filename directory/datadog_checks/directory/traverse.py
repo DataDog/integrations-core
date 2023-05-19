@@ -8,7 +8,7 @@ import six
 from scandir import scandir
 
 
-def _walk(top, follow_symlinks):
+def _walk(top, onerror=None, followlinks=False):
     """Modified version of https://docs.python.org/3/library/os.html#os.scandir
     that returns https://docs.python.org/3/library/os.html#os.DirEntry for files
     directly to take advantage of possible cached os.stat calls.
@@ -16,7 +16,12 @@ def _walk(top, follow_symlinks):
     dirs = []
     nondirs = []
 
-    scandir_iter = scandir(top)
+    try:
+        scandir_iter = scandir(top)
+    except OSError as error:
+        if onerror is not None:
+            onerror(error)
+        return
 
     # Avoid repeated global lookups.
     get_next = next
@@ -26,9 +31,13 @@ def _walk(top, follow_symlinks):
             entry = get_next(scandir_iter)
         except StopIteration:
             break
+        except OSError as error:
+            if onerror is not None:
+                onerror(error)
+            continue
 
         try:
-            is_dir = entry.is_dir(follow_symlinks=follow_symlinks)
+            is_dir = entry.is_dir(follow_symlinks=followlinks)
         except OSError:
             is_dir = False
 
@@ -40,7 +49,7 @@ def _walk(top, follow_symlinks):
     yield top, dirs, nondirs
 
     for dir_entry in dirs:
-        for entry in walk(dir_entry.path, follow_symlinks=follow_symlinks):
+        for entry in walk(dir_entry.path, onerror, followlinks):
             yield entry
 
 
@@ -51,7 +60,7 @@ else:
     # https://github.com/benhoyt/scandir/issues/54
     file_system_encoding = sys.getfilesystemencoding()
 
-    def walk(top, follow_symlinks):
+    def walk(top, onerror, followlinks):
         if isinstance(top, bytes):
             top = top.decode(file_system_encoding)
-        return _walk(top, follow_symlinks)
+        return _walk(top, onerror, followlinks)
