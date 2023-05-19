@@ -48,6 +48,7 @@ class PostgresMetadata(DBMAsyncJob):
 
         # convert collection interval from minutes to seconds
         collection_interval = collection_interval * 60
+        self.collection_interval = collection_interval
 
         self._conn_pool = MultiDatabaseConnectionPool(check._new_connection)
 
@@ -57,11 +58,11 @@ class PostgresMetadata(DBMAsyncJob):
 
         super(PostgresMetadata, self).__init__(
             check,
-            rate_limit=1 / collection_interval,
+            rate_limit=1 / self.collection_interval,
             run_sync=is_affirmative(config.metadata_config.get('run_sync', False)),
             enabled=True,
             dbms="postgres",
-            min_collection_interval=collection_interval,
+            min_collection_interval=self.collection_interval,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
             job_name="database-metadata",
             shutdown_callback=shutdown_cb,
@@ -102,6 +103,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "postgres",
                 "kind": "pg_settings",
+                "collection_interval": self.collection_interval,
                 'dbms_version': self._payload_pg_version(),
                 "tags": self._tags_no_db,
                 "timestamp": time.time() * 1000,
