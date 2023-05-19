@@ -4,10 +4,10 @@
 
 import mock
 import pytest
-from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.time import get_current_datetime
 from pyVmomi import vim
 
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.vsphere import VSphereCheck
 
 from .common import VSPHERE_VERSION
@@ -152,7 +152,10 @@ def test_event_alarm_status_changed_other(aggregator, dd_run_check, events_only_
         mock_connect.return_value = mock_si
         check = VSphereCheck('vsphere', {}, [events_only_instance])
         dd_run_check(check)
-        aggregator.assert_event("""vCenter monitor status changed on this alarm, it was green and it's now yellow.""", count=0)
+        aggregator.assert_event(
+            """vCenter monitor status changed on this alarm, it was green and it's now yellow.""",
+            count=0,
+        )
 
 
 def test_event_alarm_status_changed_wrong_from(aggregator, dd_run_check, events_only_instance):
@@ -177,7 +180,10 @@ def test_event_alarm_status_changed_wrong_from(aggregator, dd_run_check, events_
         mock_connect.return_value = mock_si
         check = VSphereCheck('vsphere', {}, [events_only_instance])
         dd_run_check(check)
-        aggregator.assert_event("""vCenter monitor status changed on this alarm, it was green and it's now yellow.""", count=0)
+        aggregator.assert_event(
+            """vCenter monitor status changed on this alarm, it was green and it's now yellow.""",
+            count=0,
+        )
 
 
 def test_event_alarm_status_changed_wrong_to(aggregator, dd_run_check, events_only_instance):
@@ -202,7 +208,10 @@ def test_event_alarm_status_changed_wrong_to(aggregator, dd_run_check, events_on
         mock_connect.return_value = mock_si
         check = VSphereCheck('vsphere', {}, [events_only_instance])
         dd_run_check(check)
-        aggregator.assert_event("""vCenter monitor status changed on this alarm, it was green and it's now yellow.""", count=0)
+        aggregator.assert_event(
+            """vCenter monitor status changed on this alarm, it was green and it's now yellow.""",
+            count=0,
+        )
 
 
 def test_event_task(aggregator, dd_run_check, events_only_instance):
