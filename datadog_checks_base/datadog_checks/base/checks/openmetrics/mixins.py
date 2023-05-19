@@ -354,11 +354,9 @@ class OpenMetricsScraperMixin(object):
         # If set to the `tls_only` value, the bearer token will be sent only to https endpoints.
         # If 'bearer_token_path' is not set, we use /var/run/secrets/kubernetes.io/serviceaccount/token
         # as a default path to get the token.
-        bearer_token_auth = _get_setting('bearer_token_auth', False)
-        if bearer_token_auth == 'tls_only':
-            config['bearer_token_auth'] = config['prometheus_url'].startswith("https://")
-        else:
-            config['bearer_token_auth'] = is_affirmative(bearer_token_auth)
+        self.log.info("found bearer token of " + str(_get_setting('bearer_token_auth', False)))
+        config['bearer_token_auth'] = _get_setting('bearer_token_auth', False)
+        self.set_bearer_token(config)
 
         # Can be used to get a service account bearer token from files
         # other than /var/run/secrets/kubernetes.io/serviceaccount/token
@@ -443,6 +441,24 @@ class OpenMetricsScraperMixin(object):
         check run, such as when polling an external resource like the Kubelet.
         """
         self._http_handlers.clear()
+
+    def set_bearer_token(self, instance):
+        # Whether or not to use the service account bearer token for authentication.
+        # Can be explicitly set to true or false to send or not the bearer token.
+        # If set to the `tls_only` value, the bearer token will be sent only to https endpoints.
+        # If 'bearer_token_path' is not set, we use /var/run/secrets/kubernetes.io/serviceaccount/token
+        # as a default path to get the token.
+        if instance['bearer_token_auth'] == 'tls_only':
+            instance["bearer_token_auth"] = instance["prometheus_url"].startswith("https://")
+        else:
+            instance["bearer_token_auth"] = is_affirmative(instance["bearer_token_auth"])
+        
+        instance['bearer_token_path'] = instance.get('bearer_token_path', None)
+
+        instance['_bearer_token'] = self._get_bearer_token(instance['bearer_token_auth'], instance['bearer_token_path'])
+        instance['_bearer_token_last_refresh'] = time.time()
+
+
 
     def parse_metric_family(self, response, scraper_config):
         """

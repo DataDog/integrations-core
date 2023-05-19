@@ -34,6 +34,7 @@ from .summary import SummaryScraperMixin
 KUBELET_HEALTH_PATH = '/healthz'
 NODE_SPEC_PATH = '/spec'
 POD_LIST_PATH = '/pods'
+CADVISOR_METRICS_PATH = '/metrics/cadvisor'
 KUBELET_METRICS_PATH = '/metrics'
 STATS_PATH = '/stats/summary/'
 PROBES_METRICS_PATH = '/metrics/probes'
@@ -239,7 +240,8 @@ class KubeletCheck(
         """
         kubelet_conn_info = get_connection_info()
 
-        endpoint = kubelet_conn_info.get('url') if kubelet_conn_info is not None else "dummy_url/kubelet" # dummy needed in case kubelet isn't running when the check is first accessed
+        endpoint = kubelet_conn_info.get('url') if kubelet_conn_info is not None else "dummy_url/kubelet" # dummy needed in case get_connection_info isn't running when the check is first accessed
+        endpoint = "dummy_url"
 
         kubelet_instance = deepcopy(instance)
         kubelet_instance.update(
@@ -330,6 +332,8 @@ class KubeletCheck(
         endpoint = kubelet_conn_info.get('url')
         if endpoint is None:
             raise CheckException("Unable to detect the kubelet URL automatically: " + kubelet_conn_info.get('err', ''))
+        
+        self._update_kubelet_url_and_bearer_token(instance, endpoint)
 
         self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
@@ -616,6 +620,28 @@ class KubeletCheck(
 
             gauge_name = '{}.containers.{}.{}'.format(self.NAMESPACE, metric_name, state_name)
             self.gauge(gauge_name, 1, tags + reason_tags)
+
+    def _update_kubelet_url_and_bearer_token(self, instance, endpoint): 
+        if 'cadvisor_metrics_endpoint' in instance:
+            self.cadvisor_scraper_config['prometheus_url'] = instance.get('cadvisor_metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
+        else:
+            self.cadvisor_scraper_config['prometheus_url'] = instance.get('metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
+        self.cadvisor_scraper_config["bearer_token_auth"] = instance["bearer_token_auth"]
+        self.set_bearer_token(self.cadvisor_scraper_config)
+
+        self.kubelet_scraper_config['prometheus_url'] = instance.get('kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH))
+        self.kubelet_scraper_config["bearer_token_auth"] = instance["bearer_token_auth"]
+
+        self.set_bearer_token(self.kubelet_scraper_config)
+
+        probes_metrics_endpoint = urljoin(endpoint, PROBES_METRICS_PATH)
+        if self.detect_probes(self.get_http_handler(self.probes_scraper_config), probes_metrics_endpoint):
+            self.probes_scraper_config['prometheus_url'] = instance.get('probes_metrics_endpoint', probes_metrics_endpoint)
+            self.probes_scraper_config["bearer_token_auth"] = instance["bearer_token_auth"]
+            self.set_bearer_token(self.probes_scraper_config)
+
+    
+
 
     @staticmethod
     def parse_quantity(string):
