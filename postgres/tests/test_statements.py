@@ -387,7 +387,7 @@ def dbm_instance(pg_instance):
     pg_instance['dbm'] = True
     pg_instance['min_collection_interval'] = 0.1
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
-    pg_instance['statement_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     pg_instance['explain_plans'] = {'enabled': True}
@@ -737,7 +737,7 @@ def test_statement_metadata(
 ):
     """Tests for metadata in both samples and metrics"""
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
-    dbm_instance['statement_samples']['run_sync'] = True
+    dbm_instance['query_samples']['run_sync'] = True
     dbm_instance['query_metrics']['run_sync'] = True
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
@@ -821,7 +821,7 @@ def test_statement_reported_hostname(
     reported_hostname,
     expected_hostname,
 ):
-    dbm_instance['statement_samples']['run_sync'] = True
+    dbm_instance['query_samples']['run_sync'] = True
     dbm_instance['query_metrics']['run_sync'] = True
     dbm_instance['reported_hostname'] = reported_hostname
 
@@ -842,6 +842,86 @@ def test_statement_reported_hostname(
     assert metrics, "should have collected metrics"
     assert metrics[0]['host'] == expected_hostname
 
+@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
+@pytest.mark.parametrize(
+    "user,password,dbname,query,arg,",
+    [
+        (
+            "bob",
+            "bob",
+            "datadog_test",
+            "SELECT city FROM persons WHERE city = %s",
+            "hello",
+        ),
+        (
+            "dd_admin",
+            "dd_admin",
+            "dogs",
+            "SELECT * FROM breed WHERE name = %s",
+            "Labrador",
+        ),
+    ],
+)
+def test_explain_plan_disable(
+    aggregator,
+    integration_check,
+    dbm_instance,
+    datadog_agent,
+    pg_stat_activity_view,
+    user,
+    password,
+    dbname,
+    query,
+    arg,
+):
+    dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
+    dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['explain_plans']['enabled'] = False
+    dbm_instance['query_samples']['enabled'] = True
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    tags = dbm_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'db:{}'.format(dbname),
+    ]
+
+    conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+    # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
+    # the simple query protocol, sending the whole query as a plain string to postgres.
+    # if a client is using the extended query protocol with prepare then the query would appear as
+    # leave connection open until after the check has run to ensure we're able to see the query in
+    # pg_stat_activity
+    try:
+        conn.cursor().execute(query, (arg,))
+        check.check(dbm_instance)
+        dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+
+        expected_query = query % ('\'' + arg + '\'' if isinstance(arg, string_types) else arg)
+
+        # Find matching events by checking if the expected query starts with the event statement. Using this
+        # instead of a direct equality check covers cases of truncated statements
+        matching = [
+            e for e in dbm_samples if expected_query.encode("utf-8").startswith(e['db']['statement'].encode("utf-8"))
+        ]
+
+        if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
+            # pg_monitor role exists only in version 10+
+            assert len(matching) == 0, "did not expect to catch any events"
+            return
+
+        assert len(matching) == 1, "missing captured event"
+        event = matching[0]
+
+        assert event['db']['plan']['definition'] is None, "did not expect to collect an execution plan"
+
+        # validate the events to ensure we've provided an explanation for not providing an exec plan
+        for event in matching:
+            assert event['ddagentversion'] == datadog_agent.get_version()
+            assert event['db']['plan']['collection_errors'] is None
+
+    finally:
+        conn.close()
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
@@ -1378,8 +1458,8 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     # Don't need query metrics or activity for this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
-    dbm_instance['statement_samples']['collection_interval'] = collection_interval
-    dbm_instance['statement_samples']['run_sync'] = False
+    dbm_instance['query_samples']['collection_interval'] = collection_interval
+    dbm_instance['query_samples']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
     sleep_time = 1
@@ -1399,9 +1479,9 @@ def test_activity_collection_rate_limit(aggregator, integration_check, dbm_insta
     activity_interval = 0.2  # double the main loop
     # Don't need query metrics on this one
     dbm_instance['query_metrics']['enabled'] = False
-    dbm_instance['statement_samples']['collection_interval'] = collection_interval
+    dbm_instance['query_samples']['collection_interval'] = collection_interval
     dbm_instance['query_activity']['collection_interval'] = activity_interval
-    dbm_instance['statement_samples']['run_sync'] = False
+    dbm_instance['query_samples']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
@@ -1467,7 +1547,7 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
 
 
 def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
-    dbm_instance['statement_samples']['run_sync'] = False
+    dbm_instance['query_samples']['run_sync'] = False
     dbm_instance['query_metrics']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
@@ -1483,7 +1563,7 @@ def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
 
 
 def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
-    dbm_instance['statement_samples']['run_sync'] = False
+    dbm_instance['query_samples']['run_sync'] = False
     dbm_instance['query_metrics']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
@@ -1538,8 +1618,8 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     [
         ("explain_plans", "explained_queries_cache_maxsize"),
         ("explain_plans", "explained_queries_per_hour_per_query"),
-        ("statement_samples", "seen_samples_cache_maxsize"),
-        ("statement_samples", "collection_interval"),
+        ("query_samples", "seen_samples_cache_maxsize"),
+        ("query_samples", "collection_interval"),
     ],
 )
 def test_statement_samples_config_invalid_number(integration_check, pg_instance, attribute, number_key):
@@ -1648,7 +1728,7 @@ def test_statement_metrics_database_errors(
     aggregator, integration_check, dbm_instance, error, metric_columns, expected_error_tag, expected_warnings
 ):
     # don't need samples for this test
-    dbm_instance['statement_samples']['enabled'] = False
+    dbm_instance['query_samples']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1697,7 +1777,7 @@ def test_pg_stat_statements_max_warning(
     integration_check, dbm_instance, pg_stat_statements_max_threshold, expected_warnings
 ):
     # don't need samples for this test
-    dbm_instance['statement_samples']['enabled'] = False
+    dbm_instance['query_samples']['enabled'] = False
     dbm_instance['query_metrics']['pg_stat_statements_max_warning_threshold'] = pg_stat_statements_max_threshold
     check = integration_check(dbm_instance)
     check._connect()
