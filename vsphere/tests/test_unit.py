@@ -55,7 +55,7 @@ def test_metadata(datadog_agent, aggregator, dd_run_check, events_only_instance)
         datadog_agent.assert_metadata('test:123', version_metadata)
 
 
-def test_event_alarm_status_changed(aggregator, dd_run_check, events_only_instance):
+def test_event_alarm_status_changed_vm(aggregator, dd_run_check, events_only_instance):
     mock_connect = mock.MagicMock()
     with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
         event = vim.event.AlarmStatusChangedEvent()
@@ -78,6 +78,131 @@ def test_event_alarm_status_changed(aggregator, dd_run_check, events_only_instan
         check = VSphereCheck('vsphere', {}, [events_only_instance])
         dd_run_check(check)
         aggregator.assert_event("""vCenter monitor status changed on this alarm, it was green and it's now yellow.""")
+
+
+def test_event_alarm_status_changed_vm_recovered(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.AlarmStatusChangedEvent()
+        event.createdTime = get_current_datetime()
+        event.entity = vim.event.ManagedEntityEventArgument()
+        event.entity.entity = vim.VirtualMachine(moId="vm1")
+        event.entity.name = "vm1"
+        event.alarm = vim.event.AlarmEventArgument()
+        event.alarm.name = "alarm1"
+        setattr(event, 'from', 'red')
+        event.to = 'green'
+        event.datacenter = vim.event.DatacenterEventArgument()
+        event.datacenter.name = "dc1"
+        event.fullFormattedMessage = "Green to Yellow"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event("""vCenter monitor status changed on this alarm, it was red and it's now green.""")
+
+
+def test_event_alarm_status_changed_host(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.AlarmStatusChangedEvent()
+        event.createdTime = get_current_datetime()
+        event.entity = vim.event.ManagedEntityEventArgument()
+        event.entity.entity = vim.HostSystem(moId="host1")
+        event.entity.name = "host1"
+        event.alarm = vim.event.AlarmEventArgument()
+        event.alarm.name = "alarm1"
+        setattr(event, 'from', 'green')
+        event.to = 'yellow'
+        event.datacenter = vim.event.DatacenterEventArgument()
+        event.datacenter.name = "dc1"
+        event.fullFormattedMessage = "Green to Yellow"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event("""vCenter monitor status changed on this alarm, it was green and it's now yellow.""")
+
+
+def test_event_alarm_status_changed_other(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.AlarmStatusChangedEvent()
+        event.createdTime = get_current_datetime()
+        event.entity = vim.event.ManagedEntityEventArgument()
+        event.entity.entity = vim.Folder(moId="host1")
+        event.entity.name = "folder1"
+        event.alarm = vim.event.AlarmEventArgument()
+        event.alarm.name = "alarm1"
+        setattr(event, 'from', 'green')
+        event.to = 'yellow'
+        event.datacenter = vim.event.DatacenterEventArgument()
+        event.datacenter.name = "dc1"
+        event.fullFormattedMessage = "Green to Yellow"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event("""vCenter monitor status changed on this alarm, it was green and it's now yellow.""", count=0)
+
+
+def test_event_alarm_status_changed_wrong_from(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.AlarmStatusChangedEvent()
+        event.createdTime = get_current_datetime()
+        event.entity = vim.event.ManagedEntityEventArgument()
+        event.entity.entity = vim.VirtualMachine(moId="vm1")
+        event.entity.name = "vm1"
+        event.alarm = vim.event.AlarmEventArgument()
+        event.alarm.name = "alarm1"
+        setattr(event, 'from', 'other')
+        event.to = 'yellow'
+        event.datacenter = vim.event.DatacenterEventArgument()
+        event.datacenter.name = "dc1"
+        event.fullFormattedMessage = "Green to Yellow"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event("""vCenter monitor status changed on this alarm, it was green and it's now yellow.""", count=0)
+
+
+def test_event_alarm_status_changed_wrong_to(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.AlarmStatusChangedEvent()
+        event.createdTime = get_current_datetime()
+        event.entity = vim.event.ManagedEntityEventArgument()
+        event.entity.entity = vim.VirtualMachine(moId="vm1")
+        event.entity.name = "vm1"
+        event.alarm = vim.event.AlarmEventArgument()
+        event.alarm.name = "alarm1"
+        setattr(event, 'from', 'green')
+        event.to = 'other'
+        event.datacenter = vim.event.DatacenterEventArgument()
+        event.datacenter.name = "dc1"
+        event.fullFormattedMessage = "Green to Yellow"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event("""vCenter monitor status changed on this alarm, it was green and it's now yellow.""", count=0)
 
 
 def test_event_vm_powered_on(aggregator, dd_run_check, events_only_instance):
