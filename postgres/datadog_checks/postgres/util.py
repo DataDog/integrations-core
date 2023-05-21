@@ -293,17 +293,14 @@ QUERY_PG_REPLICATION_SLOTS = {
     'name': 'pg_replication_slots',
     'query': """
     SELECT
-        a.slot_name,
-        a.slot_type,
-        CASE WHEN a.temporary THEN 'temporary' ELSE 'permanent' END,
-        CASE WHEN a.active THEN 'active' ELSE 'inactive' END,
-        CASE WHEN xmin IS NULL THEN NULL ELSE age(a.xmin) END,
-        pg_wal_lsn_diff(cur.lsn, a.restart_lsn),
-        pg_wal_lsn_diff(cur.lsn, a.confirmed_flush_lsn)
-    FROM pg_replication_slots as a
-    CROSS JOIN (
-        SELECT
-        CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END) as cur(lsn);
+        slot_name,
+        slot_type,
+        CASE WHEN temporary THEN 'temporary' ELSE 'permanent' END,
+        CASE WHEN active THEN 'active' ELSE 'inactive' END,
+        CASE WHEN xmin IS NULL THEN NULL ELSE age(xmin) END,
+        pg_wal_lsn_diff(CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, restart_lsn),
+	    pg_wal_lsn_diff(CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, confirmed_flush_lsn)
+	FROM pg_replication_slots;
     """.strip(),
     'columns': [
         {'name': 'slot_name', 'type': 'tag'},
