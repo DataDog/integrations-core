@@ -302,7 +302,7 @@ QUERY_PG_REPLICATION_SLOTS = {
         CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, restart_lsn),
         pg_wal_lsn_diff(
         CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, confirmed_flush_lsn)
-	FROM pg_replication_slots;
+    FROM pg_replication_slots;
     """.strip(),
     'columns': [
         {'name': 'slot_name', 'type': 'tag'},
