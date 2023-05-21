@@ -298,8 +298,10 @@ QUERY_PG_REPLICATION_SLOTS = {
         CASE WHEN temporary THEN 'temporary' ELSE 'permanent' END,
         CASE WHEN active THEN 'active' ELSE 'inactive' END,
         CASE WHEN xmin IS NULL THEN NULL ELSE age(xmin) END,
-        pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn),
-        pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn)
+        pg_wal_lsn_diff(
+        CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, restart_lsn),
+        pg_wal_lsn_diff(
+        CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, confirmed_flush_lsn)
     FROM pg_replication_slots;
     """.strip(),
     'columns': [
