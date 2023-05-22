@@ -28,6 +28,24 @@ PG_SETTINGS_QUERY = """
 SELECT name, setting FROM pg_settings
 """
 
+SCHEMAS_QUERY = '''
+SELECT
+  s.schema_name AS schema_name,
+  s.schema_owner AS schema_owner,
+  t.table_name AS table_name,
+  c.column_name AS column_name,
+  c.data_type AS data_type,
+  c.column_default AS column_default,
+  c.is_nullable::boolean AS nullable
+FROM
+  information_schema.schemata s
+  LEFT JOIN information_schema.tables t ON s.schema_name = t.table_schema
+  LEFT JOIN information_schema.columns c ON t.table_schema = c.table_schema AND t.table_name = c.table_name
+WHERE
+  s.schema_name <> 'information_schema' AND
+  s.schema_name <> 'pg_catalog';
+'''
+
 
 def agent_check_getter(self):
     return self._check
@@ -74,7 +92,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._schema_db_names = is_affirmative(config.metadata_config.get('db_names', []))
         self._pg_settings_cached = None
         self._time_since_last_pg_settings_query = 0
-        self._time_since_last_pg_class_query = 0
+        self._time_since_last_information_schema_query = 0
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
         self.tags = None
@@ -124,7 +142,7 @@ class PostgresMetadata(DBMAsyncJob):
         rows = []
         # Only query for schemas if configured to do so &&
         # don't report more often than the configured collection interval
-        elapsed_s = time.time() - self._time_since_last_pg_class_query
+        elapsed_s = time.time() - self._time_since_last_information_schema_query
         if elapsed_s >= self.pg_schema_collection_interval and self._collect_schemas_enabled:
             rows = self._collect_postgres_settings()
             self._pg_settings_cached = rows
@@ -133,8 +151,8 @@ class PostgresMetadata(DBMAsyncJob):
                 "host": self._check.resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "postgres",
-                "kind": "pg_settings",
-                "collection_interval": self.collection_interval,
+                "kind": "pg_databases",
+                "collection_interval": self.pg_schema_collection_interval,
                 'dbms_version': self._payload_pg_version(),
                 "tags": self._tags_no_db,
                 "timestamp": time.time() * 1000,
@@ -160,3 +178,55 @@ class PostgresMetadata(DBMAsyncJob):
             rows = cursor.fetchall()
             self._log.debug("Loaded %s rows from pg_settings", len(rows))
             return [dict(row) for row in rows]
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _collect_postgres_schemas(self):
+        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
+                cursor_factory=psycopg2.extras.DictCursor
+        ) as cursor:
+            self._log.debug("Running query [%s] %s", SCHEMAS_QUERY)
+            self._time_since_last_information_schema_query = time.time()
+            cursor.execute(SCHEMAS_QUERY)
+            rows = cursor.fetchall()
+            self._log.debug("Loaded %s rows from information_schema", len(rows))
+            # Transform the query result into the desired JSON structure
+            schemas = []
+            current_schema = None
+            current_table = None
+
+            for row in rows:
+                schema_name = row['schema_name']
+                schema_owner = row['schema_owner']
+                table_name = row['table_name']
+                column_name = row['column_name']
+                data_type = row['data_type']
+                column_default = row['column_default']
+                nullable = row['nullable']
+
+                if current_schema is None or current_schema['name'] != schema_name:
+                    current_schema = {
+                        'name': schema_name,
+                        'owner': schema_owner,
+                        'tables': []
+                    }
+                    schemas.append(current_schema)
+
+                if current_table is None or current_table['name'] != table_name:
+                    current_table = {
+                        'name': table_name,
+                        'columns': []
+                    }
+                    current_schema['tables'].append(current_table)
+
+                current_table['columns'].append({
+                    'name': column_name,
+                    'data_type': data_type,
+                    'default': column_default,
+                    'nullable': nullable
+                })
+        # TODO: need to get these fields too
+        #     "description": "This database belongs to us.",
+        # "encoding": "UTF-8",
+        # "id": "564182",
+        # "name": "kolesky",
+        # "owner": "us",

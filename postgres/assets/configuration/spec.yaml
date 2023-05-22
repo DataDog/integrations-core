@@ -461,7 +461,7 @@ files:
         - name: schema_collection_interval
           description: |
             Set the database settings collection interval (in seconds). Each collection involves a single query to the
-            `pg_class` catalog.
+            `information_schema.tables` and `information_schema.columns` views.
           value:
             type: number
             example: 600
