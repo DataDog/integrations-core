@@ -350,8 +350,7 @@ class OpenMetricsScraperMixin(object):
         config['_text_filter_blacklist'] = []
 
         # Set the bearer token authorization to customer value, then get the bearer token 
-        config['bearer_token_auth'] = _get_setting('bearer_token_auth', False)
-        self.set_bearer_token(config)
+        self.set_bearer_token(instance, config)
 
         # Refresh the bearer token every 60 seconds by default.
         # Ref https://github.com/DataDog/datadog-agent/pull/11686
@@ -428,25 +427,30 @@ class OpenMetricsScraperMixin(object):
         """
         self._http_handlers.clear()
 
-    def set_bearer_token(self, instance):
+    def set_bearer_token(self, instance, config):
         # Whether or not to use the service account bearer token for authentication.
         # Can be explicitly set to true or false to send or not the bearer token.
         # If set to the `tls_only` value, the bearer token will be sent only to https endpoints.
         # If 'bearer_token_path' is not set, we use /var/run/secrets/kubernetes.io/serviceaccount/token
         # as a default path to get the token.
-        if instance.get("bearer_token_auth") == 'tls_only':
-            instance["bearer_token_auth"] = instance["prometheus_url"].startswith("https://")
+        namespace = instance.get("namespace")
+        default_instance = self.default_instances.get(namespace, {})
+        bearer_token_auth = instance.get("bearer_token_auth", default_instance.get("bearer_token_auth", False))
+
+
+        if bearer_token_auth == 'tls_only':
+            config["bearer_token_auth"] = config["prometheus_url"].startswith("https://")
         else:
-            instance["bearer_token_auth"] = is_affirmative(instance.get("bearer_token_auth", False))
+            config["bearer_token_auth"] = is_affirmative(bearer_token_auth)
 
         # Can be used to get a service account bearer token from files
         # other than /var/run/secrets/kubernetes.io/serviceaccount/token
         # 'bearer_token_auth' should be enabled.
-        instance['bearer_token_path'] = instance.get('bearer_token_path', None)
+        config['bearer_token_path'] = instance.get('bearer_token_path', default_instance.get('bearer_token_path', None))
 
         # The service account bearer token to be used for authentication
-        instance['_bearer_token'] = self._get_bearer_token(instance['bearer_token_auth'], instance['bearer_token_path'])
-        instance['_bearer_token_last_refresh'] = time.time()
+        config['_bearer_token'] = self._get_bearer_token(config['bearer_token_auth'], config['bearer_token_path'])
+        config['_bearer_token_last_refresh'] = time.time()
 
 
 
