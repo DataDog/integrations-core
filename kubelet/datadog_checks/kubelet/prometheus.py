@@ -74,8 +74,10 @@ class CadvisorPrometheusScraperMixin(object):
         This is so the base class can create a scraper_config with the proper values.
         """
         kubelet_conn_info = get_connection_info()
-        endpoint = kubelet_conn_info.get('url') if kubelet_conn_info is not None else "dummy_url/cadvisor" # dummy needed in case kubelet isn't running when the check is first
 
+        # dummy needed in case kubelet isn't running when the check is first
+        endpoint = kubelet_conn_info.get('url') if kubelet_conn_info is not None else "dummy_url/cadvisor" 
+        
         cadvisor_instance = deepcopy(instance)
         cadvisor_instance.update(
             {
