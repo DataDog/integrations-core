@@ -40,7 +40,6 @@ class PostgresMetadata(DBMAsyncJob):
     """
 
     def __init__(self, check, config, shutdown_callback):
-        # convert settings collection interval from minutes to seconds
         self.pg_settings_collection_interval = config.metadata_config.get(
             'settings_collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )
@@ -123,7 +122,7 @@ class PostgresMetadata(DBMAsyncJob):
         with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
             cursor_factory=psycopg2.extras.DictCursor
         ) as cursor:
-            self._log.debug("Running query [%s] %s", PG_SETTINGS_QUERY)
+            self._log.debug("Running query [%s]", PG_SETTINGS_QUERY)
             self._time_since_last_settings_query = time.time()
             cursor.execute(PG_SETTINGS_QUERY)
             rows = cursor.fetchall()
