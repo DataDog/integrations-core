@@ -4,6 +4,7 @@
 from typing import Dict, Optional, Tuple  # noqa: F401
 
 import time
+import re
 import json
 import psycopg2
 
@@ -45,6 +46,23 @@ WHERE
   s.schema_name <> 'information_schema' AND
   s.schema_name <> 'pg_catalog';
 '''
+
+DB_METADATA_QUERY = re.sub(
+    r'\s+',
+    ' ',
+    """
+    SELECT
+        d.description AS description,
+        d.encoding AS encoding,
+        d.datname AS id,
+        d.datname AS name,
+        pg_catalog.pg_get_userbyid(d.datdba) AS owner
+    FROM
+        pg_database d
+    WHERE
+        d.datname = {db_name}
+    """,
+).strip()
 
 
 def agent_check_getter(self):
@@ -144,8 +162,7 @@ class PostgresMetadata(DBMAsyncJob):
         # don't report more often than the configured collection interval
         elapsed_s = time.time() - self._time_since_last_information_schema_query
         if elapsed_s >= self.pg_schema_collection_interval and self._collect_schemas_enabled:
-            rows = self._collect_postgres_settings()
-            self._pg_settings_cached = rows
+            rows = self._collect_postgres_schemas()
         if rows:
             event = {
                 "host": self._check.resolved_hostname,
@@ -157,7 +174,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "tags": self._tags_no_db,
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
-                "metadata": self._pg_settings_cached,
+                "metadata": rows,
             }
             self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
@@ -172,7 +189,7 @@ class PostgresMetadata(DBMAsyncJob):
         with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
             cursor_factory=psycopg2.extras.DictCursor
         ) as cursor:
-            self._log.debug("Running query [%s] %s", PG_SETTINGS_QUERY)
+            self._log.debug("Running query [%s]", PG_SETTINGS_QUERY)
             self._time_since_last_pg_settings_query = time.time()
             cursor.execute(PG_SETTINGS_QUERY)
             rows = cursor.fetchall()
@@ -181,52 +198,65 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_schemas(self):
-        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
-                cursor_factory=psycopg2.extras.DictCursor
-        ) as cursor:
-            self._log.debug("Running query [%s] %s", SCHEMAS_QUERY)
-            self._time_since_last_information_schema_query = time.time()
-            cursor.execute(SCHEMAS_QUERY)
-            rows = cursor.fetchall()
-            self._log.debug("Loaded %s rows from information_schema", len(rows))
-            # Transform the query result into the desired JSON structure
-            schemas = []
-            current_schema = None
-            current_table = None
-
-            for row in rows:
-                schema_name = row['schema_name']
-                schema_owner = row['schema_owner']
-                table_name = row['table_name']
-                column_name = row['column_name']
-                data_type = row['data_type']
-                column_default = row['column_default']
-                nullable = row['nullable']
-
-                if current_schema is None or current_schema['name'] != schema_name:
-                    current_schema = {
-                        'name': schema_name,
-                        'owner': schema_owner,
-                        'tables': []
+        metadata_rows = []
+        for db in self._schema_db_names:
+            with self._conn_pool.get_connection(db, ttl_ms=self._conn_ttl_ms).cursor(
+                    cursor_factory=psycopg2.extras.DictCursor
+            ) as cursor:
+                # First, collect information about the database
+                self._log.debug("Running query [%s]")
+                m_row = {}
+                cursor.execute(DB_METADATA_QUERY)
+                rows = cursor.fetchall()
+                if len(rows) > 0:
+                    row = rows[0]
+                    m_row = {
+                        'description': row['description'],
+                        'encoding': row['encoding'],
+                        'id': row['id'],
+                        'name': row['name'],
+                        'owner': row['owner'],
                     }
-                    schemas.append(current_schema)
+                self._log.debug("Running query [%s]", SCHEMAS_QUERY)
+                self._time_since_last_information_schema_query = time.time()
+                cursor.execute(SCHEMAS_QUERY)
+                rows = cursor.fetchall()
+                self._log.debug("Loaded %s rows from information_schema", len(rows))
+                # Transform the query result into the desired JSON structure
+                schemas = []
+                current_schema = None
+                current_table = None
 
-                if current_table is None or current_table['name'] != table_name:
-                    current_table = {
-                        'name': table_name,
-                        'columns': []
-                    }
-                    current_schema['tables'].append(current_table)
+                for row in rows:
+                    schema_name = row['schema_name']
+                    schema_owner = row['schema_owner']
+                    table_name = row['table_name']
+                    column_name = row['column_name']
+                    data_type = row['data_type']
+                    column_default = row['column_default']
+                    nullable = row['nullable']
 
-                current_table['columns'].append({
-                    'name': column_name,
-                    'data_type': data_type,
-                    'default': column_default,
-                    'nullable': nullable
-                })
-        # TODO: need to get these fields too
-        #     "description": "This database belongs to us.",
-        # "encoding": "UTF-8",
-        # "id": "564182",
-        # "name": "kolesky",
-        # "owner": "us",
+                    if current_schema is None or current_schema['name'] != schema_name:
+                        current_schema = {
+                            'name': schema_name,
+                            'owner': schema_owner,
+                            'tables': []
+                        }
+                        schemas.append(current_schema)
+
+                    if current_table is None or current_table['name'] != table_name:
+                        current_table = {
+                            'name': table_name,
+                            'columns': []
+                        }
+                        current_schema['tables'].append(current_table)
+
+                    current_table['columns'].append({
+                        'name': column_name,
+                        'data_type': data_type,
+                        'default': column_default,
+                        'nullable': nullable
+                    })
+                m_row['schemas'] = schemas
+                metadata_rows.append(m_row)
+            return metadata_rows
