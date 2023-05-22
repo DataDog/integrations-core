@@ -449,3 +449,32 @@ def test_event_vm_reconfigured(aggregator, dd_run_check, events_only_instance):
             msg_title="VM vm1 configuration has been changed",
             host="vm1",
         )
+
+
+def test_event_vm_suspended(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.VmSuspendedEvent()
+        event.userName = "datadog"
+        event.createdTime = get_current_datetime()
+        event.host = vim.event.HostEventArgument()
+        event.host.name = "host1"
+        event.datacenter = vim.event.DatacenterEventArgument()
+        event.datacenter.name = "dc1"
+        event.vm = vim.event.VmEventArgument()
+        event.vm.name = "vm1"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event(
+            """datadog has suspended this virtual machine. It was running on:
+- datacenter: dc1
+- host: host1
+""",
+            msg_title="VM vm1 has been SUSPENDED",
+            host="vm1",
+        )
