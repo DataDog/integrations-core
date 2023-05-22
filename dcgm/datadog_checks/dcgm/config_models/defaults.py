@@ -7,7 +7,6 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-
 from datadog_checks.base.utils.models.fields import get_default_field_value
 
 
@@ -117,10 +116,6 @@ def instance_hostname_format(field, value):
 
 def instance_hostname_label(field, value):
     return get_default_field_value(field, value)
-
-
-def instance_ignore_connection_errors(field, value):
-    return False
 
 
 def instance_ignore_tags(field, value):
