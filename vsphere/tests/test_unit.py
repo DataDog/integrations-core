@@ -55,6 +55,111 @@ def test_metadata(datadog_agent, aggregator, dd_run_check, events_only_instance)
         datadog_agent.assert_metadata('test:123', version_metadata)
 
 
+def test_event_vm_being_hot_migrated_change_host(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.VmBeingHotMigratedEvent()
+        event.createdTime = get_current_datetime()
+        event.userName = "datadog"
+        event.host = vim.event.HostEventArgument()
+        event.host.name = "host1"
+        event.destHost = vim.event.HostEventArgument()
+        event.destHost.name = "host2"
+        event.datacenter = vim.event.DatacenterEventArgument()
+        event.datacenter.name = "dc1"
+        event.destDatacenter = vim.event.DatacenterEventArgument()
+        event.destDatacenter.name = "dc1"
+        event.ds = vim.event.DatastoreEventArgument()
+        event.ds.name = "ds1"
+        event.destDatastore = vim.event.DatastoreEventArgument()
+        event.destDatastore.name = "ds1"
+        event.vm = vim.event.VmEventArgument()
+        event.vm.name = "vm1"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event(
+            """datadog has launched a hot migration of this virtual machine:
+- Host MIGRATION: from host1 to host2
+- No datacenter migration: still dc1
+- No datastore migration: still ds1"""
+        )
+
+
+def test_event_vm_being_hot_migrated_change_datacenter(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.VmBeingHotMigratedEvent()
+        event.createdTime = get_current_datetime()
+        event.userName = "datadog"
+        event.host = vim.event.HostEventArgument()
+        event.host.name = "host1"
+        event.destHost = vim.event.HostEventArgument()
+        event.destHost.name = "host2"
+        event.datacenter = vim.event.DatacenterEventArgument()
+        event.datacenter.name = "dc1"
+        event.destDatacenter = vim.event.DatacenterEventArgument()
+        event.destDatacenter.name = "dc2"
+        event.ds = vim.event.DatastoreEventArgument()
+        event.ds.name = "ds1"
+        event.destDatastore = vim.event.DatastoreEventArgument()
+        event.destDatastore.name = "ds1"
+        event.vm = vim.event.VmEventArgument()
+        event.vm.name = "vm1"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event(
+            """datadog has launched a hot migration of this virtual machine:
+- Datacenter MIGRATION: from dc1 to dc2
+- Host MIGRATION: from host1 to host2
+- No datastore migration: still ds1"""
+        )
+
+
+def test_event_vm_being_hot_migrated_change_datastore(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.VmBeingHotMigratedEvent()
+        event.createdTime = get_current_datetime()
+        event.userName = "datadog"
+        event.host = vim.event.HostEventArgument()
+        event.host.name = "host1"
+        event.destHost = vim.event.HostEventArgument()
+        event.destHost.name = "host1"
+        event.datacenter = vim.event.DatacenterEventArgument()
+        event.datacenter.name = "dc1"
+        event.destDatacenter = vim.event.DatacenterEventArgument()
+        event.destDatacenter.name = "dc1"
+        event.ds = vim.event.DatastoreEventArgument()
+        event.ds.name = "ds1"
+        event.destDatastore = vim.event.DatastoreEventArgument()
+        event.destDatastore.name = "ds2"
+        event.vm = vim.event.VmEventArgument()
+        event.vm.name = "vm1"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event(
+            """datadog has launched a hot migration of this virtual machine:
+- Datastore MIGRATION: from ds1 to ds2
+- No host migration: still host1
+- No datacenter migration: still dc1"""
+        )
+
+
 def test_event_alarm_status_changed_vm(aggregator, dd_run_check, events_only_instance):
     mock_connect = mock.MagicMock()
     with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
@@ -214,6 +319,42 @@ def test_event_alarm_status_changed_wrong_to(aggregator, dd_run_check, events_on
         )
 
 
+def test_event_vm_message(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.VmMessageEvent()
+        event.createdTime = get_current_datetime()
+        event.vm = vim.event.VmEventArgument()
+        event.vm.name = "vm1"
+        event.fullFormattedMessage = "Event example"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event("""@@@\nEvent example\n@@@""", msg_title="VM vm1 is reporting", host="vm1")
+
+
+def test_event_vm_migrated(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.VmMigratedEvent()
+        event.createdTime = get_current_datetime()
+        event.vm = vim.event.VmEventArgument()
+        event.vm.name = "vm1"
+        event.fullFormattedMessage = "Event example"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event("""@@@\nEvent example\n@@@""", msg_title="VM vm1 has been migrated", host="vm1")
+
+
 def test_event_task(aggregator, dd_run_check, events_only_instance):
     mock_connect = mock.MagicMock()
     with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
@@ -283,4 +424,27 @@ def test_event_vm_powered_off(aggregator, dd_run_check, events_only_instance):
 - datacenter: dc1
 - host: host1
 """
+        )
+
+
+def test_event_vm_resuming(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.VmResumingEvent()
+        event.userName = "datadog"
+        event.createdTime = get_current_datetime()
+        event.vm = vim.event.VmEventArgument()
+        event.vm.name = "vm1"
+        event.fullFormattedMessage = "Event example"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event(
+            """datadog has resumed vm1. It will soon be powered on.""",
+            msg_title="VM vm1 is RESUMING",
+            host="vm1",
         )

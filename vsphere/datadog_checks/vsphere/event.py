@@ -29,6 +29,7 @@ EXCLUDE_FILTERS = {
     'VmMigratedEvent': [],
     'VmPoweredOnEvent': [],
     'VmPoweredOffEvent': [],
+    'VmResumingEvent': [],
     'VmReconfiguredEvent': [],
     'VmSuspendedEvent': [],
 }
