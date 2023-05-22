@@ -435,7 +435,7 @@ files:
             Enable collection of pg_settings. Requires `dbm: true`.
           value:
             type: boolean
-            example: true
+            example: false
         - name: settings_collection_interval
           description: |
             Set the database settings collection interval (in seconds). Each collection involves a single query to

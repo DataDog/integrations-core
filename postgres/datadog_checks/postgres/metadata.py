@@ -93,27 +93,24 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_postgres_metadata(self):
-        rows = []
         # Only query for settings if configured to do so &&
         # don't report more often than the configured collection interval
         elapsed_s = time.time() - self._time_since_last_settings_query
         if elapsed_s >= self.pg_settings_collection_interval and self._collect_pg_settings_enabled:
-            rows = self._collect_postgres_settings()
-            self._pg_settings_cached = rows
-        if rows:
-            event = {
-                "host": self._check.resolved_hostname,
-                "agent_version": datadog_agent.get_version(),
-                "dbms": "postgres",
-                "kind": "pg_settings",
-                "collection_interval": self.collection_interval,
-                'dbms_version': self._payload_pg_version(),
-                "tags": self._tags_no_db,
-                "timestamp": time.time() * 1000,
-                "cloud_metadata": self._config.cloud_metadata,
-                "metadata": self._pg_settings_cached,
-            }
-            self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+            self._pg_settings_cached = self._collect_postgres_settings()
+        event = {
+            "host": self._check.resolved_hostname,
+            "agent_version": datadog_agent.get_version(),
+            "dbms": "postgres",
+            "kind": "pg_settings",
+            "collection_interval": self.collection_interval,
+            'dbms_version': self._payload_pg_version(),
+            "tags": self._tags_no_db,
+            "timestamp": time.time() * 1000,
+            "cloud_metadata": self._config.cloud_metadata,
+            "metadata": self._pg_settings_cached,
+        }
+        self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
     def _payload_pg_version(self):
         version = self._check.version
