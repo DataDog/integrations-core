@@ -457,8 +457,7 @@ files:
             items:
               type: string
             example:
-              - foo-db
-              - bar-db
+              - postgres
         - name: schema_collection_interval
           description: |
             Set the database settings collection interval (in seconds). Each collection involves a single query to the
