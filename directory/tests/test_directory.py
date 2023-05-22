@@ -360,8 +360,8 @@ def test_os_error_mid_walk_emits_error_and_continues(aggregator, caplog):
         check.check(instance)
 
         # Reset permissions for folders to allow cleanup
-        os.chmod(os.path.join(tdir, 'bad_folder_a'), mode=0o777)
-        os.chmod(os.path.join(tdir, 'bad_folder_b'), mode=0o777)
+        os.chmod(os.path.join(tdir, 'bad_folder_a'), 0o777)
+        os.chmod(os.path.join(tdir, 'bad_folder_b'), 0o777)
 
     aggregator.assert_metric("system.disk.directory.files", count=1, value=1)
 
