@@ -360,6 +360,24 @@ instances:
         #
         # settings_collection_interval: 600
 
+        ## @param collect_schemas - boolean - optional - default: false
+        ## Enable collection of your database schemas, tables and columns. Requires `dbm: true`.
+        #
+        # collect_schemas: false
+
+        ## @param db_names - list of strings - optional
+        ## List of databases to collect schema information from.
+        #
+        # db_names:
+        #   - foo-db
+        #   - bar-db
+
+        ## @param schema_collection_interval - number - optional - default: 600
+        ## Set the database settings collection interval (in seconds). Each collection involves a single query to the
+        ## `pg_class` catalog.
+        #
+        # schema_collection_interval: 600
+
     ## This block defines the configuration for AWS RDS and Aurora instances. 
     ##
     ## Complete this section if you have installed the Datadog AWS Integration 

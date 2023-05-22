@@ -443,6 +443,29 @@ files:
           value:
             type: number
             example: 600
+        - name: collect_schemas
+          description: |
+            Enable collection of your database schemas, tables and columns. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+        - name: db_names
+          description: |
+            List of databases to collect schema information from.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - foo-db
+              - bar-db
+        - name: schema_collection_interval
+          description: |
+            Set the database settings collection interval (in seconds). Each collection involves a single query to the
+            `pg_class` catalog.
+          value:
+            type: number
+            example: 600
 
     - name: aws
       description: |
