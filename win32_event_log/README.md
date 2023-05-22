@@ -1,7 +1,3 @@
-"dependencies":
-- "https://github.com/DataDog/integrations-core/blob/alai97/win-32-logs-mode-clarification-update/win32_event_log/README.md"
----
-
 # Agent Check: Windows Event Log
 
 ## Overview
@@ -61,9 +57,13 @@ The value under the column `LogName` is the name of the channel. In the example 
 
 Depending on collection method, the channel name can be used for the following configuration parameters:
 
-- `log_file`
-- `path`
-- `channel_path`
+- Datadog Logs: `channel_path`
+- Datadog Events: `path`
+- Datadog Events (legacy): `log_file`
+
+To find the channel name for an Event Log in the Windows Event Viewer, open the Event Log Properties window and refer to the `Full Name` field. In the following example, the channel name is `Microsoft-Windows-Windows Defender/Operational`.
+
+![Windows Event Log][19]
 
 <!-- xxx tabs xxx -->
 
@@ -435,3 +435,4 @@ Additional helpful documentation, links, and articles:
 [16]: https://docs.datadoghq.com/events/
 [17]: https://docs.datadoghq.com/logs/
 [18]: https://docs.datadoghq.com/agent/logs/#activate-log-collection
+[19]: https://raw.githubusercontent.com/DataDog/integrations-core/alai97/win32-logs-mode-clarification-update/win32_event_log/images/windows-defender-operational-event-log-properties.png
