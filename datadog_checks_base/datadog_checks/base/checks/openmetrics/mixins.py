@@ -83,7 +83,7 @@ class OpenMetricsScraperMixin(object):
         if instance and endpoint is None:
             raise CheckException("You have to define a prometheus_url for each prometheus instance")
 
-        config['prometheus_url'] = endpoint
+        self.update_prometheus_url(instance, config, endpoint)
 
         # `NAMESPACE` is the prefix metrics will have. Need to be hardcoded in the
         # child check class.
@@ -427,7 +427,11 @@ class OpenMetricsScraperMixin(object):
         """
         self._http_handlers.clear()
 
-    def set_bearer_token(self, instance, config):
+    def update_prometheus_url(self, instance, config, endpoint):
+        if not endpoint:
+            return
+        
+        config['prometheus_url'] = endpoint
         # Whether or not to use the service account bearer token for authentication.
         # Can be explicitly set to true or false to send or not the bearer token.
         # If set to the `tls_only` value, the bearer token will be sent only to https endpoints.
