@@ -425,3 +425,27 @@ def test_event_vm_powered_off(aggregator, dd_run_check, events_only_instance):
 - host: host1
 """
         )
+
+
+def test_event_vm_reconfigured(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event = vim.event.VmReconfiguredEvent()
+        event.userName = "datadog"
+        event.createdTime = get_current_datetime()
+        event.vm = vim.event.VmEventArgument()
+        event.vm.name = "vm1"
+        event.configSpec = vim.vm.ConfigSpec()
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        aggregator.assert_event(
+            """datadog saved the new configuration:\n@@@\n""",
+            exact_match=False,
+            msg_title="VM vm1 configuration has been changed",
+            host="vm1",
+        )
