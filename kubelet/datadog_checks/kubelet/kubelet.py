@@ -626,18 +626,18 @@ class KubeletCheck(
             self.cadvisor_scraper_config['prometheus_url'] = instance.get('cadvisor_metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
         else:
             self.cadvisor_scraper_config['prometheus_url'] = instance.get('metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
-        self.cadvisor_scraper_config["bearer_token_auth"] = instance["bearer_token_auth"]
+        self.cadvisor_scraper_config["bearer_token_auth"] = instance.get("bearer_token_auth", None)
         self.set_bearer_token(self.cadvisor_scraper_config)
 
         self.kubelet_scraper_config['prometheus_url'] = instance.get('kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH))
-        self.kubelet_scraper_config["bearer_token_auth"] = instance["bearer_token_auth"]
+        self.kubelet_scraper_config["bearer_token_auth"] = instance.get("bearer_token_auth", None)
 
         self.set_bearer_token(self.kubelet_scraper_config)
 
         probes_metrics_endpoint = urljoin(endpoint, PROBES_METRICS_PATH)
         if self.detect_probes(self.get_http_handler(self.probes_scraper_config), probes_metrics_endpoint):
             self.probes_scraper_config['prometheus_url'] = instance.get('probes_metrics_endpoint', probes_metrics_endpoint)
-            self.probes_scraper_config["bearer_token_auth"] = instance["bearer_token_auth"]
+            self.probes_scraper_config["bearer_token_auth"] = instance.get("bearer_token_auth", None)
             self.set_bearer_token(self.probes_scraper_config)
 
     
