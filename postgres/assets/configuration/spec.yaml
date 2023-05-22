@@ -427,16 +427,16 @@ files:
           value:
             type: number
             example: 3500
-    - name: database_metadata
+    - name: collect_settings
       description: Configure collection of pg_settings. This is an alpha feature.
       options:
-        - name: collect_settings
+        - name: enabled
           description: |
             Enable collection of pg_settings. Requires `dbm: true`.
           value:
             type: boolean
             example: false
-        - name: settings_collection_interval
+        - name: collection_interval
           description: |
             Set the database settings collection interval (in seconds). Each collection involves a single query to
             `pg_settings`.

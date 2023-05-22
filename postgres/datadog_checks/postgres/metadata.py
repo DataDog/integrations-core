@@ -40,8 +40,8 @@ class PostgresMetadata(DBMAsyncJob):
     """
 
     def __init__(self, check, config, shutdown_callback):
-        self.pg_settings_collection_interval = config.metadata_config.get(
-            'settings_collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
+        self.pg_settings_collection_interval = config.settings_metadata_config.get(
+            'collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )
 
         # by default, send resources every 5 minutes
@@ -55,7 +55,7 @@ class PostgresMetadata(DBMAsyncJob):
         super(PostgresMetadata, self).__init__(
             check,
             rate_limit=1 / self.collection_interval,
-            run_sync=is_affirmative(config.metadata_config.get('run_sync', False)),
+            run_sync=is_affirmative(config.settings_metadata_config.get('run_sync', False)),
             enabled=True,
             dbms="postgres",
             min_collection_interval=self.collection_interval,
@@ -65,7 +65,7 @@ class PostgresMetadata(DBMAsyncJob):
         )
         self._check = check
         self._config = config
-        self._collect_pg_settings_enabled = is_affirmative(config.metadata_config.get('collect_settings', False))
+        self._collect_pg_settings_enabled = is_affirmative(config.settings_metadata_config.get('enabled', False))
         self._pg_settings_cached = None
         self._time_since_last_settings_query = 0
         self._conn_ttl_ms = self._config.idle_connection_timeout

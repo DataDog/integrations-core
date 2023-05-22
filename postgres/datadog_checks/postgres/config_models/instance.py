@@ -34,12 +34,12 @@ class Azure(BaseModel):
     fully_qualified_domain_name: Optional[str]
 
 
-class DatabaseMetadata(BaseModel):
+class CollectSettings(BaseModel):
     class Config:
         allow_mutation = False
 
-    collect_settings: Optional[bool]
-    settings_collection_interval: Optional[float]
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
 
 
 class Gcp(BaseModel):
@@ -128,10 +128,10 @@ class InstanceConfig(BaseModel):
     collect_database_size_metrics: Optional[bool]
     collect_default_database: Optional[bool]
     collect_function_metrics: Optional[bool]
+    collect_settings: Optional[CollectSettings]
     collect_wal_metrics: Optional[bool]
     custom_queries: Optional[Sequence[Mapping[str, Any]]]
     data_directory: Optional[str]
-    database_metadata: Optional[DatabaseMetadata]
     dbm: Optional[bool]
     dbname: Optional[str]
     dbstrict: Optional[bool]

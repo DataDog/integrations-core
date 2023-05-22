@@ -15,7 +15,7 @@ def dbm_instance(pg_instance):
     pg_instance['query_samples'] = {'enabled': False}
     pg_instance['query_activity'] = {'enabled': False}
     pg_instance['query_metrics'] = {'enabled': False}
-    pg_instance['database_metadata'] = {'collect_settings': True, 'run_sync': True, 'settings_collection_interval': 0.1}
+    pg_instance['collect_settings'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     return pg_instance
 
 
@@ -28,6 +28,7 @@ def stop_orphaned_threads():
 
 @pytest.mark.parametrize("collect_settings", [True, False])
 def test_collect_metadata(integration_check, dbm_instance, aggregator, collect_settings):
+    dbm_instance['collect_settings'] = {'enabled': collect_settings}
     check = integration_check(dbm_instance)
     check.check(dbm_instance)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")

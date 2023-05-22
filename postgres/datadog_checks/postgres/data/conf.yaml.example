@@ -347,18 +347,18 @@ instances:
 
     ## Configure collection of pg_settings. This is an alpha feature.
     #
-    # database_metadata:
+    # collect_settings:
 
-        ## @param collect_settings - boolean - optional - default: false
+        ## @param enabled - boolean - optional - default: false
         ## Enable collection of pg_settings. Requires `dbm: true`.
         #
-        # collect_settings: false
+        # enabled: false
 
-        ## @param settings_collection_interval - number - optional - default: 600
+        ## @param collection_interval - number - optional - default: 600
         ## Set the database settings collection interval (in seconds). Each collection involves a single query to
         ## `pg_settings`.
         #
-        # settings_collection_interval: 600
+        # collection_interval: 600
 
     ## This block defines the configuration for AWS RDS and Aurora instances. 
     ##
