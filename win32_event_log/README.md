@@ -1,3 +1,7 @@
+"dependencies":
+- "https://github.com/DataDog/integrations-core/blob/alai97/win-32-logs-mode-clarification-update/win32_event_log/README.md"
+---
+
 # Agent Check: Windows Event Log
 
 ## Overview
