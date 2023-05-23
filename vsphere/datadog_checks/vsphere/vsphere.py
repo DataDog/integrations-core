@@ -616,7 +616,8 @@ class VSphereCheck(AgentCheck):
             nics = mor.guest.net
             for nic in nics:
                 mac_address = nic.macAddress
-                for ip_address in nic.ipAddress:
+                ip_addresses = nic.ipConfig.ipAddress
+                for ip_address in ip_addresses:
                     nic_tags = [f'nic_ip_address:{ip_address}', f'nic_mac_address:{mac_address}']
                     self.count(
                         'vm.guest.nic.address', 1, tags=self._config.base_tags + resource_tags + nic_tags, hostname=None

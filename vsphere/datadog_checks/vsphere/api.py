@@ -197,12 +197,19 @@ class VSphereAPI(object):
                     property_spec.pathSet.append("guest.toolsRunningStatus")
                     property_spec.pathSet.append("guest.toolsVersion")
                     property_spec.pathSet.append("config.hardware.numCoresPerSocket")
+                    property_spec.pathSet.append("config.cpuAllocation.limit")
+                    property_spec.pathSet.append("config.cpuAllocation.overheadLimit")
+                    property_spec.pathSet.append("config.memoryAllocation.limit")
+                    property_spec.pathSet.append("config.memoryAllocation.overheadLimit")
             if resource == vim.HostSystem:
                 if self.config.collect_property_metrics:
                     property_spec.pathSet.append("hardware.cpuPowerManagementInfo.currentPolicy")
+                    property_spec.pathSet.append("hardware.cpuInfo.numCpuCores")
                     property_spec.pathSet.append("summary.runtime.connectionState")
                     property_spec.pathSet.append("summary.runtime.powerState")
                     property_spec.pathSet.append("summary.runtime.inMaintenanceMode")
+                    property_spec.pathSet.append("config.virtualNicManagerInfo.netConfig")
+                    property_spec.pathSet.append("config.multipathState")
                     property_spec.pathSet.append("config.service")
             if resource == vim.Datastore:
                 if self.config.collect_property_metrics:
