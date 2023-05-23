@@ -638,16 +638,16 @@ class PostgreSql(AgentCheck):
                 ]
                 self.tags_without_db.append(replication_role_tag)
 
-            self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
-            self._collect_stats(tags)
-            if self._config.dbm_enabled:
-                self.statement_metrics.run_job_loop(tags)
-                self.statement_samples.run_job_loop(tags)
-                self.metadata_samples.run_job_loop(tags)
-            if self._config.collect_wal_metrics:
-                self._collect_wal_metrics(tags)
+            if not self._config.only_custom_queries:
+                self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
+                self._collect_stats(tags)
+                if self._config.dbm_enabled:
+                    self.statement_metrics.run_job_loop(tags)
+                    self.statement_samples.run_job_loop(tags)
+                    self.metadata_samples.run_job_loop(tags)
+                if self._config.collect_wal_metrics:
+                    self._collect_wal_metrics(tags)
             
-            # Collect custom queries
             self.custom_queries.execute()
 
         except Exception as e:
