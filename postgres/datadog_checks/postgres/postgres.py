@@ -11,8 +11,8 @@ import psycopg2
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.db import QueryExecutor
-from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
+from datadog_checks.base.utils.db import QueryExecutor, QueryManager
+from datadog_checks.base.utils.db.utils import SUBMISSION_METHODS, resolve_db_host as agent_host_resolver
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import INDEX_BLOAT, RELATION_METRICS, TABLE_BLOAT, RelationsManager
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
@@ -89,6 +89,7 @@ class PostgreSql(AgentCheck):
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
 
         self._dynamic_queries = None
+        self._custom_queries = None
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
@@ -135,6 +136,27 @@ class PostgreSql(AgentCheck):
         with self.db.cursor() as cursor:
             cursor.execute(query)
             return cursor.fetchall()
+
+    @property
+    def custom_queries(self):
+        if self._custom_queries is None:
+            # Support backwards-compatiblity by prepending metric names with the `metric_prefix` attribute.
+            # The previous API supported a prefix for metric names which is not supported in the QueryManager.
+            for query in self.instance.get('custom_queries', []):
+                metric_prefix = query.pop('metric_prefix', '')
+                for column in query['columns']:
+                    if column['type'] in SUBMISSION_METHODS and column['type'] not in ('set_metadata', 'service_check'):
+                        column['name'] = "{}.{}".format(metric_prefix, column['name'])
+
+            self._custom_queries = QueryManager(
+                self,
+                self.execute_query_raw,
+                queries=[],  # An empty list is used because custom queries are auto parsed from the config
+                tags=self.tags,
+                hostname=self.resolved_hostname,
+            )
+            self._custom_queries.compile_queries()
+        return self._custom_queries
 
     @property
     def dynamic_queries(self):
@@ -590,102 +612,6 @@ class PostgreSql(AgentCheck):
                         self.log.exception("failed to close DB connection for db=%s", dbname)
                 self._db_pool[dbname] = None
 
-    def _collect_custom_queries(self, tags):
-        """
-        Given a list of custom_queries, execute each query and parse the result for metrics
-        """
-        for custom_query in self._config.custom_queries:
-            metric_prefix = custom_query.get('metric_prefix')
-            if not metric_prefix:
-                self.log.error("custom query field `metric_prefix` is required")
-                continue
-            metric_prefix = metric_prefix.rstrip('.')
-
-            query = custom_query.get('query')
-            if not query:
-                self.log.error("custom query field `query` is required for metric_prefix `%s`", metric_prefix)
-                continue
-
-            columns = custom_query.get('columns')
-            if not columns:
-                self.log.error("custom query field `columns` is required for metric_prefix `%s`", metric_prefix)
-                continue
-
-            cursor = self.db.cursor()
-            with closing(cursor) as cursor:
-                try:
-                    self.log.debug("Running query: %s", query)
-                    cursor.execute(query)
-                except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
-                    self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
-                    self.db.rollback()
-                    continue
-
-                for row in cursor:
-                    if not row:
-                        self.log.debug("query result for metric_prefix %s: returned an empty result", metric_prefix)
-                        continue
-
-                    if len(columns) != len(row):
-                        self.log.error(
-                            "query result for metric_prefix %s: expected %s columns, got %s",
-                            metric_prefix,
-                            len(columns),
-                            len(row),
-                        )
-                        continue
-
-                    metric_info = []
-                    query_tags = list(custom_query.get('tags', []))
-                    query_tags.extend(tags)
-
-                    for column, value in zip(columns, row):
-                        # Columns can be ignored via configuration.
-                        if not column:
-                            continue
-
-                        name = column.get('name')
-                        if not name:
-                            self.log.error("column field `name` is required for metric_prefix `%s`", metric_prefix)
-                            break
-
-                        column_type = column.get('type')
-                        if not column_type:
-                            self.log.error(
-                                "column field `type` is required for column `%s` of metric_prefix `%s`",
-                                name,
-                                metric_prefix,
-                            )
-                            break
-
-                        if column_type == 'tag':
-                            query_tags.append('{}:{}'.format(name, value))
-                        else:
-                            if not hasattr(self, column_type):
-                                self.log.error(
-                                    "invalid submission method `%s` for column `%s` of metric_prefix `%s`",
-                                    column_type,
-                                    name,
-                                    metric_prefix,
-                                )
-                                break
-                            try:
-                                metric_info.append(('{}.{}'.format(metric_prefix, name), float(value), column_type))
-                            except (ValueError, TypeError):
-                                self.log.error(
-                                    "non-numeric value `%s` for metric column `%s` of metric_prefix `%s`",
-                                    value,
-                                    name,
-                                    metric_prefix,
-                                )
-                                break
-
-                    # Only submit metrics if there were absolutely no errors - all or nothing.
-                    else:
-                        for info in metric_info:
-                            metric, value, method = info
-                            getattr(self, method)(metric, value, tags=set(query_tags), hostname=self.resolved_hostname)
-
     def record_warning(self, code, message):
         # type: (DatabaseConfigurationError, str) -> None
         self._warnings_by_code[code] = message
@@ -714,13 +640,15 @@ class PostgreSql(AgentCheck):
 
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._collect_stats(tags)
-            self._collect_custom_queries(tags)
             if self._config.dbm_enabled:
                 self.statement_metrics.run_job_loop(tags)
                 self.statement_samples.run_job_loop(tags)
                 self.metadata_samples.run_job_loop(tags)
             if self._config.collect_wal_metrics:
                 self._collect_wal_metrics(tags)
+            
+            # Collect custom queries
+            self.custom_queries.execute()
 
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
