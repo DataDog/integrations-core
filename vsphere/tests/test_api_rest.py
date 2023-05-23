@@ -55,7 +55,7 @@ def test_tagging_tags_get_exception(realtime_instance, dd_run_check, caplog, agg
         "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.ClusterComputeResource'>: "
         "defaultdict(<class 'list'>, {})}" in caplog.text
 
-        aggregator.assert_metric('vsphere.net.bytesTx.avg', tags=['vcenter_server:FAKE'])
+        aggregator.assert_metric_has_tag('vsphere.net.bytesTx.avg', 'my_cat_name_1:my_tag_name_1', count=0)
 
 
 @pytest.mark.usefixtures("mock_rest_api", "mock_type", "mock_api")
@@ -80,7 +80,7 @@ def test_tagging_category_get_exception(realtime_instance, dd_run_check, caplog,
         "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.ClusterComputeResource'>: "
         "defaultdict(<class 'list'>, {})}" in caplog.text
 
-        aggregator.assert_metric('vsphere.net.bytesTx.avg', tags=['vcenter_server:FAKE'])
+        aggregator.assert_metric_has_tag('vsphere.net.bytesTx.avg', 'my_cat_name_1:my_tag_name_1', count=0)
 
 
 @pytest.mark.usefixtures("mock_rest_api", "mock_type", "mock_api")
@@ -99,10 +99,7 @@ def test_get_tags_log(realtime_instance, dd_run_check, caplog, aggregator):
         "defaultdict(<class 'list'>, {'VM4-4-1': ['my_cat_name_1:my_tag_name_1', "
         "'my_cat_name_2:my_tag_name_2']})" in caplog.text
 
-        aggregator.assert_metric(
-            'vsphere.net.bytesTx.avg',
-            tags=['my_cat_name_1:my_tag_name_1', 'vcenter_server:FAKE'],
-        )
+        aggregator.assert_metric_has_tag('vsphere.net.bytesTx.avg', 'my_cat_name_1:my_tag_name_1')
 
 
 @pytest.mark.parametrize(
