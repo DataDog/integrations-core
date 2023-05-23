@@ -230,7 +230,7 @@ class ComposeFileUp(LazyFunction):
 
     def __call__(self):
         # Capture stderr from docker compose up to make debugging easier.
-        return run_command(self.command, check=True, capture='err')
+        return run_command(self.command, check=True)
 
 
 class ComposeFileLogs(LazyFunction):
