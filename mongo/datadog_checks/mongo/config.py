@@ -57,6 +57,12 @@ class MongoConfig(object):
             self.scheme = instance.get('connection_scheme', 'mongodb')
             self.db_name = instance.get('database')
             self.additional_options = instance.get('options', {})
+            if 'replicaSet' in self.additional_options:
+                raise ConfigurationError(
+                    'Setting the `replicaSet` option is not supported. '
+                    'Configure one check instance for each node instead'
+                )
+
             self.auth_source = self.additional_options.get('authSource') or self.db_name or 'admin'
 
         if not self.hosts:
