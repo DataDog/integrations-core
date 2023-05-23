@@ -1607,9 +1607,5 @@
     ],
     "layout_type": "ordered",
     "notify_list": [],
-    "reflow_type": "fixed",
-    "tags": [
-        "team:product-management",
-        "team:agent-integrations"
-    ]
+    "reflow_type": "fixed"
 }
