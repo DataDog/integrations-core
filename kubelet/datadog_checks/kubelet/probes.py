@@ -38,7 +38,7 @@ class ProbesPrometheusScraperMixin(object):
         kubelet_conn_info = get_connection_info()
 
         # dummy needed in case kubelet isn't running when the check is first
-        endpoint = kubelet_conn_info.get('url') if kubelet_conn_info is not None else "dummy_url/probes" 
+        endpoint = kubelet_conn_info.get('url') if kubelet_conn_info is not None else "dummy_url/probes"
 
         probes_instance = deepcopy(instance)
         probes_instance.update(
