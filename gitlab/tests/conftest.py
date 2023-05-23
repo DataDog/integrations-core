@@ -245,7 +245,7 @@ def create_log_volumes():
 
     with TempDir("gitlab-logs") as d:
         os.chmod(d, 0o777)
-        docker_volumes.append(f'{d}:/var/log/gitlab')
+        docker_volumes.append('{}:/var/log/gitlab'.format(d))
         env_vars["LOGS_FOLDER"] = d
 
     save_state('logs_config', get_logs_config())
@@ -259,7 +259,7 @@ def get_logs_config():
     return [
         {
             'type': 'file',
-            'path': f'/var/log/gitlab/{service["name"]}/{service["file"]}',
+            'path': '/var/log/gitlab/{}/{}'.format(service["name"], service["file"]),
             'source': 'gitlab',
             'service': service["name"],
         }
