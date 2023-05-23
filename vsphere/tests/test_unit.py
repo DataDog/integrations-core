@@ -67,6 +67,54 @@ def test_event_exception(aggregator, dd_run_check, events_only_instance):
         assert len(aggregator.events) == 0
 
 
+def test_two_events(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event1 = vim.event.VmMessageEvent()
+        event1.createdTime = get_current_datetime()
+        event1.vm = vim.event.VmEventArgument()
+        event1.vm.name = "vm1"
+        event1.fullFormattedMessage = "First event in time"
+
+        event2 = vim.event.VmMessageEvent()
+        event2.createdTime = get_current_datetime()
+        event2.vm = vim.event.VmEventArgument()
+        event2.vm.name = "vm1"
+        event2.fullFormattedMessage = "Second event in time"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event1, event2]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        assert len(aggregator.events) == 2
+
+
+def test_two_unordered_events(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        event1 = vim.event.VmMessageEvent()
+        event1.createdTime = get_current_datetime()
+        event1.vm = vim.event.VmEventArgument()
+        event1.vm.name = "vm1"
+        event1.fullFormattedMessage = "First event in time"
+
+        event2 = vim.event.VmMessageEvent()
+        event2.createdTime = get_current_datetime()
+        event2.vm = vim.event.VmEventArgument()
+        event2.vm.name = "vm1"
+        event2.fullFormattedMessage = "Second event in time"
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = [event2, event1]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        assert len(aggregator.events) == 2
+
+
 def test_event_filtered(aggregator, dd_run_check, events_only_instance):
     mock_connect = mock.MagicMock()
     with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
