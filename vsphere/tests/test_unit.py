@@ -55,6 +55,18 @@ def test_metadata(datadog_agent, aggregator, dd_run_check, events_only_instance)
         datadog_agent.assert_metadata('test:123', version_metadata)
 
 
+def test_event_exception(aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.side_effect = [Exception()]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        dd_run_check(check)
+        assert len(aggregator.events) == 0
+
+
 def test_event_filtered(aggregator, dd_run_check, events_only_instance):
     mock_connect = mock.MagicMock()
     with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
