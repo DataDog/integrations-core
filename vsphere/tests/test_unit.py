@@ -4,7 +4,7 @@
 
 import mock
 import pytest
-from pyVmomi import vim
+from pyVmomi import vim, vmodl
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import get_current_datetime
@@ -584,3 +584,50 @@ def test_event_vm_suspended(aggregator, dd_run_check, events_only_instance):
             msg_title="VM vm1 has been SUSPENDED",
             host="vm1",
         )
+
+
+def test_report_realtime_metrics(aggregator, dd_run_check, realtime_instance):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = []
+        mock_connect.return_value = mock_si
+        mock_si.content.perfManager = mock.MagicMock()
+        mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
+            vim.PerformanceManager.CounterInfo(
+                key=100,
+                groupInfo=vim.ElementDescription(key='cpu'),
+                nameInfo=vim.ElementDescription(key='costop'),
+                rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+            )
+        ]
+        mock_metric = vim.PerformanceManager.EntityMetric()
+        mock_metric.entity = vim.VirtualMachine(moId="vm1")
+        mock_metric.value = [
+            vim.PerformanceManager.IntSeries(
+                value=[47, 52],
+                id=vim.PerformanceManager.MetricId(counterId=100),
+            )
+        ]
+        mock_si.content.perfManager.QueryPerf.return_value = [mock_metric]
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManager = mock.MagicMock()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector = mock.MagicMock()
+        mock_property_name = vmodl.DynamicProperty()
+        mock_property_name.name = "name"
+        mock_property_name.val = "vm1"
+        mock_property_power_state = vmodl.DynamicProperty()
+        mock_property_power_state.name = "runtime.powerState"
+        mock_property_power_state.val = vim.VirtualMachinePowerState.poweredOn
+        mock_object = vim.ObjectContent()
+        mock_object.obj = vim.VirtualMachine(moId="vm1")
+        mock_object.propSet = [mock_property_name, mock_property_power_state]
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult(
+            objects=[mock_object]
+        )
+        check = VSphereCheck('vsphere', {}, [realtime_instance])
+        dd_run_check(check)
+        aggregator.assert_metric('vsphere.cpu.costop.sum', value=52, count=1, tags=['vcenter_server:FAKE'])
