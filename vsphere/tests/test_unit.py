@@ -67,7 +67,7 @@ def test_event_filtered(aggregator, dd_run_check, events_only_instance):
         mock_connect.return_value = mock_si
         check = VSphereCheck('vsphere', {}, [events_only_instance])
         dd_run_check(check)
-        aggregator.assert_event("", count=0)
+        assert len(aggregator.events) == 0
 
 
 def test_event_vm_being_hot_migrated_change_host(aggregator, dd_run_check, events_only_instance):
@@ -197,7 +197,7 @@ def test_event_alarm_status_changed_excluded(aggregator, dd_run_check, events_on
         mock_connect.return_value = mock_si
         check = VSphereCheck('vsphere', {}, [events_only_instance])
         dd_run_check(check)
-        aggregator.assert_event("""vCenter monitor status changed on this alarm""", exact_match=False, count=0)
+        assert len(aggregator.events) == 0
 
 
 def test_event_alarm_status_changed_vm(aggregator, dd_run_check, events_only_instance):
@@ -297,9 +297,7 @@ def test_event_alarm_status_changed_other(aggregator, dd_run_check, events_only_
         mock_connect.return_value = mock_si
         check = VSphereCheck('vsphere', {}, [events_only_instance])
         dd_run_check(check)
-        aggregator.assert_event(
-            """vCenter monitor status changed on this alarm, it was green and it's now yellow.""", count=0
-        )
+        assert len(aggregator.events) == 0
 
 
 def test_event_alarm_status_changed_wrong_from(aggregator, dd_run_check, events_only_instance):
@@ -324,10 +322,7 @@ def test_event_alarm_status_changed_wrong_from(aggregator, dd_run_check, events_
         mock_connect.return_value = mock_si
         check = VSphereCheck('vsphere', {}, [events_only_instance])
         dd_run_check(check)
-        aggregator.assert_event(
-            """vCenter monitor status changed on this alarm, it was green and it's now yellow.""",
-            count=0,
-        )
+        assert len(aggregator.events) == 0
 
 
 def test_event_alarm_status_changed_wrong_to(aggregator, dd_run_check, events_only_instance):
@@ -352,10 +347,7 @@ def test_event_alarm_status_changed_wrong_to(aggregator, dd_run_check, events_on
         mock_connect.return_value = mock_si
         check = VSphereCheck('vsphere', {}, [events_only_instance])
         dd_run_check(check)
-        aggregator.assert_event(
-            """vCenter monitor status changed on this alarm, it was green and it's now yellow.""",
-            count=0,
-        )
+        assert len(aggregator.events) == 0
 
 
 def test_event_vm_message(aggregator, dd_run_check, events_only_instance):
