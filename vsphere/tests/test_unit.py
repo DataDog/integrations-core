@@ -55,6 +55,21 @@ def test_metadata(datadog_agent, aggregator, dd_run_check, events_only_instance)
         datadog_agent.assert_metadata('test:123', version_metadata)
 
 
+def test_disabled_metadata(datadog_agent, aggregator, dd_run_check, events_only_instance):
+    mock_connect = mock.MagicMock()
+    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+        mock_si = mock.MagicMock()
+        mock_si.content.about.version = VSPHERE_VERSION
+        mock_si.content.about.build = '123456789'
+        mock_si.content.about.apiType = 'VirtualCenter'
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        check.check_id = 'test:123'
+        datadog_agent._config["enable_metadata_collection"] = False
+        dd_run_check(check)
+        datadog_agent.assert_metadata_count(0)
+
+
 def test_event_exception(aggregator, dd_run_check, events_only_instance):
     mock_connect = mock.MagicMock()
     with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
