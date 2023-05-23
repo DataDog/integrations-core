@@ -36,12 +36,13 @@ def test_get_resource_tags(realtime_instance):
 
 
 @pytest.mark.usefixtures("mock_rest_api", "mock_type", "mock_api")
-def test_tagging_tags_get_exception(realtime_instance, dd_run_check, caplog):
+def test_tagging_tags_get_exception(realtime_instance, dd_run_check, caplog, aggregator):
     mock_connect = MagicMock()
     with patch('pyVim.connect.SmartConnect', new=mock_connect):
 
         instance = copy.deepcopy(realtime_instance)
         instance['collect_tags'] = True
+        instance['excluded_host_tags'] = ['my_cat_name_1']
         check = VSphereCheck('vsphere', {}, [instance])
 
         with patch('datadog_checks.vsphere.api_rest.VSphereRestClient.tagging_tags_get', side_effect=Exception("test")):
@@ -54,14 +55,17 @@ def test_tagging_tags_get_exception(realtime_instance, dd_run_check, caplog):
         "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.ClusterComputeResource'>: "
         "defaultdict(<class 'list'>, {})}" in caplog.text
 
+        aggregator.assert_metric('vsphere.net.bytesTx.avg', tags=['vcenter_server:FAKE'], hostname='VM4-4')
+
 
 @pytest.mark.usefixtures("mock_rest_api", "mock_type", "mock_api")
-def test_tagging_category_get_exception(realtime_instance, dd_run_check, caplog):
+def test_tagging_category_get_exception(realtime_instance, dd_run_check, caplog, aggregator):
     mock_connect = MagicMock()
     with patch('pyVim.connect.SmartConnect', new=mock_connect):
 
         instance = copy.deepcopy(realtime_instance)
         instance['collect_tags'] = True
+        instance['excluded_host_tags'] = ['my_cat_name_1']
         check = VSphereCheck('vsphere', {}, [instance])
 
         with patch(
@@ -76,20 +80,28 @@ def test_tagging_category_get_exception(realtime_instance, dd_run_check, caplog)
         "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.ClusterComputeResource'>: "
         "defaultdict(<class 'list'>, {})}" in caplog.text
 
+        aggregator.assert_metric('vsphere.net.bytesTx.avg', tags=['vcenter_server:FAKE'], hostname='VM4-4')
+
 
 @pytest.mark.usefixtures("mock_rest_api", "mock_type", "mock_api")
-def test_get_tags_log(realtime_instance, dd_run_check, caplog):
+def test_get_tags_log(realtime_instance, dd_run_check, caplog, aggregator):
     mock_connect = MagicMock()
     with patch('pyVim.connect.SmartConnect', new=mock_connect):
 
         instance = copy.deepcopy(realtime_instance)
         instance['collect_tags'] = True
+        instance['excluded_host_tags'] = ['my_cat_name_1']
+
         check = VSphereCheck('vsphere', {}, [instance])
 
         dd_run_check(check)
         assert "Result resource tags: {<class 'pyVmomi.VmomiSupport.vim.VirtualMachine'>: "
         "defaultdict(<class 'list'>, {'VM4-4-1': ['my_cat_name_1:my_tag_name_1', "
         "'my_cat_name_2:my_tag_name_2']})" in caplog.text
+
+        aggregator.assert_metric(
+            'vsphere.net.bytesTx.avg', tags=['my_cat_name_1:my_tag_name_1', 'vcenter_server:FAKE'], hostname='VM4-4'
+        )
 
 
 @pytest.mark.parametrize(
