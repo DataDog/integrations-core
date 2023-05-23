@@ -103,13 +103,13 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             'detached': True,
             'scripts': {
                 'style': [
-                    f'ruff --config {settings_dir}/pyproject.toml .',
                     f'black --config {settings_dir}/pyproject.toml --check --diff .',
+                    f'ruff --config {settings_dir}/pyproject.toml .',
                 ],
                 'fmt': [
-                    f'ruff --config {settings_dir}/pyproject.toml --fix .',
                     f'black . --config {settings_dir}/pyproject.toml',
-                    'python -c "print(\'\\n[NOTE] hello flake8 may still report style errors for things '
+                    f'ruff --config {settings_dir}/pyproject.toml --fix .',
+                    'python -c "print(\'\\n[NOTE] ruff may still report style errors for things '
                     'black cannot fix, these will need to be fixed manually.\')"',
                     'style',
                 ],
