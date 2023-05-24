@@ -1225,7 +1225,7 @@
                         "id": 3252110506236862,
                         "definition": {
                             "type": "note",
-                            "content": "This section informs on the connection between GitLab and Redis via metrics like the number of new Redis Database connections and client requests to the Redis server. ",
+                            "content": "This section informs on the connection between GitLab and Redis through metrics like the number of new Redis Database connections and client requests to the Redis server.",
                             "background_color": "orange",
                             "font_size": "14",
                             "text_align": "center",
