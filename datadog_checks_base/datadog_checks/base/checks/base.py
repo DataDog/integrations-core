@@ -373,6 +373,9 @@ class AgentCheck(object):
         """
         Convenience wrapper to ease programmatic use of this class from the C API.
         """
+        # Added this global replacement to undo the one in the Agent:
+        # https://github.com/DataDog/datadog-agent/blob/main/pkg/autodiscovery/configresolver/configresolver.go#L203
+        yaml_str = yaml_str.replace(u'\u2030', '%%')
         return yaml.safe_load(yaml_str)
 
     @property
