@@ -4,6 +4,10 @@
 import pytest
 
 
+INSTANCE = {
+    "openmetrics_endpoint": "http://locallhost:9400/metrics",
+}
+
 @pytest.fixture(scope='session')
 def dd_environment():
     yield

@@ -14,6 +14,19 @@ METRIC_MAP = {
     'DCGM_FI_DEV_POWER_USAGE': 'power_usage',
     'DCGM_FI_DEV_SM_CLOCK': 'sm_clock',
     'DCGM_FI_DEV_TOTAL_ENERGY_CONSUMPTION': 'total_energy_consumption',
-    'DCGM_FI_DEV_VGPU_LICENSE_STATUS': 'vgpu_licence_status',
+    'DCGM_FI_DEV_VGPU_LICENSE_STATUS': 'vgpu_license_status',
     'DCGM_FI_DEV_XID_ERRORS': 'xid_errors',
+    #NVML Specific Missing Metrics (5)
+    'DCGM_FI_DEV_COUNT': 'device_count',
+    'DCGM_FI_DEV_FAN_SPEED': 'fan_speed',
+    'DCGM_FI_DEV_PCIE_TX_THROUGHPUT': 'pcie_tx_throughput',    
+    'DCGM_FI_DEV_PCIE_RX_THROUGHPUT': 'pcie_rx_throughput',
+    # 'DCGM_FI_DEV_VGPU_PER_PROCESS_UTILIZATION': 'compute_running_process', # this is a label ?
+    # From the metadata: *dcgm.compute_running_process,<type>,,,,Utilization values for processes running within vGPU VMs using the device.,0,dcgm,, 
+    #Others from default-counters.csv
+    'DCGM_FI_DEV_MEMORY_TEMP': 'memory_temperature',
+    'DCGM_FI_DEV_UNCORRECTABLE_REMAPPED_ROWS': 'uncorrectable_remapped_rows',
+    'DCGM_FI_DEV_CORRECTABLE_REMAPPED_ROWS': 'correctable_remapped_rows',
+    'DCGM_FI_DEV_ROW_REMAP_FAILURE': 'row_remap_failure',
+    'DCGM_FI_DRIVER_VERSION': 'driver_version', #label
 }
