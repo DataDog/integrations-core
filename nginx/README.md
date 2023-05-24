@@ -165,11 +165,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 ##### Metric collection
 
-1. Set the `nginx_status_url` parameter to `http://localhost:
-
-
-
-/nginx_status/` in your `nginx.d/conf.yaml` file to start gathering your [NGINX metrics](#metrics). See the [sample nginx.d/conf.yaml][6] for all available configuration options.
+1. Set the `nginx_status_url` parameter to `http://localhost:81/nginx_status/` in your `nginx.d/conf.yaml` file to start gathering your [NGINX metrics](#metrics). See the [sample nginx.d/conf.yaml][6] for all available configuration options.
 
     **NGINX Plus**:
 
