@@ -75,7 +75,7 @@
                         "id": 2501952917707794,
                         "definition": {
                             "type": "note",
-                            "content": "This section provides you with an overview of your system activity and any GitLab alerts. The service checks on the left speak to the health of your GitLab environment, while the ones on the right report on the Readiness of various GitLab Dependencies. ",
+                            "content": "This section provides you with an overview of your system activity and any GitLab alerts. The service checks on the left speak to the health of your GitLab environment, while the ones on the right report on the Readiness of various GitLab Dependencies.",
                             "background_color": "orange",
                             "font_size": "14",
                             "text_align": "center",
