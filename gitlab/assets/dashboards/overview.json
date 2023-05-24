@@ -1,6 +1,6 @@
 {
     "title": "GitLab Overview",
-    "description": "**GitLab**\n\nThis dashboard provides an overview of your GitLab environment. It provides insights into you CI metrics, project information and any issues in your environment via the log stream and monitor summary. The dashboard also includes metrics and checks relevant to related services like Gitaly (population of these widgets is contingent on them being enabled via the integration's configuration).  \n\nFor more indepth monitoring of your GitLab pipelines, check out [CI Pipeline Visibility](https://app.datadoghq.com/ci/getting-started).",
+    "description": "**GitLab**\n\nThis dashboard provides an overview of your GitLab environment. It provides insights into CI metrics, project information, and any issues in your environment through the log stream and monitor summary. The dashboard also includes metrics and checks relevant to related services like Gitaly (population of these widgets is contingent on them being enabled through the integration's configuration).  \n\nFor more in-depth monitoring of your GitLab pipelines, check out [CI Pipeline Visibility](https://app.datadoghq.com/ci/getting-started).",
     "widgets": [
         {
             "id": 6955576996753366,
