@@ -117,7 +117,7 @@ data:
 [...]
   status.conf: |
     server {
-      listen 18080;
+      listen 81;
 
       location /nginx_status {
         stub_status on;
@@ -129,14 +129,14 @@ data:
     }
 ```
 
-Then, in your NGINX pod, expose the `18080` endpoint and mount that file in the NGINX configuration folder:
+Then, in your NGINX pod, expose the `81` endpoint and mount that file in the NGINX configuration folder:
 
 ```yaml
 spec:
   containers:
     - name: nginx
       ports:
-        - containerPort: 18080
+        - containerPort: 81
       volumeMounts:
         - mountPath: /etc/nginx/conf.d/status.conf
           subPath: status.conf
@@ -148,20 +148,6 @@ spec:
           name: "nginx-conf"
 ```
 
-Finally, expose that port in your NGINX service:
-
-```yaml
-spec:
-  ports:
-  - port: 80
-    protocol: TCP
-    targetPort: 80
-    name: default
-  - port: 81
-    protocol: TCP
-    targetPort: 18080
-    name: status
-```
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -179,7 +165,11 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 ##### Metric collection
 
-1. Set the `nginx_status_url` parameter to `http://localhost:81/nginx_status/` in your `nginx.d/conf.yaml` file to start gathering your [NGINX metrics](#metrics). See the [sample nginx.d/conf.yaml][6] for all available configuration options.
+1. Set the `nginx_status_url` parameter to `http://localhost:
+
+
+
+/nginx_status/` in your `nginx.d/conf.yaml` file to start gathering your [NGINX metrics](#metrics). See the [sample nginx.d/conf.yaml][6] for all available configuration options.
 
     **NGINX Plus**:
 
