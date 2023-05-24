@@ -1065,7 +1065,7 @@
                         "id": 5673463017827586,
                         "definition": {
                             "type": "note",
-                            "content": "This section informs on the number of times data is read from the cache, and time required for background jobs to be processed and completed within the Rails job queue. ",
+                            "content": "This section informs on the number of times data is read from the cache, and time required for background jobs to be processed and completed within the Rails job queue.",
                             "background_color": "orange",
                             "font_size": "14",
                             "text_align": "center",
