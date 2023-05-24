@@ -591,7 +591,7 @@
                         "id": 2866154983425430,
                         "definition": {
                             "type": "note",
-                            "content": "Pipelines created refers to a count, while creation duration refers to the latency between when a pipeline is created to the moment it is triggered to start running. Builds refers to the number of jobs executed throughout all stages within each pipeline. ",
+                            "content": "Pipelines created refers to a count, while creation duration refers to the latency between when a pipeline is created to the moment it is triggered to start running. Builds refer to the number of jobs executed throughout all stages within each pipeline. ",
                             "background_color": "orange",
                             "font_size": "14",
                             "text_align": "center",
