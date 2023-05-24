@@ -4,6 +4,7 @@
 import copy
 import json
 import os
+from contextlib import contextmanager
 from time import sleep
 
 import mock
@@ -11,7 +12,8 @@ import pytest
 import requests
 from six import PY2
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import EnvVars, TempDir, docker_run
+from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.gitlab import GitlabCheck
 
@@ -66,6 +68,7 @@ def dd_environment():
             CheckEndpoints(PROMETHEUS_ENDPOINT, attempts=100, wait=6),
             CheckEndpoints(GITLAB_GITALY_PROMETHEUS_ENDPOINT, attempts=100, wait=10),
         ],
+        wrappers=[create_log_volumes()],
     ):
         # run pre-test commands
         for _ in range(100):
@@ -233,3 +236,44 @@ def use_openmetrics(request):
         pytest.skip('This version of the integration is only available when using Python 3.')
 
     return request.param
+
+
+@contextmanager
+def create_log_volumes():
+    env_vars = {}
+    docker_volumes = get_state('docker_volumes', [])
+
+    with TempDir("gitlab-logs") as d:
+        os.chmod(d, 0o777)
+        docker_volumes.append('{}:/var/log/gitlab'.format(d))
+        env_vars["LOGS_FOLDER"] = d
+
+    save_state('logs_config', get_logs_config())
+    save_state('docker_volumes', docker_volumes)
+
+    with EnvVars(env_vars):
+        yield
+
+
+def get_logs_config():
+    return [
+        {
+            'type': 'file',
+            'path': '/var/log/gitlab/{}/{}'.format(service["name"], service["file"]),
+            'source': 'gitlab',
+            'service': service["name"],
+        }
+        for service in [
+            {"name": "gitlab-rails", "file": "api_json.log"},
+            {"name": "gitlab-rails", "file": "production.log"},
+            {"name": "gitlab-rails", "file": "production_json.log"},
+            {"name": "gitlab-rails", "file": "integrations_json.log"},
+            {"name": "gitlab-rails", "file": "application.log"},
+            {"name": "gitlab-rails", "file": "kubernetes.log"},
+            {"name": "gitlab-rails", "file": "audit_json.log"},
+            {"name": "gitlab-rails", "file": "sidekiq.log"},
+            {"name": "gitlab-rails", "file": "gitlab-shell.log"},
+            {"name": "gitlab-rails", "file": "graphql_json.log"},
+            {"name": "gitlab-rails", "file": "auth.log"},
+        ]
+    ]
