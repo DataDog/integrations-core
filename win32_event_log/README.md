@@ -31,6 +31,14 @@ Both methods are configured in `win32_event_log.d/conf.yaml` in the `conf.d/` fo
 
 First, identify the Windows Event Log channels you want to monitor. 
 
+Depending on collection method, the channel name can be used for the following configuration parameters:
+
+- Datadog Logs: `channel_path`
+- Datadog Events: `path`
+- Datadog Events (legacy): `log_file`
+
+##### PowerShell
+
 To see a list of channels, run the following command in PowerShell:
 
 ```powershell
@@ -55,11 +63,7 @@ Circular            5242880        2932 <CHANNEL_2>
 
 The value under the column `LogName` is the name of the channel. In the example above, the channel name is `Security`.
 
-Depending on collection method, the channel name can be used for the following configuration parameters:
-
-- Datadog Logs: `channel_path`
-- Datadog Events: `path`
-- Datadog Events (legacy): `log_file`
+##### Windows Event Viewer
 
 To find the channel name for an Event Log in the Windows Event Viewer, open the Event Log Properties window and refer to the `Full Name` field. In the following example, the channel name is `Microsoft-Windows-Windows Defender/Operational`.
 
