@@ -771,7 +771,7 @@
                         "id": 3886077082488710,
                         "definition": {
                             "type": "note",
-                            "content": "Gitaly is a centralized service handling file access and storage for GitLab. The status checks inform on the health of the Gitaly subservice, while the query values speak to the portion of virtual memory and File Descriptors used out of the maximum available. To have this section populated, enable Gitaly monitoring via configuration. ",
+                            "content": "Gitaly is a centralized service handling file access and storage for GitLab. The status checks inform on the health of the Gitaly subservice, while the query values speak to the portion of virtual memory and File Descriptors used out of the maximum available. To have this section populated, enable Gitaly monitoring through configuration. ",
                             "background_color": "orange",
                             "font_size": "14",
                             "text_align": "center",
