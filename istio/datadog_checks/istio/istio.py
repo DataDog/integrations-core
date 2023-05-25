@@ -32,7 +32,7 @@ class Istio(OpenMetricsBaseCheck):
         instance.update(
             {
                 'prometheus_url': instance.get('istiod_endpoint'),
-                'namespace': 'istio',
+                'namespace': instance.get('namespace', 'istio'),
                 'metrics': metrics,
                 'metadata_metric_name': 'istio_build',
                 'metadata_label_map': {'version': 'tag'},
