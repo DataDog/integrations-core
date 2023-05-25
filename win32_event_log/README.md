@@ -94,8 +94,8 @@ The Datadog Agent can be configured to collect Windows Event Logs as Datadog eve
       filters: {}
 
     - path: "<CHANNEL_2>" 
-      legacy_mode: false
-      filters: {}
+      log_file:
+        - "<CHANNEL_2>"
   ```
 
 * The legacy method uses WMI and is the default mode for an instance. 
