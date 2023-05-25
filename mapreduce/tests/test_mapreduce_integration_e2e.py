@@ -7,8 +7,6 @@ from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 
-pytestmark = pytest.mark.integration
-
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
