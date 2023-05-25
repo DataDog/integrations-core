@@ -113,7 +113,7 @@ The Datadog Agent can be configured to collect Windows Event Logs as Datadog eve
         - Security
         
     - path: "<CHANNEL_2>" 
-      legacy_mode: false
+      legacy_mode: true
       filters: {}
   ```
   
@@ -313,7 +313,7 @@ logs:
 For more examples of filtering logs, see the [Advanced Log Collection documentation][12].
 
 #### Legacy events
-_Applies to Agent versions <= 7.41_
+_Applies to Agent versions < 7.41_
 
 Legacy Provider EventIDs have a `Qualifiers` attribute that changes the format of the log, as seen in the [Windows Event Schema][14]. These events have the following XML format, visible in Windows Event Viewer:
 ```xml
