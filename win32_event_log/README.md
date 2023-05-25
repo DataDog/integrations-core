@@ -439,4 +439,4 @@ Additional helpful documentation, links, and articles:
 [16]: https://docs.datadoghq.com/events/
 [17]: https://docs.datadoghq.com/logs/
 [18]: https://docs.datadoghq.com/agent/logs/#activate-log-collection
-[19]: https://raw.githubusercontent.com/DataDog/integrations-core/alai97/win32-logs-mode-clarification-update/win32_event_log/images/windows-defender-operational-event-log-properties.png
+[19]: https://raw.githubusercontent.com/DataDog/integrations-core/master/win32_event_log/images/windows-defender-operational-event-log-properties.png
