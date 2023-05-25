@@ -103,7 +103,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][12] for a list of metrics provided by this integration. 
 
-**Note**: Metrics marked as `[Legacy]`, `[OpenMetricsV1]` or `[OpenMetricsV2]` are only available using this implementation of the integration. Metrics not marked are collected by the three different implementations.
+**Note**: Metrics marked as `[Legacy]`, `[OpenMetricsV1]`, or `[OpenMetricsV2]` are only available using this implementation of the Gitlab integration. Metrics not marked are collected by all three implementations.
 
 ### Events
 
