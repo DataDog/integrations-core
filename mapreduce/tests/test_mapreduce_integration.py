@@ -17,7 +17,7 @@ def test_integration_metrics(aggregator, check, dd_run_check, instance, datadog_
 
     for metric in common.ELAPSED_TIME_METRICS:
         aggregator.assert_metric(metric)
-    assert_metrics_covered(aggregator)
+    common.assert_metrics_covered(aggregator)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
@@ -37,22 +37,3 @@ def test_metadata(aggregator, check, dd_run_check, instance, datadog_agent):
         'version.patch': '1',
     }
     datadog_agent.assert_metadata('test:123', version_metadata)
-
-
-@pytest.mark.e2e
-def test_e2e(dd_agent_check, instance):
-    # trigger a job but wait for it to be in a running state before running check
-    assert common.setup_mapreduce()
-
-    aggregator = dd_agent_check(instance, rate=True)
-    for metric in common.ELAPSED_TIME_BUCKET_METRICS:
-        aggregator.assert_metric(metric)
-    assert_metrics_covered(aggregator)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-
-def assert_metrics_covered(aggregator):
-    for metric in common.EXPECTED_METRICS:
-        aggregator.assert_metric(metric)
-
-    aggregator.assert_all_metrics_covered()

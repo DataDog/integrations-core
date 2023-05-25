@@ -231,3 +231,9 @@ MAPREDUCE_JOB_COUNTER_METRIC_VALUES_RECORDS = {
     'mapreduce.job.counter.map_counter_value': {'value': 10, 'tags': ['counter_name:map_output_records']},
     'mapreduce.job.counter.reduce_counter_value': {'value': 11, 'tags': ['counter_name:map_output_records']},
 }
+
+def assert_metrics_covered(aggregator):
+    for metric in EXPECTED_METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
