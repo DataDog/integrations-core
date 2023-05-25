@@ -24,6 +24,7 @@ class Aws(BaseModel):
         allow_mutation = False
 
     instance_endpoint: Optional[str]
+    region: Optional[str]
 
 
 class Azure(BaseModel):
