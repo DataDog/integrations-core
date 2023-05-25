@@ -200,6 +200,10 @@ class Redis(AgentCheck):
         # Ping the database for info, and track the latency.
         # Process the service check: the check passes if we can connect to Redis
         try:
+            # By running a ping first, we get a recent connection in an attempt to
+            # reduce the chance of connection time affecting our latency measurements
+            conn.ping()
+
             info, info_latency_ms = _call_and_time(conn.info)
             _, ping_latency_ms = _call_and_time(conn.ping)
 
