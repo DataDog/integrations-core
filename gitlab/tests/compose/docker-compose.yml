@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   gitlab:
-    image: gitlab/gitlab-ce:${GITLAB_VERSION}
+    image: ${GITLAB_IMAGE:-gitlab/gitlab-ce}:${GITLAB_VERSION}
     healthcheck:
       test: curl -f http://localhost:80/-/health | grep "GitLab OK" || exit 1
       interval: 3s
@@ -10,8 +10,10 @@ services:
       timeout: 5s
     volumes:
       - ./config/gitlab.rb:/etc/gitlab/gitlab.rb
+      - ${LOGS_FOLDER}:/var/log/gitlab
     ports:
       - "${GITLAB_LOCAL_PORT}:80"
       - "${GITLAB_LOCAL_PROMETHEUS_PORT}:9090"
+      - "${GITLAB_LOCAL_GITALY_PROMETHEUS_PORT}:9236"
     environment:
       - GITLAB_ROOT_PASSWORD=${GITLAB_TEST_PASSWORD}

@@ -27,6 +27,7 @@ from datadog_checks.dev.tooling.commands.validate.typos import typos
 
 from ddev.cli.validate.ci import ci
 from ddev.cli.validate.manifest import manifest
+from ddev.cli.validate.openmetrics import openmetrics
 
 
 @click.group(short_help='Verify certain aspects of the repo')
@@ -54,6 +55,7 @@ validate.add_command(licenses)
 validate.add_command(manifest)
 validate.add_command(metadata)
 validate.add_command(models)
+validate.add_command(openmetrics)
 validate.add_command(package)
 validate.add_command(readmes)
 validate.add_command(recommended_monitors)

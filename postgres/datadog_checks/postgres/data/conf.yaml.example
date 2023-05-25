@@ -318,11 +318,11 @@ instances:
         #
         # seen_samples_cache_maxsize: 10000
 
-        ## @param explain_parameterized_queries - boolean - optional - default: false
-        ## Note, this is a BETA feature. This option will enable the ability to explain parameterized queries.
+        ## @param explain_parameterized_queries - boolean - optional - default: true
+        ## This option will enable the ability to explain parameterized queries.
         ## This is useful if your SQL clients are using the extended query protocol or prepared statements.
         #
-        # explain_parameterized_queries: false
+        # explain_parameterized_queries: true
 
     ## Configure collection of query activity
     #
@@ -344,6 +344,21 @@ instances:
         ## than the maximum rows set, then the top N longest running transactions will be reported.
         #
         # payload_row_limit: 3500
+
+    ## Configure collection of pg_settings. This is an alpha feature.
+    #
+    # collect_settings:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of pg_settings. Requires `dbm: true`.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database settings collection interval (in seconds). Each collection involves a single query to
+        ## `pg_settings`.
+        #
+        # collection_interval: 600
 
     ## This block defines the configuration for AWS RDS and Aurora instances. 
     ##
@@ -412,10 +427,12 @@ instances:
         #
         # deployment_type: flexible_server
 
-        ## @param name - string - optional - default: my-postgres-database
-        ## Equal to the name of the Azure PostgreSQL database.
+        ## @param fully_qualified_domain_name - string - optional - default: my-postgres-database.database.windows.net
+        ## Equal to the full qualified domain name of the Azure PostgreSQL database.
+        ##
+        ## This value is optional if the value of `host` is already configured to the fully qualified domain name.
         #
-        # name: my-postgres-database
+        # fully_qualified_domain_name: my-postgres-database.database.windows.net
 
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.

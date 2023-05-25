@@ -17,10 +17,8 @@ from .common import (
     DB_NAME,
     DBM_MIGRATED_METRICS,
     HOST,
-    PASSWORD,
     PORT,
     POSTGRES_VERSION,
-    USER,
     assert_metric_at_least,
     check_activity_metrics,
     check_bgw_metrics,
@@ -28,27 +26,32 @@ from .common import (
     check_conflict_metrics,
     check_connection_metrics,
     check_db_count,
-    check_replication_slots,
+    check_logical_replication_slots,
+    check_physical_replication_slots,
     check_slru_metrics,
     check_stat_replication,
+    check_uptime_metrics,
     check_wal_receiver_metrics,
+    get_expected_instance_tags,
     requires_static_version,
 )
-from .utils import requires_over_10, requires_over_14
+from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_14
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
-def test_common_metrics(aggregator, integration_check, pg_instance):
+@pytest.mark.parametrize(
+    'is_aurora',
+    [True, False],
+)
+def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check = integration_check(pg_instance)
+    check._is_aurora = is_aurora
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + [
-        'port:{}'.format(PORT),
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
-    ]
+    expected_tags = get_expected_instance_tags(check, pg_instance)
     check_common_metrics(aggregator, expected_tags=expected_tags)
     check_bgw_metrics(aggregator, expected_tags)
     check_connection_metrics(aggregator, expected_tags=expected_tags)
@@ -56,23 +59,12 @@ def test_common_metrics(aggregator, integration_check, pg_instance):
     check_db_count(aggregator, expected_tags=expected_tags)
     check_slru_metrics(aggregator, expected_tags=expected_tags)
     check_stat_replication(aggregator, expected_tags=expected_tags)
-    check_wal_receiver_metrics(aggregator, expected_tags=expected_tags, connected=0)
+    if is_aurora is False:
+        check_wal_receiver_metrics(aggregator, expected_tags=expected_tags, connected=0)
+    check_uptime_metrics(aggregator, expected_tags=expected_tags)
 
-    replication_slot_tags = expected_tags + [
-        'slot_name:replication_slot',
-        'slot_persistence:permanent',
-        'slot_state:active',
-        'slot_type:physical',
-    ]
-    check_replication_slots(aggregator, expected_tags=replication_slot_tags)
-
-    logical_replication_slot_tags = expected_tags + [
-        'slot_name:logical_slot',
-        'slot_persistence:permanent',
-        'slot_state:inactive',
-        'slot_type:logical',
-    ]
-    check_replication_slots(aggregator, expected_tags=logical_replication_slot_tags)
+    check_logical_replication_slots(aggregator, expected_tags)
+    check_physical_replication_slots(aggregator, expected_tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -84,12 +76,20 @@ def test_common_metrics_without_size(aggregator, integration_check, pg_instance)
     assert 'postgresql.database_size' not in aggregator.metric_names
 
 
-def _get_conn(user=USER, db=DB_NAME, application_name='test'):
-    passwords = {'postgres': 'datad0g', USER: PASSWORD}
-    conn = psycopg2.connect(
-        host=HOST, dbname=db, user=user, password=passwords[user], application_name=application_name
+def test_uptime(aggregator, integration_check, pg_instance):
+    conn = _get_conn(pg_instance)
+    with conn.cursor() as cur:
+        cur.execute("SELECT FLOOR(EXTRACT(EPOCH FROM current_timestamp - pg_postmaster_start_time()))")
+        uptime = cur.fetchall()[0][0]
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
+    assert_metric_at_least(
+        aggregator, 'postgresql.uptime', count=1, lower_bound=uptime, higher_bound=uptime + 1, tags=expected_tags
     )
-    return conn
 
 
 @requires_over_14
@@ -101,14 +101,14 @@ def test_session_number(aggregator, integration_check, pg_instance):
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
-    conn = _get_conn()
+    conn = _get_conn(pg_instance)
     with conn.cursor() as cur:
         cur.execute("select sessions from pg_stat_database where datname='postgres'")
         session_number = cur.fetchall()[0][0]
     aggregator.assert_metric('postgresql.sessions.count', value=session_number, count=1, tags=expected_tags)
 
     # Generate a new session in postgres database
-    conn = _get_conn('postgres', 'postgres')
+    conn = _get_conn(pg_instance, dbname='postgres')
     conn.close()
 
     # Leave time for stats to be flushed in the stats collector
@@ -123,7 +123,7 @@ def test_session_number(aggregator, integration_check, pg_instance):
 @requires_over_14
 def test_session_idle_and_killed(aggregator, integration_check, pg_instance):
     # Reset idle time to 0
-    postgres_conn = _get_conn('postgres')
+    postgres_conn = _get_superconn(pg_instance)
     with postgres_conn.cursor() as cur:
         cur.execute("select pg_stat_reset();")
         cur.fetchall()
@@ -143,7 +143,7 @@ def test_session_idle_and_killed(aggregator, integration_check, pg_instance):
     aggregator.assert_metric('postgresql.sessions.fatal', value=0, count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.sessions.abandoned', value=0, count=1, tags=expected_tags)
 
-    conn = _get_conn()
+    conn = _get_conn(pg_instance)
     with conn.cursor() as cur:
         cur.execute('BEGIN;')
         cur.execute('select txid_current();')
@@ -340,10 +340,10 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
         aggregator.assert_metric('postgresql.activity.backend_xmin_age', count=0, tags=dd_agent_tags)
     aggregator.assert_metric('postgresql.activity.xact_start_age', count=1, tags=dd_agent_tags)
 
-    conn1 = _get_conn()
+    conn1 = _get_conn(pg_instance)
     cur = conn1.cursor()
 
-    conn2 = _get_conn()
+    conn2 = _get_conn(pg_instance)
     cur2 = conn2.cursor()
 
     # Start a transaction in repeatable read to force pinning of backend_xmin

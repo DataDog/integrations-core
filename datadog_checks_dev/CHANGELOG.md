@@ -1,5 +1,19 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 19.3.0 / 2023-05-17
+
+* [Added] Add `token` and `alert` as valid metric units. See [#14575](https://github.com/DataDog/integrations-core/pull/14575).
+* [Added] Add an ignore_connection_errors option to the openmetrics check. See [#14504](https://github.com/DataDog/integrations-core/pull/14504).
+* [Fixed] Fix format-style command when test custom_integration for tox. See [#14547](https://github.com/DataDog/integrations-core/pull/14547). Thanks [FeruBaco](https://github.com/FeruBaco).
+* [Fixed] Remove unnecesary commas after type definition. See [#14529](https://github.com/DataDog/integrations-core/pull/14529). Thanks [FeruBaco](https://github.com/FeruBaco).
+* [Fixed] Capture stderr from docker compose to improve debugging experience. See [#13949](https://github.com/DataDog/integrations-core/pull/13949).
+
+## 19.2.0 / 2023-04-27
+
+* [Added] Remove Azure Pipelines from validation. See [#14475](https://github.com/DataDog/integrations-core/pull/14475).
+* [Fixed] Deprecate `use_latest_spec` option. See [#14446](https://github.com/DataDog/integrations-core/pull/14446).
+* [Fixed] Drop some kafka_consumer old dependencies from the `licenses` command. See [#14244](https://github.com/DataDog/integrations-core/pull/14244).
+
 ## 19.1.0 / 2023-04-20
 
 * [Added] Introduce initial entry in CHANGELOG during ddev create. See [#14148](https://github.com/DataDog/integrations-core/pull/14148).

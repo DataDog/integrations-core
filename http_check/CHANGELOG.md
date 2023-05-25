@@ -1,6 +1,6 @@
 # CHANGELOG - http_check
 
-## 8.2.1 / 2023-03-03
+## 8.2.1 / 2023-03-03 / Agent 7.44.0
 
 * [Fixed] Support case-insensitive header fields. See [#13876](https://github.com/DataDog/integrations-core/pull/13876).
 

@@ -195,15 +195,17 @@ class DirectoryCheck(AgentCheck):
         """
         Wraps walker iteration to handle errors and recursive option.
         """
-        walker = walk(self._config.abs_directory, self._config.follow_symlinks)
+
+        def log_error(e):
+            self.log.error("Error when traversing %s: %s", self._config.abs_directory, e)
+
+        walker = walk(self._config.abs_directory, onerror=log_error, followlinks=self._config.follow_symlinks)
 
         while True:
             try:
                 yield next(walker)
             except StopIteration:
                 break
-            except OSError as e:
-                self.log.error("Error when traversing %s: %s", self._config.abs_directory, e)
 
             # Only visit the first directory when we don't want recursive search
             if not self._config.recursive:
