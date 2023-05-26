@@ -1,10 +1,10 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+import time
 from typing import Dict, Optional, Tuple  # noqa: F401
 
-import time
-import json
 import psycopg2
 
 try:
@@ -13,12 +13,10 @@ except ImportError:
     from ..stubs import datadog_agent
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.utils.db.utils import (
-    DBMAsyncJob,
-    default_json_event_encoding,
-)
-from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
+
+from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 
 # default pg_settings collection interval in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
@@ -124,7 +122,7 @@ class PostgresMetadata(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
         with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
-            cursor_factory=psycopg2.extras.DictCursor
+                cursor_factory=psycopg2.extras.DictCursor
         ) as cursor:
             self._log.debug("Running query [%s]", PG_SETTINGS_QUERY)
             self._time_since_last_settings_query = time.time()

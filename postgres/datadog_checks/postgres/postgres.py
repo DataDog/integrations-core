@@ -8,19 +8,20 @@ from contextlib import closing
 from time import time
 
 import psycopg2
-from six import iteritems
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
+from six import iteritems
+
 from datadog_checks.postgres import aws
+from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import INDEX_BLOAT, RELATION_METRICS, TABLE_BLOAT, RelationsManager
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
-from datadog_checks.postgres.metadata import PostgresMetadata
 
 from .config import PostgresConfig
+from .util import DatabaseConfigurationError  # noqa: F401
 from .util import (
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
@@ -33,7 +34,6 @@ from .util import (
     QUERY_PG_UPTIME,
     REPLICATION_METRICS,
     SLRU_METRICS,
-    DatabaseConfigurationError,  # noqa: F401
     fmt,
     get_schema_field,
 )
