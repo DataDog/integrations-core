@@ -63,11 +63,11 @@ class Diagnosis:
             self._result(
                 self.DIAGNOSIS_SUCCESS,
                 name,
-                diagnosis,
-                category=None,
-                description=None,
-                remediation=None,
-                raw_error=None,
+                diagnosis=diagnosis,
+                category=category,
+                description=description,
+                remediation=remediation,
+                raw_error=raw_error,
             )
         )
 
@@ -75,7 +75,13 @@ class Diagnosis:
         """Register a failing diagnostic result."""
         self._diagnoses.append(
             self._result(
-                self.DIAGNOSIS_FAIL, name, diagnosis, category=None, description=None, remediation=None, raw_error=None
+                self.DIAGNOSIS_FAIL,
+                name,
+                diagnosis,
+                category=category,
+                description=description,
+                remediation=remediation,
+                raw_error=raw_error,
             )
         )
 
@@ -86,10 +92,10 @@ class Diagnosis:
                 self.DIAGNOSIS_WARNING,
                 name,
                 diagnosis,
-                category=None,
-                description=None,
-                remediation=None,
-                raw_error=None,
+                category=category,
+                description=description,
+                remediation=remediation,
+                raw_error=raw_error,
             )
         )
 
