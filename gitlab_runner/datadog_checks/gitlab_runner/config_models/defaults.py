@@ -87,7 +87,7 @@ def instance_headers(field, value):
 
 
 def instance_health_service_check(field, value):
-    return True
+    return False
 
 
 def instance_ignore_metrics(field, value):
@@ -211,7 +211,7 @@ def instance_send_histograms_buckets(field, value):
 
 
 def instance_send_monotonic_counter(field, value):
-    return True
+    return False
 
 
 def instance_send_monotonic_with_gauge(field, value):
