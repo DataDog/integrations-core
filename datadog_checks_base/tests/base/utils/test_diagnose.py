@@ -103,3 +103,44 @@ def test_exceptions_during_explicit_diagnoses_are_converted_into_unexpected_erro
         Diagnosis.Result(Diagnosis.DIAGNOSIS_UNEXPECTED_ERROR, "", "", None, None, None, "something went wrong"),
         Diagnosis.Result(Diagnosis.DIAGNOSIS_SUCCESS, "foo check", "explicit diagnosis", None, None, None, None),
     ]
+
+
+def test_diagnose_fields_get_sanitized():
+    fields_with_secrets = {
+        "description": "something's wrong with your secret",
+        "remediation": "change your secret to something else",
+    }
+
+    class Foo(AgentCheck):
+        def __init__(self, name, init_config, instances):
+            super(Foo, self).__init__(name, init_config, instances)
+
+            self.diagnosis.register(self.bad_diagnostic)
+            self.register_secret("secret")
+
+        def check(self, _):
+            self.diagnosis.success("foo check", "ok", **fields_with_secrets)
+            self.diagnosis.fail("foo check", "fail", **fields_with_secrets)
+            self.diagnosis.warning("foo check", "warn", **fields_with_secrets)
+
+        def bad_diagnostic(self):
+            raise Exception("something went wrong with secret")
+
+    check = Foo("foo", {}, [{}])
+    check.run()
+
+    expected_fields = {
+        "category": None,
+        "description": "something's wrong with your ********",
+        "remediation": "change your ******** to something else",
+        "raw_error": None,
+    }
+
+    assert check.get_diagnoses() == [
+        Diagnosis.Result(Diagnosis.DIAGNOSIS_SUCCESS, "foo check", "ok", **expected_fields),
+        Diagnosis.Result(Diagnosis.DIAGNOSIS_FAIL, "foo check", "fail", **expected_fields),
+        Diagnosis.Result(Diagnosis.DIAGNOSIS_WARNING, "foo check", "warn", **expected_fields),
+        Diagnosis.Result(
+            Diagnosis.DIAGNOSIS_UNEXPECTED_ERROR, "", "", None, None, None, "something went wrong with ********"
+        ),
+    ]

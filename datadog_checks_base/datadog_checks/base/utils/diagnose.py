@@ -47,11 +47,17 @@ class Diagnosis:
     DIAGNOSIS_WARNING = 2
     DIAGNOSIS_UNEXPECTED_ERROR = 3
 
-    def __init__(self):
+    def __init__(self, sanitize=None):
         # Holds results
         self._diagnoses = []
         # Holds explicit diagnostic routines (callables)
         self._diagnostics = []
+        # Sanitization function
+        if sanitize is not None:
+            # We need to account for a field being `None`, with the sanitizer might not do
+            self._sanitize = lambda t: t and sanitize(t)
+        else:
+            self._sanitize = lambda t: t
 
     def clear(self):
         """Remove all cached diagnoses."""
@@ -130,7 +136,13 @@ class Diagnosis:
         """The list of cached diagnostics."""
         return self._diagnoses
 
-    @classmethod
-    def _result(cls, result, name, diagnosis, category=None, description=None, remediation=None, raw_error=None):
-        # Note: Once we drop py2 we can use `defaults` in the `namedtuple` instead of this constructor
-        return cls.Result(result, name, diagnosis, category, description, remediation, raw_error)
+    def _result(self, result, name, diagnosis, category=None, description=None, remediation=None, raw_error=None):
+        return self.Result(
+            result,
+            name,
+            diagnosis,
+            category,
+            self._sanitize(description),
+            self._sanitize(remediation),
+            self._sanitize(raw_error),
+        )

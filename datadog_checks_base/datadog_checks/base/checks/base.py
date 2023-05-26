@@ -396,7 +396,7 @@ class AgentCheck(object):
         A Diagnosis object to register explicit diagnostics and record diagnoses.
         """
         if not hasattr(self, '_diagnosis'):
-            self._diagnosis = Diagnosis()
+            self._diagnosis = Diagnosis(sanitize=self.sanitize)
         return self._diagnosis
 
     def get_tls_context(self, refresh=False, overrides=None):
