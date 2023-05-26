@@ -6,6 +6,7 @@ import pytest
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.testing import requires_windows
 from datadog_checks.windows_registry import WindowsRegistryCheck
+from tests.common import INSTANCE
 
 
 @requires_windows
@@ -18,18 +19,8 @@ def test_config():
     with pytest.raises(ConfigurationError):
         c.check(instance)
 
-    # This key is pretty much guaranteed to exists in all environments
-    c.check(
-        {
-            'keypath': 'HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion',
-            'metrics': [
-                # This is a REG_SZ
-                ['CurrentBuild', 'windows.current_build', 'gauge'],
-                # This is a REG_DWORD
-                ['InstallDate', 'windows.install_date', 'gauge'],
-            ],
-        }
-    )
+    # Test with valid configuration
+    c.check(INSTANCE)
 
     # Path doesn't exist
     with pytest.raises(FileNotFoundError):

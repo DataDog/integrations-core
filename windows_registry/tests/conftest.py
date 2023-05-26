@@ -3,12 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from tests.common import INSTANCE
 
-@pytest.fixture(scope='session')
+
+@pytest.fixture(scope="session")
 def dd_environment():
-    yield
-
-
-@pytest.fixture
-def instance():
-    return {}
+    yield INSTANCE, {'docker_platform': 'windows'}
