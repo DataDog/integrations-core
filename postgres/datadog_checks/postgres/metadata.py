@@ -58,7 +58,7 @@ class PostgresMetadata(DBMAsyncJob):
             run_sync=is_affirmative(config.settings_metadata_config.get('run_sync', False)),
             enabled=True,
             dbms="postgres",
-            min_collection_interval=self.collection_interval,
+            min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
             job_name="database-metadata",
             shutdown_callback=shutdown_cb,
