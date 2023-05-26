@@ -36,8 +36,7 @@
     },
     "logs": {
       "source": "windows_registry"
-    },
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
