@@ -16,8 +16,7 @@ instances:
     ## @param keypath - string - required
     ## The path to the registry key to monitor
     #
-  - keypath: HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL
-      3.0\Client
+  - keypath: HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecureBoot\State
 
     ## @param metrics - list of lists - required
     ## A list of metrics you want to capture, with each item in the

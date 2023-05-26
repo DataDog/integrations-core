@@ -11,7 +11,7 @@ files:
       required: true
       description: The path to the registry key to monitor
       value:
-        example: HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 3.0\Client
+        example: HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecureBoot\State
         type: string
     - name: metrics
       required: true

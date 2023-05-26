@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import pytest
 
 from datadog_checks.base import ConfigurationError
@@ -19,19 +18,29 @@ def test_config():
     with pytest.raises(ConfigurationError):
         c.check(instance)
 
-    # Forward slashes and shorthand name for the hive
+    # This key is pretty much guaranteed to exists in all environments
     c.check(
         {
-            'keypath': 'HKLM/SYSTEM/CurrentControlSet/Control/SecureBoot/State',
-            'metrics': [['UEFISecureBootEnabled', 'uefi_secure_boot_enabled', 'gauge']],
+            'keypath': 'HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion',
+            'metrics': [
+                # This is a REG_SZ
+                ['CurrentBuild', 'windows.current_build', 'gauge'],
+                # This is a REG_DWORD
+                ['InstallDate', 'windows.install_date', 'gauge'],
+            ],
         }
     )
 
+    # Path doesn't exist
     with pytest.raises(FileNotFoundError):
         c.check(
             {
-                'keypath': 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\SCHANNEL\\'
-                'Protocols\\SSL 3.0\\Client',
-                'metrics': [['enabled', 'enabled', 'gauge']],
+                # Forward slashes
+                'keypath': 'HKLM/Foo',
+                'metrics': [['bar', 'bar', 'gauge']],
             }
         )
+
+    # Invalid path
+    with pytest.raises(ConfigurationError):
+        c.check({'keypath': 'foo'})

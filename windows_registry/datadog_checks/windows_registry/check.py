@@ -29,9 +29,10 @@ class WindowsRegistryCheck(AgentCheck):
         if not keypath:
             raise ConfigurationError('Missing keypath')
         split_keypath = re.split(r'\\|/', keypath)
+        if len(split_keypath) < 2:
+            raise ConfigurationError('Invalid registry path')
         if split_keypath[0] in HIVE_MAP:
             subkeypath = '\\'.join(split_keypath[1:])
-            # print(f'Opening {split_keypath[0]}|{subkeypath}')
             key = winreg.OpenKey(HIVE_MAP[split_keypath[0]], subkeypath)
             for keyname, _metric_name, _metric_type in instance['metrics']:
                 value = winreg.QueryValueEx(key, keyname)
