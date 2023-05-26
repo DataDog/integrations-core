@@ -26,9 +26,7 @@ def stop_orphaned_threads():
     DBMAsyncJob.executor = ThreadPoolExecutor()
 
 
-@pytest.mark.parametrize("collect_settings", [True, False])
-def test_collect_metadata(integration_check, dbm_instance, aggregator, collect_settings):
-    dbm_instance['collect_settings'] = {'enabled': collect_settings}
+def test_collect_metadata(integration_check, dbm_instance, aggregator):
     check = integration_check(dbm_instance)
     check.check(dbm_instance)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
@@ -36,5 +34,4 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator, collect_s
     assert event['host'] == "stubbed.hostname"
     assert event['dbms'] == "postgres"
     assert event['kind'] == "pg_settings"
-    if collect_settings:
-        assert len(event["metadata"]) > 0
+    assert len(event["metadata"]) > 0
