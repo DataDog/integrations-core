@@ -2,7 +2,7 @@
 
 ## 13.7.0 / 2023-05-26
 
-* [Added] Support IAM based RDS authentication. See [#14581](https://github.com/DataDog/integrations-core/pull/14581).
+* [Added] Support IAM-based RDS authentication. See [#14581](https://github.com/DataDog/integrations-core/pull/14581).
 
 ## 13.6.0 / 2023-05-26
 
