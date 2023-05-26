@@ -408,7 +408,6 @@ DATASTORE_METRICS = {
     'disk.used.latest',
 }
 
-
 # All metrics that can be collected from Datacenters.
 DATACENTER_METRICS = {
     'vmop.numChangeDS.latest',
