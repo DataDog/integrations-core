@@ -48,6 +48,7 @@ def test_aurora_replication_metrics(pg_instance, version, is_aurora, expected_me
 )
 def test_dbm_enabled_conn_metric(pg_instance, version, is_dbm_enabled, expected_metrics):
     pg_instance['dbm'] = is_dbm_enabled
+    pg_instance['collect_resources'] = {'enabled': False}
     pg_instance['collect_database_size_metrics'] = False
     config = PostgresConfig(pg_instance)
     cache = PostgresMetricsCache(config)

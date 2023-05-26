@@ -390,6 +390,7 @@ def dbm_instance(pg_instance):
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
 
@@ -402,6 +403,7 @@ def dbm_instance_replica2(pg_instance):
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
 
@@ -937,6 +939,7 @@ def test_activity_snapshot_collection(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['collect_resources']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
