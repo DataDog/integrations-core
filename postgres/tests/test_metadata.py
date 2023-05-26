@@ -4,6 +4,7 @@
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import pytest
+
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
