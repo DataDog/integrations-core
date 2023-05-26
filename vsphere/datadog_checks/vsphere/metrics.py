@@ -77,6 +77,9 @@ VM_METRICS = {
     'cpu.usagemhz.avg',
     'cpu.used.sum',
     'cpu.wait.sum',
+    'cpu.capacity.demand.avg',
+    'cpu.capacity.usage.avg',
+    'cpu.capacity.contention.avg',
     'datastore.maxTotalLatency.latest',
     'datastore.numberReadAveraged.avg',
     'datastore.numberWriteAveraged.avg',
@@ -123,6 +126,8 @@ VM_METRICS = {
     'mem.usage.avg',
     'mem.vmmemctl.avg',
     'mem.vmmemctltarget.avg',
+    'mem.capacity.usage.avg',
+    'mem.capacity.contention.avg',
     'mem.zero.avg',
     'mem.zipSaved.latest',
     'mem.zipped.latest',
@@ -202,6 +207,8 @@ HOST_METRICS = {
     'cpu.used.sum',
     'cpu.utilization.avg',
     'cpu.wait.sum',
+    'cpu.capacity.usage.avg',
+    'cpu.capacity.contention.avg',
     'datastore.datastoreIops.avg',
     'datastore.datastoreMaxQueueDepth.latest',
     'datastore.datastoreNormalReadLatency.latest',
@@ -286,6 +293,8 @@ HOST_METRICS = {
     'mem.totalCapacity.avg',
     'mem.unreserved.avg',
     'mem.usage.avg',
+    'mem.capacity.usage.avg',
+    'mem.capacity.contention.avg',
     'mem.vmfs.pbc.capMissRatio.latest',
     'mem.vmfs.pbc.overhead.latest',
     'mem.vmfs.pbc.size.latest',
@@ -398,6 +407,7 @@ DATASTORE_METRICS = {
     'disk.unshared.latest',
     'disk.used.latest',
 }
+
 
 # All metrics that can be collected from Datacenters.
 DATACENTER_METRICS = {
