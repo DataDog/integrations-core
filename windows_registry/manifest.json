@@ -34,9 +34,9 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {},
-    "monitors": {},
-    "logs": {},
+    "logs": {
+      "source": "windows_registry"
+    },
     "saved_views": {}
   },
   "author": {

@@ -582,6 +582,10 @@ coverage:
         target: 75
         flags:
         - win32_event_log
+      Windows Registry:
+        target: 75
+        flags:
+        - windows_registry
       Windows_Service:
         target: 75
         flags:
@@ -1369,6 +1373,11 @@ flags:
     paths:
     - windows_performance_counters/datadog_checks/windows_performance_counters
     - windows_performance_counters/tests
+  windows_registry:
+    carryforward: true
+    paths:
+    - windows_registry/datadog_checks/windows_registry
+    - windows_registry/tests
   windows_service:
     carryforward: true
     paths:
