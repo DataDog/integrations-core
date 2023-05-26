@@ -582,10 +582,6 @@ coverage:
         target: 75
         flags:
         - win32_event_log
-      Windows Registry:
-        target: 75
-        flags:
-        - windows_registry
       Windows_Service:
         target: 75
         flags:
@@ -626,6 +622,10 @@ coverage:
         target: 75
         flags:
         - vsphere
+      windows_registry:
+        target: 75
+        flags:
+        - windows_registry
     patch: false
 flags:
   active_directory:

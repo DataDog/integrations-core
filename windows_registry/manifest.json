@@ -18,7 +18,7 @@
   },
   "assets": {
     "integration": {
-      "source_type_name": "Windows Registry",
+      "source_type_name": "windows_registry",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },

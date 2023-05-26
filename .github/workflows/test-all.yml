@@ -3317,10 +3317,10 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
-  j08f2472:
+  j2b6abe5:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Windows Registry
+      job-name: windows_registry
       target: windows_registry
       platform: windows
       runner: '["windows-2022"]'
