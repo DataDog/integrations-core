@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 19.3.1 / 2023-05-26
+
+* [Fixed] Update dependencies. See [#14594](https://github.com/DataDog/integrations-core/pull/14594).
+
 ## 19.3.0 / 2023-05-17
 
 * [Added] Add `token` and `alert` as valid metric units. See [#14575](https://github.com/DataDog/integrations-core/pull/14575).

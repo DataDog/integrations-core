@@ -1,5 +1,9 @@
 # CHANGELOG - oracle
 
+## 4.1.1 / 2023-05-26
+
+* [Fixed] Update dependencies. See [#14594](https://github.com/DataDog/integrations-core/pull/14594).
+
 ## 4.1.0 / 2023-04-14
 
 * [Added] Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).

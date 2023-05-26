@@ -1,5 +1,11 @@
 # CHANGELOG - gitlab_runner
 
+## 3.3.3 / 2023-05-26
+
+* [Fixed] Revert protobuf dependency update. See [#14618](https://github.com/DataDog/integrations-core/pull/14618).
+* [Fixed] Update dependencies. See [#14594](https://github.com/DataDog/integrations-core/pull/14594).
+* [Fixed] Fix some default values in the configuration file. See [#14602](https://github.com/DataDog/integrations-core/pull/14602).
+
 ## 3.3.2 / 2022-12-09 / Agent 7.42.0
 
 * [Fixed] Update protobuf. See [#13262](https://github.com/DataDog/integrations-core/pull/13262).

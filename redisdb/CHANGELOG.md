@@ -1,5 +1,9 @@
 # CHANGELOG - redisdb
 
+## 4.7.0 / 2023-05-26
+
+* [Added] Add ping latency metric. See [#14523](https://github.com/DataDog/integrations-core/pull/14523).
+
 ## 4.6.0 / 2023-03-31 / Agent 7.44.0
 
 * [Added] Update redis to 4.5.4. See [#14270](https://github.com/DataDog/integrations-core/pull/14270).
