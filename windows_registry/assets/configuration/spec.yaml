@@ -1,0 +1,36 @@
+name: Windows Registry
+files:
+- name: windows_registry.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: keypath
+      required: true
+      description: The path to the registry key to monitor
+      value:
+        example: HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 3.0\Client
+        type: string
+    - name: metrics
+      required: true
+      description: |
+        A list of metrics you want to capture, with each item in the
+        list being a set of [<KEY_NAME>, <METRIC_NAME>, <METRIC_TYPE>]:
+          * <KEY_NAME> is something like `enabled` or `DisabledByDefault`.
+                       The <KEY_NAME> should be a child key of the the keypath specified.
+                       Sub-keys won't be enumerated.
+          * <METRIC_NAME> is the metric name you want to show up in Datadog.
+          * <METRIC_TYPE> is from the standard choices for all agent checks, such
+                          as gauge, rate, histogram or counter.
+      value:
+        example:
+          - [<KEY_NAME>, <METRIC_NAME>, <METRIC_TYPE>]
+        type: array
+        compact_example: true
+        items:
+          type: array
+          items:
+            type: string
+    - template: instances/default
