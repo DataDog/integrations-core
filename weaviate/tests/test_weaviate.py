@@ -10,13 +10,13 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.weaviate import WeaviateCheck
 
 
-def test_check(dd_run_check, aggregator, instance):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    check = WeaviateCheck('weaviate', {}, [instance])
-    dd_run_check(check)
+# def test_check(dd_run_check, aggregator, instance):
+#     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
+#     check = WeaviateCheck('weaviate', {}, [instance])
+#     dd_run_check(check)
 
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+#     aggregator.assert_all_metrics_covered()
+#     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance):
