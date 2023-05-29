@@ -16,7 +16,7 @@ pytestmark = [pytest.mark.unit]
 
 
 def test_service_check_critical(aggregator, dd_run_check, events_only_instance):
-    mock_connect = mock.MagicMock(side_effect=Exception("Connection error"))
+    mock_connect = mock.MagicMock(side_effect=[Exception("Connection error")])
     with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
         with pytest.raises(Exception):
             check = VSphereCheck('vsphere', {}, [events_only_instance])
@@ -1172,6 +1172,63 @@ def test_report_realtime_metrics_host_filtered(aggregator, dd_run_check, realtim
         mock_connect.return_value = mock_si
         instance = realtime_instance
         instance['metric_filters'] = {'host': ['cpu.maxlimited.sum']}
+        check = VSphereCheck('vsphere', {}, [instance])
+        dd_run_check(check)
+        aggregator.assert_metric('vsphere.cpu.costop.sum', count=0)
+
+
+def test_report_realtime_metrics_host_blacklisted(aggregator, dd_run_check, realtime_instance):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = []
+        mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
+            vim.PerformanceManager.CounterInfo(
+                key=100,
+                groupInfo=vim.ElementDescription(key='cpu'),
+                nameInfo=vim.ElementDescription(key='costop'),
+                rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+            )
+        ]
+        mock_si.content.perfManager.QueryPerf.return_value = [
+            vim.PerformanceManager.EntityMetric(
+                entity=vim.HostSystem(moId="host1"),
+                value=[
+                    vim.PerformanceManager.IntSeries(
+                        value=[34, 61],
+                        id=vim.PerformanceManager.MetricId(counterId=100),
+                    )
+                ],
+            ),
+        ]
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult(
+            objects=[
+                vim.ObjectContent(
+                    obj=vim.HostSystem(moId="host1"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='host1',
+                        ),
+                    ],
+                )
+            ],
+        )
+        mock_connect.return_value = mock_si
+        instance = realtime_instance
+        instance['resource_filters'] = [
+            {
+                'type': 'blacklist',
+                'resource': 'host',
+                'property': 'name',
+                'patterns': [
+                    'host.*',
+                ],
+            }
+        ]
         check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
         aggregator.assert_metric('vsphere.cpu.costop.sum', count=0)
