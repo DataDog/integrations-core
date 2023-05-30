@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
+
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.diagnose import Diagnosis
 
@@ -60,22 +62,22 @@ def test_check_subclasses_reporting_diagnoses():
     check = Foo("foo", {}, [{}])
 
     # When the check hasn't yet run once, we should only see the explicit diagnostic results
-    assert check.get_diagnoses() == [
-        Diagnosis.Result(Diagnosis.DIAGNOSIS_FAIL, "foo check", "explicit diagnosis", None, None, None, None),
+    assert get_diagnoses(check) == [
+        diagnose_dict(Diagnosis.DIAGNOSIS_FAIL, "foo check", "explicit diagnosis"),
     ]
 
     check.run()
-    assert check.get_diagnoses() == [
-        Diagnosis.Result(Diagnosis.DIAGNOSIS_SUCCESS, "foo check", "in-check diagnosis", None, None, None, None),
-        Diagnosis.Result(Diagnosis.DIAGNOSIS_FAIL, "foo check", "explicit diagnosis", None, None, None, None),
+    assert get_diagnoses(check) == [
+        diagnose_dict(Diagnosis.DIAGNOSIS_SUCCESS, "foo check", "in-check diagnosis", None, None, None, None),
+        diagnose_dict(Diagnosis.DIAGNOSIS_FAIL, "foo check", "explicit diagnosis", None, None, None, None),
     ]
 
     # A second run should give us the same results, meaning we get a fresh set of diagnoses
     # from the check run.
     check.run()
-    assert check.get_diagnoses() == [
-        Diagnosis.Result(Diagnosis.DIAGNOSIS_SUCCESS, "foo check", "in-check diagnosis", None, None, None, None),
-        Diagnosis.Result(Diagnosis.DIAGNOSIS_FAIL, "foo check", "explicit diagnosis", None, None, None, None),
+    assert get_diagnoses(check) == [
+        diagnose_dict(Diagnosis.DIAGNOSIS_SUCCESS, "foo check", "in-check diagnosis", None, None, None, None),
+        diagnose_dict(Diagnosis.DIAGNOSIS_FAIL, "foo check", "explicit diagnosis", None, None, None, None),
     ]
 
 
@@ -98,10 +100,10 @@ def test_exceptions_during_explicit_diagnoses_are_converted_into_unexpected_erro
     check = Foo("foo", {}, [{}])
     check.run()
 
-    assert check.get_diagnoses() == [
-        Diagnosis.Result(Diagnosis.DIAGNOSIS_SUCCESS, "foo check", "in-check diagnosis", None, None, None, None),
-        Diagnosis.Result(Diagnosis.DIAGNOSIS_UNEXPECTED_ERROR, "", "", None, None, None, "something went wrong"),
-        Diagnosis.Result(Diagnosis.DIAGNOSIS_SUCCESS, "foo check", "explicit diagnosis", None, None, None, None),
+    assert get_diagnoses(check) == [
+        diagnose_dict(Diagnosis.DIAGNOSIS_SUCCESS, "foo check", "in-check diagnosis", None, None, None, None),
+        diagnose_dict(Diagnosis.DIAGNOSIS_UNEXPECTED_ERROR, "", "", None, None, None, "something went wrong"),
+        diagnose_dict(Diagnosis.DIAGNOSIS_SUCCESS, "foo check", "explicit diagnosis", None, None, None, None),
     ]
 
 
@@ -136,11 +138,29 @@ def test_diagnose_fields_get_sanitized():
         "raw_error": None,
     }
 
-    assert check.get_diagnoses() == [
-        Diagnosis.Result(Diagnosis.DIAGNOSIS_SUCCESS, "foo check", "ok", **expected_fields),
-        Diagnosis.Result(Diagnosis.DIAGNOSIS_FAIL, "foo check", "fail", **expected_fields),
-        Diagnosis.Result(Diagnosis.DIAGNOSIS_WARNING, "foo check", "warn", **expected_fields),
-        Diagnosis.Result(
+    assert get_diagnoses(check) == [
+        diagnose_dict(Diagnosis.DIAGNOSIS_SUCCESS, "foo check", "ok", **expected_fields),
+        diagnose_dict(Diagnosis.DIAGNOSIS_FAIL, "foo check", "fail", **expected_fields),
+        diagnose_dict(Diagnosis.DIAGNOSIS_WARNING, "foo check", "warn", **expected_fields),
+        diagnose_dict(
             Diagnosis.DIAGNOSIS_UNEXPECTED_ERROR, "", "", None, None, None, "something went wrong with ********"
         ),
     ]
+
+
+def get_diagnoses(check):
+    """Get diagnoses from a check as a list of dictionaries."""
+    return json.loads(check.get_diagnoses())
+
+
+def diagnose_dict(result, name, diagnosis, category=None, description=None, remediation=None, raw_error=None):
+    """Helper function to create diagnosis result dictionaries with defaults."""
+    return {
+        "result": result,
+        "name": name,
+        "diagnosis": diagnosis,
+        "category": category,
+        "description": description,
+        "remediation": remediation,
+        "raw_error": raw_error,
+    }

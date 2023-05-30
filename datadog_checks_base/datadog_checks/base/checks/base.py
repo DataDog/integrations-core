@@ -1023,14 +1023,14 @@ class AgentCheck(object):
         return warnings
 
     def get_diagnoses(self):
-        # type: () -> List[Diagnosis.Result]
+        # type: () -> str
         """
-        Return the list of diagnosis.
+        Return the list of diagnosis as a JSON encoded string.
 
         The agent calls this method to retrieve diagnostics from integrations. This method
         runs explicit diagnostics if available.
         """
-        return self.diagnosis.diagnoses + self.diagnosis.run_explicit()
+        return json.dumps([d._asdict() for d in (self.diagnosis.diagnoses + self.diagnosis.run_explicit())])
 
     def _get_requests_proxy(self):
         # type: () -> ProxySettings
