@@ -46,7 +46,11 @@
                                                 }
 
                                                 May result in:
-                                                gauge("foo", tags=["server_tag:us", "server_tag:primary", "server_tag:default"])
+                                                gauge("foo", tags=[
+                                                                    "server_tag:us",
+                                                                    "server_tag:primary",
+                                                                    "server_tag:default"
+                                                                  ])
                                                 gauge("foo", tags=["server_tag:eu"])
                                                 gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
                               c. tag_not_null - This only sets tags in the metric if the value is not null
