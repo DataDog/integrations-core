@@ -51,14 +51,14 @@
 * RabbitMQ [4.0.1](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/CHANGELOG.md) **BREAKING CHANGE**
 * Redis [4.6.0](https://github.com/DataDog/integrations-core/blob/master/redisdb/CHANGELOG.md)
 * Silk [1.2.1](https://github.com/DataDog/integrations-core/blob/master/silk/CHANGELOG.md)
-* Snowflake [4.5.1](https://github.com/DataDog/integrations-core/blob/master/snowflake/CHANGELOG.md)
 * SQL Server [11.0.2](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md) **BREAKING CHANGE**
 * Supervisord [2.4.0](https://github.com/DataDog/integrations-core/blob/master/supervisord/CHANGELOG.md)
 * ZooKeeper [4.2.2](https://github.com/DataDog/integrations-core/blob/master/zk/CHANGELOG.md)
 
 ## Datadog Agent version [7.43.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7431)
 
-* datadog_checks_base [30.0.1](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* datadog_checks_base [30.0.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Snowflake [4.5.1](https://github.com/DataDog/integrations-core/blob/master/snowflake/CHANGELOG.md)
 
 ## Datadog Agent version [7.43.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7430)
 

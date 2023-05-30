@@ -311,7 +311,7 @@
 * datadog-silk: 1.2.1
 * datadog-singlestore: 1.3.1
 * datadog-snmp: 5.11.0
-* datadog-snowflake: 4.5.1
+* datadog-snowflake: 4.5.2
 * datadog-solr: 1.11.1
 * datadog-sonarqube: 2.2.3
 * datadog-spark: 3.1.3
@@ -368,7 +368,7 @@
 * datadog-cassandra: 1.16.0
 * datadog-ceph: 2.7.0
 * datadog-cert-manager: 3.0.0
-* datadog-checks-base: 30.0.1
+* datadog-checks-base: 30.0.2
 * datadog-checks-dependency-provider: 1.3.0
 * datadog-checks-downloader: 4.0.0
 * datadog-cilium: 2.3.0
