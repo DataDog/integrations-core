@@ -10,7 +10,7 @@
 * [Fixed] Update minimum datadog base package version. See [#14463](https://github.com/DataDog/integrations-core/pull/14463).
 * [Fixed] Deprecate `use_latest_spec` option. See [#14446](https://github.com/DataDog/integrations-core/pull/14446).
 
-## 6.0.2 / 2023-04-21
+## 6.0.2 / 2023-04-21 / Agent 7.45.0
 
 * [Fixed] Collect the readiness service checks even if the readiness payload is malformed. See [#14411](https://github.com/DataDog/integrations-core/pull/14411).
 

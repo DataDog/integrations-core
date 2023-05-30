@@ -16,7 +16,7 @@
 * [Fixed] Fix query sampler producing constant errors about undefined parameters. See [#14440](https://github.com/DataDog/integrations-core/pull/14440).
 * [Deprecated] No longer test postgres 9.5. See [#14582](https://github.com/DataDog/integrations-core/pull/14582).
 
-## 13.5.0 / 2023-04-14
+## 13.5.0 / 2023-04-14 / Agent 7.45.0
 
 * [Added] Send resource_type/name for postgres integration metrics. See [#14338](https://github.com/DataDog/integrations-core/pull/14338).
 * [Added] Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).

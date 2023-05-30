@@ -20,7 +20,7 @@
 
 * [Changed] Implement automatic exposition format detection. See [#14445](https://github.com/DataDog/integrations-core/pull/14445).
 
-## 31.0.1 / 2023-04-19
+## 31.0.1 / 2023-04-19 / Agent 7.45.0
 
 * [Fixed] Do not add `freezegun` dependency to agent. See [#14393](https://github.com/DataDog/integrations-core/pull/14393).
 
@@ -45,7 +45,7 @@
 
 * [Fixed] Bump dependency `snowflake-connector-python` to 3.0.1. See [#14073](https://github.com/DataDog/integrations-core/pull/14073).
 
-## 30.0.1 / 2023-02-28
+## 30.0.1 / 2023-02-28 / Agent 7.43.1
 
 * [Fixed] Update cryptography to 39.0.1. See [#13913](https://github.com/DataDog/integrations-core/pull/13913).
 

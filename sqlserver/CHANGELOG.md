@@ -10,7 +10,7 @@
 * [Fixed] Properly initialize resolved_hostname so it is set consistently across dbm and default integration metrics. See [#14479](https://github.com/DataDog/integrations-core/pull/14479).
 * [Fixed] Restore DBM-APM link functionality for SQL Server activity sessions. See [#14453](https://github.com/DataDog/integrations-core/pull/14453).
 
-## 11.1.0 / 2023-04-14
+## 11.1.0 / 2023-04-14 / Agent 7.45.0
 
 * [Added] Add resolved_hostname to metatdata. See [#13639](https://github.com/DataDog/integrations-core/pull/13639).
 * [Fixed] Fix a typo in the `disable_generic_tags` option description. See [#14246](https://github.com/DataDog/integrations-core/pull/14246).
