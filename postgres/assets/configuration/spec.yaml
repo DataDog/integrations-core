@@ -399,11 +399,11 @@ files:
             example: 10000
         - name: explain_parameterized_queries
           description: |
-            Note, this is a BETA feature. This option will enable the ability to explain parameterized queries.
+            This option will enable the ability to explain parameterized queries.
             This is useful if your SQL clients are using the extended query protocol or prepared statements.
           value:
             type: boolean
-            example: false
+            example: true
     - name: query_activity
       description: Configure collection of query activity
       options:
@@ -427,6 +427,22 @@ files:
           value:
             type: number
             example: 3500
+    - name: collect_settings
+      description: Configure collection of pg_settings. This is an alpha feature.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of pg_settings. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the database settings collection interval (in seconds). Each collection involves a single query to
+            `pg_settings`.
+          value:
+            type: number
+            example: 600
 
     - name: aws
       description: |
@@ -448,6 +464,13 @@ files:
           value:
             type: string
             example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+        - name: region
+          description: |
+            Equal to the region of the instance the agent is connecting to. 
+            This value is used to configure IAM authentication.
+          value:
+            type: string
+            example: us-east-1
 
     - name: gcp
       description: |

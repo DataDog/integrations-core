@@ -71,6 +71,10 @@ on:
         required: false
         default: false
         type: boolean
+      openmetrics:
+        required: false
+        default: false
+        type: boolean
       package:
         required: false
         default: false
@@ -195,6 +199,10 @@ jobs:
     - name: Validate configuration models
       if: inputs.models
       run: ddev validate models $TARGET
+    
+    - name: Validate openmetrics metric limit
+      if: inputs.openmetrics
+      run: ddev validate openmetrics $TARGET
 
     - name: Validate Python project metadata
       if: inputs.package

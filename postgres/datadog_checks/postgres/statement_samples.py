@@ -645,7 +645,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
                 repr(e),
             )
-            if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', False)):
+            if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', True)):
                 plan = self._explain_parameterized_queries.explain_statement(dbname, statement, obfuscated_statement)
                 if plan:
                     return plan, DBExplainError.explained_with_prepared_statement, None

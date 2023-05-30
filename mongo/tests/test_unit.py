@@ -327,15 +327,15 @@ def test_parse_server_config(check):
         'username': 'john doe',  # Space
         'password': 'p@ss\\word',  # Special characters
         'database': 'test',
-        'options': {'replicaSet': 'bar!baz'},  # Special character
+        'options': {'authSource': 'bar!baz'},  # Special character
     }
     config = check(instance)._config
     assert config.username == 'john doe'
     assert config.password == 'p@ss\\word'
     assert config.db_name == 'test'
     assert config.hosts == ['localhost', 'localhost:27018']
-    assert config.clean_server_name == 'mongodb://john doe:*****@localhost,localhost:27018/test?replicaSet=bar!baz'
-    assert config.auth_source == 'test'
+    assert config.clean_server_name == 'mongodb://john doe:*****@localhost,localhost:27018/test?authSource=bar!baz'
+    assert config.auth_source == 'bar!baz'
     assert config.do_auth is True
 
 
@@ -346,14 +346,14 @@ def test_username_no_password(check):
         'hosts': ['localhost', 'localhost:27018'],
         'username': 'john doe',  # Space
         'database': 'test',
-        'options': {'replicaSet': 'bar!baz'},  # Special character
+        'options': {'authSource': 'bar!baz'},  # Special character
     }
     config = check(instance)._config
     assert config.username == 'john doe'
     assert config.db_name == 'test'
     assert config.hosts == ['localhost', 'localhost:27018']
-    assert config.clean_server_name == 'mongodb://john doe@localhost,localhost:27018/test?replicaSet=bar!baz'
-    assert config.auth_source == 'test'
+    assert config.clean_server_name == 'mongodb://john doe@localhost,localhost:27018/test?authSource=bar!baz'
+    assert config.auth_source == 'bar!baz'
     assert config.do_auth is True
 
 
@@ -363,14 +363,14 @@ def test_no_auth(check):
     instance = {
         'hosts': ['localhost', 'localhost:27018'],
         'database': 'test',
-        'options': {'replicaSet': 'bar!baz'},  # Special character
+        'options': {'authSource': 'bar!baz'},  # Special character
     }
     config = check(instance)._config
     assert config.username is None
     assert config.db_name == 'test'
     assert config.hosts == ['localhost', 'localhost:27018']
-    assert config.clean_server_name == "mongodb://localhost,localhost:27018/test?replicaSet=bar!baz"
-    assert config.auth_source == 'test'
+    assert config.clean_server_name == "mongodb://localhost,localhost:27018/test?authSource=bar!baz"
+    assert config.auth_source == 'bar!baz'
     assert config.do_auth is False
 
 

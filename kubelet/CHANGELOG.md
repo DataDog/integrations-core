@@ -1,5 +1,10 @@
 # CHANGELOG - kubelet
 
+## 7.7.0 / 2023-05-26
+
+* [Added] [kubelet] Add node filesystem stat from stats/summary. See [#14426](https://github.com/DataDog/integrations-core/pull/14426).
+* [Fixed] Fix kubelet check failing to initialize when get_connection_info is empty. See [#14546](https://github.com/DataDog/integrations-core/pull/14546).
+
 ## 7.6.0 / 2023-04-14
 
 * [Added] Adds container memory usage metrics from /stats/summary and kubelet memory usage. See [#14150](https://github.com/DataDog/integrations-core/pull/14150).

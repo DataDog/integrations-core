@@ -3,12 +3,15 @@ datadog_checks_base = "Datadog Checks Base"
 datadog_checks_dev = "Datadog Checks Dev"
 datadog_checks_downloader = "Datadog Checks Downloader"
 ecs_fargate = "Amazon ECS Fargate"
+fluentd = "Fluentd"
 kube_scheduler = "Kubernetes Scheduler"
 nfsstat = "NFSstat"
 nginx = "NGINX"
 nginx_ingress_controller = "NGINX Ingress Controller"
 openstack_controller = "OpenStack Controller"
+pulsar = "Pulsar"
 teamcity = "TeamCity"
+win32_event_log = "Windows Event Log"
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
