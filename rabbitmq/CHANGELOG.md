@@ -1,5 +1,14 @@
 # CHANGELOG - rabbitmq
 
+## 4.1.0 / 2023-05-26
+
+* [Added] Add metric limit for rabbitmq. See [#14541](https://github.com/DataDog/integrations-core/pull/14541).
+* [Added] Add an ignore_connection_errors option to the openmetrics check. See [#14504](https://github.com/DataDog/integrations-core/pull/14504).
+* [Fixed] Expand migration docs. See [#14549](https://github.com/DataDog/integrations-core/pull/14549).
+* [Fixed] Update minimum datadog base package version. See [#14463](https://github.com/DataDog/integrations-core/pull/14463).
+* [Fixed] Adjust docs and tests based on customer feedback. See [#14444](https://github.com/DataDog/integrations-core/pull/14444).
+* [Fixed] Deprecate `use_latest_spec` option. See [#14446](https://github.com/DataDog/integrations-core/pull/14446).
+
 ## 4.0.1 / 2023-03-07 / Agent 7.44.0
 
 * [Fixed] Fix autodiscovery config instances. See [#14112](https://github.com/DataDog/integrations-core/pull/14112).

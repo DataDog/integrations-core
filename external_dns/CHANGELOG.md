@@ -1,5 +1,9 @@
 # CHANGELOG - External DNS
 
+## 2.3.1 / 2023-05-26
+
+* [Fixed] Add DEFAULT_METRIC_LIMIT for OpenMetrics-based checks. See [#14527](https://github.com/DataDog/integrations-core/pull/14527).
+
 ## 2.3.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).

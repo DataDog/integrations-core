@@ -47,6 +47,7 @@ def test_aof_loading_metrics(aggregator, redis_instance):
         redis_check._check_db()
 
         aggregator.assert_metric('redis.info.latency_ms')
+        aggregator.assert_metric('redis.ping.latency_ms')
         aggregator.assert_metric('redis.net.commands', 0)
         aggregator.assert_metric('redis.key.length', 0)
 

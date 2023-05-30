@@ -1,5 +1,12 @@
 # CHANGELOG - datadog_checks_base
 
+## 32.3.0 / 2023-05-26
+
+* [Added] Support ingesting pg_settings for `dbm` users. See [#14577](https://github.com/DataDog/integrations-core/pull/14577).
+* [Fixed] Revert protobuf dependency update. See [#14618](https://github.com/DataDog/integrations-core/pull/14618).
+* [Fixed] Update dependencies. See [#14594](https://github.com/DataDog/integrations-core/pull/14594).
+* [Fixed] Fix kubelet check failing to initialize when get_connection_info is empty. See [#14546](https://github.com/DataDog/integrations-core/pull/14546).
+
 ## 32.2.0 / 2023-05-05
 
 * [Added] Add an ignore_connection_errors option to the openmetrics check. See [#14504](https://github.com/DataDog/integrations-core/pull/14504).

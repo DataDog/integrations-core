@@ -13,6 +13,8 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
+from datadog_checks.postgres import aws
+from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import INDEX_BLOAT, RELATION_METRICS, TABLE_BLOAT, RelationsManager
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
@@ -77,6 +79,7 @@ class PostgreSql(AgentCheck):
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
+        self.metadata_samples = PostgresMetadata(self, self._config, shutdown_callback=self._close_db_pool)
         self._relations_manager = RelationsManager(self._config.relations)
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
@@ -494,10 +497,20 @@ class PostgreSql(AgentCheck):
                 connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
             conn = psycopg2.connect(connection_string)
         else:
+            password = self._config.password
+            region = self._config.cloud_metadata.get('aws', {}).get('region', None)
+            if region is not None:
+                password = aws.generate_rds_iam_token(
+                    host=self._config.host,
+                    username=self._config.user,
+                    port=self._config.port,
+                    region=region,
+                )
+
             args = {
                 'host': self._config.host,
                 'user': self._config.user,
-                'password': self._config.password,
+                'password': password,
                 'database': dbname,
                 'sslmode': self._config.ssl_mode,
                 'application_name': self._config.application_name,
@@ -716,6 +729,7 @@ class PostgreSql(AgentCheck):
             if self._config.dbm_enabled:
                 self.statement_metrics.run_job_loop(tags)
                 self.statement_samples.run_job_loop(tags)
+                self.metadata_samples.run_job_loop(tags)
             if self._config.collect_wal_metrics:
                 self._collect_wal_metrics(tags)
 

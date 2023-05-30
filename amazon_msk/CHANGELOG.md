@@ -1,5 +1,12 @@
 # CHANGELOG - Amazon MSK
 
+## 3.4.0 / 2023-05-26
+
+* [Added] Add an ignore_connection_errors option to the openmetrics check. See [#14504](https://github.com/DataDog/integrations-core/pull/14504).
+* [Fixed] Update dependencies. See [#14594](https://github.com/DataDog/integrations-core/pull/14594).
+* [Fixed] Update minimum datadog base package version. See [#14463](https://github.com/DataDog/integrations-core/pull/14463).
+* [Fixed] Deprecate `use_latest_spec` option. See [#14446](https://github.com/DataDog/integrations-core/pull/14446).
+
 ## 3.3.0 / 2023-04-14
 
 * [Added] Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).

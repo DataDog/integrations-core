@@ -194,19 +194,19 @@ class Redis(AgentCheck):
         return tags
 
     def _check_db(self):
+        tags = list(self.tags)
         conn = self._get_conn(self.instance)
+
         # Ping the database for info, and track the latency.
         # Process the service check: the check passes if we can connect to Redis
-        start = (
-            time.time() if PY2 else time.process_time()
-        )  # New in python 3.3: time.process_time (It does not include time elapsed during sleep)
-        tags = list(self.tags)
         try:
-            info = conn.info()
-            cur_time = (
-                time.time() if PY2 else time.process_time()
-            )  # New in python 3.3: time.process_time (It does not include time elapsed during sleep)
-            latency_ms = round_value((cur_time - start) * 1000, 2)
+            # By running a ping first, we get a recent connection in an attempt to
+            # reduce the chance of connection time affecting our latency measurements
+            conn.ping()
+
+            info, info_latency_ms = _call_and_time(conn.info)
+            _, ping_latency_ms = _call_and_time(conn.ping)
+
             self._collect_metadata(info)
         except ValueError as e:
             self.service_check('redis.can_connect', AgentCheck.CRITICAL, message=str(e), tags=self.tags)
@@ -222,7 +222,8 @@ class Redis(AgentCheck):
         else:
             self.log.debug("Redis role was not found")
 
-        self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
+        self.gauge('redis.info.latency_ms', info_latency_ms, tags=tags)
+        self.gauge('redis.ping.latency_ms', ping_latency_ms, tags=tags)
 
         try:
             config = conn.config_get("maxclients")
@@ -559,3 +560,13 @@ class Redis(AgentCheck):
     def _collect_metadata(self, info):
         if info and 'redis_version' in info:
             self.set_metadata('version', info['redis_version'])
+
+
+_timer = time.time if PY2 else time.perf_counter
+
+
+def _call_and_time(func):
+    start_time = _timer()
+    rv = func()
+    end_time = _timer()
+    return rv, round_value((end_time - start_time) * 1000, 2)
