@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018-present
+# (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
@@ -7,7 +7,6 @@ import mock
 import pytest
 import requests
 
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
@@ -15,36 +14,9 @@ from .common import ENVOY_VERSION, EXT_METRICS, FLAVOR, HOST, INSTANCES
 
 CHECK_NAME = 'envoy'
 
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_success(aggregator, check, dd_run_check):
-    instance = INSTANCES['main']
-    c = check(instance)
-    dd_run_check(c)
-
-    metrics_collected = 0
-    for metric in METRICS:
-        collected_metrics = aggregator.metrics(METRIC_PREFIX + metric)
-        # The ext_auth metrics are excluded because the stats_prefix is not always present.
-        # They're tested in a different test.
-        if collected_metrics and collected_metrics[0].name not in EXT_METRICS:
-            expected_tags = [t for t in METRICS[metric]['tags'] if t]
-            for tag_set in expected_tags:
-                assert all(
-                    all(any(tag in mt for mt in m.tags) for tag in tag_set) for m in collected_metrics if m.tags
-                ), ('tags ' + str(expected_tags) + ' not found in ' + metric)
-        metrics_collected += len(collected_metrics)
-    assert metrics_collected >= 445
-
-    metadata_metrics = get_metadata_metrics()
-    # Metric that has a different type in legacy
-    metadata_metrics['envoy.cluster.upstream_cx_tx_bytes_total']['metric_type'] = 'count'
-
-    aggregator.assert_metrics_using_metadata(metadata_metrics)
+pytestmark = [pytest.mark.unit]
 
 
-@pytest.mark.unit
 def test_success_fixture(aggregator, fixture_path, mock_http_response, check, dd_run_check):
     instance = INSTANCES['main']
     c = check(instance)
@@ -61,7 +33,6 @@ def test_success_fixture(aggregator, fixture_path, mock_http_response, check, dd
     assert 4481 <= metrics_collected == num_metrics
 
 
-@pytest.mark.unit
 def test_retrocompatible_config(check):
     instance = deepcopy(INSTANCES['main'])
     instance['metric_whitelist'] = deepcopy(INSTANCES['included_excluded_metrics']['included_metrics'])
@@ -73,7 +44,6 @@ def test_retrocompatible_config(check):
     assert c1.config_excluded_metrics == c2.config_excluded_metrics
 
 
-@pytest.mark.unit
 def test_retrocompatible_config2(check):
     instance = deepcopy(INSTANCES['main'])
     instance['metric_whitelist'] = deepcopy(INSTANCES['include_exclude_metrics']['include_metrics'])
@@ -85,7 +55,6 @@ def test_retrocompatible_config2(check):
     assert c1.config_excluded_metrics == c2.config_excluded_metrics
 
 
-@pytest.mark.unit
 def test_success_fixture_included_metrics(aggregator, fixture_path, mock_http_response, check, dd_run_check):
     instance = INSTANCES['included_metrics']
     c = check(instance)
@@ -97,7 +66,6 @@ def test_success_fixture_included_metrics(aggregator, fixture_path, mock_http_re
         assert metric.startswith('envoy.cluster.')
 
 
-@pytest.mark.unit
 def test_success_fixture_excluded_metrics(aggregator, fixture_path, mock_http_response, dd_run_check, check):
     instance = INSTANCES['excluded_metrics']
     c = check(instance)
@@ -109,7 +77,6 @@ def test_success_fixture_excluded_metrics(aggregator, fixture_path, mock_http_re
         assert not metric.startswith('envoy.cluster.')
 
 
-@pytest.mark.unit
 def test_success_fixture_inclued_and_excluded_metrics(
     aggregator, fixture_path, mock_http_response, dd_run_check, check
 ):
@@ -123,7 +90,6 @@ def test_success_fixture_inclued_and_excluded_metrics(
         assert metric.startswith("envoy.cluster.") and not metric.startswith("envoy.cluster.out.")
 
 
-@pytest.mark.unit
 def test_service_check(aggregator, fixture_path, mock_http_response, check, dd_run_check):
     instance = INSTANCES['main']
     c = check(instance)
@@ -134,7 +100,6 @@ def test_service_check(aggregator, fixture_path, mock_http_response, check, dd_r
     assert aggregator.service_checks(Envoy.SERVICE_CHECK_NAME)[0].status == Envoy.OK
 
 
-@pytest.mark.unit
 def test_unknown(fixture_path, mock_http_response, dd_run_check, check):
     instance = INSTANCES['main']
     c = check(instance)
@@ -145,7 +110,6 @@ def test_unknown(fixture_path, mock_http_response, dd_run_check, check):
     assert sum(c.unknown_metrics.values()) == 5
 
 
-@pytest.mark.unit
 @pytest.mark.parametrize(
     'extra_config, expected_http_kwargs',
     [
@@ -180,7 +144,6 @@ def test_config(extra_config, expected_http_kwargs, check, dd_run_check):
         r.get.assert_called_with('http://{}:8001/stats'.format(HOST), **http_wargs)
 
 
-@pytest.mark.unit
 def test_metadata(datadog_agent, fixture_path, mock_http_response, check):
     instance = INSTANCES['main']
     check = check(instance)
@@ -254,7 +217,6 @@ def test_metadata(datadog_agent, fixture_path, mock_http_response, check):
         check.log.debug.assert_called_with('Version not matched.')
 
 
-@pytest.mark.unit
 def test_metadata_not_collected(datadog_agent, check):
     instance = INSTANCES['collect_server_info']
     check = check(instance)
@@ -266,28 +228,6 @@ def test_metadata_not_collected(datadog_agent, check):
     check.log.assert_not_called()
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_metadata_integration(datadog_agent, check):
-    instance = INSTANCES['main']
-    c = check(instance)
-    c.check_id = 'test:123'
-    c.check(instance)
-
-    major, minor, patch = ENVOY_VERSION.split('.')
-    version_metadata = {
-        'version.scheme': 'semver',
-        'version.major': major,
-        'version.minor': minor,
-        'version.patch': patch,
-        'version.raw': ENVOY_VERSION,
-    }
-
-    datadog_agent.assert_metadata('test:123', version_metadata)
-    datadog_agent.assert_metadata_count(len(version_metadata))
-
-
-@pytest.mark.unit
 def test_stats_prefix_ext_auth(aggregator, fixture_path, mock_http_response, check, dd_run_check):
     instance = INSTANCES['main']
     tags = ['cluster_name:foo', 'envoy_cluster:foo']
