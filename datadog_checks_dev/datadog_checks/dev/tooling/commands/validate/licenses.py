@@ -35,8 +35,6 @@ EXPLICIT_LICENSES = {
     'aerospike': ['Apache-2.0'],
     # https://github.com/baztian/jaydebeapi/blob/master/COPYING
     'JayDeBeApi': ['LGPL-3.0-only'],
-    # https://github.com/mhammond/pywin32/blob/master/adodbapi/license.txt
-    'adodbapi': ['LGPL-2.1-only'],
     # https://github.com/pyca/cryptography/blob/main/LICENSE
     'cryptography': ['Apache-2.0', 'BSD-3-Clause', 'PSF'],
     # https://github.com/rthalley/dnspython/blob/master/LICENSE

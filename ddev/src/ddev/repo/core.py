@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import os
 from functools import cached_property
 from typing import TYPE_CHECKING, Dict, Iterable
 
@@ -43,6 +44,10 @@ class Repository:
         from ddev.repo.config import RepositoryConfig
 
         return RepositoryConfig(self.path / CONFIG_DIRECTORY / 'config.toml')
+
+    @cached_property
+    def agent_requirements(self) -> Path:
+        return os.path.join(self.path, 'datadog_checks_base', 'datadog_checks', 'base', 'data', 'agent_requirements.in')
 
 
 class IntegrationRegistry:
