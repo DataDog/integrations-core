@@ -13,15 +13,9 @@ from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.elastic import ESCheck
 
-from .common import CLUSTER_TAG, ELASTIC_CLUSTER_TAG, ELASTIC_VERSION, HERE, PASSWORD, URL, USER
+from .common import CLUSTER_TAG, ELASTIC_CLUSTER_TAG, ELASTIC_FLAVOR, ELASTIC_VERSION, HERE, PASSWORD, URL, USER
 
 CUSTOM_TAGS = ['foo:bar', 'baz']
-COMPOSE_FILES_MAP = {
-    '1.1.0': 'opensearch-docker-compose.yaml',  # opensearch doesn't play well with xpack env vars
-    'elasticsearch_0_90': 'elasticsearch_0_90.yaml',
-    '1-alpine': 'legacy.yaml',
-    '2-alpine': 'legacy.yaml',
-}
 
 INSTANCE = {
     'url': URL,
@@ -97,8 +91,8 @@ def index_starts_with_dot():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    image_name = os.environ.get('ELASTIC_IMAGE')
-    compose_file = COMPOSE_FILES_MAP.get(image_name, 'docker-compose.yaml')
+    # opensearch doesn't play well with xpack env vars
+    compose_file = '{}-docker-compose.yaml'.format(ELASTIC_FLAVOR)
     compose_file = os.path.join(HERE, 'compose', compose_file)
 
     with docker_run(

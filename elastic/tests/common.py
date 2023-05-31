@@ -24,6 +24,7 @@ IS_OPENSEARCH = 'opensearch' in os.getenv('ELASTIC_REGISTRY')
 URL = 'http://{}:{}'.format(HOST, PORT)
 
 ELASTIC_VERSION = os.getenv('ELASTIC_VERSION', os.environ['ELASTIC_IMAGE'])
+ELASTIC_FLAVOR = os.environ.get('ELASTIC_FLAVOR', 'elasticsearch')
 
 JVM_RATES = [
     'jvm.gc.collectors.young.rate',
