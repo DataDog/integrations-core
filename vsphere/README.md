@@ -6,6 +6,8 @@
 
 This check collects resource usage metrics from your vSphere cluster-CPU, disk, memory, and network usage. It also watches your vCenter server for events and emits them to Datadog.
 
+NOTE: This check does not pull in metrics about the VCenter Appliance Server itself. These metrics are exposed via a separate API. See more [here](https://github.com/vmware/pyvmomi-community-samples/issues/581). To collect VCenter Appliance Server metrics, install the Datadog Agent on the Appliance Server. 
+
 ## Setup
 
 ### Installation
