@@ -50,7 +50,7 @@ instances:
     ##
     ## Set this to <listenAddress>/<handlerPath> as configured in your DCGM Server
     #
-  - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
+    # - openmetrics_endpoint: http://localhost:9400/metrics
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.

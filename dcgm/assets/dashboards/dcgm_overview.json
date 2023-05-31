@@ -1,0 +1,1123 @@
+{
+  "title": "DCGM Overview",
+  "description": "**DCGM**\n\nThis dashboard provides an overview of your DCGM environment, giving you insights into you GPU metrics, shards and gives you an overview into proactively and efficiently managing your GPU.\n",
+  "widgets": [
+    {
+      "id": 6955576996753366,
+      "definition": {
+        "title": "New group",
+        "banner_img": "https://p-qkfgo2.t2.n0.cdn.getcloudapp.com/items/Bluzjjyn/e84e30da-129c-4e28-b855-aab460b01ce8.jpg?source=viewer&v=6c9dca4923883abb1fa1adda300ef8c7",
+        "show_title": false,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5765057495183900,
+            "definition": {
+              "type": "note",
+              "content": "**DCGM**\n\nThis dashboard provides an overview of your DCGM environment, giving you insights into you GPU metrics, shards and gives you an overview into proactively and efficiently managing your GPU",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 5, "height": 3 }
+          },
+          {
+            "id": 607314244154516,
+            "definition": {
+              "type": "note",
+              "content": "**Useful Links**\n\n* [Integration Docs](https://docs.datadoghq.com/integrations/DCGM/?tab=host)\n* [Blog Post - need to add link](https://app.datadoghq.com/ci/getting-started)",
+              "background_color": "white",
+              "font_size": "16",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 3, "width": 5, "height": 2 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 0, "width": 5, "height": 8 }
+    },
+    {
+      "id": 8178300534998464,
+      "definition": {
+        "title": "Overview",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2501952917707794,
+            "definition": {
+              "type": "note",
+              "content": "This section provides you with an overview of your system activity and any DCGM alerts. The service checks on the left speak to the health of your DCGM environment, while the ones on the right report on the Readiness of various DCGM Dependencies. ",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 7, "height": 1 }
+          },
+          {
+            "id": 8740824674228522,
+            "definition": {
+              "title": "DCGM Monitor Summary",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "query": "DCGM",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": { "x": 0, "y": 1, "width": 3, "height": 6 }
+          },
+          {
+            "id": 3431939964933534,
+            "definition": {
+              "title": "OpenMetrics",
+              "title_size": "16",
+              "title_align": "left",
+              "time": { "live_span": "1d" },
+              "type": "check_status",
+              "check": "DCGM.openmetrics.health",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": []
+            },
+            "layout": { "x": 3, "y": 1, "width": 2, "height": 1 }
+          },
+          {
+            "id": 8968856187029008,
+            "definition": {
+              "title": "Readiness - Master",
+              "title_size": "16",
+              "title_align": "left",
+              "time": { "live_span": "1d" },
+              "type": "check_status",
+              "check": "DCGM.readiness.master",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": []
+            },
+            "layout": { "x": 5, "y": 1, "width": 2, "height": 1 }
+          },
+          {
+            "id": 6987039090862476,
+            "definition": {
+              "title": "Health",
+              "title_size": "16",
+              "title_align": "left",
+              "time": { "live_span": "1d" },
+              "type": "check_status",
+              "check": "DCGM.health",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": []
+            },
+            "layout": { "x": 3, "y": 2, "width": 2, "height": 1 }
+          },
+          {
+            "id": 4138512152235570,
+            "definition": {
+              "title": "Readiness - Database",
+              "title_size": "16",
+              "title_align": "left",
+              "time": { "live_span": "1d" },
+              "type": "check_status",
+              "check": "DCGM.readiness.database",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": []
+            },
+            "layout": { "x": 5, "y": 2, "width": 2, "height": 1 }
+          },
+          {
+            "id": 5502861672310260,
+            "definition": {
+              "title": "Liveness",
+              "title_size": "16",
+              "title_align": "left",
+              "time": { "live_span": "1d" },
+              "type": "check_status",
+              "check": "DCGM.liveness",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": []
+            },
+            "layout": { "x": 3, "y": 3, "width": 2, "height": 1 }
+          },
+          {
+            "id": 2118195457092352,
+            "definition": {
+              "title": "Readiness - Queues ",
+              "title_size": "16",
+              "title_align": "left",
+              "time": { "live_span": "1d" },
+              "type": "check_status",
+              "check": "DCGM.readiness.queues",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": []
+            },
+            "layout": { "x": 5, "y": 3, "width": 2, "height": 1 }
+          },
+          {
+            "id": 4220545334262462,
+            "definition": {
+              "title": "DCGM Temperature",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:dcgm.temperature{*}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": { "x": 3, "y": 4, "width": 4, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 5, "y": 0, "width": 7, "height": 8 }
+    },
+    {
+      "id": 8025458456001434,
+      "definition": {
+        "title": "GPU Utilization Metrics",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1042082565617324,
+            "definition": {
+              "type": "note",
+              "content": "TODO - write\n",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
+          },
+          {
+            "id": 2594147831316846,
+            "definition": {
+              "title": "GPU Utilisation",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:dcgm.gpu_utilization{*}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "markers": []
+            },
+            "layout": { "x": 0, "y": 1, "width": 4, "height": 3 }
+          },
+          {
+            "id": 5780514876525742,
+            "definition": {
+              "title": "Memory Copy Utilisation",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:dcgm.mem_copy_utilization{*}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": { "x": 4, "y": 1, "width": 4, "height": 3 }
+          },
+          {
+            "id": 6563719774479316,
+            "definition": {
+              "title": "SQL Execution Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:DCGM.sql_duration_seconds.count{$DCGM_port,$DCGM_host} by {action}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 8, "y": 1, "width": 4, "height": 3 }
+          },
+          {
+            "id": 1749822540525006,
+            "definition": {
+              "title": "New Repositories Created",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:DCGM.transaction.event_create_repository.count{*}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 4, "width": 6, "height": 2 }
+          },
+          {
+            "id": 8288120010562058,
+            "definition": {
+              "title": "Branches Pushed",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:DCGM.transaction.event_push_branch.count{$DCGM_host,$DCGM_port,$service}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 4, "width": 6, "height": 2 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 8, "width": 12, "height": 7 }
+    },
+    {
+      "id": 7751449879193624,
+      "definition": {
+        "title": "Performance Metrics",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2866154983425430,
+            "definition": {
+              "type": "note",
+              "content": "Pipelines created refers to a count, while creation duration refers to the latency between when a pipeline is created to the moment it is triggered to start running. Builds refers to the number of jobs executed throughout all stages within each pipeline. ",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
+          },
+          {
+            "id": 3446180236609690,
+            "definition": {
+              "title": "Pipelines Created",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:DCGM.pipelines_created.count{*}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 1, "width": 4, "height": 2 }
+          },
+          {
+            "id": 5505379012575576,
+            "definition": {
+              "title": "Creation Duration",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:DCGM.ci_pipeline_creation_duration_seconds.sum{*}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 4, "y": 1, "width": 4, "height": 2 }
+          },
+          {
+            "id": 950305498918084,
+            "definition": {
+              "title": "Builds per pipelines",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:DCGM.ci_pipeline_size_builds.sum{$DCGM_host,$DCGM_port}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 8, "y": 1, "width": 4, "height": 2 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 15, "width": 12, "height": 4 }
+    },
+    {
+      "id": 4965434358555720,
+      "definition": {
+        "title": "Memory Metrics",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3886077082488710,
+            "definition": {
+              "type": "note",
+              "content": "Gitaly is a centralized service handling file access and storage for DCGM. The status checks inform on the health of the Gitaly subservice, while the query values speak to the portion of virtual memory and File Descriptors used out of the maximum available. To have this section populated, enable Gitaly monitoring via configuration. ",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
+          },
+          {
+            "id": 4866996724957672,
+            "definition": {
+              "title": "Gitaly Endpoint Satus",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "check_status",
+              "check": "DCGM.gitaly.openmetrics.health",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": []
+            },
+            "layout": { "x": 0, "y": 1, "width": 2, "height": 2 }
+          },
+          {
+            "id": 3037390893501968,
+            "definition": {
+              "title": "Count of FD",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:DCGM.gitaly.process_open_fds{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": { "include_zero": true }
+              }
+            },
+            "layout": { "x": 2, "y": 1, "width": 2, "height": 1 }
+          },
+          {
+            "id": 2839371544156156,
+            "definition": {
+              "title": "Gitaly gRPC Server Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    { "alias": "Sent", "formula": "query1" },
+                    { "alias": "Received", "formula": "query2" },
+                    { "alias": "Count", "formula": "query3" }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:DCGM.gitaly.grpc_server.msg_sent.count{*}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:DCGM.gitaly.grpc_server.msg_received.count{*}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:DCGM.gitaly.grpc_server.started.count{*}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": { "palette": "classic" },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 4, "y": 1, "width": 8, "height": 4 }
+          },
+          {
+            "id": 7253417443768112,
+            "definition": {
+              "title": "Max FD",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:DCGM.gitaly.process_max_fds{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": { "x": 2, "y": 2, "width": 2, "height": 1 }
+          },
+          {
+            "id": 7598978194878980,
+            "definition": {
+              "title": "Virtual Memory Size",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:DCGM.gitaly.process_virtual_memory_bytes{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": { "include_zero": true }
+              }
+            },
+            "layout": { "x": 0, "y": 3, "width": 2, "height": 1 }
+          },
+          {
+            "id": 670476045242598,
+            "definition": {
+              "title": "Gitaly Readiness Status",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "check_status",
+              "check": "DCGM.readiness.gitaly",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": []
+            },
+            "layout": { "x": 2, "y": 3, "width": 2, "height": 2 }
+          },
+          {
+            "id": 5339758046154614,
+            "definition": {
+              "title": "Max Available Virtual Memory",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:DCGM.gitaly.process_virtual_memory_max_bytes{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": { "x": 0, "y": 4, "width": 2, "height": 1 }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 19,
+        "width": 12,
+        "height": 6,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 1337901742269816,
+      "definition": {
+        "title": "Process-Specific Metrics",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5673463017827586,
+            "definition": {
+              "type": "note",
+              "content": "This section informs on the number of times data is read from the cache, and time required for background jobs to be processed and completed within the Rails job queue. ",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
+          },
+          {
+            "id": 8318750693927450,
+            "definition": {
+              "title": "Cache Read Count",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Hit",
+                      "style": { "palette": "green", "palette_index": 3 },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Miss",
+                      "style": { "palette": "warm", "palette_index": 4 },
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:DCGM.transaction.cache_read_hit_count.count{*}.as_count()"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:DCGM.transaction.cache_read_miss_count.count{*}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": { "scale": "sqrt", "include_zero": false }
+            },
+            "layout": { "x": 0, "y": 1, "width": 6, "height": 3 }
+          },
+          {
+            "id": 5846035468542530,
+            "definition": {
+              "title": "Latency (Rails Queue Duration in seconds)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "alias": "Hit", "formula": "query1" }],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:DCGM.rails_queue_duration_seconds.sum{*}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": { "scale": "sqrt", "include_zero": false }
+            },
+            "layout": { "x": 6, "y": 1, "width": 6, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 25, "width": 12, "height": 5 }
+    },
+    {
+      "id": 2477076154696754,
+      "definition": {
+        "title": "Performance History and Trends",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3252110506236862,
+            "definition": {
+              "type": "note",
+              "content": "This section informs on the connection between DCGM and Redis via metrics like the number of new Redis Database connections and client requests to the Redis server. ",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
+          },
+          {
+            "id": 1321587967734686,
+            "definition": {
+              "title": "New Redis Connections",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "vertical",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "query": "sum:DCGM.transaction.new_redis_connections.count{*} by {service,action}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": { "palette": "classic" },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 1, "width": 4, "height": 3 }
+          },
+          {
+            "id": 4934938896855774,
+            "definition": {
+              "title": "Client requests",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "query": "sum:DCGM.redis.client_requests.count{$DCGM_host,$DCGM_port} by {service}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": { "palette": "classic" },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": { "x": 4, "y": 1, "width": 4, "height": 3 }
+          },
+          {
+            "id": 703576912425752,
+            "definition": {
+              "title": "Client Requests Duration",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "query": "sum:DCGM.redis.client_requests_duration_seconds.sum{$DCGM_host,$DCGM_port} by {service}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 8, "y": 1, "width": 4, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 30, "width": 12, "height": 5 }
+    },
+    {
+      "id": 7683584978020270,
+      "definition": {
+        "title": "Logs - Not sure if we have logs",
+        "title_align": "left",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5558939457584862,
+            "definition": {
+              "type": "note",
+              "content": "When investigating logs, you can refer to the list of logs by service for insights into each section of your DCGM environment. In situations where you notice an increase in the ratio of error logs, you can refer to the log stream set up to filter erroneous logs for your perusal.\n",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
+          },
+          {
+            "id": 5248391597999240,
+            "definition": {
+              "title": "Logs by Service",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": ["*"],
+                      "compute": { "aggregation": "count" },
+                      "group_by": [
+                        {
+                          "facet": "service",
+                          "limit": 10,
+                          "sort": { "order": "desc", "aggregation": "count" }
+                        }
+                      ],
+                      "search": { "query": "source:DCGM" }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": { "count": 10, "order": "desc" }
+                    }
+                  ]
+                }
+              ],
+              "style": {}
+            },
+            "layout": { "x": 0, "y": 1, "width": 3, "height": 3 }
+          },
+          {
+            "id": 4685619350283530,
+            "definition": {
+              "title": "Error Logs",
+              "title_size": "16",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "status:(error OR critical)  source:DCGM",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": { "order": "desc", "column": "timestamp" }
+                  },
+                  "columns": [
+                    { "field": "status_line", "width": "auto" },
+                    { "field": "timestamp", "width": "auto" },
+                    { "field": "host", "width": "auto" },
+                    { "field": "service", "width": "auto" },
+                    { "field": "content", "width": "auto" }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": { "x": 3, "y": 1, "width": 4, "height": 3 }
+          },
+          {
+            "id": 2336098657145386,
+            "definition": {
+              "title": "Complete DCGM Log Stream",
+              "title_size": "16",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:DCGM",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": { "order": "desc", "column": "timestamp" }
+                  },
+                  "columns": [
+                    { "field": "status_line", "width": "auto" },
+                    { "field": "timestamp", "width": "auto" },
+                    { "field": "host", "width": "auto" },
+                    { "field": "service", "width": "auto" },
+                    { "field": "content", "width": "auto" }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": { "x": 7, "y": 1, "width": 5, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 35, "width": 12, "height": 5 }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "DCGM_host",
+      "prefix": "DCGM_host",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "DCGM_port",
+      "prefix": "DCGM_port",
+      "available_values": [],
+      "default": "*"
+    },
+    { "name": "service", "available_values": [], "default": "*" }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed",
+  "tags": ["team:product-management", "team:agent-integrations"]
+}
