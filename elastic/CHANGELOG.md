@@ -1,5 +1,9 @@
 # CHANGELOG - elastic
 
+## 5.4.1 / 2023-05-31
+
+* [Fixed] Correctly compute the `templates.count` metric. See [#14636](https://github.com/DataDog/integrations-core/pull/14636).
+
 ## 5.4.0 / 2023-05-26
 
 * [Added] Add new ES metric for templates count. See [#14569](https://github.com/DataDog/integrations-core/pull/14569).
