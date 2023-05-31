@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime as dt
 import json
+import logging
 import os
 import time
 
@@ -460,3 +461,47 @@ def test_connection_refresh(aggregator, dd_run_check, realtime_instance, test_ti
         same_object = True
 
     assert same_object == expected_result
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_vm_hostname_suffix_tag(aggregator, dd_run_check, realtime_instance, caplog):
+    realtime_instance.update(
+        {
+            'collect_tags': True,
+            'vm_hostname_suffix_tag': 'my_cat_name_1',
+            'excluded_host_tags': ['my_cat_name_1', 'my_cat_name_2'],
+        }
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        hostname='VM4-4-my_tag_name_1',
+    )
+    assert "Attached hostname suffix key my_cat_name_1, new hostname: VM4-4-my_tag_name_1" in caplog.text
+    assert "Could not attach hostname suffix key my_cat_name_1 for host: VM-on-fake-host" in caplog.text
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_vm_hostname_suffix_tag_bad_value(aggregator, dd_run_check, realtime_instance, caplog):
+    realtime_instance.update(
+        {
+            'collect_tags': True,
+            'vm_hostname_suffix_tag': 'my_cat_name_3',
+            'excluded_host_tags': ['my_cat_name_1', 'my_cat_name_2'],
+        }
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        hostname='VM4-4',
+    )
+    assert "Could not attach hostname suffix key my_cat_name_3 for host: VM4-4" in caplog.text
+    assert "Could not attach hostname suffix key my_cat_name_3 for host: VM-on-fake-host" in caplog.text
