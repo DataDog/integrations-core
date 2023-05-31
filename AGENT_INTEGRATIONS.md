@@ -21,7 +21,7 @@
 * datadog-cassandra: 1.16.0
 * datadog-ceph: 2.7.0
 * datadog-cert-manager: 3.0.0
-* datadog-checks-base: 31.0.1
+* datadog-checks-base: 31.0.2
 * datadog-checks-dependency-provider: 1.3.0
 * datadog-checks-downloader: 4.1.0
 * datadog-cilium: 2.3.0
