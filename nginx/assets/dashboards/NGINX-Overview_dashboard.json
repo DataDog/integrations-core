@@ -294,9 +294,9 @@
               "has_padding": true
             },
             "layout": {
-              "x": 3,
+              "x": 0,
               "y": 0,
-              "width": 3,
+              "width": 6,
               "height": 2
             }
           },
