@@ -316,7 +316,7 @@ class Disk(AgentCheck):
         return metrics
 
     def collect_latency_metrics(self):
-        for disk_name, disk in iteritems(psutil.disk_io_counters(True)):
+        for disk_name, disk in iteritems(psutil.disk_io_counters(perdisk=True)):
             self.log.debug('IO Counters: %s -> %s', disk_name, disk)
             try:
                 metric_tags = [] if self._custom_tags is None else self._custom_tags[:]
