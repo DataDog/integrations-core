@@ -7,6 +7,9 @@ further_reading:
 - link: "/integrations/#cat-log-collection"
   tag: "Documentation"
   text: "See existing Datadog Log integrations"
+- link: "/logs/explorer/facets/"
+  tag: "Documentation"
+  text: "Learn about log facets"
 - link: "/logs/explorer/"
   tag: "Documentation"
   text: "Learn about the Log Explorer"
@@ -29,16 +32,13 @@ Use the [Logs Ingestion HTTP endpoint][1] to send logs to Datadog.
 
 When creating a log integration, consider the following best practices:
 
-: The `source` and `service` tags must be in lowercase. 
-
-
 Set the `source` tag to the integration name.
-: Datadog recommends that the `source` tag is set to `<integration_name>` and that the `service` tag is set to the name of the service that produces the telemetry. For example, the `service` tag can be used to differentiate logs by product line. </br></br> For cases where there aren't different services, set `service` to the same value as `source`. The `source` and `service` tags must be non-editable by the user because the tags are used to enable integration pipelines and dashboards. The tags can be set in the payload or through the query parameter, for example, `?ddsource=example&service=example`.
+: Datadog recommends that the `source` tag is set to `<integration_name>` and that the `service` tag is set to the name of the service that produces the telemetry. For example, the `service` tag can be used to differentiate logs by product line. </br></br> For cases where there aren't different services, set `service` to the same value as `source`. The `source` and `service` tags must be non-editable by the user because the tags are used to enable integration pipelines and dashboards. The tags can be set in the payload or through the query parameter, for example, `?ddsource=example&service=example`. </br></br> The `source` and `service` tags must be in lowercase. 
 
 The integration must support all Datadog sites.
 : The user must be able to choose between the different Datadog sites whenever applicable. See [Getting Started with Datadog Sites][2] for more information about site differences. </br></br> Your Datadog site endpoint is `http-intake.logs`.{{< region-param key="dd_site" code="true" >}}.
 
-You can attach custom tags while setting up the integration.
+Allow users to attach custom tags while setting up the integration.
 : Datadog recommends that manual user tags are sent as key-value attributes in the JSON body. If it's not possible to add manual tags to the logs, you can send the tags using the `ddtags=<TAGS>` query parameter. See the [Send Logs API documentation][1] for examples.
 
 Send data without arrays in the JSON body whenever possible. 
