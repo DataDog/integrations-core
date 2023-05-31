@@ -7,7 +7,7 @@
 * [Fixed] Update minimum datadog base package version. See [#14463](https://github.com/DataDog/integrations-core/pull/14463).
 * [Fixed] Deprecate `use_latest_spec` option. See [#14446](https://github.com/DataDog/integrations-core/pull/14446).
 
-## 3.3.0 / 2023-04-14
+## 3.3.0 / 2023-04-14 / Agent 7.45.0
 
 * [Added] Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).
 

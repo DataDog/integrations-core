@@ -1,6 +1,6 @@
 # CHANGELOG - apache
 
-## 4.2.1 / 2023-04-14
+## 4.2.1 / 2023-04-14 / Agent 7.45.0
 
 * [Fixed] Fix a typo in the `disable_generic_tags` option description. See [#14246](https://github.com/DataDog/integrations-core/pull/14246).
 
