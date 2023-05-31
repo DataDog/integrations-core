@@ -25,7 +25,7 @@ from datadog_checks.elastic.metrics import (
     stats_for_version,
 )
 
-from .common import CLUSTER_TAG, IS_OPENSEARCH, JVM_RATES, PASSWORD, URL, USER
+from .common import CLUSTER_TAG, IS_OPENSEARCH, JVM_RATES, PASSWORD, URL, USER, get_fixture_path
 
 log = logging.getLogger('test_elastic')
 
@@ -542,3 +542,13 @@ def test_aws_auth_no_url(instance, expected_aws_host, expected_aws_service):
 def test_e2e(dd_agent_check, elastic_check, instance, cluster_tags, node_tags):
     aggregator = dd_agent_check(instance, rate=True)
     _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
+
+
+@pytest.mark.unit
+def test_get_template_metrics(aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('templates.json'))
+    check = ESCheck('elastic', {}, instances=[instance])
+
+    check._get_template_metrics(False, [])
+
+    aggregator.assert_metric("elasticsearch.templates.count", value=6)

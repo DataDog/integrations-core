@@ -23,3 +23,7 @@ JVM_RATES = [
     'jvm.gc.collectors.old.rate',
     'jvm.gc.collectors.old.collection_time.rate',
 ]
+
+
+def get_fixture_path(filename):
+    return os.path.join(HERE, 'fixtures', filename)
