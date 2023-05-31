@@ -1,4 +1,4 @@
-name: Windows Registry
+name: windows_registry
 files:
 - name: windows_registry.yaml
   options:
