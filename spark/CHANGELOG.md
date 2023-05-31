@@ -1,6 +1,6 @@
 # CHANGELOG - spark
 
-## 3.2.0 / 2023-04-14
+## 3.2.0 / 2023-04-14 / Agent 7.45.0
 
 * [Added] Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).
 

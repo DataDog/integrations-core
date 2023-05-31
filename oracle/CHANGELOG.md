@@ -4,7 +4,7 @@
 
 * [Fixed] Update dependencies. See [#14594](https://github.com/DataDog/integrations-core/pull/14594).
 
-## 4.1.0 / 2023-04-14
+## 4.1.0 / 2023-04-14 / Agent 7.45.0
 
 * [Added] Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).
 * [Added] Add thick mode for oracledb. See [#14166](https://github.com/DataDog/integrations-core/pull/14166).
