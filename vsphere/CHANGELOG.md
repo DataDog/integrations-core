@@ -1,5 +1,8 @@
 # CHANGELOG - vsphere
 
+## 6.3.0-beta.5 / 2023-06-01
+
+
 ## 6.2.2 / 2023-05-26
 
 * [Fixed] Add error handling when getting tags from API. See [#14566](https://github.com/DataDog/integrations-core/pull/14566).
