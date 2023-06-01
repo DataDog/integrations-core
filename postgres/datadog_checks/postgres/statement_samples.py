@@ -244,7 +244,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._activity_coll_interval = max(
             self._config.statement_activity_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL),
             collection_interval,
-        ) 
+        )
         self._activity_max_rows = self._config.statement_activity_config.get('payload_row_limit', 3500)
         # Keep track of last time we sent an activity event
         self._time_since_last_activity_event = 0
