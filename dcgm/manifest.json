@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Monitors the exposed GPU metrics leveraged by the DCGM Exporter",
-    "title": "dcgm",
+    "title": "DCGM",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -35,7 +35,9 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {},
+    "dashboards": {
+      "dcgm": "assets/dashboards/dcgm_overview.json"
+    },
     "monitors": {},
     "logs": {},
     "saved_views": {}
