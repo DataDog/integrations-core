@@ -240,10 +240,10 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         self._activity_coll_enabled = is_affirmative(self._config.statement_activity_config.get('enabled', True))
         # activity events cannot be reported more often than regular samples
-        self._activity_coll_interval = self.max(
+        self._activity_coll_interval = max(
             self._config.statement_activity_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL),
             collection_interval,
-        ) 
+        )
         self._activity_max_rows = self._config.statement_activity_config.get('payload_row_limit', 3500)
         # Keep track of last time we sent an activity event
         self._time_since_last_activity_event = 0
