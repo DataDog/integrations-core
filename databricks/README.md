@@ -135,13 +135,13 @@ After creating the `datadog-install-driver-workers.sh` script, add the init scri
 
 dbutils.fs.put("dbfs:/<init-script-folder>/datadog-install-driver-workers.sh","""
 #!/bin/bash
-cat <<EOF > /tmp/start_datadog.sh
-
-#!/bin/bash
 
 date -u +"%Y-%m-%d %H:%M:%S UTC"
 echo "Running on the driver? $DB_IS_DRIVER"
 echo "Driver ip: $DB_DRIVER_IP"
+
+cat <<EOF > /tmp/start_datadog.sh
+#!/bin/bash
 
 if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
 
