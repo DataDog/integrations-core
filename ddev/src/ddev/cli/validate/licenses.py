@@ -48,9 +48,9 @@ def licenses(ctx: click.Context, sync):
         validation_tracker.display()
         app.abort()
 
-    # # Call legacy licenses validation
-    # print("Invoking the legacy validation")
-    # from datadog_checks.dev.tooling.commands.validate.licenses import licenses as legacy_licenses_validation
+    # Call legacy licenses validation
+    print("Invoking the legacy validation")
+    from datadog_checks.dev.tooling.commands.validate.licenses import licenses as legacy_licenses_validation
 
-    # ctx.invoke(legacy_licenses_validation, sync=sync)
-    # validation_tracker.display()
+    ctx.invoke(legacy_licenses_validation, sync=sync)
+    validation_tracker.display()
