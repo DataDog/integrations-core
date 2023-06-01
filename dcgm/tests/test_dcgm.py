@@ -9,9 +9,6 @@ import pytest
 
 from datadog_checks.dcgm import DcgmCheck
 
-# from datadog_checks.base.stubs.aggregator import AggregatorStub #Needed for MERTIS=[]
-# from datadog_checks.dev.utils import get_metadata_metrics
-
 
 @pytest.fixture
 def instance():
@@ -45,21 +42,11 @@ def test_check(dd_run_check, aggregator, check, mock_metrics):
             name=f"dcgm.{expected_metric['name']}",
         )
 
-        # TODO Add service check form openmetrics
-
 
 def test_service_checks(dd_run_check, aggregator, check, mock_metrics):
     dd_run_check(check)
     aggregator.assert_service_check('dcgm.openmetrics.health', DcgmCheck.OK)
 
-
-# TODO  add the following
-# def _common_assertions(aggregator):
-#     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-#     aggregator.assert_all_metrics_covered()
-#     aggregator.assert_service_check('rabbitmq.openmetrics.health', status=ServiceCheck.OK)
-
-# TODO: To collect counter metrics with names ending in `_total`, specify the metric name without the `_total`
 
 # A representative sampling of metrics from the fixture used for unit tests
 METRICS = [
@@ -71,35 +58,12 @@ METRICS = [
     {"name": "gpu_utilization"},
     {"name": "mem_clock"},
     {"name": "mem_copy_utilization"},
-    {"name": "nvlink_bandwidth.count"},  # removed the total for processing
-    {"name": "pcie_replay_counter.count"},  # added .count to pass
+    {"name": "nvlink_bandwidth.count"},
+    {"name": "pcie_replay_counter.count"},
     {"name": "power_usage"},
     {"name": "sm_clock"},
-    {"name": "total_energy_consumption.count"},  # added .count to pass
+    {"name": "total_energy_consumption.count"},
     {"name": "vgpu_license_status"},
     {"name": "xid_errors"},
-    {"name": "device_count.count"},  # added .count to pass
-    # {
-    #     "name": "fan_speed"
-    # },
-    # {
-    #     "name": "pcie_tx_throughput"
-    # },
-    # {
-    #     "name": "pcie_rx_throughput"
-    # },
-    # {
-    #     "name": "memory_temperature"
-    # },
-    # {
-    #     "name": "uncorrectable_remapped_rows"
-    # },
-    # {
-    #     "name": "correctable_remapped_rows"
-    # },
-    # {
-    #     "name": "row_remap_failure"
-    # }
+    {"name": "device_count.count"},
 ]
-
-# TODO Drop the non-exposed metrics.

@@ -100,8 +100,7 @@
               "type": "check_status",
               "check": "DCGM.openmetrics.health",
               "grouping": "cluster",
-              "group_by": [],
-              "tags": []
+              "group_by": []
             },
             "layout": { "x": 3, "y": 1, "width": 2, "height": 1 }
           },
@@ -115,8 +114,7 @@
               "type": "check_status",
               "check": "DCGM.readiness.master",
               "grouping": "cluster",
-              "group_by": [],
-              "tags": []
+              "group_by": []
             },
             "layout": { "x": 5, "y": 1, "width": 2, "height": 1 }
           },
@@ -130,8 +128,7 @@
               "type": "check_status",
               "check": "DCGM.health",
               "grouping": "cluster",
-              "group_by": [],
-              "tags": []
+              "group_by": []
             },
             "layout": { "x": 3, "y": 2, "width": 2, "height": 1 }
           },
@@ -145,8 +142,7 @@
               "type": "check_status",
               "check": "DCGM.readiness.database",
               "grouping": "cluster",
-              "group_by": [],
-              "tags": []
+              "group_by": []
             },
             "layout": { "x": 5, "y": 2, "width": 2, "height": 1 }
           },
@@ -160,8 +156,7 @@
               "type": "check_status",
               "check": "DCGM.liveness",
               "grouping": "cluster",
-              "group_by": [],
-              "tags": []
+              "group_by": []
             },
             "layout": { "x": 3, "y": 3, "width": 2, "height": 1 }
           },
@@ -175,8 +170,7 @@
               "type": "check_status",
               "check": "DCGM.readiness.queues",
               "grouping": "cluster",
-              "group_by": [],
-              "tags": []
+              "group_by": []
             },
             "layout": { "x": 5, "y": 3, "width": 2, "height": 1 }
           },
@@ -565,8 +559,7 @@
               "type": "check_status",
               "check": "DCGM.gitaly.openmetrics.health",
               "grouping": "cluster",
-              "group_by": [],
-              "tags": []
+              "group_by": []
             },
             "layout": { "x": 0, "y": 1, "width": 2, "height": 2 }
           },
@@ -707,8 +700,7 @@
               "type": "check_status",
               "check": "DCGM.readiness.gitaly",
               "grouping": "cluster",
-              "group_by": [],
-              "tags": []
+              "group_by": []
             },
             "layout": { "x": 2, "y": 3, "width": 2, "height": 2 }
           },
@@ -1118,6 +1110,5 @@
   ],
   "layout_type": "ordered",
   "notify_list": [],
-  "reflow_type": "fixed",
-  "tags": ["team:product-management", "team:agent-integrations"]
+  "reflow_type": "fixed"
 }

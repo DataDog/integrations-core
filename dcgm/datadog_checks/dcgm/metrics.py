@@ -8,7 +8,7 @@ METRIC_MAP = {
     'DCGM_FI_DEV_GPU_UTIL': 'gpu_utilization',
     'DCGM_FI_DEV_MEM_CLOCK': 'mem_clock',
     'DCGM_FI_DEV_MEM_COPY_UTIL': 'mem_copy_utilization',
-    'DCGM_FI_DEV_NVLINK_BANDWIDTH_TOTAL': 'nvlink_bandwidth',  # removed the total for processing
+    'DCGM_FI_DEV_NVLINK_BANDWIDTH_TOTAL': 'nvlink_bandwidth',
     'DCGM_FI_DEV_PCIE_REPLAY_COUNTER': 'pcie_replay_counter',
     'DCGM_FI_DEV_POWER_USAGE': 'power_usage',
     'DCGM_FI_DEV_SM_CLOCK': 'sm_clock',
