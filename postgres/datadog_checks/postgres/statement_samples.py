@@ -195,7 +195,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             check,
             rate_limit=1 / collection_interval,
             run_sync=is_affirmative(config.statement_samples_config.get('run_sync', False)),
-            enabled=is_affirmative(config.statement_samples_config.get('enabled', True) or is_affirmative(config.statement_activity_config.get('enabled', True))), 
+            enabled=is_affirmative(config.statement_samples_config.get('enabled', True) or is_affirmative(config.statement_activity_config.get('enabled', True)) or is_affirmative(config.statement_activity_config.get('enabled', True))),  
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
@@ -241,7 +241,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._activity_coll_enabled = is_affirmative(self._config.statement_activity_config.get('enabled', True))
         self._explain_plan_coll_enabled = is_affirmative(self._config.statement_samples_config.get('enabled', True))
         # activity events cannot be reported more often than regular samples
-        self._activity_coll_interval = self.max(
+        self._activity_coll_interval = max(
             self._config.statement_activity_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL),
             collection_interval,
         ) 
