@@ -309,7 +309,7 @@ class VSphereCheck(AgentCheck):
                         )
 
                     else:
-                        self.log.info(
+                        self.log.debug(
                             "Could not attach hostname suffix key %s for host: %s",
                             self._config.vm_hostname_suffix_tag,
                             hostname,
