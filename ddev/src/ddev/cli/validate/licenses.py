@@ -11,8 +11,6 @@ from packaging.requirements import Requirement
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
-from datadog_checks.dev.tooling.commands.validate.licenses import EXPLICIT_LICENSES, PACKAGE_REPO_OVERRIDES
-
 
 @click.command(short_help='Validate third-party license list')
 @click.option('--sync', '-s', is_flag=True, help='Generate the `LICENSE-3rdparty.csv` file')
@@ -23,7 +21,6 @@ def licenses(ctx: click.Context, sync):
 
     # Validate that all values in the constants (EXPLICIT_LICENSES and
     # PACKAGE_REPO_OVERRIDES) appear in agent_requirements.in file
-    print("Invoking new license validation")
 
     agent_requirements_path = app.repo.agent_requirements
 
@@ -33,14 +30,14 @@ def licenses(ctx: click.Context, sync):
             requirement = Requirement(line.strip())
             packages_set.add(requirement.name)
 
-    for name in EXPLICIT_LICENSES:
+    for name in app.repo.config.get('/overrides/explicit_licenses', {}):
         if name.lower() not in packages_set:
             validation_tracker.error(
                 ("EXPLICIT_LICENSES", name),
                 message=f"EXPLICIT_LICENSES contains additional package not in agent requirements: {name}",
             )
 
-    for name in PACKAGE_REPO_OVERRIDES:
+    for name in app.repo.config.get('/overrides/package_repo_overrides', {}):
         if name.lower() not in packages_set:
             validation_tracker.error(
                 ("PACKAGE_REPO_OVERRIDES", name),
@@ -51,7 +48,7 @@ def licenses(ctx: click.Context, sync):
         validation_tracker.display()
         app.abort()
 
-    # Call legacy licenses validation
+    # # Call legacy licenses validation
     # print("Invoking the legacy validation")
     # from datadog_checks.dev.tooling.commands.validate.licenses import licenses as legacy_licenses_validation
 

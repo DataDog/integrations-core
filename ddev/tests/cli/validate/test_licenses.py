@@ -2,20 +2,51 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# Tests:
-# If extra dep in EXPLICIT_LICENSES not in agent_requirements.in, then fail
-# If extra dep in PACKAGE_REPO_OVERRIDES not in agent_requirements.in, then fail
-# If all EXPLICIT_LICENSES and PACKAGE_REPO_OVERRIDES deps are in agent_requirements.in, then pass
+import pytest
+from ddev.utils.toml import dump_toml_data, load_toml_file
 
 
-def test_error_extra_dependency(ddev, helpers, network_replay):
-    network_replay('fixtures/network/license/missing_app_uuid.yaml', record_mode='none')
+@pytest.mark.parametrize(
+    "name, contents, expected_output",
+    [
+        pytest.param(
+            "explicit_licenses",
+            {'dummy_package': 'dummy_license'},
+            """
+                EXPLICIT_LICENSES contains additional package not in agent requirements:
+                dummy_package
+            """,
+            id="explicit licenses",
+        ),
+        pytest.param(
+            "package_repo_overrides",
+            {'dummy_package': 'https://github.com/dummy_package'},
+            """
+                PACKAGE_REPO_OVERRIDES contains additional package not in agent
+                requirements: dummy_package
+            """,
+            id="package repo overrides",
+        ),
+    ],
+)
+def test_error_extra_dependency(name, contents, expected_output, ddev, repository, network_replay, helpers):
+    network_replay('fixtures/network/license/extra_dependency.yaml', record_mode='none')
+    config_file = repository.path / '.ddev' / 'config.toml'
+    data = load_toml_file(config_file)
+    data['overrides'][name] = contents
 
-    # TODO: Figure out testing of modules
+    dump_toml_data(data, config_file)
 
-    # with mock.patch("ddev.src.ddev.cli.validate.test_constant.EXPLICIT_LICENSES",
-    #     return_value=mocked_explicit_licenses):
+    result = ddev('validate', 'licenses')
 
-    #     result = ddev('validate', 'licenses')
+    assert result.exit_code == 1, result.output
 
-    # assert result.exit_code == 1, result.output
+    assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
+        f"""
+        Licenses
+        └── {name.upper()}
+            └── dummy_package
+                {expected_output}
+        Errors: 1
+        """
+    )

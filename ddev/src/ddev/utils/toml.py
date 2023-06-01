@@ -7,6 +7,7 @@ if sys.version_info >= (3, 11):
     import tomllib
 else:
     import tomli as tomllib
+import tomli_w
 
 
 def load_toml_data(data):
@@ -16,3 +17,8 @@ def load_toml_data(data):
 def load_toml_file(path):
     with open(path, encoding='utf-8') as f:
         return tomllib.loads(f.read())
+
+
+def dump_toml_data(data, path):
+    with open(path, "wb") as f:
+        tomli_w.dump(data, f)

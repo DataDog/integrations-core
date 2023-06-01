@@ -46,7 +46,7 @@ class Repository:
         return RepositoryConfig(self.path / CONFIG_DIRECTORY / 'config.toml')
 
     @cached_property
-    def agent_requirements(self) -> Path:
+    def agent_requirements(self) -> str:
         return os.path.join(self.path, 'datadog_checks_base', 'datadog_checks', 'base', 'data', 'agent_requirements.in')
 
 
