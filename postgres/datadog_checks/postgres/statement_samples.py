@@ -197,10 +197,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             check,
             rate_limit=1 / collection_interval,
             run_sync=is_affirmative(config.statement_samples_config.get('run_sync', False)),
-            enabled=is_affirmative(
-                config.statement_samples_config.get('enabled', True)
-                or is_affirmative(config.statement_activity_config.get('enabled', True))
-            ),
+            enabled=is_affirmative(config.statement_samples_config.get('enabled', True) or is_affirmative(config.statement_activity_config.get('enabled', True))), 
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
@@ -249,7 +246,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._activity_coll_interval = max(
             self._config.statement_activity_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL),
             collection_interval,
-        )
+        ) 
         self._activity_max_rows = self._config.statement_activity_config.get('payload_row_limit', 3500)
         # Keep track of last time we sent an activity event
         self._time_since_last_activity_event = 0
