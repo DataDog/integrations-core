@@ -21,6 +21,17 @@ def dd_environment():
 
 
 @pytest.fixture()
+def instance():
+    return {
+        'empty_default_hostname': True,
+        'use_legacy_check_version': False,
+        'host': 'vsphere_host',
+        'username': 'vsphere_username',
+        'password': 'vsphere_password',
+    }
+
+
+@pytest.fixture()
 def realtime_instance():
     return {
         'collection_level': 4,
