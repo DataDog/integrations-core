@@ -26,7 +26,7 @@ from datadog_checks.dev.tooling.commands.validate.service_checks import service_
 from datadog_checks.dev.tooling.commands.validate.typos import typos
 
 from ddev.cli.validate.ci import ci
-from ddev.cli.validate.licenses import licenses as licenses
+from ddev.cli.validate.licenses import licenses
 from ddev.cli.validate.manifest import manifest
 from ddev.cli.validate.openmetrics import openmetrics
 
