@@ -7,15 +7,15 @@ from unittest import mock
 
 import pytest
 
-# from datadog_checks.base.stubs.aggregator import AggregatorStub #Needed for MERTIS=[]
 from datadog_checks.dcgm import DcgmCheck
 
+# from datadog_checks.base.stubs.aggregator import AggregatorStub #Needed for MERTIS=[]
 # from datadog_checks.dev.utils import get_metadata_metrics
 
 
 @pytest.fixture
 def instance():
-    return {"openmetrics_endpoint": "http://host:9400/metrics"}
+    return {"openmetrics_endpoint": "http://localhost:9400/metrics"}
 
 
 @pytest.fixture
@@ -46,6 +46,11 @@ def test_check(dd_run_check, aggregator, check, mock_metrics):
         )
 
         # TODO Add service check form openmetrics
+
+
+def test_service_checks(dd_run_check, aggregator, check, mock_metrics):
+    dd_run_check(check)
+    aggregator.assert_service_check('dcgm.openmetrics.health', DcgmCheck.OK)
 
 
 # TODO  add the following
