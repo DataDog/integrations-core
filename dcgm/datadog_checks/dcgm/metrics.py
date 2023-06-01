@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2023-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 METRIC_MAP = {
     # Exposed OM Metrics to map:
     'DCGM_FI_DEV_GPU_TEMP': 'temperature',
