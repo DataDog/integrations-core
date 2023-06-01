@@ -46,11 +46,9 @@ init_config:
 instances:
 
     ## @param openmetrics_endpoint - string - required
-    ## The URL exposing metrics in the OpenMetrics format.
-    ##
-    ## Set this to <listenAddress>/<handlerPath> as configured in your DCGM Server
+    ## Set this to the port of the DCGM Exporter exposing the metrics in the OpenMetrics format.
     #
-    # - openmetrics_endpoint: http://localhost:9400/metrics
+  - openmetrics_endpoint: http://localhost:9400/metrics
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.
