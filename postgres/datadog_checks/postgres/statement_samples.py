@@ -180,10 +180,10 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
-        
         # if regular samples is disabled, only need to collect as often as activity is sampled
-        # if not is_affirmative(config.statement_samples_config.get('enabled', True)):
-        #     collection_interval = config.statement_activity_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL)
+        if is_affirmative(config.statement_samples_config.get('enabled', False)):
+            collection_interval = DEFAULT_ACTIVITY_COLLECTION_INTERVAL
+
 
         self._conn_pool = MultiDatabaseConnectionPool(check._new_connection)
 
@@ -241,10 +241,10 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._activity_coll_enabled = is_affirmative(self._config.statement_activity_config.get('enabled', True))
         self._explain_plan_coll_enabled = is_affirmative(self._config.statement_samples_config.get('enabled', True))
         # activity events cannot be reported more often than regular samples
-        self._activity_coll_interval = max(
+        self._activity_coll_interval = self.max(
             self._config.statement_activity_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL),
             collection_interval,
-        )
+        ) 
         self._activity_max_rows = self._config.statement_activity_config.get('payload_row_limit', 3500)
         # Keep track of last time we sent an activity event
         self._time_since_last_activity_event = 0
