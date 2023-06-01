@@ -8,7 +8,7 @@ e2e-env = false
 # If you bump the `confluent-kafka` version, also bump the `librdkafka` version in the `32_install_kerberos.sh` file
 post-install-commands = [
   "python -m pip uninstall -y confluent-kafka",
-  "python -m pip install --no-binary confluent-kafka confluent-kafka==2.0.2",
+  "python -m pip install --no-binary confluent-kafka confluent-kafka==2.1.1",
 ]
 
 [envs.default.env-vars]
