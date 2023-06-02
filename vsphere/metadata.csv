@@ -179,6 +179,7 @@ vsphere.net.received.avg,gauge,,kibibyte,second,Average rate at which data was r
 vsphere.net.transmitted.avg,gauge,,kibibyte,second,Average rate at which data was transmitted during the interval. This represents the bandwidth of the network,0,vsphere,net transmitted avg,
 vsphere.net.unknownProtos.sum,gauge,,kibibyte,second,Number of frames with unknown protocol received,0,vsphere,net unknownProtos sum,
 vsphere.net.usage.avg,gauge,,kibibyte,second,Network utilization (combined transmit- and receive-rates),0,vsphere,net usage avg,
+vsphere.net.throughput.usage.avg,gauge,,kibibyte,second,The current network bandwidth usage for the host.,0,vsphere,net throughput usage avg,
 vsphere.network.received,rate,,kibibyte,,Number of kilobytes received by the host,-1,vsphere,net rx,
 vsphere.network.transmitted,rate,,kibibyte,,Number of kilobytes transmitted by the host,-1,vsphere,net tx,
 vsphere.power.energy.sum,gauge,,,,"Total energy (in joule) used since last stats reset.",-1,vsphere,power energy sum,
