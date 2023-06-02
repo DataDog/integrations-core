@@ -645,6 +645,9 @@ def test_statement_reported_hostname(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
+    with datadog_conn_docker.cursor() as cursor:
+        cursor.execute('DBCC FREEPROCCACHE')
+
     now = time.time()
     test_query = "select * from sys.databases"
 
