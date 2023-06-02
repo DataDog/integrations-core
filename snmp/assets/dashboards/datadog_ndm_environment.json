@@ -27,7 +27,7 @@
             "name": "Custom_Tag"
         }
     ],
-    "title": "Datadog NDM Environment",
+    "title": "Thibaud's troubleshooting dashboard",
     "widgets": [
         {
             "definition": {
@@ -209,7 +209,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
@@ -259,7 +258,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
@@ -419,12 +417,11 @@
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "blue"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "CPU",
                             "title_align": "left",
                             "title_size": "16",
@@ -478,12 +475,11 @@
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "blue"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Memory",
                             "title_align": "left",
                             "title_size": "16",
@@ -526,7 +522,7 @@
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "blue"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
@@ -573,12 +569,11 @@
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "blue"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Agent Restarts",
                             "title_align": "left",
                             "title_size": "16",
@@ -639,7 +634,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
@@ -733,7 +727,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Device status",
                             "title_align": "left",
                             "title_size": "16",
@@ -776,7 +769,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
@@ -846,7 +838,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
@@ -895,7 +886,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
@@ -994,7 +984,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Check duration",
                             "title_align": "left",
                             "title_size": "16",
@@ -1053,7 +1042,6 @@
                                 }
                             ],
                             "show_legend": false,
-                            "time": {},
                             "title": "Check duration",
                             "title_align": "left",
                             "title_size": "16",
@@ -1137,12 +1125,11 @@
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "green"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Check duration by device",
                             "title_align": "left",
                             "title_size": "16",
@@ -1206,12 +1193,11 @@
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "green"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Check interval by device",
                             "title_align": "left",
                             "title_size": "16",
@@ -1275,12 +1261,11 @@
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "green"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Submitted metrics by device",
                             "title_align": "left",
                             "title_size": "16",
@@ -1337,7 +1322,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "timeseries_background": {
                                 "type": "area",
                                 "yaxis": {
@@ -1385,7 +1369,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Autodiscovery subnets",
                             "title_align": "left",
                             "title_size": "16",
@@ -1450,12 +1433,11 @@
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "green"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Devices autodiscovered",
                             "title_align": "left",
                             "title_size": "16",
@@ -1525,7 +1507,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:snmp-traps"
+                                                "query": "source:snmp-traps snmp_device:$SNMP_Device.value"
                                             }
                                         }
                                     ],
@@ -1533,7 +1515,7 @@
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "orange"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
@@ -1655,12 +1637,11 @@
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "purple"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Netflow records received, flushed and stored in Datadog",
                             "title_align": "left",
                             "title_size": "16",
@@ -1697,6 +1678,44 @@
                     },
                     {
                         "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Flows",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.netflow.aggregator.sequence.last{environment:mimic,$Netflow_Exporter} by {exporter_ip,flow_type}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Exporters",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 7915767577147442,
+                        "layout": {
+                            "height": 4,
+                            "width": 4,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -1724,84 +1743,17 @@
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "purple"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "NetFlow packets per Exporter IP",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
                         },
                         "id": 1581438962270510,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 0,
-                            "y": 2
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "bars",
-                                    "formulas": [
-                                        {
-                                            "formula": "query3"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "compute": {
-                                                "aggregation": "count",
-                                                "interval": 30000
-                                            },
-                                            "data_source": "network_device_flows",
-                                            "group_by": [
-                                                {
-                                                    "facet": "@exporter.ip",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc"
-                                                    }
-                                                }
-                                            ],
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "name": "query3",
-                                            "search": {
-                                                "query": "@exporter.ip:$Netflow_Exporter.value"
-                                            }
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "purple"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "title": "NetFlow records indexed by Exporter IP",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 94895140851006,
                         "layout": {
                             "height": 2,
                             "width": 4,
@@ -1883,6 +1835,119 @@
                             "legend_layout": "auto",
                             "requests": [
                                 {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count",
+                                                "interval": 30000
+                                            },
+                                            "data_source": "network_device_flows",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@exporter.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query3",
+                                            "search": {
+                                                "query": "@exporter.ip:$Netflow_Exporter.value"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "NetFlow records indexed by Exporter IP",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 94895140851006,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 4,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.netflow.aggregator.flows_flushed{$Agent_Hostname,$Custom_Tag} by {host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Flows flushed",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2983214365183878,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
                                     "display_type": "line",
                                     "formulas": [
                                         {
@@ -1900,12 +1965,11 @@
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "purple"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Flow contexts",
                             "title_align": "left",
                             "title_size": "16",
@@ -1916,7 +1980,7 @@
                             "height": 2,
                             "width": 4,
                             "x": 0,
-                            "y": 4
+                            "y": 6
                         }
                     },
                     {
@@ -1958,12 +2022,11 @@
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "purple"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Flush duration and interval",
                             "title_align": "left",
                             "title_size": "16",
@@ -1974,251 +2037,7 @@
                             "height": 2,
                             "width": 4,
                             "x": 4,
-                            "y": 4
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "bars",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:datadog.netflow.aggregator.flows_flushed{$Agent_Hostname,$Custom_Tag} by {host}.as_count()"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "purple"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "time": {},
-                            "title": "Flows flushed",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 2983214365183878,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 8,
-                            "y": 4
-                        }
-                    },
-                    {
-                        "definition": {
-                            "background_color": "white",
-                            "content": "**What is NetFlow port rollup ?**\n\nNetFlow records with a source or destination port that is detected as ephemeral will be aggregated together. To detect these ephemeral ports, we keep a record of every source / destination port combination seen in the last 5 minutes. If a specific source port is associated with more than 10 different destination ports during that time, the destination port will be marked as ephemeral and all NetFlow records with this source port will be aggregated.\n\n  ",
-                            "font_size": "14",
-                            "has_padding": true,
-                            "show_tick": true,
-                            "text_align": "left",
-                            "tick_edge": "right",
-                            "tick_pos": "50%",
-                            "type": "note",
-                            "vertical_align": "center"
-                        },
-                        "id": 8998029467490578,
-                        "layout": {
-                            "height": 3,
-                            "width": 4,
-                            "x": 0,
                             "y": 6
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
-                                            "alias": "Current store size",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "New store size",
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:datadog.netflow.aggregator.port_rollup.current_store_size{$Agent_Hostname,$Custom_Tag} by {host}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "avg:datadog.netflow.aggregator.port_rollup.new_store_size{$Agent_Hostname,$Custom_Tag} by {host}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "purple"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "time": {},
-                            "title": "Port rollup",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 3862271101257530,
-                        "layout": {
-                            "height": 3,
-                            "width": 8,
-                            "x": 4,
-                            "y": 6
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:datadog.netflow.traffic.bytes{$Agent_Hostname,$Custom_Tag} by {host}.as_count()"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "purple"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "time": {},
-                            "title": "Bytes received",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 3338699430806034,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 0,
-                            "y": 9
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:datadog.netflow.traffic.packets{$Agent_Hostname,$Custom_Tag} by {host}.as_count()"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "purple"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "time": {},
-                            "title": "Packets received",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 3045968110036954,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 4,
-                            "y": 9
-                        }
-                    },
-                    {
-                        "definition": {
-                            "background_color": "white",
-                            "content": "**No packets received ?**\n\n- Check your NetFlow exporter configuration and ensure it is sending flows to the right port.\n- Check NetFlow server listening port, ensure it is using an unprivileged port (> 1024) or allow the Datadog agent to listen on privileged ports.\n",
-                            "font_size": "14",
-                            "has_padding": true,
-                            "show_tick": true,
-                            "text_align": "left",
-                            "tick_edge": "left",
-                            "tick_pos": "50%",
-                            "type": "note",
-                            "vertical_align": "top"
-                        },
-                        "id": 1108502935304848,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 8,
-                            "y": 9
                         }
                     },
                     {
@@ -2260,12 +2079,11 @@
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "purple"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Flows decoded vs  processed",
                             "title_align": "left",
                             "title_size": "16",
@@ -2275,8 +2093,223 @@
                         "layout": {
                             "height": 2,
                             "width": 4,
+                            "x": 8,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**What is NetFlow port rollup ?**\n\nNetFlow records with a source or destination port that is detected as ephemeral will be aggregated together. To detect these ephemeral ports, we keep a record of every source / destination port combination seen in the last 5 minutes. If a specific source port is associated with more than 10 different destination ports during that time, the destination port will be marked as ephemeral and all NetFlow records with this source port will be aggregated.\n\n  ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "right",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 8998029467490578,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Current store size",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "New store size",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.netflow.aggregator.port_rollup.current_store_size{$Agent_Hostname,$Custom_Tag} by {host}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:datadog.netflow.aggregator.port_rollup.new_store_size{$Agent_Hostname,$Custom_Tag} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {},
+                            "title": "Port rollup",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3862271101257530,
+                        "layout": {
+                            "height": 3,
+                            "width": 8,
+                            "x": 4,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.netflow.traffic.bytes{$Agent_Hostname,$Custom_Tag} by {host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Bytes received",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3338699430806034,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
                             "x": 0,
                             "y": 11
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.netflow.traffic.packets{$Agent_Hostname,$Custom_Tag} by {host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Packets received",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3045968110036954,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 4,
+                            "y": 11
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**No packets received ?**\n\n- Check your NetFlow exporter configuration and ensure it is sending flows to the right port.\n- Check NetFlow server listening port, ensure it is using an unprivileged port (> 1024) or allow the Datadog agent to listen on privileged ports.\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 1108502935304848,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 11
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**Seeing bursts in buffer length ?**\n\nIf the buffer length is close to the buffer capacity, you can increase the buffer capacity by updating `aggregator_buffer_size` in your `datadog.yaml` config.\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "right",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 4111141821837056,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 13
                         }
                     },
                     {
@@ -2318,12 +2351,11 @@
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "purple"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Input buffer length and capacity",
                             "title_align": "left",
                             "title_size": "16",
@@ -2337,7 +2369,7 @@
                             "height": 2,
                             "width": 4,
                             "x": 4,
-                            "y": 11
+                            "y": 13
                         }
                     },
                     {
@@ -2374,7 +2406,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Hash collisions",
                             "title_align": "left",
                             "title_size": "16",
@@ -2385,7 +2416,7 @@
                             "height": 2,
                             "width": 4,
                             "x": 8,
-                            "y": 11
+                            "y": 13
                         }
                     },
                     {
@@ -2417,12 +2448,11 @@
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
-                                        "palette": "purple"
+                                        "palette": "dog_classic"
                                     }
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "NetFlows FlowSets",
                             "title_align": "left",
                             "title_size": "16",
@@ -2433,17 +2463,297 @@
                             "height": 2,
                             "width": 4,
                             "x": 0,
-                            "y": 13
+                            "y": 15
                         }
                     }
                 ]
             },
             "id": 2504847901545020,
             "layout": {
-                "height": 16,
+                "height": 18,
                 "width": 12,
                 "x": 0,
                 "y": 36
+            }
+        },
+        {
+            "definition": {
+                "background_color": "yellow",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "NetfFlow Packet Drop",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "gray",
+                            "content": "Following widget only valid for: **NetFlow5 / SFlow**\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "bottom",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 6709450430375580,
+                        "layout": {
+                            "height": 1,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "gray",
+                            "content": "Following widget only valid for: **NetFlow9 / IPFIX**",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "bottom",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 2209019171340808,
+                        "layout": {
+                            "height": 1,
+                            "width": 4,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**How to detect missing NetFlow records ?**\n\nNetFlow missing packet detection helps you identify potential issues in your network. It is an estimation of the number of packet (or flows, depending on NetFlow version) that are lost.\n\nThis metric can appear noisy depending on time aggregation, but a significant increase indicates that some NetFlow packets are lost between the exporter and the Datadog agent.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 1389581184770506,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 - query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.netflow.aggregator.sequence.delta{environment:mimic,$Netflow_Exporter} by {exporter_ip}.as_count().fill(null)"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:datadog.netflow.processor.flowsets{environment:mimic,$Netflow_Exporter} by {exporter_ip}.as_count().fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {},
+                            "title": "NetFlow5 Missing Flows",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1379019082310528,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 - query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.netflow.aggregator.sequence.delta{environment:mimic,$Netflow_Exporter} by {exporter_ip}.as_count().fill(null)"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:datadog.netflow.processor.processed{environment:mimic,$Netflow_Exporter} by {exporter_ip}.as_count().fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "NetFlow9/IPFIX Missing Packets",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1165672826764582,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.netflow.aggregator.sequence.delta{environment:mimic,$Netflow_Exporter} by {exporter_ip,flow_type}.as_count().fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Sequence Delta",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1630157338757350,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.netflow.aggregator.sequence.reset{environment:mimic,$Netflow_Exporter} by {exporter_ip,flow_type}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Sequence Reset",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 87836312062350,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 6,
+                            "y": 3
+                        }
+                    }
+                ]
+            },
+            "id": 7355716067222530,
+            "layout": {
+                "height": 6,
+                "width": 12,
+                "x": 0,
+                "y": 54
             }
         }
     ]
