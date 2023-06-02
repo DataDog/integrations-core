@@ -70,15 +70,18 @@ statement_samples_keys = ["query_samples", "statement_samples"]
 
 @pytest.mark.parametrize("statement_samples_key", statement_samples_keys)
 @pytest.mark.parametrize("statement_samples_enabled", [True, False])
+@pytest.mark.parametrize("query_activity_enabled", [True, False])
 def test_statement_samples_enabled_config(
-    integration_check, dbm_instance, statement_samples_key, statement_samples_enabled
+    integration_check, dbm_instance, statement_samples_key, statement_samples_enabled, query_activity_enabled
 ):
     # test to make sure we continue to support the old key
     for k in statement_samples_keys:
         dbm_instance.pop(k, None)
     dbm_instance[statement_samples_key] = {'enabled': statement_samples_enabled}
+    # check that if either activity OR regular samples (explain plans) is enabled, statement_samples is enabled
+    dbm_instance["query_activity"]["enabled"] = query_activity_enabled
     check = integration_check(dbm_instance)
-    assert check.statement_samples._enabled == statement_samples_enabled
+    assert check.statement_samples._enabled == statement_samples_enabled or query_activity_enabled
 
 
 @pytest.mark.parametrize(
