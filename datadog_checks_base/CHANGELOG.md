@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 32.3.1 / 2023-06-02
+
+* [Fixed] Downgrade an info log to debug. See [#14667](https://github.com/DataDog/integrations-core/pull/14667).
+
 ## 32.3.0 / 2023-05-26
 
 * [Added] Support ingesting pg_settings for `dbm` users. See [#14577](https://github.com/DataDog/integrations-core/pull/14577).
