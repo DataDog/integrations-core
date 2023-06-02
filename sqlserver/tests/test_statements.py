@@ -452,9 +452,7 @@ def test_statement_metadata(
 ):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
-    query = '''
-    -- Test comment
-    select * from sys.databases'''
+    query = 'select * from sys.databases'
     query_signature = '6d1d070f9b6c5647'
 
     def _run_query():
