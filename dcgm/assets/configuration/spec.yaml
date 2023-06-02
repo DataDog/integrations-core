@@ -11,4 +11,4 @@ files:
       overrides:
         openmetrics_endpoint.value.example: http://localhost:9400/metrics
         openmetrics_endpoint.description: |
-          Set this to the port of the DCGM Exporter exposing the metrics in the OpenMetrics format.
+          Set this to the port of the dcgm-exporter exposing the metrics in the OpenMetrics format.

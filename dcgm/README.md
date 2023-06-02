@@ -17,7 +17,7 @@ The DCGM check is included in the [Datadog Agent][2] package, however we will ne
 
 To configure the exporter in a Docker environment:
 
-1. Create the following file `$PWD/default-counters.csv` which contains the default metrics from the `etc/default-counters.csv`. Using this file, we can add more metrics for collection and can be done by adding the counter name, type and description to the end of the file. For reference on adding metrics, please see the [Changing Metrics][10] section and for the complete list of counters, see the [DCGM API reference manual][11]. 
+1. Create the following file `$PWD/default-counters.csv` which contains the default metrics from the `etc/default-counters.csv`. Using this file, we can add more metrics for collection and can be done by adding the counter name, type and description to the end of the file. For reference on adding metrics, please see the [Changing Metrics][10] section and for the complete list of counters, see the [DCGM API reference manual][11].
 <div class="alert alert-info">We recommend adding the following to cover those that are found in the <a href="https://docs.datadoghq.com/integrations/nvml/#metrics">NVML integration</a>:
 
 ```
@@ -41,7 +41,7 @@ sudo docker run --pid=host --privileged -e DCGM_EXPORTER_INTERVAL=3 --gpus all -
 
 1. To configure the Exporter in a Kubernetes environment, please review the template provided by NVIDIA here:
 
-- https://github.com/NVIDIA/dcgm-exporter/blob/main/dcgm-exporter.yaml 
+- https://github.com/iliakur/dcgm-exporter#quickstart-on-kubernetes
 
 
 <!-- xxz tab xxx -->

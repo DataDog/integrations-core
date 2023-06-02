@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+
+# Caddy will create host a site with the metrics to exposes
+  caddy:
+    image: caddy:2.7
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "9400:9400"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./site:/site
+
+#  #This is the DCGM exporter:
+# TODO - Add a second E2E test that can be used in a GPU device.
+
+  # nvidia-dcgm:
+  #   container_name: dcgm-exporter-latest
+  #   image: nvcr.io/nvidia/k8s/dcgm-exporter:latest #3.1.7-3.1.4-ubuntu20.04
+  #   # runtime: nvidia
+  #   restart: unless-stopped
+  #   # ports:
+  #   #   - "9400:9400"
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #         - capabilities: [gpu]
+
+

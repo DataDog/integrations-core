@@ -9,6 +9,7 @@ import pytest
 
 from datadog_checks.dcgm import DcgmCheck
 
+pytestmark = [pytest.mark.unit]
 
 @pytest.fixture
 def instance():

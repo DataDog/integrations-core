@@ -20,9 +20,9 @@ class DcgmCheck(OpenMetricsBaseCheckV2):
 
         self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer.add_custom_transformer(
             "build_information",
-            self._transform_build_information,
+            self._add_build_version_to_metadata,
         )
 
-    def _transform_build_information(self, metric, sample_data, runtime_data):
+    def _add_build_version_to_metadata(self, metric, sample_data, runtime_data):
         for sample, *_ in sample_data:
             self.set_metadata('version', sample.labels['build_version'].replace('_', '.'))
