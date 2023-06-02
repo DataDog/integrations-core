@@ -56,24 +56,12 @@ STATEMENT_METRICS_QUERY = """\
 with qstats as (
     select query_hash, query_plan_hash, last_execution_time, last_elapsed_time,
             CONCAT(
-                CONVERT(binary(64), plan_handle),
-                CONVERT(binary(4), statement_start_offset),
-                CONVERT(binary(4), statement_end_offset)) as plan_handle_and_offsets_order,
-            CONCAT(
                 CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
                 CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
-                CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1)
-                ) as plan_handle_and_offsets_varchar,
+                CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1)) as plan_handle_and_offsets,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
            {query_metrics_columns}
     from sys.dm_exec_query_stats
-),
-qstats_aggr_order as (
-    select FIRST_VALUE(plan_handle_and_offsets_varchar)
-        over (partition by query_hash, query_plan_hash, S.dbid
-            order by plan_handle_and_offsets_order desc) as plan_handle_and_offsets,
-        S.*
-    from qstats as S
 ),
 qstats_aggr as (
     select query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
@@ -81,7 +69,7 @@ qstats_aggr as (
        max(last_execution_time) as last_execution_time,
        max(last_elapsed_time) as last_elapsed_time,
     {query_metrics_column_sums}
-    from qstats_aggr_order S
+    from qstats S
     left join sys.databases D on S.dbid = D.database_id
     group by query_hash, query_plan_hash, S.dbid, D.name
 ),
