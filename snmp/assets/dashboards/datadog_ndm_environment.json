@@ -27,7 +27,7 @@
             "name": "Custom_Tag"
         }
     ],
-    "title": "Thibaud's troubleshooting dashboard",
+    "title": "Datadog NDM Environment",
     "widgets": [
         {
             "definition": {
