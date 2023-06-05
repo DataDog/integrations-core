@@ -239,6 +239,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
         self._activity_coll_enabled = is_affirmative(self._config.statement_activity_config.get('enabled', True))
+        self._explain_plan_coll_enabled = is_affirmative(self._config.statement_samples_config.get('enabled', True))
         # activity events cannot be reported more often than regular samples
         self._activity_coll_interval = max(
             self._config.statement_activity_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL),
@@ -443,11 +444,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         pg_activity_cols = self._get_pg_stat_activity_cols_cached(PG_STAT_ACTIVITY_COLS)
         rows = self._get_new_pg_stat_activity(pg_activity_cols)
         rows = self._filter_and_normalize_statement_rows(rows)
-        event_samples = self._collect_plans(rows)
         submitted_count = 0
-        for e in event_samples:
-            self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
-            submitted_count += 1
+        if self._explain_plan_coll_enabled:
+            event_samples = self._collect_plans(rows)
+            for e in event_samples:
+                self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
+                submitted_count += 1
 
         if self._report_activity_event():
             active_connections = self._get_active_connections()
