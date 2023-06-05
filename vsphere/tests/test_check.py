@@ -1,4 +1,4 @@
-﻿# (C) Datadog, Inc. 2019-present
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime as dt
@@ -9,12 +9,13 @@ import time
 import mock
 import pytest
 from mock import MagicMock
+from pyVmomi import vim
 
 from datadog_checks.base import to_string
+from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError
 from datadog_checks.vsphere.config import VSphereConfig
-from tests.legacy.utils import mock_alarm_event
 
 from .common import HERE, VSPHERE_VERSION, build_rest_api_client
 from .mocked_api import MockedAPI
@@ -80,10 +81,20 @@ def test_events_only(aggregator, events_only_instance):
     check = VSphereCheck('vsphere', {}, [events_only_instance])
     check.initiate_api_connection()
 
-    time1 = dt.datetime.now()
-    event1 = mock_alarm_event(from_status='green', key=10, created_time=time1)
+    event = vim.event.AlarmStatusChangedEvent()
+    event.createdTime = get_current_datetime()
+    event.entity = vim.event.ManagedEntityEventArgument()
+    event.entity.entity = vim.VirtualMachine(moId="vm1")
+    event.entity.name = "vm1"
+    event.alarm = vim.event.AlarmEventArgument()
+    event.alarm.name = "alarm1"
+    setattr(event, 'from', 'green')
+    event.to = 'red'
+    event.datacenter = vim.event.DatacenterEventArgument()
+    event.datacenter.name = "dc1"
+    event.fullFormattedMessage = "Green to Red"
 
-    check.api.mock_events = [event1]
+    check.api.mock_events = [event]
     check.check(None)
     aggregator.assert_event("vCenter monitor status changed on this alarm, it was green and it's now red.", count=1)
 
