@@ -31,6 +31,7 @@ jobs:
       licenses: true
       metadata: true
       models: true
+      openmetrics: true
       package: true
       readmes: true
       recommended-monitors: true

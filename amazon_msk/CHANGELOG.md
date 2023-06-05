@@ -1,10 +1,17 @@
 # CHANGELOG - Amazon MSK
 
-## 3.3.0 / 2023-04-14
+## 3.4.0 / 2023-05-26
+
+* [Added] Add an ignore_connection_errors option to the openmetrics check. See [#14504](https://github.com/DataDog/integrations-core/pull/14504).
+* [Fixed] Update dependencies. See [#14594](https://github.com/DataDog/integrations-core/pull/14594).
+* [Fixed] Update minimum datadog base package version. See [#14463](https://github.com/DataDog/integrations-core/pull/14463).
+* [Fixed] Deprecate `use_latest_spec` option. See [#14446](https://github.com/DataDog/integrations-core/pull/14446).
+
+## 3.3.0 / 2023-04-14 / Agent 7.45.0
 
 * [Added] Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).
 
-## 3.2.4 / 2023-03-03
+## 3.2.4 / 2023-03-03 / Agent 7.44.0
 
 * [Fixed] Switch count method to monotonic count, that's correct for OM counts. See [#13972](https://github.com/DataDog/integrations-core/pull/13972).
 * [Fixed] Submit count versions of metrics that we mistakenly submit as gauges. See [#13886](https://github.com/DataDog/integrations-core/pull/13886).

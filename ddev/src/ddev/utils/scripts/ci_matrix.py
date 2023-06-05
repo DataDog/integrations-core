@@ -36,7 +36,7 @@ JOB_LIMIT = 256
 SKIPPED_PATTERN = re.compile(
     r"""
     datadog_checks_base/datadog_checks/.+
-  | datadog_checks_dev/datadog_checks/dev/[^/]+.py
+  | datadog_checks_dev/datadog_checks/dev/[^/]+\.py
     """,
     re.VERBOSE,
 )
@@ -44,9 +44,10 @@ TESTABLE_FILE_PATTERN = re.compile(
     r"""
     assets/configuration/.+
   | tests/.+
-  | [^/]+.py
-  | hatch.toml
-  | pyproject.toml
+  | [^/]+\.py
+  | hatch\.toml
+  | metadata\.csv
+  | pyproject\.toml
     """,
     re.VERBOSE,
 )

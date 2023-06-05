@@ -4,7 +4,6 @@
 from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
 from confluent_kafka.admin import AdminClient
 
-from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
 
@@ -156,33 +155,28 @@ class KafkaClient:
         return consumer_offsets
 
     def _get_consumer_groups(self):
-        if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_regex:
-            # Get all consumer groups
-            consumer_groups = []
-            consumer_groups_future = self.kafka_client.list_consumer_groups()
-            self.log.debug('MONITOR UNLISTED CG FUTURES: %s', consumer_groups_future)
-            try:
-                list_consumer_groups_result = consumer_groups_future.result()
-                self.log.debug('MONITOR UNLISTED FUTURES RESULT: %s', list_consumer_groups_result)
+        # Get all consumer groups
+        consumer_groups = []
+        consumer_groups_future = self.kafka_client.list_consumer_groups()
+        self.log.debug('MONITOR UNLISTED CG FUTURES: %s', consumer_groups_future)
+        try:
+            list_consumer_groups_result = consumer_groups_future.result()
+            self.log.debug('MONITOR UNLISTED FUTURES RESULT: %s', list_consumer_groups_result)
 
-                consumer_groups.extend(
-                    valid_consumer_group.group_id for valid_consumer_group in list_consumer_groups_result.valid
-                )
-            except Exception as e:
-                self.log.error("Failed to collect consumer groups: %s", e)
-            return consumer_groups
-        elif self.config._consumer_groups:
-            self._validate_consumer_groups()
-            return self.config._consumer_groups
-        else:
-            raise ConfigurationError(
-                "Cannot fetch consumer offsets because no consumer_groups are specified and "
-                "monitor_unlisted_consumer_groups is %s." % self.config._monitor_unlisted_consumer_groups
+            consumer_groups.extend(
+                valid_consumer_group.group_id for valid_consumer_group in list_consumer_groups_result.valid
             )
+        except Exception as e:
+            self.log.error("Failed to collect consumer groups: %s", e)
+        return consumer_groups
 
     def _get_consumer_offset_futures(self, consumer_groups):
-        topics = self.kafka_client.list_topics(timeout=self.config._request_timeout)
-        # {(consumer_group, topic, partition): offset}
+        topic_metadata = self.kafka_client.list_topics(timeout=self.config._request_timeout).topics
+        topics = {
+            topic: list(topic_metadata[topic].partitions.keys())
+            for topic in topic_metadata
+            if topic not in KAFKA_INTERNAL_TOPICS
+        }
 
         for consumer_group in consumer_groups:
             self.log.debug('CONSUMER GROUP: %s', consumer_group)
@@ -192,114 +186,62 @@ class KafkaClient:
                     [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
                 )[consumer_group]
 
-    def _validate_consumer_groups(self):
-        """Validate any explicitly specified consumer groups.
-        consumer_groups = {'consumer_group': {'topic': [0, 1]}}
-        """
-        if not isinstance(self.config._consumer_groups, dict):
-            raise ConfigurationError("consumer_groups is not a dictionary")
-        for consumer_group, topics in self.config._consumer_groups.items():
-            if not isinstance(consumer_group, str):
-                raise ConfigurationError("consumer group is not a valid string")
-            if not (isinstance(topics, dict) or topics is None):  # topics are optional
-                raise ConfigurationError("Topics is not a dictionary")
-            if topics is not None:
-                for topic, partitions in topics.items():
-                    if not isinstance(topic, str):
-                        raise ConfigurationError("Topic is not a valid string")
-                    if not (isinstance(partitions, (list, tuple)) or partitions is None):  # partitions are optional
-                        raise ConfigurationError("Partitions is not a list or tuple")
-                    if partitions is not None:
-                        for partition in partitions:
-                            if not isinstance(partition, int):
-                                raise ConfigurationError("Partition is not a valid integer")
-
     def _get_topic_partitions(self, topics, consumer_group):
-        for topic in topics.topics:
-            if topic in KAFKA_INTERNAL_TOPICS:
-                continue
-
+        for topic, partitions in topics.items():
             self.log.debug('CONFIGURED TOPICS: %s', topic)
 
-            partitions = list(topics.topics[topic].partitions.keys())
-
             if self.config._monitor_unlisted_consumer_groups:
-                for partition in partitions:
-                    topic_partition = TopicPartition(topic, partition)
-                    self.log.debug("TOPIC PARTITION: %s", topic_partition)
-                    yield topic_partition
+                filtered_partitions = partitions
+            else:
+                filtered_partitions = self._filter_partitions(consumer_group, topic, partitions)
 
-            elif self.config._consumer_groups_regex:
-                for filtered_topic_partition in self._get_regex_filtered_topic_partitions(
-                    consumer_group, topic, partitions
-                ):
-                    topic_partition = TopicPartition(filtered_topic_partition[0], filtered_topic_partition[1])
-                    self.log.debug("TOPIC PARTITION: %s", topic_partition)
-                    yield topic_partition
+            for partition in filtered_partitions:
+                topic_partition = TopicPartition(topic, partition)
+                self.log.debug("TOPIC PARTITION: %s", topic_partition)
+                yield topic_partition
 
-            if self.config._consumer_groups:
-                for partition in partitions:
-                    # Get all topic-partition combinations allowed based on config
-                    # if topics is None => collect all topics and partitions for the consumer group
-                    # if partitions is None => collect all partitions from the consumer group's topic
-                    if self.config._consumer_groups.get(consumer_group):
-                        if (
-                            self.config._consumer_groups[consumer_group]
-                            and topic not in self.config._consumer_groups[consumer_group]
-                        ):
-                            self.log.debug(
-                                "Partition %s skipped because the topic %s is not in the consumer_group.",
-                                partition,
-                                topic,
-                            )
-                            continue
-                        if (
-                            self.config._consumer_groups[consumer_group].get(topic)
-                            and partition not in self.config._consumer_groups[consumer_group][topic]
-                        ):
-                            self.log.debug(
-                                "Partition %s skipped because it is not defined in the consumer group for the topic %s",
-                                partition,
-                                topic,
-                            )
-                            continue
+    def _filter_partitions(self, consumer_group, topic, partitions):
+        return (
+            self._filter_partitions_with_regex(consumer_group, topic, partitions)
+            | self._filter_partitions_with_exact_match(consumer_group, topic, partitions)
+        )  # fmt: skip
 
-                    topic_partition = TopicPartition(topic, partition)
-                    self.log.debug("TOPIC PARTITION: %s", topic_partition)
-                    yield topic_partition
+    def _filter_partitions_with_regex(self, consumer_group, topic, partitions):
+        partitions_to_collect = set()
 
-    def _get_regex_filtered_topic_partitions(self, consumer_group, topic, partitions):
-        for partition in partitions:
-            # Do a regex filtering here for consumer groups
-            for consumer_group_compiled_regex in self.config._consumer_groups_compiled_regex:
-                if not consumer_group_compiled_regex.match(consumer_group):
-                    return
+        for consumer_group_regex, topic_filters in self.config._consumer_groups_compiled_regex.items():
+            if not consumer_group_regex.match(consumer_group):
+                continue
 
-                consumer_group_topics_regex = self.config._consumer_groups_compiled_regex.get(
-                    consumer_group_compiled_regex
-                )
+            # No topics specified means we collect all topics and partitions
+            if not topic_filters:
+                return set(partitions)
 
-                # If topics is empty, return all combinations of topic and partition
-                if not consumer_group_topics_regex:
-                    yield (topic, partition)
+            for topic_regex, topic_partitions in topic_filters.items():
+                if not topic_regex.match(topic):
+                    continue
 
-                # Do a regex filtering here for topics
-                for topic_regex in consumer_group_topics_regex:
-                    if not topic_regex.match(topic):
-                        self.log.debug(
-                            "Partition %s skipped because the topic %s is not in the consumer_group.", partition, topic
-                        )
-                        continue
+                # No partitions specified means we collect all
+                if not topic_partitions:
+                    return set(partitions)
 
-                    if (
-                        consumer_group_topics_regex.get(topic_regex)
-                        and partition not in consumer_group_topics_regex[topic_regex]
-                    ):
-                        self.log.debug(
-                            "Partition %s skipped because it is not defined in the consumer group for the topic %s",
-                            partition,
-                            topic,
-                        )
-                        continue
+                partitions_to_collect.update(topic_partitions)
 
-                    yield (topic, partition)
+        return partitions_to_collect.intersection(partitions)
+
+    def _filter_partitions_with_exact_match(self, consumer_group, topic, partitions):
+        if consumer_group not in self.config._consumer_groups:
+            return set()
+
+        # No topics specified means we allow all topics and partitions
+        if not self.config._consumer_groups[consumer_group]:
+            return set(partitions)
+
+        if topic not in self.config._consumer_groups[consumer_group]:
+            return set()
+
+        # No partitions specified means we collect all
+        if not self.config._consumer_groups[consumer_group][topic]:
+            return set(partitions)
+
+        return set(self.config._consumer_groups[consumer_group][topic]).intersection(partitions)

@@ -280,43 +280,6 @@
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 2211250424739338,
-            "definition": {
-              "title": "Log count by status",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "toplist",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "limit": {
-                        "count": 10,
-                        "order": "desc"
-                      }
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "query": "avg:nginx_log_count_by_status{*} by {status}.as_count()",
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "aggregator": "avg"
-                    }
-                  ]
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 3,
-              "height": 2
-            }
-          },
-          {
             "id": 518123602946722,
             "definition": {
               "type": "note",
@@ -331,9 +294,9 @@
               "has_padding": true
             },
             "layout": {
-              "x": 3,
+              "x": 0,
               "y": 0,
-              "width": 3,
+              "width": 6,
               "height": 2
             }
           },
@@ -836,6 +799,5 @@
     }
   ],
   "layout_type": "ordered",
-  "is_read_only": true,
-  "id": 21
+  "is_read_only": true
 }

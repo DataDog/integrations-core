@@ -1,5 +1,11 @@
 # CHANGELOG - Aerospike
 
+## 1.18.0 / 2023-05-26
+
+* [Added] Add an ignore_connection_errors option to the openmetrics check. See [#14504](https://github.com/DataDog/integrations-core/pull/14504).
+* [Fixed] Update minimum datadog base package version. See [#14463](https://github.com/DataDog/integrations-core/pull/14463).
+* [Fixed] Deprecate `use_latest_spec` option. See [#14446](https://github.com/DataDog/integrations-core/pull/14446).
+
 ## 1.17.2 / 2022-10-28 / Agent 7.41.0
 
 * [Fixed] Update dependencies. See [#13205](https://github.com/DataDog/integrations-core/pull/13205).

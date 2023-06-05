@@ -11,6 +11,7 @@ from .metrics import METRIC_MAP
 
 
 class Etcd(OpenMetricsBaseCheck):
+    DEFAULT_METRIC_LIMIT = 0
 
     DEFAULT_TIMEOUT = 5
 
@@ -122,9 +123,7 @@ class Etcd(OpenMetricsBaseCheck):
         return response
 
     def is_leader(self, scraper_config):
-        # Modify endpoint as etcd stabilizes
-        # https://github.com/etcd-io/etcd/blob/master/Documentation/dev-guide/api_grpc_gateway.md#notes
-        response = self.access_api(scraper_config, '/v3alpha/maintenance/status')
+        response = self.access_api(scraper_config, '/v3/maintenance/status')
 
         leader = response.get('leader')
         member = response.get('header', {}).get('member_id')

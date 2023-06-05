@@ -16,11 +16,11 @@ mypy-deps = [
 
 [[envs.default.matrix]]
 python = ["3.8"]
-version = ["9.5", "9.6", "10.0", "11.0", "12.1", "13.0", "14.0"]
+version = ["9.6", "10.0", "11.0", "12.1", "13.0", "14.0"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "POSTGRES_VERSION", if = ["9.5", "9.6", "12.1"] },
+  { key = "POSTGRES_VERSION", if = ["9.6", "12.1"] },
   { key = "POSTGRES_VERSION", value = "10", if = ["10.0"] },
   { key = "POSTGRES_VERSION", value = "11", if = ["11.0"] },
   { key = "POSTGRES_VERSION", value = "13", if = ["13.0"] },

@@ -28,7 +28,7 @@ from datadog_checks.mysql.const import (
 )
 
 from . import common, tags, variables
-from .common import HOST, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT, requires_static_version
+from .common import HOST, MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED, PORT, requires_static_version
 
 
 @pytest.mark.integration
@@ -50,6 +50,24 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
     )
 
     for mname in testable_metrics:
+        # Adding condition to no longer test for innodb_os_log_fsyncs in mariadb 10.8+
+        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_os_log_fsyncs)
+        if (
+            mname == 'mysql.innodb.os_log_fsyncs'
+            and MYSQL_FLAVOR.lower() == 'mariadb'
+            and MYSQL_VERSION_PARSED >= parse_version('10.8')
+        ):
+            continue
+        # Adding condition to no longer test for mutex_spin metrics in mariadb 10.2+
+        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_mutex_spin_waits)
+        if (
+            mname in ('mysql.innodb.mutex_spin_waits', 'mysql.innodb.mutex_os_waits', 'mysql.innodb.mutex_spin_rounds')
+            and MYSQL_FLAVOR.lower() == 'mariadb'
+            and MYSQL_VERSION_PARSED >= parse_version('10.2')
+        ):
+            continue
+        else:
+            aggregator.assert_metric(mname, at_least=1)
         aggregator.assert_metric(mname, at_least=1)
 
     optional_metrics = (
@@ -70,9 +88,11 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
 def test_complex_config(aggregator, dd_run_check, instance_complex):
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
     dd_run_check(mysql_check)
+
     _assert_complex_config(
         aggregator,
-        [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname='stubbed.hostname')],
+        tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname='stubbed.hostname')],
+        tags.METRIC_TAGS_WITH_RESOURCE,
     )
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), check_submission_type=True, exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
@@ -82,18 +102,23 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, dd_default_hostname, instance_complex):
     aggregator = dd_agent_check(instance_complex)
-    _assert_complex_config(aggregator, [], hostname=dd_default_hostname)
+    _assert_complex_config(
+        aggregator,
+        tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=dd_default_hostname)],
+        tags.METRIC_TAGS,
+        hostname=dd_default_hostname,
+    )
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), exclude=['alice.age', 'bob.age'] + variables.STATEMENT_VARS
     )
 
 
-def _assert_complex_config(aggregator, expected_internal_tags, hostname='stubbed.hostname'):
+def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname='stubbed.hostname'):
     # Test service check
     aggregator.assert_service_check(
         'mysql.can_connect',
         status=MySql.OK,
-        tags=tags.METRIC_TAGS + ['port:' + str(common.PORT)],
+        tags=service_check_tags,
         hostname=hostname,
         count=1,
     )
@@ -101,7 +126,10 @@ def _assert_complex_config(aggregator, expected_internal_tags, hostname='stubbed
         aggregator.assert_service_check(
             'mysql.replication.slave_running',
             status=MySql.OK,
-            tags=tags.METRIC_TAGS + ['port:' + str(common.PORT), 'replication_mode:source'],
+            tags=service_check_tags
+            + [
+                'replication_mode:source',
+            ],
             hostname=hostname,
             at_least=1,
         )
@@ -125,13 +153,8 @@ def _assert_complex_config(aggregator, expected_internal_tags, hostname='stubbed
         aggregator.assert_service_check(
             'mysql.replication.group.status',
             status=MySql.OK,
-            tags=tags.METRIC_TAGS
-            + [
-                'port:' + str(common.PORT),
-                'channel_name:group_replication_applier',
-                'member_role:PRIMARY',
-                'member_state:ONLINE',
-            ],
+            tags=service_check_tags
+            + ['channel_name:group_replication_applier', 'member_role:PRIMARY', 'member_state:ONLINE'],
             count=1,
         )
 
@@ -148,20 +171,31 @@ def _assert_complex_config(aggregator, expected_internal_tags, hostname='stubbed
             continue
         if mname == 'mysql.performance.cpu_time' and Platform.is_windows():
             continue
-
+        # Adding condition to no longer test for innodb_os_log_fsyncs in mariadb 10.8+
+        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_os_log_fsyncs)
+        if (
+            mname == 'mysql.innodb.os_log_fsyncs'
+            and MYSQL_FLAVOR.lower() == 'mariadb'
+            and MYSQL_VERSION_PARSED >= parse_version('10.8')
+        ):
+            continue
+        # Adding condition to no longer test for mutex_spin metrics in mariadb 10.2+
+        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_mutex_spin_waits)
+        if (
+            mname in ('mysql.innodb.mutex_spin_waits', 'mysql.innodb.mutex_os_waits', 'mysql.innodb.mutex_spin_rounds')
+            and MYSQL_FLAVOR.lower() == 'mariadb'
+            and MYSQL_VERSION_PARSED >= parse_version('10.2')
+        ):
+            continue
         if mname == 'mysql.performance.query_run_time.avg':
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + expected_internal_tags + ['schema:testdb'], count=1)
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + expected_internal_tags + ['schema:mysql'], count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + ['schema:testdb'], count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + ['schema:mysql'], count=1)
         elif mname == 'mysql.info.schema.size':
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + expected_internal_tags + ['schema:testdb'], count=1)
-            aggregator.assert_metric(
-                mname, tags=tags.METRIC_TAGS + expected_internal_tags + ['schema:information_schema'], count=1
-            )
-            aggregator.assert_metric(
-                mname, tags=tags.METRIC_TAGS + expected_internal_tags + ['schema:performance_schema'], count=1
-            )
+            aggregator.assert_metric(mname, tags=metric_tags + ['schema:testdb'], count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + ['schema:information_schema'], count=1)
+            aggregator.assert_metric(mname, tags=metric_tags + ['schema:performance_schema'], count=1)
         else:
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + expected_internal_tags, at_least=0)
+            aggregator.assert_metric(mname, tags=metric_tags, at_least=0)
 
     # TODO: test this if it is implemented
     # Assert service metadata
@@ -256,6 +290,25 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
             continue
         if mname == 'mysql.performance.query_run_time.avg':
             aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:testdb'], at_least=1)
+
+        # Adding condition to no longer test for os_log_fsyncs in mariadb 10.8+
+        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_os_log_fsyncs)
+        if (
+            mname == 'mysql.innodb.os_log_fsyncs'
+            and MYSQL_FLAVOR.lower() == 'mariadb'
+            and MYSQL_VERSION_PARSED >= parse_version('10.8')
+        ):
+            continue
+
+        # Adding condition to no longer test for mutex_spin metrics in mariadb 10.2+
+        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_mutex_spin_waits)
+        if (
+            mname in ('mysql.innodb.mutex_spin_waits', 'mysql.innodb.mutex_os_waits', 'mysql.innodb.mutex_spin_rounds')
+            and MYSQL_FLAVOR.lower() == 'mariadb'
+            and MYSQL_VERSION_PARSED >= parse_version('10.2')
+        ):
+            continue
+
         elif mname == 'mysql.info.schema.size':
             aggregator.assert_metric(mname, tags=tags.METRIC_TAGS_WITH_RESOURCE + ['schema:testdb'], count=1)
             aggregator.assert_metric(
@@ -318,14 +371,31 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     expected_tags = [
         'server:{}'.format(HOST),
         'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(expected_hostname),
     ]
     aggregator.assert_service_check(
         'mysql.can_connect', status=MySql.OK, tags=expected_tags, count=1, hostname=expected_hostname
     )
 
     testable_metrics = variables.STATUS_VARS + variables.VARIABLES_VARS + variables.INNODB_VARS + variables.BINLOG_VARS
-    for metric_name in testable_metrics:
-        aggregator.assert_metric(metric_name, hostname=expected_hostname)
+    for mname in testable_metrics:
+        # Adding condition to no longer test for innodb_os_log_fsyncs in mariadb 10.8+
+        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_os_log_fsyncs)
+        if (
+            mname == 'mysql.innodb.os_log_fsyncs'
+            and MYSQL_FLAVOR.lower() == 'mariadb'
+            and MYSQL_VERSION_PARSED >= parse_version('10.8')
+        ):
+            continue
+        # Adding condition to no longer test for mutex_spin metrics in mariadb 10.2+
+        # (https://mariadb.com/kb/en/innodb-status-variables/#innodb_mutex_spin_waits)
+        if (
+            mname in ('mysql.innodb.mutex_spin_waits', 'mysql.innodb.mutex_os_waits', 'mysql.innodb.mutex_spin_rounds')
+            and MYSQL_FLAVOR.lower() == 'mariadb'
+            and MYSQL_VERSION_PARSED >= parse_version('10.2')
+        ):
+            continue
+        aggregator.assert_metric(mname, hostname=expected_hostname, count=1)
 
     optional_metrics = (
         variables.COMPLEX_STATUS_VARS
@@ -335,8 +405,8 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         + variables.SYNTHETIC_VARS
     )
 
-    for metric_name in optional_metrics:
-        aggregator.assert_metric(metric_name, hostname=expected_hostname, at_least=0)
+    for mname in optional_metrics:
+        aggregator.assert_metric(mname, hostname=expected_hostname, at_least=0)
 
 
 def _test_optional_metrics(aggregator, optional_metrics):
@@ -419,7 +489,12 @@ def test_additional_status(aggregator, dd_run_check, instance_additional_status)
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_additional_status])
     dd_run_check(mysql_check)
 
-    aggregator.assert_metric('mysql.innodb.rows_read', metric_type=1, tags=tags.METRIC_TAGS_WITH_RESOURCE)
+    # MariaDB 10.10 seems to take out the information that we use for gathering this metric if they're at 0
+    # Removing this from the test (the metric is optional) for the time being
+    if (
+        MYSQL_FLAVOR.lower() == 'mariadb' and MYSQL_VERSION_PARSED < parse_version('10.10')
+    ) or MYSQL_FLAVOR.lower() == 'mysql':
+        aggregator.assert_metric('mysql.innodb.rows_read', metric_type=1, tags=tags.METRIC_TAGS_WITH_RESOURCE)
     aggregator.assert_metric('mysql.innodb.row_lock_time', metric_type=1, tags=tags.METRIC_TAGS_WITH_RESOURCE)
 
 

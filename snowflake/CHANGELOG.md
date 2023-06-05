@@ -1,6 +1,6 @@
 # CHANGELOG - Snowflake
 
-## 4.5.2 / 2023-04-14
+## 4.5.2 / 2023-04-14 / Agent 7.45.0
 
 * [Fixed] Fix a typo in the `disable_generic_tags` option description. See [#14246](https://github.com/DataDog/integrations-core/pull/14246).
 * [Fixed] Update snowflake-connector-python to 3.0.0. See [#13926](https://github.com/DataDog/integrations-core/pull/13926).

@@ -1,10 +1,14 @@
 # CHANGELOG - directory
 
-## 1.14.2 / 2023-03-23
+## 1.14.3 / 2023-05-26
+
+* [Fixed] Continue directory traversal after errors. See [#14587](https://github.com/DataDog/integrations-core/pull/14587).
+
+## 1.14.2 / 2023-03-23 / Agent 7.45.0
 
 * [Fixed] Deduplicate symlink/target files that contribute to directory size. See [#14096](https://github.com/DataDog/integrations-core/pull/14096).
 
-## 1.14.1 / 2023-03-05
+## 1.14.1 / 2023-03-05 / Agent 7.44.0
 
 * [Fixed] Convert warning to debug log. See [#14081](https://github.com/DataDog/integrations-core/pull/14081).
 

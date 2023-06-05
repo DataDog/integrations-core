@@ -150,9 +150,14 @@ This is if you cloned [integrations-core][] and want to always use the version b
 === "macOS"
     Remove any executables shown in the output of `which -a ddev` and make sure that there is no active virtual environment, then run:
 
-    ```
-    pipx install -e /path/to/integrations-core/ddev --python /usr/local/opt/python@3.8/bin/python3.8
-    ```
+    === "ARM"
+        ```
+        pipx install -e /path/to/integrations-core/ddev --python /opt/homebrew/opt/python@3.8/bin/python3.8
+        ```
+    === "Intel"
+        ```
+        pipx install -e /path/to/integrations-core/ddev --python /usr/local/opt/python@3.8/bin/python3.8
+        ```
 
 === "Windows"
     Run:
@@ -171,6 +176,13 @@ This is if you cloned [integrations-core][] and want to always use the version b
 !!! note
     Be aware that this method does not keep track of dependencies so you will need to re-run the command if/when the required dependencies are changed.
 
+!!! note
+    Also be aware that this method does not get any changes from `datadog_checks_dev`, so if you have unreleased changes from `datadog_checks_dev` that may affect `ddev`, you will need to run the following to get the most recent changes from `datadog_checks_dev` to your `ddev`:
+
+    ```
+    pipx inject ddev -e "/path/to/datadog_checks_dev"
+    ```
+    
 ### Upgrade
 
 Upgrade (or re-sync dependencies for [development](#development) versions) at any time by running:

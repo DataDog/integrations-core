@@ -1,10 +1,10 @@
 # CHANGELOG - iis
 
-## 2.18.3 / 2023-04-14
+## 2.18.3 / 2023-04-14 / Agent 7.45.0
 
 * [Fixed] Fix `iis.*_up` service check when configured using a mapping. See [#13747](https://github.com/DataDog/integrations-core/pull/13747).
 
-## 2.18.2 / 2023-03-03
+## 2.18.2 / 2023-03-03 / Agent 7.44.0
 
 * [Fixed] Fix leak due to a bug in `win32pdh.GetFormattedCouterArray()`. See [#13901](https://github.com/DataDog/integrations-core/pull/13901).
 * [Fixed] Change the performance counter used by the `iis.app_pool_up` service check so it can tell when the app pool is down. See [#13734](https://github.com/DataDog/integrations-core/pull/13734).

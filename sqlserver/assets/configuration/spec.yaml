@@ -378,12 +378,14 @@ files:
           value:
             type: string
             example: sql_database
-        - name: name
+        - name: fully_qualified_domain_name
           description: |
             Equal to the name of the SQL Database, Managed Instance (SQL MI) or virtual machine.
+            
+            This value is optional if the value of `host` is already configured to the fully qualified domain name.
           value:
             type: string
-            example: my-sqlserver-instance
+            example: my-sqlserver-database.database.windows.net
 
     - name: obfuscator_options
       description: |

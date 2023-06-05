@@ -577,7 +577,6 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         return db_explain_error, err
 
-    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
         with self._conn_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms).cursor() as cursor:
@@ -615,6 +614,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             )
         return plan_dict, explain_err_code, err_msg
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _run_explain_safe(self, dbname, statement, obfuscated_statement, query_signature):
         # type: (str, str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
         if not self._can_explain_statement(obfuscated_statement):
@@ -645,7 +645,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
                 repr(e),
             )
-            if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', False)):
+            if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', True)):
                 plan = self._explain_parameterized_queries.explain_statement(dbname, statement, obfuscated_statement)
                 if plan:
                     return plan, DBExplainError.explained_with_prepared_statement, None

@@ -1,11 +1,15 @@
 # CHANGELOG - Datadog-Cluster-Agent
 
-## 2.6.0 / 2023-04-14
+## 2.6.1 / 2023-05-26
+
+* [Fixed] Add DEFAULT_METRIC_LIMIT for OpenMetrics-based checks. See [#14527](https://github.com/DataDog/integrations-core/pull/14527).
+
+## 2.6.0 / 2023-04-14 / Agent 7.45.0
 
 * [Added] Add `external_metrics.api_elapsed` and `external_metrics.api_requests` metrics. See [#14369](https://github.com/DataDog/integrations-core/pull/14369).
 * [Added] Add `admission_webhooks.response_duration` metric. See [#14287](https://github.com/DataDog/integrations-core/pull/14287).
 
-## 2.5.0 / 2023-03-03
+## 2.5.0 / 2023-03-03 / Agent 7.44.0
 
 * [Added] Add rc and patcher metrics. See [#13911](https://github.com/DataDog/integrations-core/pull/13911).
 

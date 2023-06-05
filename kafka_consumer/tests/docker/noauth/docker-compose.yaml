@@ -28,6 +28,7 @@ services:
       KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://:19092,EXTERNAL://127.0.0.1:9092
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       ALLOW_PLAINTEXT_LISTENER: "true"
+      KAFKA_ENABLE_KRAFT: false
     depends_on:
       zookeeper:
         condition: service_healthy

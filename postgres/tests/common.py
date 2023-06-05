@@ -13,6 +13,7 @@ from datadog_checks.postgres.util import (
     NEWER_14_METRICS,
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_STAT_WAL_RECEIVER,
+    QUERY_PG_UPTIME,
     REPLICATION_STATS_METRICS,
     SLRU_METRICS,
 )
@@ -115,6 +116,13 @@ def assert_metric_at_least(aggregator, metric_name, lower_bound=None, higher_bou
         )
 
 
+def get_expected_instance_tags(check, pg_instance):
+    return pg_instance['tags'] + [
+        'port:{}'.format(pg_instance['port']),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
+
+
 def check_common_metrics(aggregator, expected_tags, count=1):
     for db in COMMON_DBS:
         db_tags = expected_tags + ['db:{}'.format(db)]
@@ -184,6 +192,26 @@ def check_wal_receiver_metrics(aggregator, expected_tags, count=1, connected=1):
         aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
 
 
+def check_physical_replication_slots(aggregator, expected_tags):
+    replication_slot_tags = expected_tags + [
+        'slot_name:replication_slot',
+        'slot_persistence:permanent',
+        'slot_state:active',
+        'slot_type:physical',
+    ]
+    check_replication_slots(aggregator, expected_tags=replication_slot_tags)
+
+
+def check_logical_replication_slots(aggregator, expected_tags):
+    logical_replication_slot_tags = expected_tags + [
+        'slot_name:logical_slot',
+        'slot_persistence:permanent',
+        'slot_state:inactive',
+        'slot_type:logical',
+    ]
+    check_replication_slots(aggregator, expected_tags=logical_replication_slot_tags)
+
+
 def check_replication_slots(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 10.0:
         return
@@ -206,6 +234,11 @@ def check_replication_delay(aggregator, metrics_cache, expected_tags, count=1):
     replication_metrics = metrics_cache.get_replication_metrics(VersionUtils.parse_version(POSTGRES_VERSION), False)
     for (metric_name, _) in replication_metrics.values():
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_uptime_metrics(aggregator, expected_tags, count=1):
+    for column in QUERY_PG_UPTIME['columns']:
+        aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
 
 
 def check_conflict_metrics(aggregator, expected_tags, count=1):

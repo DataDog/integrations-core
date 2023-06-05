@@ -1089,7 +1089,7 @@ def test_cisco_nexus(aggregator):
         for metric in CPU_METRICS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    for (index, state) in [(3, 3), (6, 6), (8, 6), (11, 6), (13, 3), (14, 6), (20, 6), (21, 4), (31, 5)]:
+    for index, state in [(3, 3), (6, 6), (8, 6), (11, 6), (13, 3), (14, 6), (20, 6), (21, 4), (31, 5)]:
         aggregator.assert_metric(
             'snmp.ciscoEnvMonTemperatureStatusValue',
             metric_type=aggregator.GAUGE,
@@ -1120,6 +1120,10 @@ def test_cisco_nexus(aggregator):
         aggregator.assert_metric(
             'snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=['fru:{}'.format(fru)] + common_tags
         )
+
+    nexus_mem_metrics = ["memory.free", "memory.used"]
+    for metric in nexus_mem_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags + ['mem:1'])
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
@@ -1789,7 +1793,6 @@ def test_cisco_asa_5525(aggregator):
 
 
 def assert_cisco_asa(aggregator, profile):
-
     run_profile_check(profile)
 
     common_tags = common.CHECK_TAGS + [
@@ -1845,7 +1848,7 @@ def assert_cisco_asa(aggregator, profile):
     aggregator.assert_metric('snmp.entPhySensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
 
     stat_tags = [(20, 2), (5, 5)]
-    for (svc, stat) in stat_tags:
+    for svc, stat in stat_tags:
         aggregator.assert_metric(
             'snmp.cfwConnectionStatValue',
             metric_type=aggregator.GAUGE,
@@ -1862,7 +1865,7 @@ def assert_cisco_asa(aggregator, profile):
     aggregator.assert_metric('snmp.cipSecGlobalHcInOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.cipSecGlobalHcOutOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
 
-    for (index, state) in [(3, 3), (6, 6), (8, 6), (11, 6), (13, 3), (14, 6), (20, 6), (21, 4), (31, 5)]:
+    for index, state in [(3, 3), (6, 6), (8, 6), (11, 6), (13, 3), (14, 6), (20, 6), (21, 4), (31, 5)]:
         aggregator.assert_metric(
             'snmp.ciscoEnvMonTemperatureStatusValue',
             metric_type=aggregator.GAUGE,
@@ -1898,7 +1901,7 @@ def assert_cisco_asa(aggregator, profile):
         aggregator.assert_metric('snmp.cfwConnectionStatCount', metric_type=aggregator.RATE, tags=conn_tags)
 
     hardware_tags = [(3, 'Secondary unit'), (5, 'Primary unit'), (6, 'Failover LAN Interface')]
-    for (htype, hdesc) in hardware_tags:
+    for htype, hdesc in hardware_tags:
         aggregator.assert_metric(
             'snmp.cfwHardwareStatusValue',
             metric_type=aggregator.GAUGE,
@@ -2046,7 +2049,7 @@ def test_arista(aggregator):
         count=1,
     )
 
-    for (sensor_id, sensor_type) in [(1, 11), (7, 8)]:
+    for sensor_id, sensor_type in [(1, 11), (7, 8)]:
         sensor_tags = ['sensor_id:{}'.format(sensor_id), 'sensor_type:{}'.format(sensor_type)] + common_tags
         aggregator.assert_metric('snmp.entPhySensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
         aggregator.assert_metric('snmp.entPhySensorOperStatus', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
@@ -2182,7 +2185,7 @@ def test_chatsworth(aggregator):
         aggregator.assert_metric('snmp.cpiPduDoorStatus', metric_type=aggregator.GAUGE, tags=lock_tags, count=1)
         aggregator.assert_metric('snmp.cpiPduLockStatus', metric_type=aggregator.GAUGE, tags=lock_tags, count=1)
 
-    for (sensor_name, sensor_index) in [('sensor1', 4), ('sensor2', 6)]:
+    for sensor_name, sensor_index in [('sensor1', 4), ('sensor2', 6)]:
         sensor_tags = common_tags + [
             'sensor_index:{}'.format(sensor_index),
             'sensor_name:{}'.format(sensor_name),
@@ -2218,7 +2221,7 @@ def test_chatsworth(aggregator):
             'snmp.cpiPduBranchEnergy', metric_type=aggregator.MONOTONIC_COUNT, tags=branch_tags, count=1
         )
 
-    for (outlet_id, outlet_branch, outlet_name) in [(7, 29, 'outlet1'), (16, 23, 'outlet2')]:
+    for outlet_id, outlet_branch, outlet_name in [(7, 29, 'outlet1'), (16, 23, 'outlet2')]:
         outlet_tags = common_tags + [
             'outlet_id:{}'.format(outlet_id),
             'outlet_branchid:{}'.format(outlet_branch),
@@ -2774,7 +2777,7 @@ def _check_bgp4(aggregator, common_tags):
     """
     Shared testing function for profiles supporting BGP4 metrics.
     """
-    tags = ['neighbor:244.12.239.177'] + common_tags
+    tags = ['neighbor:244.12.239.177', 'admin_status:2', 'peer_state:6'] + common_tags
     for metric in PEER_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
 

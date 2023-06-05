@@ -1,5 +1,11 @@
 # CHANGELOG - kong
 
+## 2.4.0 / 2023-05-26
+
+* [Added] Add an ignore_connection_errors option to the openmetrics check. See [#14504](https://github.com/DataDog/integrations-core/pull/14504).
+* [Fixed] Update minimum datadog base package version. See [#14463](https://github.com/DataDog/integrations-core/pull/14463).
+* [Fixed] Deprecate `use_latest_spec` option. See [#14446](https://github.com/DataDog/integrations-core/pull/14446).
+
 ## 2.3.0 / 2022-12-09 / Agent 7.42.0
 
 * [Added] Add metrics to support v3.0 of Kong. See [#13059](https://github.com/DataDog/integrations-core/pull/13059).
