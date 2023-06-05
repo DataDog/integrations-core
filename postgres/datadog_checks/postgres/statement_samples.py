@@ -450,6 +450,10 @@ class PostgresStatementSamples(DBMAsyncJob):
             for e in event_samples:
                 self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
                 submitted_count += 1
+        # else:
+        #     dummy_plan = self._collect_plans(rows)
+        #     self._check.database_monitoring_query_sample(json.dumps(dummy_plan, default=default_json_event_encoding))
+        #     print("these were disabled!")
 
         if self._report_activity_event():
             active_connections = self._get_active_connections()
