@@ -19,7 +19,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import UTC
-from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState
+from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState, DEFAULT_ACTIVITY_COLLECTION_INTERVAL, DEFAULT_COLLECTION_INTERVAL
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
 
 from .common import DB_NAME, HOST, PORT, PORT_REPLICA2, POSTGRES_VERSION
@@ -1376,7 +1376,6 @@ def _check_until_time(check, dbm_instance, sleep_time, check_interval):
         time.sleep(check_interval)
         elapsed = time.time() - start_time
 
-
 def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the main collection loop rate limit
     collection_interval = 0.1
@@ -1397,6 +1396,34 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 
+@pytest.mark.parametrize("query_samples_enabled", [True, False])
+def test_main_collection_rate_adopts_activity_interval(aggregator, integration_check, dbm_instance, query_samples_enabled):
+    """
+    Test that if explain plans are disabled, the main collection rate == activity collection interval.
+    DEFAULT_ACTIVITY_COLLECTION_INTERVAL is 10 seconds, so the main collection rate should be 10 seconds
+    if explain plans are enabled.
+    """
+    if query_samples_enabled:
+        collection_interval = DEFAULT_COLLECTION_INTERVAL
+    else: 
+        collection_interval = DEFAULT_ACTIVITY_COLLECTION_INTERVAL
+        
+    check = integration_check(dbm_instance)
+    check._connect()
+    check_frequency = collection_interval / 5.0
+    # sleep until a collection is made
+    _check_until_time(check, dbm_instance, collection_interval, check_frequency)
+    max_collections = int(1 / collection_interval * collection_interval) + 1
+    
+    # assert a reasonable amount of collections has been made
+    num_collections = aggregator.metrics("dd.postgres.collect_statement_samples.time")
+    # assert len(num_collections) <=max_collections
+
+    # sleep again to get at most one more collection
+    _check_until_time(check, dbm_instance, collection_interval, check_frequency)
+    num_collections = aggregator.metrics("dd.postgres.collect_statement_samples.time")
+    assert len(num_collections) <= max_collections*2
+    check.cancel()
 
 def test_activity_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the activity collection loop rate limit
@@ -1496,6 +1523,11 @@ def test_disabled_activity_or_explain_plans(
     query,
     arg,
 ):
+    """
+    Test four combinations for the following:
+        if activity sampling is enabled, ensure there are activity logs; else ensure there are none.
+        if explain plans are enabled (query_samples), ensure there are explain plan logs; else ensure there are none.
+    """
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['query_activity']['enabled'] = query_activity_enabled
     dbm_instance['query_samples']['enabled'] = query_samples_enabled
@@ -1504,7 +1536,6 @@ def test_disabled_activity_or_explain_plans(
 
     conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
 
-    # check.check(dbm_instance)
     try:
         conn.cursor().execute(query, (arg,))
         check.check(dbm_instance)
