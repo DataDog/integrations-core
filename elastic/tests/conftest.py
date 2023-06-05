@@ -96,7 +96,7 @@ def index_starts_with_dot():
 
 
 @pytest.fixture(scope='session')
-def dd_environment(instance):
+def dd_environment():
     image_name = os.environ.get('ELASTIC_IMAGE')
     compose_file = COMPOSE_FILES_MAP.get(image_name, 'docker-compose.yaml')
     compose_file = os.path.join(HERE, 'compose', compose_file)
@@ -111,7 +111,7 @@ def dd_environment(instance):
         attempts=2,
         attempts_wait=10,
     ):
-        yield instance
+        yield INSTANCE
 
 
 @pytest.fixture
@@ -119,7 +119,7 @@ def elastic_check():
     return ESCheck('elastic', {}, instances=[INSTANCE])
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def instance():
     return copy.deepcopy(INSTANCE)
 
@@ -129,12 +129,12 @@ def benchmark_elastic_check():
     return ESCheck('elastic', {}, instances=[BENCHMARK_INSTANCE])
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def benchmark_instance():
     return copy.deepcopy(BENCHMARK_INSTANCE)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def instance_normalize_hostname():
     return {
         'url': URL,
@@ -146,7 +146,7 @@ def instance_normalize_hostname():
     }
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def version_metadata():
     if '-' in ELASTIC_VERSION:
         base, release = ELASTIC_VERSION.split('-')
