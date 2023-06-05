@@ -31,6 +31,7 @@ matrix.version.env-vars = [
 matrix.flavor.env-vars = [
     { key = "ELASTIC_REGISTRY", value = "docker.elastic.co/elasticsearch/elasticsearch", if = ["elasticsearch"] },
     { key = "ELASTIC_REGISTRY", value = "opensearchproject/opensearch", if = ["opensearch"] },
+    { key = "ELASTIC_FLAVOR" },
 ]
 
 [envs.bench.env-vars]

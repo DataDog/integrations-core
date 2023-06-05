@@ -36,6 +36,26 @@ ES_HEALTH_TO_DD_STATUS = {
     'red': DatadogESHealth(AgentCheck.CRITICAL, AgentCheck.OK, 'ALERT'),
 }
 
+# Skipping the following templates:
+#
+#   logs|metrics|synthetic: created by default by Elasticsearch, they can be disabled
+#   by setting stack.templates.enabled to false
+#
+#   .monitoring: shard monitoring templates.
+#
+#   .slm: snapshot lifecyle management
+#
+#   .deprecation: deprecation reports
+#
+TEMPLATE_EXCLUSION_LIST = (
+    'logs',
+    'metrics',
+    'synthetics',
+    '.monitoring',
+    '.slm-',
+    '.deprecation',
+)
+
 
 class AuthenticationError(requests.exceptions.HTTPError):
     """Authentication Error, unable to reach server"""
@@ -247,32 +267,10 @@ class ESCheck(AgentCheck):
 
     def _get_template_metrics(self, admin_forwarder, base_tags):
         template_resp = self._get_data(self._join_url('/_cat/templates?format=json', admin_forwarder))
-        for idx, tpl in enumerate(template_resp):
-            # Skipping the following templates:
-            #
-            #   logs|metrics|synthetic: created by default by Elasticsearch, they can be disabled
-            #   by setting stack.templates.enabled to false
-            #
-            #   .monitoring: shard monitoring templates.
-            #
-            #   .slm: snapshot lifecyle management
-            #
-            #   .deprecation: deprecation reports
-            #
-            if tpl['name'].startswith(
-                (
-                    'logs',
-                    'metrics',
-                    'synthetics',
-                    '.monitoring',
-                    '.slm-',
-                    '.deprecation',
-                )
-            ):
-                template_resp.pop(idx)
+        filtered_templates = [t for t in template_resp if not t['name'].startswith(TEMPLATE_EXCLUSION_LIST)]
 
         for metric, desc in iteritems(TEMPLATE_METRICS):
-            self._process_metric({'templates': template_resp}, metric, *desc, tags=base_tags)
+            self._process_metric({'templates': filtered_templates}, metric, *desc, tags=base_tags)
 
     def _get_index_search_stats(self, admin_forwarder, base_tags):
         """

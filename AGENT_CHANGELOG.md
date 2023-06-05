@@ -1,3 +1,30 @@
+## Datadog Agent version [7.45.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7450)
+
+* Amazon Kafka [3.3.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Apache [4.2.1](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
+* Avi Vantage [3.2.1](https://github.com/DataDog/integrations-core/blob/master/avi_vantage/CHANGELOG.md)
+* datadog_checks_base [31.0.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) **BREAKING CHANGE**
+* CoreDNS [2.3.1](https://github.com/DataDog/integrations-core/blob/master/coredns/CHANGELOG.md)
+* Datadog Cluster Agent [2.6.0](https://github.com/DataDog/integrations-core/blob/master/datadog_cluster_agent/CHANGELOG.md)
+* Directory [1.14.2](https://github.com/DataDog/integrations-core/blob/master/directory/CHANGELOG.md)
+* Gitlab [6.0.2](https://github.com/DataDog/integrations-core/blob/master/gitlab/CHANGELOG.md) **BREAKING CHANGE**
+* IIS [2.18.3](https://github.com/DataDog/integrations-core/blob/master/iis/CHANGELOG.md)
+* Kafka Consumer [3.0.1](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md) **BREAKING CHANGE**
+* Kubernetes API server metrics [3.5.0](https://github.com/DataDog/integrations-core/blob/master/kube_apiserver_metrics/CHANGELOG.md)
+* Kubelet [7.6.0](https://github.com/DataDog/integrations-core/blob/master/kubelet/CHANGELOG.md)
+* MySQL [10.2.1](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* Network [2.9.4](https://github.com/DataDog/integrations-core/blob/master/network/CHANGELOG.md)
+* Nginx [5.4.1](https://github.com/DataDog/integrations-core/blob/master/nginx/CHANGELOG.md)
+* Oracle Database [4.1.0](https://github.com/DataDog/integrations-core/blob/master/oracle/CHANGELOG.md)
+* Postgres [13.5.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* Silk [1.2.2](https://github.com/DataDog/integrations-core/blob/master/silk/CHANGELOG.md)
+* Snowflake [4.5.2](https://github.com/DataDog/integrations-core/blob/master/snowflake/CHANGELOG.md)
+* Spark [3.2.0](https://github.com/DataDog/integrations-core/blob/master/spark/CHANGELOG.md)
+* SQL Server [11.1.0](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* SSH [2.4.0](https://github.com/DataDog/integrations-core/blob/master/ssh_check/CHANGELOG.md)
+* Temporal [1.0.0](https://github.com/DataDog/integrations-core/blob/master/temporal/CHANGELOG.md)
+* TLS [2.10.0](https://github.com/DataDog/integrations-core/blob/master/tls/CHANGELOG.md)
+
 ## Datadog Agent version [7.44.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7440)
 
 * Amazon Kafka [3.2.4](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
@@ -786,6 +813,7 @@
 * HDFS Namenode [2.2.1](https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/CHANGELOG.md)
 * Hive [1.7.2](https://github.com/DataDog/integrations-core/blob/master/hive/CHANGELOG.md)
 * HiveMQ [1.5.2](https://github.com/DataDog/integrations-core/blob/master/hivemq/CHANGELOG.md)
+* HTTP [6.1.2](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
 * Hudi [2.0.1](https://github.com/DataDog/integrations-core/blob/master/hudi/CHANGELOG.md)
 * HyperV [1.5.0](https://github.com/DataDog/integrations-core/blob/master/hyperv/CHANGELOG.md)
 * IBM Db2 [1.9.1](https://github.com/DataDog/integrations-core/blob/master/ibm_db2/CHANGELOG.md)
@@ -916,7 +944,7 @@
 * HDFS Namenode [2.2.0](https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/CHANGELOG.md)
 * Hive [1.7.1](https://github.com/DataDog/integrations-core/blob/master/hive/CHANGELOG.md)
 * HiveMQ [1.5.1](https://github.com/DataDog/integrations-core/blob/master/hivemq/CHANGELOG.md)
-* HTTP [6.1.2](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
+* HTTP [6.1.2-rc.1](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
 * Hudi [2.0.0](https://github.com/DataDog/integrations-core/blob/master/hudi/CHANGELOG.md) **BREAKING CHANGE**
 * IBM Db2 [1.9.0](https://github.com/DataDog/integrations-core/blob/master/ibm_db2/CHANGELOG.md)
 * IBM i [1.1.0](https://github.com/DataDog/integrations-core/blob/master/ibm_i/CHANGELOG.md)

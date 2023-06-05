@@ -1,5 +1,9 @@
 # CHANGELOG - IBM ACE
 
+## 1.1.0 / 2023-06-05
+
+* [Fixed] Use `non_durable` queues when connecting to IBM Ace and also delete the subscription when disconnecting. See [#14568](https://github.com/DataDog/integrations-core/pull/14568).
+
 ## 1.0.4 / 2023-02-15 / Agent 7.44.0
 
 * [Fixed] Use `count` instead of `monotonic_count` for counters. See [#13959](https://github.com/DataDog/integrations-core/pull/13959).
