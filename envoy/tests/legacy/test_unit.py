@@ -144,77 +144,92 @@ def test_config(extra_config, expected_http_kwargs, check, dd_run_check):
         r.get.assert_called_with('http://{}:8001/stats'.format(HOST), **http_wargs)
 
 
-def test_metadata(datadog_agent, fixture_path, mock_http_response, check):
+@pytest.mark.parametrize(
+    'exception, log_call_parameters',
+    [
+        pytest.param(
+            requests.exceptions.Timeout(),
+            ('Envoy endpoint `%s` timed out after %s seconds', 'http://localhost:8001/server_info', (10.0, 10.0)),
+            id="timeout",
+        ),
+        pytest.param(
+            IndexError(),
+            ('Error collecting Envoy version with url=`%s`. Error: %s', 'http://localhost:8001/server_info', ''),
+            id="index error",
+        ),
+        pytest.param(
+            requests.exceptions.RequestException('Req Exception'),
+            (
+                'Error collecting Envoy version with url=`%s`. Error: %s',
+                'http://localhost:8001/server_info',
+                'Req Exception',
+            ),
+            id="request exception",
+        ),
+    ],
+)
+def test_metadata_with_exception(
+    datadog_agent, fixture_path, mock_http_response, check, exception, log_call_parameters
+):
     instance = INSTANCES['main']
     check = check(instance)
     check.check_id = 'test:123'
     check.log = mock.MagicMock()
 
-    with mock.patch('requests.get', side_effect=requests.exceptions.Timeout()):
+    with mock.patch('requests.get', side_effect=exception):
         check._collect_metadata()
         datadog_agent.assert_metadata_count(0)
-        check.log.warning.assert_called_with(
-            'Envoy endpoint `%s` timed out after %s seconds', 'http://localhost:8001/server_info', (10.0, 10.0)
-        )
+        check.log.warning.assert_called_with(*log_call_parameters)
 
-    datadog_agent.reset()
-    with mock.patch('requests.get', side_effect=IndexError()):
-        check._collect_metadata()
-        datadog_agent.assert_metadata_count(0)
-        check.log.warning.assert_called_with(
-            'Error collecting Envoy version with url=`%s`. Error: %s', 'http://localhost:8001/server_info', ''
-        )
 
-    datadog_agent.reset()
-    with mock.patch('requests.get', side_effect=requests.exceptions.RequestException('Req Exception')):
-        check._collect_metadata()
-        datadog_agent.assert_metadata_count(0)
-        check.log.warning.assert_called_with(
-            'Error collecting Envoy version with url=`%s`. Error: %s',
-            'http://localhost:8001/server_info',
-            'Req Exception',
-        )
+@pytest.mark.parametrize(
+    'fixture_file, expected_version',
+    [
+        pytest.param(
+            'server_info_' + FLAVOR,
+            ENVOY_VERSION,
+        ),
+        pytest.param(
+            'server_info_before_1_9',
+            '1.8.0',
+        ),
+    ],
+)
+def test_metadata(datadog_agent, fixture_path, mock_http_response, check, fixture_file, expected_version):
+    instance = INSTANCES['main']
+    check = check(instance)
+    check.check_id = 'test:123'
+    check.log = mock.MagicMock()
 
-    datadog_agent.reset()
-    with mock_http_response(file_path=fixture_path('server_info_' + FLAVOR)):
-        check._collect_metadata()
+    mock_http_response(file_path=fixture_path(fixture_file))
 
-        major, minor, patch = ENVOY_VERSION.split('.')
-        version_metadata = {
-            'version.scheme': 'semver',
-            'version.major': major,
-            'version.minor': minor,
-            'version.patch': patch,
-            'version.raw': ENVOY_VERSION,
-        }
+    check._collect_metadata()
 
-        datadog_agent.assert_metadata('test:123', version_metadata)
-        datadog_agent.assert_metadata_count(len(version_metadata))
+    major, minor, patch = expected_version.split(".")
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': expected_version,
+    }
 
-    datadog_agent.reset()
-    with mock_http_response(file_path=fixture_path('server_info_before_1_9')):
-        check._collect_metadata()
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
 
-        expected_version = '1.8.0'
-        major, minor, patch = expected_version.split('.')
-        version_metadata = {
-            'version.scheme': 'semver',
-            'version.major': major,
-            'version.minor': minor,
-            'version.patch': patch,
-            'version.raw': expected_version,
-        }
 
-        datadog_agent.assert_metadata('test:123', version_metadata)
-        datadog_agent.assert_metadata_count(len(version_metadata))
+def test_metadata_invalid(datadog_agent, fixture_path, mock_http_response, check):
+    instance = INSTANCES['main']
+    check = check(instance)
+    check.check_id = 'test:123'
+    check.log = mock.MagicMock()
 
-    datadog_agent.reset()
-    with mock_http_response(file_path=fixture_path('server_info_invalid')):
-        check._collect_metadata()
+    mock_http_response(file_path=fixture_path('server_info_invalid'))
+    check._collect_metadata()
 
-        datadog_agent.assert_metadata('test:123', {})
-        datadog_agent.assert_metadata_count(0)
-        check.log.debug.assert_called_with('Version not matched.')
+    datadog_agent.assert_metadata('test:123', {})
+    datadog_agent.assert_metadata_count(0)
+    check.log.debug.assert_called_with('Version not matched.')
 
 
 def test_metadata_not_collected(datadog_agent, check):
