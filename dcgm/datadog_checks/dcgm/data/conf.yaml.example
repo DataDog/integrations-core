@@ -46,7 +46,7 @@ init_config:
 instances:
 
     ## @param openmetrics_endpoint - string - required
-    ## Set this to the port of the DCGM Exporter exposing the metrics in the OpenMetrics format.
+    ## Set this to the port of the dcgm-exporter exposing the metrics in the OpenMetrics format.
     #
   - openmetrics_endpoint: http://localhost:9400/metrics
 

@@ -15,8 +15,8 @@ pytestmark = [pytest.mark.e2e, pytest.mark.usefixtures("dd_environment")]
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
 
-    for expected_metric in METRICS:
-        aggregator.assert_metric(name=f"dcgm.{expected_metric}", at_least=0)
+    for metric in METRICS:
+        aggregator.assert_metric(name=f"dcgm.{metric}", at_least=0)
 
 
 # def test_e2e_service_checks(dd_agent_check, instance):

@@ -4,7 +4,6 @@
 
 import os
 
-from datadog_checks.dcgm.metrics import METRIC_MAP
 from datadog_checks.dev import get_here
 
 INSTANCE = {
@@ -14,20 +13,43 @@ INSTANCE = {
 HERE = get_here()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
+# A representative sampling of metrics from the fixture used for unit tests
+# for expected_metric in METRICS:
+#     aggregator.assert_metric(name=f"dcgm.{expected_metric['name']}", at_least=0)
+# METRICS = [
+#     {"name": "dec_utilization"},
+#     {"name": "enc_utilization"},
+#     {"name": "fb_free"},
+#     {"name": "fb_used"},
+#     {"name": "temperature"},
+#     {"name": "gpu_utilization"},
+#     {"name": "mem_clock"},
+#     {"name": "mem_copy_utilization"},
+#     {"name": "nvlink_bandwidth.count"},
+#     {"name": "pcie_replay_counter.count"},
+#     {"name": "power_usage"},
+#     {"name": "sm_clock"},
+#     {"name": "total_energy_consumption.count"},
+#     {"name": "vgpu_license_status"},
+#     {"name": "xid_errors"},
+#     {"name": "device_count.count"},
+# ]
 
-# This function creates an array of the value of the json
-# and cuts the array at n
-def show_first_n_rows(json_data, n):
-    metric_value = []
-    for _key, value in json_data.items():
-        metric_value.append(value)
-    else:
-        print("error")
-    metric_value_N = metric_value[:n]
-    return metric_value_N
-
-
-# I only want to include the metrics that are exposed:
-METRICS = show_first_n_rows(METRIC_MAP, 16)
-
-print(METRICS)
+METRICS = [
+    'dec_utilization',
+    'enc_utilization',
+    'fb_free',
+    'fb_used',
+    'temperature',
+    'gpu_utilization',
+    'mem_clock',
+    'mem_copy_utilization',
+    'nvlink_bandwidth.count',
+    'pcie_replay_counter.count',
+    'power_usage',
+    'sm_clock',
+    'total_energy_consumption.count',
+    'vgpu_license_status',
+    'xid_errors',
+    'device_count.count',
+]
