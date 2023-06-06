@@ -56,7 +56,9 @@ def dd_environment(dd_save_state):
             app_controller_endpoint = 'http://{}:{}/metrics'.format(app_controller_host, app_controller_port)
             api_server_endpoint = 'http://{}:{}/metrics'.format(api_server_host, api_server_port)
             repo_server_endpoint = 'http://{}:{}/metrics'.format(repo_server_host, repo_server_port)
-            notifications_controller_endpoint = 'http://{}:{}/metrics'.format(notifications_controller_host, notifications_controller_port)
+            notifications_controller_endpoint = 'http://{}:{}/metrics'.format(
+                notifications_controller_host, notifications_controller_port
+            )
 
             instance = {
                 'app_controller_endpoint': app_controller_endpoint,

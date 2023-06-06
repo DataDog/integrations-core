@@ -9,7 +9,12 @@ from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 from datadog_checks.base.constants import ServiceCheck
 
 from .config_models import ConfigMixin
-from .metrics import API_SERVER_METRICS, APPLICATION_CONTROLLER_METRICS, REPO_SERVER_METRICS, NOTIFICATION_CONTROLLER_METRICS
+from .metrics import (
+    API_SERVER_METRICS,
+    APPLICATION_CONTROLLER_METRICS,
+    REPO_SERVER_METRICS,
+    NOTIFICATION_CONTROLLER_METRICS,
+)
 
 API_SERVER_NAMESPACE, APP_CONTROLLER_NAMESPACE, REPO_SERVER_NAMESPACE, NOTIFICATION_CONTROLLER_NAMESPACE = [
     'argocd.api_server',
@@ -40,7 +45,12 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         repo_server_endpoint = self.instance.get("repo_server_endpoint")
         notifications_controller_endpoint = self.instance.get("notifications_controller_endpoint")
 
-        if not app_controller_endpoint and not repo_server_endpoint and not api_server_endpoint and not notifications_controller_endpoint:
+        if (
+            not app_controller_endpoint
+            and not repo_server_endpoint
+            and not api_server_endpoint
+            and not notifications_controller_endpoint
+        ):
             raise ConfigurationError(
                 "Must specify at least one of the following:"
                 "`app_controller_endpoint`, `repo_server_endpoint` or `api_server_endpoint`."
@@ -60,7 +70,11 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             )
         if notifications_controller_endpoint:
             self.scraper_configs.append(
-                self.generate_config(notifications_controller_endpoint, NOTIFICATION_CONTROLLER_NAMESPACE, NOTIFICATION_CONTROLLER_METRICS)
+                self.generate_config(
+                    notifications_controller_endpoint,
+                    NOTIFICATION_CONTROLLER_NAMESPACE,
+                    NOTIFICATION_CONTROLLER_METRICS,
+                )
             )
 
     def generate_config(self, endpoint, namespace, metrics):
