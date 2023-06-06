@@ -725,9 +725,9 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
 {{< /site-region >}}
 partial -->
 
-2. [Instrument your application][32] based on your setup.
+2. Instrument your application based on your setup:
 
-   **Note**: With **Fargate APM applications**, do **not** set `DD_AGENT_HOST` - the default of `localhost` works.
+   **Note**: With **Fargate** APM applications, do **not** set `DD_AGENT_HOST` - the default of `localhost` works.
 
    | Language                           |
    |------------------------------------|
@@ -740,7 +740,6 @@ partial -->
    | [C++][53] |
    | [.NET Core][54] |
    | [.NET Framework][55] |
-
 
 3. Ensure your application is running in the same task definition as the Datadog Agent container.
 
