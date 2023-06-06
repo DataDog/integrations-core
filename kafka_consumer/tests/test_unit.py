@@ -7,9 +7,7 @@ from contextlib import nullcontext as does_not_raise
 import mock
 import pytest
 
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer import KafkaCheck
-from tests.common import metrics
 
 pytestmark = [pytest.mark.unit]
 
@@ -30,24 +28,6 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, check, kafka_inst
         k: v for k, v in kafka_consumer_check._tls_context_wrapper.config.items() if k in expected_http_kwargs
     }
     assert expected_http_kwargs == actual_options
-
-
-def test_invalid_connect_str(dd_run_check, check, aggregator, caplog, kafka_instance):
-    caplog.set_level(logging.DEBUG)
-    kafka_instance['kafka_connect_str'] = 'invalid'
-    del kafka_instance['consumer_groups']
-    dd_run_check(check(kafka_instance))
-
-    for m in metrics:
-        aggregator.assert_metric(m, count=0)
-
-    exception_msg = (
-        'ConfigurationError: Cannot fetch consumer offsets because no consumer_groups are specified and '
-        'monitor_unlisted_consumer_groups is False'
-    )
-
-    assert exception_msg in caplog.text
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.parametrize(

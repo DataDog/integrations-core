@@ -4,7 +4,7 @@
 
 Integration that allows to:
 
-- Visualize and monitor metrics collected with GitLab through Prometheus
+- Visualize and monitor metrics collected with GitLab and Gitaly through Prometheus
 
 See [Monitoring GitLab with Prometheus][1] for more information.
 
@@ -101,7 +101,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Metrics
 
-See [metadata.csv][12] for a list of metrics provided by this integration.
+See [metadata.csv][12] for a list of metrics provided by this integration. 
+
+**Note**: Metrics marked as `[Legacy]`, `[OpenMetricsV1]`, or `[OpenMetricsV2]` are only available using the corresponding implementation of the GitLab integration. Metrics not marked are collected by all three implementations.
 
 ### Events
 

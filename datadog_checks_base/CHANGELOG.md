@@ -1,6 +1,34 @@
 # CHANGELOG - datadog_checks_base
 
-## 31.0.1 / 2023-04-19
+## 32.3.1 / 2023-06-02
+
+* [Fixed] Downgrade an info log to debug. See [#14667](https://github.com/DataDog/integrations-core/pull/14667).
+
+## 32.3.0 / 2023-05-26
+
+* [Added] Support ingesting pg_settings for `dbm` users. See [#14577](https://github.com/DataDog/integrations-core/pull/14577).
+* [Fixed] Revert protobuf dependency update. See [#14618](https://github.com/DataDog/integrations-core/pull/14618).
+* [Fixed] Update dependencies. See [#14594](https://github.com/DataDog/integrations-core/pull/14594).
+* [Fixed] Fix kubelet check failing to initialize when get_connection_info is empty. See [#14546](https://github.com/DataDog/integrations-core/pull/14546).
+
+## 32.2.0 / 2023-05-05
+
+* [Added] Add an ignore_connection_errors option to the openmetrics check. See [#14504](https://github.com/DataDog/integrations-core/pull/14504).
+
+## 32.1.0 / 2023-05-04
+
+* [Added] Create `tag_not_null` type which doesn't set the tag when tag value is none. See [#14503](https://github.com/DataDog/integrations-core/pull/14503).
+* [Fixed] Fix bug on empty openmetrics scrape response. See [#14508](https://github.com/DataDog/integrations-core/pull/14508).
+
+## 32.0.0 / 2023-04-25
+
+* [Changed] Implement automatic exposition format detection. See [#14445](https://github.com/DataDog/integrations-core/pull/14445).
+
+## 31.0.2 / 2023-05-31 / Agent 7.45.0
+
+* [Fixed] Backport pydantic 1.10.8 upgrade to 7.45. See [#14655](https://github.com/DataDog/integrations-core/pull/14655).
+
+## 31.0.1 / 2023-04-19 
 
 * [Fixed] Do not add `freezegun` dependency to agent. See [#14393](https://github.com/DataDog/integrations-core/pull/14393).
 
@@ -11,7 +39,7 @@
 * [Fixed] Fix duplicate events bug. See [#14020](https://github.com/DataDog/integrations-core/pull/14020).
 * [Changed] Replace `kafka-python` dependency with `confluent-kafka-python`. See [#13918](https://github.com/DataDog/integrations-core/pull/13918).
 
-## 30.2.0 / 2023-03-07
+## 30.2.0 / 2023-03-07 / Agent 7.44.0
 
 * [Added] Upgrade openstacksdk dependency. See [#14109](https://github.com/DataDog/integrations-core/pull/14109).
 
@@ -25,7 +53,7 @@
 
 * [Fixed] Bump dependency `snowflake-connector-python` to 3.0.1. See [#14073](https://github.com/DataDog/integrations-core/pull/14073).
 
-## 30.0.1 / 2023-02-28
+## 30.0.1 / 2023-02-28 / Agent 7.43.1
 
 * [Fixed] Update cryptography to 39.0.1. See [#13913](https://github.com/DataDog/integrations-core/pull/13913).
 

@@ -90,12 +90,16 @@ class PostgresConfig:
         # statement samples & execution plans
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
+        self.settings_metadata_config = instance.get('collect_settings', {}) or {}
+        self.resources_metadata_config = instance.get('collect_resources', {}) or {}
         self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         self.cloud_metadata = {}
         aws = instance.get('aws', {})
         gcp = instance.get('gcp', {})
         azure = instance.get('azure', {})
+        # Remap fully_qualified_domain_name to name
+        azure = {k if k != 'fully_qualified_domain_name' else 'name': v for k, v in azure.items()}
         if aws:
             self.cloud_metadata.update({'aws': aws})
         if gcp:

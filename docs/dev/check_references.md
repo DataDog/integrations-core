@@ -16,7 +16,7 @@ further_reading:
 
 ## Overview
 
-This page walks you through how to develop an offering on the [**Integrations** page][12] or the [**Marketplace** page][11]. 
+This page walks you through the files that you need to populate in order to create an offering on the [**Integrations** page][12] or the [**Marketplace** page][9]. 
 
 ## Configuration file
 
@@ -102,7 +102,7 @@ You can find the complete list of mandatory attributes for the `service_checks.j
 | Attribute       | Description                                                                                                                |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `agent_version` | Minimum Agent version supported.                                                                                           |
-| `integration`   | The name of the integration that emits this service check. Must be the non-normalized `display_name` from `manifest.json`. |
+| `integration`   | The name of the integration that emits this service check. Must be the non-normalized `tile.title` from `manifest.json`.   |
 | `check`         | Name of the service check. It must be unique.                                                                              |
 | `statuses`      | List of different status of the check, to choose among `ok`, `warning`, and `critical`. `unknown` is also a possibility.   |
 | `groups`        | [Tags][8] sent with the service check.                                                                                     |
@@ -125,7 +125,7 @@ You can find the complete list of mandatory and optional attributes for the `met
 | `per_unit_name` | Optional           | If there is a unit sub-division, such as `request per second`.                                                                                                                                                                                                                                                                               |
 | `description`   | Optional           | Description of the metric.                                                                                                                                                                                                                                                                                                              |
 | `orientation`   | Mandatory          | Set to `1` if the metric should go up, such as `myapp.turnover`. Set to `0` if the metric variations are irrelevant. Set to `-1` if the metric should go down, such as `myapp.latency`.                                                                                                                                                         |
-| `integration`   | Mandatory          | The name of the integration that emits the metric. Must be the normalized version of the `display_name` from the `manifest.json` file. Any character besides letters, underscores, dashes, and numbers are converted to underscores. For example: `Openstack Controller` -> `openstack_controller`, `ASP.NET` -> `asp_net`, and `CRI-o` -> `cri-o`. |
+| `integration`   | Mandatory          | The name of the integration that emits the metric. Must be the normalized version of the `tile.title` from the `manifest.json` file. Any character besides letters, underscores, dashes, and numbers are converted to underscores. For example: `Openstack Controller` -> `openstack_controller`, `ASP.NET` -> `asp_net`, and `CRI-o` -> `cri-o`. |
 | `short_name`    | Mandatory          | Explicit unique ID for the metric.                                                                                                                                                                                                                                                                                                      |
 | `curated_metric`| Optional           | Marks which metrics for an integration are noteworthy for a given type (`cpu` and `memory` are both accepted). These are displayed in the UI above the other integration metrics.
 
@@ -141,7 +141,7 @@ You can find the complete list of mandatory and optional attributes for the `met
 [6]: https://docs.datadoghq.com/metrics/types/#metric-types
 [7]: https://docs.datadoghq.com/metrics/units/#unit-list
 [8]: https://docs.datadoghq.com/getting_started/tagging/
-[9]: https://docs.datadoghq.com/developers/marketplace/
+[9]: https://app.datadoghq.com/marketplace/
 [10]: https://docs.datadoghq.com/developers/datadog_apps/
-[11]: https://docs.datadoghq.com/developers/marketplace/
+[11]: https://docs.datadoghq.com/developers/integrations/marketplace_offering
 [12]: https://app.datadoghq.com/integrations

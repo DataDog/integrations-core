@@ -1,0 +1,1593 @@
+{
+    "author_name": "Datadog",
+    "description": null,
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "env",
+            "prefix": "env"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "service",
+            "prefix": "service"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "version",
+            "prefix": "version"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "model",
+            "prefix": "openai.model"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "organization",
+            "prefix": "openai.organization.name"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "openai.user.api_key",
+            "prefix": "openai.user.api_key"
+        }
+    ],
+    "title": "OpenAI Overview Dashboard",
+    "widgets": [
+        {
+            "definition": {
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "has_background": true,
+                            "has_border": false,
+                            "horizontal_align": "center",
+                            "sizing": "cover",
+                            "type": "image",
+                            "url": "/static/images/logos/openai_large.svg",
+                            "url_dark_theme": "/static/images/logos/openai_reversed_large.svg",
+                            "vertical_align": "center"
+                        },
+                        "id": 1590802316495700,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "Track OpenAI usage, cost and performance. You can use this dashboard to monitor your API requests, token usage and track costs both in aggregate as well as by model. \n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 7992422381542136,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "**Further reading:**\n\n- [Datadog OpenAI Integration Documentation](https://docs.datadoghq.com/integrations/openai/)\n- [Monitor OpenAI with Datadog Blog](https://www.datadoghq.com/blog/monitor-openai-with-datadog)",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 2961037249226966,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 3,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 6756498291092174,
+            "layout": {
+                "height": 5,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Usage Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:openai.request.duration{$env,$service,$version,$model,$organization,$openai.user.api_key}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            },
+                            "title": "Total OpenAI requests",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 3104121683554248,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "percentile",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "p95:trace.openai.request{$env,$service,$version,$model,$organization,$openai.user.api_key}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "API Response Time (p95)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 6747939900435518,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 3,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "custom_unit": "tokens/req",
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:openai.tokens.total{$env,$service,$model,$version,$organization,$openai.user.api_key}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            },
+                            "title": "Avg Tokens per request",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 4830582785535768,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": false,
+                            "custom_unit": "$",
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "((query1 / 1000) * 0.0004) + ((query2 / 1000) * 0.002) + ((query3 / 1000) * 0.002) + ((query4 / 1000) * 0.0005) + ((query5 / 1000) * 0.02) + ((query6 / 1000) * 0.03) + ((query7 / 1000) * 0.06) + ((query8 / 1000) * 0.06) + ((query9 / 1000) * 0.12) + ((query10 / 1000) * 0.0004) + ((query11 / 1000) * 0.02) + ((query12 / 1000) * 0.002) + ((query13 / 1000) * 0.0005) + ((query14 / 1000) * 0.0004)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:openai.tokens.total{openai.model:ada*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:openai.tokens.total{openai.model:gpt-3.5*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:openai.tokens.total{openai.model:curie*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "sum:openai.tokens.total{openai.model:babbage*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "sum:openai.tokens.total{openai.model:davinci*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query6",
+                                            "query": "sum:openai.tokens.prompt{openai.model:gpt-4,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query7",
+                                            "query": "sum:openai.tokens.completion{openai.model:gpt-4,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query8",
+                                            "query": "sum:openai.tokens.prompt{openai.model:gpt-4-32k*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query9",
+                                            "query": "sum:openai.tokens.completion{openai.model:gpt-4-32k*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query10",
+                                            "query": "sum:openai.tokens.total{openai.model:text-embedding-ada*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query11",
+                                            "query": "sum:openai.tokens.total{openai.model:text-davinci*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query12",
+                                            "query": "sum:openai.tokens.total{openai.model:text-curie*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query13",
+                                            "query": "sum:openai.tokens.total{openai.model:text-babbage*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query14",
+                                            "query": "sum:openai.tokens.total{openai.model:text-ada*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "text_align": "center",
+                            "title": "Estimated Cost (USD)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 748013795200996,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 3,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 1569477937421566,
+            "layout": {
+                "height": 5,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_pink",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Usage Trends",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "Monitor your OpenAI API request volume against the limits set for your org. You may get rate-limited by OpenAI if you breach this limit.",
+                            "font_size": "12",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "right",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 2774801680833934,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Request Limit",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Requests Completed",
+                                            "formula": "(query1 - query2)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:openai.ratelimit.requests{$env,$service,$version,$model,$organization,$openai.user.api_key}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:openai.ratelimit.remaining.requests{$env,$service,$version,$model,$organization,$openai.user.api_key}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Request Limit and Requests Completed",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2498485278012654,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 2,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "Monitor your OpenAI API Tokens per Min Usage against the limits set for your org. You may get rate-limited by OpenAI if you breach this limit.",
+                            "font_size": "12",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "right",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 4196478200685986,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "markers": [],
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Token Limit",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Tokens Used",
+                                            "formula": "(query1 - query2)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:openai.ratelimit.tokens{$env,$service,$version,$model,$organization,$openai.user.api_key}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:openai.ratelimit.remaining.tokens{$env,$service,$version,$model,$organization,$openai.user.api_key}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Token Limit and Tokens Used",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4429015661427628,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "table"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:openai.request.duration{$env,$service,$version,$model,$organization,$openai.user.api_key} by {openai.model}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Total OpenAI requests by model",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 3922564564861850,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:openai.request.duration{$env,$service,$version,$model,$organization,$openai.user.api_key} by {openai.model}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Total OpenAI requests by model",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3873178601866424,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "table"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:openai.request.duration{$env,$service,$version,$model,$organization,$openai.user.api_key} by {service,openai.organization.name,openai.user.api_key}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {},
+                            "title": "Total OpenAI requests by service, api_key, organization",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 2039085216132136,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:openai.request.duration{$env,$service,$version,$model,$organization,$openai.user.api_key} by {service,openai.organization.name,openai.user.api_key}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {},
+                            "title": "Total OpenAI requests by service, api_key, organization",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8824236934769324,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 5
+                        }
+                    }
+                ]
+            },
+            "id": 2219734989484006,
+            "layout": {
+                "height": 9,
+                "width": 12,
+                "x": 0,
+                "y": 5
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_orange",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Token & Cost Usage",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "custom_unit": "tokens/req",
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:openai.tokens.total{$env,$service,$model,$version,$organization,$openai.user.api_key}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Avg tokens per request",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 2743747829464642,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "custom_unit": "tokens/req",
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:openai.tokens.prompt{$env,$service,$model,$version,$organization,$openai.user.api_key}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Avg Prompt Tokens per request",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 5831322105846448,
+                        "layout": {
+                            "height": 1,
+                            "width": 3,
+                            "x": 3,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "custom_unit": "tokens/req",
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:openai.tokens.completion{$env,$service,$model,$version,$organization,$openai.user.api_key}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Avg Completion Tokens per request",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 6306168078819840,
+                        "layout": {
+                            "height": 1,
+                            "width": 3,
+                            "x": 3,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": false,
+                            "custom_unit": "$",
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "((query1 / 1000) * 0.0004) + ((query2 / 1000) * 0.002) + ((query3 / 1000) * 0.002) + ((query4 / 1000) * 0.0005) + ((query5 / 1000) * 0.02) + ((query6 / 1000) * 0.03) + ((query7 / 1000) * 0.06) + ((query8 / 1000) * 0.06) + ((query9 / 1000) * 0.12) + ((query10 / 1000) * 0.0004) + ((query11 / 1000) * 0.02) + ((query12 / 1000) * 0.002) + ((query13 / 1000) * 0.0005) + ((query14 / 1000) * 0.0004)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:openai.tokens.total{openai.model:ada*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:openai.tokens.total{openai.model:gpt-3.5*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:openai.tokens.total{openai.model:curie*,$model,$env,$version,$service,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "sum:openai.tokens.total{openai.model:babbage*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "sum:openai.tokens.total{openai.model:davinci*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query6",
+                                            "query": "sum:openai.tokens.prompt{openai.model:gpt-4,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query7",
+                                            "query": "sum:openai.tokens.completion{openai.model:gpt-4,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query8",
+                                            "query": "sum:openai.tokens.prompt{openai.model:gpt-4-32k*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query9",
+                                            "query": "sum:openai.tokens.completion{openai.model:gpt-4-32k*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query10",
+                                            "query": "sum:openai.tokens.total{openai.model:text-embedding-ada*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query11",
+                                            "query": "sum:openai.tokens.total{openai.model:text-davinci*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query12",
+                                            "query": "sum:openai.tokens.total{openai.model:text-curie*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query13",
+                                            "query": "sum:openai.tokens.total{openai.model:text-babbage*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query14",
+                                            "query": "sum:openai.tokens.total{openai.model:text-ada*,$model,$env,$service,$version,$organization,$openai.user.api_key}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "text_align": "center",
+                            "title": "Estimated Cost (USD)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 4823920930787222,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "orange",
+                            "content": "OpenAI model pricing (per 1K tokens)\n- **ada**: $0.0004\n- **babbage**: $0.0005\n- **curie**: $0.002\n- **davinci**: $0.02\n- **gpt-3.5-turbo**: $0.002\n- **gpt-4-8k**: $0.03 prompt, $0.06 completion\n- **gpt-4-32k**: $0.06 prompt, $0.12 completion\n\n\n\nhttps://openai.com/pricing (2023-04-12)",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 3868770172430520,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 3,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Prompt Token Count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:openai.tokens.prompt{$model,$service,$env,$version,$organization,$openai.user.api_key} by {model}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Prompt Token Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7235015944490804,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:openai.tokens.total{$model,$service,$env,$version,$organization,$openai.user.api_key} by {openai.model}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Total Tokens usage by model",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6954645267993526,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "formulas": [
+                                        {
+                                            "alias": "Prompt Token Count",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Completion Token Count",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:openai.tokens.prompt{$model,$service,$env,$version,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:openai.tokens.completion{$model,$service,$env,$version,$organization,$openai.user.api_key}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Tokens usage by Prompt & Completion",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3183551294675350,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 10
+                        }
+                    }
+                ]
+            },
+            "id": 3080457545117630,
+            "layout": {
+                "height": 14,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Performance",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Error Rate",
+                                            "formula": "(query1 / query2) * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:openai.request.error{$env,$service,$version,$model,$organization,$openai.user.api_key}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "count:openai.request.duration{$env,$service,$version,$model,$organization,$openai.user.api_key}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Error Rate",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 749010832783832,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:openai.request.error{$env,$service,$version,$model,$organization,$openai.user.api_key} by {error_type}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "orange"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Error Count by Type",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1155801614479808,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "p95:openai.request.duration{$service,$model,$env,$version,$organization,$openai.user.api_key} by {openai.model}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "API response time by model (p95)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5142128818083950,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "p95:openai.request.duration{$service,$model,$env,$version,$organization,$openai.user.api_key} by {service}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "API response time by service (p95)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6080119233023702,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "p95:openai.request.duration{$service,$model,$env,$version,$organization,$openai.user.api_key} by {openai.organization.name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "API response time by organization (p95)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7406601465830194,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Response Time/Prompt Token",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "p95:openai.request.duration{$service,$model,$env,$version,$organization,$openai.user.api_key}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:openai.tokens.prompt{$service,$model,$env,$version,$organization,$openai.user.api_key}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Response Time to Prompt Token Ratio",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5974438893685674,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 10
+                        }
+                    }
+                ]
+            },
+            "id": 1433120172561914,
+            "layout": {
+                "height": 14,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Prompt and completion samples",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "green",
+                            "content": "Prompts and completions are sampled from the Datadog APM library integrations.\n\nBy default prompts and completions are sampled 100% on all spans. \n\nLogs are sampled at a rate of 10% by default when spans are sampled. \n\nSee the [OpenAI integration docs](https://docs.datadoghq.com/integrations/openai/#log-prompt--completion-sampling) for how to configure this rate.",
+                            "font_size": "12",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "right",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 1451712326328870,
+                        "layout": {
+                            "height": 4,
+                            "width": 2,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "openai.model",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "choices.0.finish_reason",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "prompt",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "choices.0.text",
+                                            "width": "auto"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "indexes": [],
+                                        "query_string": "$model openai.endpoint:completions $service $env $version $organization $openai.user.api_key",
+                                        "storage": "hot"
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "title": "Completion Samples",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 7534464467163062,
+                        "layout": {
+                            "height": 4,
+                            "width": 10,
+                            "x": 2,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "openai.model",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "completion.0.finish_reason",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "messages.0.content",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "completion.0.message.content",
+                                            "width": "auto"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "indexes": [],
+                                        "query_string": "$model  openai.endpoint:chat.completions  $service $env $version $organization $openai.user.api_key",
+                                        "storage": "hot"
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "title": "Chat Completion Samples",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 1300992561669166,
+                        "layout": {
+                            "height": 5,
+                            "width": 12,
+                            "x": 0,
+                            "y": 4
+                        }
+                    }
+                ]
+            },
+            "id": 6645674536071958,
+            "layout": {
+                "height": 10,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 28
+            }
+        }
+    ]
+}

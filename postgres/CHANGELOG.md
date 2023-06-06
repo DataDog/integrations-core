@@ -1,6 +1,22 @@
 # CHANGELOG - postgres
 
-## 13.5.0 / 2023-04-14
+## 13.7.0 / 2023-05-26
+
+* [Added] Support IAM-based RDS authentication. See [#14581](https://github.com/DataDog/integrations-core/pull/14581).
+
+## 13.6.0 / 2023-05-26
+
+* [Added] Support ingesting pg_settings for `dbm` users. See [#14577](https://github.com/DataDog/integrations-core/pull/14577).
+* [Added] Enable explain parameterized query feature by default. See [#14543](https://github.com/DataDog/integrations-core/pull/14543).
+* [Added] Create `postgresql.uptime` metric. See [#14470](https://github.com/DataDog/integrations-core/pull/14470).
+* [Added] Add pgss dealloc metric. See [#14289](https://github.com/DataDog/integrations-core/pull/14289).
+* [Fixed] Fix pg_replication_slots query generating errors on posgres replica database with replication slot. See [#14531](https://github.com/DataDog/integrations-core/pull/14531). Thanks [boluwaji-deriv](https://github.com/boluwaji-deriv).
+* [Fixed] Don't try to collect wal receiver if aurora is detected. See [#14537](https://github.com/DataDog/integrations-core/pull/14537).
+* [Fixed] Rename azure.name configuration key to azure.fully_qualified_domain_name. See [#14532](https://github.com/DataDog/integrations-core/pull/14532).
+* [Fixed] Fix query sampler producing constant errors about undefined parameters. See [#14440](https://github.com/DataDog/integrations-core/pull/14440).
+* [Deprecated] No longer test postgres 9.5. See [#14582](https://github.com/DataDog/integrations-core/pull/14582).
+
+## 13.5.0 / 2023-04-14 / Agent 7.45.0
 
 * [Added] Send resource_type/name for postgres integration metrics. See [#14338](https://github.com/DataDog/integrations-core/pull/14338).
 * [Added] Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).
@@ -9,7 +25,7 @@
 * [Added] Add new sessions metrics from PG14. See [#13723](https://github.com/DataDog/integrations-core/pull/13723).
 * [Fixed] Reduce the number of idle connections opened when running explain plans across databases. See [#14164](https://github.com/DataDog/integrations-core/pull/14164).
 
-## 13.4.0 / 2023-03-03
+## 13.4.0 / 2023-03-03 / Agent 7.44.0
 
 * [Added] Add resolved_hostname to metadata. See [#14092](https://github.com/DataDog/integrations-core/pull/14092).
 * [Added] Add `postgresql.replication_slot.*` metrics. See [#14013](https://github.com/DataDog/integrations-core/pull/14013).

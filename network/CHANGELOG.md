@@ -1,6 +1,6 @@
 # CHANGELOG - network
 
-## 2.9.4 / 2023-04-14
+## 2.9.4 / 2023-04-14 / Agent 7.45.0
 
 * [Fixed] Remove `distutils` dependency from python 3 version of the check. See [#14245](https://github.com/DataDog/integrations-core/pull/14245).
 

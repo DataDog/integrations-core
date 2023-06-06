@@ -55,11 +55,8 @@ class MongoDb(AgentCheck):
        with their original metric names.
 
     # Service checks
-    Available service checks:
     * `mongodb.can_connect`
       Connectivity health to the instance.
-    * `mongodb.replica_set_member_state`
-      Disposition of the member replica set state.
     """
 
     def __init__(self, name, init_config, instances=None):

@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-# stdlib
 import os
 import tempfile
 
@@ -11,7 +9,9 @@ import pytest
 
 from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
 
-from .common import APISERVER_INSTANCE_BEARER_TOKEN
+from .common import APISERVER_INSTANCE_BEARER_TOKEN, HERE
+
+OM_RESPONSE_FIXTURES = os.path.join(HERE, 'fixtures', 'metrics.txt')
 
 customtag = "custom:tag"
 
@@ -32,22 +32,6 @@ instanceSecure = {
 
 
 @pytest.fixture()
-def mock_get():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': "text/plain", 'Authorization': "Bearer XXX"},
-        ),
-    ):
-        yield
-
-
-@pytest.fixture()
 def mock_read_bearer_token():
     with mock.patch('datadog_checks.checks.openmetrics.OpenMetricsBaseCheck._get_bearer_token', return_value="XXX"):
         yield
@@ -56,51 +40,50 @@ def mock_read_bearer_token():
 class TestKubeAPIServerMetrics:
     """Basic Test for kube_apiserver integration."""
 
-    CHECK_NAME = 'kube_apiserver_metrics'
-    NAMESPACE = 'kube_apiserver'
     METRICS = [
-        NAMESPACE + '.longrunning_gauge',
-        NAMESPACE + '.current_inflight_requests',
-        NAMESPACE + '.audit_event',
-        NAMESPACE + '.go_threads',
-        NAMESPACE + '.go_goroutines',
-        NAMESPACE + '.APIServiceRegistrationController_depth',
-        NAMESPACE + '.etcd_object_counts',
-        NAMESPACE + '.rest_client_requests_total',
-        NAMESPACE + '.apiserver_request_count',
-        NAMESPACE + '.apiserver_dropped_requests_total',
-        NAMESPACE + '.http_requests_total',
-        NAMESPACE + '.authenticated_user_requests',
-        NAMESPACE + '.rest_client_request_latency_seconds.sum',
-        NAMESPACE + '.rest_client_request_latency_seconds.count',
-        NAMESPACE + '.admission_webhook_admission_latencies_seconds.sum',
-        NAMESPACE + '.admission_webhook_admission_latencies_seconds.count',
-        NAMESPACE + '.admission_step_admission_latencies_seconds.sum',
-        NAMESPACE + '.admission_step_admission_latencies_seconds.count',
-        NAMESPACE + '.admission_step_admission_latencies_seconds_summary.sum',
-        NAMESPACE + '.admission_step_admission_latencies_seconds_summary.count',
-        NAMESPACE + '.admission_step_admission_latencies_seconds_summary.quantile',
-        NAMESPACE + '.admission_controller_admission_duration_seconds.sum',
-        NAMESPACE + '.admission_controller_admission_duration_seconds.count',
-        NAMESPACE + '.request_latencies.sum',
-        NAMESPACE + '.request_latencies.count',
-        NAMESPACE + '.process_resident_memory_bytes',
-        NAMESPACE + '.process_virtual_memory_bytes',
+        'longrunning_gauge',
+        'current_inflight_requests',
+        'audit_event',
+        'go_threads',
+        'go_goroutines',
+        'APIServiceRegistrationController_depth',
+        'etcd_object_counts',
+        'rest_client_requests_total',
+        'apiserver_request_count',
+        'apiserver_dropped_requests_total',
+        'http_requests_total',
+        'authenticated_user_requests',
+        'rest_client_request_latency_seconds.sum',
+        'rest_client_request_latency_seconds.count',
+        'admission_webhook_admission_latencies_seconds.sum',
+        'admission_webhook_admission_latencies_seconds.count',
+        'admission_step_admission_latencies_seconds.sum',
+        'admission_step_admission_latencies_seconds.count',
+        'admission_step_admission_latencies_seconds_summary.sum',
+        'admission_step_admission_latencies_seconds_summary.count',
+        'admission_step_admission_latencies_seconds_summary.quantile',
+        'admission_controller_admission_duration_seconds.sum',
+        'admission_controller_admission_duration_seconds.count',
+        'request_latencies.sum',
+        'request_latencies.count',
+        'process_resident_memory_bytes',
+        'process_virtual_memory_bytes',
     ]
     COUNT_METRICS = [
-        NAMESPACE + '.audit_event.count',
-        NAMESPACE + '.rest_client_requests_total.count',
-        NAMESPACE + '.apiserver_request_count.count',
-        NAMESPACE + '.apiserver_dropped_requests_total.count',
-        NAMESPACE + '.http_requests_total.count',
-        NAMESPACE + '.authenticated_user_requests.count',
+        'audit_event.count',
+        'rest_client_requests_total.count',
+        'apiserver_request_count.count',
+        'apiserver_dropped_requests_total.count',
+        'http_requests_total.count',
+        'authenticated_user_requests.count',
     ]
 
-    def test_check(self, dd_run_check, aggregator, mock_get):
+    def test_check(self, dd_run_check, aggregator, mock_http_response):
         """
         Testing kube_apiserver_metrics metrics collection.
         """
-
+        NAMESPACE = 'kube_apiserver'
+        mock_http_response(file_path=OM_RESPONSE_FIXTURES)
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [instance])
         dd_run_check(check)
 
@@ -108,8 +91,9 @@ class TestKubeAPIServerMetrics:
         dd_run_check(check)
 
         for metric in self.METRICS + self.COUNT_METRICS:
-            aggregator.assert_metric(metric)
-            aggregator.assert_metric_has_tag(metric, customtag)
+            metric_to_assert = NAMESPACE + "." + metric
+            aggregator.assert_metric(metric_to_assert)
+            aggregator.assert_metric_has_tag(metric_to_assert, customtag)
         aggregator.assert_all_metrics_covered()
 
     def test_bearer(self):
