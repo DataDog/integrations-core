@@ -89,12 +89,7 @@ class TestColumnTransformers:
                 ],
                 'tags': ['test:bar'],
             },
-            executor=mock_executor(
-                [
-                    ['tag2', 'tagA', 7], 
-                    ['tag3', None, 9]
-                ]
-            ),
+            executor=mock_executor([['tag2', 'tagA', 7], ['tag3', None, 9]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()
@@ -114,7 +109,6 @@ class TestColumnTransformers:
             tags=['test:foo', 'test:bar', 'test:tag3'],
         )
         aggregator.assert_all_metrics_covered()
-
 
     def test_monotonic_gauge(self, aggregator):
         query_manager = create_query_manager(
