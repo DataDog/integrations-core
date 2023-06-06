@@ -16,6 +16,7 @@ GRANT SELECT on sys.dm_os_performance_counters to datadog;
 GRANT VIEW SERVER STATE to datadog;
 GRANT CONNECT ANY DATABASE to datadog;
 GRANT VIEW ANY DEFINITION to datadog;
+GRANT ALTER SERVER STATE TO datadog;
 
 --create login for aoag
 -- this password could also be originate from an environemnt variable passed in to this script through SQLCMD

@@ -1,6 +1,8 @@
 ---
 title: OAuth for Integrations
 kind: documentation
+aliases:
+  - /developers/integrations/oauth_for_data_integrations/
 ---
 
 {{< callout btn_hidden="true" >}}
