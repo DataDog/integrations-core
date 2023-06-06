@@ -4,6 +4,7 @@
 
 import pytest
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
@@ -41,6 +42,9 @@ def test_check(aggregator, dd_run_check, check):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_service_check(
+        'envoy.openmetrics.health', AgentCheck.OK, tags=['endpoint:{}'.format(DEFAULT_INSTANCE['openmetrics_endpoint'])]
+    )
 
 
 def test_metadata_integration(dd_run_check, datadog_agent, check):
