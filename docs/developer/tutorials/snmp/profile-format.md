@@ -622,7 +622,7 @@ metrics:
           extract_value: '([a-zA-Z0-9_]+)' # will ignore surrounding non-printable characters
 ```
 
-#### Apply mapping to OID value in `metric_tags`
+#### Report string OIDs
 
 To report statuses from your network devices, you can use the constant metrics feature available in Agent 7.45+.
 
