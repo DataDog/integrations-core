@@ -727,7 +727,7 @@ partial -->
 
 2. Instrument your application based on your setup:
 
-   **Note**: With **Fargate** APM applications, do **not** set `DD_AGENT_HOST` - the default of `localhost` works.
+   **Note**: With Fargate APM applications, do **not** set `DD_AGENT_HOST` - the default of `localhost` works.
 
    | Language                           |
    |------------------------------------|
@@ -740,6 +740,8 @@ partial -->
    | [C++][53] |
    | [.NET Core][54] |
    | [.NET Framework][55] |
+
+   Learn more about [instrumenting your application][32].
 
 3. Ensure your application is running in the same task definition as the Datadog Agent container.
 
