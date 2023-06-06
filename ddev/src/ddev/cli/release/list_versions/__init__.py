@@ -22,7 +22,7 @@ def list_versions(ctx: click.Context, integration: str):
     integration_url = f'https://dd-integrations-core-wheels-build-stable.datadoghq.com/targets/simple/datadog-{integration}/index.html'
 
     response = httpx.get(integration_url)
-    versions = response.text.splitlines()[:-1]
+    versions = response.text.splitlines()
 
     version_numbers = []
     for line in versions:
