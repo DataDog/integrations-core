@@ -123,7 +123,7 @@ class Etcd(OpenMetricsBaseCheck):
         return response
 
     def is_leader(self, scraper_config):
-        response = self.access_api(scraper_config, '/v3/maintenance/status')
+        response = self.access_api(scraper_config, '/v3beta/maintenance/status')
 
         leader = response.get('leader')
         member = response.get('header', {}).get('member_id')
