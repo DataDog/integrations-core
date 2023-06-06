@@ -125,6 +125,7 @@ def test_statement_metrics(
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
+    dbm_instance['query_activity'] = {'enabled': False}
     # very low collection interval for test purposes
     dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     connections = {}
@@ -299,6 +300,7 @@ def test_statement_metrics_cloud_metadata(
     dbm_instance['pg_stat_statements_view'] = "pg_stat_statements"
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
+    dbm_instance['query_activity'] = {'enabled': False}
     # very low collection interval for test purposes
     dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     if input_cloud_metadata:
@@ -339,6 +341,7 @@ def test_statement_metrics_cloud_metadata(
 def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_instance, datadog_agent):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
+    dbm_instance['query_activity'] = {'enabled': False}
     # very low collection interval for test purposes
     dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
 
@@ -1700,6 +1703,7 @@ def test_statement_metrics_database_errors(
 ):
     # don't need samples for this test
     dbm_instance['query_samples']['enabled'] = False
+    dbm_instance['query_activity']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1749,6 +1753,7 @@ def test_pg_stat_statements_max_warning(
 ):
     # don't need samples for this test
     dbm_instance['query_samples']['enabled'] = False
+    dbm_instance['query_activity']['enabled'] = False
     dbm_instance['query_metrics']['pg_stat_statements_max_warning_threshold'] = pg_stat_statements_max_threshold
     check = integration_check(dbm_instance)
     check._connect()
