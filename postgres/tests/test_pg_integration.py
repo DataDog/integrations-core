@@ -29,6 +29,7 @@ from .common import (
     check_logical_replication_slots,
     check_physical_replication_slots,
     check_slru_metrics,
+    check_snapshot_txid_metrics,
     check_stat_replication,
     check_uptime_metrics,
     check_wal_receiver_metrics,
@@ -65,8 +66,64 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
 
     check_logical_replication_slots(aggregator, expected_tags)
     check_physical_replication_slots(aggregator, expected_tags)
+    check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_snapshot_xmin(aggregator, integration_check, pg_instance):
+    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+        with conn.cursor() as cur:
+            cur.execute('select txid_snapshot_xmin(txid_current_snapshot());')
+            xmin = float(cur.fetchall()[0][0])
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
+    aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin, count=1, tags=expected_tags)
+
+    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+        # Force autocommit
+        conn.set_session(autocommit=True)
+        with conn.cursor() as cur:
+            # Force increases of txid
+            cur.execute('select txid_current();')
+            cur.execute('select txid_current();')
+
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+    aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin + 2, count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin + 2, count=1, tags=expected_tags)
+
+
+def test_snapshot_xip(aggregator, integration_check, pg_instance):
+    conn1 = _get_conn(pg_instance)
+    cur = conn1.cursor()
+
+    # Start a transaction
+    cur.execute('BEGIN;')
+    # Force assignement of a txid and keep the transaction opened
+    cur.execute('select txid_current();')
+    # Make sure to fetch the result to make sure we start the timer after the transaction started
+    cur.fetchall()
+
+    conn2 = _get_conn(pg_instance)
+    conn2.set_session(autocommit=True)
+    with conn2.cursor() as cur2:
+        # Force increases of txid
+        cur2.execute('select txid_current();')
+
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
+    aggregator.assert_metric('postgresql.snapshot.xip_count', value=1, count=1, tags=expected_tags)
 
 
 def test_common_metrics_without_size(aggregator, integration_check, pg_instance):
