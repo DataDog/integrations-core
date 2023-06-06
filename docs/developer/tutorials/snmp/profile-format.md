@@ -622,6 +622,33 @@ metrics:
           extract_value: '([a-zA-Z0-9_]+)' # will ignore surrounding non-printable characters
 ```
 
+#### Report string OIDs
+
+To report statuses from your network devices, you can use the constant metrics feature available in Agent 7.45+.
+
+`constant_value_one` sends a constant metric, equal to one, that can be tagged with string properties.
+
+Example use case:
+
+```yaml
+metrics:
+  - MIB: MY-MIB
+    symbols:
+      - name: myDevice
+        constant_value_one: true
+    metric_tags:
+      - tag: status
+        column:
+          OID: 1.2.3.4
+          name: myStatus
+        mapping:
+          1: up
+          2: down
+    # ...
+```
+
+An `snmp.myDevice` metric is sent, with a value of 1 and tagged by statuses. This allows you to monitor status changes, number of devices per state, etc., in Datadog.
+
 ### `metric_tags`
 
 _(Optional)_
