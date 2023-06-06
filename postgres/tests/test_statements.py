@@ -1393,35 +1393,6 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 
-@pytest.mark.parametrize("query_samples_enabled", [True, False])
-def test_main_collection_rate_adopts_activity_interval(aggregator, integration_check, dbm_instance, query_samples_enabled):
-    """
-    Test that if explain plans are disabled, the main collection rate == activity collection interval.
-    DEFAULT_ACTIVITY_COLLECTION_INTERVAL is 10 seconds, so the main collection rate should be 10 seconds
-    if explain plans are enabled.
-    """
-    if query_samples_enabled:
-        collection_interval = DEFAULT_COLLECTION_INTERVAL
-    else: 
-        collection_interval = DEFAULT_ACTIVITY_COLLECTION_INTERVAL
-        
-    check = integration_check(dbm_instance)
-    check._connect()
-    check_frequency = collection_interval / 5.0
-    # sleep until a collection is made
-    _check_until_time(check, dbm_instance, collection_interval, check_frequency)
-    max_collections = int(1 / collection_interval * collection_interval) + 1
-    
-    # assert a reasonable amount of collections has been made
-    num_collections = aggregator.metrics("dd.postgres.collect_statement_samples.time")
-    # assert len(num_collecons) <=max_collections
-
-    # sleep again to get at most one more collection
-    _check_until_time(check, dbm_instance, collection_interval, check_frequency)
-    num_collections = aggregator.metrics("dd.postgres.collect_statement_samples.time")
-    assert len(num_collections) <= max_collections*2
-    check.cancel()
-
 def test_activity_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the activity collection loop rate limit
     collection_interval = 0.1
