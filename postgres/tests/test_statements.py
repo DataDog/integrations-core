@@ -1004,7 +1004,6 @@ def test_activity_snapshot_collection(
         else:
             assert len(non_client_backend) > 0
             assert all(i['backend_type'] == i['statement'] and i['query_signature'] for i in non_client_backend)
-            
         for key in expected_out:
             assert expected_out[key] == bobs_query[key]
         if POSTGRES_VERSION.split('.')[0] == "9":
@@ -1467,8 +1466,8 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
     assert len(matching) > 0, "should have collected exactly at least one matching event"
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity"])
-@pytest.mark.parametrize("query_samples_enabled", [True, False])
-@pytest.mark.parametrize("query_activity_enabled", [True, False])
+@pytest.mark.parametrize("query_samples_enabled,expected_samples_len_check", [(True, lambda a: a>=1), (False,lambda a: a==0)])
+@pytest.mark.parametrize("query_activity_enabled,expected_activity_len_check", [(True, lambda a: a>=1), (False,lambda a: a==0)])
 @pytest.mark.parametrize(
     "user,password,dbname,query,arg",
     [(
@@ -1485,6 +1484,8 @@ def test_disabled_activity_or_explain_plans(
     dbm_instance, 
     query_activity_enabled, 
     query_samples_enabled, 
+    expected_samples_len_check,
+    expected_activity_len_check,
     pg_stat_activity_view,
     user,
     password,
@@ -1511,14 +1512,8 @@ def test_disabled_activity_or_explain_plans(
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
 
-        if query_activity_enabled:
-            assert len(dbm_activity) > 0
-        else:
-            assert len(dbm_activity) == 0
-        if query_samples_enabled:
-            assert len(dbm_samples) > 0
-        else:
-            assert len(dbm_samples) == 0
+        assert expected_activity_len_check(len(dbm_activity)) == True
+        assert expected_samples_len_check(len(dbm_samples)) == True
     finally:
         conn.close()
         
