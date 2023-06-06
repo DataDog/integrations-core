@@ -843,13 +843,13 @@ Need help? Contact [Datadog support][18].
 [44]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html
 [45]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/assets/service_checks.json
 [46]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv
-[47]: /tracing/trace_collection/dd_libraries/java?tab=containers#automatic-instrumentation
-[48]: /tracing/trace_collection/dd_libraries/python?tab=containers#instrument-your-application
-[49]: /tracing/trace_collection/dd_libraries/ruby#instrument-your-application
-[50]: /tracing/trace_collection/dd_libraries/go/?tab=containers#activate-go-integrations-to-create-spans
-[51]: /tracing/trace_collection/dd_libraries/nodejs?tab=containers#instrument-your-application
-[52]: /tracing/trace_collection/dd_libraries/php?tab=containers#automatic-instrumentation
-[53]: /tracing/trace_collection/dd_libraries/cpp?tab=containers#instrument-your-application
-[54]: /tracing/trace_collection/dd_libraries/dotnet-core?tab=containers#custom-instrumentation
-[55]:/tracing/trace_collection/dd_libraries/dotnet-framework?tab=containers#custom-instrumentation
+[47]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/java?tab=containers#automatic-instrumentation
+[48]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/python?tab=containers#instrument-your-application
+[49]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/ruby#instrument-your-application
+[50]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/go/?tab=containers#activate-go-integrations-to-create-spans
+[51]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/nodejs?tab=containers#instrument-your-application
+[52]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/php?tab=containers#automatic-instrumentation
+[53]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/cpp?tab=containers#instrument-your-application
+[54]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-core?tab=containers#custom-instrumentation
+[55]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-framework?tab=containers#custom-instrumentation
 
