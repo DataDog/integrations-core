@@ -6,6 +6,7 @@ import json
 import pytest
 from ddev.utils.structures import EnvVars
 
+
 def test_list_versions(ddev, repository, helpers, network_replay):
     network_replay('fixtures/network/list_versions/success_disk.yaml', record_mode='none')
 

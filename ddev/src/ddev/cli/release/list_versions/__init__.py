@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 
-@click.command("list", short_help='Show all versions of an integration') 
+@click.command("list", short_help='Show all versions of an integration')
 @click.argument('integration')
 @click.pass_context
 def list_versions(ctx: click.Context, integration: str):
