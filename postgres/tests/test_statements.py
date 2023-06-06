@@ -1495,6 +1495,11 @@ def test_disabled_activity_or_explain_plans(
     query,
     arg,
 ):
+    """
+    Test four combinations for the following:
+        if activity sampling is enabled, ensure there are activity logs; else ensure there are none.
+        if explain plans are enabled (query_samples), ensure there are explain plan logs; else ensure there are none.
+    """
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['query_activity']['enabled'] = query_activity_enabled
     dbm_instance['query_samples']['enabled'] = query_samples_enabled
