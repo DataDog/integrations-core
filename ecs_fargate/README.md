@@ -741,7 +741,7 @@ partial -->
    | [.NET Core][54] |
    | [.NET Framework][55] |
 
-   Learn more about [instrumenting your application][32].
+   See more general information about [Sending Traces to Datadog][32].
 
 3. Ensure your application is running in the same task definition as the Datadog Agent container.
 
