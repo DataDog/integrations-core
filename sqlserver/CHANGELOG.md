@@ -1,6 +1,16 @@
 # CHANGELOG - sqlserver
 
-## 11.1.0 / 2023-04-14
+## 11.2.0 / 2023-05-26
+
+* [Added] Add sqlserver engine editition && version to DBM event payloads. See [#14499](https://github.com/DataDog/integrations-core/pull/14499).
+* [Added] [Unified Instance Tagging]: Add cloud_metadata to DBM event payloads. See [#14460](https://github.com/DataDog/integrations-core/pull/14460).
+* [Added] Send resource_type/name for sqlserver integration metrics. See [#14320](https://github.com/DataDog/integrations-core/pull/14320).
+* [Fixed] Exclude model from autodiscovery by default. See [#14493](https://github.com/DataDog/integrations-core/pull/14493).
+* [Fixed] Rename azure.name configuration key to azure.fully_qualified_domain_name. See [#14536](https://github.com/DataDog/integrations-core/pull/14536).
+* [Fixed] Properly initialize resolved_hostname so it is set consistently across dbm and default integration metrics. See [#14479](https://github.com/DataDog/integrations-core/pull/14479).
+* [Fixed] Restore DBM-APM link functionality for SQL Server activity sessions. See [#14453](https://github.com/DataDog/integrations-core/pull/14453).
+
+## 11.1.0 / 2023-04-14 / Agent 7.45.0
 
 * [Added] Add resolved_hostname to metatdata. See [#13639](https://github.com/DataDog/integrations-core/pull/13639).
 * [Fixed] Fix a typo in the `disable_generic_tags` option description. See [#14246](https://github.com/DataDog/integrations-core/pull/14246).

@@ -545,6 +545,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     pg_instance['collect_activity_metrics'] = True
     pg_instance['query_samples'] = {'enabled': False}
     pg_instance['query_metrics'] = {'enabled': False}
+    pg_instance['collect_resources'] = {'enabled': False}
 
     pg_instance['disable_generic_tags'] = False  # This flag also affects the hostname
     pg_instance['reported_hostname'] = reported_hostname

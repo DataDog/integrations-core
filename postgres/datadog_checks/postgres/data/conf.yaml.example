@@ -379,6 +379,12 @@ instances:
         #
         # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
 
+        ## @param region - string - optional - default: us-east-1
+        ## Equal to the region of the instance the agent is connecting to. 
+        ## This value is used to configure IAM authentication.
+        #
+        # region: us-east-1
+
     ## This block defines the configuration for Google Cloud SQL instances.
     ##
     ## Complete this section if you have installed the Datadog GCP Integration 

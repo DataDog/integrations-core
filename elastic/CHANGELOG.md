@@ -1,5 +1,19 @@
 # CHANGELOG - elastic
 
+## 5.4.1 / 2023-05-31
+
+* [Fixed] Correctly compute the `templates.count` metric. See [#14636](https://github.com/DataDog/integrations-core/pull/14636).
+
+## 5.4.0 / 2023-05-26
+
+* [Added] Add new ES metric for templates count. See [#14569](https://github.com/DataDog/integrations-core/pull/14569).
+* [Added] Allow disabling event submission. See [#14511](https://github.com/DataDog/integrations-core/pull/14511).
+* [Added] Add 2 index search stats metrics. See [#14507](https://github.com/DataDog/integrations-core/pull/14507).
+* [Added] Add indexing pressure metrics. See [#14466](https://github.com/DataDog/integrations-core/pull/14466).
+* [Fixed] Document that data_path in custom queries cannot contain wildcards. See [#14551](https://github.com/DataDog/integrations-core/pull/14551).
+* [Fixed] Improve description of config field. See [#14524](https://github.com/DataDog/integrations-core/pull/14524).
+* [Fixed] More metrics match metadata. See [#14506](https://github.com/DataDog/integrations-core/pull/14506).
+
 ## 5.3.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).

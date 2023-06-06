@@ -1448,7 +1448,7 @@
                     {
                         "definition": {
                             "background_color": "green",
-                            "content": "Prompts and completions are sampled from the Datadog APM library integrations.\n\nBy default prompts and completions are sampled 100% on all spans. \n\nLogs are sampled at a rate of 10% by default when spans are sampled. \n\nSee the [OpenAI integration docs]() for how to configure this rate.",
+                            "content": "Prompts and completions are sampled from the Datadog APM library integrations.\n\nBy default prompts and completions are sampled 100% on all spans. \n\nLogs are sampled at a rate of 10% by default when spans are sampled. \n\nSee the [OpenAI integration docs](https://docs.datadoghq.com/integrations/openai/#log-prompt--completion-sampling) for how to configure this rate.",
                             "font_size": "12",
                             "has_padding": true,
                             "show_tick": true,

@@ -1,10 +1,10 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+import time
 from typing import Dict, Optional, Tuple  # noqa: F401
 
-import time
-import json
 import psycopg2
 
 try:
@@ -13,15 +13,13 @@ except ImportError:
     from ..stubs import datadog_agent
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.utils.db.utils import (
-    DBMAsyncJob,
-    default_json_event_encoding,
-)
-from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 
 # default pg_settings collection interval in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
+DEFAULT_RESOURCES_COLLECTION_INTERVAL = 300
 
 PG_SETTINGS_QUERY = """
 SELECT name, setting FROM pg_settings
@@ -43,9 +41,12 @@ class PostgresMetadata(DBMAsyncJob):
         self.pg_settings_collection_interval = config.settings_metadata_config.get(
             'collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )
+        collection_interval = config.resources_metadata_config.get(
+            'collection_interval', DEFAULT_RESOURCES_COLLECTION_INTERVAL
+        )
 
         # by default, send resources every 5 minutes
-        self.collection_interval = min(300, self.pg_settings_collection_interval)
+        self.collection_interval = min(collection_interval, self.pg_settings_collection_interval)
         self._conn_pool = MultiDatabaseConnectionPool(check._new_connection)
 
         def shutdown_cb():
@@ -56,9 +57,9 @@ class PostgresMetadata(DBMAsyncJob):
             check,
             rate_limit=1 / self.collection_interval,
             run_sync=is_affirmative(config.settings_metadata_config.get('run_sync', False)),
-            enabled=True,
+            enabled=is_affirmative(config.resources_metadata_config.get('enabled', True)),
             dbms="postgres",
-            min_collection_interval=self.collection_interval,
+            min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
             job_name="database-metadata",
             shutdown_callback=shutdown_cb,

@@ -1,5 +1,10 @@
 # CHANGELOG - etcd
 
+## 4.0.0 / 2023-05-26
+
+* [Fixed] Add DEFAULT_METRIC_LIMIT for OpenMetrics-based checks. See [#14527](https://github.com/DataDog/integrations-core/pull/14527).
+* [Changed] Update etcd leader check to use v3 endpoint instead of v3alpha. See [#14459](https://github.com/DataDog/integrations-core/pull/14459). Thanks [kennydo](https://github.com/kennydo).
+
 ## 3.3.0 / 2022-09-16 / Agent 7.40.0
 
 * [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).

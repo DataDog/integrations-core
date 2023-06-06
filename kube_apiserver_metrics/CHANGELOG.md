@@ -1,6 +1,11 @@
 # CHANGELOG - Kube_apiserver_metrics
 
-## 3.5.0 / 2023-04-14
+## 3.6.0 / 2023-05-26
+
+* [Added] Add `flowcontrol` metrics. See [#14480](https://github.com/DataDog/integrations-core/pull/14480).
+* [Added] [kube-apiserver] Add new `aggregator_unavailable_apiservice` metric. See [#14457](https://github.com/DataDog/integrations-core/pull/14457).
+
+## 3.5.0 / 2023-04-14 / Agent 7.45.0
 
 * [Added] Adds new metric `kubernetes_feature_enabled`. See [#14147](https://github.com/DataDog/integrations-core/pull/14147).
 

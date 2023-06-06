@@ -1,5 +1,9 @@
 # CHANGELOG - IBM MQ
 
+## 4.1.0 / 2023-05-26
+
+* [Added] Tag queue metrics by usage. See [#14606](https://github.com/DataDog/integrations-core/pull/14606).
+
 ## 4.0.3 / 2023-01-25 / Agent 7.43.0
 
 * [Fixed] Allow setting the try basic auth value from config in all cases. See [#13781](https://github.com/DataDog/integrations-core/pull/13781).

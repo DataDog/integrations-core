@@ -1,5 +1,12 @@
 # CHANGELOG - snmp
 
+## 5.12.0 / 2023-05-26
+
+* [Added] adds sysobjectids to cisco-catalyst profile. See [#14452](https://github.com/DataDog/integrations-core/pull/14452).
+* [Added] [SNMP] Enriched BGP profile. See [#14399](https://github.com/DataDog/integrations-core/pull/14399).
+* [Fixed] NDM: Fix memory metrics OIDs for cisco-nexus. See [#14572](https://github.com/DataDog/integrations-core/pull/14572).
+* [Fixed] Add .0 to hp scalar metrics. See [#14558](https://github.com/DataDog/integrations-core/pull/14558).
+
 ## 5.11.0 / 2022-12-09 / Agent 7.42.0
 
 * [Added] Add topology metadata e2e test (aos_lldp). See [#13373](https://github.com/DataDog/integrations-core/pull/13373).

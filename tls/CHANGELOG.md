@@ -1,6 +1,6 @@
 # CHANGELOG - TLS
 
-## 2.10.0 / 2023-04-14
+## 2.10.0 / 2023-04-14 / Agent 7.45.0
 
 * [Added] Implement StartTLS protocol for MySQL. See [#14352](https://github.com/DataDog/integrations-core/pull/14352). Thanks [dpavlov-smartling](https://github.com/dpavlov-smartling).
 
