@@ -1004,7 +1004,6 @@ def test_activity_snapshot_collection(
         else:
             assert len(non_client_backend) > 0
             assert all(i['backend_type'] == i['statement'] and i['query_signature'] for i in non_client_backend)
-            
         for key in expected_out:
             assert expected_out[key] == bobs_query[key]
         if POSTGRES_VERSION.split('.')[0] == "9":
@@ -1496,6 +1495,60 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
     matching = [e for e in dbm_samples if re.match(pattern, e['db']['statement'])]
 
     assert len(matching) > 0, "should have collected exactly at least one matching event"
+
+@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity"])
+@pytest.mark.parametrize("query_samples_enabled", [True, False])
+@pytest.mark.parametrize("query_activity_enabled", [True, False])
+@pytest.mark.parametrize(
+    "user,password,dbname,query,arg",
+    [(
+        "bob",
+        "bob",
+        "datadog_test",
+        "BEGIN TRANSACTION; SELECT city FROM persons WHERE city = %s;",
+        "hello"
+    )]
+)
+def test_disabled_activity_or_explain_plans(
+    aggregator, 
+    integration_check, 
+    dbm_instance, 
+    query_activity_enabled, 
+    query_samples_enabled, 
+    pg_stat_activity_view,
+    user,
+    password,
+    dbname,
+    query,
+    arg,
+):
+    dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
+    dbm_instance['query_activity']['enabled'] = query_activity_enabled
+    dbm_instance['query_samples']['enabled'] = query_samples_enabled
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+
+    # check.check(dbm_instance)
+    try:
+        conn.cursor().execute(query, (arg,))
+        check.check(dbm_instance)
+        dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+        dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+
+        if query_activity_enabled:
+            assert len(dbm_activity) > 0
+        else:
+            assert len(dbm_activity) == 0
+        if query_samples_enabled:
+            assert len(dbm_samples) > 0
+        else:
+            assert len(dbm_samples) == 0
+    finally:
+        conn.close()
+        
+
 
 
 def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
