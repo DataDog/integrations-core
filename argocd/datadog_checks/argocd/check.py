@@ -3,9 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
 
+from six import PY2
+
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 from datadog_checks.base.constants import ServiceCheck
-from six import PY2
 
 from .config_models import ConfigMixin
 from .metrics import (
