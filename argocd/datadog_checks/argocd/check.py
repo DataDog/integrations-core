@@ -3,17 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
 
-from six import PY2
-
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 from datadog_checks.base.constants import ServiceCheck
+from six import PY2
 
 from .config_models import ConfigMixin
 from .metrics import (
     API_SERVER_METRICS,
     APPLICATION_CONTROLLER_METRICS,
-    REPO_SERVER_METRICS,
     NOTIFICATION_CONTROLLER_METRICS,
+    REPO_SERVER_METRICS,
 )
 
 API_SERVER_NAMESPACE, APP_CONTROLLER_NAMESPACE, REPO_SERVER_NAMESPACE, NOTIFICATION_CONTROLLER_NAMESPACE = [
