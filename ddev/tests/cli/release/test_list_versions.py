@@ -1,10 +1,6 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
-
-import pytest
-from ddev.utils.structures import EnvVars
 
 
 def test_list_versions(ddev, repository, helpers, network_replay):
@@ -50,6 +46,7 @@ def test_list_versions(ddev, repository, helpers, network_replay):
         4.9.0
         """
     )
+
 
 def test_list_versions_header(ddev, repository, helpers, network_replay):
     network_replay('fixtures/network/list_versions/success_disk_header.yaml', record_mode='none')
