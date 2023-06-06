@@ -23,9 +23,9 @@ def release():
 
 
 release.add_command(agent)
-release.add_command(list_versions)
 release.add_command(build)
 release.add_command(changelog)
+release.add_command(list_versions)
 release.add_command(make)
 release.add_command(show)
 release.add_command(stats)
