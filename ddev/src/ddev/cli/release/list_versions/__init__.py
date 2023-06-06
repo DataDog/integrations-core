@@ -19,6 +19,11 @@ def list_versions(ctx: click.Context, integration: str):
     import httpx
     from packaging.version import Version
 
+    integration = integration.replace('_', '-')
+    ignored_prefix = 'datadog-'
+    if integration.startswith(ignored_prefix):
+        integration = integration[len(ignored_prefix):]
+        
     integration_url = f'https://dd-integrations-core-wheels-build-stable.datadoghq.com/targets/simple/datadog-{integration}/index.html'
 
     response = httpx.get(integration_url)
