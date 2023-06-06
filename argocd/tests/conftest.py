@@ -50,7 +50,7 @@ def dd_environment(dd_save_state):
                 port_forward(kubeconfig, 'argocd', 8084, 'service', 'argocd-repo-server')
             )
             notifications_controller_host, notifications_controller_port = stack.enter_context(
-                port_forward(kubeconifg, 'argocd', 9001, 'service', 'argocd-notifications-controller')
+                port_forward(kubeconfig, 'argocd', 9001, 'service', 'argocd-notifications-controller')
             )
             app_controller_endpoint = 'http://{}:{}/metrics'.format(app_controller_host, app_controller_port)
             api_server_endpoint = 'http://{}:{}/metrics'.format(api_server_host, api_server_port)
