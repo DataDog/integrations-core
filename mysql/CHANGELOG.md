@@ -1,6 +1,12 @@
 # CHANGELOG - mysql
 
-## 10.2.1 / 2023-04-21
+## 10.2.2 / 2023-05-26
+
+* [Fixed] mysql: don't overwrite table size metrics with sys table size metrics. See [#14612](https://github.com/DataDog/integrations-core/pull/14612).
+* [Fixed] Rename azure.name configuration key to azure.fully_qualified_domain_name. See [#14534](https://github.com/DataDog/integrations-core/pull/14534).
+* [Fixed] mysql: fix tracking references to self.check. See [#14419](https://github.com/DataDog/integrations-core/pull/14419). Thanks [asenci](https://github.com/asenci).
+
+## 10.2.1 / 2023-04-21 / Agent 7.45.0
 
 * [Fixed] Fix resources not sent on service check metrics. See [#14422](https://github.com/DataDog/integrations-core/pull/14422).
 

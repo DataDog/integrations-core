@@ -1,6 +1,16 @@
 # CHANGELOG - gitlab
 
-## 6.0.2 / 2023-04-21
+## 6.1.0 / 2023-05-26
+
+* [Added] Add an ignore_connection_errors option to the openmetrics check. See [#14504](https://github.com/DataDog/integrations-core/pull/14504).
+* [Added] Add support for Gitaly metrics. See [#14316](https://github.com/DataDog/integrations-core/pull/14316).
+* [Fixed] Revert protobuf dependency update. See [#14618](https://github.com/DataDog/integrations-core/pull/14618).
+* [Fixed] Update dependencies. See [#14594](https://github.com/DataDog/integrations-core/pull/14594).
+* [Fixed] Refactor how we manage the namespaces. See [#14462](https://github.com/DataDog/integrations-core/pull/14462).
+* [Fixed] Update minimum datadog base package version. See [#14463](https://github.com/DataDog/integrations-core/pull/14463).
+* [Fixed] Deprecate `use_latest_spec` option. See [#14446](https://github.com/DataDog/integrations-core/pull/14446).
+
+## 6.0.2 / 2023-04-21 / Agent 7.45.0
 
 * [Fixed] Collect the readiness service checks even if the readiness payload is malformed. See [#14411](https://github.com/DataDog/integrations-core/pull/14411).
 

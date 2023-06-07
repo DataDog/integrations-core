@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import pytest
 import redis
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.redisdb import Redis
 
 from .common import HOST, MASTER_PORT, REPLICA_PORT, UNHEALTHY_REPLICA_PORT
@@ -33,6 +34,7 @@ def test_redis_replication_link_metric(aggregator, replica_instance, dd_run_chec
     metrics = aggregator.metrics(metric_name)
     assert len(metrics) == 1
     assert metrics[0].value != 0
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_redis_replication_service_check(aggregator, replica_instance, dd_run_check, check):
@@ -66,3 +68,5 @@ def test_redis_repl(aggregator, dd_run_check, check, master_instance):
 
     for name in REPLICA_METRICS:
         aggregator.assert_metric(name)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)

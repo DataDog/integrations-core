@@ -46,6 +46,7 @@ def assert_common_metrics(aggregator):
     aggregator.assert_metric('redis.pubsub.patterns', count=2, tags=tags)
     aggregator.assert_metric('redis.keys.expired', count=2, tags=tags)
     aggregator.assert_metric('redis.info.latency_ms', count=2, tags=tags)
+    aggregator.assert_metric('redis.ping.latency_ms', count=2, tags=tags)
     aggregator.assert_metric('redis.cpu.user', count=1, tags=tags)
     aggregator.assert_metric('redis.cpu.user_children', count=1, tags=tags)
     aggregator.assert_metric('redis.rdb.last_bgsave_time', count=2, tags=tags)

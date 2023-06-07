@@ -1,5 +1,12 @@
 # CHANGELOG - ddev
 
+## 2.1.0 / 2023-05-26
+
+* [Added] Add validation for metric limit. See [#14528](https://github.com/DataDog/integrations-core/pull/14528).
+* [Fixed] Consider changes to `metadata.csv` as testable. See [#14429](https://github.com/DataDog/integrations-core/pull/14429).
+* [Fixed] Account for dependency upgrades in CI matrix logic. See [#14366](https://github.com/DataDog/integrations-core/pull/14366).
+* [Fixed] Fix edge case in CI matrix construction. See [#14355](https://github.com/DataDog/integrations-core/pull/14355).
+
 ## 2.0.0 / 2023-04-11
 
 * [Changed] Replace flake8 and isort with Ruff. See [#14212](https://github.com/DataDog/integrations-core/pull/14212).
