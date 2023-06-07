@@ -4,29 +4,24 @@
 import copy
 
 import pytest
-import requests
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.etcd.metrics import METRIC_MAP
 
-from .common import COMPOSE_FILE, LEGACY_INSTANCE, URL, V3_PREVIEW
+from .common import COMPOSE_FILE, LEGACY_INSTANCE, URL
 
 # Needed to mount volume for logging
 E2E_METADATA = {'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro']}
 
 
 def add_key():
-    if not V3_PREVIEW:
-        requests.post('{}/v2/keys/message'.format(URL), data={'value': 'Hello world'})
+    pass
 
 
 @pytest.fixture(scope='session')
 def dd_environment(instance):
-    if V3_PREVIEW:
-        endpoints = '{}/metrics'.format(URL)
-    else:
-        endpoints = ('{}/v2/stats/self'.format(URL), '{}/v2/stats/store'.format(URL))
+    endpoints = '{}/metrics'.format(URL)
 
     # Sleep a bit so all metrics are available
     with docker_run(COMPOSE_FILE, conditions=[CheckEndpoints(endpoints), add_key], sleep=3):
@@ -40,10 +35,7 @@ def legacy_instance():
 
 @pytest.fixture(scope='session')
 def instance():
-    if V3_PREVIEW:
-        return {'use_preview': True, 'prometheus_url': '{}/metrics'.format(URL)}
-    else:
-        return copy.deepcopy(LEGACY_INSTANCE)
+    return {'use_preview': True, 'prometheus_url': '{}/metrics'.format(URL)}
 
 
 @pytest.fixture(scope='session')
