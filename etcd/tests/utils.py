@@ -1,13 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
 import requests
-
-V3_PREVIEW = True
-
-legacy = pytest.mark.skipif(V3_PREVIEW, reason='Requires < v3')
-preview = pytest.mark.skipif(not V3_PREVIEW, reason='Requires >= v3')
 
 
 def is_leader(url):
