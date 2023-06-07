@@ -115,6 +115,7 @@ class Disk(AgentCheck):
             self.devices_label = self._get_devices_label()
 
         for part in psutil.disk_partitions(all=self._include_all_devices):
+            self.log.debug('Checking device %s', part.device)
             # we check all exclude conditions
             if self.exclude_disk(part):
                 self.log.debug('Excluding device %s', part.device)
@@ -142,6 +143,7 @@ class Disk(AgentCheck):
 
             # Exclude disks with size less than min_disk_size
             if disk_usage.total <= self._min_disk_size:
+                self.log.debug('Excluding device %s with total disk size %s', part.device, disk_usage.total)
                 if disk_usage.total > 0:
                     self.log.info('Excluding device %s with total disk size %s', part.device, disk_usage.total)
                 continue
@@ -316,7 +318,7 @@ class Disk(AgentCheck):
         return metrics
 
     def collect_latency_metrics(self):
-        for disk_name, disk in iteritems(psutil.disk_io_counters(True)):
+        for disk_name, disk in iteritems(psutil.disk_io_counters(perdisk=True)):
             self.log.debug('IO Counters: %s -> %s', disk_name, disk)
             try:
                 metric_tags = [] if self._custom_tags is None else self._custom_tags[:]

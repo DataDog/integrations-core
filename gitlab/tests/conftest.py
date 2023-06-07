@@ -75,7 +75,18 @@ def dd_environment():
             requests.get(GITLAB_URL)
         sleep(2)
 
-        yield to_omv2_config(CONFIG)
+        yield {
+            'init_config': {},
+            'instances': [
+                {
+                    'openmetrics_endpoint': GITLAB_PROMETHEUS_ENDPOINT,
+                    'gitaly_server_endpoint': GITLAB_GITALY_PROMETHEUS_ENDPOINT,
+                    'gitlab_url': GITLAB_URL,
+                    'disable_ssl_validation': True,
+                    'tags': CUSTOM_TAGS,
+                }
+            ],
+        }
 
 
 @pytest.fixture()

@@ -56,9 +56,9 @@ STATEMENT_METRICS_QUERY = """\
 with qstats as (
     select query_hash, query_plan_hash, last_execution_time, last_elapsed_time,
             CONCAT(
-                CONVERT(binary(64), plan_handle),
-                CONVERT(binary(4), statement_start_offset),
-                CONVERT(binary(4), statement_end_offset)) as plan_handle_and_offsets,
+                CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
+                CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
+                CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1)) as plan_handle_and_offsets,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
            {query_metrics_columns}
     from sys.dm_exec_query_stats
@@ -74,9 +74,9 @@ qstats_aggr as (
     group by query_hash, query_plan_hash, S.dbid, D.name
 ),
 qstats_aggr_split as (select TOP {limit}
-    convert(varbinary(64), substring(plan_handle_and_offsets, 1, 64)) as plan_handle,
-    convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+1, 4))) as statement_start_offset,
-    convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+6, 4))) as statement_end_offset,
+    convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
+    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
+    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
     * from qstats_aggr
     where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
 )
@@ -98,18 +98,18 @@ STATEMENT_METRICS_QUERY_NO_AGGREGATES = """\
 with qstats_aggr as (
     select TOP {limit} query_hash, query_plan_hash,
         max(CONCAT(
-            CONVERT(binary(64), plan_handle),
-            CONVERT(binary(4), statement_start_offset),
-            CONVERT(binary(4), statement_end_offset))) as plan_handle_and_offsets,
+            CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1))) as plan_handle_and_offsets,
         {query_metrics_column_sums}
         from sys.dm_exec_query_stats S
         where last_execution_time > dateadd(second, -?, getdate())
         group by query_hash, query_plan_hash
 ),
 qstats_aggr_split as (select
-    convert(varbinary(64), substring(plan_handle_and_offsets, 1, 64)) as plan_handle,
-    convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+1, 4))) as statement_start_offset,
-    convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+6, 4))) as statement_end_offset,
+    convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
+    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
+    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
     * from qstats_aggr
 )
 select
