@@ -12,11 +12,11 @@ from .config_models import ConfigMixin
 from .metrics import (
     API_SERVER_METRICS,
     APPLICATION_CONTROLLER_METRICS,
-    NOTIFICATION_CONTROLLER_METRICS,
+    NOTIFICATIONS_CONTROLLER_METRICS,
     REPO_SERVER_METRICS,
 )
 
-API_SERVER_NAMESPACE, APP_CONTROLLER_NAMESPACE, REPO_SERVER_NAMESPACE, NOTIFICATION_CONTROLLER_NAMESPACE = [
+API_SERVER_NAMESPACE, APP_CONTROLLER_NAMESPACE, REPO_SERVER_NAMESPACE, NOTIFICATIONS_CONTROLLER_NAMESPACE = [
     'argocd.api_server',
     'argocd.app_controller',
     'argocd.repo_server',
@@ -72,8 +72,8 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             self.scraper_configs.append(
                 self.generate_config(
                     notifications_controller_endpoint,
-                    NOTIFICATION_CONTROLLER_NAMESPACE,
-                    NOTIFICATION_CONTROLLER_METRICS,
+                    NOTIFICATIONS_CONTROLLER_NAMESPACE,
+                    NOTIFICATIONS_CONTROLLER_METRICS,
                 )
             )
 

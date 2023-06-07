@@ -56,7 +56,6 @@ general_gauges = [
 ]
 
 general_counters = [
-    'redis.request.count',
     'go.memstats.frees.count',
     'go.memstats.lookups.count',
     'go.memstats.mallocs.count',
@@ -70,6 +69,7 @@ general_summaries = [
 ]
 
 app_controller_counters = [
+    'redis.request.count',
     'app.k8s.request.count',
     'app.sync.count',
     'cluster.events.count',
@@ -106,6 +106,7 @@ app_controller_histograms = [
 ]
 
 api_server_counters = [
+    'redis.request.count',
     'grpc.server.handled.count',
     'grpc.server.msg.sent.count',
     'grpc.server.msg.received.count',
@@ -123,6 +124,7 @@ repo_server_gauges = [
 ]
 
 repo_server_counters = [
+    'redis.request.count',
     'git.request.count',
 ]
 
@@ -135,9 +137,9 @@ repo_server_histograms = [
     'redis.request.duration.seconds.sum',
 ]
 
-notification_controller_counters = [
-    'notifications.deliveries.total',
-    'notifications.trigger_eval.total',
+notifications_controller_counters = [
+    'notifications.deliveries.total.count',
+    'notifications.trigger_eval.total.count',
 ]
 
 NOT_EXPOSED_METRICS = [
@@ -179,7 +181,7 @@ general = general_gauges + general_counters + general_summaries
 app_controller = app_controller_counters + app_controller_gauges + app_controller_histograms + general
 api_server = api_server_counters + api_server_histograms + general
 repo_server = repo_server_counters + repo_server_gauges + repo_server_histograms + general
-notifications_controller = notification_controller_counters + general
+notifications_controller = notifications_controller_counters + general
 
 
 def namespace_formatter(metrics, namespace):
