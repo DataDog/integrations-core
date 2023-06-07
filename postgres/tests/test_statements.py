@@ -22,8 +22,6 @@ from datadog_checks.base.utils.time import UTC
 from datadog_checks.postgres.statement_samples import (
     DBExplainError,
     StatementTruncationState,
-    DEFAULT_ACTIVITY_COLLECTION_INTERVAL,
-    DEFAULT_COLLECTION_INTERVAL,
 )
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
 
@@ -1521,8 +1519,8 @@ def test_disabled_activity_or_explain_plans(
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
 
-        assert expected_activity_len_check(len(dbm_activity)) == True
-        assert expected_samples_len_check(len(dbm_samples)) == True
+        assert expected_activity_len_check(len(dbm_activity)) is True
+        assert expected_samples_len_check(len(dbm_samples)) is True
     finally:
         conn.close()
 
