@@ -2162,7 +2162,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Port rollup",
                             "title_align": "left",
                             "title_size": "16",
@@ -2418,59 +2417,12 @@
                             "x": 8,
                             "y": 13
                         }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "bars",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:datadog.netflow.processor.flowsets{$Agent_Hostname,$Custom_Tag} by {host}.as_count()"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "title": "NetFlows FlowSets",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 2384985967892864,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 0,
-                            "y": 15
-                        }
                     }
                 ]
             },
             "id": 2504847901545020,
             "layout": {
-                "height": 18,
+                "height": 16,
                 "width": 12,
                 "x": 0,
                 "y": 36
@@ -2586,7 +2538,6 @@
                                 }
                             ],
                             "show_legend": false,
-                            "time": {},
                             "title": "NetFlow5 Missing Flows",
                             "title_align": "left",
                             "title_size": "16",
@@ -2753,7 +2704,7 @@
                 "height": 6,
                 "width": 12,
                 "x": 0,
-                "y": 54
+                "y": 52
             }
         }
     ]
