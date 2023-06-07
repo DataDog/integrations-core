@@ -24,7 +24,7 @@ def dd_environment(instance):
 
 @pytest.fixture(scope='session')
 def instance():
-    return {'use_preview': True, 'prometheus_url': '{}/metrics'.format(URL)}
+    return {'prometheus_url': '{}/metrics'.format(URL)}
 
 
 @pytest.fixture(scope='session')
