@@ -4,15 +4,17 @@
 
 import os
 
-from datadog_checks.dev import get_here
+from datadog_checks.dev import get_docker_hostname, get_here
 
+HOST = get_docker_hostname()
 INSTANCE = {
-    "openmetrics_endpoint": "http://localhost:9400/metrics",
+    "openmetrics_endpoint": f"http://{HOST}:9400/metrics",
 }
 
 HERE = get_here()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
+# TODO will need to use this structure when comparing tags, etc.
 # A representative sampling of metrics from the fixture used for unit tests
 # for expected_metric in METRICS:
 #     aggregator.assert_metric(name=f"dcgm.{expected_metric['name']}", at_least=0)
@@ -35,7 +37,7 @@ COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 #     {"name": "device_count.count"},
 # ]
 
-METRICS = [
+EXPECTED_METRICS = [
     'dec_utilization',
     'enc_utilization',
     'fb_free',

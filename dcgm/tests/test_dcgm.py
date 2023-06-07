@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.dcgm import DcgmCheck
 
-from .common import METRICS
+from .common import EXPECTED_METRICS
 
 pytestmark = [pytest.mark.unit]
 
@@ -15,5 +15,5 @@ pytestmark = [pytest.mark.unit]
 def test_check(dd_run_check, aggregator, check, mock_metrics):
     dd_run_check(check)
     aggregator.assert_service_check('dcgm.openmetrics.health', DcgmCheck.OK)
-    for metric in METRICS:
+    for metric in EXPECTED_METRICS:
         aggregator.assert_metric(name=f"dcgm.{metric}", at_least=0)

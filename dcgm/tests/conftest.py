@@ -9,17 +9,19 @@ import pytest
 
 from datadog_checks.dcgm import DcgmCheck
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 
 from . import common
 
 
 ## Fixtures that will be included in a conftest.py folder:
+## TODO - Need to add the docker IP rather than hardcode the localhost
 @pytest.fixture(scope='session')
 def dd_environment():
     compose_file = common.COMPOSE_FILE
     conditions = [
         CheckDockerLogs(identifier='caddy', patterns=['server running']),
+        CheckEndpoints(common.INSTANCE["openmetrics_endpoint"]),
     ]
     with docker_run(compose_file, conditions=conditions):
         yield {
