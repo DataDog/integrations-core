@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "datadog-boundary"
 description = "The Boundary check"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = "BSD-3-Clause"
 keywords = [
     "datadog",

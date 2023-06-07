@@ -9,7 +9,7 @@ name = "datadog-traffic_server"
 description = "The Traffic Server check"
 readme = "README.md"
 license = {text = "BSD-3-Clause"}
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 keywords = [
     "datadog",
     "datadog agent",
