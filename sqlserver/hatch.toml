@@ -50,6 +50,7 @@ matrix.setup.env-vars = [
 ]
 matrix.version.env-vars = [
   { key = "SQLSERVER_MAJOR_VERSION" },
+  { key = "SQLSERVER_ENGINE_EDITION" },
   { key = "SQLSERVER_IMAGE_TAG", value = "2017-CU24-ubuntu-16.04", if = ["2017"], platform = ["linux"] },
   { key = "SQLSERVER_IMAGE_TAG", value = "2019-CU11-ubuntu-16.04", if = ["2019"], platform = ["linux"] },
   { key = "SQLSERVER_BASE_IMAGE", value = "datadog/docker-library:sqlserver_{matrix:version}", platform = ["windows"] },
