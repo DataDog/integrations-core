@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import copy
 import os
 
 import pytest
@@ -42,3 +42,8 @@ def dd_environment():
 @pytest.fixture
 def check():
     return lambda instance: Envoy('envoy', {}, [instance])
+
+
+@pytest.fixture
+def default_instance():
+    return copy.deepcopy(DEFAULT_INSTANCE)
