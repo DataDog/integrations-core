@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+
+# coding=utf-8
+
 import datetime as dt
 import json
 import os
