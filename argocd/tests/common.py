@@ -15,7 +15,14 @@ MOCKED_API_SERVER_INSTANCE = {'api_server_endpoint': 'http://api_server:8083'}
 
 MOCKED_REPO_SERVER_INSTANCE = {'repo_server_endpoint': 'http://repo_server:8084'}
 
-app_controller_ns, api_server_ns, repo_server_ns = "argocd.app_controller", "argocd.api_server", "argocd.repo_server"
+MOCKED_NOTIFICATIONS_CONTROLLER_INSTANCE = {'notifications_controller_endpoint': 'http://notifications_controller:9001'}
+
+app_controller_ns, api_server_ns, repo_server_ns, notifications_controller_ns = (
+    "argocd.app_controller",
+    "argocd.api_server",
+    "argocd.repo_server",
+    "argocd.notifications_controller",
+)
 
 general_gauges = [
     'go.goroutines',
@@ -128,6 +135,11 @@ repo_server_histograms = [
     'redis.request.duration.seconds.sum',
 ]
 
+notification_controller_counters = [
+    'notifications.deliveries.total',
+    'notifications.trigger_eval.total',
+]
+
 NOT_EXPOSED_METRICS = [
     'argocd.app_controller.cluster.api.resource_objects',
     'argocd.app_controller.cluster.api.resources',
@@ -167,6 +179,7 @@ general = general_gauges + general_counters + general_summaries
 app_controller = app_controller_counters + app_controller_gauges + app_controller_histograms + general
 api_server = api_server_counters + api_server_histograms + general
 repo_server = repo_server_counters + repo_server_gauges + repo_server_histograms + general
+notifications_controller = notification_controller_counters + general
 
 
 def namespace_formatter(metrics, namespace):
@@ -179,3 +192,4 @@ def namespace_formatter(metrics, namespace):
 APP_CONTROLLER_METRICS = namespace_formatter(app_controller, app_controller_ns)
 API_SERVER_METRICS = namespace_formatter(api_server, api_server_ns)
 REPO_SERVER_METRICS = namespace_formatter(repo_server, repo_server_ns)
+NOTIFICATIONS_CONTROLLER_METRICS = namespace_formatter(notifications_controller, notifications_controller_ns)
