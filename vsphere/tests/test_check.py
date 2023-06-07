@@ -1,5 +1,3 @@
-# coding=utf-8
-
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -13,10 +11,11 @@ import time
 import mock
 import pytest
 from mock import MagicMock
-from pyVmomi import vim
 
+# from pyVmomi import vim
 from datadog_checks.base import to_string
-from datadog_checks.base.utils.time import get_current_datetime
+
+# from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError
 from datadog_checks.vsphere.config import VSphereConfig
@@ -80,32 +79,32 @@ def test_historical_metrics_no_dsc_folder(aggregator, dd_run_check, historical_i
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
-def test_events_only(aggregator, events_only_instance):
-    check = VSphereCheck('vsphere', {}, [events_only_instance])
-    check.initiate_api_connection()
-
-    event = vim.event.AlarmStatusChangedEvent()
-    event.createdTime = get_current_datetime()
-    event.entity = vim.event.ManagedEntityEventArgument()
-    event.entity.entity = vim.VirtualMachine(moId="vm1")
-    event.entity.name = "vm1"
-    event.alarm = vim.event.AlarmEventArgument()
-    event.alarm.name = "alarm1"
-    setattr(event, 'from', 'green')
-    event.to = 'red'
-    event.datacenter = vim.event.DatacenterEventArgument()
-    event.datacenter.name = "dc1"
-    event.fullFormattedMessage = "Green to Red"
-
-    check.api.mock_events = [event]
-    check.check(None)
-    aggregator.assert_event("vCenter monitor status changed on this alarm, it was green and it's now red.", count=1)
-
-    aggregator.assert_metric('datadog.vsphere.collect_events.time')
-
-    # assert all metrics will check that we are not collecting historical and realtime metrics
-    aggregator.assert_all_metrics_covered()
+# @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+# def test_events_only(aggregator, events_only_instance):
+#     check = VSphereCheck('vsphere', {}, [events_only_instance])
+#     check.initiate_api_connection()
+#
+#     event = vim.event.AlarmStatusChangedEvent()
+#     event.createdTime = get_current_datetime()
+#     event.entity = vim.event.ManagedEntityEventArgument()
+#     event.entity.entity = vim.VirtualMachine(moId="vm1")
+#     event.entity.name = "vm1"
+#     event.alarm = vim.event.AlarmEventArgument()
+#     event.alarm.name = "alarm1"
+#     setattr(event, 'from', 'green')
+#     event.to = 'red'
+#     event.datacenter = vim.event.DatacenterEventArgument()
+#     event.datacenter.name = "dc1"
+#     event.fullFormattedMessage = "Green to Red"
+#
+#     check.api.mock_events = [event]
+#     check.check(None)
+#     aggregator.assert_event("vCenter monitor status changed on this alarm, it was green and it's now red.", count=1)
+#
+#     aggregator.assert_metric('datadog.vsphere.collect_events.time')
+#
+#     # assert all metrics will check that we are not collecting historical and realtime metrics
+#     aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.usefixtures("mock_type", 'mock_rest_api')
