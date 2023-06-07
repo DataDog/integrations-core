@@ -754,6 +754,7 @@ class SQLServer(AgentCheck):
 
         major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+        # need either major_version or engine_edition to generate queries
         if not major_version and not is_azure_database(engine_edition):
             self.log.warning("missing major_version, cannot initialize dynamic queries")
             return None
