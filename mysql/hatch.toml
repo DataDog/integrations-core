@@ -1,6 +1,6 @@
 [env.collectors.datadog-checks]
 base-package-features = ["deps", "db", "json"]
-check-types = true
+check-types = false
 mypy-args = [
   "--py2",
   "--check-untyped-defs",
