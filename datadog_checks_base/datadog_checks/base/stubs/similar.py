@@ -2,11 +2,15 @@ from difflib import SequenceMatcher
 
 from six import iteritems
 
-from datadog_checks.base.stubs.common import HistogramBucketStub, MetricStub, ServiceCheckStub
+from datadog_checks.base.stubs.common import (
+    HistogramBucketStub,
+    MetricStub,
+    ServiceCheckStub,
+)
 
-'''
+"""
 Build similar message for better test assertion failure message.
-'''
+"""
 
 MAX_SIMILAR_TO_DISPLAY = 15
 
@@ -64,7 +68,9 @@ def _get_similarity_score_for_metric(expected_metric, candidate_metric):
         scores.append((score, 1))
 
     if expected_metric.tags is not None:
-        score = _is_similar_text_score(str(sorted(expected_metric.tags)), str(sorted(candidate_metric.tags)))
+        score = _is_similar_text_score(
+            str(sorted(expected_metric.tags)), str(sorted(candidate_metric.tags))
+        )
         scores.append((score, 1))
 
     if expected_metric.value is not None:
@@ -72,7 +78,9 @@ def _get_similarity_score_for_metric(expected_metric, candidate_metric):
         scores.append((score, 1))
 
     if expected_metric.hostname:
-        score = _is_similar_text_score(expected_metric.hostname, candidate_metric.hostname)
+        score = _is_similar_text_score(
+            expected_metric.hostname, candidate_metric.hostname
+        )
         scores.append((score, 1))
 
     if expected_metric.device:
@@ -83,59 +91,106 @@ def _get_similarity_score_for_metric(expected_metric, candidate_metric):
     return _compute_score(scores)
 
 
-def _get_similarity_score_for_service_check(expected_service_check, candidate_service_check):
+def _get_similarity_score_for_service_check(
+    expected_service_check, candidate_service_check
+):
     # Tuple of (score, weight)
-    scores = [(_is_similar_text_score(expected_service_check.name, candidate_service_check.name), 3)]
+    scores = [
+        (
+            _is_similar_text_score(
+                expected_service_check.name, candidate_service_check.name
+            ),
+            3,
+        )
+    ]
 
     if expected_service_check.status is not None:
-        score = 1 if expected_service_check.status == candidate_service_check.status else 0
+        score = (
+            1 if expected_service_check.status == candidate_service_check.status else 0
+        )
         scores.append((score, 1))
 
     if expected_service_check.tags is not None:
         score = _is_similar_text_score(
-            str(sorted(expected_service_check.tags)), str(sorted(candidate_service_check.tags))
+            str(sorted(expected_service_check.tags)),
+            str(sorted(candidate_service_check.tags)),
         )
         scores.append((score, 1))
 
     if expected_service_check.hostname:
-        score = _is_similar_text_score(expected_service_check.hostname, candidate_service_check.hostname)
+        score = _is_similar_text_score(
+            expected_service_check.hostname, candidate_service_check.hostname
+        )
         scores.append((score, 1))
 
     if expected_service_check.message:
-        score = _is_similar_text_score(expected_service_check.message, candidate_service_check.message)
+        score = _is_similar_text_score(
+            expected_service_check.message, candidate_service_check.message
+        )
         scores.append((score, 1))
 
     return _compute_score(scores)
 
 
-def _get_similarity_score_for_histogram_bucket(expected_histogram_bucket, candidate_histogram_bucket):
+def _get_similarity_score_for_histogram_bucket(
+    expected_histogram_bucket, candidate_histogram_bucket
+):
     # Tuple of (score, weight)
-    scores = [(_is_similar_text_score(expected_histogram_bucket.name, candidate_histogram_bucket.name), 3)]
+    scores = [
+        (
+            _is_similar_text_score(
+                expected_histogram_bucket.name, candidate_histogram_bucket.name
+            ),
+            3,
+        )
+    ]
 
     if expected_histogram_bucket.value is not None:
-        score = 1 if expected_histogram_bucket.value == candidate_histogram_bucket.value else 0
+        score = (
+            1
+            if expected_histogram_bucket.value == candidate_histogram_bucket.value
+            else 0
+        )
         scores.append((score, 1))
 
     if expected_histogram_bucket.lower_bound is not None:
-        score = 1 if expected_histogram_bucket.lower_bound == candidate_histogram_bucket.lower_bound else 0
+        score = (
+            1
+            if expected_histogram_bucket.lower_bound
+            == candidate_histogram_bucket.lower_bound
+            else 0
+        )
         scores.append((score, 1))
 
     if expected_histogram_bucket.upper_bound is not None:
-        score = 1 if expected_histogram_bucket.upper_bound == candidate_histogram_bucket.upper_bound else 0
+        score = (
+            1
+            if expected_histogram_bucket.upper_bound
+            == candidate_histogram_bucket.upper_bound
+            else 0
+        )
         scores.append((score, 1))
 
     if expected_histogram_bucket.monotonic is not None:
-        score = 1 if expected_histogram_bucket.monotonic == candidate_histogram_bucket.monotonic else 0
+        score = (
+            1
+            if expected_histogram_bucket.monotonic
+            == candidate_histogram_bucket.monotonic
+            else 0
+        )
         scores.append((score, 1))
 
     if expected_histogram_bucket.tags is not None:
         score = _is_similar_text_score(
-            str(sorted(expected_histogram_bucket.tags)), str(sorted(candidate_histogram_bucket.tags))
+            str(sorted(expected_histogram_bucket.tags)),
+            str(sorted(candidate_histogram_bucket.tags)),
         )
         scores.append((score, 1))
 
     if expected_histogram_bucket.hostname:
-        score = _is_similar_text_score(expected_histogram_bucket.hostname, candidate_histogram_bucket.hostname)
+        score = _is_similar_text_score(
+            expected_histogram_bucket.hostname, candidate_histogram_bucket.hostname
+        )
         scores.append((score, 1))
 
     return _compute_score(scores)

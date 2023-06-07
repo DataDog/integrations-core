@@ -19,7 +19,12 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import UTC
-from datadog_checks.postgres.statement_samples import DBExplainError, StatementTruncationState, DEFAULT_ACTIVITY_COLLECTION_INTERVAL, DEFAULT_COLLECTION_INTERVAL
+from datadog_checks.postgres.statement_samples import (
+    DBExplainError,
+    StatementTruncationState,
+    DEFAULT_ACTIVITY_COLLECTION_INTERVAL,
+    DEFAULT_COLLECTION_INTERVAL,
+)
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
 
 from .common import DB_NAME, HOST, PORT, PORT_REPLICA2, POSTGRES_VERSION
@@ -1376,6 +1381,7 @@ def _check_until_time(check, dbm_instance, sleep_time, check_interval):
         time.sleep(check_interval)
         elapsed = time.time() - start_time
 
+
 def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the main collection loop rate limit
     collection_interval = 0.1
@@ -1395,6 +1401,7 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     check.cancel()
     metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
     assert max_collections / 2.0 <= len(metrics) <= max_collections
+
 
 def test_activity_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the activity collection loop rate limit
@@ -1468,25 +1475,24 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
 
     assert len(matching) > 0, "should have collected exactly at least one matching event"
 
+
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity"])
-@pytest.mark.parametrize("query_samples_enabled,expected_samples_len_check", [(True, lambda a: a>=1), (False,lambda a: a==0)])
-@pytest.mark.parametrize("query_activity_enabled,expected_activity_len_check", [(True, lambda a: a>=1), (False,lambda a: a==0)])
+@pytest.mark.parametrize(
+    "query_samples_enabled,expected_samples_len_check", [(True, lambda a: a >= 1), (False, lambda a: a == 0)]
+)
+@pytest.mark.parametrize(
+    "query_activity_enabled,expected_activity_len_check", [(True, lambda a: a >= 1), (False, lambda a: a == 0)]
+)
 @pytest.mark.parametrize(
     "user,password,dbname,query,arg",
-    [(
-        "bob",
-        "bob",
-        "datadog_test",
-        "BEGIN TRANSACTION; SELECT city FROM persons WHERE city = %s;",
-        "hello"
-    )]
+    [("bob", "bob", "datadog_test", "BEGIN TRANSACTION; SELECT city FROM persons WHERE city = %s;", "hello")],
 )
 def test_disabled_activity_or_explain_plans(
-    aggregator, 
-    integration_check, 
-    dbm_instance, 
-    query_activity_enabled, 
-    query_samples_enabled, 
+    aggregator,
+    integration_check,
+    dbm_instance,
+    query_activity_enabled,
+    query_samples_enabled,
     expected_samples_len_check,
     expected_activity_len_check,
     pg_stat_activity_view,
@@ -1519,8 +1525,6 @@ def test_disabled_activity_or_explain_plans(
         assert expected_samples_len_check(len(dbm_samples)) == True
     finally:
         conn.close()
-        
-
 
 
 def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
