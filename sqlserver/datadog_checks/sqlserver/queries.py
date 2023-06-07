@@ -247,9 +247,7 @@ def get_query_file_stats(sqlserver_major_version, sqlserver_engine_edition):
 
     return {
         'name': 'sys.dm_io_virtual_file_stats',
-        'query': query.strip().format(
-            sql_columns=", ".join(sql_columns)
-        ),
+        'query': query.strip().format(sql_columns=", ".join(sql_columns)),
         'columns': [
             {'name': 'db', 'type': 'tag'},
             {'name': 'state', 'type': 'tag'},
