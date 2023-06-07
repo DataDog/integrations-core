@@ -1476,10 +1476,10 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity"])
 @pytest.mark.parametrize(
-    "query_samples_enabled,expected_samples_len_check", [(True), (False)]
+    "query_samples_enabled", [(True), (False)]
 )
 @pytest.mark.parametrize(
-    "query_activity_enabled,expected_activity_len_check", [(True), (False)]
+    "query_activity_enabled", [(True), (False)]
 )
 @pytest.mark.parametrize(
     "user,password,dbname,query,arg",
@@ -1491,8 +1491,6 @@ def test_disabled_activity_or_explain_plans(
     dbm_instance,
     query_activity_enabled,
     query_samples_enabled,
-    expected_samples_len_check,
-    expected_activity_len_check,
     pg_stat_activity_view,
     user,
     password,
