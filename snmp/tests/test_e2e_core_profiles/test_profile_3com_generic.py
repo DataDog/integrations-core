@@ -24,7 +24,10 @@ def test_e2e_profile_3com_generic(dd_agent_check):
 
     # --- TEST METRICS ---
     common.assert_common_metrics(aggregator, tags=common_tags, is_e2e=True, loader='core')
+
+    # assert extend `_generic-if.yaml`
     aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
+
     aggregator.assert_all_metrics_covered()
 
     # --- TEST METADATA ---
