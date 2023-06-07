@@ -408,7 +408,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         if self._config.dbstrict:
             extra_filters = " AND datname = %s"
             params = params + (self._config.dbname,)
-        elif len(self._config.ignore_databases) > 0:
+        else:
             extra_filters = " AND " + " AND ".join("datname NOT ILIKE %s" for _ in self._config.ignore_databases)
             params = params + tuple(self._config.ignore_databases)
         if filter_stale_idle_conn and self._activity_last_query_start:
@@ -445,8 +445,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         rows = self._get_new_pg_stat_activity(pg_activity_cols)
         rows = self._filter_and_normalize_statement_rows(rows)
         submitted_count = 0
-        event_samples = self._collect_plans(rows)
         if self._explain_plan_coll_enabled:
+            event_samples = self._collect_plans(rows)
             for e in event_samples:
                 self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
                 submitted_count += 1
