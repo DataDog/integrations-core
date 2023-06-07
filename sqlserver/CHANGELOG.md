@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 11.2.1 / 2023-06-07
+
+* [Fixed] fix sql-server dbm error in certain environments. See [#14495](https://github.com/DataDog/integrations-core/pull/14495). Thanks [it-ito](https://github.com/it-ito).
+
 ## 11.2.0 / 2023-05-26
 
 * [Added] Add sqlserver engine editition && version to DBM event payloads. See [#14499](https://github.com/DataDog/integrations-core/pull/14499).
