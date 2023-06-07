@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019-present
+# (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.dev.docker import get_container_ip
 from tests.common import SNMP_CONTAINER_NAME
 
-from . import common, metrics
+from .. import common, metrics
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
