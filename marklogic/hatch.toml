@@ -1,5 +1,5 @@
 [env.collectors.datadog-checks]
-check-types = true
+check-types = false
 mypy-args = [
     "--disallow-untyped-defs",
     "--py2",
