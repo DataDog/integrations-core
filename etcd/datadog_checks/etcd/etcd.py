@@ -89,7 +89,26 @@ class Etcd(OpenMetricsBaseCheck):
         )
 
     def check(self, _):
-        self.check_post_v3()
+        scraper_config = self.get_scraper_config(self.instance)
+
+        if 'prometheus_url' not in scraper_config:
+            raise ConfigurationError('You have to define at least one `prometheus_url`.')
+
+        if not scraper_config.get('metrics_mapper'):
+            raise ConfigurationError(
+                'You have to collect at least one metric from the endpoint `{}`.'.format(
+                    scraper_config['prometheus_url']
+                )
+            )
+
+        tags = []
+
+        if is_affirmative(self.instance.get('leader_tag', True)):
+            self.add_leader_state_tag(scraper_config, tags)
+
+        scraper_config['_metric_tags'][:] = tags
+
+        self.process(scraper_config)
 
     def access_api(self, scraper_config, path, data='{}'):
         url = urlparse(scraper_config['prometheus_url'])
@@ -117,28 +136,6 @@ class Etcd(OpenMetricsBaseCheck):
 
         if is_leader is not None:
             tags.append('is_leader:{}'.format('true' if is_leader else 'false'))
-
-    def check_post_v3(self):
-        scraper_config = self.get_scraper_config(self.instance)
-
-        if 'prometheus_url' not in scraper_config:
-            raise ConfigurationError('You have to define at least one `prometheus_url`.')
-
-        if not scraper_config.get('metrics_mapper'):
-            raise ConfigurationError(
-                'You have to collect at least one metric from the endpoint `{}`.'.format(
-                    scraper_config['prometheus_url']
-                )
-            )
-
-        tags = []
-
-        if is_affirmative(self.instance.get('leader_tag', True)):
-            self.add_leader_state_tag(scraper_config, tags)
-
-        scraper_config['_metric_tags'][:] = tags
-
-        self.process(scraper_config)
 
     def transform_metadata(self, metric, scraper_config):
         super(Etcd, self).transform_metadata(metric, scraper_config)
