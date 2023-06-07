@@ -3,22 +3,11 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 
+from .utils import create_profile_test_config, get_device_ip_from_config
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
-
-
-def create_profile_test_config(profile_name):
-    config = common.generate_container_instance_config([])
-    config['init_config']['loader'] = 'core'
-    instance = config['instances'][0]
-    instance.update({'community_string': profile_name})
-    return config
-
-
-def get_device_ip_from_config(config):
-    return config['instances'][0]['ip_address']
 
 
 def test_e2e_profile_3com_generic(dd_agent_check):
