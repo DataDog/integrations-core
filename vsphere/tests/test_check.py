@@ -20,6 +20,10 @@ from tests.legacy.utils import mock_alarm_event
 
 from .common import HERE, VSPHERE_VERSION, build_rest_api_client
 from .mocked_api import MockedAPI
+from six import PY2
+
+if PY2:
+    from __future__ import unicode_literals
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
