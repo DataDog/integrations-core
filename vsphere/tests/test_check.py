@@ -1,3 +1,5 @@
+# coding=utf-8
+
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -21,8 +23,6 @@ from datadog_checks.vsphere.config import VSphereConfig
 
 from .common import HERE, VSPHERE_VERSION, build_rest_api_client
 from .mocked_api import MockedAPI
-
-# coding=utf-8
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
