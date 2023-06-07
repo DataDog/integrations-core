@@ -348,7 +348,7 @@ def test_tags_filters_integration_tags(aggregator, dd_run_check, historical_inst
 
     aggregator.assert_metric('vsphere.cpu.usage.avg', count=1)
     aggregator.assert_metric_has_tag('vsphere.cpu.usage.avg', 'vsphere_datacenter:Datacenter2', count=1)
-    aggregator.assert_metric_has_tag('vsphere.cpu.usage.avg', 'vsphere_datacenter:Datacenter', count=0)
+    aggregator.assert_metric_has_tag('vsphere.cpu.usage.avg', 'vsphere_datacenter:Dätacenter', count=0)
 
     aggregator.assert_metric('vsphere.disk.used.latest', count=1)
     aggregator.assert_metric_has_tag('vsphere.disk.used.latest', 'vsphere_datastore:Datastore 1', count=1)
