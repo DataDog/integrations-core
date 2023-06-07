@@ -1476,10 +1476,10 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity"])
 @pytest.mark.parametrize(
-    "query_samples_enabled,expected_samples_len_check", [(True, lambda a: a >= 1), (False, lambda a: a == 0)]
+    "query_samples_enabled,expected_samples_len_check", [(True, 1), (False, 0)]
 )
 @pytest.mark.parametrize(
-    "query_activity_enabled,expected_activity_len_check", [(True, lambda a: a >= 1), (False, lambda a: a == 0)]
+    "query_activity_enabled,expected_activity_len_check", [(True, 1), (False, 0)]
 )
 @pytest.mark.parametrize(
     "user,password,dbname,query,arg",
@@ -1519,8 +1519,14 @@ def test_disabled_activity_or_explain_plans(
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
 
-        assert expected_activity_len_check(len(dbm_activity)) is True
-        assert expected_samples_len_check(len(dbm_samples)) is True
+        if query_activity_enabled:
+            assert len(dbm_activity) >= 1
+        else:
+            assert len(dbm_activity) == 0 
+        if query_samples_enabled: 
+            assert len(dbm_samples) >= 1
+        else:
+            assert len(dbm_samples) == 0 
     finally:
         conn.close()
 
