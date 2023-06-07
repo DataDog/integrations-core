@@ -1,0 +1,9 @@
+# Profile for Cisco  devices
+
+extends:
+  - _base_cisco.yaml
+
+device:
+  vendor: "cisco"
+
+sysobjectid: 1.3.6.1.4.1.9.1.*
