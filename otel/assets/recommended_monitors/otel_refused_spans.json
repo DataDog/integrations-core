@@ -1,7 +1,7 @@
 {
 	"name": "[OTel Collector] Refused Spans",
 	"type": "query alert",
-	"query": "avg(last_1h):avg:otelcol_receiver_refused_spans{*} by {host,receiver}.as_rate() > 100",
+	"query": "avg(last_10m):avg:otelcol_receiver_refused_spans{*} by {host,receiver}.as_rate() > 100",
 	"message": "The OpenTelemetry Collector receiver {{receiver.name}} is refusing {{value}} spans per second for host: {{host.name}}.",
 	"tags": [
 		"integration:opentelemetry"
