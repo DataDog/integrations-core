@@ -3,7 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 
-from .utils import create_profile_test_config, get_device_ip_from_config
+from .utils import create_profile_test_config, get_device_ip_from_config, assert_extend_generic_if, \
+    assert_common_metrics
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 
@@ -23,11 +24,8 @@ def test_e2e_profile_3com_generic(dd_agent_check):
     ]
 
     # --- TEST METRICS ---
-    common.assert_common_metrics(aggregator, tags=common_tags, is_e2e=True, loader='core')
-
-    # assert extend `_generic-if.yaml`
-    aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
-
+    assert_common_metrics(aggregator, common_tags)
+    assert_extend_generic_if(aggregator, common_tags)
     aggregator.assert_all_metrics_covered()
 
     # --- TEST METADATA ---
@@ -45,3 +43,4 @@ def test_e2e_profile_3com_generic(dd_agent_check):
                        'snmp_profile:3com-generic'],
               'vendor': '3com'}
     assert_device_metadata(aggregator, device)
+
