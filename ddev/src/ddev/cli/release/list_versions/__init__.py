@@ -35,5 +35,7 @@ def list_versions(ctx: click.Context, integration: str):
         version_numbers.append(Version(version_number))
 
     version_numbers.sort()
+
+    app: Application = ctx.obj
     for ver in version_numbers:
-        print(str(ver))
+        app.display(str(ver))

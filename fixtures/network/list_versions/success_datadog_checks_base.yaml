@@ -543,9 +543,9 @@ interactions:
       Content-Type:
       - text/html
       Date:
-      - Tue, 06 Jun 2023 20:39:34 GMT
+      - Wed, 07 Jun 2023 18:51:14 GMT
       Last-Modified:
-      - Tue, 06 Jun 2023 19:19:11 GMT
+      - Wed, 07 Jun 2023 18:24:30 GMT
       Server:
       - AmazonS3
       Transfer-Encoding:
@@ -553,11 +553,11 @@ interactions:
       Vary:
       - Accept-Encoding
       X-Amz-Cf-Id:
-      - qlV96U4hQXvGTI0VdT3jUqd81_32iFQoTIFlEYxqlwLwUU9_v3rLJg==
+      - 3SOFFo8UBNi0R8MkU94ph4ahs1IfIb4i_Bj4JAtDmGUGcJ2DRCCAew==
       X-Amz-Cf-Pop:
       - JFK50-P2
       X-Cache:
-      - RefreshHit from cloudfront
+      - Miss from cloudfront
       x-amz-server-side-encryption:
       - AES256
     http_version: HTTP/1.1
