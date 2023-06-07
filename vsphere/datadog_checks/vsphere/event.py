@@ -37,9 +37,15 @@ ALLOWED_EVENTS = [getattr(vim.event, event_type) for event_type in EXCLUDE_FILTE
 
 
 class VSphereEvent(object):
+    UNKNOWN = 'unknown'
+
     def __init__(self, raw_event, event_config, tags):
         self.raw_event = raw_event
-        self.event_type = self.raw_event.__class__.__name__.split(".")[2]
+        if self.raw_event and self.raw_event.__class__.__name__.startswith('vim.event'):
+            self.event_type = self.raw_event.__class__.__name__[10:]
+        else:
+            self.event_type = VSphereEvent.UNKNOWN
+
         self.timestamp = int((self.raw_event.createdTime.replace(tzinfo=None) - datetime(1970, 1, 1)).total_seconds())
         self.payload = {
             "timestamp": self.timestamp,
@@ -210,6 +216,14 @@ class VSphereEvent(object):
 - host: {host}
 """.format(
             user=self.raw_event.userName, dc=self.raw_event.datacenter.name, host=self.raw_event.host.name
+        )
+        self.payload['host'] = self.raw_event.vm.name
+        return self.payload
+
+    def transform_vmresumingevent(self):
+        self.payload["msg_title"] = u"VM {0} is RESUMING".format(self.raw_event.vm.name)
+        self.payload["msg_text"] = u"""{user} has resumed {vm}. It will soon be powered on.""".format(
+            user=self.raw_event.userName, vm=self.raw_event.vm.name
         )
         self.payload['host'] = self.raw_event.vm.name
         return self.payload
