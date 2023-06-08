@@ -1642,7 +1642,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Netflow records received, flushed and stored in Datadog",
+                            "title": "Netflow records received, flushed, and stored in Datadog",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
