@@ -1658,7 +1658,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**Why is there a difference between the number of received Netflow record and sent to Datadog ?**\n\nNetflow records are aggregated agent side, with a default flush time of 5 mins. It means that if two records with the same source, destination and protocol are collected within 5 mins, they will appear as one in the NDM UI. \n",
+                            "content": "**Why is there a difference between the number of received Netflow records and Netflow records sent to Datadog?**\n\nNetflow records are aggregated Agent side, with a default flush time of 5 minutes. It means that if two records with the same source, destination, and protocol are collected within 5 minutes, they appear as one in the UI. \n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
