@@ -17,7 +17,7 @@ from .common import VSPHERE_VERSION
 pytestmark = [pytest.mark.unit]
 
 
-def test_service_check_critical(aggregator, dd_run_check, instance):
+def test_connection_exception(aggregator, dd_run_check, instance):
     mock_connect = mock.MagicMock(side_effect=[Exception("Connection error")])
     with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
         with pytest.raises(Exception):
@@ -30,7 +30,7 @@ def test_service_check_critical(aggregator, dd_run_check, instance):
         )
 
 
-def test_service_check_ok(aggregator, dd_run_check, events_only_instance):
+def test_connection_ok(aggregator, dd_run_check, events_only_instance):
     mock_connect = mock.MagicMock()
     with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
         check = VSphereCheck('vsphere', {}, [events_only_instance])
