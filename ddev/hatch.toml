@@ -4,6 +4,7 @@ mypy-args = [
   "src/ddev",
 ]
 
+
 [envs.default]
 python = "3.8"
 e2e-env = false
