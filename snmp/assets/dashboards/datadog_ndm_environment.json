@@ -2481,7 +2481,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**How to detect missing NetFlow records ?**\n\nNetFlow missing packet detection helps you identify potential issues in your network. It is an estimation of the number of packet (or flows, depending on NetFlow version) that are lost.\n\nThis metric can appear noisy depending on time aggregation, but a significant increase indicates that some NetFlow packets are lost between the exporter and the Datadog agent.",
+                            "content": "**How can I detect missing NetFlow records?**\n\nNetFlow missing packet detection helps you identify potential issues in your network. It is an estimation of the number of packet (or flows, depending on NetFlow version) that are lost.\n\nThis metric can appear noisy depending on time aggregation, but a significant increase indicates that some NetFlow packets are lost between the exporter and the Datadog Agent.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
