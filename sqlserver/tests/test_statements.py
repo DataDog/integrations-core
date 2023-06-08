@@ -770,7 +770,6 @@ def test_async_job_enabled(dd_run_check, dbm_instance, statement_metrics_enabled
     dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
-    check.cancel()
     if statement_metrics_enabled:
         assert check.statement_metrics._job_loop_future is not None
     else:

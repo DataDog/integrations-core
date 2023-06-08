@@ -380,7 +380,6 @@ def test_async_job_enabled(dd_run_check, dbm_instance, activity_enabled):
     dbm_instance['query_activity'] = {'enabled': activity_enabled, 'run_sync': False}
     check = MySql(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
-    check.cancel()
     if activity_enabled:
         assert check._query_activity._job_loop_future is not None
     else:

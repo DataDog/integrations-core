@@ -841,7 +841,6 @@ def test_async_job_enabled(dd_run_check, dbm_instance, statement_samples_enabled
     dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
     dd_run_check(mysql_check)
-    mysql_check.cancel()
     if statement_samples_enabled:
         assert mysql_check._statement_samples._job_loop_future is not None
     else:
