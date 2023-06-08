@@ -41,7 +41,7 @@ text = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "pymongo[srv]==4.3.3; python_version >= '3.9'",
+    "pymongo[srv]==4.3.3; python_version >= '3.8'",
 ]
 
 [project.urls]
