@@ -267,11 +267,8 @@ class DBMAsyncJob(object):
         """
         self._cancel_event.set()
 
-        try:
-            if self._job_loop_future is not None:
-                self._job_loop_future.result(timeout=10)
-        except CancelledError:
-            pass
+        if self._job_loop_future is not None:
+            self._job_loop_future.result(timeout=10)
 
     def run_job_loop(self, tags):
         """
