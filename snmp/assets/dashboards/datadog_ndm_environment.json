@@ -908,7 +908,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**Why are my devices matched to the generic router profile ?**\n\nSome devices may not be supported out of the box and will default to the generic router profile, which may miss some metrics.\n\n[Follow this guide to create a custom SNMP profile for your network devices.](https://docs.datadoghq.com/fr/network_monitoring/devices/guide/build-ndm-profile/)",
+                            "content": "**Why are my devices matched to the generic router profile?**\n\nSome devices may not be supported out-of-the-box and default to the generic router profile, which may cause some missing metrics.\n\n To create a custom SNMP profile for your network devices, see [Build a NDM Profile](https://docs.datadoghq.com/network_monitoring/devices/guide/build-ndm-profile/).",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
