@@ -258,6 +258,14 @@ class DBMAsyncJob(object):
     def cancel(self):
         self._cancel_event.set()
 
+        # Ensure cancel() returns only when the job loop is fully cancelled
+        # result raises CancelledError if the thread was successfully cancelled
+        try:
+            if self._job_loop_future is not None:
+                self._job_loop_future.result(timeout=10)
+        except CancelledError:
+            pass
+
     def run_job_loop(self, tags):
         """
         :param tags:
