@@ -146,6 +146,9 @@ def repository(local_clone, config_file) -> Generator[ClonedRepo, None, None]:
 
 @pytest.fixture
 def network_replay(local_repo):
+    """
+    To use, run once without record_mode='none' as an argument and then add it in for subsequent runs.
+    """
     stack = ExitStack()
 
     def add_cassette(relative_path, *args, **kwargs):
