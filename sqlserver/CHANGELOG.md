@@ -2,7 +2,7 @@
 
 ## 11.2.2 / 2023-06-08
 
-* [Fixed] Bug Fix: Support SQL Server file metrics for Azure SQL DB / MI. See [#14679](https://github.com/DataDog/integrations-core/pull/14679).
+* [Fixed] Support SQL Server file metrics for Azure SQL DB / MI. See [#14679](https://github.com/DataDog/integrations-core/pull/14679).
 
 ## 11.2.1 / 2023-06-07
 
