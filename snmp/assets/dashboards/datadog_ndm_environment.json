@@ -161,7 +161,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "This section gives an overview of your current usage of Network Device Monitoring.\n\n[Learn more on Network Device Monitoring billing](https://www.datadoghq.com/pricing/?product=network-monitoring#network-monitoring)",
+                            "content": "This section displays your current usage of Network Device Monitoring.\n\nTo learn more, see [Network Device Monitoring billing](https://www.datadoghq.com/pricing/?product=network-monitoring#network-monitoring).",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
