@@ -459,7 +459,9 @@ See [metadata.csv][22] for a list of metrics provided by this check.
 
 See the [MongoDB 3.0 Manual][23] for more detailed descriptions of some of these metrics.
 
-**NOTE**: The following metrics are NOT collected by default, use the `additional_metrics` parameter in your `mongo.d/conf.yaml` file to collect them:
+#### Additional metrics
+
+The following metrics are **not** collected by default. Use the `additional_metrics` parameter in your `mongo.d/conf.yaml` file to collect them:
 
 | metric prefix            | what to add to `additional_metrics` to collect it |
 | ------------------------ | ------------------------------------------------- |
