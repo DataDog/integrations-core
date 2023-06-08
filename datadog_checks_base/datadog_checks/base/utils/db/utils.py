@@ -257,10 +257,14 @@ class DBMAsyncJob(object):
         self._job_name = job_name
 
     def cancel(self):
+        """
+        This returns only when the job loop is fully cancelled.
+        _job_loop_future.result raises:
+            CancelledError if the thread was successfully cancelled
+            TimeoutError if the job loop is not cancelled within the timeout
+        """
         self._cancel_event.set()
 
-        # Ensure cancel() returns only when the job loop is fully cancelled
-        # result raises CancelledError if the thread was successfully cancelled
         try:
             if self._job_loop_future is not None:
                 self._job_loop_future.result(timeout=10)
