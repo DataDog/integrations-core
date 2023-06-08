@@ -192,6 +192,7 @@ class PostgreSql(AgentCheck):
     def cancel(self):
         self.statement_samples.cancel()
         self.statement_metrics.cancel()
+        self.metadata_samples.cancel()
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
