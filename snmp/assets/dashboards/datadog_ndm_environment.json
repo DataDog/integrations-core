@@ -2293,7 +2293,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**Seeing bursts in buffer length ?**\n\nIf the buffer length is close to the buffer capacity, you can increase the buffer capacity by updating `aggregator_buffer_size` in your `datadog.yaml` config.\n",
+                            "content": "**Why are there bursts in buffer length?**\n\nIf the buffer length is close to the buffer capacity, you can increase the buffer capacity by updating `aggregator_buffer_size` in your `datadog.yaml` configuration.\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
