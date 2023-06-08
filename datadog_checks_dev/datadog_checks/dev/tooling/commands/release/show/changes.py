@@ -61,6 +61,7 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since, e
 
     applicable_changelog_types = []
     user_config = ctx.obj
+    print(user_config)
     echo_debug(f'Evaluating PRs: {pr_numbers}')
     for pr_num in pr_numbers:
         try:
