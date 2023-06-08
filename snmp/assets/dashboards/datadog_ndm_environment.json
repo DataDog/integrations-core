@@ -656,7 +656,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**Why are my devices unreachable ?**\n\nAn unreachable device means that the agent cannot connect to it. \n-  Try loosening ACLs/firewall rules for your devices. You can check connectivity from the Agent host to a network device by using the integrated `agent snmp walk` command.",
+                            "content": "**Why are my devices unreachable?**\n\nAn unreachable device means that the Agent cannot connect to it. \n-  Try loosening ACLs/firewall rules for your devices. To check connectivity from the Agent host to a network device, use the integrated `agent snmp walk` command.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
