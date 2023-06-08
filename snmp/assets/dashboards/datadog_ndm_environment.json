@@ -844,7 +844,7 @@
                                     "include_zero": false
                                 }
                             },
-                            "title": "Devices monitored using python integration",
+                            "title": "Devices monitored using the Python integration",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
