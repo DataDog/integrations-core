@@ -368,7 +368,7 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "title": "Running agents",
+                            "title": "Running Agents",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_table"
