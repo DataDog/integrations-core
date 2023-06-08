@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from datadog_checks.sqlserver.const import ENGINE_EDITION_SQL_DATABASE
+from datadog_checks.sqlserver.utils import is_azure_database
+
 QUERY_SERVER_STATIC_INFO = {
     'name': 'sys.dm_os_sys_info',
     'query': """
@@ -182,10 +185,11 @@ def get_query_ao_availability_groups(sqlserver_major_version):
     }
 
 
-def get_query_file_stats(sqlserver_major_version):
+def get_query_file_stats(sqlserver_major_version, sqlserver_engine_edition):
     """
     Construct the dm_io_virtual_file_stats QueryExecutor configuration based on the SQL Server major version
 
+    :param sqlserver_engine_edition: The engine version (i.e. 5 for Azure SQL DB...)
     :param sqlserver_major_version: SQL Server major version (i.e. 2012, 2019, ...)
     :return: a QueryExecutor query config object
     """
@@ -203,7 +207,7 @@ def get_query_file_stats(sqlserver_major_version):
         'io_stall': {'name': 'files.io_stall', 'type': 'monotonic_count'},
     }
 
-    if sqlserver_major_version <= 2012:
+    if sqlserver_major_version <= 2012 or not is_azure_database(sqlserver_engine_edition):
         column_definitions.pop("io_stall_queued_read_ms")
         column_definitions.pop("io_stall_queued_write_ms")
 
@@ -214,22 +218,36 @@ def get_query_file_stats(sqlserver_major_version):
         sql_columns.append("fs.{}".format(column))
         metric_columns.append(column_definitions[column])
 
-    return {
-        'name': 'sys.dm_io_virtual_file_stats',
-        'query': """
+    query = """
+    SELECT
+        DB_NAME(fs.database_id),
+        mf.state_desc,
+        mf.name,
+        mf.physical_name,
+        {sql_columns}
+    FROM sys.dm_io_virtual_file_stats(NULL, NULL) fs
+        LEFT JOIN sys.master_files mf
+            ON mf.database_id = fs.database_id
+            AND mf.file_id = fs.file_id;
+    """
+
+    if sqlserver_engine_edition == ENGINE_EDITION_SQL_DATABASE:
+        # Azure SQL DB does not have access to the sys.master_files view
+        query = """
         SELECT
-            DB_NAME(fs.database_id),
-            mf.state_desc,
-            mf.name,
-            mf.physical_name,
+            DB_NAME(DB_ID()),
+            df.state_desc,
+            df.name,
+            df.physical_name,
             {sql_columns}
         FROM sys.dm_io_virtual_file_stats(NULL, NULL) fs
-            LEFT JOIN sys.master_files mf
-                ON mf.database_id = fs.database_id
-                AND mf.file_id = fs.file_id;
-    """.strip().format(
-            sql_columns=", ".join(sql_columns)
-        ),
+            LEFT JOIN sys.database_files df
+                ON df.file_id = fs.file_id;
+        """
+
+    return {
+        'name': 'sys.dm_io_virtual_file_stats',
+        'query': query.strip().format(sql_columns=", ".join(sql_columns)),
         'columns': [
             {'name': 'db', 'type': 'tag'},
             {'name': 'state', 'type': 'tag'},
