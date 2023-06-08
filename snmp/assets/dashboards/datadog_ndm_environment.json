@@ -1543,7 +1543,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**No traps received ?**\n\n- Check your device configuration and ensure it is sending traps to the right port.\n- Check Traps server listening port, ensure it is using an unprivileged port (> 1024) or allow the Datadog agent to listen on privileged ports.\n",
+                            "content": "**Why are traps not being received?**\n\n- Check your device configuration and ensure it is sending traps to the right port.\n- Check the Traps server listening port and ensure it is using an unprivileged port (> 1024). Or, allow the Datadog Agent to listen on privileged ports.\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
