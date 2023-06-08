@@ -1497,12 +1497,8 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
 
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity"])
-@pytest.mark.parametrize(
-    "query_samples_enabled", [(True), (False)]
-)
-@pytest.mark.parametrize(
-    "query_activity_enabled", [(True), (False)]
-)
+@pytest.mark.parametrize("query_samples_enabled", [(True), (False)])
+@pytest.mark.parametrize("query_activity_enabled", [(True), (False)])
 @pytest.mark.parametrize(
     "user,password,dbname,query,arg",
     [("bob", "bob", "datadog_test", "BEGIN TRANSACTION; SELECT city FROM persons WHERE city = %s;", "hello")],
@@ -1543,11 +1539,11 @@ def test_disabled_activity_or_explain_plans(
         if query_activity_enabled:
             assert len(dbm_activity) > 0
         else:
-            assert len(dbm_activity) == 0 
-        if query_samples_enabled: 
+            assert len(dbm_activity) == 0
+        if query_samples_enabled:
             assert len(dbm_samples) > 0
         else:
-            assert len(dbm_samples) == 0 
+            assert len(dbm_samples) == 0
     finally:
         conn.close()
 
