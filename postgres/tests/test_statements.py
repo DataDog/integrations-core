@@ -142,6 +142,7 @@ def test_statement_metrics(
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
+    check.cancel()
 
     # We can't change track_io_timing at runtime, but we can change what the integration thinks the runtime value is
     # This must be done after the first check since postgres settings are loaded from the database then
@@ -149,8 +150,10 @@ def test_statement_metrics(
 
     _run_queries()
     check.check(dbm_instance)
+    check.cancel()
     _run_queries()
     check.check(dbm_instance)
+    check.cancel()
 
     def _should_catch_query(dbname):
         # we can always catch it if the query originals in the same DB
@@ -322,8 +325,10 @@ def test_statement_metrics_cloud_metadata(
 
     _run_queries()
     check.check(dbm_instance)
+    check.cancel()
     _run_queries()
     check.check(dbm_instance)
+    check.cancel()
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1, "should capture exactly one metrics payload"
@@ -370,9 +375,11 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
         cursor.execute(query, (['app1', 'app2'],))
         cursor.execute(query, (['app1', 'app2', 'app3'],))
         check.check(dbm_instance)
+        check.cancel()
         cursor.execute(query, (['app1', 'app2'],))
         cursor.execute(query, (['app1', 'app2', 'app3'],))
         check.check(dbm_instance)
+        check.cancel()
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1
@@ -521,6 +528,7 @@ def test_failed_explain_handling(
 
     # run check so all internal state is correctly initialized
     check.check(dbm_instance)
+    check.cancel()
 
     # clear out contents of aggregator so we measure only the metrics generated during this specific part of the test
     aggregator.reset()
@@ -675,6 +683,7 @@ def test_statement_samples_collect(
     try:
         conn.cursor().execute(query, (arg,))
         check.check(dbm_instance)
+        check.cancel()
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
         expected_query = query % ('\'' + arg + '\'' if isinstance(arg, string_types) else arg)
@@ -690,6 +699,7 @@ def test_statement_samples_collect(
             assert len(matching) == 0, "did not expect to catch any events"
             return
 
+        # check.cancel()
         assert len(matching) == 1, "missing captured event"
         event = matching[0]
         assert event['db']['query_truncated'] == expected_statement_truncated
@@ -778,10 +788,12 @@ def test_statement_metadata(
             query,
         )
         check.check(dbm_instance)
+        check.cancel()
         cursor.execute(
             query,
         )
         check.check(dbm_instance)
+        check.cancel()
 
     # Test samples metadata, metadata in samples is an object under `db`.
     samples = aggregator.get_event_platform_events("dbm-samples")
@@ -838,7 +850,9 @@ def test_statement_reported_hostname(
     check = integration_check(dbm_instance)
 
     check.check(dbm_instance)
+    check.cancel()
     check.check(dbm_instance)
+    check.cancel()
 
     samples = aggregator.get_event_platform_events("dbm-samples")
     assert samples, "should have collected at least one sample"
@@ -980,6 +994,7 @@ def test_activity_snapshot_collection(
         wait(conn)
         conn.cursor().execute(query, (arg,))
         check.check(dbm_instance)
+        check.cancel()
         dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
 
         if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
@@ -1062,6 +1077,7 @@ def test_activity_snapshot_collection(
         # Wait collection interval to make sure dbm events are reported
         time.sleep(dbm_instance['query_activity']['collection_interval'])
         check.check(dbm_instance)
+        check.cancel()
         dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
         event = dbm_activity_event[1]
         assert len(event['postgres_activity']) > 0
@@ -1102,7 +1118,9 @@ def test_activity_reported_hostname(
     check._connect()
 
     check.check(dbm_instance)
+    check.cancel()
     check.check(dbm_instance)
+    check.cancel()
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert dbm_activity, "should have at least one activity sample"
@@ -1253,8 +1271,10 @@ def test_statement_run_explain_errors(
     check._connect()
 
     check.check(dbm_instance)
+    check.cancel()
     _, explain_err_code, err = check.statement_samples._run_and_track_explain("datadog_test", query, query, query)
     check.check(dbm_instance)
+    check.cancel()
 
     assert explain_err_code == expected_explain_err_code
     assert err == expected_err
@@ -1296,6 +1316,7 @@ def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance,
         connections.append(conn)
 
     check.check(dbm_instance)
+    check.cancel()
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
     for _, _, dbname, query, arg in SAMPLE_QUERIES:
@@ -1452,6 +1473,7 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
         for q in queries:
             cursor.execute(q)
             check.check(dbm_instance)
+            check.cancel()
     cursor.close()
 
     def _sample_key(e):
@@ -1514,6 +1536,7 @@ def test_disabled_activity_or_explain_plans(
     try:
         conn.cursor().execute(query, (arg,))
         check.check(dbm_instance)
+        check.cancel()
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
 
@@ -1535,6 +1558,7 @@ def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
+    # check.cancel()
     # make sure there were no unhandled exceptions
     check.statement_samples._job_loop_future.result()
     check.statement_metrics._job_loop_future.result()
@@ -1575,12 +1599,14 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     check._connect()
     with pytest.raises(psycopg2.errors.UndefinedTable):
         check.check(dbm_instance)
+        # check.cancel()
 
     # run asynchronously, loop will crash the first time it tries to run as the table doesn't exist
     dbm_instance['query_samples']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
+    # check.cancel()
     # make sure there were no unhandled exceptions
     check.statement_samples._job_loop_future.result()
     aggregator.assert_metric(
@@ -1719,6 +1745,7 @@ def test_statement_metrics_database_errors(
         side_effect=error,
     ):
         check.check(dbm_instance)
+        check.cancel()
 
     expected_tags = dbm_instance['tags'] + [
         'db:{}'.format(DB_NAME),
@@ -1764,6 +1791,7 @@ def test_pg_stat_statements_max_warning(
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
+    check.cancel()
 
     assert check.warnings == expected_warnings
 
@@ -1779,6 +1807,7 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
 
     check = integration_check(dbm_instance_replica2)
     check.check(dbm_instance_replica2)
+    check.cancel()
 
     conn = _get_conn(dbm_instance_replica2)
     count_statements = 0
@@ -1806,6 +1835,7 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
 
     aggregator.reset()
     check.check(dbm_instance_replica2)
+    check.cancel()
     aggregator.assert_metric("postgresql.pg_stat_statements.max", value=100, tags=expected_tags)
     if float(POSTGRES_VERSION) >= 14.0:
         aggregator.assert_metric("postgresql.pg_stat_statements.dealloc", value=1, tags=expected_tags)
