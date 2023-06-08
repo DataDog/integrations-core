@@ -73,6 +73,8 @@ CONNTRACK_METRICS = [
     'system.net.conntrack.timestamp',
 ]
 
+
+# See the `tools/get_ethtool.py` script to update this mock if needed
 ETHTOOL_IOCTL_INPUTS_OUTPUTS = {
     # these are for the case where ENA values are present
     (

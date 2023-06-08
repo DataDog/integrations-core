@@ -270,10 +270,6 @@ def instance_type_overrides(field, value):
     return get_default_field_value(field, value)
 
 
-def instance_url(field, value):
-    return 'https://server:port'
-
-
 def instance_use_legacy_auth_encoding(field, value):
     return True
 

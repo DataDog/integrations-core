@@ -1,14 +1,13 @@
 base_package:
 - datadog_checks_base/**/*
 changelog/no-changelog:
-- requirements-agent-release.txt
-- '*/__about__.py'
+- any:
+  - requirements-agent-release.txt
+  - '*/__about__.py'
 - all:
-  - '*/!(datadog_checks)/**'
-- all:
-  - '*/!(pyproject.toml)'
-- all:
-  - '*/(!ddev)/**'
+  - '!*/datadog_checks/**'
+  - '!*/pyproject.toml'
+  - '!*/ddev/**'
 ddev:
 - ddev/**/*
 dependencies:
@@ -16,7 +15,7 @@ dependencies:
 dependency_provider:
 - datadog_checks_dependency_provider/**/*
 dev/testing:
-- .azure-pipelines/**
+- .github/workflows/**
 - .codecov.yml
 dev/tooling:
 - .github/workflows/**
