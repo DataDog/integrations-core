@@ -23,6 +23,8 @@ def test_check(aggregator, instance, openmetrics_metrics, dd_run_check):
 
     tags = ['is_leader:{}'.format('true' if is_leader(URL) else 'false')]
 
+    # Make sure we assert at least one metric to make sure the expected tags are being added
+    aggregator.assert_metric('etcd.process.cpu.seconds.total', tags=tags)
     for metric in openmetrics_metrics:
         aggregator.assert_metric('etcd.{}'.format(metric), tags=tags, at_least=0)
 
@@ -40,6 +42,8 @@ def test_check_no_leader_tag(aggregator, instance, openmetrics_metrics, dd_run_c
     check = Etcd('etcd', {}, [instance])
     dd_run_check(check)
 
+    # Make sure we assert at least one metric to make sure the leader tag is indeed not there
+    aggregator.assert_metric('etcd.process.cpu.seconds.total', tags=[])
     for metric in openmetrics_metrics:
         aggregator.assert_metric('etcd.{}'.format(metric), tags=[], at_least=0)
 
