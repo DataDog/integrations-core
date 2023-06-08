@@ -2100,7 +2100,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**What is NetFlow port rollup ?**\n\nNetFlow records with a source or destination port that is detected as ephemeral will be aggregated together. To detect these ephemeral ports, we keep a record of every source / destination port combination seen in the last 5 minutes. If a specific source port is associated with more than 10 different destination ports during that time, the destination port will be marked as ephemeral and all NetFlow records with this source port will be aggregated.\n\n  ",
+                            "content": "**What is NetFlow port rollup?**\n\nNetFlow records with a source or destination port that is detected as ephemeral are aggregated together. To detect these ephemeral ports, Datadog keeps a record of every source/destination port combination seen in the last 5 minutes. If a specific source port is associated with more than 10 different destination ports during that time, the destination port is marked as ephemeral and all NetFlow records with this source port will be aggregated.\n\n  ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
