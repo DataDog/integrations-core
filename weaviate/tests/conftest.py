@@ -42,8 +42,4 @@ def dd_environment():
             }
             yield instance
 
-@pytest.fixture
-def instance():
-    return {
-        "openmetrics_endpoint": 'http://localhost:2112/metrics',
-    }
+
