@@ -40,7 +40,7 @@
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "This dashboard provides a high level overview to help monitor and troubleshoot the health of your Network Device Monitoring environment. You can track health and performance of your running agents, as well as SNMP, Traps and NetFlow Monitoring integrations.\n\n**Further reading on NDM**\n\n- Our blog post on [Monitoring Datacenters and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n- Our blog post on [Monitoring network devices with SNMP](https://www.datadoghq.com/blog/monitor-snmp-with-datadog/)\n- Network Device Monitoring [docs](https://docs.datadoghq.com/network_performance_monitoring/devices) ",
+                            "content": "This dashboard provides a high-level overview to help you monitor and troubleshoot the health of your Network Device Monitoring environment. You can track health and performance of your running agents, as well as SNMP, Traps, and NetFlow Monitoring integrations.\n\n**Further reading on NDM**\n\n- Our blog post on [Monitoring Datacenters and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n- Our blog post on [Monitoring network devices with SNMP](https://www.datadoghq.com/blog/monitor-snmp-with-datadog/)\n- Network Device Monitoring [docs](https://docs.datadoghq.com/network_performance_monitoring/devices) ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
