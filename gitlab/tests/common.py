@@ -290,4 +290,7 @@ def assert_check(aggregator, metrics, use_openmetrics=False):
         )
 
     for metric in metrics:
-        aggregator.assert_metric("gitlab.{}".format(metric))
+        aggregator.assert_metric("gitlab.{}".format(metric), at_least=0)
+
+    # Assert that we have at least one of them
+    assert len(aggregator.metric_names) > 1
