@@ -2460,7 +2460,7 @@
                     {
                         "definition": {
                             "background_color": "gray",
-                            "content": "Following widget only valid for: **NetFlow9 / IPFIX**",
+                            "content": "The following widget is only valid for **NetFlow9/IPFIX**.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
