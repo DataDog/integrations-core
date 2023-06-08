@@ -15,7 +15,7 @@ dependencies:
 dependency_provider:
 - datadog_checks_dependency_provider/**/*
 dev/testing:
-- .azure-pipelines/**
+- .github/workflows/**
 - .codecov.yml
 dev/tooling:
 - .github/workflows/**
