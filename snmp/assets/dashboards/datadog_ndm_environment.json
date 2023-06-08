@@ -1385,7 +1385,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "You can find more information on how to setup network devices autodiscovery using the Datadog agent in the following article. \n\n[Collect SNMP Metrics From Your Network Devices](https://docs.datadoghq.com/network_monitoring/devices/snmp_metrics/?tab=snmpv2#autodiscovery)",
+                            "content": "You can find more information on how to setup network devices Autodiscovery using the Datadog Agent. \n\n See [Collect SNMP Metrics From Your Network Devices](https://docs.datadoghq.com/network_monitoring/devices/snmp_metrics/?tab=snmpv2#autodiscovery).",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
