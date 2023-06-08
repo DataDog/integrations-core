@@ -47,7 +47,7 @@ def _build_similar_elements(expected_element, submitted_elements):
         raise NotImplementedError("Invalid type: {}".format(expected_element))
 
     similar_elements = []
-    for _, metric_stubs in iteritems(list(submitted_elements)):
+    for _, metric_stubs in iteritems(submitted_elements):
         for candidate_metric in metric_stubs:
             score = scoring_fn(expected_element, candidate_metric)
             similar_elements.append((score, candidate_metric))
