@@ -107,6 +107,8 @@ def validate_license_headers(
 
         # When it's a new file and a license header is found, compare it to the current header template
         elif license_header != get_default_license_header():
+            print("LICENSE_HEADER: \n", license_header)
+            print("GET_DEFAULT_LICENSE_HEADER(): \n", get_default_license_header())
             return LicenseHeaderError(
                 "file does not match expected license format",
                 relpath,
