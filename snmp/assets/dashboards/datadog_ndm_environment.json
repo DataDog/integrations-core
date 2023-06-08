@@ -2272,7 +2272,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**No packets received ?**\n\n- Check your NetFlow exporter configuration and ensure it is sending flows to the right port.\n- Check NetFlow server listening port, ensure it is using an unprivileged port (> 1024) or allow the Datadog agent to listen on privileged ports.\n",
+                            "content": "**Why are packets not being received?**\n\n- Check your NetFlow exporter configuration and ensure it is sending flows to the right port.\n- Check the NetFlow server listening port and ensure that it is using an unprivileged port (> 1024). Or, allow the Datadog Agent to listen on privileged ports.\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
