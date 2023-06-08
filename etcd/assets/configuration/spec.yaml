@@ -9,7 +9,7 @@ files:
     options:
       - name: use_preview
         description: |
-          Deprecated and unused. The Prometheus-based check is now the default and only implementation.
+          Deprecated and unused. The Prometheus-based check is the default and only implementation.
         hidden: true
         value:
           type: boolean
