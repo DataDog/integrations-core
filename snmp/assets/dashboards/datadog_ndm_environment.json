@@ -791,7 +791,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**Any python integration usage ?**\n\nNetwork Device Monitoring requires the usage of the SNMP core check, which is substantially faster and includes the newest features.\n\n[Follow this guide to migrate from the python integration to the core check.](https://docs.datadoghq.com/network_monitoring/devices/guide/migrating-to-snmp-core-check)",
+                            "content": "**Are you using the Python integration ?**\n\nNetwork Device Monitoring requires the SNMP core check, which is substantially faster and includes the latest features.\n\n To migrate from the Python integration to the core check, see [Migrating to the SNMP Core Check](https://docs.datadoghq.com/network_monitoring/devices/guide/migrating-to-snmp-core-check).",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
