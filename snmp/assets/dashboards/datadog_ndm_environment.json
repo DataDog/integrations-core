@@ -2439,7 +2439,7 @@
                     {
                         "definition": {
                             "background_color": "gray",
-                            "content": "Following widget only valid for: **NetFlow5 / SFlow**\n",
+                            "content": "The following widget is only valid for **NetFlow5/SFlow**.\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
