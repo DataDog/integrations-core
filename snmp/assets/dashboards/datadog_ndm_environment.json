@@ -1000,7 +1000,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**Abnormal check duration/interval ?**\n\n- Try increasing number of check runners (`check_runners:`) in your `datadog.yaml` config.\n- You can also increase the `oid_batch_size` in SNMP conf. Be careful, as a high value can lead to timeouts on some network devices.\n- If this doesn't help, you might need to split the monitoring of your devices across several agents.",
+                            "content": "**Abnormal check duration/interval?**\n\n- Try increasing the number of check runners (`check_runners:`) in your `datadog.yaml` configuration.\n- Try also increasing the `oid_batch_size` in your SNMP configuration. **Note:** A high value can lead to timeouts on some network devices.\n- If neither suggestions work, you may need to split the monitoring of your devices across several agents.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
