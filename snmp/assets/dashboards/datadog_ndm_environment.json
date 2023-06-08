@@ -1282,7 +1282,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**No metrics are collected ?**\n\n- Try loosening ACLs/firewall rules for your devices. You can check connectivity from the agent host to a network device by using the integrated `agent snmp walk` command.\n- Check connectivity between the Agent host and Datadog.",
+                            "content": "**Why are no metrics being collected?**\n\n- Try loosening ACLs/firewall rules for your devices. You can check connectivity from the Agent host to a network device by using the integrated `agent snmp walk` command.\n- Check connectivity between the Agent host and Datadog.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
