@@ -699,7 +699,6 @@ def test_statement_samples_collect(
             assert len(matching) == 0, "did not expect to catch any events"
             return
 
-        # check.cancel()
         assert len(matching) == 1, "missing captured event"
         event = matching[0]
         assert event['db']['query_truncated'] == expected_statement_truncated
@@ -1554,7 +1553,6 @@ def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
-    # check.cancel()
     # make sure there were no unhandled exceptions
     check.statement_samples._job_loop_future.result()
     check.statement_metrics._job_loop_future.result()
@@ -1595,14 +1593,12 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     check._connect()
     with pytest.raises(psycopg2.errors.UndefinedTable):
         check.check(dbm_instance)
-        # check.cancel()
 
     # run asynchronously, loop will crash the first time it tries to run as the table doesn't exist
     dbm_instance['query_samples']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
-    # check.cancel()
     # make sure there were no unhandled exceptions
     check.statement_samples._job_loop_future.result()
     aggregator.assert_metric(
