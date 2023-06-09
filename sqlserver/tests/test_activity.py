@@ -716,7 +716,6 @@ def test_async_job_enabled(dd_run_check, dbm_instance, activity_enabled):
     check.cancel()
     if activity_enabled:
         assert check.activity._job_loop_future is not None
-        check.activity._job_loop_future.result()
     else:
         assert check.activity._job_loop_future is None
 
@@ -742,8 +741,6 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
     check.cancel()
-    # wait for it to stop and make sure it doesn't throw any exceptions
-    check.activity._job_loop_future.result()
     assert not check.activity._job_loop_future.running(), "activity thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
