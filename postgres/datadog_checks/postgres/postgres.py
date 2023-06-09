@@ -33,6 +33,8 @@ from .util import (
     QUERY_PG_UPTIME,
     REPLICATION_METRICS,
     SLRU_METRICS,
+    SNAPSHOT_TXID_METRICS,
+    SNAPSHOT_TXID_METRICS_LT_13,
     DatabaseConfigurationError,  # noqa: F401
     fmt,
     get_schema_field,
@@ -172,6 +174,11 @@ class PostgreSql(AgentCheck):
                 queries.append(QUERY_PG_STAT_WAL_RECEIVER)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
 
+        if self.version >= V13:
+            queries.append(SNAPSHOT_TXID_METRICS)
+        if self.version < V13:
+            queries.append(SNAPSHOT_TXID_METRICS_LT_13)
+
         if not queries:
             self.log.debug("no dynamic queries defined")
             return None
@@ -185,6 +192,7 @@ class PostgreSql(AgentCheck):
     def cancel(self):
         self.statement_samples.cancel()
         self.statement_metrics.cancel()
+        self.metadata_samples.cancel()
 
     def _clean_state(self):
         self.log.debug("Cleaning state")

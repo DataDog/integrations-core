@@ -24,7 +24,11 @@
 
 * [Changed] Implement automatic exposition format detection. See [#14445](https://github.com/DataDog/integrations-core/pull/14445).
 
-## 31.0.1 / 2023-04-19 / Agent 7.45.0
+## 31.0.2 / 2023-05-31 / Agent 7.45.0
+
+* [Fixed] Backport pydantic 1.10.8 upgrade to 7.45. See [#14655](https://github.com/DataDog/integrations-core/pull/14655).
+
+## 31.0.1 / 2023-04-19 
 
 * [Fixed] Do not add `freezegun` dependency to agent. See [#14393](https://github.com/DataDog/integrations-core/pull/14393).
 

@@ -1,91 +1,32 @@
-# (C) Datadog, Inc. 2018-present
+# (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-from copy import deepcopy
 
 import pytest
 import requests
 from six import iteritems
 
-from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.elastic import ESCheck
-from datadog_checks.elastic.config import from_instance
 from datadog_checks.elastic.metrics import (
     CAT_ALLOCATION_METRICS,
     CLUSTER_PENDING_TASKS,
     INDEX_SEARCH_STATS,
     STATS_METRICS,
-    ADDITIONAL_METRICS_1_x,
     health_stats_for_version,
     index_stats_for_version,
     pshard_stats_for_version,
     slm_stats_for_version,
-    stats_for_version,
 )
 
-from .common import CLUSTER_TAG, IS_OPENSEARCH, JVM_RATES, PASSWORD, URL, USER, get_fixture_path
+from .common import CLUSTER_TAG, IS_OPENSEARCH, JVM_RATES, PASSWORD, URL, USER, _test_check
 
 log = logging.getLogger('test_elastic')
 
-
-@pytest.mark.unit
-def test__join_url():
-    instance = {
-        "url": "https://localhost:9444/elasticsearch-admin",
-        "admin_forwarder": True,
-    }
-    check = ESCheck('elastic', {}, instances=[instance])
-
-    adm_forwarder_joined_url = check._join_url("/stats", admin_forwarder=True)
-    assert adm_forwarder_joined_url == "https://localhost:9444/elasticsearch-admin/stats"
-
-    joined_url = check._join_url("/stats", admin_forwarder=False)
-    assert joined_url == "https://localhost:9444/stats"
+pytestmark = pytest.mark.integration
 
 
-@pytest.mark.parametrize(
-    'instance, url_fix',
-    [
-        pytest.param({'url': URL}, '_local/'),
-        pytest.param({'url': URL, "cluster_stats": True, "slm_stats": True}, ''),
-    ],
-)
-@pytest.mark.unit
-def test__get_urls(instance, url_fix):
-    elastic_check = ESCheck('elastic', {}, instances=[instance])
-
-    health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url = elastic_check._get_urls([])
-    assert health_url == '/_cluster/health'
-    assert stats_url == '/_cluster/nodes/' + url_fix + 'stats?all=true'
-    assert pshard_stats_url == '/_stats'
-    assert pending_tasks_url is None
-    assert slm_url is None
-
-    health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url = elastic_check._get_urls([1, 0, 0])
-    assert health_url == '/_cluster/health'
-    assert stats_url == '/_nodes/' + url_fix + 'stats?all=true'
-    assert pshard_stats_url == '/_stats'
-    assert pending_tasks_url == '/_cluster/pending_tasks'
-    assert slm_url is None
-
-    health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url = elastic_check._get_urls([6, 0, 0])
-    assert health_url == '/_cluster/health'
-    assert stats_url == '/_nodes/' + url_fix + 'stats'
-    assert pshard_stats_url == '/_stats'
-    assert pending_tasks_url == '/_cluster/pending_tasks'
-    assert slm_url is None
-
-    health_url, stats_url, pshard_stats_url, pending_tasks_url, slm_url = elastic_check._get_urls([7, 4, 0])
-    assert health_url == '/_cluster/health'
-    assert stats_url == '/_nodes/' + url_fix + 'stats'
-    assert pshard_stats_url == '/_stats'
-    assert pending_tasks_url == '/_cluster/pending_tasks'
-    assert slm_url == ('/_slm/policy' if instance.get('slm_stats') is True else None)
-
-
-@pytest.mark.integration
 def test_custom_queries_valid_metrics(dd_environment, dd_run_check, instance, aggregator):
     custom_queries = [
         {
@@ -101,7 +42,6 @@ def test_custom_queries_valid_metrics(dd_environment, dd_run_check, instance, ag
         },
     ]
 
-    instance = deepcopy(instance)
     instance['custom_queries'] = custom_queries
     check = ESCheck('elastic', {}, instances=[instance])
     dd_run_check(check)
@@ -110,7 +50,6 @@ def test_custom_queries_valid_metrics(dd_environment, dd_run_check, instance, ag
     aggregator.assert_metric('elasticsearch.custom.metric', metric_type=aggregator.GAUGE)
 
 
-@pytest.mark.integration
 def test_custom_queries_one_invalid(dd_environment, dd_run_check, instance, aggregator):
     custom_queries = [
         {
@@ -137,7 +76,6 @@ def test_custom_queries_one_invalid(dd_environment, dd_run_check, instance, aggr
         },
     ]
 
-    instance = deepcopy(instance)
     instance['custom_queries'] = custom_queries
     check = ESCheck('elastic', {}, instances=[instance])
     dd_run_check(check)
@@ -145,7 +83,6 @@ def test_custom_queries_one_invalid(dd_environment, dd_run_check, instance, aggr
     aggregator.assert_metric('elasticsearch.custom.metric', metric_type=aggregator.GAUGE)
 
 
-@pytest.mark.integration
 def test_custom_queries_with_payload(dd_environment, dd_run_check, instance, aggregator, cluster_tags):
     custom_queries = [
         {
@@ -162,7 +99,6 @@ def test_custom_queries_with_payload(dd_environment, dd_run_check, instance, agg
         },
     ]
 
-    instance = deepcopy(instance)
     instance['custom_queries'] = custom_queries
     check = ESCheck('elastic', {}, instances=[instance])
     dd_run_check(check)
@@ -171,7 +107,6 @@ def test_custom_queries_with_payload(dd_environment, dd_run_check, instance, agg
     aggregator.assert_metric('elasticsearch.custom.metric', metric_type=aggregator.GAUGE, tags=tags)
 
 
-@pytest.mark.integration
 def test_custom_queries_valid_tags(dd_environment, dd_run_check, instance, aggregator, cluster_tags):
     custom_queries = [
         {
@@ -188,7 +123,6 @@ def test_custom_queries_valid_tags(dd_environment, dd_run_check, instance, aggre
         },
     ]
 
-    instance = deepcopy(instance)
     instance['custom_queries'] = custom_queries
     check = ESCheck('elastic', {}, instances=[instance])
     dd_run_check(check)
@@ -197,7 +131,6 @@ def test_custom_queries_valid_tags(dd_environment, dd_run_check, instance, aggre
     aggregator.assert_metric('elasticsearch.custom.metric', metric_type=aggregator.GAUGE, tags=tags)
 
 
-@pytest.mark.integration
 def test_custom_queries_non_existent_metrics(caplog, dd_environment, dd_run_check, instance, aggregator):
     custom_queries = [
         {
@@ -212,7 +145,6 @@ def test_custom_queries_non_existent_metrics(caplog, dd_environment, dd_run_chec
             'tags': ['custom_tag:1'],
         },
     ]
-    instance = deepcopy(instance)
     instance['custom_queries'] = custom_queries
     check = ESCheck('elastic', {}, instances=[instance])
     caplog.clear()
@@ -224,7 +156,6 @@ def test_custom_queries_non_existent_metrics(caplog, dd_environment, dd_run_chec
     assert 'Metric not found: _nodes.totals -> elasticsearch.custom.metric' in caplog.text
 
 
-@pytest.mark.integration
 def test_custom_queries_non_existent_tags(caplog, dd_environment, dd_run_check, instance, aggregator, cluster_tags):
     custom_queries = [
         {
@@ -243,7 +174,6 @@ def test_custom_queries_non_existent_tags(caplog, dd_environment, dd_run_check, 
             ],
         },
     ]
-    instance = deepcopy(instance)
     instance['custom_queries'] = custom_queries
     check = ESCheck('elastic', {}, instances=[instance])
     caplog.clear()
@@ -256,21 +186,18 @@ def test_custom_queries_non_existent_tags(caplog, dd_environment, dd_run_check, 
     assert 'Dynamic tag is null: _nodes.total -> nonexistent_tag' in caplog.text
 
 
-@pytest.mark.integration
 def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags):
     elastic_check.check(None)
     _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
 
 
 @pytest.mark.skipif(IS_OPENSEARCH, reason='Test unavailable for OpenSearch')
-@pytest.mark.integration
 def test_check_slm_stats(dd_environment, instance, aggregator, cluster_tags, node_tags, slm_tags):
-    slm_instance = deepcopy(instance)
-    slm_instance['slm_stats'] = True
-    elastic_check = ESCheck('elastic', {}, instances=[slm_instance])
+    instance['slm_stats'] = True
+    elastic_check = ESCheck('elastic', {}, instances=[instance])
     elastic_check.check(None)
 
-    _test_check(elastic_check, slm_instance, aggregator, cluster_tags, node_tags)
+    _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
 
     # SLM stats
     slm_metrics = slm_stats_for_version(elastic_check._get_es_version())
@@ -278,11 +205,9 @@ def test_check_slm_stats(dd_environment, instance, aggregator, cluster_tags, nod
         aggregator.assert_metric(m_name, at_least=1, tags=slm_tags)
 
 
-@pytest.mark.integration
 def test_disable_cluster_tag(dd_environment, instance, aggregator, new_cluster_tags):
-    disable_instance = deepcopy(instance)
-    disable_instance['disable_legacy_cluster_tag'] = True
-    elastic_check = ESCheck('elastic', {}, instances=[disable_instance])
+    instance['disable_legacy_cluster_tag'] = True
+    elastic_check = ESCheck('elastic', {}, instances=[instance])
     elastic_check.check(None)
     es_version = elastic_check._get_es_version()
 
@@ -293,7 +218,6 @@ def test_disable_cluster_tag(dd_environment, instance, aggregator, new_cluster_t
         aggregator.assert_metric(m_name, at_least=1, tags=new_cluster_tags)
 
 
-@pytest.mark.integration
 def test_jvm_gc_rate_metrics(dd_environment, instance, aggregator, cluster_tags, node_tags):
     instance['gc_collectors_as_rate'] = True
     check = ESCheck('elastic', {}, instances=[instance])
@@ -304,38 +228,6 @@ def test_jvm_gc_rate_metrics(dd_environment, instance, aggregator, cluster_tags,
     _test_check(check, instance, aggregator, cluster_tags, node_tags)
 
 
-def _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags):
-    config = from_instance(instance)
-    es_version = elastic_check._get_es_version()
-
-    # node stats, blacklist metrics that can't be tested in a small, single node instance
-    blacklist = ['elasticsearch.indices.segments.index_writer_max_memory_in_bytes']
-    blacklist.extend(ADDITIONAL_METRICS_1_x)
-    for m_name in stats_for_version(es_version):
-        if m_name in blacklist:
-            continue
-        aggregator.assert_metric(m_name, at_least=1, tags=node_tags)
-
-    # cluster stats
-    expected_metrics = health_stats_for_version(es_version)
-    expected_metrics.update(CLUSTER_PENDING_TASKS)
-    for m_name in expected_metrics:
-        aggregator.assert_metric(m_name, at_least=1, tags=cluster_tags)
-
-    aggregator.assert_service_check('elasticsearch.can_connect', status=ESCheck.OK, tags=config.service_check_tags)
-
-    # Assert service metadata
-    # self.assertServiceMetadata(['version'], count=3)
-    # FIXME: 0.90.13 returns randomly a red status instead of yellow,
-    # so we don't do a coverage test for it
-    # Remove me when we stop supporting 0.90.x (not supported anymore by ES)
-    if es_version != [0, 90, 13]:
-        # Warning because elasticsearch status should be yellow, according to
-        # http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html
-        aggregator.assert_service_check('elasticsearch.cluster_health')
-
-
-@pytest.mark.integration
 def test_node_name_as_host(dd_environment, instance_normalize_hostname, aggregator, node_tags):
     elastic_check = ESCheck('elastic', {}, instances=[instance_normalize_hostname])
     elastic_check.check(None)
@@ -345,7 +237,6 @@ def test_node_name_as_host(dd_environment, instance_normalize_hostname, aggregat
         aggregator.assert_metric(m_name, count=1, tags=node_tags, hostname=node_name)
 
 
-@pytest.mark.integration
 def test_pshard_metrics(dd_environment, aggregator):
     instance = {'url': URL, 'pshard_stats': True, 'username': USER, 'password': PASSWORD, 'tls_verify': False}
     elastic_check = ESCheck('elastic', {}, instances=[instance])
@@ -364,7 +255,6 @@ def test_pshard_metrics(dd_environment, aggregator):
     aggregator.assert_metric('elasticsearch.primaries.docs.count')
 
 
-@pytest.mark.integration
 def test_detailed_index_stats(dd_environment, aggregator):
     instance = {
         "url": URL,
@@ -405,7 +295,6 @@ def test_detailed_index_stats(dd_environment, aggregator):
     )
 
 
-@pytest.mark.integration
 def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
     instance['index_stats'] = True
     elastic_check = ESCheck('elastic', {}, instances=[instance])
@@ -423,7 +312,6 @@ def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
     )
 
 
-@pytest.mark.integration
 def test_cat_allocation_metrics(dd_environment, aggregator, instance, cluster_tags):
     instance['cat_allocation_stats'] = True
     elastic_check = ESCheck('elastic', {}, instances=[instance])
@@ -433,7 +321,6 @@ def test_cat_allocation_metrics(dd_environment, aggregator, instance, cluster_ta
         aggregator.assert_metric(m_name)
 
 
-@pytest.mark.integration
 def test_health_event(dd_environment, aggregator):
     dummy_tags = ['elastique:recherche']
     instance = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': dummy_tags, 'tls_verify': False}
@@ -452,7 +339,6 @@ def test_health_event(dd_environment, aggregator):
         aggregator.assert_service_check('elasticsearch.cluster_health')
 
 
-@pytest.mark.integration
 def test_health_event_disabled(dd_environment, aggregator):
     """
     Don't submit an event if user disables event submission.
@@ -478,77 +364,8 @@ def test_health_event_disabled(dd_environment, aggregator):
     aggregator.assert_service_check('elasticsearch.cluster_health')
 
 
-@pytest.mark.integration
 def test_metadata(dd_environment, aggregator, elastic_check, instance, version_metadata, datadog_agent):
     elastic_check.check_id = 'test:123'
     elastic_check.check(None)
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata))
-
-
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    'instance, expected_aws_host, expected_aws_service',
-    [
-        pytest.param(
-            {'auth_type': 'aws', 'aws_region': 'foo', 'url': 'http://example.com'},
-            'example.com',
-            'es',
-            id='aws_host_from_url',
-        ),
-        pytest.param(
-            {'auth_type': 'aws', 'aws_region': 'foo', 'aws_host': 'foo.com', 'url': 'http://example.com'},
-            'foo.com',
-            'es',
-            id='aws_host_custom_with_url',
-        ),
-        pytest.param(
-            {'auth_type': 'aws', 'aws_region': 'foo', 'aws_service': 'es-foo', 'url': 'http://example.com'},
-            'example.com',
-            'es-foo',
-            id='aws_service_custom',
-        ),
-    ],
-)
-def test_aws_auth_url(instance, expected_aws_host, expected_aws_service):
-    check = ESCheck('elastic', {}, instances=[instance])
-
-    assert getattr(check.http.options.get('auth'), 'aws_host', None) == expected_aws_host
-    assert getattr(check.http.options.get('auth'), 'service', None) == expected_aws_service
-
-    # make sure class attribute HTTP_CONFIG_REMAPPER is not modified
-    assert 'aws_host' not in ESCheck.HTTP_CONFIG_REMAPPER
-
-
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    'instance, expected_aws_host, expected_aws_service',
-    [
-        pytest.param({}, None, None, id='not aws auth'),
-        pytest.param(
-            {'auth_type': 'aws', 'aws_region': 'foo', 'aws_host': 'foo.com'},
-            'foo.com',
-            'es',
-            id='aws_host_custom_no_url',
-        ),
-    ],
-)
-def test_aws_auth_no_url(instance, expected_aws_host, expected_aws_service):
-    with pytest.raises(ConfigurationError):
-        ESCheck('elastic', {}, instances=[instance])
-
-
-@pytest.mark.e2e
-def test_e2e(dd_agent_check, elastic_check, instance, cluster_tags, node_tags):
-    aggregator = dd_agent_check(instance, rate=True)
-    _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
-
-
-@pytest.mark.unit
-def test_get_template_metrics(aggregator, instance, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('templates.json'))
-    check = ESCheck('elastic', {}, instances=[instance])
-
-    check._get_template_metrics(False, [])
-
-    aggregator.assert_metric("elasticsearch.templates.count", value=6)
