@@ -369,7 +369,7 @@ The Win32 Event log check does not include any service checks.
 
 Need help? Contact [Datadog support][7] with an [Agent Flare][19].
 
-### Logs are not sent to Datadog
+### Log processing rules are not working
 
 If you are using log processing rules to filter out logs, verify that the raw logs match the regex pattern you configured. In the configuration below, log levels must be either "warning" or "error", any other value will be excluded.
 
