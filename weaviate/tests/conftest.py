@@ -37,8 +37,12 @@ def dd_environment():
             weaviate_host, weaviate_port = stack.enter_context(
                 port_forward(kubeconfig, 'weaviate', 2112, 'statefulset', 'weaviate')
             )
+            weaviate_host, weaviate_api_port = stack.enter_context(
+                port_forward(kubeconfig, 'weaviate', 8080, 'statefulset', 'weaviate')
+            )
             instance = {
-                "openmetrics_endpoint": 'http://{}:{}/metrics'.format(weaviate_host, weaviate_port)
+                "openmetrics_endpoint": f"http://{weaviate_host}:{weaviate_port}/metrics",
+                "weaviate_api": f"http://{weaviate_host}:{weaviate_api_port}",
             }
             yield instance
 
