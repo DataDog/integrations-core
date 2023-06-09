@@ -180,7 +180,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
-    
 
         # if regular samples is disabled, only need to collect as often as activity is sampled
         if not is_affirmative(config.statement_samples_config.get('enabled', True)):
@@ -198,7 +197,10 @@ class PostgresStatementSamples(DBMAsyncJob):
             check,
             rate_limit=1 / collection_interval,
             run_sync=is_affirmative(config.statement_samples_config.get('run_sync', False)),
-            enabled=is_affirmative(config.statement_samples_config.get('enabled', True) or is_affirmative(config.statement_activity_config.get('enabled', True))), 
+            enabled=is_affirmative(
+                config.statement_samples_config.get('enabled', True)
+                or is_affirmative(config.statement_activity_config.get('enabled', True))
+            ),
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
