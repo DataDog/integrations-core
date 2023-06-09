@@ -260,7 +260,7 @@ GITALY_METRICS_TO_TEST = [
 ]
 
 
-def assert_check(aggregator, metrics, use_openmetrics=False):
+def assert_check(aggregator, metrics, use_openmetrics=False, at_least=1):
     """
     Basic Test for gitlab integration.
     """
@@ -290,7 +290,7 @@ def assert_check(aggregator, metrics, use_openmetrics=False):
         )
 
     for metric in metrics:
-        aggregator.assert_metric("gitlab.{}".format(metric), at_least=0)
+        aggregator.assert_metric("gitlab.{}".format(metric), at_least=at_least)
 
     # Assert that we have at least one of them
     assert len(aggregator.metric_names) > 1
