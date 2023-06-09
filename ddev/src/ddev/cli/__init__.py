@@ -5,7 +5,6 @@ import os
 
 import click
 import pluggy
-
 from datadog_checks.dev.tooling.commands.create import create
 from datadog_checks.dev.tooling.commands.dep import dep
 from datadog_checks.dev.tooling.commands.run import run
