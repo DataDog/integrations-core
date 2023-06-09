@@ -16,8 +16,7 @@ if TYPE_CHECKING:
 @click.pass_obj
 def clean(app: Application):
     """
-    Remove build and test artifacts for the given CHECK. If CHECK is not
-    specified, the current working directory is used.
+    Remove build and test artifacts for the current working directory.
     """
     with app.repo.path.as_cwd():
         app.platform.run_command(["git", "clean", "-fdX", "-e", "!.vscode", "-e", "!.idea"])
