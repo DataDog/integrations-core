@@ -65,7 +65,7 @@ In a Mongo shell, authenticate to the primary and create a read-only user for th
 use admin
 db.auth("admin", "<YOUR_MONGODB_ADMIN_PASSWORD>")
 
-
+# Create the user for the Datadog Agent.
 db.createUser({
   "user": "datadog",
   "pwd": "<UNIQUEPASSWORD>",
