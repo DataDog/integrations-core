@@ -9,7 +9,6 @@ import os
 import socket
 import threading
 import time
-from concurrent.futures import CancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from itertools import chain
 from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
