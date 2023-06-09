@@ -190,6 +190,9 @@ class PostgreSql(AgentCheck):
         return self._dynamic_queries
 
     def cancel(self):
+        """
+        Cancels and waits for all threads to stop.
+        """
         self.statement_samples.cancel()
         self.statement_metrics.cancel()
         self.metadata_samples.cancel()
