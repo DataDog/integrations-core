@@ -2,7 +2,7 @@
 
 [envs.default]
 dependencies = [
-  "confluent_kafka==1.4.1",
+  "confluent_kafka==1.7.0",
 ]
 
 [[envs.default.matrix]]

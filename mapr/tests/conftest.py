@@ -12,9 +12,8 @@ from . import common
 E2E_METADATA = {
     'post_install_commands': [
         'apt-get update',
-        'apt-get install -y gcc librdkafka-dev',
-        'pip install --global-option=build_ext --global-option="--library-dirs=/opt/mapr/lib"'
-        ' --global-option="--include-dirs=/opt/mapr/include/" mapr-streams-python',
+        'apt-get install -y gcc',
+        'pip install mapr-streams-python',
     ]
 }
 
