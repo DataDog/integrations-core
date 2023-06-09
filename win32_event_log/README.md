@@ -367,13 +367,34 @@ The Win32 Event log check does not include any service checks.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][7] with an [Agent Flare][19].
+
+### Logs are not sent to Datadog
+
+If you are using log processing rules to filter out logs, verify that the raw logs match the regex pattern you configured. In the configuration below, log levels must be either "warning" or "error", any other value will be excluded.
+
+```yaml
+    - type: windows_event
+      channel_path: System
+      source: windows.events
+      service: Windows       
+      log_processing_rules:
+      - type: include_at_match
+        name: system_errors_and_warnings
+        pattern: '"level":"((?i)warning|error)"'
+```
+
+To troubleshoot this:
+1. Remove or comment out the `log_processing_rules`.
+1. Restart the agent.
+1. Send a test log. If you see the log in Datadog, verify the filtering pattern.
 
 ## Further Reading
 
 ### Documentation
 
 - (Legacy) [Add event log files to the `Win32_NTLogEvent` WMI class][8]
+- [Advanced Log Collection][20]
 
 ### Blog
 
@@ -399,3 +420,5 @@ Need help? Contact [Datadog support][7].
 [16]: https://docs.datadoghq.com/events/
 [17]: https://docs.datadoghq.com/logs/
 [18]: https://docs.datadoghq.com/agent/logs/#activate-log-collection
+[19]: https://docs.datadoghq.com/agent/troubleshooting/send_a_flare/?tab=agentv6v7
+[20]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfile
