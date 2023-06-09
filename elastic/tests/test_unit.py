@@ -129,19 +129,5 @@ def test_get_template_metrics(aggregator, instance, mock_http_response):
 
 
 def test_get_value_from_path():
-    value = get_value_from_path(
-        {
-            "5": {
-                "b": [
-                    0,
-                    1,
-                    2,
-                    {
-                        "a": ["foo"]
-                    }
-                ]
-            }
-        },
-        "5.b.3.a.0"
-    )
+    value = get_value_from_path({"5": {"b": [0, 1, 2, {"a": ["foo"]}]}}, "5.b.3.a.0")
     assert value == "foo"

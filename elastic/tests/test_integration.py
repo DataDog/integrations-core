@@ -109,33 +109,17 @@ def test_custom_queries_with_payload(dd_environment, dd_run_check, instance, agg
 
 
 @pytest.mark.skipif(
-    version.parse(ELASTIC_VERSION) < version.parse('8.0.0'),
-    reason='Test unavailable for Elasticsearch < 8.0.0'
+    version.parse(ELASTIC_VERSION) < version.parse('8.0.0'), reason='Test unavailable for Elasticsearch < 8.0.0'
 )
 def test_custom_queries_with_payload_multiterm(dd_environment, dd_run_check, instance, aggregator, cluster_tags):
     response = requests.put(
         "{}/multiterm_test".format(instance['url']),
-        json={
-            "mappings": {
-                "properties": {
-                    "field0": {
-                        "type": "keyword"
-                    },
-                    "field1": {
-                        "type": "keyword"
-                    }
-                }
-            }
-        }
+        json={"mappings": {"properties": {"field0": {"type": "keyword"}, "field1": {"type": "keyword"}}}},
     )
     response.raise_for_status()
 
     response = requests.post(
-        "{}/multiterm_test/_doc?refresh=wait_for".format(instance['url']),
-        json={
-            "field0": "foo",
-            "field1": "bar"
-        }
+        "{}/multiterm_test/_doc?refresh=wait_for".format(instance['url']), json={"field0": "foo", "field1": "bar"}
     )
     response.raise_for_status()
 
@@ -145,36 +129,15 @@ def test_custom_queries_with_payload_multiterm(dd_environment, dd_run_check, ins
             'data_path': 'aggregations.values.buckets',
             'payload': {
                 "size": 0,
-                "aggs": {
-                    "values": {
-                        "multi_terms": {
-                            "terms": [
-                                {
-                                    "field": "field0"
-                                },
-                                {
-                                    "field": "field1"
-                                }
-                            ]
-                        }
-                    }
-                }
+                "aggs": {"values": {"multi_terms": {"terms": [{"field": "field0"}, {"field": "field1"}]}}},
             },
             'columns': [
                 {
                     'value_path': 'doc_count',
                     'name': 'elasticsearch.custom.metric',
                 },
-                {
-                    'value_path': 'key.0',
-                    'name': 'dynamic_tag0',
-                    'type': 'tag'
-                },
-                {
-                    'value_path': 'key.1',
-                    'name': 'dynamic_tag1',
-                    'type': 'tag'
-                }
+                {'value_path': 'key.0', 'name': 'dynamic_tag0', 'type': 'tag'},
+                {'value_path': 'key.1', 'name': 'dynamic_tag1', 'type': 'tag'},
             ],
         },
     ]
