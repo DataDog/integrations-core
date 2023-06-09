@@ -46,6 +46,7 @@ def _wait_for_value(db_instance, lower_threshold, query):
                 value = cur.fetchall()[0][0]
             time.sleep(0.1)
 
+
 def run_one_check(check, db_instance):
     """
     Run check and immediately cancel.
