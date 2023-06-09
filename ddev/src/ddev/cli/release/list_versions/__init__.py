@@ -24,7 +24,7 @@ def list_versions(ctx: click.Context, integration: str):
     if integration.startswith(ignored_prefix):
         integration = integration[len(ignored_prefix) :]
 
-    integration_url = f'https://dd-integrations-core-wheels-build-stable.datadoghq.com/targets/simple/datadog-{integration}/index.html'
+    integration_url = f'https://dd-integrations-core-wheels-build-stable.datadoghq.com/targets/simple/datadog-{integration}/index.html'  # noqa: E501
 
     response = httpx.get(integration_url)
     versions = response.text.splitlines()
