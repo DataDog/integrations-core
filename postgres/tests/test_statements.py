@@ -1316,15 +1316,19 @@ def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance,
         conn.close()
 
 
+@pytest.mark.parametrize("statement_activity_enabled", [True, False])
 @pytest.mark.parametrize("statement_samples_enabled", [True, False])
 @pytest.mark.parametrize("statement_metrics_enabled", [True, False])
-def test_async_job_enabled(integration_check, dbm_instance, statement_samples_enabled, statement_metrics_enabled):
+def test_async_job_enabled(
+    integration_check, dbm_instance, statement_activity_enabled, statement_samples_enabled, statement_metrics_enabled
+):
+    dbm_instance['query_activity'] = {'enabled': statement_activity_enabled, 'run_sync': False}
     dbm_instance['query_samples'] = {'enabled': statement_samples_enabled, 'run_sync': False}
     dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
     check = integration_check(dbm_instance)
     check._connect()
     run_one_check(check, dbm_instance)
-    if statement_samples_enabled:
+    if statement_samples_enabled or statement_activity_enabled:
         assert check.statement_samples._job_loop_future is not None
     else:
         assert check.statement_samples._job_loop_future is None
