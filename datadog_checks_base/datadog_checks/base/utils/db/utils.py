@@ -267,7 +267,7 @@ class DBMAsyncJob(object):
         self._cancel_event.set()
 
         if self._job_loop_future is not None:
-            self._job_loop_future.result(timeout=10)
+            self._job_loop_future.result()
 
     def run_job_loop(self, tags):
         """
@@ -346,7 +346,8 @@ class DBMAsyncJob(object):
 
     def _run_job_rate_limited(self):
         self._run_job_traced()
-        self._rate_limiter.sleep()
+        if not self._cancel_event.isSet():
+            self._rate_limiter.sleep()
 
     @_traced_dbm_async_job_method
     def _run_job_traced(self):
