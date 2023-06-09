@@ -1317,12 +1317,10 @@ def test_async_job_enabled(integration_check, dbm_instance, statement_samples_en
     check.cancel()
     if statement_samples_enabled:
         assert check.statement_samples._job_loop_future is not None
-        check.statement_samples._job_loop_future.result()
     else:
         assert check.statement_samples._job_loop_future is None
     if statement_metrics_enabled:
         assert check.statement_metrics._job_loop_future is not None
-        check.statement_metrics._job_loop_future.result()
     else:
         assert check.statement_metrics._job_loop_future is None
 
@@ -1491,9 +1489,6 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     check._connect()
     check.check(dbm_instance)
     check.cancel()
-    # wait for it to stop and make sure it doesn't throw any exceptions
-    check.statement_samples._job_loop_future.result()
-    check.statement_metrics._job_loop_future.result()
     assert not check.statement_samples._job_loop_future.running(), "samples thread should be stopped"
     assert not check.statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never

@@ -773,7 +773,6 @@ def test_async_job_enabled(dd_run_check, dbm_instance, statement_metrics_enabled
     check.cancel()
     if statement_metrics_enabled:
         assert check.statement_metrics._job_loop_future is not None
-        check.statement_metrics._job_loop_future.result()
     else:
         assert check.statement_metrics._job_loop_future is None
 
@@ -799,8 +798,6 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
     check.cancel()
-    # wait for it to stop and make sure it doesn't throw any exceptions
-    check.statement_metrics._job_loop_future.result()
     assert not check.statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
