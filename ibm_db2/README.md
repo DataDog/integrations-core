@@ -22,7 +22,7 @@ The [ibm_db][4] client library is required. To install it, ensure you have a wor
 sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install ibm_db==3.1.0
 ```
 
-Note: If running an Agent with Python 2, use `ibm_db==3.0.1` instead.
+Note: If you are on an Agent running Python 2, use `ibm_db==3.0.1` instead.
 
 ##### Windows
 
