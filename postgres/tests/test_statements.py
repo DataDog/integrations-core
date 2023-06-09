@@ -136,7 +136,6 @@ def test_statement_metrics(
     check._connect()
     run_one_check(check, dbm_instance)
 
-
     # We can't change track_io_timing at runtime, but we can change what the integration thinks the runtime value is
     # This must be done after the first check since postgres settings are loaded from the database then
     check.pg_settings["track_io_timing"] = "on" if track_io_timing_enabled else "off"
@@ -145,7 +144,6 @@ def test_statement_metrics(
     run_one_check(check, dbm_instance)
     _run_queries()
     run_one_check(check, dbm_instance)
-
 
     def _should_catch_query(dbname):
         # we can always catch it if the query originals in the same DB
@@ -319,7 +317,6 @@ def test_statement_metrics_cloud_metadata(
     _run_queries()
     run_one_check(check, dbm_instance)
 
-
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1, "should capture exactly one metrics payload"
     event = events[0]
@@ -368,7 +365,6 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
         cursor.execute(query, (['app1', 'app2'],))
         cursor.execute(query, (['app1', 'app2', 'app3'],))
         run_one_check(check, dbm_instance)
-
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1
@@ -517,7 +513,6 @@ def test_failed_explain_handling(
 
     # run check so all internal state is correctly initialized
     run_one_check(check, dbm_instance)
-
 
     # clear out contents of aggregator so we measure only the metrics generated during this specific part of the test
     aggregator.reset()
@@ -780,7 +775,6 @@ def test_statement_metadata(
             query,
         )
         run_one_check(check, dbm_instance)
-
 
     # Test samples metadata, metadata in samples is an object under `db`.
     samples = aggregator.get_event_platform_events("dbm-samples")
@@ -1103,7 +1097,6 @@ def test_activity_reported_hostname(
 
     run_one_check(check, dbm_instance)
     run_one_check(check, dbm_instance)
-
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert dbm_activity, "should have at least one activity sample"
