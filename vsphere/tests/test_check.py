@@ -529,7 +529,7 @@ def test_vm_hostname_suffix_tag_integration(aggregator, dd_run_check, realtime_i
     )
     assert "Attached hostname suffix key vsphere_host, new hostname: VM4-4-10.0.0.104" in caplog.text
 
-    
+
 def test_no_infra_cache(aggregator, realtime_instance, dd_run_check, caplog):
     with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
         'pyVmomi.vmodl.query.PropertyCollector'
