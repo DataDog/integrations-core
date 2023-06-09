@@ -79,9 +79,9 @@ class PostgreSql(AgentCheck):
         self.pg_settings = {}
         self._warnings_by_code = {}
         self.metrics_cache = PostgresMetricsCache(self._config)
-        self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback= self._close_db_pool)
-        self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback= self._close_db_pool)
-        self.metadata_samples = PostgresMetadata(self, self._config, shutdown_callback= self._close_db_pool)
+        self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
+        self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
+        self.metadata_samples = PostgresMetadata(self, self._config, shutdown_callback=self._close_db_pool)
         self._relations_manager = RelationsManager(self._config.relations)
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
@@ -194,7 +194,7 @@ class PostgreSql(AgentCheck):
         Cancels and waits for all threads to stop.
         """
         self.statement_samples.cancel()
-        self.statement_metrics.cancel()  
+        self.statement_metrics.cancel()
         self.metadata_samples.cancel()
 
     def _clean_state(self):

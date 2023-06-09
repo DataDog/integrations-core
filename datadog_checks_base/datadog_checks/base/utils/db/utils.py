@@ -101,7 +101,6 @@ def create_extra_transformer(column_transformer, source=None):
 
     # Extra transformers that call regular transformers will want to pass values directly.
     else:
-
         transformer = column_transformer
 
     return transformer
@@ -267,7 +266,7 @@ class DBMAsyncJob(object):
         self._cancel_event.set()
 
         if self._job_loop_future is not None:
-            self._job_loop_future.result()
+            self._job_loop_future.result(10)
 
     def run_job_loop(self, tags):
         """
