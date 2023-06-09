@@ -8,7 +8,7 @@ def test_clean_successful(ddev, repository):
     artifact_remove.parent.mkdir()
     artifact_remove.touch()
 
-    artifact_keep = repository.path / 'vscode' / 'something2.txt'
+    artifact_keep = repository.path / '.vscode' / 'something2.txt'
     artifact_keep.parent.mkdir()
     artifact_keep.touch()
 

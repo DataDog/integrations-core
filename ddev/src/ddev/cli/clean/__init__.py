@@ -2,11 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import click
-
-from datadog_checks.dev.subprocess import run_command
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
