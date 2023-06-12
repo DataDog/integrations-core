@@ -32,7 +32,7 @@ jira_statuses = [
 ]
 github_team = "platform-integrations"
 exclude_members = [
-  "olivielpeau",
+  "hithwen",
 ]
 
 [teams."Container Integrations"]
