@@ -416,7 +416,7 @@ Need help? Contact [Datadog support][7] with an [Agent Flare][20].
 
 ### Log processing rules are not working
 
-If you are using log processing rules to filter out logs, verify that the raw logs match the regex pattern you configured. In the configuration below, log levels must be either "warning" or "error", any other value will be excluded.
+If you are using log processing rules to filter out logs, verify that the raw logs match the regular expression (regex) pattern you configured. In the configuration below, log levels must be either `warning` or `error`. Any other value is excluded.
 
 ```yaml
     - type: windows_event
@@ -429,10 +429,10 @@ If you are using log processing rules to filter out logs, verify that the raw lo
         pattern: '"level":"((?i)warning|error)"'
 ```
 
-To troubleshoot this:
-1. Remove or comment out the `log_processing_rules`.
-1. Restart the agent.
-1. Send a test log. If you see the log in Datadog, verify the filtering pattern.
+To troubleshoot your log processing rules:
+1. Remove or comment out the `log_processing_rules` stanza.
+1. Restart the Agent.
+1. Send a test log that includes the values you're attempting to catch. If the log appears in Datadog, there is probably an issue with your regex. Compare your regex against the log file to make sure you're capturing the right phrases.
 
 ## Further Reading
 
