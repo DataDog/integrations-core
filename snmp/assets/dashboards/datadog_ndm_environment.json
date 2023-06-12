@@ -53,7 +53,7 @@
                         "id": 3628964508547190,
                         "layout": {
                             "height": 4,
-                            "width": 4,
+                            "width": 6,
                             "x": 0,
                             "y": 0
                         }
@@ -63,7 +63,7 @@
             "id": 2663583616845740,
             "layout": {
                 "height": 5,
-                "width": 4,
+                "width": 6,
                 "x": 0,
                 "y": 0
             }
@@ -155,27 +155,6 @@
                             "height": 2,
                             "width": 3,
                             "x": 3,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "background_color": "white",
-                            "content": "This section displays your current usage of Network Device Monitoring.\n\nTo learn more, see [Network Device Monitoring billing](https://www.datadoghq.com/pricing/?product=network-monitoring#network-monitoring).",
-                            "font_size": "14",
-                            "has_padding": true,
-                            "show_tick": true,
-                            "text_align": "left",
-                            "tick_edge": "left",
-                            "tick_pos": "50%",
-                            "type": "note",
-                            "vertical_align": "center"
-                        },
-                        "id": 5044642577903206,
-                        "layout": {
-                            "height": 4,
-                            "width": 2,
-                            "x": 6,
                             "y": 0
                         }
                     },
@@ -282,8 +261,8 @@
             "id": 4997228044177920,
             "layout": {
                 "height": 5,
-                "width": 8,
-                "x": 4,
+                "width": 6,
+                "x": 6,
                 "y": 0
             }
         },
@@ -656,7 +635,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**Why are my devices unreachable?**\n\nAn unreachable device means that the Agent cannot connect to it. \n-  Try loosening ACLs/firewall rules for your devices. To check connectivity from the Agent host to a network device, use the integrated `agent snmp walk` command.",
+                            "content": "**Why are my devices unreachable?**\n\nAn unreachable device means that the agent cannot collect metrics from it.\nReachability is determined by performing a GETNEXT on the OID '1.0'. \n-  Try loosening ACLs/firewall rules for your devices. To check connectivity from the Agent host to a network device, use the integrated `agent snmp walk` command.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
