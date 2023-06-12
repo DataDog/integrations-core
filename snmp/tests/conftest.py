@@ -116,7 +116,7 @@ def create_datadog_conf_file(tmp_dir):
                 {
                     'network': '{}.0/28'.format(prefix),
                     'port': PORT,
-                    'community': 'apc_ups',
+                    'community': 'apc',
                     'version': 2,
                     'timeout': 1,
                     'retries': 2,

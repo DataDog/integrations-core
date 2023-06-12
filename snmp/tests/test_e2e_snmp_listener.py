@@ -97,11 +97,11 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
                 tags = ['ipversion:{}'.format(version), 'interface:{}'.format(interface)] + common_tags
                 aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
 
-    # ==== apc_ups profile ===
+    # ==== apc profile ===
     common_tags = [
         'snmp_device:{}'.format(snmp_device),
         'autodiscovery_subnet:{}.0/28'.format(subnet_prefix),
-        'snmp_profile:apc_ups',
+        'snmp_profile:apc',
         'model:APC Smart-UPS 600',
         'firmware_version:2.0.3-test',
         'serial_num:test_serial',

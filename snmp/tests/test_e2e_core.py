@@ -11,16 +11,16 @@ from . import common, metrics
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
 
-def test_e2e_v1_with_apc_ups_profile(dd_agent_check):
+def test_e2e_v1_with_apc_profile(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
     instance.update(
         {
             'snmp_version': 1,
-            'community_string': 'apc_ups',
+            'community_string': 'apc',
         }
     )
-    assert_apc_ups_metrics(dd_agent_check, config)
+    assert_apc_metrics(dd_agent_check, config)
 
 
 def test_e2e_core_v3_no_auth_no_priv(dd_agent_check):
@@ -30,11 +30,11 @@ def test_e2e_core_v3_no_auth_no_priv(dd_agent_check):
         {
             'user': 'datadogNoAuthNoPriv',
             'snmp_version': 3,
-            'context_name': 'apc_ups',
+            'context_name': 'apc',
             'community_string': '',
         }
     )
-    assert_apc_ups_metrics(dd_agent_check, config)
+    assert_apc_metrics(dd_agent_check, config)
 
 
 def test_e2e_core_v3_with_auth_no_priv(dd_agent_check):
@@ -46,33 +46,33 @@ def test_e2e_core_v3_with_auth_no_priv(dd_agent_check):
             'snmp_version': 3,
             'authKey': 'doggiepass',
             'authProtocol': 'MD5',
-            'context_name': 'apc_ups',
+            'context_name': 'apc',
             'community_string': '',
         }
     )
-    assert_apc_ups_metrics(dd_agent_check, config)
+    assert_apc_metrics(dd_agent_check, config)
 
 
-def test_e2e_v1_with_apc_ups_profile_batch_size_1(dd_agent_check):
+def test_e2e_v1_with_apc_profile_batch_size_1(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
     instance.update(
         {
             'snmp_version': 1,
-            'community_string': 'apc_ups',
+            'community_string': 'apc',
             'oid_batch_size': 1,
         }
     )
-    assert_apc_ups_metrics(dd_agent_check, config)
+    assert_apc_metrics(dd_agent_check, config)
 
 
-def assert_apc_ups_metrics(dd_agent_check, config):
+def assert_apc_metrics(dd_agent_check, config):
     config['init_config']['loader'] = 'core'
     instance = config['instances'][0]
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     profile_tags = [
-        'snmp_profile:apc_ups',
+        'snmp_profile:apc',
         'model:APC Smart-UPS 600',
         'firmware_version:2.0.3-test',
         'serial_num:test_serial',
@@ -106,7 +106,7 @@ def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
     instance = config['instances'][0]
     instance.update(
         {
-            'community_string': 'f5-big-ip',
+            'community_string': 'f5',
         }
     )
     # run a rate check, will execute two check runs to evaluate rate metrics
@@ -116,7 +116,7 @@ def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
         'device_namespace:default',
         'device_vendor:f5',
         'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
-        'snmp_profile:f5-big-ip',
+        'snmp_profile:f5',
     ]
     tags += ['snmp_device:{}'.format(instance['ip_address'])]
 
@@ -146,7 +146,7 @@ def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
 
 
 def test_e2e_core_discovery(dd_agent_check):
-    config = common.generate_container_profile_config_with_ad('apc_ups')
+    config = common.generate_container_profile_config_with_ad('apc')
     config['init_config']['loader'] = 'core'
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=False, times=3, pause=500)
 
@@ -154,7 +154,7 @@ def test_e2e_core_discovery(dd_agent_check):
     ip_address = get_container_ip(SNMP_CONTAINER_NAME)
     tags = [
         # profile
-        'snmp_profile:apc_ups',
+        'snmp_profile:apc',
         'model:APC Smart-UPS 600',
         'firmware_version:2.0.3-test',
         'serial_num:test_serial',
@@ -253,13 +253,13 @@ def test_e2e_regex_match(dd_agent_check):
     )
 
 
-def test_e2e_meraki_cloud_controller(dd_agent_check):
+def test_e2e_meraki(dd_agent_check):
     config = common.generate_container_instance_config([])
     config['init_config']['loader'] = 'core'
     instance = config['instances'][0]
     instance.update(
         {
-            'community_string': 'meraki-cloud-controller',
+            'community_string': 'meraki',
         }
     )
     # run a rate check, will execute two check runs to evaluate rate metrics
@@ -267,7 +267,7 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
 
     ip_address = get_container_ip(SNMP_CONTAINER_NAME)
     common_tags = [
-        'snmp_profile:meraki-cloud-controller',
+        'snmp_profile:meraki',
         'snmp_host:dashboard.meraki.com',
         'device_vendor:meraki',
         'device_namespace:default',

@@ -45,7 +45,7 @@ def test_e2e_core_metadata_f5(dd_agent_check):
     instance = config['instances'][0]
     instance.update(
         {
-            'community_string': 'f5-big-ip',
+            'community_string': 'f5',
             'loader': 'core',
         }
     )
@@ -71,7 +71,7 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                     u'ip_address': device_ip,
                     u'location': u'Network Closet 1',
                     u'name': u'f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
-                    u'profile': u'f5-big-ip',
+                    u'profile': u'f5',
                     u'status': 1,
                     u'sys_object_id': u'1.3.6.1.4.1.3375.2.1.3.4.43',
                     u'tags': [
@@ -79,7 +79,7 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                         u'device_vendor:f5',
                         u'snmp_device:' + device_ip,
                         u'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
-                        u'snmp_profile:f5-big-ip',
+                        u'snmp_profile:f5',
                     ],
                     u'vendor': u'f5',
                     u'serial_number': '26ff4a4d-190e-12ac-d4257ed36ba6',
@@ -350,12 +350,12 @@ def test_e2e_core_metadata_hpe_proliant(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
 
-def test_e2e_core_metadata_apc_ups(dd_agent_check):
+def test_e2e_core_metadata_apc(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
     instance.update(
         {
-            'community_string': 'apc_ups',
+            'community_string': 'apc',
             'loader': 'core',
         }
     )
@@ -379,7 +379,7 @@ def test_e2e_core_metadata_apc_ups(dd_agent_check):
         'os_name': 'AOS',
         'os_version': 'v3.9.2',
         'product_name': 'APC Smart-UPS 600',
-        'profile': 'apc_ups',
+        'profile': 'apc',
         'serial_number': '5A1827E00000',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.318.1.1.1',
@@ -390,7 +390,7 @@ def test_e2e_core_metadata_apc_ups(dd_agent_check):
             'model:APC Smart-UPS 600',
             'serial_num:test_serial',
             'snmp_device:' + device_ip,
-            'snmp_profile:apc_ups',
+            'snmp_profile:apc',
             'ups_name:testIdentName',
         ],
         'vendor': 'apc',
@@ -747,12 +747,12 @@ def test_e2e_core_metadata_netapp(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
 
-def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
+def test_e2e_core_metadata_checkpoint(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
     instance.update(
         {
-            'community_string': 'checkpoint-firewall',
+            'community_string': 'checkpoint',
             'loader': 'core',
         }
     )
@@ -773,7 +773,7 @@ def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
         'os_name': 'Gaia',
         'os_version': '3.10.0',
         'product_name': 'SVN Foundation',
-        'profile': 'checkpoint-firewall',
+        'profile': 'checkpoint',
         'serial_number': '1711BA4008',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.2620.1.1',
@@ -781,7 +781,7 @@ def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
             'device_namespace:default',
             'device_vendor:checkpoint',
             'snmp_device:' + device_ip,
-            'snmp_profile:checkpoint-firewall',
+            'snmp_profile:checkpoint',
         ],
         'vendor': 'checkpoint',
         'version': 'R80.10',

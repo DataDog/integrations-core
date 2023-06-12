@@ -241,7 +241,7 @@ def generate_container_profile_config_with_ad(profile):
         # Make sure the check handles bytes
         'network_address': to_native_string(network),
         'port': PORT,
-        'community_string': 'apc_ups',
+        'community_string': 'apc',
     }
 
     init_config = {}

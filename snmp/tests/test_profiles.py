@@ -246,7 +246,7 @@ def test_cisco_voice(aggregator):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_f5(aggregator):
-    profile = 'f5-big-ip'
+    profile = 'f5'
     run_profile_check(profile)
 
     gauges = [
@@ -471,7 +471,7 @@ def test_router(aggregator):
 def test_f5_router(aggregator):
     # Use the generic profile against the f5 device
     instance = common.generate_instance_config([])
-    instance['community_string'] = 'f5-big-ip'
+    instance['community_string'] = 'f5'
     instance['enforce_mib_constraints'] = False
 
     init_config = {'profiles': {'router': {'definition_file': 'generic-router.yaml'}}}
@@ -661,11 +661,11 @@ def test_cisco_3850(aggregator):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_meraki_cloud_controller(aggregator):
-    run_profile_check('meraki-cloud-controller')
+def test_meraki(aggregator):
+    run_profile_check('meraki')
 
     common_tags = common.CHECK_TAGS + [
-        'snmp_profile:meraki-cloud-controller',
+        'snmp_profile:meraki',
         'snmp_host:dashboard.meraki.com',
         'device_vendor:meraki',
     ]
@@ -1941,11 +1941,11 @@ def test_cisco_csr(aggregator):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_checkpoint_firewall(aggregator):
-    run_profile_check('checkpoint-firewall')
+def test_checkpoint(aggregator):
+    run_profile_check('checkpoint')
 
     common_tags = common.CHECK_TAGS + [
-        'snmp_profile:checkpoint-firewall',
+        'snmp_profile:checkpoint',
         'device_vendor:checkpoint',
     ]
 
@@ -2112,7 +2112,7 @@ def test_aruba(aggregator):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_chatsworth(aggregator):
-    profile = "chatsworth_pdu"
+    profile = "chatsworth"
     run_profile_check(profile)
 
     # Legacy global tags are applied to all metrics
@@ -2309,10 +2309,10 @@ def test_isilon(aggregator):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_apc_ups(aggregator):
-    run_profile_check('apc_ups')
+def test_apc(aggregator):
+    run_profile_check('apc')
     profile_tags = [
-        'snmp_profile:apc_ups',
+        'snmp_profile:apc',
         'model:APC Smart-UPS 600',
         'firmware_version:2.0.3-test',
         'serial_num:test_serial',

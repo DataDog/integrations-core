@@ -58,7 +58,7 @@ def test_e2e_v3_version_autodetection(dd_agent_check):
             'authProtocol': 'sha',
             'privKey': 'doggiePRIVkey',
             'privProtocol': 'des',
-            'context_name': 'f5-big-ip',
+            'context_name': 'f5',
             'community_string': '',
         }
     )
@@ -79,7 +79,7 @@ def test_e2e_v3_explicit_version(dd_agent_check):
             'privKey': 'doggiePRIVkey',
             'privProtocol': 'DES',
             'snmp_version': 3,
-            'context_name': 'f5-big-ip',
+            'context_name': 'f5',
             'community_string': '',
         }
     )
@@ -100,7 +100,7 @@ def test_e2e_v3_md5_aes(dd_agent_check):
             'privKey': 'doggiePRIVkey',
             'privProtocol': 'AES',
             'snmp_version': 3,
-            'context_name': 'f5-big-ip',
+            'context_name': 'f5',
             'community_string': '',
         }
     )
@@ -122,7 +122,7 @@ def test_e2e_v3_md5_aes256_blumenthal(dd_agent_check):
             'privKey': 'doggiePRIVkey',
             'privProtocol': 'AES256',  # `AES256` correspond to Blumenthal implementation for pysnmp and gosnmp
             'snmp_version': 3,
-            'context_name': 'f5-big-ip',
+            'context_name': 'f5',
             'community_string': '',
         }
     )
@@ -148,7 +148,7 @@ def test_e2e_v3_md5_aes256_reeder(dd_agent_check):
             'privKey': 'doggiePRIVkey',
             'privProtocol': 'AES256C',  # `AES256C` correspond to Reeder implementation for pysnmp and gosnmp
             'snmp_version': 3,
-            'context_name': 'f5-big-ip',
+            'context_name': 'f5',
             'community_string': '',
         }
     )
@@ -279,8 +279,8 @@ def test_e2e_custom_metrics_cases(dd_agent_check):
 # are collecting some metrics.
 
 
-def test_e2e_profile_apc_ups(dd_agent_check):
-    config = common.generate_container_profile_config('apc_ups')
+def test_e2e_profile_apc(dd_agent_check):
+    config = common.generate_container_profile_config('apc')
     assert_python_vs_core(dd_agent_check, config, expected_total_count=64 + 5)
 
 
@@ -300,13 +300,13 @@ def test_e2e_profile_aruba(dd_agent_check):
     )
 
 
-def test_e2e_profile_chatsworth_pdu(dd_agent_check):
-    config = common.generate_container_profile_config('chatsworth_pdu')
+def test_e2e_profile_chatsworth(dd_agent_check):
+    config = common.generate_container_profile_config('chatsworth')
     assert_python_vs_core(dd_agent_check, config, expected_total_count=225 + 5)
 
 
-def test_e2e_profile_checkpoint_firewall(dd_agent_check):
-    config = common.generate_container_profile_config("checkpoint-firewall")
+def test_e2e_profile_checkpoint(dd_agent_check):
+    config = common.generate_container_profile_config("checkpoint")
     metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
     assert_python_vs_core(
         dd_agent_check,
@@ -392,8 +392,8 @@ def test_e2e_profile_dell_poweredge(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config, metrics_to_skip=metric_to_skip)
 
 
-def test_e2e_profile_f5_big_ip(dd_agent_check):
-    config = common.generate_container_profile_config("f5-big-ip")
+def test_e2e_profile_f5(dd_agent_check):
+    config = common.generate_container_profile_config("f5")
     metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
     assert_python_vs_core(
         dd_agent_check,
@@ -437,8 +437,8 @@ def test_e2e_profile_isilon(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config)
 
 
-def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
-    config = common.generate_container_profile_config('meraki-cloud-controller')
+def test_e2e_profile_meraki(dd_agent_check):
+    config = common.generate_container_profile_config('meraki')
     assert_python_vs_core(dd_agent_check, config, tags_to_skip=['mac_address'])
 
 
@@ -468,7 +468,7 @@ def test_e2e_profile_cisco_asr_9901(dd_agent_check):
 
 
 def test_e2e_discovery(dd_agent_check):
-    config = common.generate_container_profile_config_with_ad('apc_ups')
+    config = common.generate_container_profile_config_with_ad('apc')
     # skip telemetry metrics since they are implemented different for python and corecheck
     # python integration autodiscovery submit telemetry metrics once for all devices
     # core integration autodiscovery submit telemetry metrics once for each device
