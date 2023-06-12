@@ -177,7 +177,7 @@ If you're in an air gapped environment, or on a restricted network where it's no
 1. On a machine with network access, download [the source tarball][14].
 
    ```
-   curl -L https://github.com/ibmdb/python-ibmdb/archive/refs/tags/v3.1.0.tar.gz > ibm_db.tar.gz
+   curl -Lo ibm_db.tar.gz https://github.com/ibmdb/python-ibmdb/archive/refs/tags/v3.1.0.tar.gz
    ```
 
 1. Transport the file over to the restricted host, and then extract the archive:
