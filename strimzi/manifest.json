@@ -14,7 +14,8 @@
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Category::Log Collection"
     ]
   },
   "assets": {
@@ -35,6 +36,11 @@
         ],
         "metadata_path": "metadata.csv"
       },
+      "process_signatures": [
+        "io.strimzi.cluster-operator",
+        "io.strimzi.topic-operator",
+        "io.strimzi.user-operator"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
