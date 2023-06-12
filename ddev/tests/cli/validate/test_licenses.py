@@ -51,6 +51,7 @@ def test_error_extra_dependency(name, contents, expected_error_output, ddev, rep
         ),
     ],
 )
+@pytest.mark.requires_ci
 def test_validate_repo(repo, repository, expected_message, ddev, helpers, config_file):
     config_file.model.repo = repo
     config_file.save()

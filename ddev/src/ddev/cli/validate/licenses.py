@@ -18,9 +18,7 @@ def licenses(ctx: click.Context, sync):
     app: Application = ctx.obj
 
     if app.repo.name != 'core':
-        app.display_info(
-            f"License validation is only available for repo `core`, skipping for repo `{app.repo.name}`"
-        )
+        app.display_info(f"License validation is only available for repo `core`, skipping for repo `{app.repo.name}`")
         app.abort()
 
     from packaging.requirements import Requirement
