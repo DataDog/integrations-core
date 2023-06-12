@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
-from packaging import version
 import pytest
 import requests
+from packaging import version
 from six import iteritems
 
 from datadog_checks.dev.utils import get_metadata_metrics
