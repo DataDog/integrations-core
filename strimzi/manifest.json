@@ -37,9 +37,9 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
-        "java io.strimzi.cluster-operator",
-        "java io.strimzi.topic-operator",
-        "java io.strimzi.user-operator"
+        "java io.strimzi.operator.cluster.Main",
+        "java io.strimzi.operator.topic.Main",
+        "java io.strimzi.operator.user.Main"
       ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
