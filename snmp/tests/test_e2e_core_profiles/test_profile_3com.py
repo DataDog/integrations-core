@@ -9,7 +9,7 @@ from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
     assert_extend_generic_if,
-    create_profile_test_config,
+    create_e2e_core_test_config,
     get_device_ip_from_config,
 )
 
@@ -17,7 +17,7 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_3com(dd_agent_check):
-    config = create_profile_test_config('3com')
+    config = create_e2e_core_test_config('3com')
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)

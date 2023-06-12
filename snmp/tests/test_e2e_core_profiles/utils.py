@@ -5,11 +5,15 @@
 from .. import common
 
 
-def create_profile_test_config(profile_name):
+def create_e2e_core_test_config(community_string):
+    """
+    The community_string must correspond to a .snmprec file name.
+    It is used to tell snmpsim to use the corresponding .snmprec file.
+    """
     config = common.generate_container_instance_config([])
     config['init_config']['loader'] = 'core'
     instance = config['instances'][0]
-    instance.update({'community_string': profile_name})
+    instance.update({'community_string': community_string})
     return config
 
 
