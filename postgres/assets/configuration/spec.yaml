@@ -409,7 +409,7 @@ files:
       options:
         - name: enabled
           description: |
-            Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
+            Enable collection of query activity. Requires `dbm: true`.
           value:
             type: boolean
             example: true

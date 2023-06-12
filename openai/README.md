@@ -110,6 +110,7 @@ Need help? Contact [Datadog support][5].
 Additional helpful documentation, links, and articles:
 
 - [Monitor your OpenAI usage with Datadog][6]
+- [Monitor Azure OpenAI with Datadog][7]
 
 [1]: https://openai.com/
 [2]: https://ddtrace.readthedocs.io/en/stable/installation_quickstart.html
@@ -117,3 +118,4 @@ Additional helpful documentation, links, and articles:
 [4]: https://github.com/DataDog/integrations-core/blob/master/openai/metadata.csv
 [5]: https://docs.datadoghq.com/help/
 [6]: https://www.datadoghq.com/blog/monitor-openai-with-datadog/
+[7]: https://www.datadoghq.com/blog/monitor-azure-openai-with-datadog/

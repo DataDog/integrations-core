@@ -1,15 +1,16 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS, PROMETHEUS_METRICS_MAP
+from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
 from .common import DEFAULT_INSTANCE, ENVOY_VERSION, FLAKY_METRICS, PROMETHEUS_METRICS, requires_new_environment
 
-pytestmark = [requires_new_environment]
+pytestmark = [requires_new_environment, pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
 SKIP_TAG_ASSERTION = [
@@ -17,19 +18,6 @@ SKIP_TAG_ASSERTION = [
 ]
 
 
-@pytest.mark.unit
-def test_unique_metrics():
-    duplicated_metrics = set()
-
-    for value in PROMETHEUS_METRICS_MAP.values():
-        # We only have string with envoy so far
-        assert isinstance(value, str)
-        assert value not in duplicated_metrics, "metric `{}` already declared".format(value)
-        duplicated_metrics.add(value)
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_check(aggregator, dd_run_check, check):
     c = check(DEFAULT_INSTANCE)
 
@@ -54,10 +42,11 @@ def test_check(aggregator, dd_run_check, check):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_service_check(
+        'envoy.openmetrics.health', AgentCheck.OK, tags=['endpoint:{}'.format(DEFAULT_INSTANCE['openmetrics_endpoint'])]
+    )
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_metadata_integration(dd_run_check, datadog_agent, check):
     c = check(DEFAULT_INSTANCE)
     c.check_id = 'test:123'
