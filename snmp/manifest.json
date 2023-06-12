@@ -47,7 +47,8 @@
     },
     "dashboards": {
       "Interface Performance": "assets/dashboards/interface_performance.json",
-      "Datacenter Overview": "assets/dashboards/datacenter_overview.json"
+      "Datacenter Overview": "assets/dashboards/datacenter_overview.json",
+      "Netflow Monitoring": "assets/dashboards/netflow_monitoring.json"
     },
     "monitors": {
       "[SNMP] Device Down Alert": "assets/monitors/device_down.json",
