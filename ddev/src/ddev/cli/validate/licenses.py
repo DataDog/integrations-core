@@ -14,9 +14,8 @@ if TYPE_CHECKING:
 
 @click.command(short_help='Validate third-party license list')
 @click.option('--sync', '-s', is_flag=True, help='Generate the `LICENSE-3rdparty.csv` file')
-@click.pass_context
-def licenses(ctx: click.Context, sync):
-    app: Application = ctx.obj
+@click.pass_obj
+def licenses(app: Application, sync: bool):
     validation_tracker = app.create_validation_tracker('Licenses')
 
     # Validate that all values in the constants (EXPLICIT_LICENSES and
