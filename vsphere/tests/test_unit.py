@@ -1131,17 +1131,20 @@ def test_report_realtime_vm_metrics_runtime_host(aggregator, dd_run_check, realt
                 rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
             )
         ]
-        mock_si.content.perfManager.QueryPerf.side_effect = [[
-            vim.PerformanceManager.EntityMetric(
-                entity=vim.VirtualMachine(moId="vm1"),
-                value=[
-                    vim.PerformanceManager.IntSeries(
-                        value=[47, 52],
-                        id=vim.PerformanceManager.MetricId(counterId=100),
-                    )
-                ],
-            ),
-        ], []]
+        mock_si.content.perfManager.QueryPerf.side_effect = [
+            [
+                vim.PerformanceManager.EntityMetric(
+                    entity=vim.VirtualMachine(moId="vm1"),
+                    value=[
+                        vim.PerformanceManager.IntSeries(
+                            value=[47, 52],
+                            id=vim.PerformanceManager.MetricId(counterId=100),
+                        )
+                    ],
+                ),
+            ],
+            [],
+        ]
         mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
         mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
         mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult(
@@ -1175,7 +1178,7 @@ def test_report_realtime_vm_metrics_runtime_host(aggregator, dd_run_check, realt
                             val=vim.HostSystem(moId="host1"),
                         ),
                     ],
-                )
+                ),
             ],
         )
         mock_connect.return_value = mock_si
