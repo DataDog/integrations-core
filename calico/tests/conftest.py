@@ -6,6 +6,7 @@ from os import path
 
 import pytest
 
+from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
@@ -51,11 +52,19 @@ def dd_environment():
             calico_host, calico_port = stack.enter_context(
                 port_forward(kubeconfig, 'kube-system', 9091, 'service', 'felix-metrics-svc')
             )
+
+            endpoint = 'http://{}:{}/metrics'.format(calico_host, calico_port)
+
+            # We can't add this to `kind_run` because we don't know the URL at this moment
+            condition = CheckEndpoints(endpoint, wait=2)
+            condition()
+
             instance = {
-                "openmetrics_endpoint": 'http://{}:{}/metrics'.format(calico_host, calico_port),
+                "openmetrics_endpoint": endpoint,
                 "namespace": NAMESPACE,
                 "extra_metrics": EXTRA_METRICS,
             }
+
             yield instance
 
 
