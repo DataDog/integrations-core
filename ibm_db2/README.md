@@ -169,23 +169,26 @@ See [service_checks.json][11] for a list of service checks provided by this inte
 ## Troubleshooting
 
 ### Installing `ibm_db` client library offline
-For systems where running `pip install ibm_db==3.0.1` is not possible, such as offline machines or in networks with restrictions, `ibm_db` can be installed alternatively.
 
-On a machine that can install [the source tarball][14], download the file. The following example assumes an Ubuntu machine, although it should also be applicable to most machines.
+If you're in an air gapped environment, or on a restricted network where it's not possible to run `pip install ibm_db==3.0.1`, you can install `ibm_db` using the following method:
 
-```
+**Note**: The following example assumes an Ubuntu machine, but the steps should also be similar on most operating systems.
+
+1. On a machine with network access, download [the source tarball][14].
+
+   ```
 curl -L https://github.com/ibmdb/python-ibmdb/archive/refs/tags/v3.1.0.tar.gz > ibm_db.tar.gz
 ```
 
-Transport this file over to the restricted host, and then extract the archive:
+1. Transport the file over to the restricted host, and then extract the archive:
 
-```
+   ```
 tar xvf ibm_db.tar.gz
 ```
 
-Using the embedded [`pip`][15] on the Agent, run the following command:
+1. Using the embedded [`pip`][15] on the Agent, run the following command:
 
-```
+   ```
 /opt/datadog-agent/embedded/bin/pip install --no-index --no-deps --no-build-isolation  python-ibmdb-3.1.0/IBM_DB/ibm_db/
 ```
 
