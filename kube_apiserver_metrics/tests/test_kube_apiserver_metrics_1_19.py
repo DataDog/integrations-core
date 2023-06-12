@@ -69,7 +69,6 @@ class TestKubeAPIServerMetrics:
         'authenticated_user_requests.count',
         'apiserver_request_total.count',
         'apiserver_request_terminations_total.count',
-        'aggregator_unavailable_apiservice.count',
     ]
 
     def test_check(self, dd_run_check, aggregator, mock_http_response):

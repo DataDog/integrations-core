@@ -157,7 +157,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
 
         return kube_apiserver_metrics_instance
 
-    def submit_as_gauge_and_monotonic_count(self, metric_suffix, metric, scraper_config):
+    def submit_as_gauge_and_monotonic_count(self, metric_suffix, metric, scraper_config, monotonic_count=True):
         """
         submit a kube_apiserver_metrics metric both as a gauge (for compatibility) and as a monotonic_count
         """
@@ -170,17 +170,18 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
                 _tags.append('{}:{}'.format(label_name, label_value))
             # submit raw metric
             self.gauge(metric_name, sample[self.SAMPLE_VALUE], _tags)
-            # submit rate metric
-            self.monotonic_count(metric_name + '.count', sample[self.SAMPLE_VALUE], _tags)
+            if monotonic_count:
+                # submit rate metric
+                self.monotonic_count(metric_name + '.count', sample[self.SAMPLE_VALUE], _tags)
 
     def aggregator_unavailable_apiservice(self, metric, scraper_config):
         """
-            This function replaces the tag "name" by "apiservice_name".
-            It assumes that every sample is tagged with `name`.
+        This function replaces the tag "name" by "apiservice_name".
+        It assumes that every sample is tagged with `name`.
         """
         for sample in metric.samples:
             sample[self.SAMPLE_LABELS]["apiservice_name"] = sample[self.SAMPLE_LABELS].pop("name")
-        self.submit_as_gauge_and_monotonic_count('.aggregator_unavailable_apiservice', metric, scraper_config)
+        self.submit_as_gauge_and_monotonic_count('.aggregator_unavailable_apiservice', metric, scraper_config, False)
 
     def apiserver_audit_event_total(self, metric, scraper_config):
         self.submit_as_gauge_and_monotonic_count('.audit_event', metric, scraper_config)
