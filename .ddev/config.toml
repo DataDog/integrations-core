@@ -65,7 +65,7 @@ platforms = ["linux", "windows"]
 [overrides.ci.tokumx]
 only-py2 = true
 
-[overrides.explicit_licenses]
+[overrides.dependencies.licenses]
 # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
 aerospike = ['Apache-2.0']
 # https://github.com/baztian/jaydebeapi/blob/master/COPYING
@@ -106,7 +106,7 @@ uptime = ['BSD-2-Clause']
 # https://github.com/hickeroar/win_inet_pton/blob/master/LICENSE
 win-inet-pton = ['Unlicense']
 
-[overrides.package_repo_overrides]
+[overrides.dependencies.repo]
 PyYAML = 'https://github.com/yaml/pyyaml'
 Pyro4 = 'https://github.com/irmen/Pyro4'
 contextlib2 = 'https://github.com/jazzband/contextlib2'

@@ -30,14 +30,14 @@ def licenses(ctx: click.Context, sync):
             requirement = Requirement(line.strip())
             packages_set.add(requirement.name)
 
-    for name in app.repo.config.get('/overrides/explicit_licenses', {}):
+    for name in app.repo.config.get('/overrides/dependencies/licenses', {}):
         if name.lower() not in packages_set:
             validation_tracker.error(
                 ("EXPLICIT_LICENSES", name),
                 message=f"EXPLICIT_LICENSES contains additional package not in agent requirements: {name}",
             )
 
-    for name in app.repo.config.get('/overrides/package_repo_overrides', {}):
+    for name in app.repo.config.get('/overrides/dependencies/repo', {}):
         if name.lower() not in packages_set:
             validation_tracker.error(
                 ("PACKAGE_REPO_OVERRIDES", name),
