@@ -177,20 +177,21 @@ If you're in an air gapped environment, or on a restricted network where it's no
 1. On a machine with network access, download [the source tarball][14].
 
    ```
-curl -L https://github.com/ibmdb/python-ibmdb/archive/refs/tags/v3.1.0.tar.gz > ibm_db.tar.gz
-```
+   curl -L https://github.com/ibmdb/python-ibmdb/archive/refs/tags/v3.1.0.tar.gz > ibm_db.tar.gz
+   ```
 
 1. Transport the file over to the restricted host, and then extract the archive:
 
    ```
-tar xvf ibm_db.tar.gz
-```
+   tar xvf ibm_db.tar.gz
+   ```
 
 1. Using the embedded [`pip`][15] on the Agent, run the following command:
 
    ```
-/opt/datadog-agent/embedded/bin/pip install --no-index --no-deps --no-build-isolation  python-ibmdb-3.1.0/IBM_DB/ibm_db/
-```
+   /opt/datadog-agent/embedded/bin/pip install --no-index --no-deps --no-build-isolation  python-ibmdb- 
+   3.1.0/IBM_DB/ibm_db/
+   ```
 
 If you get the following error:
 
