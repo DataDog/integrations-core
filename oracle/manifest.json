@@ -46,7 +46,8 @@
       }
     },
     "dashboards": {
-      "oracle": "assets/dashboards/oracle_overview.json"
+      "oracle": "assets/dashboards/oracle_overview.json",
+      "DBM Oracle Database Overview": "assets/dashboards/dbm_oracle_database_overview.json"
     }
   }
 }
