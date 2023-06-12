@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import os
 from functools import cached_property
 from typing import TYPE_CHECKING, Dict, Iterable
 

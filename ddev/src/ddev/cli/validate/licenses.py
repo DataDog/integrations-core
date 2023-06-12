@@ -6,7 +6,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import click
-from packaging.requirements import Requirement
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -14,8 +13,18 @@ if TYPE_CHECKING:
 
 @click.command(short_help='Validate third-party license list')
 @click.option('--sync', '-s', is_flag=True, help='Generate the `LICENSE-3rdparty.csv` file')
-@click.pass_obj
-def licenses(app: Application, sync: bool):
+@click.pass_context
+def licenses(ctx: click.Context, sync):
+    app: Application = ctx.obj
+
+    if app.repo.name != 'core':
+        app.display_info(
+            f"License validation is only available for repo `core`, skipping for repo `{app.repo.name}`"
+        )
+        app.abort()
+
+    from packaging.requirements import Requirement
+
     validation_tracker = app.create_validation_tracker('Licenses')
 
     # Validate that all values in the constants (EXPLICIT_LICENSES and

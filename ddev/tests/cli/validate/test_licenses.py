@@ -38,3 +38,23 @@ def test_error_extra_dependency(name, contents, expected_error_output, ddev, rep
 
     # Check if expected error validation error message is in output
     assert expected_error_output in helpers.remove_trailing_spaces(result.output)
+
+
+@pytest.mark.parametrize(
+    "repo, expected_message",
+    [
+        pytest.param("core", "Licenses file is valid!", id="Core integrations"),
+        pytest.param(
+            "extras",
+            "License validation is only available for repo `core`, skipping for repo `extras`",
+            id="Extras integrations",
+        ),
+    ],
+)
+def test_validate_repo(repo, repository, expected_message, ddev, helpers, config_file):
+    config_file.model.repo = repo
+    config_file.save()
+
+    result = ddev("validate", "licenses")
+
+    assert expected_message in helpers.remove_trailing_spaces(result.output)
