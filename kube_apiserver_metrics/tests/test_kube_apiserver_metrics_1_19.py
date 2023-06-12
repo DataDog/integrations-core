@@ -62,12 +62,14 @@ class TestKubeAPIServerMetrics:
         'aggregator_unavailable_apiservice',
         'envelope_encryption_dek_cache_fill_percent',
     ]
+
     COUNT_METRICS = [
         'audit_event.count',
         'rest_client_requests_total.count',
         'authenticated_user_requests.count',
         'apiserver_request_total.count',
         'apiserver_request_terminations_total.count',
+        'aggregator_unavailable_apiservice.count',
     ]
 
     def test_check(self, dd_run_check, aggregator, mock_http_response):
@@ -86,4 +88,6 @@ class TestKubeAPIServerMetrics:
             metric_to_assert = NAMESPACE + "." + metric
             aggregator.assert_metric(metric_to_assert)
             aggregator.assert_metric_has_tag(metric_to_assert, customtag)
+            if "aggregator_unavailable_apiservice" in metric:
+                aggregator.assert_metric_has_tag(metric_to_assert, "apiservice_name:v1.")
         aggregator.assert_all_metrics_covered()

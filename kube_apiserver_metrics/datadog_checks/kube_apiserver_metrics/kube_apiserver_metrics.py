@@ -40,7 +40,6 @@ METRICS = {
     # fmt: on
     # For Kubernetes >= 1.14
     # (https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.14.md#deprecated-metrics)
-    'aggregator_unavailable_apiservice': 'aggregator_unavailable_apiservice',
     'rest_client_request_duration_seconds': 'rest_client_request_latency_seconds',
     'apiserver_admission_webhook_admission_duration_seconds': 'admission_webhook_admission_latencies_seconds',
     'apiserver_admission_step_admission_duration_seconds': 'admission_step_admission_latencies_seconds',
@@ -94,6 +93,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     def __init__(self, name, init_config, instances=None):
         # Set up metrics_transformers
         self.metric_transformers = {
+            'aggregator_unavailable_apiservice': self.aggregator_unavailable_apiservice,
             'apiserver_audit_event_total': self.apiserver_audit_event_total,
             'rest_client_requests_total': self.rest_client_requests_total,
             'apiserver_request_count': self.apiserver_request_count,
@@ -172,6 +172,15 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
             self.gauge(metric_name, sample[self.SAMPLE_VALUE], _tags)
             # submit rate metric
             self.monotonic_count(metric_name + '.count', sample[self.SAMPLE_VALUE], _tags)
+
+    def aggregator_unavailable_apiservice(self, metric, scraper_config):
+        """
+            This function replaces the tag "name" by "apiservice_name".
+            It assumes that every sample is tagged with `name`.
+        """
+        for sample in metric.samples:
+            sample[self.SAMPLE_LABELS]["apiservice_name"] = sample[self.SAMPLE_LABELS].pop("name")
+        self.submit_as_gauge_and_monotonic_count('.aggregator_unavailable_apiservice', metric, scraper_config)
 
     def apiserver_audit_event_total(self, metric, scraper_config):
         self.submit_as_gauge_and_monotonic_count('.audit_event', metric, scraper_config)

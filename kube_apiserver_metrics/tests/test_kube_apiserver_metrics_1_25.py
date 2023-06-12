@@ -97,6 +97,7 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.apiserver_request_total.count',
         NAMESPACE + '.apiserver_request_terminations_total.count',
         NAMESPACE + '.apiserver_admission_webhook_fail_open_count.count',
+        NAMESPACE + '.aggregator_unavailable_apiservice.count',
     ]
 
     def test_check(self, dd_run_check, aggregator, mock_get):
@@ -113,4 +114,6 @@ class TestKubeAPIServerMetrics:
         for metric in self.METRICS + self.COUNT_METRICS:
             aggregator.assert_metric(metric)
             aggregator.assert_metric_has_tag(metric, customtag)
+            if "aggregator_unavailable_apiservice" in metric:
+                aggregator.assert_metric_has_tag(metric, "apiservice_name:v1.")
         aggregator.assert_all_metrics_covered()
