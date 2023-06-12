@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import time
 from os import path
 
 import pytest
@@ -12,11 +12,6 @@ from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 
 from .common import EXTRA_METRICS
-
-try:
-    from contextlib import ExitStack
-except ImportError:
-    from contextlib2 import ExitStack
 
 NAMESPACE = "calico"
 HERE = path.dirname(path.abspath(__file__))
@@ -43,16 +38,17 @@ def setup_calico():
         default --patch '{"spec":{"prometheusMetricsEnabled": true}}'"""
     )
 
+    time.sleep(10)
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
 
     with kind_run(conditions=[setup_calico], kind_config=path.join(HERE, 'kind-calico.yaml')) as kubeconfig:
-        with ExitStack() as stack:
-            calico_host, calico_port = stack.enter_context(
-                port_forward(kubeconfig, 'kube-system', 9091, 'service', 'felix-metrics-svc')
-            )
-
+        with port_forward(kubeconfig, 'kube-system', 9091, 'service', 'felix-metrics-svc') as (
+            calico_host,
+            calico_port,
+        ):
             endpoint = 'http://{}:{}/metrics'.format(calico_host, calico_port)
 
             # We can't add this to `kind_run` because we don't know the URL at this moment
