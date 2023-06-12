@@ -135,7 +135,7 @@ def test_diagnose_fields_get_sanitized():
         "category": None,
         "description": "something's wrong with your ********",
         "remediation": "change your ******** to something else",
-        "raw_error": None,
+        "rawerror": None,
     }
 
     assert get_diagnoses(check) == [
@@ -153,7 +153,7 @@ def get_diagnoses(check):
     return json.loads(check.get_diagnoses())
 
 
-def diagnose_dict(result, name, diagnosis, category=None, description=None, remediation=None, raw_error=None):
+def diagnose_dict(result, name, diagnosis, category=None, description=None, remediation=None, rawerror=None):
     """Helper function to create diagnosis result dictionaries with defaults."""
     return {
         "result": result,
@@ -162,5 +162,5 @@ def diagnose_dict(result, name, diagnosis, category=None, description=None, reme
         "category": category,
         "description": description,
         "remediation": remediation,
-        "raw_error": raw_error,
+        "rawerror": rawerror,
     }

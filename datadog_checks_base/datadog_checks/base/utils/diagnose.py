@@ -35,9 +35,7 @@ class Diagnosis:
     #     RawError error
     # }
     # defined in datadog-agent\\pkg\\diagnose\\diagnosis\\loader.go
-    Result = namedtuple(
-        'Result', ['result', 'name', 'diagnosis', 'category', 'description', 'remediation', 'raw_error']
-    )
+    Result = namedtuple('Result', ['result', 'name', 'diagnosis', 'category', 'description', 'remediation', 'rawerror'])
 
     # defined in
     # datadog-agent\\pkg\\diagnose\\diagnosis\\loader.go and
@@ -63,7 +61,7 @@ class Diagnosis:
         """Remove all cached diagnoses."""
         self._diagnoses = []
 
-    def success(self, name, diagnosis, category=None, description=None, remediation=None, raw_error=None):
+    def success(self, name, diagnosis, category=None, description=None, remediation=None, rawerror=None):
         """Register a successful diagnostic result."""
         self._diagnoses.append(
             self._result(
@@ -73,11 +71,11 @@ class Diagnosis:
                 category=category,
                 description=description,
                 remediation=remediation,
-                raw_error=raw_error,
+                rawerror=rawerror,
             )
         )
 
-    def fail(self, name, diagnosis, category=None, description=None, remediation=None, raw_error=None):
+    def fail(self, name, diagnosis, category=None, description=None, remediation=None, rawerror=None):
         """Register a failing diagnostic result."""
         self._diagnoses.append(
             self._result(
@@ -87,11 +85,11 @@ class Diagnosis:
                 category=category,
                 description=description,
                 remediation=remediation,
-                raw_error=raw_error,
+                rawerror=rawerror,
             )
         )
 
-    def warning(self, name, diagnosis, category=None, description=None, remediation=None, raw_error=None):
+    def warning(self, name, diagnosis, category=None, description=None, remediation=None, rawerror=None):
         """Register a warning for a diagnostic result."""
         self._diagnoses.append(
             self._result(
@@ -101,7 +99,7 @@ class Diagnosis:
                 category=category,
                 description=description,
                 remediation=remediation,
-                raw_error=raw_error,
+                rawerror=rawerror,
             )
         )
 
@@ -126,7 +124,7 @@ class Diagnosis:
             try:
                 diagnostic()
             except Exception as e:
-                self._diagnoses.append(self._result(self.DIAGNOSIS_UNEXPECTED_ERROR, "", "", raw_error=str(e)))
+                self._diagnoses.append(self._result(self.DIAGNOSIS_UNEXPECTED_ERROR, "", "", rawerror=str(e)))
 
         explicit_results, self._diagnoses = self._diagnoses, cached_results
         return explicit_results
@@ -136,7 +134,7 @@ class Diagnosis:
         """The list of cached diagnostics."""
         return self._diagnoses
 
-    def _result(self, result, name, diagnosis, category=None, description=None, remediation=None, raw_error=None):
+    def _result(self, result, name, diagnosis, category=None, description=None, remediation=None, rawerror=None):
         return self.Result(
             result,
             name,
@@ -144,5 +142,5 @@ class Diagnosis:
             category,
             self._sanitize(description),
             self._sanitize(remediation),
-            self._sanitize(raw_error),
+            self._sanitize(rawerror),
         )
