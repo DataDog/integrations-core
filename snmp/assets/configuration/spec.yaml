@@ -83,8 +83,8 @@ files:
         value:
           type: object
           example:
-            f5-big-ip:
-              definition_file: f5-big-ip.yaml
+            f5:
+              definition_file: f5.yaml
             router:
               definition_file: generic-router.yaml
       - name: refresh_oids_cache_interval
