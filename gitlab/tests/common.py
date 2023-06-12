@@ -260,11 +260,15 @@ GITALY_METRICS_TO_TEST = [
 ]
 
 
-def assert_check(aggregator, metrics, use_openmetrics=False):
+def assert_check(aggregator, metrics=None, use_openmetrics=False):
     """
     Basic Test for gitlab integration.
     """
     # Make sure we're receiving gitlab service checks
+
+    if not metrics:
+        metrics = []
+
     for service_check in GitlabCheck.ALLOWED_SERVICE_CHECKS:
         aggregator.assert_service_check(
             'gitlab.{}'.format(service_check), status=GitlabCheck.OK, tags=GITLAB_TAGS + CUSTOM_TAGS
@@ -291,3 +295,6 @@ def assert_check(aggregator, metrics, use_openmetrics=False):
 
     for metric in metrics:
         aggregator.assert_metric("gitlab.{}".format(metric))
+
+    # Assert that we have at least one of them
+    assert len(aggregator.metric_names) > 1
