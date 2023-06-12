@@ -1,3 +1,5 @@
+# Profile for Chatsworth devices
+
 extends:
   - _base.yaml
 
