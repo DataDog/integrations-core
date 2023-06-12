@@ -198,8 +198,8 @@ If you get the following error:
   error: subprocess-exited-with-error
 
   × Preparing metadata (pyproject.toml) did not run successfully.
-  │ exit code: 1
-  ╰─> [8 lines of output]
+  | exit code: 1
+   -> [8 lines of output]
       Detected 64-bit Python
       Detected platform = linux, uname = x86_64
       Downloading https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/linuxx64_odbc_cli.tar.gz
