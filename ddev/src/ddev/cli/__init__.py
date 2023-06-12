@@ -13,8 +13,8 @@ from datadog_checks.dev.tooling.commands.test import test
 from ddev.__about__ import __version__
 from ddev.cli.application import Application
 from ddev.cli.ci import ci
-from ddev.cli.config import config
 from ddev.cli.clean import clean
+from ddev.cli.config import config
 from ddev.cli.docs import docs
 from ddev.cli.env import env
 from ddev.cli.meta import meta
