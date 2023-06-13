@@ -1,6 +1,6 @@
 # CHANGELOG - Silk
 
-## 1.2.2 / 2023-04-14
+## 1.2.2 / 2023-04-14 / Agent 7.45.0
 
 * [Fixed] Fix duplicate events bug. See [#14020](https://github.com/DataDog/integrations-core/pull/14020).
 

@@ -262,7 +262,7 @@ After you've created your pull request, automatic checks run to verify that your
 
 ## Review process
 
-Once your pull request passes all checks, reviewers from the `Datadog/agent-integrations`, `Datadog/marketplace-review`, and `Datadog/documentation` teams provide suggestions and feedback on best practices.
+Once your pull request passes all checks, reviewers from the `Datadog/agent-integrations`, `Datadog/ecosystems-review`, and `Datadog/documentation` teams provide suggestions and feedback on best practices.
 
 Once you have addressed the feedback and re-requested reviews, these reviewers approve your pull request. Contact the Marketplace team if you would like to preview the tile in your sandbox account. This allows you to validate and preview your tile before your tile goes live to all customers.
 

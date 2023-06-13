@@ -395,6 +395,7 @@ By default, not all of the following metrics are sent by the Agent. To send all 
 - `pshard_stats` sends **elasticsearch.primaries.\*** and **elasticsearch.indices.count** metrics
 - `index_stats` sends **elasticsearch.index.\*** metrics
 - `pending_task_stats` sends **elasticsearch.pending\_\*** metrics
+- `slm_stats` sends **elasticsearch.slm.\*** metrics
 
 ### Metrics
 

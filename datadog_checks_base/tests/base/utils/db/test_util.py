@@ -206,7 +206,6 @@ def test_dbm_async_job_enabled(enabled):
     if enabled:
         assert job._job_loop_future is not None
         job.cancel()
-        job._job_loop_future.result()
     else:
         assert job._job_loop_future is None
 
@@ -216,7 +215,6 @@ def test_dbm_async_job_cancel(aggregator):
     tags = ["hello:there"]
     job.run_job_loop(tags)
     job.cancel()
-    job._job_loop_future.result()
     assert not job._job_loop_future.running(), "thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
