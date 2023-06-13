@@ -11,6 +11,8 @@ This check monitors [Strimzi][1] through the Datadog Agent.
 The Strimzi check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
+<div class="alert alert-warning">This check uses <a href="https://docs.datadoghq.com/integrations/openmetrics/">OpenMetrics</a>, which requires Python 3.</div>
+
 ### Configuration
 
 The Strimzi check collects Prometheus-formatted metrics on the following operators:
@@ -25,8 +27,6 @@ Follow the instructions below to enable and configure this check for an Agent.
 #### Host
 
 1. Edit the `strimzi.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Strimzi performance data. See the [sample strimzi.d/conf.yaml][4] for all available configuration options.
-
-**Note**: This check uses [OpenMetrics][10] for metric collection, which requires Python 3.
 
 2. [Restart the Agent][5].
 
