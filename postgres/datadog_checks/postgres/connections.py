@@ -4,12 +4,12 @@
 import datetime
 import inspect
 import threading
+from typing import Callable
 from collections import namedtuple
 
 import psycopg2
 
-ConnectionWithTTL = namedtuple("ConnectionWithTTL", "connection deadline")
-
+ConnectionWithTTLAndLastAccess = namedtuple("ConnectionWithTTLAndLastAccess", "connection deadline last_access")
 
 class MultiDatabaseConnectionPool(object):
     """
@@ -54,7 +54,7 @@ class MultiDatabaseConnectionPool(object):
     def get_connection(self, dbname, ttl_ms):
         self.prune_connections()
         with self._mu:
-            conn = self._conns.pop(dbname, ConnectionWithTTL(None, None))
+            conn = self._conns.pop(dbname, ConnectionWithTTLAndLastAccess(None, None, None))
             db = conn.connection
             if db is None or db.closed:
                 self._stats.connection_opened += 1
@@ -65,7 +65,7 @@ class MultiDatabaseConnectionPool(object):
                 db.rollback()
 
             deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
-            self._conns[dbname] = ConnectionWithTTL(db, deadline)
+            self._conns[dbname] = ConnectionWithTTLAndLastAccess(db, deadline, datetime.datetime.now())
             return db
 
     def prune_connections(self):
@@ -93,7 +93,7 @@ class MultiDatabaseConnectionPool(object):
         return success
 
     def _terminate_connection_unsafe(self, dbname):
-        db, _ = self._conns.pop(dbname, ConnectionWithTTL(None, None))
+        db, _ = self._conns.pop(dbname, ConnectionWithTTLAndLastAccess(None, None, None))
         if db is not None:
             try:
                 self._stats.connection_closed += 1
@@ -103,3 +103,39 @@ class MultiDatabaseConnectionPool(object):
                 self._log.exception("failed to close DB connection for db=%s", dbname)
                 return False
         return True
+
+class MultiDatabaseConnectionPoolLimited(MultiDatabaseConnectionPool):
+    """
+    Managing multiple database connections, with a limit on concurrent connections.
+    Evicts from the _conns pool with LRU rule, and also prunes connections after a specified TTL.
+    """
+    def __init__(self, connect_fn: Callable[[str], None], max_conn: int):
+        super().__init__(connect_fn)
+        self.max_conn = max_conn
+        self._conns: Dict[str, ConnectionWithTTLAndLastAccess] = {}
+
+    def evict_lru(self) -> None:
+        """
+        Evict least recently used connection.
+        """
+        with self._mu:
+            if len(self._conns) == 0:
+                return
+
+            self._conns.pop(min(self._conns, key = lambda t: self._conns.get(t).last_access))
+        
+    def get_connection(self, dbname: str, ttl_ms: int) -> psycopg2.extensions.connection:
+        self.prune_connections()
+        db_pool_len = 0
+        with self._mu:
+            db_pool_len = len(self._conns)
+
+        if db_pool_len < self.max_conn:
+            conn = super().get_connection(dbname, ttl_ms)
+            return conn
+
+        if db_pool_len > self.max_conn:
+            self.evict_lru()
+
+        conn = super().get_connection(dbname, ttl_ms)
+        return conn
