@@ -12,6 +12,7 @@
     "title": "Strimzi",
     "media": [],
     "classifier_tags": [
+      "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"
@@ -35,6 +36,11 @@
         ],
         "metadata_path": "metadata.csv"
       },
+      "process_signatures": [
+        "java io.strimzi.operator.cluster.Main",
+        "java io.strimzi.operator.topic.Main",
+        "java io.strimzi.operator.user.Main"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
