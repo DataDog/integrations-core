@@ -55,6 +55,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
 
     expected_tags = get_expected_instance_tags(check, pg_instance)
     check_common_metrics(aggregator, expected_tags=expected_tags)
+    check_control_metrics(aggregator, expected_tags=expected_tags)
     check_bgw_metrics(aggregator, expected_tags)
     check_connection_metrics(aggregator, expected_tags=expected_tags)
     check_conflict_metrics(aggregator, expected_tags=expected_tags)

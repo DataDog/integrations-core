@@ -147,6 +147,19 @@ QUERY_PG_UPTIME = {
     ],
 }
 
+QUERY_PG_CONTROL_CHECKPOINT = {
+    'name': 'pg_control_checkpoint',
+    'query': """
+        SELECT timeline_id,
+               EXTRACT (EPOCH FROM now() - checkpoint_time)
+        FROM pg_control_checkpoint();
+""",
+    'columns': [
+        {'name': 'postgresql.control.timeline_id', 'type': 'gauge'},
+        {'name': 'postgresql.control.checkpoint_delay', 'type': 'gauge'},
+    ],
+}
+
 COMMON_BGW_METRICS = {
     'checkpoints_timed': ('postgresql.bgwriter.checkpoints_timed', AgentCheck.monotonic_count),
     'checkpoints_req': ('postgresql.bgwriter.checkpoints_requested', AgentCheck.monotonic_count),
