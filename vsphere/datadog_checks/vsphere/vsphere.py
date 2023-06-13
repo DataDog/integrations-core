@@ -616,7 +616,6 @@ class VSphereCheck(AgentCheck):
         self.log.debug("resource type is %s", resource_type)
         if resource_type == vim.VirtualMachine:
             self.log.debug("submitting metrics is %s", mor)
-            mor.summary.guest.guestFullName
             nics = mor.guest.net
             for nic in nics:
                 mac_address = nic.macAddress
@@ -699,13 +698,6 @@ class VSphereCheck(AgentCheck):
             tools_version = mor.guest.toolsVersion
             tools_status = mor.guest.toolsRunningStatus
             tools_tags = [f'tools_status:{tools_status}']
-            self.gauge(
-                'vm.guest.toolsVersion',
-                tools_version,
-                tags=self._config.base_tags + resource_tags + tools_tags,
-                hostname=None,
-            )
-
             self.gauge(
                 'vm.guest.toolsVersion',
                 tools_version,
