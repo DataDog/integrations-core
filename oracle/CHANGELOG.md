@@ -1,5 +1,10 @@
 # CHANGELOG - oracle
 
+## 4.1.2-beta.1 / 2023-06-13
+
+* [Fixed] Downgrade requirements to 3.8. See [#14711](https://github.com/DataDog/integrations-core/pull/14711).
+* [Fixed] Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 4.1.1 / 2023-05-26
 
 * [Fixed] Update dependencies. See [#14594](https://github.com/DataDog/integrations-core/pull/14594).
