@@ -48,7 +48,8 @@
     "dashboards": {
       "Interface Performance": "assets/dashboards/interface_performance.json",
       "Datacenter Overview": "assets/dashboards/datacenter_overview.json",
-      "Netflow Monitoring": "assets/dashboards/netflow_monitoring.json"
+      "Netflow Monitoring": "assets/dashboards/netflow_monitoring.json",
+      "Datadog NDM Environment": "assets/dashboards/datadog_ndm_environment.json"
     },
     "monitors": {
       "[SNMP] Device Down Alert": "assets/monitors/device_down.json",

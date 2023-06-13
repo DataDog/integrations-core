@@ -32,6 +32,7 @@ from .common import (
     check_snapshot_txid_metrics,
     check_stat_replication,
     check_uptime_metrics,
+    check_wal_metrics,
     check_wal_receiver_metrics,
     get_expected_instance_tags,
     requires_static_version,
@@ -67,6 +68,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_logical_replication_slots(aggregator, expected_tags)
     check_physical_replication_slots(aggregator, expected_tags)
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
+    check_wal_metrics(aggregator, expected_tags=expected_tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -515,6 +517,43 @@ def test_query_timeout(aggregator, integration_check, pg_instance):
         cursor.execute("select pg_sleep(2000)")
 
 
+@requires_over_10
+def test_wal_metrics(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    # Default PG's wal size is 16MB
+    wal_size = 16777216
+
+    postgres_conn = _get_superconn(pg_instance)
+    with postgres_conn.cursor() as cur:
+        cur.execute("select count(*) from pg_ls_waldir();")
+        expected_num_wals = cur.fetchall()[0][0]
+
+    check.check(pg_instance)
+
+    expected_wal_size = expected_num_wals * wal_size
+    dd_agent_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
+    aggregator.assert_metric('postgresql.wal_count', count=1, value=expected_num_wals, tags=dd_agent_tags)
+    aggregator.assert_metric('postgresql.wal_size', count=1, value=expected_wal_size, tags=dd_agent_tags)
+
+    with postgres_conn.cursor() as cur:
+        # Force a wal switch
+        cur.execute("select pg_switch_wal();")
+        cur.fetchall()
+        # Checkpoint to accelerate new wal file
+        cur.execute("CHECKPOINT;")
+
+    aggregator.reset()
+    check.check(pg_instance)
+
+    expected_num_wals += 1
+    expected_wal_size = expected_num_wals * wal_size
+    aggregator.assert_metric('postgresql.wal_count', count=1, value=expected_num_wals, tags=dd_agent_tags)
+    aggregator.assert_metric('postgresql.wal_size', count=1, value=expected_wal_size, tags=dd_agent_tags)
+
+
 def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance):
     pg_instance['tag_replication_role'] = True
     check = integration_check(pg_instance)
@@ -544,6 +583,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     pg_instance['dbm'] = dbm_enabled
     pg_instance['collect_activity_metrics'] = True
     pg_instance['query_samples'] = {'enabled': False}
+    pg_instance['query_activity'] = {'enabled': False}
     pg_instance['query_metrics'] = {'enabled': False}
     pg_instance['collect_resources'] = {'enabled': False}
 
