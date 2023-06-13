@@ -298,8 +298,10 @@ QUERY_PG_REPLICATION_SLOTS = {
         CASE WHEN temporary THEN 'temporary' ELSE 'permanent' END,
         CASE WHEN active THEN 'active' ELSE 'inactive' END,
         CASE WHEN xmin IS NULL THEN NULL ELSE age(xmin) END,
-        pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn),
-        pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn)
+        pg_wal_lsn_diff(
+        CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, restart_lsn),
+        pg_wal_lsn_diff(
+        CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, confirmed_flush_lsn)
     FROM pg_replication_slots;
     """.strip(),
     'columns': [
@@ -343,6 +345,59 @@ SLRU_METRICS = {
 SELECT name, {metrics_columns}
   FROM pg_stat_slru
 """,
+}
+
+SNAPSHOT_TXID_METRICS = {
+    'name': 'pg_snapshot',
+    # Use CTE to only do a single call to pg_current_snapshot
+    # FROM LATERAL was necessary given that pg_snapshot_xip returns a setof xid8
+    'query': """
+WITH snap AS (
+    SELECT * from pg_current_snapshot()
+), xip_count AS (
+    SELECT COUNT(xip_list) FROM LATERAL (SELECT pg_snapshot_xip(pg_current_snapshot) FROM snap) as xip_list
+)
+select pg_snapshot_xmin(pg_current_snapshot), pg_snapshot_xmax(pg_current_snapshot), count from snap, xip_count;
+""",
+    'columns': [
+        {'name': 'postgresql.snapshot.xmin', 'type': 'gauge'},
+        {'name': 'postgresql.snapshot.xmax', 'type': 'gauge'},
+        {'name': 'postgresql.snapshot.xip_count', 'type': 'gauge'},
+    ],
+}
+
+# Use txid_current_snapshot for PG < 13
+SNAPSHOT_TXID_METRICS_LT_13 = {
+    'name': 'pg_snapshot_lt_13',
+    'query': """
+WITH snap AS (
+    SELECT * from txid_current_snapshot()
+), xip_count AS (
+    SELECT COUNT(xip_list) FROM LATERAL (SELECT txid_snapshot_xip(txid_current_snapshot) FROM snap) as xip_list
+)
+select txid_snapshot_xmin(txid_current_snapshot), txid_snapshot_xmax(txid_current_snapshot), count from snap, xip_count;
+""",
+    'columns': [
+        {'name': 'postgresql.snapshot.xmin', 'type': 'gauge'},
+        {'name': 'postgresql.snapshot.xmax', 'type': 'gauge'},
+        {'name': 'postgresql.snapshot.xip_count', 'type': 'gauge'},
+    ],
+}
+
+WAL_FILE_METRICS = {
+    'name': 'wal_metrics',
+    'query': """
+SELECT
+count(*),
+sum(size),
+EXTRACT (EPOCH FROM now() - min(modification))
+  FROM pg_ls_waldir();
+""",
+    'columns': [
+        {'name': 'postgresql.wal_count', 'type': 'gauge'},
+        {'name': 'postgresql.wal_size', 'type': 'gauge'},
+        {'name': 'postgresql.wal_age', 'type': 'gauge'},
+    ],
 }
 
 FUNCTION_METRICS = {

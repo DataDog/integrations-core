@@ -34,6 +34,7 @@ from .summary import SummaryScraperMixin
 KUBELET_HEALTH_PATH = '/healthz'
 NODE_SPEC_PATH = '/spec'
 POD_LIST_PATH = '/pods'
+CADVISOR_METRICS_PATH = '/metrics/cadvisor'
 KUBELET_METRICS_PATH = '/metrics'
 STATS_PATH = '/stats/summary/'
 PROBES_METRICS_PATH = '/metrics/probes'
@@ -238,7 +239,9 @@ class KubeletCheck(
         This is so the base class can create a scraper_config with the proper values.
         """
         kubelet_conn_info = get_connection_info()
-        endpoint = kubelet_conn_info.get('url')
+
+        # dummy needed in case get_connection_info isn't running when the check is first accessed
+        endpoint = kubelet_conn_info.get('url') if kubelet_conn_info is not None else "dummy_url/kubelet"
 
         kubelet_instance = deepcopy(instance)
         kubelet_instance.update(
@@ -329,6 +332,8 @@ class KubeletCheck(
         endpoint = kubelet_conn_info.get('url')
         if endpoint is None:
             raise CheckException("Unable to detect the kubelet URL automatically: " + kubelet_conn_info.get('err', ''))
+
+        self._update_kubelet_url_and_bearer_token(instance, endpoint)
 
         self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
@@ -615,6 +620,24 @@ class KubeletCheck(
 
             gauge_name = '{}.containers.{}.{}'.format(self.NAMESPACE, metric_name, state_name)
             self.gauge(gauge_name, 1, tags + reason_tags)
+
+    def _update_kubelet_url_and_bearer_token(self, instance, endpoint):
+        if 'cadvisor_metrics_endpoint' in instance:
+            cadvisor_metrics_endpoint = instance.get(
+                'cadvisor_metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH)
+            )
+        else:
+            cadvisor_metrics_endpoint = instance.get('metrics_endpoint', urljoin(endpoint, CADVISOR_METRICS_PATH))
+
+        self.update_prometheus_url(instance, self.cadvisor_scraper_config, cadvisor_metrics_endpoint)
+
+        kubelet_metrics_endpoint = instance.get('kubelet_metrics_endpoint', urljoin(endpoint, KUBELET_METRICS_PATH))
+        self.update_prometheus_url(instance, self.kubelet_scraper_config, kubelet_metrics_endpoint)
+
+        probes_metrics_endpoint = urljoin(endpoint, PROBES_METRICS_PATH)
+        if self.detect_probes(self.get_http_handler(self.probes_scraper_config), probes_metrics_endpoint):
+            instance_probes_metrics_endpoint = instance.get('probes_metrics_endpoint', probes_metrics_endpoint)
+            self.update_prometheus_url(instance, self.probes_scraper_config, instance_probes_metrics_endpoint)
 
     @staticmethod
     def parse_quantity(string):

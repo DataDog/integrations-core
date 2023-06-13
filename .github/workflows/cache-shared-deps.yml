@@ -16,7 +16,7 @@ jobs:
         os: [ubuntu-22.04, windows-2022]
 
     env:
-      PYTHON_VERSION: "3.8"
+      PYTHON_VERSION: "3.9"
 
     steps:
     - uses: actions/checkout@v3

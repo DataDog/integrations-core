@@ -13,6 +13,8 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
+from datadog_checks.postgres import aws
+from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import INDEX_BLOAT, RELATION_METRICS, TABLE_BLOAT, RelationsManager
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
@@ -31,6 +33,9 @@ from .util import (
     QUERY_PG_UPTIME,
     REPLICATION_METRICS,
     SLRU_METRICS,
+    SNAPSHOT_TXID_METRICS,
+    SNAPSHOT_TXID_METRICS_LT_13,
+    WAL_FILE_METRICS,
     DatabaseConfigurationError,  # noqa: F401
     fmt,
     get_schema_field,
@@ -77,6 +82,7 @@ class PostgreSql(AgentCheck):
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
+        self.metadata_samples = PostgresMetadata(self, self._config, shutdown_callback=self._close_db_pool)
         self._relations_manager = RelationsManager(self._config.relations)
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
@@ -139,6 +145,11 @@ class PostgreSql(AgentCheck):
         if self._dynamic_queries:
             return self._dynamic_queries
 
+        if self._version is None:
+            self.log.debug("Version set to None due to incorrect identified version, aborting dynamic queries")
+            return None
+
+        self.log.debug("Generating dynamic queries")
         queries = []
         if self.version >= V9_2:
             q_pg_stat_database = copy.deepcopy(QUERY_PG_STAT_DATABASE)
@@ -157,8 +168,18 @@ class PostgreSql(AgentCheck):
             queries.extend([q_pg_stat_database, q_pg_stat_database_conflicts, QUERY_PG_UPTIME])
 
         if self.version >= V10:
-            queries.append(QUERY_PG_STAT_WAL_RECEIVER)
+            # Wal receiver is not supported on aurora
+            # select * from pg_stat_wal_receiver;
+            # ERROR:  Function pg_stat_get_wal_receiver() is currently not supported in Aurora
+            if self.is_aurora is False:
+                queries.append(QUERY_PG_STAT_WAL_RECEIVER)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
+            queries.append(WAL_FILE_METRICS)
+
+        if self.version >= V13:
+            queries.append(SNAPSHOT_TXID_METRICS)
+        if self.version < V13:
+            queries.append(SNAPSHOT_TXID_METRICS_LT_13)
 
         if not queries:
             self.log.debug("no dynamic queries defined")
@@ -166,19 +187,24 @@ class PostgreSql(AgentCheck):
 
         self._dynamic_queries = self._new_query_executor(queries)
         self._dynamic_queries.compile_queries()
-        self.log.debug("initialized {cnt} dynamic querie(s)", extra={"cnt": str(len(queries))})
+        self.log.debug("initialized %s dynamic querie(s)", len(queries))
 
         return self._dynamic_queries
 
     def cancel(self):
+        """
+        Cancels and waits for all threads to stop.
+        """
         self.statement_samples.cancel()
         self.statement_metrics.cancel()
+        self.metadata_samples.cancel()
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
         self._version = None
         self._is_aurora = None
         self.metrics_cache.clean_state()
+        self._dynamic_queries = None
 
     def _get_debug_tags(self):
         return ['agent_hostname:{}'.format(self.agent_hostname)]
@@ -196,7 +222,11 @@ class PostgreSql(AgentCheck):
         return "standby" if role else "master"
 
     def _collect_wal_metrics(self, instance_tags):
-        wal_file_age = self._get_wal_file_age()
+        if self.version >= V10:
+            # _collect_stats will gather wal file metrics
+            # for PG >= V10
+            return
+        wal_file_age = self._get_local_wal_file_age()
         if wal_file_age is not None:
             self.gauge(
                 "postgresql.wal_age",
@@ -205,18 +235,8 @@ class PostgreSql(AgentCheck):
                 hostname=self.resolved_hostname,
             )
 
-    def _get_wal_dir(self):
-        if self.version >= V10:
-            wal_dir = "pg_wal"
-        else:
-            wal_dir = "pg_xlog"
-
-        wal_log_dir = os.path.join(self._config.data_directory, wal_dir)
-
-        return wal_log_dir
-
-    def _get_wal_file_age(self):
-        wal_log_dir = self._get_wal_dir()
+    def _get_local_wal_file_age(self):
+        wal_log_dir = os.path.join(self._config.data_directory, "pg_xlog")
         if not os.path.isdir(wal_log_dir):
             self.log.warning(
                 "Cannot access WAL log directory: %s. Ensure that you are "
@@ -484,10 +504,20 @@ class PostgreSql(AgentCheck):
                 connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
             conn = psycopg2.connect(connection_string)
         else:
+            password = self._config.password
+            region = self._config.cloud_metadata.get('aws', {}).get('region', None)
+            if region is not None:
+                password = aws.generate_rds_iam_token(
+                    host=self._config.host,
+                    username=self._config.user,
+                    port=self._config.port,
+                    region=region,
+                )
+
             args = {
                 'host': self._config.host,
                 'user': self._config.user,
-                'password': self._config.password,
+                'password': password,
                 'database': dbname,
                 'sslmode': self._config.ssl_mode,
                 'application_name': self._config.application_name,
@@ -706,6 +736,7 @@ class PostgreSql(AgentCheck):
             if self._config.dbm_enabled:
                 self.statement_metrics.run_job_loop(tags)
                 self.statement_samples.run_job_loop(tags)
+                self.metadata_samples.run_job_loop(tags)
             if self._config.collect_wal_metrics:
                 self._collect_wal_metrics(tags)
 

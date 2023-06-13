@@ -360,12 +360,6 @@ ADDITIONAL_METRICS_BY_VERSION = {
         ),
         'elasticsearch.breakers.request.overhead': ('gauge', 'breakers.request.overhead'),
         'elasticsearch.breakers.request.tripped': ('rate', 'breakers.request.tripped'),
-        'elasticsearch.thread_pool.listener.active': ('gauge', 'thread_pool.listener.active'),
-        'elasticsearch.thread_pool.listener.threads': ('gauge', 'thread_pool.listener.threads'),
-        'elasticsearch.thread_pool.listener.threads.count': ('monotonic_count', 'thread_pool.listener.threads'),
-        'elasticsearch.thread_pool.listener.queue': ('gauge', 'thread_pool.listener.queue'),
-        'elasticsearch.thread_pool.listener.rejected': ('rate', 'thread_pool.listener.rejected'),
-        'elasticsearch.thread_pool.listener.rejected.count': ('monotonic_count', 'thread_pool.listener.rejected'),
     },
     (1, 5, 0): {
         'elasticsearch.indices.recovery.current_as_source': ('gauge', 'indices.recovery.current_as_source'),
@@ -401,8 +395,8 @@ ADDITIONAL_METRICS_BY_VERSION = {
         # Some of these may very well exist in previous ES versions, but not worth the time/effort
         # to find where they were introduced
         'elasticsearch.indices.query_cache.cache_size': ('gauge', 'indices.query_cache.cache_size'),
-        'elasticsearch.indices.query_cache.cache_count': ('rate', 'indices.query_cache.cache_count'),
-        'elasticsearch.indices.query_cache.total_count': ('rate', 'indices.query_cache.total_count'),
+        'elasticsearch.indices.query_cache.cache_count': ('monotonic_count', 'indices.query_cache.cache_count'),
+        'elasticsearch.indices.query_cache.total_count': ('monotonic_count', 'indices.query_cache.total_count'),
         'elasticsearch.indices.segments.doc_values_memory_in_bytes': (
             'gauge',
             'indices.segments.doc_values_memory_in_bytes',
@@ -455,12 +449,6 @@ ADDITIONAL_METRICS_BY_VERSION = {
         'elasticsearch.fs.total.disk_writes': ('rate', 'fs.io_stats.total.write_operations'),
         'elasticsearch.fs.total.disk_read_size_in_bytes': ('gauge', 'fs.io_stats.total.read_kilobytes'),
         'elasticsearch.fs.total.disk_write_size_in_bytes': ('gauge', 'fs.io_stats.total.write_kilobytes'),
-        'elasticsearch.breakers.inflight_requests.tripped': ('gauge', 'breakers.in_flight_requests.tripped'),
-        'elasticsearch.breakers.inflight_requests.overhead': ('gauge', 'breakers.in_flight_requests.overhead'),
-        'elasticsearch.breakers.inflight_requests.estimated_size_in_bytes': (
-            'gauge',
-            'breakers.in_flight_requests.estimated_size_in_bytes',
-        ),
         'elasticsearch.search.scroll.total': ('gauge', 'indices.search.scroll_total'),
         'elasticsearch.search.scroll.total.count': ('monotonic_count', 'indices.search.scroll_total'),
         'elasticsearch.search.scroll.time': (
@@ -556,6 +544,23 @@ ADDITIONAL_METRICS_BY_VERSION = {
 }
 VERSIONS_THAT_ADD_METRICS = sorted(ADDITIONAL_METRICS_BY_VERSION)
 
+# These metrics have been deleted on ES8
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html
+ADDITIONAL_METRIC_PRE_8_0_0 = {
+    'elasticsearch.thread_pool.listener.active': ('gauge', 'thread_pool.listener.active'),
+    'elasticsearch.thread_pool.listener.threads': ('gauge', 'thread_pool.listener.threads'),
+    'elasticsearch.thread_pool.listener.threads.count': ('monotonic_count', 'thread_pool.listener.threads'),
+    'elasticsearch.thread_pool.listener.queue': ('gauge', 'thread_pool.listener.queue'),
+    'elasticsearch.thread_pool.listener.rejected': ('rate', 'thread_pool.listener.rejected'),
+    'elasticsearch.thread_pool.listener.rejected.count': ('monotonic_count', 'thread_pool.listener.rejected'),
+    'elasticsearch.breakers.inflight_requests.tripped': ('gauge', 'breakers.in_flight_requests.tripped'),
+    'elasticsearch.breakers.inflight_requests.overhead': ('gauge', 'breakers.in_flight_requests.overhead'),
+    'elasticsearch.breakers.inflight_requests.estimated_size_in_bytes': (
+        'gauge',
+        'breakers.in_flight_requests.estimated_size_in_bytes',
+    ),
+}
+
 ADDITIONAL_METRICS_PRE_7_0_0 = {
     'elasticsearch.thread_pool.index.active': ('gauge', 'thread_pool.index.active'),
     'elasticsearch.thread_pool.index.queue': ('gauge', 'thread_pool.index.queue'),
@@ -591,6 +596,11 @@ INDEX_STATS_METRICS = {
     'elasticsearch.index.primary_store_size': ('gauge', 'primary_store_size'),
     'elasticsearch.index.store_size': ('gauge', 'store_size'),
 }
+INDEX_SEARCH_STATS = [
+    ('elasticsearch.index.search.query.total', 'total.search.query_total'),
+    ('elasticsearch.index.search.query.time', 'total.search.query_time_in_millis'),
+]
+
 
 JVM_METRICS_POST_0_90_10 = {
     'jvm.gc.collectors.young.count': ('gauge', 'jvm.gc.collectors.young.collection_count'),
@@ -754,6 +764,10 @@ CAT_ALLOCATION_METRICS = {
     'elasticsearch.disk.percent': ('gauge', 'disk_percent'),
 }
 
+TEMPLATE_METRICS = {
+    'elasticsearch.templates.count': ('gauge', 'templates', lambda templates: len(templates)),
+}
+
 
 def stats_for_version(version, jvm_rate=False):
     """
@@ -786,6 +800,8 @@ def stats_for_version(version, jvm_rate=False):
         metrics.update(ADDITIONAL_METRICS_PRE_6_3)
     if version < [7, 0, 0]:
         metrics.update(ADDITIONAL_METRICS_PRE_7_0_0)
+    if version < [8, 0, 0]:
+        metrics.update(ADDITIONAL_METRIC_PRE_8_0_0)
 
     for ver in VERSIONS_THAT_ADD_METRICS[: bisect(VERSIONS_THAT_ADD_METRICS, tuple(version))]:
         metrics.update(ADDITIONAL_METRICS_BY_VERSION[ver])

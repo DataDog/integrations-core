@@ -4,12 +4,12 @@ services:
   elastic:
     image: "${ELASTIC_REGISTRY}:${ELASTIC_IMAGE}"
     environment:
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
       - "cluster.name=test-cluster"
       - "node.name=test-node"
       - "discovery.type=single-node"
-      - "path.repo=[\"/backup/my_backup_location\"]"
+      - "path.repo=[\"/usr/share/elasticsearch/data\"]"
       - "ELASTIC_PASSWORD=admin"
       - "ELASTIC_USERNAME=admin"
       - "DISABLE_SECURITY_PLUGIN=true"

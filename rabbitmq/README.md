@@ -38,7 +38,7 @@ Configure the `prometheus_plugin` section in your instance configuration. When u
        url: http://<HOST>:15692
  ```
 
- This enables scraping of the [`/metrics` endpoint][20] on one RabbitMQ node. We can also collect data from the [`/metrics/detailed` endpoint][22]. 
+ This enables scraping of the [`/metrics` endpoint][20] on one RabbitMQ node. Datadog can also collect data from the [`/metrics/detailed` endpoint][22].
 
  ```yaml
  instances:
@@ -176,11 +176,21 @@ Additional helpful documentation, links, and articles:
 
 ### Migrating to Prometheus Plugin
 
-When migrating from the Management Plugin to the Prometheus Plugin, review the metrics that you use because some of them might have new names or might not be available anymore.
+The Prometheus Plugin exposes a different set of metrics from the Management Plugin.
+Here is what to be aware of as you migrate from the Management to the Prometheus Plugin.
 
-Look up your metrics in [this table][23]. If a metric's description contains an `[OpenMetricsV2]` tag, then it is available in the Prometheus Plugin.
+- Look up your metrics in [this table][23]. If a metric's description contains an `[OpenMetricsV2]` tag, then it is available in the Prometheus Plugin. Metrics available only in the Management Plugin do not have any tags in their descriptions.
+- Any dashboards and monitors using Management Plugin metrics do not function. Switch to the dashboards and monitors marked as *OpenMetrics Version*.
+- The default configuration collects aggregated metrics. This means, for example, that there are no metrics tagged by queue. Configure the option `prometheus_plugin.unaggregated_endpoint` to get metrics without aggregation.
+- The `rabbitmq.status` service check is replaced by `rabbitmq.openmetrics.health`. The service check `rabbitmq.aliveness` has no equivalent in the Prometheus Plugin.
 
-Metrics available only in the Management Plugin do not have tags in their descriptions.
+The Prometheus Plugin changes some tags. The table below describes the changes to the more common tags.
+
+| Management          | Prometheus                               |
+|:--------------------|:-----------------------------------------|
+| `queue_name`        | `queue`                                  |
+| `rabbitmq_vhost`    | `vhost`, `exchange_vhost`, `queue_vhost` |
+| `rabbitmq_exchange` | `exchange`                               |
 
 
 ### FAQ

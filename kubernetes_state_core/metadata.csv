@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+kubernetes_state.configmap.count,gauge,,,,Number of ConfigMaps. Requires ConfigMaps to be added to Cluster Agent collector. Tags: `kube_namespace`.,0,kubernetes_state_core,k8s_state.cm.count,
 kubernetes_state.daemonset.count,gauge,,,,Number of DaemonSets. Tags:`kube_namespace`.,0,kubernetes_state_core,k8s_state.ds.count,
 kubernetes_state.daemonset.scheduled,gauge,,,,The number of nodes running at least one daemon pod and are supposed to. Tags:`kube_daemon_set` `kube_namespace` (`env` `service` `version` from standard labels).,0,kubernetes_state_core,k8s_state.ds.scheduled,
 kubernetes_state.daemonset.desired,gauge,,,,The number of nodes that should be running the daemon pod. Tags:`kube_daemon_set` `kube_namespace` (`env` `service` `version` from standard labels).,0,kubernetes_state_core,k8s_state.ds.desired,
@@ -63,6 +64,7 @@ kubernetes_state.pdb.pods_desired,gauge,,,,Minimum desired number of healthy pod
 kubernetes_state.pdb.disruptions_allowed,gauge,,,,Number of pod disruptions that are currently allowed. Tags:`kube_namespace` `poddisruptionbudget`.,0,kubernetes_state_core,k8s_state.pdb.disruptions_allowed,
 kubernetes_state.pdb.pods_total,gauge,,,,Total number of pods counted by this disruption budget. Tags:`kube_namespace` `poddisruptionbudget`.,0,kubernetes_state_core,k8s_state.pdb.pods_total,
 kubernetes_state.secret.type,gauge,,,,Type about secret. Tags:`kube_namespace` `secret` `type`.,0,kubernetes_state_core,k8s_state.secret.type,
+kubernetes_state.secret.count,gauge,,,,Number of Secrets. Requires Secrets to be added to Cluster Agent collector. Tags: `kube_namespace`.,0,kubernetes_state_core,k8s_state.s.count,
 kubernetes_state.replicaset.count,gauge,,,,Number of ReplicaSets Tags:`kube_namespace` `kube_deployment`.,0,kubernetes_state_core,k8s_state.rs.count,
 kubernetes_state.replicaset.replicas_desired,gauge,,,,Number of desired pods for a ReplicaSet. Tags:`kube_namespace` `kube_replica_set` (`env` `service` `version` from standard labels).,0,kubernetes_state_core,k8s_state.rs.replicas_desired,
 kubernetes_state.replicaset.fully_labeled_replicas,gauge,,,,The number of fully labeled replicas per ReplicaSet. Tags:`kube_namespace` `kube_replica_set` (`env` `service` `version` from standard labels).,0,kubernetes_state_core,k8s_state.rs.fully_labeled,

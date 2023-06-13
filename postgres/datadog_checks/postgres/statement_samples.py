@@ -181,6 +181,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
 
+        # if regular samples is disabled, only need to collect as often as activity is sampled
+        if not is_affirmative(config.statement_samples_config.get('enabled', True)):
+            collection_interval = config.statement_activity_config.get(
+                'collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL
+            )
+
         self._conn_pool = MultiDatabaseConnectionPool(check._new_connection)
 
         def shutdown_cb():
@@ -191,7 +197,10 @@ class PostgresStatementSamples(DBMAsyncJob):
             check,
             rate_limit=1 / collection_interval,
             run_sync=is_affirmative(config.statement_samples_config.get('run_sync', False)),
-            enabled=is_affirmative(config.statement_samples_config.get('enabled', True)),
+            enabled=is_affirmative(
+                config.statement_samples_config.get('enabled', True)
+                or is_affirmative(config.statement_activity_config.get('enabled', True))
+            ),
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
@@ -235,6 +244,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
         self._activity_coll_enabled = is_affirmative(self._config.statement_activity_config.get('enabled', True))
+        self._explain_plan_coll_enabled = is_affirmative(self._config.statement_samples_config.get('enabled', True))
         # activity events cannot be reported more often than regular samples
         self._activity_coll_interval = max(
             self._config.statement_activity_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL),
@@ -439,11 +449,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         pg_activity_cols = self._get_pg_stat_activity_cols_cached(PG_STAT_ACTIVITY_COLS)
         rows = self._get_new_pg_stat_activity(pg_activity_cols)
         rows = self._filter_and_normalize_statement_rows(rows)
-        event_samples = self._collect_plans(rows)
         submitted_count = 0
-        for e in event_samples:
-            self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
-            submitted_count += 1
+        if self._explain_plan_coll_enabled:
+            event_samples = self._collect_plans(rows)
+            for e in event_samples:
+                self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
+                submitted_count += 1
 
         if self._report_activity_event():
             active_connections = self._get_active_connections()
@@ -645,7 +656,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
                 repr(e),
             )
-            if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', False)):
+            if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', True)):
                 plan = self._explain_parameterized_queries.explain_statement(dbname, statement, obfuscated_statement)
                 if plan:
                     return plan, DBExplainError.explained_with_prepared_statement, None

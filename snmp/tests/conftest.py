@@ -103,7 +103,7 @@ def create_datadog_conf_file(tmp_dir):
                 {
                     'network': '{}.0/29'.format(prefix),
                     'port': PORT,
-                    'community': 'generic-router',
+                    'community': 'generic-device',
                     'version': 2,
                     'timeout': 1,
                     'retries': 2,

@@ -200,6 +200,11 @@ You need to change the ownership of the `conf.yaml` to `dd-agent`:
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Gain visibility into your Cloudera clusters with Datadog][15]
 
 [1]: https://www.cloudera.com/products/cloudera-data-platform.html
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -215,3 +220,4 @@ Need help? Contact [Datadog support][9].
 [12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cloudera/images/set_workload_password.png
 [13]: https://docs.cloudera.com/data-hub/cloud/access-clusters/topics/mc-accessing-cluster-via-ssh.html
 [14]: https://docs.cloudera.com/cloudera-manager/7.9.0/monitoring-and-diagnostics/topics/cm-tsquery-syntax.html
+[15]: https://www.datadoghq.com/blog/cloudera-integration-announcement/

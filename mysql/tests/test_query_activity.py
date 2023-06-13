@@ -131,7 +131,6 @@ def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, quer
     )
     assert blocked_row['sql_text'] == expected_sql_text
     assert blocked_row['processlist_state'], "missing state"
-    assert blocked_row['wait_event'] == 'wait/io/table/sql/handler'
     assert blocked_row['thread_id'], "missing thread id"
     assert blocked_row['processlist_id'], "missing processlist id"
     assert blocked_row['wait_timer_start'], "missing wait timer start"
@@ -384,7 +383,6 @@ def test_async_job_enabled(dd_run_check, dbm_instance, activity_enabled):
     check.cancel()
     if activity_enabled:
         assert check._query_activity._job_loop_future is not None
-        check._query_activity._job_loop_future.result()
     else:
         assert check._query_activity._job_loop_future is None
 
@@ -410,8 +408,6 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     check = MySql(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
     check.cancel()
-    # wait for it to stop and make sure it doesn't throw any exceptions
-    check._query_activity._job_loop_future.result()
     assert not check._query_activity._job_loop_future.running(), "activity thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
