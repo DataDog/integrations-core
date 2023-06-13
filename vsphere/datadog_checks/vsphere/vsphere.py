@@ -293,8 +293,9 @@ class VSphereCheck(AgentCheck):
                 if self._config.vm_hostname_suffix_tag is not None:
                     hostname_suffix = None
 
-                    sorted_resource_tags = sorted(resource_tags)
-                    for resource_tag in sorted_resource_tags:
+                    all_tags = resource_tags + self._config.custom_tags
+                    sorted_tags = sorted(all_tags)
+                    for resource_tag in sorted_tags:
                         resource_tag_key, _, resource_tag_value = resource_tag.partition(":")
                         if resource_tag_key == self._config.vm_hostname_suffix_tag:
                             hostname_suffix = resource_tag_value

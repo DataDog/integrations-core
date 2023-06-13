@@ -110,6 +110,7 @@ class VSphereConfig(object):
             instance.get("collect_per_instance_filters", {})
         )
         self.include_datastore_cluster_folder_tag = instance.get("include_datastore_cluster_folder_tag", True)
+        self.custom_tags = instance.get('tags', [])
         self.validate_config()
 
     def is_historical(self):
