@@ -18,7 +18,9 @@ The Strimzi check collects Prometheus-formatted metrics on the following operato
    - Topic
    - User
 
-Follow the instructions below to enable and configure this check for an Agent. This check will only collect metrics from the above listed operators. For monitoring Kafka and Zookeeper, please use the [Kafka][11] and [Zookeeper][12] checks respectively.
+**Note**: For monitoring Kafka and Zookeeper, please use the [Kafka][11] and [Zookeeper][12] checks respectively.
+ 
+Follow the instructions below to enable and configure this check for an Agent.
 
 #### Host
 
