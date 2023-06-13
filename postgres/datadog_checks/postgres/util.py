@@ -384,6 +384,22 @@ select txid_snapshot_xmin(txid_current_snapshot), txid_snapshot_xmax(txid_curren
     ],
 }
 
+WAL_FILE_METRICS = {
+    'name': 'wal_metrics',
+    'query': """
+SELECT
+count(*),
+sum(size),
+EXTRACT (EPOCH FROM now() - min(modification))
+  FROM pg_ls_waldir();
+""",
+    'columns': [
+        {'name': 'postgresql.wal_count', 'type': 'gauge'},
+        {'name': 'postgresql.wal_size', 'type': 'gauge'},
+        {'name': 'postgresql.wal_age', 'type': 'gauge'},
+    ],
+}
+
 FUNCTION_METRICS = {
     'descriptors': [('schemaname', 'schema'), ('funcname', 'function')],
     'metrics': {

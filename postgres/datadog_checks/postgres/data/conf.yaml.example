@@ -204,6 +204,7 @@ instances:
     ## @param collect_wal_metrics - boolean - optional - default: false
     ## Collect metrics about WAL file age.
     ## NOTE: You must be running the check local to your database if you want to enable this option.
+    ## Starting PG10, wal metrics are collected by default using `pg_ls_waldir` and don't need local access anymore.
     #
     # collect_wal_metrics: false
 
