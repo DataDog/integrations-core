@@ -157,7 +157,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
 
         return kube_apiserver_metrics_instance
 
-    def submit_as_gauge_and_monotonic_count(self, metric_suffix, metric, scraper_config, monotonic_count=True):
+    def submit_metric(self, metric_suffix, metric, scraper_config, gauge=True, monotonic_count=True):
         """
         submit a kube_apiserver_metrics metric both as a gauge (for compatibility) and as a monotonic_count
         """
@@ -168,8 +168,9 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
 
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 _tags.append('{}:{}'.format(label_name, label_value))
-            # submit raw metric
-            self.gauge(metric_name, sample[self.SAMPLE_VALUE], _tags)
+            if gauge:
+                # submit raw metric
+                self.gauge(metric_name, sample[self.SAMPLE_VALUE], _tags)
             if monotonic_count:
                 # submit rate metric
                 self.monotonic_count(metric_name + '.count', sample[self.SAMPLE_VALUE], _tags)
@@ -181,31 +182,31 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
         """
         for sample in metric.samples:
             sample[self.SAMPLE_LABELS]["apiservice_name"] = sample[self.SAMPLE_LABELS].pop("name")
-        self.submit_as_gauge_and_monotonic_count('.aggregator_unavailable_apiservice', metric, scraper_config, False)
+        self.submit_metric('.aggregator_unavailable_apiservice', metric, scraper_config, monotonic_count=False)
 
     def apiserver_audit_event_total(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.audit_event', metric, scraper_config)
+        self.submit_metric('.audit_event', metric, scraper_config)
 
     def rest_client_requests_total(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.rest_client_requests_total', metric, scraper_config)
+        self.submit_metric('.rest_client_requests_total', metric, scraper_config)
 
     def http_requests_total(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.http_requests_total', metric, scraper_config)
+        self.submit_metric('.http_requests_total', metric, scraper_config)
 
     def apiserver_request_count(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.apiserver_request_count', metric, scraper_config)
+        self.submit_metric('.apiserver_request_count', metric, scraper_config)
 
     def apiserver_dropped_requests_total(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.apiserver_dropped_requests_total', metric, scraper_config)
+        self.submit_metric('.apiserver_dropped_requests_total', metric, scraper_config)
 
     def authenticated_user_requests(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.authenticated_user_requests', metric, scraper_config)
+        self.submit_metric('.authenticated_user_requests', metric, scraper_config)
 
     def apiserver_request_total(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.apiserver_request_total', metric, scraper_config)
+        self.submit_metric('.apiserver_request_total', metric, scraper_config)
 
     def apiserver_request_terminations_total(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.apiserver_request_terminations_total', metric, scraper_config)
+        self.submit_metric('.apiserver_request_terminations_total', metric, scraper_config)
 
     def apiserver_admission_webhook_fail_open_count(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.apiserver_admission_webhook_fail_open_count', metric, scraper_config)
+        self.submit_metric('.apiserver_admission_webhook_fail_open_count', metric, scraper_config)
