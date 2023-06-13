@@ -98,3 +98,4 @@ def test_collect_metadata_with_disabled_collect_server_info(
     c._collect_metadata()
     datadog_agent.assert_metadata_count(0)
     c.log.debug.assert_called_with('Skipping server info collection as it is disabled, collect_server_info: %s', False)
+    
