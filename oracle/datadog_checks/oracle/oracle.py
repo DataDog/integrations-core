@@ -233,6 +233,7 @@ class Oracle(AgentCheck):
         try:
             with jdbc_lock:
                 if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
+                    self.log.debug("JVM started but thread not attached to JVM.")
                     jpype.attachThreadToJVM()
                     jpype.java.lang.Thread.currentThread().setContextClassLoader(
                         jpype.java.lang.ClassLoader.getSystemClassLoader()
@@ -240,9 +241,17 @@ class Oracle(AgentCheck):
                 connection = jdb.connect(
                     self.ORACLE_DRIVER_CLASS, connect_string, jdbc_connect_properties, self._jdbc_driver
                 )
-            self.log.debug("Connected to Oracle DB using JDBC connector")
+                if jpype.isJVMStarted() and jpype.isThreadAttachedToJVM():
+                    jpype.detachThreadFromJVM()
+                    self.log.info("Detaching thread from JVM after connection")
+
+            self.log.info("Connected to Oracle DB using JDBC connector")
+
             return connection
         except Exception as e:
+            if jpype.isJVMStarted() and jpype.isThreadAttachedToJVM():
+                jpype.detachThreadFromJVM()
+                self.log.debug("Thread detached from JVM after JDBC connection failure")
             self._connection_errors += 1
             if "Class {} not found".format(self.ORACLE_DRIVER_CLASS) in str(e):
                 msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver
