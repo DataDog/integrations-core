@@ -28,6 +28,7 @@ class PostgresAutodiscovery(Discovery):
         relations_config = [{'relation_regex': '.*'}]
         self._relations_manager = RelationsManager(relations_config)
         self._conn_pool = MultiDatabaseConnectionPoolLimited(self._connect, max_conn)
+        self._db_usage: Dict[str, bool] = {} # is query running for db?
         self.default_ttl = 60000
         # get once to cache dbs
         self.get_items()
@@ -76,6 +77,8 @@ class PostgresAutodiscovery(Discovery):
         formatted_query = self._relations_manager.filter_relation_query(query, "nspname")
         cursor.execute(formatted_query)
         relations = list(cursor.fetchall())
+        self._conn_pool.dbs_usage[database] = False
+        # self._conn_pool.get_connection(database, self.default_ttl)
         # print(relations)
 
     def query_relations_all_databases_threaded(self) -> None:
@@ -86,6 +89,7 @@ class PostgresAutodiscovery(Discovery):
         for database in databases:
             print("getting relations from", database)
             self._print_num_connections()
+            self._conn_pool.dbs_usage[database] = True
             thread = threading.Thread(target=self.query_relations, args=(database,))
             db_threads.append(thread)
             thread.start()

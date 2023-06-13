@@ -4,7 +4,7 @@
 import datetime
 import inspect
 import threading
-from typing import Callable
+from typing import Callable, Dict
 from collections import namedtuple
 
 import psycopg2
@@ -112,17 +112,22 @@ class MultiDatabaseConnectionPoolLimited(MultiDatabaseConnectionPool):
     def __init__(self, connect_fn: Callable[[str], None], max_conn: int):
         super().__init__(connect_fn)
         self.max_conn = max_conn
+        self.dbs_usage: Dict[str, bool] = {} # if connection should not be evicted, barring TTL expiration, set dbs_usage[db] = True here
         self._conns: Dict[str, ConnectionWithTTLAndLastAccess] = {}
 
-    def evict_lru(self) -> None:
+    def _evict_lru(self) -> None:
         """
         Evict least recently used connection.
+        Ensure lock is held before calling.
         """
-        with self._mu:
-            if len(self._conns) == 0:
-                return
+        if len(self._conns) == 0:
+            return
 
-            self._conns.pop(min(self._conns, key = lambda t: self._conns.get(t).last_access))
+        lru = min(self._conns, key = lambda t: self._conns.get(t).last_access)
+        if self.dbs_usage[lru]: # don't evict if query is running
+            return
+
+        self._conns.pop(lru)
         
     def get_connection(self, dbname: str, ttl_ms: int) -> psycopg2.extensions.connection:
         self.prune_connections()
@@ -132,10 +137,12 @@ class MultiDatabaseConnectionPoolLimited(MultiDatabaseConnectionPool):
 
         if db_pool_len < self.max_conn:
             conn = super().get_connection(dbname, ttl_ms)
+            self.dbs_usage[dbname] = True
             return conn
 
-        if db_pool_len > self.max_conn:
-            self.evict_lru()
+        with self._mu:
+            while len(self._conns) > self.max_conn:
+                self._evict_lru()
 
         conn = super().get_connection(dbname, ttl_ms)
         return conn
