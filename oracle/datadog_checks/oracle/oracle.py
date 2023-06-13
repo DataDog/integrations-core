@@ -245,7 +245,7 @@ class Oracle(AgentCheck):
                     jpype.detachThreadFromJVM()
                     self.log.info("Detaching thread from JVM after connection")
 
-            self.log.info("Connected to Oracle DB using JDBC connector")
+            self.log.debug("Connected to Oracle DB using JDBC connector")
 
             return connection
         except Exception as e:
