@@ -1,6 +1,6 @@
 [
   {
-    "agent_version": "7.46.0",
+    "agent_version": "7.47.0",
     "integration": "Strimzi",
     "check": "strimzi.cluster_operator.openmetrics.health",
     "statuses": [
@@ -15,7 +15,7 @@
     "description": "Returns `CRITICAL` if the Agent is unable to connect to the Cluster Operator OpenMetrics endpoint, otherwise returns `OK`."
   },
   {
-    "agent_version": "7.46.0",
+    "agent_version": "7.47.0",
     "integration": "Strimzi",
     "check": "strimzi.topic_operator.openmetrics.health",
     "statuses": [
@@ -30,7 +30,7 @@
     "description": "Returns `CRITICAL` if the Agent is unable to connect to the Topic Operator OpenMetrics endpoint, otherwise returns `OK`."
   },
   {
-    "agent_version": "7.46.0",
+    "agent_version": "7.47.0",
     "integration": "Strimzi",
     "check": "strimzi.user_operator.openmetrics.health",
     "statuses": [
