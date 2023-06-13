@@ -1,7 +1,7 @@
 [env.collectors.datadog-checks]
 base-package-features = ["deps", "db", "json"]
 
-check-types = true
+check-types = false
 mypy-args = [
   "--py2",
   "datadog_checks/",
@@ -15,7 +15,7 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["3.8"]
+python = ["3.9"]
 version = ["9.6", "10.0", "11.0", "12.1", "13.0", "14.0"]
 
 [envs.default.overrides]

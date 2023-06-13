@@ -19,8 +19,10 @@ The [ibm_db][4] client library is required. To install it, ensure you have a wor
 ##### Unix
 
 ```text
-sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install ibm_db==3.0.1
+sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install ibm_db==3.1.0
 ```
+
+Note: If you are on an Agent running Python 2, use `ibm_db==3.0.1` instead.
 
 ##### Windows
 
@@ -166,6 +168,56 @@ See [service_checks.json][11] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
+### Installing `ibm_db` client library offline
+
+If you're in an air gapped environment, or on a restricted network where it's not possible to run `pip install ibm_db==3.0.1`, you can install `ibm_db` using the following method:
+
+**Note**: The following example assumes an Ubuntu machine, but the steps should also be similar on most operating systems.
+
+1. On a machine with network access, download [the source tarball][14].
+
+   ```
+   curl -Lo ibm_db.tar.gz https://github.com/ibmdb/python-ibmdb/archive/refs/tags/v3.1.0.tar.gz
+   ```
+
+1. Transport the file over to the restricted host, and then extract the archive:
+
+   ```
+   tar xvf ibm_db.tar.gz
+   ```
+
+1. Using the embedded [`pip`][15] on the Agent, run the following command:
+
+   ```
+   /opt/datadog-agent/embedded/bin/pip install --no-index --no-deps --no-build-isolation  python-ibmdb- 
+   3.1.0/IBM_DB/ibm_db/
+   ```
+
+If you get the following error:
+
+```
+  error: subprocess-exited-with-error
+
+  × Preparing metadata (pyproject.toml) did not run successfully.
+  | exit code: 1
+   -> [8 lines of output]
+      Detected 64-bit Python
+      Detected platform = linux, uname = x86_64
+      Downloading https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/linuxx64_odbc_cli.tar.gz
+       Downloading DSDriver from url =  https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/linuxx64_odbc_cli.tar.gz
+      Pre-requisite check [which gcc] : Failed
+
+      No Gcc installation detected.
+      Please install gcc and continue with the installation of the ibm_db.
+      [end of output]
+```
+
+You may need to install `gcc`, which can be done using:
+
+```
+apt-get install gcc
+```
+
 Need help? Contact [Datadog support][12].
 
 ## Further Reading
@@ -187,3 +239,5 @@ Additional helpful documentation, links, and articles:
 [11]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/assets/service_checks.json
 [12]: https://docs.datadoghq.com/help/
 [13]: https://www.datadoghq.com/blog/monitor-db2-with-datadog
+[14]: https://pypi.org/project/ibm-db/#files
+[15]: https://docs.datadoghq.com/developers/guide/custom-python-package/?tab=linux
