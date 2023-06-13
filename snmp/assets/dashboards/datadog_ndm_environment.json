@@ -859,7 +859,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:snmp.devices_monitored{snmp_profile:generic-router,agent_host:$Agent_Hostname.value,$Custom_Tag}"
+                                            "query": "sum:snmp.devices_monitored{snmp_profile IN (generic-router,generic-device) AND agent_host:$Agent_Hostname.value AND $Custom_Tag}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -887,7 +887,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**Why are my devices matched to the generic router profile?**\n\nSome devices may not be supported out-of-the-box and default to the generic router profile, which may cause some missing metrics.\n\n To create a custom SNMP profile for your network devices, see [Build a NDM Profile](https://docs.datadoghq.com/network_monitoring/devices/guide/build-ndm-profile/).",
+                            "content": "**Why are my devices matched to the generic device profile?**\n\nSome devices may not be supported out-of-the-box and default to the generic device profile, which may cause some missing metrics.\n\n To create a custom SNMP profile for your network devices, see [Build a NDM Profile](https://docs.datadoghq.com/network_monitoring/devices/guide/build-ndm-profile/).",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
