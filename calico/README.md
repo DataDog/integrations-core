@@ -154,7 +154,7 @@ Additional helpful documentation, links, and articles:
 [7]: https://github.com/DataDog/integrations-core/blob/master/calico/assets/service_checks.json
 [8]: https://docs.datadoghq.com/help/
 [9]: https://docs.tigera.io/calico/3.25/operations/monitor/monitor-component-metrics
-[10]: https://docs.datadoghq.com/developers/integrations/new_check_howto/#developer-toolkit
+[10]: https://docs.datadoghq.com/developers/integrations/python/
 [11]: https://app.datadoghq.com/account/settings#agent
 [12]: https://docs.datadoghq.com/agent/kubernetes
 [13]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker

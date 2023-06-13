@@ -71,6 +71,10 @@ METRICS = {
     # For Kubernetes >= 1.26
     # https://github.com/kubernetes/kubernetes/pull/112690
     'kubernetes_feature_enabled': 'kubernetes_feature_enabled',
+    'apiserver_envelope_encryption_dek_cache_fill_percent': 'envelope_encryption_dek_cache_fill_percent',
+    'apiserver_flowcontrol_request_concurrency_limit': 'flowcontrol_request_concurrency_limit',
+    'apiserver_flowcontrol_current_executing_requests': 'flowcontrol_current_executing_requests',
+    'apiserver_flowcontrol_rejected_requests_total': 'flowcontrol_rejected_requests_total',
 }
 
 

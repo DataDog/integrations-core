@@ -37,10 +37,7 @@ In a Mongo shell, create a read-only user for the Datadog Agent in the `admin` d
 use admin
 db.auth("admin", "<YOUR_MONGODB_ADMIN_PASSWORD>")
 
-# On MongoDB 2.x, use the addUser command.
-db.addUser("datadog", "<UNIQUEPASSWORD>", true)
-
-# On MongoDB 3.x or higher, use the createUser command.
+# Create the user for the Datadog Agent.
 db.createUser({
   "user": "datadog",
   "pwd": "<UNIQUEPASSWORD>",
@@ -68,10 +65,7 @@ In a Mongo shell, authenticate to the primary and create a read-only user for th
 use admin
 db.auth("admin", "<YOUR_MONGODB_ADMIN_PASSWORD>")
 
-# On MongoDB 2.x, use the addUser command.
-db.addUser("datadog", "<UNIQUEPASSWORD>", true)
-
-# On MongoDB 3.x or higher, use the createUser command.
+# Create the user for the Datadog Agent.
 db.createUser({
   "user": "datadog",
   "pwd": "<UNIQUEPASSWORD>",
@@ -128,10 +122,7 @@ For each shard in your cluster, connect to the primary of the replica set and cr
 use admin
 db.auth("admin", "<YOUR_MONGODB_ADMIN_PASSWORD>")
 
-# On MongoDB 2.x, use the addUser command.
-db.addUser("datadog", "<UNIQUEPASSWORD>", true)
-
-# On MongoDB 3.x or higher, use the createUser command.
+# Create the user for the Datadog Agent.
 db.createUser({
   "user": "datadog",
   "pwd": "<UNIQUEPASSWORD>",
@@ -459,7 +450,9 @@ See [metadata.csv][22] for a list of metrics provided by this check.
 
 See the [MongoDB 3.0 Manual][23] for more detailed descriptions of some of these metrics.
 
-**NOTE**: The following metrics are NOT collected by default, use the `additional_metrics` parameter in your `mongo.d/conf.yaml` file to collect them:
+#### Additional metrics
+
+The following metrics are **not** collected by default. Use the `additional_metrics` parameter in your `mongo.d/conf.yaml` file to collect them:
 
 | metric prefix            | what to add to `additional_metrics` to collect it |
 | ------------------------ | ------------------------------------------------- |

@@ -22,7 +22,7 @@ dev_option = click.option(
     '--dev/--prod',
     default=None,
     help=(
-        'By default we use the local version of the check. Pass --prod to use the one shipped with the agent. '
+        'By default we use version of the check that is shipped with the agent you are using.'
         'Pass --dev to explicitly enforce the local version. Also see the `--base` option.'
     ),
 )

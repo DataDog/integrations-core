@@ -9,7 +9,6 @@ import pytest
     ],
 )
 def test_openmetrics_pass_single_parameter(ddev, repository, check_name, helpers, network_replay):
-    network_replay('fixtures/openmetrics/metric_limit/success.yaml', record_mode='none')
     result = ddev("validate", "openmetrics", check_name)
 
     assert result.exit_code == 0, result.output
@@ -31,7 +30,6 @@ def test_openmetrics_fail_single_parameter(ddev, helpers, repository, network_re
             def __init__(self, name, init_config, instances):
                 super(ArangodbCheck, self).__init__(name, init_config, instances)
         '''
-    network_replay('fixtures/openmetrics/metric_limit/fail.yaml', record_mode='none')
 
     check = "arangodb"
     check_file = repository.path / check / "datadog_checks" / check / "check.py"
@@ -47,8 +45,6 @@ def test_openmetrics_fail_single_parameter(ddev, helpers, repository, network_re
 
 
 def test_openmetrics_skip_openmetrics(ddev, helpers, repository, network_replay):
-    network_replay('fixtures/openmetrics/metric_limit/skip_openmetrics.yaml', record_mode='none')
-
     result = ddev("validate", "openmetrics", "openmetrics")
 
     assert result.exit_code == 0, result.output

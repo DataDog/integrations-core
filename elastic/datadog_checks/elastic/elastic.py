@@ -18,6 +18,7 @@ from .metrics import (
     CAT_ALLOCATION_METRICS,
     CLUSTER_PENDING_TASKS,
     INDEX_SEARCH_STATS,
+    TEMPLATE_METRICS,
     health_stats_for_version,
     index_stats_for_version,
     node_system_stats_for_version,
@@ -34,6 +35,26 @@ ES_HEALTH_TO_DD_STATUS = {
     'yellow': DatadogESHealth(AgentCheck.WARNING, AgentCheck.WARNING, 'WARN'),
     'red': DatadogESHealth(AgentCheck.CRITICAL, AgentCheck.OK, 'ALERT'),
 }
+
+# Skipping the following templates:
+#
+#   logs|metrics|synthetic: created by default by Elasticsearch, they can be disabled
+#   by setting stack.templates.enabled to false
+#
+#   .monitoring: shard monitoring templates.
+#
+#   .slm: snapshot lifecyle management
+#
+#   .deprecation: deprecation reports
+#
+TEMPLATE_EXCLUSION_LIST = (
+    'logs',
+    'metrics',
+    'synthetics',
+    '.monitoring',
+    '.slm-',
+    '.deprecation',
+)
 
 
 class AuthenticationError(requests.exceptions.HTTPError):
@@ -125,6 +146,8 @@ class ESCheck(AgentCheck):
             base_tags.extend(cluster_tags)
             service_check_tags.extend(cluster_tags)
         self._process_stats_data(stats_data, stats_metrics, base_tags)
+
+        self._get_template_metrics(admin_forwarder, base_tags)
 
         # Load cluster-wise data
         # Note: this is a cluster-wide query, might TO.
@@ -241,6 +264,13 @@ class ESCheck(AgentCheck):
             for metric, desc in iteritems(index_stats_for_version(version)):
                 self._process_metric(index_data, metric, *desc, tags=tags)
         self._get_index_search_stats(admin_forwarder, base_tags)
+
+    def _get_template_metrics(self, admin_forwarder, base_tags):
+        template_resp = self._get_data(self._join_url('/_cat/templates?format=json', admin_forwarder))
+        filtered_templates = [t for t in template_resp if not t['name'].startswith(TEMPLATE_EXCLUSION_LIST)]
+
+        for metric, desc in iteritems(TEMPLATE_METRICS):
+            self._process_metric({'templates': filtered_templates}, metric, *desc, tags=base_tags)
 
     def _get_index_search_stats(self, admin_forwarder, base_tags):
         """

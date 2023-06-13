@@ -69,7 +69,7 @@ files:
         For a complete list of available connection options, see:
         https://docs.mongodb.com/manual/reference/connection-string/#connections-connection-options
 
-        NOTE: For monitoring replica set, do not use the replSet parameter as the Agent expects to always
+        NOTE: For monitoring replica set, do not use the replicaSet parameter as the Agent expects to always
         connect to the same host. Instead configure one check instance for each node.
       value:
         type: object

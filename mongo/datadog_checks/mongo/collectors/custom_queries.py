@@ -62,6 +62,7 @@ class CustomQueriesCollector(MongoCollector):
         # Can theoretically be run on any node as long as it contains data.
         # i.e Arbiters are ruled out
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
+            self.log.debug("CustomQueriesCollector cannot be run on arbiter nodes.")
             return False
         return True
 

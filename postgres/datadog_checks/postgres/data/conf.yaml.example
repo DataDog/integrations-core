@@ -204,6 +204,7 @@ instances:
     ## @param collect_wal_metrics - boolean - optional - default: false
     ## Collect metrics about WAL file age.
     ## NOTE: You must be running the check local to your database if you want to enable this option.
+    ## Starting PG10, wal metrics are collected by default using `pg_ls_waldir` and don't need local access anymore.
     #
     # collect_wal_metrics: false
 
@@ -329,7 +330,7 @@ instances:
     # query_activity:
 
         ## @param enabled - boolean - optional - default: true
-        ## Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
+        ## Enable collection of query activity. Requires `dbm: true`.
         #
         # enabled: true
 
@@ -344,6 +345,21 @@ instances:
         ## than the maximum rows set, then the top N longest running transactions will be reported.
         #
         # payload_row_limit: 3500
+
+    ## Configure collection of pg_settings. This is an alpha feature.
+    #
+    # collect_settings:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of pg_settings. Requires `dbm: true`.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database settings collection interval (in seconds). Each collection involves a single query to
+        ## `pg_settings`.
+        #
+        # collection_interval: 600
 
     ## This block defines the configuration for AWS RDS and Aurora instances. 
     ##
@@ -363,6 +379,12 @@ instances:
         ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
         #
         # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+        ## @param region - string - optional - default: us-east-1
+        ## Equal to the region of the instance the agent is connecting to. 
+        ## This value is used to configure IAM authentication.
+        #
+        # region: us-east-1
 
     ## This block defines the configuration for Google Cloud SQL instances.
     ##

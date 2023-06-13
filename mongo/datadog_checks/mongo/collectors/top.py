@@ -17,8 +17,10 @@ class TopCollector(MongoCollector):
     def compatible_with(self, deployment):
         # Can only be run on mongod nodes, and not on arbiters.
         if isinstance(deployment, MongosDeployment):
+            self.log.debug("Top collector can only be run on mongod nodes, mongos deployment detected.")
             return False
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
+            self.log.debug("Top collector can only be run on mongod nodes, arbiter node detected.")
             return False
         return True
 

@@ -25,6 +25,18 @@ Note that when Temporal services in a cluster are deployed independently, every 
 
 See the [sample temporal.d/conf.yaml][4] for all available configuration options.
 
+#### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Configure your Temporal Cluster to output logs to a file by following the [official documentation][11].
+
+3. Uncomment and edit the logs configuration block in your `temporal.d/conf.yaml` file, and set the `path` to point to the file you configured on your Temporal Cluster.
+
 3. [Restart the Agent][5].
 
 ### Validation
@@ -48,16 +60,6 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 ### Logs
 
 The Temporal integration can collect logs from the Temporal Cluster and forward them to Datadog. 
-
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
-
-   ```yaml
-   logs_enabled: true
-   ```
-
-2. Configure your Temporal Cluster to output logs to a file by following the [official documentation][11].
-
-3. Uncomment and edit the logs configuration block in your `temporal.d/conf.yaml` file, and set the `path` to point to the file you configured on your Temporal Cluster.
 
 ## Troubleshooting
 

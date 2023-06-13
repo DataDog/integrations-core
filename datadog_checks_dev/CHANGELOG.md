@@ -1,5 +1,30 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 19.4.1 / 2023-06-08
+
+* [Fixed] Revert "Capture stderr from docker compose to improve debugging experience" (#13949). See [#14714](https://github.com/DataDog/integrations-core/pull/14714).
+* [Fixed] Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* [Fixed] Allow typed-ast to work for python3.11. See [#14689](https://github.com/DataDog/integrations-core/pull/14689).
+* [Fixed] Rephrase the `--dev` description for the `start` command. See [#14681](https://github.com/DataDog/integrations-core/pull/14681).
+
+## 19.4.0 / 2023-06-06
+
+* [Added] Update minimum base check version for templates. See [#14643](https://github.com/DataDog/integrations-core/pull/14643).
+* [Fixed] Keep pydantic version synced. See [#14656](https://github.com/DataDog/integrations-core/pull/14656).
+* [Fixed] Fix `generate-profile-from-mibs`. See [#14676](https://github.com/DataDog/integrations-core/pull/14676).
+
+## 19.3.1 / 2023-05-26
+
+* [Fixed] Update dependencies. See [#14594](https://github.com/DataDog/integrations-core/pull/14594).
+
+## 19.3.0 / 2023-05-17
+
+* [Added] Add `token` and `alert` as valid metric units. See [#14575](https://github.com/DataDog/integrations-core/pull/14575).
+* [Added] Add an ignore_connection_errors option to the openmetrics check. See [#14504](https://github.com/DataDog/integrations-core/pull/14504).
+* [Fixed] Fix format-style command when test custom_integration for tox. See [#14547](https://github.com/DataDog/integrations-core/pull/14547). Thanks [FeruBaco](https://github.com/FeruBaco).
+* [Fixed] Remove unnecesary commas after type definition. See [#14529](https://github.com/DataDog/integrations-core/pull/14529). Thanks [FeruBaco](https://github.com/FeruBaco).
+* [Fixed] Capture stderr from docker compose to improve debugging experience. See [#13949](https://github.com/DataDog/integrations-core/pull/13949).
+
 ## 19.2.0 / 2023-04-27
 
 * [Added] Remove Azure Pipelines from validation. See [#14475](https://github.com/DataDog/integrations-core/pull/14475).

@@ -84,28 +84,18 @@ def test_load_profiles(caplog):
 
 def test_profile_hierarchy():
     """
-    * Only concrete profiles MUST inherit from '_base.yaml'.
-    * Only concrete profiles MUST define a `sysobjectid` field.
+    * Abstract profile must not define a `sysobjectid` field.
     """
     errors = []
-    compat_base_profiles = ['_base_cisco', '_base_cisco_voice']
 
     for path in _iter_default_profile_file_paths():
         name = _get_profile_name(path)
         definition = get_profile_definition({'definition_file': path})
-        extends = definition.get('extends', [])
         sysobjectid = definition.get('sysobjectid')
 
         if _is_abstract_profile(name):
-            if '_base.yaml' in extends and name not in compat_base_profiles:
-                errors.append("'{}': mixin wrongly extends '_base.yaml'".format(name))
             if sysobjectid is not None:
                 errors.append("'{}': mixin wrongly defines a `sysobjectid`".format(name))
-        else:
-            if '_base.yaml' not in extends:
-                errors.append("'{}': concrete profile must directly extend '_base.yaml'".format(name))
-            if sysobjectid is None:
-                errors.append("'{}': concrete profile must define a `sysobjectid`".format(name))
 
     if errors:
         pytest.fail('\n'.join(sorted(errors)))
@@ -426,8 +416,8 @@ def test_f5(aggregator):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_router(aggregator):
-    profile = "generic-router"
+def test_device(aggregator):
+    profile = "generic-device"
     run_profile_check(profile)
     common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile]
 
@@ -484,7 +474,7 @@ def test_f5_router(aggregator):
     instance['community_string'] = 'f5-big-ip'
     instance['enforce_mib_constraints'] = False
 
-    init_config = {'profiles': {'router': {'definition_file': 'generic-router.yaml'}}}
+    init_config = {'profiles': {'router': {'definition_file': 'generic-device.yaml'}}}
     check = SnmpCheck('snmp', init_config, [instance])
     check.check(instance)
 
@@ -1120,6 +1110,10 @@ def test_cisco_nexus(aggregator):
         aggregator.assert_metric(
             'snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=['fru:{}'.format(fru)] + common_tags
         )
+
+    nexus_mem_metrics = ["memory.free", "memory.used"]
+    for metric in nexus_mem_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags + ['mem:1'])
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()

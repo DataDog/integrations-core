@@ -258,6 +258,7 @@ files:
       description: |
         Collect metrics about WAL file age.
         NOTE: You must be running the check local to your database if you want to enable this option.
+        Starting PG10, wal metrics are collected by default using `pg_ls_waldir` and don't need local access anymore.
       value:
         type: boolean
         example: false
@@ -409,7 +410,7 @@ files:
       options:
         - name: enabled
           description: |
-            Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
+            Enable collection of query activity. Requires `dbm: true`.
           value:
             type: boolean
             example: true
@@ -427,6 +428,22 @@ files:
           value:
             type: number
             example: 3500
+    - name: collect_settings
+      description: Configure collection of pg_settings. This is an alpha feature.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of pg_settings. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the database settings collection interval (in seconds). Each collection involves a single query to
+            `pg_settings`.
+          value:
+            type: number
+            example: 600
 
     - name: aws
       description: |
@@ -448,6 +465,13 @@ files:
           value:
             type: string
             example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+        - name: region
+          description: |
+            Equal to the region of the instance the agent is connecting to. 
+            This value is used to configure IAM authentication.
+          value:
+            type: string
+            example: us-east-1
 
     - name: gcp
       description: |
