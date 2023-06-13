@@ -254,6 +254,10 @@ class VSphereCheck(AgentCheck):
                 runtime_hostname = to_string(runtime_host_props.get("name", "unknown"))
                 tags.append('vsphere_host:{}'.format(runtime_hostname))
 
+                if self._config.collect_property_metrics:
+                    full_name = properties.get("guest.guestFullName")
+                    tags.append("vsphere_full_name{}".format(full_name))
+
                 if self._config.use_guest_hostname:
                     hostname = properties.get("guest.hostName", mor_name)
                 else:
@@ -695,6 +699,13 @@ class VSphereCheck(AgentCheck):
             tools_version = mor.guest.toolsVersion
             tools_status = mor.guest.toolsRunningStatus
             tools_tags = [f'tools_status:{tools_status}']
+            self.gauge(
+                'vm.guest.toolsVersion',
+                tools_version,
+                tags=self._config.base_tags + resource_tags + tools_tags,
+                hostname=None,
+            )
+
             self.gauge(
                 'vm.guest.toolsVersion',
                 tools_version,

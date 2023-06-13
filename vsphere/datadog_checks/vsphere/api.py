@@ -201,26 +201,6 @@ class VSphereAPI(object):
                     property_spec.pathSet.append("config.cpuAllocation.overheadLimit")
                     property_spec.pathSet.append("config.memoryAllocation.limit")
                     property_spec.pathSet.append("config.memoryAllocation.overheadLimit")
-            if resource == vim.HostSystem:
-                if self.config.collect_property_metrics:
-                    property_spec.pathSet.append("hardware.cpuPowerManagementInfo.currentPolicy")
-                    property_spec.pathSet.append("hardware.cpuInfo.numCpuCores")
-                    property_spec.pathSet.append("summary.runtime.connectionState")
-                    property_spec.pathSet.append("summary.runtime.powerState")
-                    property_spec.pathSet.append("summary.runtime.inMaintenanceMode")
-                    property_spec.pathSet.append("config.virtualNicManagerInfo.netConfig")
-                    property_spec.pathSet.append("config.multipathState")
-                    property_spec.pathSet.append("config.service")
-            if resource == vim.Datastore:
-                if self.config.collect_property_metrics:
-                    property_spec.pathSet.append("summary.capacity")
-                    property_spec.pathSet.append("summary.freeSpace")
-            if resource == vim.ClusterComputeResource:
-                if self.config.collect_property_metrics:
-                    property_spec.pathSet.append("configuration.drsConfig.enabled")
-                    property_spec.pathSet.append("configuration.drsConfig.defaultVmBehavior")
-                    property_spec.pathSet.append("configuration.drsConfig.vmotionRate")
-                    property_spec.pathSet.append("configuration.dasConfig.enabled")
 
             property_specs.append(property_spec)
 
