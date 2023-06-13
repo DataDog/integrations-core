@@ -34,7 +34,7 @@ Follow the instructions below to enable and configure this check for an Agent.
 
 For containerized environments, refer to the [Autodiscovery Integration Templates][3] for guidance on applying these instructions. Here's an example of how to configure this on the different Operator manifests using pod annotations:
 
-Cluster Operator:
+##### Cluster Operator:
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -73,7 +73,7 @@ spec:
 **Note**: Full template used for this example can be found [here][13].
 
 
-Topic and User Operators:
+##### Topic and User Operators:
 ```yaml
 apiVersion: kafka.strimzi.io/v1beta2
 kind: Kafka
