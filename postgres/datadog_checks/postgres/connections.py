@@ -9,7 +9,7 @@ from collections import namedtuple
 
 import psycopg2
 
-ConnectionWithTTLAndLastAccess = namedtuple("ConnectionWithTTLAndLastAccess", "connection deadline last_access")
+ConnectionWithTTL = namedtuple("ConnectionWithTTL", "connection deadline")
 
 class MultiDatabaseConnectionPool(object):
     """
@@ -54,7 +54,7 @@ class MultiDatabaseConnectionPool(object):
     def get_connection(self, dbname, ttl_ms):
         self.prune_connections()
         with self._mu:
-            conn = self._conns.pop(dbname, ConnectionWithTTLAndLastAccess(None, None, None))
+            conn = self._conns.pop(dbname, ConnectionWithTTL(None, None))
             db = conn.connection
             if db is None or db.closed:
                 self._stats.connection_opened += 1
@@ -65,7 +65,7 @@ class MultiDatabaseConnectionPool(object):
                 db.rollback()
 
             deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
-            self._conns[dbname] = ConnectionWithTTLAndLastAccess(db, deadline, datetime.datetime.now())
+            self._conns[dbname] = ConnectionWithTTL(db, deadline)
             return db
 
     def prune_connections(self):
@@ -93,7 +93,7 @@ class MultiDatabaseConnectionPool(object):
         return success
 
     def _terminate_connection_unsafe(self, dbname):
-        db, _, _ = self._conns.pop(dbname, ConnectionWithTTLAndLastAccess(None, None, None))
+        db, _, _ = self._conns.pop(dbname, ConnectionWithTTL(None, None))
         if db is not None:
             try:
                 self._stats.connection_closed += 1
@@ -112,7 +112,7 @@ class MultiDatabaseConnectionPoolLimited(MultiDatabaseConnectionPool):
     def __init__(self, connect_fn: Callable[[str], None], max_conn: int):
         super().__init__(connect_fn)
         self.max_conn = max_conn
-        self._conns: Dict[str, ConnectionWithTTLAndLastAccess] = {}
+        self._conns: Dict[str, ConnectionWithTTL] = {}
 
     def release(self, dbname: str) -> None:
         """
