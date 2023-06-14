@@ -6,6 +6,7 @@
 import pytest
 
 from datadog_checks.dcgm import DcgmCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import EXPECTED_METRICS
 
@@ -17,3 +18,5 @@ def test_check(dd_run_check, aggregator, check, mock_metrics):
     aggregator.assert_service_check('dcgm.openmetrics.health', DcgmCheck.OK)
     for metric in EXPECTED_METRICS:
         aggregator.assert_metric(name=f"dcgm.{metric}", at_least=0)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_all_metrics_covered()

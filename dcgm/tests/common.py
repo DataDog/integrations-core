@@ -47,11 +47,11 @@ EXPECTED_METRICS = [
     'mem_clock',
     'mem_copy_utilization',
     'nvlink_bandwidth.count',
-    'pcie_replay_counter.count',
+    'pcie_replay.count',
     'power_usage',
     'sm_clock',
     'total_energy_consumption.count',
     'vgpu_license_status',
     'xid_errors',
-    'device_count.count',
+    'device.count',
 ]
