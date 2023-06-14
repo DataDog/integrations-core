@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_apiserver_metrics
 
+## 3.6.1 / 2023-06-14
+
+* [Fixed] [kube_apiserver_metrics] Rename aggregator_unavailable_apiservice `name` tag to `apiservice_name` (#14738). See [#14751](https://github.com/DataDog/integrations-core/pull/14751).
+
 ## 3.6.0 / 2023-05-26
 
 * [Added] Add `flowcontrol` metrics. See [#14480](https://github.com/DataDog/integrations-core/pull/14480).
