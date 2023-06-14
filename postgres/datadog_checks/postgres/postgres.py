@@ -35,12 +35,13 @@ from .util import (
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
     SNAPSHOT_TXID_METRICS_LT_13,
+    STAT_WAL_METRICS,
     WAL_FILE_METRICS,
     DatabaseConfigurationError,  # noqa: F401
     fmt,
     get_schema_field,
 )
-from .version_utils import V9, V9_2, V10, V13, VersionUtils
+from .version_utils import V9, V9_2, V10, V13, V14, VersionUtils
 
 try:
     import datadog_agent
@@ -180,6 +181,8 @@ class PostgreSql(AgentCheck):
             queries.append(SNAPSHOT_TXID_METRICS)
         if self.version < V13:
             queries.append(SNAPSHOT_TXID_METRICS_LT_13)
+        if self.version >= V14:
+            queries.append(STAT_WAL_METRICS)
 
         if not queries:
             self.log.debug("no dynamic queries defined")

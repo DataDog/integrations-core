@@ -400,6 +400,27 @@ EXTRACT (EPOCH FROM now() - min(modification))
     ],
 }
 
+STAT_WAL_METRICS = {
+    'name': 'stat_wal_metrics',
+    'query': """
+SELECT wal_records, wal_fpi,
+       wal_bytes, wal_buffers_full,
+       wal_write, wal_sync,
+       wal_write_time, wal_sync_time
+  FROM pg_stat_wal
+""",
+    'columns': [
+        {'name': 'postgresql.wal.records', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.full_page_images', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.bytes', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.buffers_full', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.write', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.sync', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.write_time', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.sync_time', 'type': 'monotonic_count'},
+    ],
+}
+
 FUNCTION_METRICS = {
     'descriptors': [('schemaname', 'schema'), ('funcname', 'function')],
     'metrics': {
