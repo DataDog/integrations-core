@@ -106,6 +106,16 @@ def _iterate_metric_name(columns):
         yield column['name']
 
 
+def _get_expected_tags(check, pg_instance, **kwargs):
+    base_tags = pg_instance['tags'] + [
+        'port:{}'.format(pg_instance['port']),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
+    for k, v in kwargs.items():
+        base_tags.append('{}:{}'.format(k, v))
+    return base_tags
+
+
 def assert_metric_at_least(aggregator, metric_name, lower_bound=None, higher_bound=None, count=None, tags=None):
     found_values = 0
     expected_tags = normalize_tags(tags, sort=True)
@@ -125,13 +135,6 @@ def assert_metric_at_least(aggregator, metric_name, lower_bound=None, higher_bou
         assert found_values == count, 'Expected to have {} with tags {} values for metric {}, got {}'.format(
             count, expected_tags, metric_name, found_values
         )
-
-
-def get_expected_instance_tags(check, pg_instance):
-    return pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
-    ]
 
 
 def check_common_metrics(aggregator, expected_tags, count=1):
