@@ -7,20 +7,29 @@ import sys
 import os
 import threading
 import time
+from six import iteritems
 from  datetime import datetime
+from datadog import initialize, statsd
 
 sys.path.append(os.path.abspath("/home/ec2-user/dd/integrations-core/datadog_checks_base"))
 
-from util import fmt
+from util import fmt, get_schema_field
 from datadog_checks.base.utils.discovery import Discovery
+from datadog_checks.base import AgentCheck
 
 # sys.path.append(os.path.abspath("/home/ec2-user/dd/integrations-core"))
-from relationsmanager import RelationsManager, SIZE_METRICS
+from relationsmanager import RelationsManager, RELATION_METRICS
 from connections import MultiDatabaseConnectionPoolLimited
 
 
 AUTODISCOVERY_QUERY: str = """select {columns} from pg_catalog.pg_database where datistemplate = false;"""
 
+options = {
+    'statsd_host':'127.0.0.1',
+    'statsd_port':8125
+}
+
+initialize(**options)
 
 class PostgresAutodiscovery(Discovery): 
     def __init__(self, host: str, max_conn: int) -> None:
@@ -68,6 +77,20 @@ class PostgresAutodiscovery(Discovery):
         databases = [x[0] for x in databases] # fetchall returns list of tuples representing rows, so need to parse
         print("Databases found were: ", databases)
         return databases 
+    
+    def run_query_scope(self, cursor, scope, cols, descriptors):
+        # try:
+        query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
+        schema_field = get_schema_field(descriptors)
+        # print(schema_field)
+        formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
+        # print(formatted_query)
+        # while(1):
+        #     pass
+        cursor.execute(formatted_query)
+        
+        results = cursor.fetchall()
+        return results
 
     def query_relations(self, database: str) -> None:
         # print(cached_dbs)
@@ -75,12 +98,40 @@ class PostgresAutodiscovery(Discovery):
         # wait for connection to open up
         while conn == None:
             conn = self._conn_pool.get_connection(database, self.default_ttl)
+        print("got connection")
         cursor = conn.cursor()
-        query = fmt.format(SIZE_METRICS['query'], metrics_columns=", ".join(SIZE_METRICS['metrics']))
-        time.sleep(1) # it's a long query
-        formatted_query = self._relations_manager.filter_relation_query(query, "nspname")
-        cursor.execute(formatted_query)
-        relations = list(cursor.fetchall())        
+
+        # now query all relations metrics
+        for scope in RELATION_METRICS:
+            cols = list(scope['metrics']) 
+            descriptors = scope['descriptors']
+            results = self.run_query_scope(cursor, scope, cols, descriptors)
+            # print(results)
+            if not results:
+                print("got none")    
+                self._conn_pool.release(database)
+                return None
+            print("got results")
+            for row in results:
+                descriptor_values = row[: len(descriptors)]
+                column_values = row[len(descriptors) :]
+
+                # build a map of descriptors and values
+                desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values)}
+
+                # build tags
+                tags = ['db'+database]
+                # add tags from descriptors
+                tags += [("%s:%s" % (k, v)) for (k, v) in iteritems(desc_map)]
+
+                # now submit!
+                for column, value in zip(cols, column_values):
+                    name, submit_metric = scope['metrics'][column]
+                    # only submit gauge metrics
+                    if submit_metric[1] == AgentCheck.gauge:
+                        statsd.set('eden_test'+name, value, tags=set(tags), hostname='eden-test-pgautodiscovery')
+
+        print("done getting")
         # print(relations)
         self._conn_pool.release(database)
         # self._conn_pool.get_connection(database, self.default_ttl)
@@ -122,7 +173,7 @@ class PostgresAutodiscovery(Discovery):
         conn = None
         while conn == None:
             conn = self._conn_pool.get_connection('postgres', self.default_ttl)
-            
+
         cursor = conn.cursor()
         cursor.execute("SELECT sum(numbackends) FROM pg_stat_database;")
         rows = list(cursor.fetchall())
@@ -135,10 +186,10 @@ if __name__ == "__main__":
     discovery._print_num_connections()
     discovery.query_relations(a_database)
 
-    # now = datetime.now()
-    # discovery.query_relations_all_databases_sync()
-    # print("elapsed: ", datetime.now() - now, "non-threaded finished")
-
     now = datetime.now()
-    discovery.query_relations_all_databases_threaded()
-    print("elapsed: ", datetime.now() - now, "threaded finished")
+    discovery.query_relations_all_databases_sync()
+    print("elapsed: ", datetime.now() - now, "non-threaded finished")
+
+    # now = datetime.now()
+    # discovery.query_relations_all_databases_threaded()
+    # print("elapsed: ", datetime.now() - now, "threaded finished")
