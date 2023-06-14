@@ -7,6 +7,7 @@ from datadog_checks.dev.docker import get_container_ip
 from tests.common import SNMP_CONTAINER_NAME
 
 from . import common, metrics
+from .test_e2e_core_metadata import assert_device_metadata
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
@@ -75,6 +76,8 @@ def test_e2e_user_profiles(dd_agent_check):
             'community_string': 'apc_ups_user',
         }
     )
+    device_ip = instance['ip_address']
+
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
     profile_tags = [
         'snmp_profile:apc_ups_user',
@@ -84,12 +87,45 @@ def test_e2e_user_profiles(dd_agent_check):
         'ups_name:testIdentName',
         'device_namespace:default',
     ]
-    tags = profile_tags + ["snmp_device:{}".format(instance['ip_address'])]
+    tags = profile_tags + ["snmp_device:{}".format(device_ip)]
 
     aggregator.assert_metric('snmp.upsAdvBatteryNumOfBattPacks', metric_type=aggregator.GAUGE, tags=tags, count=2)
     aggregator.assert_metric(
         'snmp.upsAdvBatteryNumOfBattPacks_userMetric', metric_type=aggregator.GAUGE, tags=tags, count=2
     )
+
+    device = {
+        'description': 'APC Web/SNMP Management Card (MB:v3.9.2 PF:v3.9.2 '
+        'PN:apc_hw02_aos_392.bin AF1:v3.7.2 AN1:apc_hw02_sumx_372.bin '
+        'MN:AP9619 HR:A10 SN: 5A1827E00000 MD:12/04/2007) (Embedded '
+        'PowerNet SNMP Agent SW v2.2 compatible)',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'AP9619',
+        'os_name': 'AOS',
+        'os_version': 'v3.9.2',
+        'product_name': 'APC Smart-UPS 600',
+        'profile': 'apc_ups_user',
+        'serial_number': 'fake-user-serial-num',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.318.1.999',
+        'tags': [
+            'device_namespace:default',
+            'firmware_version:2.0.3-test',
+            'model:APC Smart-UPS 600',
+            'serial_num:test_serial',
+            'snmp_device:' + device_ip,
+            'snmp_profile:apc_ups_user',
+            'ups_name:testIdentName',
+        ],
+        'vendor': 'apc',
+        'version': '2.0.3-test',
+    }
+    assert_device_metadata(aggregator, device)
 
 
 def assert_apc_ups_metrics(dd_agent_check, config):
