@@ -66,6 +66,32 @@ def test_e2e_v1_with_apc_ups_profile_batch_size_1(dd_agent_check):
     assert_apc_ups_metrics(dd_agent_check, config)
 
 
+def test_e2e_user_profiles(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'snmp_version': 1,
+            'community_string': 'apc_ups_user',
+            'oid_batch_size': 1,
+        }
+    )
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
+    profile_tags = [
+        'snmp_profile:apc_ups_user',
+        'model:APC Smart-UPS 600',
+        'firmware_version:2.0.3-test',
+        'serial_num:test_serial',
+        'ups_name:testIdentName',
+        'device_vendor:apc',
+        'device_namespace:default',
+    ]
+    tags = profile_tags + ["snmp_device:{}".format(instance['ip_address'])]
+
+    aggregator.assert_metric('snmp.upsAdvBatteryNumOfBattPacks', metric_type=aggregator.GAUGE, tags=tags, count=2)
+    aggregator.assert_metric('snmp.upsAdvBatteryNumOfBattPacks_userMetric', metric_type=aggregator.GAUGE, tags=tags, count=2)
+
+
 def assert_apc_ups_metrics(dd_agent_check, config):
     config['init_config']['loader'] = 'core'
     instance = config['instances'][0]
