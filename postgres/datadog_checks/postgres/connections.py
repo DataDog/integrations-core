@@ -39,7 +39,7 @@ class MultiDatabaseConnectionPool(object):
 
     def __init__(self, connect_fn):
         self._stats = self.Stats()
-        self._mu = threading.Lock()
+        self._mu = threading.RLock()
         self._conns = {}
 
         if hasattr(inspect, 'signature'):
@@ -93,7 +93,7 @@ class MultiDatabaseConnectionPool(object):
         return success
 
     def _terminate_connection_unsafe(self, dbname):
-        db, _ = self._conns.pop(dbname, ConnectionWithTTLAndLastAccess(None, None, None))
+        db, _, _ = self._conns.pop(dbname, ConnectionWithTTLAndLastAccess(None, None, None))
         if db is not None:
             try:
                 self._stats.connection_closed += 1
@@ -107,42 +107,29 @@ class MultiDatabaseConnectionPool(object):
 class MultiDatabaseConnectionPoolLimited(MultiDatabaseConnectionPool):
     """
     Managing multiple database connections, with a limit on concurrent connections.
-    Evicts from the _conns pool with LRU rule, and also prunes connections after a specified TTL.
+    Connection release must be handled by the code which created the connection.
     """
     def __init__(self, connect_fn: Callable[[str], None], max_conn: int):
         super().__init__(connect_fn)
         self.max_conn = max_conn
-        self.dbs_usage: Dict[str, bool] = {} # if connection should not be evicted, barring TTL expiration, set dbs_usage[db] = True here
         self._conns: Dict[str, ConnectionWithTTLAndLastAccess] = {}
 
-    def _evict_lru(self) -> None:
+    def release(self, dbname: str) -> None:
         """
-        Evict least recently used connection.
-        Ensure lock is held before calling.
+        Release connection to database from _conns pool.
         """
-        if len(self._conns) == 0:
-            return
-
-        lru = min(self._conns, key = lambda t: self._conns.get(t).last_access)
-        if self.dbs_usage[lru]: # don't evict if query is running
-            return
-
-        self._conns.pop(lru)
+        self._terminate_connection_unsafe(dbname)
         
     def get_connection(self, dbname: str, ttl_ms: int) -> psycopg2.extensions.connection:
+        """
+        Grab a connection from the pool if the database is already connected.
+        If the database isn't connected, make a new connection IFF the max_conn limit hasn't been reached.
+        If we can't fit the connection into the pool, return None.
+        """
         self.prune_connections()
-        db_pool_len = 0
         with self._mu:
-            db_pool_len = len(self._conns)
+            if (dbname in self._conns) or (len(self._conns) < self.max_conn):
+                conn = super().get_connection(dbname, ttl_ms)
+                return conn
 
-        if db_pool_len < self.max_conn:
-            conn = super().get_connection(dbname, ttl_ms)
-            self.dbs_usage[dbname] = True
-            return conn
-
-        with self._mu:
-            while len(self._conns) > self.max_conn:
-                self._evict_lru()
-
-        conn = super().get_connection(dbname, ttl_ms)
-        return conn
+            return None

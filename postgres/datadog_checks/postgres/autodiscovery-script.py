@@ -6,7 +6,8 @@ import psycopg2
 import sys
 import os
 import threading
-import datetime
+import time
+from  datetime import datetime
 
 sys.path.append(os.path.abspath("/home/ec2-user/dd/integrations-core/datadog_checks_base"))
 
@@ -23,12 +24,11 @@ AUTODISCOVERY_QUERY: str = """select {columns} from pg_catalog.pg_database where
 
 class PostgresAutodiscovery(Discovery): 
     def __init__(self, host: str, max_conn: int) -> None:
-        super(PostgresAutodiscovery, self).__init__(self._get_databases, include={'.*': 10}, exclude=[])
+        super(PostgresAutodiscovery, self).__init__(self._get_databases, include={'.*': 10}, exclude=[], interval=60)
         self.host = host
         relations_config = [{'relation_regex': '.*'}]
         self._relations_manager = RelationsManager(relations_config)
         self._conn_pool = MultiDatabaseConnectionPoolLimited(self._connect, max_conn)
-        self._db_usage: Dict[str, bool] = {} # is query running for db?
         self.default_ttl = 60000
         # get once to cache dbs
         self.get_items()
@@ -41,7 +41,7 @@ class PostgresAutodiscovery(Discovery):
         This function takes the item of interest (dbname) from this four-tuple
         and returns the full list of database names from the generator.
         """
-        items = list(super(PostgresAutodiscovery, self).get_items())
+        items = list(super().get_items())
         items_parsed = [item[1] for item in items]
         return items_parsed
    
@@ -52,7 +52,7 @@ class PostgresAutodiscovery(Discovery):
             connection_string += " dbname=" + dbname
         conn = psycopg2.connect(connection_string)
 
-        print("connected")
+        # print("connected")
         return conn
 
     def _get_autodiscovery_query(self) -> str:
@@ -66,31 +66,36 @@ class PostgresAutodiscovery(Discovery):
         cursor.execute(autodiscovery_query)
         databases = list(cursor.fetchall())
         databases = [x[0] for x in databases] # fetchall returns list of tuples representing rows, so need to parse
-        print("got", databases)
+        print("Databases found were: ", databases)
         return databases 
 
     def query_relations(self, database: str) -> None:
         # print(cached_dbs)
-        conn = self._conn_pool.get_connection(database, self.default_ttl)
+        conn = None
+        # wait for connection to open up
+        while conn == None:
+            conn = self._conn_pool.get_connection(database, self.default_ttl)
         cursor = conn.cursor()
         query = fmt.format(SIZE_METRICS['query'], metrics_columns=", ".join(SIZE_METRICS['metrics']))
+        time.sleep(1) # it's a long query
         formatted_query = self._relations_manager.filter_relation_query(query, "nspname")
         cursor.execute(formatted_query)
-        relations = list(cursor.fetchall())
-        self._conn_pool.dbs_usage[database] = False
-        # self._conn_pool.get_connection(database, self.default_ttl)
+        relations = list(cursor.fetchall())        
         # print(relations)
+        self._conn_pool.release(database)
+        # self._conn_pool.get_connection(database, self.default_ttl)
 
     def query_relations_all_databases_threaded(self) -> None:
         self._print_num_connections()
         databases = self.get_items()
 
         db_threads = list()
-        for database in databases:
-            print("getting relations from", database)
-            self._print_num_connections()
-            self._conn_pool.dbs_usage[database] = True
-            thread = threading.Thread(target=self.query_relations, args=(database,))
+        for i, database in enumerate(databases):         
+            if i % 10 == 0:
+                # report samples
+                self._print_num_connections()
+
+            thread = threading.Thread(target=self.query_relations, args=(database,), name=database)
             db_threads.append(thread)
             thread.start()
 
@@ -103,31 +108,37 @@ class PostgresAutodiscovery(Discovery):
         self._print_num_connections()
         databases = self.get_items()
 
-        for database in databases:
-            print("getting relations from", database)
-            self._print_num_connections()
+        for i, database in enumerate(databases):
+            if i % 10 == 0:
+                # report samples
+                self._print_num_connections()
             self.query_relations(database)
 
         self._print_num_connections()
 
 
     def _print_num_connections(self) -> None:
-        conn = self._conn_pool.get_connection('postgres', self.default_ttl)
+        # wait for connection to open up
+        conn = None
+        while conn == None:
+            conn = self._conn_pool.get_connection('postgres', self.default_ttl)
+            
         cursor = conn.cursor()
         cursor.execute("SELECT sum(numbackends) FROM pg_stat_database;")
         rows = list(cursor.fetchall())
         print("NUM CONNECTIONS IS",rows[0])
+        # self._conn_pool.release('postgres') 
 
 if __name__ == "__main__":
-    discovery = PostgresAutodiscovery("0.0.0.0", 5)
+    discovery = PostgresAutodiscovery("0.0.0.0", 10)
     a_database = discovery.get_items()[0]
     discovery._print_num_connections()
     discovery.query_relations(a_database)
 
-    time = datetime.datetime.now()
-    discovery.query_relations_all_databases_sync()
-    print("elapsed: ", datetime.datetime.now() - time, "non-threaded finished")
+    # now = datetime.now()
+    # discovery.query_relations_all_databases_sync()
+    # print("elapsed: ", datetime.now() - now, "non-threaded finished")
 
-    time = datetime.datetime.now()
+    now = datetime.now()
     discovery.query_relations_all_databases_threaded()
-    print("elapsed: ", datetime.datetime.now() - time, "threaded finished")
+    print("elapsed: ", datetime.now() - now, "threaded finished")
