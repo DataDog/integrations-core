@@ -153,7 +153,7 @@ class EnvoyCheckV2(OpenMetricsBaseCheckV2):
         
         # From http://domain/thing/stats to http://domain/thing/server_info
         if not self.collect_server_info:
-            self.log.debug("Skipping server info collection as it is disabled, collect_server_info:")
+            self.log.debug("Skipping server info collection as it is disabled, collect_server_info")
             return
         
         server_info_url = urljoin(self.base_url, 'server_info')
