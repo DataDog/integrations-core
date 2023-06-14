@@ -10,8 +10,6 @@ METRIC_MAP = {
     'DCGM_FI_DEV_FB_FREE': 'fb_free',
     'DCGM_FI_DEV_FB_USED': 'fb_used',
     'DCGM_FI_DEV_GPU_UTIL': 'gpu_utilization',
-    'DCGM_FI_DEV_MEM_CLOCK': 'mem_clock',
-    'DCGM_FI_DEV_MEM_COPY_UTIL': 'mem_copy_utilization',
     'DCGM_FI_DEV_NVLINK_BANDWIDTH_TOTAL': 'nvlink_bandwidth',
     'DCGM_FI_DEV_PCIE_REPLAY_COUNTER': 'pcie_replay',  # becomes pcie_replay.count
     'DCGM_FI_DEV_POWER_USAGE': 'power_usage',
@@ -19,6 +17,9 @@ METRIC_MAP = {
     'DCGM_FI_DEV_TOTAL_ENERGY_CONSUMPTION': 'total_energy_consumption',
     'DCGM_FI_DEV_VGPU_LICENSE_STATUS': 'vgpu_license_status',
     'DCGM_FI_DEV_XID_ERRORS': 'xid_errors',
+    # Metrics related to memory get grouped together because there are more of them available.
+    'DCGM_FI_DEV_MEM_CLOCK': 'mem.clock',
+    'DCGM_FI_DEV_MEM_COPY_UTIL': 'mem.copy_utilization',
     # NVML Specific Missing Metrics (5)
     'DCGM_FI_DEV_COUNT': 'device',  # becomes device.count
     'DCGM_FI_DEV_FAN_SPEED': 'fan_speed',
