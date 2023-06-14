@@ -71,9 +71,8 @@ def test_e2e_user_profiles(dd_agent_check):
     instance = config['instances'][0]
     instance.update(
         {
-            'snmp_version': 1,
+            'loader': 'core',
             'community_string': 'apc_ups_user',
-            'oid_batch_size': 1,
         }
     )
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
