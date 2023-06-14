@@ -152,7 +152,9 @@ def network_replay(local_repo):
     stack = ExitStack()
 
     def add_cassette(relative_path, *args, **kwargs):
-        cassette = vcr.use_cassette(str(local_repo / relative_path), *args, **kwargs)
+        cassette = vcr.use_cassette(
+            str(local_repo / "ddev" / "tests" / "fixtures" / "network" / relative_path), *args, **kwargs
+        )
         stack.enter_context(cassette)
         return cassette
 

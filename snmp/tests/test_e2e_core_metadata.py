@@ -37,7 +37,7 @@ def assert_device_metadata(aggregator, device_metadata):
     pprint.pprint(event1['devices'])
     assert len(event1['devices']) == 1
 
-    assert device_metadata == event1['devices'][0]
+    assert event1['devices'][0] == device_metadata
 
 
 def test_e2e_core_metadata_f5(dd_agent_check):

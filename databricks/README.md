@@ -82,8 +82,8 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
 
   # WAITING UNTIL MASTER PARAMS ARE LOADED, THEN GRABBING IP AND PORT
   while [ -z \$gotparams ]; do
-    if [ -e "/tmp/master-params" ]; then
-      DB_DRIVER_PORT=\$(cat /tmp/master-params | cut -d' ' -f2)
+    if [ -e "/tmp/driver-env.sh" ]; then
+      DB_DRIVER_PORT=\$(cat /tmp/driver-env.sh | cut -d' ' -f2)
       gotparams=TRUE
     fi
     sleep 2

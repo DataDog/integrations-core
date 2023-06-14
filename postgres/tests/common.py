@@ -17,6 +17,7 @@ from datadog_checks.postgres.util import (
     REPLICATION_STATS_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
+    WAL_FILE_METRICS,
 )
 from datadog_checks.postgres.version_utils import VersionUtils
 
@@ -275,4 +276,12 @@ def check_slru_metrics(aggregator, expected_tags, count=1):
 
 def check_snapshot_txid_metrics(aggregator, expected_tags, count=1):
     for metric_name in _iterate_metric_name(SNAPSHOT_TXID_METRICS['columns']):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_wal_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 10:
+        return
+
+    for metric_name in _iterate_metric_name(WAL_FILE_METRICS['columns']):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)

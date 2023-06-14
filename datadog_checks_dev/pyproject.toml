@@ -10,7 +10,7 @@ build-backend = "hatchling.build"
 name = "datadog-checks-dev"
 description = "The Datadog Checks Developer Tool"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
 keywords = [
     "datadog",
     "datadog agent",
@@ -29,7 +29,7 @@ classifiers = [
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
 ]
 dependencies = [
     "contextlib2; python_version < '3.0'",

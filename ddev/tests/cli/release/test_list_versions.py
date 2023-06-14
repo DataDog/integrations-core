@@ -4,7 +4,7 @@
 
 
 def test_list_versions(ddev, repository, helpers, network_replay):
-    network_replay('fixtures/network/list_versions/success_disk.yaml', record_mode='none')
+    network_replay('list_versions/success_disk.yaml', record_mode='none')
 
     result = ddev('release', 'list', 'disk')
 
@@ -49,7 +49,7 @@ def test_list_versions(ddev, repository, helpers, network_replay):
 
 
 def test_list_versions_header(ddev, repository, helpers, network_replay):
-    network_replay('fixtures/network/list_versions/success_datadog_checks_base.yaml', record_mode='none')
+    network_replay('list_versions/success_datadog_checks_base.yaml', record_mode='none')
 
     result = ddev('release', 'list', 'datadog_checks_base')
 
