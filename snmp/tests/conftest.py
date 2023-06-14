@@ -30,7 +30,7 @@ FILES = [
 E2E_METADATA = {
     'start_commands': [
         # Ensure the Agent has access to profile definition files and auto_conf.
-        'cp -r /home/snmp/datadog_checks/snmp/data/profiles /etc/datadog-agent/conf.d/snmp.d/',
+        'cp -r /home/snmp/datadog_checks/snmp/data/default_profiles /etc/datadog-agent/conf.d/snmp.d/',
     ],
 }
 
