@@ -630,7 +630,7 @@ All OID values are fetched, even if they might not be used in the end. In the ex
 
 ### Symbol modifiers
 
-#### Extract value
+#### `extract_value`
 
 If the metric value to be submitted is from a OID with string value and needs to be extracted from it, you can use extract value feature.
 
@@ -693,7 +693,7 @@ metrics:
           extract_value: '([a-zA-Z0-9_]+)' # will ignore surrounding non-printable characters
 ```
 
-#### Extract values using regex match pattern
+#### `match_pattern` and `match_value`
 
 ```yaml
 metadata:
@@ -712,7 +712,7 @@ metadata:
 
 Regex groups captured in `match_pattern` can be used in `match_value`. `$1` is the first captured group, `$2` is the second captured group, and so on.
 
-#### Formatting MAC Addresses
+#### `format: mac_address`
 
 If you see MAC Address in tags being encoded as `0x000000000000` instead of `00:00:00:00:00:00`,
 then you can use `format: mac_address` to format the MAC Address to `00:00:00:00:00:00` format.
@@ -738,7 +738,7 @@ metrics:
 
 In this case, the metrics will be tagged with `mac_address:00:00:00:00:00:00`.
 
-#### Formatting IP Addresses
+#### `format: ip_address`
 
 If you see IP Address in tags being encoded as `0x0a430007` instead of `10.67.0.7`,
 then you can use `format: ip_address` to format the IP Address to `10.67.0.7` format.
@@ -763,7 +763,7 @@ In this case, the metrics `snmp.myOidSymbol` will be tagged like this: `connecte
 
 This `format: ip_address` formatter also works for IPv6 when the input bytes represent IPv6. 
 
-#### Apply a scale factor to value
+#### `scale_factor`
 
 In a value is in kilobytes and you would like to convert it to bytes, `scale_factor` can be used for that.  
 
