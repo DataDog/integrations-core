@@ -7,7 +7,7 @@ changelog/no-changelog:
 - all:
   - '!*/datadog_checks/**'
   - '!*/pyproject.toml'
-  - '!*/ddev/**'
+  - '!ddev/src/**'
 ddev:
 - ddev/**/*
 dependencies:

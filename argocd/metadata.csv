@@ -51,7 +51,6 @@ argocd.app_controller.app.sync.count,count,,,,The total number of application sy
 argocd.app_controller.cluster.api.resource_objects,gauge,,object,,The number of Kubernetes resource objects in the cache,0,argocd,app_controller cluster api resource_objects,
 argocd.app_controller.cluster.api.resources,gauge,,resource,,The number of monitored kubernetes API resources.,0,argocd,app_controller cluster api resources,
 argocd.app_controller.cluster.cache.age.seconds,gauge,,second,,The age of the cluster cache in seconds,0,argocd,app_controller cluster cache age seconds,
-argocd.app_controller.cluster.connection.status,gauge,,,,The current Kubernetes cluster connection status,0,argocd,app_controller cluster connection status,
 argocd.app_controller.cluster.events.count,count,,event,,The number of processed Kubernetes resource events,0,argocd,app_controller cluster events,
 argocd.app_controller.cluster.info,gauge,,,,Information about cluster.,0,argocd,app_controller cluster info,
 argocd.app_controller.go.gc.duration.seconds.quantile,gauge,,second,,A summary of the pause duration of garbage collection cycles in the Application Controller,0,argocd,app_controller go gc duration seconds,
