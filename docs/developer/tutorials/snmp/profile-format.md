@@ -778,3 +778,5 @@ metrics:
       scale_factor: 1000 # convert to bytes
       name: memory.free
 ```
+
+To scale down by 1000x: `scale_factor: 0.001`.
