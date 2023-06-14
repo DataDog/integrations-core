@@ -10,4 +10,4 @@ services:
       - "9400:9400"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./site:/site
+      - ./serve:/site
