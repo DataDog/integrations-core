@@ -34,6 +34,7 @@ E2E_METADATA = {
         'cp -r /home/snmp/datadog_checks/snmp/data/default_profiles /etc/datadog-agent/conf.d/snmp.d/',
     ],
     'docker_volumes': [
+        # Mount mock user profiles
         '{}/fixtures/user_profiles:/etc/datadog-agent/conf.d/snmp.d/profiles'.format(HERE),
     ],
 }
