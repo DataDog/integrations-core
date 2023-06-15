@@ -54,7 +54,7 @@
 					}
 				],
 				"search": {
-					"query": "source:snmp-traps @snmpTrapName:linkDown device_namespace:mimic @ifAdminStatus:up"
+					"query": "source:snmp-traps @snmpTrapName:linkDown @ifAdminStatus:up"
 				},
 				"storage": "hot"
 			},
@@ -94,7 +94,7 @@
 					}
 				],
 				"search": {
-					"query": "source:snmp-traps @snmpTrapName:linkUp device_namespace:mimic @ifAdminStatus:up"
+					"query": "source:snmp-traps @snmpTrapName:linkUp @ifAdminStatus:up"
 				},
 				"storage": "hot"
 			}
