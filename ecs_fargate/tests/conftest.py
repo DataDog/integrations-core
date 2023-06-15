@@ -51,6 +51,8 @@ EXPECTED_CONTAINER_METRICS_WINDOWS = [
 
 EXPECTED_TASK_METRICS = [
     "ecs.fargate.cpu.task.limit",
+    'ecs.fargate.ephemeral_storage.utilized',
+    'ecs.fargate.ephemeral_storage.reserved',
 ]
 
 EXTRA_EXPECTED_CONTAINER_METRICS_LINUX = [
