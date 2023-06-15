@@ -7,7 +7,7 @@ import os
 def test_default_scrubbed(ddev, config_file, helpers):
     config_file.model.orgs['default']['api_key'] = 'foo'
     config_file.model.orgs['default']['app_key'] = 'bar'
-    config_file.model.github = {'user': '', 'token': ''}
+    #config_file.model.github = {'user': '', 'token': ''}
     config_file.save()
 
     result = ddev('config', 'show')
@@ -69,7 +69,7 @@ def test_default_scrubbed(ddev, config_file, helpers):
 def test_reveal(ddev, config_file, helpers):
     config_file.model.orgs['default']['api_key'] = 'foo'
     config_file.model.orgs['default']['app_key'] = 'bar'
-    config_file.model.github = {'user': '', 'token': ''}
+    #config_file.model.github = {'user': '', 'token': ''}
     config_file.save()
 
     result = ddev('config', 'show', '-a')
