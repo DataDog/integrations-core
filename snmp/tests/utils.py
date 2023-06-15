@@ -11,7 +11,14 @@ from datadog_checks.snmp import utils
 
 
 @contextlib.contextmanager
-def mock_profiles_confd_root(root):
+def mock_profiles_confd_default_root(root):
     # type: (str) -> Iterator[None]
-    with mock.patch.object(utils, '_get_profiles_confd_root', return_value=root):
+    with mock.patch.object(utils, '_get_profiles_confd_default_root', return_value=root):
+        yield
+
+
+@contextlib.contextmanager
+def mock_profiles_confd_user_root(root):
+    # type: (str) -> Iterator[None]
+    with mock.patch.object(utils, '_get_profiles_confd_user_root', return_value=root):
         yield
