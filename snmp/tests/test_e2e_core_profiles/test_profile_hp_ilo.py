@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.dev.utils import get_metadata_metrics
 import pytest
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
