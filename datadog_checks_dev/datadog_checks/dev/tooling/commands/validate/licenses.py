@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import asyncio
+#import asyncio
 import difflib
 import io
 import os
@@ -14,7 +14,7 @@ from zipfile import ZipFile
 import click
 import orjson
 import requests
-from aiohttp import request
+# from aiohttp import request
 from aiomultiprocess import Pool
 from packaging.requirements import Requirement
 import concurrent.futures
@@ -205,12 +205,12 @@ def get_known_spdx_licenses():
     return {data['licenseId'] for data in license_list}
 
 
-async def get_data(url):
-    async with request('GET', url) as response:
-        return orjson.loads(await response.read())
+def get_data(url):
+    with requests.get(url) as response:
+        return orjson.loads(response.content)
 
 
-async def scrape_license_data(urls):
+def scrape_license_data(urls):
     package_data = defaultdict(
         lambda: {'copyright': {}, 'licenses': set(), 'classifiers': set(), 'home_page': None, 'author': None}
     )
@@ -454,7 +454,7 @@ def licenses(ctx, sync):
         for version in versions:
             api_urls.append(f'https://pypi.org/pypi/{package}/{version}/json')
 
-    package_data = asyncio.run(scrape_license_data(api_urls))
+    package_data = scrape_license_data(api_urls)
     known_spdx_licenses = {license_id.lower(): license_id for license_id in get_known_spdx_licenses()}
 
     package_license_errors = defaultdict(list)
