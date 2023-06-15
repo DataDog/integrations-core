@@ -25,15 +25,16 @@ from ddev.utils.toml import dump_toml_data, load_toml_file
     ],
 )
 @pytest.mark.requires_ci
-def test_error_extra_dependency(name, contents, expected_error_output, ddev, repository, network_replay, helpers):
+def test_error_extra_dependency(name, contents, expected_error_output, ddev, repository, network_replay, helpers, config_file):
     network_replay('fixtures/network/license/extra_dependency.yaml', record_mode='none')
-    config_file = repository.path / '.ddev' / 'config.toml'
+    ddev_config_path = repository.path / '.ddev' / 'config.toml'
     config_file.model.github = {'user': os.getenv('DD_GITHUB_USER'), 'token': os.getenv('DD_GITHUB_TOKEN')}
-    data = load_toml_file(config_file)
+    config_file.save()
+    data = load_toml_file(ddev_config_path)
 
     data['overrides']['dependencies'] = {name: contents}
 
-    dump_toml_data(data, config_file)
+    dump_toml_data(data, ddev_config_path)
 
     result = ddev('validate', 'licenses')
 
