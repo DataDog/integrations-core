@@ -121,9 +121,6 @@ class FargateCheck(AgentCheck):
 
         exlcuded_cid = set()
         container_tags = {}
-
-
-
         for container in metadata['Containers']:
             c_id = container['DockerId']
             # Check if container is excluded
