@@ -28,9 +28,7 @@ from ddev.utils.toml import dump_toml_data, load_toml_file
 def test_error_extra_dependency(name, contents, expected_error_output, ddev, repository, network_replay, helpers):
     network_replay('fixtures/network/license/extra_dependency.yaml', record_mode='none')
     config_file = repository.path / '.ddev' / 'config.toml'
-    print(os.getenv('DD_GITHUB_USER'))
-    raise Exception
-    # config_file.model.github = {'user': os.getenv('DD_GITHUB_USER'), 'token': os.getenv('DD_GITHUB_TOKEN')}
+    config_file.model.github = {'user': os.getenv('DD_GITHUB_USER'), 'token': os.getenv('DD_GITHUB_TOKEN')}
     data = load_toml_file(config_file)
 
     data['overrides']['dependencies'] = {name: contents}
