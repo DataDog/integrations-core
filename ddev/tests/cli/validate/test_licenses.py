@@ -24,11 +24,16 @@ from ddev.utils.toml import dump_toml_data, load_toml_file
         ),
     ],
 )
-@pytest.mark.requires_ci
 def test_error_extra_dependency(name, contents, expected_error_output, ddev, repository, network_replay, helpers, config_file):
     network_replay('fixtures/network/license/extra_dependency.yaml', record_mode='none')
     ddev_config_path = repository.path / '.ddev' / 'config.toml'
     print(os.getenv('DD_GITHUB_USER'))
+    print(config_file.read_scrubbed())
+    
+    if not (os.getenv('DD_GITHUB_TOKEN') == config_file.model.raw_data['github']['token']):
+        print("Tokens are different")
+    else:
+        print("Tokens are same")
     raise Exception
     config_file.model.github = {'user': os.getenv('DD_GITHUB_USER'), 'token': os.getenv('DD_GITHUB_TOKEN')}
     config_file.save()
