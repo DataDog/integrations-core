@@ -50,6 +50,9 @@ Source = "https://github.com/DataDog/integrations-core"
 [tool.hatch.version]
 path = "src/ddev/__about__.py"
 
+[tool.hatch.build.targets.app]
+scripts = ["ddev"]
+
 [tool.black]
 include = '\.pyi?$'
 line-length = 120
