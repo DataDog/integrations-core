@@ -117,8 +117,11 @@ def recursively_expand_base_profiles(definition):
         definition.setdefault('metric_tags', []).extend(base_definition.get('metric_tags', []))
 
 
-def _iter_default_profile_file_paths(paths):
-    # type: (List[str]) -> Iterator[str]
+def _iter_default_profile_file_paths():
+    # type: () -> Iterator[str]
+
+    # the order of the path is important, the first profile with specific name found will take precedence
+    paths = [_get_profiles_confd_user_root(), _get_profiles_confd_default_root(), _get_profiles_site_root()]
 
     for path in paths:
         if not os.path.isdir(path):
@@ -147,10 +150,7 @@ def _load_default_profiles():
     """Load all the profiles installed on the system."""
     profiles = {}
 
-    # the order of the path is important, the first profile with specific name found will take precedence
-    paths = [_get_profiles_confd_user_root(), _get_profiles_confd_default_root(), _get_profiles_site_root()]
-
-    for path in _iter_default_profile_file_paths(paths):
+    for path in _iter_default_profile_file_paths():
         name = _get_profile_name(path)
         if name in profiles:  # TODO: TESTME
             continue
