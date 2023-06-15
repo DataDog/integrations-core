@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import concurrent.futures
 import difflib
 import io
 import os
@@ -14,7 +15,6 @@ import click
 import orjson
 import requests
 from packaging.requirements import Requirement
-import concurrent.futures
 
 from ....fs import file_exists, read_file_lines, write_file_lines
 from ...constants import (
