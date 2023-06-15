@@ -5,7 +5,6 @@
 import copy
 import logging
 import os
-import pathlib
 import time
 import weakref
 from concurrent import futures
@@ -30,7 +29,7 @@ from datadog_checks.snmp.utils import (
 )
 
 from . import common
-from .utils import mock_profiles_confd_default_root, mock_profiles_confd_user_root
+from .utils import mkdir_p, mock_profiles_confd_default_root, mock_profiles_confd_user_root
 
 pytestmark = [pytest.mark.unit, common.snmp_integration_only]
 
@@ -510,10 +509,11 @@ def test_user_profile_override():
     }
 
     with temp_dir() as tmp:
-        with mock_profiles_confd_default_root(os.path.join(tmp, 'default_profiles')), \
-                mock_profiles_confd_user_root(os.path.join(tmp, 'profiles')):
-            pathlib.Path(os.path.join(tmp, 'default_profiles')).mkdir(parents=True, exist_ok=True)
-            pathlib.Path(os.path.join(tmp, 'profiles')).mkdir(parents=True, exist_ok=True)
+        with mock_profiles_confd_default_root(os.path.join(tmp, 'default_profiles')), mock_profiles_confd_user_root(
+            os.path.join(tmp, 'profiles')
+        ):
+            mkdir_p(os.path.join(tmp, 'default_profiles'))
+            mkdir_p(os.path.join(tmp, 'profiles'))
 
             with open(os.path.join(tmp, 'default_profiles', 'generic-device.yaml'), 'wb') as f:
                 f.write(yaml.safe_dump(default_profile))
@@ -552,10 +552,11 @@ def test_profile_extends_with_user_profiles():
     }
 
     with temp_dir() as tmp:
-        with mock_profiles_confd_default_root(os.path.join(tmp, 'default_profiles')), \
-                mock_profiles_confd_user_root(os.path.join(tmp, 'profiles')):
-            pathlib.Path(os.path.join(tmp, 'default_profiles')).mkdir(parents=True, exist_ok=True)
-            pathlib.Path(os.path.join(tmp, 'profiles')).mkdir(parents=True, exist_ok=True)
+        with mock_profiles_confd_default_root(os.path.join(tmp, 'default_profiles')), mock_profiles_confd_user_root(
+            os.path.join(tmp, 'profiles')
+        ):
+            mkdir_p(os.path.join(tmp, 'default_profiles'))
+            mkdir_p(os.path.join(tmp, 'profiles'))
 
             with open(os.path.join(tmp, 'default_profiles', 'base.yaml'), 'wb') as f:
                 f.write(yaml.safe_dump(default_base))
