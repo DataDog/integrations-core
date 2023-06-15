@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-#import asyncio
 import difflib
 import io
 import os
@@ -14,8 +13,6 @@ from zipfile import ZipFile
 import click
 import orjson
 import requests
-# from aiohttp import request
-from aiomultiprocess import Pool
 from packaging.requirements import Requirement
 import concurrent.futures
 
