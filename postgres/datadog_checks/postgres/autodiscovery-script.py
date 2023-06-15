@@ -18,7 +18,7 @@ from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.base import AgentCheck
 
 # sys.path.append(os.path.abspath("/home/ec2-user/dd/integrations-core"))
-from relationsmanager import RelationsManager, RELATION_METRICS, SIZE_METRICS
+from relationsmanager import RelationsManager, RELATION_METRICS, REL_METRICS
 from connections import MultiDatabaseConnectionPoolLimited
 
 
@@ -102,6 +102,8 @@ class PostgresAutodiscovery(Discovery):
 
         # now query all relations metrics
         for scope in RELATION_METRICS:
+            if scope == REL_METRICS:
+                print(scope)
             cols = list(scope['metrics']) 
             descriptors = scope['descriptors']
             results = self.run_query_scope(cursor, scope, cols, descriptors)
@@ -117,7 +119,7 @@ class PostgresAutodiscovery(Discovery):
                 desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values)}
 
                 # build tags
-                tags = ['db'+database]
+                tags = ['db:'+database]
                 # add tags from descriptors
                 tags += [("%s:%s" % (k, v)) for (k, v) in iteritems(desc_map)]
 
