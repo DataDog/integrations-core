@@ -11,12 +11,14 @@ from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.postgres.util import (
     NEWER_14_METRICS,
+    QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
     REPLICATION_STATS_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
+    STAT_WAL_METRICS,
     WAL_FILE_METRICS,
 )
 from datadog_checks.postgres.version_utils import VersionUtils
@@ -104,6 +106,16 @@ def _iterate_metric_name(columns):
         yield column['name']
 
 
+def _get_expected_tags(check, pg_instance, **kwargs):
+    base_tags = pg_instance['tags'] + [
+        'port:{}'.format(pg_instance['port']),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
+    for k, v in kwargs.items():
+        base_tags.append('{}:{}'.format(k, v))
+    return base_tags
+
+
 def assert_metric_at_least(aggregator, metric_name, lower_bound=None, higher_bound=None, count=None, tags=None):
     found_values = 0
     expected_tags = normalize_tags(tags, sort=True)
@@ -123,13 +135,6 @@ def assert_metric_at_least(aggregator, metric_name, lower_bound=None, higher_bou
         assert found_values == count, 'Expected to have {} with tags {} values for metric {}, got {}'.format(
             count, expected_tags, metric_name, found_values
         )
-
-
-def get_expected_instance_tags(check, pg_instance):
-    return pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
-    ]
 
 
 def check_common_metrics(aggregator, expected_tags, count=1):
@@ -246,6 +251,11 @@ def check_uptime_metrics(aggregator, expected_tags, count=1):
         aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
 
 
+def check_control_metrics(aggregator, expected_tags, count=1):
+    for column in QUERY_PG_CONTROL_CHECKPOINT['columns']:
+        aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
+
+
 def check_conflict_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 9.1:
         return
@@ -279,9 +289,17 @@ def check_snapshot_txid_metrics(aggregator, expected_tags, count=1):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
-def check_wal_metrics(aggregator, expected_tags, count=1):
+def check_file_wal_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 10:
         return
 
     for metric_name in _iterate_metric_name(WAL_FILE_METRICS['columns']):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_stat_wal_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 14.0:
+        return
+
+    for metric_name in _iterate_metric_name(STAT_WAL_METRICS['columns']):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
