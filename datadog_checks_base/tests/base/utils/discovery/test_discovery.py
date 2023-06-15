@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 
 import mock
 
@@ -18,6 +19,21 @@ def test_include_not_empty():
     mock_get_items = mock.Mock(return_value=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
     d = Discovery(mock_get_items, include={'a.*': None})
     assert list(d.get_items()) == [('a.*', 'a', 'a', None)]
+    assert mock_get_items.call_count == 1
+
+
+def test_include_patterns_are_compiled_internally():
+    mock_get_items = mock.Mock(return_value=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
+    d = Discovery(mock_get_items, include={'a.*': None, 'b.*': None})
+    assert list(d.get_items()) == [('a.*', 'a', 'a', None), ('b.*', 'b', 'b', None)]
+    assert mock_get_items.call_count == 1
+    assert d._filter._compiled_include_patterns == {p: re.compile(p) for p in ['a.*', 'b.*']}
+
+
+def test_include_not_empty_with_already_compiled_patterns():
+    mock_get_items = mock.Mock(return_value=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
+    d = Discovery(mock_get_items, include={re.compile('a.*'): None})
+    assert list(d.get_items()) == [(re.compile('a.*'), 'a', 'a', None)]
     assert mock_get_items.call_count == 1
 
 
