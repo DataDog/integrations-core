@@ -73,7 +73,6 @@ def _resolve_definition_file(definition_file):
     if os.path.isabs(definition_file):
         return definition_file
 
-    # TODO: TESTME
     definition_conf_file = os.path.join(_get_profiles_confd_user_root(), definition_file)
     if os.path.isfile(definition_conf_file):
         return definition_conf_file
@@ -152,7 +151,7 @@ def _load_default_profiles():
 
     for path in _iter_default_profile_file_paths():
         name = _get_profile_name(path)
-        if name in profiles:  # TODO: TESTME
+        if name in profiles:
             continue
 
         if _is_abstract_profile(name):
