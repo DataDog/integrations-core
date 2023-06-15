@@ -25,12 +25,15 @@ from .common import (
     check_common_metrics,
     check_conflict_metrics,
     check_connection_metrics,
+    check_control_metrics,
     check_db_count,
+    check_file_wal_metrics,
     check_logical_replication_slots,
     check_physical_replication_slots,
     check_slru_metrics,
     check_snapshot_txid_metrics,
     check_stat_replication,
+    check_stat_wal_metrics,
     check_uptime_metrics,
     check_wal_receiver_metrics,
     get_expected_instance_tags,
@@ -54,6 +57,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
 
     expected_tags = get_expected_instance_tags(check, pg_instance)
     check_common_metrics(aggregator, expected_tags=expected_tags)
+    check_control_metrics(aggregator, expected_tags=expected_tags)
     check_bgw_metrics(aggregator, expected_tags)
     check_connection_metrics(aggregator, expected_tags=expected_tags)
     check_conflict_metrics(aggregator, expected_tags=expected_tags)
@@ -67,6 +71,8 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_logical_replication_slots(aggregator, expected_tags)
     check_physical_replication_slots(aggregator, expected_tags)
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
+    check_stat_wal_metrics(aggregator, expected_tags=expected_tags)
+    check_file_wal_metrics(aggregator, expected_tags=expected_tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -506,6 +512,43 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
     assert_state_clean(check)
 
 
+@requires_over_14
+def test_wal_stats(aggregator, integration_check, pg_instance):
+    conn = _get_superconn(pg_instance)
+    with conn.cursor() as cur:
+        cur.execute("select wal_records, wal_fpi, wal_bytes from pg_stat_wal;")
+        (wal_records, wal_fpi, wal_bytes) = cur.fetchall()[0]
+        cur.execute("insert into persons (lastname) values ('test');")
+
+    # Wait for pg_stat_wal to be updated
+    for _ in range(10):
+        with conn.cursor() as cur:
+            cur.execute("select wal_records, wal_bytes from pg_stat_wal;")
+            new_wal_records = cur.fetchall()[0][0]
+            if new_wal_records > wal_records:
+                break
+        time.sleep(0.1)
+
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    expected_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
+
+    aggregator.assert_metric('postgresql.wal.records', count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.wal.bytes', count=1, tags=expected_tags)
+
+    # Expect at least one Heap + one Transaction additional records in the WAL
+    assert_metric_at_least(
+        aggregator, 'postgresql.wal.records', tags=expected_tags, count=1, lower_bound=wal_records + 2
+    )
+    # We should have at least one full page write
+    assert_metric_at_least(aggregator, 'postgresql.wal.bytes', tags=expected_tags, count=1, lower_bound=wal_bytes + 100)
+    aggregator.assert_metric('postgresql.wal.full_page_images', tags=expected_tags, count=1, value=wal_fpi + 1)
+
+
 def test_query_timeout(aggregator, integration_check, pg_instance):
     pg_instance['query_timeout'] = 1000
     check = integration_check(pg_instance)
@@ -513,6 +556,65 @@ def test_query_timeout(aggregator, integration_check, pg_instance):
     cursor = check.db.cursor()
     with pytest.raises(psycopg2.errors.QueryCanceled):
         cursor.execute("select pg_sleep(2000)")
+
+
+@requires_over_10
+def test_wal_metrics(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    # Default PG's wal size is 16MB
+    wal_size = 16777216
+
+    postgres_conn = _get_superconn(pg_instance)
+    with postgres_conn.cursor() as cur:
+        cur.execute("select count(*) from pg_ls_waldir();")
+        expected_num_wals = cur.fetchall()[0][0]
+
+    check.check(pg_instance)
+
+    expected_wal_size = expected_num_wals * wal_size
+    dd_agent_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
+    aggregator.assert_metric('postgresql.wal_count', count=1, value=expected_num_wals, tags=dd_agent_tags)
+    aggregator.assert_metric('postgresql.wal_size', count=1, value=expected_wal_size, tags=dd_agent_tags)
+
+    with postgres_conn.cursor() as cur:
+        # Force a wal switch
+        cur.execute("select pg_switch_wal();")
+        cur.fetchall()
+        # Checkpoint to accelerate new wal file
+        cur.execute("CHECKPOINT;")
+
+    aggregator.reset()
+    check.check(pg_instance)
+
+    expected_num_wals += 1
+    expected_wal_size = expected_num_wals * wal_size
+    aggregator.assert_metric('postgresql.wal_count', count=1, value=expected_num_wals, tags=dd_agent_tags)
+    aggregator.assert_metric('postgresql.wal_size', count=1, value=expected_wal_size, tags=dd_agent_tags)
+
+
+def test_pg_control(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    dd_agent_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
+    aggregator.assert_metric('postgresql.control.timeline_id', count=1, value=1, tags=dd_agent_tags)
+
+    postgres_conn = _get_superconn(pg_instance)
+    with postgres_conn.cursor() as cur:
+        cur.execute("CHECKPOINT;")
+
+    aggregator.reset()
+    check.check(pg_instance)
+    # checkpoint should be less than 2s old
+    assert_metric_at_least(
+        aggregator, 'postgresql.control.checkpoint_delay', count=1, higher_bound=2.0, tags=dd_agent_tags
+    )
 
 
 def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance):
@@ -544,6 +646,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     pg_instance['dbm'] = dbm_enabled
     pg_instance['collect_activity_metrics'] = True
     pg_instance['query_samples'] = {'enabled': False}
+    pg_instance['query_activity'] = {'enabled': False}
     pg_instance['query_metrics'] = {'enabled': False}
     pg_instance['collect_resources'] = {'enabled': False}
 

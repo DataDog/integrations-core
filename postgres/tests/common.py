@@ -11,12 +11,15 @@ from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.postgres.util import (
     NEWER_14_METRICS,
+    QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
     REPLICATION_STATS_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
+    STAT_WAL_METRICS,
+    WAL_FILE_METRICS,
 )
 from datadog_checks.postgres.version_utils import VersionUtils
 
@@ -245,6 +248,11 @@ def check_uptime_metrics(aggregator, expected_tags, count=1):
         aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
 
 
+def check_control_metrics(aggregator, expected_tags, count=1):
+    for column in QUERY_PG_CONTROL_CHECKPOINT['columns']:
+        aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
+
+
 def check_conflict_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 9.1:
         return
@@ -275,4 +283,20 @@ def check_slru_metrics(aggregator, expected_tags, count=1):
 
 def check_snapshot_txid_metrics(aggregator, expected_tags, count=1):
     for metric_name in _iterate_metric_name(SNAPSHOT_TXID_METRICS['columns']):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_file_wal_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 10:
+        return
+
+    for metric_name in _iterate_metric_name(WAL_FILE_METRICS['columns']):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_stat_wal_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 14.0:
+        return
+
+    for metric_name in _iterate_metric_name(STAT_WAL_METRICS['columns']):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
