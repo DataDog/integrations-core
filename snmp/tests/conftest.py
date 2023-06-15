@@ -17,7 +17,6 @@ from datadog_checks.dev.docker import get_container_ip
 from .common import (
     ACTIVE_ENV_NAME,
     COMPOSE_DIR,
-    HERE,
     PORT,
     SNMP_CONTAINER_NAME,
     SNMP_LISTENER_ENV,
@@ -31,11 +30,7 @@ FILES = [
 E2E_METADATA = {
     'start_commands': [
         # Ensure the Agent has access to profile definition files and auto_conf.
-        'cp -r /home/snmp/datadog_checks/snmp/data/default_profiles /etc/datadog-agent/conf.d/snmp.d/',
-    ],
-    'docker_volumes': [
-        # Mount mock user profiles
-        '{}/fixtures/user_profiles:/etc/datadog-agent/conf.d/snmp.d/profiles'.format(HERE),
+        'cp -r /home/snmp/datadog_checks/snmp/data/profiles /etc/datadog-agent/conf.d/snmp.d/',
     ],
 }
 
@@ -58,9 +53,9 @@ def dd_environment():
         with docker_run(os.path.join(COMPOSE_DIR, 'docker-compose.yaml'), env_vars=env, log_patterns="Listening at"):
             if SNMP_LISTENER_ENV == 'true':
                 instance_config = {}
-                new_e2e_metadata['docker_volumes'].append(
-                    '{}:/etc/datadog-agent/datadog.yaml'.format(create_datadog_conf_file(tmp_dir)),
-                )
+                new_e2e_metadata['docker_volumes'] = [
+                    '{}:/etc/datadog-agent/datadog.yaml'.format(create_datadog_conf_file(tmp_dir))
+                ]
             else:
                 instance_config = generate_container_instance_config([])
                 instance_config['init_config'].update(
