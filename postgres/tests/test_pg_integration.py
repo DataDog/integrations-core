@@ -25,6 +25,7 @@ from .common import (
     check_common_metrics,
     check_conflict_metrics,
     check_connection_metrics,
+    check_control_metrics,
     check_db_count,
     check_file_wal_metrics,
     check_logical_replication_slots,
@@ -56,6 +57,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
 
     expected_tags = get_expected_instance_tags(check, pg_instance)
     check_common_metrics(aggregator, expected_tags=expected_tags)
+    check_control_metrics(aggregator, expected_tags=expected_tags)
     check_bgw_metrics(aggregator, expected_tags)
     check_connection_metrics(aggregator, expected_tags=expected_tags)
     check_conflict_metrics(aggregator, expected_tags=expected_tags)
@@ -591,6 +593,28 @@ def test_wal_metrics(aggregator, integration_check, pg_instance):
     expected_wal_size = expected_num_wals * wal_size
     aggregator.assert_metric('postgresql.wal_count', count=1, value=expected_num_wals, tags=dd_agent_tags)
     aggregator.assert_metric('postgresql.wal_size', count=1, value=expected_wal_size, tags=dd_agent_tags)
+
+
+def test_pg_control(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    dd_agent_tags = pg_instance['tags'] + [
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
+    ]
+    aggregator.assert_metric('postgresql.control.timeline_id', count=1, value=1, tags=dd_agent_tags)
+
+    postgres_conn = _get_superconn(pg_instance)
+    with postgres_conn.cursor() as cur:
+        cur.execute("CHECKPOINT;")
+
+    aggregator.reset()
+    check.check(pg_instance)
+    # checkpoint should be less than 2s old
+    assert_metric_at_least(
+        aggregator, 'postgresql.control.checkpoint_delay', count=1, higher_bound=2.0, tags=dd_agent_tags
+    )
 
 
 def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance):

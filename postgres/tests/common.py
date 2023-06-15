@@ -11,6 +11,7 @@ from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.postgres.util import (
     NEWER_14_METRICS,
+    QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
@@ -244,6 +245,11 @@ def check_replication_delay(aggregator, metrics_cache, expected_tags, count=1):
 
 def check_uptime_metrics(aggregator, expected_tags, count=1):
     for column in QUERY_PG_UPTIME['columns']:
+        aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
+
+
+def check_control_metrics(aggregator, expected_tags, count=1):
+    for column in QUERY_PG_CONTROL_CHECKPOINT['columns']:
         aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
 
 
