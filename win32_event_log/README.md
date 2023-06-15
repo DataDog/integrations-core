@@ -77,7 +77,7 @@ To find the channel name for an Event Log in the Windows Event Viewer, open the 
 
 To collect Windows Event Logs as Datadog events, configure channels under the `instances:` section of your `win32_event_log.d/conf.yaml` configuration file. 
 
-The Datadog Agent can be configured to collect Windows Event Logs as Datadog events in two ways. Each method has its own configuration syntax for channels and for filters (see [Filtering Events](?tab=events#filtering-events)). 
+The Datadog Agent can be configured to collect Windows Event Logs as Datadog events in two ways. Each method has its own configuration syntax for channels and for filters . For more information, see [Filtering Events](?tab=events#filtering-events). 
 
 * The latest method uses the Event Log API. Datadog recommends using the Event Log API because it has better performance than the legacy method below. 
 
@@ -118,6 +118,10 @@ The Datadog Agent can be configured to collect Windows Event Logs as Datadog eve
   ```
   
   For more information, see [Add event log files to the `Win32_NTLogEvent` WMI class][101].
+
+You can use the `query` option, as well as the `log_processing_rules` regex option, to filter events. 
+
+// Example of a query code snippet
 
 [101]: https://docs.datadoghq.com/integrations/guide/add-event-log-files-to-the-win32-ntlogevent-wmi-class/
 
@@ -347,6 +351,10 @@ logs:
         pattern: '"EventID":"(101|201|301)"'
 ```
 
+You can use the `query` option, as well as the `log_processing_rules` regex option, to filter events. 
+
+// Example of a query code snippet
+
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
@@ -357,7 +365,7 @@ When you're done setting up filters, [restart the Agent][4] using the Agent Mana
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Events" xxx -->
 
-Check the info page in the Datadog Agent Manager or run the [Agent's `status` subcommand][6] and look for `win32_event_log` under the Checks section. 
+Check the information page in the Datadog Agent Manager or run the [Agent's `status` subcommand][6] and look for `win32_event_log` under the Checks section. 
 
 It should display a section similar to the following:
 
@@ -376,7 +384,7 @@ Checks
 <!-- xxz tab xxx -->
 <!-- xxx tab "Logs" xxx -->
 
-Check the info page in the Datadog Agent Manager or run the [Agent's `status` subcommand][6] and look for `win32_event_log` under the Logs Agent section. 
+Check the information page in the Datadog Agent Manager or run the [Agent's `status` subcommand][6] and look for `win32_event_log` under the Logs Agent section. 
 
 It should display a section similar to the following:
 
