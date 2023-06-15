@@ -10,6 +10,8 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import round_value
 
+import os
+
 try:
     from tagger import get_tags
 except ImportError:
@@ -37,9 +39,10 @@ except ImportError:
 
 # Fargate related constants
 EVENT_TYPE = SOURCE_TYPE_NAME = 'ecs.fargate'
-API_ENDPOINT = 'http://169.254.170.2/v2'
-METADATA_ROUTE = '/metadata'
-STATS_ROUTE = '/stats'
+# Fargate metadata endpoint https://docs.aws.amazon.com/AmazonECS/latest/userguide/task-metadata-endpoint-v4-fargate.html
+API_ENDPOINT = os.environ.get('ECS_CONTAINER_METADATA_URI_V4')
+METADATA_ROUTE = '/task'
+STATS_ROUTE = '/task/stats'
 DEFAULT_TIMEOUT = 5
 
 # Default value is maxed out for some cgroup metrics
@@ -67,6 +70,10 @@ NETWORK_GAUGE_METRICS = {
 NETWORK_RATE_METRICS = {'rx_bytes': 'ecs.fargate.net.bytes_rcvd', 'tx_bytes': 'ecs.fargate.net.bytes_sent'}
 TASK_TAGGER_ENTITY_ID = "internal://global-entity-id"
 
+EPHEMERAL_STORAGE_GAUGE_METRICS = {
+    'Utilized': 'ecs.fargate.ephemeral_storage.utilized',
+    'Reserved': 'ecs.fargate.ephemeral_storage.reserved',
+}
 
 class FargateCheck(AgentCheck):
 
@@ -114,6 +121,9 @@ class FargateCheck(AgentCheck):
 
         exlcuded_cid = set()
         container_tags = {}
+
+
+
         for container in metadata['Containers']:
             c_id = container['DockerId']
             # Check if container is excluded
@@ -138,18 +148,26 @@ class FargateCheck(AgentCheck):
             if container.get('Limits', {}).get('CPU', 0) > 0:
                 self.gauge('ecs.fargate.cpu.limit', container['Limits']['CPU'], container_tags[c_id])
 
-        # Generating task tags only if we need to push the only task metric
-        if metadata.get('Limits', {}).get('CPU', 0) > 0:
-            task_tags = get_tags(TASK_TAGGER_ENTITY_ID, True) or []
-            # Compatibility with previous versions of the check
-            compat_tags = []
-            for tag in task_tags:
-                if tag.startswith(("task_family:", "task_version:")):
-                    compat_tags.append("ecs_" + tag)
-                elif tag.startswith("cluster_name:"):
-                    compat_tags.append(tag.replace("cluster_name:", "ecs_cluster:"))
-            task_tags = task_tags + compat_tags + custom_tags
+        # Create task tags
+        task_tags = get_tags(TASK_TAGGER_ENTITY_ID, True) or []
+        # Compatibility with previous versions of the check
+        compat_tags = []
+        for tag in task_tags:
+            if tag.startswith(("task_family:", "task_version:")):
+                compat_tags.append("ecs_" + tag)
+            elif tag.startswith("cluster_name:"):
+                compat_tags.append(tag.replace("cluster_name:", "ecs_cluster:"))
 
+        task_tags = task_tags + compat_tags + custom_tags
+
+        ## Ephemeral Storage Metrics
+        es_metrics = metadata['EphemeralStorageMetrics']
+        for es in es_metrics:
+            metric_value = es_metrics.get(es)
+            metric_name = EPHEMERAL_STORAGE_GAUGE_METRICS.get(es)
+            self.gauge(metric_name, metric_value, task_tags)
+
+        if metadata.get('Limits', {}).get('CPU', 0) > 0:
             self.gauge('ecs.fargate.cpu.task.limit', metadata['Limits']['CPU'] * 10**9, task_tags)
 
         try:
