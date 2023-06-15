@@ -103,5 +103,10 @@
 	"Limits": {
 		"CPU": 2,
 		"Memory": 4096
-	}
+	},
+	"EphemeralStorageMetrics":
+    	{
+        	"Utilized": 1650,
+        	"Reserved": 21499
+   	}
 }
