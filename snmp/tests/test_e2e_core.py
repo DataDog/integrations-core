@@ -411,6 +411,9 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
     for metric in metrics.APC_UPS_METRICS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
     aggregator.assert_metric(
+        'snmp.upsAdvBatteryNumOfBattPacks_userMetric', metric_type=aggregator.GAUGE, tags=tags, count=2
+    )
+    aggregator.assert_metric(
         'snmp.upsOutletGroupStatusGroupState',
         metric_type=aggregator.GAUGE,
         tags=['outlet_group_name:test_outlet'] + tags,
