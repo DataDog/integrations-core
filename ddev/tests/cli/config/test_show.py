@@ -5,8 +5,6 @@ import os
 
 
 def test_default_scrubbed(ddev, config_file, helpers):
-    print(os.getenv('DD_GITHUB_USER'))
-    raise Exception
     config_file.model.orgs['default']['api_key'] = 'foo'
     config_file.model.orgs['default']['app_key'] = 'bar'
     config_file.model.github = {'user': '', 'token': ''}
