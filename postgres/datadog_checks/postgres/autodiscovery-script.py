@@ -18,7 +18,7 @@ from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.base import AgentCheck
 
 # sys.path.append(os.path.abspath("/home/ec2-user/dd/integrations-core"))
-from relationsmanager import RelationsManager, RELATION_METRICS
+from relationsmanager import RelationsManager, RELATION_METRICS, SIZE_METRICS
 from connections import MultiDatabaseConnectionPoolLimited
 
 
@@ -98,7 +98,6 @@ class PostgresAutodiscovery(Discovery):
         # wait for connection to open up
         while conn == None:
             conn = self._conn_pool.get_connection(database, self.default_ttl)
-        print("got connection")
         cursor = conn.cursor()
 
         # now query all relations metrics
@@ -109,9 +108,7 @@ class PostgresAutodiscovery(Discovery):
             # print(results)
             if not results:
                 print("got none")    
-                self._conn_pool.release(database)
-                return None
-            print("got results")
+                continue
             for row in results:
                 descriptor_values = row[: len(descriptors)]
                 column_values = row[len(descriptors) :]
@@ -127,14 +124,13 @@ class PostgresAutodiscovery(Discovery):
                 # now submit!
                 for column, value in zip(cols, column_values):
                     name, submit_metric = scope['metrics'][column]
-                    # only submit gauge metrics
-                    if submit_metric[1] == AgentCheck.gauge:
-                        statsd.set('eden_test'+name, value, tags=set(tags), hostname='eden-test-pgautodiscovery')
+                    # only submit gauge metrics for now
+                    if submit_metric == AgentCheck.gauge:
+                        statsd.set('eden_test.'+name, value, tags=set(tags))
 
-        print("done getting")
+        print("done getting metrics")
         # print(relations)
         self._conn_pool.release(database)
-        # self._conn_pool.get_connection(database, self.default_ttl)
 
     def query_relations_all_databases_threaded(self) -> None:
         self._print_num_connections()
