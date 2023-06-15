@@ -119,7 +119,7 @@ The Datadog Agent can be configured to collect Windows Event Logs as Datadog eve
   
   For more information, see [Add event log files to the `Win32_NTLogEvent` WMI class][101].
 
-You can use the `query` option, as well as the `log_processing_rules` regex option, to filter events. 
+You can use the [`query` option][20], as well as the `log_processing_rules` regex option, to filter events. 
 
 // Example of a query code snippet
 
@@ -351,7 +351,7 @@ logs:
         pattern: '"EventID":"(101|201|301)"'
 ```
 
-You can use the `query` option, as well as the `log_processing_rules` regex option, to filter events. 
+You can use the [`query` option][20], as well as the `log_processing_rules` regex option, to filter events. 
 
 // Example of a query code snippet
 
@@ -448,3 +448,4 @@ Additional helpful documentation, links, and articles:
 [17]: https://docs.datadoghq.com/logs/
 [18]: https://docs.datadoghq.com/agent/logs/#activate-log-collection
 [19]: https://raw.githubusercontent.com/DataDog/integrations-core/master/win32_event_log/images/windows-defender-operational-event-log-properties.png
+[20]: https://github.com/DataDog/integrations-core/blob/10296a69722b75098ed0b45ce55f0309a1800afd/win32_event_log/datadog_checks/win32_event_log/data/conf.yaml.example#L74-L89
