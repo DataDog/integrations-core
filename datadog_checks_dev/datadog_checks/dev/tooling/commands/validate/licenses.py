@@ -17,6 +17,7 @@ import requests
 from aiohttp import request
 from aiomultiprocess import Pool
 from packaging.requirements import Requirement
+import concurrent.futures
 
 from ....fs import file_exists, read_file_lines, write_file_lines
 from ...constants import (
@@ -214,8 +215,10 @@ async def scrape_license_data(urls):
         lambda: {'copyright': {}, 'licenses': set(), 'classifiers': set(), 'home_page': None, 'author': None}
     )
 
-    async with Pool() as pool:
-        async for resp in pool.map(get_data, urls):
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        future_to_url = {executor.submit(get_data, url): url for url in urls}
+        for future in concurrent.futures.as_completed(future_to_url):
+            resp = future.result()
             info = resp['info']
             data = package_data[(info['name'], info['version'])]
             data['urls'] = resp['urls']
