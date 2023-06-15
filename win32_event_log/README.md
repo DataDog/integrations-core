@@ -119,10 +119,6 @@ The Datadog Agent can be configured to collect Windows Event Logs as Datadog eve
   
   For more information, see [Add event log files to the `Win32_NTLogEvent` WMI class][101].
 
-You can use the [`query` option][20], as well as the `log_processing_rules` regex option, to filter events. 
-
-// Example of a query code snippet
-
 [101]: https://docs.datadoghq.com/integrations/guide/add-event-log-files-to-the-win32-ntlogevent-wmi-class/
 
 <!-- xxz tab xxx -->
@@ -218,7 +214,25 @@ Datadog recommends using the latest method for filters.
         - 7036
   ```
 
-The legacy method is the default mode for filters. 
+You can use the [`query` option][20] to filter events with an XPATH or structured XML query. Datadog recommends creating the query in Event Viewer's filter editor until the events shown in Event Viewer match what you want the Datadog Agent to collect. The `filters` option is ignored when the `query` option is used.
+
+  ```yaml
+  init_config:
+  instances:
+    # collect Critical, Warning, and Error events
+    - path: Application
+      legacy_mode: false
+      query: '*[System[(Level=1 or Level=2 or Level=3)]]'
+      
+    - path: Application
+      legacy_mode: false
+      query: |
+        <QueryList>
+          <Query Id="0" Path="Application">
+            <Select Path="Application">*[System[(Level=1 or Level=2 or Level=3)]]</Select>
+          </Query>
+        </QueryList>
+ ```
 
 * The legacy method includes the following filters:
 
@@ -231,7 +245,7 @@ The legacy method is the default mode for filters.
 
   ```yaml
   instances:
-    # Default
+    # Legacy
     # The following captures errors and warnings from SQL Server which
     # puts all events under the MSSQLSERVER source and tag them with #sqlserver.
     - tags:
@@ -256,7 +270,31 @@ The legacy method is the default mode for filters.
 <!-- xxz tab xxx -->
 <!-- xxx tab "Logs" xxx -->
 
-For each filter, add a log processing rule in the configuration file at `win32_event_log.d/conf.yaml`.
+You can use the `query`, as well as the `log_processing_rules` regex option, to filter event logs.
+
+You can use the `query` to filter events with an XPATH or structured XML query. Datadog recommends creating the query in Event Viewer's filter editor until the events shown in Event Viewer match what you want the Datadog Agent to collect.
+
+```yaml
+  # collect Critical, Warning, and Error events
+  - type: windows_event
+    channel_path: Application
+    source: windows.events
+    service: Windows       
+    query: '*[System[(Level=1 or Level=2 or Level=3)]]'
+      
+  - type: windows_event
+    channel_path: Application
+    source: windows.events
+    service: Windows       
+    query: |
+      <QueryList>
+        <Query Id="0" Path="Application">
+          <Select Path="Application">*[System[(Level=1 or Level=2 or Level=3)]]</Select>
+        </Query>
+      </QueryList>
+```
+
+In addition to the `query` option, events can be further filtered with log processing rules. 
 
 Some example filters include the following:
 
@@ -350,10 +388,6 @@ logs:
         name: include_x01
         pattern: '"EventID":"(101|201|301)"'
 ```
-
-You can use the [`query` option][20], as well as the `log_processing_rules` regex option, to filter events. 
-
-// Example of a query code snippet
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
