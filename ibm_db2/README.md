@@ -170,23 +170,33 @@ See [service_checks.json][11] for a list of service checks provided by this inte
 
 ### Installing `ibm_db` client library offline
 
-If you're in an air gapped environment, or on a restricted network where it's not possible to run `pip install ibm_db==3.0.1`, you can install `ibm_db` using the following method:
+If you're in an air gapped environment, or on a restricted network where it's not possible to run `pip install ibm_db==<version>`, you can install `ibm_db` using the following method:
 
 **Note**: The following example assumes an Ubuntu machine, but the steps should also be similar on most operating systems.
 
-1. On a machine with network access, download [the source tarball][14].
+1. On a machine with network access, download the source tarballs for [the `ibm_db` library][14] and [the ODBC and CLI][16]. The ODBC and CLI are required to be downloaded separately because the `ibm_db` library requires them, but it cannot download them via `pip`.
 
    ```
    curl -Lo ibm_db.tar.gz https://github.com/ibmdb/python-ibmdb/archive/refs/tags/v3.1.0.tar.gz
+
+   curl -Lo linuxx64_odbc_cli.tar.gz https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/linuxx64_odbc_cli.tar.gz
    ```
 
-1. Transport the file over to the restricted host, and then extract the archive:
+1. Transport the two files over to the restricted host, and then extract the archive.
 
    ```
    tar xvf ibm_db.tar.gz
+
+   tar xvf linuxx64_odbc_cli.tar.gz
    ```
 
-1. Using the embedded [`pip`][15] on the Agent, run the following command:
+1. Set the `IBM_DB_HOME` environment variable to the location of where `/clidriver` was extracted from `linuxx64_odbc_cli.tar.gz`. This will prevent the `ibm_db` library from installing a new version of the ODBC and CLI and failing.
+
+   ```
+   export IBM_DB_HOME=/path/to/clidriver
+   ```
+
+1. Using the embedded [`pip`][15] on the Agent, run the following command to install the library locally.
 
    ```
    /opt/datadog-agent/embedded/bin/pip install --no-index --no-deps --no-build-isolation  python-ibmdb- 
@@ -241,3 +251,4 @@ Additional helpful documentation, links, and articles:
 [13]: https://www.datadoghq.com/blog/monitor-db2-with-datadog
 [14]: https://pypi.org/project/ibm-db/#files
 [15]: https://docs.datadoghq.com/developers/guide/custom-python-package/?tab=linux
+[16]: https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/
