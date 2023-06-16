@@ -174,7 +174,7 @@ If you're in an air gapped environment, or on a restricted network where it's no
 
 **Note**: The following example assumes an Ubuntu machine, but the steps should also be similar on most operating systems.
 
-1. On a machine with network access, download the source tarballs for [the `ibm_db` library][14] and [the ODBC and CLI][16]. The ODBC and CLI are required to be downloaded separately because the `ibm_db` library requires them, but it cannot download them via `pip`.
+1. On a machine with network access, download the source tarballs for [the `ibm_db` library][14] and [the ODBC and CLI][16]. The ODBC and CLI are required to be downloaded separately because the `ibm_db` library requires them, but it cannot download them via `pip`. The following script installs the archive file for ibm_db==3.1.0:
 
    ```
    curl -Lo ibm_db.tar.gz https://github.com/ibmdb/python-ibmdb/archive/refs/tags/v3.1.0.tar.gz
