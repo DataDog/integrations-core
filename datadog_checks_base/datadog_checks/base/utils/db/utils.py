@@ -256,17 +256,9 @@ class DBMAsyncJob(object):
 
     def cancel(self):
         """
-        Returns only when the async job loop is fully cancelled.
-        future.result() waits until the timeout (10 seconds) to see that the job loop has exited,
-        so we use it here to verify the async job is cancelled before exiting.
-
-        Raises:
-            TimeoutError if the job loop is not cancelled within 10 seconds
+        Send a signal to cancel the job loop asynchronously.
         """
         self._cancel_event.set()
-
-        if self._job_loop_future is not None:
-            self._job_loop_future.result(10)
 
     def run_job_loop(self, tags):
         """

@@ -26,6 +26,7 @@ from .util import (
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
     CONNECTION_METRICS,
     FUNCTION_METRICS,
+    QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_STAT_DATABASE,
     QUERY_PG_STAT_DATABASE_CONFLICTS,
@@ -35,12 +36,13 @@ from .util import (
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
     SNAPSHOT_TXID_METRICS_LT_13,
+    STAT_WAL_METRICS,
     WAL_FILE_METRICS,
     DatabaseConfigurationError,  # noqa: F401
     fmt,
     get_schema_field,
 )
-from .version_utils import V9, V9_2, V10, V13, VersionUtils
+from .version_utils import V9, V9_2, V10, V13, V14, VersionUtils
 
 try:
     import datadog_agent
@@ -165,7 +167,9 @@ class PostgreSql(AgentCheck):
                 q_pg_stat_database["query"] += " AND datname in('{}')".format(self._config.dbname)
                 q_pg_stat_database_conflicts["query"] += " AND datname in('{}')".format(self._config.dbname)
 
-            queries.extend([q_pg_stat_database, q_pg_stat_database_conflicts, QUERY_PG_UPTIME])
+            queries.extend(
+                [q_pg_stat_database, q_pg_stat_database_conflicts, QUERY_PG_UPTIME, QUERY_PG_CONTROL_CHECKPOINT]
+            )
 
         if self.version >= V10:
             # Wal receiver is not supported on aurora
@@ -180,6 +184,8 @@ class PostgreSql(AgentCheck):
             queries.append(SNAPSHOT_TXID_METRICS)
         if self.version < V13:
             queries.append(SNAPSHOT_TXID_METRICS_LT_13)
+        if self.version >= V14:
+            queries.append(STAT_WAL_METRICS)
 
         if not queries:
             self.log.debug("no dynamic queries defined")
