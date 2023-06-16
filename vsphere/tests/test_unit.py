@@ -2284,7 +2284,36 @@ def test_report_realtime_host_count(aggregator, dd_run_check, instance, expected
         )
 
 
-def test_report_realtime_host_metrics(aggregator, dd_run_check, realtime_instance):
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_count",
+        "expected_value",
+        "expected_hostname",
+        "expected_tags",
+    ),
+    [
+        pytest.param(
+            legacy_historical_instance,
+            1,
+            61,
+            'host1',
+            ['vcenter_server:vsphere_host'],
+            id='Legacy version',
+        ),
+        pytest.param(
+            historical_instance,
+            1,
+            61,
+            'host1',
+            ['vcenter_server:vsphere_host'],
+            id='New version',
+        ),
+    ],
+)
+def test_report_realtime_host_metrics(
+    aggregator, dd_run_check, instance, expected_count, expected_value, expected_hostname, expected_tags
+):
     with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
         'pyVmomi.vmodl.query.PropertyCollector'
     ) as mock_property_collector:
@@ -2329,10 +2358,10 @@ def test_report_realtime_host_metrics(aggregator, dd_run_check, realtime_instanc
         dd_run_check(check)
         aggregator.assert_metric(
             'vsphere.cpu.costop.sum',
-            value=61,
-            count=1,
-            hostname='host1',
-            tags=['vcenter_server:FAKE'],
+            count=expected_count,
+            value=expected_value,
+            hostname=expected_hostname,
+            tags=expected_tags,
         )
 
 
