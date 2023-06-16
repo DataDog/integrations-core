@@ -57,3 +57,23 @@ REFERENCE_METRIC = "cpu.usage.avg"
 
 DEFAULT_VSPHERE_TAG_PREFIX = ""
 DEFAULT_VSPHERE_ATTR_PREFIX = ""
+
+
+VM_PROPERTIES = [
+    "summary.config.numCpu",
+    "summary.config.memorySizeMB",
+    "summary.config.numEthernetCards",
+    "summary.config.numVirtualDisks",
+    "summary.quickStats.uptimeSeconds",
+    "guest.guestFullName",
+    "guest.disk",
+    "guest.net",
+    "guest.ipStack",
+    "guest.toolsRunningStatus",
+    "guest.toolsVersion",
+    "config.hardware.numCoresPerSocket",
+    "config.cpuAllocation.limit",
+    "config.cpuAllocation.overheadLimit",
+    "config.memoryAllocation.limit",
+    "config.memoryAllocation.overheadLimit",
+]

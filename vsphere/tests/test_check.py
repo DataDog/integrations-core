@@ -589,6 +589,7 @@ def test_no_infra_cache_no_perf_values(aggregator, realtime_instance, dd_run_che
     with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
         'pyVmomi.vmodl.query.PropertyCollector'
     ) as mock_property_collector:
+
         event = vim.event.VmReconfiguredEvent()
         event.userName = "datadog"
         event.createdTime = get_current_datetime()
@@ -624,3 +625,270 @@ def test_no_infra_cache_no_perf_values(aggregator, realtime_instance, dd_run_che
         )
 
         aggregator.assert_all_metrics_covered()
+
+
+def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
+
+        realtime_instance['collect_property_metrics'] = True
+
+        disk = vim.vm.GuestInfo.DiskInfo()
+        disk.diskPath = '\\'
+        disk.capacity = 2064642048
+        disk.freeSpace = 1270075392
+        disk.filesystemType = 'ext4'
+        disks = []  # type: List[vim.vm.GuestInfo.DiskInfo]
+
+        disks.append(disk)
+
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = []
+        mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
+            vim.PerformanceManager.CounterInfo(
+                key=100,
+                groupInfo=vim.ElementDescription(key='cpu'),
+                nameInfo=vim.ElementDescription(key='costop'),
+                rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+            )
+        ]
+        mock_si.content.perfManager.QueryPerf.return_value = [
+            vim.PerformanceManager.EntityMetric(
+                entity=vim.VirtualMachine(moId="vm1"),
+                value=[
+                    vim.PerformanceManager.IntSeries(
+                        value=[47, 52],
+                        id=vim.PerformanceManager.MetricId(counterId=100),
+                    )
+                ],
+            ),
+            vim.PerformanceManager.EntityMetric(
+                entity=vim.VirtualMachine(moId="vm2"),
+                value=[
+                    vim.PerformanceManager.IntSeries(
+                        value=[30, 11],
+                        id=vim.PerformanceManager.MetricId(counterId=100),
+                    )
+                ],
+            ),
+        ]
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult(
+            objects=[
+                vim.ObjectContent(
+                    obj=vim.VirtualMachine(moId="vm1"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='vm1',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='runtime.powerState',
+                            val=vim.VirtualMachinePowerState.poweredOn,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='summary.config.numCpu',
+                            val=2,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='summary.config.memorySizeMB',
+                            val=2048,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='summary.config.numVirtualDisks',
+                            val=1,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='summary.config.numEthernetCards',
+                            val=1,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='summary.quickStats.uptimeSeconds',
+                            val=12184573,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='summary.quickStats.uptimeSeconds',
+                            val=12184573,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='guest.guestFullName',
+                            val='Debian GNU/Linux 11 (32-bit)',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='guest.disk',
+                            val=[],
+                        ),
+                        vmodl.DynamicProperty(
+                            name='guest.net',
+                            val=[],
+                        ),
+                        vmodl.DynamicProperty(
+                            name='guest.ipStack',
+                            val=[],
+                        ),
+                        vmodl.DynamicProperty(
+                            name='guest.toolsRunningStatus',
+                            val='guestToolsRunning',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='guest.toolsVersion',
+                            val='11296',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='config.hardware.numCoresPerSocket',
+                            val='2',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='config.cpuAllocation.limit',
+                            val='-1',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='config.cpuAllocation.overheadLimit',
+                            val=None,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='config.memoryAllocation.limit',
+                            val='-1',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='config.memoryAllocation.overheadLimit',
+                            val=None,
+                        ),
+                    ],
+                )
+            ],
+            token='123',
+        )
+        mock_si.content.propertyCollector.ContinueRetrievePropertiesEx.return_value = (
+            vim.PropertyCollector.RetrieveResult(
+                objects=[
+                    vim.ObjectContent(
+                        obj=vim.VirtualMachine(moId="vm2"),
+                        propSet=[
+                            vmodl.DynamicProperty(
+                                name='name',
+                                val='vm2',
+                            ),
+                            vmodl.DynamicProperty(
+                                name='runtime.powerState',
+                                val=vim.VirtualMachinePowerState.poweredOn,
+                            ),
+                            vmodl.DynamicProperty(
+                                name='summary.config.numCpu',
+                                val=2,
+                            ),
+                            vmodl.DynamicProperty(
+                                name='summary.config.memorySizeMB',
+                                val=2048,
+                            ),
+                            vmodl.DynamicProperty(
+                                name='summary.config.numVirtualDisks',
+                                val=1,
+                            ),
+                            vmodl.DynamicProperty(
+                                name='summary.config.numEthernetCards',
+                                val=1,
+                            ),
+                            vmodl.DynamicProperty(
+                                name='summary.quickStats.uptimeSeconds',
+                                val=12184573,
+                            ),
+                            vmodl.DynamicProperty(
+                                name='summary.quickStats.uptimeSeconds',
+                                val=12184573,
+                            ),
+                            vmodl.DynamicProperty(
+                                name='guest.guestFullName',
+                                val='Debian GNU/Linux 12 (32-bit)',
+                            ),
+                            vmodl.DynamicProperty(name='guest.disk', val=[]),
+                            vmodl.DynamicProperty(
+                                name='guest.net',
+                                val=[],
+                            ),
+                            vmodl.DynamicProperty(
+                                name='guest.ipStack',
+                                val=[],
+                            ),
+                            vmodl.DynamicProperty(
+                                name='guest.toolsRunningStatus',
+                                val='guestToolsRunning',
+                            ),
+                            vmodl.DynamicProperty(
+                                name='guest.toolsVersion',
+                                val='11296',
+                            ),
+                            vmodl.DynamicProperty(
+                                name='config.hardware.numCoresPerSocket',
+                                val='2',
+                            ),
+                            vmodl.DynamicProperty(
+                                name='config.cpuAllocation.limit',
+                                val='-1',
+                            ),
+                            vmodl.DynamicProperty(
+                                name='config.cpuAllocation.overheadLimit',
+                                val=None,
+                            ),
+                            vmodl.DynamicProperty(
+                                name='config.memoryAllocation.limit',
+                                val='-1',
+                            ),
+                            vmodl.DynamicProperty(
+                                name='config.memoryAllocation.overheadLimit',
+                                val=None,
+                            ),
+                        ],
+                    )
+                ],
+            )
+        )
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [realtime_instance])
+        dd_run_check(check)
+        aggregator.assert_metric(
+            'vsphere.vm.count',
+            value=1,
+            count=1,
+            tags=[
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
+            ],
+        )
+        aggregator.assert_metric(
+            'vsphere.vm.uptime',
+            count=1,
+            value=12184573.0,
+            tags=[
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
+            ],
+        )
+        aggregator.assert_metric(
+            'vsphere.vm.numCpu',
+            count=1,
+            value=2.0,
+            tags=[
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
+            ],
+        )
+        aggregator.assert_metric(
+            'vsphere.vm.numEthernetCards',
+            count=1,
+            value=1.0,
+            tags=[
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
+            ],
+        )

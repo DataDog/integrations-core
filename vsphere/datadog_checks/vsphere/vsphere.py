@@ -233,6 +233,7 @@ class VSphereCheck(AgentCheck):
             mor_type_str = MOR_TYPE_AS_STRING[type(mor)]
             hostname = None
             tags = []
+            mor_payload = {}  # type: Dict[str, Any]
 
             if isinstance(mor, vim.VirtualMachine):
                 power_state = properties.get("runtime.powerState")
@@ -255,8 +256,12 @@ class VSphereCheck(AgentCheck):
                 tags.append('vsphere_host:{}'.format(runtime_hostname))
 
                 if self._config.collect_property_metrics:
-                    full_name = properties.get("guest.guestFullName")
-                    tags.append("vsphere_full_name{}".format(full_name))
+                    all_properties = properties.get('properties', {})
+                    full_name = all_properties.get("guest.guestFullName")
+                    if full_name is not None:
+                        tags.append("vsphere_full_name:{}".format(full_name))
+
+                    mor_payload['properties'] = all_properties
 
                 if self._config.use_guest_hostname:
                     hostname = properties.get("guest.hostName", mor_name)
@@ -295,7 +300,7 @@ class VSphereCheck(AgentCheck):
                 )
                 continue
 
-            mor_payload = {"tags": tags}  # type: Dict[str, Any]
+            mor_payload["tags"] = tags
 
             if hostname:
                 mor_payload['hostname'] = hostname
@@ -612,11 +617,15 @@ class VSphereCheck(AgentCheck):
             # OR something bad happened (which might happen again indefinitely).
             self.latest_event_query = collect_start_time
 
-    def submit_property_metrics(self, resource_type, mor, mor_props, resource_tags):
-        self.log.debug("resource type is %s", resource_type)
+    def submit_property_metrics(self, resource_type, mor_props, resource_tags):
         if resource_type == vim.VirtualMachine:
-            self.log.debug("submitting metrics is %s", mor)
-            nics = mor.guest.net
+            mor_name = to_string(mor_props.get("name", "unknown"))
+            self.log.trace("All properties for VM %s: %s", mor_name, mor_props)
+            all_properties = mor_props.get('properties', None)
+            if all_properties is None:
+                self.log.warning("Did not retrieve properties for VM %s", mor_name)
+                return
+            nics = all_properties.get('guest.net', [])
             for nic in nics:
                 mac_address = nic.macAddress
                 ip_addresses = nic.ipConfig.ipAddress
@@ -626,7 +635,7 @@ class VSphereCheck(AgentCheck):
                         'vm.guest.nic.address', 1, tags=self._config.base_tags + resource_tags + nic_tags, hostname=None
                     )
 
-            ip_stacks = mor.guest.ipStack
+            ip_stacks = all_properties.get('guest.ipStack', [])
             for ip_stack in ip_stacks:
                 host_name = ip_stack.dnsConfig.hostName
                 ip_routes = ip_stack.ipRouteConfig.ipRoute
@@ -646,7 +655,8 @@ class VSphereCheck(AgentCheck):
                         hostname=None,
                     )
 
-            disks = mor.guest.disk
+            disks = all_properties.get('guest.disk', [])
+            self.log.debug("type array %s", type(disks))
             for disk in disks:
                 disk_path = disk.diskPath
                 file_system_type = disk.filesystemType
@@ -669,34 +679,34 @@ class VSphereCheck(AgentCheck):
                     hostname=None,
                 )
 
-            cores_per_socket = mor.config.hardware.numCoresPerSocket
-            self.gauge(
-                'vm.hardware.numCoresPerSocket',
-                cores_per_socket,
-                tags=self._config.base_tags + resource_tags,
-                hostname=None,
-            )
+            cores_per_socket = all_properties.get('config.hardware.numCoresPerSocket', None)
+            if cores_per_socket is not None:
+                self.gauge(
+                    'vm.hardware.numCoresPerSocket',
+                    cores_per_socket,
+                    tags=self._config.base_tags + resource_tags,
+                    hostname=None,
+                )
 
-            config = mor.summary.config
-            num_cpu = config.numCpu
+            num_cpu = all_properties.get('summary.config.numCpu', None)
             self.gauge('vm.numCpu', num_cpu, tags=self._config.base_tags + resource_tags, hostname=None)
 
-            memory_size = config.memorySizeMB
+            memory_size = all_properties.get('summary.config.memorySizeMB', None)
             self.gauge('vm.memorySizeMB', memory_size, tags=self._config.base_tags + resource_tags, hostname=None)
 
-            ethernet_cards = config.numEthernetCards
+            ethernet_cards = all_properties.get('summary.config.numEthernetCards', None)
             self.gauge(
                 'vm.numEthernetCards', ethernet_cards, tags=self._config.base_tags + resource_tags, hostname=None
             )
 
-            virtual_disks = config.numVirtualDisks
+            virtual_disks = all_properties.get('summary.config.numVirtualDisks', None)
             self.gauge('vm.numVirtualDisks', virtual_disks, tags=self._config.base_tags + resource_tags, hostname=None)
 
-            uptime = mor.summary.quickStats.uptimeSeconds
+            uptime = all_properties.get('summary.quickStats.uptimeSeconds', None)
             self.gauge('vm.uptime', uptime, tags=self._config.base_tags + resource_tags, hostname=None)
 
-            tools_version = mor.guest.toolsVersion
-            tools_status = mor.guest.toolsRunningStatus
+            tools_version = all_properties.get('guest.toolsVersion', None)
+            tools_status = all_properties.get('guest.toolsRunningStatus', None)
             tools_tags = [f'tools_status:{tools_status}']
             self.gauge(
                 'vm.guest.toolsVersion',
@@ -777,7 +787,7 @@ class VSphereCheck(AgentCheck):
                 # Explicitly do not attach any host to those metrics.
                 resource_tags = mor_props.get('tags', [])
                 if self._config.collect_property_metrics:
-                    self.submit_property_metrics(resource_type, mor, mor_props, resource_tags)
+                    self.submit_property_metrics(resource_type, mor_props, resource_tags)
                 self.count(
                     '{}.count'.format(MOR_TYPE_AS_STRING[resource_type]),
                     1,
