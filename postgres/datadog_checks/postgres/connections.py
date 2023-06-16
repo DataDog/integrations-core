@@ -63,7 +63,7 @@ class MultiDatabaseConnectionPool(object):
         self._mu = threading.RLock()
         self._conns: Dict[str, ConnectionInfo] = {}
 
-        if hasattr(inspect, "signature"):
+        if hasattr(inspect, 'signature'):
             connect_sig = inspect.signature(connect_fn)
             if len(connect_sig.parameters) != 1:
                 raise ValueError(
