@@ -30,7 +30,6 @@ dependencies = [
     "hatch>=1.6.3",
     "httpx",
     "jsonpointer",
-    "pyperclip",
     "rich>=12.5.1",
     "tomli; python_version < '3.11'",
     "tomli-w",
