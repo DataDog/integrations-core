@@ -25,7 +25,7 @@ def make_msi(target):
     )
     msi.msi_filename = DISPLAY_NAME + "-" + VERSION + "-" + arch + ".msi"
     msi.help_url = "https://github.com/DataDog/integrations-core/tree/master/ddev"
-    msi.license_path = CWD + "/../LICENSE.txt"
+    msi.license_path = CWD + "/../LICENSE"
 
     # https://gregoryszorc.com/docs/pyoxidizer/main/tugger_starlark_type_file_manifest.html
     m = FileManifest()

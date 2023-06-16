@@ -7,6 +7,8 @@ on:
     branches:
     - master
   pull_request:
+    paths:
+    - ddev/**
     branches:
     - master
 
@@ -211,6 +213,8 @@ jobs:
     if: >-
       github.event_name == 'push'
       &&
+      github.event.pull_request.head.repo.full_name == github.repository
+      &&
       (github.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags'))
     needs: binaries
     runs-on: windows-2022
@@ -283,6 +287,8 @@ jobs:
     name: Build macOS installer and sign/notarize artifacts
     if: >-
       github.event_name == 'push'
+      &&
+      github.event.pull_request.head.repo.full_name == github.repository
       &&
       (github.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags'))
     needs: binaries
