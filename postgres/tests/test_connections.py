@@ -308,7 +308,6 @@ def test_conn_pool_multithreaded(pg_instance):
         pool.get_connection(dbname, 10000)
         time.sleep(5)
         pool.done(dbname)
-        print("Connection {} done ".format(dbname))
 
     limit = 30
     check = PostgreSql("postgres", {}, [pg_instance])
