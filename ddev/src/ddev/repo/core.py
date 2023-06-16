@@ -44,6 +44,10 @@ class Repository:
 
         return RepositoryConfig(self.path / CONFIG_DIRECTORY / 'config.toml')
 
+    @cached_property
+    def agent_requirements(self) -> Path:
+        return self.path / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
+
 
 class IntegrationRegistry:
     def __init__(self, repo: Repository):

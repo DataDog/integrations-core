@@ -84,8 +84,6 @@ def valid_integration(valid_integrations) -> str:
 @pytest.fixture(autouse=True)
 def config_file(tmp_path, monkeypatch) -> ConfigFile:
     for env_var in (
-        'DD_GITHUB_USER',
-        'DD_GITHUB_TOKEN',
         'DD_SITE',
         'DD_LOGS_CONFIG_DD_URL',
         'DD_DD_URL',
@@ -152,7 +150,9 @@ def network_replay(local_repo):
     stack = ExitStack()
 
     def add_cassette(relative_path, *args, **kwargs):
-        cassette = vcr.use_cassette(str(local_repo / relative_path), *args, **kwargs)
+        cassette = vcr.use_cassette(
+            str(local_repo / "ddev" / "tests" / "fixtures" / "network" / relative_path), *args, **kwargs
+        )
         stack.enter_context(cassette)
         return cassette
 

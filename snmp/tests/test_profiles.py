@@ -416,8 +416,8 @@ def test_f5(aggregator):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_router(aggregator):
-    profile = "generic-router"
+def test_device(aggregator):
+    profile = "generic-device"
     run_profile_check(profile)
     common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile]
 
@@ -474,7 +474,7 @@ def test_f5_router(aggregator):
     instance['community_string'] = 'f5-big-ip'
     instance['enforce_mib_constraints'] = False
 
-    init_config = {'profiles': {'router': {'definition_file': 'generic-router.yaml'}}}
+    init_config = {'profiles': {'router': {'definition_file': 'generic-device.yaml'}}}
     check = SnmpCheck('snmp', init_config, [instance])
     check.check(instance)
 

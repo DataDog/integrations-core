@@ -22,12 +22,11 @@ def test_upgrade_python(ddev, repository):
 
     minimum_changes = sum(map(len, changes.values()))
 
-    # TODO: uncomment after merging
-    # constant_file = repository.path / 'ddev' / 'src' / 'ddev' / 'repo' / 'constants.py'
-    # contents = constant_file.read_text()
-    #
-    # assert f'PYTHON_VERSION = {PYTHON_VERSION!r}' in contents
-    # assert f'PYTHON_VERSION = {new_version!r}' not in contents
+    constant_file = repository.path / 'ddev' / 'src' / 'ddev' / 'repo' / 'constants.py'
+    contents = constant_file.read_text()
+
+    assert f'PYTHON_VERSION = {PYTHON_VERSION!r}' in contents
+    assert f'PYTHON_VERSION = {new_version!r}' not in contents
 
     result = ddev('meta', 'scripts', 'upgrade-python', new_version)
 
@@ -37,7 +36,6 @@ def test_upgrade_python(ddev, repository):
     passed = int(result.output.partition('Passed:')[2].strip())
     assert passed >= minimum_changes
 
-    # TODO: uncomment after merging
-    # contents = constant_file.read_text()
-    # assert f'PYTHON_VERSION = {PYTHON_VERSION!r}' not in contents
-    # assert f'PYTHON_VERSION = {new_version!r}' in contents
+    contents = constant_file.read_text()
+    assert f'PYTHON_VERSION = {PYTHON_VERSION!r}' not in contents
+    assert f'PYTHON_VERSION = {new_version!r}' in contents
