@@ -4,11 +4,26 @@
 import datetime
 import inspect
 import threading
+from typing import Callable, Dict
 from collections import namedtuple
 
 import psycopg2
 
-ConnectionWithTTL = namedtuple("ConnectionWithTTL", "connection deadline")
+
+class ConnectionInfo:
+    def __init__(
+        self,
+        connection: psycopg2.extensions.connection,
+        deadline: int,
+        active: bool,
+        last_accessed: int,
+        thread: threading.Thread,
+    ):
+        self.connection = connection
+        self.deadline = deadline
+        self.active = active
+        self.last_accessed = last_accessed
+        self.thread = thread
 
 
 class MultiDatabaseConnectionPool(object):
@@ -22,6 +37,11 @@ class MultiDatabaseConnectionPool(object):
     databases still present a connection overhead risk. This class provides a mechanism
     to prune connections to a database which were not used in the time specified by their
     TTL.
+
+    If max_conns is specified, the connection pool will limit concurrent connections.
+    Connection eviction should be handled by the calling code.
+    If the connection pool is full, try to evict a connection with `evict_lru` until `get_connection`
+    successfully returns a connection.
     """
 
     class Stats(object):
@@ -37,26 +57,37 @@ class MultiDatabaseConnectionPool(object):
         def reset(self):
             self.__init__()
 
-    def __init__(self, connect_fn):
+    def __init__(self, connect_fn: Callable[[str], None], max_conns: int = None):
+        self.max_conns: int = max_conns
         self._stats = self.Stats()
-        self._mu = threading.Lock()
-        self._conns = {}
+        self._mu = threading.RLock()
+        self._conns: Dict[str, ConnectionInfo] = {}
 
-        if hasattr(inspect, 'signature'):
+        if hasattr(inspect, "signature"):
             connect_sig = inspect.signature(connect_fn)
             if len(connect_sig.parameters) != 1:
                 raise ValueError(
                     "Invalid signature for the connection function. "
-                    "A single parameter for dbname is expected, got signature: {}".format(connect_sig)
+                    "A single parameter for dbname is expected, got signature: {}".format(
+                        connect_sig
+                    )
                 )
         self.connect_fn = connect_fn
 
-    def get_connection(self, dbname, ttl_ms):
+    def get_connection(self, dbname: str, ttl_ms: int):
+        """
+        Grab a connection from the pool if the database is already connected.
+        If max_conns is specified, and the database isn't already connected,
+        make a new connection IFF the max_conn limit hasn't been reached.
+        If we can't fit the connection into the pool, return None.
+        """
         self.prune_connections()
         with self._mu:
-            conn = self._conns.pop(dbname, ConnectionWithTTL(None, None))
+            conn = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None))
             db = conn.connection
             if db is None or db.closed:
+                if self.max_conns is not None and len(self._conns) == self.max_conns:
+                    return None
                 self._stats.connection_opened += 1
                 db = self.connect_fn(dbname)
 
@@ -65,7 +96,13 @@ class MultiDatabaseConnectionPool(object):
                 db.rollback()
 
             deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
-            self._conns[dbname] = ConnectionWithTTL(db, deadline)
+            self._conns[dbname] = ConnectionInfo(
+                connection=db,
+                deadline=deadline,
+                active=True,
+                last_accessed=datetime.datetime.now(),
+                thread=threading.current_thread(),
+            )
             return db
 
     def prune_connections(self):
@@ -92,8 +129,51 @@ class MultiDatabaseConnectionPool(object):
                     success = False
         return success
 
-    def _terminate_connection_unsafe(self, dbname):
-        db, _ = self._conns.pop(dbname, ConnectionWithTTL(None, None))
+    def done(self, dbname: str) -> None:
+        """
+        Mark a connection as done being used, so it can be evicted from the pool.
+        done() can only be called on a connection in the same thread that the connection
+        was made.
+        """
+        with self._mu:
+            if self._conns[dbname].thread != threading.current_thread():
+                raise RuntimeError(
+                    "Cannot call done() for this dbname on this thread. Done() can only be called \
+                                   from the same thread the connection was made."
+                )
+
+            self._conns[dbname].active = False
+
+    def evict_lru(self) -> str:
+        """
+        Evict and close the inactive connection which was least recently used.
+        Return the dbname connection that was evicted.
+        """
+        with self._mu:
+            conns_list = dict(self._conns)
+            while True:
+                if not conns_list:
+                    break
+
+                eviction_candidate = self._get_lru(conns_list)
+                if self._conns[eviction_candidate].active:
+                    del conns_list[eviction_candidate]
+                    continue
+
+                # eviction candidate successfully found
+                self._terminate_connection_unsafe(eviction_candidate)
+                return eviction_candidate
+
+            # Could not evict a candidate; return None, calling code should keep trying.
+            return None
+
+    def _get_lru(self, connections: Dict[str, ConnectionInfo]) -> str:
+        return min(connections, key=lambda t: self._conns[t].last_accessed)
+
+    def _terminate_connection_unsafe(self, dbname: str):
+        db = self._conns.pop(
+            dbname, ConnectionInfo(None, None, None, None, None)
+        ).connection
         if db is not None:
             try:
                 self._stats.connection_closed += 1
