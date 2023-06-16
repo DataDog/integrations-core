@@ -5,7 +5,6 @@ import datetime
 import inspect
 import threading
 from typing import Callable, Dict
-from collections import namedtuple
 
 import psycopg2
 
@@ -68,9 +67,7 @@ class MultiDatabaseConnectionPool(object):
             if len(connect_sig.parameters) != 1:
                 raise ValueError(
                     "Invalid signature for the connection function. "
-                    "A single parameter for dbname is expected, got signature: {}".format(
-                        connect_sig
-                    )
+                    "A single parameter for dbname is expected, got signature: {}".format(connect_sig)
                 )
         self.connect_fn = connect_fn
 
@@ -171,9 +168,7 @@ class MultiDatabaseConnectionPool(object):
         return min(connections, key=lambda t: self._conns[t].last_accessed)
 
     def _terminate_connection_unsafe(self, dbname: str):
-        db = self._conns.pop(
-            dbname, ConnectionInfo(None, None, None, None, None)
-        ).connection
+        db = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None)).connection
         if db is not None:
             try:
                 self._stats.connection_closed += 1
