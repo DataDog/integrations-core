@@ -2,14 +2,34 @@
 
 ## 1.1.0 / 2022-02-19 / Agent 7.35.0
 
-* [Added] Add `pyproject.toml` file. See [#11411](https://github.com/DataDog/integrations-core/pull/11411).
-* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+***Added***: 
+
+* Add `pyproject.toml` file. See [#11411](https://github.com/DataDog/integrations-core/pull/11411).
+
+***Fixed***: 
+
+* Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+
+***FEATURE***: 
+
+* adds oracle integration. See [#680](https://github.com/DataDog/integrations-core/issues/680).
+
+***BUGFIX***: 
+
+* adds oracle integration. See [#690](https://github.com/DataDog/integrations-core/issues/690). (Thanks [@dwjvaughan](https://github.com/dwjvaughan))
+
 
 ## 1.0.1 / 2021-10-04 / Agent 7.32.0
 
-* [Fixed] Fix packaging. See [#10146](https://github.com/DataDog/integrations-core/pull/10146).
+***Fixed***: 
+
+* Fix packaging. See [#10146](https://github.com/DataDog/integrations-core/pull/10146).
+
 
 ## 1.0.0 / 2021-09-16
 
-* [Added] Added palo alto networks firewall integration. See [#8637](https://github.com/DataDog/integrations-core/pull/8637).
+***Added***: 
+
+* Added palo alto networks firewall integration. See [#8637](https://github.com/DataDog/integrations-core/pull/8637).
+
 
