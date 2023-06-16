@@ -1,9 +1,5 @@
 # CHANGELOG - ECS Fargate
 
-## 3.4.0 / 2023-06-15 / Agent 7.46.0
-
-* [Added] Add ephemeral storage metrics and change ECS metadata endpoint version from v2 to v4. See []().
-
 ## 3.3.0 / 2023-01-20 / Agent 7.43.0
 
 ***Added***: 
