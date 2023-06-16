@@ -892,3 +892,49 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
         )
+
+        aggregator.assert_metric(
+            'vsphere.vm.numVirtualDisks',
+            count=1,
+            value=1.0,
+            tags=[
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
+            ],
+        )
+        aggregator.assert_metric(
+            'vsphere.vm.memorySizeMB',
+            count=1,
+            value=2048,
+            tags=[
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
+            ],
+        )
+        aggregator.assert_metric(
+            'vsphere.vm.hardware.numCoresPerSocket',
+            count=1,
+            value=2.0,
+            tags=[
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
+            ],
+        )
+        aggregator.assert_metric(
+            'vsphere.vm.guest.toolsVersion',
+            count=1,
+            value=11296.0,
+            tags=[
+                'tools_status:guestToolsRunning',
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
+            ],
+        )
