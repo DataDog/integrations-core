@@ -2958,19 +2958,49 @@ def test_report_historical_cluster_count(
         )
 
 
-def test_report_historical_cluster_metrics(aggregator, dd_run_check, historical_instance):
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_count",
+        "expected_value",
+        "expected_tags",
+    ),
+    [
+        pytest.param(
+            legacy_historical_instance,
+            1,
+            5,
+            ['instance:c1', 'vcenter_server:vsphere_mock', 'vsphere_cluster:c1', 'vsphere_type:cluster'],
+            id='Legacy version',
+        ),
+        pytest.param(
+            historical_instance,
+            1,
+            5,
+            ['vcenter_server:vsphere_host', 'vsphere_cluster:c1', 'vsphere_type:cluster'],
+            id='New version',
+        ),
+    ],
+)
+def test_report_historical_cluster_metrics(
+    aggregator, dd_run_check, instance, expected_count, expected_value, expected_tags
+):
     with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
         'pyVmomi.vmodl.query.PropertyCollector'
     ) as mock_property_collector:
         mock_si = mock.MagicMock()
         mock_si.CurrentTime.return_value = dt.datetime.now()
         mock_si.content.eventManager.QueryEvents.return_value = []
+        mock_si.content.perfManager.QueryAvailablePerfMetric.return_value = [
+            vim.PerformanceManager.MetricId(counterId=100),
+        ]
         mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
             vim.PerformanceManager.CounterInfo(
                 key=100,
                 groupInfo=vim.ElementDescription(key='cpu'),
                 nameInfo=vim.ElementDescription(key='totalmhz'),
                 rollupType=vim.PerformanceManager.CounterInfo.RollupType.average,
+                unitInfo=vim.ElementDescription(key='megahertz'),
             ),
         ]
         mock_si.content.perfManager.QueryPerf.return_value = [
@@ -2979,7 +3009,10 @@ def test_report_historical_cluster_metrics(aggregator, dd_run_check, historical_
                 value=[
                     vim.PerformanceManager.IntSeries(
                         value=[2, 5],
-                        id=vim.PerformanceManager.MetricId(counterId=100),
+                        id=vim.PerformanceManager.MetricId(
+                            counterId=100,
+                            instance='c1',
+                        ),
                     )
                 ],
             ),
@@ -3000,11 +3033,11 @@ def test_report_historical_cluster_metrics(aggregator, dd_run_check, historical_
             ],
         )
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [historical_instance])
+        check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
         aggregator.assert_metric(
             'vsphere.cpu.totalmhz.avg',
-            count=1,
-            value=5,
-            tags=['vcenter_server:FAKE', 'vsphere_cluster:c1', 'vsphere_type:cluster'],
+            count=expected_count,
+            value=expected_value,
+            tags=expected_tags,
         )
