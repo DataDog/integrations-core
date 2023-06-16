@@ -1,7 +1,5 @@
 [build-system]
-requires = [
-    "hatchling>=1.5.0",
-]
+requires = ["hatchling>=1.17.1", "hatch-vcs>=0.3.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -48,7 +46,17 @@ ddev-starship = "ddev.plugin.external.starship.prompt:main"
 Source = "https://github.com/DataDog/integrations-core"
 
 [tool.hatch.version]
-path = "src/ddev/__about__.py"
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+root = ".."
+version_scheme = "python-simplified-semver"
+local_scheme = "no-local-version"
+parentdir_prefix_version = "ddev-"
+git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "ddev-v*"]
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/ddev/_version.py"
 
 [tool.black]
 include = '\.pyi?$'
