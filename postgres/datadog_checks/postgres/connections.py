@@ -38,9 +38,10 @@ class MultiDatabaseConnectionPool(object):
     TTL.
 
     If max_conns is specified, the connection pool will limit concurrent connections.
-    Connection eviction should be handled by the calling code.
-    If the connection pool is full, try to evict a connection with `evict_lru` until `get_connection`
-    successfully returns a connection.
+    Connection eviction should be handled by the calling code. Call done() on a connection
+    when it is no longer necessary, so it will be marked evictable.
+    If the connection pool is full, try to evict a connection with evict_lru() until a 
+    connection is evicted, then try get_connection() again.
     """
 
     class Stats(object):
@@ -129,6 +130,8 @@ class MultiDatabaseConnectionPool(object):
     def done(self, dbname: str) -> None:
         """
         Mark a connection as done being used, so it can be evicted from the pool.
+        This function does not evict connections from the pool; it just marks them
+        as inactive.
         done() can only be called on a connection in the same thread that the connection
         was made.
         """
