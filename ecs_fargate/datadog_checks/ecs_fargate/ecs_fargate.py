@@ -9,7 +9,6 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import round_value
-
 import os
 
 try:
@@ -23,7 +22,6 @@ except ImportError:
     def get_tags(name, card):
         return []
 
-
 try:
     from containers import is_excluded as c_is_excluded
 except ImportError:
@@ -36,14 +34,19 @@ except ImportError:
     def c_is_excluded(name, image, namespace=""):
         return False
 
-
 # Fargate related constants
 EVENT_TYPE = SOURCE_TYPE_NAME = 'ecs.fargate'
-# Fargate metadata endpoint https://docs.aws.amazon.com/AmazonECS/latest/userguide/task-metadata-endpoint-v4-fargate.html
-API_ENDPOINT = os.environ.get('ECS_CONTAINER_METADATA_URI_V4')
-METADATA_ROUTE = '/task'
-STATS_ROUTE = '/task/stats'
 DEFAULT_TIMEOUT = 5
+
+# Fargate ECS Endpoint v2
+API_ENDPOINT_V2 = 'http://169.254.170.2/v2'
+METADATA_ROUTE_V2 = '/metadata'
+STATS_ROUTE_V2 = '/stats'
+
+# Fargate ECS Endpoint v4
+API_ENDPOINT_V4_ENV_VAR = 'ECS_CONTAINER_METADATA_URI_V4'
+METADATA_ROUTE_V4 = '/task'
+STATS_ROUTE_V4 = '/task/stats'
 
 # Default value is maxed out for some cgroup metrics
 CGROUP_NO_VALUE = 0x7FFFFFFFFFFFF000
@@ -79,9 +82,25 @@ class FargateCheck(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'timeout': {'name': 'timeout', 'default': DEFAULT_TIMEOUT}}
 
+    def __init__(self, name, init_config, instances):
+        # Fargate metadata endpoint https://docs.aws.amazon.com/AmazonECS/latest/userguide/task-metadata-endpoint-v4-fargate.html
+        self.API_ENDPOINT = os.environ.get(API_ENDPOINT_V4_ENV_VAR)
+        
+        if self.API_ENDPOINT is None:
+            # If v4 endpoint is not available, fall back to v2
+            self.API_ENDPOINT = API_ENDPOINT_V2
+            self.METADATA_ROUTE = METADATA_ROUTE_V2
+            self.STATS_ROUTE = STATS_ROUTE_V2
+        else:
+            # Otherwise set v4 routes 
+            self.METADATA_ROUTE = METADATA_ROUTE_V4
+            self.STATS_ROUTE = STATS_ROUTE_V4
+        
+        super(FargateCheck, self).__init__(name, init_config, instances)
+   
     def check(self, _):
-        metadata_endpoint = API_ENDPOINT + METADATA_ROUTE
-        stats_endpoint = API_ENDPOINT + STATS_ROUTE
+        metadata_endpoint = self.API_ENDPOINT + self.METADATA_ROUTE
+        stats_endpoint = self.API_ENDPOINT + self.STATS_ROUTE
         custom_tags = self.instance.get('tags', [])
 
         try:
