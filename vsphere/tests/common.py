@@ -27,6 +27,74 @@ LAB_INSTANCE = {
     'use_collect_events_fallback': True,
 }
 
+legacy_default_instance = {
+    'name': 'vsphere_mock',
+    'empty_default_hostname': True,
+    'event_config': {
+        'collect_vcenter_alarms': True,
+    },
+    'use_legacy_check_version': True,
+    'host': 'vsphere_host',
+    'username': 'vsphere_username',
+    'password': 'vsphere_password',
+}
+
+legacy_realtime_instance = {
+    'name': 'vsphere_mock',
+    'empty_default_hostname': True,
+    'event_config': {
+        'collect_vcenter_alarms': True,
+    },
+    'use_legacy_check_version': True,
+    'host': 'vsphere_host',
+    'username': 'vsphere_username',
+    'password': 'vsphere_password',
+    'collect_realtime_only': True,
+}
+
+legacy_historical_instance = {
+    'name': 'vsphere_mock',
+    'empty_default_hostname': True,
+    'event_config': {
+        'collect_vcenter_alarms': True,
+    },
+    'use_legacy_check_version': True,
+    'host': 'vsphere_host',
+    'username': 'vsphere_username',
+    'password': 'vsphere_password',
+    'collect_historical_only': True,
+}
+
+default_instance = {
+    'empty_default_hostname': True,
+    'use_legacy_check_version': False,
+    'host': 'vsphere_host',
+    'username': 'vsphere_username',
+    'password': 'vsphere_password',
+}
+
+realtime_instance = {
+    'collection_level': 4,
+    'empty_default_hostname': True,
+    'use_legacy_check_version': False,
+    'host': 'vsphere_host',
+    'username': 'vsphere_username',
+    'password': 'vsphere_password',
+    'ssl_verify': False,
+    'rest_api_options': None,
+}
+
+historical_instance = {
+    'collection_level': 1,
+    'empty_default_hostname': True,
+    'use_legacy_check_version': False,
+    'host': 'vsphere_host',
+    'username': 'vsphere_username',
+    'password': 'vsphere_password',
+    'ssl_verify': False,
+    'collection_type': 'historical',
+}
+
 
 def build_rest_api_client(config, logger):
     if VSPHERE_VERSION.startswith('7.'):

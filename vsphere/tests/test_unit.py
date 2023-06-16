@@ -12,41 +12,157 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.vsphere import VSphereCheck
 
-from .common import VSPHERE_VERSION
+from .common import (
+    VSPHERE_VERSION,
+    default_instance,
+    historical_instance,
+    legacy_default_instance,
+    legacy_historical_instance,
+    legacy_realtime_instance,
+    realtime_instance,
+)
 
 pytestmark = [pytest.mark.unit]
 
 
-def test_connection_exception(aggregator, dd_run_check, instance):
+@pytest.mark.parametrize(
+    ("instance", "log_deprecation_warning"),
+    [
+        pytest.param(
+            legacy_default_instance,
+            True,
+            id='Legacy version',
+        ),
+        pytest.param(
+            default_instance,
+            False,
+            id='New version',
+        ),
+    ],
+)
+def test_log_deprecation_warning(dd_run_check, caplog, instance, log_deprecation_warning):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult()
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [instance])
+        dd_run_check(check)
+        deprecation_message = 'DEPRECATION NOTICE: You are using a deprecated version of the vSphere integration.'
+        assert (
+            (deprecation_message in caplog.text)
+            if log_deprecation_warning
+            else (deprecation_message not in caplog.text)
+        )
+
+
+@pytest.mark.parametrize(
+    ("instance", "service_check", "expected_tags"),
+    [
+        pytest.param(
+            legacy_default_instance,
+            'vcenter.can_connect',
+            ['vcenter_host:vsphere_host', 'vcenter_server:vsphere_mock'],
+            id='Legacy version',
+        ),
+        pytest.param(
+            default_instance,
+            'vsphere.can_connect',
+            ['vcenter_server:vsphere_host'],
+            id='New version',
+        ),
+    ],
+)
+def test_connection_exception(aggregator, dd_run_check, instance, service_check, expected_tags):
     mock_connect = mock.MagicMock(side_effect=[Exception("Connection error")])
     with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
         with pytest.raises(Exception):
             check = VSphereCheck('vsphere', {}, [instance])
             dd_run_check(check)
         aggregator.assert_service_check(
-            "vsphere.can_connect",
+            service_check,
             AgentCheck.CRITICAL,
-            tags=['vcenter_server:vsphere_host'],
+            tags=expected_tags,
         )
+        assert len(aggregator._metrics) == 0
+        assert len(aggregator.events) == 0
 
 
-def test_connection_ok(aggregator, dd_run_check, events_only_instance):
-    mock_connect = mock.MagicMock()
-    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
-        check = VSphereCheck('vsphere', {}, [events_only_instance])
+@pytest.mark.parametrize(
+    ("instance", "service_check", "expected_tags"),
+    [
+        pytest.param(
+            legacy_default_instance,
+            'vcenter.can_connect',
+            ['vcenter_host:vsphere_host', 'vcenter_server:vsphere_mock'],
+            id='Legacy version',
+        ),
+        pytest.param(
+            default_instance,
+            'vsphere.can_connect',
+            ['vcenter_server:vsphere_host'],
+            id='New version',
+        ),
+    ],
+)
+def test_connection_ok(aggregator, dd_run_check, instance, service_check, expected_tags):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
+        mock_si = mock.MagicMock()
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
+        mock_si.content.eventManager.QueryEvents.return_value = []
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
-        aggregator.assert_service_check("vsphere.can_connect", AgentCheck.OK, tags=['vcenter_server:FAKE'])
+        aggregator.assert_service_check(service_check, AgentCheck.OK, tags=expected_tags)
 
 
-def test_metadata(datadog_agent, aggregator, dd_run_check, events_only_instance):
-    mock_connect = mock.MagicMock()
-    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+def test_legacy_metadata(datadog_agent, aggregator, dd_run_check):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
         mock_si = mock.MagicMock()
         mock_si.content.about.version = VSPHERE_VERSION
         mock_si.content.about.build = '123456789'
         mock_si.content.about.apiType = 'VirtualCenter'
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
+        mock_si.content.eventManager.QueryEvents.return_value = []
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        check = VSphereCheck('vsphere', {}, [legacy_default_instance])
+        check.check_id = 'test:123'
+        dd_run_check(check)
+        datadog_agent.assert_metadata_count(0)
+
+
+def test_metadata(datadog_agent, aggregator, dd_run_check):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
+        mock_si = mock.MagicMock()
+        mock_si.content.about.version = VSPHERE_VERSION
+        mock_si.content.about.build = '123456789'
+        mock_si.content.about.apiType = 'VirtualCenter'
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
+        mock_si.content.eventManager.QueryEvents.return_value = []
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [default_instance])
         check.check_id = 'test:123'
         dd_run_check(check)
         major, minor, patch = VSPHERE_VERSION.split('.')
@@ -76,84 +192,201 @@ def test_disabled_metadata(datadog_agent, aggregator, dd_run_check, events_only_
         datadog_agent.assert_metadata_count(0)
 
 
-def test_event_exception(aggregator, dd_run_check, events_only_instance):
-    mock_connect = mock.MagicMock()
-    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+@pytest.mark.parametrize(
+    ("instance", "service_check", "query_events_call_count"),
+    [
+        pytest.param(
+            legacy_default_instance,
+            'vcenter.can_connect',
+            1,
+            id='Legacy version',
+        ),
+        pytest.param(
+            default_instance,
+            'vsphere.can_connect',
+            2,
+            id='New version',
+        ),
+    ],
+)
+def test_event_exception(aggregator, dd_run_check, instance, service_check, query_events_call_count):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
         mock_si = mock.MagicMock()
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult()
         mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
         mock_si.content.eventManager.QueryEvents.side_effect = [Exception()]
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        check = VSphereCheck('vsphere', {}, [instance])
+        dd_run_check(check)
+        aggregator.assert_service_check(
+            service_check,
+            AgentCheck.CRITICAL,
+            count=0,
+        )
+        assert len(aggregator.events) == 0
+        assert mock_si.content.eventManager.QueryEvents.call_count == query_events_call_count
+
+
+@pytest.mark.parametrize(
+    ("instance",),
+    [
+        pytest.param(
+            legacy_default_instance,
+            id='Legacy version',
+        ),
+        pytest.param(
+            default_instance,
+            id='New version',
+        ),
+    ],
+)
+def test_two_events(aggregator, dd_run_check, instance):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
+        event1 = vim.event.VmMessageEvent()
+        event1.createdTime = get_current_datetime()
+        event1.vm = vim.event.VmEventArgument()
+        event1.vm.name = "vm1"
+        event1.fullFormattedMessage = "First event in time"
+
+        event2 = vim.event.VmMessageEvent()
+        event2.createdTime = get_current_datetime()
+        event2.vm = vim.event.VmEventArgument()
+        event2.vm.name = "vm1"
+        event2.fullFormattedMessage = "Second event in time"
+
+        mock_si = mock.MagicMock()
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
+        mock_si.content.eventManager.QueryEvents.side_effect = [[event1, event2]]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [instance])
+        dd_run_check(check)
+        assert len(aggregator.events) == 2
+        assert mock_si.content.eventManager.QueryEvents.call_count == 1
+
+
+@pytest.mark.parametrize(
+    ("instance",),
+    [
+        pytest.param(
+            legacy_default_instance,
+            id='Legacy version',
+        ),
+        pytest.param(
+            default_instance,
+            id='New version',
+        ),
+    ],
+)
+def test_two_calls_to_queryevents(aggregator, dd_run_check, instance):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
+        event1 = vim.event.VmMessageEvent()
+        event1.createdTime = get_current_datetime()
+        event1.vm = vim.event.VmEventArgument()
+        event1.vm.name = "vm1"
+        event1.fullFormattedMessage = "First event in time"
+
+        event2 = vim.event.VmMessageEvent()
+        event2.createdTime = get_current_datetime()
+        event2.vm = vim.event.VmEventArgument()
+        event2.vm.name = "vm1"
+        event2.fullFormattedMessage = "Second event in time"
+
+        mock_si = mock.MagicMock()
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult()
+        mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
+        mock_si.content.eventManager.QueryEvents.side_effect = [[event1, event2], []]
+        mock_connect.return_value = mock_si
+        check = VSphereCheck('vsphere', {}, [instance])
+        dd_run_check(check)
+        assert len(aggregator.events) == 2
+        aggregator.reset()
         dd_run_check(check)
         assert len(aggregator.events) == 0
+        assert mock_si.content.eventManager.QueryEvents.call_count == 2
 
 
-def test_two_events(aggregator, dd_run_check, events_only_instance):
-    mock_connect = mock.MagicMock()
-    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
-        event1 = vim.event.VmMessageEvent()
-        event1.createdTime = get_current_datetime()
-        event1.vm = vim.event.VmEventArgument()
-        event1.vm.name = "vm1"
-        event1.fullFormattedMessage = "First event in time"
-
-        event2 = vim.event.VmMessageEvent()
-        event2.createdTime = get_current_datetime()
-        event2.vm = vim.event.VmEventArgument()
-        event2.vm.name = "vm1"
-        event2.fullFormattedMessage = "Second event in time"
-
-        mock_si = mock.MagicMock()
-        mock_si.content.eventManager = mock.MagicMock()
-        mock_si.content.eventManager.QueryEvents.return_value = [event1, event2]
-        mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [events_only_instance])
-        dd_run_check(check)
-        assert len(aggregator.events) == 2
-
-
-def test_two_unordered_events(aggregator, dd_run_check, events_only_instance):
-    mock_connect = mock.MagicMock()
-    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
-        event1 = vim.event.VmMessageEvent()
-        event1.createdTime = get_current_datetime()
-        event1.vm = vim.event.VmEventArgument()
-        event1.vm.name = "vm1"
-        event1.fullFormattedMessage = "First event in time"
-
-        event2 = vim.event.VmMessageEvent()
-        event2.createdTime = get_current_datetime()
-        event2.vm = vim.event.VmEventArgument()
-        event2.vm.name = "vm1"
-        event2.fullFormattedMessage = "Second event in time"
-
-        mock_si = mock.MagicMock()
-        mock_si.content.eventManager = mock.MagicMock()
-        mock_si.content.eventManager.QueryEvents.return_value = [event2, event1]
-        mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [events_only_instance])
-        dd_run_check(check)
-        assert len(aggregator.events) == 2
-
-
-def test_event_filtered(aggregator, dd_run_check, events_only_instance):
-    mock_connect = mock.MagicMock()
-    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+@pytest.mark.parametrize(
+    ("instance",),
+    [
+        pytest.param(
+            legacy_default_instance,
+            id='Legacy version',
+        ),
+        pytest.param(
+            default_instance,
+            id='New version',
+        ),
+    ],
+)
+def test_event_filtered(aggregator, dd_run_check, instance):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
         event = vim.event.VmDiskFailedEvent()
         event.createdTime = get_current_datetime()
 
         mock_si = mock.MagicMock()
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult()
         mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
         mock_si.content.eventManager.QueryEvents.return_value = [event]
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
         assert len(aggregator.events) == 0
 
 
-def test_event_vm_being_hot_migrated_change_host(aggregator, dd_run_check, events_only_instance):
-    mock_connect = mock.MagicMock()
-    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_tags",
+    ),
+    [
+        pytest.param(
+            legacy_default_instance,
+            [
+                'vsphere_host:host1',
+                'vsphere_host:host2',
+                'vsphere_datacenter:dc1',
+                'vsphere_datacenter:dc1',
+            ],
+            id='Legacy version',
+        ),
+        pytest.param(
+            default_instance,
+            [
+                'vcenter_server:vsphere_host',
+                'vsphere_host:host1',
+                'vsphere_host:host2',
+                'vsphere_datacenter:dc1',
+                'vsphere_datacenter:dc1',
+            ],
+            id='New version',
+        ),
+    ],
+)
+def test_event_vm_being_hot_migrated_change_host(aggregator, dd_run_check, instance, expected_tags):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
         event = vim.event.VmBeingHotMigratedEvent()
         event.createdTime = get_current_datetime()
         event.userName = "datadog"
@@ -173,22 +406,60 @@ def test_event_vm_being_hot_migrated_change_host(aggregator, dd_run_check, event
         event.vm.name = "vm1"
 
         mock_si = mock.MagicMock()
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult()
         mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
         mock_si.content.eventManager.QueryEvents.return_value = [event]
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
         aggregator.assert_event(
             """datadog has launched a hot migration of this virtual machine:
 - Host MIGRATION: from host1 to host2
 - No datacenter migration: still dc1
-- No datastore migration: still ds1"""
+- No datastore migration: still ds1""",
+            count=1,
+            msg_title="VM vm1 is being migrated",
+            host="vm1",
+            tags=expected_tags,
         )
 
 
-def test_event_vm_being_hot_migrated_change_datacenter(aggregator, dd_run_check, events_only_instance):
-    mock_connect = mock.MagicMock()
-    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_tags",
+    ),
+    [
+        pytest.param(
+            legacy_default_instance,
+            [
+                'vsphere_host:host1',
+                'vsphere_host:host2',
+                'vsphere_datacenter:dc1',
+                'vsphere_datacenter:dc2',
+            ],
+            id='Legacy version',
+        ),
+        pytest.param(
+            default_instance,
+            [
+                'vcenter_server:vsphere_host',
+                'vsphere_host:host1',
+                'vsphere_host:host2',
+                'vsphere_datacenter:dc1',
+                'vsphere_datacenter:dc2',
+            ],
+            id='New version',
+        ),
+    ],
+)
+def test_event_vm_being_hot_migrated_change_datacenter(aggregator, dd_run_check, instance, expected_tags):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
         event = vim.event.VmBeingHotMigratedEvent()
         event.createdTime = get_current_datetime()
         event.userName = "datadog"
@@ -208,22 +479,60 @@ def test_event_vm_being_hot_migrated_change_datacenter(aggregator, dd_run_check,
         event.vm.name = "vm1"
 
         mock_si = mock.MagicMock()
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult()
         mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
         mock_si.content.eventManager.QueryEvents.return_value = [event]
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
         aggregator.assert_event(
             """datadog has launched a hot migration of this virtual machine:
 - Datacenter MIGRATION: from dc1 to dc2
 - Host MIGRATION: from host1 to host2
-- No datastore migration: still ds1"""
+- No datastore migration: still ds1""",
+            count=1,
+            msg_title="VM vm1 is being migrated",
+            host="vm1",
+            tags=expected_tags,
         )
 
 
-def test_event_vm_being_hot_migrated_change_datastore(aggregator, dd_run_check, events_only_instance):
-    mock_connect = mock.MagicMock()
-    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_tags",
+    ),
+    [
+        pytest.param(
+            legacy_default_instance,
+            [
+                'vsphere_host:host1',
+                'vsphere_host:host1',
+                'vsphere_datacenter:dc1',
+                'vsphere_datacenter:dc1',
+            ],
+            id='Legacy version',
+        ),
+        pytest.param(
+            default_instance,
+            [
+                'vcenter_server:vsphere_host',
+                'vsphere_host:host1',
+                'vsphere_host:host1',
+                'vsphere_datacenter:dc1',
+                'vsphere_datacenter:dc1',
+            ],
+            id='New version',
+        ),
+    ],
+)
+def test_event_vm_being_hot_migrated_change_datastore(aggregator, dd_run_check, instance, expected_tags):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
         event = vim.event.VmBeingHotMigratedEvent()
         event.createdTime = get_current_datetime()
         event.userName = "datadog"
@@ -243,22 +552,44 @@ def test_event_vm_being_hot_migrated_change_datastore(aggregator, dd_run_check, 
         event.vm.name = "vm1"
 
         mock_si = mock.MagicMock()
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult()
         mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
         mock_si.content.eventManager.QueryEvents.return_value = [event]
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
         aggregator.assert_event(
             """datadog has launched a hot migration of this virtual machine:
 - Datastore MIGRATION: from ds1 to ds2
 - No host migration: still host1
-- No datacenter migration: still dc1"""
+- No datacenter migration: still dc1""",
+            count=1,
+            msg_title="VM vm1 is being migrated",
+            host="vm1",
+            tags=expected_tags,
         )
 
 
-def test_event_alarm_status_changed_excluded(aggregator, dd_run_check, events_only_instance):
-    mock_connect = mock.MagicMock()
-    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+@pytest.mark.parametrize(
+    ("instance",),
+    [
+        pytest.param(
+            legacy_default_instance,
+            id='Legacy version',
+        ),
+        pytest.param(
+            default_instance,
+            id='New version',
+        ),
+    ],
+)
+def test_event_alarm_status_changed_excluded(aggregator, dd_run_check, instance):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
         event = vim.event.AlarmStatusChangedEvent()
         event.createdTime = get_current_datetime()
         event.entity = vim.event.ManagedEntityEventArgument()
@@ -273,17 +604,42 @@ def test_event_alarm_status_changed_excluded(aggregator, dd_run_check, events_on
         event.fullFormattedMessage = "Green to Gray"
 
         mock_si = mock.MagicMock()
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult()
         mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
         mock_si.content.eventManager.QueryEvents.return_value = [event]
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
         assert len(aggregator.events) == 0
 
 
-def test_event_alarm_status_changed_vm(aggregator, dd_run_check, events_only_instance):
-    mock_connect = mock.MagicMock()
-    with mock.patch('pyVim.connect.SmartConnect', new=mock_connect):
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_tags",
+    ),
+    [
+        pytest.param(
+            legacy_default_instance,
+            [],
+            id='Legacy version',
+        ),
+        pytest.param(
+            default_instance,
+            [
+                'vcenter_server:vsphere_host',
+            ],
+            id='New version',
+        ),
+    ],
+)
+def test_event_alarm_status_changed_vm(aggregator, dd_run_check, instance, expected_tags):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
         event = vim.event.AlarmStatusChangedEvent()
         event.createdTime = get_current_datetime()
         event.entity = vim.event.ManagedEntityEventArgument()
@@ -298,12 +654,23 @@ def test_event_alarm_status_changed_vm(aggregator, dd_run_check, events_only_ins
         event.fullFormattedMessage = "Green to Yellow"
 
         mock_si = mock.MagicMock()
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult()
         mock_si.content.eventManager = mock.MagicMock()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
         mock_si.content.eventManager.QueryEvents.return_value = [event]
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [events_only_instance])
+        check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
-        aggregator.assert_event("""vCenter monitor status changed on this alarm, it was green and it's now yellow.""")
+        aggregator.assert_event(
+            """vCenter monitor status changed on this alarm, it was green and it's now yellow.""",
+            count=1,
+            msg_title="[Triggered] alarm1 on VM vm1 is now yellow",
+            alert_type="warning",
+            host="vm1",
+            tags=expected_tags,
+        )
 
 
 def test_event_alarm_status_changed_vm_recovered(aggregator, dd_run_check, events_only_instance):
@@ -535,7 +902,8 @@ def test_event_vm_powered_off(aggregator, dd_run_check, events_only_instance):
             """datadog has powered off this virtual machine. It was running on:
 - datacenter: dc1
 - host: host1
-"""
+""",
+            count=1,
         )
 
 
@@ -557,6 +925,7 @@ def test_event_vm_reconfigured(aggregator, dd_run_check, events_only_instance):
         dd_run_check(check)
         aggregator.assert_event(
             """datadog saved the new configuration:\n@@@\n""",
+            count=1,
             exact_match=False,
             msg_title="VM vm1 configuration has been changed",
             host="vm1",
@@ -587,16 +956,42 @@ def test_event_vm_suspended(aggregator, dd_run_check, events_only_instance):
 - datacenter: dc1
 - host: host1
 """,
+            count=1,
             msg_title="VM vm1 has been SUSPENDED",
             host="vm1",
         )
 
 
-def test_report_realtime_vm_count(aggregator, dd_run_check, realtime_instance):
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_count",
+        "expected_value",
+        "expected_tags",
+    ),
+    [
+        pytest.param(
+            legacy_realtime_instance,
+            1,
+            2,
+            ['vcenter_server:vsphere_mock'],
+            id='Legacy version',
+        ),
+        pytest.param(
+            realtime_instance,
+            2,
+            2,
+            ['vcenter_server:vsphere_host', 'vsphere_host:unknown', 'vsphere_type:vm'],
+            id='New version',
+        ),
+    ],
+)
+def test_report_realtime_vm_count(aggregator, dd_run_check, instance, expected_count, expected_value, expected_tags):
     with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
         'pyVmomi.vmodl.query.PropertyCollector'
     ) as mock_property_collector:
         mock_si = mock.MagicMock()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
         mock_si.content.eventManager.QueryEvents.return_value = []
         mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
             vim.PerformanceManager.CounterInfo(
@@ -604,6 +999,7 @@ def test_report_realtime_vm_count(aggregator, dd_run_check, realtime_instance):
                 groupInfo=vim.ElementDescription(key='cpu'),
                 nameInfo=vim.ElementDescription(key='costop'),
                 rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+                unitInfo=vim.ElementDescription(key='millisecond'),
             )
         ]
         mock_si.content.perfManager.QueryPerf.return_value = [
@@ -666,12 +1062,13 @@ def test_report_realtime_vm_count(aggregator, dd_run_check, realtime_instance):
             )
         )
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [realtime_instance])
+        check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
         aggregator.assert_metric(
             'vsphere.vm.count',
-            count=2,
-            tags=['vcenter_server:FAKE', 'vsphere_host:unknown', 'vsphere_type:vm'],
+            count=expected_count,
+            value=expected_value,
+            tags=expected_tags,
         )
 
 
@@ -1810,11 +2207,36 @@ def test_report_realtime_vm_metrics_off(aggregator, dd_run_check, realtime_insta
         )
 
 
-def test_report_realtime_host_count(aggregator, dd_run_check, realtime_instance):
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_count",
+        "expected_value",
+        "expected_tags",
+    ),
+    [
+        pytest.param(
+            legacy_realtime_instance,
+            0,
+            0,
+            [],
+            id='Legacy version',
+        ),
+        pytest.param(
+            realtime_instance,
+            1,
+            1,
+            ['vcenter_server:vsphere_host', 'vsphere_type:host'],
+            id='New version',
+        ),
+    ],
+)
+def test_report_realtime_host_count(aggregator, dd_run_check, instance, expected_count, expected_value, expected_tags):
     with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
         'pyVmomi.vmodl.query.PropertyCollector'
     ) as mock_property_collector:
         mock_si = mock.MagicMock()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
         mock_si.content.eventManager.QueryEvents.return_value = []
         mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
             vim.PerformanceManager.CounterInfo(
@@ -1822,6 +2244,7 @@ def test_report_realtime_host_count(aggregator, dd_run_check, realtime_instance)
                 groupInfo=vim.ElementDescription(key='cpu'),
                 nameInfo=vim.ElementDescription(key='costop'),
                 rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+                unitInfo=vim.ElementDescription(key='millisecond'),
             )
         ]
         mock_si.content.perfManager.QueryPerf.return_value = [
@@ -1851,12 +2274,13 @@ def test_report_realtime_host_count(aggregator, dd_run_check, realtime_instance)
             ],
         )
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [realtime_instance])
+        check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
         aggregator.assert_metric(
             'vsphere.host.count',
-            value=1,
-            tags=['vcenter_server:FAKE', 'vsphere_type:host'],
+            count=expected_count,
+            value=expected_value,
+            tags=expected_tags,
         )
 
 
@@ -2071,12 +2495,39 @@ def test_report_realtime_host_metrics_blacklisted(aggregator, dd_run_check, real
         aggregator.assert_metric('vsphere.cpu.costop.sum', count=0)
 
 
-def test_report_historical_datacenter_count(aggregator, dd_run_check, historical_instance):
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_count",
+        "expected_value",
+        "expected_tags",
+    ),
+    [
+        pytest.param(
+            legacy_historical_instance,
+            0,
+            0,
+            [],
+            id='Legacy version',
+        ),
+        pytest.param(
+            historical_instance,
+            1,
+            1,
+            ['vcenter_server:vsphere_host', 'vsphere_datacenter:dc1', 'vsphere_type:datacenter'],
+            id='New version',
+        ),
+    ],
+)
+def test_report_historical_datacenter_count(
+    aggregator, dd_run_check, instance, expected_count, expected_value, expected_tags
+):
     with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
         'pyVmomi.vmodl.query.PropertyCollector'
     ) as mock_property_collector:
         mock_si = mock.MagicMock()
         mock_si.CurrentTime.return_value = dt.datetime.now()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
         mock_si.content.eventManager.QueryEvents.return_value = []
         mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = []
         mock_si.content.perfManager.QueryPerf.return_value = []
@@ -2096,28 +2547,59 @@ def test_report_historical_datacenter_count(aggregator, dd_run_check, historical
             ],
         )
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [historical_instance])
+        check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
         aggregator.assert_metric(
             'vsphere.datacenter.count',
-            count=1,
-            tags=['vcenter_server:FAKE', 'vsphere_datacenter:dc1', 'vsphere_type:datacenter'],
+            count=expected_count,
+            value=expected_value,
+            tags=expected_tags,
         )
 
 
-def test_report_historical_datacenter_metrics(aggregator, dd_run_check, historical_instance):
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_count",
+        "expected_value",
+        "expected_tags",
+    ),
+    [
+        pytest.param(
+            legacy_historical_instance,
+            1,
+            3,
+            ['instance:dc1', 'vcenter_server:vsphere_mock', 'vsphere_datacenter:dc1', 'vsphere_type:datacenter'],
+            id='Legacy version',
+        ),
+        pytest.param(
+            historical_instance,
+            1,
+            3,
+            ['vcenter_server:vsphere_host', 'vsphere_datacenter:dc1', 'vsphere_type:datacenter'],
+            id='New version',
+        ),
+    ],
+)
+def test_report_historical_datacenter_metrics(
+    aggregator, dd_run_check, instance, expected_count, expected_value, expected_tags
+):
     with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
         'pyVmomi.vmodl.query.PropertyCollector'
     ) as mock_property_collector:
         mock_si = mock.MagicMock()
         mock_si.CurrentTime.return_value = dt.datetime.now()
         mock_si.content.eventManager.QueryEvents.return_value = []
+        mock_si.content.perfManager.QueryAvailablePerfMetric.return_value = [
+            vim.PerformanceManager.MetricId(counterId=100),
+        ]
         mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
             vim.PerformanceManager.CounterInfo(
                 key=100,
                 groupInfo=vim.ElementDescription(key='vmop'),
                 nameInfo=vim.ElementDescription(key='numChangeDS'),
                 rollupType=vim.PerformanceManager.CounterInfo.RollupType.latest,
+                unitInfo=vim.ElementDescription(key='operation'),
             ),
         ]
         mock_si.content.perfManager.QueryPerf.return_value = [
@@ -2126,7 +2608,10 @@ def test_report_historical_datacenter_metrics(aggregator, dd_run_check, historic
                 value=[
                     vim.PerformanceManager.IntSeries(
                         value=[1, 3],
-                        id=vim.PerformanceManager.MetricId(counterId=100),
+                        id=vim.PerformanceManager.MetricId(
+                            counterId=100,
+                            instance='dc1',
+                        ),
                     )
                 ],
             ),
@@ -2147,29 +2632,70 @@ def test_report_historical_datacenter_metrics(aggregator, dd_run_check, historic
             ],
         )
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [historical_instance])
+        check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
         aggregator.assert_metric(
             'vsphere.vmop.numChangeDS.latest',
-            count=1,
-            value=3,
-            tags=['vcenter_server:FAKE', 'vsphere_datacenter:dc1', 'vsphere_type:datacenter'],
+            count=expected_count,
+            value=expected_value,
+            tags=expected_tags,
         )
 
 
-def test_report_historical_datacenter_in_folder_metrics(aggregator, dd_run_check, historical_instance):
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_count",
+        "expected_value",
+        "expected_tags",
+    ),
+    [
+        pytest.param(
+            legacy_historical_instance,
+            1,
+            3,
+            [
+                'instance:dc1',
+                'vcenter_server:vsphere_mock',
+                'vsphere_datacenter:dc1',
+                'vsphere_folder:folder_1',
+                'vsphere_type:datacenter',
+            ],
+            id='Legacy version',
+        ),
+        pytest.param(
+            historical_instance,
+            1,
+            3,
+            [
+                'vcenter_server:vsphere_host',
+                'vsphere_datacenter:dc1',
+                'vsphere_folder:folder_1',
+                'vsphere_type:datacenter',
+            ],
+            id='New version',
+        ),
+    ],
+)
+def test_report_historical_datacenter_in_folder_metrics(
+    aggregator, dd_run_check, instance, expected_count, expected_value, expected_tags
+):
     with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
         'pyVmomi.vmodl.query.PropertyCollector'
     ) as mock_property_collector:
         mock_si = mock.MagicMock()
         mock_si.CurrentTime.return_value = dt.datetime.now()
         mock_si.content.eventManager.QueryEvents.return_value = []
+        mock_si.content.perfManager.QueryAvailablePerfMetric.return_value = [
+            vim.PerformanceManager.MetricId(counterId=100),
+        ]
         mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
             vim.PerformanceManager.CounterInfo(
                 key=100,
                 groupInfo=vim.ElementDescription(key='vmop'),
                 nameInfo=vim.ElementDescription(key='numChangeDS'),
                 rollupType=vim.PerformanceManager.CounterInfo.RollupType.latest,
+                unitInfo=vim.ElementDescription(key='operation'),
             ),
         ]
         mock_si.content.perfManager.QueryPerf.return_value = [
@@ -2178,7 +2704,10 @@ def test_report_historical_datacenter_in_folder_metrics(aggregator, dd_run_check
                 value=[
                     vim.PerformanceManager.IntSeries(
                         value=[1, 3],
-                        id=vim.PerformanceManager.MetricId(counterId=100),
+                        id=vim.PerformanceManager.MetricId(
+                            counterId=100,
+                            instance='dc1',
+                        ),
                     )
                 ],
             ),
@@ -2212,22 +2741,43 @@ def test_report_historical_datacenter_in_folder_metrics(aggregator, dd_run_check
             ],
         )
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [historical_instance])
+        check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
         aggregator.assert_metric(
             'vsphere.vmop.numChangeDS.latest',
-            value=3,
-            count=1,
-            tags=[
-                'vcenter_server:FAKE',
-                'vsphere_datacenter:dc1',
-                'vsphere_folder:folder_1',
-                'vsphere_type:datacenter',
-            ],
+            count=expected_count,
+            value=expected_value,
+            tags=expected_tags,
         )
 
 
-def test_report_historical_datastore_count(aggregator, dd_run_check, historical_instance):
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_count",
+        "expected_value",
+        "expected_tags",
+    ),
+    [
+        pytest.param(
+            legacy_historical_instance,
+            0,
+            0,
+            [],
+            id='Legacy version',
+        ),
+        pytest.param(
+            historical_instance,
+            1,
+            1,
+            ['vcenter_server:vsphere_host', 'vsphere_datastore:ds1', 'vsphere_type:datastore'],
+            id='New version',
+        ),
+    ],
+)
+def test_report_historical_datastore_count(
+    aggregator, dd_run_check, instance, expected_count, expected_value, expected_tags
+):
     with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
         'pyVmomi.vmodl.query.PropertyCollector'
     ) as mock_property_collector:
@@ -2252,28 +2802,59 @@ def test_report_historical_datastore_count(aggregator, dd_run_check, historical_
             ],
         )
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [historical_instance])
+        check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
         aggregator.assert_metric(
             'vsphere.datastore.count',
-            count=1,
-            tags=['vcenter_server:FAKE', 'vsphere_datastore:ds1', 'vsphere_type:datastore'],
+            count=expected_count,
+            value=expected_value,
+            tags=expected_tags,
         )
 
 
-def test_report_historical_datastore_metrics(aggregator, dd_run_check, historical_instance):
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_count",
+        "expected_value",
+        "expected_tags",
+    ),
+    [
+        pytest.param(
+            legacy_historical_instance,
+            1,
+            5,
+            ['instance:ds1', 'vcenter_server:vsphere_mock', 'vsphere_datastore:ds1', 'vsphere_type:datastore'],
+            id='Legacy version',
+        ),
+        pytest.param(
+            historical_instance,
+            1,
+            5,
+            ['vcenter_server:vsphere_host', 'vsphere_datastore:ds1', 'vsphere_type:datastore'],
+            id='New version',
+        ),
+    ],
+)
+def test_report_historical_datastore_metrics(
+    aggregator, dd_run_check, instance, expected_count, expected_value, expected_tags
+):
     with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
         'pyVmomi.vmodl.query.PropertyCollector'
     ) as mock_property_collector:
         mock_si = mock.MagicMock()
         mock_si.CurrentTime.return_value = dt.datetime.now()
         mock_si.content.eventManager.QueryEvents.return_value = []
+        mock_si.content.perfManager.QueryAvailablePerfMetric.return_value = [
+            vim.PerformanceManager.MetricId(counterId=100),
+        ]
         mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
             vim.PerformanceManager.CounterInfo(
                 key=100,
                 groupInfo=vim.ElementDescription(key='datastore'),
                 nameInfo=vim.ElementDescription(key='busResets'),
                 rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+                unitInfo=vim.ElementDescription(key='command'),
             ),
         ]
         mock_si.content.perfManager.QueryPerf.return_value = [
@@ -2282,7 +2863,10 @@ def test_report_historical_datastore_metrics(aggregator, dd_run_check, historica
                 value=[
                     vim.PerformanceManager.IntSeries(
                         value=[2, 5],
-                        id=vim.PerformanceManager.MetricId(counterId=100),
+                        id=vim.PerformanceManager.MetricId(
+                            counterId=100,
+                            instance='ds1',
+                        ),
                     )
                 ],
             ),
@@ -2303,17 +2887,43 @@ def test_report_historical_datastore_metrics(aggregator, dd_run_check, historica
             ],
         )
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [historical_instance])
+        check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
         aggregator.assert_metric(
             'vsphere.datastore.busResets.sum',
-            count=1,
-            value=5,
-            tags=['vcenter_server:FAKE', 'vsphere_datastore:ds1', 'vsphere_type:datastore'],
+            count=expected_count,
+            value=expected_value,
+            tags=expected_tags,
         )
 
 
-def test_report_historical_cluster_count(aggregator, dd_run_check, historical_instance):
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_count",
+        "expected_value",
+        "expected_tags",
+    ),
+    [
+        pytest.param(
+            legacy_historical_instance,
+            0,
+            0,
+            [],
+            id='Legacy version',
+        ),
+        pytest.param(
+            historical_instance,
+            1,
+            1,
+            ['vcenter_server:vsphere_host', 'vsphere_cluster:c1', 'vsphere_type:cluster'],
+            id='New version',
+        ),
+    ],
+)
+def test_report_historical_cluster_count(
+    aggregator, dd_run_check, instance, expected_count, expected_value, expected_tags
+):
     with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
         'pyVmomi.vmodl.query.PropertyCollector'
     ) as mock_property_collector:
@@ -2338,12 +2948,13 @@ def test_report_historical_cluster_count(aggregator, dd_run_check, historical_in
             ],
         )
         mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [historical_instance])
+        check = VSphereCheck('vsphere', {}, [instance])
         dd_run_check(check)
         aggregator.assert_metric(
             'vsphere.cluster.count',
-            count=1,
-            tags=['vcenter_server:FAKE', 'vsphere_cluster:c1', 'vsphere_type:cluster'],
+            count=expected_count,
+            value=expected_value,
+            tags=expected_tags,
         )
 
 
