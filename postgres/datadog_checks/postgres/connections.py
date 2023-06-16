@@ -40,7 +40,7 @@ class MultiDatabaseConnectionPool(object):
     If max_conns is specified, the connection pool will limit concurrent connections.
     Connection eviction should be handled by the calling code. Call done() on a connection
     when it is no longer necessary, so it will be marked evictable.
-    If the connection pool is full, try to evict a connection with evict_lru() until a 
+    If the connection pool is full, try to evict a connection with evict_lru() until a
     connection is evicted, then try get_connection() again.
     """
 
