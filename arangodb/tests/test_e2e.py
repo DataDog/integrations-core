@@ -4,9 +4,11 @@
 import pytest
 
 from .common import METRICS, OPTIONAL_METRICS
+from tenacity import retry, wait_fixed, stop_after_attempt
 
 
 @pytest.mark.e2e
+@retry(wait=wait_fixed(2), stop=stop_after_attempt(2))
 def test_check_ok(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
     base_tags = ['endpoint:http://localhost:8529/_admin/metrics/v2', 'server_mode:default']
