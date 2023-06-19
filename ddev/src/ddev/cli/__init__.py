@@ -10,7 +10,12 @@ from datadog_checks.dev.tooling.commands.dep import dep
 from datadog_checks.dev.tooling.commands.run import run
 from datadog_checks.dev.tooling.commands.test import test
 
-from ddev._version import __version__
+try:
+    # If we're running the local version of ddev, this file does not exist
+    from ddev._version import __version__
+except ModuleNotFoundError:
+    __version__ = "local"
+
 from ddev.cli.application import Application
 from ddev.cli.ci import ci
 from ddev.cli.clean import clean
