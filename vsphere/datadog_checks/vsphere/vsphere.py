@@ -57,6 +57,7 @@ except ImportError:
 
 SERVICE_CHECK_NAME = 'can_connect'
 
+# Run
 
 class VSphereCheck(AgentCheck):
     __NAMESPACE__ = 'vsphere'
