@@ -511,16 +511,13 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "query1"
-                                        },
-                                        {
                                             "formula": "query1 * 8"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "compute": {
-                                                "aggregation": "avg",
+                                                "aggregation": "sum",
                                                 "metric": "@bytes"
                                             },
                                             "data_source": "network_device_flows",
@@ -529,7 +526,7 @@
                                                     "facet": "@device.name",
                                                     "limit": 10,
                                                     "sort": {
-                                                        "aggregation": "avg",
+                                                        "aggregation": "sum",
                                                         "metric": "@bytes",
                                                         "order": "desc"
                                                     }
@@ -538,7 +535,7 @@
                                                     "facet": "@exporter.ip",
                                                     "limit": 10,
                                                     "sort": {
-                                                        "aggregation": "avg",
+                                                        "aggregation": "sum",
                                                         "metric": "@bytes",
                                                         "order": "desc"
                                                     }
@@ -562,6 +559,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Total Traffic from Top 10 Devices (Bits)",
                             "title_align": "left",
                             "title_size": "16",
