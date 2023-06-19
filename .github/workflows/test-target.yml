@@ -115,7 +115,7 @@ jobs:
 
     - name: Set up Python 2.7
       if: inputs.test-py2
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v3
       with:
         python-version: "2.7"
 
