@@ -20,7 +20,6 @@ def dd_environment():
     yield LAB_INSTANCE
 
 
-
 @pytest.fixture()
 def realtime_instance():
     return {
