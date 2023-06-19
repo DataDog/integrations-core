@@ -4,7 +4,8 @@
 
 import logging
 
-import psycopg2
+import psycopg
+from psycopg.rows import dict_row
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.tracking import tracked_method
@@ -112,7 +113,10 @@ class ExplainParameterizedQueries:
         rows = self._execute_query_and_fetch_rows(
             dbname, PARAM_TYPES_COUNT_QUERY.format(query_signature=query_signature)
         )
-        return rows[0][0] if rows else 0
+        count = 0
+        if rows and 'count' in rows[0]:
+            count = rows[0]['count']
+        return count
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _explain_prepared_statement(self, dbname, statement, obfuscated_statement, query_signature):
@@ -157,15 +161,16 @@ class ExplainParameterizedQueries:
             )
 
     def _execute_query(self, dbname, query):
+        # TODO: fix this for psycopg3 upgrade
         # Psycopg2 connections do not get closed when context ends;
         # leaving context will just mark the connection as inactive in MultiDatabaseConnectionPool
         with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with conn.cursor(row_factory=dict_row) as cursor:
                 logger.debug('Executing query=[%s]', query)
                 cursor.execute(query)
 
     def _execute_query_and_fetch_rows(self, dbname, query):
         with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with conn.cursor(row_factory=dict_row) as cursor:
                 cursor.execute(query)
                 return cursor.fetchall()

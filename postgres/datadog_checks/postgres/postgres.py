@@ -5,7 +5,9 @@ import copy
 import os
 from time import time
 
-import psycopg2
+import psycopg
+from psycopg.rows import dict_row
+from psycopg_pool import ConnectionPool
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
@@ -371,14 +373,14 @@ class PostgreSql(AgentCheck):
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
-        except psycopg2.errors.FeatureNotSupported as e:
+        except psycopg.errors.FeatureNotSupported as e:
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
             self.db.rollback()
             self.log.debug("Disabling replication metrics")
             self._is_aurora = False
             self.metrics_cache.replication_metrics = {}
-        except psycopg2.errors.UndefinedFunction as e:
+        except psycopg.errors.UndefinedFunction as e:
             log_func(e)
             log_func(
                 "It seems the PG version has been incorrectly identified as %s. "
@@ -386,7 +388,7 @@ class PostgreSql(AgentCheck):
             )
             self._clean_state()
             self.db.rollback()
-        except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
+        except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
             log_func("Not all metrics may be available: %s" % str(e))
             self.db.rollback()
 
@@ -584,7 +586,7 @@ class PostgreSql(AgentCheck):
             )
             if self._config.query_timeout:
                 connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
-            conn = psycopg2.connect(connection_string)
+            conn = psycopg.connect(conninfo=connection_string, autocommit=True)
         else:
             password = self._config.password
             region = self._config.cloud_metadata.get('aws', {}).get('region', None)
@@ -600,7 +602,7 @@ class PostgreSql(AgentCheck):
                 'host': self._config.host,
                 'user': self._config.user,
                 'password': password,
-                'database': dbname,
+                'dbname': dbname,
                 'sslmode': self._config.ssl_mode,
                 'application_name': self._config.application_name,
             }
@@ -616,9 +618,7 @@ class PostgreSql(AgentCheck):
                 args['sslkey'] = self._config.ssl_key
             if self._config.ssl_password:
                 args['sslpassword'] = self._config.ssl_password
-            conn = psycopg2.connect(**args)
-        # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
-        conn.set_session(autocommit=True, readonly=True)
+            conn = psycopg.connect(**args, autocommit=True)
         return conn
 
     def _connect(self):
@@ -637,7 +637,7 @@ class PostgreSql(AgentCheck):
     # Reload pg_settings on a new connection to the main db
     def _load_pg_settings(self, db):
         try:
-            with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with db.cursor(row_factory=dict_row) as cursor:
                 self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                 cursor.execute(
                     PG_SETTINGS_QUERY,
@@ -648,7 +648,7 @@ class PostgreSql(AgentCheck):
                 for setting in rows:
                     name, val = setting
                     self.pg_settings[name] = val
-        except (psycopg2.DatabaseError, psycopg2.OperationalError) as err:
+        except (psycopg.DatabaseError, psycopg.OperationalError) as err:
             self.log.warning("Failed to query for pg_settings: %s", repr(err))
             self.count(
                 "dd.postgres.error",
@@ -700,7 +700,7 @@ class PostgreSql(AgentCheck):
                 try:
                     self.log.debug("Running query: %s", query)
                     cursor.execute(query)
-                except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
+                except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
                     self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
                     self.db.rollback()
                     continue

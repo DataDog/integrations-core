@@ -8,7 +8,7 @@ import threading
 import time
 from typing import Callable, Dict
 
-import psycopg2
+import psycopg
 
 
 class ConnectionPoolFullError(Exception):
@@ -23,10 +23,10 @@ class ConnectionPoolFullError(Exception):
 class ConnectionInfo:
     def __init__(
         self,
-        connection: psycopg2.extensions.connection,
-        deadline: int,
+        connection: psycopg.Connection,
+        deadline: datetime,
         active: bool,
-        last_accessed: int,
+        last_accessed: datetime,
         thread: threading.Thread,
         persistent: bool,
     ):
@@ -86,9 +86,9 @@ class MultiDatabaseConnectionPool(object):
         dbname: str,
         ttl_ms: int,
         timeout: int = None,
-        startup_fn: Callable[[psycopg2.extensions.connection], None] = None,
+        startup_fn: Callable[[psycopg.Connection], None] = None,
         persistent: bool = False,
-    ) -> psycopg2.extensions.connection:
+    ) -> psycopg.Connection:
         """
         Return a connection from the pool.
         Pass a function to startup_func if there is an action needed with the connection
@@ -117,7 +117,7 @@ class MultiDatabaseConnectionPool(object):
                 # if already in pool, retain persistence status
                 persistent = conn.persistent
 
-            if db.status != psycopg2.extensions.STATUS_READY:
+            if db.info.status != psycopg.pq.ConnStatus.OK:
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 db.rollback()
 
@@ -202,5 +202,6 @@ class MultiDatabaseConnectionPool(object):
                 db.close()
             except Exception:
                 self._stats.connection_closed_failed += 1
+                self.log.exception("failed to close DB connection for db=%s", dbname)
                 return False
         return True
