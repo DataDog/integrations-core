@@ -7,7 +7,9 @@ import threading
 from contextlib import closing
 from time import time
 
-import psycopg2
+import psycopg
+from psycopg.rows import dict_row
+from psycopg_pool import ConnectionPool
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
@@ -351,14 +353,14 @@ class PostgreSql(AgentCheck):
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
-        except psycopg2.errors.FeatureNotSupported as e:
+        except psycopg.errors.FeatureNotSupported as e:
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
             self.db.rollback()
             self.log.debug("Disabling replication metrics")
             self._is_aurora = False
             self.metrics_cache.replication_metrics = {}
-        except psycopg2.errors.UndefinedFunction as e:
+        except psycopg.errors.UndefinedFunction as e:
             log_func(e)
             log_func(
                 "It seems the PG version has been incorrectly identified as %s. "
@@ -366,7 +368,7 @@ class PostgreSql(AgentCheck):
             )
             self._clean_state()
             self.db.rollback()
-        except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
+        except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
             log_func("Not all metrics may be available: %s" % str(e))
             self.db.rollback()
 
@@ -522,7 +524,7 @@ class PostgreSql(AgentCheck):
             )
             if self._config.query_timeout:
                 connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
-            conn = psycopg2.connect(connection_string)
+            conn = psycopg.connect(conninfo=connection_string, autocommit=True)
         else:
             password = self._config.password
             region = self._config.cloud_metadata.get('aws', {}).get('region', None)
@@ -538,7 +540,7 @@ class PostgreSql(AgentCheck):
                 'host': self._config.host,
                 'user': self._config.user,
                 'password': password,
-                'database': dbname,
+                'dbname': dbname,
                 'sslmode': self._config.ssl_mode,
                 'application_name': self._config.application_name,
             }
@@ -554,9 +556,7 @@ class PostgreSql(AgentCheck):
                 args['sslkey'] = self._config.ssl_key
             if self._config.ssl_password:
                 args['sslpassword'] = self._config.ssl_password
-            conn = psycopg2.connect(**args)
-        # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
-        conn.set_session(autocommit=True, readonly=True)
+            conn = psycopg.connect(**args, autocommit=True)
         return conn
 
     def _connect(self):
@@ -566,7 +566,7 @@ class PostgreSql(AgentCheck):
             self.db = None
 
         if self.db:
-            if self.db.status != psycopg2.extensions.STATUS_READY:
+            if self.db.info.status != psycopg.pq.ConnStatus.OK:
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 self.db.rollback()
         else:
@@ -575,7 +575,7 @@ class PostgreSql(AgentCheck):
     # Reload pg_settings on a new connection to the main db
     def _load_pg_settings(self, db):
         try:
-            with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with db.cursor(row_factory=dict_row) as cursor:
                 self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                 cursor.execute(
                     PG_SETTINGS_QUERY,
@@ -586,7 +586,7 @@ class PostgreSql(AgentCheck):
                 for setting in rows:
                     name, val = setting
                     self.pg_settings[name] = val
-        except (psycopg2.DatabaseError, psycopg2.OperationalError) as err:
+        except (psycopg.DatabaseError, psycopg.OperationalError) as err:
             self.log.warning("Failed to query for pg_settings: %s", repr(err))
             self.count(
                 "dd.postgres.error",
@@ -597,25 +597,27 @@ class PostgreSql(AgentCheck):
 
     def _get_db(self, dbname):
         """
-        Returns a memoized psycopg2 connection to `dbname` with autocommit
+        Returns a memoized psycopg connection to `dbname` with autocommit
         Threadsafe as long as no transactions are used
         :param dbname:
-        :return: a psycopg2 connection
+        :return: a psycopg connection
         """
         # TODO: migrate the rest of this check to use a connection from this pool
-        with self._db_pool_lock:
-            db = self._db_pool.get(dbname)
-            if not db or db.closed:
-                self.log.debug("initializing connection to dbname=%s", dbname)
-                db = self._new_connection(dbname)
-                self._db_pool[dbname] = db
-                if self._config.dbname == dbname:
-                    # reload settings for the main DB only once every time the connection is reestablished
-                    self._load_pg_settings(db)
-            if db.status != psycopg2.extensions.STATUS_READY:
-                # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
-                db.rollback()
-            return db
+        # right now we wrap everything in a `with` block so the conn gets closed automatically
+        return self._new_connection(dbname)
+        # with self._db_pool_lock:
+        #     db = self._db_pool.get(dbname)
+        #     if not db or db.closed:
+        #         self.log.debug("initializing connection to dbname=%s", dbname)
+        #         db = self._new_connection(dbname)
+        #         self._db_pool[dbname] = db
+        #         if self._config.dbname == dbname:
+        #             # reload settings for the main DB only once every time the connection is reestablished
+        #             self._load_pg_settings(db)
+        #     if db.info.status != psycopg.pq.ConnStatus.OK:
+        #         # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
+        #         db.rollback()
+        #     return db
 
     def _close_db_pool(self):
         # TODO: add automatic aging out of connections after some time
@@ -654,7 +656,7 @@ class PostgreSql(AgentCheck):
                 try:
                     self.log.debug("Running query: %s", query)
                     cursor.execute(query)
-                except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
+                except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
                     self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
                     self.db.rollback()
                     continue

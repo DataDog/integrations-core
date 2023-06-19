@@ -4,8 +4,8 @@
 import re
 import time
 
-import psycopg2 as pg
-from psycopg2 import extras as pgextras
+import psycopg as pg
+from psycopg.rows import dict_row
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -73,7 +73,7 @@ class PgBouncer(AgentCheck):
             metric_scope.append(SERVERS_METRICS)
 
         try:
-            with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
+            with db.cursor(row_factory=dict_row) as cursor:
                 for scope in metric_scope:
                     descriptors = scope['descriptors']
                     metrics = scope['metrics']
@@ -159,6 +159,7 @@ class PgBouncer(AgentCheck):
 
         return args
 
+    # TODO: needs to be updated to remain compliant with psycopg3
     def _get_connection(self, use_cached=None):
         """Get and memoize connections to instances"""
         use_cached = use_cached if use_cached is not None else self.use_cached
