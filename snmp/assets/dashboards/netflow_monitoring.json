@@ -46,7 +46,7 @@
             "prefix": "@ingress.interface.name"
         }
     ],
-    "title": "Netflow Monitoring",
+    "title": "NetFlow Monitoring",
     "widgets": [
         {
             "definition": {
@@ -559,7 +559,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Total Traffic from Top 10 Devices (Bits)",
                             "title_align": "left",
                             "title_size": "16",
