@@ -53,42 +53,37 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
 ]
 
 STATEMENT_METRICS_QUERY = """\
-with qstats as (
-    select TOP {limit} query_hash, query_plan_hash, last_execution_time, last_elapsed_time,
-            CONCAT(
-                CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
-                CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
-                CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1)) as plan_handle_and_offsets,
-           (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
-           {query_metrics_columns}
-    from sys.dm_exec_query_stats
-    where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
-),
 qstats_aggr as (
-    select query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
-       D.name as database_name, max(plan_handle_and_offsets) as plan_handle_and_offsets,
-       max(last_execution_time) as last_execution_time,
-       max(last_elapsed_time) as last_elapsed_time,
-    {query_metrics_column_sums}
-    from qstats S
-    left join sys.databases D on S.dbid = D.database_id
-    group by query_hash, query_plan_hash, S.dbid, D.name
+    select query_hash, query_plan_hash, max(last_execution_time) last_execution_time, max(last_elapsed_time) last_elapsed_time,
+        max(CONCAT(
+            CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1))) as plan_handle_and_offsets,
+        {query_metrics_column_sums},
+        d.dbid
+    from sys.dm_exec_query_stats o 
+    outer apply (select cast(value as int) as dbid from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') d
+    where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -120, getdate()) 
+    group by query_hash, query_plan_hash, d.dbid
 ),
-qstats_aggr_split as (select 
-    convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
-    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
-    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
+qstats_aggr_split as (
+    select TOP {limit}
+        convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
+        convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
+        convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
     * from qstats_aggr
 )
-select
+select execution_count,last_execution_time,
     SUBSTRING(text, (statement_start_offset / 2) + 1,
     ((CASE statement_end_offset
         WHEN -1 THEN DATALENGTH(text)
         ELSE statement_end_offset END
-            - statement_start_offset) / 2) + 1) AS statement_text,
+            - statement_start_offset) / 2) + 1) AS statement_text, 
     qt.text,
-    encrypted as is_encrypted,
-    * from qstats_aggr_split
+    encrypted as is_encrypted, 
+    s.*, d.name database_name
+    from qstats_aggr_split s
+    left join sys.databases d on s.dbid = d.database_id 
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
 
