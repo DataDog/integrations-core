@@ -79,7 +79,6 @@ class VSphereCheck(AgentCheck):
         instance = cast(InstanceConfig, self.instance)
         self._config = VSphereConfig(instance, self.init_config, self.log)
 
-        self.latest_event_query = get_current_datetime()
         self.infrastructure_cache = InfrastructureCache(interval_sec=self._config.refresh_infrastructure_cache_interval)
         self.metrics_metadata_cache = MetricsMetadataCache(
             interval_sec=self._config.refresh_metrics_metadata_cache_interval
