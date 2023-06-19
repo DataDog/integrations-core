@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "This dashboard provides an overview of NetFlow Monitoring for the traffic between your network gear. \n\nFor more information on monitoring on-premise gear with Datadog, check out: \n\n- Our blog post on [Monitoring Datacenters and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n- Our blog post on [Monitoring network devices with SNMP](https://www.datadoghq.com/blog/monitor-snmp-with-datadog/)\n- Network Device Monitoring [docs](https://docs.datadoghq.com/network_performance_monitoring/devices) \n\ndatadog_demo_keep:true (cloned)\n",
+    "description": "This dashboard provides an overview of NetFlow Monitoring for the traffic between your network gear. \n\nFor more information on monitoring on-premise gear with Datadog, check out: \n\n- Our blog post on [Monitoring Datacenters and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n- Our blog post on [Monitoring network devices with SNMP](https://www.datadoghq.com/blog/monitor-snmp-with-datadog/)\n- Network Device Monitoring [docs](https://docs.datadoghq.com/network_performance_monitoring/devices)",
     "layout_type": "ordered",
     "template_variables": [
         {
