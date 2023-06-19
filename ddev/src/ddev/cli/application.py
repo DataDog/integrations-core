@@ -7,7 +7,7 @@ import os
 from typing import cast
 
 from ddev.cli.terminal import Terminal
-from ddev.config.constants import AppEnvVars
+from ddev.config.constants import AppEnvVars, VerbosityLevels
 from ddev.config.file import ConfigFile, RootConfig
 from ddev.repo.core import Repository
 from ddev.utils.fs import Path
@@ -22,8 +22,8 @@ class Application(Terminal):
         self.__exit_func = exit_func
 
         self.config_file = ConfigFile()
-        self.quiet = self.verbosity < 0
-        self.verbose = self.verbosity > 0
+        self.quiet = self.verbosity < VerbosityLevels.NORMAL
+        self.verbose = self.verbosity > VerbosityLevels.NORMAL
 
         # Lazily set these as we acquire more knowledge about the desired environment
         self.__repo = cast(Repository, None)

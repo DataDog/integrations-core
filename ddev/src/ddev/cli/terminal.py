@@ -15,6 +15,9 @@ from rich.errors import StyleSyntaxError
 from rich.style import Style
 from rich.text import Text
 
+
+from ddev.config.constants import VerbosityLevels
+
 if TYPE_CHECKING:
     from rich.status import Status
 
@@ -182,38 +185,41 @@ class Terminal:
             self.console.stderr = False
 
     def display_error(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < -2:
+        if self.verbosity < VerbosityLevels.ERROR:
             return
 
         self.output(text, self._style_level_error, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_warning(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < -1:
+        if self.verbosity < VerbosityLevels.WARN:
             return
 
         self.output(text, self._style_level_warning, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_info(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < 0:
+        if self.verbosity < VerbosityLevels.NORMAL:
             return
 
         self.output(text, self._style_level_info, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_success(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < 0:
+        if self.verbosity < VerbosityLevels.NORMAL:
             return
 
         self.output(text, self._style_level_success, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_waiting(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < 0:
+        if self.verbosity < VerbosityLevels.NORMAL:
             return
 
         self.output(text, self._style_level_waiting, stderr=stderr, indent=indent, link=link, **kwargs)
 
-    def display_debug(self, text='', level=1, stderr=True, indent=None, link=None, **kwargs):
-        if not 1 <= level <= 3:
-            raise ValueError('Debug output can only have verbosity levels between 1 and 3 (inclusive)')
+    def display_debug(self, text='', level=VerbosityLevels.VERBOSE, stderr=True, indent=None, link=None, **kwargs):
+        if not VerbosityLevels.VERBOSE <= level <= VerbosityLevels.DEBUG:
+            raise ValueError(
+                f'Debug output can only have verbosity levels between {VerbosityLevels.VERBOSE} and \
+{VerbosityLevels.DEBUG} (inclusive)'
+            )
         elif self.verbosity < level:
             return
 
