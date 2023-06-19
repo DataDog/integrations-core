@@ -42,6 +42,7 @@ from datadog_checks.sqlserver.const import (
     DATABASE_SERVICE_CHECK_NAME,
     DBM_MIGRATED_METRICS,
     DEFAULT_AUTODISCOVERY_INTERVAL,
+    ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
     ENGINE_EDITION_SQL_DATABASE,
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
@@ -67,7 +68,7 @@ from datadog_checks.sqlserver.queries import (
     get_query_ao_availability_groups,
     get_query_file_stats,
 )
-from datadog_checks.sqlserver.utils import set_default_driver_conf
+from datadog_checks.sqlserver.utils import is_azure_database, set_default_driver_conf
 
 try:
     import adodbapi
@@ -295,6 +296,14 @@ class SQLServer(AgentCheck):
                             self.static_info_cache[STATIC_INFO_VERSION] = version
                             self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = parse_sqlserver_major_version(version)
                             if not self.static_info_cache[STATIC_INFO_MAJOR_VERSION]:
+                                cursor.execute(
+                                    "SELECT CAST(ServerProperty('ProductMajorVersion') AS INT) AS MajorVersion"
+                                )
+                                result = cursor.fetchone()
+                                if result:
+                                    self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = result[0]
+                                else:
+                                    self.log.warning("failed to load version static information due to empty results")
                                 self.log.warning("failed to parse SQL Server major version from version: %s", version)
                         else:
                             self.log.warning("failed to load version static information due to empty results")
@@ -744,14 +753,15 @@ class SQLServer(AgentCheck):
             return self._dynamic_queries
 
         major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
-        if not major_version:
+        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+        # need either major_version or engine_edition to generate queries
+        if not major_version and not is_azure_database(engine_edition):
             self.log.warning("missing major_version, cannot initialize dynamic queries")
             return None
-
-        queries = [get_query_file_stats(major_version)]
+        queries = [get_query_file_stats(major_version, engine_edition)]
 
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
-            if major_version > 2012:
+            if major_version > 2012 or engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE:
                 queries.extend(
                     [
                         get_query_ao_availability_groups(major_version),
@@ -762,7 +772,7 @@ class SQLServer(AgentCheck):
             else:
                 self.log.warning('AlwaysOn metrics are not supported on version 2012')
         if is_affirmative(self.instance.get('include_fci_metrics', False)):
-            if major_version > 2012:
+            if major_version > 2012 or engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE:
                 queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
             else:
                 self.log.warning('Failover Cluster Instance metrics are not supported on version 2012')

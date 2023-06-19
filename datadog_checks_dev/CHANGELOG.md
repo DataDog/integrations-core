@@ -1,5 +1,19 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 20.0.0 / 2023-06-16
+
+* [Added] Upgrade Pydantic model code generator. See [#14779](https://github.com/DataDog/integrations-core/pull/14779).
+* [Added] Add validations for removed dependencies. See [#14556](https://github.com/DataDog/integrations-core/pull/14556).
+* [Fixed] Update the expvar port and enable telemetry. See [#14729](https://github.com/DataDog/integrations-core/pull/14729).
+* [Changed] Remove `pyperclip` dependency and clipboard functionality. See [#14782](https://github.com/DataDog/integrations-core/pull/14782).
+
+## 19.4.1 / 2023-06-08
+
+* [Fixed] Revert "Capture stderr from docker compose to improve debugging experience" (#13949). See [#14714](https://github.com/DataDog/integrations-core/pull/14714).
+* [Fixed] Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* [Fixed] Allow typed-ast to work for python3.11. See [#14689](https://github.com/DataDog/integrations-core/pull/14689).
+* [Fixed] Rephrase the `--dev` description for the `start` command. See [#14681](https://github.com/DataDog/integrations-core/pull/14681).
+
 ## 19.4.0 / 2023-06-06
 
 * [Added] Update minimum base check version for templates. See [#14643](https://github.com/DataDog/integrations-core/pull/14643).
