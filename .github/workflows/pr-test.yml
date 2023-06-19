@@ -37,7 +37,7 @@ jobs:
 
       # Options
       standard: true
-      test-py2: ${{ !matrix.python-support || contains(matrix.python-support, '2') }}
+      test-py2: false
       test-py3: ${{ !matrix.python-support || contains(matrix.python-support, '3') }}
 
       # For other repositories
