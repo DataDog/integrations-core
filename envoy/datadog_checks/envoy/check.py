@@ -150,12 +150,12 @@ class EnvoyCheckV2(OpenMetricsBaseCheckV2):
         if not self.base_url:
             self.log.debug("Skipping server info collection due to malformed url: %s", self.base_url)
             return
-        
+
         # From http://domain/thing/stats to http://domain/thing/server_info
         if not self.collect_server_info:
             self.log.debug("Skipping server info collection as it is disabled, collect_server_info")
             return
-        
+
         server_info_url = urljoin(self.base_url, 'server_info')
         raw_version = _get_server_info(server_info_url, self.log, self.http)
 
