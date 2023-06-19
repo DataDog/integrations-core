@@ -10,7 +10,7 @@ from datadog_checks.dev.tooling.commands.dep import dep
 from datadog_checks.dev.tooling.commands.run import run
 from datadog_checks.dev.tooling.commands.test import test
 
-from ddev.__about__ import __version__
+from ddev._version import __version__
 from ddev.cli.application import Application
 from ddev.cli.ci import ci
 from ddev.cli.clean import clean
@@ -144,6 +144,10 @@ ddev.add_command(status)
 ddev.add_command(test)
 ddev.add_command(validate)
 
+__management_command = os.environ.get('PYAPP_COMMAND_NAME', '')
+if __management_command:
+    ddev.add_command(click.Command(name=__management_command, help='Manage this application'))
+
 
 def main():  # no cov
     manager = pluggy.PluginManager('ddev')
@@ -152,7 +156,7 @@ def main():  # no cov
     manager.hook.register_commands()
 
     try:
-        return ddev(windows_expand_args=False)
+        return ddev(prog_name='ddev', windows_expand_args=False)
     except Exception:
         from rich.console import Console
 
