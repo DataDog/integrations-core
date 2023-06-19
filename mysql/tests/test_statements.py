@@ -809,6 +809,9 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
     dd_run_check(mysql_check)
     mysql_check.cancel()
+    # wait for it to stop and make sure it doesn't throw any exceptions
+    mysql_check._statement_samples._job_loop_future.result()
+    mysql_check._statement_metrics._job_loop_future.result()
     assert not mysql_check._statement_samples._job_loop_future.running(), "samples thread should be stopped"
     assert not mysql_check._statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
     assert mysql_check._statement_samples._db is None, "samples db connection should be gone"
@@ -844,10 +847,12 @@ def test_async_job_enabled(dd_run_check, dbm_instance, statement_samples_enabled
     mysql_check.cancel()
     if statement_samples_enabled:
         assert mysql_check._statement_samples._job_loop_future is not None
+        mysql_check._statement_samples._job_loop_future.result()
     else:
         assert mysql_check._statement_samples._job_loop_future is None
     if statement_metrics_enabled:
         assert mysql_check._statement_metrics._job_loop_future is not None
+        mysql_check._statement_metrics._job_loop_future.result()
     else:
         assert mysql_check._statement_metrics._job_loop_future is None
 

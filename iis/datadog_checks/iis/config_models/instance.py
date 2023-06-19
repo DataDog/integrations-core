@@ -69,35 +69,14 @@ class MetricPatterns(BaseModel):
     include: Optional[Sequence[str]]
 
 
-class Counter1(BaseModel):
-    class Config:
-        extra = Extra.allow
-        allow_mutation = False
-
-    aggregate: Optional[Union[bool, Literal['only']]]
-    average: Optional[bool]
-    metric_name: Optional[str]
-    name: Optional[str]
-    type: Optional[str]
-
-
-class InstanceCounts1(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    monitored: Optional[str]
-    total: Optional[str]
-    unique: Optional[str]
-
-
 class Metrics(BaseModel):
     class Config:
         allow_mutation = False
 
-    counters: Sequence[Mapping[str, Union[str, Counter1]]]
+    counters: Sequence[Mapping[str, Union[str, Counter]]]
     exclude: Optional[Sequence[str]]
     include: Optional[Sequence[str]]
-    instance_counts: Optional[InstanceCounts1]
+    instance_counts: Optional[InstanceCounts]
     name: str
     tag_name: Optional[str]
     use_localized_counters: Optional[bool]
