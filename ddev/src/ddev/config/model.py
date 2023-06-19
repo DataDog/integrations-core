@@ -37,11 +37,29 @@ class LazilyParsedConfig:
             if prefix:
                 parse_config(getattr(self, name))
 
-    def raise_error(self, message, *, extra_steps=()):
+    def raise_error(self, message, *, extra_steps=(), stack_depth=1):
         import inspect
 
-        field = inspect.currentframe().f_back.f_code.co_name
-        raise ConfigurationError(message, location=' -> '.join([*self.steps, field, *extra_steps]))
+        # raise_error will be the current frame i.e., sys._getframe(0) as the stack is inspected here
+        #
+        # In order to get details about the actual exception point, the first entry of the stack is used
+        #   by default i.e., sys._getframe(1). This can be extracted using index 1 of inspect.stack() response
+        #
+        # Providing an option to specify the stack depth will allow getting the correct function deatils inspite
+        #   of abstracting error checks
+        #
+        # In this case to use stack depth of 2 thereby providing the correct function names for calling functions
+        #   that use _check_string_instance and _check_dict_instance which inturn uses raise_error
+        field = inspect.stack()[stack_depth].function
+        raise ConfigurationError(message, location=" -> ".join([*self.steps, field, *extra_steps]))
+
+    def _check_string_instance(self, obj, extra_steps=()):
+        if not isinstance(obj, str):
+            self.raise_error("must be a string", stack_depth=2, extra_steps=extra_steps)
+
+    def _check_dict_instance(self, obj, extra_steps=()):
+        if not isinstance(obj, dict):
+            self.raise_error("must be a table", stack_depth=2, extra_steps=extra_steps)
 
 
 class RootConfig(LazilyParsedConfig):
@@ -63,9 +81,8 @@ class RootConfig(LazilyParsedConfig):
     def repo(self):
         if self._field_repo is FIELD_TO_PARSE:
             repo = self.raw_data['repo'] if 'repo' in self.raw_data else 'core'
-            if not isinstance(repo, str):
-                self.raise_error('must be a string')
-            elif repo not in self.repos:
+            self._check_string_instance(obj=repo)
+            if repo not in self.repos:
                 self.raise_error('unknown repository')
 
             self.raw_data['repo'] = repo
@@ -82,9 +99,8 @@ class RootConfig(LazilyParsedConfig):
     def agent(self):
         if self._field_agent is FIELD_TO_PARSE:
             agent = self.raw_data['agent'] if 'agent' in self.raw_data else 'dev'
-            if not isinstance(agent, str):
-                self.raise_error('must be a string')
-            elif agent not in self.agents:
+            self._check_string_instance(obj=agent)
+            if agent not in self.agents:
                 self.raise_error('unknown Agent')
 
             self.raw_data['agent'] = agent
@@ -101,9 +117,8 @@ class RootConfig(LazilyParsedConfig):
     def org(self):
         if self._field_org is FIELD_TO_PARSE:
             org = self.raw_data['org'] if 'org' in self.raw_data else 'default'
-            if not isinstance(org, str):
-                self.raise_error('must be a string')
-            elif org not in self.orgs:
+            self._check_string_instance(obj=org)
+            if org not in self.orgs:
                 self.raise_error('unknown Org')
 
             self.raw_data['org'] = org
@@ -121,14 +136,12 @@ class RootConfig(LazilyParsedConfig):
         if self._field_repos is FIELD_TO_PARSE:
             if 'repos' in self.raw_data:
                 repos = self.raw_data['repos']
-                if not isinstance(repos, dict):
-                    self.raise_error('must be a table')
-                elif not repos:
+                self._check_dict_instance(obj=repos)
+                if not repos:
                     self.raise_error('must define at least one repository')
 
                 for name, data in repos.items():
-                    if not isinstance(data, str):
-                        self.raise_error('must be a string', extra_steps=(name,))
+                    self._check_string_instance(obj=data, extra_steps=(name,))
 
                 self._field_repos = repos
             else:
@@ -151,14 +164,12 @@ class RootConfig(LazilyParsedConfig):
         if self._field_agents is FIELD_TO_PARSE:
             if 'agents' in self.raw_data:
                 agents = self.raw_data['agents']
-                if not isinstance(agents, dict):
-                    self.raise_error('must be a table')
-                elif not agents:
+                self._check_dict_instance(obj=agents)
+                if not agents:
                     self.raise_error('must define at least one Agent')
 
                 for name, data in agents.items():
-                    if not isinstance(data, dict):
-                        self.raise_error('must be a table', extra_steps=(name,))
+                    self._check_dict_instance(obj=data, extra_steps=(name,))
 
                 self._field_agents = agents
             else:
@@ -179,14 +190,12 @@ class RootConfig(LazilyParsedConfig):
         if self._field_orgs is FIELD_TO_PARSE:
             if 'orgs' in self.raw_data:
                 orgs = self.raw_data['orgs']
-                if not isinstance(orgs, dict):
-                    self.raise_error('must be a table')
-                elif not orgs:
+                self._check_dict_instance(obj=orgs)
+                if not orgs:
                     self.raise_error('must define at least one Org')
 
                 for name, data in orgs.items():
-                    if not isinstance(data, dict):
-                        self.raise_error('must be a table', extra_steps=(name,))
+                    self._check_dict_instance(obj=data, extra_steps=(name,))
 
                 self._field_orgs = orgs
             else:
@@ -212,14 +221,11 @@ class RootConfig(LazilyParsedConfig):
         if self._field_github is FIELD_TO_PARSE:
             if 'github' in self.raw_data:
                 github = self.raw_data['github']
-                if not isinstance(github, dict):
-                    self.raise_error('must be a table')
-
-                self._field_github = GitHubConfig(github, ('github',))
+                self._check_dict_instance(obj=github)
             else:
                 github = {}
                 self.raw_data['github'] = github
-                self._field_github = GitHubConfig(github, ('github',))
+            self._field_github = GitHubConfig(github, ('github',))
 
         return self._field_github
 
@@ -233,14 +239,11 @@ class RootConfig(LazilyParsedConfig):
         if self._field_pypi is FIELD_TO_PARSE:
             if 'pypi' in self.raw_data:
                 pypi = self.raw_data['pypi']
-                if not isinstance(pypi, dict):
-                    self.raise_error('must be a table')
-
-                self._field_pypi = PyPIConfig(pypi, ('pypi',))
+                self._check_dict_instance(obj=pypi)
             else:
                 pypi = {}
                 self.raw_data['pypi'] = pypi
-                self._field_pypi = PyPIConfig(pypi, ('pypi',))
+            self._field_pypi = PyPIConfig(pypi, ('pypi',))
 
         return self._field_pypi
 
@@ -251,17 +254,15 @@ class RootConfig(LazilyParsedConfig):
 
     @property
     def trello(self):
+        # TODO: Remove trello
         if self._field_trello is FIELD_TO_PARSE:
             if 'trello' in self.raw_data:
                 trello = self.raw_data['trello']
-                if not isinstance(trello, dict):
-                    self.raise_error('must be a table')
-
-                self._field_trello = TrelloConfig(trello, ('trello',))
+                self._check_dict_instance(obj=trello)
             else:
                 trello = {}
                 self.raw_data['trello'] = trello
-                self._field_trello = TrelloConfig(trello, ('trello',))
+            self._field_trello = TrelloConfig(trello, ('trello',))
 
         return self._field_trello
 
@@ -275,14 +276,11 @@ class RootConfig(LazilyParsedConfig):
         if self._field_terminal is FIELD_TO_PARSE:
             if 'terminal' in self.raw_data:
                 terminal = self.raw_data['terminal']
-                if not isinstance(terminal, dict):
-                    self.raise_error('must be a table')
-
-                self._field_terminal = TerminalConfig(terminal, ('terminal',))
+                self._check_dict_instance(obj=terminal)
             else:
                 terminal = {}
                 self.raw_data['terminal'] = terminal
-                self._field_terminal = TerminalConfig(terminal, ('terminal',))
+            self._field_terminal = TerminalConfig(terminal, ('terminal',))
 
         return self._field_terminal
 
@@ -304,9 +302,7 @@ class RepoConfig(LazilyParsedConfig):
         if self._field_name is FIELD_TO_PARSE:
             if 'name' in self.raw_data:
                 name = self.raw_data['name']
-                if not isinstance(name, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=name)
                 self._field_name = name
             else:
                 self.raise_error('required field')
@@ -323,9 +319,7 @@ class RepoConfig(LazilyParsedConfig):
         if self._field_path is FIELD_TO_PARSE:
             if 'path' in self.raw_data:
                 path = self.raw_data['path']
-                if not isinstance(path, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=path)
                 self._field_path = path
             else:
                 self.raise_error('required field')
@@ -350,9 +344,7 @@ class AgentConfig(LazilyParsedConfig):
         if self._field_name is FIELD_TO_PARSE:
             if 'name' in self.raw_data:
                 name = self.raw_data['name']
-                if not isinstance(name, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=name)
                 self._field_name = name
             else:
                 self.raise_error('required field')
@@ -369,9 +361,7 @@ class AgentConfig(LazilyParsedConfig):
         if self._field_config is FIELD_TO_PARSE:
             if 'config' in self.raw_data:
                 config = self.raw_data['config']
-                if not isinstance(config, dict):
-                    self.raise_error('must be a table')
-
+                self._check_dict_instance(obj=config)
                 self._field_config = config
             else:
                 self.raise_error('required field')
@@ -396,9 +386,7 @@ class OrgConfig(LazilyParsedConfig):
         if self._field_name is FIELD_TO_PARSE:
             if 'name' in self.raw_data:
                 name = self.raw_data['name']
-                if not isinstance(name, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=name)
                 self._field_name = name
             else:
                 self.raise_error('required field')
@@ -415,9 +403,7 @@ class OrgConfig(LazilyParsedConfig):
         if self._field_config is FIELD_TO_PARSE:
             if 'config' in self.raw_data:
                 config = self.raw_data['config']
-                if not isinstance(config, dict):
-                    self.raise_error('must be a table')
-
+                self._check_dict_instance(obj=config)
                 self._field_config = config
             else:
                 self.raise_error('required field')
@@ -442,9 +428,7 @@ class GitHubConfig(LazilyParsedConfig):
         if self._field_user is FIELD_TO_PARSE:
             if 'user' in self.raw_data:
                 user = self.raw_data['user']
-                if not isinstance(user, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=user)
                 self._field_user = user
             else:
                 self._field_user = self.raw_data['user'] = os.environ.get('DD_GITHUB_USER', '')
@@ -461,9 +445,7 @@ class GitHubConfig(LazilyParsedConfig):
         if self._field_token is FIELD_TO_PARSE:
             if 'token' in self.raw_data:
                 token = self.raw_data['token']
-                if not isinstance(token, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=token)
                 self._field_token = token
             else:
                 self._field_token = self.raw_data['token'] = os.environ.get('DD_GITHUB_TOKEN', '')
@@ -488,9 +470,7 @@ class PyPIConfig(LazilyParsedConfig):
         if self._field_user is FIELD_TO_PARSE:
             if 'user' in self.raw_data:
                 user = self.raw_data['user']
-                if not isinstance(user, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=user)
                 self._field_user = user
             else:
                 self._field_user = self.raw_data['user'] = ''
@@ -507,9 +487,7 @@ class PyPIConfig(LazilyParsedConfig):
         if self._field_auth is FIELD_TO_PARSE:
             if 'auth' in self.raw_data:
                 auth = self.raw_data['auth']
-                if not isinstance(auth, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=auth)
                 self._field_auth = auth
             else:
                 self._field_auth = self.raw_data['auth'] = ''
@@ -534,9 +512,7 @@ class TrelloConfig(LazilyParsedConfig):
         if self._field_key is FIELD_TO_PARSE:
             if 'key' in self.raw_data:
                 key = self.raw_data['key']
-                if not isinstance(key, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=key)
                 self._field_key = key
             else:
                 self._field_key = self.raw_data['key'] = ''
@@ -553,9 +529,7 @@ class TrelloConfig(LazilyParsedConfig):
         if self._field_token is FIELD_TO_PARSE:
             if 'token' in self.raw_data:
                 token = self.raw_data['token']
-                if not isinstance(token, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=token)
                 self._field_token = token
             else:
                 self._field_token = self.raw_data['token'] = ''
@@ -579,14 +553,11 @@ class TerminalConfig(LazilyParsedConfig):
         if self._field_styles is FIELD_TO_PARSE:
             if 'styles' in self.raw_data:
                 styles = self.raw_data['styles']
-                if not isinstance(styles, dict):
-                    self.raise_error('must be a table')
-
-                self._field_styles = StylesConfig(styles, self.steps + ('styles',))
+                self._check_dict_instance(obj=styles)
             else:
                 styles = {}
                 self.raw_data['styles'] = styles
-                self._field_styles = StylesConfig(styles, self.steps + ('styles',))
+            self._field_styles = StylesConfig(styles, self.steps + ('styles',))
 
         return self._field_styles
 
@@ -613,9 +584,7 @@ class StylesConfig(LazilyParsedConfig):
         if self._field_info is FIELD_TO_PARSE:
             if 'info' in self.raw_data:
                 info = self.raw_data['info']
-                if not isinstance(info, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=info)
                 self._field_info = info
             else:
                 self._field_info = self.raw_data['info'] = 'bold'
@@ -632,9 +601,7 @@ class StylesConfig(LazilyParsedConfig):
         if self._field_success is FIELD_TO_PARSE:
             if 'success' in self.raw_data:
                 success = self.raw_data['success']
-                if not isinstance(success, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=success)
                 self._field_success = success
             else:
                 self._field_success = self.raw_data['success'] = 'bold cyan'
@@ -651,9 +618,7 @@ class StylesConfig(LazilyParsedConfig):
         if self._field_error is FIELD_TO_PARSE:
             if 'error' in self.raw_data:
                 error = self.raw_data['error']
-                if not isinstance(error, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=error)
                 self._field_error = error
             else:
                 self._field_error = self.raw_data['error'] = 'bold red'
@@ -670,9 +635,7 @@ class StylesConfig(LazilyParsedConfig):
         if self._field_warning is FIELD_TO_PARSE:
             if 'warning' in self.raw_data:
                 warning = self.raw_data['warning']
-                if not isinstance(warning, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=warning)
                 self._field_warning = warning
             else:
                 self._field_warning = self.raw_data['warning'] = 'bold yellow'
@@ -689,9 +652,7 @@ class StylesConfig(LazilyParsedConfig):
         if self._field_waiting is FIELD_TO_PARSE:
             if 'waiting' in self.raw_data:
                 waiting = self.raw_data['waiting']
-                if not isinstance(waiting, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=waiting)
                 self._field_waiting = waiting
             else:
                 self._field_waiting = self.raw_data['waiting'] = 'bold magenta'
@@ -708,9 +669,7 @@ class StylesConfig(LazilyParsedConfig):
         if self._field_debug is FIELD_TO_PARSE:
             if 'debug' in self.raw_data:
                 debug = self.raw_data['debug']
-                if not isinstance(debug, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=debug)
                 self._field_debug = debug
             else:
                 self._field_debug = self.raw_data['debug'] = 'bold'
@@ -727,9 +686,7 @@ class StylesConfig(LazilyParsedConfig):
         if self._field_spinner is FIELD_TO_PARSE:
             if 'spinner' in self.raw_data:
                 spinner = self.raw_data['spinner']
-                if not isinstance(spinner, str):
-                    self.raise_error('must be a string')
-
+                self._check_string_instance(obj=spinner)
                 self._field_spinner = spinner
             else:
                 self._field_spinner = self.raw_data['spinner'] = 'simpleDotsScrolling'
