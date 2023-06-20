@@ -6,7 +6,6 @@ from collections import defaultdict
 from itertools import product
 
 import click
-import pyperclip
 import requests
 
 from ....fs import dir_exists, path_join, write_file_lines
@@ -243,5 +242,4 @@ def parse(ctx, endpoint, check, here):
         '}}'.format('\n'.join("    '{}': '{}',".format(metric, data['dd_name']) for metric, data in metric_items))
     )
 
-    pyperclip.copy(metric_map)
-    echo_success('\nThe metric map has been copied to your clipboard, paste it to any file you want!')
+    echo_info(metric_map)

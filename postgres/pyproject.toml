@@ -30,7 +30,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=25.4.0",
+    "datadog-checks-base>=32.1.0",
 ]
 dynamic = [
     "version",
