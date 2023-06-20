@@ -22,8 +22,8 @@ class Application(Terminal):
         self.__exit_func = exit_func
 
         self.config_file = ConfigFile()
-        self.quiet = self.verbosity < VerbosityLevels.NORMAL
-        self.verbose = self.verbosity > VerbosityLevels.NORMAL
+        self.quiet = self.verbosity < VerbosityLevels.INFO
+        self.verbose = self.verbosity > VerbosityLevels.INFO
 
         # Lazily set these as we acquire more knowledge about the desired environment
         self.__repo = cast(Repository, None)

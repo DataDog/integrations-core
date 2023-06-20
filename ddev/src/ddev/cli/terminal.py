@@ -15,7 +15,6 @@ from rich.errors import StyleSyntaxError
 from rich.style import Style
 from rich.text import Text
 
-
 from ddev.config.constants import VerbosityLevels
 
 if TYPE_CHECKING:
@@ -197,33 +196,22 @@ class Terminal:
         self.output(text, self._style_level_warning, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_info(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < VerbosityLevels.NORMAL:
+        if self.verbosity < VerbosityLevels.INFO:
             return
 
         self.output(text, self._style_level_info, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_success(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < VerbosityLevels.NORMAL:
+        if self.verbosity < VerbosityLevels.INFO:
             return
 
         self.output(text, self._style_level_success, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_waiting(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < VerbosityLevels.NORMAL:
+        if self.verbosity < VerbosityLevels.INFO:
             return
 
         self.output(text, self._style_level_waiting, stderr=stderr, indent=indent, link=link, **kwargs)
-
-    def display_debug(self, text='', level=VerbosityLevels.VERBOSE, stderr=True, indent=None, link=None, **kwargs):
-        if not VerbosityLevels.VERBOSE <= level <= VerbosityLevels.DEBUG:
-            raise ValueError(
-                f'Debug output can only have verbosity levels between {VerbosityLevels.VERBOSE} and \
-{VerbosityLevels.DEBUG} (inclusive)'
-            )
-        elif self.verbosity < level:
-            return
-
-        self.output(text, self._style_level_debug, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_header(self, title=''):
         self.console.rule(Text(title, self._style_level_success))
