@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 20.0.1 / 2023-06-20
+
+* [Fixed] Fix ability to release ddev. See [#14790](https://github.com/DataDog/integrations-core/pull/14790).
+
 ## 20.0.0 / 2023-06-16
 
 * [Added] Upgrade Pydantic model code generator. See [#14779](https://github.com/DataDog/integrations-core/pull/14779).
