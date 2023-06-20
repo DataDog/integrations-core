@@ -22,7 +22,7 @@ defaults:
     working-directory: ddev
 
 env:
-  APP_NAME: ddev         
+  APP_NAME: ddev
   PYTHON_VERSION: "3.9"
   PYOXIDIZER_VERSION: "0.24.0"
 
@@ -179,17 +179,17 @@ jobs:
       run: |-
         mkdir packaging
         cd dist/app
-        echo $PWD 
+        echo $PWD
 
         binary="$(ls)"
 
         if [[ "$binary" =~ -pc-windows- ]]; then
           7z a "../../packaging/${binary:0:-4}.zip" "$binary"
-          echo $PWD 
+          echo $PWD
         else
           chmod +x "$binary"
           tar -czf "../../packaging/$binary.tar.gz" "$binary"
-          echo $PWD 
+          echo $PWD
         fi
 
     - name: Upload staged archive
@@ -478,7 +478,7 @@ jobs:
       with:
         skip-existing: true
         user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
+        password: ${{ secrets.PYPI_TOKEN_DDEV }}
 
     - name: Add assets to current release
       uses: softprops/action-gh-release@v1
