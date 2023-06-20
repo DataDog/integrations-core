@@ -15,7 +15,6 @@ class ConnectionPoolFullError(Exception):
     def __init__(self, size, timeout):
         self.size = size
         self.timeout = timeout
-        super().__init__()
 
     def __str__(self):
         return "Could not insert connection in pool size {} within {} seconds".format(self.size, self.timeout)
@@ -90,14 +89,14 @@ class MultiDatabaseConnectionPool(object):
             conn = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None))
             db = conn.connection
             if db is None or db.closed:
-                if self.max_conns is not None and len(self._conns) == self.max_conns:
+                if self.max_conns is not None:
                     # try to free space until we succeed
                     while len(self._conns) >= self.max_conns:
                         self.prune_connections()
                         self.evict_lru()
                         if timeout is not None and (datetime.datetime.now() - start).total_seconds() > timeout:
                             raise ConnectionPoolFullError(self.max_conns, timeout)
-                        time.sleep(0.001)
+                        time.sleep(0.01)
                         continue
                 self._stats.connection_opened += 1
                 db = self.connect_fn(dbname)
@@ -127,13 +126,15 @@ class MultiDatabaseConnectionPool(object):
         """
         try:
             with self._mu:
-                db = None
                 db = self._get_connection_raw(dbname, ttl_ms, timeout)
             yield db
         finally:
             with self._mu:
-                if db is not None:
+                try:
                     self._conns[dbname].active = False
+                except KeyError:
+                    # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
+                    pass
 
     def prune_connections(self):
         """
