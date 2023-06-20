@@ -53,32 +53,32 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
 ]
 
 STATEMENT_METRICS_QUERY = """\
-with qstats as (
-    select query_hash, query_plan_hash, last_execution_time, last_elapsed_time,
-            CONCAT(
+with qstats_aggr as (
+    select query_hash, query_plan_hash, max(last_execution_time) last_execution_time, max(last_elapsed_time) last_elapsed_time,
+            max(CONCAT(
                 CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
                 CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
-                CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1)) as plan_handle_and_offsets,
-           (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
-           {query_metrics_columns}
+                CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1))) as plan_handle_and_offsets,
+    sum(execution_count) as execution_count, sum(total_worker_time) as total_worker_time, sum(total_physical_reads) as total_physical_reads, 
+    sum(total_logical_writes) as total_logical_writes, sum(total_logical_reads) as total_logical_reads, sum(total_clr_time) as total_clr_time, sum(total_elapsed_time) as total_elapsed_time, 
+    sum(total_rows) as total_rows, sum(total_dop) as total_dop, sum(total_grant_kb) as total_grant_kb, sum(total_used_grant_kb) as total_used_grant_kb, sum(total_ideal_grant_kb) as total_ideal_grant_kb, 
+    sum(total_reserved_threads) as total_reserved_threads, sum(total_used_threads) as total_used_threads, sum(total_columnstore_segment_reads) as total_columnstore_segment_reads, 
+    sum(total_columnstore_segment_skips) as total_columnstore_segment_skips, sum(total_spills) as total_spills
     from sys.dm_exec_query_stats
-),
-qstats_aggr as (
-    select query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
-       D.name as database_name, max(plan_handle_and_offsets) as plan_handle_and_offsets,
-       max(last_execution_time) as last_execution_time,
-       max(last_elapsed_time) as last_elapsed_time,
-    {query_metrics_column_sums}
-    from qstats S
-    left join sys.databases D on S.dbid = D.database_id
-    group by query_hash, query_plan_hash, S.dbid, D.name
-),
+    group by query_hash, query_plan_hash
+    having DATEADD(ms, max(last_elapsed_time) / 1000, max(last_execution_time)) > dateadd(second, -?, getdate())
+), 
 qstats_aggr_split as (select TOP {limit}
     convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
     convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
     convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
-    * from qstats_aggr
-    where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
+    a.* from qstats_aggr a
+), 
+qstats_dbid as (
+    select a.*,
+    ( select cast(value as int) 
+        from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid
+    from qstats_aggr_split a
 )
 select
     SUBSTRING(text, (statement_start_offset / 2) + 1,
@@ -88,8 +88,10 @@ select
             - statement_start_offset) / 2) + 1) AS statement_text,
     qt.text,
     encrypted as is_encrypted,
-    * from qstats_aggr_split
-    cross apply sys.dm_exec_sql_text(plan_handle) qt
+    q.*, d.name database_name
+    from qstats_dbid q
+    left join sys.databases d on q.dbid = d.database_id 
+    cross apply sys.dm_exec_sql_text(plan_handle) qt 
 """
 
 # This query is an optimized version of the statement metrics query
