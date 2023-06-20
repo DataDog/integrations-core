@@ -32,9 +32,30 @@ EXPECTED_METRICS_POOL_TAGS = [
 EXPECTED_TAGS = ['ceph_fsid:e0efcf84-e8ed-4916-8ce1-9c70242d390a', 'ceph_mon_state:peon', 'optional:tag1']
 
 OSD_SPECIFIC_TAGS = {
-    'osd0': ['ceph_osd_device:/dev/sda', 'ceph_osd_device_class:hdd', 'ceph_osd_device_id:disk0', 'ceph_osd_objectstore:bluestore', 'ceph_release:octopus', 'ceph_version:15.2.8'],
-    'osd1': ['ceph_osd_device:/dev/sdb', 'ceph_osd_device_class:hdd', 'ceph_osd_device_id:disk1', 'ceph_osd_objectstore:bluestore', 'ceph_release:octopus', 'ceph_version:15.2.8'],
-    'osd2': ['ceph_osd_device:/dev/sdc', 'ceph_osd_device_class:hdd', 'ceph_osd_device_id:disk2', 'ceph_osd_objectstore:bluestore', 'ceph_release:octopus', 'ceph_version:15.2.8'],
+    'osd0': [
+        'ceph_osd_device:/dev/sda',
+        'ceph_osd_device_class:hdd',
+        'ceph_osd_device_id:disk0',
+        'ceph_osd_objectstore:bluestore',
+        'ceph_release:octopus',
+        'ceph_version:15.2.8',
+    ],
+    'osd1': [
+        'ceph_osd_device:/dev/sdb',
+        'ceph_osd_device_class:hdd',
+        'ceph_osd_device_id:disk1',
+        'ceph_osd_objectstore:bluestore',
+        'ceph_release:octopus',
+        'ceph_version:15.2.8',
+    ],
+    'osd2': [
+        'ceph_osd_device:/dev/sdc',
+        'ceph_osd_device_class:hdd',
+        'ceph_osd_device_id:disk2',
+        'ceph_osd_objectstore:bluestore',
+        'ceph_release:octopus',
+        'ceph_version:15.2.8',
+    ],
 }
 
 pytestmark = pytest.mark.unit
