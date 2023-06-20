@@ -206,19 +206,19 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
         # The test can be considered successful as long as the backend is eventually terminated.
         for attempt in range(attempts_to_verify):
             rows = get_activity()
-            server_pids = {row["pid"] for row in rows}
+            server_pids = {row['pid'] for row in rows}
             conns = [c.connection for c in pool._conns.values()]
             conn_pids = {db.info.backend_pid for db in conns}
-            leaked_rows = [row for row in rows if row["pid"] in server_pids - conn_pids]
+            leaked_rows = [row for row in rows if row['pid'] in server_pids - conn_pids]
             if not leaked_rows:
                 break
             if attempt < attempts_to_verify - 1:
                 time.sleep(1)
                 continue
-            assert len(leaked_rows) == 0, "Found leaked rows on the server not in the connection pool"
+            assert len(leaked_rows) == 0, 'Found leaked rows on the server not in the connection pool'
 
         assert len({row['datname'] for row in rows}) == 51
-        assert len(rows) == 51, "Possible leaked connections"
+        assert len(rows) == 51, 'Possible leaked connections'
         assert all(row['state'] == 'idle' for row in rows)
     assert pool._stats.connection_opened == 1
     assert pool._stats.connection_closed == 0
@@ -240,7 +240,7 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
         if attempt < attempts_to_verify - 1:
             time.sleep(1)
             continue
-        assert len(leaked_rows) == 0, "Found leaked rows remaining after TTL was updated to short TTL"
+        assert len(leaked_rows) == 0, 'Found leaked rows remaining after TTL was updated to short TTL'
 
     # Final check that the server contains no leaked connections still open
     rows = get_activity()
