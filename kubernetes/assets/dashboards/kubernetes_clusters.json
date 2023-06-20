@@ -569,12 +569,7 @@
                     },
                     {
                         "definition": {
-                            "custom_links": [
-                                {
-                                    "label": "View Pods overview",
-                                    "link": "https://app.datadoghq.com/screen/integration/30322/kubernetes-pods-overview"
-                                }
-                            ],
+                            "custom_links": [],
                             "precision": 0,
                             "requests": [
                                 {
@@ -597,12 +592,7 @@
                     },
                     {
                         "definition": {
-                            "custom_links": [
-                                {
-                                    "label": "View Pods overview",
-                                    "link": "https://app.datadoghq.com/screen/integration/30322/kubernetes-pods-overview"
-                                }
-                            ],
+                            "custom_links": [],
                             "precision": 0,
                             "requests": [
                                 {

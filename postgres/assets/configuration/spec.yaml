@@ -258,6 +258,7 @@ files:
       description: |
         Collect metrics about WAL file age.
         NOTE: You must be running the check local to your database if you want to enable this option.
+        Starting PG10, wal metrics are collected by default using `pg_ls_waldir` and don't need local access anymore.
       value:
         type: boolean
         example: false
@@ -409,7 +410,7 @@ files:
       options:
         - name: enabled
           description: |
-            Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
+            Enable collection of query activity. Requires `dbm: true`.
           value:
             type: boolean
             example: true

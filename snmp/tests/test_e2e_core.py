@@ -7,6 +7,7 @@ from datadog_checks.dev.docker import get_container_ip
 from tests.common import SNMP_CONTAINER_NAME
 
 from . import common, metrics
+from .test_e2e_core_metadata import assert_device_metadata
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
@@ -348,6 +349,9 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
 
     for metric in metrics.APC_UPS_METRICS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+    aggregator.assert_metric(
+        'snmp.upsAdvBatteryNumOfBattPacks_userMetric', metric_type=aggregator.GAUGE, tags=tags, count=2
+    )
     aggregator.assert_metric(
         'snmp.upsOutletGroupStatusGroupState',
         metric_type=aggregator.GAUGE,

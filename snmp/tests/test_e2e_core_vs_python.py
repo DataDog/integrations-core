@@ -412,8 +412,8 @@ def test_e2e_profile_fortinet_fortigate(dd_agent_check):
     )
 
 
-def test_e2e_profile_generic_router(dd_agent_check):
-    config = common.generate_container_profile_config('generic-router')
+def test_e2e_profile_generic_device(dd_agent_check):
+    config = common.generate_container_profile_config('generic-device')
     assert_python_vs_core(dd_agent_check, config)
 
 

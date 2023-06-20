@@ -84,8 +84,6 @@ def valid_integration(valid_integrations) -> str:
 @pytest.fixture(autouse=True)
 def config_file(tmp_path, monkeypatch) -> ConfigFile:
     for env_var in (
-        'DD_GITHUB_USER',
-        'DD_GITHUB_TOKEN',
         'DD_SITE',
         'DD_LOGS_CONFIG_DD_URL',
         'DD_DD_URL',

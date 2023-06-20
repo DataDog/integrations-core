@@ -1,5 +1,4 @@
 # Generic profile for network devices
-#
 
 extends:
   - _base.yaml
