@@ -5,9 +5,20 @@ import contextlib
 import datetime
 import inspect
 import threading
+import time
 from typing import Callable, Dict
 
 import psycopg2
+
+
+class ConnectionPoolFullError(Exception):
+    def __init__(self, size, timeout):
+        self.size = size
+        self.timeout = timeout
+        super().__init__()
+
+    def __str__(self):
+        return "Could not insert connection in pool size {} within {} seconds".format(self.size, self.timeout)
 
 
 class ConnectionInfo:
@@ -69,13 +80,9 @@ class MultiDatabaseConnectionPool(object):
                 )
         self.connect_fn = connect_fn
 
-    def get_connection(self, dbname: str, ttl_ms: int, timeout: int = None) -> psycopg2.extensions.connection:
+    def _get_connection_raw(self, dbname: str, ttl_ms: int, timeout: int = None) -> psycopg2.extensions.connection:
         """
-        Grab a connection from the pool if the database is already connected.
-        If max_conns is specified, and the database isn't already connected,
-        make a new connection if the max_conn limit hasn't been reached.
-        Blocks until a connection can be added to the pool,
-        and optionally takes a timeout in seconds.
+        Return a connection from the pool.
         """
         start = datetime.datetime.now()
         self.prune_connections()
@@ -89,7 +96,8 @@ class MultiDatabaseConnectionPool(object):
                         self.prune_connections()
                         self.evict_lru()
                         if timeout is not None and (datetime.datetime.now() - start).total_seconds() > timeout:
-                            raise TimeoutError
+                            raise ConnectionPoolFullError(self.max_conns, timeout)
+                        time.sleep(0.001)
                         continue
                 self._stats.connection_opened += 1
                 db = self.connect_fn(dbname)
@@ -109,18 +117,18 @@ class MultiDatabaseConnectionPool(object):
             return db
 
     @contextlib.contextmanager
-    def get_connection_cm(self, dbname: str, ttl_ms: int, timeout: int = None) -> psycopg2.extensions.connection:
+    def get_connection(self, dbname: str, ttl_ms: int, timeout: int = None):
         """
-        Context managed version of get_connection.
-        TODO: We should eventually move all connection logic in the postgres integration to
-        use context managed connections from one pool. Then, we can combine
-        get_connection and get_connection_context_managed, so no connections can be grabbed
-        out of context.
+        Grab a connection from the pool if the database is already connected.
+        If max_conns is specified, and the database isn't already connected,
+        make a new connection if the max_conn limit hasn't been reached.
+        Blocks until a connection can be added to the pool,
+        and optionally takes a timeout in seconds.
         """
         try:
             with self._mu:
                 db = None
-                db = self.get_connection(dbname, ttl_ms, timeout)
+                db = self._get_connection_raw(dbname, ttl_ms, timeout)
             yield db
         finally:
             with self._mu:
@@ -150,22 +158,6 @@ class MultiDatabaseConnectionPool(object):
                 if not self._terminate_connection_unsafe(dbname):
                     success = False
         return success
-
-    def done(self, dbname: str) -> None:
-        """
-        Mark a connection as done being used, so it can be evicted from the pool.
-        This function does not evict connections from the pool; it just marks them
-        as inactive.
-        done() can only be called on a connection in the same thread that the connection
-        was made.
-        """
-        with self._mu:
-            if self._conns[dbname].thread != threading.current_thread():
-                raise RuntimeError(
-                    "Cannot call done() for this dbname on this thread. Done() can only be called \
-                                   from the same thread the connection was made."
-                )
-            self._conns[dbname].active = False
 
     def evict_lru(self) -> str:
         """
