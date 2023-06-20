@@ -62,6 +62,26 @@ OpenMetrics configurations with generic wildcard values for the `metrics` option
 
 Datadog recommends that you use specific metric names or partial metric name matches for more precise collection.
 
+### Errors parsing the OpenMetrics payload with Agent 7.46 and above
+
+Starting with version 3.0.0 of this integration, that is shipped by default with Agent 7.46 and above, the integration sends by default the `Accept` header set to `application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,text/plain;version=0.0.4;q=0.5,*/*;q=0.1` instead of `text/plain` as it used to do. The integration will then dynamically define which scraper to use based on the `Content-type` it receives from the server.
+
+If you start seeing errors scrapping the OpenMetrics endpoint with this new version because the scraper is now stricter, you can manually set the `Accept` header the integration sends to `text/plain` using the `headers` option in the [configuration file][14], for instance: 
+
+```yaml
+## All options defined here are available to all instances.
+#
+init_config:
+  ...
+instances:
+  - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
+  ...
+    headers:
+      - Accept: text/plain
+```
+
+This will cause the endpoint to return a `Content-type` set to `text/plain`, the integration will then use the previous scraper.
+
 Need help? Contact [Datadog support][8].
 
 ## Further Reading
@@ -82,3 +102,4 @@ Need help? Contact [Datadog support][8].
 [11]: https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
 [12]: https://prometheus.io/docs/instrumenting/exposition_formats/#text-based-format
 [13]: https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
+[14]: https://github.com/DataDog/integrations-core/blob/master/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example#L537-L546
