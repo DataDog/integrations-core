@@ -263,7 +263,7 @@ def test_conn_pool_hit_pool_limit_and_evict(pg_instance):
 
     # ask for one more connection
     with pytest.raises(TimeoutError):
-        db = pool.get_connection("dogs_10", 60000, 1)
+        pool.get_connection("dogs_10", 60000, 1)
 
     # try to evict; none were marked inactive
     evicted = pool.evict_lru()
@@ -277,7 +277,7 @@ def test_conn_pool_hit_pool_limit_and_evict(pg_instance):
     assert pool._stats.connection_closed == 1
 
     # ask for another connection again, error not raised
-    db = pool.get_connection("dogs_50", 60000, 1)
+    pool.get_connection("dogs_50", 60000, 1)
 
 
 @pytest.mark.integration
@@ -307,7 +307,7 @@ def test_conn_pool_multithreaded(pg_instance):
 
     # ask for one more connection
     with pytest.raises(TimeoutError):
-        db = pool.get_connection('dogs_{}'.format(limit + 1), 1, 1)
+        pool.get_connection('dogs_{}'.format(limit + 1), 1, 1)
 
     # try to evict; should be too early
     evicted = pool.evict_lru()
@@ -329,7 +329,7 @@ def test_conn_pool_multithreaded(pg_instance):
 
     assert pool._stats.connection_closed == limit
     # now can add a new connection!
-    db = pool.get_connection('dogs_{}'.format(limit + 1), 60000, 1)
+    pool.get_connection('dogs_{}'.format(limit + 1), 60000, 1)
 
 
 @pytest.mark.integration
@@ -340,7 +340,7 @@ def test_conn_pool_context_managed(pg_instance):
     """
 
     def pretend_to_run_query(pool, dbname):
-        with pool.get_connection_cm(dbname, 10000) as conn:
+        with pool.get_connection_cm(dbname, 10000):
             time.sleep(5)
 
     limit = 30
@@ -371,7 +371,7 @@ def test_conn_pool_context_managed(pg_instance):
         thread.join()
 
     # now can add a new connection, one will get kicked out of pool
-    with pool.get_connection_cm('dogs_{}'.format(limit + 1), 60000) as conn:
+    with pool.get_connection_cm('dogs_{}'.format(limit + 1), 60000):
         pass
 
     assert pool._stats.connection_closed == 1

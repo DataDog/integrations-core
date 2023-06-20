@@ -88,7 +88,7 @@ class MultiDatabaseConnectionPool(object):
                     while len(self._conns) >= self.max_conns:
                         self.prune_connections()
                         self.evict_lru()
-                        if timeout != None and (datetime.datetime.now() - start).total_seconds() > timeout:
+                        if timeout is not None and (datetime.datetime.now() - start).total_seconds() > timeout:
                             raise TimeoutError
                         continue
                 self._stats.connection_opened += 1
