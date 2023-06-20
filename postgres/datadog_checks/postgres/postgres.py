@@ -16,7 +16,13 @@ from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_res
 from datadog_checks.postgres import aws
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
-from datadog_checks.postgres.relationsmanager import INDEX_BLOAT, RELATION_METRICS, TABLE_BLOAT, RelationsManager
+from datadog_checks.postgres.relationsmanager import (
+    DYNAMIC_RELATION_QUERIES,
+    INDEX_BLOAT,
+    RELATION_METRICS,
+    TABLE_BLOAT,
+    RelationsManager,
+)
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
@@ -26,6 +32,7 @@ from .util import (
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
     CONNECTION_METRICS,
     FUNCTION_METRICS,
+    QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_STAT_DATABASE,
     QUERY_PG_STAT_DATABASE_CONFLICTS,
@@ -33,11 +40,15 @@ from .util import (
     QUERY_PG_UPTIME,
     REPLICATION_METRICS,
     SLRU_METRICS,
+    SNAPSHOT_TXID_METRICS,
+    SNAPSHOT_TXID_METRICS_LT_13,
+    STAT_WAL_METRICS,
+    WAL_FILE_METRICS,
     DatabaseConfigurationError,  # noqa: F401
     fmt,
     get_schema_field,
 )
-from .version_utils import V9, V9_2, V10, V13, VersionUtils
+from .version_utils import V9, V9_2, V10, V13, V14, VersionUtils
 
 try:
     import datadog_agent
@@ -80,7 +91,7 @@ class PostgreSql(AgentCheck):
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
         self.metadata_samples = PostgresMetadata(self, self._config, shutdown_callback=self._close_db_pool)
-        self._relations_manager = RelationsManager(self._config.relations)
+        self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
         self.check_initializations.append(self.set_resolved_hostname_metadata)
@@ -162,7 +173,9 @@ class PostgreSql(AgentCheck):
                 q_pg_stat_database["query"] += " AND datname in('{}')".format(self._config.dbname)
                 q_pg_stat_database_conflicts["query"] += " AND datname in('{}')".format(self._config.dbname)
 
-            queries.extend([q_pg_stat_database, q_pg_stat_database_conflicts, QUERY_PG_UPTIME])
+            queries.extend(
+                [q_pg_stat_database, q_pg_stat_database_conflicts, QUERY_PG_UPTIME, QUERY_PG_CONTROL_CHECKPOINT]
+            )
 
         if self.version >= V10:
             # Wal receiver is not supported on aurora
@@ -171,10 +184,26 @@ class PostgreSql(AgentCheck):
             if self.is_aurora is False:
                 queries.append(QUERY_PG_STAT_WAL_RECEIVER)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
+            queries.append(WAL_FILE_METRICS)
+
+        if self.version >= V13:
+            queries.append(SNAPSHOT_TXID_METRICS)
+        if self.version < V13:
+            queries.append(SNAPSHOT_TXID_METRICS_LT_13)
+        if self.version >= V14:
+            queries.append(STAT_WAL_METRICS)
 
         if not queries:
             self.log.debug("no dynamic queries defined")
             return None
+
+        # Dynamic queries for relationsmanager
+        if self._config.relations:
+            for query in DYNAMIC_RELATION_QUERIES:
+                query = copy.copy(query)
+                formatted_query = self._relations_manager.filter_relation_query(query['query'], 'nspname')
+                query['query'] = formatted_query
+                queries.append(query)
 
         self._dynamic_queries = self._new_query_executor(queries)
         self._dynamic_queries.compile_queries()
@@ -183,8 +212,12 @@ class PostgreSql(AgentCheck):
         return self._dynamic_queries
 
     def cancel(self):
+        """
+        Cancels and waits for all threads to stop.
+        """
         self.statement_samples.cancel()
         self.statement_metrics.cancel()
+        self.metadata_samples.cancel()
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
@@ -209,7 +242,11 @@ class PostgreSql(AgentCheck):
         return "standby" if role else "master"
 
     def _collect_wal_metrics(self, instance_tags):
-        wal_file_age = self._get_wal_file_age()
+        if self.version >= V10:
+            # _collect_stats will gather wal file metrics
+            # for PG >= V10
+            return
+        wal_file_age = self._get_local_wal_file_age()
         if wal_file_age is not None:
             self.gauge(
                 "postgresql.wal_age",
@@ -218,18 +255,8 @@ class PostgreSql(AgentCheck):
                 hostname=self.resolved_hostname,
             )
 
-    def _get_wal_dir(self):
-        if self.version >= V10:
-            wal_dir = "pg_wal"
-        else:
-            wal_dir = "pg_xlog"
-
-        wal_log_dir = os.path.join(self._config.data_directory, wal_dir)
-
-        return wal_log_dir
-
-    def _get_wal_file_age(self):
-        wal_log_dir = self._get_wal_dir()
+    def _get_local_wal_file_age(self):
+        wal_log_dir = os.path.join(self._config.data_directory, "pg_xlog")
         if not os.path.isdir(wal_log_dir):
             self.log.warning(
                 "Cannot access WAL log directory: %s. Ensure that you are "

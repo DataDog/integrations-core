@@ -64,3 +64,67 @@ platforms = ["linux", "windows"]
 
 [overrides.ci.tokumx]
 only-py2 = true
+
+[overrides.dependencies.licenses]
+# https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
+aerospike = ['Apache-2.0']
+# https://github.com/baztian/jaydebeapi/blob/master/COPYING
+JayDeBeApi = ['LGPL-3.0-only']
+# https://github.com/pyca/cryptography/blob/main/LICENSE
+cryptography = ['Apache-2.0', 'BSD-3-Clause', 'PSF']
+# https://github.com/rthalley/dnspython/blob/master/LICENSE
+dnspython = ['ISC']
+# https://github.com/cannatag/ldap3/blob/dev/COPYING.txt
+ldap3 = ['LGPL-3.0-only']
+# https://cloudera.github.io/cm_api/
+cm-client = ['Apache-2.0']
+# https://github.com/oauthlib/oauthlib/blob/master/LICENSE
+oauthlib = ['BSD-3-Clause']
+# https://github.com/hajimes/mmh3/blob/master/LICENSE
+mmh3 = ['CC0-1.0']
+# https://github.com/paramiko/paramiko/blob/master/LICENSE
+paramiko = ['LGPL-2.1-only']
+# https://github.com/oracle/python-oracledb/blob/main/LICENSE.txt
+oracledb = ['Apache-2.0']
+# https://github.com/psycopg/psycopg2/blob/master/LICENSE
+# https://github.com/psycopg/psycopg2/blob/master/doc/COPYING.LESSER
+psycopg2-binary = ['LGPL-3.0-only', 'BSD-3-Clause']
+# https://github.com/Legrandin/pycryptodome/blob/master/LICENSE.rst
+pycryptodomex = ['Unlicense', 'BSD-2-Clause']
+# https://github.com/requests/requests-kerberos/pull/123
+requests-kerberos = ['ISC']
+# https://github.com/requests/requests-ntlm/blob/master/LICENSE
+requests-ntlm = ['ISC']
+# https://github.com/rethinkdb/rethinkdb-python/blob/master/LICENSE
+rethinkdb = ['Apache-2.0']
+# https://github.com/simplejson/simplejson/blob/master/LICENSE.txt
+simplejson = ['MIT']
+# https://github.com/Supervisor/supervisor/blob/master/LICENSES.txt
+supervisor = ['BSD-3-Clause-Modification']
+# https://github.com/Cairnarvon/uptime/blob/master/COPYING.txt
+uptime = ['BSD-2-Clause']
+# https://github.com/hickeroar/win_inet_pton/blob/master/LICENSE
+win-inet-pton = ['Unlicense']
+
+[overrides.dependencies.repo]
+PyYAML = 'https://github.com/yaml/pyyaml'
+Pyro4 = 'https://github.com/irmen/Pyro4'
+contextlib2 = 'https://github.com/jazzband/contextlib2'
+dnspython = 'https://github.com/rthalley/dnspython'
+foundationdb = 'https://github.com/apple/foundationdb'
+in-toto = 'https://github.com/in-toto/in-toto'
+lxml = 'https://github.com/lxml/lxml'
+oracledb = 'https://github.com/oracle/python-oracledb'
+packaging = 'https://github.com/pypa/packaging'
+paramiko = 'https://github.com/paramiko/paramiko'
+protobuf = 'https://github.com/protocolbuffers/protobuf'
+psycopg2-binary = 'https://github.com/psycopg/psycopg2'
+pycryptodomex = 'https://github.com/Legrandin/pycryptodome'
+redis = 'https://github.com/redis/redis-py'
+requests = 'https://github.com/psf/requests'
+requests-toolbelt = 'https://github.com/requests/toolbelt'
+service-identity = 'https://github.com/pyca/service-identity'
+snowflake-connector-python = 'https://github.com/snowflakedb/snowflake-connector-python'
+supervisor = 'https://github.com/Supervisor/supervisor'
+tuf = 'https://github.com/theupdateframework/python-tuf'
+typing = 'https://github.com/python/typing'

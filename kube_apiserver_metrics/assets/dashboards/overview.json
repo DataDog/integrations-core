@@ -380,7 +380,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:kube_apiserver.aggregator_unavailable_apiservice{$cluster,$scope} by {kube_namespace,name}",
+                                            "query": "max:kube_apiserver.aggregator_unavailable_apiservice{$cluster,$scope} by {kube_namespace, apiservice_name}",
                                             "aggregator": "avg"
                                         }
                                     ],

@@ -1,5 +1,5 @@
 [env.collectors.datadog-checks]
-check-types = true
+check-types = false
 mypy-args = [
     "--py2",
     "--disallow-untyped-defs",
@@ -13,4 +13,4 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["2.7", "3.9"]
