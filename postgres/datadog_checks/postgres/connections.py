@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import contextlib
 import datetime
 import inspect
 import threading
@@ -72,20 +73,28 @@ class MultiDatabaseConnectionPool(object):
                 )
         self.connect_fn = connect_fn
 
-    def get_connection(self, dbname: str, ttl_ms: int):
+    def get_connection(self, dbname: str, ttl_ms: int, timeout: int = None) -> psycopg2.extensions.connection:
         """
         Grab a connection from the pool if the database is already connected.
         If max_conns is specified, and the database isn't already connected,
-        make a new connection IFF the max_conn limit hasn't been reached.
-        If we can't fit the connection into the pool, return None.
+        make a new connection if the max_conn limit hasn't been reached.
+        Blocks until a connection can be added to the pool,
+        and optionally takes a timeout in seconds.
         """
+        start = datetime.datetime.now()
         self.prune_connections()
         with self._mu:
             conn = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None))
             db = conn.connection
             if db is None or db.closed:
                 if self.max_conns is not None and len(self._conns) == self.max_conns:
-                    return None
+                    # try to free space until we succeed
+                    while len(self._conns) >= self.max_conns:
+                        self.prune_connections()
+                        self.evict_lru()
+                        if timeout != None and (datetime.datetime.now() - start).total_seconds() > timeout:
+                            raise TimeoutError
+                        continue
                 self._stats.connection_opened += 1
                 db = self.connect_fn(dbname)
 
@@ -102,6 +111,25 @@ class MultiDatabaseConnectionPool(object):
                 thread=threading.current_thread(),
             )
             return db
+
+    @contextlib.contextmanager
+    def get_connection_cm(self, dbname: str, ttl_ms: int, timeout: int = None) -> psycopg2.extensions.connection:
+        """
+        Context managed version of get_connection.
+        TODO: We should eventually move all connection logic in the postgres integration to
+        use context managed connections from one pool. Then, we can combine
+        get_connection and get_connection_context_managed, so no connections can be grabbed
+        out of context.
+        """
+        try:
+            with self._mu:
+                db = None
+                db = self.get_connection(dbname, ttl_ms, timeout)
+            yield db
+        finally:
+            with self._mu:
+                if db is not None:
+                    self._conns[dbname].active = False
 
     def prune_connections(self):
         """
@@ -141,34 +169,22 @@ class MultiDatabaseConnectionPool(object):
                     "Cannot call done() for this dbname on this thread. Done() can only be called \
                                    from the same thread the connection was made."
                 )
-
             self._conns[dbname].active = False
 
     def evict_lru(self) -> str:
         """
         Evict and close the inactive connection which was least recently used.
-        Return the dbname connection that was evicted.
+        Return the dbname connection that was evicted or None if we couldn't evict a connection.
         """
         with self._mu:
-            conns_list = dict(self._conns)
-            while True:
-                if not conns_list:
-                    break
+            sorted_conns = sorted(self._conns.items(), key=lambda i: i[1].last_accessed)
+            for name, conn_info in sorted_conns:
+                if not conn_info.active:
+                    self._terminate_connection_unsafe(name)
+                    return name
 
-                eviction_candidate = self._get_lru(conns_list)
-                if self._conns[eviction_candidate].active:
-                    del conns_list[eviction_candidate]
-                    continue
-
-                # eviction candidate successfully found
-                self._terminate_connection_unsafe(eviction_candidate)
-                return eviction_candidate
-
-            # Could not evict a candidate; return None, calling code should keep trying.
+            # Could not evict a candidate; return None
             return None
-
-    def _get_lru(self, connections: Dict[str, ConnectionInfo]) -> str:
-        return min(connections, key=lambda t: self._conns[t].last_accessed)
 
     def _terminate_connection_unsafe(self, dbname: str):
         db = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None)).connection

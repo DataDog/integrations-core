@@ -262,8 +262,8 @@ def test_conn_pool_hit_pool_limit_and_evict(pg_instance):
     assert pool._stats.connection_opened == limit
 
     # ask for one more connection
-    db = pool.get_connection("dogs_10", 60000)
-    assert db is None
+    with pytest.raises(TimeoutError):
+        db = pool.get_connection("dogs_10", 60000, 1)
 
     # try to evict; none were marked inactive
     evicted = pool.evict_lru()
@@ -276,9 +276,8 @@ def test_conn_pool_hit_pool_limit_and_evict(pg_instance):
     assert evicted == expected_evicted
     assert pool._stats.connection_closed == 1
 
-    # ask for another connection again
-    db = pool.get_connection("dogs_50", 60000)
-    assert db is not None
+    # ask for another connection again, error not raised
+    db = pool.get_connection("dogs_50", 60000, 1)
 
 
 @pytest.mark.integration
@@ -307,8 +306,8 @@ def test_conn_pool_multithreaded(pg_instance):
     assert pool._stats.connection_opened == limit
 
     # ask for one more connection
-    db = pool.get_connection('dogs_{}'.format(limit + 1), 1)
-    assert db is None
+    with pytest.raises(TimeoutError):
+        db = pool.get_connection('dogs_{}'.format(limit + 1), 1, 1)
 
     # try to evict; should be too early
     evicted = pool.evict_lru()
@@ -330,5 +329,53 @@ def test_conn_pool_multithreaded(pg_instance):
 
     assert pool._stats.connection_closed == limit
     # now can add a new connection!
-    db = pool.get_connection('dogs_{}'.format(limit + 1), 60000)
-    assert db is not None
+    db = pool.get_connection('dogs_{}'.format(limit + 1), 60000, 1)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_conn_pool_context_managed(pg_instance):
+    """
+    Test context manager API for connection grabbing.
+    """
+
+    def pretend_to_run_query(pool, dbname):
+        with pool.get_connection_cm(dbname, 10000) as conn:
+            time.sleep(5)
+
+    limit = 30
+    check = PostgreSql('postgres', {}, [pg_instance])
+
+    pool = MultiDatabaseConnectionPool(check._new_connection, limit)
+    threadpool = []
+    for i in range(limit):
+        print(i)
+        thread = threading.Thread(target=pretend_to_run_query, args=(pool, 'dogs_{}'.format(i)))
+        threadpool.append(thread)
+        thread.start()
+
+    time.sleep(1)
+    assert pool._stats.connection_opened == limit
+
+    # ask for one more connection
+    with pytest.raises(TimeoutError):
+        with pool.get_connection_cm('dogs_{}'.format(limit + 1), 1, 1):
+            pass
+
+    # try to call done from wrong thread
+    with pytest.raises(RuntimeError):
+        pool.done("dogs_3")
+
+    # join threads
+    for thread in threadpool:
+        thread.join()
+
+    # now can add a new connection, one will get kicked out of pool
+    with pool.get_connection_cm('dogs_{}'.format(limit + 1), 60000) as conn:
+        pass
+
+    assert pool._stats.connection_closed == 1
+
+    # close the rest
+    pool.close_all_connections()
+    assert pool._stats.connection_closed == limit + 1
