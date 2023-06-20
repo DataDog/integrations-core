@@ -122,9 +122,13 @@ def mock_connect():
         mock_si.content.about.build = '123456789'
         mock_si.content.about.apiType = 'VirtualCenter'
         mock_si.CurrentTime.return_value = dt.datetime.now()
+        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
         mock_si.content.eventManager.QueryEvents.return_value = []
         mock_si.content.perfManager.QueryAvailablePerfMetric.return_value = [
             vim.PerformanceManager.MetricId(counterId=100),
+            vim.PerformanceManager.MetricId(counterId=101),
+            vim.PerformanceManager.MetricId(counterId=102),
+            vim.PerformanceManager.MetricId(counterId=103),
         ]
         mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
             vim.PerformanceManager.CounterInfo(
@@ -134,20 +138,91 @@ def mock_connect():
                 rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
                 unitInfo=vim.ElementDescription(key='command'),
             ),
-        ]
-        mock_si.content.perfManager.QueryPerf.return_value = [
-            vim.PerformanceManager.EntityMetric(
-                entity=vim.Datastore(moId="NFS-Share-1"),
-                value=[
-                    vim.PerformanceManager.IntSeries(
-                        value=[2, 5],
-                        id=vim.PerformanceManager.MetricId(
-                            counterId=100,
-                            instance='ds1',
-                        ),
-                    )
-                ],
+            vim.PerformanceManager.CounterInfo(
+                key=101,
+                groupInfo=vim.ElementDescription(key='cpu'),
+                nameInfo=vim.ElementDescription(key='totalmhz'),
+                rollupType=vim.PerformanceManager.CounterInfo.RollupType.average,
+                unitInfo=vim.ElementDescription(key='megahertz'),
             ),
+            vim.PerformanceManager.CounterInfo(
+                key=102,
+                groupInfo=vim.ElementDescription(key='vmop'),
+                nameInfo=vim.ElementDescription(key='numChangeDS'),
+                rollupType=vim.PerformanceManager.CounterInfo.RollupType.latest,
+                unitInfo=vim.ElementDescription(key='operation'),
+            ),
+            vim.PerformanceManager.CounterInfo(
+                key=103,
+                groupInfo=vim.ElementDescription(key='cpu'),
+                nameInfo=vim.ElementDescription(key='costop'),
+                rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+                unitInfo=vim.ElementDescription(key='millisecond'),
+            ),
+        ]
+        mock_si.content.perfManager.QueryPerf.side_effect = [
+            [
+                vim.PerformanceManager.EntityMetric(
+                    entity=vim.Datastore(moId="NFS-Share-1"),
+                    value=[
+                        vim.PerformanceManager.IntSeries(
+                            value=[2, 5],
+                            id=vim.PerformanceManager.MetricId(
+                                counterId=100,
+                                instance='ds1',
+                            ),
+                        )
+                    ],
+                ),
+                vim.PerformanceManager.EntityMetric(
+                    entity=vim.ClusterComputeResource(moId="c1"),
+                    value=[
+                        vim.PerformanceManager.IntSeries(
+                            value=[2, 5],
+                            id=vim.PerformanceManager.MetricId(
+                                counterId=101,
+                                instance='c1',
+                            ),
+                        )
+                    ],
+                ),
+                vim.PerformanceManager.EntityMetric(
+                    entity=vim.Datacenter(moId="dc1"),
+                    value=[
+                        vim.PerformanceManager.IntSeries(
+                            value=[1, 7],
+                            id=vim.PerformanceManager.MetricId(
+                                counterId=102,
+                                instance='dc1',
+                            ),
+                        )
+                    ],
+                ),
+                vim.PerformanceManager.EntityMetric(
+                    entity=vim.Datacenter(moId="dc2"),
+                    value=[
+                        vim.PerformanceManager.IntSeries(
+                            value=[1, 3],
+                            id=vim.PerformanceManager.MetricId(
+                                counterId=102,
+                                instance='dc2',
+                            ),
+                        )
+                    ],
+                ),
+                vim.PerformanceManager.EntityMetric(
+                    entity=vim.HostSystem(moId="host1"),
+                    value=[
+                        vim.PerformanceManager.IntSeries(
+                            value=[34, 61],
+                            id=vim.PerformanceManager.MetricId(
+                                counterId=103,
+                                instance='host1',
+                            ),
+                        )
+                    ],
+                ),
+            ],
         ]
         mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
         mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
@@ -159,6 +234,55 @@ def mock_connect():
                         vmodl.DynamicProperty(
                             name='name',
                             val='NFS-Share-1',
+                        ),
+                    ],
+                ),
+                vim.ObjectContent(
+                    obj=vim.ClusterComputeResource(moId="c1"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='c1',
+                        ),
+                    ],
+                ),
+                vim.ObjectContent(
+                    obj=vim.Folder(moId="folder_1"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='folder_1',
+                        ),
+                    ],
+                ),
+                vim.ObjectContent(
+                    obj=vim.Datacenter(moId="dc1"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='dc1',
+                        ),
+                    ],
+                ),
+                vim.ObjectContent(
+                    obj=vim.Datacenter(moId="dc2"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='dc2',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='parent',
+                            val=vim.Folder(moId="folder_1"),
+                        ),
+                    ],
+                ),
+                vim.ObjectContent(
+                    obj=vim.HostSystem(moId="host1"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='host1',
                         ),
                     ],
                 ),

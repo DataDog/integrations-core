@@ -52,6 +52,34 @@ legacy_realtime_instance = {
     'collect_realtime_only': True,
 }
 
+legacy_realtime_host_include_instance = {
+    'name': 'vsphere_mock',
+    'empty_default_hostname': True,
+    'event_config': {
+        'collect_vcenter_alarms': True,
+    },
+    'use_legacy_check_version': True,
+    'host': 'vsphere_host',
+    'username': 'vsphere_username',
+    'password': 'vsphere_password',
+    'collect_realtime_only': True,
+    'host_include_only_regex': "host1",
+}
+
+legacy_realtime_host_exclude_instance = {
+    'name': 'vsphere_mock',
+    'empty_default_hostname': True,
+    'event_config': {
+        'collect_vcenter_alarms': True,
+    },
+    'use_legacy_check_version': True,
+    'host': 'vsphere_host',
+    'username': 'vsphere_username',
+    'password': 'vsphere_password',
+    'collect_realtime_only': True,
+    'host_include_only_regex': "host[2-9]",
+}
+
 legacy_historical_instance = {
     'name': 'vsphere_mock',
     'empty_default_hostname': True,
@@ -82,6 +110,48 @@ realtime_instance = {
     'password': 'vsphere_password',
     'ssl_verify': False,
     'rest_api_options': None,
+}
+
+realtime_blacklist_instance = {
+    'collection_level': 4,
+    'empty_default_hostname': True,
+    'use_legacy_check_version': False,
+    'host': 'vsphere_host',
+    'username': 'vsphere_username',
+    'password': 'vsphere_password',
+    'ssl_verify': False,
+    'rest_api_options': None,
+    'resource_filters': [
+        {
+            'type': 'blacklist',
+            'resource': 'host',
+            'property': 'name',
+            'patterns': [
+                'host.*',
+            ],
+        }
+    ],
+}
+
+realtime_whitelist_instance = {
+    'collection_level': 4,
+    'empty_default_hostname': True,
+    'use_legacy_check_version': False,
+    'host': 'vsphere_host',
+    'username': 'vsphere_username',
+    'password': 'vsphere_password',
+    'ssl_verify': False,
+    'rest_api_options': None,
+    'resource_filters': [
+        {
+            'type': 'whitelist',
+            'resource': 'host',
+            'property': 'name',
+            'patterns': [
+                'host.*',
+            ],
+        }
+    ],
 }
 
 historical_instance = {
