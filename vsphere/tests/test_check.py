@@ -869,6 +869,7 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vsphere_type:vm',
                 'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
+            hostname='vm1',
         )
         aggregator.assert_metric(
             'vsphere.vm.numCpu',
@@ -880,6 +881,7 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vsphere_type:vm',
                 'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
+            hostname='vm1',
         )
         aggregator.assert_metric(
             'vsphere.vm.numEthernetCards',
@@ -891,6 +893,7 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vsphere_type:vm',
                 'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
+            hostname='vm1',
         )
 
         aggregator.assert_metric(
@@ -903,6 +906,7 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vsphere_type:vm',
                 'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
+            hostname='vm1',
         )
         aggregator.assert_metric(
             'vsphere.vm.memorySizeMB',
@@ -914,6 +918,7 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vsphere_type:vm',
                 'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
+            hostname='vm1',
         )
         aggregator.assert_metric(
             'vsphere.vm.hardware.numCoresPerSocket',
@@ -925,6 +930,7 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vsphere_type:vm',
                 'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
+            hostname='vm1',
         )
         aggregator.assert_metric(
             'vsphere.vm.guest.toolsVersion',
@@ -937,4 +943,5 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vsphere_type:vm',
                 'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
+            hostname='vm1',
         )

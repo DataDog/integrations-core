@@ -190,22 +190,8 @@ class VSphereAPI(object):
                 property_spec.pathSet.append("runtime.host")
                 property_spec.pathSet.append("guest.hostName")
                 if self.config.collect_property_metrics:
-                    property_spec.pathSet.append("summary.config.numCpu")
-                    property_spec.pathSet.append("summary.config.memorySizeMB")
-                    property_spec.pathSet.append("summary.config.numEthernetCards")
-                    property_spec.pathSet.append("summary.config.numVirtualDisks")
-                    property_spec.pathSet.append("summary.quickStats.uptimeSeconds")
-                    property_spec.pathSet.append("guest.guestFullName")
-                    property_spec.pathSet.append("guest.disk")
-                    property_spec.pathSet.append("guest.net")
-                    property_spec.pathSet.append("guest.ipStack")
-                    property_spec.pathSet.append("guest.toolsRunningStatus")
-                    property_spec.pathSet.append("guest.toolsVersion")
-                    property_spec.pathSet.append("config.hardware.numCoresPerSocket")
-                    property_spec.pathSet.append("config.cpuAllocation.limit")
-                    property_spec.pathSet.append("config.cpuAllocation.overheadLimit")
-                    property_spec.pathSet.append("config.memoryAllocation.limit")
-                    property_spec.pathSet.append("config.memoryAllocation.overheadLimit")
+                    for vm_property in VM_PROPERTIES:
+                        property_spec.pathSet.append(vm_property)
 
             property_specs.append(property_spec)
 

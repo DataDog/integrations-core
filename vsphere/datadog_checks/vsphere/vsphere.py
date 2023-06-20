@@ -212,7 +212,7 @@ class VSphereCheck(AgentCheck):
         self.gauge(
             "datadog.vsphere.refresh_infrastructure_cache.time",
             t0.total(),
-            tags=self._config.base_tags + [f'collect_property_metrics:{collect_property_metrics}'],
+            tags=self._config.base_tags + ['collect_property_metrics:{}'.format(collect_property_metrics)],
             raw=True,
             hostname=self._hostname,
         )
@@ -257,7 +257,8 @@ class VSphereCheck(AgentCheck):
 
                 if self._config.collect_property_metrics:
                     all_properties = properties.get('properties', {})
-                    full_name = all_properties.get("guest.guestFullName")
+                    full_name = all_properties.get('guest.guestFullName')
+
                     if full_name is not None:
                         tags.append("vsphere_full_name:{}".format(full_name))
 
@@ -626,13 +627,17 @@ class VSphereCheck(AgentCheck):
                 self.log.warning("Did not retrieve properties for VM %s", mor_name)
                 return
             nics = all_properties.get('guest.net', [])
+            hostname = mor_props.get('hostname')
             for nic in nics:
                 mac_address = nic.macAddress
                 ip_addresses = nic.ipConfig.ipAddress
                 for ip_address in ip_addresses:
                     nic_tags = [f'nic_ip_address:{ip_address}', f'nic_mac_address:{mac_address}']
                     self.count(
-                        'vm.guest.nic.address', 1, tags=self._config.base_tags + resource_tags + nic_tags, hostname=None
+                        'vm.guest.nic.address',
+                        1,
+                        tags=self._config.base_tags + resource_tags + nic_tags,
+                        hostname=hostname,
                     )
 
             ip_stacks = all_properties.get('guest.ipStack', [])
@@ -652,7 +657,7 @@ class VSphereCheck(AgentCheck):
                         'vm.guest.ipStack.ipRoute.prefixLength',
                         prefix_length,
                         tags=self._config.base_tags + resource_tags + route_tags,
-                        hostname=None,
+                        hostname=hostname,
                     )
 
             disks = all_properties.get('guest.disk', [])
@@ -670,13 +675,13 @@ class VSphereCheck(AgentCheck):
                     'vm.guest.disk.freeSpace',
                     free_space,
                     tags=self._config.base_tags + resource_tags + disk_tags,
-                    hostname=None,
+                    hostname=hostname,
                 )
                 self.gauge(
                     'vm.guest.disk.capacity',
                     capacity,
                     tags=self._config.base_tags + resource_tags + disk_tags,
-                    hostname=None,
+                    hostname=hostname,
                 )
 
             cores_per_socket = all_properties.get('config.hardware.numCoresPerSocket', None)
@@ -685,25 +690,27 @@ class VSphereCheck(AgentCheck):
                     'vm.hardware.numCoresPerSocket',
                     cores_per_socket,
                     tags=self._config.base_tags + resource_tags,
-                    hostname=None,
+                    hostname=hostname,
                 )
 
             num_cpu = all_properties.get('summary.config.numCpu', None)
-            self.gauge('vm.numCpu', num_cpu, tags=self._config.base_tags + resource_tags, hostname=None)
+            self.gauge('vm.numCpu', num_cpu, tags=self._config.base_tags + resource_tags, hostname=hostname)
 
             memory_size = all_properties.get('summary.config.memorySizeMB', None)
-            self.gauge('vm.memorySizeMB', memory_size, tags=self._config.base_tags + resource_tags, hostname=None)
+            self.gauge('vm.memorySizeMB', memory_size, tags=self._config.base_tags + resource_tags, hostname=hostname)
 
             ethernet_cards = all_properties.get('summary.config.numEthernetCards', None)
             self.gauge(
-                'vm.numEthernetCards', ethernet_cards, tags=self._config.base_tags + resource_tags, hostname=None
+                'vm.numEthernetCards', ethernet_cards, tags=self._config.base_tags + resource_tags, hostname=hostname
             )
 
             virtual_disks = all_properties.get('summary.config.numVirtualDisks', None)
-            self.gauge('vm.numVirtualDisks', virtual_disks, tags=self._config.base_tags + resource_tags, hostname=None)
+            self.gauge(
+                'vm.numVirtualDisks', virtual_disks, tags=self._config.base_tags + resource_tags, hostname=hostname
+            )
 
             uptime = all_properties.get('summary.quickStats.uptimeSeconds', None)
-            self.gauge('vm.uptime', uptime, tags=self._config.base_tags + resource_tags, hostname=None)
+            self.gauge('vm.uptime', uptime, tags=self._config.base_tags + resource_tags, hostname=hostname)
 
             tools_version = all_properties.get('guest.toolsVersion', None)
             tools_status = all_properties.get('guest.toolsRunningStatus', None)
@@ -712,7 +719,7 @@ class VSphereCheck(AgentCheck):
                 'vm.guest.toolsVersion',
                 tools_version,
                 tags=self._config.base_tags + resource_tags + tools_tags,
-                hostname=None,
+                hostname=hostname,
             )
 
     def check(self, _):
