@@ -129,7 +129,7 @@ def changelog(
 
         author = payload.get('user', {}).get('login')
         author_url = payload.get('user', {}).get('html_url')
-        title = f"[{changelog_type}] {payload.get('title')}"
+        title = f"{payload.get('title')}"
 
         entry = ChangelogEntry(pr_num, title, payload.get('html_url'), author, author_url, from_contributor(payload))
 
@@ -143,8 +143,9 @@ def changelog(
     new_entry.write(header)
 
     # one bullet point for each PR
-    new_entry.write('\n')
     for changelog_type in CHANGELOG_TYPES_ORDERED:
+        if entries[changelog_type]:
+            new_entry.write(f"\n***{changelog_type}***:\n\n")
         for entry in entries[changelog_type]:
             thanks_note = ''
             if entry.from_contributor:
