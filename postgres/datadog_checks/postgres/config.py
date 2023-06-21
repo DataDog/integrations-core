@@ -48,8 +48,8 @@ class PostgresConfig:
         self.query_timeout = int(instance.get('query_timeout', 5000))
         self.idle_connection_timeout = instance.get('idle_connection_timeout', 60000)
         self.relations = instance.get('relations', [])
-        if self.relations and not self.dbname:
-            raise ConfigurationError('"dbname" parameter must be set when using the "relations" parameter.')
+        if self.relations and not (self.dbname or self.discovery_config):
+            raise ConfigurationError('"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.')
 
         self.tags = self._build_tags(instance.get('tags', []))
 
