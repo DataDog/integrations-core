@@ -92,8 +92,8 @@ def _read_profile_definition(definition_file):
         return yaml.safe_load(f)
 
 
-def recursively_expand_base_profiles(definition):
-    # type: (Dict[str, Any]) -> None
+def recursively_expand_base_profiles(parent_path, definition):
+    # type: (str, Dict[str, Any]) -> None
     """
     Update `definition` in-place with the contents of base profile files listed in the 'extends' section.
 
@@ -106,8 +106,12 @@ def recursively_expand_base_profiles(definition):
     extends = definition.get('extends', [])
 
     for filename in extends:
+        parent_basename = os.path.basename(parent_path)
+        if parent_basename == filename:
+            filename = os.path.join(_get_profiles_confd_default_root(), filename)
+
         base_definition = _read_profile_definition(filename)
-        recursively_expand_base_profiles(base_definition)
+        recursively_expand_base_profiles(filename, base_definition)
 
         base_metrics = base_definition.get('metrics', [])
         existing_metrics = definition.get('metrics', [])
@@ -159,9 +163,9 @@ def _load_default_profiles():
 
         definition = _read_profile_definition(path)
         try:
-            recursively_expand_base_profiles(definition)
-        except Exception:
-            logger.error("Could not expand base profile %s", path)
+            recursively_expand_base_profiles(path, definition)
+        except Exception as e:
+            logger.error("Could not expand base profile %s: %s", path, e)
             raise
         profiles[name] = {'definition': definition}
 
