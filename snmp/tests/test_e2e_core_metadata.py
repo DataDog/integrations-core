@@ -28,7 +28,7 @@ def assert_metadata_events(aggregator, events):
     assert events == actual_events, "ACTUAL EVENTS: " + json.dumps(actual_events, indent=4)
 
 
-def assert_device_metadata(aggregator, device_metadata):
+def assert_device_metadata(aggregator, expected_device):
     events = get_events(aggregator)
 
     assert len(events) >= 1
@@ -37,7 +37,12 @@ def assert_device_metadata(aggregator, device_metadata):
     pprint.pprint(event1['devices'])
     assert len(event1['devices']) == 1
 
-    assert event1['devices'][0] == device_metadata
+    actual_device = event1['devices'][0]
+    for device in [actual_device, expected_device]:
+        if 'tags' in device:
+            device['tags'] = sorted(device.get('tags'))
+
+    assert actual_device == expected_device
 
 
 def test_e2e_core_metadata_f5(dd_agent_check):
