@@ -20,6 +20,7 @@ class OpenstackConfig:
         self.user = instance.get("user")
         self.nova_microversion = instance.get('nova_microversion')
         self.ironic_microversion = instance.get('ironic_microversion')
+        self.use_internal_endpoints = instance.get('use_internal_endpoints', False)
         self.api_type = None
         self.custom_tags = instance.get("tags", [])
         self.collect_hypervisor_metrics = instance.get("collect_hypervisor_metrics", True)

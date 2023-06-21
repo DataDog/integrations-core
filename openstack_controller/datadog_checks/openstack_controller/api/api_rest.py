@@ -377,13 +377,14 @@ class ApiRest(Api):
         return None
 
     def _get_endpoint(self, endpoint_type):
+        endpoint_interface = 'internal' if self.config.use_internal_endpoints else 'public'
         if endpoint_type in self._endpoints:
             self.log.debug("cached endpoint of type %s", endpoint_type)
             return self._endpoints[endpoint_type]
         for item in self._catalog:
             if item['type'] == endpoint_type:
                 for endpoint in item['endpoints']:
-                    if endpoint['interface'] == 'public':
+                    if endpoint['interface'] == endpoint_interface:
                         self._endpoints[endpoint_type] = endpoint['url']
                         return self._endpoints[endpoint_type]
         return None
