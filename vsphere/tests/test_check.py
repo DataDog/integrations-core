@@ -634,14 +634,81 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
 
         realtime_instance['collect_property_metrics'] = True
 
+        # VM 1 disk
         disk = vim.vm.GuestInfo.DiskInfo()
         disk.diskPath = '\\'
         disk.capacity = 2064642048
         disk.freeSpace = 1270075392
         disk.filesystemType = 'ext4'
-        disks = []  # type: List[vim.vm.GuestInfo.DiskInfo]
-
+        disks = vim.ArrayOfAnyType()
         disks.append(disk)
+
+        # VM 1 net
+        ip_address = vim.net.IpConfigInfo.IpAddress()
+        ip_address.ipAddress = 'fe70::150:46ff:fe47:6311'
+        ip_config = vim.net.IpConfigInfo()
+        ip_config.ipAddress = vim.ArrayOfAnyType()
+        ip_config.ipAddress.append(ip_address)
+        net = vim.vm.GuestInfo.NicInfo()
+        net.macAddress = '00:61:58:72:53:13'
+        net.ipConfig = ip_config
+        nets = vim.ArrayOfAnyType()
+        nets.append(net)
+
+        # VM 1 ip stack
+        dns_config = vim.net.DnsConfigInfo()
+        dns_config.hostName = 'test-hostname'
+        dns_config.domainName = 'example.com'
+        gateway = vim.net.IpRouteConfigInfo.Gateway()
+        gateway.device = '0'
+        gateway.ipAddress = None
+        ip_route = vim.net.IpRouteConfigInfo.IpRoute()
+        ip_route.prefixLength = 64
+        ip_route.network = 'fe83::'
+        ip_route.gateway = gateway
+        ip_route_config = vim.net.IpRouteConfigInfo()
+        ip_route_config.ipRoute = vim.ArrayOfAnyType()
+        ip_route_config.ipRoute.append(ip_route)
+        ip_stack = vim.vm.GuestInfo.StackInfo()
+        ip_stack.dnsConfig = dns_config
+        ip_stack.ipRouteConfig = ip_route_config
+        ip_stacks = vim.ArrayOfAnyType()
+        ip_stacks.append(ip_stack)
+
+        # VM 3 disk
+        disks3 = vim.ArrayOfAnyType()
+
+        # VM 3 net
+        ip_address3 = vim.net.IpConfigInfo.IpAddress()
+        ip_address3.ipAddress = 'fe70::150:46ff:fe47:6311'
+        ip_address4 = vim.net.IpConfigInfo.IpAddress()
+        ip_address4.ipAddress = 'fe80::170:46ff:fe27:6311'
+        ip_config3 = vim.net.IpConfigInfo()
+        ip_config3.ipAddress = vim.ArrayOfAnyType()
+        ip_config3.ipAddress.append(ip_address3)
+        ip_config3.ipAddress.append(ip_address4)
+        net3 = vim.vm.GuestInfo.NicInfo()
+        net3.macAddress = None
+        net3.ipConfig = ip_config3
+        nets3 = vim.ArrayOfAnyType()
+        nets3.append(net3)
+
+        # VM 3 ip stack
+        gateway3 = vim.net.IpRouteConfigInfo.Gateway()
+        gateway3.device = '0'
+        gateway3.ipAddress = '0.0.0.0'
+        ip_route3 = vim.net.IpRouteConfigInfo.IpRoute()
+        ip_route3.prefixLength = 32
+        ip_route3.network = 'fe83::'
+        ip_route3.gateway = gateway3
+        ip_route_config3 = vim.net.IpRouteConfigInfo()
+        ip_route_config3.ipRoute = vim.ArrayOfAnyType()
+        ip_route_config3.ipRoute.append(ip_route3)
+        ip_stack3 = vim.vm.GuestInfo.StackInfo()
+        ip_stack3.dnsConfig = None
+        ip_stack3.ipRouteConfig = ip_route_config3
+        ip_stacks3 = vim.ArrayOfAnyType()
+        ip_stacks3.append(ip_stack3)
 
         mock_si = mock.MagicMock()
         mock_si.content.eventManager.QueryEvents.return_value = []
@@ -665,6 +732,15 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
             ),
             vim.PerformanceManager.EntityMetric(
                 entity=vim.VirtualMachine(moId="vm2"),
+                value=[
+                    vim.PerformanceManager.IntSeries(
+                        value=[30, 11],
+                        id=vim.PerformanceManager.MetricId(counterId=100),
+                    )
+                ],
+            ),
+            vim.PerformanceManager.EntityMetric(
+                entity=vim.VirtualMachine(moId="vm3"),
                 value=[
                     vim.PerformanceManager.IntSeries(
                         value=[30, 11],
@@ -718,15 +794,15 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                         ),
                         vmodl.DynamicProperty(
                             name='guest.disk',
-                            val=[],
+                            val=disks,
                         ),
                         vmodl.DynamicProperty(
                             name='guest.net',
-                            val=[],
+                            val=nets,
                         ),
                         vmodl.DynamicProperty(
                             name='guest.ipStack',
-                            val=[],
+                            val=ip_stacks,
                         ),
                         vmodl.DynamicProperty(
                             name='guest.toolsRunningStatus',
@@ -757,7 +833,81 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                             val=None,
                         ),
                     ],
-                )
+                ),
+                vim.ObjectContent(
+                    obj=vim.VirtualMachine(moId="vm3"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='vm3',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='runtime.powerState',
+                            val=vim.VirtualMachinePowerState.poweredOn,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='summary.config.numCpu',
+                            val=1,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='summary.config.memorySizeMB',
+                            val=None,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='summary.config.numVirtualDisks',
+                            val=3,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='summary.config.numEthernetCards',
+                            val=3,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='summary.quickStats.uptimeSeconds',
+                            val=1218453,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='guest.guestFullName',
+                            val='Debian GNU/Linux 12 (32-bit)',
+                        ),
+                        vmodl.DynamicProperty(name='guest.disk', val=disks3),
+                        vmodl.DynamicProperty(
+                            name='guest.net',
+                            val=nets3,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='guest.ipStack',
+                            val=ip_stacks3,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='guest.toolsRunningStatus',
+                            val='guestToolsRunning',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='guest.toolsVersion',
+                            val='11296',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='config.hardware.numCoresPerSocket',
+                            val='2',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='config.cpuAllocation.limit',
+                            val='10',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='config.cpuAllocation.overheadLimit',
+                            val='24',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='config.memoryAllocation.limit',
+                            val='-1',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='config.memoryAllocation.overheadLimit',
+                            val='59',
+                        ),
+                    ],
+                ),
             ],
             token='123',
         )
@@ -773,7 +923,7 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                             ),
                             vmodl.DynamicProperty(
                                 name='runtime.powerState',
-                                val=vim.VirtualMachinePowerState.poweredOn,
+                                val=vim.VirtualMachinePowerState.poweredOff,
                             ),
                             vmodl.DynamicProperty(
                                 name='summary.config.numCpu',
@@ -796,21 +946,17 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                                 val=12184573,
                             ),
                             vmodl.DynamicProperty(
-                                name='summary.quickStats.uptimeSeconds',
-                                val=12184573,
-                            ),
-                            vmodl.DynamicProperty(
                                 name='guest.guestFullName',
                                 val='Debian GNU/Linux 12 (32-bit)',
                             ),
-                            vmodl.DynamicProperty(name='guest.disk', val=[]),
+                            vmodl.DynamicProperty(name='guest.disk', val=disks),
                             vmodl.DynamicProperty(
                                 name='guest.net',
-                                val=[],
+                                val=nets,
                             ),
                             vmodl.DynamicProperty(
                                 name='guest.ipStack',
-                                val=[],
+                                val=ip_stacks,
                             ),
                             vmodl.DynamicProperty(
                                 name='guest.toolsRunningStatus',
@@ -944,4 +1090,192 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
             hostname='vm1',
+        )
+
+        aggregator.assert_metric(
+            'vsphere.vm.guest.nic.ipConfig.address',
+            count=1,
+            value=1,
+            tags=[
+                'nic_ip_address:fe70::150:46ff:fe47:6311',
+                'nic_mac_address:00:61:58:72:53:13',
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
+            ],
+            hostname='vm1',
+        )
+
+        aggregator.assert_metric(
+            'vsphere.vm.guest.ipStack.ipRoute',
+            count=1,
+            value=1,
+            tags=[
+                'device:0',
+                'network_dest_ip:fe83::',
+                'route_domain_name:example.com',
+                'route_hostname:test-hostname',
+                'prefix_length:64',
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
+            ],
+            hostname='vm1',
+        )
+
+        aggregator.assert_metric(
+            'vsphere.vm.guest.disk.freeSpace',
+            count=1,
+            value=1270075392,
+            tags=[
+                'disk_path:\\',
+                'file_system_type:ext4',
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
+            ],
+            hostname='vm1',
+        )
+
+        aggregator.assert_metric(
+            'vsphere.vm.guest.disk.capacity',
+            count=1,
+            value=2064642048,
+            tags=[
+                'disk_path:\\',
+                'file_system_type:ext4',
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
+            ],
+            hostname='vm1',
+        )
+
+        # VM 3
+        aggregator.assert_metric(
+            'vsphere.vm.count',
+            value=1,
+            count=0,
+            tags=[
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 12 (32-bit)',
+            ],
+        )
+        aggregator.assert_metric(
+            'vsphere.vm.numCpu',
+            value=1,
+            count=1,
+            hostname='vm3',
+            tags=[
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 12 (32-bit)',
+            ],
+        )
+
+        aggregator.assert_metric(
+            'vsphere.vm.numEthernetCards',
+            count=1,
+            value=3.0,
+            tags=[
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 12 (32-bit)',
+            ],
+            hostname='vm3',
+        )
+
+        aggregator.assert_metric(
+            'vsphere.vm.numVirtualDisks',
+            count=1,
+            value=3.0,
+            tags=[
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 12 (32-bit)',
+            ],
+            hostname='vm3',
+        )
+        aggregator.assert_metric(
+            'vsphere.vm.memorySizeMB',
+            count=0,
+            hostname='vm3',
+        )
+        aggregator.assert_metric(
+            'vsphere.vm.hardware.numCoresPerSocket',
+            count=1,
+            value=2.0,
+            tags=[
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 12 (32-bit)',
+            ],
+            hostname='vm3',
+        )
+        aggregator.assert_metric(
+            'vsphere.vm.guest.toolsVersion',
+            count=1,
+            value=11296.0,
+            tags=[
+                'tools_status:guestToolsRunning',
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 12 (32-bit)',
+            ],
+            hostname='vm3',
+        )
+
+        aggregator.assert_metric(
+            'vsphere.vm.guest.nic.ipConfig.address',
+            count=1,
+            value=1,
+            tags=[
+                'nic_ip_address:fe70::150:46ff:fe47:6311',
+                'nic_mac_address:None',
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 12 (32-bit)',
+            ],
+            hostname='vm3',
+        )
+
+        aggregator.assert_metric(
+            'vsphere.vm.guest.ipStack.ipRoute',
+            count=1,
+            value=1,
+            tags=[
+                'device:0',
+                'gateway_address:0.0.0.0',
+                'network_dest_ip:fe83::',
+                'prefix_length:32',
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+                'vsphere_full_name:Debian GNU/Linux 12 (32-bit)',
+            ],
+            hostname='vm3',
+        )
+
+        aggregator.assert_metric(
+            'vsphere.vm.guest.disk.freeSpace',
+            count=0,
+            hostname='vm3',
+        )
+
+        aggregator.assert_metric(
+            'vsphere.vm.guest.disk.capacity',
+            count=0,
+            hostname='vm3',
         )

@@ -626,15 +626,16 @@ class VSphereCheck(AgentCheck):
             if all_properties is None:
                 self.log.warning("Did not retrieve properties for VM %s", mor_name)
                 return
-            nics = all_properties.get('guest.net', [])
+
             hostname = mor_props.get('hostname')
+            nics = all_properties.get('guest.net', [])
             for nic in nics:
                 mac_address = nic.macAddress
                 ip_addresses = nic.ipConfig.ipAddress
                 for ip_address in ip_addresses:
-                    nic_tags = [f'nic_ip_address:{ip_address}', f'nic_mac_address:{mac_address}']
+                    nic_tags = [f'nic_ip_address:{ip_address.ipAddress}', f'nic_mac_address:{mac_address}']
                     self.count(
-                        'vm.guest.nic.address',
+                        'vm.guest.nic.ipConfig.address',
                         1,
                         tags=self._config.base_tags + resource_tags + nic_tags,
                         hostname=hostname,
@@ -642,7 +643,12 @@ class VSphereCheck(AgentCheck):
 
             ip_stacks = all_properties.get('guest.ipStack', [])
             for ip_stack in ip_stacks:
-                host_name = ip_stack.dnsConfig.hostName
+                domain_tags = []
+                if ip_stack.dnsConfig is not None:
+                    host_name = ip_stack.dnsConfig.hostName
+                    domain_name = ip_stack.dnsConfig.domainName
+                    domain_tags.append('route_hostname:{}'.format(host_name))
+                    domain_tags.append('route_domain_name:{}'.format(domain_name))
                 ip_routes = ip_stack.ipRouteConfig.ipRoute
                 for ip_route in ip_routes:
                     prefix_length = ip_route.prefixLength
@@ -650,12 +656,18 @@ class VSphereCheck(AgentCheck):
                     network = ip_route.network
                     # network
                     device = ip_route.gateway.device
-                    route_tags = [f'device:{device}', f'route_hostname:{host_name}', f'network_dest_ip:{network}']
+                    route_tags = [
+                        'device:{}'.format(device),
+                        'network_dest_ip:{}'.format(network),
+                        'prefix_length:{}'.format(prefix_length),
+                    ]
+                    route_tags = route_tags + domain_tags
                     if gateway_address is not None:
                         route_tags.append(f'gateway_address:{gateway_address}')
+
                     self.count(
-                        'vm.guest.ipStack.ipRoute.prefixLength',
-                        prefix_length,
+                        'vm.guest.ipStack.ipRoute',
+                        1,
                         tags=self._config.base_tags + resource_tags + route_tags,
                         hostname=hostname,
                     )
