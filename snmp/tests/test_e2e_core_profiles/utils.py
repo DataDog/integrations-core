@@ -72,3 +72,7 @@ def assert_extend_cisco_cpu_memory(aggregator, common_tags):
         metric_type=aggregator.GAUGE,
         tags=common_tags + ["cpu:712"],
     )
+
+
+def assert_extend_generic_host_resources(aggregator, common_tags):
+    aggregator.assert_metric("snmp.hrSystemUptime", metric_type=aggregator.GAUGE, tags=common_tags)
