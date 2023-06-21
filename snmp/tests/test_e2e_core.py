@@ -91,7 +91,7 @@ def test_e2e_user_profiles(dd_agent_check):
 
     aggregator.assert_metric('snmp.upsAdvBatteryNumOfBattPacks', metric_type=aggregator.GAUGE, tags=tags, count=2)
     aggregator.assert_metric(
-        'snmp.upsAdvBatteryNumOfBattPacks_userMetric', metric_type=aggregator.GAUGE, tags=tags, count=2
+        'snmp.upsAdvBatteryFullCapacity_userMetric', metric_type=aggregator.GAUGE, tags=tags, count=2
     )
 
     device = {
