@@ -1,5 +1,16 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 20.0.1 / 2023-06-20
+
+* [Fixed] Fix ability to release ddev. See [#14790](https://github.com/DataDog/integrations-core/pull/14790).
+
+## 20.0.0 / 2023-06-16
+
+* [Added] Upgrade Pydantic model code generator. See [#14779](https://github.com/DataDog/integrations-core/pull/14779).
+* [Added] Add validations for removed dependencies. See [#14556](https://github.com/DataDog/integrations-core/pull/14556).
+* [Fixed] Update the expvar port and enable telemetry. See [#14729](https://github.com/DataDog/integrations-core/pull/14729).
+* [Changed] Remove `pyperclip` dependency and clipboard functionality. See [#14782](https://github.com/DataDog/integrations-core/pull/14782).
+
 ## 19.4.1 / 2023-06-08
 
 * [Fixed] Revert "Capture stderr from docker compose to improve debugging experience" (#13949). See [#14714](https://github.com/DataDog/integrations-core/pull/14714).

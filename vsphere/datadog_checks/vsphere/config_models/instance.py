@@ -156,6 +156,7 @@ class InstanceConfig(BaseModel):
     use_guest_hostname: Optional[bool]
     use_legacy_check_version: bool
     username: str
+    vm_hostname_suffix_tag: Optional[str]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):

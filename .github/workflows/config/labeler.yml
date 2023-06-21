@@ -399,6 +399,8 @@ integration/ssh_check:
 - ssh_check/**/*
 integration/statsd:
 - statsd/**/*
+integration/strimzi:
+- strimzi/**/*
 integration/supervisord:
 - supervisord/**/*
 integration/system_core:
