@@ -11,9 +11,11 @@ import psycopg2
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.postgres import aws
+from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
@@ -70,7 +72,6 @@ class PostgreSql(AgentCheck):
         self._version = None
         self._is_aurora = None
         self._version_utils = VersionUtils()
-        self.autodiscovery = None
         # Deprecate custom_metrics in favor of custom_queries
         if 'custom_metrics' in self.instance:
             self.warning(
@@ -94,9 +95,23 @@ class PostgreSql(AgentCheck):
         # map[dbname -> psycopg connection]
         self._db_pool = {}
         self._db_pool_lock = threading.Lock()
+        self.autodiscovery_db_pool = MultiDatabaseConnectionPool(self._new_connection)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
+        self.autodiscovery = self._build_autodiscovery()
 
         self._dynamic_queries = None
+
+    def _build_autodiscovery(self):
+        if not is_affirmative(self._config.get("database_autodiscovery").get("enabled")):
+            return None
+        
+        if not self._config.relations:
+            self.log.warning("Database autodiscovery is enabled, but relation-level metrics are not being collected.\
+                              All metrics can be gathered from global view.")
+            return None
+        
+        discovery = PostgresAutodiscovery('postgres', self._config.get("database_autodiscovery"), self.log, self.autodiscovery_db_pool)
+        return discovery
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
@@ -439,6 +454,17 @@ class PostgreSql(AgentCheck):
             num_results += 1
 
         return num_results
+    
+    def _collect_relations_autodiscovery(self, instance_tags, relations_scopes):
+        if not self.autodiscovery:
+            return
+        
+        databases = self.autodiscovery.get_items()
+        for db in databases:
+            with self.autodiscovery_db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
+                cursor = conn.cursor()
+                for scope in relations_scopes:
+                    self._query_scope(cursor, scope, instance_tags, False)
 
     def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
@@ -461,9 +487,16 @@ class PostgreSql(AgentCheck):
 
         # Do we need relation-specific metrics?
         if self._config.relations:
-            metric_scope.extend(RELATION_METRICS)
+            relations_scopes = RELATION_METRICS
             if self._config.collect_bloat_metrics:
-                metric_scope.extend([INDEX_BLOAT, TABLE_BLOAT])
+                relations_scopes.extend([INDEX_BLOAT, TABLE_BLOAT])
+                
+            # If autodiscovery is enabled, get relation metrics from all databases found
+            if self.autodiscovery:
+                self._collect_relations_autodiscovery(instance_tags, relations_scopes)
+            # otherwise, continue just with dbname
+            else:
+                metric_scope.extend(relations_scopes)
 
         replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
         if replication_metrics:

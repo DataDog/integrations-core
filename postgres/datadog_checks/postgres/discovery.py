@@ -13,6 +13,7 @@ class PostgresAutodiscovery(Discovery):
         self._log = log
         self._db = global_view_db
         self._conn_pool = conn_pool
+        self._max_databases = self.autodiscovery_config.get("max_databases")
 
     def _parse_includelist(self, include: List[str]) -> Dict[str, int]:
         ret = {}
@@ -29,6 +30,10 @@ class PostgresAutodiscovery(Discovery):
         """
         items = list(super().get_items())
         items_parsed = [item[1] for item in items]
+        if len(items_parsed) > self._max_databases:
+            items_parsed = items_parsed[:self._max_databases]
+            self._log.warning("Autodiscovery found more than {} databases, which was specified as a limit. Truncating list and running checks only on \
+                              the following databases: {}".format(self._max_databases, items_parsed))
         return items_parsed
     
     def _get_autodiscovery_query(self) -> str:
