@@ -43,7 +43,7 @@ def test_e2e_profile_juniper(dd_agent_check):
     assert_extend_generic_ospf(aggregator, common_tags)
     assert_extend_generic_bgp4(aggregator, common_tags)
     assert_extend_generic_host_resources(aggregator, common_tags)
-    
+
     aggregator.assert_all_metrics_covered()
 
     # --- TEST METADATA ---
@@ -89,7 +89,7 @@ def test_e2e_profile_juniper_variation(dd_agent_check):
     assert_extend_generic_ospf(aggregator, common_tags)
     assert_extend_generic_bgp4(aggregator, common_tags)
     assert_extend_generic_host_resources(aggregator, common_tags)
-    
+
     aggregator.assert_all_metrics_covered()
 
     # --- TEST METADATA ---

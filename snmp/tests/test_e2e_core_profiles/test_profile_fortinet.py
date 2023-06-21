@@ -53,6 +53,7 @@ def test_e2e_profile_fortinet_appliance(dd_agent_check):
     }
     assert_device_metadata(aggregator, device)
 
+
 def test_e2e_profile_fortinet_fortiswitch(dd_agent_check):
     config = create_e2e_core_test_config("fortinet-fortiswitch")
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
