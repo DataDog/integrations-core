@@ -55,15 +55,11 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
 STATEMENT_METRICS_QUERY = """\
 with qstats_aggr as (
     select query_hash, query_plan_hash, max(last_execution_time) last_execution_time, max(last_elapsed_time) last_elapsed_time,
-            max(CONCAT(
-                CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
-                CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
-                CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1))) as plan_handle_and_offsets,
-    sum(execution_count) as execution_count, sum(total_worker_time) as total_worker_time, sum(total_physical_reads) as total_physical_reads, 
-    sum(total_logical_writes) as total_logical_writes, sum(total_logical_reads) as total_logical_reads, sum(total_clr_time) as total_clr_time, sum(total_elapsed_time) as total_elapsed_time, 
-    sum(total_rows) as total_rows, sum(total_dop) as total_dop, sum(total_grant_kb) as total_grant_kb, sum(total_used_grant_kb) as total_used_grant_kb, sum(total_ideal_grant_kb) as total_ideal_grant_kb, 
-    sum(total_reserved_threads) as total_reserved_threads, sum(total_used_threads) as total_used_threads, sum(total_columnstore_segment_reads) as total_columnstore_segment_reads, 
-    sum(total_columnstore_segment_skips) as total_columnstore_segment_skips, sum(total_spills) as total_spills
+        max(CONCAT(
+            CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1))) as plan_handle_and_offsets,
+        {query_metrics_column_sums}    
     from sys.dm_exec_query_stats
     group by query_hash, query_plan_hash
     having DATEADD(ms, max(last_elapsed_time) / 1000, max(last_execution_time)) > dateadd(second, -?, getdate())
@@ -74,10 +70,12 @@ qstats_aggr_split as (select TOP {limit}
     convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
     a.* from qstats_aggr a
 ), 
-qstats_dbid as (
+qstats_db as (
     select a.*,
-    ( select cast(value as int) 
-        from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid
+    ( select top 1 d.name 
+        from sys.dm_exec_plan_attributes(plan_handle) s 
+        join sys.databases d on d.database_id = cast(value as int) 
+        where attribute = 'dbid') as database_name
     from qstats_aggr_split a
 )
 select
@@ -88,9 +86,8 @@ select
             - statement_start_offset) / 2) + 1) AS statement_text,
     qt.text,
     encrypted as is_encrypted,
-    q.*, d.name database_name
-    from qstats_dbid q
-    left join sys.databases d on q.dbid = d.database_id 
+    q.*
+    from qstats_db q
     cross apply sys.dm_exec_sql_text(plan_handle) qt 
 """
 
