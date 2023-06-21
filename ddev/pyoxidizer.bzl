@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 VERSION = VARS["version"]
 APP_NAME = "ddev"
-DISPLAY_NAME = "Datadog Agent integration developer tool"
+DISPLAY_NAME = "ddev"
 AUTHOR = "Datadog, Inc."
 
 
@@ -25,7 +25,7 @@ def make_msi(target):
     )
     msi.msi_filename = DISPLAY_NAME + "-" + VERSION + "-" + arch + ".msi"
     msi.help_url = "https://github.com/DataDog/integrations-core/tree/master/ddev"
-    msi.license_path = CWD + "/../LICENSE.txt"
+    msi.license_path = CWD + "/../LICENSE"
 
     # https://gregoryszorc.com/docs/pyoxidizer/main/tugger_starlark_type_file_manifest.html
     m = FileManifest()
@@ -72,7 +72,7 @@ def make_macos_app_bundle():
     bundle = MacOsApplicationBundleBuilder(DISPLAY_NAME)
     bundle.set_info_plist_required_keys(
         display_name=DISPLAY_NAME,
-        identifier="com.datadoghq." + APP_NAME,         
+        identifier="com.datadoghq." + APP_NAME,
         version=VERSION,
         signature=APP_NAME,
         executable=APP_NAME,

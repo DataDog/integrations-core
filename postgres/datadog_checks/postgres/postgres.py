@@ -20,6 +20,13 @@ from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.relationsmanager import INDEX_BLOAT, RELATION_METRICS, TABLE_BLOAT, RelationsManager
+from datadog_checks.postgres.relationsmanager import (
+    DYNAMIC_RELATION_QUERIES,
+    INDEX_BLOAT,
+    RELATION_METRICS,
+    TABLE_BLOAT,
+    RelationsManager,
+)
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
@@ -88,7 +95,7 @@ class PostgreSql(AgentCheck):
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
         self.metadata_samples = PostgresMetadata(self, self._config, shutdown_callback=self._close_db_pool)
-        self._relations_manager = RelationsManager(self._config.relations)
+        self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
         self.check_initializations.append(self.set_resolved_hostname_metadata)
@@ -207,6 +214,14 @@ class PostgreSql(AgentCheck):
         if not queries:
             self.log.debug("no dynamic queries defined")
             return None
+
+        # Dynamic queries for relationsmanager
+        if self._config.relations:
+            for query in DYNAMIC_RELATION_QUERIES:
+                query = copy.copy(query)
+                formatted_query = self._relations_manager.filter_relation_query(query['query'], 'nspname')
+                query['query'] = formatted_query
+                queries.append(query)
 
         self._dynamic_queries = self._new_query_executor(queries)
         self._dynamic_queries.compile_queries()
