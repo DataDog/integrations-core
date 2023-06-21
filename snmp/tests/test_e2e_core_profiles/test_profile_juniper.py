@@ -9,12 +9,12 @@ from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
     assert_extend_generic_bgp4,
+    assert_extend_generic_host_resources,
     assert_extend_generic_if,
     assert_extend_generic_ip,
     assert_extend_generic_ospf,
     assert_extend_generic_tcp,
     assert_extend_generic_udp,
-    assert_extend_generic_host_resources,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
