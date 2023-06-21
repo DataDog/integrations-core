@@ -16,6 +16,7 @@ from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_res
 from datadog_checks.postgres import aws
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
+from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.relationsmanager import INDEX_BLOAT, RELATION_METRICS, TABLE_BLOAT, RelationsManager
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
@@ -69,6 +70,7 @@ class PostgreSql(AgentCheck):
         self._version = None
         self._is_aurora = None
         self._version_utils = VersionUtils()
+        self.autodiscovery = None
         # Deprecate custom_metrics in favor of custom_queries
         if 'custom_metrics' in self.instance:
             self.warning(

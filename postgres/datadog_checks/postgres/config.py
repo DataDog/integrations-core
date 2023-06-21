@@ -38,6 +38,8 @@ class PostgresConfig:
         self.reported_hostname = instance.get('reported_hostname', '')
         self.dbstrict = is_affirmative(instance.get('dbstrict', False))
         self.disable_generic_tags = is_affirmative(instance.get('disable_generic_tags', False)) if instance else False
+        
+        self.discovery_config = instance.get('database_autodiscovery', {})
 
         self.application_name = instance.get('application_name', 'datadog-agent')
         if not self.isascii(self.application_name):
