@@ -109,7 +109,7 @@ class PostgreSql(AgentCheck):
         self._dynamic_queries = None
 
     def _build_autodiscovery(self):
-        if not is_affirmative(self._config.get("database_autodiscovery").get("enabled")):
+        if not is_affirmative(self._config.discovery_config):
             return None
         
         if not self._config.relations:
@@ -117,7 +117,7 @@ class PostgreSql(AgentCheck):
                               All metrics can be gathered from global view.")
             return None
         
-        discovery = PostgresAutodiscovery('postgres', self._config.get("database_autodiscovery"), self.log, self.autodiscovery_db_pool)
+        discovery = PostgresAutodiscovery('postgres', self._config.discovery_config, self.log, self.autodiscovery_db_pool)
         return discovery
 
     def set_resource_tags(self):
@@ -502,7 +502,8 @@ class PostgreSql(AgentCheck):
 
         # Do we need relation-specific metrics?
         if self._config.relations:
-            relations_scopes = RELATION_METRICS
+            relations_scopes = list(RELATION_METRICS)
+
             if self._config.collect_bloat_metrics:
                 relations_scopes.extend([INDEX_BLOAT, TABLE_BLOAT])
                 
@@ -513,6 +514,7 @@ class PostgreSql(AgentCheck):
             else:
                 metric_scope.extend(relations_scopes)
 
+        self.log.warning(metric_scope)
         replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
         if replication_metrics:
             replication_metrics_query = copy.deepcopy(REPLICATION_METRICS)

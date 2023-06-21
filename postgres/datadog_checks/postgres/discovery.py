@@ -1,7 +1,7 @@
 from typing import Dict, List, Callable
 from datadog_checks.base.utils.discovery import Discovery
+from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 import logging
-from connections import MultiDatabaseConnectionPool
 
 AUTODISCOVERY_QUERY: str = """select {columns} from pg_catalog.pg_database where datistemplate = false;"""
 
