@@ -39,8 +39,7 @@ def assert_device_metadata(aggregator, expected_device):
 
     actual_device = event1['devices'][0]
     for device in [actual_device, expected_device]:
-        if 'tags' in device:
-            device['tags'] = sorted(device.get('tags'))
+        device.get('tags', []).sort()
 
     assert actual_device == expected_device
 
