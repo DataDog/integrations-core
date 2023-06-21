@@ -151,7 +151,7 @@ def test_e2e_user_profiles_that_extend_profile_with_same_name(dd_agent_check):
 
     device = {
         'description': 'Palo Alto Networks PA-3000 series firewall',
-        'id': 'default:172.28.0.2',
+        'id': 'default:' + device_ip,
         'id_tags': ['device_namespace:default', 'snmp_device:' + device_ip],
         'ip_address': device_ip,
         'model': 'PA-3020',
