@@ -64,9 +64,9 @@ Datadog recommends that you use specific metric names or partial metric name mat
 
 ### Errors parsing the OpenMetrics payload with Agent 7.46 and above
 
-Starting with version 3.0.0 of this integration, that is shipped by default with Agent 7.46 and above, the integration sends by default the `Accept` header set to `application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,text/plain;version=0.0.4;q=0.5,*/*;q=0.1` instead of `text/plain` as it used to do. The integration will then dynamically define which scraper to use based on the `Content-type` it receives from the server.
+Starting with version 3.0.0 of this integration, which is shipped by default with Agent 7.46 and above, the integration sends by default the `Accept` header set to `application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,text/plain;version=0.0.4;q=0.5,*/*;q=0.1`. Previous versions set the `Accept` header to `text/plain`. The integration then dynamically determines which scraper to use based on the `Content-type` it receives from the server.
 
-If you start seeing errors scraping the OpenMetrics endpoint with this new version because the scraper is now stricter, you can manually set the `Accept` header the integration sends to `text/plain` using the `headers` option in the [configuration file][14], for instance: 
+If you see errors scraping the OpenMetrics endpoint with this new version because the scraper is stricter than before, manually set the `Accept` header that the integration sends to `text/plain` using the `headers` option in the [configuration file][14]. For instance: 
 
 ```yaml
 ## All options defined here are available to all instances.
@@ -80,7 +80,7 @@ instances:
       - Accept: text/plain
 ```
 
-This will cause the endpoint to return a `Content-type` set to `text/plain`, the integration will then use the previous scraper.
+With this configuration, the endpoint returns the `Content-type` set to `text/plain`, causing the integration to use the previous scraper.
 
 Need help? Contact [Datadog support][8].
 
