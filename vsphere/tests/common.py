@@ -3,6 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 
+from pyVmomi import vim
+
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -170,3 +172,119 @@ def build_rest_api_client(config, logger):
     if VSPHERE_VERSION.startswith('7.'):
         return VSphereRestAPI(config, logger, False)
     return VSphereRestAPI(config, logger, True)
+
+
+def QueryPerfCounterByLevel(collection_level):
+    return [
+        vim.PerformanceManager.CounterInfo(
+            key=100,
+            groupInfo=vim.ElementDescription(key='datastore'),
+            nameInfo=vim.ElementDescription(key='busResets'),
+            rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+            unitInfo=vim.ElementDescription(key='command'),
+        ),
+        vim.PerformanceManager.CounterInfo(
+            key=101,
+            groupInfo=vim.ElementDescription(key='cpu'),
+            nameInfo=vim.ElementDescription(key='totalmhz'),
+            rollupType=vim.PerformanceManager.CounterInfo.RollupType.average,
+            unitInfo=vim.ElementDescription(key='megahertz'),
+        ),
+        vim.PerformanceManager.CounterInfo(
+            key=102,
+            groupInfo=vim.ElementDescription(key='vmop'),
+            nameInfo=vim.ElementDescription(key='numChangeDS'),
+            rollupType=vim.PerformanceManager.CounterInfo.RollupType.latest,
+            unitInfo=vim.ElementDescription(key='operation'),
+        ),
+        vim.PerformanceManager.CounterInfo(
+            key=103,
+            groupInfo=vim.ElementDescription(key='cpu'),
+            nameInfo=vim.ElementDescription(key='costop'),
+            rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
+            unitInfo=vim.ElementDescription(key='millisecond'),
+        ),
+    ]
+
+
+entity_metrics = [
+    vim.PerformanceManager.EntityMetric(
+        entity=vim.Datastore(moId="NFS-Share-1"),
+        value=[
+            vim.PerformanceManager.IntSeries(
+                value=[2, 5],
+                id=vim.PerformanceManager.MetricId(
+                    counterId=100,
+                    instance='ds1',
+                ),
+            )
+        ],
+    ),
+    vim.PerformanceManager.EntityMetric(
+        entity=vim.ClusterComputeResource(moId="c1"),
+        value=[
+            vim.PerformanceManager.IntSeries(
+                value=[2, 5],
+                id=vim.PerformanceManager.MetricId(
+                    counterId=101,
+                    instance='c1',
+                ),
+            )
+        ],
+    ),
+    vim.PerformanceManager.EntityMetric(
+        entity=vim.Datacenter(moId="dc1"),
+        value=[
+            vim.PerformanceManager.IntSeries(
+                value=[1, 7],
+                id=vim.PerformanceManager.MetricId(
+                    counterId=102,
+                    instance='dc1',
+                ),
+            )
+        ],
+    ),
+    vim.PerformanceManager.EntityMetric(
+        entity=vim.Datacenter(moId="dc2"),
+        value=[
+            vim.PerformanceManager.IntSeries(
+                value=[1, 3],
+                id=vim.PerformanceManager.MetricId(
+                    counterId=102,
+                    instance='dc2',
+                ),
+            )
+        ],
+    ),
+    vim.PerformanceManager.EntityMetric(
+        entity=vim.HostSystem(moId="host1"),
+        value=[
+            vim.PerformanceManager.IntSeries(
+                value=[34, 61],
+                id=vim.PerformanceManager.MetricId(
+                    counterId=103,
+                    instance='host1',
+                ),
+            )
+        ],
+    ),
+]
+
+
+def QueryPerf(query_specs):
+    result = []
+    for query_spec in query_specs:
+        for entity_metric in entity_metrics:
+            if query_spec.entity == entity_metric.entity:
+                value = []
+                for metric_id in query_spec.metricId:
+                    for metric_value in entity_metric.value:
+                        if metric_id.counterId == metric_value.id.counterId:
+                            value.append(metric_value)
+                result.append(
+                    vim.PerformanceManager.EntityMetric(
+                        entity=entity_metric.entity,
+                        value=value,
+                    )
+                )
+    return result

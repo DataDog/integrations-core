@@ -8,7 +8,7 @@ import pytest
 from mock import MagicMock, Mock, patch
 from pyVmomi import vim, vmodl
 
-from .common import LAB_INSTANCE, VSPHERE_VERSION
+from .common import LAB_INSTANCE, VSPHERE_VERSION, QueryPerf, QueryPerfCounterByLevel
 from .mocked_api import MockedAPI, mock_http_rest_api_v6, mock_http_rest_api_v7
 
 try:
@@ -130,100 +130,8 @@ def mock_connect():
             vim.PerformanceManager.MetricId(counterId=102),
             vim.PerformanceManager.MetricId(counterId=103),
         ]
-        mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
-            vim.PerformanceManager.CounterInfo(
-                key=100,
-                groupInfo=vim.ElementDescription(key='datastore'),
-                nameInfo=vim.ElementDescription(key='busResets'),
-                rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
-                unitInfo=vim.ElementDescription(key='command'),
-            ),
-            vim.PerformanceManager.CounterInfo(
-                key=101,
-                groupInfo=vim.ElementDescription(key='cpu'),
-                nameInfo=vim.ElementDescription(key='totalmhz'),
-                rollupType=vim.PerformanceManager.CounterInfo.RollupType.average,
-                unitInfo=vim.ElementDescription(key='megahertz'),
-            ),
-            vim.PerformanceManager.CounterInfo(
-                key=102,
-                groupInfo=vim.ElementDescription(key='vmop'),
-                nameInfo=vim.ElementDescription(key='numChangeDS'),
-                rollupType=vim.PerformanceManager.CounterInfo.RollupType.latest,
-                unitInfo=vim.ElementDescription(key='operation'),
-            ),
-            vim.PerformanceManager.CounterInfo(
-                key=103,
-                groupInfo=vim.ElementDescription(key='cpu'),
-                nameInfo=vim.ElementDescription(key='costop'),
-                rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
-                unitInfo=vim.ElementDescription(key='millisecond'),
-            ),
-        ]
-        mock_si.content.perfManager.QueryPerf.side_effect = [
-            [
-                vim.PerformanceManager.EntityMetric(
-                    entity=vim.Datastore(moId="NFS-Share-1"),
-                    value=[
-                        vim.PerformanceManager.IntSeries(
-                            value=[2, 5],
-                            id=vim.PerformanceManager.MetricId(
-                                counterId=100,
-                                instance='ds1',
-                            ),
-                        )
-                    ],
-                ),
-                vim.PerformanceManager.EntityMetric(
-                    entity=vim.ClusterComputeResource(moId="c1"),
-                    value=[
-                        vim.PerformanceManager.IntSeries(
-                            value=[2, 5],
-                            id=vim.PerformanceManager.MetricId(
-                                counterId=101,
-                                instance='c1',
-                            ),
-                        )
-                    ],
-                ),
-                vim.PerformanceManager.EntityMetric(
-                    entity=vim.Datacenter(moId="dc1"),
-                    value=[
-                        vim.PerformanceManager.IntSeries(
-                            value=[1, 7],
-                            id=vim.PerformanceManager.MetricId(
-                                counterId=102,
-                                instance='dc1',
-                            ),
-                        )
-                    ],
-                ),
-                vim.PerformanceManager.EntityMetric(
-                    entity=vim.Datacenter(moId="dc2"),
-                    value=[
-                        vim.PerformanceManager.IntSeries(
-                            value=[1, 3],
-                            id=vim.PerformanceManager.MetricId(
-                                counterId=102,
-                                instance='dc2',
-                            ),
-                        )
-                    ],
-                ),
-                vim.PerformanceManager.EntityMetric(
-                    entity=vim.HostSystem(moId="host1"),
-                    value=[
-                        vim.PerformanceManager.IntSeries(
-                            value=[34, 61],
-                            id=vim.PerformanceManager.MetricId(
-                                counterId=103,
-                                instance='host1',
-                            ),
-                        )
-                    ],
-                ),
-            ],
-        ]
+        mock_si.content.perfManager.QueryPerfCounterByLevel = QueryPerfCounterByLevel
+        mock_si.content.perfManager.QueryPerf = QueryPerf
         mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
         mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
         mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult(
