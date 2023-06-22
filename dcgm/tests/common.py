@@ -11,6 +11,10 @@ INSTANCE = {
     "openmetrics_endpoint": f"http://{HOST}:9400/metrics",
 }
 
+INSTANCE_WRONG_URL = {
+    'openmetrics_endpoint': 'http://localhost:5555/metrics',
+}
+
 HERE = get_here()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 

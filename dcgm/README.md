@@ -1,5 +1,7 @@
 # Agent Check: DCGM
 
+<!-- # TODO include https://docs.datadoghq.com/containers/kubernetes/prometheus/?tab=kubernetesadv2 -->
+
 ## Overview
 
 Harnessing the Nvidia DCGM Exporter, this check monitors the exposed [GPU metrics][1] through the Datadog Agent.
@@ -203,10 +205,8 @@ Additional helpful documentation, links, and articles:
 
 
 Need help? Contact [Datadog support][9].
+#TODO - Run through Doc and work fix links
 
-
-
-<!-- TODO NEED TO SORT OUT ALL INTEGRATION REFERENCES -->
 [1]: **LINK_TO_INTEGRATION_SITE**
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -217,6 +217,6 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/dcgm/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://github.com/NVIDIA/dcgm-exporter/tree/main#changing-metrics
-[11]: https://docs.nvidia.com/datacenter/dcgm/latest/dcgm-api/dcgm-api-field-ids.html 
+[11]: https://docs.nvidia.com/datacenter/dcgm/latest/dcgm-api/dcgm-api-field-ids.html
 [12]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
 [13]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes

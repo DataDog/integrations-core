@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import copy
 import os
 from unittest import mock
 
@@ -14,8 +15,6 @@ from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from . import common
 
 
-## Fixtures that will be included in a conftest.py folder:
-## TODO - Need to add the docker IP rather than hardcode the localhost
 @pytest.fixture(scope='session')
 def dd_environment():
     compose_file = common.COMPOSE_FILE
@@ -32,7 +31,7 @@ def dd_environment():
 # For E2E and Unit testing:
 @pytest.fixture
 def instance():
-    return common.INSTANCE
+    return copy.deepcopy(common.INSTANCE)
 
 
 # For Unit Test:

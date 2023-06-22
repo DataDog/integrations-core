@@ -28,7 +28,7 @@
       },
       "metrics": {
         "prefix": "dcgm.",
-        "check": "",
+        "check": "dcgm.temperature",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {

@@ -1,6 +1,6 @@
 [
     {
-        "agent_version": "7.45.0",
+        "agent_version": "7.47.0",
         "integration": "dcgm",
         "check": "dcgm.openmetrics.health",
         "statuses": [
