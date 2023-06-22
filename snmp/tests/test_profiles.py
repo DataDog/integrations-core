@@ -148,8 +148,8 @@ def test_compat_cisco_base_profiles(definition_file, equivalent_definition):
     """
     definition = get_profile_definition({'definition_file': definition_file})
 
-    recursively_expand_base_profiles(definition_file, definition)
-    recursively_expand_base_profiles(definition_file, equivalent_definition)
+    recursively_expand_base_profiles(definition)
+    recursively_expand_base_profiles(equivalent_definition)
 
     assert definition == equivalent_definition
 

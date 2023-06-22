@@ -456,7 +456,7 @@ def test_profile_extends():
 
             definition = {'extends': ['profile1.yaml']}
 
-            recursively_expand_base_profiles('my-profile.yaml', definition)
+            recursively_expand_base_profiles(definition)
 
             assert definition == {
                 'extends': ['profile1.yaml'],
@@ -571,75 +571,13 @@ def test_profile_extends_with_user_profiles():
 
             definition = {'extends': ['profile1.yaml']}
 
-            recursively_expand_base_profiles('my-profile.yaml', definition)
+            recursively_expand_base_profiles(definition)
 
             assert definition == {
                 'extends': ['profile1.yaml'],
                 'metrics': [
                     {'MIB': 'TCP-MIB', 'symbol': 'tcpActiveOpens', 'forced_type': 'monotonic_count'},
                     {'MIB': 'UDP-MIB', 'symbol': 'udpHCInDatagrams', 'forced_type': 'monotonic_count'},
-                    {'MIB': 'TCP-MIB', 'symbol': 'abstract_metric_user', 'forced_type': 'monotonic_count'},
-                    {'MIB': 'TCP-MIB', 'symbol': 'profile1_metric_user', 'forced_type': 'monotonic_count'},
-                ],
-                'metric_tags': [{'MIB': 'SNMPv2-MIB', 'symbol': 'sysName', 'tag': 'snmp_host'}],
-            }
-
-
-def test_profile_extends_with_user_profiles_with_same_name():
-    # type: () -> None
-    default_base = {
-        'metrics': [
-            {'MIB': 'TCP-MIB', 'symbol': 'tcpActiveOpens', 'forced_type': 'monotonic_count'},
-            {'MIB': 'UDP-MIB', 'symbol': 'udpHCInDatagrams', 'forced_type': 'monotonic_count'},
-        ],
-        'metric_tags': [{'MIB': 'SNMPv2-MIB', 'symbol': 'sysName', 'tag': 'snmp_host'}],
-    }
-
-    default_profile1 = {
-        'extends': ['base.yaml'],
-        'metrics': [{'MIB': 'TCP-MIB', 'symbol': 'profile1_metric_default', 'forced_type': 'monotonic_count'}],
-    }
-    default_abstract = {
-        'extends': ['base.yaml'],
-        'metrics': [{'MIB': 'TCP-MIB', 'symbol': 'abstract_metric_default', 'forced_type': 'monotonic_count'}],
-    }
-    user_abstract = {
-        'extends': ['_abstract.yaml'],
-        'metrics': [{'MIB': 'TCP-MIB', 'symbol': 'abstract_metric_user', 'forced_type': 'monotonic_count'}],
-    }
-    user_profile1 = {
-        'extends': ['_abstract.yaml'],
-        'metrics': [{'MIB': 'TCP-MIB', 'symbol': 'profile1_metric_user', 'forced_type': 'monotonic_count'}],
-    }
-
-    with temp_dir() as tmp:
-        with mock_profiles_confd_default_root(os.path.join(tmp, 'default_profiles')), mock_profiles_confd_user_root(
-            os.path.join(tmp, 'profiles')
-        ):
-            mkdir_p(os.path.join(tmp, 'default_profiles'))
-            mkdir_p(os.path.join(tmp, 'profiles'))
-
-            with open(os.path.join(tmp, 'default_profiles', 'base.yaml'), 'wb') as f:
-                f.write(yaml.safe_dump(default_base))
-            with open(os.path.join(tmp, 'default_profiles', 'profile1.yaml'), 'wb') as f:
-                f.write(yaml.safe_dump(default_profile1))
-            with open(os.path.join(tmp, 'default_profiles', '_abstract.yaml'), 'wb') as f:
-                f.write(yaml.safe_dump(default_abstract))
-            with open(os.path.join(tmp, 'profiles', 'profile1.yaml'), 'wb') as f:
-                f.write(yaml.safe_dump(user_profile1))
-            with open(os.path.join(tmp, 'profiles', '_abstract.yaml'), 'wb') as f:
-                f.write(yaml.safe_dump(user_abstract))
-
-            definition = {'extends': ['profile1.yaml']}
-
-            recursively_expand_base_profiles('my-profile.yaml', definition)
-
-            assert definition == {
-                'extends': ['profile1.yaml'],
-                'metrics': [
-                    {'MIB': 'TCP-MIB', 'symbol': 'tcpActiveOpens', 'forced_type': 'monotonic_count'},
-                    {'MIB': 'UDP-MIB', 'symbol': 'udpHCInDatagrams', 'forced_type': 'monotonic_count'},
-                    {'MIB': 'TCP-MIB', 'symbol': 'abstract_metric_default', 'forced_type': 'monotonic_count'},
                     {'MIB': 'TCP-MIB', 'symbol': 'abstract_metric_user', 'forced_type': 'monotonic_count'},
                     {'MIB': 'TCP-MIB', 'symbol': 'profile1_metric_user', 'forced_type': 'monotonic_count'},
                 ],

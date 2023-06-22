@@ -121,7 +121,7 @@ class SnmpCheck(AgentCheck):
                 raise ConfigurationError("Couldn't read profile '{}': {}".format(name, exc))
 
             try:
-                recursively_expand_base_profiles(profile.get('definition_file'), definition)
+                recursively_expand_base_profiles(definition)
             except Exception as exc:
                 raise ConfigurationError("Failed to expand base profiles in profile '{}': {}".format(name, exc))
 
