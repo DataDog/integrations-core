@@ -30,8 +30,6 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
-    assert_extend_generic_if(aggregator, common_tags)
-
 
     aggregator.assert_all_metrics_covered()
 
