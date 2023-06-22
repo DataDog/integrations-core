@@ -407,6 +407,177 @@ def test_f5(aggregator):
 
 
 @pytest.mark.usefixtures("dd_environment")
+def test_f5_big_ip(aggregator):
+    profile = 'f5-big-ip'
+    run_profile_check(recording_name='f5', profile_name=profile)
+
+    gauges = [
+        'sysStatMemoryTotal',
+        'sysStatMemoryUsed',
+        'sysGlobalTmmStatMemoryTotal',
+        'sysGlobalTmmStatMemoryUsed',
+        'sysGlobalHostOtherMemoryTotal',
+        'sysGlobalHostOtherMemoryUsed',
+        'sysGlobalHostSwapTotal',
+        'sysGlobalHostSwapUsed',
+        'sysTcpStatOpen',
+        'sysTcpStatCloseWait',
+        'sysTcpStatFinWait',
+        'sysTcpStatTimeWait',
+        'sysUdpStatOpen',
+        'sysClientsslStatCurConns',
+    ]
+    counts = [
+        'sysTcpStatAccepts',
+        'sysTcpStatAcceptfails',
+        'sysTcpStatConnects',
+        'sysTcpStatConnfails',
+        'sysUdpStatAccepts',
+        'sysUdpStatAcceptfails',
+        'sysUdpStatConnects',
+        'sysUdpStatConnfails',
+        'sysClientsslStatEncryptedBytesIn',
+        'sysClientsslStatEncryptedBytesOut',
+        'sysClientsslStatDecryptedBytesIn',
+        'sysClientsslStatDecryptedBytesOut',
+        'sysClientsslStatHandshakeFailures',
+    ]
+    cpu_rates = [
+        'sysMultiHostCpuUser',
+        'sysMultiHostCpuNice',
+        'sysMultiHostCpuSystem',
+        'sysMultiHostCpuIdle',
+        'sysMultiHostCpuIrq',
+        'sysMultiHostCpuSoftirq',
+        'sysMultiHostCpuIowait',
+    ]
+    cpu_gauges = ['sysMultiHostCpuUsageRatio', 'cpu.usage']
+
+    interfaces = [
+        ('1.0', 'desc2'),
+        ('mgmt', 'desc1'),
+        ('/Common/internal', 'desc5'),
+        ('/Common/http-tunnel', 'desc3'),
+        ('/Common/socks-tunnel', 'desc4'),
+    ]
+    interfaces_with_bandwidth_usage = {
+        '1.0',
+        'mgmt',
+        '/Common/internal',
+    }
+    tags = [
+        'snmp_profile:' + profile,
+        'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
+        'device_vendor:f5',
+    ]
+    tags += common.CHECK_TAGS
+
+    common.assert_common_metrics(aggregator, tags)
+
+    for metric in gauges:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    for metric in counts:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
+    for metric in cpu_rates:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:0'] + tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:1'] + tags, count=1)
+    for metric in cpu_gauges:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=['cpu:0'] + tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=['cpu:1'] + tags, count=1)
+
+    for metric in IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    for interface, desc in interfaces:
+        interface_tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + tags
+        for metric in IF_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=interface_tags, count=1
+            )
+        for metric in IF_RATES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=interface_tags, count=1
+            )
+        if interface in interfaces_with_bandwidth_usage:
+            for metric in IF_BANDWIDTH_USAGE:
+                aggregator.assert_metric(
+                    'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=interface_tags, count=1
+                )
+
+        for metric in IF_GAUGES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric),
+                metric_type=aggregator.GAUGE,
+                tags=interface_tags,
+                count=1,
+            )
+
+    for version in ['ipv4', 'ipv6']:
+        ip_tags = ['ipversion:{}'.format(version)] + tags
+        for metric in IP_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=ip_tags, count=1
+            )
+
+    for metric in LTM_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    servers = ['server1', 'server2', 'server3']
+    for server in servers:
+        server_tags = tags + ['server:{}'.format(server)]
+        for metric in LTM_VIRTUAL_SERVER_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=server_tags, count=1)
+        for metric in LTM_VIRTUAL_SERVER_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=server_tags, count=1
+            )
+        for metric in LTM_VIRTUAL_SERVER_RATES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=server_tags, count=1)
+
+    nodes = ['node1', 'node2', 'node3']
+    for node in nodes:
+        node_tags = tags + ['node:{}'.format(node)]
+        for metric in LTM_NODES_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=node_tags, count=1)
+        for metric in LTM_NODES_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=node_tags, count=1
+            )
+        for metric in LTM_NODES_RATES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=node_tags, count=1)
+
+    pools = ['pool1', 'pool2']
+    for pool in pools:
+        pool_tags = tags + ['pool:{}'.format(pool)]
+        for metric in LTM_POOL_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=pool_tags, count=1)
+        for metric in LTM_POOL_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=pool_tags, count=1
+            )
+        for metric in LTM_POOL_RATES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=pool_tags, count=1)
+
+    pool_members = [('pool1', 'node1'), ('pool1', 'node2'), ('pool2', 'node3')]
+    for pool, node in pool_members:
+        pool_member_tags = tags + ['pool:{}'.format(pool), 'node:{}'.format(node)]
+        for metric in LTM_POOL_MEMBER_GAUGES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=pool_member_tags, count=1
+            )
+        for metric in LTM_POOL_MEMBER_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=pool_member_tags, count=1
+            )
+        for metric in LTM_POOL_MEMBER_RATES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=pool_member_tags, count=1
+            )
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("dd_environment")
 def test_device(aggregator):
     profile = "generic-device"
     run_profile_check(profile)
@@ -657,6 +828,48 @@ def test_meraki(aggregator):
 
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:meraki',
+        'snmp_host:dashboard.meraki.com',
+        'device_vendor:meraki',
+    ]
+
+    common.assert_common_metrics(aggregator, common_tags)
+
+    dev_metrics = ['devStatus', 'devClientCount']
+    dev_tags = ['device:Gymnasium', 'product:MR16-HW', 'network:L_NETWORK', 'mac_address:0x02020066f57f'] + common_tags
+    for metric in dev_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=dev_tags, count=1)
+
+    if_tags = ['interface:wifi0', 'index:4', 'mac_address:0x02020066f500'] + common_tags
+    if_metrics = ['devInterfaceSentPkts', 'devInterfaceRecvPkts', 'devInterfaceSentBytes', 'devInterfaceRecvBytes']
+    for metric in if_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
+
+    # IF-MIB
+    if_tags = ['interface:eth0'] + common_tags
+    for metric in IF_COUNTS:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
+        )
+
+    for metric in IF_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
+
+    for metric in IF_RATES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
+
+    for metric in IF_BANDWIDTH_USAGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_meraki_cloud_controller(aggregator):
+    run_profile_check(recording_name='meraki', profile_name='meraki-cloud-controller')
+
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:meraki-cloud-controller',
         'snmp_host:dashboard.meraki.com',
         'device_vendor:meraki',
     ]
@@ -1998,6 +2211,72 @@ def test_checkpoint(aggregator):
 
 
 @pytest.mark.usefixtures("dd_environment")
+def test_checkpoint_firewall(aggregator):
+    run_profile_check(recording_name='checkpoint', profile_name='checkpoint-firewall')
+
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:checkpoint-firewall',
+        'device_vendor:checkpoint',
+    ]
+
+    common.assert_common_metrics(aggregator, common_tags)
+
+    cpu_metrics = [
+        'multiProcUserTime',
+        'multiProcSystemTime',
+        'multiProcIdleTime',
+        'multiProcUsage',
+    ]
+    cpu_cores = [7097, 13039, 13761, 28994, 29751, 33826, 40053, 48847, 61593, 65044]
+    for core in cpu_cores:
+        tags = ['cpu_core:{}'.format(core)] + common_tags
+        for metric in cpu_metrics:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+    aggregator.assert_metric('snmp.procNum', metric_type=aggregator.GAUGE, tags=common_tags)
+
+    mem_metrics = ['memTotalReal64', 'memActiveReal64', 'memFreeReal64', 'memTotalVirtual64', 'memActiveVirtual64']
+    for metric in mem_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
+
+    disk_metrics = [
+        'multiDiskSize',
+        'multiDiskUsed',
+        'multiDiskFreeTotalBytes',
+        'multiDiskFreeAvailableBytes',
+        'multiDiskFreeTotalPercent',
+        'multiDiskFreeAvailablePercent',
+    ]
+    appliance_metrics = [
+        'fanSpeedSensorValue',
+        'fanSpeedSensorStatus',
+        'tempertureSensorValue',
+        'tempertureSensorStatus',
+    ]
+    common_indices = range(10)
+    common_names = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth']
+    for idx in common_indices:
+        name = common_names[idx]
+        tags = ['disk_index:{}'.format(idx), 'disk_name:{}'.format(name)] + common_tags
+        for metric in disk_metrics:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+        tags = ['sensor_index:{}'.format(idx), 'sensor_name:{}'.format(name)] + common_tags
+        for metric in appliance_metrics:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+    fw_count_metrics = ['fwAccepted', 'fwDropped', 'fwRejected']
+    for metric in fw_count_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
+
+    fw_gauge_metrics = ['fwNumConn', 'fwPeakNumConn']
+    for metric in fw_gauge_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("dd_environment")
 def test_arista(aggregator):
     run_profile_check('arista')
 
@@ -2221,6 +2500,125 @@ def test_chatsworth(aggregator):
 
 
 @pytest.mark.usefixtures("dd_environment")
+def test_chatsworth_pdu(aggregator):
+    profile = "chatsworth_pdu"
+    run_profile_check(recording_name='chatsworth', profile_name=profile)
+
+    # Legacy global tags are applied to all metrics
+    legacy_global_tags = [
+        'legacy_pdu_macaddress:00:0E:D3:AA:CC:EE',
+        'legacy_pdu_model:P10-1234-ABC',
+        'legacy_pdu_name:legacy-name1',
+        'legacy_pdu_version:1.2.3',
+    ]
+    common_tags = common.CHECK_TAGS + legacy_global_tags + ['snmp_profile:' + profile, 'device_vendor:chatsworth']
+
+    common.assert_common_metrics(aggregator, common_tags)
+
+    # Legacy metrics
+    legacy_pdu_tags = common_tags
+    legacy_pdu_gauge_metrics = [
+        'snmp.pduRole',
+        'snmp.outOfService',
+    ]
+    legacy_pdu_monotonic_count_metrics = []
+    for line in range(1, 4):
+        legacy_pdu_gauge_metrics.append('snmp.line{}curr'.format(line))
+    for branch in range(1, 3):
+        legacy_pdu_gauge_metrics.append('snmp.temperatureProbe{}'.format(branch))
+        legacy_pdu_gauge_metrics.append('snmp.humidityProbe{}'.format(branch))
+        for xyz in ['xy', 'yz', 'zx']:
+            legacy_pdu_monotonic_count_metrics.append('snmp.energy{}{}s'.format(xyz, branch))
+            legacy_pdu_gauge_metrics.append('snmp.voltage{}{}'.format(xyz, branch))
+            legacy_pdu_gauge_metrics.append('snmp.power{}{}'.format(xyz, branch))
+            legacy_pdu_gauge_metrics.append('snmp.powerFact{}{}'.format(xyz, branch))
+            legacy_pdu_gauge_metrics.append('snmp.current{}{}'.format(xyz, branch))
+    for branch in range(1, 25):
+        legacy_pdu_monotonic_count_metrics.append('snmp.receptacleEnergyoutlet{}s'.format(branch))
+        legacy_pdu_gauge_metrics.append('snmp.outlet{}Current'.format(branch))
+
+    for metric in legacy_pdu_gauge_metrics:
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=legacy_pdu_tags, count=1)
+    for metric in legacy_pdu_monotonic_count_metrics:
+        aggregator.assert_metric(metric, metric_type=aggregator.MONOTONIC_COUNT, tags=legacy_pdu_tags, count=1)
+
+    # New metrics
+    pdu_tags = common_tags + [
+        'pdu_cabinetid:cab1',
+        'pdu_ipaddress:42.2.210.224',
+        'pdu_macaddress:0x00249b3503f6',
+        'pdu_model:model1',
+        'pdu_name:name1',
+        'pdu_version:v1.1',
+    ]
+    aggregator.assert_metric('snmp.cpiPduNumberBranches', metric_type=aggregator.GAUGE, tags=pdu_tags, count=1)
+    aggregator.assert_metric('snmp.cpiPduNumberOutlets', metric_type=aggregator.GAUGE, tags=pdu_tags, count=1)
+    aggregator.assert_metric('snmp.cpiPduOutOfService', metric_type=aggregator.GAUGE, tags=pdu_tags, count=1)
+    aggregator.assert_metric('snmp.cpiPduUpgrade', metric_type=aggregator.GAUGE, tags=pdu_tags, count=1)
+    aggregator.assert_metric('snmp.cpiPduChainRole', metric_type=aggregator.GAUGE, tags=pdu_tags, count=1)
+    aggregator.assert_metric('snmp.cpiPduTotalPower', metric_type=aggregator.GAUGE, tags=pdu_tags, count=1)
+
+    for lock in [1, 2]:
+        lock_tags = common_tags + ['lock_id:{}'.format(lock)]
+        aggregator.assert_metric('snmp.cpiPduEasStatus', metric_type=aggregator.GAUGE, tags=lock_tags, count=1)
+        aggregator.assert_metric('snmp.cpiPduDoorStatus', metric_type=aggregator.GAUGE, tags=lock_tags, count=1)
+        aggregator.assert_metric('snmp.cpiPduLockStatus', metric_type=aggregator.GAUGE, tags=lock_tags, count=1)
+
+    for sensor_name, sensor_index in [('sensor1', 4), ('sensor2', 6)]:
+        sensor_tags = common_tags + [
+            'sensor_index:{}'.format(sensor_index),
+            'sensor_name:{}'.format(sensor_name),
+            'sensor_type:1',
+        ]
+        aggregator.assert_metric('snmp.cpiPduSensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
+
+    for line in [6, 18]:
+        line_tags = common_tags + ['line_id:{}'.format(line)]
+        aggregator.assert_metric('snmp.cpiPduLineCurrent', metric_type=aggregator.GAUGE, tags=line_tags, count=1)
+
+    for branch in [1, 17]:
+        branch_tags = common_tags + ['branch_id:{}'.format(branch), 'pdu_name:name1']
+        aggregator.assert_metric('snmp.cpiPduBranchCurrent', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
+        aggregator.assert_metric('snmp.cpiPduBranchMaxCurrent', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
+        aggregator.assert_metric('snmp.cpiPduBranchVoltage', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
+        aggregator.assert_metric('snmp.cpiPduBranchPower', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
+        aggregator.assert_metric(
+            'snmp.cpiPduBranchPowerFactor', metric_type=aggregator.GAUGE, tags=branch_tags, count=1
+        )
+        aggregator.assert_metric('snmp.cpiPduBranchStatus', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
+        aggregator.assert_metric(
+            'snmp.cpiPduBranchEnergy', metric_type=aggregator.MONOTONIC_COUNT, tags=branch_tags, count=1
+        )
+
+    for branch in [1]:
+        branch_tags = common_tags + ['branch_id:{}'.format(branch), 'pdu_name:name2']
+        aggregator.assert_metric(
+            'snmp.cpiPduBranchPowerFactor', metric_type=aggregator.GAUGE, tags=branch_tags, count=1
+        )
+
+        aggregator.assert_metric(
+            'snmp.cpiPduBranchEnergy', metric_type=aggregator.MONOTONIC_COUNT, tags=branch_tags, count=1
+        )
+
+    for outlet_id, outlet_branch, outlet_name in [(7, 29, 'outlet1'), (16, 23, 'outlet2')]:
+        outlet_tags = common_tags + [
+            'outlet_id:{}'.format(outlet_id),
+            'outlet_branchid:{}'.format(outlet_branch),
+            'outlet_name:{}'.format(outlet_name),
+        ]
+        aggregator.assert_metric('snmp.cpiPduOutletCurrent', metric_type=aggregator.GAUGE, tags=outlet_tags, count=1)
+        aggregator.assert_metric('snmp.cpiPduOutletVoltage', metric_type=aggregator.GAUGE, tags=outlet_tags, count=1)
+        aggregator.assert_metric('snmp.cpiPduOutletPower', metric_type=aggregator.GAUGE, tags=outlet_tags, count=1)
+        aggregator.assert_metric('snmp.cpiPduOutletStatus', metric_type=aggregator.GAUGE, tags=outlet_tags, count=1)
+        aggregator.assert_metric(
+            'snmp.cpiPduOutletEnergy', metric_type=aggregator.MONOTONIC_COUNT, tags=outlet_tags, count=1
+        )
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
+
+@pytest.mark.usefixtures("dd_environment")
 def test_isilon(aggregator):
     run_profile_check('isilon')
 
@@ -2304,6 +2702,36 @@ def test_apc(aggregator):
     run_profile_check('apc')
     profile_tags = [
         'snmp_profile:apc',
+        'model:APC Smart-UPS 600',
+        'firmware_version:2.0.3-test',
+        'serial_num:test_serial',
+        'ups_name:testIdentName',
+        'device_vendor:apc',
+    ]
+
+    tags = common.CHECK_TAGS + profile_tags
+
+    common.assert_common_metrics(aggregator, tags)
+
+    for metric in metrics.APC_UPS_METRICS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    aggregator.assert_metric(
+        'snmp.upsOutletGroupStatusGroupState',
+        metric_type=aggregator.GAUGE,
+        tags=['outlet_group_name:test_outlet'] + tags,
+    )
+
+    for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:
+        aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=1, tags=tags)
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_apc_ups(aggregator):
+    run_profile_check(recording_name='apc', profile_name='apc_ups')
+    profile_tags = [
+        'snmp_profile:apc_ups',
         'model:APC Smart-UPS 600',
         'firmware_version:2.0.3-test',
         'serial_num:test_serial',
