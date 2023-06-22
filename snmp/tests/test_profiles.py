@@ -242,6 +242,7 @@ def test_cisco_voice(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=instance_tags)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -413,6 +414,7 @@ def test_f5(aggregator):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -465,6 +467,7 @@ def test_device(aggregator):
                 )
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -522,6 +525,7 @@ def test_f5_router(aggregator):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -658,6 +662,7 @@ def test_cisco_3850(aggregator):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -700,6 +705,7 @@ def test_meraki_cloud_controller(aggregator):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -1117,6 +1123,7 @@ def test_cisco_nexus(aggregator):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -1718,6 +1725,7 @@ def test_generic_host_resources(aggregator):
         aggregator.assert_metric('snmp.hrProcessorLoad', count=1, tags=tags)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -1768,6 +1776,7 @@ def test_palo_alto(aggregator):
     # Needs cross table entLogicalDescr tag
     aggregator.assert_metric('snmp.panEntryFanTrayPowerUsed', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -1921,6 +1930,7 @@ def assert_cisco_asa(aggregator, profile):
             aggregator.assert_metric('snmp.{}'.format(rtt), metric_type=aggregator.GAUGE, tags=tags)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -2004,6 +2014,7 @@ def test_checkpoint_firewall(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -2046,6 +2057,7 @@ def test_arista(aggregator):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -2108,6 +2120,7 @@ def test_aruba(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -2336,6 +2349,7 @@ def test_apc_ups(aggregator):
         aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=1, tags=tags)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -2549,6 +2563,7 @@ def test_netapp(aggregator):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -2579,6 +2594,8 @@ def test_cisco_catalyst(aggregator):
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     common.assert_common_metrics(aggregator, common_tags)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
 
 
 @pytest.mark.parametrize("file", ["juniper-ex", "juniper-ex-variation"])
