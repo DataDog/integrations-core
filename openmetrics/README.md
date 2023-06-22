@@ -82,6 +82,10 @@ instances:
 
 With this configuration, the endpoint returns the `Content-type` set to `text/plain`, causing the integration to use the previous scraper.
 
+The OpenMetrics integration reports an error parsing the payload when the system you are monitoring sends data that does not match their Content-type header. Setting the integration to accept text/plain content creates a workaround to address the problem in the short term.
+
+To fix the root cause of the problem, reach out to the maintainers of the upstream system. Submit a bug report and ask them to fix the system so the payload and the Content-type set in the header match.
+
 Need help? Contact [Datadog support][8].
 
 ## Further Reading
