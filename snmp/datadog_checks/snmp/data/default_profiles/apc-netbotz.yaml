@@ -1,5 +1,4 @@
 extends:
-  - _base.yaml
   - apc.yaml
 sysobjectid:
   - 1.3.6.1.4.1.5528.100.20.10.*

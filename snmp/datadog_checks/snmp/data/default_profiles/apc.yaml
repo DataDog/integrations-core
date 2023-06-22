@@ -1,0 +1,9 @@
+extends:
+  - _base.yaml
+
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "apc"
+
