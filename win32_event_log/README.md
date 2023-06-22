@@ -214,7 +214,7 @@ Datadog recommends using the latest method for filters.
         - 7036
   ```
 
-You can use the [`query` option][20] to filter events with an XPATH or structured XML query. Datadog recommends creating the query in Event Viewer's filter editor until the events shown in Event Viewer match what you want the Datadog Agent to collect. The `filters` option is ignored when the `query` option is used.
+You can use the [`query` option][20] to filter events with an [XPATH or structured XML query][21]. Datadog recommends creating the query in Event Viewer's filter editor until the events shown in Event Viewer match what you want the Datadog Agent to collect. The `filters` option is ignored when the `query` option is used.
 
   ```yaml
   init_config:
@@ -240,6 +240,8 @@ You can use the [`query` option][20] to filter events with an XPATH or structure
   - `type`: `Critical`, `Error`, `Warning`, `Information`, `Audit Success`, `Audit Failure`
   - `source_name`: Any available source name
   - `event_id`: Windows EventLog ID
+
+* The legacy method does not support the `query` option. Only the latest method (setting `legacy_mode: false`) and the Logs Tailer supports the `query` option.
 
   This example filter uses the legacy method.
 
@@ -270,9 +272,15 @@ You can use the [`query` option][20] to filter events with an XPATH or structure
 <!-- xxz tab xxx -->
 <!-- xxx tab "Logs" xxx -->
 
-You can use the `query`, as well as the `log_processing_rules` regex option, to filter event logs.
+You can use the `query`, as well as the `log_processing_rules` regex option, to filter event logs. If you are using the Logs Tailer, the `query` option has better filtering performance than the `log_processing_rules` filters. The Datadog Agent cannot see any events filtered out by the `query` option. When using the `log_processing_rules` filters, the Agent can see every event and must process and format the event before applying the regex filter, so it takes more processing, and is less performant.
 
-You can use the `query` to filter events with an XPATH or structured XML query. Datadog recommends creating the query in Event Viewer's filter editor until the events shown in Event Viewer match what you want the Datadog Agent to collect.
+You can use the `query` to filter events or filter out the bulk of the events with an [XPATH or structured XML query][21]. There is an expression limit on the syntax of XPath and XML queries. For additional filtering, use `log_processing_rules` filters.
+
+Datadog recommends creating and testing the query in Event Viewer's filter editor until the events shown in Event Viewer match what you want the Agent to collect.
+
+![Filter Current Log][23]
+
+Then, copy and paste the query into the Agent configuration. 
 
 ```yaml
   # collect Critical, Warning, and Error events
@@ -294,7 +302,9 @@ You can use the `query` to filter events with an XPATH or structured XML query. 
       </QueryList>
 ```
 
-In addition to the `query` option, events can be further filtered with log processing rules. 
+![XML Query][24]
+
+In addition to the `query` option, events can be further filtered with log processing rules. If the `query` option is specified, then the `filters` option is ignored. For more information, see the [example `conf.yaml` file][22].
 
 Some example filters include the following:
 
@@ -483,3 +493,7 @@ Additional helpful documentation, links, and articles:
 [18]: https://docs.datadoghq.com/agent/logs/#activate-log-collection
 [19]: https://raw.githubusercontent.com/DataDog/integrations-core/master/win32_event_log/images/windows-defender-operational-event-log-properties.png
 [20]: https://github.com/DataDog/integrations-core/blob/10296a69722b75098ed0b45ce55f0309a1800afd/win32_event_log/datadog_checks/win32_event_log/data/conf.yaml.example#L74-L89
+[21]: https://learn.microsoft.com/en-us/windows/win32/wes/consuming-events
+[22]: https://github.com/DataDog/integrations-core/blob/master/win32_event_log/datadog_checks/win32_event_log/data/conf.yaml.example#L87C32-L87C32
+[23]: https://raw.githubusercontent.com/DataDog/integrations-core/master/win32_event_log/images/filter-event-viewer.png
+[24]: https://raw.githubusercontent.com/DataDog/integrations-core/master/win32_event_log/images/xml-query-event-viewer.png
