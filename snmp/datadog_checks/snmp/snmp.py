@@ -123,7 +123,7 @@ class SnmpCheck(AgentCheck):
             try:
                 recursively_expand_base_profiles(definition)
             except RecursionError as exc:
-                self.log.warning("Failed to expand base profiles in profile '{}': {}".format(name, exc))
+                self.log.warning("Failed to expand base profiles in profile '%s': %s", name, exc)
             except Exception as exc:
                 raise ConfigurationError("Failed to expand base profiles in profile '{}': {}".format(name, exc))
 

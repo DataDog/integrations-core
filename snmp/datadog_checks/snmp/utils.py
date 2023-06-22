@@ -161,7 +161,7 @@ def _load_default_profiles():
         try:
             recursively_expand_base_profiles(definition)
         except RecursionError as exc:
-            logger.warning("Failed to expand base profiles in profile '{}': {}".format(name, exc))
+            logger.warning("Failed to expand base profiles in profile '%s': %s", name, exc)
         except Exception:
             logger.error("Could not expand base profile %s", path)
             raise
