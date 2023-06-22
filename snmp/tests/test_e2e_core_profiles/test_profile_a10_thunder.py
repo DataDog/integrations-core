@@ -84,11 +84,11 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
         aggregator.assert_metric('snmp.axFanSpeed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['ax_power_supply_voltage_description:kept forward oxen forward', 'ax_power_supply_voltage_status:unknown'],
         [
-            'ax_power_supply_voltage_description:zombies but Jaded quaintly their their ' 'forward',
+            'ax_power_supply_voltage_description:zombies but Jaded quaintly their their forward',
             'ax_power_supply_voltage_status:normal',
         ],
+        ['ax_power_supply_voltage_description:kept forward oxen forward', 'ax_power_supply_voltage_status:unknown'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.axPowerSupplyVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -103,27 +103,27 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
         )
 
     tag_rows = [
-        ['ax_app_global_system_resource_name:kept acted their zombies driving driving ' 'but'],
-        ['ax_app_global_system_resource_name:their zombies oxen kept but oxen their ' 'zombies'],
+        ['ax_app_global_system_resource_name:their zombies oxen kept but oxen their zombies'],
+        ['ax_app_global_system_resource_name:kept acted their zombies driving driving but'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.axAppGlobalAllowedMaxValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.axAppGlobalAllowedCurrentValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.axAppGlobalAllowedCurrentValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.axAppGlobalAllowedMaxValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     tag_rows = [
         [
             'ax_server_enabled_state:enabled',
-            'ax_server_monitor_state:down',
-            'ax_server_name:acted acted Jaded kept acted',
+            'ax_server_monitor_state:disabled',
+            'ax_server_name:but quaintly quaintly driving forward',
         ],
         [
             'ax_server_enabled_state:enabled',
-            'ax_server_monitor_state:disabled',
-            'ax_server_name:but quaintly quaintly driving forward',
+            'ax_server_monitor_state:down',
+            'ax_server_name:acted acted Jaded kept acted',
         ],
     ]
     for tag_row in tag_rows:
@@ -131,17 +131,17 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
 
     tag_rows = [
         [
-            'ax_server_stat_name:zombies Jaded zombies kept oxen oxen zombies Jaded ' 'driving',
+            'ax_server_stat_name:zombies Jaded zombies kept oxen oxen zombies Jaded driving',
             'ax_server_stat_server_status:down',
         ],
         ['ax_server_stat_name:oxen but oxen driving', 'ax_server_stat_server_status:up'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.axServerStatServerCurConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.axServerStatServerTotalCurrL7Reqs', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.axServerStatServerTotalCurrL7Reqs', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.axServerStatServerCurConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     tag_rows = [
@@ -170,7 +170,7 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
         [
             'ax_virtual_server_display_status:partial_up',
             'ax_virtual_server_enabled:disabled',
-            'ax_virtual_server_ha_group:but acted kept zombies forward kept quaintly oxen ' 'zombies',
+            'ax_virtual_server_ha_group:but acted kept zombies forward kept quaintly oxen zombies',
             'ax_virtual_server_name:oxen but quaintly forward driving their driving',
         ],
     ]
@@ -193,21 +193,6 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.axVirtualServerStatCurConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.axVirtualServerStatTotalL7Reqs', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.axVirtualServerStatTotConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.axVirtualServerStatPktsIn', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.axVirtualServerStatPktsOut', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
             'snmp.axVirtualServerStatTotalCurrL7Reqs', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
@@ -220,19 +205,34 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
             'snmp.axVirtualServerStatBytesIn', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
+            'snmp.axVirtualServerStatTotalL7Reqs', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.axVirtualServerStatPktsIn', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.axVirtualServerStatPktsOut', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.axVirtualServerStatTotConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
             'snmp.axVirtualServerStatPersistConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.axVirtualServerStatCurConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     tag_rows = [
         [
-            'ax_virtual_server_port_stat_address:zombies Jaded forward zombies acted ' 'forward quaintly forward',
+            'ax_virtual_server_port_stat_address:zombies Jaded forward zombies acted forward quaintly forward',
             'ax_virtual_server_port_stat_name:quaintly forward Jaded',
             'ax_virtual_server_stat_port_display_status:all_up',
             'ax_virtual_server_stat_port_num:18',
             'ax_virtual_server_stat_port_status:down',
         ],
         [
-            'ax_virtual_server_port_stat_address:zombies driving driving kept zombies ' 'Jaded quaintly but',
+            'ax_virtual_server_port_stat_address:zombies driving driving kept zombies Jaded quaintly but',
             'ax_virtual_server_port_stat_name:oxen Jaded',
             'ax_virtual_server_stat_port_display_status:all_up',
             'ax_virtual_server_stat_port_num:19',
