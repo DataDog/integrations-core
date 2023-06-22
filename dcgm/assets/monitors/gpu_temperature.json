@@ -1,0 +1,27 @@
+{
+    "id": 10606406,
+    "name": "🌡️ GPU Temperature is high",
+    "type": "query alert",
+    "query": "avg(last_5m):avg:dcgm.temperature{*} by {host} > 85",
+    "message": "{{#is_alert}}\nYour GPU on {{host.name}} is running hot, please check it.\n{{/is_alert}}",
+    "tags": [
+        "integration:dcgm"
+    ],
+    "options": {
+        "thresholds": {
+            "critical": 85
+        },
+        "notify_audit": false,
+        "require_full_window": false,
+        "notify_no_data": false,
+        "renotify_interval": 0,
+        "include_tags": true,
+        "new_group_delay": 60,
+        "avalanche_window": 10,
+        "silenced": {
+            "*": null
+        }
+    },
+    "priority": null,
+    "restricted_roles": null
+}
