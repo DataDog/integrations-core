@@ -3,3 +3,6 @@
 
 extends:
   - chatsworth.yaml
+
+device:
+  vendor: "chatsworth"

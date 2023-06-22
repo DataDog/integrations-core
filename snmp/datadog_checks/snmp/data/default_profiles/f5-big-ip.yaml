@@ -1,6 +1,8 @@
 # Profile for F5 devices kept for backward compatibility
 # Check the profile f5.yaml
 
-
 extends:
   - f5.yaml
+
+device:
+  vendor: "f5"

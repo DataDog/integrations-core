@@ -3,3 +3,6 @@
 
 extends:
   - meraki.yaml
+
+device:
+  vendor: "meraki"
