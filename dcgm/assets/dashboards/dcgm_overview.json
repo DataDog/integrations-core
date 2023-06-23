@@ -93,7 +93,7 @@
                     "display_format": "countsAndList",
                     "color_preference": "text",
                     "hide_zero_counts": true,
-                    "query": "DCGM",
+                    "query": "tag:(integration:dcgm)",
                     "sort": "status,asc",
                     "count": 50,
                     "start": 0,
