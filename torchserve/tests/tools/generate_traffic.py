@@ -36,9 +36,9 @@ def run_bad_prediction():
 
 def add_remove_model():
     requests.post("http://localhost:8081/models", params={"url": "linear_regression_3_3.mar"})
-    time.sleep(randrange(100))
+    time.sleep(150)
     requests.delete("http://localhost:8081/models/linear_regression_3_3/1")
-    time.sleep(randrange(20))
+    time.sleep(200)
 
 
 def change_default_version():
@@ -48,6 +48,10 @@ def change_default_version():
 
 def call_openmetrics_endpoint():
     requests.get("http://localhost:8082/metrics")
+
+
+def run_bad_healthcheck():
+    requests.get("http://localhost:8080/pin")
 
 
 if __name__ == "__main__":
@@ -81,6 +85,10 @@ if __name__ == "__main__":
     x.start()
 
     x = threading.Thread(target=do_stuff, args=("BADPRED", run_bad_prediction))
+    threads.append(x)
+    x.start()
+
+    x = threading.Thread(target=do_stuff, args=("404", run_bad_healthcheck))
     threads.append(x)
     x.start()
 
