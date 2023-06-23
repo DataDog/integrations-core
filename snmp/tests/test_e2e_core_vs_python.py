@@ -284,6 +284,11 @@ def test_e2e_profile_apc(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config, expected_total_count=64 + 5)
 
 
+def test_e2e_profile_apc_ups(dd_agent_check):
+    config = common.generate_container_profile_config(community_string='apc', profile='apc_ups')
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=64 + 5)
+
+
 def test_e2e_profile_arista(dd_agent_check):
     config = common.generate_container_profile_config('arista')
     assert_python_vs_core(dd_agent_check, config, expected_total_count=16 + 5)
@@ -305,8 +310,24 @@ def test_e2e_profile_chatsworth(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config, expected_total_count=225 + 5)
 
 
+def test_e2e_profile_chatsworth_pdu(dd_agent_check):
+    config = common.generate_container_profile_config(community_string='chatsworth', profile='chatsworth_pdu')
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=225 + 5)
+
+
 def test_e2e_profile_checkpoint(dd_agent_check):
     config = common.generate_container_profile_config("checkpoint")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        expected_total_count=301 + 5,
+        metrics_to_skip=metrics_to_skip,
+    )
+
+
+def test_e2e_profile_checkpoint_firewall(dd_agent_check):
+    config = common.generate_container_profile_config(community_string="checkpoint", profile='checkpoint-firewall')
     metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
     assert_python_vs_core(
         dd_agent_check,
@@ -402,6 +423,16 @@ def test_e2e_profile_f5(dd_agent_check):
     )
 
 
+def test_e2e_profile_f5_big_ip(dd_agent_check):
+    config = common.generate_container_profile_config(community_string='f5', profile="f5-big-ip")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metrics_to_skip,
+    )
+
+
 def test_e2e_profile_fortinet_fortigate(dd_agent_check):
     config = common.generate_container_profile_config("fortinet-fortigate")
     metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
@@ -439,6 +470,11 @@ def test_e2e_profile_isilon(dd_agent_check):
 
 def test_e2e_profile_meraki(dd_agent_check):
     config = common.generate_container_profile_config('meraki')
+    assert_python_vs_core(dd_agent_check, config, tags_to_skip=['mac_address'])
+
+
+def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
+    config = common.generate_container_profile_config(community_string='meraki', profile='meraki-cloud-controller')
     assert_python_vs_core(dd_agent_check, config, tags_to_skip=['mac_address'])
 
 
