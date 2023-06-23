@@ -313,7 +313,7 @@ class DockerInterface(object):
             # More info: https://github.com/DataDog/integrations-core/pull/5454
             # TODO: Remove PYTHONDONTWRITEBYTECODE env var when Python 2 support is removed
             'PYTHONDONTWRITEBYTECODE': "1",
-            "DD_TELEMETRY_ENABLED": True,
+            "DD_TELEMETRY_ENABLED": "1",
         }
         if self.dd_site:
             env_vars['DD_SITE'] = self.dd_site
