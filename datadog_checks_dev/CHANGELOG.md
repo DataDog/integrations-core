@@ -1,5 +1,13 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 21.0.0 / 2023-06-23
+
+* [Added] Update changelog generation to use a better formatting. See [#14810](https://github.com/DataDog/integrations-core/pull/14810).
+* [Fixed] Revert "Set the `marker` option to `not e2e` by default (#14804)". See [#14815](https://github.com/DataDog/integrations-core/pull/14815).
+* [Fixed] Set the `marker` option to `not e2e` by default. See [#14804](https://github.com/DataDog/integrations-core/pull/14804).
+* [Changed] Reorder changelogs by priority. See [#14836](https://github.com/DataDog/integrations-core/pull/14836).
+* [Removed] Remove ddev script from datadog_checks_dev. See [#14837](https://github.com/DataDog/integrations-core/pull/14837).
+
 ## 20.0.1 / 2023-06-20
 
 * [Fixed] Fix ability to release ddev. See [#14790](https://github.com/DataDog/integrations-core/pull/14790).
