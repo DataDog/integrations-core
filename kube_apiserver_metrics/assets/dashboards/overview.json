@@ -1050,7 +1050,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:kube_apiserver.longrunning_gauge{$cluster} by {scope,verb}",
+                                            "query": "sum:kube_apiserver.longrunning_requests{$cluster} by {scope,verb}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
