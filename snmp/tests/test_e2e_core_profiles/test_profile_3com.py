@@ -4,6 +4,8 @@
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
+
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
@@ -52,3 +54,5 @@ def test_e2e_profile_3com(dd_agent_check):
         'vendor': '3com',
     }
     assert_device_metadata(aggregator, device)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
