@@ -83,3 +83,5 @@ def test_e2e_profile_3com_huawei(dd_agent_check):
         'vendor': '3com',
     }
     assert_device_metadata(aggregator, device)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
