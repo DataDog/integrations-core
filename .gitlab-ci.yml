@@ -232,12 +232,12 @@ tagger-image-builder:
   only:
     changes:
       - .gitlab/tagger/**/*
-      - datadog_checks_dev/**/*
+      - ddev/**/*
       - .gitlab-ci.yaml
     refs:
       - master
   script:
-    - docker build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile ./datadog_checks_dev/
+    - docker build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile ./ddev/
     - docker images $TAGGER_IMAGE
     - docker push $TAGGER_IMAGE
   except: [ tags, schedules ]
