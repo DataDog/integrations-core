@@ -107,7 +107,7 @@ def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
     instance = config['instances'][0]
     instance.update(
         {
-            'community_string': 'f5',
+            'community_string': 'f5-big-ip',
         }
     )
     # run a rate check, will execute two check runs to evaluate rate metrics
@@ -117,7 +117,7 @@ def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
         'device_namespace:default',
         'device_vendor:f5',
         'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
-        'snmp_profile:f5',
+        'snmp_profile:f5-big-ip',
     ]
     tags += ['snmp_device:{}'.format(instance['ip_address'])]
 

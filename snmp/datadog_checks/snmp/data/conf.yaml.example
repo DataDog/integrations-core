@@ -64,8 +64,8 @@ init_config:
     ## installed in the python package and in the configuration directory.
     #
     # profiles:
-    #   f5:
-    #     definition_file: f5.yaml
+    #   f5-big-ip:
+    #     definition_file: f5-big-ip.yaml
     #   cisco-asr:
     #     definition_file: cisco-asr.yaml
 

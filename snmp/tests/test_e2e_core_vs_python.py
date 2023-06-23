@@ -58,7 +58,7 @@ def test_e2e_v3_version_autodetection(dd_agent_check):
             'authProtocol': 'sha',
             'privKey': 'doggiePRIVkey',
             'privProtocol': 'des',
-            'context_name': 'f5',
+            'context_name': 'f5-big-ip',
             'community_string': '',
         }
     )
@@ -79,7 +79,7 @@ def test_e2e_v3_explicit_version(dd_agent_check):
             'privKey': 'doggiePRIVkey',
             'privProtocol': 'DES',
             'snmp_version': 3,
-            'context_name': 'f5',
+            'context_name': 'f5-big-ip',
             'community_string': '',
         }
     )
@@ -100,7 +100,7 @@ def test_e2e_v3_md5_aes(dd_agent_check):
             'privKey': 'doggiePRIVkey',
             'privProtocol': 'AES',
             'snmp_version': 3,
-            'context_name': 'f5',
+            'context_name': 'f5-big-ip',
             'community_string': '',
         }
     )
@@ -122,7 +122,7 @@ def test_e2e_v3_md5_aes256_blumenthal(dd_agent_check):
             'privKey': 'doggiePRIVkey',
             'privProtocol': 'AES256',  # `AES256` correspond to Blumenthal implementation for pysnmp and gosnmp
             'snmp_version': 3,
-            'context_name': 'f5',
+            'context_name': 'f5-big-ip',
             'community_string': '',
         }
     )
@@ -148,7 +148,7 @@ def test_e2e_v3_md5_aes256_reeder(dd_agent_check):
             'privKey': 'doggiePRIVkey',
             'privProtocol': 'AES256C',  # `AES256C` correspond to Reeder implementation for pysnmp and gosnmp
             'snmp_version': 3,
-            'context_name': 'f5',
+            'context_name': 'f5-big-ip',
             'community_string': '',
         }
     )
@@ -413,18 +413,8 @@ def test_e2e_profile_dell_poweredge(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config, metrics_to_skip=metric_to_skip)
 
 
-def test_e2e_profile_f5(dd_agent_check):
-    config = common.generate_container_profile_config("f5")
-    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
-    assert_python_vs_core(
-        dd_agent_check,
-        config,
-        metrics_to_skip=metrics_to_skip,
-    )
-
-
 def test_e2e_profile_f5_big_ip(dd_agent_check):
-    config = common.generate_container_profile_config(community_string='f5', profile="f5-big-ip")
+    config = common.generate_container_profile_config("f5-big-ip")
     metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
     assert_python_vs_core(
         dd_agent_check,
