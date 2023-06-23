@@ -156,6 +156,123 @@ def test_e2e_core_metadata_f5(dd_agent_check):
     assert_metadata_events(aggregator, events)
 
 
+def test_e2e_core_metadata_f5_big_ip(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'f5',
+            'loader': 'core',
+            'profile': 'f5-big-ip',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+    device_id = u'default:' + device_ip
+
+    events = [
+        {
+            u'collect_timestamp': 0,
+            u'devices': [
+                {
+                    u'description': u'BIG-IP Virtual Edition : Linux '
+                    u'3.10.0-862.14.4.el7.ve.x86_64 : BIG-IP software '
+                    u'release 15.0.1, build 0.0.11',
+                    u'id': device_id,
+                    u'id_tags': [
+                        u'device_namespace:default',
+                        u'snmp_device:' + device_ip,
+                    ],
+                    u'ip_address': device_ip,
+                    u'location': u'Network Closet 1',
+                    u'name': u'f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
+                    u'profile': u'f5-big-ip',
+                    u'status': 1,
+                    u'sys_object_id': u'1.3.6.1.4.1.3375.2.1.3.4.43',
+                    u'tags': [
+                        u'device_namespace:default',
+                        u'device_vendor:f5',
+                        u'snmp_device:' + device_ip,
+                        u'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
+                        u'snmp_profile:f5-big-ip',
+                    ],
+                    u'vendor': u'f5',
+                    u'serial_number': '26ff4a4d-190e-12ac-d4257ed36ba6',
+                    u'version': u'15.0.1',
+                    u'product_name': u'BIG-IP',
+                    u'model': u'Z100',
+                    u'os_name': u'Linux',
+                    u'os_version': u'3.10.0-862.14.4.el7.ve.x86_64',
+                },
+            ],
+            u'interfaces': [
+                {
+                    u'admin_status': 1,
+                    u'alias': u'desc5',
+                    u'description': u'/Common/internal',
+                    u'device_id': device_id,
+                    u'id_tags': [u'interface:/Common/internal'],
+                    u'index': 112,
+                    u'mac_address': u'42:01:0a:a4:00:33',
+                    u'name': u'/Common/internal',
+                    u'oper_status': 1,
+                },
+                {
+                    u'admin_status': 1,
+                    u'alias': u'desc1',
+                    u'description': u'mgmt',
+                    u'device_id': device_id,
+                    u'id_tags': [u'interface:mgmt'],
+                    u'index': 32,
+                    u'mac_address': u'42:01:0a:a4:00:33',
+                    u'name': u'mgmt',
+                    u'oper_status': 1,
+                },
+                {
+                    u'admin_status': 1,
+                    u'alias': u'desc2',
+                    u'description': u'1.0',
+                    u'device_id': device_id,
+                    u'id_tags': [u'interface:1.0'],
+                    u'index': 48,
+                    u'mac_address': u'42:01:0a:a4:00:33',
+                    u'name': u'1.0',
+                    u'oper_status': 1,
+                },
+                {
+                    u'admin_status': 1,
+                    u'alias': u'desc3',
+                    u'description': u'/Common/http-tunnel',
+                    u'device_id': device_id,
+                    u'id_tags': [u'interface:/Common/http-tunnel'],
+                    u'index': 80,
+                    u'mac_address': u'42:01:0a:a4:00:34',
+                    u'name': u'/Common/http-tunnel',
+                    u'oper_status': 4,
+                },
+                {
+                    u'admin_status': 1,
+                    u'alias': u'desc4',
+                    u'description': u'/Common/socks-tunnel',
+                    u'device_id': device_id,
+                    u'id_tags': [u'interface:/Common/socks-tunnel'],
+                    u'index': 96,
+                    u'mac_address': u'42:01:0a:a4:00:34',
+                    u'name': u'/Common/socks-tunnel',
+                    u'oper_status': 4,
+                },
+            ],
+            "ip_addresses": [
+                {"interface_id": "default:{}:32".format(device_ip), "ip_address": "10.164.0.51", "prefixlen": 32}
+            ],
+            u'namespace': u'default',
+        },
+    ]
+    assert_metadata_events(aggregator, events)
+
+
 def test_e2e_core_metadata_cisco_3850(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
@@ -391,6 +508,56 @@ def test_e2e_core_metadata_apc(dd_agent_check):
             'serial_num:test_serial',
             'snmp_device:' + device_ip,
             'snmp_profile:apc',
+            'ups_name:testIdentName',
+        ],
+        'vendor': 'apc',
+        'version': '2.0.3-test',
+    }
+    assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_apc_ups(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'apc',
+            'loader': 'core',
+            'profile': 'apc_ups',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'description': 'APC Web/SNMP Management Card (MB:v3.9.2 PF:v3.9.2 '
+        'PN:apc_hw02_aos_392.bin AF1:v3.7.2 AN1:apc_hw02_sumx_372.bin '
+        'MN:AP9619 HR:A10 SN: 5A1827E00000 MD:12/04/2007) (Embedded '
+        'PowerNet SNMP Agent SW v2.2 compatible)',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'AP9619',
+        'os_name': 'AOS',
+        'os_version': 'v3.9.2',
+        'product_name': 'APC Smart-UPS 600',
+        'profile': 'apc_ups',
+        'serial_number': '5A1827E00000',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.318.1.1.1',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:apc',
+            'firmware_version:2.0.3-test',
+            'model:APC Smart-UPS 600',
+            'serial_num:test_serial',
+            'snmp_device:' + device_ip,
+            'snmp_profile:apc_ups',
             'ups_name:testIdentName',
         ],
         'vendor': 'apc',
@@ -782,6 +949,49 @@ def test_e2e_core_metadata_checkpoint(dd_agent_check):
             'device_vendor:checkpoint',
             'snmp_device:' + device_ip,
             'snmp_profile:checkpoint',
+        ],
+        'vendor': 'checkpoint',
+        'version': 'R80.10',
+    }
+    assert_device_metadata(aggregator, device)
+
+
+def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'checkpoint',
+            'loader': 'core',
+            'profile': 'checkpoint-firewall',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'description': 'Linux host1 3.10.0-957.21.3cpx86_64 #1 SMP Tue Jan 28 17:26:12 IST 2020 x86_64',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'Check Point 3200',
+        'os_name': 'Gaia',
+        'os_version': '3.10.0',
+        'product_name': 'SVN Foundation',
+        'profile': 'checkpoint-firewall',
+        'serial_number': '1711BA4008',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.2620.1.1',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:checkpoint',
+            'snmp_device:' + device_ip,
+            'snmp_profile:checkpoint-firewall',
         ],
         'vendor': 'checkpoint',
         'version': 'R80.10',
