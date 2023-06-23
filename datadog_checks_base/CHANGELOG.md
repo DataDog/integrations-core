@@ -1,5 +1,20 @@
 # CHANGELOG - datadog_checks_base
 
+## 32.4.0 / 2023-06-23
+
+***Added***:
+
+* Internally compile the `include` patterns in the autodiscovery feature. See [#14768](https://github.com/DataDog/integrations-core/pull/14768).
+* Make cancel() synchronous in DBMAsyncJob. See [#14717](https://github.com/DataDog/integrations-core/pull/14717).
+
+***Fixed***:
+
+* Move cancel waiting logic to test functions for DBMAsyncJob . See [#14773](https://github.com/DataDog/integrations-core/pull/14773).
+* Update requests-toolbelt version. See [#14748](https://github.com/DataDog/integrations-core/pull/14748).
+* Update requests library. See [#14670](https://github.com/DataDog/integrations-core/pull/14670).
+* Bump snowflake connector python to 3.0.4. See [#14675](https://github.com/DataDog/integrations-core/pull/14675).
+* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 32.3.1 / 2023-06-02
 
 * [Fixed] Downgrade an info log to debug. See [#14667](https://github.com/DataDog/integrations-core/pull/14667).
