@@ -2597,7 +2597,6 @@ def test_cisco_catalyst(aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
-
 @pytest.mark.parametrize("file", ["juniper-ex", "juniper-ex-variation"])
 @pytest.mark.usefixtures("dd_environment")
 def test_juniper_ex(aggregator, file):
