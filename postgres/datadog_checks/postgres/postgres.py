@@ -113,11 +113,11 @@ class PostgreSql(AgentCheck):
             return None
         
         if not self._config.relations:
-            self.log.warning("Database autodiscovery is enabled, but relation-level metrics are not being collected.\
-                              All metrics can be gathered from global view.")
+            self.log.warning("Database autodiscovery is enabled, but relation-level metrics are not being collected."
+                              "All metrics will be gathered from global view.")
             return None
         
-        discovery = PostgresAutodiscovery('postgres', self._config.discovery_config, self.log, self.autodiscovery_db_pool)
+        discovery = PostgresAutodiscovery('postgres', self._config.discovery_config, self.log, self.autodiscovery_db_pool, self._config.idle_connection_timeout)
         return discovery
 
     def set_resource_tags(self):
