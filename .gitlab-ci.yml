@@ -237,7 +237,7 @@ tagger-image-builder:
     refs:
       - master
   script:
-    - docker build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile ./ddev/
+    - docker build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile .
     - docker images $TAGGER_IMAGE
     - docker push $TAGGER_IMAGE
   except: [ tags, schedules ]
