@@ -323,12 +323,7 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
     config = common.generate_container_instance_config([])
     config['init_config']['loader'] = 'core'
     instance = config['instances'][0]
-    instance.update(
-        {
-            'community_string': 'meraki',
-            'profile': 'meraki-cloud-controller'
-        }
-    )
+    instance.update({'community_string': 'meraki', 'profile': 'meraki-cloud-controller'})
     # run a rate check, will execute two check runs to evaluate rate metrics
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
