@@ -65,6 +65,7 @@ def test_type_support(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_transient_error(aggregator):
@@ -105,6 +106,7 @@ def test_snmpget(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_custom_mib(aggregator):
@@ -244,6 +246,7 @@ def test_scalar(aggregator):
 
     common.assert_common_metrics(aggregator, tags=common.CHECK_TAGS)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_submitted_metrics_count(aggregator):
@@ -313,6 +316,7 @@ def test_unenforce_constraint(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_table(aggregator):
@@ -340,6 +344,7 @@ def test_table(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_table_regex_match(aggregator):
@@ -376,6 +381,7 @@ def test_table_regex_match(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_resolved_table(aggregator):
@@ -398,6 +404,7 @@ def test_resolved_table(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_table_v3_MD5_DES(aggregator):
@@ -438,6 +445,7 @@ def test_table_v3_MD5_DES(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_table_v3_MD5_AES(aggregator):
@@ -478,6 +486,7 @@ def test_table_v3_MD5_AES(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_table_v3_SHA_DES(aggregator):
@@ -517,6 +526,7 @@ def test_table_v3_SHA_DES(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_table_v3_SHA_AES(aggregator):
@@ -556,6 +566,7 @@ def test_table_v3_SHA_AES(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_bulk_table(aggregator, caplog):
@@ -623,6 +634,7 @@ def test_forcedtype_metric(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_invalid_forcedtype_metric(aggregator, caplog):
@@ -661,6 +673,7 @@ def test_scalar_with_tags(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_network_failure(aggregator):
@@ -680,6 +693,7 @@ def test_network_failure(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_cast_metrics(aggregator):
@@ -693,6 +707,7 @@ def test_cast_metrics(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_profile(aggregator):
@@ -710,6 +725,7 @@ def test_profile(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_profile_by_file(aggregator):
@@ -731,6 +747,7 @@ def test_profile_by_file(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_profile_sys_object(aggregator):
@@ -753,6 +770,7 @@ def test_profile_sys_object(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_profile_sysoid_list(aggregator, caplog):
@@ -796,6 +814,7 @@ def test_profile_sysoid_list(aggregator, caplog):
         common.assert_common_device_metrics(aggregator, tags=common.CHECK_TAGS, count=1, devices_monitored_value=1)
         common.assert_common_metrics(aggregator, common.CHECK_TAGS)
         aggregator.assert_all_metrics_covered()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
         aggregator.reset()
         caplog.clear()
@@ -838,6 +857,7 @@ def test_profile_sys_object_prefix(aggregator, most_specific_oid, least_specific
 
     common.assert_common_metrics(aggregator)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_profile_sys_object_unknown(aggregator, caplog):
@@ -861,6 +881,7 @@ def test_profile_sys_object_unknown(aggregator, caplog):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
     # Via network discovery...
 
@@ -942,6 +963,7 @@ def test_discovery(aggregator):
     common.assert_common_device_metrics(aggregator, tags=check_tags)
     common.assert_common_check_run_metrics(aggregator, network_tags)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")
@@ -980,6 +1002,7 @@ def test_discovery_devices_monitored_count(read_mock, aggregator):
 
     common.assert_common_check_run_metrics(aggregator, network_tags)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_different_mibs(aggregator):
@@ -1045,6 +1068,7 @@ def test_metric_tag_symbol(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_metric_tag_oid(aggregator):
@@ -1067,6 +1091,7 @@ def test_metric_tag_oid(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_metric_tag_profile_manual(aggregator):
@@ -1094,6 +1119,7 @@ def test_metric_tag_profile_manual(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_metric_tag_profile_sysoid(aggregator):
@@ -1121,6 +1147,7 @@ def test_metric_tag_profile_sysoid(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_metric_tags_misconfiguration():
@@ -1203,6 +1230,7 @@ def test_metric_tag_matching(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.all_metrics_asserted()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_timeout(aggregator, caplog):
@@ -1230,6 +1258,7 @@ def test_timeout(aggregator, caplog):
 
     common.assert_common_metrics(aggregator)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
     assert (
         len([record for record in caplog.records if "No SNMP response received before timeout" in record.message]) > 0
@@ -1264,6 +1293,7 @@ def test_oids_cache_metrics_collected_using_scalar_oids(aggregator):
 
         common.assert_common_metrics(aggregator)
         aggregator.all_metrics_asserted()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
     for _ in range(3):
         run_check()
