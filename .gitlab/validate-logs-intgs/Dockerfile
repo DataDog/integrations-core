@@ -1,5 +1,5 @@
 FROM registry.ddbuild.io/images/mirror/node:12-alpine
-RUN apk add git python3 --no-cache
+RUN apk add git python3 py3-pip --no-cache
 RUN python3 -m pip install pyyaml awscli
 RUN npm install -g ts-node@9.1.1
 WORKDIR /app
