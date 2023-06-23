@@ -8,10 +8,10 @@ import select
 import time
 
 from .utils import run_one_check
-from .common import HOST, USER_ADMIN, PASSWORD_ADMIN
+from .test_relations import RELATION_METRICS
+from .common import HOST, USER_ADMIN, PASSWORD_ADMIN, _get_expected_tags
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
-from datadog_checks.postgres.relationsmanager import RELATION_METRICS, INDEX_BLOAT, TABLE_BLOAT
 
 
 import psycopg2
@@ -108,29 +108,26 @@ def test_autodiscovery_relations_disabled(integration_check, pg_instance):
     assert check.autodiscovery is None
 
 
-# @pytest.mark.integration
-# @pytest.mark.usefixtures('dd_environment')
-# def test_autodiscovery_collect_all_relations(aggregator, integration_check, pg_instance):
-#     """
-#     If no relation metrics are being collected, autodiscovery should not run.
-#     """
-#     pg_instance["database_autodiscovery"] = DISCOVERY_CONFIG
-#     pg_instance['relations'] = [{'relation_regex': '.*'}]
-#     check = integration_check(pg_instance)
-#     run_one_check(check, pg_instance)
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_autodiscovery_collect_all_relations(aggregator, integration_check, pg_instance):
+    """
+    If no relation metrics are being collected, autodiscovery should not run.
+    """
+    pg_instance["database_autodiscovery"] = DISCOVERY_CONFIG
+    pg_instance['relations'] = ["breed"]
+    del pg_instance['dbname']
 
-#     # assert that for all databases found, a relation metric was reported
-#     databases = check.autodiscovery.get_items()
-#     relation_scopes = RELATION_METRICS
-#     relation_scopes.extend(TABLE_BLOAT)
-#     relation_scopes.extend(INDEX_BLOAT)
-#     print(type(relation_scopes[0]))
-#     relation_metrics = []
-#     for scope in relation_scopes:
-#         print(type(scope))
-#         relation_metrics.append(scope["metrics"])
-#     # relation_metrics = [m["metrics"] for m in relation_scopes]
-#     print(relation_metrics)
-#     assert None is not None
-#     for db in databases:
-#         aggregator.assert_metric('postgresql.index_bloat', tags=['db:'+db])
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    # assert that for all databases found, a relation metric was reported
+    databases = check.autodiscovery.get_items()
+    for db in databases:
+        print(RELATION_METRICS)
+        expected_tags = _get_expected_tags(check, pg_instance, db=db, table='breed', schema='public')
+        for metric in RELATION_METRICS:
+            aggregator.assert_metric(metric, tags=expected_tags)
+            print("yay {}".format(metric))
+    
+    assert None is not None

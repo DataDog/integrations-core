@@ -357,6 +357,7 @@ class PostgreSql(AgentCheck):
 
         results = None
         is_relations = scope.get('relation') and self._relations_manager.has_relations
+        # self.log.warning("DOES THIS HAVE REALTIONS? {}".format(is_relations))
         try:
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
             # if this is a relation-specific query, we need to list all relations last
@@ -409,9 +410,10 @@ class PostgreSql(AgentCheck):
 
         return results
 
-    def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics):
+    def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics, dbname = None):
         if scope is None:
             return None
+        # self.log.warning("Collecting metrics with these tags: {}".format(instance_tags))
         # build query
         cols = list(scope['metrics'])  # list of metrics to query, in some order
         # we must remember that order to parse results
@@ -421,7 +423,9 @@ class PostgreSql(AgentCheck):
         descriptors = scope['descriptors']
         results = self._run_query_scope(cursor, scope, is_custom_metrics, cols, descriptors)
         if not results:
+            # self.log.warning("none")
             return None
+        self.log.warning(results)
 
         # Parse and submit results.
 
@@ -455,6 +459,12 @@ class PostgreSql(AgentCheck):
             # connection.
             if not scope['relation'] and not scope.get('use_global_db_tag', False):
                 tags = copy.copy(self.tags_without_db)
+            elif dbname is not None:
+                # self.log.warning("Collecting metrics {} from this db: {}".format(scope, dbname))
+                # if dbname is specified in this function, we are querying relation-level metrics from autodiscovered database
+                tags = copy.copy(self.tags_without_db)
+                tags.append("db:{}".format(dbname))
+                # self.log.warning("current tags {}".format(tags))
             else:
                 tags = copy.copy(instance_tags)
 
@@ -473,13 +483,20 @@ class PostgreSql(AgentCheck):
     def _collect_relations_autodiscovery(self, instance_tags, relations_scopes):
         if not self.autodiscovery:
             return
-        
+        # self.log.warning("Entering autodiscovery")
         databases = self.autodiscovery.get_items()
+        self.log.warning("Found these databases {}".format(databases))
         for db in databases:
             with self.autodiscovery_db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
                 cursor = conn.cursor()
+                # show tables
+                cursor.execute("SELECT * FROM pg_catalog.pg_tables;")
+                results = cursor.fetchall()
+                # self.log.warning("tables {}".format(results))
+
                 for scope in relations_scopes:
-                    self._query_scope(cursor, scope, instance_tags, False)
+                    # self.log.warning("Relation scope is {}".format(scope))
+                    self._query_scope(cursor, scope, instance_tags, False, db)
 
     def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
@@ -509,12 +526,13 @@ class PostgreSql(AgentCheck):
                 
             # If autodiscovery is enabled, get relation metrics from all databases found
             if self.autodiscovery:
+                self.log.warning("Entering discovery")
                 self._collect_relations_autodiscovery(instance_tags, relations_scopes)
             # otherwise, continue just with dbname
-            else:
+            else:  
                 metric_scope.extend(relations_scopes)
 
-        self.log.warning(metric_scope)
+        # self.log.warning(metric_scope)
         replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
         if replication_metrics:
             replication_metrics_query = copy.deepcopy(REPLICATION_METRICS)
@@ -526,6 +544,11 @@ class PostgreSql(AgentCheck):
             metric_scope.append(replication_stats_metrics)
 
         cursor = self.db.cursor()
+
+        # show tables
+        # cursor.execute("SELECT * FROM pg_catalog.pg_tables;")
+        # results = cursor.fetchall() 
+        # self.log.warning("tables {}".format(results))
         results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False)
         if results_len is not None:
             self.gauge(
