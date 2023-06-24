@@ -117,7 +117,7 @@ The custom query sends as a `GET` request. If you use an optional `payload` para
 }
 ```
 
-`value_path: foo.bar.1` would return the value `result1`.
+`value_path: foo.bar.1` returns the value `result1`.
 
 ##### Trace collection
 
