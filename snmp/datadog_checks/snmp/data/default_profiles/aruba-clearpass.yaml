@@ -28,7 +28,13 @@ metrics:
         OID: 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.14
       - name: cppmSystemDiskSpaceFree
         OID: 1.3.6.1.4.1.14823.1.6.1.1.1.1.1.15
-    metric_tags: 'TODO: Metrics tags are needed for table metrics'
+    metric_tags:
+      - index: 1
+        tag: cppm_system_idx  # cppmSystemIdx
+      - column:
+          name: cppmSystemHostname
+          OID: 1.3.6.1.4.1.14823.1.6.1.1.2.1.1.4
+        tag: cppm_system_hostname
   - MIB: ARUBA-CPPM-MIB
     table:
       name: radiusServerTable
