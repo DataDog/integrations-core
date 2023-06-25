@@ -48,7 +48,7 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
         'name': 'aruba-clearpass.device.name',
         'profile': 'aruba-clearpass',
         'status': 1,
-        'sys_object_id': '1.2.3.999',
+        'sys_object_id': '1.3.6.1.4.1.14823.1.6.1',
         'vendor': 'aruba',
     }
     device['tags'] = common_tags
