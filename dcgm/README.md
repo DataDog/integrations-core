@@ -1,16 +1,14 @@
 # Agent Check: DCGM
 
-<!-- # TODO include https://docs.datadoghq.com/containers/kubernetes/prometheus/?tab=kubernetesadv2 -->
-
 ## Overview
 
-Harnessing the Nvidia DCGM Exporter, this check monitors the exposed [GPU metrics][1] through the Datadog Agent.
+Harnessing the Nvidia DCGM Exporter, this check monitors the exposed through the Datadog Agent.
 
 ## Setup
 
 ### Installation
 
-The DCGM check is included in the [Datadog Agent][2] package, however we will need to spin up the DCGM Exporter container to expose the GPU metrics for the Agent to collect.
+The DCGM check is included in the [Datadog Agent][1] package, however we will need to spin up the DCGM Exporter container to expose the GPU metrics for the Agent to collect.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host | Docker" xxx -->
@@ -19,7 +17,7 @@ The DCGM check is included in the [Datadog Agent][2] package, however we will ne
 
 To configure the exporter in a Docker environment:
 
-1. Create the following file `$PWD/default-counters.csv` which contains the default metrics from the `etc/default-counters.csv`. Using this file, we can add more metrics for collection and can be done by adding the counter name, type and description to the end of the file. For reference on adding metrics, please see the [Changing Metrics][10] section and for the complete list of counters, see the [DCGM API reference manual][11].
+1. Create the following file `$PWD/default-counters.csv` which contains the default metrics from the `etc/default-counters.csv`. Using this file, we can add more metrics for collection and can be done by adding the counter name, type and description to the end of the file. For reference on adding metrics, please see the [Changing Metrics][9] section and for the complete list of counters, see the [DCGM API reference manual][10].
 <div class="alert alert-info">We recommend adding the following to cover those that are found in the <a href="https://docs.datadoghq.com/integrations/nvml/#metrics">NVML integration</a>:
 
 ```
@@ -67,7 +65,7 @@ sudo docker run --pid=host --privileged -e DCGM_EXPORTER_INTERVAL=3 --gpus all -
 
 ##### Metric collection
 
-1. Edit the `dcgm.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your GPU Metrics. See the [sample dcgm.d/conf.yaml][4] for all available configuration options.
+1. Edit the `dcgm.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your GPU Metrics. See the [sample dcgm.d/conf.yaml][3] for all available configuration options.
 
 ```
 instances:
@@ -89,7 +87,7 @@ instances:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][7] as Docker labels on your application container:
+Set [Autodiscovery Integrations Templates][5] as Docker labels on your application container:
 
 ```yaml
 LABEL "com.datadoghq.ad.check_names"='["dcgm"]'
@@ -106,7 +104,7 @@ LABEL "com.datadoghq.ad.instances"='[{"openmetrics_endpoint": "http://%%host%%:9
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][13] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][12].
+Set [Autodiscovery Integrations Templates][12] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][11].
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -114,7 +112,7 @@ Set [Autodiscovery Integrations Templates][13] as pod annotations on your applic
 apiVersion: v1
 kind: Pod
 metadata:
-  name: dcgm-exporter #TODO should this be be podname or check name?
+  name: '<POD_NAME>'
   annotations:
     ad.datadoghq.com/dcgm.check_names: '["dcgm"]'
     ad.datadoghq.com/dcgm.init_configs: '[{}]'
@@ -135,7 +133,7 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: dcgm-exporter #TODO should this be be podname or check name?
+  name: '<POD_NAME>'
   annotations:
     ad.datadoghq.com/dcgm.checks: |
       {
@@ -156,17 +154,23 @@ spec:
 
 <!-- xxz tabs xxx -->
 
-2. [Restart the Agent][5].
+2. [Restart the Agent][4].
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `dcgm` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `dcgm` under the Checks section.
+
+
+### Adjusting Monitors
+
+The monitors that come with this integration out of the box have some common-sense default values for their alert thresholds. For instance, the GPU temperature was determined based on [acceptable range for industrial devices][13].
+However we recommend you check to make sure these values fit your particular needs.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -176,13 +180,13 @@ The DCGM integration does not include any events.
 
 The dcgm integration does not include any service checks.
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
+See [service_checks.json][7] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 ### Metric Mapping
 
-If you have added some metrics that don't appear in the [metadata.csv][7] above and appear in your account with the format `DCGM_FI_DEV_NEW_METRIC`, it is important to remap these metrics in the [dcgm.d/conf.yaml][4] configuration file:
+If you have added some metrics that don't appear in the [metadata.csv][6] above and appear in your account with the format `DCGM_FI_DEV_NEW_METRIC`, it is important to remap these metrics in the [dcgm.d/conf.yaml][3] configuration file:
 ```yaml
     ## @param extra_metrics - (list of string or mapping) - optional
     ## This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
@@ -197,26 +201,24 @@ The example below will append the part in `NEW_METRIC` to the namespace (`dcgm.`
     - DCGM_FI_DEV_NEW_METRIC: new_metric
 ```
 
+### Need Help?
+
+Contact [Datadog support][8].
+
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-<!-- Blog Posts on the way ? -->
-
-
-Need help? Contact [Datadog support][9].
-#TODO - Run through Doc and work fix links
-
-[1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[4]: https://github.com/DataDog/integrations-core/blob/master/dcgm/datadog_checks/dcgm/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/dcgm/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/dcgm/assets/service_checks.json
-[9]: https://docs.datadoghq.com/help/
-[10]: https://github.com/NVIDIA/dcgm-exporter/tree/main#changing-metrics
-[11]: https://docs.nvidia.com/datacenter/dcgm/latest/dcgm-api/dcgm-api-field-ids.html
-[12]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
-[13]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[1]: https://app.datadoghq.com/account/settings#agent
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[3]: https://github.com/DataDog/integrations-core/blob/master/dcgm/datadog_checks/dcgm/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/dcgm/metadata.csv
+[7]: https://github.com/DataDog/integrations-core/blob/master/dcgm/assets/service_checks.json
+[8]: https://docs.datadoghq.com/help/
+[9]: https://github.com/NVIDIA/dcgm-exporter/tree/main#changing-metrics
+[10]: https://docs.nvidia.com/datacenter/dcgm/latest/dcgm-api/dcgm-api-field-ids.html
+[11]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
+[12]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
+[13]: https://en.wikipedia.org/wiki/Operating_temperature
