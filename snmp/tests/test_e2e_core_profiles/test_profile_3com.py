@@ -34,6 +34,7 @@ def test_e2e_profile_3com(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
     assert_extend_generic_if(aggregator, common_tags)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
     # --- TEST METADATA ---
     device = {
@@ -54,5 +55,3 @@ def test_e2e_profile_3com(dd_agent_check):
         'vendor': '3com',
     }
     assert_device_metadata(aggregator, device)
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
