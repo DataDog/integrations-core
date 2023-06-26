@@ -824,7 +824,7 @@ datadog.snmp_traps.forwarded,count,,packet,,The number of SNMP Traps forwarded.,
 snmp.axSysDiskTotalSpace,gauge,,,,"[A10-AX-MIB] The total space of the disk in MB.",0,snmp,,
 snmp.axSysDiskFreeSpace,gauge,,,,"[A10-AX-MIB] The free space of the disk in MB.",0,snmp,,
 snmp.axSysHwPhySystemTemp,gauge,,,,"[A10-AX-MIB] The physical system temperature in Celsius.",0,snmp,,
-snmp.axPowerSupplyVoltageTotal,gauge,,,,"TODO",0,snmp,,
+snmp.axPowerSupplyVoltageTotal,gauge,,,,"[A10-AX-MIB] The total number of axPowerSupplyVoltage entries.",0,snmp,,
 snmp.axAppGlobalTotalCurrentConnections,gauge,,,,"[A10-AX-MIB] Total current connections",0,snmp,,
 snmp.axAppGlobalTotalNewConnections,gauge,,,,"[A10-AX-MIB] Total new connections",0,snmp,,
 snmp.axAppGlobalTotalNewL4Connections,gauge,,,,"[A10-AX-MIB] Total new L4 connections",0,snmp,,
@@ -876,4 +876,3 @@ snmp.axVirtualServerStatTotalL7Reqs,gauge,,,,"[A10-AX-MIB] The total number of L
 snmp.axVirtualServerStatTotalCurrL7Reqs,gauge,,,,"[A10-AX-MIB] The number of current L7 requests if applicable",0,snmp,,
 snmp.axVirtualServerStatTotalSuccL7Reqs,gauge,,,,"[A10-AX-MIB] The number of successful L7 requests if applicable",0,snmp,,
 snmp.axVirtualServerPortStatCurConns,gauge,,,,"[A10-AX-MIB] Current connections from client side.",0,snmp,,
-
