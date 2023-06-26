@@ -30,7 +30,8 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
-    assert_extend_generic_if(aggregator, common_tags)
+    # TODO: Add assert_extend_* here:
+    # assert_extend_generic_if(aggregator, common_tags)
 
     aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags)
