@@ -37,20 +37,20 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
     aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-         ['rad_auth_source_name:kept oxen driving their kept but but'],
-         ['rad_auth_source_name:quaintly kept Jaded forward'],
          ['rad_auth_source_name:Jaded kept oxen their zombies driving forward'],
-         ['rad_auth_source_name:driving acted but acted zombies their their driving'],
-         ['rad_auth_source_name:zombies acted forward quaintly their'],
-         ['rad_auth_source_name:quaintly driving but quaintly'],
-         ['rad_auth_source_name:their their forward but but driving'],
-         ['rad_auth_source_name:forward but driving their'],
-         ['rad_auth_source_name:but forward forward kept but forward forward oxen'],
          ['rad_auth_source_name:acted quaintly zombies but Jaded acted but'],
-         ['rad_auth_source_name:quaintly driving driving driving'],
-         ['rad_auth_source_name:oxen'],
-         ['rad_auth_source_name:zombies kept forward but'],
+         ['rad_auth_source_name:but forward forward kept but forward forward oxen'],
          ['rad_auth_source_name:but kept zombies but kept kept zombies zombies oxen'],
+         ['rad_auth_source_name:driving acted but acted zombies their their driving'],
+         ['rad_auth_source_name:forward but driving their'],
+         ['rad_auth_source_name:kept oxen driving their kept but but'],
+         ['rad_auth_source_name:oxen'],
+         ['rad_auth_source_name:quaintly driving but quaintly'],
+         ['rad_auth_source_name:quaintly driving driving driving'],
+         ['rad_auth_source_name:quaintly kept Jaded forward'],
+         ['rad_auth_source_name:their their forward but but driving'],
+         ['rad_auth_source_name:zombies acted forward quaintly their'],
+         ['rad_auth_source_name:zombies kept forward but'],
 
     ]
     for tag_row in tag_rows:
@@ -60,15 +60,15 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
         aggregator.assert_metric('snmp.radAuthCounterTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['ps_autz_source_name:their Jaded acted driving acted quaintly'],
-         ['ps_autz_source_name:kept forward their zombies oxen driving driving but'],
-         ['ps_autz_source_name:driving but their quaintly quaintly quaintly their but oxen'],
-         ['ps_autz_source_name:their acted acted zombies but acted driving'],
-         ['ps_autz_source_name:forward quaintly quaintly'],
          ['ps_autz_source_name:Jaded driving oxen'],
-         ['ps_autz_source_name:quaintly Jaded kept'],
-         ['ps_autz_source_name:their but but acted kept'],
+         ['ps_autz_source_name:driving but their quaintly quaintly quaintly their but oxen'],
+         ['ps_autz_source_name:forward quaintly quaintly'],
+         ['ps_autz_source_name:kept forward their zombies oxen driving driving but'],
          ['ps_autz_source_name:oxen driving acted kept Jaded driving kept oxen'],
+         ['ps_autz_source_name:quaintly Jaded kept'],
+         ['ps_autz_source_name:their Jaded acted driving acted quaintly'],
+         ['ps_autz_source_name:their acted acted zombies but acted driving'],
+         ['ps_autz_source_name:their but but acted kept'],
 
     ]
     for tag_row in tag_rows:
@@ -78,17 +78,17 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
         aggregator.assert_metric('snmp.psAutzCounterTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
+         ['nw_app_name:driving Jaded driving oxen forward quaintly their kept kept'],
          ['nw_app_name:driving forward kept but'],
-         ['nw_app_name:quaintly quaintly'],
-         ['nw_app_name:oxen'],
-         ['nw_app_name:their kept forward acted acted'],
          ['nw_app_name:forward'],
-         ['nw_app_name:zombies their'],
-         ['nw_app_name:their zombies acted their oxen'],
-         ['nw_app_name:quaintly oxen driving but their zombies zombies acted'],
          ['nw_app_name:forward oxen quaintly but Jaded forward quaintly'],
          ['nw_app_name:kept acted acted oxen'],
-         ['nw_app_name:driving Jaded driving oxen forward quaintly their kept kept'],
+         ['nw_app_name:oxen'],
+         ['nw_app_name:quaintly oxen driving but their zombies zombies acted'],
+         ['nw_app_name:quaintly quaintly'],
+         ['nw_app_name:their kept forward acted acted'],
+         ['nw_app_name:their zombies acted their oxen'],
+         ['nw_app_name:zombies their'],
 
     ]
     for tag_row in tag_rows:
