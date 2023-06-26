@@ -21,6 +21,8 @@ No additional installation is needed on your server.
 
 2. [Restart the Agent][5].
 
+**Note**: This check is case sensitive.
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `windows_performance_counters` under the Checks section.
