@@ -863,6 +863,8 @@ snmp.upsAdvOutputCurrent,gauge,,ampere,,The current in amperes drawn by the load
 snmp.upsAdvOutputEnergyUsage,gauge,,,,The output energy usage of the UPS in kWh.,0,snmp,,
 snmp.upsAdvOutputFrequency,gauge,,hertz,,The current output frequency of the UPS system in Hz.,0,snmp,,
 snmp.upsAdvOutputVoltage,gauge,,,,The output voltage of the UPS system in VAC.,0,snmp,,
+snmp.hwdevMFan,gauge,,,,,0,snmp,,
+snmp.hwdevMPowerStatus,gauge,,,,Power status: active (1) deactive (2) not installed (3) and unsupported.,0,snmp,,
 snmp.IAmACounter32,gauge,,,,,0,snmp,,
 snmp.IAmACounter64,gauge,,,,,0,snmp,,
 snmp.IAmAGauge32,gauge,,,,,0,snmp,,
