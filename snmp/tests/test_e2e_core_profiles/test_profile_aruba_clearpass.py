@@ -47,6 +47,17 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
         aggregator.assert_metric('snmp.cppmSystemMemoryTotal', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
+         ['TODO'],
+
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.radAuthRequestTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.radPolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.radServerCounterCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.radServerCounterFailure', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.radServerCounterSuccess', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
          ['rad_auth_source_name:Jaded kept oxen their zombies driving forward'],
          ['rad_auth_source_name:acted quaintly zombies but Jaded acted but'],
          ['rad_auth_source_name:but forward forward kept but forward forward oxen'],
@@ -70,6 +81,31 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
         aggregator.assert_metric('snmp.radAuthCounterTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
+         ['TODO'],
+
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.dailyFailedAuthCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dailySuccessAuthCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dailyTotalAuthCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psAuditPolicyEvalCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psAuditPolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psAuthCounterFailure', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psAuthCounterSuccess', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psAuthCounterTotal', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psEnforcementPolicyEvalCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psEnforcementPolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psPosturePolicyEvalCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psPosturePolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psRestrictionPolicyEvalCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psRestrictionPolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psRolemappingPolicyEvalCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psRolemappingPolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psServicePolicyEvalCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psServicePolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.psSessionlogTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
          ['ps_autz_source_name:Jaded driving oxen'],
          ['ps_autz_source_name:driving but their quaintly quaintly quaintly their but oxen'],
          ['ps_autz_source_name:forward quaintly quaintly'],
@@ -86,6 +122,29 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
         aggregator.assert_metric('snmp.psAutzCounterFailure', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.psAutzCounterSuccess', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.psAutzCounterTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
+         ['TODO'],
+
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.tacAuthCounterAuthTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tacAuthCounterCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tacAuthCounterFailure', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tacAuthCounterSuccess', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tacAuthCounterTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tacPolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tacServicePolicyEvalTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
+         ['TODO'],
+
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.tacAutzCounterCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tacAutzCounterFailure', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tacAutzCounterSuccess', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tacAutzCounterTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
          ['nw_app_name:driving Jaded driving oxen forward quaintly their kept kept'],
