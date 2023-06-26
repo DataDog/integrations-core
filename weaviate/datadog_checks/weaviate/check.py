@@ -66,7 +66,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
         if response.status_code == 200:
             latency = round_value((end_time - start_time) * 1000, 2)
             self.service_check('liveness.status', 0)
-            self.gauge('http.latency_ms', latency)
+            self.gauge('http.latency_ms', latency, tags=[f"weaviate_liveness_url:{endpoint}"])
         else:
             self.service_check('liveness.status', 2)
 
@@ -81,14 +81,14 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
             for node in data.get('nodes', []):
                 tags = []
                 if 'name' in node:
-                    tags.append(f"node_name:{node['name']}")
+                    tags.append(f"weaviate_node:{node['name']}")
                 if 'version' in node:
                     tags.append(f"weaviate_version:{node['version']}")
                 if 'gitHash' in node:
-                    tags.append(f"githash:{node['gitHash']}")
+                    tags.append(f"weaviate_githash:{node['gitHash']}")
 
                 if 'status' in node:
-                    tags.append(f"node_status:{node['status'].lower()}")
+                    tags.append(f"weaviate_node_status:{node['status'].lower()}")
                     status_values = {'HEALTHY': 0, 'UNHEALTHY': 1, 'UNAVAILABLE': 2}
                     self.gauge('node.status', status_values.get(node['status'], 0), tags=tags)
                     self.service_check('node.status', status_values.get(node['status'], 0), tags=tags)
@@ -100,8 +100,8 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
 
                 if 'shards' in node:
                     for shard in node['shards']:
-                        tags.append(f"shard_name:{shard.get('name', '')}")
-                        tags.append(f"shard_class:{shard.get('class', '')}")
+                        tags.append(f"weaviate_shard_name:{shard.get('name', '')}")
+                        tags.append(f"weaviate_shard_class:{shard.get('class', '')}")
                         self.gauge('node.shard.objects', shard.get('objectCount', 0), tags=tags)
         except Exception as e:
             self.log.debug("Error occurred during node metrics submission: %s", str(e))
