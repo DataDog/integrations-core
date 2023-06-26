@@ -151,6 +151,7 @@ class Oracle(AgentCheck):
     def _connection(self):
         if self._cached_connection is None:
             if self.can_use_jdbc():
+                self.log.debug('Detected that JDBC can be used to connect, will attempt first')
                 try:
                     self._cached_connection = self._jdbc_connect()
                 except Exception as e:
@@ -158,6 +159,7 @@ class Oracle(AgentCheck):
                     self._connection_errors += 1
             else:
                 if self._use_instant_client:
+                    self.log.debug('Connecting to Oracle using Oracle Instant Client')
                     self.init_instant_client()
                 else:
                     self.log.debug('Connecting to Oracle using the native client')
@@ -243,7 +245,7 @@ class Oracle(AgentCheck):
                 )
                 if jpype.isJVMStarted() and jpype.isThreadAttachedToJVM():
                     jpype.detachThreadFromJVM()
-                    self.log.info("Detaching thread from JVM after connection")
+                    self.log.debug("Detaching thread from JVM after connection")
 
             self.log.debug("Connected to Oracle DB using JDBC connector")
 
@@ -252,6 +254,7 @@ class Oracle(AgentCheck):
             if jpype.isJVMStarted() and jpype.isThreadAttachedToJVM():
                 jpype.detachThreadFromJVM()
                 self.log.debug("Thread detached from JVM after JDBC connection failure")
+
             self._connection_errors += 1
             if "Class {} not found".format(self.ORACLE_DRIVER_CLASS) in str(e):
                 msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver
