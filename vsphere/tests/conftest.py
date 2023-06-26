@@ -137,6 +137,32 @@ def mock_connect():
         mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult(
             objects=[
                 vim.ObjectContent(
+                    obj=vim.VirtualMachine(moId="vm1"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='vm1',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='runtime.powerState',
+                            val=vim.VirtualMachinePowerState.poweredOn,
+                        ),
+                    ],
+                ),
+                vim.ObjectContent(
+                    obj=vim.VirtualMachine(moId="vm2"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='vm2',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='runtime.powerState',
+                            val=vim.VirtualMachinePowerState.poweredOn,
+                        ),
+                    ],
+                ),
+                vim.ObjectContent(
                     obj=vim.Datastore(moId="NFS-Share-1"),
                     propSet=[
                         vmodl.DynamicProperty(
