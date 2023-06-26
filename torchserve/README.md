@@ -222,7 +222,7 @@ The TorchServe integration can collect logs from the TorchServe service and forw
 
 See [the example configuration file][4] on how to collect all logs.
 
-Logging configuration with TorchServer is detailed in [this section][16] of the official documentation.
+For more information about the logging configuration with TorchServer, see the [official TorchServe documentation][16].
 
 <div class="alert alert-warning">You can also collect logs from the `access_log.log` file. However, these logs are included in the `ts_log.log` file, leading you to duplicated logs in Datadog if you configure both files.</div>
 
