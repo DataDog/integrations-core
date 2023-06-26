@@ -17,8 +17,8 @@ The TorchServe check is included in the [Datadog Agent][2] package. No additiona
 ### Prerequisites
 
 The TorchServe check collects TorchServe's metrics and performance data using three different endpoints:
-   - The [Inference API][14] to collect the overall health status of your TorchServe instance, 
-   - The [Management API][13] to collect metrics on the various models you are running,
+   - The [Inference API][14] to collect the overall health status of your TorchServe instance.
+   - The [Management API][13] to collect metrics on the various models you are running.
    - The [OpenMetrics endpoint][15] exposed by TorchServe.
 
 You can configure these endpoints using the `config.properties` file, as described in [the TorchServe documentation][10]. For example:
@@ -36,11 +36,11 @@ workflow_store=/home/model-server/wf-store
 load_models=all
 ```
 
-This configuration file expose the three different endpoints that can be used by the integration to monitor your instance.
+This configuration file exposes the three different endpoints that can be used by the integration to monitor your instance.
 
 #### OpenMetrics endpoint
 
-To enable the prometheus endpoint, you need to configure two options: 
+To enable the Prometheus endpoint, you need to configure two options: 
 
 - `metrics_address`: Metrics API binding address. Defaults to `http://127.0.0.1:8082`
 - `metrics_mode`: Two metric modes are supported: `log` and `prometheus`. Defaults to `log`. You have to set it to `prometheus` to collect metrics from this endpoint.
@@ -52,7 +52,7 @@ metrics_address=http://0.0.0.0:8082
 metrics_mode=prometheus
 ```
 
-In this case, the OpenMetrics endpoint will be exposed at this URL: `http://<TORCHSERVE_ADDRESS>:8082/metrics`.
+In this case, the OpenMetrics endpoint is exposed at this URL: `http://<TORCHSERVE_ADDRESS>:8082/metrics`.
 
 ### Configuration
 
@@ -62,7 +62,7 @@ These three different endpoints can be monitored independently and must be confi
 <!-- xxx tab "OpenMetrics endpoint" xxx -->
 #### Configure the OpenMetrics endpoint
 
-Configuration options for the OpenMetrics endpoint can be found in the configuration file under the `TorchServe OpenMetrics endpoint configuration` section. The minial configuration only requires the `openmetrics_endpoint` option:
+Configuration options for the OpenMetrics endpoint can be found in the configuration file under the `TorchServe OpenMetrics endpoint configuration` section. The minimal configuration only requires the `openmetrics_endpoint` option:
 
 ```yaml
 init_config:
@@ -71,17 +71,17 @@ instances:
   - openmetrics_endpoint: http://<TORCHSERVE_ADDRESS>:8082/metrics
 ```
 
-A lot more options are available for this endpoint, as you can see in the [sample torchserve.d/conf.yaml][4].
+For more options, see the [sample `torchserve.d/conf.yaml` file][4].
 
-TorchServe allows the custom service code to emit metrics that will be available based on the configured `metrics_mode` as explained in [their documentation][11]. You can configure this integration to collect these metrics using the `extra_metrics` option. These metrics will have the `torchserver.openmetrics` prefix, just like any other metrics coming from this endpoint.
+TorchServe allows the custom service code to emit [metrics that will be available based on the configured `metrics_mode`][11]. You can configure this integration to collect these metrics using the `extra_metrics` option. These metrics will have the `torchserver.openmetrics` prefix, just like any other metrics coming from this endpoint.
 
-<div class="alert alert-info">These custom TorchServe metrics will be considered as standard metrics in Datadog.</div>
+<div class="alert alert-info">These custom TorchServe metrics are considered standard metrics in Datadog.</div>
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Inference API" xxx -->
 #### Configure the Inference API
 
-This integration relies on the [Inference API][14] to get the overall status of your TorchServe instance. Configuration options for the Inference API can be found in the [configuration file][4] under the `TorchServe Inference API endpoint configuration` section. The minial configuration only requires the `inference_api_url` option:
+This integration relies on the [Inference API][14] to get the overall status of your TorchServe instance. Configuration options for the Inference API can be found in the [configuration file][4] under the `TorchServe Inference API endpoint configuration` section. The minimal configuration only requires the `inference_api_url` option:
 
 ```yaml
 init_config:
@@ -90,13 +90,13 @@ instances:
   - inference_api_url: http://<TORCHSERVE_ADDRESS>:8080
 ```
 
-Under the hood, this integration leverages the [ping][12] endpoint to collect the overall health status of your TorchServe server.
+This integration leverages the [Ping endpoint][12] to collect the overall health status of your TorchServe server.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Management API" xxx -->
 #### Configure the Management API
 
-You can collect metrics related to the models that are currently running in your TorchServe server using the [Management API][13]. Configuration options for the Inference API can be found in the [configuration file][4] under the `TorchServe Management API endpoint configuration` section. The minial configuration only requires the `management_api_url` option:
+You can collect metrics related to the models that are currently running in your TorchServe server using the [Management API][13]. Configuration options for the Inference API can be found in the [configuration file][4] under the `TorchServe Management API endpoint configuration` section. The minimal configuration only requires the `management_api_url` option:
 
 ```yaml
 init_config:
@@ -105,7 +105,7 @@ instances:
   - management_api_url: http://<TORCHSERVE_ADDRESS>:8081
 ```
 
-By default, the integration collects data from every single models, up to 100 models. This can be modified using the `limit`, `include` and `exclude` options. For example:
+By default, the integration collects data from every single models, up to 100 models. This can be modified using the `limit`, `include`, and `exclude` options. For example:
 
 ```yaml
 init_config:
@@ -117,7 +117,7 @@ instances:
       - my_model.* 
 ```
 
-This configuration will only collect metrics for model names that match the `my_model.*` regular expression, up to 25 models. 
+This configuration only collects metrics for model names that match the `my_model.*` regular expression, up to 25 models. 
 
 You can also exclude some models:
 
@@ -130,11 +130,11 @@ instances:
       - test.* 
 ```
 
-This configuration will collect metrics for every model name that does not match the `test.*` regular expression, up to 100 models.
+This configuration collects metrics for every model name that does not match the `test.*` regular expression, up to 100 models.
 
 <div class="alert alert-info">You can use the `include` and `exclude` options in the same configuration. The `exclude` filters are applied after the `include` ones.</div>
 
-By default, the integration will retrieve the full list of the models every time the check runs. It's possible to cache this list using the `interval` option for increased performance of this check. 
+By default, the integration retrieves the full list of the models every time the check runs. You can cache this list by using the `interval` option for increased performance of this check. 
 
 <div class="alert alert-warning">Using the `interval` can also delays some metrics and events.</div>
 
@@ -143,7 +143,7 @@ By default, the integration will retrieve the full list of the models every time
 
 #### Complete configuration 
 
-An example of a complete configuration leveraging the three different APIs described in the previous sections would be:
+This example demonstrates the complete configuration leveraging the three different APIs described in the previous sections:
 
 ```yaml
 init_config:
@@ -165,7 +165,7 @@ instances:
     interval: 3600
 ```
 
-Don't forget to [restart the Agent][5] after modifying the configuration.
+[Restart the Agent][5] after modifying the configuration.
 
 ### Validation
 
@@ -178,13 +178,13 @@ Don't forget to [restart the Agent][5] after modifying the configuration.
 See [metadata.csv][7] for a list of metrics provided by this integration. 
 
 Metrics are prefixed using the API they are coming from:
-- `torchserve.openmetrics.*` for metrics coming from the OpenMetrics endpoint,
-- `torchserve.inference_api.*` for metrics coming from the Inference API,
+- `torchserve.openmetrics.*` for metrics coming from the OpenMetrics endpoint.
+- `torchserve.inference_api.*` for metrics coming from the Inference API.
 - `torchserve.management_api.*` for metrics coming from the Management API.
 
 ### Events
 
-The TorchServe integration include 3 events using the Management API:
+The TorchServe integration include three events using the Management API:
 
 - `torchserve.management_api.model_added`: This event fires when a new model has been added.
 - `torchserve.management_api.model_removed`: This event fires when a model has been removed.
