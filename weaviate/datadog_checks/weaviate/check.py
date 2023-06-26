@@ -1,16 +1,21 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import requests
-import json
-from datadog_checks.base import OpenMetricsBaseCheckV2, AgentCheck
+import time
+
+from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
+from datadog_checks.base.utils.common import round_value
 
 from .metrics import METRICS
+
 DEFAULT_METADATA_ENDPOINT = '/v1/meta'
 DEFAULT_NODE_METRICS_ENDPOINT = '/v1/nodes'
+DEFAULT_LIVENESS_ENDPOINT = '/v1/.well-known/live'
+
 
 class WeaviateCheck(OpenMetricsBaseCheckV2):
     DEFAULT_METRIC_LIMIT = 0
+    __NAMESPACE__ = 'weaviate'
 
     def __init__(self, name, init_config, instances=None):
 
@@ -21,44 +26,98 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
         )
 
     def get_default_config(self):
-        return {'namespace': 'weaviate', 'metrics': [METRICS]}
+        return {'metrics': [METRICS]}
 
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self):
-    
         endpoint = f"{self.instance.get('weaviate_api')}{DEFAULT_METADATA_ENDPOINT}"
-        response = requests.get(endpoint)
-        
+        response = self.http.get(endpoint)
+
         if response.status_code == 200:
-            data = json.loads(response.text)
-            version = data["version"]
             try:
+                data = response.json()
+                version = data["version"]
                 version_split = version.split(".")
-                major = version_split[0]
-                minor = version_split[1]
-                patch = version_split[2]
+                if len(version_split) >= 3:
+                    major = version_split[0]
+                    minor = version_split[1]
+                    patch = version_split[2]
 
-                version_raw = '{}.{}.{}'.format(major, minor, patch)
+                    version_raw = '{}.{}.{}'.format(major, minor, patch)
 
-                version_parts = {
-                    'major': major,
-                    'minor': minor,
-                    'patch': patch,
-
-                }
-                self.set_metadata('version', version_raw, scheme='semver', part_map=version_parts)
+                    version_parts = {
+                        'major': major,
+                        'minor': minor,
+                        'patch': patch,
+                    }
+                    self.set_metadata('version', version_raw, scheme='semver', part_map=version_parts)
+                else:
+                    self.log.debug("Invalid Weaviate version format: %s", version)
             except Exception as e:
-                self.log.error("Error while parsing Weaviate version: %s", str(e))
-                return
+                self.log.debug("Error while parsing Weaviate version: %s", str(e))
         else:
-            self.log.debug("Could not submit version metadata.")
+            self.log.debug("Could not retrieve version metadata from host.")
 
-    def _submit_node_metrics:
-    
+    def _submit_liveness_metrics(self):
+        endpoint = f"{self.instance.get('weaviate_api')}{DEFAULT_LIVENESS_ENDPOINT}"
+        start_time = time.time()
+        response = self.http.get(endpoint)
+        end_time = time.time()
+        if response.status_code == 200:
+            latency = round_value((end_time - start_time) * 1000, 2)
+            self.service_check('liveness.status', 0)
+            self.gauge('http.latency_ms', latency)
+        else:
+            self.service_check('liveness.status', 2)
+
+    def _submit_node_metrics(self):
+        endpoint = f"{self.instance.get('weaviate_api')}{DEFAULT_NODE_METRICS_ENDPOINT}"
+        response = self.http.get(endpoint)
+        if response.status_code != 200:
+            self.log.debug("Could not retrieve Node metrics. Request returned a: %s", str(response.status_code))
+            return
+        try:
+            data = response.json()
+            for node in data.get('nodes', []):
+                tags = []
+                if 'name' in node:
+                    tags.append(f"node_name:{node['name']}")
+                if 'version' in node:
+                    tags.append(f"weaviate_version:{node['version']}")
+                if 'gitHash' in node:
+                    tags.append(f"githash:{node['gitHash']}")
+
+                if 'status' in node:
+                    tags.append(f"node_status:{node['status'].lower()}")
+                    status_values = {'HEALTHY': 0, 'UNHEALTHY': 1, 'UNAVAILABLE': 2}
+                    self.gauge('node.status', status_values.get(node['status'], 0), tags=tags)
+                    self.service_check('node.status', status_values.get(node['status'], 0), tags=tags)
+
+                if 'stats' in node:
+                    stats = node['stats']
+                    self.gauge('node.stats.shards', stats.get('shardCount', 0), tags=tags)
+                    self.gauge('node.stats.objects', stats.get('objectCount', 0), tags=tags)
+
+                if 'shards' in node:
+                    for shard in node['shards']:
+                        tags.append(f"shard_name:{shard.get('name', '')}")
+                        tags.append(f"shard_class:{shard.get('class', '')}")
+                        self.gauge('node.shard.objects', shard.get('objectCount', 0), tags=tags)
+        except Exception as e:
+            self.log.debug("Error occurred during node metrics submission: %s", str(e))
+
 
     def check(self, _):
         try:
-            self._submit_version_metadata()
+            if self.instance.get("openmetrics_endpoint"):
+                super().check(_)
         except Exception as e:
-            self.log.error("Error while collecting Weaviate metrics: %s", str(e))
-            raise
+            self.log.error("Error while collecting Weaviate metrics from OpenMetrics endpoint: %s", str(e))
+
+        try:
+            if self.instance.get("weaviate_api"):
+                self._submit_version_metadata()
+                self._submit_liveness_metrics()
+                self._submit_node_metrics()
+        except Exception as e:
+            self.log.error("Error while collecting Weaviate metrics from API: %s", str(e))
