@@ -1,5 +1,25 @@
 # CHANGELOG - ddev
 
+## 3.1.0 / 2023-06-23
+
+***Added***:
+
+* Update version of datadog-checks-dev. See [#14865](https://github.com/DataDog/integrations-core/pull/14865).
+* Add Git utilities. See [#14838](https://github.com/DataDog/integrations-core/pull/14838).
+* Add pluggy to ddev dependencies. See [#14821](https://github.com/DataDog/integrations-core/pull/14821).
+
+## 3.0.0 / 2023-06-20
+
+* [Added] Bump the minimum version of datadog-checks-dev. See [#14785](https://github.com/DataDog/integrations-core/pull/14785).
+* [Added] Upgrade Pydantic model code generator. See [#14779](https://github.com/DataDog/integrations-core/pull/14779).
+* [Added] Use Git for versioning. See [#14778](https://github.com/DataDog/integrations-core/pull/14778).
+* [Added] Add validations for removed dependencies. See [#14556](https://github.com/DataDog/integrations-core/pull/14556).
+* [Added] Migrate `clean` command. See [#14726](https://github.com/DataDog/integrations-core/pull/14726).
+* [Added] Add `release list` command to list integration version releases. See [#14687](https://github.com/DataDog/integrations-core/pull/14687).
+* [Added] Migrate command to upgrade Python. See [#14700](https://github.com/DataDog/integrations-core/pull/14700).
+* [Fixed] Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* [Changed] Remove `pyperclip` dependency and clipboard functionality. See [#14782](https://github.com/DataDog/integrations-core/pull/14782).
+
 ## 2.1.0 / 2023-05-26
 
 * [Added] Add validation for metric limit. See [#14528](https://github.com/DataDog/integrations-core/pull/14528).

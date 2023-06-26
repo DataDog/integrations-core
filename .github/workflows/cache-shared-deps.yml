@@ -49,16 +49,6 @@ jobs:
         pip install ./datadog_checks_dev[cli]
         pip install ./datadog_checks_base[deps]
 
-    - name: Set up Python 2.7
-      if: steps.cache.outputs.cache-hit != 'true'
-      uses: actions/setup-python@v4
-      with:
-        python-version: "2.7"
-
-    - name: Install dependencies for Python 2.7
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: pip install ./datadog_checks_base[deps] ./datadog_checks_dev
-
     - name: Cache dependencies
       uses: actions/cache/save@v3
       if: steps.cache.outputs.cache-hit != 'true'

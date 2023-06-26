@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "This dashboard was built by the Network Device Monitoring product team at Datadog. For any questions or feedback, please reach out to angelina@datadoghq.com.\n\n- You can read more about Datadog's Network Device Monitoring product in our [blog post](https://www.datadoghq.com/blog/network-device-monitoring/)\n\ndatadog_demo_keep:true (cloned)\n",
+    "description": "This dashboard provides an overview of NetFlow Monitoring for the traffic between your network gear. \n\nFor more information on monitoring on-premise gear with Datadog, check out: \n\n- Our blog post on [Monitoring Datacenters and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n- Our blog post on [Monitoring network devices with SNMP](https://www.datadoghq.com/blog/monitor-snmp-with-datadog/)\n- Network Device Monitoring [docs](https://docs.datadoghq.com/network_performance_monitoring/devices)",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -46,7 +46,7 @@
             "prefix": "@ingress.interface.name"
         }
     ],
-    "title": "Netflow Monitoring",
+    "title": "NetFlow Monitoring",
     "widgets": [
         {
             "definition": {
@@ -106,7 +106,6 @@
                                 }
                             ],
                             "text_align": "center",
-                            "time": {},
                             "title": "# devices sending NetFlow data ",
                             "title_align": "left",
                             "title_size": "16",
@@ -164,7 +163,6 @@
                                 }
                             ],
                             "show_legend": false,
-                            "time": {},
                             "title": "# devices sending NetFlow data ",
                             "title_align": "left",
                             "title_size": "16",
@@ -336,7 +334,7 @@
                                     "queries": [
                                         {
                                             "compute": {
-                                                "aggregation": "avg",
+                                                "aggregation": "sum",
                                                 "metric": "@bytes"
                                             },
                                             "data_source": "network_device_flows",
@@ -513,13 +511,13 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "(query1 * 8)"
+                                            "formula": "query1 * 8"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "compute": {
-                                                "aggregation": "avg",
+                                                "aggregation": "sum",
                                                 "metric": "@bytes"
                                             },
                                             "data_source": "network_device_flows",
@@ -528,7 +526,7 @@
                                                     "facet": "@device.name",
                                                     "limit": 10,
                                                     "sort": {
-                                                        "aggregation": "avg",
+                                                        "aggregation": "sum",
                                                         "metric": "@bytes",
                                                         "order": "desc"
                                                     }
@@ -537,7 +535,7 @@
                                                     "facet": "@exporter.ip",
                                                     "limit": 10,
                                                     "sort": {
-                                                        "aggregation": "avg",
+                                                        "aggregation": "sum",
                                                         "metric": "@bytes",
                                                         "order": "desc"
                                                     }
@@ -800,7 +798,7 @@
                                     }
                                 }
                             ],
-                            "title": "Top Conversations through Source \u2192 Device \u2192 Destination",
+                            "title": "Top Conversations through Source \u2192 Device \u2192 Destination (Bytes)",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "sunburst"
@@ -874,7 +872,7 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "title": "Top Conversations through Source \u2192 Device \u2192 Destination",
+                            "title": "Top Conversations through Source \u2192 Device \u2192 Destination (Bytes)",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_table"
@@ -959,7 +957,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Top Conversations through Source \u2192 Device \u2192 Destination",
+                            "title": "Top Conversations through Source \u2192 Device \u2192 Destination (Bytes)",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
@@ -1329,7 +1327,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1 * 8"
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -1362,7 +1360,7 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "title": "Top Protocols Used by Conversation",
+                            "title": "Top Protocols Used by Conversation (Bytes)",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "sunburst"
@@ -1377,12 +1375,20 @@
                     },
                     {
                         "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
                             "requests": [
                                 {
                                     "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "query1 * 8"
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -1421,7 +1427,7 @@
                                 }
                             ],
                             "show_legend": false,
-                            "title": "Top Protocols Used by Conversation",
+                            "title": "Top Protocols Used by Conversation (Bytes)",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
@@ -1442,7 +1448,7 @@
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 16
+                "y": 0
             }
         },
         {
@@ -1511,7 +1517,7 @@
                                     }
                                 }
                             ],
-                            "title": "Top Applications by Source Port",
+                            "title": "Top Applications by Source Port (Bytes)",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "sunburst"
@@ -1585,7 +1591,7 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "title": "Top Source Ports",
+                            "title": "Top Source Ports (Bytes)",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_table"
@@ -1670,7 +1676,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Top Source Ports ",
+                            "title": "Top Source Ports (Bytes)",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
@@ -1741,7 +1747,7 @@
                                     }
                                 }
                             ],
-                            "title": "Top Applications by Destination Port",
+                            "title": "Top Applications by Destination Port (Bytes)",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "sunburst"
@@ -1815,7 +1821,7 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "title": "Top Destination Ports ",
+                            "title": "Top Destination Ports (Bytes)",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_table"
@@ -1900,7 +1906,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Top Destination Ports ",
+                            "title": "Top Destination Ports (Bytes)",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
@@ -1920,7 +1926,7 @@
                 "height": 17,
                 "width": 12,
                 "x": 0,
-                "y": 37
+                "y": 21
             }
         }
     ]

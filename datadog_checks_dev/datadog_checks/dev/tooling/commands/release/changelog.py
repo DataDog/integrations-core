@@ -30,6 +30,7 @@ ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, autho
 @click.option('--quiet', '-q', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.option('--output-file', '-o', default='CHANGELOG.md', show_default=True)
+@click.option('--tag-pattern', default=None, hidden=True)
 @click.option('--tag-prefix', '-tp', default='v', show_default=True)
 @click.option('--no-semver', '-ns', default=False, is_flag=True)
 @click.option('--exclude-branch', default=None, help="Exclude changes comming from a specific branch")
@@ -44,6 +45,7 @@ def changelog(
     quiet,
     dry_run,
     output_file,
+    tag_pattern,
     tag_prefix,
     no_semver,
     organization,
@@ -57,7 +59,7 @@ def changelog(
         abort(f'Check `{check}` is not an Agent-based Integration')
 
     # sanity check on the version provided
-    cur_version = old_version or get_version_string(check, tag_prefix=tag_prefix)
+    cur_version = old_version or get_version_string(check, pattern=tag_pattern, tag_prefix=tag_prefix)
     if not cur_version:
         abort(
             'Failed to retrieve the latest version. Please ensure your project or check has a proper set of tags '
@@ -127,7 +129,7 @@ def changelog(
 
         author = payload.get('user', {}).get('login')
         author_url = payload.get('user', {}).get('html_url')
-        title = f"[{changelog_type}] {payload.get('title')}"
+        title = f"{payload.get('title')}"
 
         entry = ChangelogEntry(pr_num, title, payload.get('html_url'), author, author_url, from_contributor(payload))
 
@@ -141,8 +143,9 @@ def changelog(
     new_entry.write(header)
 
     # one bullet point for each PR
-    new_entry.write('\n')
     for changelog_type in CHANGELOG_TYPES_ORDERED:
+        if entries[changelog_type]:
+            new_entry.write(f"\n***{changelog_type}***:\n\n")
         for entry in entries[changelog_type]:
             thanks_note = ''
             if entry.from_contributor:
