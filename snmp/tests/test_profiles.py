@@ -111,19 +111,10 @@ def run_profile_check(recording_name, profile_name=None):
 
     instance['community_string'] = recording_name
     instance['enforce_mib_constraints'] = False
-    check = SnmpCheck('snmp', {}, [instance])
-
-    # First, see if recording name is a profile, then use profile as definition.
+    # if a profile_name is specified, use that profile
     if profile_name is not None:
-        profile = check.profiles.get(profile_name)
-    else:
-        profile = check.profiles.get(recording_name)
-    if profile:
-        try:
-            test_check = SnmpCheck('snmp', {}, [common.generate_instance_config([])])
-            test_check._config.refresh_with_profile(profile)
-        except ConfigurationError as e:
-            pytest.fail("Profile `{}` is not configured correctly: {}".format(recording_name, e))
+        instance['profile'] = profile_name
+    check = SnmpCheck('snmp', {}, [instance])
     check.check(instance)
 
 
