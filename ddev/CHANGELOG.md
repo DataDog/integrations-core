@@ -1,5 +1,13 @@
 # CHANGELOG - ddev
 
+## 3.1.0 / 2023-06-23
+
+***Added***:
+
+* Update version of datadog-checks-dev. See [#14865](https://github.com/DataDog/integrations-core/pull/14865).
+* Add Git utilities. See [#14838](https://github.com/DataDog/integrations-core/pull/14838).
+* Add pluggy to ddev dependencies. See [#14821](https://github.com/DataDog/integrations-core/pull/14821).
+
 ## 3.0.0 / 2023-06-20
 
 * [Added] Bump the minimum version of datadog-checks-dev. See [#14785](https://github.com/DataDog/integrations-core/pull/14785).

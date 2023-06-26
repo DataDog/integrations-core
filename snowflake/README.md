@@ -76,10 +76,10 @@ datadog-agent integration install datadog-snowflake==2.0.1
         #
       - account: <ORG_NAME>-<ACCOUNT_NAME>
     
-        ## @param user - string - required
+        ## @param username - string - required
         ## Login name for the user.
         #
-        user: <USER>
+        username: <USER>
     
         ## @param password - string - required
         ## Password for the user
