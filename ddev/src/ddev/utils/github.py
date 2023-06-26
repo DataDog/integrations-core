@@ -95,8 +95,8 @@ class GitHubManager:
                 if response.status_code == 403 and response.headers['X-RateLimit-Remaining'] == '0':  # noqa: PLR2004
                     await sleep(float(response.headers['X-RateLimit-Reset']) - time.time() + 1)
                     continue
-            except Exception as e:
-                await sleep(retry_wait, context=str(e))
+            except Exception:
+                await sleep(retry_wait)
                 retry_wait *= 2
                 continue
 
