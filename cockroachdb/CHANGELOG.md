@@ -178,7 +178,7 @@
 
 ***Added***: 
 
-* Collect metadata for cockroachdb. See [#5924](https://github.com/DataDog/integrations-core/pull/5924).
+* Collect metadata for CockroachDB. See [#5924](https://github.com/DataDog/integrations-core/pull/5924).
 
 ***Fixed***: 
 
