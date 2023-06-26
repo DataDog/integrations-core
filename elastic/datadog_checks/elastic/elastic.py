@@ -77,7 +77,11 @@ def get_value_from_path(value, path):
     # Traverse the nested dictionaries
     for key in re.split(REGEX, path):
         if result is not None:
-            result = result.get(key.replace('\\', ''))
+            key = key.replace('\\', '')
+            if key.isdigit() and isinstance(result, list):
+                result = result[int(key)]
+            else:
+                result = result.get(key)
         else:
             break
 
