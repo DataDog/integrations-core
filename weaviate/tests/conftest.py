@@ -42,36 +42,9 @@ def dd_environment():
                 port_forward(kubeconfig, 'weaviate', 8080, 'statefulset', 'weaviate')
             )
             api_url = f"http://{weaviate_host}:{weaviate_api_port}"
-            seed_data(api_url)
-                
+
             instance = {
                 "openmetrics_endpoint": f"http://{weaviate_host}:{weaviate_port}/metrics",
                 "weaviate_api": f"{api_url}",
             }
             yield instance
-
-
-
-def seed_data(url):
-    headers = {
-        "Content-Type": "application/json"
-    }
-    data = {
-        "objects": [
-            {
-                "class": "Example",
-                "vector": [0.1, 0.3],
-                "properties": {
-                    "text": "This is the first object"
-                }
-            },
-            {
-                "class": "Example",
-                "vector": [0.01, 0.7],
-                "properties": {
-                    "text": "This is another object"
-                }
-            }
-        ]
-    }
-    requests.post(url, headers=headers, json=data)
