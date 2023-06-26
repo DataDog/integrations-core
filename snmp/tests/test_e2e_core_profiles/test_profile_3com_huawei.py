@@ -64,8 +64,6 @@ def test_e2e_profile_3com_huawei(dd_agent_check):
     for fan_tags in fan_row_tags:
         aggregator.assert_metric('snmp.hwdevMPowerStatus', metric_type=aggregator.GAUGE, tags=common_tags + fan_tags)
 
-    aggregator.assert_all_metrics_covered()
-
     # --- TEST METADATA ---
     device = {
         'description': '3Com Huawei Device Desc',
@@ -85,4 +83,7 @@ def test_e2e_profile_3com_huawei(dd_agent_check):
         'vendor': '3com',
     }
     assert_device_metadata(aggregator, device)
+
+    # --- CHECK COVERAGE ---
+    aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
