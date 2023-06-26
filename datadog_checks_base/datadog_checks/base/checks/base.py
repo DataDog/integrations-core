@@ -89,6 +89,8 @@ if TYPE_CHECKING:
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
 TYPO_SIMILARITY_THRESHOLD = 0.95
 
+# Trigger pipeline to test all integrations
+
 
 @traced_class
 class AgentCheck(object):
@@ -455,7 +457,6 @@ class AgentCheck(object):
         known_options = {k for k, _ in models_config}  # type: Set[str]
 
         if not PY2:
-
             if isinstance(models_config, BaseModel):
                 # Also add aliases, if any
                 known_options.update(set(models_config.dict(by_alias=True)))
