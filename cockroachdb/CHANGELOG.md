@@ -196,7 +196,7 @@
 
 ***Added***: 
 
-* Add cockroachdb integration. See [#2150][1].
+* Add CockroachDB integration. See [#2150][1].
 
 
 [1]: https://github.com/DataDog/integrations-core/pull/2150
