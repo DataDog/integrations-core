@@ -18,6 +18,7 @@ No additional installation is needed on your server.
 ### Configuration
 
 1. Edit the `windows_performance_counters.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your windows_performance_counters performance data. See the [sample windows_performance_counters.d/conf.yaml][4] for all available configuration options.
+**Note**: The Counter name is case sensitive.
 
 2. [Restart the Agent][5].
 
