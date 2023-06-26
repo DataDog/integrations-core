@@ -321,5 +321,5 @@
 
 ***Added***: 
 
-* adds consul integration.
+* adds Consul integration.
 
