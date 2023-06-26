@@ -618,37 +618,67 @@ class VSphereCheck(AgentCheck):
             # OR something bad happened (which might happen again indefinitely).
             self.latest_event_query = collect_start_time
 
+    def submit_property_metric(
+        self, metric_name, metric_value, metric_method, base_tags, hostname, additional_tags=None
+    ):
+        if metric_value is None:
+            self.log.debug(
+                "Could not sumbit property metric name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
+                metric_name,
+                metric_value,
+                hostname,
+                additional_tags + base_tags,
+            )
+            return
+
+        tags = []
+        tags = tags + base_tags
+        if additional_tags is not None:
+            for tag_name, tag_value in additional_tags.items():
+                if tag_value is not None:
+                    tags.append("{}:{}".format(tag_name, tag_value))
+
+        self.log.debug(
+            "Submit property metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
+            metric_name,
+            metric_value,
+            hostname,
+            tags,
+        )
+        metric_method(metric_name, metric_value, tags=tags, hostname=hostname)
+
     def submit_property_metrics(self, resource_type, mor_props, resource_tags):
         if resource_type == vim.VirtualMachine:
             mor_name = to_string(mor_props.get("name", "unknown"))
-            self.log.trace("All properties for VM %s: %s", mor_name, mor_props)
             all_properties = mor_props.get('properties', None)
             if all_properties is None:
-                self.log.warning("Did not retrieve properties for VM %s", mor_name)
+                self.log.warning("Could not retrieve properties for VM %s", mor_name)
                 return
 
             hostname = mor_props.get('hostname')
+            base_tags = self._config.base_tags + resource_tags
             nics = all_properties.get('guest.net', [])
             for nic in nics:
                 mac_address = nic.macAddress
                 ip_addresses = nic.ipConfig.ipAddress
                 for ip_address in ip_addresses:
-                    nic_tags = [f'nic_ip_address:{ip_address.ipAddress}', f'nic_mac_address:{mac_address}']
-                    self.count(
+                    nic_tags = {'nic_ip_address': ip_address.ipAddress, 'nic_mac_address': mac_address}
+                    self.submit_property_metric(
                         'vm.guest.nic.ipConfig.address',
                         1,
-                        tags=self._config.base_tags + resource_tags + nic_tags,
-                        hostname=hostname,
+                        self.count,
+                        base_tags,
+                        hostname,
+                        additional_tags=nic_tags,
                     )
 
             ip_stacks = all_properties.get('guest.ipStack', [])
             for ip_stack in ip_stacks:
-                domain_tags = []
+                domain_tags = {}
                 if ip_stack.dnsConfig is not None:
                     host_name = ip_stack.dnsConfig.hostName
                     domain_name = ip_stack.dnsConfig.domainName
-                    domain_tags.append('route_hostname:{}'.format(host_name))
-                    domain_tags.append('route_domain_name:{}'.format(domain_name))
+                    domain_tags = {'route_hostname': host_name, 'route_domain_name': domain_name}
                 ip_routes = ip_stack.ipRouteConfig.ipRoute
                 for ip_route in ip_routes:
                     prefix_length = ip_route.prefixLength
@@ -656,82 +686,77 @@ class VSphereCheck(AgentCheck):
                     network = ip_route.network
                     # network
                     device = ip_route.gateway.device
-                    route_tags = [
-                        'device:{}'.format(device),
-                        'network_dest_ip:{}'.format(network),
-                        'prefix_length:{}'.format(prefix_length),
-                    ]
-                    route_tags = route_tags + domain_tags
-                    if gateway_address is not None:
-                        route_tags.append(f'gateway_address:{gateway_address}')
+                    route_tags = {
+                        'device': device,
+                        'network_dest_ip': network,
+                        'prefix_length': prefix_length,
+                        'gateway_address': gateway_address,
+                    }
 
-                    self.count(
-                        'vm.guest.ipStack.ipRoute',
-                        1,
-                        tags=self._config.base_tags + resource_tags + route_tags,
-                        hostname=hostname,
+                    self.submit_property_metric(
+                        'vm.guest.ipStack.ipRoute', 1, self.count, base_tags, hostname, additional_tags=route_tags + domain_tags
                     )
 
             disks = all_properties.get('guest.disk', [])
-            self.log.debug("type array %s", type(disks))
             for disk in disks:
                 disk_path = disk.diskPath
                 file_system_type = disk.filesystemType
                 free_space = disk.freeSpace
                 capacity = disk.capacity
-                disk_tags = [f'disk_path:{disk_path}']
-                if file_system_type is not None:
-                    disk_tags.append(f'file_system_type:{file_system_type}')
+                disk_tags = {'disk_path': disk_path, 'file_system_type': file_system_type}
 
-                self.gauge(
+                self.submit_property_metric(
                     'vm.guest.disk.freeSpace',
                     free_space,
-                    tags=self._config.base_tags + resource_tags + disk_tags,
-                    hostname=hostname,
+                    self.gauge,
+                    base_tags,
+                    hostname,
+                    additional_tags=disk_tags,
                 )
-                self.gauge(
+
+                self.submit_property_metric(
                     'vm.guest.disk.capacity',
                     capacity,
-                    tags=self._config.base_tags + resource_tags + disk_tags,
-                    hostname=hostname,
+                    self.gauge,
+                    base_tags,
+                    hostname,
+                    additional_tags=disk_tags,
                 )
 
             cores_per_socket = all_properties.get('config.hardware.numCoresPerSocket', None)
-            if cores_per_socket is not None:
-                self.gauge(
-                    'vm.hardware.numCoresPerSocket',
-                    cores_per_socket,
-                    tags=self._config.base_tags + resource_tags,
-                    hostname=hostname,
-                )
+            self.submit_property_metric(
+                'vm.hardware.numCoresPerSocket',
+                cores_per_socket,
+                self.gauge,
+                base_tags,
+                hostname,
+            )
 
             num_cpu = all_properties.get('summary.config.numCpu', None)
-            self.gauge('vm.numCpu', num_cpu, tags=self._config.base_tags + resource_tags, hostname=hostname)
+            self.submit_property_metric('vm.numCpu', num_cpu, self.gauge, base_tags, hostname)
 
             memory_size = all_properties.get('summary.config.memorySizeMB', None)
-            self.gauge('vm.memorySizeMB', memory_size, tags=self._config.base_tags + resource_tags, hostname=hostname)
+            self.submit_property_metric('vm.memorySizeMB', memory_size, self.gauge, base_tags, hostname)
 
             ethernet_cards = all_properties.get('summary.config.numEthernetCards', None)
-            self.gauge(
-                'vm.numEthernetCards', ethernet_cards, tags=self._config.base_tags + resource_tags, hostname=hostname
+            self.submit_property_metric(
+                'vm.numEthernetCards',
+                ethernet_cards,
+                self.gauge,
+                base_tags,
             )
 
             virtual_disks = all_properties.get('summary.config.numVirtualDisks', None)
-            self.gauge(
-                'vm.numVirtualDisks', virtual_disks, tags=self._config.base_tags + resource_tags, hostname=hostname
-            )
+            self.submit_property_metric('vm.numVirtualDisks', virtual_disks, self.gauge, base_tags, hostname)
 
             uptime = all_properties.get('summary.quickStats.uptimeSeconds', None)
-            self.gauge('vm.uptime', uptime, tags=self._config.base_tags + resource_tags, hostname=hostname)
+            self.submit_property_metric('vm.uptime', uptime, self.gauge, base_tags, hostname)
 
             tools_version = all_properties.get('guest.toolsVersion', None)
             tools_status = all_properties.get('guest.toolsRunningStatus', None)
-            tools_tags = [f'tools_status:{tools_status}']
-            self.gauge(
-                'vm.guest.toolsVersion',
-                tools_version,
-                tags=self._config.base_tags + resource_tags + tools_tags,
-                hostname=hostname,
+            tools_tags = {'tools_status': tools_status}
+            self.submit_property_metric(
+                'vm.guest.toolsVersion', tools_version, self.gauge, base_tags, hostname, additional_tags=tools_tags
             )
 
     def check(self, _):
