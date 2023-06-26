@@ -48,6 +48,24 @@ jobs:
         pip install ./ddev
         pip install ./datadog_checks_dev[cli]
         pip install ./datadog_checks_base[deps]
+      
+    - name: Set up Python 2.7
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          sudo apt update
+          sudo apt install python2 python2-dev
+          sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 1
+        elif [ "$RUNNER_OS" == "Windows" ]; then
+          choco install python2
+        else
+          echo "$RUNNER_OS not supported"
+          exit 1
+        fi
+
+    - name: Install dependencies for Python 2.7
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: pip install ./datadog_checks_base[deps] ./datadog_checks_dev
 
     - name: Cache dependencies
       uses: actions/cache/save@v3
