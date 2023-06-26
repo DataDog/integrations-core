@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from copy import deepcopy
 
 import pytest
+import requests
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
@@ -33,6 +33,7 @@ def setup_weaviate():
 @pytest.fixture(scope='session')
 def dd_environment():
     with kind_run(conditions=[setup_weaviate]) as kubeconfig:
+
         with ExitStack() as stack:
             weaviate_host, weaviate_port = stack.enter_context(
                 port_forward(kubeconfig, 'weaviate', 2112, 'statefulset', 'weaviate')
@@ -40,10 +41,37 @@ def dd_environment():
             weaviate_host, weaviate_api_port = stack.enter_context(
                 port_forward(kubeconfig, 'weaviate', 8080, 'statefulset', 'weaviate')
             )
+            api_url = f"http://{weaviate_host}:{weaviate_api_port}"
+            seed_data(api_url)
+                
             instance = {
                 "openmetrics_endpoint": f"http://{weaviate_host}:{weaviate_port}/metrics",
-                "weaviate_api": f"http://{weaviate_host}:{weaviate_api_port}",
+                "weaviate_api": f"{api_url}",
             }
             yield instance
 
 
+
+def seed_data(url):
+    headers = {
+        "Content-Type": "application/json"
+    }
+    data = {
+        "objects": [
+            {
+                "class": "Example",
+                "vector": [0.1, 0.3],
+                "properties": {
+                    "text": "This is the first object"
+                }
+            },
+            {
+                "class": "Example",
+                "vector": [0.01, 0.7],
+                "properties": {
+                    "text": "This is another object"
+                }
+            }
+        ]
+    }
+    requests.post(url, headers=headers, json=data)

@@ -2,13 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-MOCKED_INSTANCE = {'openmetrics_endpoint': 'http://weaviate:2112/metrics'}
+MOCKED_INSTANCE = {'openmetrics_endpoint': 'http://weaviate:2112/metrics', 'weaviate_api': 'http://weaviate:8080'}
 
 E2E_METRICS = [
     "weaviate.go.gc.duration.seconds.count",
     "weaviate.go.gc.duration.seconds.quantile",
     "weaviate.go.gc.duration.seconds.sum",
     "weaviate.go.goroutines",
+    "weaviate.go.memstats.alloc_bytes",
+    "weaviate.go.memstats.alloc_bytes.count",
     "weaviate.go.memstats.buck_hash.sys_bytes",
     "weaviate.go.memstats.frees.count",
     "weaviate.go.memstats.lookups.count",
@@ -20,7 +22,6 @@ E2E_METRICS = [
     "weaviate.go.memstats.heap.objects",
     "weaviate.go.memstats.heap.released_bytes",
     "weaviate.go.memstats.heap.sys_bytes",
-    "weaviate.go.memstats.last_gc_time.seconds",
     "weaviate.go.memstats.mallocs.count",
     "weaviate.go.memstats.mcache.inuse_bytes",
     "weaviate.go.memstats.mcache.sys_bytes",
@@ -40,7 +41,8 @@ E2E_METRICS = [
     "weaviate.process.virtual_memory.bytes",
     "weaviate.process.virtual_memory.max_bytes",
     "weaviate.promhttp.metric_handler.requests.count",
-    "weaviate.promhttp.metric_handler.requests_in_flight"
+    "weaviate.promhttp.metric_handler.requests_in_flight",
+    "weaviate.http.latency_ms",
 ]
 
 fixture_metrics = [
@@ -66,7 +68,15 @@ fixture_metrics = [
     "weaviate.vector.index.size",
     "weaviate.vector.index.tombstone.cleaned.count",
     "weaviate.vector.index.tombstone.cleanup.threads",
-    "weaviate.vector.index.tombstones"
+    "weaviate.vector.index.tombstones",
+]
+
+API_METRICS = [
+    "weaviate.node.status",
+    "weaviate.node.shard.objects",
+    "weaviate.node.stats.objects",
+    "weaviate.node.stats.shards",
+    "weaviate.http.latency_ms",
 ]
 
 TEST_METRICS = E2E_METRICS + fixture_metrics
