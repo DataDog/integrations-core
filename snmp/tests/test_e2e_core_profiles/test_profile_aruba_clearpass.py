@@ -37,6 +37,16 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
     aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
+         ['TODO'],
+
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.cppmSystemDiskSpaceFree', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cppmSystemDiskSpaceTotal', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cppmSystemMemoryFree', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cppmSystemMemoryTotal', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
          ['rad_auth_source_name:Jaded kept oxen their zombies driving forward'],
          ['rad_auth_source_name:acted quaintly zombies but Jaded acted but'],
          ['rad_auth_source_name:but forward forward kept but forward forward oxen'],
