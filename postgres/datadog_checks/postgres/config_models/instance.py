@@ -43,6 +43,17 @@ class CollectSettings(BaseModel):
     enabled: Optional[bool]
 
 
+class DatabaseAutodiscovery(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    enabled: Optional[bool]
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+    max_databases: Optional[int]
+    refresh: Optional[int]
+
+
 class Gcp(BaseModel):
     class Config:
         allow_mutation = False
@@ -133,6 +144,7 @@ class InstanceConfig(BaseModel):
     collect_wal_metrics: Optional[bool]
     custom_queries: Optional[Sequence[Mapping[str, Any]]]
     data_directory: Optional[str]
+    database_autodiscovery: Optional[DatabaseAutodiscovery]
     dbm: Optional[bool]
     dbname: Optional[str]
     dbstrict: Optional[bool]
