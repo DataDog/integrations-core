@@ -70,10 +70,6 @@ metrics:
         mapping:
           0: no_error
           1: error
-      - column:
-          OID: 1.3.6.1.4.1.2021.9.1.101
-          name: dskErrorMsg
-        tag: dsk_error_msg
   - MIB: UCD-DISKIO-MIB
     table:
       OID: 1.3.6.1.4.1.2021.13.15.1.1
@@ -138,5 +134,3 @@ metrics:
     symbol:
       name: ssCpuRawInterrupt
       OID: 1.3.6.1.4.1.2021.11.56.0
-extends:
-  - _general.yaml
