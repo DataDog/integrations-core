@@ -117,11 +117,6 @@ class PostgreSql(AgentCheck):
                               "All metrics will be gathered from global view, and autodiscovery will not run.")
             return None
         
-        if is_affirmative(self._config.discovery_config) and self._config.dbname != "postgres":
-            self.log.warning("Database autodiscovery is enabled, but a database name to monitor was specified in `dbname`."
-                              "The check will default to monitor {}, and autodiscovery will not run.".format(self._config.dbname))
-            return None
-        
         discovery = PostgresAutodiscovery('postgres', self._config.discovery_config, self.log, self.autodiscovery_db_pool, self._config.idle_connection_timeout)
         return discovery
 
