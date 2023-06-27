@@ -1,6 +1,5 @@
 from typing import Dict, List, Callable
 from datadog_checks.base.utils.discovery import Discovery
-from datadog_checks.postgres.relationsmanager import RELATION_METRICS, INDEX_BLOAT, TABLE_BLOAT
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 import logging
 
@@ -49,5 +48,5 @@ class PostgresAutodiscovery(Discovery):
             cursor.execute(autodiscovery_query)
             databases = list(cursor.fetchall())
             databases = [x[0] for x in databases] # fetchall returns list of tuples representing rows, so need to parse
-            self._log.info("Databases found were: ", databases)
+            self._log.info("Databases found were: {}".format(databases))
             return databases 
