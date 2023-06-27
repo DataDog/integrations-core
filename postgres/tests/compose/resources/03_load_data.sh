@@ -31,12 +31,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
 EOSQL
 fi
 
-i=1
-dbs=(dogs dogs_noschema dogs_nofunc)
-for ((i=1; i<=100; i++)); do
-    dbs+=(dogs_$i)
-done
-for DBNAME in ${dbs[@]}; do
+for DBNAME in dogs dogs_noschema dogs_nofunc; do
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-EOSQL
     CREATE TABLE breed (id SERIAL, name VARCHAR(255));
