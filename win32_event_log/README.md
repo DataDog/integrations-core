@@ -272,9 +272,9 @@ You can use the [`query` option][20] to filter events with an [XPATH or structur
 <!-- xxz tab xxx -->
 <!-- xxx tab "Logs" xxx -->
 
-You can use the `query`, as well as the `log_processing_rules` regex option, to filter event logs. If you are using the Logs Tailer, the `query` option has better filtering performance than the `log_processing_rules` filters. The Datadog Agent cannot see any events filtered out by the `query` option. When using the `log_processing_rules` filters, the Agent can see every event and must process and format the event before applying the regex filter, so it takes more processing, and is less performant.
+You can use the `query`, as well as the `log_processing_rules` regex option, to filter event logs. The `query` option has better filtering performance than the `log_processing_rules` filters. When using the `log_processing_rules` filters, the Agent must process and format each event before applying the regex filter, so it takes more processing, and is less performant.
 
-You can use the `query` to filter events or filter out the bulk of the events with an [XPATH or structured XML query][21]. There is an expression limit on the syntax of XPath and XML queries. For additional filtering, use `log_processing_rules` filters.
+You can use the `query` option to filter events with an [XPATH or structured XML query][21]. The `query` option can reduce the number of events that are processed by `log_processing_rules` and improve performance. There is an expression limit on the syntax of XPath and XML queries. For additional filtering, use `log_processing_rules` filters.
 
 Datadog recommends creating and testing the query in Event Viewer's filter editor until the events shown in Event Viewer match what you want the Agent to collect.
 
@@ -304,7 +304,7 @@ Then, copy and paste the query into the Agent configuration.
 
 ![XML Query][24]
 
-In addition to the `query` option, events can be further filtered with log processing rules. If the `query` option is specified, then the `filters` option is ignored. For more information, see the [example `conf.yaml` file][22].
+In addition to the `query` option, events can be further filtered with log processing rules.
 
 Some example filters include the following:
 
