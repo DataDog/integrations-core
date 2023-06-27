@@ -12,6 +12,10 @@ The Agent check monitors Amazon Managed Streaming for Apache Kafka ([Amazon MSK]
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
 
+### Prerequisites
+
+This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see the [Latest and Legacy Versioning For OpenMetrics-based Integrations][19].
+
 ### Installation
 
 1. [Create a client machine][3] if one does not already exist.
@@ -31,9 +35,7 @@ Follow the instructions below to install and configure this check for an Agent r
      - <KEY_2>:<VALUE_2>
    ```
    
-   See the [sample amazon_msk.d/conf.yaml][9] for all available configuration options.
-
-   **Note**: This is the default OpenMetrics check example. If you previously implemented this integration, see the [legacy example][10].
+   See the [sample amazon_msk.d/conf.yaml][9] for all available configuration options for the latest version. For the legacy version of this integration, see the [legacy example][10].
 
 2. [Restart the Agent][11].
 
@@ -83,3 +85,4 @@ Additional helpful documentation, links, and articles:
 [16]: https://www.datadoghq.com/blog/monitor-amazon-msk/
 [17]: https://docs.datadoghq.com/getting_started/tagging/
 [18]: https://docs.datadoghq.com/integrations/amazon_msk
+[19]: https://docs.datadohgq.com/integrations/guide/versions-for-openmetrics-based-integrations
