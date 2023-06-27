@@ -258,6 +258,26 @@ metrics:
 
   - MIB: F5-BIGIP-LOCAL-MIB
     table:
+      OID: 1.3.6.1.4.1.3375.2.2.10.13.2
+      name: ltmVsStatusTable
+    symbols:
+      - name: ltmVsStatus
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.3375.2.2.10.13.2.1.2
+          name: ltmVsStatusAvailState
+        mapping:
+          0: error
+          1: available in some capacity
+          2: not currently available
+          3: not available
+          4: availability is unknown
+          5: unlicensed
+        tag: server
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    table:
       OID: 1.3.6.1.4.1.3375.2.2.10.2.3
       name: ltmVirtualServStatTable
     symbols:
