@@ -93,9 +93,7 @@ def assert_extend_generic_host_resources(aggregator, common_tags):
 
     cpu_rows = ['10', '21']
     for cpu_row in cpu_rows:
-        aggregator.assert_metric(
-            'snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + ['cpu:' + {cpu_row}]
-        )
+        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + ['cpu:' + cpu_row])
         aggregator.assert_metric(
             'snmp.hrProcessorLoad', metric_type=aggregator.GAUGE, tags=common_tags + ['processorid:' + cpu_row]
         )
