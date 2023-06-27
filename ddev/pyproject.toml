@@ -1,14 +1,12 @@
 [build-system]
-requires = [
-    "hatchling>=1.5.0",
-]
+requires = ["hatchling>=1.17.1", "hatch-vcs>=0.3.0"]
 build-backend = "hatchling.build"
 
 [project]
 name = "ddev"
 description = "The Datadog Agent integration developer tool"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = "BSD-3-Clause"
 keywords = [
     "datadog",
@@ -28,11 +26,11 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
 ]
 dependencies = [
-    "datadog-checks-dev[cli]~=19.0",
+    "datadog-checks-dev[cli]~=21.0",
     "hatch>=1.6.3",
     "httpx",
     "jsonpointer",
-    "pyperclip",
+    "pluggy",
     "rich>=12.5.1",
     "tomli; python_version < '3.11'",
     "tomli-w",
@@ -48,7 +46,20 @@ ddev-starship = "ddev.plugin.external.starship.prompt:main"
 Source = "https://github.com/DataDog/integrations-core"
 
 [tool.hatch.version]
-path = "src/ddev/__about__.py"
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+root = ".."
+version_scheme = "python-simplified-semver"
+local_scheme = "no-local-version"
+parentdir_prefix_version = "ddev-"
+git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "ddev-v*"]
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/ddev/_version.py"
+
+[tool.hatch.build.targets.app]
+scripts = ["ddev"]
 
 [tool.black]
 include = '\.pyi?$'

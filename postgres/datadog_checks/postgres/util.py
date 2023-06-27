@@ -147,6 +147,19 @@ QUERY_PG_UPTIME = {
     ],
 }
 
+QUERY_PG_CONTROL_CHECKPOINT = {
+    'name': 'pg_control_checkpoint',
+    'query': """
+        SELECT timeline_id,
+               EXTRACT (EPOCH FROM now() - checkpoint_time)
+        FROM pg_control_checkpoint();
+""",
+    'columns': [
+        {'name': 'postgresql.control.timeline_id', 'type': 'gauge'},
+        {'name': 'postgresql.control.checkpoint_delay', 'type': 'gauge'},
+    ],
+}
+
 COMMON_BGW_METRICS = {
     'checkpoints_timed': ('postgresql.bgwriter.checkpoints_timed', AgentCheck.monotonic_count),
     'checkpoints_req': ('postgresql.bgwriter.checkpoints_requested', AgentCheck.monotonic_count),
@@ -397,6 +410,27 @@ EXTRACT (EPOCH FROM now() - min(modification))
         {'name': 'postgresql.wal_count', 'type': 'gauge'},
         {'name': 'postgresql.wal_size', 'type': 'gauge'},
         {'name': 'postgresql.wal_age', 'type': 'gauge'},
+    ],
+}
+
+STAT_WAL_METRICS = {
+    'name': 'stat_wal_metrics',
+    'query': """
+SELECT wal_records, wal_fpi,
+       wal_bytes, wal_buffers_full,
+       wal_write, wal_sync,
+       wal_write_time, wal_sync_time
+  FROM pg_stat_wal
+""",
+    'columns': [
+        {'name': 'postgresql.wal.records', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.full_page_images', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.bytes', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.buffers_full', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.write', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.sync', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.write_time', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.sync_time', 'type': 'monotonic_count'},
     ],
 }
 
