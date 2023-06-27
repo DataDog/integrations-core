@@ -139,7 +139,8 @@ def test_autodiscovery_collect_all_relations(aggregator, integration_check, pg_i
     """
     Check that relation metrics get collected for each database discovered.
     """
-    pg_instance["database_autodiscovery"] = DISCOVERY_CONFIG
+    pg_instance["database_autodiscovery"] = copy.deepcopy(DISCOVERY_CONFIG)
+    pg_instance["database_autodiscovery"]["include"] = ["dogs$", "dogs_noschema$", "dogs_nofunc$"]
     pg_instance['relations'] = [
         {'relation_regex': '.*'},
     ]
