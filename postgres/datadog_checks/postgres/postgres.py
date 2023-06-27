@@ -5,7 +5,7 @@ import copy
 import os
 import threading
 from contextlib import closing
-from time import time
+from time import time, sleep
 
 import psycopg2
 from six import iteritems
@@ -109,6 +109,9 @@ class PostgreSql(AgentCheck):
         self._dynamic_queries = None
 
     def _build_autodiscovery(self):
+        self.log.error("config looks like {}".format(self._config.discovery_config))
+        # return None
+        assert None is None
         if not is_affirmative(self._config.discovery_config):
             return None
         
