@@ -3,7 +3,6 @@
 ## 5.4.2 / 2023-06-27
 
 * [Fixed] Do not stop collecting metrics if the templates endpoint is not reachable. See [#15054](https://github.com/DataDog/integrations-core/pull/15054).
-* [Fixed] Correctly compute the `templates.count` metric. See [#14636](https://github.com/DataDog/integrations-core/pull/14636).
 
 ## 5.4.1 / 2023-05-31
 
