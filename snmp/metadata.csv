@@ -823,3 +823,4 @@ snmp.voltageyz2,gauge,,,,[Legacy Chatsworth] The branch YZ2 voltage in 1/10 volt
 snmp.voltagezx1,gauge,,,,[Legacy Chatsworth] The branch ZX1 voltage in 1/10 volts.,0,snmp,,
 snmp.voltagezx2,gauge,,,,[Legacy Chatsworth] The branch ZX2 voltage in 1/10 volts.,0,snmp,,
 snmp.wlsxSysExtPacketLossPercent,gauge,,,,[Aruba] The packet loss count of the switch.,0,snmp,,
+
