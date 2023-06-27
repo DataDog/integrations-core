@@ -8,8 +8,4 @@ RUN apt-get install -yq python${PYTHON_VERSION} python3-pip python${PYTHON_VERSI
 RUN apt-get install -yq git build-essential liblz4-dev libunwind-dev
 
 RUN pip install pipx
-RUN which pipx
 ENV PATH=/root/.local/bin:$PATH
-RUN pipx install ddev
-# Install ruff to apply linter recommandation: ruff --fix
-RUN pipx install ruff

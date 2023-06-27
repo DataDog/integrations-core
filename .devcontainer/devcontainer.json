@@ -10,16 +10,16 @@
 	},
 	"features": {
 		"ghcr.io/devcontainers/features/python:1": {}
-	}
+	},
+
+	// Install the local ddev cli at start time.
+	"postCreateCommand": "pip install -e /workspaces/integrations-core/ddev"
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
-
-	// Uncomment the next line to run commands after the container is created.
-	// "postCreateCommand": "cat /etc/os-release",
 
 	// Configure tool-specific properties.
 	// "customizations": {},
