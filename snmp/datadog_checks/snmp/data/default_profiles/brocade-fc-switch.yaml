@@ -1,6 +1,4 @@
 extends:
-  - _base.yaml
-  - _generic-if.yaml
   - brocade.yaml
 sysobjectid:
   - 1.3.6.1.4.1.1588.2.1.1.*
