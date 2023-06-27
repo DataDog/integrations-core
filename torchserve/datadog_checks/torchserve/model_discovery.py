@@ -29,8 +29,6 @@ class ModelDiscovery(Discovery):
         return super().get_items()
 
     def get_models(self):
-        # The cache wanted to refresh, so we update the flag
-        self.refreshed = True
         page_number = 0
         models = []
 
@@ -61,6 +59,8 @@ class ModelDiscovery(Discovery):
             self.check.log.error("Caught exception %s, no models returned.", e)
             self.api_status = AgentCheck.CRITICAL
         else:
+            # The cache wanted to refresh, so we update the flag
+            self.refreshed = True
             self.check.gauge("models", len(models), tags=self.check.tags)
             self.all_models = {e["modelName"]: e["modelUrl"] for e in models}
 
