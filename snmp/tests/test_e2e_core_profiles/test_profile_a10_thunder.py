@@ -264,4 +264,7 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
+
+    # --- CHECK COVERAGE ---
+    aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
