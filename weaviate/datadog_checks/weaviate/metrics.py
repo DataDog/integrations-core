@@ -46,7 +46,7 @@ METRICS = {
     'object_count': 'object_count',
     'async_operations_running': 'async.operations.running',
     'lsm_active_segments': 'lsm.active.segments',
-    'lsm_bloom_filter_duration_ms': 'lsm.bloom_filter.duration_ms',
+    'lsm_bloom_filter_duration_ms': 'lsm.bloom.filter.duration_ms',
     'lsm_segment_objects': 'lsm.segment.objects',
     'lsm_segment_size': 'lsm.segment.size',
     'lsm_segment_count': 'lsm.segment.count',
@@ -60,5 +60,5 @@ METRICS = {
     'startup_durations_ms': 'startup.durations_ms',
     'startup_diskio_throughput': 'startup.diskio.throughput',
     'startup_progress': 'startup.progress',
-    'queries_filtered_vector_durations_ms': 'queries.filtered_vector.durations_ms',
+    'queries_filtered_vector_durations_ms': 'queries.filtered.vector.durations_ms',
 }

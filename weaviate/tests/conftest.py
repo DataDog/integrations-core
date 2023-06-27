@@ -4,7 +4,6 @@
 import os
 
 import pytest
-import requests
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
@@ -41,10 +40,9 @@ def dd_environment():
             weaviate_host, weaviate_api_port = stack.enter_context(
                 port_forward(kubeconfig, 'weaviate', 8080, 'statefulset', 'weaviate')
             )
-            api_url = f"http://{weaviate_host}:{weaviate_api_port}"
 
             instance = {
                 "openmetrics_endpoint": f"http://{weaviate_host}:{weaviate_port}/metrics",
-                "weaviate_api": f"{api_url}",
+                "weaviate_api": f"http://{weaviate_host}:{weaviate_api_port}",
             }
             yield instance

@@ -42,6 +42,7 @@ E2E_METRICS = [
     "weaviate.process.virtual_memory.max_bytes",
     "weaviate.promhttp.metric_handler.requests.count",
     "weaviate.promhttp.metric_handler.requests_in_flight",
+    # liveness latency metric from API
     "weaviate.http.latency_ms",
 ]
 
@@ -55,8 +56,8 @@ fixture_metrics = [
     "weaviate.object_count",
     "weaviate.objects.durations_ms.count",
     "weaviate.objects.durations_ms.sum",
-    "weaviate.queries.filtered_vector.durations_ms.count",
-    "weaviate.queries.filtered_vector.durations_ms.sum",
+    "weaviate.queries.filtered.vector.durations_ms.count",
+    "weaviate.queries.filtered.vector.durations_ms.sum",
     "weaviate.startup.durations_ms.count",
     "weaviate.startup.durations_ms.sum",
     "weaviate.startup.progress",

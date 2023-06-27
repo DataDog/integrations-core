@@ -8,13 +8,14 @@ import pytest
 from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.weaviate import WeaviateCheck
 
 from .common import API_METRICS, MOCKED_INSTANCE, TEST_METRICS
 from .utils import get_fixture_path
 
 
-def test_check_mock_weaviate(dd_run_check, aggregator, mock_http_response):
+def test_check_mock_weaviate_openmetrics(dd_run_check, aggregator, mock_http_response):
     mock_http_response(file_path=get_fixture_path('weaviate_metrics.txt'))
     check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
     dd_run_check(check)
@@ -23,6 +24,7 @@ def test_check_mock_weaviate(dd_run_check, aggregator, mock_http_response):
         aggregator.assert_metric(metric, at_least=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('weaviate.openmetrics.health', ServiceCheck.OK)
 
 
@@ -34,18 +36,19 @@ def test_check_mock_weaviate_node(dd_run_check, aggregator, mock_http_response):
     for metric in API_METRICS:
         aggregator.assert_metric(metric, at_least=1)
 
-    aggregator.assert_service_check('weaviate.node.status', ServiceCheck.OK)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_service_check('weaviate.node.status', ServiceCheck.OK)
 
 
-def test_check_mock_liveness(dd_run_check, aggregator, mock_http_response):
+def test_check_failed_liveness(dd_run_check, aggregator, mock_http_response):
     mock_http_response(status_code=404)
-
     check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
     dd_run_check(check)
 
     # No metrics should be submitted
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('weaviate.liveness.status', ServiceCheck.CRITICAL)
 
 
