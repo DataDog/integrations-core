@@ -16,10 +16,14 @@ def test_e2e_python(dd_agent_check):
     metrics = common.SUPPORTED_METRIC_TYPES
     config = common.generate_container_instance_config(metrics)
     instance = config['instances'][0]
+    instance['loader'] = 'python'
     aggregator = dd_agent_check(config, rate=True)
-    tags = ['snmp_device:{}'.format(instance['ip_address'])]
+    tags = [
+        'device_namespace:default',
+        'snmp_device:{}'.format(instance['ip_address']),
+    ]
 
-    # Test metrics UPDATE
+    # Test metrics
     for metric in common.SUPPORTED_METRIC_TYPES:
         metric_name = "snmp." + metric['name']
         aggregator.assert_metric(metric_name, tags=tags)
