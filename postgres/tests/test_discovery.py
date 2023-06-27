@@ -13,7 +13,7 @@ import pytest
 from datadog_checks.base import ConfigurationError
 
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags
-from .utils import run_one_check, requires_over_13
+from .utils import requires_over_13, run_one_check
 
 DISCOVERY_CONFIG = {
     "enabled": True,
