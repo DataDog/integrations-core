@@ -105,6 +105,20 @@ custom_queries:
 ```
 The custom query sends as a `GET` request. If you use an optional `payload` parameter, the request sends as a `POST` request. 
 
+`value_path` may either be string keys or list indices. Example:
+```json
+{
+  "foo": {
+    "bar": [
+      "result0",
+      "result1"
+    ]
+  }
+}
+```
+
+`value_path: foo.bar.1` returns the value `result1`.
+
 ##### Trace collection
 
 Datadog APM integrates with Elasticsearch to see the traces across your distributed system. Trace collection is enabled by default in the Datadog Agent v6+. To start collecting traces:

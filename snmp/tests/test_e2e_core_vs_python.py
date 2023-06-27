@@ -284,6 +284,11 @@ def test_e2e_profile_apc_ups(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config, expected_total_count=64 + 5)
 
 
+def test_e2e_profile_apc_ups_user(dd_agent_check):
+    config = common.generate_container_profile_config('apc_ups_user')
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=66 + 5)
+
+
 def test_e2e_profile_arista(dd_agent_check):
     config = common.generate_container_profile_config('arista')
     assert_python_vs_core(dd_agent_check, config, expected_total_count=16 + 5)
@@ -444,11 +449,6 @@ def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
 
 def test_e2e_profile_netapp(dd_agent_check):
     config = common.generate_container_profile_config('netapp')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_palo_alto(dd_agent_check):
-    config = common.generate_container_profile_config('palo-alto')
     assert_python_vs_core(dd_agent_check, config)
 
 
