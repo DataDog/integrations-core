@@ -93,21 +93,23 @@ def assert_extend_generic_host_resources(aggregator, common_tags):
 
     cpu_rows = ['10', '21']
     for cpu_row in cpu_rows:
-        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + [f'cpu:{cpu_row}'])
         aggregator.assert_metric(
-            'snmp.hrProcessorLoad', metric_type=aggregator.GAUGE, tags=common_tags + [f'processorid:{cpu_row}']
+            'snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + ['cpu:' + {cpu_row}]
+        )
+        aggregator.assert_metric(
+            'snmp.hrProcessorLoad', metric_type=aggregator.GAUGE, tags=common_tags + ['processorid:' + cpu_row]
         )
 
     mem_rows = ['31', '4']
     for mem_row in mem_rows:
         aggregator.assert_metric(
-            'snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags + [f'mem:{mem_row}']
+            'snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags + ['mem:' + mem_row]
         )
         aggregator.assert_metric(
-            'snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + [f'mem:{mem_row}']
+            'snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + ['mem:' + mem_row]
         )
         aggregator.assert_metric(
-            'snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags + [f'mem:{mem_row}']
+            'snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags + ['mem:' + mem_row]
         )
 
     hr_mem_rows = [
