@@ -230,6 +230,12 @@ The example below will append the part in `NEW_METRIC` to the namespace (`dcgm.`
     - DCGM_FI_DEV_NEW_METRIC: new_metric
 ```
 
+### DCGM Field is Enabled but not Being Submitted?
+
+It may happen that you enable the collection of a field in `default-counters.csv` but it doesn't show up in Datadog, nor in fact if you make a `curl` request to `host:9400/metrics`.
+To figure out why this field is not being collected [dcgm-exporter devs recommend][14] looking at the file `var/log/nv-hostengine.log`.
+Keep in mind that `dcgm-exporter` is a thin wrapper around lower-level libraries and drivers which do the actual reporting.
+
 ### Need Help?
 
 Contact [Datadog support][8].
@@ -251,3 +257,4 @@ Additional helpful documentation, links, and articles:
 [11]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes#configuration
 [12]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
 [13]: https://en.wikipedia.org/wiki/Operating_temperature
+[14]: https://github.com/NVIDIA/dcgm-exporter/issues/163#issuecomment-1577506512
