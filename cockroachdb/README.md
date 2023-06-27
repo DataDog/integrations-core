@@ -11,6 +11,12 @@ The CockroachDB check monitors the overall health and performance of a [Cockroac
 The CockroachDB check is included in the [Datadog Agent][2] package, so you do not
 need to install anything else on your server.
 
+### Prerequisities
+
+This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see the [Latest and Legacy Versioning For OpenMetrics-based Integrations][14].
+
+Version 1.9.0 and later of this check uses the [latest version][12] for metric collection, which requires Python 3. For hosts unable to use Python 3, or to use the legacy version of this check, see the following [configuration][13].
+
 ### Configuration
 
 <!-- xxx tabs xxx -->
@@ -34,13 +40,11 @@ To configure this check for an Agent running on a host:
      - openmetrics_endpoint: http://localhost:8080/_status/vars
    ```
 
-2. [Restart the Agent][5]
-
-**Note**: The current version of the check (1.9.0+) uses a newer implementation of [OpenMetrics][12] for metric collection, which requires Python 3. For hosts unable to use Python 3, or to use a legacy version of this check, see the following [config][13].
+2. [Restart the Agent][5].
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
+_Available for Agent version 6.0 or later_
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
 
@@ -133,3 +137,4 @@ Additional helpful documentation, links, and articles:
 [11]: https://www.datadoghq.com/blog/monitor-cockroachdb-performance-metrics-with-datadog
 [12]: https://docs.datadoghq.com/integrations/openmetrics/
 [13]: https://github.com/DataDog/integrations-core/blob/7.33.x/cockroachdb/datadog_checks/cockroachdb/data/conf.yaml.example
+[14]: https://docs.datadohgq.com/integrations/guide/versions-for-openmetrics-based-integrations
