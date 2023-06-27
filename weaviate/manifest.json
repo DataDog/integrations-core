@@ -28,12 +28,15 @@
       },
       "metrics": {
         "prefix": "weaviate.",
-        "check": "",
+        "check": "weaviate.go.goroutines",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "/bin/weaviate"
+      ]
     },
     "dashboards": {},
     "monitors": {},

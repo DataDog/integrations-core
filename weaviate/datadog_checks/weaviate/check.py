@@ -78,20 +78,20 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
             return
         try:
             data = response.json()
+            status_values = {'HEALTHY': 0, 'UNHEALTHY': 1, 'UNAVAILABLE': 2}
+
             for node in data.get('nodes', []):
                 tags = []
-                if 'name' in node:
-                    tags.append(f"weaviate_node:{node['name']}")
-                if 'version' in node:
-                    tags.append(f"weaviate_version:{node['version']}")
-                if 'gitHash' in node:
-                    tags.append(f"weaviate_githash:{node['gitHash']}")
+
+                tags.append(f"weaviate_node:{node.get('name')}")
+                tags.append(f"weaviate_version:{node.get('version')}")
+                tags.append(f"weaviate_githash:{node.get('gitHash')}")
 
                 if 'status' in node:
-                    tags.append(f"weaviate_node_status:{node['status'].lower()}")
-                    status_values = {'HEALTHY': 0, 'UNHEALTHY': 1, 'UNAVAILABLE': 2}
-                    self.gauge('node.status', status_values.get(node['status'], 0), tags=tags)
-                    self.service_check('node.status', status_values.get(node['status'], 0), tags=tags)
+                    status = node.get('status')
+                    tags.append(f"weaviate_node_status:{status.lower()}")
+                    self.gauge('node.status', status_values.get(status, 3), tags=tags)
+                    self.service_check('node.status', status_values.get(status, 3), tags=tags)
 
                 if 'stats' in node:
                     stats = node['stats']
@@ -100,20 +100,14 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
 
                 if 'shards' in node:
                     for shard in node['shards']:
-                        tags.append(f"weaviate_shard_name:{shard.get('name', '')}")
-                        tags.append(f"weaviate_shard_class:{shard.get('class', '')}")
+                        tags.append(f"weaviate_shard_name:{shard.get('name')}")
+                        tags.append(f"weaviate_shard_class:{shard.get('class')}")
                         self.gauge('node.shard.objects', shard.get('objectCount', 0), tags=tags)
+
         except Exception as e:
             self.log.debug("Error occurred during node metrics submission: %s", str(e))
 
-
     def check(self, _):
-        try:
-            if self.instance.get("openmetrics_endpoint"):
-                super().check(_)
-        except Exception as e:
-            self.log.error("Error while collecting Weaviate metrics from OpenMetrics endpoint: %s", str(e))
-
         try:
             if self.instance.get("weaviate_api"):
                 self._submit_version_metadata()
@@ -121,3 +115,8 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
                 self._submit_node_metrics()
         except Exception as e:
             self.log.error("Error while collecting Weaviate metrics from API: %s", str(e))
+        try:
+            if self.instance.get("openmetrics_endpoint"):
+                super().check(_)
+        except Exception as e:
+            self.log.error("Error while collecting Weaviate metrics from OpenMetrics endpoint: %s", str(e))
