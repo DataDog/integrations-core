@@ -10,8 +10,8 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
-    assert_extend_generic_if,
     assert_extend_entity_sensor_mib,
+    assert_extend_generic_if,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
@@ -75,19 +75,23 @@ def test_e2e_profile_nvidia_cumulus_linux_switch(dd_agent_check):
     aggregator.assert_metric('snmp.poeTotalUsedPower', metric_type=aggregator.GAUGE, tags=common_tags)
 
     tag_rows = [
-         ['cl_port_name:their zombies'],
-         ['cl_port_name:zombies zombies acted oxen but oxen'],
+        ['cl_port_name:their zombies'],
+        ['cl_port_name:zombies zombies acted oxen but oxen'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.clBufferOverflowDiscards', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.clBufferOverflowDiscards', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric('snmp.clEgressNonQDiscards', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.clEgressQOverflowDiscards', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.clEgressQOverflowDiscards', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric('snmp.clL3AclDiscards', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.clL3v4InDiscards', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['cl_int_port_name:oxen'],
-         ['cl_int_port_name:forward but'],
+        ['cl_int_port_name:oxen'],
+        ['cl_int_port_name:forward but'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.clIntInBcastPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -100,8 +104,8 @@ def test_e2e_profile_nvidia_cumulus_linux_switch(dd_agent_check):
         aggregator.assert_metric('snmp.clIntOutUcastPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['cl_int_pfc_port_name:forward kept quaintly quaintly driving oxen'],
-         ['cl_int_pfc_port_name:driving Jaded driving Jaded kept oxen driving quaintly'],
+        ['cl_int_pfc_port_name:forward kept quaintly quaintly driving oxen'],
+        ['cl_int_pfc_port_name:driving Jaded driving Jaded kept oxen driving quaintly'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.clIntInPausePkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -122,7 +126,6 @@ def test_e2e_profile_nvidia_cumulus_linux_switch(dd_agent_check):
         aggregator.assert_metric('snmp.clIntOutPfc5Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.clIntOutPfc6Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.clIntOutPfc7Pkt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
 
     aggregator.assert_all_metrics_covered()
 

@@ -10,9 +10,9 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
-    assert_extend_generic_if,
     assert_extend_entity_sensor_mib,
     assert_extend_generic_host_resources,
+    assert_extend_generic_if,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
