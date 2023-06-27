@@ -17,8 +17,8 @@ COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 EXPECTED_METRICS = [
     'dec_utilization',
     'enc_utilization',
-    'fb_free',
-    'fb_used',
+    'frame_buffer.free',
+    'frame_buffer.used',
     'temperature',
     'gpu_utilization',
     'mem.clock',

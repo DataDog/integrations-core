@@ -1,8 +1,8 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 dcgm.dec_utilization,gauge,,percent,,Decoder utilization (in %).,0,dcgm,,
 dcgm.enc_utilization,gauge,,percent,,Encoder utilization (in %).,0,dcgm,,
-dcgm.fb_free,gauge,,mebibyte,,Framebuffer memory free (in MiB).,0,dcgm,,
-dcgm.fb_used,gauge,,mebibyte,,Framebuffer memory used (in MiB).,0,dcgm,,
+dcgm.frame_buffer.free,gauge,,mebibyte,,Frame buffer memory free (in MiB).,0,dcgm,,
+dcgm.frame_buffer.used,gauge,,mebibyte,,Frame buffer memory used (in MiB).,0,dcgm,,
 dcgm.temperature,gauge,,degree celsius,,GPU temperature (in C).,0,dcgm,,
 dcgm.gpu_utilization,gauge,,percent,,GPU utilization (in %).,0,dcgm,,
 dcgm.mem.clock,gauge,,megahertz,,Memory clock frequency (in MHz).,0,dcgm,,

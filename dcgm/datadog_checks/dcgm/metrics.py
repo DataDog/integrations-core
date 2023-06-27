@@ -4,11 +4,11 @@
 
 METRIC_MAP = {
     # Exposed OM Metrics to map:
-    'DCGM_FI_DEV_GPU_TEMP': 'temperature',
     'DCGM_FI_DEV_DEC_UTIL': 'dec_utilization',
     'DCGM_FI_DEV_ENC_UTIL': 'enc_utilization',
-    'DCGM_FI_DEV_FB_FREE': 'fb_free',
-    'DCGM_FI_DEV_FB_USED': 'fb_used',
+    'DCGM_FI_DEV_FB_FREE': 'frame_buffer.free',
+    'DCGM_FI_DEV_FB_USED': 'frame_buffer.used',
+    'DCGM_FI_DEV_GPU_TEMP': 'temperature',
     'DCGM_FI_DEV_GPU_UTIL': 'gpu_utilization',
     'DCGM_FI_DEV_NVLINK_BANDWIDTH_TOTAL': 'nvlink_bandwidth',
     'DCGM_FI_DEV_PCIE_REPLAY_COUNTER': 'pcie_replay',  # becomes pcie_replay.count
@@ -23,11 +23,11 @@ METRIC_MAP = {
     # NVML Specific Missing Metrics (5)
     'DCGM_FI_DEV_COUNT': 'device',  # becomes device.count
     'DCGM_FI_DEV_FAN_SPEED': 'fan_speed',
-    'DCGM_FI_PROF_PCIE_TX_BYTES': 'pcie_tx_throughput',
     'DCGM_FI_PROF_PCIE_RX_BYTES': 'pcie_rx_throughput',
+    'DCGM_FI_PROF_PCIE_TX_BYTES': 'pcie_tx_throughput',
     # Others from default-counters.csv
-    'DCGM_FI_DEV_MEMORY_TEMP': 'memory_temperature',
-    'DCGM_FI_DEV_UNCORRECTABLE_REMAPPED_ROWS': 'uncorrectable_remapped_rows',
     'DCGM_FI_DEV_CORRECTABLE_REMAPPED_ROWS': 'correctable_remapped_rows',
+    'DCGM_FI_DEV_MEMORY_TEMP': 'memory_temperature',
     'DCGM_FI_DEV_ROW_REMAP_FAILURE': 'row_remap_failure',
+    'DCGM_FI_DEV_UNCORRECTABLE_REMAPPED_ROWS': 'uncorrectable_remapped_rows',
 }
