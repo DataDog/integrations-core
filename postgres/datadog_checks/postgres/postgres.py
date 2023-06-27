@@ -109,9 +109,7 @@ class PostgreSql(AgentCheck):
         self._dynamic_queries = None
 
     def _build_autodiscovery(self):
-        self.log.error("config looks like {}".format(self._config.discovery_config))
-        # return None
-        assert None is None
+        self.log.warning("config looks like {}".format(self._config.discovery_config))
         if not is_affirmative(self._config.discovery_config):
             return None
         
