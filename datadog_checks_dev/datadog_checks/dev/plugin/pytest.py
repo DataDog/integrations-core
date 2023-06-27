@@ -163,7 +163,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
         env = os.environ.get('TOX_ENV_NAME') or os.environ['HATCH_ENV_ACTIVE']
 
         # TODO: switch to `ddev` when the old CLI is gone
-        check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env, '--json', '--log-level=trace']
+        check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env, '--json']
 
         if config:
             config = format_config(config)
