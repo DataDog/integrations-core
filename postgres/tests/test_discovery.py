@@ -8,7 +8,6 @@ import select
 import time
 
 from .utils import run_one_check
-from .test_relations import RELATION_METRICS
 from .common import HOST, USER_ADMIN, PASSWORD_ADMIN, _get_expected_tags
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
@@ -22,6 +21,23 @@ DISCOVERY_CONFIG = {
     "enabled": True,
     "include": ["dogs_([1-9]|[1-9][0-9]|10[0-9])"],
     "exclude":["dogs_5$", "dogs_50$"],
+}
+
+RELATION_METRICS = {
+     'postgresql.seq_scans',
+    'postgresql.seq_rows_read',
+    'postgresql.rows_inserted',
+    'postgresql.rows_updated',
+    'postgresql.rows_deleted',
+    'postgresql.rows_hot_updated',
+    'postgresql.live_rows',
+    'postgresql.dead_rows',
+    'postgresql.heap_blocks_read',
+    'postgresql.heap_blocks_hit',
+    'postgresql.vacuumed',
+    'postgresql.autovacuumed',
+    'postgresql.analyzed',
+    'postgresql.autoanalyzed',
 }
 
 @pytest.mark.integration
@@ -115,7 +131,9 @@ def test_autodiscovery_collect_all_relations(aggregator, integration_check, pg_i
     If no relation metrics are being collected, autodiscovery should not run.
     """
     pg_instance["database_autodiscovery"] = DISCOVERY_CONFIG
-    pg_instance['relations'] = ["breed"]
+    pg_instance['relations'] = [
+        {'relation_regex': '.*'},
+    ]
     del pg_instance['dbname']
 
     check = integration_check(pg_instance)
@@ -124,10 +142,10 @@ def test_autodiscovery_collect_all_relations(aggregator, integration_check, pg_i
     # assert that for all databases found, a relation metric was reported
     databases = check.autodiscovery.get_items()
     for db in databases:
-        print(RELATION_METRICS)
+        # print(RELATION_METRICS)
         expected_tags = _get_expected_tags(check, pg_instance, db=db, table='breed', schema='public')
         for metric in RELATION_METRICS:
             aggregator.assert_metric(metric, tags=expected_tags)
-            print("yay {}".format(metric))
+            # print("yay {}".format(metric))
     
     assert None is not None
