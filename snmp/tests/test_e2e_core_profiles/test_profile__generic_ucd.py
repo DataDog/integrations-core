@@ -57,7 +57,8 @@ def test_e2e_profile__generic_ucd(dd_agent_check):
     aggregator.assert_metric('snmp.ssCpuSystem', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.ssCpuUser', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-         ['TODO'],
+         ['dsk_device:driving driving but kept oxen oxen', 'dsk_error_flag:no_error', 'dsk_path:oxen acted oxen their'],
+         ['dsk_device:kept Jaded', 'dsk_error_flag:no_error', 'dsk_path:quaintly oxen acted oxen'],
 
     ]
     for tag_row in tag_rows:
@@ -68,7 +69,8 @@ def test_e2e_profile__generic_ucd(dd_agent_check):
         aggregator.assert_metric('snmp.dskUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['TODO'],
+         ['disk_io_device:forward'],
+         ['disk_io_device:their zombies'],
 
     ]
     for tag_row in tag_rows:
@@ -92,7 +94,7 @@ def test_e2e_profile__generic_ucd(dd_agent_check):
         'name': '_generic-ucd.device.name',
         'profile': '_generic-ucd',
         'status': 1,
-        'sys_object_id': '1.2.3.999',
+        'sys_object_id': '1.2.3.1001',
         'vendor': '_generic',
     }
     device['tags'] = common_tags
