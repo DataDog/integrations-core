@@ -13,7 +13,7 @@ import pytest
 from datadog_checks.base import ConfigurationError
 
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags
-from .utils import run_one_check
+from .utils import run_one_check, requires_over_13
 
 DISCOVERY_CONFIG = {
     "enabled": True,
@@ -78,6 +78,7 @@ def test_autodiscovery_max_databases(integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@requires_over_13
 def test_autodiscovery_refresh(integration_check, pg_instance):
     """
     Test cache refresh by adding a database in the middle of a check.
