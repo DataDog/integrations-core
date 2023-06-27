@@ -1,6 +1,6 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
 import time
@@ -10,8 +10,8 @@ import psycopg2
 import psycopg2.sql
 import pytest
 
-
 from datadog_checks.base import ConfigurationError
+
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags
 from .utils import run_one_check
 
