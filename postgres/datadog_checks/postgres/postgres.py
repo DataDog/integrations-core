@@ -5,7 +5,7 @@ import copy
 import os
 import threading
 from contextlib import closing
-from time import time, sleep
+from time import time
 
 import psycopg2
 from six import iteritems
@@ -16,10 +16,9 @@ from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.postgres import aws
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
+from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
-from datadog_checks.postgres.discovery import PostgresAutodiscovery
-from datadog_checks.postgres.relationsmanager import INDEX_BLOAT, RELATION_METRICS, TABLE_BLOAT, RelationsManager
 from datadog_checks.postgres.relationsmanager import (
     DYNAMIC_RELATION_QUERIES,
     INDEX_BLOAT,
@@ -111,13 +110,21 @@ class PostgreSql(AgentCheck):
     def _build_autodiscovery(self):
         if not is_affirmative(self._config.discovery_config):
             return None
-        
+
         if not self._config.relations:
-            self.log.warning("Database autodiscovery is enabled, but relation-level metrics are not being collected."
-                              "All metrics will be gathered from global view, and autodiscovery will not run.")
+            self.log.warning(
+                "Database autodiscovery is enabled, but relation-level metrics are not being collected."
+                "All metrics will be gathered from global view, and autodiscovery will not run."
+            )
             return None
-        
-        discovery = PostgresAutodiscovery('postgres', self._config.discovery_config, self.log, self.autodiscovery_db_pool, self._config.idle_connection_timeout)
+
+        discovery = PostgresAutodiscovery(
+            'postgres',
+            self._config.discovery_config,
+            self.log,
+            self.autodiscovery_db_pool,
+            self._config.idle_connection_timeout,
+        )
         return discovery
 
     def set_resource_tags(self):
@@ -410,7 +417,7 @@ class PostgreSql(AgentCheck):
 
         return results
 
-    def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics, dbname = None):
+    def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics, dbname=None):
         if scope is None:
             return None
         # build query
@@ -475,11 +482,11 @@ class PostgreSql(AgentCheck):
             num_results += 1
 
         return num_results
-    
+
     def _collect_relations_autodiscovery(self, instance_tags, relations_scopes):
         if not self.autodiscovery:
             return
-        
+
         databases = self.autodiscovery.get_items()
         for db in databases:
             with self.autodiscovery_db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
@@ -512,12 +519,12 @@ class PostgreSql(AgentCheck):
 
             if self._config.collect_bloat_metrics:
                 relations_scopes.extend([INDEX_BLOAT, TABLE_BLOAT])
-                
+
             # If autodiscovery is enabled, get relation metrics from all databases found
             if self.autodiscovery:
                 self._collect_relations_autodiscovery(instance_tags, relations_scopes)
             # otherwise, continue just with dbname
-            else:  
+            else:
                 metric_scope.extend(relations_scopes)
 
         # self.log.warning(metric_scope)
@@ -535,7 +542,7 @@ class PostgreSql(AgentCheck):
 
         # show tables
         # cursor.execute("SELECT * FROM pg_catalog.pg_tables;")
-        # results = cursor.fetchall() 
+        # results = cursor.fetchall()
         # self.log.warning("tables {}".format(results))
         results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False)
         if results_len is not None:
