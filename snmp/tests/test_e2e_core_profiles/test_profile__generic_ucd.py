@@ -24,6 +24,7 @@ def test_e2e_profile__generic_ucd(dd_agent_check):
     ip_address = get_device_ip_from_config(config)
     common_tags = [
         'snmp_profile:generic-ucd',
+        'snmp_host:_generic-ucd.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
     ] + []
