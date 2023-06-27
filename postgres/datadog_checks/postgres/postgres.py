@@ -109,13 +109,17 @@ class PostgreSql(AgentCheck):
         self._dynamic_queries = None
 
     def _build_autodiscovery(self):
-        self.log.warning("config looks like {}".format(self._config.discovery_config))
         if not is_affirmative(self._config.discovery_config):
             return None
         
         if not self._config.relations:
             self.log.warning("Database autodiscovery is enabled, but relation-level metrics are not being collected."
-                              "All metrics will be gathered from global view.")
+                              "All metrics will be gathered from global view, and autodiscovery will not run.")
+            return None
+        
+        if is_affirmative(self._config.discovery_config) and self._config.dbname != "postgres":
+            self.log.warning("Database autodiscovery is enabled, but a database name to monitor was specified in `dbname`."
+                              "The check will default to monitor {}, and autodiscovery will not run.".format(self._config.dbname))
             return None
         
         discovery = PostgresAutodiscovery('postgres', self._config.discovery_config, self.log, self.autodiscovery_db_pool, self._config.idle_connection_timeout)
@@ -414,7 +418,6 @@ class PostgreSql(AgentCheck):
     def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics, dbname = None):
         if scope is None:
             return None
-        # self.log.warning("Collecting metrics with these tags: {}".format(instance_tags))
         # build query
         cols = list(scope['metrics'])  # list of metrics to query, in some order
         # we must remember that order to parse results
@@ -422,16 +425,9 @@ class PostgreSql(AgentCheck):
         # A descriptor is the association of a Postgres column name (e.g. 'schemaname')
         # to a tag name (e.g. 'schema').
         descriptors = scope['descriptors']
-        self.log.warning("test print statement. {}, {}, {}".format(self._config.relations, self._config.dbname, self.autodiscovery))
-        if dbname and self._config.relations:
-            self.log.warning("Autodiscovery enabled; trying to get relations for {}".format(dbname))
-            self.log.warning("Relations is {}".format(self._config.relations))
-            self.log.warning("dbname is set? {}".format(self._config.dbname))
         results = self._run_query_scope(cursor, scope, is_custom_metrics, cols, descriptors)
         if not results:
-            # self.log.warning("none")
             return None
-        self.log.warning(results)
 
         # Parse and submit results.
 
@@ -466,11 +462,10 @@ class PostgreSql(AgentCheck):
             if not scope['relation'] and not scope.get('use_global_db_tag', False):
                 tags = copy.copy(self.tags_without_db)
             elif dbname is not None:
-                # self.log.warning("Collecting metrics {} from this db: {}".format(scope, dbname))
-                # if dbname is specified in this function, we are querying relation-level metrics from autodiscovered database
+                # if dbname is specified in this function, we are querying an autodiscovered database
+                # and we need to tag it
                 tags = copy.copy(self.tags_without_db)
                 tags.append("db:{}".format(dbname))
-                # self.log.warning("current tags {}".format(tags))
             else:
                 tags = copy.copy(instance_tags)
 
@@ -489,19 +484,12 @@ class PostgreSql(AgentCheck):
     def _collect_relations_autodiscovery(self, instance_tags, relations_scopes):
         if not self.autodiscovery:
             return
-        # self.log.warning("Entering autodiscovery")
+        
         databases = self.autodiscovery.get_items()
-        self.log.warning("Found these databases {}".format(databases))
         for db in databases:
             with self.autodiscovery_db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
                 cursor = conn.cursor()
-                # show tables
-                cursor.execute("SELECT * FROM pg_catalog.pg_tables;")
-                results = cursor.fetchall()
-                # self.log.warning("tables {}".format(results))
-
                 for scope in relations_scopes:
-                    # self.log.warning("Relation scope is {}".format(scope))
                     self._query_scope(cursor, scope, instance_tags, False, db)
 
     def _collect_stats(self, instance_tags):
@@ -532,7 +520,6 @@ class PostgreSql(AgentCheck):
                 
             # If autodiscovery is enabled, get relation metrics from all databases found
             if self.autodiscovery:
-                self.log.warning("Entering discovery")
                 self._collect_relations_autodiscovery(instance_tags, relations_scopes)
             # otherwise, continue just with dbname
             else:  

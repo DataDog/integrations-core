@@ -9,6 +9,7 @@ import time
 
 from .utils import run_one_check
 from .common import HOST, USER_ADMIN, PASSWORD_ADMIN, _get_expected_tags
+from .conftest import INSTANCE
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 
@@ -48,6 +49,7 @@ def test_autodiscovery_simple(integration_check, pg_instance):
     """
     pg_instance["database_autodiscovery"] = DISCOVERY_CONFIG
     pg_instance['relations'] = ['pg_index']
+    del pg_instance['dbname']
     check = integration_check(pg_instance)
     run_one_check(check, pg_instance)
 
@@ -65,6 +67,8 @@ def test_autodiscovery_max_databases(integration_check, pg_instance):
     pg_instance["database_autodiscovery"] = copy.deepcopy(DISCOVERY_CONFIG)
     pg_instance['database_autodiscovery']['max_databases'] = 20
     pg_instance['relations'] = ['pg_index']
+    del pg_instance['dbname']
+
     check = integration_check(pg_instance)
     run_one_check(check, pg_instance)
 
@@ -90,6 +94,7 @@ def test_autodiscovery_refresh(integration_check, pg_instance):
     pg_instance["database_autodiscovery"] = copy.deepcopy(DISCOVERY_CONFIG)
     pg_instance['database_autodiscovery']['include'].append(database_to_find)
     pg_instance['relations'] = ['pg_index']
+    del pg_instance['dbname']
     pg_instance["database_autodiscovery"]['refresh'] = 1
     check = integration_check(pg_instance)
     run_one_check(check, pg_instance)
@@ -118,6 +123,7 @@ def test_autodiscovery_relations_disabled(integration_check, pg_instance):
     """
     pg_instance["database_autodiscovery"] = DISCOVERY_CONFIG
     pg_instance['relations'] = []
+    del pg_instance['dbname']
     check = integration_check(pg_instance)
     run_one_check(check, pg_instance)
 
@@ -128,7 +134,7 @@ def test_autodiscovery_relations_disabled(integration_check, pg_instance):
 @pytest.mark.usefixtures('dd_environment')
 def test_autodiscovery_collect_all_relations(aggregator, integration_check, pg_instance):
     """
-    If no relation metrics are being collected, autodiscovery should not run.
+    Check that relation metrics get collected for each database discovered.
     """
     pg_instance["database_autodiscovery"] = DISCOVERY_CONFIG
     pg_instance['relations'] = [
@@ -142,10 +148,21 @@ def test_autodiscovery_collect_all_relations(aggregator, integration_check, pg_i
     # assert that for all databases found, a relation metric was reported
     databases = check.autodiscovery.get_items()
     for db in databases:
-        # print(RELATION_METRICS)
         expected_tags = _get_expected_tags(check, pg_instance, db=db, table='breed', schema='public')
         for metric in RELATION_METRICS:
             aggregator.assert_metric(metric, tags=expected_tags)
-            # print("yay {}".format(metric))
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_autodiscovery_dbname_specified(integration_check, pg_instance):
+    """
+    If a dbname is specified in the config, autodiscovery should not run.
+    """
+    pg_instance["database_autodiscovery"] = DISCOVERY_CONFIG
+    pg_instance['relations'] = ['breed']
+    pg_instance['dbname'] = "dogs_30"
+    check = integration_check(pg_instance)
+    run_one_check(check, pg_instance)
+
+    assert check.autodiscovery is None
     
-    assert None is not None
