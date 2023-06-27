@@ -4,11 +4,13 @@
 import logging
 from copy import deepcopy
 
+import mock
 import pytest
 import requests
 from six import iteritems
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.config import from_instance
@@ -552,3 +554,16 @@ def test_get_template_metrics(aggregator, instance, mock_http_response):
     check._get_template_metrics(False, [])
 
     aggregator.assert_metric("elasticsearch.templates.count", value=6)
+
+
+@pytest.mark.unit
+def test_get_template_metrics_raise_exception(aggregator, instance):
+    with mock.patch(
+        'requests.get',
+        return_value=MockResponse(status_code=403),
+    ):
+        check = ESCheck('elastic', {}, instances=[instance])
+        # Make sure we do not throw an exception and move on
+        check._get_template_metrics(False, [])
+
+    aggregator.assert_metric("elasticsearch.templates.count", count=0)
