@@ -1,0 +1,6 @@
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "nvidia"
+
