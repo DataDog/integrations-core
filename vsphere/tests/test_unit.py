@@ -10,10 +10,12 @@ from pyVmomi import vim, vmodl
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import get_current_datetime
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.vsphere import VSphereCheck
 
 from .common import (
     VSPHERE_VERSION,
+    MockHttp,
     default_instance,
     historical_instance,
     legacy_default_instance,
@@ -1445,6 +1447,69 @@ def test_report_realtime_vm_metrics_instance_two_values(aggregator, dd_run_check
         )
 
 
+def test_report_realtime_vm_metrics_instance_untagged(aggregator, dd_run_check, realtime_instance):
+    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
+        'pyVmomi.vmodl.query.PropertyCollector'
+    ) as mock_property_collector:
+        mock_si = mock.MagicMock()
+        mock_si.content.eventManager.QueryEvents.return_value = []
+        mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
+            vim.PerformanceManager.CounterInfo(
+                key=100,
+                groupInfo=vim.ElementDescription(key='mem'),
+                nameInfo=vim.ElementDescription(key='active'),
+                rollupType=vim.PerformanceManager.CounterInfo.RollupType.average,
+            )
+        ]
+        mock_si.content.perfManager.QueryPerf.return_value = [
+            vim.PerformanceManager.EntityMetric(
+                entity=vim.VirtualMachine(moId="vm1"),
+                value=[
+                    vim.PerformanceManager.IntSeries(
+                        value=[47, 52],
+                        id=vim.PerformanceManager.MetricId(counterId=100, instance='vm1'),
+                    )
+                ],
+            ),
+        ]
+        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
+        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
+        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult(
+            objects=[
+                vim.ObjectContent(
+                    obj=vim.VirtualMachine(moId="vm1"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='vm1',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='runtime.powerState',
+                            val=vim.VirtualMachinePowerState.poweredOn,
+                        ),
+                    ],
+                )
+            ],
+        )
+        mock_connect.return_value = mock_si
+        realtime_instance.update(
+            {
+                'collect_per_instance_filters': {
+                    'vm': ['mem.active.avg'],
+                }
+            }
+        )
+        check = VSphereCheck('vsphere', {}, [realtime_instance])
+        dd_run_check(check)
+        aggregator.assert_metric(
+            'vsphere.mem.active.avg',
+            value=52,
+            count=1,
+            hostname='vm1',
+            tags=['vcenter_server:FAKE', 'instance:vm1'],
+        )
+
+
 def test_report_realtime_vm_metrics_runtime_host(aggregator, dd_run_check, realtime_instance):
     with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
         'pyVmomi.vmodl.query.PropertyCollector'
@@ -2682,6 +2747,115 @@ def test_report_historical_cluster_metrics(
     dd_run_check(check)
     aggregator.assert_metric(
         'vsphere.cpu.totalmhz.avg',
+        count=expected_count,
+        value=expected_value,
+        tags=expected_tags,
+    )
+
+
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_count",
+        "expected_value",
+        "expected_tags",
+    ),
+    [
+        pytest.param(
+            legacy_historical_instance,
+            1,
+            5,
+            [
+                'instance:ds1',
+                'vcenter_server:vsphere_mock',
+                'vsphere_datastore:NFS-Share-1',
+                'vsphere_type:datastore',
+            ],
+            id='Legacy version',
+        ),
+        pytest.param(
+            historical_instance,
+            1,
+            5,
+            [
+                'vcenter_server:vsphere_host',
+                'vsphere_datastore:NFS-Share-1',
+                'vsphere_type:datastore',
+            ],
+            id='New version',
+        ),
+    ],
+)
+def test_rest_api_tags_session_exception(
+    aggregator, dd_run_check, instance, expected_count, expected_value, expected_tags, mock_connect, monkeypatch
+):
+    http = MockHttp(exceptions={'api/session': Exception('wow'), 'rest/com/vmware/cis/session': Exception('wow2')})
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    instance['collect_tags'] = True
+    check = VSphereCheck('vsphere', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'vsphere.datastore.busResets.sum',
+        count=expected_count,
+        value=expected_value,
+        tags=expected_tags,
+    )
+
+
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_count",
+        "expected_value",
+        "expected_tags",
+    ),
+    [
+        pytest.param(
+            legacy_historical_instance,
+            1,
+            5,
+            [
+                'instance:ds1',
+                'vcenter_server:vsphere_mock',
+                'vsphere_datastore:NFS-Share-1',
+                'vsphere_type:datastore',
+            ],
+            id='Legacy version',
+        ),
+        pytest.param(
+            historical_instance,
+            1,
+            5,
+            [
+                'vcenter_server:vsphere_host',
+                'vsphere_datastore:NFS-Share-1',
+                'vsphere_type:datastore',
+            ],
+            id='New version',
+        ),
+    ],
+)
+def test_rest_api_v7_tags_tag_association(
+    aggregator, dd_run_check, instance, expected_count, expected_value, expected_tags, mock_connect, monkeypatch
+):
+
+    http = MockHttp(
+        defaults={'api/session': MockResponse(json_data="dummy-token", status_code=200)},
+        exceptions={
+            'rest/com/vmware/cis/session': Exception('wow2'),
+            'api/cis/tagging/tag-association?' 'action=list-attached-tags-on-objects': Exception('wow'),
+        },
+    )
+    monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
+
+    instance['collect_tags'] = True
+    check = VSphereCheck('vsphere', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'vsphere.datastore.busResets.sum',
         count=expected_count,
         value=expected_value,
         tags=expected_tags,

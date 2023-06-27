@@ -2,9 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
+from urllib.parse import urlparse
 
 from pyVmomi import vim
 
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -288,3 +290,24 @@ def QueryPerf(query_specs):
                     )
                 )
     return result
+
+
+class MockHttp:
+    def __init__(self, **kwargs):
+        self._exceptions = kwargs.get('exceptions')
+        self._defaults = kwargs.get('defaults')
+
+    def get(self, url, *args, **kwargs):
+        return MockResponse(json_data={}, status_code=200)
+
+    def post(self, url, *args, **kwargs):
+        parsed_url = urlparse(url)
+        path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
+        path_parts = path_and_args.split('/')
+        subpath = os.path.join(
+            *path_parts,
+        )
+        if self._exceptions and subpath in self._exceptions:
+            raise self._exceptions[subpath]
+        elif self._defaults and subpath in self._defaults:
+            return self._defaults[subpath]
