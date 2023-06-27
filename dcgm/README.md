@@ -17,7 +17,8 @@ The DCGM check is included in the [Datadog Agent][1] package, however we will ne
 
 To configure the exporter in a Docker environment:
 
-1. Create the following file `$PWD/default-counters.csv` which contains the default metrics from the `etc/default-counters.csv`. Using this file, we can add more metrics for collection and can be done by adding the counter name, type and description to the end of the file. For reference on adding metrics, please see the [Changing Metrics][9] section and for the complete list of counters, see the [DCGM API reference manual][10].
+1. Create the following file `$PWD/default-counters.csv` which contains the default fields from the `etc/default-counters.csv`. Using this file, we can add more fields for collection and can be done by adding the counter name, type and (optionally) description to the end of the file. For reference on adding fields, please see the [Changing Fields][9] section and for the complete list of fields, see the [DCGM API reference manual][10].
+
 <div class="alert alert-info">We recommend adding the following to cover those that are found in the <a href="https://docs.datadoghq.com/integrations/nvml/#metrics">NVML integration</a>:
 
 ```
@@ -27,9 +28,37 @@ DCGM_FI_PROCESS_NAME,                    label,   The Process Name.
 DCGM_FI_PROF_PCIE_TX_BYTES,              counter, Total number of bytes transmitted through PCIe TX (in KB) via NVML.
 DCGM_FI_PROF_PCIE_RX_BYTES,              counter, Total number of bytes received through PCIe RX (in KB) via NVML.
 ```
+
+NVIDIA devs also recommend enabling the following default counters and labels:
+- `DCGM_FI_DEV_MEMORY_TEMP`
+- `DCGM_FI_DEV_GPU_TEMP`
+- `DCGM_FI_DEV_POWER_USAGE`
+- `DCGM_FI_DEV_TOTAL_ENERGY_CONSUMPTION`
+- `DCGM_FI_DEV_GPU_UTIL`
+- `DCGM_FI_DEV_MEM_COPY_UTIL`
+- `DCGM_FI_DEV_FB_FREE`
+- `DCGM_FI_DEV_FB_USED`
+- `DCGM_FI_DRIVER_VERSION`
+- `DCGM_FI_DEV_NAME`
+- `DCGM_FI_DEV_BRAND`
+- `DCGM_FI_DEV_SERIAL`
+
+They also recommend adding the following non-default fields and labels:
+```
+DCGM_FI_DEV_SLOWDOWN_TEMP, gauge, Slowdown temperature for the device.
+DCGM_FI_DEV_POWER_MGMT_LIMIT,gauge, Current power limit for the device.
+DCGM_FI_DEV_PSTATE, gauge, Performance state (P-State) 0-15. 0=highest
+DCGM_FI_DEV_FB_TOTAL,gauge,
+DCGM_FI_DEV_FB_RESERVED,gauge,
+DCGM_FI_DEV_FB_USED_PERCENT,gauge,
+DCGM_FI_DEV_CLOCK_THROTTLE_REASONS,gauge, Current clock throttle reasons (bitmask of DCGM_CLOCKS_THROTTLE_REASON_*)
+DCGM_FI_CUDA_DRIVER_VERSION,label,
+DCGM_FI_DEV_NAME,label,
+DCGM_FI_DEV_MINOR_NUMBER,label,
+```
 </div>
 
-3. Run the Docker container using the following command:
+2. Run the Docker container using the following command:
 ```
 sudo docker run --pid=host --privileged -e DCGM_EXPORTER_INTERVAL=3 --gpus all -d -v /proc:/proc -v $PWD/default-counters.csv:/etc/dcgm-exporter/default-counters.csv -p 9400:9400 --name dcgm-exporter nvcr.io/nvidia/k8s/dcgm-exporter:3.1.7-3.1.4-ubuntu20.04
 ```
@@ -49,7 +78,7 @@ sudo docker run --pid=host --privileged -e DCGM_EXPORTER_INTERVAL=3 --gpus all -
 
 #### Operator
 
-1. To configure the Exporter in an Operator environment, please review the template provided by NVIDIA here:
+To configure the Exporter in an Operator environment, please review the template provided by NVIDIA here:
 
 - https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/getting-started.html#gpu-telemetry
 

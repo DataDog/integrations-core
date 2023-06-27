@@ -30,4 +30,12 @@ METRIC_MAP = {
     'DCGM_FI_DEV_MEMORY_TEMP': 'memory_temperature',
     'DCGM_FI_DEV_ROW_REMAP_FAILURE': 'row_remap_failure',
     'DCGM_FI_DEV_UNCORRECTABLE_REMAPPED_ROWS': 'uncorrectable_remapped_rows',
+    # Metrics recommended by NVIDIA
+    'DCGM_FI_DEV_CLOCK_THROTTLE_REASONS': 'clock_throttle_reasons',
+    'DCGM_FI_DEV_FB_RESERVED': 'frame_buffer.reserved',
+    'DCGM_FI_DEV_FB_TOTAL': 'frame_buffer.total',
+    'DCGM_FI_DEV_FB_USED_PERCENT': 'frame_buffer.used_percent',
+    'DCGM_FI_DEV_POWER_MGMT_LIMIT': 'power_management_limit',
+    'DCGM_FI_DEV_PSTATE': 'pstate',
+    'DCGM_FI_DEV_SLOWDOWN_TEMP': 'slowdown_temperature',
 }
