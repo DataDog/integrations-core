@@ -10,7 +10,6 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
-    assert_extend_generic_if,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
@@ -24,16 +23,13 @@ def test_e2e_profile__generic_ucd(dd_agent_check):
 
     ip_address = get_device_ip_from_config(config)
     common_tags = [
-        'snmp_profile:_generic-ucd',
-        'snmp_host:_generic-ucd.device.name',
+        'snmp_profile:generic-ucd',
         'device_namespace:default',
         'snmp_device:' + ip_address,
     ] + []
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
-    # TODO: Add assert_extend_* here:
-    # assert_extend_generic_if(aggregator, common_tags)
 
     aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memAvailSwap', metric_type=aggregator.GAUGE, tags=common_tags)
@@ -57,9 +53,8 @@ def test_e2e_profile__generic_ucd(dd_agent_check):
     aggregator.assert_metric('snmp.ssCpuSystem', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.ssCpuUser', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-         ['dsk_device:driving driving but kept oxen oxen', 'dsk_error_flag:no_error', 'dsk_path:oxen acted oxen their'],
-         ['dsk_device:kept Jaded', 'dsk_error_flag:no_error', 'dsk_path:quaintly oxen acted oxen'],
-
+        ['dsk_device:driving driving but kept oxen oxen', 'dsk_error_flag:no_error', 'dsk_path:oxen acted oxen their'],
+        ['dsk_device:kept Jaded', 'dsk_error_flag:no_error', 'dsk_path:quaintly oxen acted oxen'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.dskAvail', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -69,9 +64,8 @@ def test_e2e_profile__generic_ucd(dd_agent_check):
         aggregator.assert_metric('snmp.dskUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['disk_io_device:forward'],
-         ['disk_io_device:their zombies'],
-
+        ['disk_io_device:forward'],
+        ['disk_io_device:their zombies'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.diskIOLA1', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -82,7 +76,6 @@ def test_e2e_profile__generic_ucd(dd_agent_check):
         aggregator.assert_metric('snmp.diskIOReads', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.diskIOWrites', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
-
     aggregator.assert_all_metrics_covered()
 
     # --- TEST METADATA ---
@@ -92,10 +85,9 @@ def test_e2e_profile__generic_ucd(dd_agent_check):
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
         'name': '_generic-ucd.device.name',
-        'profile': '_generic-ucd',
+        'profile': 'generic-ucd',
         'status': 1,
         'sys_object_id': '1.2.3.1001',
-        'vendor': '_generic',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
