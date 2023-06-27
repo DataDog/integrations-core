@@ -218,7 +218,6 @@ LTM_GAUGES = [
 LTM_VIRTUAL_SERVER_GAUGES = [
     'ltmVirtualServEnabled',
     'ltmVirtualServConnLimit',
-    'ltmVsStatus',
     'ltmVirtualServStatClientCurConns',
     'ltmVirtualServStatVsUsageRatio5s',
     'ltmVirtualServStatVsUsageRatio1m',
