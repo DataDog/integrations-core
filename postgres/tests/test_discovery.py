@@ -10,6 +10,8 @@ import psycopg2
 import psycopg2.sql
 import pytest
 
+
+from datadog_checks.base import ConfigurationError
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags
 from .utils import run_one_check
 
@@ -162,7 +164,6 @@ def test_autodiscovery_dbname_specified(integration_check, pg_instance):
     pg_instance["database_autodiscovery"] = DISCOVERY_CONFIG
     pg_instance['relations'] = ['breed']
     pg_instance['dbname'] = "dogs_30"
-    check = integration_check(pg_instance)
-    run_one_check(check, pg_instance)
 
-    assert check.autodiscovery is None
+    with pytest.raises(ConfigurationError):
+        integration_check(pg_instance)

@@ -364,7 +364,6 @@ class PostgreSql(AgentCheck):
 
         results = None
         is_relations = scope.get('relation') and self._relations_manager.has_relations
-        # self.log.warning("DOES THIS HAVE REALTIONS? {}".format(is_relations))
         try:
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
             # if this is a relation-specific query, we need to list all relations last
@@ -527,7 +526,6 @@ class PostgreSql(AgentCheck):
             else:
                 metric_scope.extend(relations_scopes)
 
-        # self.log.warning(metric_scope)
         replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
         if replication_metrics:
             replication_metrics_query = copy.deepcopy(REPLICATION_METRICS)
@@ -539,11 +537,6 @@ class PostgreSql(AgentCheck):
             metric_scope.append(replication_stats_metrics)
 
         cursor = self.db.cursor()
-
-        # show tables
-        # cursor.execute("SELECT * FROM pg_catalog.pg_tables;")
-        # results = cursor.fetchall()
-        # self.log.warning("tables {}".format(results))
         results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False)
         if results_len is not None:
             self.gauge(
