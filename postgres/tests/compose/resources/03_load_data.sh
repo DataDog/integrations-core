@@ -32,13 +32,10 @@ EOSQL
 fi
 
 i=1
-dbs=()
+dbs=(dogs dogs_noschema dogs_nofunc)
 for ((i=1; i<=100; i++)); do
     dbs+=(dogs_$i)
 done
-dbs+=dogs
-dbs+=dogs_noschema
-dbs+=dogs_nofunc
 for DBNAME in ${dbs[@]}; do
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-EOSQL
