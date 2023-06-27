@@ -421,6 +421,7 @@ class PostgreSql(AgentCheck):
         # A descriptor is the association of a Postgres column name (e.g. 'schemaname')
         # to a tag name (e.g. 'schema').
         descriptors = scope['descriptors']
+        self.log.warning("test print statement. {}, {}, {}".format(self._config.relations, self._config.dbname, self.autodiscovery))
         if dbname and self._config.relations:
             self.log.warning("Autodiscovery enabled; trying to get relations for {}".format(dbname))
             self.log.warning("Relations is {}".format(self._config.relations))
