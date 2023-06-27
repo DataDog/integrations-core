@@ -19,9 +19,7 @@ def test_e2e_python(dd_agent_check):
     aggregator = dd_agent_check(config, rate=True)
     tags = ['snmp_device:{}'.format(instance['ip_address'])]
 
-    print("config:", config)
-
-    # Test metrics UPDATE
+    # Test metrics
     for metric in common.SUPPORTED_METRIC_TYPES:
         metric_name = "snmp." + metric['name']
         aggregator.assert_metric(metric_name, tags=tags)
