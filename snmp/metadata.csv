@@ -490,6 +490,7 @@ snmp.latencyMin,gauge,,microsecond,,[Isilon] The minimum latency in microseconds
 snmp.line1curr,gauge,,,,[Legacy Chatsworth] Line 1 current draw in 1/100 Amps.,0,snmp,,
 snmp.line2curr,gauge,,,,[Legacy Chatsworth] Line 2 current draw in 1/100 Amps.,0,snmp,,
 snmp.line3curr,gauge,,,,[Legacy Chatsworth] Line 3 current draw in 1/100 Amps.,0,snmp,,
+snmp.lldpRem,gauge,,,,[generic LLDP] LLDP remote system.,0,snmp,,
 snmp.ltmNodeAddrConnLimit,gauge,,,,[F5 BIG-IP] The maximum number of open connections on a given node.,0,snmp,,
 snmp.ltmNodeAddrDynamicRatio,gauge,,,,[F5 BIG-IP] The load balancing dynamic ration on a given node.,0,snmp,,
 snmp.ltmNodeAddrMonitorState,gauge,,,,[F5 BIG-IP] The internal TMM monitor state for a given node.,0,snmp,,
