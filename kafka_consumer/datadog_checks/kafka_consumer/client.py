@@ -150,7 +150,11 @@ class KafkaClient:
                             topic_partition.topic,
                             str(topic_partition.partition),
                         )
-                    consumer_offsets[(consumer_group, topic, partition)] = offset
+                    # -1001 is the default OFFSET_INVALID value
+                    # This may mean this particular consumer group has not consumed
+                    # anything for this given topic+partition combination
+                    if offset != -1001:
+                        consumer_offsets[(consumer_group, topic, partition)] = offset
 
         return consumer_offsets
 
@@ -171,6 +175,8 @@ class KafkaClient:
         return consumer_groups
 
     def _get_consumer_offset_futures(self, consumer_groups):
+        # When listening for topics, we should skip any where the topic partition combo results in -1001
+        # Instead of getting topics and partitions 
         topic_metadata = self.kafka_client.list_topics(timeout=self.config._request_timeout).topics
         topics = {
             topic: list(topic_metadata[topic].partitions.keys())

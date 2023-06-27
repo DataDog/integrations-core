@@ -98,6 +98,7 @@ class KafkaCheck(AgentCheck):
             consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
             consumer_group_tags.extend(self.config._custom_tags)
 
+            # This call is happening more than necessary, since the partitions for this topic will be the same even though our list of partitions will be different
             partitions = self.client.get_partitions_for_topic(topic)
             self.log.debug("Received partitions %s for topic %s", partitions, topic)
             if partitions is not None and partition in partitions:
