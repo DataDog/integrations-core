@@ -8,10 +8,6 @@ MOCKED_INSTANCE = {
     'tags': ["test:tag"],
 }
 
-MOCKED_INSTANCE2 = {
-    'weaviate_api': 'http://weaviate:8080',
-    'tags': ["test:tag"],
-}
 
 E2E_METRICS = [
     "weaviate.go.gc.duration.seconds.count",
