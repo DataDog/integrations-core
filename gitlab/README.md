@@ -10,6 +10,12 @@ See [Monitoring GitLab with Prometheus][1] for more information.
 
 ## Setup
 
+### Prerequisites
+
+This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see the [Latest and Legacy Versioning For OpenMetrics-based Integrations][17].
+
+Metrics marked as `[Legacy]`, `[OpenMetricsV1]`, or `[OpenMetricsV2]` are only available using the corresponding version of the GitLab integration. Metrics not marked are collected by all three versions.
+
 ### Installation
 
 The GitLab check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your GitLab servers.
@@ -103,8 +109,6 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 See [metadata.csv][12] for a list of metrics provided by this integration. 
 
-**Note**: Metrics marked as `[Legacy]`, `[OpenMetricsV1]`, or `[OpenMetricsV2]` are only available using the corresponding implementation of the GitLab integration. Metrics not marked are collected by all three implementations.
-
 ### Events
 
 The GitLab check does not include any events.
@@ -133,3 +137,4 @@ Need help? Contact [Datadog support][14].
 [14]: https://docs.datadoghq.com/help/
 [15]: https://docs.gitlab.com/ee/user/admin_area/monitoring/health_check.html#readiness
 [16]: https://github.com/DataDog/integrations-core/blob/7.43.x/gitlab/datadog_checks/gitlab/data/conf.yaml.example
+[17]: https://docs.datadohgq.com/integrations/guide/versions-for-openmetrics-based-integrations
