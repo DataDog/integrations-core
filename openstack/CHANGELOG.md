@@ -176,7 +176,7 @@
 
 ## 1.0.2 / 2017-11-21
 
-***Added***: 
+***Changed***: 
 
 * Don't check on powered off VMs. See [#878](https://github.com/DataDog/integrations-core/issues/878)
 
