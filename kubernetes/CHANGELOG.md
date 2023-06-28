@@ -24,12 +24,8 @@
 
 ## 1.5.0 / 2017-10-10
 
-***Added***: 
-
-* remove namespace from pod_name tag. See [#770](https://github.com/DataDog/integrations-core/issues/770)
-
 ***Fixed***: 
-
+* remove namespace from pod_name tag. See [#770](https://github.com/DataDog/integrations-core/issues/770)
 * stop reporting cAdvisor metrics about non-container objects. See [#770](https://github.com/DataDog/integrations-core/issues/770)
 
 
