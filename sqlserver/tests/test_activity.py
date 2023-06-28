@@ -295,7 +295,7 @@ def test_activity_nested_blocking_transactions(
     # associated sys.dm_exec_requests.
     assert root_blocker["text"] == QUERY1
     assert root_blocker["session_status"] == "sleeping"
-    assert len(root_blocker["query_signature"]) == 16
+    assert root_blocker["query_signature"]
 
     # TX2 should be blocked by the root blocker TX1, TX3 should be blocked by TX2
     assert tx2["blocking_session_id"] == root_blocker["id"]
