@@ -4,7 +4,7 @@
 
 This integration watches for Windows Event Logs and forwards them to Datadog. 
 
-Enable this check to:
+Enable this integration to:
 
 - Track system and application events in Datadog.
 - Correlate system and application events with the rest of your application.
