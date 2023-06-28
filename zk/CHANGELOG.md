@@ -208,7 +208,7 @@
 
 ## 1.1.0 / 2017-07-18
 
-***Added***: 
+***Fixed***: 
 
 * Replace usage of deprecated `AgentCheck.set` method with `gauge`. See [#473](https://github.com/DataDog/integrations-core/issues/473)
 
