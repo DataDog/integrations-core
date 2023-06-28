@@ -7,10 +7,10 @@ files:
     - template: init_config/openmetrics
   - template: instances
     options:
-    - name: weaviate_metrics_endpoint
+    - name: openmetrics_endpoint
       required: true
       description: |
-        Endpoint exposing the Weaviate's Prometheus metrics. For more information refer to:
+        Endpoint exposing the Weaviate's OpenMetrics/Prometheus metrics. For more information refer to:
         https://weaviate.io/developers/weaviate/configuration/monitoring
       value:
         display_default: null
