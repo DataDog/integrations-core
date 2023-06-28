@@ -46,7 +46,9 @@ def assert_extend_generic_udp(aggregator, common_tags):
 
 
 def assert_extend_generic_ospf(aggregator, common_tags):
-    aggregator.assert_metric("snmp.ospfNbrState", metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric(
+        "snmp.ospfNbrState", metric_type=aggregator.GAUGE, tags=common_tags + ["neighbor_state:full"]
+    )
 
 
 def assert_extend_generic_bgp4(aggregator, common_tags):
