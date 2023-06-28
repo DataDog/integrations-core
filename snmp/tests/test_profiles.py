@@ -642,7 +642,7 @@ def test_cisco_3850(aggregator):
         ('ospfNbrLsRetransQLen', aggregator.GAUGE),
     ]
     for metric, metric_type in neighbor_metrics:
-        tags = ['neighbor_ip:192.29.116.26', 'neighbor_id:192.29.66.79'] + common_tags
+        tags = ['neighbor_ip:192.29.116.26', 'neighbor_id:192.29.66.79', 'neighbor_state:8'] + common_tags
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=metric_type, tags=tags, count=1)
 
     lls_metrics = ['ospfIfRetransInterval', 'ospfIfState']
@@ -2082,7 +2082,7 @@ def test_aruba(aggregator):
         ('ospfNbrLsRetransQLen', aggregator.GAUGE),
     ]
     for metric, metric_type in neighbor_metrics:
-        tags = ['neighbor_ip:192.29.116.26', 'neighbor_id:192.29.66.79'] + common_tags
+        tags = ['neighbor_ip:192.29.116.26', 'neighbor_id:192.29.66.79', 'neighbor_state:8'] + common_tags
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=metric_type, tags=tags, count=1)
 
     virtual_neighbor_metrics = [
