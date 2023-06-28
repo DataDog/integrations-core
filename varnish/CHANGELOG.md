@@ -191,7 +191,7 @@
 
 ## 1.1.0 / 2018-01-10
 
-***Added***: 
+***Changed***: 
 
 * Use JSON with varnishstat starting varnish 5.0.0. See [#939](https://github.com/DataDog/integrations-core/pull/939).
 
