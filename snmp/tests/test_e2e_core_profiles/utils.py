@@ -135,9 +135,9 @@ def assert_extend_entity_sensor_mib(aggregator, common_tags):
     1.3.6.1.6.3.10.2.1.4.0|2|1234"""
     additional_tags = [
         'ent_phy_sensor_oper_status:nonoperational',
-        'sensor_precision:7',
-        'sensor_scale:micro',
-        'sensor_type:percent_rh',
-        'sensor_units:driving driving forward acted their but',
+        'ent_phy_sensor_precision:7',
+        'ent_phy_sensor_scale:micro',
+        'ent_phy_sensor_type:percent_rh',
+        'ent_phy_sensor_units_display:driving driving forward acted their but',
     ]
     aggregator.assert_metric("snmp.entPhySensorValue", metric_type=aggregator.GAUGE, tags=common_tags + additional_tags)

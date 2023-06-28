@@ -10,7 +10,7 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
-    assert_extend_entity_sensor_mib,
+    assert_extend_entity_sensor,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
@@ -18,32 +18,32 @@ from .utils import (
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
 
-def test_e2e_profile__generic_entity_sensor_mib(dd_agent_check):
-    config = create_e2e_core_test_config('_generic-entity-sensor-mib')
+def test_e2e_profile__generic_entity_sensor(dd_agent_check):
+    config = create_e2e_core_test_config('_generic-entity-sensor')
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
     common_tags = [
-        'snmp_profile:generic-entity-sensor-mib',
-        'snmp_host:_generic-entity-sensor-mib.device.name',
+        'snmp_profile:generic-entity-sensor',
+        'snmp_host:_generic-entity-sensor.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
     ] + []
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
-    assert_extend_entity_sensor_mib(aggregator, common_tags)
+    assert_extend_entity_sensor(aggregator, common_tags)
 
     aggregator.assert_all_metrics_covered()
 
     # --- TEST METADATA ---
     device = {
-        'description': '_generic-entity-sensor-mib Device Description',
+        'description': '_generic-entity-sensor Device Description',
         'id': 'default:' + ip_address,
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
-        'name': '_generic-entity-sensor-mib.device.name',
-        'profile': 'generic-entity-sensor-mib',
+        'name': '_generic-entity-sensor.device.name',
+        'profile': 'generic-entity-sensor',
         'status': 1,
         'sys_object_id': '1.2.3.1002',
     }

@@ -6,11 +6,13 @@ metrics:
     symbols:
       - OID: 1.3.6.1.2.1.99.1.1.1.4
         name: entPhySensorValue
+        tag: sensor_value
+        TODO_tag: Handle unknown tag `sensor_value` (remove this field once fixed)
     metric_tags:
       - column:
           OID: 1.3.6.1.2.1.99.1.1.1.1
           name: entPhySensorType
-        tag: sensor_type
+        tag: ent_phy_sensor_type
         mapping:
           1: other
           2: unknown
@@ -27,7 +29,7 @@ metrics:
       - column:
           OID: 1.3.6.1.2.1.99.1.1.1.2
           name: entPhySensorScale
-        tag: sensor_scale
+        tag: ent_phy_sensor_scale
         mapping:
           1: yocto
           2: zepto
@@ -49,19 +51,19 @@ metrics:
       - column:
           OID: 1.3.6.1.2.1.99.1.1.1.3
           name: entPhySensorPrecision
-        tag: sensor_precision
+        tag: ent_phy_sensor_precision
       - column:
           OID: 1.3.6.1.2.1.99.1.1.1.6
           name: entPhySensorUnitsDisplay
-        tag: sensor_units
+        tag: ent_phy_sensor_units_display
       - column:
           OID: 1.3.6.1.2.1.47.1.1.1.1.2
           name: entPhysicalDescr
-        tag: entity_description
+        tag: ent_physical_descr
       - column:
           OID: 1.3.6.1.2.1.47.1.1.1.1.5
           name: entPhysicalClass
-        tag: entity_class
+        tag: ent_physical_class
         mapping:
           1: other
           2: unknown
@@ -78,15 +80,15 @@ metrics:
       - column:
           OID: 1.3.6.1.2.1.47.1.1.1.1.7
           name: entPhysicalName
-        tag: entity_name
+        tag: ent_physical_name
       - column:
           OID: 1.3.6.1.2.1.47.1.1.1.1.11
           name: entPhysicalSerialNum
-        tag: entity_serial
+        tag: ent_physical_serial_num
       - column:
           OID: 1.3.6.1.2.1.47.1.1.1.1.13
           name: entPhysicalModelName
-        tag: entity_model
+        tag: ent_physical_model_name
       - column:
           OID: 1.3.6.1.2.1.99.1.1.1.5
           name: entPhySensorOperStatus
@@ -95,3 +97,4 @@ metrics:
           1: ok
           2: unavailable
           3: nonoperational
+extends: []
