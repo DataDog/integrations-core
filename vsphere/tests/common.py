@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
-from urllib.parse import urlparse
 
 from pyVmomi import vim
+from six.moves.urllib.parse import urlparse
 
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
