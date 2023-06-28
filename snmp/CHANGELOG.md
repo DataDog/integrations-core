@@ -740,7 +740,7 @@
 
 ## 1.2.0 / 2017-07-18
 
-***Added***: 
+***Changed***: 
 
 * Drop dependency on pycrypto. See [#426](https://github.com/DataDog/integrations-core/issues/426)
 
