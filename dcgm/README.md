@@ -2,7 +2,7 @@
 
 ## Overview
 
-Harnessing the Nvidia DCGM Exporter, this check monitors the exposed through the Datadog Agent.
+This check submits metrics exposed by the Nvidia DCGM Exporter in Datadog Agent format.
 
 ## Setup
 
