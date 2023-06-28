@@ -6,8 +6,6 @@ metrics:
     symbols:
       - OID: 1.3.6.1.2.1.99.1.1.1.4
         name: entPhySensorValue
-        tag: sensor_value
-        TODO_tag: Handle unknown tag `sensor_value` (remove this field once fixed)
     metric_tags:
       - column:
           OID: 1.3.6.1.2.1.99.1.1.1.1
@@ -97,4 +95,3 @@ metrics:
           1: ok
           2: unavailable
           3: nonoperational
-extends: []
