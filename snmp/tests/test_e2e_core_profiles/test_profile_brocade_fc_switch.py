@@ -10,7 +10,6 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
-    assert_extend_generic_if,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
@@ -38,26 +37,49 @@ def test_e2e_profile_brocade_fc_switch(dd_agent_check):
     aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-         ['fc_fe_module_index:40140', 'fc_fx_port_admin_mode:f_port', 'fc_fx_port_index:50904', 'fc_fx_port_oper_mode:f_port'],
-         ['fc_fe_module_index:48039', 'fc_fx_port_admin_mode:fl_port', 'fc_fx_port_index:17014', 'fc_fx_port_oper_mode:f_port'],
-
+        [
+            'fc_fe_module_index:40140',
+            'fc_fx_port_admin_mode:f_port',
+            'fc_fx_port_index:50904',
+            'fc_fx_port_oper_mode:f_port',
+        ],
+        [
+            'fc_fe_module_index:48039',
+            'fc_fx_port_admin_mode:fl_port',
+            'fc_fx_port_index:17014',
+            'fc_fx_port_oper_mode:f_port',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.fcFxPortStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['fc_fe_module_index:28355', 'fc_fx_port_index:44487', 'fc_fx_port_phys_admin_status:offline', 'fc_fx_port_phys_oper_status:online'],
-         ['fc_fe_module_index:36669', 'fc_fx_port_index:26368', 'fc_fx_port_phys_admin_status:testing', 'fc_fx_port_phys_oper_status:online'],
-
+        [
+            'fc_fe_module_index:28355',
+            'fc_fx_port_index:44487',
+            'fc_fx_port_phys_admin_status:offline',
+            'fc_fx_port_phys_oper_status:online',
+        ],
+        [
+            'fc_fe_module_index:36669',
+            'fc_fx_port_index:26368',
+            'fc_fx_port_phys_admin_status:testing',
+            'fc_fx_port_phys_oper_status:online',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.fcFxPortPhys', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['sw_fc_port_name:Jaded driving their zombies forward acted quaintly oxen', 'sw_fc_port_specifier:driving driving kept their but Jaded zombies forward quaintly'],
-         ['sw_fc_port_name:Jaded forward forward', 'sw_fc_port_specifier:oxen quaintly forward driving quaintly kept zombies'],
-         ['sw_fc_port_name:zombies kept driving zombies kept forward acted Jaded', 'sw_fc_port_specifier:driving acted'],
-
+        [
+            'sw_fc_port_name:Jaded driving their zombies forward acted quaintly oxen',
+            'sw_fc_port_specifier:driving driving kept their but Jaded zombies forward quaintly',
+        ],
+        [
+            'sw_fc_port_name:Jaded forward forward',
+            'sw_fc_port_specifier:oxen quaintly forward driving quaintly kept zombies',
+        ],
+        ['sw_fc_port_name:zombies kept driving zombies kept forward acted Jaded', 'sw_fc_port_specifier:driving acted'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.swFCPortC3Discards', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -75,8 +97,6 @@ def test_e2e_profile_brocade_fc_switch(dd_agent_check):
         aggregator.assert_metric('snmp.swFCPortRxTooLongs', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.swFCPortTooManyRdys', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.swFCPortTxFrames', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-
 
     # --- TEST METADATA ---
     device = {
