@@ -31,7 +31,7 @@ def test_check_mock_weaviate_openmetrics(dd_run_check, aggregator, mock_http_res
 
 def test_check_mock_weaviate_node(dd_run_check, aggregator, mock_http_response):
     mock_http_response(file_path=get_fixture_path('nodes_api.txt'))
-    check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE2])
+    check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
     dd_run_check(check)
 
     for metric in API_METRICS:
@@ -45,7 +45,7 @@ def test_check_mock_weaviate_node(dd_run_check, aggregator, mock_http_response):
 
 def test_check_failed_liveness(dd_run_check, aggregator, mock_http_response):
     mock_http_response(status_code=404)
-    check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE2])
+    check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
     dd_run_check(check)
 
     # No metrics should be submitted
@@ -57,7 +57,7 @@ def test_check_failed_liveness(dd_run_check, aggregator, mock_http_response):
 def test_empty_instance(dd_run_check):
     with pytest.raises(
         Exception,
-        match="Must specify at least one of the following: `openmetrics_endpoint` or `weaviate_api`.",
+        match="The setting `openmetrics_endpoint` is required",
     ):
         check = WeaviateCheck('argocd', {}, [{}])
         dd_run_check(check)
@@ -66,7 +66,7 @@ def test_empty_instance(dd_run_check):
 @pytest.mark.integration
 def test_check_mock_weaviate_metadata(dd_run_check, datadog_agent, mock_http_response):
     mock_http_response(file_path=get_fixture_path('meta_api.txt'))
-    check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE2])
+    check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
     check.check_id = 'test:123'
     dd_run_check(check)
 

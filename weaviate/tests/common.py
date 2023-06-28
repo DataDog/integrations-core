@@ -4,6 +4,7 @@
 
 MOCKED_INSTANCE = {
     'openmetrics_endpoint': 'http://weaviate:2112/metrics',
+    'weaviate_api': 'http://weaviate:8080',
     'tags': ["test:tag"],
 }
 
@@ -17,6 +18,7 @@ E2E_METRICS = [
     "weaviate.go.gc.duration.seconds.quantile",
     "weaviate.go.gc.duration.seconds.sum",
     "weaviate.go.goroutines",
+    "weaviate.go.info",
     "weaviate.lsm.memtable.durations_ms.count",
     "weaviate.lsm.memtable.durations_ms.sum",
     "weaviate.go.memstats.alloc_bytes",
@@ -52,6 +54,8 @@ E2E_METRICS = [
     "weaviate.process.virtual_memory.max_bytes",
     "weaviate.promhttp.metric_handler.requests.count",
     "weaviate.promhttp.metric_handler.requests_in_flight",
+    # Latency metric since the mock response is 200
+    "weaviate.http.latency_ms",
 ]
 
 fixture_metrics = [
