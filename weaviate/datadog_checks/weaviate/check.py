@@ -25,7 +25,6 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
             instances,
         )
         self.tags = self.instance.get('tags', [])
-
         self.api_url = self.instance.get('weaviate_api')
 
     def get_default_config(self):
