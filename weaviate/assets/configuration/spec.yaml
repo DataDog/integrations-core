@@ -8,6 +8,7 @@ files:
   - template: instances
     options:
     - name: weaviate_metrics_endpoint
+      required: true
       description: |
         Endpoint exposing the Weaviate's Prometheus metrics. For more information refer to:
         https://weaviate.io/developers/weaviate/configuration/monitoring
