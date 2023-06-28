@@ -230,7 +230,6 @@ def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
 
     memory_metrics = ['memory.total', 'memory.used']
-
     for metric in memory_metrics:
         aggregator.assert_metric(
             'snmp.{}'.format(metric),
@@ -250,6 +249,17 @@ def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
                 tags=cpu_tags,
                 count=2,
             )
+
+    server_status_tags = [
+        ["server:error"],
+        ["server:available_in_some_capacity"],
+        ["server:not_currently_available"],
+        ["server:not_available"],
+        ["server:availability_is_unknown"],
+        ["server:unlicensed"],
+    ]
+
+    aggregator.assert_metric('snmp.ltmVsStatus', metric_type=aggregator.GAUGE, tags=tags + server_status_tags[0], value=1)
 
 
 def test_e2e_core_discovery(dd_agent_check):
