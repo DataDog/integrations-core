@@ -10,9 +10,9 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
+    assert_extend_entity_sensor_mib,
     create_e2e_core_test_config,
     get_device_ip_from_config,
-    assert_extend_entity_sensor_mib
 )
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
@@ -33,7 +33,6 @@ def test_e2e_profile__generic_entity_sensor_mib(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
     assert_extend_entity_sensor_mib(aggregator, common_tags)
-
 
     aggregator.assert_all_metrics_covered()
 
