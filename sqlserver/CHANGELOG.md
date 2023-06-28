@@ -762,7 +762,7 @@
 
 ***Added***: 
 
-* Allow custom connection string to connect. See [#1068](https://github.com/DataDog/integrations-core/pull/1065).
+* Allow custom connection string to connect. See [#1068](https://github.com/DataDog/integrations-core/pull/1068).
 
 
 ## 1.2.1 / 2018-01-10
