@@ -425,6 +425,9 @@
 ***Added***: 
 
 * adds `pshard_graceful_timeout` that will skip pshard_stats if TO. See [#463](https://github.com/DataDog/integrations-core/issues/463)
+
+***Fixed***:
+
 * get rid of pretty json. See [#893](https://github.com/DataDog/integrations-core/issues/893).
 
 
