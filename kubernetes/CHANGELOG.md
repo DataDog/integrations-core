@@ -56,12 +56,12 @@
 
 * allow to configure kubelet and apiserver urls and credentials to run directly on the host. See [#508](https://github.com/DataDog/integrations-core/issues/508)
 * query kubernetes service mapping every 5 minutes to reduce apiserver traffic (see service_tag_update_freq option) and add collect_service_tags option to disable it completely. See [#476](https://github.com/DataDog/integrations-core/issues/476)
-* Fix typo in exception reporting when unable to collect metrics for a container. See [#493](https://github.com/DataDog/integrations-core/issues/493)
 
 ***Fixed***: 
 
 * fix failures when the spec has "has_filesystem" entry but no stats entry for filesystem. See [#494](https://github.com/DataDog/integrations-core/issues/494)
 * don't fail if cadvisor is unreachable, send integration warning and send other metrics. See [#538](https://github.com/DataDog/integrations-core/issues/538)
+* Fix typo in exception reporting when unable to collect metrics for a container. See [#493](https://github.com/DataDog/integrations-core/issues/493)
 
 
 ## 1.1.0 / 2017-06-05
