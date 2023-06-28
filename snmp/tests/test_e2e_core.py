@@ -259,8 +259,9 @@ def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
         ["server:unlicensed"],
     ]
 
-    aggregator.assert_metric('snmp.ltmVsStatus', metric_type=aggregator.GAUGE, tags=tags + server_status_tags[0],
-                             value=1)
+    aggregator.assert_metric(
+        'snmp.ltmVsStatus', metric_type=aggregator.GAUGE, tags=tags + server_status_tags[0], value=1
+    )
 
 
 def test_e2e_core_discovery(dd_agent_check):
@@ -712,11 +713,11 @@ def test_e2e_cisco_legacy_wlc(dd_agent_check):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags)
 
     ap_tags = [
-                  'ap_location:default location',
-                  'ap_name:DD-AP-1',
-                  'ap_ip_address:1.1.1.1',
-                  'ap_mac_address:  00 00 00 00 00 01',
-              ] + tags
+        'ap_location:default location',
+        'ap_name:DD-AP-1',
+        'ap_ip_address:1.1.1.1',
+        'ap_mac_address:  00 00 00 00 00 01',
+    ] + tags
 
     ap_status_tags = ['ap_oper_status:associated', 'ap_admin_status:enable'] + ap_tags
 
