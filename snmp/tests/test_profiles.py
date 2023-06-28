@@ -647,7 +647,7 @@ def test_cisco_3850(aggregator):
 
     lls_metrics = ['ospfIfRetransInterval', 'ospfIfState']
     for metric in lls_metrics:
-        tags = ['ospf_ip_addr:192.29.116.25', 'if_state:6'] + common_tags
+        tags = ['ospf_ip_addr:192.29.116.25', 'if_state:2'] + common_tags
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     for temp_index in [1006, 1007, 1008, 2006, 2007, 2008]:
