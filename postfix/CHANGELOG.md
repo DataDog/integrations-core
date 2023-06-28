@@ -160,7 +160,7 @@
 
 ## 1.2.1 / 2018-06-20 / Agent 6.4.0
 
-***Changed***: 
+***Fixed***: 
 
 * Bump check to be in sync with new release tooling.
 
