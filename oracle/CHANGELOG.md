@@ -327,7 +327,7 @@
 ***Added***: 
 
 * Support custom queries. See [#1528](https://github.com/DataDog/integrations-core/pull/1528).
-* [oracle]  Add ability to use the JDBC Driver instead of cx_Oracle. See [#1459](https://github.com/DataDog/integrations-core/pull/1459).
+* Add ability to use the JDBC Driver instead of cx_Oracle. See [#1459](https://github.com/DataDog/integrations-core/pull/1459).
 * ability to use the JDBC Driver instead of `cx_Oracle` to connect to the database. See [#1459](https://github.com/DataDog/integrations-core/issues/1459)
 
 
