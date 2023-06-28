@@ -2,4 +2,4 @@ extends:
   - _base.yaml
   - _generic-ospf.yaml
 
-sysobjectid: 1.2.3.1002
+sysobjectid: 1.2.3.3294.1281

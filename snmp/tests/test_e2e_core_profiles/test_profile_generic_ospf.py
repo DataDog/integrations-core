@@ -85,7 +85,7 @@ def test_e2e_profile_generic_ospf(dd_agent_check):
         'name': '_generic-ospf.device.name',
         'profile': 'generic-ospf',
         'status': 1,
-        'sys_object_id': '1.2.3.1002',
+        'sys_object_id': '1.2.3.3294.1281',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
