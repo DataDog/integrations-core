@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Win32 Event Log check watches for Windows Event Logs and forwards them to Datadog. 
+This integration watches for Windows Event Logs and forwards them to Datadog. 
 
 Enable this check to:
 
@@ -15,7 +15,7 @@ For more information, see the [Windows Event Logging documentation][13].
 
 ### Installation
 
-The Windows Event Log check is included in the [Datadog Agent][1] package. There is no additional installation required.
+The Windows Event Log integration is included in the [Datadog Agent][1] package. There is no additional installation required.
 
 ### Configuration
 
@@ -452,7 +452,7 @@ Logs Agent
 
 ### Metrics
 
-The Win32 Event log check does not include any metrics.
+The Windows Event log integration does not include any metrics.
 
 ### Events
 
@@ -460,7 +460,7 @@ All Windows events are forwarded to Datadog.
 
 ### Service Checks
 
-The Win32 Event log check does not include any service checks.
+The Windows Event log integration does not include any service checks.
 
 ## Troubleshooting
 
