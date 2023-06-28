@@ -22,6 +22,7 @@ def test_check_mock_weaviate_openmetrics(dd_run_check, aggregator, mock_http_res
 
     for metric in TEST_METRICS:
         aggregator.assert_metric(metric, at_least=1)
+        aggregator.assert_metric_has_tag(metric, "test:tag", at_least=1)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -35,6 +36,7 @@ def test_check_mock_weaviate_node(dd_run_check, aggregator, mock_http_response):
 
     for metric in API_METRICS:
         aggregator.assert_metric(metric, at_least=1)
+        aggregator.assert_metric_has_tag(metric, "test:tag", at_least=1)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
