@@ -96,9 +96,9 @@ def test_e2e_user_profiles(dd_agent_check):
 
     device = {
         'description': 'APC Web/SNMP Management Card (MB:v3.9.2 PF:v3.9.2 '
-                       'PN:apc_hw02_aos_392.bin AF1:v3.7.2 AN1:apc_hw02_sumx_372.bin '
-                       'MN:AP9619 HR:A10 SN: 5A1827E00000 MD:12/04/2007) (Embedded '
-                       'PowerNet SNMP Agent SW v2.2 compatible)',
+        'PN:apc_hw02_aos_392.bin AF1:v3.7.2 AN1:apc_hw02_sumx_372.bin '
+        'MN:AP9619 HR:A10 SN: 5A1827E00000 MD:12/04/2007) (Embedded '
+        'PowerNet SNMP Agent SW v2.2 compatible)',
         'id': 'default:' + device_ip,
         'id_tags': [
             'device_namespace:default',
