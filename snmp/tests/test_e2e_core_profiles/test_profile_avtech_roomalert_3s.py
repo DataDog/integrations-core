@@ -10,7 +10,6 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
-    assert_extend_generic_if,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
@@ -32,8 +31,6 @@ def test_e2e_profile_avtech_roomalert_3s(dd_agent_check):
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
-    # TODO: Add assert_extend_* here:
-    # assert_extend_generic_if(aggregator, common_tags)
 
     aggregator.assert_metric('snmp.digital_sen1_1', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.digital_sen1_2', metric_type=aggregator.GAUGE, tags=common_tags)
@@ -52,7 +49,6 @@ def test_e2e_profile_avtech_roomalert_3s(dd_agent_check):
     aggregator.assert_metric('snmp.externalrelay1_element_two', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.internal_tempc', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.internal_tempf', metric_type=aggregator.GAUGE, tags=common_tags)
-
 
     # --- TEST METADATA ---
     device = {
