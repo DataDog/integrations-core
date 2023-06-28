@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
+from urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.utils.common import round_value
@@ -18,21 +19,35 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'weaviate'
 
     def __init__(self, name, init_config, instances=None):
-
         super(WeaviateCheck, self).__init__(
             name,
             init_config,
             instances,
         )
-
+        if self.instance.get('weaviate_api'):
+            try: 
+                _url = urlparse(self.instance.get('weaviate_api'))
+                self.api_url = f"{_url.scheme}://{_url.netloc}"
+            except Exception as e:
+                self.error.log(f"Error parsing weaviate_api param. Error: {e}")
         self.tags = self.instance.get('tags', [])
 
     def get_default_config(self):
         return {'metrics': [METRICS]}
+    
+    def _validate_scheme_and_netloc(self, url, endpoint):
+        parsed_url = urlparse(url)
+        if endpoint is 'openmetrics':
+            if parsed_url.scheme and parsed_url.netloc and parsed_url.path == '/metrics':
+                return True
+            else:
+                self.error.log()
+                return False
+        
 
     @AgentCheck.metadata_entrypoint
     def _submit_version_metadata(self):
-        endpoint = f"{self.instance.get('weaviate_api')}{DEFAULT_METADATA_ENDPOINT}"
+        endpoint = f"{self.api_url}{DEFAULT_METADATA_ENDPOINT}"
         response = self.http.get(endpoint)
 
         if response.status_code == 200:
@@ -61,7 +76,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
             self.log.debug("Could not retrieve version metadata from host.")
 
     def _submit_liveness_metrics(self):
-        endpoint = f"{self.instance.get('weaviate_api')}{DEFAULT_LIVENESS_ENDPOINT}"
+        endpoint = f"{self.api_url}{DEFAULT_LIVENESS_ENDPOINT}"
         start_time = time.time()
         response = self.http.get(endpoint)
         end_time = time.time()
@@ -75,7 +90,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
             self.service_check('liveness.status', 2)
 
     def _submit_node_metrics(self):
-        endpoint = f"{self.instance.get('weaviate_api')}{DEFAULT_NODE_METRICS_ENDPOINT}"
+        endpoint = f"{self.api_url}{DEFAULT_NODE_METRICS_ENDPOINT}"
         response = self.http.get(endpoint)
         if response.status_code != 200:
             self.log.debug("Could not retrieve Node metrics. Request returned a: %s", str(response.status_code))

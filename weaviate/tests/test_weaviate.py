@@ -11,7 +11,7 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.weaviate import WeaviateCheck
 
-from .common import API_METRICS, MOCKED_INSTANCE, TEST_METRICS
+from .common import API_METRICS, MOCKED_INSTANCE, MOCKED_INSTANCE2, TEST_METRICS
 from .utils import get_fixture_path
 
 
@@ -31,7 +31,7 @@ def test_check_mock_weaviate_openmetrics(dd_run_check, aggregator, mock_http_res
 
 def test_check_mock_weaviate_node(dd_run_check, aggregator, mock_http_response):
     mock_http_response(file_path=get_fixture_path('nodes_api.txt'))
-    check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
+    check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE2])
     dd_run_check(check)
 
     for metric in API_METRICS:
@@ -45,7 +45,7 @@ def test_check_mock_weaviate_node(dd_run_check, aggregator, mock_http_response):
 
 def test_check_failed_liveness(dd_run_check, aggregator, mock_http_response):
     mock_http_response(status_code=404)
-    check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
+    check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE2])
     dd_run_check(check)
 
     # No metrics should be submitted
@@ -54,10 +54,19 @@ def test_check_failed_liveness(dd_run_check, aggregator, mock_http_response):
     aggregator.assert_service_check('weaviate.liveness.status', ServiceCheck.CRITICAL)
 
 
+def test_empty_instance(dd_run_check):
+    with pytest.raises(
+        Exception,
+        match="Must specify at least one of the following: `openmetrics_endpoint` or `weaviate_api`.",
+    ):
+        check = WeaviateCheck('argocd', {}, [{}])
+        dd_run_check(check)
+
+
 @pytest.mark.integration
 def test_check_mock_weaviate_metadata(dd_run_check, datadog_agent, mock_http_response):
     mock_http_response(file_path=get_fixture_path('meta_api.txt'))
-    check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
+    check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE2])
     check.check_id = 'test:123'
     dd_run_check(check)
 
