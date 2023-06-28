@@ -49,6 +49,7 @@ METRICS = {
     'lsm_bloom_filter_duration_ms': 'lsm.bloom.filter.duration_ms',
     'lsm_segment_objects': 'lsm.segment.objects',
     'lsm_segment_size': 'lsm.segment.size',
+    'lsm_memtable_durations_ms': 'lsm.memtable.durations_ms',
     'lsm_segment_count': 'lsm.segment.count',
     'vector_index_tombstones': 'vector.index.tombstones',
     'vector_index_tombstone_cleanup_threads': 'vector.index.tombstone.cleanup.threads',

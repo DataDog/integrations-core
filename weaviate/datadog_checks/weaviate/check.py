@@ -25,6 +25,8 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
             instances,
         )
 
+        self.tags = self.instance.get('tags', [])
+
     def get_default_config(self):
         return {'metrics': [METRICS]}
 
@@ -64,9 +66,11 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
         response = self.http.get(endpoint)
         end_time = time.time()
         if response.status_code == 200:
+            tags = self.tags
             latency = round_value((end_time - start_time) * 1000, 2)
             self.service_check('liveness.status', 0)
-            self.gauge('http.latency_ms', latency, tags=[f"weaviate_liveness_url:{endpoint}"])
+            tags.append(f"weaviate_liveness_url:{endpoint}")
+            self.gauge('http.latency_ms', latency, tags=tags)
         else:
             self.service_check('liveness.status', 2)
 
@@ -81,7 +85,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
             status_values = {'HEALTHY': 0, 'UNHEALTHY': 1, 'UNAVAILABLE': 2}
 
             for node in data.get('nodes', []):
-                tags = []
+                tags = self.tags
 
                 tags.append(f"weaviate_node:{node.get('name')}")
                 tags.append(f"weaviate_version:{node.get('version')}")

@@ -127,8 +127,6 @@ spec:
             value: '/var/lib/weaviate'
           - name: DEFAULT_VECTORIZER_MODULE
             value: none
-          
-          
           - name: CLUSTER_JOIN
             value: weaviate-headless.weaviate.svc.cluster.local
         ports:

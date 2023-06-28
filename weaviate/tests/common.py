@@ -2,13 +2,20 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-MOCKED_INSTANCE = {'openmetrics_endpoint': 'http://weaviate:2112/metrics', 'weaviate_api': 'http://weaviate:8080'}
+MOCKED_INSTANCE = {
+    'openmetrics_endpoint': 'http://weaviate:2112/metrics',
+    'weaviate_api': 'http://weaviate:8080',
+    'tags': ["test:tag"],
+}
 
 E2E_METRICS = [
     "weaviate.go.gc.duration.seconds.count",
     "weaviate.go.gc.duration.seconds.quantile",
     "weaviate.go.gc.duration.seconds.sum",
     "weaviate.go.goroutines",
+    "weaviate.lsm.memtable.durations_ms.count",
+    "weaviate.lsm.memtable.durations_ms.quantile",
+    "weaviate.lsm.memtable.durations_ms.sum",
     "weaviate.go.memstats.alloc_bytes",
     "weaviate.go.memstats.alloc_bytes.count",
     "weaviate.go.memstats.buck_hash.sys_bytes",
