@@ -92,9 +92,6 @@ cli = [
     "wheel>=0.31.0",
 ]
 
-[project.scripts]
-ddev = "datadog_checks.dev.tooling.cli:ddev"
-
 [project.entry-points.pytest11]
 datadog_checks = "datadog_checks.dev.plugin.pytest"
 

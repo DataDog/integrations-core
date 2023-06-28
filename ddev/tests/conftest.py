@@ -36,6 +36,11 @@ class ClonedRepo:
             # Remove untracked files
             PLATFORM.check_command_output(['git', 'clean', '-fd'])
 
+            # Remove all tags
+            tags_dir = self.path / '.git' / 'refs' / 'tags'
+            if tags_dir.is_dir():
+                tags_dir.remove()
+
     @staticmethod
     def new_branch():
         return os.urandom(10).hex()
@@ -118,7 +123,9 @@ def isolation() -> Generator[Path, None, None]:
 def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
     cloned_repo_path = isolation / local_repo.name
 
-    PLATFORM.check_command_output(['git', 'clone', '--local', '--shared', str(local_repo), str(cloned_repo_path)])
+    PLATFORM.check_command_output(
+        ['git', 'clone', '--local', '--shared', '--no-tags', str(local_repo), str(cloned_repo_path)]
+    )
     with cloned_repo_path.as_cwd():
         PLATFORM.check_command_output(['git', 'config', 'user.name', 'Foo Bar'])
         PLATFORM.check_command_output(['git', 'config', 'user.email', 'foo@bar.baz'])

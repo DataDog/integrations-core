@@ -465,6 +465,117 @@ def test_connection_refresh(aggregator, dd_run_check, realtime_instance, test_ti
     assert same_object == expected_result
 
 
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_vm_hostname_suffix_tag(aggregator, dd_run_check, realtime_instance, caplog):
+    realtime_instance.update(
+        {
+            'collect_tags': True,
+            'vm_hostname_suffix_tag': 'my_cat_name_1',
+            'excluded_host_tags': ['my_cat_name_1', 'my_cat_name_2'],
+        }
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        hostname='VM4-4-my_tag_name_1',
+    )
+    assert "Attached hostname suffix key my_cat_name_1, new hostname: VM4-4-my_tag_name_1" in caplog.text
+    assert "Could not attach hostname suffix key my_cat_name_1 for host: VM-on-fake-host" in caplog.text
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_vm_hostname_suffix_tag_bad_value(aggregator, dd_run_check, realtime_instance, caplog):
+    realtime_instance.update(
+        {
+            'collect_tags': True,
+            'vm_hostname_suffix_tag': 'my_cat_name_3',
+            'excluded_host_tags': ['my_cat_name_1', 'my_cat_name_2'],
+        }
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        hostname='VM4-4',
+    )
+    assert "Could not attach hostname suffix key my_cat_name_3 for host: VM4-4" in caplog.text
+    assert "Could not attach hostname suffix key my_cat_name_3 for host: VM-on-fake-host" in caplog.text
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_vm_hostname_suffix_tag_integration(aggregator, dd_run_check, realtime_instance, caplog):
+    realtime_instance.update(
+        {
+            'collect_tags': True,
+            'vm_hostname_suffix_tag': 'vsphere_host',
+            'excluded_host_tags': ['my_cat_name_1', 'my_cat_name_2'],
+        }
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        hostname='VM4-4-10.0.0.104',
+    )
+    assert "Attached hostname suffix key vsphere_host, new hostname: VM4-4-10.0.0.104" in caplog.text
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_vm_hostname_suffix_tag_custom(aggregator, dd_run_check, realtime_instance, caplog):
+    realtime_instance.update({'collect_tags': True, 'vm_hostname_suffix_tag': 'test', 'tags': ['test:tag_name']})
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=['test:tag_name', 'vcenter_server:FAKE'],
+        hostname='VM4-4-tag_name',
+    )
+    assert "Attached hostname suffix key test, new hostname: VM4-4-tag_name" in caplog.text
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_vm_hostname_suffix_tag_same_key(aggregator, dd_run_check, realtime_instance, caplog):
+    realtime_instance.update(
+        {
+            'collect_tags': True,
+            'vm_hostname_suffix_tag': 'my_cat_name_1',
+            'excluded_host_tags': ['my_cat_name_1'],
+            'tags': ['my_cat_name_1:tag_name'],
+        }
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_1:tag_name', 'vcenter_server:FAKE'],
+        hostname='VM4-4-my_tag_name_1',
+    )
+    assert "Attached hostname suffix key my_cat_name_1, new hostname: VM4-4-my_tag_name_1" in caplog.text
+
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_1:tag_name', 'vcenter_server:FAKE'],
+        hostname='VM4-4-my_tag_name_1',
+    )
+    assert "Attached hostname suffix key my_cat_name_1, new hostname: VM4-4-my_tag_name_1" in caplog.text
+
+
 def test_no_infra_cache(aggregator, realtime_instance, dd_run_check, caplog):
     with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
         'pyVmomi.vmodl.query.PropertyCollector'
