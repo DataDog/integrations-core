@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import contextlib
 import copy
 import datetime as dt
-from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
@@ -31,6 +31,11 @@ from .common import (
 )
 
 pytestmark = [pytest.mark.unit]
+
+
+@contextlib.contextmanager
+def does_not_raise(enter_result=None):
+    yield enter_result
 
 
 @pytest.mark.parametrize(
