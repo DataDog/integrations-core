@@ -259,9 +259,11 @@
 
 ***Added***: 
 
-* Get the right metrics depending on the instance state. See [#1348](https://github.com/DataDog/integrations-core/issues/1348).
 * Hardcode the 2379 port in the Autodiscovery template. See [#1444](https://github.com/DataDog/integrations-core/pull/1444) for more information.
 
+***Fixed***:
+
+* Get the right metrics depending on the instance state. See [#1348](https://github.com/DataDog/integrations-core/issues/1348).
 
 ## 1.3.0 / 2018-01-10
 
