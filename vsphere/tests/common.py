@@ -304,9 +304,7 @@ class MockHttp:
         parsed_url = urlparse(url)
         path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
         path_parts = path_and_args.split('/')
-        subpath = os.path.join(
-            *path_parts,
-        )
+        subpath = os.path.join(*path_parts)
         if self._exceptions and subpath in self._exceptions:
             raise self._exceptions[subpath]
         elif self._defaults and subpath in self._defaults:
