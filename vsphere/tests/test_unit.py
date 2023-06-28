@@ -1,14 +1,15 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import copy
 import datetime as dt
+from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
 from pyVmomi import vim, vmodl
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.vsphere import VSphereCheck
@@ -3108,6 +3109,7 @@ def test_max_query_metrics(
     extra_instance,
     expected_metrics,
 ):
+    instance = copy.deepcopy(instance)
     instance['fix_max_query_metrics'] = True
     instance.update(extra_instance)
     check = VSphereCheck('vsphere', {}, [instance])
@@ -3120,3 +3122,53 @@ def test_max_query_metrics(
             hostname=expected_metric.get('hostname'),
             tags=expected_metric.get('tags'),
         )
+
+
+@pytest.mark.parametrize(
+    ('instance', 'extra_instance', 'expected_exception', 'expected_warning_message'),
+    [
+        pytest.param(
+            default_instance,
+            {
+                'ssl_verify': False,
+                'ssl_capath': '/dummy/path',
+            },
+            does_not_raise(),
+            'Your configuration is incorrectly attempting to specify both a CA path, '
+            'and to disable SSL verification. You cannot do both. Proceeding with disabling ssl verification.',
+            id='\'ssl_verify\' set to False and \'ssl_capath\' configured',
+        ),
+        pytest.param(
+            default_instance,
+            {
+                'collection_type': 'invalid',
+            },
+            pytest.raises(
+                ConfigurationError,
+                match="Your configuration is incorrectly attempting to " "set the `collection_type` to ",
+            ),
+            None,
+            id='\'collection_type\' set to invalid value',
+        ),
+        pytest.param(
+            default_instance,
+            {
+                'collection_level': 0,
+            },
+            pytest.raises(
+                ConfigurationError,
+                match="Your configuration is incorrectly attempting to set the collection_level to something different"
+                " than a integer between 1 and 4.",
+            ),
+            None,
+            id='\'collection_level\' set to invalid value',
+        ),
+    ],
+)
+def test_validate_config_errors(instance, extra_instance, expected_exception, expected_warning_message, caplog):
+    instance = copy.deepcopy(instance)
+    instance.update(extra_instance)
+    with expected_exception:
+        VSphereCheck('vsphere', {}, [instance])
+        if expected_warning_message:
+            assert expected_warning_message in caplog.text
