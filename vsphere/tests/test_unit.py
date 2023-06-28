@@ -12,6 +12,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.vsphere import VSphereCheck
+from datadog_checks.vsphere.constants import DEFAULT_MAX_QUERY_METRICS
 
 from .common import (
     VSPHERE_VERSION,
@@ -2909,3 +2910,213 @@ def test_report_historical_metrics_with_tags(
         value=expected_value,
         tags=expected_tags,
     )
+
+
+@pytest.mark.parametrize(
+    ('instance', 'query_options', 'extra_instance', 'expected_metrics'),
+    [
+        pytest.param(
+            legacy_historical_instance,
+            [mock.MagicMock(value=10)],
+            {},
+            [
+                {
+                    'name': 'vsphere.vmop.numChangeDS.latest',
+                    'count': 1,
+                    'value': 7,
+                    'tags': [
+                        'instance:dc1',
+                        'vcenter_server:vsphere_mock',
+                        'vsphere_datacenter:dc1',
+                        'vsphere_type:datacenter',
+                    ],
+                },
+            ],
+            id='Legacy version. Valid value',
+        ),
+        pytest.param(
+            legacy_historical_instance,
+            [mock.MagicMock(value=-1)],
+            {},
+            [
+                {
+                    'name': 'vsphere.vmop.numChangeDS.latest',
+                    'count': 1,
+                    'value': 7,
+                    'tags': [
+                        'instance:dc1',
+                        'vcenter_server:vsphere_mock',
+                        'vsphere_datacenter:dc1',
+                        'vsphere_type:datacenter',
+                    ],
+                },
+            ],
+            id='Legacy version. Invalid value',
+        ),
+        pytest.param(
+            legacy_historical_instance,
+            [Exception()],
+            {},
+            [
+                {
+                    'name': 'vsphere.vmop.numChangeDS.latest',
+                    'count': 1,
+                    'value': 7,
+                    'tags': [
+                        'instance:dc1',
+                        'vcenter_server:vsphere_mock',
+                        'vsphere_datacenter:dc1',
+                        'vsphere_type:datacenter',
+                    ],
+                },
+            ],
+            id='Legacy version. Exception',
+        ),
+        pytest.param(
+            legacy_historical_instance,
+            [mock.MagicMock(value=10)],
+            {'max_query_metrics': 10},
+            [
+                {
+                    'name': 'vsphere.vmop.numChangeDS.latest',
+                    'count': 1,
+                    'value': 7,
+                    'tags': [
+                        'instance:dc1',
+                        'vcenter_server:vsphere_mock',
+                        'vsphere_datacenter:dc1',
+                        'vsphere_type:datacenter',
+                    ],
+                },
+            ],
+            id='Legacy version. Configured value',
+        ),
+        pytest.param(
+            realtime_instance,
+            [mock.MagicMock(value=DEFAULT_MAX_QUERY_METRICS)],
+            {},
+            [
+                {
+                    'name': 'vsphere.cpu.costop.sum',
+                    'count': 1,
+                    'value': 61,
+                    'hostname': 'host1',
+                    'tags': [
+                        'vcenter_server:vsphere_host',
+                    ],
+                },
+            ],
+            id='New version.Realtime.Valid value',
+        ),
+        pytest.param(
+            historical_instance,
+            [mock.MagicMock(value=DEFAULT_MAX_QUERY_METRICS)],
+            {},
+            [
+                {
+                    'name': 'vsphere.vmop.numChangeDS.latest',
+                    'count': 1,
+                    'value': 7,
+                    'tags': [
+                        'vcenter_server:vsphere_host',
+                        'vsphere_datacenter:dc1',
+                        'vsphere_type:datacenter',
+                    ],
+                },
+            ],
+            id='New version.Historical.Valid value',
+        ),
+        pytest.param(
+            realtime_instance,
+            [Exception()],
+            {},
+            [
+                {
+                    'name': 'vsphere.cpu.costop.sum',
+                    'count': 1,
+                    'value': 61,
+                    'hostname': 'host1',
+                    'tags': [
+                        'vcenter_server:vsphere_host',
+                    ],
+                },
+            ],
+            id='New version.Realtime.Exception',
+        ),
+        pytest.param(
+            historical_instance,
+            [Exception()],
+            {},
+            [
+                {
+                    'name': 'vsphere.vmop.numChangeDS.latest',
+                    'count': 1,
+                    'value': 7,
+                    'tags': [
+                        'vcenter_server:vsphere_host',
+                        'vsphere_datacenter:dc1',
+                        'vsphere_type:datacenter',
+                    ],
+                },
+            ],
+            id='New version.Historical.Exception',
+        ),
+        pytest.param(
+            historical_instance,
+            [mock.MagicMock(value=DEFAULT_MAX_QUERY_METRICS)],
+            {'max_historical_metrics': DEFAULT_MAX_QUERY_METRICS + 10},
+            [
+                {
+                    'name': 'vsphere.vmop.numChangeDS.latest',
+                    'count': 1,
+                    'value': 7,
+                    'tags': [
+                        'vcenter_server:vsphere_host',
+                        'vsphere_datacenter:dc1',
+                        'vsphere_type:datacenter',
+                    ],
+                },
+            ],
+            id='New version.Historical.Valid value.\'max_historical_metrics\' bigger',
+        ),
+        pytest.param(
+            historical_instance,
+            [mock.MagicMock(value=DEFAULT_MAX_QUERY_METRICS)],
+            {'metrics_per_query': -1},
+            [
+                {
+                    'name': 'vsphere.vmop.numChangeDS.latest',
+                    'count': 1,
+                    'value': 7,
+                    'tags': [
+                        'vcenter_server:vsphere_host',
+                        'vsphere_datacenter:dc1',
+                        'vsphere_type:datacenter',
+                    ],
+                },
+            ],
+            id='New version.Historical.Valid value.\'metrics_per_query\' negative',
+        ),
+    ],
+)
+def test_max_query_metrics(
+    aggregator,
+    dd_run_check,
+    mock_connect,
+    mock_rest_api,
+    instance,
+    extra_instance,
+    expected_metrics,
+):
+    instance['fix_max_query_metrics'] = True
+    instance.update(extra_instance)
+    check = VSphereCheck('vsphere', {}, [instance])
+    dd_run_check(check)
+    for expected_metric in expected_metrics:
+        aggregator.assert_metric(
+            expected_metric.get('name'),
+            count=expected_metric.get('count'),
+            value=expected_metric.get('value'),
+            hostname=expected_metric.get('hostname'),
+            tags=expected_metric.get('tags'),
+        )

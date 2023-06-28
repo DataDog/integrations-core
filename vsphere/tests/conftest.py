@@ -8,6 +8,8 @@ import pytest
 from mock import MagicMock, Mock, patch
 from pyVmomi import vim, vmodl
 
+from datadog_checks.vsphere.legacy.vsphere_legacy import DEFAULT_MAX_HIST_METRICS
+
 from .common import LAB_INSTANCE, VSPHERE_VERSION, QueryPerf, QueryPerfCounterByLevel
 from .mocked_api import MockedAPI, mock_http_rest_api_v6, mock_http_rest_api_v7
 
@@ -113,7 +115,12 @@ def mock_api():
 
 
 @pytest.fixture
-def mock_connect():
+def query_options():
+    yield [MagicMock(value=DEFAULT_MAX_HIST_METRICS)]
+
+
+@pytest.fixture
+def mock_connect(query_options):
     with patch('pyVim.connect.SmartConnect') as mock_connect, patch(
         'pyVmomi.vmodl.query.PropertyCollector'
     ) as mock_property_collector:
@@ -124,6 +131,7 @@ def mock_connect():
         mock_si.CurrentTime.return_value = dt.datetime.now()
         mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
         mock_si.content.eventManager.QueryEvents.return_value = []
+        mock_si.content.setting.QueryOptions.return_value = query_options
         mock_si.content.perfManager.QueryAvailablePerfMetric.return_value = [
             vim.PerformanceManager.MetricId(counterId=100),
             vim.PerformanceManager.MetricId(counterId=101),
