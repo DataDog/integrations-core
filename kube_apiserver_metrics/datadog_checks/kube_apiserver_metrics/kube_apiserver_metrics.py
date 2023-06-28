@@ -64,7 +64,7 @@ METRICS = {
     'apiserver_requested_deprecated_apis': 'requested_deprecated_apis',
     # For Kubernetes >= 1.23
     # https://github.com/kubernetes/kubernetes/pull/103799
-    'apiserver_longrunning_requests': 'longrunning_requests',
+    'apiserver_longrunning_requests': 'longrunning_gauge',
     # https://github.com/kubernetes/kubernetes/pull/104983
     'apiserver_storage_list_total': 'storage_list_total',
     'apiserver_storage_list_fetched_objects_total': 'storage_list_fetched_objects_total',
