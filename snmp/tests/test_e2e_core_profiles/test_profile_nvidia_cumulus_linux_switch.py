@@ -33,7 +33,6 @@ def test_e2e_profile_nvidia_cumulus_linux_switch(dd_agent_check):
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
-    # TODO: Add assert_extend_* here:
     assert_extend_generic_if(aggregator, common_tags)
     assert_extend_entity_sensor(aggregator, common_tags)
 
