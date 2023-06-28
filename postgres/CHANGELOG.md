@@ -895,7 +895,7 @@
 
 ## 1.1.0 / 2017-08-28
 
-***Added***: 
+***Changed***: 
 
 * Deprecating "postgres.replication_delay_bytes" in favor of "postgresql.replication_delay_bytes". See[#639](https://github.com/DataDog/integrations-core/issues/639) and [#699](https://github.com/DataDog/integrations-core/issues/699), thanks to [@Erouan50](https://github.com/Erouan50)
 
