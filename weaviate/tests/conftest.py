@@ -26,10 +26,12 @@ opj = os.path.join
 
 def setup_weaviate():
     run_command(["kubectl", "create", "ns", "weaviate"])
+    
     if USE_AUTH:
         run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "weaviate_auth.yaml"), "-n", "weaviate"])
     else:
         run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "weaviate_install.yaml"), "-n", "weaviate"])
+
     run_command(
         ["kubectl", "wait", "statefulset", "--all", "--for=condition=Available", "-n", "weaviate", "--timeout=300s"]
     )
@@ -55,7 +57,7 @@ def dd_environment():
             if USE_AUTH:
                 instance["headers"] = {"Authorization": "Bearer test123"}
 
-            make_weaviate_request(instance)
+            # make_weaviate_request(instance)
             yield instance
 
 
