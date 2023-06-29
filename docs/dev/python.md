@@ -3,7 +3,17 @@ title: Install the Datadog Agent Integration Developer Tool
 kind: documentation
 ---
 
-This document covers how to setup a Python environment to work on Agent-based Integrations, including installing the interpreter and ensuring all of the required dependencies are present.
+This document covers how to setup a Python environment to work on Agent-based Integrations, including installing the interpreter and ensuring all of the required dependencies are present. Alternatively, you can use the standalone binaries and installers provided with each release.
+
+## GitHub releases
+
+Each [release](https://github.com/DataDog/integrations-core/releases?q=ddev-&expanded=true) provides the following:
+
+- Standalone binaries for Linux, Windows, and macOS
+- Windows AMD64 (64-bit) MSI installer
+- Windows x86 (32-bit) MSI installer
+- Windows universal (AMD64+x86) EXE installer
+- macOS DMG installer
 
 ## Install Python
 
