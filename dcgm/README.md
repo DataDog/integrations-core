@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check submits metrics exposed by the Nvidia DCGM Exporter in Datadog Agent format.
+This check submits metrics exposed by the [Nvidia DCGM][15] [Exporter][16] in Datadog Agent format.
 
 ## Setup
 
@@ -256,3 +256,5 @@ Additional helpful documentation, links, and articles:
 [12]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=kubernetes
 [13]: https://en.wikipedia.org/wiki/Operating_temperature
 [14]: https://github.com/NVIDIA/dcgm-exporter/issues/163#issuecomment-1577506512
+[15]: https://developer.nvidia.com/dcgm
+[16]: https://github.com/NVIDIA/dcgm-exporter
