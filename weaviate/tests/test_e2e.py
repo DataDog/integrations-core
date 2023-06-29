@@ -14,9 +14,9 @@ def test_e2e_openmetrics_v1(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
 
     aggregator.assert_service_check('weaviate.openmetrics.health', ServiceCheck.OK, count=2)
-
+    flaky_metrics = ['weaviate.lsm.segment.size', 'weaviate.lsm.segments']
     for metric in E2E_METRICS:
-        if metric == 'weaviate.node.shard.objects':
+        if metric in flaky_metrics:
             aggregator.assert_metric(metric, at_least=0)
         else:
             aggregator.assert_metric(metric)

@@ -60,7 +60,7 @@ weaviate.async.operations.running,gauge,,operation,,The number of currently runn
 weaviate.lsm.active.segments,gauge,,segment,,The number of currently present segments per shard. Granularity is shard of a class. Grouped by strategy,0,weaviate,weaviate startup diskio throughput sum,
 weaviate.lsm.segment.objects,gauge,,object,,The number of entries per LSM segment by level. Granularity is shard of a class. Grouped by strategy and level,0,weaviate,weaviate lsm segment objects,
 weaviate.lsm.segment.size,gauge,,,,The size of LSM segment by level and unit,0,weaviate,weaviate lsm segment size,
-weaviate.lsm.segment.count,gauge,,segment,,The number of segments by level,0,weaviate,weaviate lsm segment count,
+weaviate.lsm.segments,gauge,,segment,,The number of segments by level,0,weaviate,weaviate lsm segment count,
 weaviate.vector.index.tombstone.cleanup.threads,gauge,,,,The number of currently active threads for repairing/cleaning up the vector index after deletes have occurred,0,weaviate,weaviate vector index tomstone cleanup threads,
 weaviate.vector.index.tombstone.cleaned.count,count,,,,The total number of deleted and removed vectors after repair operations,0,weaviate,weaviate vector index tomstone cleaned,
 weaviate.vector.index.operations,gauge,,operation,,The total number of mutating operations on the vector index. The operation itself is defined by the operation label,0,weaviate,weaviate vector index tomstone operations,
