@@ -64,7 +64,7 @@ def test_no_partitions(aggregator, check, kafka_instance, dd_run_check):
 @pytest.mark.parametrize(
     'is_enabled, metric_count, topic_tags',
     [
-        pytest.param(True, 4, ['topic:marvel', 'topic:dc'], id="Enabled"),
+        pytest.param(True, 6, ['topic:marvel', 'topic:dc'], id="Enabled"),
         pytest.param(False, 2, ['topic:marvel'], id="Disabled"),
     ],
 )
@@ -158,6 +158,12 @@ def test_monitor_broker_highwatermarks(
             does_not_raise(),
             1,
             id="One consumer group, one topic, one partition",
+        ),
+        pytest.param(
+            {'consumer_groups': {'my_consumer': {'unconsumed_topic': None}}},
+            does_not_raise(),
+            0,
+            id="One consumer group and one unconsumed topic for that consumer",
         ),
     ],
 )
@@ -357,6 +363,17 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             2,
             '',
             id="Using the same consumer_groups and consumer_groups_regex values",
+        ),
+        pytest.param(
+            {
+                'consumer_groups': {},
+                'consumer_groups_regex': {'my_consumer': {'unconsumed_*': []}},
+            },
+            0,
+            0,
+            0,
+            '',
+            id="Specified consumer with unconsumed topic regex for that consumer",
         ),
     ],
 )
