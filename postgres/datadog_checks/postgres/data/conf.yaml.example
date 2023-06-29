@@ -280,10 +280,10 @@ instances:
         #   - model
         #   - msdb
 
-        ## @param refresh - integer - optional - default: 3600
-        ## Frequency in seconds of scans for new databases. Defaults to `3600`.
+        ## @param refresh - integer - optional - default: 600
+        ## Frequency in seconds of scans for new databases. Defaults to 10 minutes.
         #
-        # refresh: 3600
+        # refresh: 600
 
     ## @param application_name - string - optional - default: datadog-agent
     ## The application_name can be any string of less than NAMEDATALEN characters (64 characters in a standard build).
