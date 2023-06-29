@@ -88,7 +88,7 @@ select
             - statement_start_offset) / 2) + 1) AS statement_text,
     qt.text,
     encrypted as is_encrypted,
-    * from qstats_aggr_split
+    s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
 
@@ -120,7 +120,7 @@ select
     END - statement_start_offset) / 2) + 1) AS statement_text,
     qt.text,
     encrypted as is_encrypted,
-    * from qstats_aggr_split
+    s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
 
