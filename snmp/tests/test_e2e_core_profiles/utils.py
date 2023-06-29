@@ -32,6 +32,8 @@ def assert_extend_generic_if(aggregator, common_tags):
 
 
 def assert_extend_generic_ip(aggregator, common_tags):
+    """Add the following to the snmprec
+    1.3.6.1.2.1.4.31.1.1.4.1|2|310637142"""
     aggregator.assert_metric(
         "snmp.ipSystemStatsHCInReceives",
         metric_type=aggregator.COUNT,
@@ -40,18 +42,26 @@ def assert_extend_generic_ip(aggregator, common_tags):
 
 
 def assert_extend_generic_tcp(aggregator, common_tags):
+    """Add the following to the snmprec
+    1.3.6.1.2.1.6.5.0|65|457790"""
     aggregator.assert_metric("snmp.tcpActiveOpens", metric_type=aggregator.COUNT, tags=common_tags)
 
 
 def assert_extend_generic_udp(aggregator, common_tags):
+    """Add the following to the snmprec
+    1.3.6.1.2.1.7.8.0|70|6116206687099577350"""
     aggregator.assert_metric("snmp.udpHCInDatagrams", metric_type=aggregator.COUNT, tags=common_tags)
 
 
 def assert_extend_generic_ospf(aggregator, common_tags):
+    """Add the following to the snmprec
+    1.3.6.1.2.1.14.10.1.6.192.29.116.26.0|2|8"""
     aggregator.assert_metric("snmp.ospfNbrState", metric_type=aggregator.GAUGE, tags=common_tags)
 
 
 def assert_extend_generic_bgp4(aggregator, common_tags):
+    """Add the following to the snmprec
+    1.3.6.1.2.1.15.3.1.3.244.12.239.177|2|2"""
     aggregator.assert_metric(
         "snmp.bgpPeerAdminStatus",
         metric_type=aggregator.GAUGE,
@@ -66,6 +76,9 @@ def assert_extend_generic_bgp4(aggregator, common_tags):
 
 
 def assert_extend_cisco_cpu_memory(aggregator, common_tags):
+    """Add the following to the snmprec
+    1.3.6.1.4.1.9.9.48.1.1.1.5.18|66|4078680985
+    1.3.6.1.4.1.9.9.109.1.1.1.1.7.712|66|20"""
     aggregator.assert_metric("snmp.memory.used", metric_type=aggregator.GAUGE, tags=common_tags + ["mem:18"])
     aggregator.assert_metric("snmp.ciscoMemoryPoolUsed", metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric("snmp.cpu.usage", metric_type=aggregator.GAUGE, tags=common_tags + ["cpu:712"])
@@ -88,7 +101,11 @@ def assert_extend_generic_host_resources(aggregator, common_tags):
     1.3.6.1.2.1.25.2.3.1.5.4|2|17
     1.3.6.1.2.1.25.2.3.1.5.31|2|21
     1.3.6.1.2.1.25.2.3.1.6.4|2|30
-    1.3.6.1.2.1.25.2.3.1.6.31|2|4"""
+    1.3.6.1.2.1.25.2.3.1.6.31|2|4
+    1.3.6.1.2.1.25.3.3.1.1.10|2|10
+    1.3.6.1.2.1.25.3.3.1.1.21|2|21
+    1.3.6.1.2.1.25.3.3.1.2.10|2|31
+    1.3.6.1.2.1.25.3.3.1.2.21|2|15"""
     aggregator.assert_metric("snmp.hrSystemUptime", metric_type=aggregator.GAUGE, tags=common_tags)
 
     cpu_rows = ['10', '21']
