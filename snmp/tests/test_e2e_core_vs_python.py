@@ -24,7 +24,7 @@ ASSERT_VALUE_METRICS = [
 ]
 
 # Profiles may contain symbols declared twice with different names and the same OID
-# Python check does handles one single metric name per OID symbol
+# Python check does handle one single metric name per OID symbol
 SKIPPED_CORE_ONLY_METRICS = [
     'snmp.memory.total',
     'snmp.memory.used',
@@ -37,6 +37,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.ifInSpeed',
     'snmp.ifOutSpeed',
     'snmp.peerConnectionByState',  # BGP4 constant metric, not handled by python check
+    'snmp.ltmVsStatus', # F5-BIG-IP constant metric
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']

@@ -298,6 +298,7 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=interface_tags, count=1
             )
+
         if interface in interfaces_with_bandwidth_usage:
             for metric in IF_BANDWIDTH_USAGE:
                 aggregator.assert_metric(
@@ -326,7 +327,6 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
     aggregator.assert_metric('snmp.memory.total', count=2)
     aggregator.assert_metric('snmp.memory.usage', count=2)
     aggregator.assert_metric('snmp.memory.used', count=2)
-
 
     # --- TEST METADATA ---
     device = {

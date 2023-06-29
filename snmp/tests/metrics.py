@@ -224,7 +224,6 @@ LTM_VIRTUAL_SERVER_GAUGES = [
     'ltmVirtualServStatVsUsageRatio5m',
     'ltmVirtualServStatCurrentConnsPerSec',
     'ltmVirtualServStatDurationRateExceeded',
-    'ltmVsStatus'
 ]
 
 LTM_VIRTUAL_SERVER_COUNTS = [
