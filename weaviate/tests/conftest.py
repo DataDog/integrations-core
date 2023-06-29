@@ -26,7 +26,7 @@ opj = os.path.join
 
 def setup_weaviate():
     run_command(["kubectl", "create", "ns", "weaviate"])
-    
+
     if USE_AUTH:
         run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "weaviate_auth.yaml"), "-n", "weaviate"])
     else:
