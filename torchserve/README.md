@@ -136,7 +136,7 @@ This configuration collects metrics for every model name that does not match the
 
 By default, the integration retrieves the full list of the models every time the check runs. You can cache this list by using the `interval` option for increased performance of this check. 
 
-<div class="alert alert-warning">Using the `interval` can also delays some metrics and events.</div>
+<div class="alert alert-warning">Using the `interval` option can also delay some metrics and events.</div>
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
