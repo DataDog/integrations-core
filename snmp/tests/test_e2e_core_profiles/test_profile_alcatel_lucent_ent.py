@@ -37,41 +37,75 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     tag_rows = [
-         ['health_module_chassis_id:0'],
-         ['health_module_chassis_id:1'],
+        ['health_module_chassis_id:0'],
+        ['health_module_chassis_id:1'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['chas_ent_phys_admin_status:standby', 'chas_ent_phys_led_status_backup_ps:green_on', 'chas_ent_phys_led_status_control:amber_blink', 'chas_ent_phys_led_status_fabric:amber_blink', 'chas_ent_phys_led_status_fan:amber_blink', 'chas_ent_phys_led_status_internal_ps:green_on', 'chas_ent_phys_led_status_ok1:green_on', 'chas_ent_phys_led_status_ok2:green_blink', 'chas_ent_phys_led_status_primary_cmm:not_applicable', 'chas_ent_phys_led_status_ps:off', 'chas_ent_phys_led_status_secondary_cmm:green_blink', 'chas_ent_phys_led_status_temperature:green_on'],
-         ['chas_ent_phys_admin_status:unknown', 'chas_ent_phys_led_status_backup_ps:green_on', 'chas_ent_phys_led_status_control:green_on', 'chas_ent_phys_led_status_fabric:amber_blink', 'chas_ent_phys_led_status_fan:amber_on', 'chas_ent_phys_led_status_internal_ps:green_on', 'chas_ent_phys_led_status_ok1:not_applicable', 'chas_ent_phys_led_status_ok2:green_on', 'chas_ent_phys_led_status_primary_cmm:off', 'chas_ent_phys_led_status_ps:amber_blink', 'chas_ent_phys_led_status_secondary_cmm:amber_blink', 'chas_ent_phys_led_status_temperature:green_on'],
+        [
+            'chas_ent_phys_admin_status:standby',
+            'chas_ent_phys_led_status_backup_ps:green_on',
+            'chas_ent_phys_led_status_control:amber_blink',
+            'chas_ent_phys_led_status_fabric:amber_blink',
+            'chas_ent_phys_led_status_fan:amber_blink',
+            'chas_ent_phys_led_status_internal_ps:green_on',
+            'chas_ent_phys_led_status_ok1:green_on',
+            'chas_ent_phys_led_status_ok2:green_blink',
+            'chas_ent_phys_led_status_primary_cmm:not_applicable',
+            'chas_ent_phys_led_status_ps:off',
+            'chas_ent_phys_led_status_secondary_cmm:green_blink',
+            'chas_ent_phys_led_status_temperature:green_on',
+        ],
+        [
+            'chas_ent_phys_admin_status:unknown',
+            'chas_ent_phys_led_status_backup_ps:green_on',
+            'chas_ent_phys_led_status_control:green_on',
+            'chas_ent_phys_led_status_fabric:amber_blink',
+            'chas_ent_phys_led_status_fan:amber_on',
+            'chas_ent_phys_led_status_internal_ps:green_on',
+            'chas_ent_phys_led_status_ok1:not_applicable',
+            'chas_ent_phys_led_status_ok2:green_on',
+            'chas_ent_phys_led_status_primary_cmm:off',
+            'chas_ent_phys_led_status_ps:amber_blink',
+            'chas_ent_phys_led_status_secondary_cmm:amber_blink',
+            'chas_ent_phys_led_status_temperature:green_on',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.chasEntPhysical', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['chas_ent_temp_status:not_present'],
-         ['chas_ent_temp_status:unknown'],
+        ['chas_ent_temp_status:not_present'],
+        ['chas_ent_temp_status:unknown'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.chasEntTempCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['ala_chas_ent_phys_fan_status:running'],
+        ['ala_chas_ent_phys_fan_status:running'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.alaChasEntPhysFanSpeed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.alaChasEntPhysFanSpeed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
-         ['ala_chas_bps_power_supply_name:Jaded', 'ala_chas_bps_power_supply_oper_status:up', 'ala_chas_bps_power_supply_serial_num:driving quaintly kept'],
-         ['ala_chas_bps_power_supply_name:acted their zombies forward oxen', 'ala_chas_bps_power_supply_oper_status:unknown', 'ala_chas_bps_power_supply_serial_num:acted forward zombies Jaded but'],
+        [
+            'ala_chas_bps_power_supply_name:Jaded',
+            'ala_chas_bps_power_supply_oper_status:up',
+            'ala_chas_bps_power_supply_serial_num:driving quaintly kept',
+        ],
+        [
+            'ala_chas_bps_power_supply_name:acted their zombies forward oxen',
+            'ala_chas_bps_power_supply_oper_status:unknown',
+            'ala_chas_bps_power_supply_serial_num:acted forward zombies Jaded but',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.alaChasBpsPowerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-
 
     # --- TEST METADATA ---
     device = {
