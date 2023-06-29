@@ -13,6 +13,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
+from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres import aws
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
@@ -481,6 +482,7 @@ class PostgreSql(AgentCheck):
 
         return num_results
 
+    @tracked_method()
     def _collect_relations_autodiscovery(self, instance_tags, relations_scopes):
         if not self.autodiscovery:
             return
