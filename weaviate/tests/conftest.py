@@ -10,6 +10,8 @@ from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 
+from .common import USE_AUTH
+
 try:
     from contextlib import ExitStack
 except ImportError:
@@ -22,7 +24,10 @@ opj = os.path.join
 
 def setup_weaviate():
     run_command(["kubectl", "create", "ns", "weaviate"])
-    run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "weaviate_install.yaml"), "-n", "weaviate"])
+    if USE_AUTH:
+        run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "weaviate_auth.yaml"), "-n", "weaviate"])
+    else:
+        run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "weaviate_install.yaml"), "-n", "weaviate"])
     run_command(
         ["kubectl", "wait", "statefulset", "--all", "--for=condition=Available", "-n", "weaviate", "--timeout=300s"]
     )
@@ -45,4 +50,7 @@ def dd_environment():
                 "openmetrics_endpoint": f"http://{weaviate_host}:{weaviate_port}/metrics",
                 "weaviate_api_endpoint": f"http://{weaviate_host}:{weaviate_api_port}",
             }
+            if USE_AUTH:
+                instance["headers"] = {"Authorization": "Bearer test123"}
+
             yield instance
