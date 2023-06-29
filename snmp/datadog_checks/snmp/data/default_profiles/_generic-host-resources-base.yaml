@@ -2,8 +2,6 @@
 
 # Currently covers basic uptime and system process count along with storage stats
 # TODO: add device table
-extends:
-  - _generic-host-cpu-memory.yaml
 
 metrics:
   #

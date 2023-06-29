@@ -8,18 +8,32 @@ device:
   vendor: "cisco"
 
 sysobjectid:
-  - 1.3.6.1.4.1.9.1.923 # ciscoASR1002
-  - 1.3.6.1.4.1.9.1.924 # ciscoASR1004
-  - 1.3.6.1.4.1.9.1.925 # ciscoASR1006
+  - 1.3.6.1.4.1.9.1.403  # ciscoASR7401
+  - 1.3.6.1.4.1.9.1.923  # ciscoASR1002
+  - 1.3.6.1.4.1.9.1.924  # ciscoASR1004
+  - 1.3.6.1.4.1.9.1.925  # ciscoASR1006
   - 1.3.6.1.4.1.9.1.1017 # ciscoASR9010
   - 1.3.6.1.4.1.9.1.1018 # ciscoASR9006
+  - 1.3.6.1.4.1.9.1.1036 # ciscoASR14K4S
+  - 1.3.6.1.4.1.9.1.1037 # ciscoASR14K8S
   - 1.3.6.1.4.1.9.1.1116 # ciscoASR1002F
   - 1.3.6.1.4.1.9.1.1165 # ciscoASR1001
   - 1.3.6.1.4.1.9.1.1166 # ciscoASR1013
   - 1.3.6.1.4.1.9.1.1441 # ciscoASR903
+  - 1.3.6.1.4.1.9.1.1457 # ciscoASR5500
+  - 1.3.6.1.4.1.9.1.1498 # ciscoASR9KMOD80SE
+  - 1.3.6.1.4.1.9.1.1499 # ciscoASR9KMOD80TR
+  - 1.3.6.1.4.1.9.1.1500 # ciscoASR9KMOD160SE
+  - 1.3.6.1.4.1.9.1.1501 # ciscoASR9KMOD160TR
+  - 1.3.6.1.4.1.9.1.1502 # ciscoASR9KMPA2X10GE
+  - 1.3.6.1.4.1.9.1.1503 # ciscoASR9KMPA4X10GE
+  - 1.3.6.1.4.1.9.1.1504 # ciscoASR9KMPA20X1GE
+  - 1.3.6.1.4.1.9.1.1505 # ciscoASR9KMPA1X40GE
+  - 1.3.6.1.4.1.9.1.1506 # ciscoASR9KMPA2X40GE
   - 1.3.6.1.4.1.9.1.1521 # ciscoASR901
   - 1.3.6.1.4.1.9.1.1522 # ciscoASR901E
   - 1.3.6.1.4.1.9.1.1525 # ciscoASR1002X
+  - 1.3.6.1.4.1.9.1.1538 # ciscoASR5000
   - 1.3.6.1.4.1.9.1.1639 # ciscoASR9001
   - 1.3.6.1.4.1.9.1.1640 # ciscoASR9922
   - 1.3.6.1.4.1.9.1.1688 # ciscoASR1002XC
@@ -29,6 +43,11 @@ sysobjectid:
   - 1.3.6.1.4.1.9.1.1726 # ciscoASR901TenGigDC
   - 1.3.6.1.4.1.9.1.1727 # ciscoASR901TenGigAC
   - 1.3.6.1.4.1.9.1.1762 # ciscoASR9904
+  - 1.3.6.1.4.1.9.1.1818 # ciscoASR901S4SGFD
+  - 1.3.6.1.4.1.9.1.1819 # ciscoASR901S3SGFD
+  - 1.3.6.1.4.1.9.1.1820 # ciscoASR901S2SGFD
+  - 1.3.6.1.4.1.9.1.1821 # ciscoASR901S3SGFAH
+  - 1.3.6.1.4.1.9.1.1822 # ciscoASR901S2SGFAH
   - 1.3.6.1.4.1.9.1.1861 # ciscoASR1001X
   - 1.3.6.1.4.1.9.1.1897 # ciscoASR902
   - 1.3.6.1.4.1.9.1.2098 # ciscoASR901AC10GS

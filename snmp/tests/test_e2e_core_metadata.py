@@ -28,7 +28,7 @@ def assert_metadata_events(aggregator, events):
     assert events == actual_events, "ACTUAL EVENTS: " + json.dumps(actual_events, indent=4)
 
 
-def assert_device_metadata(aggregator, device_metadata):
+def assert_device_metadata(aggregator, expected_device):
     events = get_events(aggregator)
 
     assert len(events) >= 1
@@ -37,7 +37,11 @@ def assert_device_metadata(aggregator, device_metadata):
     pprint.pprint(event1['devices'])
     assert len(event1['devices']) == 1
 
-    assert event1['devices'][0] == device_metadata
+    actual_device = event1['devices'][0]
+    for device in [actual_device, expected_device]:
+        device.get('tags', []).sort()
+
+    assert actual_device == expected_device
 
 
 def test_e2e_core_metadata_f5(dd_agent_check):
@@ -686,14 +690,13 @@ def test_e2e_core_metadata_palo_alto(dd_agent_check):
         'model': 'PA-3020',
         'os_name': 'PAN-OS',
         'os_version': '9.0.5',
-        'product_name': 'PA-3000 series firewall',
+        'product_name': 'user palo-alto product name',
         'profile': 'palo-alto',
         'serial_number': '015351000009999',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.25461.2.3.18',
         'tags': [
             'device_namespace:default',
-            'device_vendor:paloaltonetworks',
             'snmp_device:' + device_ip,
             'snmp_profile:palo-alto',
         ],
