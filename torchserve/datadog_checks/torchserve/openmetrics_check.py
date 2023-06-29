@@ -8,19 +8,20 @@ from datadog_checks.torchserve.config_models import ConfigMixin
 from datadog_checks.torchserve.metrics import OPENMETRICS_METRIC_MAP
 
 
-class TorchServeOpenMetricsScraper(OpenMetricsScraper):
-    SERVICE_CHECK_HEALTH = "health"
-
-
 class TorchserveOpenMetricsCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'torchserve.openmetrics'
     DEFAULT_METRIC_LIMIT = 0
 
     def create_scraper(self, config):
-        # We prefix all the metrics with their endpoint. If we use the default scraper, we will emit the service check
-        # `torchserve.openmetrics.openmetrics.health`. It seems we can't override it dynamically.
-        # I prefer overriding the service check over manually adding `openmetrics.` to every single metrics.
-        return TorchServeOpenMetricsScraper(self, self.get_config_with_defaults(config))
+        # All metrics are prefixed with their endpoint.
+        # When default scraper (`OpenMetricsScraper`) is used, the service checks will have duplicates,
+        # for eg. `torchserve.openmetrics.health` would be `torchserve.openmetrics.openmetrics.health`
+        # There isn't a mechanism to dynamically override service check names,
+        # hence `TorchServeOpenMetricsScraper` is derived from `OpenMetricsScraper`
+        # to override `SERVICE_CHECK_HEALTH` value
+        scraper = OpenMetricsScraper(self, self.get_config_with_defaults(config))
+        scraper.SERVICE_CHECK_HEALTH = "health"
+        return scraper
 
     def get_default_config(self):
         return {
