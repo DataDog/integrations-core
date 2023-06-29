@@ -2796,7 +2796,7 @@ def test_report_historical_cluster_metrics(
 def test_rest_api_tags_session_exception(
     aggregator, dd_run_check, instance, expected_count, expected_value, expected_tags, mock_connect, monkeypatch
 ):
-    http = MockHttp(exceptions={'api/session': Exception('wow'), 'rest/com/vmware/cis/session': Exception('wow2')})
+    http = MockHttp(exceptions={'api/session': Exception(), 'rest/com/vmware/cis/session': Exception()})
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
@@ -2852,7 +2852,7 @@ def test_rest_api_v7_tags_tag_association(
         defaults={'api/session': MockResponse(json_data="dummy-token", status_code=200)},
         exceptions={
             'rest/com/vmware/cis/session': Exception('wow2'),
-            'api/cis/tagging/tag-association?' 'action=list-attached-tags-on-objects': Exception('wow'),
+            'api/cis/tagging/tag-association?' 'action=list-attached-tags-on-objects': Exception(),
         },
     )
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))

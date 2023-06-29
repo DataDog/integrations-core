@@ -10,7 +10,7 @@ from pyVmomi import vim, vmodl
 
 from datadog_checks.vsphere.legacy.vsphere_legacy import DEFAULT_MAX_HIST_METRICS
 
-from .common import LAB_INSTANCE, VSPHERE_VERSION, QueryPerf, QueryPerfCounterByLevel
+from .common import LAB_INSTANCE, PERF_COUNTER_INFO, PERF_ENTITY_METRICS, PERF_METRIC_ID, PROPERTIES_EX, VSPHERE_VERSION
 from .mocked_api import MockedAPI, mock_http_rest_api_v6, mock_http_rest_api_v7
 
 try:
@@ -115,12 +115,77 @@ def mock_api():
 
 
 @pytest.fixture
-def query_options():
-    yield [MagicMock(value=DEFAULT_MAX_HIST_METRICS)]
+def query_events():
+    def QueryEvents(filter):
+        return []
+
+    yield QueryEvents
 
 
 @pytest.fixture
-def mock_connect(query_options):
+def query_options():
+    def QueryOptions(name):
+        return [MagicMock(value=DEFAULT_MAX_HIST_METRICS)]
+
+    yield QueryOptions
+
+
+@pytest.fixture
+def query_available_perf_metric():
+    def QueryAvailablePerfMetric(entity, begin_time=None, end_time=None, interval_id=None):
+        return PERF_METRIC_ID
+
+    yield QueryAvailablePerfMetric
+
+
+@pytest.fixture
+def query_perf_counter_by_level():
+    def QueryPerfCounterByLevel(collection_level):
+        return PERF_COUNTER_INFO
+
+    yield QueryPerfCounterByLevel
+
+
+@pytest.fixture
+def retrieve_properties_ex():
+    def RetrievePropertiesEx(spec_set, options):
+        return PROPERTIES_EX
+
+    yield RetrievePropertiesEx
+
+
+@pytest.fixture
+def query_perf():
+    def QueryPerf(query_specs):
+        result = []
+        for query_spec in query_specs:
+            for entity_metric in PERF_ENTITY_METRICS:
+                if query_spec.entity == entity_metric.entity:
+                    value = []
+                    for metric_id in query_spec.metricId:
+                        for metric_value in entity_metric.value:
+                            if metric_id.counterId == metric_value.id.counterId:
+                                value.append(metric_value)
+                    result.append(
+                        vim.PerformanceManager.EntityMetric(
+                            entity=entity_metric.entity,
+                            value=value,
+                        )
+                    )
+        return result
+
+    yield QueryPerf
+
+
+@pytest.fixture
+def mock_connect(
+    query_events,
+    query_options,
+    query_available_perf_metric,
+    query_perf_counter_by_level,
+    query_perf,
+    retrieve_properties_ex,
+):
     with patch('pyVim.connect.SmartConnect') as mock_connect, patch(
         'pyVmomi.vmodl.query.PropertyCollector'
     ) as mock_property_collector:
@@ -130,106 +195,14 @@ def mock_connect(query_options):
         mock_si.content.about.apiType = 'VirtualCenter'
         mock_si.CurrentTime.return_value = dt.datetime.now()
         mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
-        mock_si.content.eventManager.QueryEvents.return_value = []
-        mock_si.content.setting.QueryOptions.return_value = query_options
-        mock_si.content.perfManager.QueryAvailablePerfMetric.return_value = [
-            vim.PerformanceManager.MetricId(counterId=100),
-            vim.PerformanceManager.MetricId(counterId=101),
-            vim.PerformanceManager.MetricId(counterId=102),
-            vim.PerformanceManager.MetricId(counterId=103),
-        ]
-        mock_si.content.perfManager.QueryPerfCounterByLevel = QueryPerfCounterByLevel
-        mock_si.content.perfManager.QueryPerf = QueryPerf
+        mock_si.content.eventManager.QueryEvents = query_events
+        mock_si.content.setting.QueryOptions = query_options
+        mock_si.content.perfManager.QueryAvailablePerfMetric = query_available_perf_metric
+        mock_si.content.perfManager.QueryPerfCounterByLevel = query_perf_counter_by_level
+        mock_si.content.perfManager.QueryPerf = query_perf
         mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
         mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
-        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult(
-            objects=[
-                vim.ObjectContent(
-                    obj=vim.VirtualMachine(moId="vm1"),
-                    propSet=[
-                        vmodl.DynamicProperty(
-                            name='name',
-                            val='vm1',
-                        ),
-                        vmodl.DynamicProperty(
-                            name='runtime.powerState',
-                            val=vim.VirtualMachinePowerState.poweredOn,
-                        ),
-                    ],
-                ),
-                vim.ObjectContent(
-                    obj=vim.VirtualMachine(moId="vm2"),
-                    propSet=[
-                        vmodl.DynamicProperty(
-                            name='name',
-                            val='vm2',
-                        ),
-                        vmodl.DynamicProperty(
-                            name='runtime.powerState',
-                            val=vim.VirtualMachinePowerState.poweredOn,
-                        ),
-                    ],
-                ),
-                vim.ObjectContent(
-                    obj=vim.Datastore(moId="NFS-Share-1"),
-                    propSet=[
-                        vmodl.DynamicProperty(
-                            name='name',
-                            val='NFS-Share-1',
-                        ),
-                    ],
-                ),
-                vim.ObjectContent(
-                    obj=vim.ClusterComputeResource(moId="c1"),
-                    propSet=[
-                        vmodl.DynamicProperty(
-                            name='name',
-                            val='c1',
-                        ),
-                    ],
-                ),
-                vim.ObjectContent(
-                    obj=vim.Folder(moId="folder_1"),
-                    propSet=[
-                        vmodl.DynamicProperty(
-                            name='name',
-                            val='folder_1',
-                        ),
-                    ],
-                ),
-                vim.ObjectContent(
-                    obj=vim.Datacenter(moId="dc1"),
-                    propSet=[
-                        vmodl.DynamicProperty(
-                            name='name',
-                            val='dc1',
-                        ),
-                    ],
-                ),
-                vim.ObjectContent(
-                    obj=vim.Datacenter(moId="dc2"),
-                    propSet=[
-                        vmodl.DynamicProperty(
-                            name='name',
-                            val='dc2',
-                        ),
-                        vmodl.DynamicProperty(
-                            name='parent',
-                            val=vim.Folder(moId="folder_1"),
-                        ),
-                    ],
-                ),
-                vim.ObjectContent(
-                    obj=vim.HostSystem(moId="host1"),
-                    propSet=[
-                        vmodl.DynamicProperty(
-                            name='name',
-                            val='host1',
-                        ),
-                    ],
-                ),
-            ],
-        )
+        mock_si.content.propertyCollector.RetrievePropertiesEx = retrieve_properties_ex
         mock_connect.return_value = mock_si
         yield
 
