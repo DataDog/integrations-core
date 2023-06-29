@@ -213,7 +213,7 @@ def metric_should_be_exposed(metric, expected_models):
             id="new model",
         ),
         pytest.param(
-            "management/events/models_with_new_default_version.json",
+            "management/events/models_with_v1_as_default_for_1_1.json",
             [
                 {
                     "type": "torchserve.management_api.default_version_changed",
@@ -238,7 +238,7 @@ def metric_should_be_exposed(metric, expected_models):
             id="one model removed",
         ),
         pytest.param(
-            "management/events/models_without_2_2_with_3_3_with_new_default_version.json",
+            "management/events/models_without_2_2_with_3_3_and_1_2_v1.json",
             [
                 {
                     "type": "torchserve.management_api.default_version_changed",
