@@ -49,7 +49,7 @@ The README file must provide the following sections:
 - **Events**: Include a list of events if your integration provides any.
 - **Service checks**: Include a list of service checks if your integration provides any.
 
-[Find more about the overall layout][10]
+For more information, see [Create an Agent-based Integration][1].
 
 #### `check.py`
 
@@ -286,7 +286,6 @@ Consider the following when writing tests:
 [7]: https://rubygems.org/gems/datadog-sdk-testing
 [8]: https://github.com/DataDog/integrations-extras
 [9]: https://virtualenv.pypa.io/en/stable
-[10]: /developers/integrations/#new-integration-documentation
 [11]: https://docs.datadoghq.com/developers/integrations/
 [12]: https://github.com/DataDog/dd-agent/blob/master/tests/README.md#integration-tests
 [13]: https://github.com/DataDog/dd-agent/blob/master/ci/common.rb
