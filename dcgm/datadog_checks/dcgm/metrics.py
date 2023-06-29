@@ -20,6 +20,7 @@ METRIC_MAP = {
     # Metrics related to memory get grouped together because there are more of them available.
     'DCGM_FI_DEV_MEM_CLOCK': 'mem.clock',
     'DCGM_FI_DEV_MEM_COPY_UTIL': 'mem.copy_utilization',
+    'DCGM_FI_DEV_MEMORY_TEMP': 'mem.temperature',
     # NVML Specific Missing Metrics (5)
     'DCGM_FI_DEV_COUNT': 'device',  # becomes device.count
     'DCGM_FI_DEV_FAN_SPEED': 'fan_speed',
@@ -27,7 +28,6 @@ METRIC_MAP = {
     'DCGM_FI_PROF_PCIE_TX_BYTES': 'pcie_tx_throughput',
     # Others from default-counters.csv
     'DCGM_FI_DEV_CORRECTABLE_REMAPPED_ROWS': 'correctable_remapped_rows',
-    'DCGM_FI_DEV_MEMORY_TEMP': 'memory_temperature',
     'DCGM_FI_DEV_ROW_REMAP_FAILURE': 'row_remap_failure',
     'DCGM_FI_DEV_UNCORRECTABLE_REMAPPED_ROWS': 'uncorrectable_remapped_rows',
     # Metrics recommended by NVIDIA
