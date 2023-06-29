@@ -17,7 +17,7 @@ def run_prediction(model):
             headers={'Content-Type': 'application/json'},
         )
         response.raise_for_status()
-    except requests.HTTPError:
+    except Exception:
         return False
     else:
         return response.status_code == 200
@@ -29,7 +29,7 @@ def set_model_default_version(model, version):
             f"{MANAGEMENT_API_URL}/models/{model}/{version}/set-default",
         )
         response.raise_for_status()
-    except requests.HTTPError:
+    except Exception:
         return False
     else:
         return response.status_code == 200
@@ -45,7 +45,7 @@ def update_workers(model, min, max):
             },
         )
         response.raise_for_status()
-    except requests.HTTPError:
+    except Exception:
         return False
     else:
         return response.status_code == 202
@@ -55,7 +55,7 @@ def register_model(model):
     try:
         response = requests.post(f"{MANAGEMENT_API_URL}/models", params={"url": model})
         response.raise_for_status()
-    except requests.HTTPError:
+    except Exception:
         return False
     else:
         return response.status_code == 200
