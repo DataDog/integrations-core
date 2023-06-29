@@ -12,7 +12,7 @@ Many operating systems come with a pre-installed version of Python. However, the
 {{< tabs >}}
 
 {{% tab "MacOS" %}}
-Install Python 3.8 using [Homebrew][1]:
+Install Python 3.9 using [Homebrew][1]:
 
 1. Update Homebrew:
    ```
@@ -21,31 +21,31 @@ Install Python 3.8 using [Homebrew][1]:
 
 1. Install Python:
    ```
-   brew install python@3.8
+   brew install python@3.9
    ```
 
 1. Check the Homebrew installation output and run any additional commands recommended by the installation script.
 
 1. Verify that the Python binary is installed in your `PATH` and that you've installed the correct version:
    ```
-   which python3.8
+   which python3.9
    ```
 
    You should see the following output depending on your Mac architecture:
    - ARM (M1+) machines:
      ```
-     /opt/homebrew/bin/python3.8
+     /opt/homebrew/bin/python3.9
      ```
    - MacOS on Intel machines:
      ```
-     /usr/local/bin/python3.8
+     /usr/local/bin/python3.9
      ```
 
 [1]: https://brew.sh/
 {{% /tab %}}
 
 {{% tab "Windows" %}}
-1. Download the [Python 3.8 64-bit executable installer][1] and run it.
+1. Download the [Python 3.9 64-bit executable installer][1] and run it.
 1. Select the option to add Python to your PATH.
 1. Click **Install Now**.
 1. After the installation has completed, restart your machine.
@@ -53,14 +53,14 @@ Install Python 3.8 using [Homebrew][1]:
    ```
    > where python
 
-   C:\Users\<USER>\AppData\Local\Programs\Python\Python38\python.exe
+   C:\Users\<USER>\AppData\Local\Programs\Python\Python39\python.exe
    ```
 
-[1]: https://www.python.org/downloads/release/python-3810/
+[1]: https://www.python.org/downloads/release/python-3917/
 {{% /tab %}}
 
 {{% tab "Linux" %}}
-For Linux installations, avoid modifying your system Python. Datadog recommends installing Python 3.8 using [pyenv][1] or [miniconda][2].
+For Linux installations, avoid modifying your system Python. Datadog recommends installing Python 3.9 using [pyenv][1] or [miniconda][2].
 
 [1]: https://github.com/pyenv/pyenv#automatic-installer
 [2]: https://conda.io/projects/conda/en/stable/user-guide/install/linux.html
@@ -106,7 +106,7 @@ The `pipx` python package is required for the `ddev` command line tools.
 1. Verify that pipx is installed:
    ```
    > where pipx
-   C:\Users\<USER>\AppData\Local\Programs\Python\Python38\Scripts\pipx.exe
+   C:\Users\<USER>\AppData\Local\Programs\Python\Python39\Scripts\pipx.exe
    ```
 
 {{% /tab %}}
@@ -146,12 +146,12 @@ The `pipx` python package is required for the `ddev` command line tools.
 
    - ARM (M1+) machines:
      ```
-     pipx install ddev --python /opt/homebrew/bin/python3.8
+     pipx install ddev --python /opt/homebrew/bin/python3.9
      ```
 
    - MacOS on Intel machines:
      ```
-     pipx install ddev --python /usr/local/bin/python3.8
+     pipx install ddev --python /usr/local/bin/python3.9
      ```
 
 1. Check the installation output and run any additional commands recommended by the installation script.
