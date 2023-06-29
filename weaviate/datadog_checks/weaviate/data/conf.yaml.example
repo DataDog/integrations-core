@@ -51,10 +51,10 @@ instances:
     #
   - openmetrics_endpoint: http://localhost:2112/metrics
 
-    ## @param weaviate_api - string - optional
+    ## @param weaviate_api_endpoint - string - optional
     ## Endpoint of the Weaviate Restful API. For more information see: https://weaviate.io/developers/weaviate/api/rest
     #
-    # weaviate_api: http://localhost:8080
+    # weaviate_api_endpoint: http://localhost:8080
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.
