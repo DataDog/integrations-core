@@ -5,7 +5,7 @@
 from typing import Dict, List
 
 from datadog_checks.base.utils.discovery import Discovery
-from datadog_checks.postgres import PostgreSql
+from datadog_checks.base import AgentCheck
 from datadog_checks.postgres.util import DatabaseConfigurationError, warning_with_tags
 
 AUTODISCOVERY_QUERY: str = """select datname from pg_catalog.pg_database where datistemplate = false;"""
@@ -16,7 +16,7 @@ DEFAULT_REFRESH = 600
 class PostgresAutodiscovery(Discovery):
     def __init__(
         self,
-        check: PostgreSql,
+        check: AgentCheck,
         global_view_db: str,
         autodiscovery_config: Dict,
         default_ttl: int,

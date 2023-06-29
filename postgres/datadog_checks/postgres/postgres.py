@@ -119,10 +119,9 @@ class PostgreSql(AgentCheck):
             return None
 
         discovery = PostgresAutodiscovery(
+            self,
             'postgres',
             self._config.discovery_config,
-            self.log,
-            self.autodiscovery_db_pool,
             self._config.idle_connection_timeout,
         )
         return discovery
