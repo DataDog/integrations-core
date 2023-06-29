@@ -14,7 +14,7 @@ MOCKED_INSTANCE = {
 }
 
 
-om_metrics = [
+OM_METRICS = [
     "weaviate.go.gc.duration.seconds.count",
     "weaviate.go.gc.duration.seconds.quantile",
     "weaviate.go.gc.duration.seconds.sum",
@@ -53,15 +53,12 @@ om_metrics = [
     "weaviate.process.virtual_memory.max_bytes",
     "weaviate.promhttp.metric_handler.requests.count",
     "weaviate.promhttp.metric_handler.requests_in_flight",
-]
-
-fixture_metrics = [
     "weaviate.batch.durations_ms.bucket",
     "weaviate.batch.durations_ms.count",
     "weaviate.batch.durations_ms.sum",
     "weaviate.lsm.active.segments",
-    "weaviate.lsm.segment.count",
     "weaviate.lsm.segment.size",
+    "weaviate.lsm.segments",
     "weaviate.object_count",
     "weaviate.objects.durations_ms.count",
     "weaviate.objects.durations_ms.sum",
@@ -93,5 +90,5 @@ API_METRICS = [
     "weaviate.http.latency_ms",
 ]
 
-TEST_METRICS = om_metrics + fixture_metrics
-E2E_METRICS = om_metrics + API_METRICS
+
+E2E_METRICS = OM_METRICS + API_METRICS

@@ -9,14 +9,14 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.weaviate import WeaviateCheck
 
-from .common import API_METRICS, MOCKED_INSTANCE, TEST_METRICS
+from .common import API_METRICS, MOCKED_INSTANCE, OM_METRICS
 from .utils import get_fixture_path
 
 
 @pytest.mark.parametrize(
     'name, metrics',
     [
-        ('openmetrics', TEST_METRICS),
+        ('openmetrics', OM_METRICS),
         ('nodes_api', API_METRICS),
     ],
 )

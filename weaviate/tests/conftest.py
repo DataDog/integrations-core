@@ -1,9 +1,11 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 
 import pytest
+import requests
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
@@ -53,4 +55,23 @@ def dd_environment():
             if USE_AUTH:
                 instance["headers"] = {"Authorization": "Bearer test123"}
 
+            make_weaviate_request(instance)
             yield instance
+
+
+def make_weaviate_request(instance):
+    weaviate_api_endpoint = f"{instance.get('weaviate_api_endpoint')}/v1/batch/objects"
+    headers = {'content-type': 'application/json'}
+
+    data = {
+        'objects': [
+            {'class': 'Example', 'vector': [0.1, 0.3], 'properties': {'text': 'This is the first object'}},
+            {'class': 'Example', 'vector': [0.01, 0.7], 'properties': {'text': 'This is another object'}},
+        ]
+    }
+
+    if instance.get('headers'):
+        headers.update(instance['headers'])
+
+    response = requests.post(weaviate_api_endpoint, headers=headers, data=json.dumps(data))
+    return response
