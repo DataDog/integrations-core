@@ -49,150 +49,71 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric(
-        'snmp.ltmNodeAddrNumber', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.ltmPoolMemberNumber', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.ltmPoolNumber', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.ltmVirtualServNumber', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysClientsslStatCurConns', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysClientsslStatDecryptedBytesIn', metric_type=aggregator.COUNT, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysClientsslStatDecryptedBytesOut', metric_type=aggregator.COUNT, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysClientsslStatEncryptedBytesIn', metric_type=aggregator.COUNT, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysClientsslStatEncryptedBytesOut', metric_type=aggregator.COUNT, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysClientsslStatHandshakeFailures', metric_type=aggregator.COUNT, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysGlobalHostOtherMemoryTotal', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysGlobalHostOtherMemoryUsed', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysGlobalHostSwapTotal', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysGlobalHostSwapUsed', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysGlobalTmmStatMemoryTotal', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysGlobalTmmStatMemoryUsed', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysStatMemoryTotal', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysStatMemoryUsed', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysTcpStatAcceptfails', metric_type=aggregator.COUNT, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysTcpStatAccepts', metric_type=aggregator.COUNT, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysTcpStatCloseWait', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysTcpStatConnects', metric_type=aggregator.COUNT, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysTcpStatConnfails', metric_type=aggregator.COUNT, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysTcpStatFinWait', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysTcpStatOpen', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysTcpStatTimeWait', metric_type=aggregator.GAUGE, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysUdpStatAcceptfails', metric_type=aggregator.COUNT, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysUdpStatAccepts', metric_type=aggregator.COUNT, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysUdpStatConnects', metric_type=aggregator.COUNT, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysUdpStatConnfails', metric_type=aggregator.COUNT, tags=common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.sysUdpStatOpen', metric_type=aggregator.GAUGE, tags=common_tags
-    )
+    aggregator.assert_metric('snmp.ltmNodeAddrNumber', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.ltmPoolMemberNumber', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.ltmPoolNumber', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.ltmVirtualServNumber', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysClientsslStatCurConns', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysClientsslStatDecryptedBytesIn', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.sysClientsslStatDecryptedBytesOut', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.sysClientsslStatEncryptedBytesIn', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.sysClientsslStatEncryptedBytesOut', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.sysClientsslStatHandshakeFailures', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.sysGlobalHostOtherMemoryTotal', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysGlobalHostOtherMemoryUsed', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysGlobalHostSwapTotal', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysGlobalHostSwapUsed', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysGlobalTmmStatMemoryTotal', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysGlobalTmmStatMemoryUsed', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysStatMemoryTotal', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysStatMemoryUsed', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysTcpStatAcceptfails', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.sysTcpStatAccepts', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.sysTcpStatCloseWait', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysTcpStatConnects', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.sysTcpStatConnfails', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.sysTcpStatFinWait', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysTcpStatOpen', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysTcpStatTimeWait', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.sysUdpStatAcceptfails', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.sysUdpStatAccepts', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.sysUdpStatConnects', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.sysUdpStatConnfails', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.sysUdpStatOpen', metric_type=aggregator.GAUGE, tags=common_tags)
 
     tag_rows = [
         ['cpu:0'],
         ['cpu:1'],
-
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.sysMultiHostCpuUsageRatio', metric_type=aggregator.GAUGE,
-                                 tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.sysMultiHostCpuUsageRatio', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['cpu:0'],
         ['cpu:1'],
-
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric(
-            'snmp.sysMultiHostCpuIdle', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.sysMultiHostCpuIowait', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.sysMultiHostCpuIrq', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.sysMultiHostCpuNice', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.sysMultiHostCpuIdle', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.sysMultiHostCpuIowait', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.sysMultiHostCpuIrq', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.sysMultiHostCpuNice', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
             'snmp.sysMultiHostCpuSoftirq', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric(
-            'snmp.sysMultiHostCpuSystem', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.sysMultiHostCpuUser', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.sysMultiHostCpuSystem', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.sysMultiHostCpuUser', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['server:server1'],
         ['server:server2'],
         ['server:server3'],
-
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
             'snmp.ltmVirtualServConnLimit', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric(
-            'snmp.ltmVirtualServEnabled', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.ltmVirtualServEnabled', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['ltm_vs_status_avail_state:availability is unknown'],
@@ -201,18 +122,14 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         ['ltm_vs_status_avail_state:not available'],
         ['ltm_vs_status_avail_state:not currently available'],
         ['ltm_vs_status_avail_state:unlicensed'],
-
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric(
-            'snmp.ltmVsStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.ltmVsStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['server:server1'],
         ['server:server2'],
         ['server:server3'],
-
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -250,7 +167,6 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         ['server:server1'],
         ['server:server2'],
         ['server:server3'],
-
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -273,12 +189,9 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         ['node:node1'],
         ['node:node2'],
         ['node:node3'],
-
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric(
-            'snmp.ltmNodeAddrConnLimit', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.ltmNodeAddrConnLimit', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
             'snmp.ltmNodeAddrDynamicRatio', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
@@ -288,9 +201,7 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         aggregator.assert_metric(
             'snmp.ltmNodeAddrMonitorStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric(
-            'snmp.ltmNodeAddrRatio', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.ltmNodeAddrRatio', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
             'snmp.ltmNodeAddrSessionStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
@@ -299,7 +210,6 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         ['node:node1'],
         ['node:node2'],
         ['node:node3'],
-
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -331,7 +241,6 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         ['node:node1'],
         ['node:node2'],
         ['node:node3'],
-
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -344,7 +253,6 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
     tag_rows = [
         ['pool:pool1'],
         ['pool:pool2'],
-
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -353,22 +261,17 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         aggregator.assert_metric(
             'snmp.ltmPoolDynamicRatioSum', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric(
-            'snmp.ltmPoolMemberCnt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.ltmPoolMemberCnt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['pool:pool1'],
         ['pool:pool2'],
-
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
             'snmp.ltmPoolStatConnqAgeHead', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric(
-            'snmp.ltmPoolStatConnqDepth', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.ltmPoolStatConnqDepth', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
             'snmp.ltmPoolStatCurSessions', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
@@ -391,7 +294,6 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
     tag_rows = [
         ['pool:pool1'],
         ['pool:pool2'],
-
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -408,7 +310,6 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         ['node:node1', 'pool:pool1'],
         ['node:node2', 'pool:pool1'],
         ['node:node3', 'pool:pool2'],
-
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -423,9 +324,7 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         aggregator.assert_metric(
             'snmp.ltmPoolMemberMonitorStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric(
-            'snmp.ltmPoolMemberRatio', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.ltmPoolMemberRatio', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
             'snmp.ltmPoolMemberSessionStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
@@ -434,7 +333,6 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         ['node:node1', 'pool:pool1'],
         ['node:node2', 'pool:pool1'],
         ['node:node3', 'pool:pool2'],
-
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -472,7 +370,6 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         ['node:node1', 'pool:pool1'],
         ['node:node2', 'pool:pool1'],
         ['node:node3', 'pool:pool2'],
-
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
