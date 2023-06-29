@@ -6,14 +6,25 @@ from urllib.parse import urlparse
 
 def initialize_instance(values, **kwargs):
     if 'openmetrics_endpoint' in values:
-        validate_url(values['openmetrics_endpoint'], required_path='/metrics')
+        validate_url(
+            values['openmetrics_endpoint'],
+            required_path='/metrics',
+            example='http://localhost:2112/metrics',
+            config='openmetrics_endpoint',
+        )
 
-    if 'weaviate_api_endpoint_endpoint' in values:
-        validate_url(values['weaviate_api_endpoint'], required_path=None)
+    if 'weaviate_api_endpoint' in values:
+        validate_url(
+            values['weaviate_api_endpoint'],
+            required_path=None,
+            example='http://localhost:8080',
+            config='weaviate_api_endpoint',
+        )
 
     return values
 
-def validate_url(url, required_path=None):
+
+def validate_url(url, required_path=None, example=None, config=None):
     url_parsed = urlparse(url)
     errors = []
 
@@ -23,9 +34,11 @@ def validate_url(url, required_path=None):
         errors.append("http or https scheme is missing")
     if required_path and url_parsed.path != required_path:
         errors.append(f"URL should end with {required_path}")
-    if not required_path:
+    if not required_path and url_parsed.path:
         errors.append("should not contain a path or trailing /")
 
     if errors:
         error_message = ", ".join(errors)
-        raise ValueError(f"{url} is incorrectly configured. Errors detected: {error_message}. Example: http://localhost:8080/metrics")
+        raise ValueError(
+            f"{config}: {url} is incorrectly configured. Errors detected: {error_message}. Example: {example}"
+        )

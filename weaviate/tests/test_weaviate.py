@@ -53,8 +53,25 @@ def test_empty_instance(dd_run_check):
         Exception,
         match="The setting `openmetrics_endpoint` is required",
     ):
-        check = WeaviateCheck('argocd', {}, [{}])
+        check = WeaviateCheck('weaviate', {}, [{}])
         dd_run_check(check)
+
+
+@pytest.mark.parametrize(
+    'instance',
+    [
+        ({'openmetrics_endpoint': 'weaviate:2112/metrics'}),
+        ({'weaviate_api_endpoint': 'https://localhost:2112/metrics'}),
+    ],
+)
+def test_custom_validation(dd_run_check, instance):
+    for k, v in instance.items():
+        with pytest.raises(
+            Exception,
+            match=f"{k}: {v} is incorrectly configured",
+        ):
+            check = WeaviateCheck('weaviate', {}, [instance])
+            dd_run_check(check)
 
 
 @pytest.mark.integration

@@ -15,8 +15,6 @@ E2E_METRICS = [
     "weaviate.go.gc.duration.seconds.sum",
     "weaviate.go.goroutines",
     "weaviate.go.info",
-    "weaviate.lsm.memtable.durations_ms.count",
-    "weaviate.lsm.memtable.durations_ms.sum",
     "weaviate.go.memstats.alloc_bytes",
     "weaviate.go.memstats.alloc_bytes.count",
     "weaviate.go.memstats.buck_hash.sys_bytes",
@@ -50,8 +48,6 @@ E2E_METRICS = [
     "weaviate.process.virtual_memory.max_bytes",
     "weaviate.promhttp.metric_handler.requests.count",
     "weaviate.promhttp.metric_handler.requests_in_flight",
-    # Latency metric since the mock response is 200
-    "weaviate.http.latency_ms",
 ]
 
 fixture_metrics = [
@@ -78,6 +74,10 @@ fixture_metrics = [
     "weaviate.vector.index.tombstone.cleaned.count",
     "weaviate.vector.index.tombstone.cleanup.threads",
     "weaviate.vector.index.tombstones",
+    "weaviate.lsm.memtable.durations_ms.count",
+    "weaviate.lsm.memtable.durations_ms.sum",
+    # Latency metric since the mock response is 200
+    "weaviate.http.latency_ms",
 ]
 
 API_METRICS = [
