@@ -65,14 +65,14 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
         start_time = time.time()
         response = self.http.get(endpoint)
         end_time = time.time()
+        tags = self.tags
+        tags.append(f"weaviate_liveness_url:{endpoint}")
         if response.status_code == 200:
-            tags = self.tags
             latency = round_value((end_time - start_time) * 1000, 2)
-            self.service_check('liveness.status', 0)
-            tags.append(f"weaviate_liveness_url:{endpoint}")
+            self.service_check('liveness.status', 0, tags)
             self.gauge('http.latency_ms', latency, tags=tags)
         else:
-            self.service_check('liveness.status', 2)
+            self.service_check('liveness.status', 2, tags)
 
     def _submit_node_metrics(self):
         endpoint = urljoin(self.api_url, DEFAULT_NODE_METRICS_ENDPOINT)
