@@ -77,14 +77,16 @@ def test_autodiscovery_max_databases(integration_check, pg_instance):
     assert check.autodiscovery is not None
     databases = check.autodiscovery.get_items()
     assert len(databases) == pg_instance['database_autodiscovery']['max_databases']
-    expected_warning = ["Autodiscovery found {} databases, which was more than the specified limit of {}. "
-                    "Increase `max_databases` in the `database_autodiscovery` block of the agent configuration"
-                    "to see these extra databases."
-                    "Truncating list and running checks only on the following databases: {}\n".format(
-                    len(check.autodiscovery._cache._cached_items),
-                    pg_instance['database_autodiscovery']['max_databases'],
-                    databases
-                    )]
+    expected_warning = [
+        "Autodiscovery found {} databases, which was more than the specified limit of {}. "
+        "Increase `max_databases` in the `database_autodiscovery` block of the agent configuration"
+        "to see these extra databases."
+        "Truncating list and running checks only on the following databases: {}\n".format(
+            len(check.autodiscovery._cache._cached_items),
+            pg_instance['database_autodiscovery']['max_databases'],
+            databases,
+        )
+    ]
     print(check.warnings)
     assert check.warnings == expected_warning
 

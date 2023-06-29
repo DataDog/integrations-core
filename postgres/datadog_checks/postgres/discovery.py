@@ -47,7 +47,10 @@ class PostgresAutodiscovery(Discovery):
         # get_items updates _cache._cached_items, so check if the last refresh
         # added a database that put this instance over the limit.
         # _cache._cached_items stores databases before the limit filter is applied
-        if len(self._cache._cached_items) != prev_cached_items_len and len(self._cache._cached_items) > self._filter._limit:
+        if (
+            len(self._cache._cached_items) != prev_cached_items_len
+            and len(self._cache._cached_items) > self._filter._limit
+        ):
             self._check.record_warning(
                 DatabaseConfigurationError.autodiscovered_databases_exceeds_limit,
                 warning_with_tags(
