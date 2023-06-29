@@ -500,22 +500,14 @@
 
 ## 1.5.0 / 2017-11-21
 
-<<<<<<< HEAD
 ***Changed***:
 
 * Filter out oplog entries without a timestamp. See [#406](https://github.com/DataDog/integrations-core/issues/406), thanks [@hindmanj](https://github.com/hindmanj)
 
-=======
->>>>>>> 51b9d020def0c3ec63abae293faa09bb07804967
 ***Added***: 
 
 * Collect metrics about indexes usage. See [#823](https://github.com/DataDog/integrations-core/issues/823)
 * Upgrading pymongo to version 3.5. See [#747](https://github.com/DataDog/integrations-core/issues/747)
-<<<<<<< HEAD
-=======
-* Filter out oplog entries without a timestamp. See [#406](https://github.com/DataDog/integrations-core/issues/406), thanks [@hindmanj](https://github.com/hindmanj)
->>>>>>> 51b9d020def0c3ec63abae293faa09bb07804967
-
 
 ## 1.4.0 / 2017-10-10
 
@@ -526,7 +518,6 @@
 
 ## 1.3.0 / 2017-08-28
 
-<<<<<<< HEAD
 ***Changed***:
 
 * Simplify "system.namespaces" usage. See [#625](https://github.com/DataDog/integrations-core/issues/625), thanks [@dtbartle](https://github.com/dtbartle)
@@ -534,12 +525,6 @@
 ***Added***: 
 
 * Add support for `authSource` parameter in mongo URL. See [#691](https://github.com/DataDog/integrations-core/issues/691)
-=======
-***Added***: 
-
-* Add support for `authSource` parameter in mongo URL. See [#691](https://github.com/DataDog/integrations-core/issues/691)
-* Simplify "system.namespaces" usage. See [#625](https://github.com/DataDog/integrations-core/issues/625), thanks [@dtbartle](https://github.com/dtbartle)
->>>>>>> 51b9d020def0c3ec63abae293faa09bb07804967
 
 ***Fixed***: 
 
@@ -555,11 +540,8 @@
 
 ## 1.1.0 / 2017-06-05
 
-<<<<<<< HEAD
+
 ***Changed***: 
-=======
-***Added***: 
->>>>>>> 51b9d020def0c3ec63abae293faa09bb07804967
 
 * Set connectTimeout & serverSelectionTimeout to timeout in config. See [#352](https://github.com/DataDog/integrations-core/issues/352)
 
