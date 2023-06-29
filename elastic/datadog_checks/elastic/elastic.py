@@ -270,7 +270,13 @@ class ESCheck(AgentCheck):
         self._get_index_search_stats(admin_forwarder, base_tags)
 
     def _get_template_metrics(self, admin_forwarder, base_tags):
-        template_resp = self._get_data(self._join_url('/_cat/templates?format=json', admin_forwarder))
+
+        try:
+            template_resp = self._get_data(self._join_url('/_cat/templates?format=json', admin_forwarder))
+        except Exception as e:
+            self.log.error("Error reading templates info from servers (%s) - template metrics will be missing", e)
+            return
+
         filtered_templates = [t for t in template_resp if not t['name'].startswith(TEMPLATE_EXCLUSION_LIST)]
 
         for metric, desc in iteritems(TEMPLATE_METRICS):
