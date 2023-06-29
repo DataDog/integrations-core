@@ -3,7 +3,7 @@ version: '3'
 services:
 
   vault:
-    image: vault:latest
+    image: vault:1.13.3
     container_name: ddev_vault
     cap_add:
       - IPC_LOCK
