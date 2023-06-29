@@ -4,7 +4,7 @@
 
 MOCKED_INSTANCE = {
     'openmetrics_endpoint': 'http://weaviate:2112/metrics',
-    'weaviate_api': 'http://weaviate:8080',
+    'weaviate_api_endpoint': 'http://weaviate:8080',
     'tags': ["test:tag"],
 }
 

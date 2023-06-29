@@ -16,7 +16,7 @@ files:
         openmetrics_endpoint.description: |
           Endpoint exposing the Weaviate's Prometheus metrics. For more information refer to:
           https://weaviate.io/developers/weaviate/configuration/monitoring
-    - name: weaviate_api
+    - name: weaviate_api_endpoint
       display_priority: 1
       description: |
         Endpoint of the Weaviate Restful API. For more information see: https://weaviate.io/developers/weaviate/api/rest

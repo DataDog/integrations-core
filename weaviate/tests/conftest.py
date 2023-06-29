@@ -43,6 +43,6 @@ def dd_environment():
 
             instance = {
                 "openmetrics_endpoint": f"http://{weaviate_host}:{weaviate_port}/metrics",
-                "weaviate_api": f"http://{weaviate_host}:{weaviate_api_port}",
+                "weaviate_api_endpoint": f"http://{weaviate_host}:{weaviate_api_port}",
             }
             yield instance

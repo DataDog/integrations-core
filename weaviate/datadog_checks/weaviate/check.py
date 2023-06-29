@@ -25,7 +25,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
             instances,
         )
         self.tags = self.instance.get('tags', [])
-        self.api_url = self.instance.get('weaviate_api')
+        self.api_url = self.instance.get('weaviate_api_endpoint')
 
     def get_default_config(self):
         return {'metrics': [METRICS]}
@@ -113,7 +113,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
 
     def check(self, _):
         try:
-            if self.instance.get("weaviate_api"):
+            if self.instance.get("weaviate_api_endpoint"):
                 self._submit_version_metadata()
                 self._submit_liveness_metrics()
                 self._submit_node_metrics()
