@@ -209,13 +209,13 @@ jobs:
       if: inputs.standard && inputs.repo == 'core'
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-      run: ddev env test --base --new-env --junit ${{ inputs.target }} --agent agent-dev:alex-symbol-forced-type
+      run: ddev env test --base --new-env --junit ${{ inputs.target }} --agent datadog/agent-dev:alex-symbol-forced-type
 
     - name: Run E2E tests
       if: inputs.standard && inputs.repo != 'core'
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-      run: ddev env test --new-env --junit ${{ inputs.target }}  --agent agent-dev:alex-symbol-forced-type
+      run: ddev env test --new-env --junit ${{ inputs.target }}  --agent datadog/agent-dev:alex-symbol-forced-type
 
     - name: Run benchmarks
       if: inputs.benchmark
