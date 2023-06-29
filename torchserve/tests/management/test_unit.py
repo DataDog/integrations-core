@@ -226,7 +226,7 @@ def metric_should_be_exposed(metric, expected_models):
             id="new version set",
         ),
         pytest.param(
-            "management/events/models_without_2_2.json",
+            "management/events/models_without_3_2.json",
             [
                 {
                     "type": "torchserve.management_api.model_removed",
