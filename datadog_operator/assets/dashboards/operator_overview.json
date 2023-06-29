@@ -550,7 +550,7 @@
                             ],
                             "custom_links": [
                                 {
-                                    "link": "/dash/integration/30322/kubernetes-pods-overview",
+                                    "link": "/dash/integration/Kubernetes%20-%20Pods",
                                     "label": "View Pods overview"
                                 }
                             ],

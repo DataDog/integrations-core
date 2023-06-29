@@ -35,7 +35,7 @@ from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_succes
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
 @click.option('--cov-missing', '-cm', is_flag=True, help='Show line numbers of statements that were not executed')
 @click.option('--junit', '-j', 'junit', is_flag=True, help='Generate junit reports')
-@click.option('--marker', '-m', default="not e2e", help='Only run tests matching given marker expression')
+@click.option('--marker', '-m', help='Only run tests matching given marker expression')
 @click.option('--filter', '-k', 'test_filter', help='Only run tests matching given substring expression')
 @click.option('--pdb', 'enter_pdb', is_flag=True, help='Drop to PDB on first failure, then end test session')
 @click.option('--debug', '-d', is_flag=True, help='Set the log level to debug')

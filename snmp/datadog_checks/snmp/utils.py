@@ -160,9 +160,10 @@ def _load_default_profiles():
         definition = _read_profile_definition(path)
         try:
             recursively_expand_base_profiles(definition)
-        except Exception:
-            logger.error("Could not expand base profile %s", path)
-            raise
+        except Exception as exc:
+            logger.warning("Failed to expand base profiles in profile '%s': %s", name, exc)
+            continue
+
         profiles[name] = {'definition': definition}
 
     return profiles
