@@ -1,6 +1,11 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
+from datadog_checks.base import is_affirmative
+
+USE_AUTH = is_affirmative(os.environ.get('USE_AUTH'))
 
 MOCKED_INSTANCE = {
     'openmetrics_endpoint': 'http://weaviate:2112/metrics',
@@ -9,7 +14,7 @@ MOCKED_INSTANCE = {
 }
 
 
-E2E_METRICS = [
+om_metrics = [
     "weaviate.go.gc.duration.seconds.count",
     "weaviate.go.gc.duration.seconds.quantile",
     "weaviate.go.gc.duration.seconds.sum",
@@ -88,4 +93,5 @@ API_METRICS = [
     "weaviate.http.latency_ms",
 ]
 
-TEST_METRICS = E2E_METRICS + fixture_metrics
+TEST_METRICS = om_metrics + fixture_metrics
+E2E_METRICS = om_metrics + API_METRICS
