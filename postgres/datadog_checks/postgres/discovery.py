@@ -57,10 +57,9 @@ class PostgresAutodiscovery(Discovery):
                     "Autodiscovery found %d databases, which was more than the specified limit of %d. "
                     "Increase `max_databases` in the `database_autodiscovery` block of the agent configuration"
                     "to see these extra databases."
-                    "Truncating list and running checks only on the following databases: %s",
+                    "The database list will be truncated.",
                     len(self._cache._cached_items),
                     self._filter._limit,
-                    self.get_items(),
                 ),
             )
 
