@@ -17,7 +17,7 @@ def test_e2e_openmetrics_v1(dd_agent_check):
 
     for metric in E2E_METRICS:
         if metric == 'weaviate.node.shard.objects':
-            aggregator.assert_metric(metric, at_least = 0)
+            aggregator.assert_metric(metric, at_least=0)
         else:
             aggregator.assert_metric(metric)
 
