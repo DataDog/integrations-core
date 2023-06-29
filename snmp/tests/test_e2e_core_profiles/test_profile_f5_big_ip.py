@@ -37,14 +37,9 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_vendor:f5',
-] + []
+    ] + []
 
     # --- TEST EXTENDED METRICS ---
-    # Examples:
-    # assert_extend_generic_if(aggregator, common_tags)
-    # assert_extend_generic_ip(aggregator, common_tags)
-    # assert_extend_generic_tcp(aggregator, common_tags)
-    # TODO: Update extended metrics section as needed, if any. (Remove this TODO note once done.)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
