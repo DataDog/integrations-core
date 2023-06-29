@@ -341,6 +341,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         # to the backend
         if 'statement_text' in row:
             del row['statement_text']
+        # we're already able to link to the procedure via procedure_name and procedure_signature so we don't need
+        # the text in metrics payloads
+        if 'procedure_text' in row:
+            del row['procedure_text']
         return row
 
     def _to_metrics_payload(self, rows):
