@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from urllib.parse import urljoin
 
-from requests import HTTPError
-
 from datadog_checks.base import AgentCheck
 
 
@@ -29,8 +27,7 @@ class TorchserveInferenceAPICheck(AgentCheck):
             response = self.http.get(ping_url)
             self.log.debug("Inference API `response`: [%s]", response)
             response.raise_for_status()
-        except HTTPError as e:
-            self.log.debug("An HTTPError occurred. %s", e, exc_info=True)
+        except Exception:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.tags)
             raise
         else:
