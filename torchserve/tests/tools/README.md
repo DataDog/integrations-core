@@ -21,4 +21,4 @@ Note: `.pth` file are not stored in this repository, we only keep the final `.ma
 
 # Generate traffic in the e2e environment
 
-The `generate_traffic.py` file is a simple that will continuously send requests to the torchserve instance to generate more metrics and logs.
+The `generate_traffic.py` file is a simple script that will continuously send requests to the torchserve instance to generate more metrics and logs.
