@@ -7,13 +7,6 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .. import common
-from ..test_e2e_core_metadata import assert_device_metadata
-from .utils import (
-    assert_common_metrics,
-    assert_extend_generic_if,
-    create_e2e_core_test_config,
-    get_device_ip_from_config,
-)
 from ..metrics import (
     IF_BANDWIDTH_USAGE,
     IF_COUNTS,
@@ -21,6 +14,12 @@ from ..metrics import (
     IF_RATES,
     IF_SCALAR_GAUGE,
     IP_COUNTS,
+)
+from ..test_e2e_core_metadata import assert_device_metadata
+from .utils import (
+    assert_common_metrics,
+    create_e2e_core_test_config,
+    get_device_ip_from_config,
 )
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
@@ -32,12 +31,12 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
 
     ip_address = get_device_ip_from_config(config)
     common_tags = [
-        'snmp_profile:f5-big-ip',
-        'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
-        'device_namespace:default',
-        'snmp_device:' + ip_address,
-        'device_vendor:f5',
-    ] + []
+                      'snmp_profile:f5-big-ip',
+                      'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
+                      'device_namespace:default',
+                      'snmp_device:' + ip_address,
+                      'device_vendor:f5',
+                  ] + []
 
     # --- TEST EXTENDED METRICS ---
 
@@ -433,7 +432,8 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
 
     # --- TEST METADATA ---
     device = {
-        'description': 'BIG-IP Virtual Edition : Linux 3.10.0-862.14.4.el7.ve.x86_64 : BIG-IP software release 15.0.1, build 0.0.11',
+        'description': 'BIG-IP Virtual Edition : Linux 3.10.0-862.14.4.el7.ve.x86_64 : BIG-IP software release 15.0.1, '
+        'build 0.0.11',
         'id': 'default:' + ip_address,
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
