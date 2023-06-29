@@ -116,6 +116,8 @@ class KafkaClient:
         self.kafka_client.list_topics(None, timeout=self.config._request_timeout_ms / 1000)
 
     def get_consumer_offsets(self):
+        # list_consumer_group_offsets() takes a Consumer Group + Topic + Partition combo
+        # Reimplement the check so it doesn't fetch all possible topic+partitions first?
         # {(consumer_group, topic, partition): offset}
         consumer_offsets = {}
 
@@ -132,7 +134,6 @@ class KafkaClient:
                 topic_partitions = response_offset_info.topic_partitions
 
                 self.log.debug('RESULT CONSUMER GROUP: %s', consumer_group)
-                self.log.debug('RESULT TOPIC PARTITIONS: %s', topic_partitions)
 
                 for topic_partition in topic_partitions:
                     topic = topic_partition.topic
@@ -159,47 +160,60 @@ class KafkaClient:
         return consumer_offsets
 
     def _get_consumer_groups(self):
-        # Get all consumer groups
+        breakpoint()
+        # Get all consumer groups to monitor
         consumer_groups = []
-        consumer_groups_future = self.kafka_client.list_consumer_groups()
-        self.log.debug('MONITOR UNLISTED CG FUTURES: %s', consumer_groups_future)
-        try:
-            list_consumer_groups_result = consumer_groups_future.result()
-            self.log.debug('MONITOR UNLISTED FUTURES RESULT: %s', list_consumer_groups_result)
+        if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_compiled_regex:
+            consumer_groups_future = self.kafka_client.list_consumer_groups()
+            # self.log.debug('MONITOR UNLISTED CG FUTURES: %s', consumer_groups_future)
+            try:
+                list_consumer_groups_result = consumer_groups_future.result()
+                # self.log.debug('MONITOR UNLISTED FUTURES RESULT: %s', list_consumer_groups_result)
 
-            consumer_groups.extend(
-                valid_consumer_group.group_id for valid_consumer_group in list_consumer_groups_result.valid
-            )
-        except Exception as e:
-            self.log.error("Failed to collect consumer groups: %s", e)
-        return consumer_groups
+                consumer_groups.extend(
+                    valid_consumer_group.group_id for valid_consumer_group in list_consumer_groups_result.valid
+                )
+            except Exception as e:
+                self.log.error("Failed to collect consumer groups: %s", e)
+            # add debug log here to list the consumer groups result
+            return consumer_groups
+        else:
+            return self.config._consumer_groups
 
     def _get_consumer_offset_futures(self, consumer_groups):
         # When listening for topics, we should skip any where the topic partition combo results in -1001
         # Instead of getting topics and partitions 
+
+        # If not using monitor all or regex, just yield the offsets for the selected consumer_groups
         topic_metadata = self.kafka_client.list_topics(timeout=self.config._request_timeout).topics
         topics = {
             topic: list(topic_metadata[topic].partitions.keys())
             for topic in topic_metadata
             if topic not in KAFKA_INTERNAL_TOPICS
         }
+        breakpoint()
 
+        # This is ALL consumer groups, not just the ones we want to monitor
         for consumer_group in consumer_groups:
             self.log.debug('CONSUMER GROUP: %s', consumer_group)
-
-            for topic_partition in self._get_topic_partitions(topics, consumer_group):
+            # This double for loop might be causing issues, maybe we can do it in batches here?
+            if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_compiled_regex:
                 yield self.kafka_client.list_consumer_group_offsets(
-                    [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
+                    [ConsumerGroupTopicPartitions(consumer_group)]
                 )[consumer_group]
+            else:
+                for topic_partition in self._get_topic_partitions_for_group(topics, consumer_group):
+                    yield self.kafka_client.list_consumer_group_offsets(
+                        [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
+                    )[consumer_group]
 
-    def _get_topic_partitions(self, topics, consumer_group):
+
+    # This function figures out the consumer group+topic+partitions
+    def _get_topic_partitions_for_group(self, topics, consumer_group):
         for topic, partitions in topics.items():
             self.log.debug('CONFIGURED TOPICS: %s', topic)
 
-            if self.config._monitor_unlisted_consumer_groups:
-                filtered_partitions = partitions
-            else:
-                filtered_partitions = self._filter_partitions(consumer_group, topic, partitions)
+            filtered_partitions = self._filter_partitions(consumer_group, topic, partitions)
 
             for partition in filtered_partitions:
                 topic_partition = TopicPartition(topic, partition)
