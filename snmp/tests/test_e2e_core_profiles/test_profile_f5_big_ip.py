@@ -80,6 +80,7 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
     aggregator.assert_metric('snmp.sysUdpStatConnects', metric_type=aggregator.COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.sysUdpStatConnfails', metric_type=aggregator.COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.sysUdpStatOpen', metric_type=aggregator.GAUGE, tags=common_tags)
+
     tag_rows = [
          ['cpu:0'],
          ['cpu:1'],
