@@ -31,12 +31,12 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
 
     ip_address = get_device_ip_from_config(config)
     common_tags = [
-                      'snmp_profile:f5-big-ip',
-                      'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
-                      'device_namespace:default',
-                      'snmp_device:' + ip_address,
-                      'device_vendor:f5',
-                  ] + []
+        'snmp_profile:f5-big-ip',
+        'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
+        'device_namespace:default',
+        'snmp_device:' + ip_address,
+        'device_vendor:f5',
+    ] + []
 
     # --- TEST EXTENDED METRICS ---
 
