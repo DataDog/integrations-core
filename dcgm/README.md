@@ -17,9 +17,9 @@ The DCGM check is included in the [Datadog Agent][1] package, however we will ne
 
 To configure the exporter in a Docker environment:
 
-1. Create the following file `$PWD/default-counters.csv` which contains the default fields from the `etc/default-counters.csv`. Using this file, we can add more fields for collection and can be done by adding the counter name, type and (optionally) description to the end of the file. For reference on adding fields, please see the [Changing Fields][9] section and for the complete list of fields, see the [DCGM API reference manual][10].
+1. Create the following file `$PWD/default-counters.csv` which contains the default fields from `etc/default-counters.csv`. Using this file we can add more fields for collection. Follow [these instructions][9] to add more fields. For the complete list of fields see the [DCGM API reference manual][10].
 
-<div class="alert alert-info">We recommend adding the following to cover those that are found in the <a href="https://docs.datadoghq.com/integrations/nvml/#metrics">NVML integration</a>:
+<div class="alert alert-info">We recommend adding the following fields to cover the same ground as our <a href="https://docs.datadoghq.com/integrations/nvml/#metrics">NVML integration</a>:
 
 ```
 DCGM_FI_DEV_COUNT,                       counter, Number of Devices on the node.
@@ -45,16 +45,16 @@ NVIDIA devs also recommend enabling the following default counters and labels:
 
 They also recommend adding the following non-default fields and labels:
 ```
-DCGM_FI_DEV_SLOWDOWN_TEMP, gauge, Slowdown temperature for the device.
-DCGM_FI_DEV_POWER_MGMT_LIMIT,gauge, Current power limit for the device.
-DCGM_FI_DEV_PSTATE, gauge, Performance state (P-State) 0-15. 0=highest
-DCGM_FI_DEV_FB_TOTAL,gauge,
-DCGM_FI_DEV_FB_RESERVED,gauge,
-DCGM_FI_DEV_FB_USED_PERCENT,gauge,
-DCGM_FI_DEV_CLOCK_THROTTLE_REASONS,gauge, Current clock throttle reasons (bitmask of DCGM_CLOCKS_THROTTLE_REASON_*)
-DCGM_FI_CUDA_DRIVER_VERSION,label,
-DCGM_FI_DEV_NAME,label,
-DCGM_FI_DEV_MINOR_NUMBER,label,
+DCGM_FI_DEV_SLOWDOWN_TEMP,              gauge, Slowdown temperature for the device.
+DCGM_FI_DEV_POWER_MGMT_LIMIT,           gauge, Current power limit for the device.
+DCGM_FI_DEV_PSTATE,                     gauge, Performance state (P-State) 0-15. 0=highest
+DCGM_FI_DEV_FB_TOTAL,                   gauge,
+DCGM_FI_DEV_FB_RESERVED,                gauge,
+DCGM_FI_DEV_FB_USED_PERCENT,            gauge,
+DCGM_FI_DEV_CLOCK_THROTTLE_REASONS,     gauge, Current clock throttle reasons (bitmask of DCGM_CLOCKS_THROTTLE_REASON_*)
+DCGM_FI_CUDA_DRIVER_VERSION,            label,
+DCGM_FI_DEV_NAME,                       label,
+DCGM_FI_DEV_MINOR_NUMBER,               label,
 ```
 </div>
 
@@ -193,7 +193,7 @@ spec:
 ### Adjusting Monitors
 
 The monitors that come with this integration out of the box have some common-sense default values for their alert thresholds. For instance, the GPU temperature was determined based on [acceptable range for industrial devices][13].
-However we recommend you check to make sure these values fit your particular needs.
+However we recommend you check to make sure these values suit your particular needs.
 
 ## Data Collected
 
