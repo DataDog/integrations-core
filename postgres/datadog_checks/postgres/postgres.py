@@ -481,7 +481,7 @@ class PostgreSql(AgentCheck):
 
         return num_results
 
-    @tracked_method(agent_check_getter=None)
+    @tracked_method()
     def _collect_relations_autodiscovery(self, instance_tags, relations_scopes):
         if not self.autodiscovery:
             return
