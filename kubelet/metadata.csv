@@ -50,7 +50,7 @@ kubernetes.kubelet.pleg.relist_duration.sum,gauge,,second,,The sum of duration i
 kubernetes.kubelet.pleg.relist_interval.count,gauge,,second,,The count of relisting pods in PLEG,0,kubernetes,k8s.pleg.relist_interv,
 kubernetes.kubelet.pleg.relist_interval.sum,gauge,,,,The sum of interval in seconds between relisting in PLEG,0,kubernetes,k8s.pleg.relist_interv,
 kubernetes.kubelet.runtime.operations,count,,operation,,The number of runtime operations,0,kubernetes,k8s.runtime.ops,
-kubernetes.kubelet.runtime.errors,count,,operation,,The number of runtime operations errors,-1,kubernetes,k8s.runtime.err,
+kubernetes.kubelet.runtime.errors,gauge,,operation,,Cumulative number of runtime operations errors,-1,kubernetes,k8s.runtime.err,
 kubernetes.kubelet.runtime.operations.duration.sum,gauge,,operation,,The sum of duration of operations,0,kubernetes,k8s.runtime.duration,
 kubernetes.kubelet.runtime.operations.duration.count,gauge,,,,The count of operations,0,kubernetes,k8s.runtime.duration,
 kubernetes.kubelet.network_plugin.latency.sum,gauge,,microsecond,,The sum of latency in microseconds of network plugin operations,1,kubernetes,k8s.net_plug.lat.sum,

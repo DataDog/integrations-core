@@ -572,7 +572,7 @@
                             "custom_links": [
                                 {
                                     "label": "View Pods overview",
-                                    "link": "https://app.datadoghq.com/screen/integration/30322/kubernetes-pods-overview"
+                                    "link": "/dash/integration/Kubernetes%20-%20Pods"
                                 }
                             ],
                             "precision": 0,
@@ -600,7 +600,7 @@
                             "custom_links": [
                                 {
                                     "label": "View Pods overview",
-                                    "link": "https://app.datadoghq.com/screen/integration/30322/kubernetes-pods-overview"
+                                    "link": "/dash/integration/Kubernetes%20-%20Pods"
                                 }
                             ],
                             "precision": 0,
@@ -3170,7 +3170,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "View more in the [Kubernetes Pods Overview Dashboard](https://app.datadoghq.com/dash/integration/30322/kubernetes-pods-overview?tpl_var_cluster=$cluster.value&tpl_var_scope=$scope.value)",
+                            "content": "View more in the [Kubernetes Pods Overview Dashboard](/dash/integration/Kubernetes%20-%20Pods?tpl_var_cluster=$cluster.value&tpl_var_scope=$scope.value)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,

@@ -52,7 +52,7 @@ VERSION_BUMP = {
     'beta': lambda v: semver.bump_prerelease(v, 'beta'),
 }
 
-CHANGELOG_TYPES_ORDERED = ['Added', 'Fixed', 'Security', 'Changed', 'Deprecated', 'Removed']
+CHANGELOG_TYPES_ORDERED = ['Removed', 'Changed', 'Security', 'Deprecated', 'Added', 'Fixed']
 
 AGENT_V5_ONLY = {'agent_metrics', 'docker_daemon', 'go-metro', 'kubernetes', 'ntp'}
 

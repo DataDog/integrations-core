@@ -5,6 +5,7 @@ import logging
 
 import pytest
 import requests
+from packaging import version
 from six import iteritems
 
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -20,7 +21,7 @@ from datadog_checks.elastic.metrics import (
     slm_stats_for_version,
 )
 
-from .common import CLUSTER_TAG, IS_OPENSEARCH, JVM_RATES, PASSWORD, URL, USER, _test_check
+from .common import CLUSTER_TAG, ELASTIC_VERSION, IS_OPENSEARCH, JVM_RATES, PASSWORD, URL, USER, _test_check
 
 log = logging.getLogger('test_elastic')
 
@@ -103,6 +104,48 @@ def test_custom_queries_with_payload(dd_environment, dd_run_check, instance, agg
     check = ESCheck('elastic', {}, instances=[instance])
     dd_run_check(check)
     tags = cluster_tags + ['dynamic_tag:eq']
+
+    aggregator.assert_metric('elasticsearch.custom.metric', metric_type=aggregator.GAUGE, tags=tags)
+
+
+@pytest.mark.skipif(
+    version.parse(ELASTIC_VERSION) < version.parse('8.0.0'), reason='Test unavailable for Elasticsearch < 8.0.0'
+)
+def test_custom_queries_with_payload_multiterm(dd_environment, dd_run_check, instance, aggregator, cluster_tags):
+    response = requests.put(
+        "{}/multiterm_test".format(instance['url']),
+        json={"mappings": {"properties": {"field0": {"type": "keyword"}, "field1": {"type": "keyword"}}}},
+    )
+    response.raise_for_status()
+
+    response = requests.post(
+        "{}/multiterm_test/_doc?refresh=wait_for".format(instance['url']), json={"field0": "foo", "field1": "bar"}
+    )
+    response.raise_for_status()
+
+    custom_queries = [
+        {
+            'endpoint': '/_search',
+            'data_path': 'aggregations.values.buckets',
+            'payload': {
+                "size": 0,
+                "aggs": {"values": {"multi_terms": {"terms": [{"field": "field0"}, {"field": "field1"}]}}},
+            },
+            'columns': [
+                {
+                    'value_path': 'doc_count',
+                    'name': 'elasticsearch.custom.metric',
+                },
+                {'value_path': 'key.0', 'name': 'dynamic_tag0', 'type': 'tag'},
+                {'value_path': 'key.1', 'name': 'dynamic_tag1', 'type': 'tag'},
+            ],
+        },
+    ]
+
+    instance['custom_queries'] = custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+    dd_run_check(check)
+    tags = cluster_tags + ['dynamic_tag0:foo', "dynamic_tag1:bar"]
 
     aggregator.assert_metric('elasticsearch.custom.metric', metric_type=aggregator.GAUGE, tags=tags)
 

@@ -725,7 +725,23 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
 {{< /site-region >}}
 partial -->
 
-2. [Instrument your application][32] based on your setup. With Fargate APM applications do **not** set `DD_AGENT_HOST`, the default of `localhost` works.
+2. Instrument your application based on your setup:
+
+   **Note**: With Fargate APM applications, do **not** set `DD_AGENT_HOST` - the default of `localhost` works.
+
+   | Language                           |
+   |------------------------------------|
+   | [Java][47] |
+   | [Python][48] |
+   | [Ruby][49] |
+   | [Go][50] |
+   | [Node.js][51] |
+   | [PHP][52] |
+   | [C++][53] |
+   | [.NET Core][54] |
+   | [.NET Framework][55] |
+
+   See more general information about [Sending Traces to Datadog][32].
 
 3. Ensure your application is running in the same task definition as the Datadog Agent container.
 
@@ -827,3 +843,13 @@ Need help? Contact [Datadog support][18].
 [44]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html
 [45]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/assets/service_checks.json
 [46]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv
+[47]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/java?tab=containers#automatic-instrumentation
+[48]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/python?tab=containers#instrument-your-application
+[49]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/ruby#instrument-your-application
+[50]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/go/?tab=containers#activate-go-integrations-to-create-spans
+[51]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/nodejs?tab=containers#instrument-your-application
+[52]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/php?tab=containers#automatic-instrumentation
+[53]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/cpp?tab=containers#instrument-your-application
+[54]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-core?tab=containers#custom-instrumentation
+[55]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-framework?tab=containers#custom-instrumentation
+

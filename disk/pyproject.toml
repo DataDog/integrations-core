@@ -37,8 +37,7 @@ dynamic = [
     "version",
 ]
 
-[project.license]
-text = "BSD-3-Clause"
+license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [

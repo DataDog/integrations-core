@@ -10,7 +10,7 @@ build-backend = "hatchling.build"
 name = "datadog-checks-dev"
 description = "The Datadog Checks Developer Tool"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
 keywords = [
     "datadog",
     "datadog agent",
@@ -66,7 +66,7 @@ cli = [
     "click~=8.1",
     "codespell",
     "colorama",
-    "datamodel-code-generator~=0.12.0",
+    "datamodel-code-generator~=0.20.0",
     "hatch>=1.5.0",
     "in-toto==1.0.1",
     "jsonschema",
@@ -76,7 +76,6 @@ cli = [
     "pip-tools",
     "pathspec>=0.10.0",
     "platformdirs>=2.0.0a3",
-    "pyperclip>=1.7.0",
     "pysmi>=0.3.4",
     "securesystemslib[crypto]==0.20.1",
     "semver>=2.13.0",
@@ -92,9 +91,6 @@ cli = [
     "setuptools; python_version < '3.0'",
     "wheel>=0.31.0",
 ]
-
-[project.scripts]
-ddev = "datadog_checks.dev.tooling.cli:ddev"
 
 [project.entry-points.pytest11]
 datadog_checks = "datadog_checks.dev.plugin.pytest"

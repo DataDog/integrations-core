@@ -37,6 +37,10 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.ifInSpeed',
     'snmp.ifOutSpeed',
     'snmp.peerConnectionByState',  # BGP4 constant metric, not handled by python check
+    'snmp.ospfNbr',  # OSPF constant metrics, not handled by python check
+    'snmp.ospfVirtNbr',
+    'snmp.ospfIf',
+    'snmp.ospfVirtIf',
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
@@ -284,6 +288,11 @@ def test_e2e_profile_apc_ups(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config, expected_total_count=64 + 5)
 
 
+def test_e2e_profile_apc_ups_user(dd_agent_check):
+    config = common.generate_container_profile_config('apc_ups_user')
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=66 + 5)
+
+
 def test_e2e_profile_arista(dd_agent_check):
     config = common.generate_container_profile_config('arista')
     assert_python_vs_core(dd_agent_check, config, expected_total_count=16 + 5)
@@ -297,6 +306,7 @@ def test_e2e_profile_aruba(dd_agent_check):
         config,
         expected_total_count=67 + 5,
         metrics_to_skip=metrics_to_skip,
+        tags_to_skip=['neighbor_state', 'if_state'],  # Ignore tags that have a mapping
     )
 
 
@@ -324,6 +334,7 @@ def test_e2e_profile_cisco_3850(dd_agent_check):
         config,
         expected_total_count=5108 + 5,
         metrics_to_skip=metrics_to_skip,
+        tags_to_skip=['neighbor_state', 'if_state'],  # Ignore tags that have a mapping
     )
 
 
@@ -412,8 +423,8 @@ def test_e2e_profile_fortinet_fortigate(dd_agent_check):
     )
 
 
-def test_e2e_profile_generic_router(dd_agent_check):
-    config = common.generate_container_profile_config('generic-router')
+def test_e2e_profile_generic_device(dd_agent_check):
+    config = common.generate_container_profile_config('generic-device')
     assert_python_vs_core(dd_agent_check, config)
 
 
@@ -444,11 +455,6 @@ def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
 
 def test_e2e_profile_netapp(dd_agent_check):
     config = common.generate_container_profile_config('netapp')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_palo_alto(dd_agent_check):
-    config = common.generate_container_profile_config('palo-alto')
     assert_python_vs_core(dd_agent_check, config)
 
 
