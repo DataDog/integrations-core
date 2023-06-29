@@ -150,7 +150,8 @@ class KafkaClient:
                             topic_partition.topic,
                             str(topic_partition.partition),
                         )
-                    consumer_offsets[(consumer_group, topic, partition)] = offset
+                    if offset != -1001:
+                        consumer_offsets[(consumer_group, topic, partition)] = offset
 
         return consumer_offsets
 
