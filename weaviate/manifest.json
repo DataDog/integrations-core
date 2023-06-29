@@ -38,7 +38,7 @@
         "/bin/weaviate"
       ]
     },
-    "dashboards": "weaviate_overview.json",
+    "dashboards": {"Weaviate Overview": "assets/dashboards/weaviate_overview.json"},
     "monitors": {},
     "logs": {},
     "saved_views": {}
