@@ -39,8 +39,8 @@ class PostgresConfig:
         self.dbstrict = is_affirmative(instance.get('dbstrict', False))
         self.disable_generic_tags = is_affirmative(instance.get('disable_generic_tags', False)) if instance else False
 
-        self.discovery_config = instance.get('database_autodiscovery', {})
-        if self.discovery_config and self.dbname != 'postgres':
+        self.discovery_config = instance.get('database_autodiscovery', {"enabled": False})
+        if self.discovery_config['enabled'] and self.dbname != 'postgres':
             raise ConfigurationError(
                 "'dbname' parameter should not be set when `database_autodiscovery` is enabled."
                 "To monitor more databases, add them to the `database_autodiscovery` includelist."
@@ -53,7 +53,7 @@ class PostgresConfig:
         self.query_timeout = int(instance.get('query_timeout', 5000))
         self.idle_connection_timeout = instance.get('idle_connection_timeout', 60000)
         self.relations = instance.get('relations', [])
-        if self.relations and not (self.dbname or self.discovery_config):
+        if self.relations and not (self.dbname or self.discovery_config['enabled']):
             raise ConfigurationError(
                 '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
             )

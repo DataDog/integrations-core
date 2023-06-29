@@ -17,9 +17,12 @@ from .utils import requires_over_13, run_one_check
 
 DISCOVERY_CONFIG = {
     "enabled": True,
-    "include": ["dogs_([1-9]|[1-9][0-9]|10[0-9])"],
+    "include": ["dogs_([0-9]|[1-9][0-9]|10[0-9])"],
     "exclude": ["dogs_5$", "dogs_50$"],
 }
+
+# the number of test databases that exist from [dogs_0, dogs_100]
+NUM_DOGS_DATABASES = 101
 
 RELATION_METRICS = {
     'postgresql.seq_scans',
@@ -53,7 +56,7 @@ def test_autodiscovery_simple(integration_check, pg_instance):
 
     assert check.autodiscovery is not None
     databases = check.autodiscovery.get_items()
-    expected_len = 100 - len(DISCOVERY_CONFIG["exclude"])
+    expected_len = NUM_DOGS_DATABASES - len(DISCOVERY_CONFIG["exclude"])
     assert len(databases) == expected_len
 
 
@@ -102,20 +105,22 @@ def test_autodiscovery_refresh(integration_check, pg_instance):
 
     assert check.autodiscovery is not None
     databases = check.autodiscovery.get_items()
-    expected_len = 100 - len(DISCOVERY_CONFIG["exclude"])
+    expected_len = NUM_DOGS_DATABASES - len(DISCOVERY_CONFIG["exclude"])
     assert len(databases) == expected_len
 
     with get_postgres_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute(psycopg2.sql.SQL("CREATE DATABASE {}").format(psycopg2.sql.Identifier(database_to_find)))
+        try:
+            cursor.execute(psycopg2.sql.SQL("CREATE DATABASE {}").format(psycopg2.sql.Identifier(database_to_find)))
 
-        time.sleep(pg_instance["database_autodiscovery"]['refresh'])
-        databases = check.autodiscovery.get_items()
-        assert len(databases) == expected_len + 1
-        # Need to drop the new database to clean up the environment for next tests.
-        cursor.execute(
-            psycopg2.sql.SQL("DROP DATABASE {} WITH (FORCE);").format(psycopg2.sql.Identifier(database_to_find))
-        )
+            time.sleep(pg_instance["database_autodiscovery"]['refresh'])
+            databases = check.autodiscovery.get_items()
+            assert len(databases) == expected_len + 1
+        finally:
+            # Need to drop the new database to clean up the environment for next tests.
+            cursor.execute(
+                psycopg2.sql.SQL("DROP DATABASE {} WITH (FORCE);").format(psycopg2.sql.Identifier(database_to_find))
+            )
 
 
 @pytest.mark.integration

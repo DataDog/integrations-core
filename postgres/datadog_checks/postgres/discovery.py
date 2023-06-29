@@ -2,46 +2,38 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import logging
 from typing import Dict, List
 
 from datadog_checks.base.utils.discovery import Discovery
-from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
+from datadog_checks.postgres import PostgreSql
+from datadog_checks.postgres.util import DatabaseConfigurationError, warning_with_tags
 
-AUTODISCOVERY_QUERY: str = """select {columns} from pg_catalog.pg_database where datistemplate = false;"""
+AUTODISCOVERY_QUERY: str = """select datname from pg_catalog.pg_database where datistemplate = false;"""
+DEFAULT_MAX_DATABASES = 100
+DEFAULT_REFRESH = 600
 
 
 class PostgresAutodiscovery(Discovery):
     def __init__(
         self,
+        check: PostgreSql,
         global_view_db: str,
         autodiscovery_config: Dict,
-        log: logging.Logger,
-        conn_pool: MultiDatabaseConnectionPool,
         default_ttl: int,
     ) -> None:
-        # parent class asks for includelist to be a dictionary
-        parsed_include = self._parse_includelist(autodiscovery_config.get("include", [".*"]))
         super(PostgresAutodiscovery, self).__init__(
             self._get_databases,
-            include=parsed_include,
+            # parent class asks for includelist to be a dictionary
+            include={db: 0 for db in autodiscovery_config.get("include", [".*"])},
             exclude=autodiscovery_config.get("exclude", []),
-            interval=autodiscovery_config.get("refresh", 3600),
+            interval=autodiscovery_config.get("refresh", DEFAULT_REFRESH),
+            limit=autodiscovery_config.get("max_databases", DEFAULT_MAX_DATABASES),
         )
-        self._log = log
-        self._db = global_view_db
-        self._conn_pool = conn_pool
         self._default_ttl = default_ttl
-        self._max_databases = autodiscovery_config.get("max_databases", 100)
-
-    def _parse_includelist(self, include: List[str]) -> Dict[str, int]:
-        """
-        Convert includelist to a dictionary so the parent class can process it.
-        """
-        ret = {}
-        for item in include:
-            ret[item] = 0
-        return ret
+        self._db = global_view_db
+        self._check = check
+        self._log = self._check.log
+        self._conn_pool = self._check.autodiscovery_db_pool
 
     def get_items(self) -> List[str]:
         """
@@ -52,24 +44,35 @@ class PostgresAutodiscovery(Discovery):
         """
         items = list(super().get_items())
         items_parsed = [item[1] for item in items]
-        if len(items_parsed) > self._max_databases:
-            items_parsed = items_parsed[: self._max_databases]
-            self._log.warning(
-                "Autodiscovery found more than {} databases, which was specified as a limit. Truncating list"
-                "and running checks only on the following databases: {}".format(self._max_databases, items_parsed)
-            )
         return items_parsed
-
-    def _get_autodiscovery_query(self) -> str:
-        autodiscovery_query = AUTODISCOVERY_QUERY.format(columns=', '.join(['datname']))
-        return autodiscovery_query
 
     def _get_databases(self) -> List[str]:
         with self._conn_pool.get_connection(self._db, self._default_ttl) as conn:
-            cursor = conn.cursor()
-            autodiscovery_query = self._get_autodiscovery_query()
-            cursor.execute(autodiscovery_query)
-            databases = list(cursor.fetchall())
-            databases = [x[0] for x in databases]  # fetchall returns list of tuples representing rows, so need to parse
-            self._log.info("Databases found were: {}".format(databases))
-            return databases
+            with conn.cursor() as cursor:
+                cursor.execute(AUTODISCOVERY_QUERY)
+                databases = list(cursor.fetchall())
+                databases = [
+                    x[0] for x in databases
+                ]  # fetchall returns list of tuples representing rows, so need to parse
+                self._log.debug("Autodiscovered databases were: {}".format(databases))
+                return databases
+
+    def __refresh(self):
+        prev_cached_items_len = len(self._cached_items)
+        super().__refresh()
+        # refresh updates _cached_items, so check if the last refresh
+        # added a database that put this instance over the limit.
+        # _cached_items stores databases before the limit filter is applied
+        if len(self._cached_items) != prev_cached_items_len and len(self._cached_items) > self._limit:
+            self._check.record_warning(
+                DatabaseConfigurationError.autodiscovered_databases_exceeds_limit,
+                warning_with_tags(
+                    "Autodiscovery found %d databases, which was more than the specified limit of %d. "
+                    "Increase `max_databases` in the `database_autodiscovery` block of the agent configuration"
+                    "to see these extra databases."
+                    "Truncating list and running checks only on the following databases: %s",
+                    len(self._cached_items),
+                    self._limit,
+                    self.get_items(),
+                ),
+            )

@@ -11,7 +11,6 @@ import psycopg2
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.postgres import aws
@@ -108,7 +107,7 @@ class PostgreSql(AgentCheck):
         self._dynamic_queries = None
 
     def _build_autodiscovery(self):
-        if not is_affirmative(self._config.discovery_config):
+        if not self._config.discovery_config['enabled']:
             return None
 
         if not self._config.relations:
@@ -489,9 +488,9 @@ class PostgreSql(AgentCheck):
         databases = self.autodiscovery.get_items()
         for db in databases:
             with self.autodiscovery_db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
-                cursor = conn.cursor()
-                for scope in relations_scopes:
-                    self._query_scope(cursor, scope, instance_tags, False, db)
+                with conn.cursor() as cursor:
+                    for scope in relations_scopes:
+                        self._query_scope(cursor, scope, instance_tags, False, db)
 
     def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics

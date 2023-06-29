@@ -351,11 +351,11 @@ files:
               - "model"
               - "msdb"
         - name: refresh
-          description: Frequency in seconds of scans for new databases. Defaults to `3600`.
+          description: Frequency in seconds of scans for new databases. Defaults to 10 minutes.
           value:
             type: integer
-            example: 3600
-            display_default: 3600
+            example: 600
+            display_default: 600
     - name: application_name
       description: |
         The application_name can be any string of less than NAMEDATALEN characters (64 characters in a standard build).
