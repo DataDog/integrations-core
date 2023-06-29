@@ -1,0 +1,233 @@
+extends:
+  - alcatel-lucent.yaml
+sysobjectid:
+  - 1.3.6.1.4.1.6486.800.1.1.2.1.*
+metrics:
+  - MIB: ALCATEL-IND1-HEALTH-MIB
+    symbol:
+      name: cpu.usage
+      OID: 1.3.6.1.4.1.6486.800.1.2.1.16.1.1.1.14.0
+  - MIB: ALCATEL-IND1-HEALTH-MIB
+    symbol:
+      name: memory.usage
+      OID: 1.3.6.1.4.1.6486.800.1.2.1.16.1.1.1.10
+  - MIB: ALCATEL-IND1-HEALTH-MIB
+    symbol:
+      name: healthDeviceTemperatureChas1MinAvg
+      OID: 1.3.6.1.4.1.6486.800.1.2.1.16.1.1.1.18
+  - MIB: ALCATEL-IND1-CHASSIS-MIB
+    table:
+      name: chasEntPhysicalTable
+      OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1
+    symbols:
+      - name: chasEntPhysical
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.2.1.47.1.1.1.1.5
+          name: entPhysicalClass
+        tag: ent_physical_class
+        mapping:
+          1: other
+          2: unknown
+          3: chassis
+          4: backplane
+          5: container
+          6: power_supply
+          7: fan
+          8: sensor
+          9: module
+          10: port
+          11: stack
+          12: cpu
+      - column:
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+          name: entPhysicalName
+        tag: ent_physical_name
+      - column:
+          OID: 1.3.6.1.2.1.47.1.1.1.1.11
+          name: entPhysicalSerialNum
+        tag: ent_physical_serial_num
+      - column:
+          OID: 1.3.6.1.2.1.47.1.1.1.1.13
+          name: entPhysicalModelName
+        tag: ent_physical_model_name
+      - column:
+          OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.1
+          name: chasEntPhysAdminStatus
+        tag: chas_ent_phys_admin_status
+        mapping:
+          1: unknown
+          2: power_off
+          3: power_on
+          4: reset
+          5: takeover
+          6: reset_all
+          7: standby
+      - column:
+          OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.2
+          name: chasEntPhysOperStatus
+        tag: chas_ent_phys_oper_status
+        mapping:
+          1: up
+          2: down
+          3: testing
+          4: unknown
+          5: secondary
+          6: not_present
+          7: unpowered
+          8: master
+      - column:
+          OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.8
+          name: chasEntPhysLedStatusOk1
+        tag: chas_ent_phys_led_status_ok1
+        mapping:
+          0: not_applicable
+          1: off
+          2: green_on
+          3: green_blink
+          4: amber_on
+          5: amber_blink
+      - column:
+          OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.9
+          name: chasEntPhysLedStatusOk2
+        tag: chas_ent_phys_led_status_ok2
+        mapping:
+          0: not_applicable
+          1: off
+          2: green_on
+          3: green_blink
+          4: amber_on
+          5: amber_blink
+      - column:
+          OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.10
+          name: chasEntPhysLedStatusPrimaryCMM
+        tag: chas_ent_phys_led_status_primary_cmm
+        mapping:
+          0: not_applicable
+          1: off
+          2: green_on
+          3: green_blink
+          4: amber_on
+          5: amber_blink
+      - column:
+          OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.11
+          name: chasEntPhysLedStatusSecondaryCMM
+        tag: chas_ent_phys_led_status_secondary_cmm
+        mapping:
+          0: not_applicable
+          1: off
+          2: green_on
+          3: green_blink
+          4: amber_on
+          5: amber_blink
+      - column:
+          OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.12
+          name: chasEntPhysLedStatusTemperature
+        tag: chas_ent_phys_led_status_temperature
+        mapping:
+          0: not_applicable
+          1: off
+          2: green_on
+          3: green_blink
+          4: amber_on
+          5: amber_blink
+      - column:
+          OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.13
+          name: chasEntPhysLedStatusFan
+        tag: chas_ent_phys_led_status_fan
+        mapping:
+          0: not_applicable
+          1: off
+          2: green_on
+          3: green_blink
+          4: amber_on
+          5: amber_blink
+      - column:
+          OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.14
+          name: chasEntPhysLedStatusFan1
+        tag: chas_ent_phys_led_status_fan1
+        mapping:
+          0: not_applicable
+          1: off
+          2: green_on
+          3: green_blink
+          4: amber_on
+          5: amber_blink
+      - column:
+          OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.15
+          name: chasEntPhysLedStatusFan2
+        tag: chas_ent_phys_led_status_fan2
+        mapping:
+          0: not_applicable
+          1: off
+          2: green_on
+          3: green_blink
+          4: amber_on
+          5: amber_blink
+      - column:
+          OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.16
+          name: chasEntPhysLedStatusFan3
+        tag: chas_ent_phys_led_status_fan3
+        mapping:
+          0: not_applicable
+          1: off
+          2: green_on
+          3: green_blink
+          4: amber_on
+          5: amber_blink
+      - column:
+          OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.17
+          name: chasEntPhysLedStatusBackupPS
+        tag: chas_ent_phys_led_status_backup_ps
+        mapping:
+          0: not_applicable
+          1: off
+          2: green_on
+          3: green_blink
+          4: amber_on
+          5: amber_blink
+      - column:
+          OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.18
+          name: chasEntPhysLedStatusInternalPS
+        tag: chas_ent_phys_led_status_internal_ps
+        mapping:
+          0: not_applicable
+          1: off
+          2: green_on
+          3: green_blink
+          4: amber_on
+          5: amber_blink
+      - column:
+          OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.19
+          name: chasEntPhysLedStatusControl
+        tag: chas_ent_phys_led_status_control
+        mapping:
+          0: not_applicable
+          1: off
+          2: green_on
+          3: green_blink
+          4: amber_on
+          5: amber_blink
+      - column:
+          OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.20
+          name: chasEntPhysLedStatusFabric
+        tag: chas_ent_phys_led_status_fabric
+        mapping:
+          0: not_applicable
+          1: off
+          2: green_on
+          3: green_blink
+          4: amber_on
+          5: amber_blink
+      - column:
+          OID: 1.3.6.1.4.1.6486.800.1.1.1.1.1.1.1.21
+          name: chasEntPhysLedStatusPSU
+        tag: chas_ent_phys_led_status_psu
+        mapping:
+          0: not_applicable
+          1: off
+          2: green_on
+          3: green_blink
+          4: amber_on
+          5: amber_blink
