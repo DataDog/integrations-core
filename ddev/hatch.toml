@@ -13,7 +13,6 @@ mypy-args = [
 python = "3.9"
 e2e-env = false
 dependencies = [
-  "pytest-asyncio",
   "vcrpy",
 ]
 # TODO: remove this when the old CLI is gone

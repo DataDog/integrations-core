@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 from functools import cached_property
+from time import time
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from httpx import AsyncClient
+    from httpx import Client
 
+    from ddev.cli.terminal import BorrowedStatus
     from ddev.repo.core import Repository
 
 
@@ -48,9 +50,10 @@ class GitHubManager:
     # https://docs.github.com/en/rest/search?apiVersion=2022-11-28#search-issues-and-pull-requests
     ISSUE_SEARCH_API = 'https://api.github.com/search/issues'
 
-    def __init__(self, repo: Repository, *, user: str, token: str):
+    def __init__(self, repo: Repository, *, user: str, token: str, status: BorrowedStatus):
         self.__repo = repo
         self.__auth = (user, token)
+        self.__status = status
         self.__repo_id = f'DataDog/{self.__repo.full_name}'
 
     @property
@@ -58,18 +61,18 @@ class GitHubManager:
         return self.__repo_id
 
     @cached_property
-    def client(self) -> AsyncClient:
-        from httpx import AsyncClient
+    def client(self) -> Client:
+        from httpx import Client
 
         # https://docs.github.com/en/rest/overview/api-versions?apiVersion=2022-11-28#specifying-an-api-version
-        client = AsyncClient(headers={'X-GitHub-Api-Version': self.API_VERSION})
+        client = Client(headers={'X-GitHub-Api-Version': self.API_VERSION})
 
         return client
 
-    async def get_pull_request(self, sha: str) -> PullRequest | None:
+    def get_pull_request(self, sha: str) -> PullRequest | None:
         from json import loads
 
-        response = await self.__api_get(
+        response = self.__api_get(
             self.ISSUE_SEARCH_API,
             # https://docs.github.com/en/search-github/searching-on-github/searching-issues-and-pull-requests
             params={'q': f'sha:{sha}+repo:{self.repo_id}'},
@@ -80,23 +83,23 @@ class GitHubManager:
 
         return PullRequest(data['items'][0])
 
-    async def __api_get(self, *args, **kwargs):
-        from asyncio import sleep
-        from time import time
-
+    def __api_get(self, *args, **kwargs):
         retry_wait = 2
         while True:
             try:
-                async with self.client as client:
-                    response = await client.get(*args, auth=self.__auth, **kwargs)
+                with self.client as client:
+                    response = client.get(*args, auth=self.__auth, **kwargs)
 
                 # https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting
                 # https://docs.github.com/en/rest/guides/best-practices-for-integrators?apiVersion=2022-11-28#dealing-with-rate-limits
                 if response.status_code == 403 and response.headers['X-RateLimit-Remaining'] == '0':  # noqa: PLR2004
-                    await sleep(float(response.headers['X-RateLimit-Reset']) - time.time() + 1)
+                    self.__status.wait_for(
+                        float(response.headers['X-RateLimit-Reset']) - time() + 1,
+                        context='GitHub API rate limit reached',
+                    )
                     continue
-            except Exception:
-                await sleep(retry_wait)
+            except Exception as e:
+                self.__status.wait_for(retry_wait, context=f'GitHub API error: {e}')
                 retry_wait *= 2
                 continue
 

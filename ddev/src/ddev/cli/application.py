@@ -68,7 +68,9 @@ class Application(Terminal):
         else:
             self.__repo = Repository(self.config.repo.name, self.config.repo.path)
 
-        self.__github = GitHubManager(self.repo, user=self.config.github.user, token=self.config.github.token)
+        self.__github = GitHubManager(
+            self.repo, user=self.config.github.user, token=self.config.github.token, status=self.status
+        )
 
     def abort(self, text='', code=1, **kwargs):
         if text:
