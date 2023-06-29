@@ -27,7 +27,8 @@ class TorchserveInferenceAPICheck(AgentCheck):
             response = self.http.get(ping_url)
             self.log.debug("Inference API `response`: [%s]", response)
             response.raise_for_status()
-        except Exception:
+        except Exception as e:
+            self.log.debug('Error querying the endpoint: %s', e)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.tags)
             raise
         else:

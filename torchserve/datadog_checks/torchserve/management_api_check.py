@@ -59,9 +59,9 @@ class TorchserveManagementAPICheck(AgentCheck):
         model_name = model['modelName']
         endpoint = f"models/{model_name}/all"
         url = urljoin(self.instance["management_api_url"], endpoint)
-        response = self.http.get(url)
 
         try:
+            response = self.http.get(url)
             response.raise_for_status()
             content = response.json()
         except Exception as e:
