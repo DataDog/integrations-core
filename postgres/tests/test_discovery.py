@@ -172,9 +172,9 @@ def test_autodiscovery_collect_all_relations(aggregator, integration_check, pg_i
             aggregator.assert_metric(metric, tags=expected_tags)
 
     aggregator.assert_metric(
-            'dd.postgres.operation.time',
-            tags=['operation:_collect_relations_autodiscovery'],
-        )
+        'dd.postgres.operation.time',
+        tags=['operation:_collect_relations_autodiscovery'],
+    )
 
 
 @pytest.mark.integration
