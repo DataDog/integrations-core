@@ -4,8 +4,8 @@
 
 from typing import Dict, List
 
-from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.postgres.util import DatabaseConfigurationError, warning_with_tags
 
 AUTODISCOVERY_QUERY: str = """select datname from pg_catalog.pg_database where datistemplate = false;"""
@@ -42,7 +42,25 @@ class PostgresAutodiscovery(Discovery):
         This function takes the item of interest (dbname) from this four-tuple
         and returns the full list of database names from the generator.
         """
+        prev_cached_items_len = len(self._cache._cached_items)
         items = list(super().get_items())
+        # get_items updates _cache._cached_items, so check if the last refresh
+        # added a database that put this instance over the limit.
+        # _cache._cached_items stores databases before the limit filter is applied
+        if len(self._cache._cached_items) != prev_cached_items_len and len(self._cache._cached_items) > self._filter._limit:
+            self._check.record_warning(
+                DatabaseConfigurationError.autodiscovered_databases_exceeds_limit,
+                warning_with_tags(
+                    "Autodiscovery found %d databases, which was more than the specified limit of %d. "
+                    "Increase `max_databases` in the `database_autodiscovery` block of the agent configuration"
+                    "to see these extra databases."
+                    "Truncating list and running checks only on the following databases: %s",
+                    len(self._cache._cached_items),
+                    self._filter._limit,
+                    self.get_items(),
+                ),
+            )
+
         items_parsed = [item[1] for item in items]
         return items_parsed
 
@@ -56,23 +74,3 @@ class PostgresAutodiscovery(Discovery):
                 ]  # fetchall returns list of tuples representing rows, so need to parse
                 self._log.debug("Autodiscovered databases were: {}".format(databases))
                 return databases
-
-    def __refresh(self):
-        prev_cached_items_len = len(self._cached_items)
-        super().__refresh()
-        # refresh updates _cached_items, so check if the last refresh
-        # added a database that put this instance over the limit.
-        # _cached_items stores databases before the limit filter is applied
-        if len(self._cached_items) != prev_cached_items_len and len(self._cached_items) > self._limit:
-            self._check.record_warning(
-                DatabaseConfigurationError.autodiscovered_databases_exceeds_limit,
-                warning_with_tags(
-                    "Autodiscovery found %d databases, which was more than the specified limit of %d. "
-                    "Increase `max_databases` in the `database_autodiscovery` block of the agent configuration"
-                    "to see these extra databases."
-                    "Truncating list and running checks only on the following databases: %s",
-                    len(self._cached_items),
-                    self._limit,
-                    self.get_items(),
-                ),
-            )
