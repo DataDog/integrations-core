@@ -147,9 +147,14 @@ def query_perf_counter_by_level():
 
 
 @pytest.fixture
-def retrieve_properties_ex():
+def properties_ex():
+    return PROPERTIES_EX
+
+
+@pytest.fixture
+def retrieve_properties_ex(properties_ex):
     def RetrievePropertiesEx(spec_set, options):
-        return PROPERTIES_EX
+        return properties_ex
 
     yield RetrievePropertiesEx
 

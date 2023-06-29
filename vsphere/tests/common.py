@@ -218,6 +218,24 @@ PERF_COUNTER_INFO = [
 
 PERF_ENTITY_METRICS = [
     vim.PerformanceManager.EntityMetric(
+        entity=vim.VirtualMachine(moId="vm1"),
+        value=[
+            vim.PerformanceManager.IntSeries(
+                value=[47, 52],
+                id=vim.PerformanceManager.MetricId(counterId=103),
+            )
+        ],
+    ),
+    vim.PerformanceManager.EntityMetric(
+        entity=vim.VirtualMachine(moId="vm2"),
+        value=[
+            vim.PerformanceManager.IntSeries(
+                value=[30, 11],
+                id=vim.PerformanceManager.MetricId(counterId=103),
+            )
+        ],
+    ),
+    vim.PerformanceManager.EntityMetric(
         entity=vim.Datastore(moId="NFS-Share-1"),
         value=[
             vim.PerformanceManager.IntSeries(

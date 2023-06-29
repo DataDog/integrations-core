@@ -2119,63 +2119,29 @@ def test_report_realtime_vm_metrics_blacklisted(aggregator, dd_run_check, realti
         aggregator.assert_metric('vsphere.cpu.costop.sum', count=0)
 
 
-def test_report_realtime_vm_metrics_off(aggregator, dd_run_check, realtime_instance):
-    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
-        'pyVmomi.vmodl.query.PropertyCollector'
-    ) as mock_property_collector:
-        mock_si = mock.MagicMock()
-        mock_si.content.eventManager.QueryEvents.return_value = []
-        mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
-            vim.PerformanceManager.CounterInfo(
-                key=100,
-                groupInfo=vim.ElementDescription(key='cpu'),
-                nameInfo=vim.ElementDescription(key='costop'),
-                rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
-            )
-        ]
-        mock_si.content.perfManager.QueryPerf.return_value = [
-            vim.PerformanceManager.EntityMetric(
-                entity=vim.VirtualMachine(moId="vm1"),
-                value=[
-                    vim.PerformanceManager.IntSeries(
-                        value=[47, 52],
-                        id=vim.PerformanceManager.MetricId(counterId=100),
-                    )
-                ],
-            ),
-            vim.PerformanceManager.EntityMetric(
-                entity=vim.VirtualMachine(moId="vm2"),
-                value=[
-                    vim.PerformanceManager.IntSeries(
-                        value=[30, 11],
-                        id=vim.PerformanceManager.MetricId(counterId=100),
-                    )
-                ],
-            ),
-        ]
-        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
-        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
-        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult(
-            objects=[
-                vim.ObjectContent(
-                    obj=vim.VirtualMachine(moId="vm1"),
-                    propSet=[
-                        vmodl.DynamicProperty(
-                            name='name',
-                            val='vm1',
-                        ),
-                        vmodl.DynamicProperty(
-                            name='runtime.powerState',
-                            val=vim.VirtualMachinePowerState.poweredOff,
-                        ),
-                    ],
-                )
-            ],
-            token='123',
-        )
-        mock_si.content.propertyCollector.ContinueRetrievePropertiesEx.return_value = (
+@pytest.mark.parametrize(
+    (
+        "properties_ex",
+        "instance",
+        "expected_metrics",
+    ),
+    [
+        pytest.param(
             vim.PropertyCollector.RetrieveResult(
                 objects=[
+                    vim.ObjectContent(
+                        obj=vim.VirtualMachine(moId="vm1"),
+                        propSet=[
+                            vmodl.DynamicProperty(
+                                name='name',
+                                val='vm1',
+                            ),
+                            vmodl.DynamicProperty(
+                                name='runtime.powerState',
+                                val=vim.VirtualMachinePowerState.poweredOff,
+                            ),
+                        ],
+                    ),
                     vim.ObjectContent(
                         obj=vim.VirtualMachine(moId="vm2"),
                         propSet=[
@@ -2188,25 +2154,38 @@ def test_report_realtime_vm_metrics_off(aggregator, dd_run_check, realtime_insta
                                 val=vim.VirtualMachinePowerState.poweredOn,
                             ),
                         ],
-                    )
+                    ),
                 ]
-            )
-        )
-        mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [realtime_instance])
-        dd_run_check(check)
+            ),
+            realtime_instance,
+            [
+                {
+                    'name': 'vsphere.cpu.costop.sum',
+                    'count': 0,
+                    'hostname': 'vm1',
+                },
+                {
+                    'name': 'vsphere.cpu.costop.sum',
+                    'count': 1,
+                    'value': 11,
+                    'tags': ['vcenter_server:vsphere_host'],
+                    'hostname': 'vm2',
+                },
+            ],
+            id='New version',
+        ),
+    ],
+)
+def test_report_realtime_vm_metrics_off(aggregator, dd_run_check, instance, expected_metrics, mock_connect):
+    check = VSphereCheck('vsphere', {}, [instance])
+    dd_run_check(check)
+    for expected_metric in expected_metrics:
         aggregator.assert_metric(
-            'vsphere.cpu.costop.sum',
-            value=52,
-            count=0,
-            tags=['vcenter_server:FAKE'],
-        )
-        aggregator.assert_metric(
-            'vsphere.cpu.costop.sum',
-            value=11,
-            count=1,
-            hostname='vm2',
-            tags=['vcenter_server:FAKE'],
+            name=expected_metric.get('name'),
+            value=expected_metric.get('value'),
+            count=expected_metric.get('count'),
+            hostname=expected_metric.get('hostname'),
+            tags=expected_metric.get('tags'),
         )
 
 
@@ -2234,57 +2213,17 @@ def test_report_realtime_vm_metrics_off(aggregator, dd_run_check, realtime_insta
         ),
     ],
 )
-def test_report_realtime_host_count(aggregator, dd_run_check, instance, expected_count, expected_value, expected_tags):
-    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
-        'pyVmomi.vmodl.query.PropertyCollector'
-    ) as mock_property_collector:
-        mock_si = mock.MagicMock()
-        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
-        mock_si.content.eventManager.QueryEvents.return_value = []
-        mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
-            vim.PerformanceManager.CounterInfo(
-                key=100,
-                groupInfo=vim.ElementDescription(key='cpu'),
-                nameInfo=vim.ElementDescription(key='costop'),
-                rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
-                unitInfo=vim.ElementDescription(key='millisecond'),
-            )
-        ]
-        mock_si.content.perfManager.QueryPerf.return_value = [
-            vim.PerformanceManager.EntityMetric(
-                entity=vim.HostSystem(moId="host1"),
-                value=[
-                    vim.PerformanceManager.IntSeries(
-                        value=[34, 61],
-                        id=vim.PerformanceManager.MetricId(counterId=100),
-                    )
-                ],
-            ),
-        ]
-        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
-        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
-        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult(
-            objects=[
-                vim.ObjectContent(
-                    obj=vim.HostSystem(moId="host1"),
-                    propSet=[
-                        vmodl.DynamicProperty(
-                            name='name',
-                            val='host1',
-                        ),
-                    ],
-                )
-            ],
-        )
-        mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [instance])
-        dd_run_check(check)
-        aggregator.assert_metric(
-            'vsphere.host.count',
-            count=expected_count,
-            value=expected_value,
-            tags=expected_tags,
-        )
+def test_report_realtime_host_count(
+    aggregator, dd_run_check, instance, expected_count, expected_value, expected_tags, mock_connect
+):
+    check = VSphereCheck('vsphere', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'vsphere.host.count',
+        count=expected_count,
+        value=expected_value,
+        tags=expected_tags,
+    )
 
 
 @pytest.mark.parametrize(
@@ -2315,104 +2254,60 @@ def test_report_realtime_host_count(aggregator, dd_run_check, instance, expected
     ],
 )
 def test_report_realtime_host_metrics(
-    aggregator, dd_run_check, instance, expected_count, expected_value, expected_hostname, expected_tags
+    aggregator, dd_run_check, instance, expected_count, expected_value, expected_hostname, expected_tags, mock_connect
 ):
-    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
-        'pyVmomi.vmodl.query.PropertyCollector'
-    ) as mock_property_collector:
-        mock_si = mock.MagicMock()
-        mock_si.content.eventManager.QueryEvents.return_value = []
-        mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
-            vim.PerformanceManager.CounterInfo(
-                key=100,
-                groupInfo=vim.ElementDescription(key='cpu'),
-                nameInfo=vim.ElementDescription(key='costop'),
-                rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
-            )
-        ]
-        mock_si.content.perfManager.QueryPerf.return_value = [
-            vim.PerformanceManager.EntityMetric(
-                entity=vim.HostSystem(moId="host1"),
-                value=[
-                    vim.PerformanceManager.IntSeries(
-                        value=[34, 61],
-                        id=vim.PerformanceManager.MetricId(counterId=100),
-                    )
-                ],
-            ),
-        ]
-        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
-        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
-        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult(
-            objects=[
-                vim.ObjectContent(
-                    obj=vim.HostSystem(moId="host1"),
-                    propSet=[
-                        vmodl.DynamicProperty(
-                            name='name',
-                            val='host1',
-                        ),
-                    ],
-                )
-            ],
-        )
-        mock_connect.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [realtime_instance])
-        dd_run_check(check)
-        aggregator.assert_metric(
-            'vsphere.cpu.costop.sum',
-            count=expected_count,
-            value=expected_value,
-            hostname=expected_hostname,
-            tags=expected_tags,
-        )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'vsphere.cpu.costop.sum',
+        count=expected_count,
+        value=expected_value,
+        hostname=expected_hostname,
+        tags=expected_tags,
+    )
 
 
-def test_report_realtime_host_metrics_filtered(aggregator, dd_run_check, realtime_instance):
-    with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
-        'pyVmomi.vmodl.query.PropertyCollector'
-    ) as mock_property_collector:
-        mock_si = mock.MagicMock()
-        mock_si.content.eventManager.QueryEvents.return_value = []
-        mock_si.content.perfManager.QueryPerfCounterByLevel.return_value = [
-            vim.PerformanceManager.CounterInfo(
-                key=100,
-                groupInfo=vim.ElementDescription(key='cpu'),
-                nameInfo=vim.ElementDescription(key='costop'),
-                rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
-            )
-        ]
-        mock_si.content.perfManager.QueryPerf.return_value = [
-            vim.PerformanceManager.EntityMetric(
-                entity=vim.HostSystem(moId="host1"),
-                value=[
-                    vim.PerformanceManager.IntSeries(
-                        value=[34, 61],
-                        id=vim.PerformanceManager.MetricId(counterId=100),
-                    )
-                ],
-            ),
-        ]
-        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
-        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
-        mock_si.content.propertyCollector.RetrievePropertiesEx.return_value = vim.PropertyCollector.RetrieveResult(
-            objects=[
-                vim.ObjectContent(
-                    obj=vim.HostSystem(moId="host1"),
-                    propSet=[
-                        vmodl.DynamicProperty(
-                            name='name',
-                            val='host1',
-                        ),
-                    ],
-                )
-            ],
-        )
-        mock_connect.return_value = mock_si
-        realtime_instance['metric_filters'] = {'host': ['cpu.maxlimited.sum']}
-        check = VSphereCheck('vsphere', {}, [realtime_instance])
-        dd_run_check(check)
-        aggregator.assert_metric('vsphere.cpu.costop.sum', count=0)
+@pytest.mark.parametrize(
+    (
+        "instance",
+        "expected_count",
+        "expected_value",
+        "expected_tags",
+        "expected_hostname",
+    ),
+    [
+        pytest.param(
+            legacy_realtime_host_include_instance,
+            1,
+            61,
+            ['instance:host1'],
+            'host1',
+            id='Legacy version',
+        ),
+        pytest.param(
+            realtime_whitelist_instance,
+            0,
+            None,
+            None,
+            'host1',
+            id='New version',
+        ),
+    ],
+)
+def test_report_realtime_host_metrics_filtered(
+    aggregator, dd_run_check, instance, expected_count, expected_value, expected_tags, expected_hostname, mock_connect
+):
+    instance = copy.deepcopy(instance)
+    instance['metric_filters'] = {'host': ['cpu.maxlimited.sum']}
+    check = VSphereCheck('vsphere', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'vsphere.cpu.costop.sum',
+        count=expected_count,
+        value=expected_value,
+        tags=expected_tags,
+        hostname=expected_hostname,
+    )
 
 
 @pytest.mark.parametrize(
@@ -2453,22 +2348,36 @@ def test_report_realtime_host_metrics_whitelisted(
 
 
 @pytest.mark.parametrize(
-    ("instance",),
+    (
+        "instance",
+        "expected_count",
+        "expected_hostname",
+    ),
     [
         pytest.param(
             legacy_realtime_host_exclude_instance,
+            0,
+            'host1',
             id='Legacy version',
         ),
         pytest.param(
             realtime_blacklist_instance,
+            0,
+            'host1',
             id='New version',
         ),
     ],
 )
-def test_report_realtime_host_metrics_blacklisted(aggregator, dd_run_check, instance, mock_connect):
+def test_report_realtime_host_metrics_blacklisted(
+    aggregator, dd_run_check, instance, expected_count, expected_hostname, mock_connect
+):
     check = VSphereCheck('vsphere', {}, [instance])
     dd_run_check(check)
-    aggregator.assert_metric('vsphere.cpu.costop.sum', count=0)
+    aggregator.assert_metric(
+        'vsphere.cpu.costop.sum',
+        count=expected_count,
+        hostname=expected_hostname,
+    )
 
 
 @pytest.mark.parametrize(
