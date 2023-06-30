@@ -1,5 +1,4 @@
 extends:
-  - _base.yaml
   - brother.yaml
 sysobjectid:
   - 1.3.6.1.4.1.2435.2.3.9.1
