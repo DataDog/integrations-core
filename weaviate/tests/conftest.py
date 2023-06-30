@@ -32,7 +32,8 @@ def setup_weaviate():
     else:
         run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "weaviate_install.yaml"), "-n", "weaviate"])
     run_command(["kubectl", "rollout", "status", "statefulset/weaviate", "-n", "weaviate"])
-    run_command(["kubectl", "wait", "pods", "--all","-n", "weaviate", "--for=condition=Ready", "--timeout=600s"])
+    run_command(["kubectl", "wait", "pods", "--all", "-n", "weaviate", "--for=condition=Ready", "--timeout=600s"])
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
@@ -79,7 +80,7 @@ def make_weaviate_request(instance):
 
 def make_wait(endpoint):
     while True:
-        try:        
+        try:
             response = requests.get(endpoint, timeout=5)
             if response.ok:
                 return response
