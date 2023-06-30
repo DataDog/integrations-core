@@ -31,11 +31,8 @@ def setup_weaviate():
         run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "weaviate_auth.yaml"), "-n", "weaviate"])
     else:
         run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "weaviate_install.yaml"), "-n", "weaviate"])
-
-    run_command(
-        ["kubectl", "wait", "statefulset", "--all", "--for=condition=Available", "-n", "weaviate", "--timeout=240s"]
-    )
-    run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=240s"])
+    run_command(["kubectl", "rollout", "status", "statefulset/weaviate", "-n", "weaviate"])
+    run_command(["kubectl", "wait", "pods", "--all", "-n", "weaviate", "--for=condition=Ready", "--timeout=600s"])
 
 
 @pytest.fixture(scope='session')
@@ -62,6 +59,7 @@ def dd_environment():
 
 
 def make_weaviate_request(instance):
+
     weaviate_api_endpoint = f"{instance.get('weaviate_api_endpoint')}/v1/batch/objects"
     headers = {'content-type': 'application/json'}
 
