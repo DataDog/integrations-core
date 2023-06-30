@@ -93,7 +93,7 @@ class KindUp(LazyFunction):
 
     def __call__(self):
         # Create cluster
-        create_cmd = ['kind', 'create', 'cluster', '--name', self.cluster_name]
+        create_cmd = ['kind', 'create', 'cluster', '--name', self.cluster_name, '--image', "kindest/node:v1.25.3"]
         if self.kind_config:
             create_cmd += ['--config', self.kind_config]
 
