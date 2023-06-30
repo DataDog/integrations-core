@@ -45,8 +45,8 @@ def test_e2e_profile_alcatel_lucent_omni_access_wlc(dd_agent_check):
         'snmp.wlsxSwitchTotalNumStationsAssociated', metric_type=aggregator.GAUGE, tags=common_tags
     )
     tag_rows = [
-        ['sys_x_processor_descr:Jaded acted quaintly their forward Jaded forward oxen Jaded'],
-        ['sys_x_processor_descr:zombies zombies their acted Jaded'],
+        ['sys_x_processor_descr:Jaded acted quaintly their forward Jaded forward oxen Jaded', 'cpu:4'],
+        ['sys_x_processor_descr:zombies zombies their acted Jaded', "cpu:27"],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
