@@ -7,6 +7,13 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .. import common
+from ..test_e2e_core_metadata import assert_device_metadata
+from .utils import (
+    assert_common_metrics,
+    assert_extend_generic_if,
+    create_e2e_core_test_config,
+    get_device_ip_from_config,
+)
 from ..metrics import (
     IF_BANDWIDTH_USAGE,
     IF_COUNTS,
@@ -14,12 +21,6 @@ from ..metrics import (
     IF_RATES,
     IF_SCALAR_GAUGE,
     IP_COUNTS,
-)
-from ..test_e2e_core_metadata import assert_device_metadata
-from .utils import (
-    assert_common_metrics,
-    create_e2e_core_test_config,
-    get_device_ip_from_config,
 )
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
@@ -111,12 +112,13 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         aggregator.assert_metric('snmp.ltmVirtualServEnabled', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['ltm_vs_status_avail_state:none'],
-        ['ltm_vs_status_avail_state:green'],
-        ['ltm_vs_status_avail_state:yellow'],
-        ['ltm_vs_status_avail_state:red'],
-        ['ltm_vs_status_avail_state:blue'],
-        ['ltm_vs_status_avail_state:gray'],
+         ['ltm_vs_status_avail_state:blue'],
+         ['ltm_vs_status_avail_state:gray'],
+         ['ltm_vs_status_avail_state:green', 'ltm_vs_status_enabled_state:enabled', 'ltm_vs_status_name:server1'],
+         ['ltm_vs_status_avail_state:none', 'ltm_vs_status_enabled_state:none'],
+         ['ltm_vs_status_avail_state:red', 'ltm_vs_status_enabled_state:disabledbyparent', 'ltm_vs_status_name:server3'],
+         ['ltm_vs_status_avail_state:yellow', 'ltm_vs_status_enabled_state:disabled', 'ltm_vs_status_name:server2'],
+
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ltmVsStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)

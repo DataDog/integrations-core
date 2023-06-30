@@ -412,6 +412,13 @@ def test_f5(aggregator):
             )
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+    aggregator.assert_metric('snmp.cpu.usage', count=4)
+    aggregator.assert_metric('snmp.ifInSpeed', count=6)
+    aggregator.assert_metric('snmp.ifOutSpeed', count=6)
+    aggregator.assert_metric('snmp.memory.total', count=2)
+    aggregator.assert_metric('snmp.memory.usage', count=2)
+    aggregator.assert_metric('snmp.memory.used', count=2)
+
     aggregator.assert_all_metrics_covered()
 
 
