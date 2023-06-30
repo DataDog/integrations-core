@@ -131,7 +131,6 @@ class KafkaClient:
             except KafkaException as e:
                 self.log.debug("Failed to read consumer offsets for future %s: %s", future, e)
             else:
-                self.log.debug('FUTURE RESULT: %s', response_offset_info)
                 consumer_group = response_offset_info.group_id
                 topic_partitions = response_offset_info.topic_partitions
 
@@ -154,8 +153,15 @@ class KafkaClient:
                             topic_partition.topic,
                             str(topic_partition.partition),
                         )
-                    if offset != OFFSET_INVALID:
-                        consumer_offsets[(consumer_group, topic, partition)] = offset
+                        continue
+                    if self.config._monitor_unlisted_consumer_groups or not self.config._consumer_groups_compiled_regex:
+                        if offset != OFFSET_INVALID:
+                            consumer_offsets[(consumer_group, topic, partition)] = offset
+                    else:
+                        to_match = f"{consumer_group},{topic},{partition}"
+                        if self.config._consumer_groups_compiled_regex.match(to_match):
+                            if offset != OFFSET_INVALID:
+                                consumer_offsets[(consumer_group, topic, partition)] = offset                    
 
         return consumer_offsets
 
@@ -222,14 +228,11 @@ class KafkaClient:
                     )
 
         else:
-            topic_metadata = self.kafka_client.list_topics(timeout=self.config._request_timeout).topics
-            topics = {
-                topic: list(topic_metadata[topic].partitions.keys())
-                for topic in topic_metadata
-                if topic not in KAFKA_INTERNAL_TOPICS
-            }
+            # if using consumer_groups, can pile together with consumer_groups_regex
 
+            # Return everything for now, and just filter after
             for consumer_group in consumer_groups:
+<<<<<<< HEAD
                 self.log.debug('CONSUMER GROUP: %s', consumer_group)
 
                 for topic_partition in self._get_topic_partitions(topics, consumer_group):
@@ -297,3 +300,7 @@ class KafkaClient:
             return set(partitions)
 
         return set(self.config._consumer_groups[consumer_group][topic]).intersection(partitions)
+=======
+                # Should filter first so that offsets can remain as a future
+                yield self.kafka_client.list_consumer_group_offsets([ConsumerGroupTopicPartitions(consumer_group)])[consumer_group]
+>>>>>>> fceb38944c (Update regex filtering to be more efficient)
