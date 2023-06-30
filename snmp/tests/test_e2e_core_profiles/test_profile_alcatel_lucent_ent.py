@@ -37,11 +37,17 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     tag_rows = [
-        ['health_module_chassis_id:0'],
-        ['health_module_chassis_id:1'],
+        ['health_module_chassis_id:0', 'cpu:0'],
+        ['health_module_chassis_id:1', 'cpu:1'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
+        ['health_module_chassis_id:0', 'mem:0'],
+        ['health_module_chassis_id:1', 'mem:1'],
+    ]
+    for tag_row in tag_rows:
         aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
