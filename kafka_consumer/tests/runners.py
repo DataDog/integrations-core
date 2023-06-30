@@ -80,7 +80,7 @@ class Consumer(StoppableThread):
         consumer.subscribe(self.topics)
 
         while not self._shutdown_event.is_set():
-            consumer.poll(timeout=1)
+            consumer.poll(timeout=5)
 
     def __get_consumer_client(self):
         config = {
