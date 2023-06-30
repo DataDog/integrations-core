@@ -177,6 +177,28 @@ class KafkaClient:
         if self.config._monitor_unlisted_consumer_groups:
             for consumer_group in consumer_groups:
                 yield self.kafka_client.list_consumer_group_offsets([ConsumerGroupTopicPartitions(consumer_group)])[consumer_group]
+        elif not self.config._consumer_groups_compiled_regex: # if only consumer_groups specified
+            for consumer_group in consumer_groups:
+                # If topics are specified
+                if topics := consumer_groups[consumer_group]:
+                    for topic in topics:
+                        # If partitions are defined
+                        if partitions := topics[topic]:
+                            for partition in partitions:
+                                topic_partition = TopicPartition(topic, partition)
+                                yield self.kafka_client.list_consumer_group_offsets(
+                                    [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
+                                )[consumer_group]
+                        else: # If partitions are not defined
+                            # get all the partitions for this topic
+                            partitions = self.kafka_client.list_topics(topic=topic, timeout=self.config._request_timeout).topics[topic].partitions
+                            for partition in partitions:
+                                topic_partition = TopicPartition(topic, partition)
+                                yield self.kafka_client.list_consumer_group_offsets(
+                                    [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
+                                )[consumer_group]
+                else:
+                    yield self.kafka_client.list_consumer_group_offsets([ConsumerGroupTopicPartitions(consumer_group)])[consumer_group]
         else:
             topic_metadata = self.kafka_client.list_topics(timeout=self.config._request_timeout).topics
             topics = {
