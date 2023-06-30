@@ -37,6 +37,10 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.ifInSpeed',
     'snmp.ifOutSpeed',
     'snmp.peerConnectionByState',  # BGP4 constant metric, not handled by python check
+    'snmp.ospfNbr',  # OSPF constant metrics, not handled by python check
+    'snmp.ospfVirtNbr',
+    'snmp.ospfIf',
+    'snmp.ospfVirtIf',
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
@@ -302,6 +306,7 @@ def test_e2e_profile_aruba(dd_agent_check):
         config,
         expected_total_count=67 + 5,
         metrics_to_skip=metrics_to_skip,
+        tags_to_skip=['neighbor_state', 'if_state'],  # Ignore tags that have a mapping
     )
 
 
@@ -340,6 +345,7 @@ def test_e2e_profile_cisco_3850(dd_agent_check):
         config,
         expected_total_count=5108 + 5,
         metrics_to_skip=metrics_to_skip,
+        tags_to_skip=['neighbor_state', 'if_state'],  # Ignore tags that have a mapping
     )
 
 
