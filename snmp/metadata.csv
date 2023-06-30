@@ -338,7 +338,6 @@ snmp.cvCallVolMediaOutgoingCalls,gauge,,,,"[Cisco UC Virtual Machine] [Cisco ICM
 snmp.cvCallVolPeerIncomingCalls,gauge,,,,"[Cisco UC Virtual Machine] [Cisco ICM] [Cisco ISR 4431] The total number of active calls that has selected the dialpeer as an incoming dialpeer.",0,snmp,,
 snmp.cvCallVolPeerOutgoingCalls,gauge,,,,"[Cisco UC Virtual Machine] [Cisco ICM] [Cisco ISR 4431] The total number of active calls that has selected the dialpeer as an outgoing dialpeer.",0,snmp,,
 snmp.cvsChassisUpTime,gauge,,time,,[Cisco ASA 5525] The time (in hundredths of a second) since the chassis device was last re-initialized.,0,snmp,,
-snmp.cvsChassisUpTime,gauge,,time,,[Cisco ASA 5525] The time (in hundredths of a second) since the chassis device was last re-initialized.,0,snmp,,
 snmp.devClientCount,gauge,,,,[Cisco Meraki] The number of clients currently associated with the device.,0,snmp,,
 snmp.devInterfaceRecvBytes,gauge,,byte,,[Cisco Meraki] The number of bytes received on this interface.,0,snmp,,
 snmp.devInterfaceRecvPkts,gauge,,packet,,[Cisco Meraki] The number of packets received on this interface.,0,snmp,,
