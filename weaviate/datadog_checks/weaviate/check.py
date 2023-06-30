@@ -112,8 +112,8 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
     def check(self, _):
         try:
             if self.instance.get("weaviate_api_endpoint"):
-                self._submit_version_metadata()
                 self._submit_liveness_metrics()
+                self._submit_version_metadata()
                 self._submit_node_metrics()
         except Exception as e:
             self.log.error("Error while collecting Weaviate metrics from API: %s", str(e))
