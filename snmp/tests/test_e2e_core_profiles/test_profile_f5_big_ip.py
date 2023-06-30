@@ -112,13 +112,12 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         aggregator.assert_metric('snmp.ltmVirtualServEnabled', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['ltm_vs_status_avail_state:blue'],
-         ['ltm_vs_status_avail_state:gray'],
-         ['ltm_vs_status_avail_state:green', 'ltm_vs_status_enabled_state:enabled', 'ltm_vs_status_name:server1'],
-         ['ltm_vs_status_avail_state:none', 'ltm_vs_status_enabled_state:none'],
-         ['ltm_vs_status_avail_state:red', 'ltm_vs_status_enabled_state:disabledbyparent', 'ltm_vs_status_name:server3'],
-         ['ltm_vs_status_avail_state:yellow', 'ltm_vs_status_enabled_state:disabled', 'ltm_vs_status_name:server2'],
-
+        ['ltm_vs_status_avail_state:blue'],
+        ['ltm_vs_status_avail_state:gray'],
+        ['ltm_vs_status_avail_state:green', 'ltm_vs_status_enabled_state:enabled', 'ltm_vs_status_name:server1'],
+        ['ltm_vs_status_avail_state:none', 'ltm_vs_status_enabled_state:none'],
+        ['ltm_vs_status_avail_state:red', 'ltm_vs_status_enabled_state:disabledbyparent', 'ltm_vs_status_name:server3'],
+        ['ltm_vs_status_avail_state:yellow', 'ltm_vs_status_enabled_state:disabled', 'ltm_vs_status_name:server2'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ltmVsStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
