@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+import time
 
 import pytest
 import requests
@@ -11,6 +12,7 @@ from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
+from datadog_checks.weaviate.check import DEFAULT_LIVENESS_ENDPOINT
 
 from .common import USE_AUTH
 
@@ -59,8 +61,8 @@ def dd_environment():
 
 
 def make_weaviate_request(instance):
-
-    weaviate_api_endpoint = f"{instance.get('weaviate_api_endpoint')}/v1/batch/objects"
+    weaviate_api_endpoint = instance.get('weaviate_api_endpoint')
+    weaviate_batch_endpoint = f"{weaviate_api_endpoint}/v1/batch/objects"
     headers = {'content-type': 'application/json'}
 
     data = {
@@ -69,9 +71,23 @@ def make_weaviate_request(instance):
             {'class': 'Example', 'vector': [0.01, 0.7], 'properties': {'text': 'This is another object'}},
         ]
     }
-
     if instance.get('headers'):
         headers.update(instance['headers'])
+    is_ready = ready_check(weaviate_api_endpoint, 300)
+    if is_ready:
+        response = requests.post(weaviate_batch_endpoint, headers=headers, data=json.dumps(data))
+        return response
 
-    response = requests.post(weaviate_api_endpoint, headers=headers, data=json.dumps(data))
-    return response
+
+def ready_check(endpoint, timeout=300):
+    stop_time = time.time() + timeout
+    endpoint = f"{endpoint}{DEFAULT_LIVENESS_ENDPOINT}"
+    while time.time() < stop_time:
+        try:
+            response = requests.get(endpoint, timeout=5)
+            if response.ok:
+                return True
+        except requests.RequestException as e:
+            print(f"Request failed: {e}")
+
+    return False
