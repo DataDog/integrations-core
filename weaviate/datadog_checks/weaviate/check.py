@@ -54,9 +54,9 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
                     }
                     self.set_metadata('version', version_raw, scheme='semver', part_map=version_parts)
                 else:
-                    self.log.debug("Invalid Weaviate version format: %s", version)
+                    self.log.debug(f"Invalid Weaviate version format: {version}")
             except Exception as e:
-                self.log.debug("Error while parsing Weaviate version: %s", str(e))
+                self.log.debug(f"Error while parsing Weaviate version: {str(e)}")
         else:
             self.log.debug("Could not retrieve version metadata from host.")
 
@@ -78,7 +78,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
         endpoint = urljoin(self.api_url, DEFAULT_NODE_METRICS_ENDPOINT)
         response = self.http.get(endpoint)
         if response.status_code != 200:
-            self.log.debug("Could not retrieve Node metrics. Request returned a: %s", str(response.status_code))
+            self.log.debug(f"Could not retrieve Node metrics. Request returned a: {response.status_code}")
             return
         try:
             data = response.json()
@@ -109,7 +109,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
                         self.gauge('node.shard.objects', shard.get('objectCount', 0), tags=tags)
 
         except Exception as e:
-            self.log.debug("Error occurred during node metrics submission: %s", str(e))
+            self.log.debug(f"Error occurred during node metrics submission: {str(e)}")
 
     def check(self, _):
         try:
@@ -118,9 +118,9 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
                 self._submit_liveness_metrics()
                 self._submit_node_metrics()
         except Exception as e:
-            self.log.error("Error while collecting Weaviate metrics from API: %s", str(e))
+            self.log.error(f"Error while collecting Weaviate metrics from API: {str(e)}")
         try:
             if self.instance.get("openmetrics_endpoint"):
                 super().check(_)
         except Exception as e:
-            self.log.error("Error while collecting Weaviate metrics from OpenMetrics endpoint: %s", str(e))
+            self.log.error(f"Error while collecting Weaviate metrics from OpenMetrics endpoint: {str(e)}")
