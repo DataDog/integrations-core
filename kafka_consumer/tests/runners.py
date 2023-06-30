@@ -56,7 +56,7 @@ class Producer(StoppableThread):
                     producer.produce('unconsumed_topic', b"extra message 4", partition=partition)
                     producer.produce('unconsumed_topic', b"extra message 5", partition=partition)
                 except Exception:
-                    raise
+                    pass
 
             time.sleep(1)
 
