@@ -12,6 +12,7 @@ import pytest
 import vcr
 from click.testing import CliRunner as __CliRunner
 from datadog_checks.dev.tooling.utils import set_root
+from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.config.file import ConfigFile
 from ddev.repo.core import Repository
@@ -68,6 +69,11 @@ def ddev():
 @pytest.fixture(scope='session')
 def platform() -> Platform:
     return PLATFORM
+
+
+@pytest.fixture(scope='session')
+def terminal() -> Terminal:
+    return Terminal(verbosity=0, enable_color=False, interactive=False)
 
 
 @pytest.fixture(scope='session')

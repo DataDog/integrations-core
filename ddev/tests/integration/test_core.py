@@ -187,3 +187,17 @@ class TestPackageDirectory:
         integration = repo.integrations.get('go-metro')
 
         assert integration.package_directory == local_repo / integration.name / 'datadog_checks' / 'go_metro'
+
+
+class TestReleaseTagPattern:
+    def test_shipped(self, local_repo):
+        repo = Repository(local_repo.name, str(local_repo))
+        integration = repo.integrations.get('datadog_checks_base')
+
+        assert integration.release_tag_pattern == r'datadog_checks_base-\d+\.\d+\.\d+'
+
+    def test_ddev(self, local_repo):
+        repo = Repository(local_repo.name, str(local_repo))
+        integration = repo.integrations.get('ddev')
+
+        assert integration.release_tag_pattern == r'ddev-v\d+\.\d+\.\d+'
