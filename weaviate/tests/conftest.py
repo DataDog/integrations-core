@@ -58,8 +58,6 @@ def dd_environment():
                 instance["headers"] = {"Authorization": "Bearer test123"}
 
             make_weaviate_request(instance)
-            make_weaviate_request(instance)
-            make_weaviate_request(instance)
             yield instance
 
 
