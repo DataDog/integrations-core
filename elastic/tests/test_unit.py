@@ -3,10 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
+import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.elastic import ESCheck
+from datadog_checks.elastic.elastic import get_value_from_path
 
 from .common import URL, get_fixture_path
 
@@ -125,3 +128,20 @@ def test_get_template_metrics(aggregator, instance, mock_http_response):
     check._get_template_metrics(False, [])
 
     aggregator.assert_metric("elasticsearch.templates.count", value=6)
+
+
+def test_get_template_metrics_raise_exception(aggregator, instance):
+    with mock.patch(
+        'requests.get',
+        return_value=MockResponse(status_code=403),
+    ):
+        check = ESCheck('elastic', {}, instances=[instance])
+        # Make sure we do not throw an exception and move on
+        check._get_template_metrics(False, [])
+
+    aggregator.assert_metric("elasticsearch.templates.count", count=0)
+
+
+def test_get_value_from_path():
+    value = get_value_from_path({"5": {"b": [0, 1, 2, {"a": ["foo"]}]}}, "5.b.3.a.0")
+    assert value == "foo"

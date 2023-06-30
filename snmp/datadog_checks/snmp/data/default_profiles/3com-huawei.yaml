@@ -32,7 +32,7 @@ metrics:
       name: hwdevMFanStatusTable  # indexes: hwDevMFanNum
       OID: 1.3.6.1.4.1.43.45.1.2.23.1.9.1.1
     symbols:
-      - name: hwdevMFan
+      - name: hwdevMFanStatus
         constant_value_one: true
     metric_tags:
       - index: 1
