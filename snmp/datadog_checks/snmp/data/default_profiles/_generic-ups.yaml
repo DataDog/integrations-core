@@ -47,6 +47,7 @@ metrics:
     symbol:
       OID: 1.3.6.1.2.1.33.1.3.1.0
       name: upsInputLineBads
+    metric_type: monotonic_count
   - MIB: UPS-MIB
     symbol:
       OID: 1.3.6.1.2.1.33.1.3.2.0
@@ -94,6 +95,8 @@ metrics:
         4: aborted
         5: inProgress
         6: noTestsInitiated
+  # scalar string metric is not supported yet (keep this metric and this comment in profile until it's fixed)
+  # not currently supported
   # - MIB: UPS-MIB
   #   symbol:
   #     OID: 1.3.6.1.2.1.33.1.7.4.0

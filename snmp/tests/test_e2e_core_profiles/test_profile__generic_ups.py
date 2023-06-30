@@ -10,7 +10,6 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
-    assert_extend_generic_if,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
@@ -31,13 +30,11 @@ def test_e2e_profile__generic_ups(dd_agent_check):
     ] + [
         'ups_ident_manufacturer:quaintly forward driving Jaded',
         'ups_ident_model:but zombies acted kept forward zombies quaintly acted Jaded',
-        'ups_ident_name:zombies zombies zombies acted acted forward'
+        'ups_ident_name:zombies zombies zombies acted acted forward',
     ]
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
-    # TODO: Add assert_extend_* here:
-    # assert_extend_generic_if(aggregator, common_tags)
 
     aggregator.assert_metric('snmp.upsAlarmsPresent', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsBatteryCurrent', metric_type=aggregator.GAUGE, tags=common_tags)
@@ -48,18 +45,17 @@ def test_e2e_profile__generic_ups(dd_agent_check):
     aggregator.assert_metric('snmp.upsBypassNumLines', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsEstimatedChargeRemaining', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsEstimatedMinutesRemaining', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.upsInputLineBads', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.upsInputLineBads', metric_type=aggregator.COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.upsInputNumLines', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsOutputFrequency', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsOutputNumLines', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsOutputSource', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsSecondsOnBattery', metric_type=aggregator.GAUGE, tags=common_tags)
-    # aggregator.assert_metric('snmp.upsTestResultsDetail', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsTestResultsSummary', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsTestStartTime', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-         ['ups_output_line_index:2',],
-         ['ups_output_line_index:20'],
+        ['ups_output_line_index:2'],
+        ['ups_output_line_index:20'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.upsOutputCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -68,8 +64,8 @@ def test_e2e_profile__generic_ups(dd_agent_check):
         aggregator.assert_metric('snmp.upsOutputVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['ups_input_line_index:24'],
-         ['ups_input_line_index:29'],
+        ['ups_input_line_index:24'],
+        ['ups_input_line_index:29'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.upsInputCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -78,8 +74,8 @@ def test_e2e_profile__generic_ups(dd_agent_check):
         aggregator.assert_metric('snmp.upsInputVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['ups_bypass_line_index:16'],
-         ['ups_bypass_line_index:30']
+        ['ups_bypass_line_index:16'],
+        ['ups_bypass_line_index:30'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.upsBypassCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -87,13 +83,11 @@ def test_e2e_profile__generic_ups(dd_agent_check):
         aggregator.assert_metric('snmp.upsBypassVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['ups_alarm_descr:1.3.6.1.3.74.53.14.181.54.30.174.140'],
-         ['ups_alarm_descr:1.3.6.1.3.142.254.54.128.104.168.23.51'],
+        ['ups_alarm_descr:1.3.6.1.3.142.254.54.128.104.168.23.51'],
+        ['ups_alarm_descr:1.3.6.1.3.74.53.14.181.54.30.174.140'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.upsAlarmTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-
 
     # --- TEST METADATA ---
     device = {

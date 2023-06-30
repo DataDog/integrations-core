@@ -825,7 +825,7 @@ snmp.upsHighPrecInputLineVoltage,gauge,,,,[APC UPS] The current utility line vol
 snmp.upsHighPrecOutputCurrent,gauge,,,,[APC UPS] The current in tenths of amperes drawn by the load on the UPS.,0,snmp,,
 snmp.upsInputCurrent,gauge,,,,"[UPS-MIB] The magnitude of the present input current.",0,snmp,,
 snmp.upsInputFrequency,gauge,,,,"[UPS-MIB] The present input frequency.",0,snmp,,
-snmp.upsInputLineBads,gauge,,,,"[UPS-MIB] A count of the number of times the input entered an out-of-tolerance condition as defined by the manufacturer. This count is incremented by one each time the input transitions from zero out-of-tolerance lines to one or more input lines out-of-tolerance.",0,snmp,,
+snmp.upsInputLineBads,count,,,,"[UPS-MIB] A count of the number of times the input entered an out-of-tolerance condition as defined by the manufacturer. This count is incremented by one each time the input transitions from zero out-of-tolerance lines to one or more input lines out-of-tolerance.",0,snmp,,
 snmp.upsInputNumLines,gauge,,,,"[UPS-MIB] The number of input lines utilized in this device. This variable indicates the number of rows in the input table.",0,snmp,,
 snmp.upsInputTruePower,gauge,,,,"[UPS-MIB] The magnitude of the present input true power.",0,snmp,,
 snmp.upsInputVoltage,gauge,,,,"[UPS-MIB] The magnitude of the present input voltage.",0,snmp,,
