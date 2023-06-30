@@ -10,7 +10,6 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
-    assert_extend_generic_if,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
@@ -41,14 +40,11 @@ def test_e2e_profile_brother_net_printer(dd_agent_check):
     aggregator.assert_metric('snmp.brToner3Low', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.brToner4Low', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-         ['br_error_history_description:but Jaded driving'],
-         ['br_error_history_description:kept'],
-
+        ['br_error_history_description:but Jaded driving'],
+        ['br_error_history_description:kept'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.brErrorHistory', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-
 
     # --- TEST METADATA ---
     device = {
