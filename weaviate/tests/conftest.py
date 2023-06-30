@@ -32,8 +32,7 @@ def setup_weaviate():
     else:
         run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "weaviate_install.yaml"), "-n", "weaviate"])
     run_command(["kubectl", "rollout", "status", "statefulset/weaviate", "-n", "weaviate"])
-    run_command(["kubectl", "wait", "pods", "--all", "-n", "weaviate", "--for=condition=Ready", "--timeout=600s"])
-
+    run_command(["kubectl", "wait", "pods", "--all","-n", "weaviate", "--for=condition=Ready", "--timeout=600s"])
 
 @pytest.fixture(scope='session')
 def dd_environment():
@@ -72,6 +71,17 @@ def make_weaviate_request(instance):
 
     if instance.get('headers'):
         headers.update(instance['headers'])
+    alive = make_wait(f"{instance.get('weaviate_api_endpoint')}/v1/.well-known/live")
+    if alive:
+        response = requests.post(weaviate_api_endpoint, headers=headers, data=json.dumps(data))
+        return response
 
-    response = requests.post(weaviate_api_endpoint, headers=headers, data=json.dumps(data))
-    return response
+
+def make_wait(endpoint):
+    while True:
+        try:        
+            response = requests.get(endpoint, timeout=5)
+            if response.ok:
+                return response
+        except requests.RequestException as e:
+            print(f"Request failed: {e}")
