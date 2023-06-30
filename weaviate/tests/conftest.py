@@ -90,4 +90,6 @@ def ready_check(endpoint, timeout=300):
         except requests.RequestException as e:
             print(f"Request failed: {e}")
 
+        time.sleep(1)
+
     return False
