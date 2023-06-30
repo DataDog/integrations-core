@@ -270,12 +270,12 @@ metrics:
           OID: 1.3.6.1.4.1.3375.2.2.10.13.2.1.2
           name: ltmVsStatusAvailState
         mapping:
-          0: error
-          1: available in some capacity
-          2: not currently available
-          3: not available
-          4: availability is unknown
-          5: unlicensed
+          0: none
+          1: green
+          2: yellow
+          3: red
+          4: blue
+          5: gray
       - tag: ltm_vs_status_name
         column:
           OID: 1.3.6.1.4.1.3375.2.2.10.13.2.1.1
@@ -288,7 +288,7 @@ metrics:
           0: none
           1: enabled
           2: disabled
-          3: disabled by parent
+          3: disabledbyparent
 
   - MIB: F5-BIGIP-LOCAL-MIB
     table:
