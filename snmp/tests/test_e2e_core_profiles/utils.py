@@ -56,7 +56,12 @@ def assert_extend_generic_udp(aggregator, common_tags):
 def assert_extend_generic_ospf(aggregator, common_tags):
     """Add the following to the snmprec
     1.3.6.1.2.1.14.10.1.6.192.29.116.26.0|2|8"""
-    aggregator.assert_metric("snmp.ospfNbrState", metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric(
+        "snmp.ospfNbr", metric_type=aggregator.GAUGE, tags=common_tags + ["neighbor_state:full"], value=1
+    )
+    aggregator.assert_metric(
+        "snmp.ospfNbrState", metric_type=aggregator.GAUGE, tags=common_tags + ["neighbor_state:full"]
+    )
 
 
 def assert_extend_generic_bgp4(aggregator, common_tags):
