@@ -7,13 +7,6 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .. import common
-from ..test_e2e_core_metadata import assert_device_metadata
-from .utils import (
-    assert_common_metrics,
-    assert_extend_generic_if,
-    create_e2e_core_test_config,
-    get_device_ip_from_config,
-)
 from ..metrics import (
     IF_BANDWIDTH_USAGE,
     IF_COUNTS,
@@ -21,6 +14,12 @@ from ..metrics import (
     IF_RATES,
     IF_SCALAR_GAUGE,
     IP_COUNTS,
+)
+from ..test_e2e_core_metadata import assert_device_metadata
+from .utils import (
+    assert_common_metrics,
+    create_e2e_core_test_config,
+    get_device_ip_from_config,
 )
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
