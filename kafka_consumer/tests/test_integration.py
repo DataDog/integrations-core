@@ -339,7 +339,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             4,
             4,
             'Using consumer_groups and consumer_groups_regex',
-            id="Mix",
+            id="Mixing both consumer_groups and consumer_groups_regex",
         ),
         pytest.param(
             {
