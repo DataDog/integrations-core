@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2023-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
 from pyVmomi import vim
@@ -337,17 +340,47 @@ def test_event_alarm_status_changed_wrong_to(aggregator, dd_run_check, legacy_de
     assert len(aggregator.events) == 0
 
 
-def test_event_vm_message(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_vm_message(aggregator, dd_run_check, legacy_default_instance, service_instance):
     event = vim.event.VmMessageEvent(
         createdTime=get_current_datetime(),
         vm=vim.event.VmEventArgument(name="vm1"),
         fullFormattedMessage="Event example",
     )
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(return_value=[event])
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [legacy_default_instance])
     dd_run_check(check)
     aggregator.assert_event(
         """@@@\nEvent example\n@@@""",
         msg_title="VM vm1 is reporting",
         host="vm1",
+    )
+
+
+def test_event_vm_migrated(aggregator, dd_run_check, legacy_default_instance, service_instance):
+    event = vim.event.VmMigratedEvent(
+        createdTime=get_current_datetime(),
+        vm=vim.event.VmEventArgument(name="vm1"),
+        fullFormattedMessage="Event example",
+    )
+    service_instance.content.eventManager.QueryEvents = mock.MagicMock(return_value=[event])
+    check = VSphereCheck('vsphere', {}, [legacy_default_instance])
+    dd_run_check(check)
+    aggregator.assert_event(
+        """@@@\nEvent example\n@@@""",
+        msg_title="VM vm1 has been migrated",
+        host="vm1",
+    )
+
+
+def test_event_task(aggregator, dd_run_check, legacy_default_instance, service_instance):
+    event = vim.event.TaskEvent(
+        createdTime=get_current_datetime(),
+        fullFormattedMessage="Task completed successfully",
+    )
+    service_instance.content.eventManager.QueryEvents = mock.MagicMock(return_value=[event])
+    check = VSphereCheck('vsphere', {}, [legacy_default_instance])
+    dd_run_check(check)
+    aggregator.assert_event(
+        """@@@\nTask completed successfully\n@@@""",
+        msg_title="TaskEvent",
     )

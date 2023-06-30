@@ -402,38 +402,36 @@ def test_event_vm_message(aggregator, dd_run_check, default_instance, service_in
     )
 
 
-def test_event_vm_migrated(aggregator, dd_run_check, events_only_instance):
-    service_instance = mock.MagicMock()
-    with mock.patch('pyVim.connect.SmartConnect', new=service_instance):
-        event = vim.event.VmMigratedEvent()
-        event.createdTime = get_current_datetime()
-        event.vm = vim.event.VmEventArgument()
-        event.vm.name = "vm1"
-        event.fullFormattedMessage = "Event example"
+def test_event_vm_migrated(aggregator, dd_run_check, default_instance, service_instance):
+    event = vim.event.VmMigratedEvent(
+        createdTime=get_current_datetime(),
+        vm=vim.event.VmEventArgument(name="vm1"),
+        fullFormattedMessage="Event example",
+    )
+    service_instance.content.eventManager.QueryEvents = mock.MagicMock(return_value=[event])
+    check = VSphereCheck('vsphere', {}, [default_instance])
+    dd_run_check(check)
+    aggregator.assert_event(
+        """@@@\nEvent example\n@@@""",
+        msg_title="VM vm1 has been migrated",
+        host="vm1",
+        tags=['vcenter_server:vsphere_host'],
+    )
 
-        mock_si = mock.MagicMock()
-        mock_si.content.eventManager = mock.MagicMock()
-        mock_si.content.eventManager.QueryEvents.return_value = [event]
-        service_instance.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [events_only_instance])
-        dd_run_check(check)
-        aggregator.assert_event("""@@@\nEvent example\n@@@""", msg_title="VM vm1 has been migrated", host="vm1")
 
-
-def test_event_task(aggregator, dd_run_check, events_only_instance):
-    service_instance = mock.MagicMock()
-    with mock.patch('pyVim.connect.SmartConnect', new=service_instance):
-        event = vim.event.TaskEvent()
-        event.createdTime = get_current_datetime()
-        event.fullFormattedMessage = "Task completed successfully"
-
-        mock_si = mock.MagicMock()
-        mock_si.content.eventManager = mock.MagicMock()
-        mock_si.content.eventManager.QueryEvents.return_value = [event]
-        service_instance.return_value = mock_si
-        check = VSphereCheck('vsphere', {}, [events_only_instance])
-        dd_run_check(check)
-        aggregator.assert_event("""@@@\nTask completed successfully\n@@@""")
+def test_event_task(aggregator, dd_run_check, default_instance, service_instance):
+    event = vim.event.TaskEvent(
+        createdTime=get_current_datetime(),
+        fullFormattedMessage="Task completed successfully",
+    )
+    service_instance.content.eventManager.QueryEvents = mock.MagicMock(return_value=[event])
+    check = VSphereCheck('vsphere', {}, [default_instance])
+    dd_run_check(check)
+    aggregator.assert_event(
+        """@@@\nTask completed successfully\n@@@""",
+        msg_title="TaskEvent",
+        tags=['vcenter_server:vsphere_host'],
+    )
 
 
 def test_event_vm_powered_on(aggregator, dd_run_check, events_only_instance):
