@@ -6,11 +6,21 @@ import os
 
 import pytest
 from mock import MagicMock, Mock, patch
-from pyVmomi import vim, vmodl
+from pyVmomi import vim
 
 from datadog_checks.vsphere.legacy.vsphere_legacy import DEFAULT_MAX_HIST_METRICS
 
-from .common import LAB_INSTANCE, PERF_COUNTER_INFO, PERF_ENTITY_METRICS, PERF_METRIC_ID, PROPERTIES_EX, VSPHERE_VERSION
+from .common import (
+    DEFAULT_INSTANCE,
+    EVENTS,
+    LAB_INSTANCE,
+    LEGACY_DEFAULT_INSTANCE,
+    PERF_COUNTER_INFO,
+    PERF_ENTITY_METRICS,
+    PERF_METRIC_ID,
+    PROPERTIES_EX,
+    VSPHERE_VERSION,
+)
 from .mocked_api import MockedAPI, mock_http_rest_api_v6, mock_http_rest_api_v7
 
 try:
@@ -22,6 +32,16 @@ except ImportError:
 @pytest.fixture(scope='session')
 def dd_environment():
     yield LAB_INSTANCE
+
+
+@pytest.fixture()
+def legacy_default_instance():
+    return LEGACY_DEFAULT_INSTANCE
+
+
+@pytest.fixture()
+def default_instance():
+    return DEFAULT_INSTANCE
 
 
 @pytest.fixture()
@@ -117,7 +137,7 @@ def mock_api():
 @pytest.fixture
 def query_events():
     def QueryEvents(filter):
-        return []
+        return EVENTS
 
     yield QueryEvents
 
@@ -183,7 +203,15 @@ def query_perf():
 
 
 @pytest.fixture
-def mock_connect(
+def connect_exception():
+    mock_si = MagicMock()
+    mock_si.side_effect = Exception("Connection error")
+    with patch('pyVim.connect.SmartConnect', side_effect=mock_si):
+        yield mock_si
+
+
+@pytest.fixture(scope="function", autouse=True)
+def service_instance(
     query_events,
     query_options,
     query_available_perf_metric,
@@ -191,25 +219,22 @@ def mock_connect(
     query_perf,
     retrieve_properties_ex,
 ):
-    with patch('pyVim.connect.SmartConnect') as mock_connect, patch(
-        'pyVmomi.vmodl.query.PropertyCollector'
-    ) as mock_property_collector:
-        mock_si = MagicMock()
-        mock_si.content.about.version = VSPHERE_VERSION
-        mock_si.content.about.build = '123456789'
-        mock_si.content.about.apiType = 'VirtualCenter'
-        mock_si.CurrentTime.return_value = dt.datetime.now()
-        mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
-        mock_si.content.eventManager.QueryEvents = query_events
-        mock_si.content.setting.QueryOptions = query_options
-        mock_si.content.perfManager.QueryAvailablePerfMetric = query_available_perf_metric
-        mock_si.content.perfManager.QueryPerfCounterByLevel = query_perf_counter_by_level
-        mock_si.content.perfManager.QueryPerf = query_perf
-        mock_property_collector.ObjectSpec.return_value = vmodl.query.PropertyCollector.ObjectSpec()
-        mock_si.content.viewManagerCreateContainerView.return_value = vim.view.ContainerView(moId="cv1")
-        mock_si.content.propertyCollector.RetrievePropertiesEx = retrieve_properties_ex
-        mock_connect.return_value = mock_si
-        yield
+    mock_si = MagicMock()
+    mock_si.content.about.version = VSPHERE_VERSION
+    mock_si.content.about.build = '123456789'
+    mock_si.content.about.apiType = 'VirtualCenter'
+    mock_si.CurrentTime.return_value = dt.datetime.now()
+    mock_si.content.eventManager.latestEvent.createdTime = dt.datetime.now()
+    mock_si.content.eventManager.QueryEvents = MagicMock(side_effect=query_events)
+    mock_si.content.setting.QueryOptions = MagicMock(side_effect=query_options)
+    mock_si.content.perfManager.QueryAvailablePerfMetric = MagicMock(side_effect=query_available_perf_metric)
+    mock_si.content.perfManager.QueryPerfCounterByLevel = MagicMock(side_effect=query_perf_counter_by_level)
+    mock_si.content.perfManager.QueryPerf = MagicMock(side_effect=query_perf)
+    mock_si.content.propertyCollector.RetrievePropertiesEx = MagicMock(side_effect=retrieve_properties_ex)
+    with patch('pyVmomi.vmodl.query.PropertyCollector.ObjectSpec', return_value=MagicMock()), patch(
+        'pyVmomi.vmodl.query.PropertyCollector.FilterSpec', return_value=MagicMock()
+    ), patch('pyVim.connect.SmartConnect', return_value=mock_si):
+        yield mock_si
 
 
 @pytest.fixture

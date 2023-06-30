@@ -6,6 +6,7 @@ import os
 from pyVmomi import vim, vmodl
 from six.moves.urllib.parse import urlparse
 
+from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
 
@@ -31,13 +32,13 @@ LAB_INSTANCE = {
     'use_collect_events_fallback': True,
 }
 
-legacy_default_instance = {
+LEGACY_DEFAULT_INSTANCE = {
+    'use_legacy_check_version': True,
     'name': 'vsphere_mock',
     'empty_default_hostname': True,
     'event_config': {
         'collect_vcenter_alarms': True,
     },
-    'use_legacy_check_version': True,
     'host': 'vsphere_host',
     'username': 'vsphere_username',
     'password': 'vsphere_password',
@@ -97,9 +98,9 @@ legacy_historical_instance = {
     'collect_historical_only': True,
 }
 
-default_instance = {
-    'empty_default_hostname': True,
+DEFAULT_INSTANCE = {
     'use_legacy_check_version': False,
+    'empty_default_hostname': True,
     'host': 'vsphere_host',
     'username': 'vsphere_username',
     'password': 'vsphere_password',
@@ -174,6 +175,20 @@ def build_rest_api_client(config, logger):
     if VSPHERE_VERSION.startswith('7.'):
         return VSphereRestAPI(config, logger, False)
     return VSphereRestAPI(config, logger, True)
+
+
+EVENTS = [
+    vim.event.VmMessageEvent(
+        createdTime=get_current_datetime(),
+        vm=vim.event.VmEventArgument(name="vm1"),
+        fullFormattedMessage="First event in time",
+    ),
+    vim.event.VmMessageEvent(
+        createdTime=get_current_datetime(),
+        vm=vim.event.VmEventArgument(name="vm2"),
+        fullFormattedMessage="Second event in time",
+    ),
+]
 
 
 PERF_METRIC_ID = [
@@ -297,6 +312,37 @@ PERF_ENTITY_METRICS = [
     ),
 ]
 
+
+PROPERTIES_EX_VM_OFF = vim.PropertyCollector.RetrieveResult(
+    objects=[
+        vim.ObjectContent(
+            obj=vim.VirtualMachine(moId="vm1"),
+            propSet=[
+                vmodl.DynamicProperty(
+                    name='name',
+                    val='vm1',
+                ),
+                vmodl.DynamicProperty(
+                    name='runtime.powerState',
+                    val=vim.VirtualMachinePowerState.poweredOff,
+                ),
+            ],
+        ),
+        vim.ObjectContent(
+            obj=vim.VirtualMachine(moId="vm2"),
+            propSet=[
+                vmodl.DynamicProperty(
+                    name='name',
+                    val='vm2',
+                ),
+                vmodl.DynamicProperty(
+                    name='runtime.powerState',
+                    val=vim.VirtualMachinePowerState.poweredOn,
+                ),
+            ],
+        ),
+    ]
+)
 
 PROPERTIES_EX = vim.PropertyCollector.RetrieveResult(
     objects=[
