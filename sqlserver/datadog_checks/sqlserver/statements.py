@@ -21,7 +21,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.sqlserver.utils import extract_sql_comments, is_statement_proc
+from datadog_checks.sqlserver.utils import extract_sql_comments, is_statement_proc, PROC_CHAR_LIMIT
 
 try:
     import datadog_agent
@@ -86,9 +86,9 @@ select
         WHEN -1 THEN DATALENGTH(text)
         ELSE statement_end_offset END
             - statement_start_offset) / 2) + 1) AS statement_text,
-    qt.text,
+    SUBSTRING(qt.text, 1, {PROC_CHAR_LIMIT})
     encrypted as is_encrypted,
-    s.* from qstats_aggr_split s
+    * from qstats_aggr_split
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
 
@@ -120,7 +120,7 @@ select
     END - statement_start_offset) / 2) + 1) AS statement_text,
     qt.text,
     encrypted as is_encrypted,
-    s.* from qstats_aggr_split s
+    * from qstats_aggr_split
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
 
