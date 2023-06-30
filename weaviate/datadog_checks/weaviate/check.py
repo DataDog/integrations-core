@@ -35,7 +35,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
         endpoint = urljoin(self.api_url, DEFAULT_METADATA_ENDPOINT)
         response = self.http.get(endpoint)
 
-        if response.status_code == 200:
+        if response.ok:
             try:
                 data = response.json()
                 version = data["version"]
@@ -67,7 +67,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
         end_time = time.time()
         tags = self.tags
         tags.append(f"weaviate_liveness_url:{endpoint}")
-        if response.status_code == 200:
+        if response.ok:
             latency = round_value((end_time - start_time) * 1000, 2)
             self.service_check('liveness.status', 0, tags)
             self.gauge('http.latency_ms', latency, tags=tags)
@@ -77,7 +77,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
     def _submit_node_metrics(self):
         endpoint = urljoin(self.api_url, DEFAULT_NODE_METRICS_ENDPOINT)
         response = self.http.get(endpoint)
-        if response.status_code != 200:
+        if not response.ok:
             self.log.debug(f"Could not retrieve Node metrics. Request returned a: {response.status_code}")
             return
         try:
