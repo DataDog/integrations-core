@@ -675,7 +675,7 @@ def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         matching = [r for r in rows if r['text'] == test_query]
-        assert matching, "the test query should be visible in the query stats"
+        assert matching, "the test query should be visible in the query stats, found all rows: {}".format(rows)
         row = matching[0]
 
         cursor.execute(
