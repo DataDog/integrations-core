@@ -14,7 +14,7 @@ from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 from datadog_checks.weaviate.check import DEFAULT_LIVENESS_ENDPOINT
 
-from .common import USE_AUTH
+from .common import USE_AUTH, BATCH_OBJECTS
 
 try:
     from contextlib import ExitStack
@@ -65,18 +65,12 @@ def make_weaviate_request(instance):
     weaviate_batch_endpoint = f"{weaviate_api_endpoint}/v1/batch/objects"
     headers = {'content-type': 'application/json'}
 
-    data = {
-        'objects': [
-            {'class': 'Example', 'vector': [0.1, 0.3], 'properties': {'text': 'This is the first object'}},
-            {'class': 'Example', 'vector': [0.01, 0.7], 'properties': {'text': 'This is another object'}},
-        ]
-    }
     if instance.get('headers'):
         headers.update(instance['headers'])
-    is_ready = ready_check(weaviate_api_endpoint, 300)
-    if is_ready:
-        response = requests.post(weaviate_batch_endpoint, headers=headers, data=json.dumps(data))
-        return response
+
+    if ready_check(weaviate_api_endpoint, 300):
+        requests.post(weaviate_batch_endpoint, headers=headers, data=json.dumps(BATCH_OBJECTS))
+
 
 
 def ready_check(endpoint, timeout=300):
