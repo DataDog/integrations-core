@@ -14,10 +14,10 @@ MOCKED_INSTANCE = {
 }
 
 BATCH_OBJECTS = {
-        'objects': [
-            {'class': 'Example', 'vector': [0.1, 0.3], 'properties': {'text': 'This is the first object'}},
-            {'class': 'Example', 'vector': [0.01, 0.7], 'properties': {'text': 'This is another object'}},
-        ]
+    'objects': [
+        {'class': 'Example', 'vector': [0.1, 0.3], 'properties': {'text': 'This is the first object'}},
+        {'class': 'Example', 'vector': [0.01, 0.7], 'properties': {'text': 'This is another object'}},
+    ]
 }
 
 

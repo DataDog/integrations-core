@@ -14,7 +14,7 @@ from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 from datadog_checks.weaviate.check import DEFAULT_LIVENESS_ENDPOINT
 
-from .common import USE_AUTH, BATCH_OBJECTS
+from .common import BATCH_OBJECTS, USE_AUTH
 
 try:
     from contextlib import ExitStack
@@ -33,6 +33,8 @@ def setup_weaviate():
         run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "weaviate_auth.yaml"), "-n", "weaviate"])
     else:
         run_command(["kubectl", "apply", "-f", opj(HERE, 'kind', "weaviate_install.yaml"), "-n", "weaviate"])
+
+    # Tries to ensure that the Kubernetes resources are deployed and ready before we do anything else
     run_command(["kubectl", "rollout", "status", "statefulset/weaviate", "-n", "weaviate"])
     run_command(["kubectl", "wait", "pods", "--all", "-n", "weaviate", "--for=condition=Ready", "--timeout=600s"])
 
@@ -61,6 +63,7 @@ def dd_environment():
 
 
 def make_weaviate_request(instance):
+    # This helps seed some dummy data in to Weaviate to make some metrics available
     weaviate_api_endpoint = instance.get('weaviate_api_endpoint')
     weaviate_batch_endpoint = f"{weaviate_api_endpoint}/v1/batch/objects"
     headers = {'content-type': 'application/json'}
@@ -72,8 +75,9 @@ def make_weaviate_request(instance):
         requests.post(weaviate_batch_endpoint, headers=headers, data=json.dumps(BATCH_OBJECTS))
 
 
-
 def ready_check(endpoint, timeout=300):
+    # Sometimes the API endpoint isn't ready when the cluster is ready. This will tries to ensure the
+    # API is ready for requests before we seed some dummy data.
     stop_time = time.time() + timeout
     endpoint = f"{endpoint}{DEFAULT_LIVENESS_ENDPOINT}"
     while time.time() < stop_time:
