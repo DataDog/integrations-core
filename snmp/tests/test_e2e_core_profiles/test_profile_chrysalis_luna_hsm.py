@@ -10,8 +10,10 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
+    assert_extend_generic_tcp,
+    assert_extend_generic_ucd,
     create_e2e_core_test_config,
-    get_device_ip_from_config, assert_extend_generic_tcp, assert_extend_generic_ucd,
+    get_device_ip_from_config,
 )
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
@@ -44,7 +46,6 @@ def test_e2e_profile_chrysalis_luna_hsm(dd_agent_check):
     aggregator.assert_metric('snmp.ntlsFailedClientConnections', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.ntlsLinks', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.ntlsSuccessfulClientConnections', metric_type=aggregator.GAUGE, tags=common_tags)
-
 
     # --- TEST METADATA ---
     device = {
