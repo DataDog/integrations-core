@@ -26,16 +26,20 @@ def assert_common_metrics(aggregator, common_tags):
 
 
 def assert_extend_generic_if(aggregator, common_tags):
+    # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.2.1.0|2|28
     """
+    # fmt: on
     aggregator.assert_metric("snmp.ifNumber", metric_type=aggregator.GAUGE, tags=common_tags)
 
 
 def assert_extend_generic_ip(aggregator, common_tags):
+    # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.4.31.1.1.4.1 = Counter64: 310637142
     """
+    # fmt: on
     aggregator.assert_metric(
         "snmp.ipSystemStatsHCInReceives",
         metric_type=aggregator.COUNT,
@@ -44,23 +48,29 @@ def assert_extend_generic_ip(aggregator, common_tags):
 
 
 def assert_extend_generic_tcp(aggregator, common_tags):
+    # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.6.5.0|65|4698
     """
+    # fmt: on
     aggregator.assert_metric("snmp.tcpActiveOpens", metric_type=aggregator.COUNT, tags=common_tags)
 
 
 def assert_extend_generic_udp(aggregator, common_tags):
+    # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.7.8.0|70|6116206687099577350
     """
+    # fmt: on
     aggregator.assert_metric("snmp.udpHCInDatagrams", metric_type=aggregator.COUNT, tags=common_tags)
 
 
 def assert_extend_generic_ospf(aggregator, common_tags):
+    # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.14.10.1.6.192.29.116.26.0|2|8
     """
+    # fmt: on
     aggregator.assert_metric(
         "snmp.ospfNbr", metric_type=aggregator.GAUGE, tags=common_tags + ["neighbor_state:full"], value=1
     )
@@ -70,9 +80,11 @@ def assert_extend_generic_ospf(aggregator, common_tags):
 
 
 def assert_extend_generic_bgp4(aggregator, common_tags):
+    # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.15.3.1.3.244.12.239.177|2|2
     """
+    # fmt: on
     aggregator.assert_metric(
         "snmp.bgpPeerAdminStatus",
         metric_type=aggregator.GAUGE,
@@ -98,6 +110,7 @@ def assert_extend_cisco_cpu_memory(aggregator, common_tags):
 
 
 def assert_extend_generic_host_resources(aggregator, common_tags):
+    # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.25.1.1.0|67|201526890
 1.3.6.1.2.1.25.2.3.1.1.4|2|4
@@ -111,6 +124,7 @@ def assert_extend_generic_host_resources(aggregator, common_tags):
 1.3.6.1.2.1.25.2.3.1.6.4|2|30
 1.3.6.1.2.1.25.2.3.1.6.31|2|4
     """
+    # fmt: on
     aggregator.assert_metric("snmp.hrSystemUptime", metric_type=aggregator.GAUGE, tags=common_tags)
 
     cpu_rows = ['10', '21']
@@ -142,13 +156,16 @@ def assert_extend_generic_host_resources(aggregator, common_tags):
 
 
 def assert_extend_generic_host_resources_base(aggregator, common_tags):
+    # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.25.1.1.0|67|201526890
     """
+    # fmt: on
     aggregator.assert_metric("snmp.hrSystemUptime", metric_type=aggregator.GAUGE, tags=common_tags)
 
 
 def assert_extend_entity_sensor(aggregator, common_tags):
+    # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.99.1.1.1.1.8|2|9
 1.3.6.1.2.1.99.1.1.1.2.8|2|7
@@ -163,6 +180,7 @@ def assert_extend_entity_sensor(aggregator, common_tags):
 1.3.6.1.6.3.10.2.1.3.0|2|31
 1.3.6.1.6.3.10.2.1.4.0|2|1234
     """
+    # fmt: on
     additional_tags = [
         'ent_phy_sensor_oper_status:nonoperational',
         'ent_phy_sensor_precision:7',
