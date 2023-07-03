@@ -18,9 +18,9 @@ class QueryBuilder(object):
         else: 
             updatedQueries = []
             for q in queries:
-                nq = q
-                nq['query'] = nq['clusterQueryFormat'].format(cluster_name)
-                updatedQueries.append(nq)
+                clusterQuery = q
+                clusterQuery['query'] = clusterQuery['clusterQueryFormat'].format(cluster_name)
+                updatedQueries.append(clusterQuery)
             return updatedQueries
 
 
