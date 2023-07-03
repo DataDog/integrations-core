@@ -7,7 +7,6 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.base.stubs.common import MetricStub
-from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 
