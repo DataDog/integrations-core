@@ -1,5 +1,5 @@
 {
-	"name": "SNMP Interface went down on device {{snmp_device.name}}",
+	"name": "[SNMP-Traps] Interface went down on device {{snmp_device.name}}",
 	"type": "log alert",
 	"query": "formula(\"default_zero(query1) / default_zero(query1) - default_zero(query) / default_zero(query)\").last(\"1m\") > 0.5",
 	"message": "{{#is_alert}} \nA network device with IP {{snmp_device.name}} in namespace {{device_namespace.name}} is reporting CRITICAL and can't be monitored anymore.\n{{/is_alert}}\n\n{{#is_alert_recovery}}\nA network device with IP {{snmp_device.name}} in namespace {{device_namespace.name}} is back online.\n{{/is_alert_recovery}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_namespace.name}}:{{snmp_device.name}}](/infrastructure/devices/graph?inspectedDevice={{device_namespace.name}}%3A{{snmp_device.name}}).",

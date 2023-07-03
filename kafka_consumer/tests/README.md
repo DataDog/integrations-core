@@ -29,4 +29,4 @@ If you face this issue:
 ```
 
 1. Make sure you installed `librdkafka` (see the previous section).
-2. You might need to set the `C_INCLUDE_PATH` and `LIBRARY_PATH` environments variable to load `librdkafka` when bulding `confluent-kafka`. For instance: `C_INCLUDE_PATH=/opt/homebrew/Cellar/librdkafka/2.0.2/include/ LIBRARY_PATH=/opt/homebrew/Cellar/librdkafka/2.0.2/lib ddev test kafka_consumer`. Setting these environment variables is only needed when the test environment is built (or rebuilt with the `--force-env-rebuild` option).  
+2. You might need to set the `C_INCLUDE_PATH` and `LIBRARY_PATH` environments variable to load `librdkafka` when building `confluent-kafka`. For instance: `C_INCLUDE_PATH=/opt/homebrew/Cellar/librdkafka/2.1.1/include/ LIBRARY_PATH=/opt/homebrew/Cellar/librdkafka/2.1.1/lib ddev test kafka_consumer`. (be sure to use the same version as declared in the `pyproject.toml` file). Setting these environment variables is only needed when the test environment is built (or rebuilt with the `--force-env-rebuild` option).  

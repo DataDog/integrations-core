@@ -27,7 +27,6 @@ def test_e2e_profile_hp_ilo(dd_agent_check):
         'snmp_host:hp-ilo.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-        'device_vendor:hp',
     ]
 
     # --- TEST METRICS ---
@@ -175,7 +174,6 @@ def test_e2e_profile_hp_ilo(dd_agent_check):
         'version': 'A04-08/12/2018',
         'tags': [
             'device_namespace:default',
-            'device_vendor:hp',
             'snmp_device:' + ip_address,
             'snmp_host:hp-ilo.device.name',
             'snmp_profile:hp-ilo',

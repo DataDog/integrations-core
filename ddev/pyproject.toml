@@ -26,10 +26,11 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
 ]
 dependencies = [
-    "datadog-checks-dev[cli]~=20.0",
+    "datadog-checks-dev[cli]~=21.0",
     "hatch>=1.6.3",
     "httpx",
     "jsonpointer",
+    "pluggy",
     "rich>=12.5.1",
     "tomli; python_version < '3.11'",
     "tomli-w",
