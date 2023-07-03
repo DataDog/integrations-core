@@ -18,13 +18,13 @@ from .utils import (
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
 
-def test_e2e_profile_anue_packet_broker(dd_agent_check):
+def test_e2e_profile_anue(dd_agent_check):
     config = create_e2e_core_test_config('anue-packet-broker')
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
     common_tags = [
-        'snmp_profile:anue-packet-broker',
+        'snmp_profile:anue',
         'snmp_host:anue-packet-broker.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
@@ -43,7 +43,7 @@ def test_e2e_profile_anue_packet_broker(dd_agent_check):
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
         'name': 'anue-packet-broker.device.name',
-        'profile': 'anue-packet-broker',
+        'profile': 'anue',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.32620.1.1',
         'vendor': 'anue',
