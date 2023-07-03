@@ -48,6 +48,7 @@ def dd_environment():
                 else f"{common.HERE}/docker/kerberos/kdc/krb5_local.conf",
                 "SECRET_DIR": secret_dir,
             },
+            sleep=5,
             build=True,
         ):
             yield {
@@ -74,7 +75,7 @@ def create_topics():
 
     for topic in common.TOPICS:
         client.create_topics([NewTopic(topic, 2, 1)])
-        time.sleep(1)
+        time.sleep(5)
 
     # Make sure the topics in `TOPICS` are created. Brokers may have more topics (such as internal topics)
     # so we only check if it contains the topic we need.
