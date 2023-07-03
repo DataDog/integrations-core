@@ -1,5 +1,4 @@
 extends:
-  - _base.yaml
   - avtech.yaml
 sysobjectid:
   - 1.3.6.1.4.1.20916.1.13.*
