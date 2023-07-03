@@ -307,7 +307,7 @@ def test_e2e_profile_aruba(dd_agent_check):
         config,
         expected_total_count=67 + 5,
         metrics_to_skip=metrics_to_skip,
-        tags_to_skip=['neighbor_state', 'if_state'],
+        tags_to_skip=['neighbor_state', 'if_state'],  # Ignore tags that have a mapping
     )
 
 
