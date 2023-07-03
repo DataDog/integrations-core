@@ -1,12 +1,13 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from concurrent.futures import as_completed
+
 from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
 from confluent_kafka.admin import AdminClient
 
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, OFFSET_INVALID
 
-from concurrent.futures import as_completed
 
 class KafkaClient:
     def __init__(self, config, tls_context, log) -> None:
@@ -176,36 +177,49 @@ class KafkaClient:
         else:
             return self.config._consumer_groups
 
+    def _list_consumer_group_offsets(self, cg_tp):
+        return self.kafka_client.list_consumer_group_offsets([cg_tp])
+
     def _get_consumer_offset_futures(self, consumer_groups):
         futures = []
 
         if self.config._monitor_unlisted_consumer_groups:
             for consumer_group in consumer_groups:
-                futures.append(self.kafka_client.list_consumer_group_offsets([ConsumerGroupTopicPartitions(consumer_group)])[consumer_group])
+                futures.append(
+                    self._list_consumer_group_offsets(ConsumerGroupTopicPartitions(consumer_group))[consumer_group]
+                )
 
-        elif not self.config._consumer_groups_compiled_regex: # if only consumer_groups specified
+        # if only consumer_groups specified
+        elif not self.config._consumer_groups_compiled_regex:
             for consumer_group in consumer_groups:
                 # If topics are specified
                 if topics := consumer_groups[consumer_group]:
                     for topic in topics:
+                        topic_partitions = []
                         # If partitions are defined
                         if partitions := topics[topic]:
-                            for partition in partitions:
-                                topic_partition = TopicPartition(topic, partition)
-                                futures.append(self.kafka_client.list_consumer_group_offsets(
-                                    [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
-                                )[consumer_group])
-                        else: # If partitions are not defined
+                            topic_partitions = [TopicPartition(topic, partition) for partition in partitions]
+                        # If partitions are not defined
+                        else:
                             # get all the partitions for this topic
-                            partitions = self.kafka_client.list_topics(topic=topic, timeout=self.config._request_timeout).topics[topic].partitions
-                            for partition in partitions:
-                                topic_partition = TopicPartition(topic, partition)
-                                futures.append(self.kafka_client.list_consumer_group_offsets(
-                                    [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
-                                )[consumer_group])
+                            partitions = (
+                                self.kafka_client.list_topics(topic=topic, timeout=self.config._request_timeout)
+                                .topics[topic]
+                                .partitions
+                            )
+                            topic_partitions = [TopicPartition(topic, partition) for partition in partitions]
+
+                        futures.append(
+                            self._list_consumer_group_offsets(
+                                ConsumerGroupTopicPartitions(consumer_group, topic_partitions)
+                            )[consumer_group]
+                        )
+
                 else:
-                    futures.append(self.kafka_client.list_consumer_group_offsets([ConsumerGroupTopicPartitions(consumer_group)])[consumer_group])
-            
+                    futures.append(
+                        self._list_consumer_group_offsets(ConsumerGroupTopicPartitions(consumer_group))[consumer_group]
+                    )
+
         else:
             topic_metadata = self.kafka_client.list_topics(timeout=self.config._request_timeout).topics
             topics = {
@@ -218,7 +232,11 @@ class KafkaClient:
                 self.log.debug('CONSUMER GROUP: %s', consumer_group)
 
                 for topic_partition in self._get_topic_partitions(topics, consumer_group):
-                    futures.append(self.kafka_client.list_consumer_group_offsets([ConsumerGroupTopicPartitions(consumer_group, [topic_partition])])[consumer_group])
+                    futures.append(
+                        self.kafka_client.list_consumer_group_offsets(
+                            [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
+                        )[consumer_group]
+                    )
 
         return futures
 
