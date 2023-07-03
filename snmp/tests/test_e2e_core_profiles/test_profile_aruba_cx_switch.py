@@ -29,7 +29,7 @@ def test_e2e_profile_aruba_cx_switch(dd_agent_check):
         'snmp_host:aruba-cx-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-    ] + []
+    ]
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
