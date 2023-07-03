@@ -6,6 +6,7 @@ from confluent_kafka.admin import AdminClient
 
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, OFFSET_INVALID
 
+from concurrent.futures import as_completed
 
 class KafkaClient:
     def __init__(self, config, tls_context, log) -> None:
@@ -121,7 +122,9 @@ class KafkaClient:
 
         consumer_groups = self._get_consumer_groups()
 
-        for future in self._get_consumer_offset_futures(consumer_groups):
+        futures = self._get_consumer_offset_futures(consumer_groups)
+
+        for future in as_completed(futures):
             try:
                 response_offset_info = future.result()
             except KafkaException as e:
@@ -174,9 +177,12 @@ class KafkaClient:
             return self.config._consumer_groups
 
     def _get_consumer_offset_futures(self, consumer_groups):
+        futures = []
+
         if self.config._monitor_unlisted_consumer_groups:
             for consumer_group in consumer_groups:
-                yield self.kafka_client.list_consumer_group_offsets([ConsumerGroupTopicPartitions(consumer_group)])[consumer_group]
+                futures.append(self.kafka_client.list_consumer_group_offsets([ConsumerGroupTopicPartitions(consumer_group)])[consumer_group])
+
         elif not self.config._consumer_groups_compiled_regex: # if only consumer_groups specified
             for consumer_group in consumer_groups:
                 # If topics are specified
@@ -186,19 +192,20 @@ class KafkaClient:
                         if partitions := topics[topic]:
                             for partition in partitions:
                                 topic_partition = TopicPartition(topic, partition)
-                                yield self.kafka_client.list_consumer_group_offsets(
+                                futures.append(self.kafka_client.list_consumer_group_offsets(
                                     [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
-                                )[consumer_group]
+                                )[consumer_group])
                         else: # If partitions are not defined
                             # get all the partitions for this topic
                             partitions = self.kafka_client.list_topics(topic=topic, timeout=self.config._request_timeout).topics[topic].partitions
                             for partition in partitions:
                                 topic_partition = TopicPartition(topic, partition)
-                                yield self.kafka_client.list_consumer_group_offsets(
+                                futures.append(self.kafka_client.list_consumer_group_offsets(
                                     [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
-                                )[consumer_group]
+                                )[consumer_group])
                 else:
-                    yield self.kafka_client.list_consumer_group_offsets([ConsumerGroupTopicPartitions(consumer_group)])[consumer_group]
+                    futures.append(self.kafka_client.list_consumer_group_offsets([ConsumerGroupTopicPartitions(consumer_group)])[consumer_group])
+            
         else:
             topic_metadata = self.kafka_client.list_topics(timeout=self.config._request_timeout).topics
             topics = {
@@ -211,9 +218,9 @@ class KafkaClient:
                 self.log.debug('CONSUMER GROUP: %s', consumer_group)
 
                 for topic_partition in self._get_topic_partitions(topics, consumer_group):
-                    yield self.kafka_client.list_consumer_group_offsets(
-                        [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
-                    )[consumer_group]
+                    futures.append(self.kafka_client.list_consumer_group_offsets([ConsumerGroupTopicPartitions(consumer_group, [topic_partition])])[consumer_group])
+
+        return futures
 
     def _get_topic_partitions(self, topics, consumer_group):
         for topic, partitions in topics.items():

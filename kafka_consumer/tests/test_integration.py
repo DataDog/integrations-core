@@ -64,8 +64,8 @@ def test_no_partitions(aggregator, check, kafka_instance, dd_run_check):
 @pytest.mark.parametrize(
     'is_enabled, broker_offset_metric_count, topic_tags',
     [
-        pytest.param(True, 6, ['topic:marvel', 'topic:dc'], id="Enabled"),
-        pytest.param(False, 2, ['topic:marvel'], id="Disabled"),
+        pytest.param(True, 6, ['topic:marvel', 'topic:dc'], id="Monitor all broker highwatermarks Enabled"),
+        pytest.param(False, 2, ['topic:marvel'], id="Monitor all broker highwatermarks Disabled"),
     ],
 )
 def test_monitor_broker_highwatermarks(
