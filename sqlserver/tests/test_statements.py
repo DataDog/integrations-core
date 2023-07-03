@@ -269,6 +269,22 @@ test_statement_metrics_and_plans_parameterized = (
             True,
             True,
         ],
+        [
+            "datadog_test",
+            "EXEC bobProcParams @P1 = ?, @P2 = ?",
+            [
+                r"SELECT \* FROM ϑings WHERE id = @P1",
+                r"SELECT id FROM ϑings WHERE name = @P2",
+            ],
+            (
+                (1, "foo"),
+                (2, "bar"),
+            ),
+            5,
+            False,
+            True,
+            True,
+        ],
     ],
 )
 
@@ -430,6 +446,73 @@ def test_statement_metrics_and_plans(
         tags=['agent_hostname:stubbed.hostname', 'operation:collect_statement_metrics_and_plans']
         + _expected_dbm_instance_tags(dbm_instance),
     )
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize("database,query,expected_queries_patterns,param_groups,exe_count,",
+            [["master",
+            "EXEC multiQueryProc",
+            [
+                r"select @total = @total \+ count\(\*\) from sys\.databases where name like '%_'",
+                r"select @total = @total \+ count\(\*\) from sys\.sysobjects where type = 'U'",
+            ],
+            ((),),
+            1,
+            ]]
+        )
+def test_statement_metrics_limit(
+    aggregator,
+    dd_run_check,
+    dbm_instance,
+    bob_conn,
+    database,
+    query,
+    param_groups,
+    exe_count,
+    expected_queries_patterns):
+    dbm_instance['query_metrics']['max_queries'] = 5
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    # the check must be run three times:
+    # 1) set _last_stats_query_time (this needs to happen before the 1st test queries to ensure the query time
+    # interval is correct)
+    # 2) load the test queries into the StatementMetrics state
+    # 3) emit the query metrics based on the diff of current and last state
+    dd_run_check(check)
+    for _ in range(0, exe_count):
+        for params in param_groups:
+            bob_conn.execute_with_retries(query, params, database=database)
+    dd_run_check(check)
+    aggregator.reset()
+    for _ in range(0, exe_count):
+        for params in param_groups:
+            bob_conn.execute_with_retries(query, params, database=database)
+    dd_run_check(check)
+
+    _conn_key_prefix = "dbm-"
+    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
+        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+            available_query_metrics_columns = check.statement_metrics._get_available_query_metrics_columns(
+                cursor, SQL_SERVER_QUERY_METRICS_COLUMNS
+            )
+
+    
+    instance_tags = dbm_instance.get('tags', [])
+    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
+    expected_instance_tags_with_db = expected_instance_tags | {"db:{}".format(database)}
+
+    # dbm-metrics
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
+    payload = dbm_metrics[0]
+    # metrics rows
+    sqlserver_rows = payload.get('sqlserver_rows', [])
+    assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
+    assert len(sqlserver_rows) == dbm_instance['query_metrics']['max_queries']
+
+    # check that it's sorted
+    assert sqlserver_rows == sorted(sqlserver_rows, key=lambda i: i['total_elapsed_time'], reverse=True)
+        
 
 
 @pytest.mark.integration
