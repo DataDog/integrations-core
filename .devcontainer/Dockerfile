@@ -1,3 +1,5 @@
+# This dockerfile is used to build the devcontainer environment.
+# more info about vscode devcontainer: https://code.visualstudio.com/docs/devcontainers/containers
 FROM ubuntu
 ARG PYTHON_VERSION=3.9
 
