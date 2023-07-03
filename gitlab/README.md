@@ -137,4 +137,4 @@ Need help? Contact [Datadog support][14].
 [14]: https://docs.datadoghq.com/help/
 [15]: https://docs.gitlab.com/ee/user/admin_area/monitoring/health_check.html#readiness
 [16]: https://github.com/DataDog/integrations-core/blob/7.43.x/gitlab/datadog_checks/gitlab/data/conf.yaml.example
-[17]: https://docs.datadohgq.com/integrations/guide/versions-for-openmetrics-based-integrations
+[17]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
