@@ -15,6 +15,6 @@ UNIX_GAUGES = {
     'system.fs.inodes.used': 1,
     'system.fs.inodes.free': 9,
     'system.fs.inodes.in_use': 0.10,
-    'system.fs.inodes.utilized': 1,
+    'system.fs.inodes.utilized': 10,
 }
 UNIX_GAUGES.update(CORE_GAUGES)

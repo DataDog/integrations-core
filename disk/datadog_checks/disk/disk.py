@@ -319,7 +319,7 @@ class Disk(AgentCheck):
             metrics[self.METRIC_INODE.format('utilized')] = (used / total) * 100
 
             # TODO: deprecate in favor of `utilized` metric
-            metrics[self.METRIC_INODE.format('in_use')] = (total - free) / total
+            metrics[self.METRIC_INODE.format('in_use')] = used / total
 
         return metrics
 
