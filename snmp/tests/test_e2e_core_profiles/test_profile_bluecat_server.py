@@ -10,8 +10,8 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
-    assert_extend_generic_if,
     assert_extend_generic_host_resources,
+    assert_extend_generic_if,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
@@ -40,22 +40,42 @@ def test_e2e_profile_bluecat_server(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     tag_rows = [
-         ['bcn_dhcpv4_subnet_high_threshold:36313', 'bcn_dhcpv4_subnet_ip:53.202.135.190', 'bcn_dhcpv4_subnet_low_threshold:20994', 'bcn_dhcpv4_subnet_mask:173.237.3.46', 'bcn_dhcpv4_subnet_size:29950'],
-         ['bcn_dhcpv4_subnet_high_threshold:6107', 'bcn_dhcpv4_subnet_ip:171.172.73.225', 'bcn_dhcpv4_subnet_low_threshold:9664', 'bcn_dhcpv4_subnet_mask:88.247.127.217', 'bcn_dhcpv4_subnet_size:64705'],
-
+        [
+            'bcn_dhcpv4_subnet_high_threshold:36313',
+            'bcn_dhcpv4_subnet_ip:53.202.135.190',
+            'bcn_dhcpv4_subnet_low_threshold:20994',
+            'bcn_dhcpv4_subnet_mask:173.237.3.46',
+            'bcn_dhcpv4_subnet_size:29950',
+        ],
+        [
+            'bcn_dhcpv4_subnet_high_threshold:6107',
+            'bcn_dhcpv4_subnet_ip:171.172.73.225',
+            'bcn_dhcpv4_subnet_low_threshold:9664',
+            'bcn_dhcpv4_subnet_mask:88.247.127.217',
+            'bcn_dhcpv4_subnet_size:64705',
+        ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.bcnDhcpv4SubnetFreeAddresses', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.bcnDhcpv4SubnetFreeAddresses', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
-         ['bcn_dhcpv4_pool_end_ip:138.41.248.20', 'bcn_dhcpv4_pool_size:55389', 'bcn_dhcpv4_pool_subnet_ip:115.187.187.225'],
-         ['bcn_dhcpv4_pool_end_ip:58.239.195.226', 'bcn_dhcpv4_pool_size:59812', 'bcn_dhcpv4_pool_subnet_ip:16.140.203.163'],
-
+        [
+            'bcn_dhcpv4_pool_end_ip:138.41.248.20',
+            'bcn_dhcpv4_pool_size:55389',
+            'bcn_dhcpv4_pool_subnet_ip:115.187.187.225',
+        ],
+        [
+            'bcn_dhcpv4_pool_end_ip:58.239.195.226',
+            'bcn_dhcpv4_pool_size:59812',
+            'bcn_dhcpv4_pool_subnet_ip:16.140.203.163',
+        ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.bcnDhcpv4PoolFreeAddresses', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-
+        aggregator.assert_metric(
+            'snmp.bcnDhcpv4PoolFreeAddresses', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     # --- TEST METADATA ---
     device = {
