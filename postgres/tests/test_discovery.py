@@ -4,6 +4,7 @@
 
 import copy
 import time
+import re
 from contextlib import contextmanager
 
 import psycopg2
@@ -79,12 +80,10 @@ def test_autodiscovery_max_databases(integration_check, pg_instance):
     assert len(databases) == pg_instance['database_autodiscovery']['max_databases']
     expected_warning = [
         "Autodiscovery found {} databases, which was more than the specified limit of {}. "
-        "Increase `max_databases` in the `database_autodiscovery` block of the agent configuration"
-        "to see these extra databases."
-        "The database list will be truncated.\n".format(
-            len(check.autodiscovery._cache._cached_items),
-            pg_instance['database_autodiscovery']['max_databases'],
-        )
+        "Increase `max_databases` in the `database_autodiscovery` block of the agent configuration "
+        "to see these extra databases. "
+        "The database list will be truncated.\n".format(NUM_DOGS_DATABASES - len(DISCOVERY_CONFIG["exclude"]),
+        pg_instance['database_autodiscovery']['max_databases'])
     ]
     assert check.warnings == expected_warning
 
@@ -172,9 +171,34 @@ def test_autodiscovery_collect_all_relations(aggregator, integration_check, pg_i
             aggregator.assert_metric(metric, tags=expected_tags)
 
     aggregator.assert_metric(
-        'dd.postgres.operation.time',
-        tags=['operation:_collect_relations_autodiscovery'],
+        'dd.postgres._collect_relations_autodiscovery.time',
     )
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_autodiscovery_exceeds_min_interval(aggregator, integration_check, pg_instance):
+    """
+    Check that relation metrics get collected for each database discovered.
+    """
+    pg_instance["database_autodiscovery"] = copy.deepcopy(DISCOVERY_CONFIG)
+    pg_instance["database_autodiscovery"]["include"] = ["dogs$", "dogs_noschema$", "dogs_nofunc$"]
+    pg_instance['relations'] = [
+        {'relation_regex': '.*'},
+    ]
+    pg_instance['min_collection_interval'] = .001
+    del pg_instance['dbname']
+
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    aggregator.assert_metric(
+        'dd.postgres._collect_relations_autodiscovery.time',
+    )
+    assert len(check.warnings) == 1
+    test_structure = re.compile("Collecting metrics on autodiscovery metrics took .* ms, which is longer than "
+        "the minimum collection interval. Consider increasing the min_collection_interval parameter "
+        "in the postgres yaml configuration.\n")
+    assert test_structure.match(check.warnings[0])
 
 
 @pytest.mark.integration

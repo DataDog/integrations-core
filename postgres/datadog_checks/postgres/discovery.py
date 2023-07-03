@@ -27,13 +27,14 @@ class PostgresAutodiscovery(Discovery):
             include={db: 0 for db in autodiscovery_config.get("include", [".*"])},
             exclude=autodiscovery_config.get("exclude", []),
             interval=autodiscovery_config.get("refresh", DEFAULT_REFRESH),
-            limit=autodiscovery_config.get("max_databases", DEFAULT_MAX_DATABASES),
         )
         self._default_ttl = default_ttl
         self._db = global_view_db
         self._check = check
         self._log = self._check.log
         self._conn_pool = self._check.autodiscovery_db_pool
+        self._max_databases = autodiscovery_config.get("max_databases", DEFAULT_MAX_DATABASES)
+        self._cache_filtered = []
 
     def get_items(self) -> List[str]:
         """
@@ -42,28 +43,30 @@ class PostgresAutodiscovery(Discovery):
         This function takes the item of interest (dbname) from this four-tuple
         and returns the full list of database names from the generator.
         """
-        prev_cached_items_len = len(self._cache._cached_items)
+        prev_cached_items_len = len(self._cache_filtered)
         items = list(super().get_items())
-        # get_items updates _cache._cached_items, so check if the last refresh
-        # added a database that put this instance over the limit.
-        # _cache._cached_items stores databases before the limit filter is applied
+        
+        # check if the items got refreshed + went over limit
+        # before this function applies
+        # the max_databases limit
         if (
-            len(self._cache._cached_items) != prev_cached_items_len
-            and len(self._cache._cached_items) > self._filter._limit
+            len(items) != prev_cached_items_len
+            and len(items) > self._max_databases
         ):
             self._check.record_warning(
                 DatabaseConfigurationError.autodiscovered_databases_exceeds_limit,
                 warning_with_tags(
                     "Autodiscovery found %d databases, which was more than the specified limit of %d. "
-                    "Increase `max_databases` in the `database_autodiscovery` block of the agent configuration"
-                    "to see these extra databases."
+                    "Increase `max_databases` in the `database_autodiscovery` block of the agent configuration "
+                    "to see these extra databases. "
                     "The database list will be truncated.",
-                    len(self._cache._cached_items),
-                    self._filter._limit,
+                    len(items),
+                    self._max_databases,
                 ),
             )
 
-        items_parsed = [item[1] for item in items]
+        items_parsed = [item[1] for item in items][:self._max_databases]
+        self._cache_filtered = items_parsed
         return items_parsed
 
     def _get_databases(self) -> List[str]:
