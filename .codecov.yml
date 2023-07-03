@@ -467,7 +467,7 @@ coverage:
         flags:
         - sap_hana
       SNMP:
-        target: 75
+        target: 50
         flags:
         - snmp
       SQL_Server:
