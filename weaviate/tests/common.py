@@ -66,7 +66,7 @@ OM_METRICS = [
     "weaviate.lsm.active.segments",
     "weaviate.lsm.segment.size",
     "weaviate.lsm.segments",
-    "weaviate.object_count",
+    "weaviate.objects",
     "weaviate.objects.durations_ms.count",
     "weaviate.objects.durations_ms.sum",
     "weaviate.queries.filtered.vector.durations_ms.count",
