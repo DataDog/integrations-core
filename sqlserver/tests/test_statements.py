@@ -449,15 +449,13 @@ def test_statement_metrics_and_plans(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize("database,query,expected_queries_patterns,param_groups,exe_count,",
+@pytest.mark.parametrize("database,query,expected_queries_patterns,",
             [["master",
             "EXEC multiQueryProc",
             [
                 r"select @total = @total \+ count\(\*\) from sys\.databases where name like '%_'",
                 r"select @total = @total \+ count\(\*\) from sys\.sysobjects where type = 'U'",
             ],
-            ((),),
-            1,
             ]]
         )
 def test_statement_metrics_limit(
@@ -467,8 +465,6 @@ def test_statement_metrics_limit(
     bob_conn,
     database,
     query,
-    param_groups,
-    exe_count,
     expected_queries_patterns):
     dbm_instance['query_metrics']['max_queries'] = 5
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
@@ -479,22 +475,18 @@ def test_statement_metrics_limit(
     # 2) load the test queries into the StatementMetrics state
     # 3) emit the query metrics based on the diff of current and last state
     dd_run_check(check)
-    for _ in range(0, exe_count):
-        for params in param_groups:
-            bob_conn.execute_with_retries(query, params, database=database)
+    bob_conn.execute_with_retries(query, (), database=database)
     dd_run_check(check)
     aggregator.reset()
-    for _ in range(0, exe_count):
-        for params in param_groups:
-            bob_conn.execute_with_retries(query, params, database=database)
+    bob_conn.execute_with_retries(query, (), database=database)
     dd_run_check(check)
 
-    _conn_key_prefix = "dbm-"
-    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
-        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
-            available_query_metrics_columns = check.statement_metrics._get_available_query_metrics_columns(
-                cursor, SQL_SERVER_QUERY_METRICS_COLUMNS
-            )
+    # _conn_key_prefix = "dbm-"
+    # with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
+    #     with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+    #         available_query_metrics_columns = check.statement_metrics._get_available_query_metrics_columns(
+    #             cursor, SQL_SERVER_QUERY_METRICS_COLUMNS
+    #         )
 
     
     instance_tags = dbm_instance.get('tags', [])
