@@ -86,9 +86,9 @@ select
         WHEN -1 THEN DATALENGTH(text)
         ELSE statement_end_offset END
             - statement_start_offset) / 2) + 1) AS statement_text,
-    SUBSTRING(qt.text, 1, {proc_char_limit}),
+    SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     encrypted as is_encrypted,
-    * from qstats_aggr_split
+    s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
 
@@ -118,9 +118,9 @@ select
         WHEN -1 THEN DATALENGTH(text)
         ELSE statement_end_offset
     END - statement_start_offset) / 2) + 1) AS statement_text,
-    SUBSTRING(qt.text, 1, {proc_char_limit}),
+    SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     encrypted as is_encrypted,
-    * from qstats_aggr_split
+    s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
 
@@ -345,6 +345,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         # to the backend
         if 'statement_text' in row:
             del row['statement_text']
+        # we're already able to link to the procedure via procedure_name and procedure_signature so we don't need
+        # the text in metrics payloads
+        if 'procedure_text' in row:
+            del row['procedure_text']
         return row
 
     def _to_metrics_payload(self, rows):
@@ -531,3 +535,4 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         'total_elapsed_time': row.get('total_elapsed_time', None),
                     },
                 }
+
