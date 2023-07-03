@@ -230,6 +230,7 @@ def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
 
     memory_metrics = ['memory.total', 'memory.used']
+
     for metric in memory_metrics:
         aggregator.assert_metric(
             'snmp.{}'.format(metric),
