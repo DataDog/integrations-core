@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2021-present
+﻿# (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -464,13 +464,6 @@ def test_statement_metrics_limit(
     aggregator.reset()
     bob_conn.execute_with_retries(query, (), database=database)
     dd_run_check(check)
-
-    # _conn_key_prefix = "dbm-"
-    # with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
-    #     with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
-    #         available_query_metrics_columns = check.statement_metrics._get_available_query_metrics_columns(
-    #             cursor, SQL_SERVER_QUERY_METRICS_COLUMNS
-    #         )
 
     instance_tags = dbm_instance.get('tags', [])
     expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
