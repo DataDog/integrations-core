@@ -778,7 +778,7 @@ snmp.rttMonLatestRttOperSense,gauge,,,,A sense code for the completion status of
 snmp.snapmirrorLag,gauge,,,,"[NetApp] How far behind from the source a snapmirror destination is, in hundredths of a second.",0,snmp,,
 snmp.snapmirrorTotalFailures,count,,,,"[NetApp] Total number of failed or aborted transfers for a given snapmirror.",0,snmp,,
 snmp.svTotalFailures,count,,,,"[NetApp] Total number of failed or aborted transfers for a given snapvault.",0,snmp,,
-snmp.switch_sen1,gauge,,,,"",0,snmp,,
+snmp.switch_sen1,gauge,,,,"The reading for the switch sensor (0 = OPEN, 1 = CLOSED).",0,snmp,,
 snmp.sysClientsslStatCurConns,gauge,,,,[F5 BIG-IP] The current number of concurrent connections with established SSL sessions being maintained by the filter.,0,snmp,,
 snmp.sysClientsslStatDecryptedBytesIn,count,,byte,,[F5 BIG-IP] The total decrypted bytes received.,0,snmp,,
 snmp.sysClientsslStatDecryptedBytesOut,count,,byte,,[F5 BIG-IP] The total decrypted bytes sent.,0,snmp,,
