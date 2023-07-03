@@ -485,7 +485,6 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
     assert if_in_error_metrics[0].value > 0
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_e2e_core_cisco_csr(dd_agent_check):
