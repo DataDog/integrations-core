@@ -188,6 +188,7 @@ class KafkaClient:
                 futures.append(
                     self._list_consumer_group_offsets(ConsumerGroupTopicPartitions(consumer_group))[consumer_group]
                 )
+            return futures
 
         # if only consumer_groups specified
         elif not self.config._consumer_groups_compiled_regex:
