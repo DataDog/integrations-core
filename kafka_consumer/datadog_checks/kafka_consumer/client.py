@@ -189,47 +189,41 @@ class KafkaClient:
     def _get_consumer_offset_futures(self, consumer_groups):
         futures = []
 
-        if self.config._monitor_unlisted_consumer_groups:
+        # If either monitoring all consumer groups or regex, return all consumer group offsets (can filter later)
+        if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_compiled_regex:
             for consumer_group in consumer_groups:
                 futures.append(
                     self._list_consumer_group_offsets(ConsumerGroupTopicPartitions(consumer_group))[consumer_group]
                 )
             return futures
 
-        # if only consumer_groups specified
-        elif not self.config._consumer_groups_compiled_regex:
-            for consumer_group in consumer_groups:
-                # If topics are specified
-                if topics := consumer_groups[consumer_group]:
-                    for topic in topics:
-                        topic_partitions = []
-                        # If partitions are defined
-                        if partitions := topics[topic]:
-                            topic_partitions = [TopicPartition(topic, partition) for partition in partitions]
-                        # If partitions are not defined
-                        else:
-                            # get all the partitions for this topic
-                            partitions = (
-                                self.kafka_client.list_topics(topic=topic, timeout=self.config._request_timeout)
-                                .topics[topic]
-                                .partitions
-                            )
-                            topic_partitions = [TopicPartition(topic, partition) for partition in partitions]
-
-                        futures.append(
-                            self._list_consumer_group_offsets(
-                                ConsumerGroupTopicPartitions(consumer_group, topic_partitions)
-                            )[consumer_group]
+        for consumer_group in consumer_groups:
+            # If topics are specified
+            if topics := consumer_groups[consumer_group]:
+                for topic in topics:
+                    topic_partitions = []
+                    # If partitions are defined
+                    if partitions := topics[topic]:
+                        topic_partitions = [TopicPartition(topic, partition) for partition in partitions]
+                    # If partitions are not defined
+                    else:
+                        # get all the partitions for this topic
+                        partitions = (
+                            self.kafka_client.list_topics(topic=topic, timeout=self.config._request_timeout)
+                            .topics[topic]
+                            .partitions
                         )
+                        topic_partitions = [TopicPartition(topic, partition) for partition in partitions]
 
-                else:
                     futures.append(
-                        self._list_consumer_group_offsets(ConsumerGroupTopicPartitions(consumer_group))[consumer_group]
+                        self._list_consumer_group_offsets(
+                            ConsumerGroupTopicPartitions(consumer_group, topic_partitions)
+                        )[consumer_group]
                     )
 
-        else:
-            # Return everything for now, and just filter after
-            for consumer_group in consumer_groups:
-                futures.append(self._list_consumer_group_offsets(ConsumerGroupTopicPartitions(consumer_group))[consumer_group])
+            else:
+                futures.append(
+                    self._list_consumer_group_offsets(ConsumerGroupTopicPartitions(consumer_group))[consumer_group]
+                )
 
         return futures
