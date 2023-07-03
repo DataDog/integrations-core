@@ -2335,7 +2335,7 @@ def test_apc_ups(aggregator):
         metric_type=aggregator.GAUGE,
         tags=[
             'outlet_group_name:test_outlet',
-            'ups_outlet_group_status_group_state:ups_outlet_group_status_unknown',
+            'ups_outlet_group_status_group_state:3',
         ]
         + tags,
     )
