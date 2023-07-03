@@ -5,6 +5,7 @@ import os
 import re
 
 from datadog_checks.base.utils.platform import Platform
+from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
@@ -114,3 +115,12 @@ def parse_sqlserver_major_version(version):
     if not match:
         return None
     return int(match.group(1))
+
+
+def is_azure_database(engine_edition):
+    """
+    Checks if engine edition matches Azure SQL MI or Azure SQL DB
+    :param engine_edition: The engine version of the database host
+    :return: bool
+    """
+    return engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE or engine_edition == ENGINE_EDITION_SQL_DATABASE

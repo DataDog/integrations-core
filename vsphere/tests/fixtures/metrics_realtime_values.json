@@ -10509,6 +10509,16 @@
         "hostname": "VM4-9"
     },
     {
+        "name": "vsphere.mem.capacity.usage.avg",
+        "value": 4957.0,
+        "hostname": "10.0.0.103"
+    },
+    {
+        "name": "vsphere.mem.capacity.usage.avg",
+        "value": 4957.0,
+        "hostname": "10.0.0.104"
+    },
+    {
         "name": "vsphere.virtualDisk.read.avg",
         "value": 0.0,
         "hostname": "$VM3-2"
@@ -10621,6 +10631,121 @@
     {
         "name": "vsphere.virtualDisk.read.avg",
         "value": 0.0,
+        "hostname": "VM4-9"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "$VM3-2"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "$VM5"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM3-1"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-1"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-10"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-11"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-12"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-13"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-14"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-15"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-16"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-17"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-18"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-19"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-2"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-20"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-3"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-4"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-5"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-6"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-7"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-8"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
         "hostname": "VM4-9"
     },
     {

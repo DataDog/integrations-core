@@ -7,6 +7,7 @@ from datadog_checks.dev.docker import get_container_ip
 from tests.common import SNMP_CONTAINER_NAME
 
 from . import common, metrics
+from .test_e2e_core_metadata import assert_device_metadata
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
@@ -64,6 +65,112 @@ def test_e2e_v1_with_apc_ups_profile_batch_size_1(dd_agent_check):
         }
     )
     assert_apc_ups_metrics(dd_agent_check, config)
+
+
+def test_e2e_user_profiles(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'loader': 'core',
+            'community_string': 'apc_ups_user',
+        }
+    )
+    device_ip = instance['ip_address']
+
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
+    profile_tags = [
+        'snmp_profile:apc_ups_user',
+        'model:APC Smart-UPS 600',
+        'firmware_version:2.0.3-test',
+        'serial_num:test_serial',
+        'ups_name:testIdentName',
+        'device_namespace:default',
+    ]
+    tags = profile_tags + ["snmp_device:{}".format(device_ip)]
+
+    aggregator.assert_metric('snmp.upsAdvBatteryNumOfBattPacks', metric_type=aggregator.GAUGE, tags=tags, count=2)
+    aggregator.assert_metric(
+        'snmp.upsAdvBatteryFullCapacity_userMetric', metric_type=aggregator.GAUGE, tags=tags, count=2
+    )
+
+    device = {
+        'description': 'APC Web/SNMP Management Card (MB:v3.9.2 PF:v3.9.2 '
+        'PN:apc_hw02_aos_392.bin AF1:v3.7.2 AN1:apc_hw02_sumx_372.bin '
+        'MN:AP9619 HR:A10 SN: 5A1827E00000 MD:12/04/2007) (Embedded '
+        'PowerNet SNMP Agent SW v2.2 compatible)',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'AP9619',
+        'os_name': 'AOS',
+        'os_version': 'v3.9.2',
+        'product_name': 'APC Smart-UPS 600',
+        'profile': 'apc_ups_user',
+        'serial_number': 'fake-user-serial-num',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.318.1.999',
+        'tags': [
+            'device_namespace:default',
+            'firmware_version:2.0.3-test',
+            'model:APC Smart-UPS 600',
+            'serial_num:test_serial',
+            'snmp_device:' + device_ip,
+            'snmp_profile:apc_ups_user',
+            'ups_name:testIdentName',
+        ],
+        'vendor': 'apc',
+        'version': '2.0.3-test',
+    }
+    assert_device_metadata(aggregator, device)
+
+
+def test_e2e_user_profiles_that_extend_profile_with_same_name(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'loader': 'core',
+            'community_string': 'palo-alto',
+        }
+    )
+    device_ip = instance['ip_address']
+
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
+    profile_tags = [
+        'snmp_profile:palo-alto',
+        'device_namespace:default',
+    ]
+    tags = profile_tags + ["snmp_device:{}".format(device_ip)]
+
+    aggregator.assert_metric('snmp.panSessionUtilization', metric_type=aggregator.GAUGE, tags=tags, count=2)
+    aggregator.assert_metric('snmp.panSessionUtilization_user', metric_type=aggregator.GAUGE, tags=tags, count=2)
+
+    device = {
+        'description': 'Palo Alto Networks PA-3000 series firewall',
+        'id': 'default:' + device_ip,
+        'id_tags': ['device_namespace:default', 'snmp_device:' + device_ip],
+        'ip_address': device_ip,
+        'model': 'PA-3020',
+        'os_name': 'PAN-OS',
+        'os_version': '9.0.5',
+        'product_name': 'user palo-alto product name',
+        'profile': 'palo-alto',
+        'serial_number': '015351000009999',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.25461.2.3.18',
+        'tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+            'snmp_profile:palo-alto',
+        ],
+        'vendor': 'paloaltonetworks',
+        'version': '9.0.5',
+    }
+    assert_device_metadata(aggregator, device)
 
 
 def assert_apc_ups_metrics(dd_agent_check, config):
@@ -349,6 +456,9 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
     for metric in metrics.APC_UPS_METRICS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
     aggregator.assert_metric(
+        'snmp.upsAdvBatteryFullCapacity_userMetric', metric_type=aggregator.GAUGE, tags=tags, count=2
+    )
+    aggregator.assert_metric(
         'snmp.upsOutletGroupStatusGroupState',
         metric_type=aggregator.GAUGE,
         tags=['outlet_group_name:test_outlet'] + tags,
@@ -400,5 +510,232 @@ def test_e2e_core_cisco_csr(dd_agent_check):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=metric_tags)
 
     aggregator.assert_metric('snmp.peerConnectionByState', metric_type=aggregator.GAUGE, tags=metric_tags, value=1)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_e2e_cisco_nexus(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update({'community_string': 'cisco-nexus'})
+    config['init_config']['loader'] = 'core'
+    instance = config['instances'][0]
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
+
+    common_tags = [
+        'snmp_profile:cisco-nexus',
+        'device_vendor:cisco',
+        'device_namespace:default',
+        "snmp_device:{}".format(instance['ip_address']),
+        'snmp_host:Nexus-eu1.companyname.managed',
+    ]
+
+    common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
+
+    interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
+    for metric in metrics.IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface)] + common_tags
+        aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.COUNT, tags=tags, count=1)
+
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface), 'interface_alias:'] + common_tags
+        for metric in metrics.IF_COUNTS:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
+        for metric in metrics.IF_RATES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        for metric in metrics.IF_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+        for metric in metrics.IF_BANDWIDTH_USAGE:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        custom_speed_tags = tags + ['speed_source:device']
+        for metric in metrics.IF_CUSTOM_SPEED_GAUGES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=custom_speed_tags, count=2
+            )
+
+    for metric in metrics.TCP_COUNTS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=common_tags, count=1)
+
+    for metric in metrics.TCP_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
+
+    for metric in metrics.UDP_COUNTS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=common_tags, count=1)
+
+    sensors = [1, 9, 11, 12, 12, 14, 17, 26, 29, 31]
+    for sensor in sensors:
+        tags = ['sensor_id:{}'.format(sensor), 'sensor_type:8'] + common_tags
+        aggregator.assert_metric('snmp.entSensorValue', metric_type=aggregator.GAUGE, tags=tags, count=2)
+
+    frus = [6, 7, 15, 16, 19, 27, 30, 31]
+    for fru in frus:
+        tags = ['fru:{}'.format(fru)] + common_tags
+        for metric in metrics.FRU_METRICS:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+
+    cpus = [3173, 6692, 11571, 19529, 30674, 38253, 52063, 54474, 55946, 63960]
+    for cpu in cpus:
+        tags = ['cpu:{}'.format(cpu)] + common_tags
+        for metric in metrics.CPU_METRICS:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+
+    for index, state in [(3, 3), (6, 6), (8, 6), (11, 6), (13, 3), (14, 6), (20, 6), (21, 4), (31, 5)]:
+        aggregator.assert_metric(
+            'snmp.ciscoEnvMonTemperatureStatusValue',
+            metric_type=aggregator.GAUGE,
+            tags=['temp_state:{}'.format(state), 'temp_index:{}'.format(index)] + common_tags,
+        )
+
+    power_supply_tags = ['power_source:1', 'power_status_descr:Jaded driving their their their'] + common_tags
+    aggregator.assert_metric('snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=power_supply_tags)
+
+    fan_indices = [4, 6, 7, 16, 21, 22, 25, 27]
+    for index in fan_indices:
+        tags = ['fan_status_index:{}'.format(index)] + common_tags
+        aggregator.assert_metric('snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags)
+
+    aggregator.assert_metric(
+        'snmp.cswStackPortOperStatus',
+        metric_type=aggregator.GAUGE,
+        tags=common_tags + ['interface:GigabitEthernet1/0/1'],
+    )
+
+    aggregator.assert_metric(
+        'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:0xffffffffffff'] + common_tags
+    )
+
+    frus = [2, 7, 8, 21, 26, 27, 30, 31]
+    for fru in frus:
+        tags = ['fru:{}'.format(fru)] + common_tags
+        aggregator.assert_metric(
+            'snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=['fru:{}'.format(fru)] + common_tags
+        )
+
+    cpu_ids = [6692, 3173, 54474, 63960, 11571, 38253, 30674, 52063]
+    for cpu in cpu_ids:
+        aggregator.assert_metric(
+            'snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + ['cpu:{}'.format(cpu)]
+        )
+
+    nexus_mem_metrics = ["memory.free", "memory.used", "memory.usage"]
+    for metric in nexus_mem_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags + ['mem:1'])
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=2)
+    aggregator.assert_all_metrics_covered()
+
+
+def test_e2e_cisco_legacy_wlc(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'cisco-5500-wlc',
+        }
+    )
+    config['init_config']['loader'] = 'core'
+    instance = config['instances'][0]
+
+    ip_address = get_container_ip(SNMP_CONTAINER_NAME)
+
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
+
+    tags = [
+        'device_namespace:default',
+        'snmp_profile:cisco-legacy-wlc',
+        'device_vendor:cisco',
+        'snmp_host:DDOGWLC',
+        'snmp_device:' + ip_address,
+    ]
+    common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
+
+    SYSTEM_GAUGES = ["cpu.usage", "memory.free", "memory.total", "memory.usage"]
+
+    for metric in SYSTEM_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+    if_tags = ["interface:If1"] + tags
+
+    for metric in metrics.IF_COUNTS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=if_tags)
+
+    for metric in metrics.IF_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags)
+
+    for metric in metrics.IF_RATES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags)
+
+    for metric in metrics.IF_SCALAR_GAUGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+    for metric in metrics.IF_BANDWIDTH_USAGE:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags)
+
+    custom_speed_tags = if_tags + ['speed_source:device']
+    for metric in metrics.IF_CUSTOM_SPEED_GAUGES:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=custom_speed_tags, count=2
+        )
+
+    TCP_COUNTS = [
+        'tcpActiveOpens',
+        'tcpPassiveOpens',
+        'tcpAttemptFails',
+        'tcpEstabResets',
+        'tcpRetransSegs',
+        'tcpInErrs',
+        'tcpOutRsts',
+    ]
+
+    for metric in TCP_COUNTS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags)
+
+    for metric in metrics.TCP_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+    UDP_COUNTS = ['udpNoPorts', 'udpInErrors']
+
+    for metric in UDP_COUNTS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags)
+
+    ap_tags = [
+        'ap_location:default location',
+        'ap_name:DD-AP-1',
+        'ap_ip_address:1.1.1.1',
+        'ap_mac_address:  00 00 00 00 00 01',
+    ] + tags
+
+    ap_status_tags = ['ap_oper_status:associated', 'ap_admin_status:enable'] + ap_tags
+
+    aggregator.assert_metric("snmp.accessPoint".format(), metric_type=aggregator.GAUGE, tags=ap_status_tags, value=1)
+
+    if_ap_tags = ["ap_if_slot_id:0"] + ap_tags
+    if_ap_status_tags = ['ap_if_oper_status:up', 'ap_if_admin_status:enable'] + if_ap_tags
+
+    AP_IF_GAUGE_METRICS = [
+        "bsnAPIfLoadChannelUtilization",
+        "bsnAPIfLoadRxUtilization",
+        "bsnAPIfLoadTxUtilization",
+        "bsnAPIfPoorSNRClients",
+    ]
+
+    for metric in AP_IF_GAUGE_METRICS:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_ap_tags)
+
+    aggregator.assert_metric(
+        "snmp.accessPointInterface".format(), metric_type=aggregator.GAUGE, tags=if_ap_status_tags, value=1
+    )
+
+    aggregator.assert_metric('snmp.bsnApIfNoOfUsers', metric_type=aggregator.GAUGE, tags=if_ap_tags)
+
+    wlan_tags = ["ssid:DD-1", "wlan_index:17"] + tags
+
+    wlan_status_tags = ['wlan_row_status:active', 'wlan_admin_status:enable'] + wlan_tags
+
+    aggregator.assert_metric("snmp.wlan".format(), metric_type=aggregator.GAUGE, tags=wlan_status_tags, value=1)
+
+    aggregator.assert_metric('snmp.bsnDot11EssNumberOfMobileStations', metric_type=aggregator.GAUGE, tags=wlan_tags)
 
     aggregator.assert_all_metrics_covered()

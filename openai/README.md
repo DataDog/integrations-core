@@ -39,19 +39,19 @@ DD_SERVICE="my-service" DD_ENV="staging" DD_API_KEY=<DATADOG_API_KEY> ddtrace-ru
 
 **Note**: If the Agent is using a non-default hostname or port, be sure to also set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
 
-See the [APM Python library documentation][12] for more advanced usage.
+See the [APM Python library documentation][2] for more advanced usage.
 
 
 ### Configuration
 
-See the [APM Python library documentation][10] for all the available configuration options.
+See the [APM Python library documentation][3] for all the available configuration options.
 
 
 #### Log Prompt & Completion Sampling
 
 To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED=1` environment variable. By default, 10% of traced requests will emit logs containing the prompts and completions.
 
-To adjust the log sample rate, see the [APM library documentation][10].
+To adjust the log sample rate, see the [APM library documentation][3].
 
 **Note**: Logs submission requires `DD_API_KEY` to be specified when running `ddtrace-run`.
 
@@ -90,7 +90,7 @@ DEBUG:ddtrace.contrib.openai._logging.py:sent 2 logs to 'http-intake.logs.datado
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this integration.
+See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -103,17 +103,19 @@ The OpenAI integration does not include any service checks.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][5].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitor your OpenAI usage with Datadog][6]
+- [Monitor Azure OpenAI with Datadog][7]
 
 [1]: https://openai.com/
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[4]: https://github.com/DataDog/integrations-core/blob/master/openai/datadog_checks/openai/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/openai/metadata.csv
-[9]: https://docs.datadoghq.com/help/
-[10]: https://ddtrace.readthedocs.io/en/stable/integrations.html#openai
-[11]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/python/?tab=containers#configure-the-datadog-agent-for-apm
-[12]: https://ddtrace.readthedocs.io/en/stable/installation_quickstart.html
+[2]: https://ddtrace.readthedocs.io/en/stable/installation_quickstart.html
+[3]: https://ddtrace.readthedocs.io/en/stable/integrations.html#openai
+[4]: https://github.com/DataDog/integrations-core/blob/master/openai/metadata.csv
+[5]: https://docs.datadoghq.com/help/
+[6]: https://www.datadoghq.com/blog/monitor-openai-with-datadog/
+[7]: https://www.datadoghq.com/blog/monitor-azure-openai-with-datadog/

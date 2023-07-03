@@ -149,7 +149,7 @@ tests:
         commit: 1
         name: "sports-data-forest-09"
         remember: 0
-        sessionKey: 1.1481992789033468E19
+        sessionKey: "11481992789033467723"
     message: "2018-10-24 00:00:19.982 Info: [Event:id=Forest XA Complete] Completing prepared Forest distributed transaction: name=sports-data-forest-09, sessionKey=11481992789033467723, commit=1, remember=0"
     tags:
      - "source:LOGS_SOURCE"

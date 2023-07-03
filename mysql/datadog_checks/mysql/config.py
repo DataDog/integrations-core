@@ -44,6 +44,8 @@ class MySQLConfig(object):
         aws = instance.get('aws', {})
         gcp = instance.get('gcp', {})
         azure = instance.get('azure', {})
+        # Remap fully_qualified_domain_name to name
+        azure = {k if k != 'fully_qualified_domain_name' else 'name': v for k, v in azure.items()}
         if aws:
             self.cloud_metadata.update({'aws': aws})
         if gcp:

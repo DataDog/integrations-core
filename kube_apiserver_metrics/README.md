@@ -33,7 +33,7 @@ You must add `cluster_check: true` to your [configuration file][6] when using a 
 
 By default the Agent running the check tries to get the service account bearer token to authenticate against the APIServer. If you are not using RBACs, set `bearer_token_auth` to `false`.
 
-Finally, if you run the Datadog Agent on the master nodes, you can rely on [Autodiscovery][8] to schedule the check. It is automatic if you are running the official image `k8s.gcr.io/kube-apiserver`.
+Finally, if you run the Datadog Agent on the master nodes, you can rely on [Autodiscovery][8] to schedule the check. It is automatic if you are running the official image `registry.k8s.io/kube-apiserver`.
 
 ### Validation
 

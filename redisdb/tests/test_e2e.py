@@ -46,6 +46,7 @@ def assert_common_metrics(aggregator):
     aggregator.assert_metric('redis.pubsub.patterns', count=2, tags=tags)
     aggregator.assert_metric('redis.keys.expired', count=2, tags=tags)
     aggregator.assert_metric('redis.info.latency_ms', count=2, tags=tags)
+    aggregator.assert_metric('redis.ping.latency_ms', count=2, tags=tags)
     aggregator.assert_metric('redis.cpu.user', count=1, tags=tags)
     aggregator.assert_metric('redis.cpu.user_children', count=1, tags=tags)
     aggregator.assert_metric('redis.rdb.last_bgsave_time', count=2, tags=tags)
@@ -74,6 +75,9 @@ def assert_common_metrics(aggregator):
     aggregator.assert_metric('redis.key.length', count=2, tags=(['key:test_key1', 'key_type:list'] + tags_with_db))
     aggregator.assert_metric('redis.key.length', count=2, tags=(['key:test_key2', 'key_type:list'] + tags_with_db))
     aggregator.assert_metric('redis.key.length', count=2, tags=(['key:test_key3', 'key_type:list'] + tags_with_db))
+    aggregator.assert_metric(
+        'redis.key.length', count=2, value=2, tags=(['key:test_key4', 'key_type:stream'] + tags_with_db)
+    )
 
     aggregator.assert_metric('redis.replication.delay', count=2)
 

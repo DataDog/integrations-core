@@ -13,6 +13,7 @@ if ON_WINDOWS:
         'system.disk.in_use',
         'system.disk.total',
         'system.disk.used',
+        'system.disk.utilized',
     ]
 else:
     EXPECTED_DEVICES = ['overlay', 'shm', 'tmpfs', '/dev/sdb1']
@@ -21,10 +22,12 @@ else:
         'system.disk.in_use',
         'system.disk.total',
         'system.disk.used',
+        'system.disk.utilized',
         'system.fs.inodes.free',
         'system.fs.inodes.in_use',
         'system.fs.inodes.total',
         'system.fs.inodes.used',
+        'system.fs.inodes.utilized',
     ]
 
 

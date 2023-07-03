@@ -147,6 +147,19 @@ QUERY_PG_UPTIME = {
     ],
 }
 
+QUERY_PG_CONTROL_CHECKPOINT = {
+    'name': 'pg_control_checkpoint',
+    'query': """
+        SELECT timeline_id,
+               EXTRACT (EPOCH FROM now() - checkpoint_time)
+        FROM pg_control_checkpoint();
+""",
+    'columns': [
+        {'name': 'postgresql.control.timeline_id', 'type': 'gauge'},
+        {'name': 'postgresql.control.checkpoint_delay', 'type': 'gauge'},
+    ],
+}
+
 COMMON_BGW_METRICS = {
     'checkpoints_timed': ('postgresql.bgwriter.checkpoints_timed', AgentCheck.monotonic_count),
     'checkpoints_req': ('postgresql.bgwriter.checkpoints_requested', AgentCheck.monotonic_count),
@@ -298,8 +311,10 @@ QUERY_PG_REPLICATION_SLOTS = {
         CASE WHEN temporary THEN 'temporary' ELSE 'permanent' END,
         CASE WHEN active THEN 'active' ELSE 'inactive' END,
         CASE WHEN xmin IS NULL THEN NULL ELSE age(xmin) END,
-        pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn),
-        pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn)
+        pg_wal_lsn_diff(
+        CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, restart_lsn),
+        pg_wal_lsn_diff(
+        CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, confirmed_flush_lsn)
     FROM pg_replication_slots;
     """.strip(),
     'columns': [
@@ -343,6 +358,80 @@ SLRU_METRICS = {
 SELECT name, {metrics_columns}
   FROM pg_stat_slru
 """,
+}
+
+SNAPSHOT_TXID_METRICS = {
+    'name': 'pg_snapshot',
+    # Use CTE to only do a single call to pg_current_snapshot
+    # FROM LATERAL was necessary given that pg_snapshot_xip returns a setof xid8
+    'query': """
+WITH snap AS (
+    SELECT * from pg_current_snapshot()
+), xip_count AS (
+    SELECT COUNT(xip_list) FROM LATERAL (SELECT pg_snapshot_xip(pg_current_snapshot) FROM snap) as xip_list
+)
+select pg_snapshot_xmin(pg_current_snapshot), pg_snapshot_xmax(pg_current_snapshot), count from snap, xip_count;
+""",
+    'columns': [
+        {'name': 'postgresql.snapshot.xmin', 'type': 'gauge'},
+        {'name': 'postgresql.snapshot.xmax', 'type': 'gauge'},
+        {'name': 'postgresql.snapshot.xip_count', 'type': 'gauge'},
+    ],
+}
+
+# Use txid_current_snapshot for PG < 13
+SNAPSHOT_TXID_METRICS_LT_13 = {
+    'name': 'pg_snapshot_lt_13',
+    'query': """
+WITH snap AS (
+    SELECT * from txid_current_snapshot()
+), xip_count AS (
+    SELECT COUNT(xip_list) FROM LATERAL (SELECT txid_snapshot_xip(txid_current_snapshot) FROM snap) as xip_list
+)
+select txid_snapshot_xmin(txid_current_snapshot), txid_snapshot_xmax(txid_current_snapshot), count from snap, xip_count;
+""",
+    'columns': [
+        {'name': 'postgresql.snapshot.xmin', 'type': 'gauge'},
+        {'name': 'postgresql.snapshot.xmax', 'type': 'gauge'},
+        {'name': 'postgresql.snapshot.xip_count', 'type': 'gauge'},
+    ],
+}
+
+WAL_FILE_METRICS = {
+    'name': 'wal_metrics',
+    'query': """
+SELECT
+count(*),
+sum(size),
+EXTRACT (EPOCH FROM now() - min(modification))
+  FROM pg_ls_waldir();
+""",
+    'columns': [
+        {'name': 'postgresql.wal_count', 'type': 'gauge'},
+        {'name': 'postgresql.wal_size', 'type': 'gauge'},
+        {'name': 'postgresql.wal_age', 'type': 'gauge'},
+    ],
+}
+
+STAT_WAL_METRICS = {
+    'name': 'stat_wal_metrics',
+    'query': """
+SELECT wal_records, wal_fpi,
+       wal_bytes, wal_buffers_full,
+       wal_write, wal_sync,
+       wal_write_time, wal_sync_time
+  FROM pg_stat_wal
+""",
+    'columns': [
+        {'name': 'postgresql.wal.records', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.full_page_images', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.bytes', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.buffers_full', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.write', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.sync', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.write_time', 'type': 'monotonic_count'},
+        {'name': 'postgresql.wal.sync_time', 'type': 'monotonic_count'},
+    ],
 }
 
 FUNCTION_METRICS = {

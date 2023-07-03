@@ -54,10 +54,11 @@ SERVER_METRICS = [
 ]
 
 SQLSERVER_MAJOR_VERSION = int(os.environ.get('SQLSERVER_MAJOR_VERSION'))
+SQLSERVER_ENGINE_EDITION = int(os.environ.get('SQLSERVER_ENGINE_EDITION'))
 
 
 def get_expected_file_stats_metrics():
-    query_file_stats = get_query_file_stats(SQLSERVER_MAJOR_VERSION)
+    query_file_stats = get_query_file_stats(SQLSERVER_MAJOR_VERSION, SQLSERVER_ENGINE_EDITION)
     return ["sqlserver." + c["name"] for c in query_file_stats["columns"] if c["type"] != "tag"]
 
 
