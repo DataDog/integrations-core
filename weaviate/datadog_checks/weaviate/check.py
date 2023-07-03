@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
-from urllib.parse import urljoin  # urlparse
+from urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.utils.common import round_value
@@ -97,8 +97,8 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
 
                 if status := node.get('status'):
                     tags.append(f"weaviate_node_status:{status.lower()}")
-                    self.gauge('node.status', status_values.get(status, 3), tags=tags)
-                    self.service_check('node.status', status_values.get(status, 3), tags=tags)
+                    self.gauge('node.status', status_values.get(status, AgentCheck.UNKNOWN), tags=tags)
+                    self.service_check('node.status', status_values.get(status, AgentCheck.UNKNOWN), tags=tags)
 
                 if stats := node.get('stats'):
                     self.gauge('node.stats.shards', stats.get('shardCount', 0), tags=tags)
