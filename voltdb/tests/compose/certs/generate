@@ -20,7 +20,7 @@ rm -f $KEYSTORE $TRUSTSTORE $CA_FILE $CLIENT_CERT_FILE
 # Generate server keystore and truststore.
 keytool -genkey -keystore $KEYSTORE -storepass $PASSWORD -alias $ALIAS -dname "cn=localhost, ou=Unknown, o=Unknown, c=Unknown" -keyalg rsa -keysize 2048 -validity $VALIDITY
 keytool -certreq -keystore $KEYSTORE -storepass $PASSWORD -alias $ALIAS -keyalg rsa -file $TMP_REQ_FILE
-keytool -gencert -keystore $KEYSTORE -storepass $PASSWORD -alias $ALIAS -infile $TMP_REQ_FILE -outfile $TMP_CERT_FILE -validity $VALIDITY
+keytool -gencert -keystore $KEYSTORE -storepass $PASSWORD -alias $ALIAS -infile $TMP_REQ_FILE -outfile $TMP_CERT_FILE -validity $VALIDITY -ext "san=dns:localhost"
 keytool -import -keystore $KEYSTORE -storepass $PASSWORD -alias $ALIAS -noprompt -file $TMP_CERT_FILE
 keytool -import -keystore $TRUSTSTORE -storepass $PASSWORD -alias $ALIAS -noprompt -file $TMP_CERT_FILE
 
