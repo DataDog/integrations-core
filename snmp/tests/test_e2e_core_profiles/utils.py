@@ -153,3 +153,9 @@ def assert_extend_entity_sensor(aggregator, common_tags):
         'ent_phy_sensor_units_display:driving driving forward acted their but',
     ]
     aggregator.assert_metric("snmp.entPhySensorValue", metric_type=aggregator.GAUGE, tags=common_tags + additional_tags)
+
+def assert_extend_generic_ucd(aggregator, common_tags):
+    """Add the following to the snmprec
+1.3.6.1.4.1.2021.4.3.0|2|1048572
+    """
+    aggregator.assert_metric("snmp.memTotalSwap", metric_type=aggregator.GAUGE, tags=common_tags)
