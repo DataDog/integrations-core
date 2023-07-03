@@ -959,6 +959,7 @@ snmp.swFCPortRxLCs,count,,,,"[SW-MIB] This object counts the number of Link Cont
 snmp.swFCPortRxTooLongs,count,,,,"[SW-MIB] This object counts the number of received frames that are too long.",0,snmp,,
 snmp.swFCPortTooManyRdys,count,,,,"[SW-MIB] This object counts the number of times when RDYs exceeds the frames received.",0,snmp,,
 snmp.swFCPortTxFrames,count,,,,"[SW-MIB] This object counts the number of (Fibre Channel) frames that the port has transmitted.",0,snmp,,
+snmp.switch_sen1,gauge,,,,"The reading for the switch sensor (0 = OPEN, 1 = CLOSED).",0,snmp,,
 snmp.sysClientsslStatCurConns,gauge,,,,[F5 BIG-IP] The current number of concurrent connections with established SSL sessions being maintained by the filter.,0,snmp,,
 snmp.sysClientsslStatDecryptedBytesIn,count,,byte,,[F5 BIG-IP] The total decrypted bytes received.,0,snmp,,
 snmp.sysClientsslStatDecryptedBytesOut,count,,byte,,[F5 BIG-IP] The total decrypted bytes sent.,0,snmp,,
