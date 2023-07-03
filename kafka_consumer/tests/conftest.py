@@ -35,7 +35,7 @@ def dd_environment():
         conditions.extend(
             [
                 WaitFor(create_topics, attempts=60, wait=3),
-                WaitFor(initialize_topics),
+                WaitFor(initialize_topics, attempts=60, wait=3),
             ]
         )
 
