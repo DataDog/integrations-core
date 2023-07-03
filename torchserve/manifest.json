@@ -41,6 +41,9 @@
       "process_signatures": [
         "torchserve"
       ]
+    },
+    "logs": {
+      "source": "impala"
     }
   },
   "author": {
