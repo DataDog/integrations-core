@@ -123,7 +123,10 @@ def assert_extend_generic_host_resources(aggregator, common_tags):
 1.3.6.1.2.1.25.2.3.1.5.31|2|21
 1.3.6.1.2.1.25.2.3.1.6.4|2|30
 1.3.6.1.2.1.25.2.3.1.6.31|2|4
-    """
+1.3.6.1.2.1.25.3.3.1.1.10|2|10
+1.3.6.1.2.1.25.3.3.1.1.21|2|21
+1.3.6.1.2.1.25.3.3.1.2.10|2|31
+1.3.6.1.2.1.25.3.3.1.2.21|2|15"""
     # fmt: on
     aggregator.assert_metric("snmp.hrSystemUptime", metric_type=aggregator.GAUGE, tags=common_tags)
 

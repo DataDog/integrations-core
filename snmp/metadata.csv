@@ -80,6 +80,8 @@ snmp.axVirtualServerStatTotalSuccL7Reqs,count,,,,"[A10-AX-MIB] The number of suc
 snmp.batteryReading,gauge,,,,[Dell Poweredge] The reading of the battery.,0,snmp,,
 snmp.batteryState,gauge,,,,[Dell iDRAC] The current state of the battery.,0,snmp,,
 snmp.batteryStatus,gauge,,,,[Dell Poweredge] The status of the battery.,0,snmp,,
+snmp.bcnDhcpv4PoolFreeAddresses,gauge,,,,"[BCN-DHCPV4-MIB] The number of IPs addresses available in this pool.",0,snmp,,
+snmp.bcnDhcpv4SubnetFreeAddresses,gauge,,,,"[BCN-DHCPV4-MIB] The number of IPs addresses available in this subnet.",0,snmp,,
 snmp.bgpPeerAdminStatus,gauge,,,,[Arista] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Cisco CSR1000v] [F5 BIG-IP] [Juniper MX] [Juniper EX] [Juniper SRX] The desired state of the BGP connection.,0,snmp,,
 snmp.bgpPeerConnectRetryInterval,gauge,,second,,[Arista] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Cisco CSR1000v] [F5 BIG-IP] [Juniper MX] [Juniper EX] [Juniper SRX] The time interval in seconds for the ConnectRetry timer.,0,snmp,,
 snmp.bgpPeerFsmEstablishedTime,gauge,,second,,[Arista] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Cisco CSR1000v] [F5 BIG-IP] [Juniper MX] [Juniper EX] [Juniper SRX] This timer indicates how long (in seconds) this peer has been in the Established state or how long since this peer was last in the Established state.,0,snmp,,
