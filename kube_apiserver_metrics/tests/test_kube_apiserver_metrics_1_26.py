@@ -22,6 +22,7 @@ class TestKubeAPIServerMetrics:
     """Basic Test for kube_apiserver integration."""
 
     METRICS = [
+        'longrunning_gauge',
         'current_inflight_requests',
         'audit_event',
         'go_threads',
