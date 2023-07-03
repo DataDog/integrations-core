@@ -5,6 +5,7 @@
 
 import pytest
 
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dcgm import DcgmCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -39,3 +40,12 @@ def test_successful_run(dd_run_check, aggregator, check):
         aggregator.assert_metric(name=f"dcgm.{metric}")
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
+
+
+def test_invalid_config():
+    """
+    Config with unknown fields should raise an exception.
+    """
+    check = DcgmCheck('dcgm', {}, [{'bad_config_option': 'test'}])
+    with pytest.raises(ConfigurationError):
+        check.load_configuration_models()
