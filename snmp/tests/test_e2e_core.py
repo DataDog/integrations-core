@@ -202,7 +202,7 @@ def assert_apc_ups_metrics(dd_agent_check, config):
 
     group_state_tags = tags + [
         'outlet_group_name:test_outlet',
-        'ups_outlet_group_status_group_state:upsOutletGroupStatusUnknown',
+        'ups_outlet_group_status_group_state:ups_outlet_group_status_unknown',
     ]
 
     aggregator.assert_metric(
@@ -471,10 +471,8 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
 
     group_state_tags = tags + [
         'outlet_group_name:test_outlet',
-        'ups_outlet_group_status_group_state:upsOutletGroupStatusUnknown',
+        'ups_outlet_group_status_group_state:ups_outlet_group_status_unknown',
     ]
-
-    # FIXME : will need to assert constant metric here
 
     aggregator.assert_metric(
         'snmp.upsOutletGroupStatusGroupState',
