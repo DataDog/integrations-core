@@ -124,6 +124,13 @@ def assert_extend_generic_host_resources(aggregator, common_tags):
         aggregator.assert_metric('snmp.hrStorageUsed', metric_type=aggregator.GAUGE, tags=common_tags + mem_row)
 
 
+def assert_extend_generic_host_resources_base(aggregator, common_tags):
+    """Add the following to the snmprec
+    1.3.6.1.2.1.25.1.1.0|67|201526890
+    """
+    aggregator.assert_metric("snmp.hrSystemUptime", metric_type=aggregator.GAUGE, tags=common_tags)
+
+
 def assert_extend_entity_sensor(aggregator, common_tags):
     """Add the following to the snmprec
     1.3.6.1.2.1.99.1.1.1.1.8|2|9
