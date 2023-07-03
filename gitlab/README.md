@@ -8,7 +8,7 @@ Integration that allows to:
 
 See [Monitoring GitLab with Prometheus][1] for more information.
 
-For more in-depth monitoring of your GitLab pipelines, check out [CI Pipeline Visibility][17]. CI Pipeline visibility gives you granular insights into your user workflow, let you access in-depth git metadata, and enables you to track pipeline performance over time.
+For more in-depth monitoring of your GitLab pipelines, check out [CI Pipeline Visibility][17]. CI Pipeline Visibility provides granular insights into your user workflow, lets you access detailed Git metadata, and tracks pipeline performance over time.
 
 ## Setup
 
