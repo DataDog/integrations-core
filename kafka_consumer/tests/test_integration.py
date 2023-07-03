@@ -308,7 +308,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
         pytest.param(
             {
                 'consumer_groups': {},
-                'consumer_groups_regex': {'my_consume*': {'dc': []}},
+                'consumer_groups_regex': {'my_consume.+': {'dc': []}},
                 'monitor_unlisted_consumer_groups': False,
             },
             2,
@@ -320,7 +320,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
         pytest.param(
             {
                 'consumer_groups': {},
-                'consumer_groups_regex': {'foo': {'bar': []}, 'my_consume*': {'dc': []}},
+                'consumer_groups_regex': {'foo': {'bar': []}, 'my_consume.+': {'dc': []}},
                 'monitor_unlisted_consumer_groups': False,
             },
             2,
