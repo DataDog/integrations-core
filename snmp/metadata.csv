@@ -984,7 +984,6 @@ snmp.udpInErrors,count,,datagram,,[Generic router] [Cisco c3850] [Cisco Nexus] [
 snmp.udpNoPorts,count,,datagram,,[Generic router] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Arista] [Checkpoint Firewall] [F5 BIG-IP] [HPE Proliant] [Palo Alto]  [Dell Poweredge] The total number of received UDP datagrams for which there was no application at the destination port.,0,snmp,,
 snmp.uioSensorStatusTemperatureDegC,gauge,,degree celsius,,The sensor's current temperature reading in degrees Celsius.,0,snmp,,
 snmp.upsAdvBatteryCapacity,gauge,,percent,,[APC UPS] The remaining battery capacity expressed in percent of full capacity.,0,snmp,,
-snmp.upsAdvBatteryFullCapacity_userMetric,gauge,,percent,,[APC UPS] The full chargeable capacity of the battery which is expressed in percentage.,0,snmp,,
 snmp.upsAdvBatteryNumOfBadBattPacks,gauge,,unit,,[APC UPS] The number of external battery packs connected to the UPS that are defective.,0,snmp,,
 snmp.upsAdvBatteryNumOfBattPacks,gauge,,,,The number of external battery packs connected to the UPS.,0,snmp,,
 snmp.upsAdvBatteryReplaceIndicator,gauge,,event,,[APC UPS] Indicates whether the UPS batteries need replacing.,0,snmp,,
