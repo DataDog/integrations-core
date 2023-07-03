@@ -21,13 +21,13 @@ from .utils import get_fixture_path
     ],
 )
 def test_check_mock_weaviate_responses(dd_run_check, aggregator, mock_http_response, name, metrics):
-    mock_http_response(file_path=get_fixture_path(f"weaviate_{name}.txt"))
+    mock_http_response(file_path=get_fixture_path(f'weaviate_{name}.txt'))
     check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
     dd_run_check(check)
 
     for metric in metrics:
         aggregator.assert_metric(metric, at_least=1)
-        aggregator.assert_metric_has_tag(metric, "test:tag", at_least=1)
+        aggregator.assert_metric_has_tag(metric, 'test:tag', at_least=1)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -51,7 +51,7 @@ def test_check_failed_liveness(dd_run_check, aggregator, mock_http_response):
 def test_empty_instance(dd_run_check):
     with pytest.raises(
         Exception,
-        match="The setting `openmetrics_endpoint` is required",
+        match='The setting `openmetrics_endpoint` is required',
     ):
         check = WeaviateCheck('weaviate', {}, [{}])
         dd_run_check(check)
@@ -68,7 +68,7 @@ def test_custom_validation(dd_run_check, instance):
     for k, v in instance.items():
         with pytest.raises(
             Exception,
-            match=f"{k}: {v} is incorrectly configured",
+            match=f'{k}: {v} is incorrectly configured',
         ):
             check = WeaviateCheck('weaviate', {}, [instance])
             dd_run_check(check)
@@ -81,7 +81,7 @@ def test_check_mock_weaviate_metadata(dd_run_check, datadog_agent, mock_http_res
     check.check_id = 'test:123'
     dd_run_check(check)
 
-    raw_version = "1.19.1"
+    raw_version = '1.19.1'
     major, minor, patch = raw_version.split('.')
     version_metadata = {
         'version.scheme': 'semver',

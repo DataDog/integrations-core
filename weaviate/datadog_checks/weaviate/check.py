@@ -68,7 +68,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
         start_time = time.time()
         response = self.http.get(endpoint)
         end_time = time.time()
-        
+
         if response.ok:
             latency = round_value((end_time - start_time) * 1000, 2)
             self.service_check('liveness.status', 0, tags)
@@ -84,7 +84,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
             return
         try:
             data = response.json()
-            # Mapping service checks to HEALTHY = Ok, UNHEALTHY = Warning, UNAVAILABLE = Critical. 
+            # Mapping service checks to HEALTHY = Ok, UNHEALTHY = Warning, UNAVAILABLE = Critical.
             # Defaults to unknown if not of the above (3).
             status_values = {'HEALTHY': 0, 'UNHEALTHY': 1, 'UNAVAILABLE': 2}
 

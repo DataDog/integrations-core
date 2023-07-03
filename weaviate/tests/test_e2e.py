@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import E2E_METRICS
+from .common import E2E_METRICS, FLAKY_E2E_METRICS
 
 
 @pytest.mark.e2e
@@ -14,9 +14,8 @@ def test_e2e_openmetrics_v1(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
 
     aggregator.assert_service_check('weaviate.openmetrics.health', ServiceCheck.OK, count=2)
-    flaky_metrics = ['weaviate.lsm.segment.size', 'weaviate.lsm.segments']
     for metric in E2E_METRICS:
-        if metric in flaky_metrics:
+        if metric in FLAKY_E2E_METRICS:
             aggregator.assert_metric(metric, at_least=0)
         else:
             aggregator.assert_metric(metric)

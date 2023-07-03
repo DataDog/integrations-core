@@ -67,7 +67,7 @@ METRICS = {
     'concurrent_goroutines': 'concurrent.goroutines',
     'lsm_memtable_size': 'lsm.memtable.size',
     'lsm_memtable_durations_ms': 'lsm.memtable.durations_ms',
-    'vector_dimensions_sum':'vector.dimensions',
+    'vector_dimensions_sum': 'vector.dimensions',
     'startup_progress': 'startup.progress',
     'query_dimensions': 'query.dimensions',
     'backup_restore_ms': 'backup.restore.ms',
@@ -77,5 +77,5 @@ METRICS = {
     'backup_store_to_backend_ms': 'backup.store.to.backend.ms',
     'bucket_pause_durations_ms': 'bucket.pause.durations.ms',
     'backup_restore_data_transferred': 'backup.restore.data.transferred',
-    'backup_store_data_transferred': 'backup.store.data.transferred'
+    'backup_store_data_transferred': 'backup.store.data.transferred',
 }
