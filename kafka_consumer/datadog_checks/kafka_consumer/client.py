@@ -228,79 +228,8 @@ class KafkaClient:
                     )
 
         else:
-            # if using consumer_groups, can pile together with consumer_groups_regex
-
             # Return everything for now, and just filter after
             for consumer_group in consumer_groups:
-<<<<<<< HEAD
-                self.log.debug('CONSUMER GROUP: %s', consumer_group)
-
-                for topic_partition in self._get_topic_partitions(topics, consumer_group):
-                    futures.append(
-                        self.kafka_client.list_consumer_group_offsets(
-                            [ConsumerGroupTopicPartitions(consumer_group, [topic_partition])]
-                        )[consumer_group]
-                    )
+                futures.append(self._list_consumer_group_offsets(ConsumerGroupTopicPartitions(consumer_group))[consumer_group])
 
         return futures
-
-    def _get_topic_partitions(self, topics, consumer_group):
-        for topic, partitions in topics.items():
-            self.log.debug('CONFIGURED TOPICS: %s', topic)
-
-            filtered_partitions = self._filter_partitions(consumer_group, topic, partitions)
-
-            for partition in filtered_partitions:
-                topic_partition = TopicPartition(topic, partition)
-                self.log.debug("TOPIC PARTITION: %s", topic_partition)
-                yield topic_partition
-
-    def _filter_partitions(self, consumer_group, topic, partitions):
-        return (
-            self._filter_partitions_with_regex(consumer_group, topic, partitions)
-            | self._filter_partitions_with_exact_match(consumer_group, topic, partitions)
-        )  # fmt: skip
-
-    def _filter_partitions_with_regex(self, consumer_group, topic, partitions):
-        partitions_to_collect = set()
-
-        for consumer_group_regex, topic_filters in self.config._consumer_groups_compiled_regex.items():
-            if not consumer_group_regex.match(consumer_group):
-                continue
-
-            # No topics specified means we collect all topics and partitions
-            if not topic_filters:
-                return set(partitions)
-
-            for topic_regex, topic_partitions in topic_filters.items():
-                if not topic_regex.match(topic):
-                    continue
-
-                # No partitions specified means we collect all
-                if not topic_partitions:
-                    return set(partitions)
-
-                partitions_to_collect.update(topic_partitions)
-
-        return partitions_to_collect.intersection(partitions)
-
-    def _filter_partitions_with_exact_match(self, consumer_group, topic, partitions):
-        if consumer_group not in self.config._consumer_groups:
-            return set()
-
-        # No topics specified means we allow all topics and partitions
-        if not self.config._consumer_groups[consumer_group]:
-            return set(partitions)
-
-        if topic not in self.config._consumer_groups[consumer_group]:
-            return set()
-
-        # No partitions specified means we collect all
-        if not self.config._consumer_groups[consumer_group][topic]:
-            return set(partitions)
-
-        return set(self.config._consumer_groups[consumer_group][topic]).intersection(partitions)
-=======
-                # Should filter first so that offsets can remain as a future
-                yield self.kafka_client.list_consumer_group_offsets([ConsumerGroupTopicPartitions(consumer_group)])[consumer_group]
->>>>>>> fceb38944c (Update regex filtering to be more efficient)
