@@ -1,5 +1,10 @@
 # CHANGELOG - kafka_consumer
 
+## 3.1.1-beta.1 / 2023-07-03
+
+* [Fixed] Bump the confluent-kafka version. See [#14665](https://github.com/DataDog/integrations-core/pull/14665).
+* [Fixed] Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 3.1.0 / 2023-05-26
 
 ***Added***: 
