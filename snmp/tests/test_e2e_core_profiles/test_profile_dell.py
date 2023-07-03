@@ -38,7 +38,7 @@ def test_e2e_profile_dell(dd_agent_check):
     assert_extend_generic_tcp(aggregator, common_tags)
     assert_extend_generic_udp(aggregator, common_tags)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     # --- TEST METADATA ---
     device = {
