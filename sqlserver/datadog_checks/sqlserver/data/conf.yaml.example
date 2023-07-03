@@ -249,6 +249,11 @@ instances:
         #
         # samples_per_hour_per_query: 4
 
+        ## @param max_queries - integer - optional - default: 250
+        ## Limit the number of queries sent to the backend.
+        #
+        # max_queries: 250
+
     ## Configure collection of active sessions monitoring
     #
     # query_activity:

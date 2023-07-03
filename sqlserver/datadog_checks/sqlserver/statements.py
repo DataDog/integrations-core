@@ -219,6 +219,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._conn_key_prefix = "dbm-"
         self._statement_metrics_query = None
         self._last_stats_query_time = None
+        self._max_query_metrics = check.statement_metrics_config.get("max_queries", 250)
 
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -350,14 +351,16 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             del row['procedure_text']
         return row
 
-    def _to_metrics_payload(self, rows):
+    def _to_metrics_payload(self, rows, max_queries):
+        # sort by total_elapsed_time and return the top max_queries
+        sorted(rows, key=lambda i: i['total_elapsed_time'], reverse=True)
         return {
             'host': self.check.resolved_hostname,
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
             'tags': self.tags,
             'cloud_metadata': self.check.cloud_metadata,
-            'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
+            'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows[:max_queries]],
             'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self.check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             'ddagentversion': datadog_agent.get_version(),
@@ -382,7 +385,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     return
                 for event in self._rows_to_fqt_events(rows):
                     self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
-                payload = self._to_metrics_payload(rows)
+                payload = self._to_metrics_payload(rows, self._max_query_metrics)
                 self.check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
                 for event in self._collect_plans(rows, cursor, deadline):
                     self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
