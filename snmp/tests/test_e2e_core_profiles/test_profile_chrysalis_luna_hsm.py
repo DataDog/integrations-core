@@ -55,7 +55,7 @@ def test_e2e_profile_chrysalis_luna_hsm(dd_agent_check):
         'name': 'chrysalis-luna-hsm.device.name',
         'profile': 'chrysalis-luna-hsm',
         'status': 1,
-        'sys_object_id': '1.2.3.999',
+        'sys_object_id': '1.3.6.1.4.1.12383.3.1.1',
         'vendor': 'chrysalis',
     }
     device['tags'] = common_tags
