@@ -8,7 +8,7 @@ Integration that allows to:
 
 See [Monitoring GitLab with Prometheus][1] for more information.
 
-For more in-depth monitoring of your GitLab pipelines, check out [CI Pipeline Visibility](https://app.datadoghq.com/ci/getting-started). CI Pipeline visibility gives you granular insights into your user workflow, let you access in-depth git metadata, and enables you to track pipeline performance over time.
+For more in-depth monitoring of your GitLab pipelines, check out [CI Pipeline Visibility][17]. CI Pipeline visibility gives you granular insights into your user workflow, let you access in-depth git metadata, and enables you to track pipeline performance over time.
 
 ## Setup
 
@@ -135,3 +135,4 @@ Need help? Contact [Datadog support][14].
 [14]: https://docs.datadoghq.com/help/
 [15]: https://docs.gitlab.com/ee/user/admin_area/monitoring/health_check.html#readiness
 [16]: https://github.com/DataDog/integrations-core/blob/7.43.x/gitlab/datadog_checks/gitlab/data/conf.yaml.example
+[17]: https://app.datadoghq.com/ci/getting-started
