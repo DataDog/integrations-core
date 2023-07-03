@@ -50,6 +50,7 @@ from .util import (
     DatabaseConfigurationError,  # noqa: F401
     fmt,
     get_schema_field,
+    warning_with_tags
 )
 from .version_utils import V9, V9_2, V10, V13, V14, VersionUtils
 
@@ -481,17 +482,34 @@ class PostgreSql(AgentCheck):
 
         return num_results
 
-    @tracked_method()
     def _collect_relations_autodiscovery(self, instance_tags, relations_scopes):
         if not self.autodiscovery:
             return
 
+        start_time = time()
         databases = self.autodiscovery.get_items()
         for db in databases:
             with self.autodiscovery_db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
                 with conn.cursor() as cursor:
                     for scope in relations_scopes:
                         self._query_scope(cursor, scope, instance_tags, False, db)
+        elapsed_ms = (time() - start_time) * 1000
+        self.histogram(
+            "dd.postgres._collect_relations_autodiscovery.time",
+            elapsed_ms * 1000,
+            tags=self.tags + self._get_debug_tags(),
+            hostname=self.resolved_hostname,
+        )
+        if elapsed_ms > self._config.min_collection_interval*1000:
+            self.record_warning(
+                DatabaseConfigurationError.autodiscovered_metrics_exceeds_collection_interval,
+                warning_with_tags(
+                    "Collecting metrics on autodiscovery metrics took %d ms, which is longer than "
+                    "the minimum collection interval. Consider increasing the min_collection_interval parameter "
+                    "in the postgres yaml configuration.",
+                    int(elapsed_ms),
+                ),
+            )
 
     def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
