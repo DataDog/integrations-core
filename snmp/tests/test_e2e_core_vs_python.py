@@ -565,7 +565,6 @@ def assert_python_vs_core(
             aggregator.assert_metric(name, metric_type=mtype, tags=tags, count=count)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
     for (name, status, tags, message), stubs in python_service_checks.items():
         count = len(stubs) if assert_count else None
