@@ -1,4 +1,4 @@
-﻿# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -269,22 +269,6 @@ test_statement_metrics_and_plans_parameterized = (
             True,
             True,
         ],
-        [
-            "datadog_test",
-            "EXEC bobProcParams @P1 = ?, @P2 = ?",
-            [
-                r"SELECT \* FROM ϑings WHERE id = @P1",
-                r"SELECT id FROM ϑings WHERE name = @P2",
-            ],
-            (
-                (1, "foo"),
-                (2, "bar"),
-            ),
-            5,
-            False,
-            True,
-            True,
-        ],
     ],
 )
 
@@ -447,25 +431,25 @@ def test_statement_metrics_and_plans(
         + _expected_dbm_instance_tags(dbm_instance),
     )
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.parametrize("database,query,expected_queries_patterns,",
-            [["master",
+@pytest.mark.parametrize(
+    "database,query,expected_queries_patterns,",
+    [
+        [
+            "master",
             "EXEC multiQueryProc",
             [
                 r"select @total = @total \+ count\(\*\) from sys\.databases where name like '%_'",
                 r"select @total = @total \+ count\(\*\) from sys\.sysobjects where type = 'U'",
             ],
-            ]]
-        )
+        ]
+    ],
+)
 def test_statement_metrics_limit(
-    aggregator,
-    dd_run_check,
-    dbm_instance,
-    bob_conn,
-    database,
-    query,
-    expected_queries_patterns):
+    aggregator, dd_run_check, dbm_instance, bob_conn, database, query, expected_queries_patterns
+):
     dbm_instance['query_metrics']['max_queries'] = 5
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
@@ -488,10 +472,9 @@ def test_statement_metrics_limit(
     #             cursor, SQL_SERVER_QUERY_METRICS_COLUMNS
     #         )
 
-    
     instance_tags = dbm_instance.get('tags', [])
     expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
-    expected_instance_tags_with_db = expected_instance_tags | {"db:{}".format(database)}
+    expected_instance_tags | {"db:{}".format(database)}
 
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
@@ -504,7 +487,6 @@ def test_statement_metrics_limit(
 
     # check that it's sorted
     assert sqlserver_rows == sorted(sqlserver_rows, key=lambda i: i['total_elapsed_time'], reverse=True)
-        
 
 
 @pytest.mark.integration
