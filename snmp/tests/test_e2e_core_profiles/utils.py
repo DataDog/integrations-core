@@ -198,3 +198,11 @@ def assert_extend_generic_ucd(aggregator, common_tags):
     """
     # fmt:on
     aggregator.assert_metric("snmp.memTotalSwap", metric_type=aggregator.GAUGE, tags=common_tags)
+
+def assert_extend_cisco_generic(aggregator, common_tags):
+    # fmt:off
+    """Add the following to the snmprec
+1.3.6.1.4.1.9.9.109.1.1.1.1.12.712|66|353
+    """
+    # fmt:on
+    aggregator.assert_metric("snmp.cpmCPUMemoryUsed", metric_type=aggregator.GAUGE, tags=common_tags)
