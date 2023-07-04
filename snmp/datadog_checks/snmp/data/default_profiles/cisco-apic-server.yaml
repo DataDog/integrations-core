@@ -1,18 +1,15 @@
 extends:
-  - _base.yaml
   - cisco.yaml
 sysobjectid:
   - 1.3.6.1.4.1.9.1.2238
 metrics:
-  - MIB: CISCO-PROCESS-MIB
-    symbol:
-      name: cpu.usage
-      OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.7.1
   - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
     table:
       name: cefcFRUPowerSupplyGroupTable
       OID: 1.3.6.1.4.1.9.9.117.1.1.1
     symbols:
+      - name: cefcFRUPowerSupplyGroup
+        constant_value_one: true
       - name: cefcTotalAvailableCurrent
         OID: 1.3.6.1.4.1.9.9.117.1.1.1.1.3
       - name: cefcTotalDrawnCurrent
@@ -84,6 +81,8 @@ metrics:
       name: cefcFRUPowerStatusTable
       OID: 1.3.6.1.4.1.9.9.117.1.1.2
     symbols:
+      - name: cefcFRUPowerStatus
+        constant_value_one: true
       - name: cefcFRUCurrent
         OID: 1.3.6.1.4.1.9.9.117.1.1.2.1.3
     metric_tags:
@@ -322,6 +321,8 @@ metrics:
       name: cefcFanTable
       OID: 1.3.6.1.4.1.9.9.117.1.4.2
     symbols:
+      - name: cefcFan
+        constant_value_one: true
       - name: cefcFanSpeed
         OID: 1.3.6.1.4.1.9.9.117.1.4.2.1.1
       - name: cefcFanSpeedPercent
@@ -365,6 +366,8 @@ metrics:
       name: entSensorValueTable
       OID: 1.3.6.1.4.1.9.9.91.1.1.1
     symbols:
+      - name: entSensorValue
+        constant_value_one: true
       - name: entSensorValue
         OID: 1.3.6.1.4.1.9.9.91.1.1.1.1.4
     metric_tags:
@@ -459,10 +462,10 @@ metrics:
       name: ciscoEnvMonVoltageStatusTable
       OID: 1.3.6.1.4.1.9.9.13.1.2
     symbols:
+      - name: ciscoEnvMonVoltageStatus
+        constant_value_one: true
       - name: ciscoEnvMonVoltageStatusValue
         OID: 1.3.6.1.4.1.9.9.13.1.2.1.3
-        tag: voltage_value
-        TODO_tag: Handle unknown tag `voltage_value` (remove this field once fixed)
     metric_tags:
       - tag: cisco_env_mon_voltage_status_descr
         column:
@@ -517,10 +520,10 @@ metrics:
       name: ciscoEnvMonTemperatureStatusTable
       OID: 1.3.6.1.4.1.9.9.13.1.3
     symbols:
+      - name: ciscoEnvMonTemperatureStatus
+        constant_value_one: true
       - name: ciscoEnvMonTemperatureStatusValue
         OID: 1.3.6.1.4.1.9.9.13.1.3.1.3
-        tag: temp_value
-        TODO_tag: Handle unknown tag `temp_value` (remove this field once fixed)
     metric_tags:
       - tag: cisco_env_mon_temperature_status_descr
         column:
