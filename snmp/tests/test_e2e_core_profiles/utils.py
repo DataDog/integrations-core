@@ -35,16 +35,11 @@ def assert_extend_generic_if(aggregator, common_tags):
 
 
 def assert_extend_generic_ip(aggregator, common_tags):
-<<<<<<< HEAD
-    """Add the following to the snmprec
-    1.3.6.1.2.1.4.31.1.1.4.1|2|310637142"""
-=======
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.4.31.1.1.4.1 = Counter64: 310637142
     """
     # fmt: on
->>>>>>> master
     aggregator.assert_metric(
         "snmp.ipSystemStatsHCInReceives",
         metric_type=aggregator.COUNT,
@@ -53,16 +48,11 @@ def assert_extend_generic_ip(aggregator, common_tags):
 
 
 def assert_extend_generic_tcp(aggregator, common_tags):
-<<<<<<< HEAD
-    """Add the following to the snmprec
-    1.3.6.1.2.1.6.5.0|65|457790"""
-=======
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.6.5.0|65|4698
     """
     # fmt: on
->>>>>>> master
     aggregator.assert_metric("snmp.tcpActiveOpens", metric_type=aggregator.COUNT, tags=common_tags)
 
 
