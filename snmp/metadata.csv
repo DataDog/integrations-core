@@ -24,7 +24,6 @@ snmp.alaChasBpsPowerSupply,gauge,,,,"[ALCATEL-ENT1-CHASSIS-MIB] This table conta
 snmp.alaChasEntPhysFanSpeed,gauge,,,,"[ALCATEL-ENT1-CHASSIS-MIB] Chassis fan speed.",0,snmp,,
 snmp.amperageProbeReading,gauge,,milliampere,,[Dell iDRAC] The reading for an amperage probe.,0,snmp,,
 snmp.amperageProbeStatus,gauge,,milliampere,,[Dell iDRAC] The probe status of the amperage probe.,0,snmp,,
-<<<<<<< HEAD
 snmp.apBSSBwRate,gauge,,,,"[WLSX-SWITCH-MIB] Bandwidth Rate in Kbps of the ap on this BSSID.",0,snmp,,
 snmp.apBSSFrameFragmentationRate,gauge,,,,"[WLSX-SWITCH-MIB] Frame Fragmentation Rate on this BSSID.",0,snmp,,
 snmp.apBSSFrameLowSpeedRate,gauge,,,,"[WLSX-SWITCH-MIB] Frame Low Speed Rate on this BSSID.",0,snmp,,
@@ -45,10 +44,6 @@ snmp.apChannelNoise,gauge,,,,"[WLSX-SWITCH-MIB] Indicates the noise on the chann
 snmp.apSignalToNoiseRatio,gauge,,,,"[WLSX-SWITCH-MIB] SNR for the BSSID.",0,snmp,,
 snmp.aristaEgressQueuePktsDropped,gauge,,,,[Arista] The number of packets discarded from this egress queue.,0,snmp,,
 snmp.aristaIngressQueuePktsDropped,gauge,,,,[Arista] The number of dropped packets due to congestion at the ingress port in an interface.,0,snmp,,
-=======
-snmp.aristaEgressQueuePktsDropped,count,,,,[Arista] The number of packets discarded from this egress queue.,0,snmp,,
-snmp.aristaIngressQueuePktsDropped,count,,,,[Arista] The number of dropped packets due to congestion at the ingress port in an interface.,0,snmp,,
->>>>>>> master
 snmp.axAppGlobalAllowedCurrentValue,gauge,,,,"[A10-AX-MIB] The current value for the allowed system resource.",0,snmp,,
 snmp.axAppGlobalAllowedMaxValue,gauge,,,,"[A10-AX-MIB] The maximum value for the allowed system resource.",0,snmp,,
 snmp.axAppGlobalBufferConfigLimit,gauge,,,,"[A10-AX-MIB] Application buffer configured limit.",0,snmp,,
@@ -531,7 +526,6 @@ snmp.fwAccepted,count,,packet,,[Checkpoint Firewall] Number of accepted packets.
 snmp.fwDropped,count,,packet,,[Checkpoint Firewall] Number of dropped packets.,0,snmp,,
 snmp.fwNumConn,gauge,,connection,,[Checkpoint Firewall] Number of concurrent IPv6 and IPv4 connections.,0,snmp,,
 snmp.fwPeakNumConn,gauge,,connection,,[Checkpoint Firewall] Peak number of concurrent connections since last reboot.,0,snmp,,
-<<<<<<< HEAD
 snmp.fwRejected,gauge,,packet,,[Checkpoint Firewall] Number of rejected packets.,0,snmp,,
 snmp.haAPHbtTunnels,gauge,,,,"[WLSX-HA-MIB] The number of AP hbt GRE tunnels.",0,snmp,,
 snmp.haActiveAPs,gauge,,,,"[WLSX-HA-MIB] The number of active APs.",0,snmp,,
@@ -540,10 +534,7 @@ snmp.haStandbyAPs,gauge,,,,"[WLSX-HA-MIB] The number of standby APs.",0,snmp,,
 snmp.haStandbyVapTunnels,gauge,,,,"[WLSX-HA-MIB] The number of standby per VAP GRE tunnels.",0,snmp,,
 snmp.haTotalAPs,gauge,,,,"[WLSX-HA-MIB] The total number of APs.",0,snmp,,
 snmp.haTotalVapTunnels,gauge,,,,"[WLSX-HA-MIB] The total number of per VAP GRE tunnels.",0,snmp,,
-=======
-snmp.fwRejected,count,,packet,,[Checkpoint Firewall] Number of rejected packets.,0,snmp,,
 snmp.healthDeviceTemperatureChas1MinAvg,gauge,,,,"[ALCATEL-IND1-HEALTH-MIB] Average chassis temperature over the last minute (percent).",0,snmp,,
->>>>>>> master
 snmp.hrProcessorLoad,gauge,,,,"[HOST-RESOURCES-MIB] The average, over the last minute, of the percentage of time that this processor was not idle. Implementations may approximate this one minute smoothing period if necessary.",0,snmp,,
 snmp.hrSWRunPerfCPU,gauge,,,,[Cisco UC Virtual Machine] [Cisco ICM] [Cisco ISR 4431] The number of centi-seconds of the total system's CPU resources consumed by this process.,0,snmp,,
 snmp.hrSWRunPerfMem,gauge,,,,[Cisco UC Virtual Machine] [Cisco ICM] [Cisco ISR 4431] The total amount of real system memory allocated to this process.,0,snmp,,
@@ -1183,7 +1174,7 @@ snmp.voltageyz1,gauge,,,,[Legacy Chatsworth] The branch YZ1 voltage in 1/10 volt
 snmp.voltageyz2,gauge,,,,[Legacy Chatsworth] The branch YZ2 voltage in 1/10 volts.,0,snmp,,
 snmp.voltagezx1,gauge,,,,[Legacy Chatsworth] The branch ZX1 voltage in 1/10 volts.,0,snmp,,
 snmp.voltagezx2,gauge,,,,[Legacy Chatsworth] The branch ZX2 voltage in 1/10 volts.,0,snmp,,
-<<<<<<< HEAD
+snmp.wlan,gauge,,,,Constant metric equal to 1,0,snmp,,
 snmp.wlanStaRSSI,gauge,,,,"[WLSX-WLAN-MIB] Signal to Noise ratio for the station.",0,snmp,,
 snmp.wlanStaRxBytes64,gauge,,,,"[WLSX-WLAN-MIB] The number of bytes received by this station, 64-bit value",0,snmp,,
 snmp.wlanStaTransmitRate,gauge,,,,"[WLSX-WLAN-MIB] Transmit rate with which the Station is associated with this system.",0,snmp,,
@@ -1195,8 +1186,5 @@ snmp.wlsxNumOfUsersCP,gauge,,,,"[WLSX-USER-MIB] Number of Captive Portal users."
 snmp.wlsxNumOfUsersMAC,gauge,,,,"[WLSX-USER-MIB] Number of MAC users.",0,snmp,,
 snmp.wlsxNumOfUsersStateful8021x,gauge,,,,"[WLSX-USER-MIB] Number of stateful 802.1x users.",0,snmp,,
 snmp.wlsxNumOfUsersVPN,gauge,,,,"[WLSX-USER-MIB] Number of VPN users.",0,snmp,,
-=======
-snmp.wlan,gauge,,,,Constant metric equal to 1,0,snmp,,
->>>>>>> master
 snmp.wlsxSysExtPacketLossPercent,gauge,,,,[Aruba] The packet loss count of the switch.,0,snmp,,
 
