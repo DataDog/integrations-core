@@ -2,39 +2,21 @@ extends:
   - _base.yaml
   - _generic-bgp4.yaml
   - _generic-if.yaml
-  - cisco.yaml
+  # this profile does not extend cisco.yaml on purpose since some metrics might not be compatible
+  # for example cpu.usage from OLD-CISCO-CPU-MIB 1.3.6.1.4.1.9.2.1.57.0
 sysobjectid:
   - 1.3.6.1.4.1.9.1.1537
   - 1.3.6.1.4.1.9.1.3004
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "cisco"
 metrics:
   - MIB: OLD-CISCO-CPU-MIB
     symbol:
-      OID: 1.3.6.1.4.1.9.2.1.57.0
+      OID: 1.3.6.1.4.1.9.2.1.57.0  # avgBusy1
       name: cpu.usage
-  - MIB: CISCO-PROCESS-MIB
-    table:
-      OID: 1.3.6.1.4.1.9.9.109.1.1.1
-      name: cpmCPUTotalTable
-    symbols:
-      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.7
-        name: cpmCPUTotal1minRev
-        tag: dataPlane_CPU
-        TODO_tag: Handle unknown tag `dataPlane_CPU` (remove this field once fixed)
-      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.12
-        name: cpmCPUMemoryUsed
-        tag: dataPlane_MemoryUsed
-        TODO_tag: Handle unknown tag `dataPlane_MemoryUsed` (remove this field once
-          fixed)
-      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.13
-        name: cpmCPUMemoryFree
-        tag: dataPlane_MemoryFree
-        TODO_tag: Handle unknown tag `dataPlane_MemoryFree` (remove this field once
-          fixed)
-    metric_tags:
-      - column:
-          OID: 1.2.3.4.5.6.7.8.9
-          name: TODO
-        tag: todo
   - MIB: CISCO-MEMORY-POOL-MIB
     table:
       OID: 1.3.6.1.4.1.9.9.48.1.1
@@ -45,10 +27,26 @@ metrics:
       - OID: 1.3.6.1.4.1.9.9.48.1.1.1.6
         name: memory.free
     metric_tags:
+      - index: 1  # ciscoMemoryPoolType
+        tag: mem
       - column:
           OID: 1.3.6.1.4.1.9.9.48.1.1.1.2
           name: ciscoMemoryPoolName
         tag: cisco_memory_pool_name
+  - MIB: CISCO-PROCESS-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.109.1.1.1
+      name: cpmCPUTotalTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.7
+        name: cpmCPUTotal1minRev
+      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.12
+        name: cpmCPUMemoryUsed
+      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.13
+        name: cpmCPUMemoryFree
+    metric_tags:
+      - index: 1  # cpmCPUTotalIndex
+        tag: cpm_cpu_total_index
   - MIB: CISCO-RTTMON-MIB
     table:
       OID: 1.3.6.1.4.1.9.9.42.1.2.10
