@@ -320,8 +320,19 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config, expected_total_count=225 + 5)
 
 
+def test_e2e_profile_checkpoint(dd_agent_check):
+    config = common.generate_container_profile_config("checkpoint")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        expected_total_count=301 + 5,
+        metrics_to_skip=metrics_to_skip,
+    )
+
+
 def test_e2e_profile_checkpoint_firewall(dd_agent_check):
-    config = common.generate_container_profile_config("checkpoint-firewall")
+    config = common.generate_container_profile_config(community_string="checkpoint", profile="checkpoint-firewall")
     metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
     assert_python_vs_core(
         dd_agent_check,

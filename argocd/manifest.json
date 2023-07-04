@@ -46,7 +46,9 @@
         "argocd-server"
       ]
     },
-    "logs": {},
+    "logs": {
+      "source": "argocd"
+    },
     "dashboards": {
       "Argo CD Overview": "assets/dashboards/argo_cd_overview.json"
     },
