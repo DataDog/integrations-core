@@ -32,17 +32,54 @@ def test_e2e_profile_exagrid(dd_agent_check):
     ]
 
     # --- TEST EXTENDED METRICS ---
+    # Examples:
     assert_extend_generic_host_resources(aggregator, common_tags)
     assert_extend_generic_if(aggregator, common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.exagridDeduplicationRatio', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.exagridLandingSpace', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.exagridPendingDeduplication', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.exagridPendingReplication', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.exagridRetentionSpace', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric(
+        'snmp.egBackupDataAvailableFractionalGigabytes', metric_type=aggregator.GAUGE, tags=common_tags
+    )
+    aggregator.assert_metric('snmp.egBackupDataAvailableWholeGigabytes', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric(
+        'snmp.egBackupDataSpaceConsumedFractionalGigabytes', metric_type=aggregator.GAUGE, tags=common_tags
+    )
+    aggregator.assert_metric(
+        'snmp.egBackupDataSpaceConsumedWholeGigabytes', metric_type=aggregator.GAUGE, tags=common_tags
+    )
+    aggregator.assert_metric(
+        'snmp.egLandingSpaceAvailableFractionalGigabytes', metric_type=aggregator.GAUGE, tags=common_tags
+    )
+    aggregator.assert_metric(
+        'snmp.egLandingSpaceAvailableWholeGigabytes', metric_type=aggregator.GAUGE, tags=common_tags
+    )
+    aggregator.assert_metric(
+        'snmp.egLandingSpaceConfiguredFractionalGigabytes', metric_type=aggregator.GAUGE, tags=common_tags
+    )
+    aggregator.assert_metric(
+        'snmp.egLandingSpaceConfiguredWholeGigabytes', metric_type=aggregator.GAUGE, tags=common_tags
+    )
+    aggregator.assert_metric('snmp.egPendingDeduplicationAge', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric(
+        'snmp.egPendingDeduplicationFractionalGigabytes', metric_type=aggregator.GAUGE, tags=common_tags
+    )
+    aggregator.assert_metric(
+        'snmp.egPendingDeduplicationWholeGigabytes', metric_type=aggregator.GAUGE, tags=common_tags
+    )
+    aggregator.assert_metric(
+        'snmp.egRetentionSpaceAvailableFractionalGigabytes', metric_type=aggregator.GAUGE, tags=common_tags
+    )
+    aggregator.assert_metric(
+        'snmp.egRetentionSpaceAvailableWholeGigabytes', metric_type=aggregator.GAUGE, tags=common_tags
+    )
+    aggregator.assert_metric(
+        'snmp.egRetentionSpaceConfiguredFractionalGigabytes', metric_type=aggregator.GAUGE, tags=common_tags
+    )
+    aggregator.assert_metric(
+        'snmp.egRetentionSpaceConfiguredWholeGigabytes', metric_type=aggregator.GAUGE, tags=common_tags
+    )
 
     # --- TEST METADATA ---
     device = {
