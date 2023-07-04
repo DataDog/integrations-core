@@ -13,13 +13,19 @@ from datadog_checks.vsphere.legacy.vsphere_legacy import DEFAULT_MAX_HIST_METRIC
 from .common import (
     DEFAULT_INSTANCE,
     EVENTS,
+    HISTORICAL_INSTANCE,
     LAB_INSTANCE,
     LEGACY_DEFAULT_INSTANCE,
+    LEGACY_HISTORICAL_INSTANCE,
+    LEGACY_REALTIME_INSTANCE,
     PERF_COUNTER_INFO,
     PERF_ENTITY_METRICS,
     PERF_METRIC_ID,
     PROPERTIES_EX,
+    REALTIME_INSTANCE,
     VSPHERE_VERSION,
+    MockHttpV6,
+    MockHttpV7,
 )
 from .mocked_api import MockedAPI, mock_http_rest_api_v6, mock_http_rest_api_v7
 
@@ -31,56 +37,37 @@ except ImportError:
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield LAB_INSTANCE
+    yield LAB_INSTANCE.copy()
 
 
 @pytest.fixture()
 def legacy_default_instance():
-    return LEGACY_DEFAULT_INSTANCE
+    return LEGACY_DEFAULT_INSTANCE.copy()
+
+
+@pytest.fixture()
+def legacy_realtime_instance():
+    return LEGACY_REALTIME_INSTANCE.copy()
+
+
+@pytest.fixture()
+def legacy_historical_instance():
+    return LEGACY_HISTORICAL_INSTANCE.copy()
 
 
 @pytest.fixture()
 def default_instance():
-    return DEFAULT_INSTANCE
-
-
-@pytest.fixture()
-def instance():
-    return {
-        'empty_default_hostname': True,
-        'use_legacy_check_version': False,
-        'host': 'vsphere_host',
-        'username': 'vsphere_username',
-        'password': 'vsphere_password',
-    }
+    return DEFAULT_INSTANCE.copy()
 
 
 @pytest.fixture()
 def realtime_instance():
-    return {
-        'collection_level': 4,
-        'empty_default_hostname': True,
-        'use_legacy_check_version': False,
-        'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-        'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-        'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
-        'ssl_verify': False,
-        'rest_api_options': None,
-    }
+    return REALTIME_INSTANCE.copy()
 
 
 @pytest.fixture()
 def historical_instance():
-    return {
-        'collection_level': 1,
-        'empty_default_hostname': True,
-        'use_legacy_check_version': False,
-        'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-        'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-        'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
-        'ssl_verify': False,
-        'collection_type': 'historical',
-    }
+    return HISTORICAL_INSTANCE.copy()
 
 
 @pytest.fixture()
@@ -235,6 +222,17 @@ def service_instance(
         'pyVmomi.vmodl.query.PropertyCollector.FilterSpec', return_value=MagicMock()
     ), patch('pyVim.connect.SmartConnect', return_value=mock_si):
         yield mock_si
+
+
+@pytest.fixture
+def mock_http_api(monkeypatch):
+    if VSPHERE_VERSION.startswith('7.'):
+        http = MockHttpV7()
+    else:
+        http = MockHttpV6()
+    monkeypatch.setattr('requests.get', MagicMock(side_effect=http.get))
+    monkeypatch.setattr('requests.post', MagicMock(side_effect=http.post))
+    yield http
 
 
 @pytest.fixture

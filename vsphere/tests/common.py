@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
+import re
 
 from pyVmomi import vim, vmodl
 from six.moves.urllib.parse import urlparse
@@ -39,134 +40,64 @@ LEGACY_DEFAULT_INSTANCE = {
     'event_config': {
         'collect_vcenter_alarms': True,
     },
-    'host': 'vsphere_host',
-    'username': 'vsphere_username',
-    'password': 'vsphere_password',
+    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
+    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
+    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
 }
 
-legacy_realtime_instance = {
+LEGACY_REALTIME_INSTANCE = {
+    'use_legacy_check_version': True,
     'name': 'vsphere_mock',
     'empty_default_hostname': True,
     'event_config': {
         'collect_vcenter_alarms': True,
     },
-    'use_legacy_check_version': True,
-    'host': 'vsphere_host',
-    'username': 'vsphere_username',
-    'password': 'vsphere_password',
+    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
+    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
+    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
     'collect_realtime_only': True,
 }
 
-legacy_realtime_host_include_instance = {
+LEGACY_HISTORICAL_INSTANCE = {
+    'use_legacy_check_version': True,
     'name': 'vsphere_mock',
     'empty_default_hostname': True,
     'event_config': {
         'collect_vcenter_alarms': True,
     },
-    'use_legacy_check_version': True,
-    'host': 'vsphere_host',
-    'username': 'vsphere_username',
-    'password': 'vsphere_password',
-    'collect_realtime_only': True,
-    'host_include_only_regex': "host1",
-}
-
-legacy_realtime_host_exclude_instance = {
-    'name': 'vsphere_mock',
-    'empty_default_hostname': True,
-    'event_config': {
-        'collect_vcenter_alarms': True,
-    },
-    'use_legacy_check_version': True,
-    'host': 'vsphere_host',
-    'username': 'vsphere_username',
-    'password': 'vsphere_password',
-    'collect_realtime_only': True,
-    'host_include_only_regex': "host[2-9]",
-}
-
-legacy_historical_instance = {
-    'name': 'vsphere_mock',
-    'empty_default_hostname': True,
-    'event_config': {
-        'collect_vcenter_alarms': True,
-    },
-    'use_legacy_check_version': True,
-    'host': 'vsphere_host',
-    'username': 'vsphere_username',
-    'password': 'vsphere_password',
+    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
+    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
+    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
     'collect_historical_only': True,
 }
 
 DEFAULT_INSTANCE = {
     'use_legacy_check_version': False,
     'empty_default_hostname': True,
-    'host': 'vsphere_host',
-    'username': 'vsphere_username',
-    'password': 'vsphere_password',
+    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
+    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
+    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
 }
 
-realtime_instance = {
-    'collection_level': 4,
-    'empty_default_hostname': True,
+REALTIME_INSTANCE = {
     'use_legacy_check_version': False,
-    'host': 'vsphere_host',
-    'username': 'vsphere_username',
-    'password': 'vsphere_password',
+    'empty_default_hostname': True,
+    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
+    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
+    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
     'ssl_verify': False,
+    'collection_level': 4,
     'rest_api_options': None,
 }
 
-realtime_blacklist_instance = {
+HISTORICAL_INSTANCE = {
+    'use_legacy_check_version': False,
+    'empty_default_hostname': True,
+    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
+    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
+    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'ssl_verify': False,
     'collection_level': 4,
-    'empty_default_hostname': True,
-    'use_legacy_check_version': False,
-    'host': 'vsphere_host',
-    'username': 'vsphere_username',
-    'password': 'vsphere_password',
-    'ssl_verify': False,
-    'rest_api_options': None,
-    'resource_filters': [
-        {
-            'type': 'blacklist',
-            'resource': 'host',
-            'property': 'name',
-            'patterns': [
-                'host.*',
-            ],
-        }
-    ],
-}
-
-realtime_whitelist_instance = {
-    'collection_level': 4,
-    'empty_default_hostname': True,
-    'use_legacy_check_version': False,
-    'host': 'vsphere_host',
-    'username': 'vsphere_username',
-    'password': 'vsphere_password',
-    'ssl_verify': False,
-    'rest_api_options': None,
-    'resource_filters': [
-        {
-            'type': 'whitelist',
-            'resource': 'host',
-            'property': 'name',
-            'patterns': [
-                'host.*',
-            ],
-        }
-    ],
-}
-
-historical_instance = {
-    'collection_level': 1,
-    'empty_default_hostname': True,
-    'use_legacy_check_version': False,
-    'host': 'vsphere_host',
-    'username': 'vsphere_username',
-    'password': 'vsphere_password',
-    'ssl_verify': False,
     'collection_type': 'historical',
 }
 
@@ -228,6 +159,13 @@ PERF_COUNTER_INFO = [
         rollupType=vim.PerformanceManager.CounterInfo.RollupType.summation,
         unitInfo=vim.ElementDescription(key='millisecond'),
     ),
+    vim.PerformanceManager.CounterInfo(
+        key=104,
+        groupInfo=vim.ElementDescription(key='mem'),
+        nameInfo=vim.ElementDescription(key='active'),
+        rollupType=vim.PerformanceManager.CounterInfo.RollupType.average,
+        unitInfo=vim.ElementDescription(key='kibibyte'),
+    ),
 ]
 
 
@@ -251,7 +189,7 @@ PERF_ENTITY_METRICS = [
         ],
     ),
     vim.PerformanceManager.EntityMetric(
-        entity=vim.Datastore(moId="NFS-Share-1"),
+        entity=vim.Datastore(moId="ds1"),
         value=[
             vim.PerformanceManager.IntSeries(
                 value=[2, 5],
@@ -293,7 +231,7 @@ PERF_ENTITY_METRICS = [
                 value=[1, 3],
                 id=vim.PerformanceManager.MetricId(
                     counterId=102,
-                    instance='dc2',
+                    # instance='dc2',
                 ),
             )
         ],
@@ -305,7 +243,7 @@ PERF_ENTITY_METRICS = [
                 value=[34, 61],
                 id=vim.PerformanceManager.MetricId(
                     counterId=103,
-                    instance='host1',
+                    # instance='host1',
                 ),
             )
         ],
@@ -373,11 +311,11 @@ PROPERTIES_EX = vim.PropertyCollector.RetrieveResult(
             ],
         ),
         vim.ObjectContent(
-            obj=vim.Datastore(moId="NFS-Share-1"),
+            obj=vim.Datastore(moId="ds1"),
             propSet=[
                 vmodl.DynamicProperty(
                     name='name',
-                    val='NFS-Share-1',
+                    val='ds1',
                 ),
             ],
         ),
@@ -434,20 +372,139 @@ PROPERTIES_EX = vim.PropertyCollector.RetrieveResult(
 )
 
 
-class MockHttp:
-    def __init__(self, **kwargs):
-        self._exceptions = kwargs.get('exceptions')
-        self._defaults = kwargs.get('defaults')
+class MockHttpV6:
+    def __init__(self):
+        self.exceptions = {}
 
     def get(self, url, *args, **kwargs):
-        return MockResponse(json_data={}, status_code=200)
-
-    def post(self, url, *args, **kwargs):
+        if '/api/' in url:
+            return MockResponse({}, 404)
         parsed_url = urlparse(url)
         path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
         path_parts = path_and_args.split('/')
         subpath = os.path.join(*path_parts)
-        if self._exceptions and subpath in self._exceptions:
-            raise self._exceptions[subpath]
-        elif self._defaults and subpath in self._defaults:
-            return self._defaults[subpath]
+        if subpath in self.exceptions:
+            raise self.exceptions[subpath]
+        if re.match(r'.*/category/id:.*$', url):
+            parts = url.split('_')
+            num = parts[len(parts) - 1]
+            return MockResponse(
+                json_data={
+                    "value": {
+                        "name": "my_cat_name_{}".format(num),
+                        "description": "",
+                        "id": "cat_id_{}".format(num),
+                        "used_by": [],
+                        "cardinality": "SINGLE",
+                    }
+                },
+                status_code=200,
+            )
+        elif re.match(r'.*/tagging/tag/id:.*$', url):
+            parts = url.split('_')
+            num = parts[len(parts) - 1]
+            return MockResponse(
+                json_data={
+                    "value": {
+                        "category_id": "cat_id_{}".format(num),
+                        "name": "my_tag_name_{}".format(num),
+                        "description": "",
+                        "id": "xxx",
+                        "used_by": [],
+                    }
+                },
+                status_code=200,
+            )
+        raise Exception("Rest api mock request not matched: method={}, url={}".format('get', url))
+
+    def post(self, url, *args, **kwargs):
+        if '/api/' in url:
+            return MockResponse({}, 404)
+        assert kwargs['headers']['Content-Type'] == 'application/json'
+        parsed_url = urlparse(url)
+        path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
+        path_parts = path_and_args.split('/')
+        subpath = os.path.join(*path_parts)
+        if subpath in self.exceptions:
+            raise self.exceptions[subpath]
+        if re.match(r'.*/session$', url):
+            return MockResponse(
+                json_data={"value": "dummy-token"},
+                status_code=200,
+            )
+        elif re.match(r'.*/tagging/tag-association\?~action=list-attached-tags-on-objects$', url):
+            return MockResponse(
+                json_data={
+                    "value": [
+                        {"object_id": {"id": "vm1", "type": "VirtualMachine"}, "tag_ids": ["tag_id_1", "tag_id_2"]},
+                        {"object_id": {"id": "host1", "type": "HostSystem"}, "tag_ids": ["tag_id_2"]},
+                        {"object_id": {"id": "ds1", "type": "Datastore"}, "tag_ids": ["tag_id_2"]},
+                    ]
+                },
+                status_code=200,
+            )
+        raise Exception("Rest api mock request not matched: method={}, url={}".format('post', url))
+
+
+class MockHttpV7:
+    def __init__(self):
+        self.exceptions = []
+
+    def get(self, url, *args, **kwargs):
+        parsed_url = urlparse(url)
+        path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
+        path_parts = path_and_args.split('/')
+        subpath = os.path.join(*path_parts)
+        if subpath in self.exceptions:
+            raise self.exceptions[subpath]
+        if re.match(r'.*/category/.*$', url):
+            parts = url.split('_')
+            num = parts[len(parts) - 1]
+            return MockResponse(
+                json_data={
+                    'name': 'my_cat_name_{}'.format(num),
+                    'description': 'VM category description',
+                    'id': 'cat_id_{}'.format(num),
+                    'used_by': [],
+                    'cardinality': 'SINGLE',
+                },
+                status_code=200,
+            )
+        elif re.match(r'.*/tagging/tag/.*$', url):
+            parts = url.split('_')
+            num = parts[len(parts) - 1]
+            return MockResponse(
+                json_data={
+                    'category_id': 'cat_id_{}'.format(num),
+                    'name': 'my_tag_name_{}'.format(num),
+                    'description': '',
+                    'id': 'tag_id_{}'.format(num),
+                    'used_by': [],
+                },
+                status_code=200,
+            )
+        raise Exception("Rest api mock request not matched: method={}, url={}".format('get', url))
+
+    def post(self, url, *args, **kwargs):
+        assert kwargs['headers']['Content-Type'] == 'application/json'
+        parsed_url = urlparse(url)
+        path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
+        path_parts = path_and_args.split('/')
+        subpath = os.path.join(*path_parts)
+        if subpath in self.exceptions:
+            raise self.exceptions[subpath]
+        if re.match(r'.*/session$', url):
+            return MockResponse(
+                json_data="dummy-token",
+                status_code=200,
+            )
+        elif re.match(r'.*/tagging/tag-association\?action=list-attached-tags-on-objects$', url):
+            return MockResponse(
+                json_data=[
+                    {'tag_ids': ['tag_id_1', 'tag_id_2'], 'object_id': {'id': 'vm1', 'type': 'VirtualMachine'}},
+                    {'tag_ids': ['tag_id_2'], 'object_id': {'id': 'ds1', 'type': 'Datastore'}},
+                    {'tag_ids': ['tag_id_2'], 'object_id': {'id': 'host1', 'type': 'HostSystem'}},
+                ],
+                status_code=200,
+            )
+        raise Exception("Rest api mock request not matched: method={}, url={}".format('post', url))
