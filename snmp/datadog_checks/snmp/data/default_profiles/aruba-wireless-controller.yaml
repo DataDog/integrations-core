@@ -217,7 +217,7 @@ metrics:
         table: wlsxHighAvalabilityConfigTable
         tag: ha_membership
         # The actual index of the table is haProfileName that is not accessible
-        # TODO: Requires feature to convert full index into a metric tag
+        
   - MIB: WLSX-WLAN-MIB
     table:
       name: wlsxWlanStationTable
