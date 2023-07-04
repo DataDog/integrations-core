@@ -7,48 +7,30 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-from datadog_checks.base.utils.models.fields import get_default_field_value
 
-
-def shared_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_collect_events(field, value):
+def instance_collect_events():
     return True
 
 
-def instance_collect_host_performance_data(field, value):
+def instance_collect_host_performance_data():
     return False
 
 
-def instance_collect_service_performance_data(field, value):
+def instance_collect_service_performance_data():
     return False
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags():
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname():
     return False
 
 
-def instance_metric_patterns(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval():
     return 15
 
 
-def instance_passive_checks_events(field, value):
+def instance_passive_checks_events():
     return False
-
-
-def instance_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tags(field, value):
-    return get_default_field_value(field, value)

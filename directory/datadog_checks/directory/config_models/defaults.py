@@ -7,84 +7,50 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-from datadog_checks.base.utils.models.fields import get_default_field_value
 
-
-def shared_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_countonly(field, value):
+def instance_countonly():
     return False
 
 
-def instance_dirs_patterns_full(field, value):
+def instance_dirs_patterns_full():
     return False
 
 
-def instance_dirtagname(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags():
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname():
     return False
 
 
-def instance_exclude_dirs(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_filegauges(field, value):
+def instance_filegauges():
     return False
 
 
-def instance_filetagname(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_follow_symlinks(field, value):
+def instance_follow_symlinks():
     return True
 
 
-def instance_ignore_missing(field, value):
+def instance_ignore_missing():
     return False
 
 
-def instance_metric_patterns(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval():
     return 15
 
 
-def instance_name(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_pattern(field, value):
+def instance_pattern():
     return '*'
 
 
-def instance_recursive(field, value):
+def instance_recursive():
     return False
 
 
-def instance_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_stat_follow_symlinks(field, value):
+def instance_stat_follow_symlinks():
     return True
 
 
-def instance_submit_histograms(field, value):
+def instance_submit_histograms():
     return True
-
-
-def instance_tags(field, value):
-    return get_default_field_value(field, value)

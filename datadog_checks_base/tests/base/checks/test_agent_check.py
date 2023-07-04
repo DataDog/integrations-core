@@ -976,20 +976,19 @@ def test_load_configuration_models(dd_run_check, mocker):
     instance_config = {}
     shared_config = {}
     package = mocker.MagicMock()
-    package.InstanceConfig = mocker.MagicMock(return_value=instance_config)
-    package.SharedConfig = mocker.MagicMock(return_value=shared_config)
+    package.InstanceConfig.model_validate = mocker.MagicMock(return_value=instance_config)
+    package.SharedConfig.model_validate = mocker.MagicMock(return_value=shared_config)
     import_module = mocker.patch('importlib.import_module', return_value=package)
 
     dd_run_check(check)
 
-    instance_data = check._get_config_model_initialization_data()
-    instance_data.update(instance)
-    init_config_data = check._get_config_model_initialization_data()
-    init_config_data.update(init_config)
-
     import_module.assert_called_with('datadog_checks.base.config_models')
-    package.InstanceConfig.assert_called_once_with(**instance_data)
-    package.SharedConfig.assert_called_once_with(**init_config_data)
+    package.InstanceConfig.model_validate.assert_called_once_with(
+        instance, context=check._get_config_model_context(instance)
+    )
+    package.SharedConfig.model_validate.assert_called_once_with(
+        init_config, context=check._get_config_model_context(init_config)
+    )
 
     assert check._config_model_instance is instance_config
     assert check._config_model_shared is shared_config
@@ -997,11 +996,7 @@ def test_load_configuration_models(dd_run_check, mocker):
 
 if PY3:
 
-    from pydantic import BaseModel, Field
-
-    class BaseModelTest(BaseModel):
-        field = ""
-        schema_ = Field("", alias='schema')
+    from .utils import BaseModelTest
 
 else:
 
