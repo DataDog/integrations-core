@@ -1,6 +1,4 @@
 extends:
-  - _base.yaml
-  - _generic-if.yaml
   - cisco.yaml
 sysobjectid:
   - 1.3.6.1.4.1.9.1.525
@@ -8,18 +6,6 @@ sysobjectid:
   - 1.3.6.1.4.1.9.1.1660
   - 1.3.6.1.4.1.9.1.2371
 metrics:
-  - MIB: CISCO-PROCESS-MIB
-    symbol:
-      name: cpu.usage
-      OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.7.1
-  - MIB: CISCO-MEMORY-POOL-MIB
-    symbol:
-      name: memory.used
-      OID: 1.3.6.1.4.1.9.9.48.1.1.1.5.1
-  - MIB: CISCO-MEMORY-POOL-MIB
-    symbol:
-      name: memory.free
-      OID: 1.3.6.1.4.1.9.9.48.1.1.1.6.1
   - MIB: CISCO-DOT11-ASSOCIATION-MIB
     table:
       name: cDot11ActiveDevicesTable
