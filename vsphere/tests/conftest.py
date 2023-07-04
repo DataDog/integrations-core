@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime as dt
-import os
 
 import pytest
 from mock import MagicMock, Mock, patch
@@ -13,6 +12,7 @@ from datadog_checks.vsphere.legacy.vsphere_legacy import DEFAULT_MAX_HIST_METRIC
 from .common import (
     DEFAULT_INSTANCE,
     EVENTS,
+    EVENTS_ONLY_INSTANCE,
     HISTORICAL_INSTANCE,
     LAB_INSTANCE,
     LEGACY_DEFAULT_INSTANCE,
@@ -72,15 +72,7 @@ def historical_instance():
 
 @pytest.fixture()
 def events_only_instance():
-    return {
-        'empty_default_hostname': True,
-        'use_legacy_check_version': False,
-        'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-        'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-        'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
-        'ssl_verify': False,
-        'collect_events_only': True,
-    }
+    return EVENTS_ONLY_INSTANCE.copy()
 
 
 @pytest.fixture
@@ -195,6 +187,12 @@ def connect_exception():
     mock_si.side_effect = Exception("Connection error")
     with patch('pyVim.connect.SmartConnect', side_effect=mock_si):
         yield mock_si
+
+
+@pytest.fixture
+def get_timestamp():
+    with patch('datadog_checks.base.utils.time.epoch_offset') as mock_time:
+        yield mock_time
 
 
 @pytest.fixture(scope="function", autouse=True)

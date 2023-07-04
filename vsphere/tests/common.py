@@ -77,6 +77,7 @@ DEFAULT_INSTANCE = {
     'host': os.environ.get('VSPHERE_URL', 'FAKE'),
     'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
     'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'ssl_verify': False,
 }
 
 REALTIME_INSTANCE = {
@@ -99,6 +100,16 @@ HISTORICAL_INSTANCE = {
     'ssl_verify': False,
     'collection_level': 4,
     'collection_type': 'historical',
+}
+
+EVENTS_ONLY_INSTANCE = {
+    'empty_default_hostname': True,
+    'use_legacy_check_version': False,
+    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
+    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
+    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'ssl_verify': False,
+    'collect_events_only': True,
 }
 
 

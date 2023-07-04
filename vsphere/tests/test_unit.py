@@ -79,9 +79,9 @@ def test_disabled_metadata(datadog_agent, aggregator, dd_run_check, default_inst
     datadog_agent.assert_metadata_count(0)
 
 
-def test_event_exception(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_exception(aggregator, dd_run_check, events_only_instance, service_instance):
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(side_effect=[Exception()])
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     aggregator.assert_service_check(
         'vsphere.can_connect',
@@ -92,21 +92,21 @@ def test_event_exception(aggregator, dd_run_check, default_instance, service_ins
     assert service_instance.content.eventManager.QueryEvents.call_count == 2
 
 
-def test_two_events(aggregator, dd_run_check, default_instance, service_instance):
-    check = VSphereCheck('vsphere', {}, [default_instance])
+def test_two_events(aggregator, dd_run_check, events_only_instance, service_instance):
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     assert len(aggregator.events) == 2
     assert service_instance.content.eventManager.QueryEvents.call_count == 1
 
 
-def test_two_calls_to_queryevents(aggregator, dd_run_check, default_instance, service_instance):
+def test_two_calls_to_queryevents(aggregator, dd_run_check, events_only_instance, service_instance):
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(
         side_effect=[
             EVENTS,
             [],
         ]
     )
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     assert len(aggregator.events) == 2
     aggregator.reset()
@@ -115,7 +115,7 @@ def test_two_calls_to_queryevents(aggregator, dd_run_check, default_instance, se
     assert service_instance.content.eventManager.QueryEvents.call_count == 2
 
 
-def test_event_filtered(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_filtered(aggregator, dd_run_check, events_only_instance, service_instance):
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(
         return_value=[
             vim.event.VmDiskFailedEvent(
@@ -123,12 +123,12 @@ def test_event_filtered(aggregator, dd_run_check, default_instance, service_inst
             ),
         ]
     )
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     assert len(aggregator.events) == 0
 
 
-def test_event_vm_being_hot_migrated_change_host(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_vm_being_hot_migrated_change_host(aggregator, dd_run_check, events_only_instance, service_instance):
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(
         return_value=[
             vim.event.VmBeingHotMigratedEvent(
@@ -144,7 +144,7 @@ def test_event_vm_being_hot_migrated_change_host(aggregator, dd_run_check, defau
             ),
         ]
     )
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     aggregator.assert_event(
         """datadog has launched a hot migration of this virtual machine:
@@ -164,7 +164,9 @@ def test_event_vm_being_hot_migrated_change_host(aggregator, dd_run_check, defau
     )
 
 
-def test_event_vm_being_hot_migrated_change_datacenter(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_vm_being_hot_migrated_change_datacenter(
+    aggregator, dd_run_check, events_only_instance, service_instance
+):
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(
         return_value=[
             vim.event.VmBeingHotMigratedEvent(
@@ -180,7 +182,7 @@ def test_event_vm_being_hot_migrated_change_datacenter(aggregator, dd_run_check,
             ),
         ]
     )
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     aggregator.assert_event(
         """datadog has launched a hot migration of this virtual machine:
@@ -200,7 +202,7 @@ def test_event_vm_being_hot_migrated_change_datacenter(aggregator, dd_run_check,
     )
 
 
-def test_event_vm_being_hot_migrated_change_datastore(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_vm_being_hot_migrated_change_datastore(aggregator, dd_run_check, events_only_instance, service_instance):
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(
         return_value=[
             vim.event.VmBeingHotMigratedEvent(
@@ -216,7 +218,7 @@ def test_event_vm_being_hot_migrated_change_datastore(aggregator, dd_run_check, 
             ),
         ]
     )
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     aggregator.assert_event(
         """datadog has launched a hot migration of this virtual machine:
@@ -236,7 +238,7 @@ def test_event_vm_being_hot_migrated_change_datastore(aggregator, dd_run_check, 
     )
 
 
-def test_event_alarm_status_changed_excluded(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_alarm_status_changed_excluded(aggregator, dd_run_check, events_only_instance, service_instance):
     event = vim.event.AlarmStatusChangedEvent(
         createdTime=get_current_datetime(),
         entity=vim.event.ManagedEntityEventArgument(entity=vim.VirtualMachine(moId="vm1"), name="vm1"),
@@ -247,12 +249,12 @@ def test_event_alarm_status_changed_excluded(aggregator, dd_run_check, default_i
     )
     setattr(event, 'from', 'green')
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(return_value=[event])
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     assert len(aggregator.events) == 0
 
 
-def test_event_alarm_status_changed_vm(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_alarm_status_changed_vm(aggregator, dd_run_check, events_only_instance, service_instance):
     event = vim.event.AlarmStatusChangedEvent(
         createdTime=get_current_datetime(),
         entity=vim.event.ManagedEntityEventArgument(entity=vim.VirtualMachine(moId="vm1"), name="vm1"),
@@ -263,7 +265,7 @@ def test_event_alarm_status_changed_vm(aggregator, dd_run_check, default_instanc
     )
     setattr(event, 'from', 'green')
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(return_value=[event])
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     aggregator.assert_event(
         """vCenter monitor status changed on this alarm, it was green and it's now yellow.""",
@@ -277,7 +279,7 @@ def test_event_alarm_status_changed_vm(aggregator, dd_run_check, default_instanc
     )
 
 
-def test_event_alarm_status_changed_vm_recovered(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_alarm_status_changed_vm_recovered(aggregator, dd_run_check, events_only_instance, service_instance):
     event = vim.event.AlarmStatusChangedEvent(
         createdTime=get_current_datetime(),
         entity=vim.event.ManagedEntityEventArgument(entity=vim.VirtualMachine(moId="vm1"), name="vm1"),
@@ -288,7 +290,7 @@ def test_event_alarm_status_changed_vm_recovered(aggregator, dd_run_check, defau
     )
     setattr(event, 'from', 'red')
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(return_value=[event])
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     aggregator.assert_event(
         """vCenter monitor status changed on this alarm, it was red and it's now green.""",
@@ -302,7 +304,7 @@ def test_event_alarm_status_changed_vm_recovered(aggregator, dd_run_check, defau
     )
 
 
-def test_event_alarm_status_changed_host(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_alarm_status_changed_host(aggregator, dd_run_check, events_only_instance, service_instance):
     event = vim.event.AlarmStatusChangedEvent(
         createdTime=get_current_datetime(),
         entity=vim.event.ManagedEntityEventArgument(entity=vim.HostSystem(moId="host1"), name="host1"),
@@ -313,7 +315,7 @@ def test_event_alarm_status_changed_host(aggregator, dd_run_check, default_insta
     )
     setattr(event, 'from', 'green')
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(return_value=[event])
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     aggregator.assert_event(
         """vCenter monitor status changed on this alarm, it was green and it's now yellow.""",
@@ -327,7 +329,7 @@ def test_event_alarm_status_changed_host(aggregator, dd_run_check, default_insta
     )
 
 
-def test_event_alarm_status_changed_other(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_alarm_status_changed_other(aggregator, dd_run_check, events_only_instance, service_instance):
     event = vim.event.AlarmStatusChangedEvent(
         createdTime=get_current_datetime(),
         entity=vim.event.ManagedEntityEventArgument(entity=vim.Folder(moId="folder1"), name="folder1"),
@@ -338,12 +340,12 @@ def test_event_alarm_status_changed_other(aggregator, dd_run_check, default_inst
     )
     setattr(event, 'from', 'green')
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(return_value=[event])
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     assert len(aggregator.events) == 0
 
 
-def test_event_alarm_status_changed_wrong_from(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_alarm_status_changed_wrong_from(aggregator, dd_run_check, events_only_instance, service_instance):
     event = vim.event.AlarmStatusChangedEvent(
         createdTime=get_current_datetime(),
         entity=vim.event.ManagedEntityEventArgument(entity=vim.VirtualMachine(moId="vm1"), name="vm1"),
@@ -354,12 +356,12 @@ def test_event_alarm_status_changed_wrong_from(aggregator, dd_run_check, default
     )
     setattr(event, 'from', 'other')
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(return_value=[event])
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     assert len(aggregator.events) == 0
 
 
-def test_event_alarm_status_changed_wrong_to(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_alarm_status_changed_wrong_to(aggregator, dd_run_check, events_only_instance, service_instance):
     event = vim.event.AlarmStatusChangedEvent(
         createdTime=get_current_datetime(),
         entity=vim.event.ManagedEntityEventArgument(entity=vim.VirtualMachine(moId="vm1"), name="vm1"),
@@ -370,12 +372,12 @@ def test_event_alarm_status_changed_wrong_to(aggregator, dd_run_check, default_i
     )
     setattr(event, 'from', 'green')
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(return_value=[event])
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     assert len(aggregator.events) == 0
 
 
-def test_event_vm_message(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_vm_message(aggregator, dd_run_check, events_only_instance, service_instance):
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(
         return_value=[
             vim.event.VmMessageEvent(
@@ -385,7 +387,7 @@ def test_event_vm_message(aggregator, dd_run_check, default_instance, service_in
             )
         ]
     )
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     aggregator.assert_event(
         """@@@\nEvent example\n@@@""",
@@ -395,7 +397,7 @@ def test_event_vm_message(aggregator, dd_run_check, default_instance, service_in
     )
 
 
-def test_event_vm_migrated(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_vm_migrated(aggregator, dd_run_check, events_only_instance, service_instance):
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(
         return_value=[
             vim.event.VmMigratedEvent(
@@ -405,7 +407,7 @@ def test_event_vm_migrated(aggregator, dd_run_check, default_instance, service_i
             )
         ]
     )
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     aggregator.assert_event(
         """@@@\nEvent example\n@@@""",
@@ -415,7 +417,7 @@ def test_event_vm_migrated(aggregator, dd_run_check, default_instance, service_i
     )
 
 
-def test_event_task(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_task(aggregator, dd_run_check, events_only_instance, service_instance):
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(
         return_value=[
             vim.event.TaskEvent(
@@ -424,7 +426,7 @@ def test_event_task(aggregator, dd_run_check, default_instance, service_instance
             )
         ]
     )
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     aggregator.assert_event(
         """@@@\nTask completed successfully\n@@@""",
@@ -433,7 +435,7 @@ def test_event_task(aggregator, dd_run_check, default_instance, service_instance
     )
 
 
-def test_event_vm_powered_on(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_vm_powered_on(aggregator, dd_run_check, events_only_instance, service_instance):
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(
         return_value=[
             vim.event.VmPoweredOnEvent(
@@ -446,7 +448,7 @@ def test_event_vm_powered_on(aggregator, dd_run_check, default_instance, service
             )
         ]
     )
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     aggregator.assert_event(
         """datadog has powered on this virtual machine. It is running on:
@@ -456,7 +458,7 @@ def test_event_vm_powered_on(aggregator, dd_run_check, default_instance, service
     )
 
 
-def test_event_vm_powered_off(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_vm_powered_off(aggregator, dd_run_check, events_only_instance, service_instance):
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(
         return_value=[
             vim.event.VmPoweredOffEvent(
@@ -469,7 +471,7 @@ def test_event_vm_powered_off(aggregator, dd_run_check, default_instance, servic
             )
         ]
     )
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     aggregator.assert_event(
         """datadog has powered off this virtual machine. It was running on:
@@ -480,7 +482,7 @@ def test_event_vm_powered_off(aggregator, dd_run_check, default_instance, servic
     )
 
 
-def test_event_vm_reconfigured(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_vm_reconfigured(aggregator, dd_run_check, events_only_instance, service_instance):
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(
         return_value=[
             vim.event.VmReconfiguredEvent(
@@ -491,7 +493,7 @@ def test_event_vm_reconfigured(aggregator, dd_run_check, default_instance, servi
             )
         ]
     )
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     aggregator.assert_event(
         """datadog saved the new configuration:\n@@@\n""",
@@ -502,7 +504,7 @@ def test_event_vm_reconfigured(aggregator, dd_run_check, default_instance, servi
     )
 
 
-def test_event_vm_suspended(aggregator, dd_run_check, default_instance, service_instance):
+def test_event_vm_suspended(aggregator, dd_run_check, events_only_instance, service_instance):
     service_instance.content.eventManager.QueryEvents = mock.MagicMock(
         return_value=[
             vim.event.VmSuspendedEvent(
@@ -514,7 +516,7 @@ def test_event_vm_suspended(aggregator, dd_run_check, default_instance, service_
             )
         ]
     )
-    check = VSphereCheck('vsphere', {}, [default_instance])
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
     dd_run_check(check)
     aggregator.assert_event(
         """datadog has suspended this virtual machine. It was running on:
@@ -557,6 +559,45 @@ def test_report_realtime_vm_metrics(aggregator, dd_run_check, realtime_instance)
     )
 
 
+def test_report_realtime_vm_percent_metrics(aggregator, dd_run_check, realtime_instance, service_instance):
+    service_instance.content.perfManager.QueryPerfCounterByLevel = mock.MagicMock(
+        return_value=[
+            vim.PerformanceManager.CounterInfo(
+                key=100,
+                groupInfo=vim.ElementDescription(key='cpu'),
+                nameInfo=vim.ElementDescription(key='usage'),
+                rollupType=vim.PerformanceManager.CounterInfo.RollupType.average,
+                unitInfo=vim.ElementDescription(key='percent'),
+            ),
+        ]
+    )
+    service_instance.content.perfManager.QueryPerf = mock.MagicMock(
+        side_effect=[
+            [
+                vim.PerformanceManager.EntityMetric(
+                    entity=vim.VirtualMachine(moId="vm1"),
+                    value=[
+                        vim.PerformanceManager.IntSeries(
+                            value=[5299],
+                            id=vim.PerformanceManager.MetricId(counterId=100),
+                        )
+                    ],
+                ),
+            ],
+            [],
+        ]
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        value=52.99,
+        count=1,
+        hostname='vm1',
+        tags=['vcenter_server:FAKE'],
+    )
+
+
 def test_report_realtime_vm_metrics_invalid_value(aggregator, dd_run_check, realtime_instance, service_instance):
     service_instance.content.perfManager.QueryPerf = mock.MagicMock(
         return_value=[
@@ -569,6 +610,20 @@ def test_report_realtime_vm_metrics_invalid_value(aggregator, dd_run_check, real
                     )
                 ],
             ),
+        ]
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'vsphere.cpu.costop.sum',
+        count=0,
+    )
+
+
+def test_report_realtime_vm_metrics_exception(aggregator, dd_run_check, realtime_instance, service_instance):
+    service_instance.CurrentTime = mock.MagicMock(
+        side_effect=[
+            Exception(),
         ]
     )
     check = VSphereCheck('vsphere', {}, [realtime_instance])
@@ -2245,3 +2300,11 @@ def test_validate_config_errors(default_instance, extra_instance, expected_excep
         VSphereCheck('vsphere', {}, [default_instance])
         if expected_warning_message:
             assert expected_warning_message in caplog.text
+
+
+def test_two_checks(aggregator, dd_run_check, realtime_instance, get_timestamp):
+    get_timestamp.side_effect = [0, 0, 1000]
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    dd_run_check(check)
+    get_timestamp.call_count == 3
