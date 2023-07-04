@@ -6,11 +6,10 @@ metrics:
       OID: 1.3.6.1.4.1.9.9.109.1.1.1
       name: cpmCPUTotalTable
     symbols:
-      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.7
-        # core check only
+      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.7  # cpmCPUTotal1minRev
         name: cpu.usage
     metric_tags:
-      - index: 1
+      - index: 1  # cpmCPUTotalIndex
         tag: cpu
 
   - MIB: CISCO-MEMORY-POOL-MIB
@@ -18,12 +17,10 @@ metrics:
       OID: 1.3.6.1.4.1.9.9.48.1.1
       name: ciscoMemoryPoolTable
     symbols:
-      - OID: 1.3.6.1.4.1.9.9.48.1.1.1.5
-        # core check only
+      - OID: 1.3.6.1.4.1.9.9.48.1.1.1.5  # ciscoMemoryPoolUsed
         name: memory.used
-      - OID: 1.3.6.1.4.1.9.9.48.1.1.1.6
-        # core check only
+      - OID: 1.3.6.1.4.1.9.9.48.1.1.1.6  # ciscoMemoryPoolFree
         name: memory.free
     metric_tags:
-      - tag: mem
-        index: 1
+      - index: 1  # ciscoMemoryPoolType
+        tag: mem

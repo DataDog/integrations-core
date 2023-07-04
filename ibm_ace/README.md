@@ -12,6 +12,10 @@ Follow the instructions below to install and configure this check for an Agent r
 
 An [IBM MQ][10] server is required for consuming metric messages from IBM ACE.
 
+<div class="alert alert-warning">
+For Linux, make sure to set the LD_LIBRARY_PATH environment variable as described in the <a href="https://docs.datadoghq.com/integrations/ibm_mq/">IBM MQ setup</a> before continuing.
+</div>
+
 ### IBM ACE
 
 1. Ensure at least version 12.0.2.0 is installed.
