@@ -116,7 +116,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         'snmp.upsOutletGroupStatusGroupState',
         metric_type=aggregator.GAUGE,
         count=2,
-        tags=['outlet_group_name:test_outlet'] + common_tags,
+        tags=['outlet_group_name:test_outlet', 'ups_outlet_group_status_group_state:3'] + common_tags,
     )
 
     for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:
