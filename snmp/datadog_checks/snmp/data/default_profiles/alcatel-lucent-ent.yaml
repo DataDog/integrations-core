@@ -15,9 +15,7 @@ metrics:
           name: healthModuleChassisId
           OID: 1.3.6.1.4.1.6486.801.1.2.1.16.1.1.1.1.1.14
         tag: health_module_chassis_id
-      - column:
-          name: healthModuleChassisId
-          OID: 1.3.6.1.4.1.6486.801.1.2.1.16.1.1.1.1.1.14
+      - index: 1  # healthModuleSlot
         tag: cpu
   - MIB: ALCATEL-ENT1-HEALTH-MIB
     table:
@@ -31,9 +29,7 @@ metrics:
           name: healthModuleChassisId
           OID: 1.3.6.1.4.1.6486.801.1.2.1.16.1.1.1.1.1.14
         tag: health_module_chassis_id
-      - column:
-          name: healthModuleChassisId
-          OID: 1.3.6.1.4.1.6486.801.1.2.1.16.1.1.1.1.1.14
+      - index: 1  # healthModuleSlot
         tag: mem
   - MIB: ALCATEL-ENT1-CHASSIS-MIB
     table:
