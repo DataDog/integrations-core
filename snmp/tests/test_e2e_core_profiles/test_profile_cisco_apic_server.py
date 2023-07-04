@@ -10,9 +10,8 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
-    assert_extend_generic_if,
     create_e2e_core_test_config,
-    get_device_ip_from_config,
+    get_device_ip_from_config, assert_extend_cisco,
 )
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
@@ -31,11 +30,7 @@ def test_e2e_profile_cisco_apic_server(dd_agent_check):
     ] + []
 
     # --- TEST EXTENDED METRICS ---
-    # Examples:
-    # assert_extend_generic_if(aggregator, common_tags)
-    # assert_extend_generic_ip(aggregator, common_tags)
-    # assert_extend_generic_tcp(aggregator, common_tags)
-    # TODO: Update extended metrics section as needed, if any. (Remove this TODO note once done.)
+    assert_extend_cisco(aggregator, common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
