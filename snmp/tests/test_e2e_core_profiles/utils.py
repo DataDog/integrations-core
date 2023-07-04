@@ -109,30 +109,28 @@ def assert_extend_cisco_cpu_memory(aggregator, common_tags):
     )
 
 
-def assert_extend_generic_host_resources(aggregator, common_tags):
-    # fmt: off
-    """Add the following to the snmprec
-1.3.6.1.2.1.25.1.1.0|67|201526890
-1.3.6.1.2.1.25.2.3.1.1.4|2|4
-1.3.6.1.2.1.25.2.3.1.1.31|2|31
-1.3.6.1.2.1.25.2.3.1.2.4|6|1.3.6.1.3.167.36
-1.3.6.1.2.1.25.2.3.1.2.31|6|1.3.6.1.3
-1.3.6.1.2.1.25.2.3.1.3.4|4x|6b65707420627574207468656972204a61646564206275742064726976696e67
-1.3.6.1.2.1.25.2.3.1.3.31|4x|7a6f6d62696573206f78656e206b657074204a6164656420717561696e746c79207a6f6d62696573
-1.3.6.1.2.1.25.2.3.1.5.4|2|17
-1.3.6.1.2.1.25.2.3.1.5.31|2|21
-1.3.6.1.2.1.25.2.3.1.6.4|2|30
-1.3.6.1.2.1.25.2.3.1.6.31|2|4
-    """
-    # fmt: on
+def assert_extend_generic_host_resources_base(aggregator, common_tags):
     aggregator.assert_metric("snmp.hrSystemUptime", metric_type=aggregator.GAUGE, tags=common_tags)
 
     cpu_rows = ['10', '21']
     for cpu_row in cpu_rows:
-        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + ['cpu:' + cpu_row])
         aggregator.assert_metric(
             'snmp.hrProcessorLoad', metric_type=aggregator.GAUGE, tags=common_tags + ['processorid:' + cpu_row]
         )
+
+    hr_mem_rows = [
+        ['storagedesc:kept but their Jaded but driving', 'storagetype:1.3.6.1.3.167.36'],
+        ['storagedesc:kept but their Jaded but driving', 'storagetype:1.3.6.1.3.167.36'],
+    ]
+    for mem_row in hr_mem_rows:
+        aggregator.assert_metric('snmp.hrStorageSize', metric_type=aggregator.GAUGE, tags=common_tags + mem_row)
+        aggregator.assert_metric('snmp.hrStorageUsed', metric_type=aggregator.GAUGE, tags=common_tags + mem_row)
+
+
+def assert_extend_generic_host_resources_cpu_mem(aggregator, common_tags):
+    cpu_rows = ['10', '21']
+    for cpu_row in cpu_rows:
+        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + ['cpu:' + cpu_row])
 
     mem_rows = ['31', '4']
     for mem_row in mem_rows:
@@ -146,22 +144,36 @@ def assert_extend_generic_host_resources(aggregator, common_tags):
             'snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags + ['mem:' + mem_row]
         )
 
-    hr_mem_rows = [
-        ['storagedesc:kept but their Jaded but driving', 'storagetype:1.3.6.1.3.167.36'],
-        ['storagedesc:kept but their Jaded but driving', 'storagetype:1.3.6.1.3.167.36'],
-    ]
-    for mem_row in hr_mem_rows:
-        aggregator.assert_metric('snmp.hrStorageSize', metric_type=aggregator.GAUGE, tags=common_tags + mem_row)
-        aggregator.assert_metric('snmp.hrStorageUsed', metric_type=aggregator.GAUGE, tags=common_tags + mem_row)
 
-
-def assert_extend_generic_host_resources_base(aggregator, common_tags):
+def assert_extend_generic_host_resources(aggregator, common_tags):
     # fmt: off
     """Add the following to the snmprec
+<<<<<<< HEAD
 1.3.6.1.2.1.25.1.1.0|67|201526890
-    """
+1.3.6.1.2.1.25.2.3.1.1.4|2|4
+1.3.6.1.2.1.25.2.3.1.1.31|2|31
+1.3.6.1.2.1.25.2.3.1.2.4|6|1.3.6.1.3.167.36
+1.3.6.1.2.1.25.2.3.1.2.31|6|1.3.6.1.3
+1.3.6.1.2.1.25.2.3.1.3.4|4x|6b65707420627574207468656972204a61646564206275742064726976696e67
+1.3.6.1.2.1.25.2.3.1.3.31|4x|7a6f6d62696573206f78656e206b657074204a6164656420717561696e746c79207a6f6d62696573
+1.3.6.1.2.1.25.2.3.1.5.4|2|17
+1.3.6.1.2.1.25.2.3.1.5.31|2|21
+1.3.6.1.2.1.25.2.3.1.6.4|2|30
+1.3.6.1.2.1.25.2.3.1.6.31|2|4
+1.3.6.1.2.1.25.3.3.1.1.10|2|10
+1.3.6.1.2.1.25.3.3.1.1.21|2|21
+1.3.6.1.2.1.25.3.3.1.2.10|2|31
+1.3.6.1.2.1.25.3.3.1.2.21|2|15"""
     # fmt: on
-    aggregator.assert_metric("snmp.hrSystemUptime", metric_type=aggregator.GAUGE, tags=common_tags)
+    assert_extend_generic_host_resources_cpu_mem(aggregator, common_tags)
+    assert_extend_generic_host_resources_base(aggregator, common_tags)
+
+
+def assert_extend_generic_ucd(aggregator, common_tags):
+    """Add the following to the snmprec
+    1.3.6.1.4.1.2021.10.1.5.1|2|18
+    """
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
 
 
 def assert_extend_entity_sensor(aggregator, common_tags):
