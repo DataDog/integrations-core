@@ -206,4 +206,5 @@ def assert_extend_cisco(aggregator, common_tags):
 1.3.6.1.4.1.9.9.109.1.1.1.1.12.712|66|353
     """
     # fmt:on
-    aggregator.assert_metric("snmp.cpmCPUMemoryUsed", metric_type=aggregator.GAUGE, tags=common_tags)
+    tags = ['cpu:712']
+    aggregator.assert_metric("snmp.cpmCPUMemoryUsed", metric_type=aggregator.GAUGE, tags=common_tags + tags)
