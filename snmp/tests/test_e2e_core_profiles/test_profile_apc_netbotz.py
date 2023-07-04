@@ -10,8 +10,10 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
+    assert_extend_generic_tcp,
+    assert_extend_generic_udp,
     create_e2e_core_test_config,
-    get_device_ip_from_config, assert_extend_generic_tcp, assert_extend_generic_udp,
+    get_device_ip_from_config,
 )
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
