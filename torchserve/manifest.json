@@ -41,6 +41,12 @@
       "process_signatures": [
         "torchserve"
       ]
+    },
+    "monitors": {
+      "error_ratio": "assets/monitors/error_ratio.json"
+    },
+    "logs": {
+      "source": "torchserve"
     }
   },
   "author": {
