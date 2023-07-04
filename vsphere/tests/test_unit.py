@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import contextlib
+import logging
 
 import mock
 import pytest
@@ -1132,6 +1133,211 @@ def test_report_realtime_vm_metrics_powered_off(aggregator, dd_run_check, realti
         name='vsphere.cpu.costop.sum',
         count=0,
     )
+
+
+@pytest.mark.usefixtures('mock_http_api')
+def test_vm_hostname_suffix_tag(aggregator, caplog, dd_run_check, realtime_instance, service_instance):
+    caplog.set_level(logging.DEBUG)
+    realtime_instance.update(
+        {
+            'collect_tags': True,
+            'vm_hostname_suffix_tag': 'my_cat_name_1',
+            'excluded_host_tags': ['my_cat_name_1', 'my_cat_name_2'],
+        }
+    )
+    service_instance.content.propertyCollector.RetrievePropertiesEx = mock.MagicMock(
+        return_value=vim.PropertyCollector.RetrieveResult(
+            objects=[
+                vim.ObjectContent(
+                    obj=vim.VirtualMachine(moId="vm1"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='vm1',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='runtime.powerState',
+                            val=vim.VirtualMachinePowerState.poweredOn,
+                        ),
+                    ],
+                ),
+                vim.ObjectContent(
+                    obj=vim.VirtualMachine(moId="vm2"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='vm2',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='runtime.powerState',
+                            val=vim.VirtualMachinePowerState.poweredOn,
+                        ),
+                    ],
+                ),
+            ]
+        )
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        name='vsphere.cpu.costop.sum',
+        count=1,
+        value=52,
+        tags=[
+            'my_cat_name_1:my_tag_name_1',
+            'my_cat_name_2:my_tag_name_2',
+            'vcenter_server:FAKE',
+        ],
+        hostname='vm1-my_tag_name_1',
+    )
+    assert "Attached hostname suffix key my_cat_name_1, new hostname: vm1-my_tag_name_1" in caplog.text
+    assert "Could not attach hostname suffix key my_cat_name_1 for host: vm2" in caplog.text
+
+
+@pytest.mark.usefixtures('mock_http_api')
+def test_vm_hostname_suffix_tag_integration(aggregator, caplog, dd_run_check, realtime_instance, service_instance):
+    caplog.set_level(logging.DEBUG)
+    realtime_instance.update(
+        {
+            'collect_tags': True,
+            'vm_hostname_suffix_tag': 'vsphere_host',
+            'excluded_host_tags': ['my_cat_name_1', 'my_cat_name_2'],
+        }
+    )
+    service_instance.content.propertyCollector.RetrievePropertiesEx = mock.MagicMock(
+        return_value=vim.PropertyCollector.RetrieveResult(
+            objects=[
+                vim.ObjectContent(
+                    obj=vim.HostSystem(moId="host1"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='host1',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='parent',
+                            val=vim.Folder(moId="root"),
+                        ),
+                    ],
+                ),
+                vim.ObjectContent(
+                    obj=vim.VirtualMachine(moId="vm1"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='vm1',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='runtime.powerState',
+                            val=vim.VirtualMachinePowerState.poweredOn,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='runtime.host',
+                            val=vim.HostSystem(moId="host1"),
+                        ),
+                    ],
+                ),
+                vim.ObjectContent(
+                    obj=vim.VirtualMachine(moId="vm2"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='vm2',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='runtime.powerState',
+                            val=vim.VirtualMachinePowerState.poweredOn,
+                        ),
+                    ],
+                ),
+            ]
+        )
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        name='vsphere.cpu.costop.sum',
+        count=1,
+        value=52,
+        tags=[
+            'my_cat_name_1:my_tag_name_1',
+            'my_cat_name_2:my_tag_name_2',
+            'vcenter_server:FAKE',
+        ],
+        hostname='vm1-host1',
+    )
+    assert "Attached hostname suffix key vsphere_host, new hostname: vm1-host1" in caplog.text
+
+
+@pytest.mark.usefixtures('mock_http_api')
+def test_vm_hostname_suffix_tag_custom(aggregator, caplog, dd_run_check, realtime_instance, service_instance):
+    caplog.set_level(logging.DEBUG)
+    realtime_instance.update(
+        {
+            'collect_tags': True,
+            'vm_hostname_suffix_tag': 'test',
+            'tags': ['test:tag_name'],
+        },
+    )
+    service_instance.content.propertyCollector.RetrievePropertiesEx = mock.MagicMock(
+        return_value=vim.PropertyCollector.RetrieveResult(
+            objects=[
+                vim.ObjectContent(
+                    obj=vim.HostSystem(moId="host1"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='host1',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='parent',
+                            val=vim.Folder(moId="root"),
+                        ),
+                    ],
+                ),
+                vim.ObjectContent(
+                    obj=vim.VirtualMachine(moId="vm1"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='vm1',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='runtime.powerState',
+                            val=vim.VirtualMachinePowerState.poweredOn,
+                        ),
+                        vmodl.DynamicProperty(
+                            name='runtime.host',
+                            val=vim.HostSystem(moId="host1"),
+                        ),
+                    ],
+                ),
+                vim.ObjectContent(
+                    obj=vim.VirtualMachine(moId="vm2"),
+                    propSet=[
+                        vmodl.DynamicProperty(
+                            name='name',
+                            val='vm2',
+                        ),
+                        vmodl.DynamicProperty(
+                            name='runtime.powerState',
+                            val=vim.VirtualMachinePowerState.poweredOn,
+                        ),
+                    ],
+                ),
+            ]
+        )
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        name='vsphere.cpu.costop.sum',
+        count=1,
+        value=52,
+        tags=['test:tag_name', 'vcenter_server:FAKE'],
+        hostname='vm1-tag_name',
+    )
+    assert "Attached hostname suffix key test, new hostname: vm1-tag_name" in caplog.text
 
 
 def test_report_realtime_host_count(aggregator, dd_run_check, realtime_instance):
