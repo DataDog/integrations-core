@@ -1,13 +1,5 @@
 # This dockerfile is used to build the devcontainer environment.
 # more info about vscode devcontainer: https://code.visualstudio.com/docs/devcontainers/containers
-FROM ubuntu
-ARG PYTHON_VERSION=3.9
-
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt install -yq  software-properties-common
-RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt-get install -yq python${PYTHON_VERSION} python3-pip python${PYTHON_VERSION}-dev python3-venv python${PYTHON_VERSION}-distutils python3-psutil
-RUN apt-get install -yq git build-essential liblz4-dev libunwind-dev
-
-RUN pip install pipx
-ENV PATH=/root/.local/bin:$PATH
+FROM mcr.microsoft.com/devcontainers/python:1-3.9-bullseye
+# Need to install `liblz4-dev` `libunwind-dev` packages for ddev installation see: https://github.com/DataDog/integrations-core/issues/14043
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt install -y liblz4-dev libunwind-dev --option=Dpkg::Options::=--force-confdef
