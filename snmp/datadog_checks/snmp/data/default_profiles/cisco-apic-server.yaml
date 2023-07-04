@@ -1,0 +1,698 @@
+extends:
+  - _base.yaml
+  - cisco.yaml
+sysobjectid:
+  - 1.3.6.1.4.1.9.1.2238
+metrics:
+  - MIB: CISCO-PROCESS-MIB
+    symbol:
+      name: cpu.usage
+      OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.7.1
+  - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
+    table:
+      name: cefcFRUPowerSupplyGroupTable
+      OID: 1.3.6.1.4.1.9.9.117.1.1.1
+    symbols:
+      - name: cefcTotalAvailableCurrent
+        OID: 1.3.6.1.4.1.9.9.117.1.1.1.1.3
+      - name: cefcTotalDrawnCurrent
+        OID: 1.3.6.1.4.1.9.9.117.1.1.1.1.4
+    metric_tags:
+      - tag: cefc_power_redundancy_mode
+        column:
+          name: cefcPowerRedundancyMode
+          OID: 1.3.6.1.4.1.9.9.117.1.1.1.1.1
+        mapping:
+          1: notsupported
+          2: redundant
+          3: combined
+          4: non_redundant
+          5: ps_redundant
+          6: in_pwr_src_redundant
+          7: ps_redundant_single_input
+      - tag: cefc_power_units
+        column:
+          name: cefcPowerUnits
+          OID: 1.3.6.1.4.1.9.9.117.1.1.1.1.2
+      - tag: ent_physical_descr
+        column:
+          name: entPhysicalDescr
+          OID: 1.3.6.1.2.1.47.1.1.1.1.2
+      - tag: ent_physical_class
+        column:
+          name: entPhysicalClass
+          OID: 1.3.6.1.2.1.47.1.1.1.1.5
+        mapping:
+          1: other
+          2: unknown
+          3: chassis
+          4: backplane
+          5: container
+          6: power_supply
+          7: fan
+          8: sensor
+          9: module
+          10: port
+          11: stack
+          12: cpu
+      - tag: ent_physical_name
+        column:
+          name: entPhysicalName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+      - tag: ent_physical_serial_num
+        column:
+          name: entPhysicalSerialNum
+          OID: 1.3.6.1.2.1.47.1.1.1.1.11
+      - tag: ent_physical_model_name
+        column:
+          name: entPhysicalModelName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.13
+      - column:
+          OID: 1.3.6.1.4.1.9.9.117.1.1.1.1.5
+          name: cefcPowerRedundancyOperMode
+        tag: cefc_power_redundancy_oper_mode
+        mapping:
+          1: notsupported
+          2: redundant
+          3: combined
+          4: non_redundant
+          5: ps_redundant
+          6: in_pwr_src_redundant
+          7: ps_redundant_single_input
+  - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
+    table:
+      name: cefcFRUPowerStatusTable
+      OID: 1.3.6.1.4.1.9.9.117.1.1.2
+    symbols:
+      - name: cefcFRUCurrent
+        OID: 1.3.6.1.4.1.9.9.117.1.1.2.1.3
+    metric_tags:
+      - tag: cefc_fru_power_admin_status
+        column:
+          name: cefcFRUPowerAdminStatus
+          OID: 1.3.6.1.4.1.9.9.117.1.1.2.1.1
+        mapping:
+          1: on
+          2: off
+          3: inline_auto
+          4: inline_on
+          5: power_cycle
+      - tag: ent_physical_descr
+        column:
+          name: entPhysicalDescr
+          OID: 1.3.6.1.2.1.47.1.1.1.1.2
+      - tag: ent_physical_class
+        column:
+          name: entPhysicalClass
+          OID: 1.3.6.1.2.1.47.1.1.1.1.5
+        mapping:
+          1: other
+          2: unknown
+          3: chassis
+          4: backplane
+          5: container
+          6: power_supply
+          7: fan
+          8: sensor
+          9: module
+          10: port
+          11: stack
+          12: cpu
+      - tag: ent_physical_name
+        column:
+          name: entPhysicalName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+      - tag: ent_physical_serial_num
+        column:
+          name: entPhysicalSerialNum
+          OID: 1.3.6.1.2.1.47.1.1.1.1.11
+      - tag: ent_physical_model_name
+        column:
+          name: entPhysicalModelName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.13
+      - column:
+          OID: 1.3.6.1.4.1.9.9.117.1.1.2.1.2
+          name: cefcFRUPowerOperStatus
+        tag: cefc_fru_power_oper_status
+        mapping:
+          1: off_env_other
+          2: on
+          3: off_admin
+          4: off_denied
+          5: off_env_power
+          6: off_env_temp
+          7: off_env_fan
+          8: failed
+          9: on_but_fan_fail
+          10: off_cooling
+          11: off_connector_rating
+          12: on_but_inline_power_fail
+  - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
+    table:
+      name: cefcModuleTable
+      OID: 1.3.6.1.4.1.9.9.117.1.2.1
+    symbols:
+      - name: cefcModule
+        constant_value_one: true
+    metric_tags:
+      - tag: ent_physical_descr
+        column:
+          name: entPhysicalDescr
+          OID: 1.3.6.1.2.1.47.1.1.1.1.2
+      - tag: ent_physical_class
+        column:
+          name: entPhysicalClass
+          OID: 1.3.6.1.2.1.47.1.1.1.1.5
+        mapping:
+          1: other
+          2: unknown
+          3: chassis
+          4: backplane
+          5: container
+          6: power_supply
+          7: fan
+          8: sensor
+          9: module
+          10: port
+          11: stack
+          12: cpu
+      - tag: ent_physical_name
+        column:
+          name: entPhysicalName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+      - tag: ent_physical_serial_num
+        column:
+          name: entPhysicalSerialNum
+          OID: 1.3.6.1.2.1.47.1.1.1.1.11
+      - tag: ent_physical_model_name
+        column:
+          name: entPhysicalModelName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.13
+      - column:
+          OID: 1.3.6.1.4.1.9.9.117.1.2.1.1.1
+          name: cefcModuleAdminStatus
+        tag: cefc_module_admin_status
+        mapping:
+          1: enabled
+          2: disabled
+          3: reset
+          4: out_of_service_admin
+          0: unsupported
+      - column:
+          OID: 1.3.6.1.4.1.9.9.117.1.2.1.1.2
+          name: cefcModuleOperStatus
+        tag: cefc_module_oper_status
+        mapping:
+          1: unknown
+          2: ok
+          3: disabled
+          4: ok_but_diag_failed
+          5: boot
+          6: self_test
+          7: failed
+          8: missing
+          9: mismatch_with_parent
+          10: mismatch_config
+          11: diag_failed
+          12: dormant
+          13: out_of_service_admin
+          14: out_of_service_env_temp
+          15: powered_down
+          16: powered_up
+          17: power_denied
+          18: power_cycled
+          19: ok_but_power_over_warning
+          20: ok_but_power_over_critical
+          21: sync_in_progress
+          22: upgrading
+          23: ok_but_auth_failed
+          24: mdr
+          25: fw_mismatch_found
+          26: fw_download_success
+          27: fw_download_failure
+      - column:
+          OID: 1.3.6.1.4.1.9.9.117.1.2.1.1.3
+          name: cefcModuleResetReason
+        tag: cefc_module_reset_reason
+        mapping:
+          0: unsupported
+          1: unknown
+          2: power_up
+          3: parity_error
+          4: clear_config_reset
+          5: manual_reset
+          6: watch_dog_timeout_reset
+          7: resource_overflow_reset
+          8: missing_task_reset
+          9: low_voltage_reset
+          10: controller_reset
+          11: system_reset
+          12: switchover_reset
+          13: upgrade_reset
+          14: downgrade_reset
+          15: cache_error_reset
+          16: device_driver_reset
+          17: software_exception_reset
+          18: restore_config_reset
+          19: abort_rev_reset
+          20: burn_boot_reset
+          21: standby_cd_healthier_reset
+          22: non_native_config_clear_reset
+          23: memory_protection_error_reset
+      - column:
+          OID: 1.3.6.1.4.1.9.9.117.1.2.1.1.6
+          name: cefcModuleResetReasonDescription
+        tag: cefc_module_reset_reason_description
+      - column:
+          OID: 1.3.6.1.4.1.9.9.117.1.2.1.1.7
+          name: cefcModuleStateChangeReasonDescr
+        tag: cefc_module_state_change_reason_descr
+  - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
+    table:
+      name: cefcFanTrayStatusTable
+      OID: 1.3.6.1.4.1.9.9.117.1.4.1
+    symbols:
+      - name: cefcFanTrayStatus
+        constant_value_one: true
+    metric_tags:
+      - tag: ent_physical_descr
+        column:
+          name: entPhysicalDescr
+          OID: 1.3.6.1.2.1.47.1.1.1.1.2
+      - tag: ent_physical_class
+        column:
+          name: entPhysicalClass
+          OID: 1.3.6.1.2.1.47.1.1.1.1.5
+        mapping:
+          1: other
+          2: unknown
+          3: chassis
+          4: backplane
+          5: container
+          6: power_supply
+          7: fan
+          8: sensor
+          9: module
+          10: port
+          11: stack
+          12: cpu
+      - tag: ent_physical_name
+        column:
+          name: entPhysicalName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+      - tag: ent_physical_serial_num
+        column:
+          name: entPhysicalSerialNum
+          OID: 1.3.6.1.2.1.47.1.1.1.1.11
+      - tag: ent_physical_model_name
+        column:
+          name: entPhysicalModelName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.13
+      - column:
+          OID: 1.3.6.1.4.1.9.9.117.1.4.1.1.1
+          name: cefcFanTrayOperStatus
+        tag: cefc_fan_tray_oper_status
+        mapping:
+          1: unknown
+          2: up
+          3: down
+          4: warning
+  - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
+    table:
+      name: cefcFanTable
+      OID: 1.3.6.1.4.1.9.9.117.1.4.2
+    symbols:
+      - name: cefcFanSpeed
+        OID: 1.3.6.1.4.1.9.9.117.1.4.2.1.1
+      - name: cefcFanSpeedPercent
+        OID: 1.3.6.1.4.1.9.9.117.1.4.2.1.2
+    metric_tags:
+      - tag: ent_physical_descr
+        column:
+          name: entPhysicalDescr
+          OID: 1.3.6.1.2.1.47.1.1.1.1.2
+      - tag: ent_physical_class
+        column:
+          name: entPhysicalClass
+          OID: 1.3.6.1.2.1.47.1.1.1.1.5
+        mapping:
+          1: other
+          2: unknown
+          3: chassis
+          4: backplane
+          5: container
+          6: power_supply
+          7: fan
+          8: sensor
+          9: module
+          10: port
+          11: stack
+          12: cpu
+      - tag: ent_physical_name
+        column:
+          name: entPhysicalName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+      - tag: ent_physical_serial_num
+        column:
+          name: entPhysicalSerialNum
+          OID: 1.3.6.1.2.1.47.1.1.1.1.11
+      - tag: ent_physical_model_name
+        column:
+          name: entPhysicalModelName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.13
+  - MIB: CISCO-ENTITY-SENSOR-MIB
+    table:
+      name: entSensorValueTable
+      OID: 1.3.6.1.4.1.9.9.91.1.1.1
+    symbols:
+      - name: entSensorValue
+        OID: 1.3.6.1.4.1.9.9.91.1.1.1.1.4
+    metric_tags:
+      - tag: ent_sensor_type
+        column:
+          OID: 1.3.6.1.4.1.9.9.91.1.1.1.1.1
+          name: entSensorType
+        mapping:
+          1: other
+          2: unknown
+          3: volts_ac
+          4: volts_dc
+          5: amperes
+          6: watts
+          7: hertz
+          8: celsius
+          9: percent_rh
+          10: rpm
+          11: cmm
+          12: truthvalue
+          13: special_enum
+          14: d_bm
+          15: d_b
+      - tag: ent_sensor_scale
+        column:
+          OID: 1.3.6.1.4.1.9.9.91.1.1.1.1.2
+          name: entSensorScale
+        mapping:
+          1: yocto
+          2: zepto
+          3: atto
+          4: femto
+          5: pico
+          6: zetta
+          7: micro
+          8: milli
+          9: units
+          10: kilo
+          11: mega
+          12: giga
+          13: tera
+          14: exa
+          15: peta
+          17: yotta
+      - tag: ent_sensor_precision
+        column:
+          OID: 1.3.6.1.4.1.9.9.91.1.1.1.1.3
+          name: entSensorPrecision
+      - tag: ent_physical_descr
+        column:
+          name: entPhysicalDescr
+          OID: 1.3.6.1.2.1.47.1.1.1.1.2
+      - tag: ent_physical_class
+        column:
+          name: entPhysicalClass
+          OID: 1.3.6.1.2.1.47.1.1.1.1.5
+        mapping:
+          1: other
+          2: unknown
+          3: chassis
+          4: backplane
+          5: container
+          6: power_supply
+          7: fan
+          8: sensor
+          9: module
+          10: port
+          11: stack
+          12: cpu
+      - tag: ent_physical_name
+        column:
+          name: entPhysicalName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+      - tag: ent_physical_serial_num
+        column:
+          name: entPhysicalSerialNum
+          OID: 1.3.6.1.2.1.47.1.1.1.1.11
+      - tag: ent_physical_model_name
+        column:
+          name: entPhysicalModelName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.13
+      - column:
+          OID: 1.3.6.1.4.1.9.9.91.1.1.1.1.5
+          name: entSensorStatus
+        tag: ent_sensor_status
+        mapping:
+          1: ok
+          2: unavailable
+          3: nonoperational
+  - MIB: CISCO-ENVMON-MIB
+    table:
+      name: ciscoEnvMonVoltageStatusTable
+      OID: 1.3.6.1.4.1.9.9.13.1.2
+    symbols:
+      - name: ciscoEnvMonVoltageStatusValue
+        OID: 1.3.6.1.4.1.9.9.13.1.2.1.3
+        tag: voltage_value
+        TODO_tag: Handle unknown tag `voltage_value` (remove this field once fixed)
+    metric_tags:
+      - tag: cisco_env_mon_voltage_status_descr
+        column:
+          name: ciscoEnvMonVoltageStatusDescr
+          OID: 1.3.6.1.4.1.9.9.13.1.2.1.2
+      - tag: ent_physical_descr
+        column:
+          name: entPhysicalDescr
+          OID: 1.3.6.1.2.1.47.1.1.1.1.2
+      - tag: ent_physical_class
+        column:
+          name: entPhysicalClass
+          OID: 1.3.6.1.2.1.47.1.1.1.1.5
+        mapping:
+          1: other
+          2: unknown
+          3: chassis
+          4: backplane
+          5: container
+          6: power_supply
+          7: fan
+          8: sensor
+          9: module
+          10: port
+          11: stack
+          12: cpu
+      - tag: ent_physical_name
+        column:
+          name: entPhysicalName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+      - tag: ent_physical_serial_num
+        column:
+          name: entPhysicalSerialNum
+          OID: 1.3.6.1.2.1.47.1.1.1.1.11
+      - tag: ent_physical_model_name
+        column:
+          name: entPhysicalModelName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.13
+      - column:
+          OID: 1.3.6.1.4.1.9.9.13.1.2.1.7
+          name: ciscoEnvMonVoltageState
+        tag: cisco_env_mon_voltage_state
+        mapping:
+          1: normal
+          2: warning
+          3: critical
+          4: shutdown
+          5: not_present
+          6: not_functioning
+  - MIB: CISCO-ENVMON-MIB
+    table:
+      name: ciscoEnvMonTemperatureStatusTable
+      OID: 1.3.6.1.4.1.9.9.13.1.3
+    symbols:
+      - name: ciscoEnvMonTemperatureStatusValue
+        OID: 1.3.6.1.4.1.9.9.13.1.3.1.3
+        tag: temp_value
+        TODO_tag: Handle unknown tag `temp_value` (remove this field once fixed)
+    metric_tags:
+      - tag: cisco_env_mon_temperature_status_descr
+        column:
+          name: ciscoEnvMonTemperatureStatusDescr
+          OID: 1.3.6.1.4.1.9.9.13.1.3.1.2
+      - tag: cisco_env_mon_temperature_threshold
+        column:
+          name: ciscoEnvMonTemperatureThreshold
+          OID: 1.3.6.1.4.1.9.9.13.1.3.1.4
+      - tag: ent_physical_descr
+        column:
+          name: entPhysicalDescr
+          OID: 1.3.6.1.2.1.47.1.1.1.1.2
+      - tag: ent_physical_class
+        column:
+          name: entPhysicalClass
+          OID: 1.3.6.1.2.1.47.1.1.1.1.5
+        mapping:
+          1: other
+          2: unknown
+          3: chassis
+          4: backplane
+          5: container
+          6: power_supply
+          7: fan
+          8: sensor
+          9: module
+          10: port
+          11: stack
+          12: cpu
+      - tag: ent_physical_name
+        column:
+          name: entPhysicalName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+      - tag: ent_physical_serial_num
+        column:
+          name: entPhysicalSerialNum
+          OID: 1.3.6.1.2.1.47.1.1.1.1.11
+      - tag: ent_physical_model_name
+        column:
+          name: entPhysicalModelName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.13
+      - column:
+          OID: 1.3.6.1.4.1.9.9.13.1.3.1.6
+          name: ciscoEnvMonTemperatureState
+        tag: cisco_env_mon_temperature_state
+        mapping:
+          1: normal
+          2: warning
+          3: critical
+          4: shutdown
+          5: not_present
+          6: not_functioning
+  - MIB: CISCO-ENVMON-MIB
+    table:
+      name: ciscoEnvMonFanStatusTable
+      OID: 1.3.6.1.4.1.9.9.13.1.4
+    symbols:
+      - name: ciscoEnvMonFanStatus
+        constant_value_one: true
+    metric_tags:
+      - tag: cisco_env_mon_fan_status_descr
+        column:
+          name: ciscoEnvMonFanStatusDescr
+          OID: 1.3.6.1.4.1.9.9.13.1.4.1.2
+      - tag: ent_physical_descr
+        column:
+          name: entPhysicalDescr
+          OID: 1.3.6.1.2.1.47.1.1.1.1.2
+      - tag: ent_physical_class
+        column:
+          name: entPhysicalClass
+          OID: 1.3.6.1.2.1.47.1.1.1.1.5
+        mapping:
+          1: other
+          2: unknown
+          3: chassis
+          4: backplane
+          5: container
+          6: power_supply
+          7: fan
+          8: sensor
+          9: module
+          10: port
+          11: stack
+          12: cpu
+      - tag: ent_physical_name
+        column:
+          name: entPhysicalName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+      - tag: ent_physical_serial_num
+        column:
+          name: entPhysicalSerialNum
+          OID: 1.3.6.1.2.1.47.1.1.1.1.11
+      - tag: ent_physical_model_name
+        column:
+          name: entPhysicalModelName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.13
+      - column:
+          OID: 1.3.6.1.4.1.9.9.13.1.4.1.3
+          name: ciscoEnvMonFanState
+        tag: cisco_env_mon_fan_state
+        mapping:
+          1: normal
+          2: warning
+          3: critical
+          4: shutdown
+          5: not_present
+          6: not_functioning
+  - MIB: CISCO-ENVMON-MIB
+    table:
+      name: ciscoEnvMonSupplyStatusTable
+      OID: 1.3.6.1.4.1.9.9.13.1.5
+    symbols:
+      - name: ciscoEnvMonSupplyStatus
+        constant_value_one: true
+    metric_tags:
+      - tag: cisco_env_mon_supply_status_descr
+        column:
+          name: ciscoEnvMonSupplyStatusDescr
+          OID: 1.3.6.1.4.1.9.9.13.1.5.1.2
+      - tag: cisco_env_mon_supply_source
+        column:
+          name: ciscoEnvMonSupplySource
+          OID: 1.3.6.1.4.1.9.9.13.1.5.1.4
+        mapping:
+          1: unknown
+          2: ac
+          3: dc
+          4: external_power_supply
+          5: internal_redundant
+      - tag: ent_physical_descr
+        column:
+          name: entPhysicalDescr
+          OID: 1.3.6.1.2.1.47.1.1.1.1.2
+      - tag: ent_physical_class
+        column:
+          name: entPhysicalClass
+          OID: 1.3.6.1.2.1.47.1.1.1.1.5
+        mapping:
+          1: other
+          2: unknown
+          3: chassis
+          4: backplane
+          5: container
+          6: power_supply
+          7: fan
+          8: sensor
+          9: module
+          10: port
+          11: stack
+          12: cpu
+      - tag: ent_physical_name
+        column:
+          name: entPhysicalName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+      - tag: ent_physical_serial_num
+        column:
+          name: entPhysicalSerialNum
+          OID: 1.3.6.1.2.1.47.1.1.1.1.11
+      - tag: ent_physical_model_name
+        column:
+          name: entPhysicalModelName
+          OID: 1.3.6.1.2.1.47.1.1.1.1.13
+      - column:
+          OID: 1.3.6.1.4.1.9.9.13.1.5.1.3
+          name: ciscoEnvMonSupplyState
+        tag: cisco_env_mon_supply_state
+        mapping:
+          1: normal
+          2: warning
+          3: critical
+          4: shutdown
+          5: not_present
+          6: not_functioning
