@@ -1,0 +1,24 @@
+[
+  {
+    "modelName": "linear_regression_2_2",
+    "modelVersion": "1",
+    "modelUrl": "linear_regression_2_2.mar",
+    "runtime": "python",
+    "minWorkers": 1,
+    "maxWorkers": 1,
+    "batchSize": 1,
+    "maxBatchDelay": 100,
+    "loadedAtStartup": true,
+    "workers": [
+      {
+        "id": "9004",
+        "startTime": "2023-06-13T08:44:34.770Z",
+        "status": "READY",
+        "memoryUsage": 417554432,
+        "pid": 77,
+        "gpu": false,
+        "gpuUsage": "N/A"
+      }
+    ]
+  }
+]
