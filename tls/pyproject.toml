@@ -35,7 +35,6 @@ dependencies = [
 dynamic = [
     "version",
 ]
-
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
@@ -43,7 +42,8 @@ deps = [
     "cryptography==3.3.2; python_version < '3.0'",
     "cryptography==39.0.1; python_version > '3.0'",
     "ipaddress==1.0.23; python_version < '3.0'",
-    "service-identity[idna]==21.1.0",
+    "service-identity[idna]==21.1.0; python_version < '3.0'",
+    "service-identity[idna]==23.1.0; python_version > '3.0'",
 ]
 
 [project.urls]
