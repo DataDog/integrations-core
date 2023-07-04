@@ -13,7 +13,7 @@ This integration forwards logs to Datadog using Azure with Event Hubs. Configure
 
 ### Configuration
 
-1. Set up the log forwarding pipeline from Azure to Datadog using Event Hubs by following the [log collection documentation][2].
+1. Set up the log forwarding pipeline from Azure to Datadog using Event Hubs by following the [Send Azure Logs to Datadog][2] guide.
 
 2. In Azure portal, select _Azure Active Directory > Monitoring > Audit logs_.
    
@@ -61,6 +61,6 @@ Azure Active Directory does not include any metrics.
 Need help? Contact [Datadog support][4].
 
 [1]: https://docs.microsoft.com/en-us/azure/active-directory/reports-monitoring/overview-reports#activity-reports
-[2]: https://docs.datadoghq.com/integrations/azure/?tab=eventhub#log-collection
+[2]: https://docs.datadoghq.com/logs/guide/azure-logging-guide/
 [3]: https://docs.microsoft.com/en-us/azure/active-directory/reports-monitoring/tutorial-azure-monitor-stream-logs-to-event-hub
 [4]: https://docs.datadoghq.com/help

@@ -1,0 +1,68 @@
+[
+  {
+    "modelName": "linear_regression_1_2",
+    "modelVersion": "1",
+    "modelUrl": "linear_regression_1_2_v1.mar",
+    "runtime": "python",
+    "minWorkers": 1,
+    "maxWorkers": 1,
+    "batchSize": 1,
+    "maxBatchDelay": 100,
+    "loadedAtStartup": true,
+    "workers": [
+      {
+        "id": "9001",
+        "startTime": "2023-06-13T08:44:34.555Z",
+        "status": "unknown_value",
+        "memoryUsage": 417181696,
+        "pid": 50,
+        "gpu": false,
+        "gpuUsage": "N/A"
+      }
+    ]
+  },
+  {
+    "modelName": "linear_regression_1_2",
+    "modelVersion": "2",
+    "modelUrl": "linear_regression_1_2_v2.mar",
+    "runtime": "python",
+    "minWorkers": 1,
+    "maxWorkers": 1,
+    "batchSize": 1,
+    "maxBatchDelay": 100,
+    "loadedAtStartup": true,
+    "workers": [
+      {
+        "id": "9002",
+        "startTime": "2023-06-13T08:44:34.609Z",
+        "status": "READY",
+        "memoryUsage": 413630464,
+        "pid": 56,
+        "gpu": false,
+        "gpuUsage": "N/A"
+      }
+    ]
+  },
+  {
+    "modelName": "linear_regression_1_2",
+    "modelVersion": "3",
+    "modelUrl": "linear_regression_1_2_v3.mar",
+    "runtime": "python",
+    "minWorkers": 1,
+    "maxWorkers": 1,
+    "batchSize": 1,
+    "maxBatchDelay": 100,
+    "loadedAtStartup": true,
+    "workers": [
+      {
+        "id": "9003",
+        "startTime": "2023-06-13T08:44:34.677Z",
+        "status": "READY",
+        "memoryUsage": 416645120,
+        "pid": 66,
+        "gpu": false,
+        "gpuUsage": "N/A"
+      }
+    ]
+  }
+]
