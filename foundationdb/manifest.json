@@ -52,6 +52,9 @@
       "FoundationDB Processes and Utilization": "assets/dashboards/foundationdb_processes_and_utilization.json",
       "FoundationDB Transactions and Queues": "assets/dashboards/foundationdb_transactions_and_queues.json"
     },
+    "logs": {
+      "source": "foundationdb"
+    },
     "monitors": {
       "FoundationDB Status Check": "assets/monitors/service_check.json",
       "FoundationDB Errors Logged": "assets/monitors/errors_logged.json",

@@ -272,7 +272,7 @@ You can use the [`query` option][20] to filter events with an [XPATH or structur
 <!-- xxz tab xxx -->
 <!-- xxx tab "Logs" xxx -->
 
-You can use the `query`, as well as the `log_processing_rules` regex option, to filter event logs. The `query` option has better filtering performance than the `log_processing_rules` filters. When using the `log_processing_rules` filters, the Agent must process and format each event before applying the regex filter, so it takes more processing, and is less performant.
+You can use the `query`, as well as the `log_processing_rules` regex option, to filter event logs. Datadog recommends using the `query` option which is faster at high rates of Windows Event Log generation and requires less CPU and memory than the `log_processing_rules` filters. When using the `log_processing_rules` filters, the Agent is forced to process and format each event, even if it will be excluded by `log_processing_rules` regex. With the `query` option, these events are not reported to the Agent.
 
 You can use the `query` option to filter events with an [XPATH or structured XML query][21]. The `query` option can reduce the number of events that are processed by `log_processing_rules` and improve performance. There is an expression limit on the syntax of XPath and XML queries. For additional filtering, use `log_processing_rules` filters.
 
