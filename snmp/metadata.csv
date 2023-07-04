@@ -1186,5 +1186,7 @@ snmp.wlsxNumOfUsersCP,gauge,,,,"[WLSX-USER-MIB] Number of Captive Portal users."
 snmp.wlsxNumOfUsersMAC,gauge,,,,"[WLSX-USER-MIB] Number of MAC users.",0,snmp,,
 snmp.wlsxNumOfUsersStateful8021x,gauge,,,,"[WLSX-USER-MIB] Number of stateful 802.1x users.",0,snmp,,
 snmp.wlsxNumOfUsersVPN,gauge,,,,"[WLSX-USER-MIB] Number of VPN users.",0,snmp,,
+snmp.wlsxSwitchTotalNumAccessPoints,gauge,,,,"[WLSX-SWITCH-MIB] Total Number of Access Points Connected to this switch.",0,snmp,,
+snmp.wlsxSwitchTotalNumStationsAssociated,gauge,,,,"[WLSX-SWITCH-MIB] Total Number of Stations Associated to this switch.",0,snmp,,
 snmp.wlsxSysExtPacketLossPercent,gauge,,,,[Aruba] The packet loss count of the switch.,0,snmp,,
 
