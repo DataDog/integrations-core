@@ -42,8 +42,11 @@
         "torchserve"
       ]
     },
+    "monitors": {
+      "error_ratio": "assets/monitors/error_ratio.json"
+    },
     "logs": {
-      "source": "impala"
+      "source": "torchserve"
     }
   },
   "author": {
