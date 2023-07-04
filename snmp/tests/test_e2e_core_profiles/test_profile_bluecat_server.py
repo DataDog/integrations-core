@@ -64,11 +64,13 @@ def test_e2e_profile_bluecat_server(dd_agent_check):
 
     tag_rows = [
         [
+            'bcn_dhcpv4_pool_start_ip:70.175.239.238',
             'bcn_dhcpv4_pool_end_ip:138.41.248.20',
             'bcn_dhcpv4_pool_size:55389',
             'bcn_dhcpv4_pool_subnet_ip:115.187.187.225',
         ],
         [
+            'bcn_dhcpv4_pool_start_ip:186.152.75.142',
             'bcn_dhcpv4_pool_end_ip:58.239.195.226',
             'bcn_dhcpv4_pool_size:59812',
             'bcn_dhcpv4_pool_subnet_ip:16.140.203.163',
