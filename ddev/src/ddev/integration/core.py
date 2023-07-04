@@ -59,6 +59,14 @@ class Integration:
 
             return self.path / 'datadog_checks' / directory
 
+    @property
+    def release_tag_pattern(self) -> str:
+        version_part = r'\d+\.\d+\.\d+'
+        if self.name == 'ddev':
+            version_part = f'v{version_part}'
+
+        return f'{self.name}-{version_part}'
+
     @cached_property
     def manifest(self) -> Manifest:
         from ddev.integration.manifest import Manifest
