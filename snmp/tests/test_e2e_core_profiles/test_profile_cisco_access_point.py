@@ -10,8 +10,9 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
+    assert_extend_cisco,
     create_e2e_core_test_config,
-    get_device_ip_from_config, assert_extend_cisco,
+    get_device_ip_from_config,
 )
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
@@ -36,27 +37,39 @@ def test_e2e_profile_cisco_access_point(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     tag_rows = [
-         ['TODO'],
-
+        ['if_name:eth0'],
+        ['if_name:eth1'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cDot11ActiveBridges', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.cDot11ActiveRepeaters', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cDot11ActiveWirelessClients', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.cDot11ActiveWirelessClients', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
-         ['TODO'],
-
+        ['if_name:eth11'],
+        ['if_name:eth12'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cDot11AssStatsAssociated', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cDot11AssStatsAuthenticated', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cDot11AssStatsDeauthenticated', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cDot11AssStatsDisassociated', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cDot11AssStatsRoamedAway', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cDot11AssStatsRoamedIn', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-
-
+        aggregator.assert_metric(
+            'snmp.cDot11AssStatsAssociated', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cDot11AssStatsAuthenticated', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cDot11AssStatsDeauthenticated', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cDot11AssStatsDisassociated', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cDot11AssStatsRoamedAway', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cDot11AssStatsRoamedIn', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+        )
 
     # --- TEST METADATA ---
     device = {
