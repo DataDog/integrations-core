@@ -74,6 +74,25 @@ The Boundary integration does not include any events.
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
+### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `boundary.d/conf.yaml` file to start collecting your Boundary logs:
+
+    ```yaml
+    logs:
+       - type: file
+         source: boundary
+         path: /var/log/boundary/events.ndjson
+    ```
+
+    Change the `path` parameter value based on your environment. See the [sample boundary.d/conf.yaml][4] for all available configuration options.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
