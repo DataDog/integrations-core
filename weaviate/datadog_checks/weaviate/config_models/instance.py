@@ -114,7 +114,7 @@ class InstanceConfig(BaseModel):
     namespace: Optional[str] = Field(None, regex='\\w*')
     non_cumulative_histogram_buckets: Optional[bool]
     ntlm_domain: Optional[str]
-    openmetrics_endpoint: Optional[str]
+    openmetrics_endpoint: str
     password: Optional[str]
     persist_connections: Optional[bool]
     proxy: Optional[Proxy]
@@ -141,8 +141,7 @@ class InstanceConfig(BaseModel):
     use_legacy_auth_encoding: Optional[bool]
     use_process_start_time: Optional[bool]
     username: Optional[str]
-    weaviate_api: Optional[str]
-    weaviate_metrics_endpoint: Optional[str]
+    weaviate_api_endpoint: Optional[str]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):
