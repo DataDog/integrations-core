@@ -113,7 +113,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
         except Exception as e:
             self.log.debug("Error occurred during node metrics submission: %s", e)
 
-    def check(self, _):
+    def check(self, instance):
         try:
             if self.instance.get("weaviate_api_endpoint"):
                 self._submit_liveness_metrics()
@@ -123,6 +123,6 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
             self.log.error("Error while collecting Weaviate metrics from API: %s", e)
         try:
             if self.instance.get("openmetrics_endpoint"):
-                super().check(_)
+                super().check(instance)
         except Exception as e:
             self.log.error("Error while collecting Weaviate metrics from OpenMetrics endpoint: %s", e)
