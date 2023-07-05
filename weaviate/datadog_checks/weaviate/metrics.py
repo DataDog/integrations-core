@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/
+# https://weaviate.io/developers/weaviate/configuration/monitoring
 METRICS = {
     # General metrics
     'go_gc_duration_seconds': 'go.gc.duration.seconds',
