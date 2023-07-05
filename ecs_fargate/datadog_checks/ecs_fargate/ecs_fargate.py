@@ -3,6 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
+import os
+
 import requests
 from dateutil import parser
 from six import iteritems
@@ -37,10 +39,17 @@ except ImportError:
 
 # Fargate related constants
 EVENT_TYPE = SOURCE_TYPE_NAME = 'ecs.fargate'
-API_ENDPOINT = 'http://169.254.170.2/v2'
-METADATA_ROUTE = '/metadata'
-STATS_ROUTE = '/stats'
 DEFAULT_TIMEOUT = 5
+
+# Fargate ECS Endpoint v2
+API_ENDPOINT_V2 = 'http://169.254.170.2/v2'
+METADATA_ROUTE_V2 = '/metadata'
+STATS_ROUTE_V2 = '/stats'
+
+# Fargate ECS Endpoint v4
+API_ENDPOINT_V4_ENV_VAR = 'ECS_CONTAINER_METADATA_URI_V4'
+METADATA_ROUTE_V4 = '/task'
+STATS_ROUTE_V4 = '/task/stats'
 
 # Default value is maxed out for some cgroup metrics
 CGROUP_NO_VALUE = 0x7FFFFFFFFFFFF000
@@ -67,14 +76,36 @@ NETWORK_GAUGE_METRICS = {
 NETWORK_RATE_METRICS = {'rx_bytes': 'ecs.fargate.net.bytes_rcvd', 'tx_bytes': 'ecs.fargate.net.bytes_sent'}
 TASK_TAGGER_ENTITY_ID = "internal://global-entity-id"
 
+EPHEMERAL_STORAGE_GAUGE_METRICS = {
+    'Utilized': 'ecs.fargate.ephemeral_storage.utilized',
+    'Reserved': 'ecs.fargate.ephemeral_storage.reserved',
+}
+
 
 class FargateCheck(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'timeout': {'name': 'timeout', 'default': DEFAULT_TIMEOUT}}
 
+    def __init__(self, name, init_config, instances):
+        # Fargate metadata endpoint https://docs.aws.amazon.com/AmazonECS/latest/userguide/task-metadata-endpoint-v4-fargate.html
+        self.API_ENDPOINT = os.environ.get(API_ENDPOINT_V4_ENV_VAR)
+
+        if self.API_ENDPOINT is None:
+            # If v4 endpoint is not available, fall back to v2
+            self.API_ENDPOINT = API_ENDPOINT_V2
+            self.METADATA_ROUTE = METADATA_ROUTE_V2
+            self.STATS_ROUTE = STATS_ROUTE_V2
+        else:
+            # Otherwise set v4 routes
+            self.METADATA_ROUTE = METADATA_ROUTE_V4
+            self.STATS_ROUTE = STATS_ROUTE_V4
+
+        super(FargateCheck, self).__init__(name, init_config, instances)
+
     def check(self, _):
-        metadata_endpoint = API_ENDPOINT + METADATA_ROUTE
-        stats_endpoint = API_ENDPOINT + STATS_ROUTE
+        metadata_endpoint = self.API_ENDPOINT + self.METADATA_ROUTE
+        stats_endpoint = self.API_ENDPOINT + self.STATS_ROUTE
+
         custom_tags = self.instance.get('tags', [])
 
         try:
@@ -138,18 +169,26 @@ class FargateCheck(AgentCheck):
             if container.get('Limits', {}).get('CPU', 0) > 0:
                 self.gauge('ecs.fargate.cpu.limit', container['Limits']['CPU'], container_tags[c_id])
 
-        # Generating task tags only if we need to push the only task metric
-        if metadata.get('Limits', {}).get('CPU', 0) > 0:
-            task_tags = get_tags(TASK_TAGGER_ENTITY_ID, True) or []
-            # Compatibility with previous versions of the check
-            compat_tags = []
-            for tag in task_tags:
-                if tag.startswith(("task_family:", "task_version:")):
-                    compat_tags.append("ecs_" + tag)
-                elif tag.startswith("cluster_name:"):
-                    compat_tags.append(tag.replace("cluster_name:", "ecs_cluster:"))
-            task_tags = task_tags + compat_tags + custom_tags
+        # Create task tags
+        task_tags = get_tags(TASK_TAGGER_ENTITY_ID, True) or []
+        # Compatibility with previous versions of the check
+        compat_tags = []
+        for tag in task_tags:
+            if tag.startswith(("task_family:", "task_version:")):
+                compat_tags.append("ecs_" + tag)
+            elif tag.startswith("cluster_name:"):
+                compat_tags.append(tag.replace("cluster_name:", "ecs_cluster:"))
 
+        task_tags = task_tags + compat_tags + custom_tags
+
+        ## Ephemeral Storage Metrics
+        if 'EphemeralStorageMetrics' in metadata:
+            es_metrics = metadata['EphemeralStorageMetrics']
+            for field_name, metric_value in iteritems(es_metrics):
+                metric_name = EPHEMERAL_STORAGE_GAUGE_METRICS.get(field_name)
+                self.gauge(metric_name, metric_value, task_tags)
+
+        if metadata.get('Limits', {}).get('CPU', 0) > 0:
             self.gauge('ecs.fargate.cpu.task.limit', metadata['Limits']['CPU'] * 10**9, task_tags)
 
         try:
@@ -298,6 +337,7 @@ class FargateCheck(AgentCheck):
                     blkio_stats = []
 
                 for blkio_stat in blkio_stats:
+
                     if blkio_stat["op"] == "Read" and "value" in blkio_stat:
                         read_counter += blkio_stat["value"]
                     elif blkio_stat["op"] == "Write" and "value" in blkio_stat:
