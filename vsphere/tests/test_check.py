@@ -651,6 +651,7 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         ip_config.ipAddress.append(ip_address)
         net = vim.vm.GuestInfo.NicInfo()
         net.macAddress = '00:61:58:72:53:13'
+        net.connected = True
         net.ipConfig = ip_config
         nets = vim.ArrayOfAnyType()
         nets.append(net)
@@ -689,6 +690,7 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         ip_config3.ipAddress.append(ip_address4)
         net3 = vim.vm.GuestInfo.NicInfo()
         net3.macAddress = None
+        net3.deviceConfigId = 43
         net3.ipConfig = ip_config3
         nets3 = vim.ArrayOfAnyType()
         nets3.append(net3)
@@ -1076,9 +1078,40 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         aggregator.assert_metric(
             'vsphere.vm.guest.toolsVersion',
             count=1,
-            value=11296.0,
+            value=1,
             tags=[
                 'tools_status:guestToolsRunning',
+                'tools_version:11296',
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+            ],
+            hostname='vm1',
+        )
+
+        aggregator.assert_metric(
+            'vsphere.vm.guest.net',
+            count=1,
+            value=1,
+            tags=[
+                'device_id:0',
+                'is_connected:True',
+                'nic_mac_address:00:61:58:72:53:13',
+                'vcenter_server:FAKE',
+                'vsphere_host:unknown',
+                'vsphere_type:vm',
+            ],
+            hostname='vm1',
+        )
+
+        aggregator.assert_metric(
+            'vsphere.vm.guest.net',
+            count=1,
+            value=1,
+            tags=[
+                'device_id:0',
+                'is_connected:True',
+                'nic_mac_address:00:61:58:72:53:13',
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
@@ -1091,6 +1124,8 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
             count=1,
             value=1,
             tags=[
+                'device_id:0',
+                'is_connected:True',
                 'nic_ip_address:fe70::150:46ff:fe47:6311',
                 'nic_mac_address:00:61:58:72:53:13',
                 'vcenter_server:FAKE',
@@ -1198,9 +1233,10 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         aggregator.assert_metric(
             'vsphere.vm.guest.toolsVersion',
             count=1,
-            value=11296.0,
+            value=1,
             tags=[
                 'tools_status:guestToolsRunning',
+                'tools_version:11296',
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
@@ -1213,6 +1249,8 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
             count=1,
             value=1,
             tags=[
+                'device_id:43',
+                'is_connected:False',
                 'nic_ip_address:fe70::150:46ff:fe47:6311',
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',

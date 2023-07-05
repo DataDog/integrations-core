@@ -8,6 +8,7 @@ import logging
 from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
+from copy import deepcopy
 from typing import Any, Callable, Dict, Generator, Iterable, List, Optional, Set, Type, cast  # noqa: F401
 
 from pyVmomi import vim, vmodl
@@ -705,17 +706,23 @@ class VSphereCheck(AgentCheck):
     ):
         # type: (...) -> None
         for nic in nics:
+            device_id = nic.deviceConfigId
+            is_connected = nic.connected
             mac_address = nic.macAddress
+            nic_tags = {'device_id': device_id, 'is_connected': is_connected, 'nic_mac_address': mac_address}
+            self.submit_property_metric('vm.guest.net', 1, self.count, base_tags, hostname, additional_tags=nic_tags)
             ip_addresses = nic.ipConfig.ipAddress
             for ip_address in ip_addresses:
-                nic_tags = {'nic_ip_address': ip_address.ipAddress, 'nic_mac_address': mac_address}
+                ip_tags = deepcopy(nic_tags)
+
+                ip_tags['nic_ip_address'] = ip_address.ipAddress
                 self.submit_property_metric(
                     'vm.guest.net.ipConfig.address',
                     1,
                     self.count,
                     base_tags,
                     hostname,
-                    additional_tags=nic_tags,
+                    additional_tags=ip_tags,
                 )
 
     def submit_ip_stack_property_metrics(
@@ -831,9 +838,9 @@ class VSphereCheck(AgentCheck):
 
             tools_version = all_properties.get('guest.toolsVersion', None)
             tools_status = all_properties.get('guest.toolsRunningStatus', None)
-            tools_tags = {'tools_status': tools_status}
+            tools_tags = {'tools_version': tools_version, 'tools_status': tools_status}
             self.submit_property_metric(
-                'vm.guest.toolsVersion', tools_version, self.gauge, base_tags, hostname, additional_tags=tools_tags
+                'vm.guest.toolsVersion', 1, self.count, base_tags, hostname, additional_tags=tools_tags
             )
 
     def check(self, _):
