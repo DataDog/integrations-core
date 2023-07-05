@@ -56,7 +56,9 @@ See [service_checks.json][7] for a list of service checks provided by this integ
 
 ## Troubleshooting
 
-One has to be careful when running the check against very large directories and recursion is set to true because it could be both I/O and CPU intensive operation. Default check frequency, which is every 15 seconds, may need to be adjusted. For example, if there is a directory with 15,000 files and sub-directories and the check runs 30-40 seconds with high CPU usage, if one does not set up less frequent check frequency the check with high CPU will be running effectively continuously.
+When running the check against very large directories and recursion is set to true, be aware that is an intensive operation on the I/O and CPU. The default check frequency, every 15 seconds, may need to be adjusted. 
+
+For example, if there is a directory with 15,000 files and sub-directories, and the check runs 30-40 seconds with high CPU usage, if you do not set up less frequent check frequency, the check with high CPU runs effectively and continuously.
 
 Need help? Contact [Datadog support][8].
 
