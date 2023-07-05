@@ -1,5 +1,19 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 22.0.0 / 2023-07-05
+
+***Changed***:
+
+* Move CLI plugins to ddev. See [#15166](https://github.com/DataDog/integrations-core/pull/15166).
+
+***Added***:
+
+* Add step unit to metadata check. See [#14862](https://github.com/DataDog/integrations-core/pull/14862).
+
+***Fixed***:
+
+* Update a log message to mention `hatch` instead of `tox`. See [#15037](https://github.com/DataDog/integrations-core/pull/15037).
+
 ## 21.0.0 / 2023-06-22
 
 ***Removed***:
