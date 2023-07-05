@@ -1,7 +1,6 @@
 extends:
   - _base.yaml
   - _generic-if.yaml
-  - cisco.yaml
 sysobjectid:
   - 1.3.6.1.4.1.15497.1.*    # IronPort Email Security Appliance
   - 1.3.6.1.4.1.15497.1.2    # IronPort S300V
