@@ -29,10 +29,10 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
         'device_namespace:default',
         'snmp_device:' + ip_address,
     ] + [
-        'ironport.cache_admin:forward Jaded Jaded oxen',
-        'ironport.cache_software:but driving Jaded but kept but Jaded',
-        'ironport.cache_version:acted driving their oxen kept forward',
-        'ironport.license_expiration:5',
+        'ironport_cache_admin:forward Jaded Jaded oxen',
+        'ironport_cache_software:but driving Jaded but kept but Jaded',
+        'ironport_cache_version:acted driving their oxen kept forward',
+        'ironport_license_expiration:5',
     ]
 
     # --- TEST EXTENDED METRICS ---
@@ -92,22 +92,22 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         [
-            'ironport.power_supply_name:kept',
-            'ironport.power_supply_redundancy:power_supply_redundancy_lost',
-            'ironport.power_supply_status:power_supply_not_installed',
+            'ironport_power_supply_name:kept',
+            'ironport_power_supply_redundancy:power_supply_redundancy_lost',
+            'ironport_power_supply_status:power_supply_not_installed',
         ],
         [
-            'ironport.power_supply_name:oxen their oxen oxen zombies driving quaintly their',
-            'ironport.power_supply_redundancy:power_supply_redundancy_ok',
-            'ironport.power_supply_status:power_supply_no_ac',
+            'ironport_power_supply_name:oxen their oxen oxen zombies driving quaintly their',
+            'ironport_power_supply_redundancy:power_supply_redundancy_ok',
+            'ironport_power_supply_status:power_supply_no_ac',
         ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ironport.powerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['ironport.temperature_name:kept'],
-        ['ironport.temperature_name:oxen kept oxen'],
+        ['ironport_temperature_name:kept'],
+        ['ironport_temperature_name:oxen kept oxen'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -115,15 +115,15 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
         )
 
     tag_rows = [
-        ['ironport.fan_name:driving Jaded Jaded quaintly quaintly forward Jaded driving'],
-        ['ironport.fan_name:zombies kept quaintly quaintly kept Jaded zombies but Jaded'],
+        ['ironport_fan_name:driving Jaded Jaded quaintly quaintly forward Jaded driving'],
+        ['ironport_fan_name:zombies kept quaintly quaintly kept Jaded zombies but Jaded'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ironport.fanRPMs', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['ironport.key_description:their kept driving but kept driving kept oxen', 'ironport.key_is_perpetual:true'],
-        ['ironport.key_description:zombies oxen', 'ironport.key_is_perpetual:false'],
+        ['ironport_key_description:their kept driving but kept driving kept oxen', 'ironport_key_is_perpetual:true'],
+        ['ironport_key_description:zombies oxen', 'ironport_key_is_perpetual:false'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -131,8 +131,8 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
         )
 
     tag_rows = [
-        ['ironport.update_service_name:acted'],
-        ['ironport.update_service_name:their acted but'],
+        ['ironport_update_service_name:acted'],
+        ['ironport_update_service_name:their acted but'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -142,14 +142,14 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
 
     tag_rows = [
         [
-            'ironport.raid_id:but Jaded',
-            'ironport.raid_last_error:their their oxen but Jaded their driving kept',
-            'ironport.raid_status:drive_failure',
+            'ironport_raid_id:but Jaded',
+            'ironport_raid_last_error:their their oxen but Jaded their driving kept',
+            'ironport_raid_status:drive_failure',
         ],
         [
-            'ironport.raid_id:zombies zombies their Jaded oxen',
-            'ironport.raid_last_error:but quaintly their',
-            'ironport.raid_status:drive_healthy',
+            'ironport_raid_id:zombies zombies their Jaded oxen',
+            'ironport_raid_last_error:but quaintly their',
+            'ironport_raid_status:drive_healthy',
         ],
     ]
     for tag_row in tag_rows:
