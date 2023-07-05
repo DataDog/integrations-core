@@ -5,7 +5,7 @@
 from typing import Any, Dict, List, Optional, Pattern, Type, TypedDict
 
 # CONFIG ALIASES
-from pyVmomi import vim
+from pyVmomi import VmomiSupport, vim
 
 ResourceFilterConfig = TypedDict(
     'ResourceFilterConfig', {'resource': str, 'property': str, 'type': str, 'patterns': List[str]}
@@ -95,3 +95,5 @@ TagAssociation = TypedDict('TagAssociation', {'object_id': Dict[str, str], 'tag_
 MetricFilters = Dict[str, List[Pattern]]
 
 MorBatch = Dict[vim.ManagedEntity, List[vim.PerformanceManager.MetricId]]
+
+VmomiObject = VmomiSupport.Object

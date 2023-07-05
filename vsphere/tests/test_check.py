@@ -996,15 +996,16 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         dd_run_check(check)
         aggregator.assert_metric(
             'vsphere.vm.count',
-            value=1,
-            count=1,
+            value=2,
+            count=2,
             tags=[
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
         )
+
+        # VM 1
         aggregator.assert_metric(
             'vsphere.vm.uptime',
             count=1,
@@ -1013,7 +1014,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
             hostname='vm1',
         )
@@ -1025,7 +1025,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
             hostname='vm1',
         )
@@ -1037,7 +1036,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
             hostname='vm1',
         )
@@ -1050,7 +1048,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
             hostname='vm1',
         )
@@ -1062,7 +1059,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
             hostname='vm1',
         )
@@ -1074,7 +1070,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
             hostname='vm1',
         )
@@ -1087,13 +1082,12 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
             hostname='vm1',
         )
 
         aggregator.assert_metric(
-            'vsphere.vm.guest.nic.ipConfig.address',
+            'vsphere.vm.guest.net.ipConfig.address',
             count=1,
             value=1,
             tags=[
@@ -1102,7 +1096,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
             hostname='vm1',
         )
@@ -1120,7 +1113,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
             hostname='vm1',
         )
@@ -1135,7 +1127,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
             hostname='vm1',
         )
@@ -1150,22 +1141,8 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 11 (32-bit)',
             ],
             hostname='vm1',
-        )
-
-        # VM 3
-        aggregator.assert_metric(
-            'vsphere.vm.count',
-            value=1,
-            count=0,
-            tags=[
-                'vcenter_server:FAKE',
-                'vsphere_host:unknown',
-                'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 12 (32-bit)',
-            ],
         )
         aggregator.assert_metric(
             'vsphere.vm.numCpu',
@@ -1176,7 +1153,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 12 (32-bit)',
             ],
         )
 
@@ -1188,7 +1164,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 12 (32-bit)',
             ],
             hostname='vm3',
         )
@@ -1201,7 +1176,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 12 (32-bit)',
             ],
             hostname='vm3',
         )
@@ -1218,7 +1192,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 12 (32-bit)',
             ],
             hostname='vm3',
         )
@@ -1231,22 +1204,19 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 12 (32-bit)',
             ],
             hostname='vm3',
         )
 
         aggregator.assert_metric(
-            'vsphere.vm.guest.nic.ipConfig.address',
+            'vsphere.vm.guest.net.ipConfig.address',
             count=1,
             value=1,
             tags=[
                 'nic_ip_address:fe70::150:46ff:fe47:6311',
-                'nic_mac_address:None',
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 12 (32-bit)',
             ],
             hostname='vm3',
         )
@@ -1263,7 +1233,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
                 'vcenter_server:FAKE',
                 'vsphere_host:unknown',
                 'vsphere_type:vm',
-                'vsphere_full_name:Debian GNU/Linux 12 (32-bit)',
             ],
             hostname='vm3',
         )
@@ -1279,3 +1248,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
             count=0,
             hostname='vm3',
         )
+        # assert we still get VM performance counter metrics
+        aggregator.assert_metric('vsphere.cpu.costop.sum', count=1, hostname='vm1')
+        aggregator.assert_metric('vsphere.cpu.costop.sum', count=1, hostname='vm3')
