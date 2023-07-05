@@ -37,60 +37,63 @@ def test_e2e_profile_cisco_firepower(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     tag_rows = [
-         ['cpu:34881'],
-         ['cpu:7541'],
-
+        ['cpu:34881'],
+        ['cpu:7541'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['mem:11603'],
-         ['mem:14559'],
-         ['mem:20786'],
-         ['mem:21724'],
-         ['mem:41868'],
-         ['mem:47424'],
-
+        ['mem:11603'],
+        ['mem:14559'],
+        ['mem:20786'],
+        ['mem:21724'],
+        ['mem:41868'],
+        ['mem:47424'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['cfpr_sm_monitor_dn:Jaded oxen'],
-         ['cfpr_sm_monitor_dn:but Jaded kept zombies but but Jaded'],
-         ['cfpr_sm_monitor_dn:forward'],
-         ['cfpr_sm_monitor_dn:their forward their driving oxen'],
-         ['cfpr_sm_monitor_dn:their oxen quaintly Jaded oxen their acted kept driving'],
-         ['cfpr_sm_monitor_dn:their zombies oxen oxen'],
-
+        ['cfpr_sm_monitor_dn:Jaded oxen'],
+        ['cfpr_sm_monitor_dn:but Jaded kept zombies but but Jaded'],
+        ['cfpr_sm_monitor_dn:forward'],
+        ['cfpr_sm_monitor_dn:their forward their driving oxen'],
+        ['cfpr_sm_monitor_dn:their oxen quaintly Jaded oxen their acted kept driving'],
+        ['cfpr_sm_monitor_dn:their zombies oxen oxen'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cfprSmMonitorDataDiskAvailable', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cfprSmMonitorDataDiskTotal', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.cfprSmMonitorDataDiskAvailable', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cfprSmMonitorDataDiskTotal', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
-         ['cfpr_equipment_fan_dn:driving forward but Jaded zombies', 'cfpr_equipment_fan_oper_state:operable'],
-         ['cfpr_equipment_fan_dn:forward kept quaintly Jaded zombies driving acted kept driving', 'cfpr_equipment_fan_oper_state:accessibility_problem'],
-         ['cfpr_equipment_fan_dn:kept driving', 'cfpr_equipment_fan_oper_state:thermal_problem'],
-         ['cfpr_equipment_fan_dn:their but driving but', 'cfpr_equipment_fan_oper_state:operable'],
-
+        ['cfpr_equipment_fan_dn:driving forward but Jaded zombies', 'cfpr_equipment_fan_oper_state:operable'],
+        [
+            'cfpr_equipment_fan_dn:forward kept quaintly Jaded zombies driving acted kept driving',
+            'cfpr_equipment_fan_oper_state:accessibility_problem',
+        ],
+        ['cfpr_equipment_fan_dn:kept driving', 'cfpr_equipment_fan_oper_state:thermal_problem'],
+        ['cfpr_equipment_fan_dn:their but driving but', 'cfpr_equipment_fan_oper_state:operable'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cfprEquipmentFan', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['cfpr_equipment_psu_dn:driving zombies their acted', 'cfpr_equipment_psu_power:ok'],
-         ['cfpr_equipment_psu_dn:forward driving quaintly zombies their acted kept but forward', 'cfpr_equipment_psu_power:offduty'],
-         ['cfpr_equipment_psu_dn:forward forward', 'cfpr_equipment_psu_power:oir_failed'],
-         ['cfpr_equipment_psu_dn:zombies acted zombies', 'cfpr_equipment_psu_power:ok'],
-
+        ['cfpr_equipment_psu_dn:driving zombies their acted', 'cfpr_equipment_psu_power:ok'],
+        [
+            'cfpr_equipment_psu_dn:forward driving quaintly zombies their acted kept but forward',
+            'cfpr_equipment_psu_power:offduty',
+        ],
+        ['cfpr_equipment_psu_dn:forward forward', 'cfpr_equipment_psu_power:oir_failed'],
+        ['cfpr_equipment_psu_dn:zombies acted zombies', 'cfpr_equipment_psu_power:ok'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cfprEquipmentPsu', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-
 
     # --- TEST METADATA ---
     device = {
