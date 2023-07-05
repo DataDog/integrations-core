@@ -43,8 +43,8 @@ def test_e2e_profile_extreme_switching(dd_agent_check):
     aggregator.assert_metric('snmp.extremeInputPowerVoltage', metric_type=aggregator.GAUGE, tags=common_tags)
 
     tag_rows = [
-        ['extreme_memory_monitor_system_slot_id:12719'],
-        ['extreme_memory_monitor_system_slot_id:63847'],
+        ['mem:12719'],
+        ['mem:63847'],
 
     ]
     for tag_row in tag_rows:
