@@ -827,6 +827,7 @@ snmp.ltmVirtualServStatTotRequests,count,,,,[F5 BIG-IP] The total number of requ
 snmp.ltmVirtualServStatVsUsageRatio1m,gauge,,,,[F5 BIG-IP] The percentage of time a given virtual server was busy over the last minute.,0,snmp,,
 snmp.ltmVirtualServStatVsUsageRatio5m,gauge,,,,[F5 BIG-IP] The percentage of time a given virtual server was busy over the last 5 minutes.,0,snmp,,
 snmp.ltmVirtualServStatVsUsageRatio5s,gauge,,,,[F5 BIG-IP] The percentage of time a given virtual server was busy over the last 5 seconds.,0,snmp,,
+snmp.ltmVsStatus,gauge,,,,[F5 BIG-IP] Stores status information of virtual servers.,0,snmp,,
 snmp.memActiveReal64,gauge,,byte,,[Checkpoint Firewall] Active real memory (memory used by applications that is not cached to the disk) in bytes.,0,snmp,,
 snmp.memActiveVirtual64,gauge,,byte,,[Checkpoint Firewall] The size in bytes of the virtual-memory working segment pages that have actually been touched.,0,snmp,,
 snmp.memAvailSwap,gauge,,,,"[UCD-SNMP-MIB] The amount of swap space currently unused or available.",0,snmp,,
