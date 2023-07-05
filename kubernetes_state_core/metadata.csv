@@ -130,3 +130,4 @@ kubernetes_state.service.count,gauge,,,,Number of services. Tags:`kube_namespace
 kubernetes_state.service.type,gauge,,,,Service types. Tags:`kube_namespace` `kube_service` `type`.,0,kubernetes_state_core,k8s_state.svc.type,
 kubernetes_state.ingress.count,gauge,,,,Number of ingresses. Tags:`kube_namespace`.,0,kubernetes_state_core,k8s_state.ingress.count,
 kubernetes_state.ingress.path,gauge,,,,Information about the ingress path. Tags:`kube_namespace` `kube_ingress_path` `kube_ingress` `kube_service` `kube_service_port` `kube_ingress_host` .,0,kubernetes_state_core,k8s_state.ingress.path,
+kubernetes_state.crd.count,gauge,,,,Number of crds. Tags:`kube_namespace`.,0,kubernetes_state_core,k8s_state.crd.count,
