@@ -31,11 +31,7 @@ def test_e2e_profile_cisco_firepower(dd_agent_check):
     ] + []
 
     # --- TEST EXTENDED METRICS ---
-    # Examples:
-    # assert_extend_generic_if(aggregator, common_tags)
-    # assert_extend_generic_ip(aggregator, common_tags)
-    # assert_extend_generic_tcp(aggregator, common_tags)
-    # TODO: Update extended metrics section as needed, if any. (Remove this TODO note once done.)
+    assert_extend_generic_if(aggregator, common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
