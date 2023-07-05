@@ -126,3 +126,4 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
                 super().check(_)
         except Exception as e:
             self.log.error("Error while collecting Weaviate metrics from OpenMetrics endpoint: %s", e)
+            raise(e)
