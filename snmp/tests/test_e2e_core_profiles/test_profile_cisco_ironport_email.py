@@ -32,6 +32,7 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
         'ironport_cache_admin:forward Jaded Jaded oxen',
         'ironport_cache_software:but driving Jaded but kept but Jaded',
         'ironport_cache_version:acted driving their oxen kept forward',
+        'ironport_http_ports:but Jaded oxen kept',
         'ironport_license_expiration:5',
     ]
 
