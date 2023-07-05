@@ -89,9 +89,14 @@ OM_METRICS = [
     'weaviate.lsm.bloom.filters.duration_ms.count',
     'weaviate.lsm.bloom.filters.duration_ms.sum',
     'weaviate.lsm.memtable.size',
+    "weaviate.queries.durations_ms.bucket",
+    "weaviate.queries.durations_ms.count",
+    "weaviate.queries.durations_ms.sum",
+    "weaviate.query.dimensions.count",
     # Latency metric since the mock response is 200
     'weaviate.http.latency_ms',
 ]
+
 
 API_METRICS = [
     'weaviate.node.status',
@@ -106,6 +111,10 @@ FLAKY_E2E_METRICS = [
     'weaviate.lsm.segments',
     'weaviate.lsm.bloom.filters.duration_ms.count',
     'weaviate.lsm.bloom.filters.duration_ms.sum',
+    "weaviate.queries.durations_ms.bucket",
+    "weaviate.queries.durations_ms.count",
+    "weaviate.queries.durations_ms.sum",
+    "weaviate.query.dimensions.count",
 ]
 
 E2E_METRICS = OM_METRICS + API_METRICS
