@@ -23,6 +23,6 @@ class DcgmCheck(OpenMetricsBaseCheckV2):
             self._add_build_version_to_metadata,
         )
 
-    def _add_build_version_to_metadata(self, metric, sample_data, runtime_data):
+    def _add_build_version_to_metadata(self, _metric, sample_data, _runtime_data):
         for sample, *_ in sample_data:
             self.set_metadata('version', sample.labels['build_version'].replace('_', '.'))
