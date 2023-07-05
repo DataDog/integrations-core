@@ -35,12 +35,12 @@ metrics:
       - name: hwdevMFanStatus
         constant_value_one: true
     metric_tags:
-      - index: 1
-        tag: fan_num
+      - index: 1  # hwDevMFanNum
+        tag: hw_dev_m_fan_num
       - column:
           OID: 1.3.6.1.4.1.43.45.1.2.23.1.9.1.1.1.2
           name: hwDevMFanStatus
-        tag: fan_status
+        tag: hw_dev_m_fan_status
         mapping:
           1: active
           2: deactive
@@ -55,11 +55,11 @@ metrics:
         constant_value_one: true
     metric_tags:
       - index: 1
-        tag: power_num
+        tag: hw_dev_m_power_num
       - column:
           OID: 1.3.6.1.4.1.43.45.1.2.23.1.9.1.2.1.2
           name: hwDevMPowerStatus
-        tag: power_status
+        tag: hw_dev_m_power_status
         mapping:
           1: active
           2: deactive
