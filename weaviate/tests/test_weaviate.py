@@ -20,14 +20,14 @@ def get_fixture_path(filename):
 
 
 @pytest.mark.parametrize(
-    'name, metrics',
+    'fname, metrics',
     [
-        ('openmetrics', OM_METRICS),
-        ('nodes_api', API_METRICS),
+        ('weaviate_openmetrics.txt', OM_METRICS),
+        ('weaviate_nodes_api.json', API_METRICS),
     ],
 )
-def test_check_mock_weaviate_responses(dd_run_check, aggregator, mock_http_response, name, metrics):
-    mock_http_response(file_path=get_fixture_path(f'weaviate_{name}.txt'))
+def test_check_mock_weaviate_responses(dd_run_check, aggregator, mock_http_response, fname, metrics):
+    mock_http_response(file_path=get_fixture_path(f'{fname}'))
     check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
     dd_run_check(check)
 
@@ -38,7 +38,7 @@ def test_check_mock_weaviate_responses(dd_run_check, aggregator, mock_http_respo
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
-    if name == 'openmetrics':
+    if fname == 'weaviate_openmetrics.txt':
         aggregator.assert_service_check('weaviate.openmetrics.health', ServiceCheck.OK)
     else:
         aggregator.assert_service_check('weaviate.node.status', ServiceCheck.OK)
@@ -82,7 +82,7 @@ def test_custom_validation(dd_run_check, instance):
 
 @pytest.mark.integration
 def test_check_mock_weaviate_metadata(dd_run_check, datadog_agent, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('weaviate_meta_api.txt'))
+    mock_http_response(file_path=get_fixture_path('weaviate_meta_api.json'))
     check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
     check.check_id = 'test:123'
     dd_run_check(check)
