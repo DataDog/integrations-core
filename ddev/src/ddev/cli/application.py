@@ -87,8 +87,11 @@ class Application(Terminal):
         self.__config['color'] = not self.console.no_color
         self.__config['dd_api_key'] = self.config.orgs.get('default', {}).get('api_key', '')
         self.__config['dd_app_key'] = self.config.orgs.get('default', {}).get('app_key', '')
-
-        kwargs = {'here' if self.repo.name == 'local' else self.repo.name: True}
+        # Make sure that envvar overrides of repo make it into config.
+        self.__config['repo'] = self.repo.name
+        kwargs = {}
+        if self.repo.name == 'local':
+            kwargs['here'] = True
         initialize_root(self.__config, **kwargs)
 
     def copy(self):
