@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
 import os
+
+import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev import get_here
@@ -12,6 +13,7 @@ from datadog_checks.weaviate import WeaviateCheck
 from .common import API_METRICS, MOCKED_INSTANCE, OM_METRICS
 
 HERE = get_here()
+
 
 def get_fixture_path(filename):
     return os.path.join(HERE, 'fixtures', filename)
@@ -55,7 +57,7 @@ def test_check_failed_liveness(dd_run_check, aggregator, mock_http_response):
 def test_empty_instance(dd_run_check):
     with pytest.raises(
         Exception,
-        match='The setting `openmetrics_endpoint` is required',
+        match='InstanceConfig`:\nopenmetrics_endpoint\n  field required',
     ):
         check = WeaviateCheck('weaviate', {}, [{}])
         dd_run_check(check)
