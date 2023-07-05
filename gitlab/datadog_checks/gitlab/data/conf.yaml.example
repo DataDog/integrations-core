@@ -46,21 +46,14 @@ init_config:
 instances:
 
     ## @param openmetrics_endpoint - string - optional - default: http://<GITLAB_URL>/-/metrics
-    ## To enable GitLab metrics using OpenMetricsBaseCheckV2 you must specify the 
-    ## `openmetrics_endpoint` option.
-    ##
-    ## Either `prometheus_url` or `openmetrics_endpoint` must be specified.
-    ## See documentation: https://docs.datadoghq.com/integrations/gitlab
+    ## The URL where GitLab exposes Prometheus metrics.
     #
   - openmetrics_endpoint: http://<GITLAB_URL>/-/metrics
 
-    ## @param prometheus_url - string - optional - default: http://<GITLAB_URL>/-/metrics
-    ## To enable GitLab metrics using the legacy OpenMetricsBaseCheckV1 you must specify the `prometheus_url` option.
-    ##
-    ## Either `prometheus_url` or `openmetrics_endpoint` must be specified.
-    ## See documentation: https://docs.datadoghq.com/integrations/gitlab
+    ## @param gitaly_server_endpoint - string - optional
+    ## Endpoint exposing the Gitaly server's Prometheus metrics (only available when `openmetrics_endpoint` is used).
     #
-    # prometheus_url: http://<GITLAB_URL>/-/metrics
+    # gitaly_server_endpoint: http://<GITALY-URL>:9236/metrics
 
     ## @param gitlab_url - string - optional
     ## The GitLab external URL to probe for service health status
@@ -194,6 +187,11 @@ instances:
     #
     # enable_health_service_check: true
 
+    ## @param ignore_connection_errors - boolean - optional - default: false
+    ## Whether or not to ignore connection errors when scraping `openmetrics_endpoint`.
+    #
+    # ignore_connection_errors: false
+
     ## @param hostname_label - string - optional
     ## Override the hostname for every metric submission with the value of one of its labels.
     #
@@ -288,11 +286,6 @@ instances:
     ## than the full metric name.
     #
     # cache_metric_wildcards: true
-
-    ## @param use_latest_spec - boolean - optional - default: false
-    ## Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
-    #
-    # use_latest_spec: false
 
     ## @param telemetry - boolean - optional - default: false
     ## Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.

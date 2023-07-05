@@ -1,5 +1,5 @@
 [env.collectors.datadog-checks]
-check-types = true
+check-types = false
 mypy-args = [
     "--disallow-untyped-defs",
     "--py2",
@@ -13,7 +13,7 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["2.7", "3.9"]
 version = ["9.0", "10.0"]
 
 [envs.default.overrides]

@@ -550,7 +550,7 @@
                             ],
                             "custom_links": [
                                 {
-                                    "link": "/dash/integration/30322/kubernetes-pods-overview",
+                                    "link": "/dash/integration/Kubernetes%20-%20Pods",
                                     "label": "View Pods overview"
                                 }
                             ],
@@ -1982,6 +1982,5 @@
     ],
     "layout_type": "ordered",
     "notify_list": [],
-    "reflow_type": "fixed",
-    "id": "y9b-g8i-kpt"
+    "reflow_type": "fixed"
 }

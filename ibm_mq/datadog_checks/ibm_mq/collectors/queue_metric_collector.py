@@ -23,6 +23,12 @@ else:
     # we load the following constants only pymqi import succeed
     SUPPORTED_QUEUE_TYPES = [pymqi.CMQC.MQQT_LOCAL, pymqi.CMQC.MQQT_MODEL]
 
+    # https://www.ibm.com/docs/en/ibm-mq/9.3?topic=queues-usage-mqlong
+    KNOWN_USAGES = {
+        pymqi.CMQC.MQUS_NORMAL: 'normal',
+        pymqi.CMQC.MQUS_TRANSMISSION: 'transmission',
+    }
+
 
 class QueueMetricCollector(object):
     QUEUE_SERVICE_CHECK = 'ibm_mq.queue'
@@ -52,15 +58,15 @@ class QueueMetricCollector(object):
                     queue_tags.extend(q_tags)
 
             try:
-                self.queue_stats(queue_manager, queue_name, queue_tags)
+                enriched_tags = self.queue_stats(queue_manager, queue_name, queue_tags)
                 # some system queues don't have PCF metrics
                 # so we don't collect those metrics from those queues
                 if queue_name not in self.config.DISALLOWED_QUEUES:
-                    self.get_pcf_queue_status_metrics(queue_manager, queue_name, queue_tags)
+                    self.get_pcf_queue_status_metrics(queue_manager, queue_name, enriched_tags)
 
                     # if collect queue reset metrics is disabled, skip this
                     if self.config.collect_reset_queue_metrics:
-                        self.get_pcf_queue_reset_metrics(queue_manager, queue_name, queue_tags)
+                        self.get_pcf_queue_reset_metrics(queue_manager, queue_name, enriched_tags)
                 self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags, hostname=self.config.hostname)
             except Exception as e:
                 self.warning('Cannot connect to queue %s: %s', queue_name, e)
@@ -164,6 +170,7 @@ class QueueMetricCollector(object):
         """
         Grab stats from queues
         """
+        enriched_tags = list(tags)
         pcf = None
         try:
             args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name), pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL}
@@ -181,10 +188,14 @@ class QueueMetricCollector(object):
         else:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
-                self._submit_queue_stats(queue_info, queue_name, tags)
+                usage = KNOWN_USAGES.get(queue_info.get(pymqi.CMQC.MQIA_USAGE), 'unknown')
+                enriched_tags.append('queue_usage:{}'.format(usage))
+                self._submit_queue_stats(queue_info, queue_name, enriched_tags)
         finally:
             if pcf is not None:
                 pcf.disconnect()
+
+        return enriched_tags
 
     def _submit_queue_stats(self, queue_info, queue_name, tags):
         for metric_suffix, mq_attr in iteritems(metrics.queue_metrics()):

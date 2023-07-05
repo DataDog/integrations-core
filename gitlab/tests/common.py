@@ -15,9 +15,11 @@ GITLAB_TEST_PASSWORD = 'hdkss33jdijb123'
 GITLAB_TEST_API_TOKEN = 'token'
 GITLAB_LOCAL_PORT = 8086
 GITLAB_LOCAL_PROMETHEUS_PORT = 8088
+GITLAB_LOCAL_GITALY_PROMETHEUS_PORT = 8089
 
 PROMETHEUS_ENDPOINT = "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_PROMETHEUS_PORT)
 GITLAB_PROMETHEUS_ENDPOINT = "http://{}:{}/-/metrics".format(HOST, GITLAB_LOCAL_PORT)
+GITLAB_GITALY_PROMETHEUS_ENDPOINT = "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_GITALY_PROMETHEUS_PORT)
 GITLAB_URL = "http://{}:{}".format(HOST, GITLAB_LOCAL_PORT)
 GITLAB_TAGS = ['gitlab_host:{}'.format(HOST), 'gitlab_port:{}'.format(GITLAB_LOCAL_PORT)]
 
@@ -149,6 +151,94 @@ V2_METRICS = COMMON_METRICS + [
     "redis.client_requests_duration_seconds.bucket",
 ]
 
+GITALY_METRICS = [
+    "gitaly.cacheinvalidator_rpc.count",
+    "gitaly.catfile_cache_members",
+    "gitaly.catfile_processes",
+    "gitaly.command.context_switches.count",
+    "gitaly.command.cpu_seconds.count",
+    "gitaly.command.major_page_faults.count",
+    "gitaly.command.minor_page_faults.count",
+    "gitaly.command.real_seconds.count",
+    "gitaly.command.signals_received.count",
+    "gitaly.command.spawn_token_acquiring_seconds.count",
+    "gitaly.commands_running",
+    "gitaly.concurrency_limiting_acquiring_seconds.bucket",
+    "gitaly.concurrency_limiting_acquiring_seconds.count",
+    "gitaly.concurrency_limiting_acquiring_seconds.sum",
+    "gitaly.concurrency_limiting_in_progress",
+    "gitaly.concurrency_limiting_queued",
+    "gitaly.diskcache.bytes_fetched.count",
+    "gitaly.diskcache.bytes_loser.count",
+    "gitaly.diskcache.bytes_stored.count",
+    "gitaly.diskcache.miss.count",
+    "gitaly.diskcache.requests.count",
+    "gitaly.diskcache.walker_empty_dir.count",
+    "gitaly.diskcache.walker_empty_dir_removal.count",
+    "gitaly.diskcache.walker_error.count",
+    "gitaly.diskcache.walker_removal.count",
+    "gitaly.go.gc_duration_seconds.count",
+    "gitaly.go.gc_duration_seconds.quantile",
+    "gitaly.go.gc_duration_seconds.sum",
+    "gitaly.go.goroutines",
+    "gitaly.go.info",
+    "gitaly.go.memstats_alloc_bytes",
+    "gitaly.go.memstats_buck_hash_sys_bytes",
+    "gitaly.go.memstats_frees.count",
+    "gitaly.go.memstats_gc_sys_bytes",
+    "gitaly.go.memstats_heap_alloc_bytes",
+    "gitaly.go.memstats_heap_idle_bytes",
+    "gitaly.go.memstats_heap_inuse_bytes",
+    "gitaly.go.memstats_heap_objects",
+    "gitaly.go.memstats_heap_released_bytes",
+    "gitaly.go.memstats_heap_sys_bytes",
+    "gitaly.go.memstats_last_gc_time_seconds",
+    "gitaly.go.memstats_lookups.count",
+    "gitaly.go.memstats_mallocs.count",
+    "gitaly.go.memstats_mcache_inuse_bytes",
+    "gitaly.go.memstats_mcache_sys_bytes",
+    "gitaly.go.memstats_mspan_inuse_bytes",
+    "gitaly.go.memstats_mspan_sys_bytes",
+    "gitaly.go.memstats_next_gc_bytes",
+    "gitaly.go.memstats_other_sys_bytes",
+    "gitaly.go.memstats_stack_inuse_bytes",
+    "gitaly.go.memstats_stack_sys_bytes",
+    "gitaly.go.memstats_sys_bytes",
+    "gitaly.go.threads",
+    "gitaly.grpc_server.handled.count",
+    "gitaly.grpc_server.handling_seconds.bucket",
+    "gitaly.grpc_server.handling_seconds.count",
+    "gitaly.grpc_server.handling_seconds.sum",
+    "gitaly.grpc_server.msg_received.count",
+    "gitaly.grpc_server.msg_sent.count",
+    "gitaly.grpc_server.started.count",
+    "gitaly.hook_transaction_voting_delay_seconds.bucket",
+    "gitaly.hook_transaction_voting_delay_seconds.count",
+    "gitaly.hook_transaction_voting_delay_seconds.sum",
+    "gitaly.inforef_cache_attempt.count",
+    "gitaly.list_commits_by_oid_request_size.bucket",
+    "gitaly.list_commits_by_oid_request_size.count",
+    "gitaly.list_commits_by_oid_request_size.sum",
+    "gitaly.pack_objects.acquiring_seconds.bucket",
+    "gitaly.pack_objects.acquiring_seconds.count",
+    "gitaly.pack_objects.acquiring_seconds.sum",
+    "gitaly.pack_objects.generated_bytes.count",
+    "gitaly.pack_objects.in_progress",
+    "gitaly.pack_objects.queued",
+    "gitaly.pack_objects.served_bytes.count",
+    "gitaly.process_cpu_seconds.count",
+    "gitaly.process_max_fds",
+    "gitaly.process_open_fds",
+    "gitaly.process_resident_memory_bytes",
+    "gitaly.process_start_time_seconds",
+    "gitaly.process_virtual_memory_bytes",
+    "gitaly.process_virtual_memory_max_bytes",
+    "gitaly.promhttp_metric_handler_requests.count",
+    "gitaly.promhttp_metric_handler_requests_in_flight",
+    "gitaly.spawn_timeouts.count",
+    "gitaly.streamcache_sendfile_bytes.count",
+]
+
 METRICS_TO_TEST = [
     "puma.workers",
     "rack.http_requests_total",
@@ -165,12 +255,20 @@ METRICS_TO_TEST_V2 = [
     "sql_duration_seconds.sum",
 ]
 
+GITALY_METRICS_TO_TEST = [
+    "gitaly.process_max_fds",
+]
 
-def assert_check(aggregator, metrics, use_openmetrics=False):
+
+def assert_check(aggregator, metrics=None, use_openmetrics=False):
     """
     Basic Test for gitlab integration.
     """
     # Make sure we're receiving gitlab service checks
+
+    if not metrics:
+        metrics = []
+
     for service_check in GitlabCheck.ALLOWED_SERVICE_CHECKS:
         aggregator.assert_service_check(
             'gitlab.{}'.format(service_check), status=GitlabCheck.OK, tags=GITLAB_TAGS + CUSTOM_TAGS
@@ -197,3 +295,6 @@ def assert_check(aggregator, metrics, use_openmetrics=False):
 
     for metric in metrics:
         aggregator.assert_metric("gitlab.{}".format(metric))
+
+    # Assert that we have at least one of them
+    assert len(aggregator.metric_names) > 1

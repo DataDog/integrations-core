@@ -216,7 +216,7 @@ reminder-image-builder:
   only:
     changes:
       - .gitlab/reminder/**/*
-      - .gitlab-ci.yaml
+      - .gitlab-ci.yml
     refs:
       - master
   script:
@@ -232,12 +232,12 @@ tagger-image-builder:
   only:
     changes:
       - .gitlab/tagger/**/*
-      - datadog_checks_dev/**/*
-      - .gitlab-ci.yaml
+      - ddev/**/*
+      - .gitlab-ci.yml
     refs:
       - master
   script:
-    - docker build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile ./datadog_checks_dev/
+    - docker build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile .
     - docker images $TAGGER_IMAGE
     - docker push $TAGGER_IMAGE
   except: [ tags, schedules ]
@@ -249,7 +249,7 @@ validate-log-intgs-builder:
   only:
     changes:
       - .gitlab/validate-logs-intgs/**/*
-      - .gitlab-ci.yaml
+      - .gitlab-ci.yml
     refs:
       - master
   script:
@@ -265,7 +265,7 @@ validate-agent-build-builder:
   only:
     changes:
       - .gitlab/validate-agent-build/**/*
-      - .gitlab-ci.yaml
+      - .gitlab-ci.yml
     refs:
       - master
   script:

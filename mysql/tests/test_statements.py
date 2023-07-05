@@ -19,7 +19,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql import MySql, statements
 from datadog_checks.mysql.statement_samples import StatementTruncationState
 
-from . import common, tags
+from . import common
 from .common import MYSQL_VERSION_PARSED
 
 logger = logging.getLogger(__name__)
@@ -138,7 +138,7 @@ def test_statement_metrics(
     assert event['mysql_flavor'] == mysql_check.version.flavor
     assert event['timestamp'] > 0
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
-    expected_tags = set(tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)])
+    expected_tags = set(_expected_dbm_instance_tags(dbm_instance))
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
     assert set(event['tags']) == expected_tags
@@ -225,36 +225,80 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
-    "cloud_metadata",
+    "input_cloud_metadata,output_cloud_metadata",
     [
-        {},
-        {
-            'azure': {
-                'deployment_type': 'flexible_server',
-                'database_name': 'test-server',
+        ({}, {}),
+        (
+            {
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'name': 'test-server.database.windows.net',
+                },
             },
-        },
-        {
-            'aws': {
-                'instance_endpoint': 'foo.aws.com',
+            {
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'name': 'test-server.database.windows.net',
+                },
             },
-            'azure': {
-                'deployment_type': 'flexible_server',
-                'database_name': 'test-server',
+        ),
+        (
+            {
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'fully_qualified_domain_name': 'test-server.database.windows.net',
+                },
             },
-        },
-        {
-            'gcp': {
-                'project_id': 'foo-project',
-                'instance_id': 'bar',
-                'extra_field': 'included',
+            {
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'name': 'test-server.database.windows.net',
+                },
             },
-        },
+        ),
+        (
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'name': 'test-server.database.windows.net',
+                },
+            },
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+                'azure': {
+                    'deployment_type': 'flexible_server',
+                    'name': 'test-server.database.windows.net',
+                },
+            },
+        ),
+        (
+            {
+                'gcp': {
+                    'project_id': 'foo-project',
+                    'instance_id': 'bar',
+                    'extra_field': 'included',
+                },
+            },
+            {
+                'gcp': {
+                    'project_id': 'foo-project',
+                    'instance_id': 'bar',
+                    'extra_field': 'included',
+                },
+            },
+        ),
     ],
 )
-def test_statement_metrics_cloud_metadata(aggregator, dd_run_check, dbm_instance, cloud_metadata, datadog_agent):
-    if cloud_metadata:
-        for k, v in cloud_metadata.items():
+def test_statement_metrics_cloud_metadata(
+    aggregator, dd_run_check, dbm_instance, input_cloud_metadata, output_cloud_metadata, datadog_agent
+):
+    if input_cloud_metadata:
+        for k, v in input_cloud_metadata.items():
             dbm_instance[k] = v
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
@@ -282,7 +326,7 @@ def test_statement_metrics_cloud_metadata(aggregator, dd_run_check, dbm_instance
     assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['mysql_version'] == mysql_check.version.version + '+' + mysql_check.version.build
     assert event['mysql_flavor'] == mysql_check.version.flavor
-    assert event['cloud_metadata'] == cloud_metadata, "wrong cloud_metadata"
+    assert event['cloud_metadata'] == output_cloud_metadata, "wrong cloud_metadata"
 
 
 @pytest.mark.integration
@@ -360,7 +404,7 @@ def test_statement_samples_collect(
     if explain_strategy:
         mysql_check._statement_samples._preferred_explain_strategies = [explain_strategy]
 
-    expected_tags = set(tags.METRIC_TAGS + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)])
+    expected_tags = set(_expected_dbm_instance_tags(dbm_instance))
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
 
@@ -752,7 +796,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     mysql_check._statement_metrics._job_loop_future.result()
     for job in ['statement-metrics', 'statement-samples']:
         aggregator.assert_metric(
-            "dd.mysql.async_job.inactive_stop", tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job]
+            "dd.mysql.async_job.inactive_stop", tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job]
         )
 
 
@@ -774,12 +818,22 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     assert mysql_check._statement_metrics._db is None, "metrics db connection should be gone"
     for job in ['statement-metrics', 'statement-samples']:
         aggregator.assert_metric(
-            "dd.mysql.async_job.cancel", tags=_expected_dbm_instance_tags(dbm_instance) + ['job:' + job]
+            "dd.mysql.async_job.cancel", tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job]
         )
 
 
 def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance['tags'] + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
+    return dbm_instance.get('tags', []) + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
+
+
+# the inactive job metrics are emitted from the main integrations
+# directly to metrics-intake, so they should also be properly tagged with a resource
+def _expected_dbm_job_err_tags(dbm_instance):
+    return dbm_instance['tags'] + [
+        'port:{}'.format(common.PORT),
+        'server:{}'.format(common.HOST),
+        'dd.internal.resource:database_instance:stubbed.hostname',
+    ]
 
 
 @pytest.mark.parametrize("statement_samples_enabled", [True, False])

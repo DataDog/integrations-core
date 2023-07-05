@@ -1,0 +1,136 @@
+metrics:
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: cpu.usage
+      OID: 1.3.6.1.4.1.2021.10.1.5.1
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: memory.total
+      OID: 1.3.6.1.4.1.2021.4.5.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: memory.free
+      OID: 1.3.6.1.4.1.2021.4.6.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: memTotalSwap
+      OID: 1.3.6.1.4.1.2021.4.3.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: memAvailSwap
+      OID: 1.3.6.1.4.1.2021.4.4.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: memTotalFree
+      OID: 1.3.6.1.4.1.2021.4.11.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: memMinimumSwap
+      OID: 1.3.6.1.4.1.2021.4.12.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: memShared
+      OID: 1.3.6.1.4.1.2021.4.13.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: memBuffer
+      OID: 1.3.6.1.4.1.2021.4.14.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: memCached
+      OID: 1.3.6.1.4.1.2021.4.15.0
+  - MIB: UCD-SNMP-MIB
+    table:
+      OID: 1.3.6.1.4.1.2021.9
+      name: dskTable
+    symbols:
+      - name: dskTotal
+        OID: 1.3.6.1.4.1.2021.9.1.6
+      - name: dskAvail
+        OID: 1.3.6.1.4.1.2021.9.1.7
+      - name: dskUsed
+        OID: 1.3.6.1.4.1.2021.9.1.8
+      - name: dskPercent
+        OID: 1.3.6.1.4.1.2021.9.1.9
+      - name: dskPercentNode
+        OID: 1.3.6.1.4.1.2021.9.1.10
+    metric_tags:
+      - tag: dsk_path
+        column:
+          OID: 1.3.6.1.4.1.2021.9.1.2
+          name: dskPath
+      - tag: dsk_device
+        column:
+          OID: 1.3.6.1.4.1.2021.9.1.3
+          name: dskDevice
+      - column:
+          OID: 1.3.6.1.4.1.2021.9.1.100
+          name: dskErrorFlag
+        tag: dsk_error_flag
+        mapping:
+          0: no_error
+          1: error
+  - MIB: UCD-DISKIO-MIB
+    table:
+      OID: 1.3.6.1.4.1.2021.13.15.1.1
+      name: diskIOTable
+    symbols:
+      - name: diskIOReads
+        OID: 1.3.6.1.4.1.2021.13.15.1.1.5
+      - name: diskIOWrites
+        OID: 1.3.6.1.4.1.2021.13.15.1.1.6
+      - name: diskIOLA1
+        OID: 1.3.6.1.4.1.2021.13.15.1.1.9
+      - name: diskIOLA5
+        OID: 1.3.6.1.4.1.2021.13.15.1.1.10
+      - name: diskIOLA15
+        OID: 1.3.6.1.4.1.2021.13.15.1.1.11
+      - name: diskIONReadX
+        OID: 1.3.6.1.4.1.2021.13.15.1.1.12
+      - name: diskIONWrittenX
+        OID: 1.3.6.1.4.1.2021.13.15.1.1.13
+    metric_tags:
+      - tag: disk_io_device
+        column:
+          name: diskIODevice
+          OID: 1.3.6.1.4.1.2021.13.15.1.1.2
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: ssCpuUser
+      OID: 1.3.6.1.4.1.2021.11.9.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: ssCpuSystem
+      OID: 1.3.6.1.4.1.2021.11.10.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: ssCpuIdle
+      OID: 1.3.6.1.4.1.2021.11.11.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: ssCpuRawUser
+      OID: 1.3.6.1.4.1.2021.11.50.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: ssCpuRawNice
+      OID: 1.3.6.1.4.1.2021.11.51.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: ssCpuRawSystem
+      OID: 1.3.6.1.4.1.2021.11.52.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: ssCpuRawIdle
+      OID: 1.3.6.1.4.1.2021.11.53.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: ssCpuRawWait
+      OID: 1.3.6.1.4.1.2021.11.54.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: ssCpuRawKernel
+      OID: 1.3.6.1.4.1.2021.11.55.0
+  - MIB: UCD-SNMP-MIB
+    symbol:
+      name: ssCpuRawInterrupt
+      OID: 1.3.6.1.4.1.2021.11.56.0
