@@ -4,6 +4,7 @@
 import json
 import os
 import time
+from contextlib import ExitStack
 
 import pytest
 import requests
@@ -15,12 +16,6 @@ from datadog_checks.dev.subprocess import run_command
 from datadog_checks.weaviate.check import DEFAULT_LIVENESS_ENDPOINT
 
 from .common import BATCH_OBJECTS, USE_AUTH
-
-try:
-    from contextlib import ExitStack
-except ImportError:
-    from contextlib2 import ExitStack
-
 
 HERE = get_here()
 opj = os.path.join

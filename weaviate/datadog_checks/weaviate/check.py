@@ -56,7 +56,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
                 else:
                     self.log.debug("Invalid Weaviate version format: %s", version)
             except Exception as e:
-                self.log.debug("Error while parsing Weaviate version: %s", str(e))
+                self.log.debug("Error while parsing Weaviate version: %s", e)
         else:
             self.log.debug("Could not retrieve version metadata from host.")
 
@@ -111,7 +111,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
                         self.gauge('node.shard.objects', shard.get('objectCount', 0), tags=tags)
 
         except Exception as e:
-            self.log.debug("Error occurred during node metrics submission: %s", str(e))
+            self.log.debug("Error occurred during node metrics submission: %s", e)
 
     def check(self, _):
         try:
@@ -120,9 +120,9 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
                 self._submit_version_metadata()
                 self._submit_node_metrics()
         except Exception as e:
-            self.log.error("Error while collecting Weaviate metrics from API: %s", str(e))
+            self.log.error("Error while collecting Weaviate metrics from API: %s", e)
         try:
             if self.instance.get("openmetrics_endpoint"):
                 super().check(_)
         except Exception as e:
-            self.log.error("Error while collecting Weaviate metrics from OpenMetrics endpoint: %s", str(e))
+            self.log.error("Error while collecting Weaviate metrics from OpenMetrics endpoint: %s", e)
