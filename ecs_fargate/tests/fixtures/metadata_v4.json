@@ -1,0 +1,135 @@
+{
+    "Cluster": "arn:aws:ecs:ap-northeast-1:601427279990:cluster/akira-fargate-check-cluster",
+    "TaskARN": "arn:aws:ecs:ap-northeast-1:601427279990:task/akira-fargate-check-cluster/67cd8a22b533459696d4ccab5278e009",
+    "Family": "akira-fargate-check",
+    "Revision": "1",
+    "DesiredStatus": "RUNNING",
+    "KnownStatus": "RUNNING",
+    "Limits":
+    {
+        "CPU": 1,
+        "Memory": 3072
+    },
+    "PullStartedAt": "2023-06-20T01:13:03.763177835Z",
+    "PullStoppedAt": "2023-06-20T01:13:30.942112076Z",
+    "AvailabilityZone": "ap-northeast-1d",
+    "Containers":
+    [
+        {
+            "DockerId": "67cd8a22b533459696d4ccab5278e009-2860414825",
+            "Name": "dd-agent",
+            "DockerName": "dd-agent",
+            "Image": "public.ecr.aws/b1o7r7e0/akira-agent-fgcheck:9",
+            "ImageID": "sha256:9d285ef4b9bac6f4c58211b711436dd507db7ba1f52605ae463102ee31b0f49b",
+            "Labels":
+            {
+                "com.amazonaws.ecs.cluster": "arn:aws:ecs:ap-northeast-1:601427279990:cluster/akira-fargate-check-cluster",
+                "com.amazonaws.ecs.container-name": "dd-agent",
+                "com.amazonaws.ecs.task-arn": "arn:aws:ecs:ap-northeast-1:601427279990:task/akira-fargate-check-cluster/67cd8a22b533459696d4ccab5278e009",
+                "com.amazonaws.ecs.task-definition-family": "akira-fargate-check",
+                "com.amazonaws.ecs.task-definition-version": "1"
+            },
+            "DesiredStatus": "RUNNING",
+            "KnownStatus": "RUNNING",
+            "Limits":
+            {
+                "CPU": 2
+            },
+            "CreatedAt": "2023-06-20T01:13:35.073930071Z",
+            "StartedAt": "2023-06-20T01:13:35.073930071Z",
+            "Type": "NORMAL",
+            "Networks":
+            [
+                {
+                    "NetworkMode": "awsvpc",
+                    "IPv4Addresses":
+                    [
+                        "172.31.38.118"
+                    ],
+                    "AttachmentIndex": 0,
+                    "MACAddress": "0e:e9:74:a3:d1:ab",
+                    "IPv4SubnetCIDRBlock": "172.31.32.0/20",
+                    "DomainNameServers":
+                    [
+                        "172.31.0.2"
+                    ],
+                    "DomainNameSearchList":
+                    [
+                        "ap-northeast-1.compute.internal"
+                    ],
+                    "PrivateDNSName": "ip-172-31-38-118.ap-northeast-1.compute.internal",
+                    "SubnetGatewayIpv4Address": "172.31.32.1/20"
+                }
+            ],
+            "ContainerARN": "arn:aws:ecs:ap-northeast-1:601427279990:container/akira-fargate-check-cluster/67cd8a22b533459696d4ccab5278e009/a1241647-2e14-4653-bcbf-ecad62209a2c",
+            "LogOptions":
+            {
+                "awslogs-create-group": "true",
+                "awslogs-group": "/ecs/akira-fargate-check",
+                "awslogs-region": "us-east-2",
+                "awslogs-stream": "ecs/dd-agent/67cd8a22b533459696d4ccab5278e009"
+            },
+            "LogDriver": "awslogs"
+        },
+        {
+            "DockerId": "67cd8a22b533459696d4ccab5278e009-3344678718",
+            "Name": "apmtest-ping",
+            "DockerName": "apmtest-ping",
+            "Image": "akirahiiro/apmtest-ping:1.0.3",
+            "ImageID": "sha256:89d560b293f9c04a31eff4b69e59b5b375cead0d8ed20074f55e774c4e45a018",
+            "Labels":
+            {
+                "com.amazonaws.ecs.cluster": "arn:aws:ecs:ap-northeast-1:601427279990:cluster/akira-fargate-check-cluster",
+                "com.amazonaws.ecs.container-name": "apmtest-ping",
+                "com.amazonaws.ecs.task-arn": "arn:aws:ecs:ap-northeast-1:601427279990:task/akira-fargate-check-cluster/67cd8a22b533459696d4ccab5278e009",
+                "com.amazonaws.ecs.task-definition-family": "akira-fargate-check",
+                "com.amazonaws.ecs.task-definition-version": "1"
+            },
+            "DesiredStatus": "RUNNING",
+            "KnownStatus": "RUNNING",
+            "Limits":
+            {
+                "CPU": 2
+            },
+            "CreatedAt": "2023-06-20T01:13:34.891627424Z",
+            "StartedAt": "2023-06-20T01:13:34.891627424Z",
+            "Type": "NORMAL",
+            "Networks":
+            [
+                {
+                    "NetworkMode": "awsvpc",
+                    "IPv4Addresses":
+                    [
+                        "172.31.38.118"
+                    ],
+                    "AttachmentIndex": 0,
+                    "MACAddress": "0e:e9:74:a3:d1:ab",
+                    "IPv4SubnetCIDRBlock": "172.31.32.0/20",
+                    "DomainNameServers":
+                    [
+                        "172.31.0.2"
+                    ],
+                    "DomainNameSearchList":
+                    [
+                        "ap-northeast-1.compute.internal"
+                    ],
+                    "PrivateDNSName": "ip-172-31-38-118.ap-northeast-1.compute.internal",
+                    "SubnetGatewayIpv4Address": "172.31.32.1/20"
+                }
+            ],
+            "ContainerARN": "arn:aws:ecs:ap-northeast-1:601427279990:container/akira-fargate-check-cluster/67cd8a22b533459696d4ccab5278e009/ae76367e-3352-4e74-9567-20050c15491c"
+        }
+    ],
+    "LaunchType": "FARGATE",
+    "ClockDrift":
+    {
+        "ClockErrorBound": 0.4347665,
+        "ReferenceTimestamp": "2023-06-20T01:18:13Z",
+        "ClockSynchronizationStatus": "SYNCHRONIZED"
+    },
+    "EphemeralStorageMetrics":
+    {
+        "Utilized": 2925,
+        "Reserved": 21499
+    }
+}
