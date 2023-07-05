@@ -53,6 +53,7 @@ def test_e2e_profile_cisco_firepower(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
