@@ -18,20 +18,22 @@ metrics:
     symbol:
       name: cpu.usage
       OID: 1.3.6.1.4.1.1916.1.32.1.2.0
-  - MIB: EXTREME-SOFTWARE-MONITOR-MIB
-    table:
-      name: extremeMemoryMonitorSystemTable
-      OID: 1.3.6.1.4.1.1916.1.32.2.2
-    symbols:
-      - name: memory.total
-        OID: 1.3.6.1.4.1.1916.1.32.2.2.1.2
-      - name: memory.free
-        OID: 1.3.6.1.4.1.1916.1.32.2.2.1.3
-    metric_tags:
-      - column:
-          OID: 1.3.6.1.4.1.1916.1.32.2.2.1.1
-          name: extremeMemoryMonitorSystemSlotId
-        tag: extreme_memory_monitor_system_slot_id
+  # - MIB: EXTREME-SOFTWARE-MONITOR-MIB
+  #   table:
+  #     name: extremeMemoryMonitorSystemTable
+  #     OID: 1.3.6.1.4.1.1916.1.32.2.2
+  #   symbols:
+  #     - name: memory.total
+  #       OID: 1.3.6.1.4.1.1916.1.32.2.2.1.2
+  #     - name: memory.free
+  #       OID: 1.3.6.1.4.1.1916.1.32.2.2.1.3
+  #   metric_tags:
+  #     - column:
+  #         OID: 1.3.6.1.4.1.1916.1.32.2.2.1.1
+  #         name: extremeMemoryMonitorSystemSlotId
+  #       tag: extreme_memory_monitor_system_slot_id
+  #     TODO: enum in scalar metric is not supported yet (keep this metric and this
+  #       comment in profile until it's fixed)
   # - MIB: EXTREME-SYSTEM-MIB
   #   symbol:
   #     name: extremeOverTemperatureAlarm
@@ -73,14 +75,18 @@ metrics:
   #       false: 2
   #     TODO: enum in scalar metric is not supported yet (keep this metric and this
   #       comment in profile until it's fixed)
-  - MIB: EXTREME-SYSTEM-MIB
-    symbol:
-      name: extremePrimarySoftwareRev
-      OID: 1.3.6.1.4.1.1916.1.1.1.13.0
-  - MIB: EXTREME-SYSTEM-MIB
-    symbol:
-      name: extremeSecondarySoftwareRev
-      OID: 1.3.6.1.4.1.1916.1.1.1.14.0
+  # - MIB: EXTREME-SYSTEM-MIB
+  #   symbol:
+  #     name: extremePrimarySoftwareRev
+  #     OID: 1.3.6.1.4.1.1916.1.1.1.13.0
+  #     TODO: enum in scalar metric is not supported yet (keep this metric and this
+  #       comment in profile until it's fixed)
+  # - MIB: EXTREME-SYSTEM-MIB
+  #   symbol:
+  #     name: extremeSecondarySoftwareRev
+  #     OID: 1.3.6.1.4.1.1916.1.1.1.14.0
+  #     TODO: enum in scalar metric is not supported yet (keep this metric and this
+  #       comment in profile until it's fixed)
   - MIB: EXTREME-SYSTEM-MIB
     symbol:
       name: extremeInputPowerVoltage

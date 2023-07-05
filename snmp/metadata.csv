@@ -441,6 +441,8 @@ snmp.externalrelay1_element_seven,gauge,,,,"[ROOMALERT3S-MIB] The status of the 
 snmp.externalrelay1_element_six,gauge,,,,"[ROOMALERT3S-MIB] The status of the sixth element on external relay 1.",0,snmp,,
 snmp.externalrelay1_element_three,gauge,,,,"[ROOMALERT3S-MIB] The status of the third element on external relay 1.",0,snmp,,
 snmp.externalrelay1_element_two,gauge,,,,"[ROOMALERT3S-MIB] The status of the second element on external relay 1.",0,snmp,,
+snmp.extremeCurrentTemperature,gauge,,,,"[EXTREME-SYSTEM-MIB] Current temperature in degrees celcius measured inside device enclosure.",0,snmp,,
+snmp.extremeInputPowerVoltage,gauge,,,,"[EXTREME-SYSTEM-MIB] The input power voltage at which the system is currently operating.",0,snmp,,
 snmp.fanSpeed,gauge,,,,[Isilon] The current speed of the fan in revolutions per minute,0,snmp,,
 snmp.fanSpeedSensorStatus,gauge,,,,[Checkpoint Firewall] 0 = OK Otherwise = problem,0,snmp,,
 snmp.fanSpeedSensorValue,gauge,,hertz,,[Checkpoint Firewall] Fan rotations per minute.,0,snmp,,
