@@ -353,14 +353,15 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
     def _to_metrics_payload(self, rows, max_queries):
         # sort by total_elapsed_time and return the top max_queries
-        rows.sort(key=lambda i: i['total_elapsed_time'], reverse=True)
+        rows = rows.sorted(key=lambda i: i['total_elapsed_time'], reverse=True)
+        rows = rows[:max_queries]
         return {
             'host': self.check.resolved_hostname,
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
             'tags': self.tags,
             'cloud_metadata': self.check.cloud_metadata,
-            'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows[:max_queries]],
+            'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self.check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             'ddagentversion': datadog_agent.get_version(),
