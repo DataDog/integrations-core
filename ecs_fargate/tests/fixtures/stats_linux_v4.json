@@ -1,0 +1,417 @@
+{
+    "67cd8a22b533459696d4ccab5278e009-2860414825":
+    {
+        "read": "2023-06-20T01:19:45.077342978Z",
+        "preread": "2023-06-20T01:19:35.076984286Z",
+        "pids_stats":
+        {},
+        "blkio_stats": {
+            "io_service_bytes_recursive":
+            [
+                {
+                    "major": 259,
+                    "minor": 0,
+                    "op": "Read",
+                    "value": 0
+                },
+                {
+                    "major": 259,
+                    "minor": 0,
+                    "op": "Write",
+                    "value": 57344
+                },
+                {
+                    "major": 259,
+                    "minor": 0,
+                    "op": "Sync",
+                    "value": 0
+                },
+                {
+                    "major": 259,
+                    "minor": 0,
+                    "op": "Async",
+                    "value": 57344
+                },
+                {
+                    "major": 259,
+                    "minor": 0,
+                    "op": "Discard",
+                    "value": 0
+                },
+                {
+                    "major": 259,
+                    "minor": 0,
+                    "op": "Total",
+                    "value": 57344
+                },
+                {
+                    "major": 259,
+                    "minor": 1,
+                    "op": "Read",
+                    "value": 143360
+                },
+                {
+                    "major": 259,
+                    "minor": 1,
+                    "op": "Write",
+                    "value": 0
+                },
+                {
+                    "major": 259,
+                    "minor": 1,
+                    "op": "Sync",
+                    "value": 143360
+                },
+                {
+                    "major": 259,
+                    "minor": 1,
+                    "op": "Async",
+                    "value": 0
+                },
+                {
+                    "major": 259,
+                    "minor": 1,
+                    "op": "Discard",
+                    "value": 0
+                },
+                {
+                    "major": 259,
+                    "minor": 1,
+                    "op": "Total",
+                    "value": 143360
+                }
+            ],
+            "io_serviced_recursive":
+            [
+                {
+                    "major": 259,
+                    "minor": 0,
+                    "op": "Read",
+                    "value": 0
+                },
+                {
+                    "major": 259,
+                    "minor": 0,
+                    "op": "Write",
+                    "value": 14
+                },
+                {
+                    "major": 259,
+                    "minor": 0,
+                    "op": "Sync",
+                    "value": 0
+                },
+                {
+                    "major": 259,
+                    "minor": 0,
+                    "op": "Async",
+                    "value": 14
+                },
+                {
+                    "major": 259,
+                    "minor": 0,
+                    "op": "Discard",
+                    "value": 0
+                },
+                {
+                    "major": 259,
+                    "minor": 0,
+                    "op": "Total",
+                    "value": 14
+                },
+                {
+                    "major": 259,
+                    "minor": 1,
+                    "op": "Read",
+                    "value": 2
+                },
+                {
+                    "major": 259,
+                    "minor": 1,
+                    "op": "Write",
+                    "value": 0
+                },
+                {
+                    "major": 259,
+                    "minor": 1,
+                    "op": "Sync",
+                    "value": 2
+                },
+                {
+                    "major": 259,
+                    "minor": 1,
+                    "op": "Async",
+                    "value": 0
+                },
+                {
+                    "major": 259,
+                    "minor": 1,
+                    "op": "Discard",
+                    "value": 0
+                },
+                {
+                    "major": 259,
+                    "minor": 1,
+                    "op": "Total",
+                    "value": 2
+                }
+            ],
+            "io_queue_recursive":
+            [],
+            "io_service_time_recursive":
+            [],
+            "io_wait_time_recursive":
+            [],
+            "io_merged_recursive":
+            [],
+            "io_time_recursive":
+            [],
+            "sectors_recursive":
+            []
+        },
+        "num_procs": 0,
+        "storage_stats":
+        {},
+        "cpu_stats":
+        {
+            "cpu_usage":
+            {
+                "total_usage": 4817594472,
+                "percpu_usage":
+                [
+                    2130796487,
+                    1675103146
+                ],
+                "usage_in_kernelmode": 540000000,
+                "usage_in_usermode": 2300000000
+            },
+            "system_cpu_usage": 1039490000000,
+            "online_cpus": 2,
+            "throttling_data":
+            {
+                "periods": 0,
+                "throttled_periods": 0,
+                "throttled_time": 0
+            }
+        },
+        "precpu_stats":
+        {
+            "cpu_usage":
+            {
+                "total_usage": 4731035320,
+                "percpu_usage":
+                [
+                    2095343340,
+                    1642174563
+                ],
+                "usage_in_kernelmode": 540000000,
+                "usage_in_usermode": 2280000000
+            },
+            "system_cpu_usage": 1019570000000,
+            "online_cpus": 2,
+            "throttling_data":
+            {
+                "periods": 0,
+                "throttled_periods": 0,
+                "throttled_time": 0
+            }
+        },
+        "memory_stats":
+        {
+            "usage": 160886784,
+            "max_usage": 205619200,
+            "stats":
+            {
+                "active_anon": 0,
+                "active_file": 1081344,
+                "cache": 5136384,
+                "dirty": 0,
+                "hierarchical_memory_limit": 3221225472,
+                "hierarchical_memsw_limit": 92233720,
+                "inactive_anon": 147873792,
+                "inactive_file": 3919872,
+                "mapped_file": 0,
+                "pgfault": 125499,
+                "pgmajfault": 0,
+                "pgpgin": 83193,
+                "pgpgout": 45842,
+                "rss": 147873792,
+                "rss_huge": 0,
+                "total_active_anon": 0,
+                "total_active_file": 1081344,
+                "total_cache": 5136384,
+                "total_dirty": 0,
+                "total_inactive_anon": 147873792,
+                "total_inactive_file": 3919872,
+                "total_mapped_file": 0,
+                "total_pgfault": 125499,
+                "total_pgmajfault": 0,
+                "total_pgpgin": 83193,
+                "total_pgpgout": 45842,
+                "total_rss": 147873792,
+                "total_rss_huge": 0,
+                "total_unevictable": 0,
+                "total_writeback": 135168,
+                "unevictable": 0,
+                "writeback": 135168
+            },
+            "limit": 922337
+        },
+        "name": "dd-agent",
+        "id": "67cd8a22b533459696d4ccab5278e009-2860414825",
+        "networks":
+        {
+            "eth1":
+            {
+                "rx_bytes": 781187362,
+                "rx_packets": 527514,
+                "rx_errors": 0,
+                "rx_dropped": 0,
+                "tx_bytes": 971750,
+                "tx_packets": 6117,
+                "tx_errors": 0,
+                "tx_dropped": 0
+            }
+        },
+        "network_rate_stats":
+        {
+            "rx_bytes_per_sec": 1911.331442643617,
+            "tx_bytes_per_sec": 2390.9142405361977
+        }
+    },
+    "67cd8a22b533459696d4ccab5278e009-3344678718":
+    {
+        "read": "2023-06-20T01:19:44.895193503Z",
+        "preread": "2023-06-20T01:19:34.895391778Z",
+        "pids_stats":
+        {},
+        "blkio_stats":
+        {
+            "io_service_bytes_recursive":
+            [],
+            "io_serviced_recursive":
+            [],
+            "io_queue_recursive":
+            [],
+            "io_service_time_recursive":
+            [],
+            "io_wait_time_recursive":
+            [],
+            "io_merged_recursive":
+            [],
+            "io_time_recursive":
+            [],
+            "sectors_recursive":
+            []
+        },
+        "num_procs": 0,
+        "storage_stats":
+        {},
+        "cpu_stats":
+        {
+            "cpu_usage":
+            {
+                "total_usage": 977249587,
+                "percpu_usage":
+                [
+                    317451515,
+                    454575659
+                ],
+                "usage_in_kernelmode": 90000000,
+                "usage_in_usermode": 750000000
+            },
+            "system_cpu_usage": 1039130000000,
+            "online_cpus": 2,
+            "throttling_data":
+            {
+                "periods": 0,
+                "throttled_periods": 0,
+                "throttled_time": 0
+            }
+        },
+        "precpu_stats":
+        {
+            "cpu_usage":
+            {
+                "total_usage": 970577025,
+                "percpu_usage":
+                [
+                    315805506,
+                    450950344
+                ],
+                "usage_in_kernelmode": 90000000,
+                "usage_in_usermode": 740000000
+            },
+            "system_cpu_usage": 1019220000000,
+            "online_cpus": 2,
+            "throttling_data":
+            {
+                "periods": 0,
+                "throttled_periods": 0,
+                "throttled_time": 0
+            }
+        },
+        "memory_stats":
+        {
+            "usage": 34865152,
+            "max_usage": 36872192,
+            "stats":
+            {
+                "active_anon": 0,
+                "active_file": 0,
+                "cache": 0,
+                "dirty": 135168,
+                "hierarchical_memory_limit": 3221225472,
+                "hierarchical_memsw_limit": 36854771712,
+                "inactive_anon": 32169984,
+                "inactive_file": 0,
+                "mapped_file": 0,
+                "pgfault": 16896,
+                "pgmajfault": 0,
+                "pgpgin": 10626,
+                "pgpgout": 2707,
+                "rss": 32169984,
+                "rss_huge": 0,
+                "total_active_anon": 0,
+                "total_active_file": 0,
+                "total_cache": 0,
+                "total_dirty": 135168,
+                "total_inactive_anon": 32169984,
+                "total_inactive_file": 0,
+                "total_mapped_file": 0,
+                "total_pgfault": 16896,
+                "total_pgmajfault": 0,
+                "total_pgpgin": 10626,
+                "total_pgpgout": 2707,
+                "total_rss": 32169984,
+                "total_rss_huge": 0,
+                "total_unevictable": 0,
+                "total_writeback": 0,
+                "unevictable": 0,
+                "writeback": 0
+            },
+            "limit": 92233
+        },
+        "name": "apmtest-ping",
+        "id": "67cd8a22b533459696d4ccab5278e009-3344678718",
+        "networks":
+        {
+            "eth1":
+            {
+                "rx_bytes": 781186753,
+                "rx_packets": 527511,
+                "rx_errors": 0,
+                "rx_dropped": 0,
+                "tx_bytes": 971042,
+                "tx_packets": 6113,
+                "tx_errors": 0,
+                "tx_dropped": 0
+            }
+        },
+        "network_rate_stats":
+        {
+            "rx_bytes_per_sec": 1850.5366907760217,
+            "tx_bytes_per_sec": 2320.246003749541
+        }
+    }
+}
