@@ -41,25 +41,23 @@ def setup_weaviate():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with kind_run(conditions=[setup_weaviate]) as kubeconfig:
+    with kind_run(conditions=[setup_weaviate]) as kubeconfig, ExitStack() as stack:
+        weaviate_host, weaviate_port = stack.enter_context(
+            port_forward(kubeconfig, 'weaviate', 2112, 'statefulset', 'weaviate')
+        )
+        weaviate_host, weaviate_api_port = stack.enter_context(
+            port_forward(kubeconfig, 'weaviate', 8080, 'statefulset', 'weaviate')
+        )
 
-        with ExitStack() as stack:
-            weaviate_host, weaviate_port = stack.enter_context(
-                port_forward(kubeconfig, 'weaviate', 2112, 'statefulset', 'weaviate')
-            )
-            weaviate_host, weaviate_api_port = stack.enter_context(
-                port_forward(kubeconfig, 'weaviate', 8080, 'statefulset', 'weaviate')
-            )
+        instance = {
+            'openmetrics_endpoint': f'http://{weaviate_host}:{weaviate_port}/metrics',
+            'weaviate_api_endpoint': f'http://{weaviate_host}:{weaviate_api_port}',
+        }
+        if USE_AUTH:
+            instance['headers'] = {'Authorization': 'Bearer test123'}
 
-            instance = {
-                'openmetrics_endpoint': f'http://{weaviate_host}:{weaviate_port}/metrics',
-                'weaviate_api_endpoint': f'http://{weaviate_host}:{weaviate_api_port}',
-            }
-            if USE_AUTH:
-                instance['headers'] = {'Authorization': 'Bearer test123'}
-
-            make_weaviate_request(instance)
-            yield instance
+        make_weaviate_request(instance)
+        yield instance
 
 
 def make_weaviate_request(instance):
