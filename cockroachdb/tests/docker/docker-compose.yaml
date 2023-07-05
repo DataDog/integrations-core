@@ -12,8 +12,8 @@ services:
     ports:
       - "26257:26257"
       - "8080:8080"
-#    volumes:  # Uncomment this section to mount the sql script. See /tests/README.md.
-#      - ./sql.sh:/sql.sh
+    volumes:
+      - ./sql.sh:/sql.sh
     networks:
      - roachnet
 
