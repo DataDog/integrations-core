@@ -6,6 +6,7 @@ import os
 import pytest
 from packaging.version import parse as parse_version
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.dev import docker_run, run_command
 
 from .common import COCKROACHDB_VERSION, HOST, PORT
@@ -17,11 +18,14 @@ DOCKER_DIR = os.path.join(HERE, 'docker')
 @pytest.fixture(scope='session')
 def dd_environment(instance):
     env_vars = {'COCKROACHDB_START_COMMAND': _get_start_command()}
+
+    conditions = [run_sql] if is_affirmative(os.environ.get("POPULATE_METRICS")) else None
+
     with docker_run(
         os.path.join(DOCKER_DIR, 'docker-compose.yaml'),
         env_vars=env_vars,
         endpoints=instance['openmetrics_endpoint'],
-        # conditions=[run_sql], # Uncomment to run the sql script in the cockroachdb container. See /tests/README.md.
+        conditions=conditions,
     ):
         yield instance
 
