@@ -495,7 +495,7 @@ class PostgreSql(AgentCheck):
         elapsed_ms = (time() - start_time) * 1000
         self.histogram(
             "dd.postgres._collect_relations_autodiscovery.time",
-            elapsed_ms * 1000,
+            elapsed_ms,
             tags=self.tags + self._get_debug_tags(),
             hostname=self.resolved_hostname,
         )
