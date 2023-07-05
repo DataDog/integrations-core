@@ -82,8 +82,9 @@ def test_autodiscovery_max_databases(integration_check, pg_instance):
         "Autodiscovery found {} databases, which was more than the specified limit of {}. "
         "Increase `max_databases` in the `database_autodiscovery` block of the agent configuration "
         "to see these extra databases. "
-        "The database list will be truncated.\n".format(
+        "The database list will be truncated.\ncode=autodiscovered-databases-exceeds-limit max_databases={}".format(
             NUM_DOGS_DATABASES - len(DISCOVERY_CONFIG["exclude"]),
+            pg_instance['database_autodiscovery']['max_databases'],
             pg_instance['database_autodiscovery']['max_databases'],
         )
     ]
