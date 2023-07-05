@@ -15,6 +15,8 @@ from rich.errors import StyleSyntaxError
 from rich.style import Style
 from rich.text import Text
 
+from ddev.config.constants import VerbosityLevels
+
 if TYPE_CHECKING:
     from rich.status import Status
 
@@ -101,7 +103,7 @@ class BorrowedStatus:
             return
 
         old_message, final_text = self.__messages.pop()
-        if self.__verbosity > 0:
+        if self.__verbosity > VerbosityLevels.INFO:
             if not final_text:
                 final_text = old_message.plain
                 final_text = f'Finished {final_text[:1].lower()}{final_text[1:]}'
@@ -182,42 +184,34 @@ class Terminal:
             self.console.stderr = False
 
     def display_error(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < -2:
+        if self.verbosity < VerbosityLevels.ERROR:
             return
 
         self.output(text, self._style_level_error, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_warning(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < -1:
+        if self.verbosity < VerbosityLevels.WARN:
             return
 
         self.output(text, self._style_level_warning, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_info(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < 0:
+        if self.verbosity < VerbosityLevels.INFO:
             return
 
         self.output(text, self._style_level_info, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_success(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < 0:
+        if self.verbosity < VerbosityLevels.INFO:
             return
 
         self.output(text, self._style_level_success, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_waiting(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < 0:
+        if self.verbosity < VerbosityLevels.INFO:
             return
 
         self.output(text, self._style_level_waiting, stderr=stderr, indent=indent, link=link, **kwargs)
-
-    def display_debug(self, text='', level=1, stderr=True, indent=None, link=None, **kwargs):
-        if not 1 <= level <= 3:
-            raise ValueError('Debug output can only have verbosity levels between 1 and 3 (inclusive)')
-        elif self.verbosity < level:
-            return
-
-        self.output(text, self._style_level_debug, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_header(self, title=''):
         self.console.rule(Text(title, self._style_level_success))
