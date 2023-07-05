@@ -10,7 +10,7 @@ from .common import E2E_METRICS, FLAKY_E2E_METRICS
 
 
 @pytest.mark.e2e
-def test_e2e_openmetrics_v1(dd_agent_check):
+def test_e2e_openmetrics_v2(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
 
     aggregator.assert_service_check('weaviate.openmetrics.health', ServiceCheck.OK, count=2)
