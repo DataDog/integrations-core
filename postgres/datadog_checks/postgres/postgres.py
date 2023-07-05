@@ -13,7 +13,6 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
-from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres import aws
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
@@ -50,7 +49,7 @@ from .util import (
     DatabaseConfigurationError,  # noqa: F401
     fmt,
     get_schema_field,
-    warning_with_tags
+    warning_with_tags,
 )
 from .version_utils import V9, V9_2, V10, V13, V14, VersionUtils
 
@@ -500,7 +499,7 @@ class PostgreSql(AgentCheck):
             tags=self.tags + self._get_debug_tags(),
             hostname=self.resolved_hostname,
         )
-        if elapsed_ms > self._config.min_collection_interval*1000:
+        if elapsed_ms > self._config.min_collection_interval * 1000:
             self.record_warning(
                 DatabaseConfigurationError.autodiscovered_metrics_exceeds_collection_interval,
                 warning_with_tags(
@@ -508,6 +507,8 @@ class PostgreSql(AgentCheck):
                     "the minimum collection interval. Consider increasing the min_collection_interval parameter "
                     "in the postgres yaml configuration.",
                     int(elapsed_ms),
+                    code=DatabaseConfigurationError.autodiscovered_metrics_exceeds_collection_interval.value,
+                    min_collection_interval=self._config.min_collection_interval,
                 ),
             )
 

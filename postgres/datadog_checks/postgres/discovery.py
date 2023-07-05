@@ -45,14 +45,11 @@ class PostgresAutodiscovery(Discovery):
         """
         prev_cached_items_len = len(self._cache_filtered)
         items = list(super().get_items())
-        
+
         # check if the items got refreshed + went over limit
         # before this function applies
         # the max_databases limit
-        if (
-            len(items) != prev_cached_items_len
-            and len(items) > self._max_databases
-        ):
+        if len(items) != prev_cached_items_len and len(items) > self._max_databases:
             self._check.record_warning(
                 DatabaseConfigurationError.autodiscovered_databases_exceeds_limit,
                 warning_with_tags(
@@ -62,10 +59,12 @@ class PostgresAutodiscovery(Discovery):
                     "The database list will be truncated.",
                     len(items),
                     self._max_databases,
+                    code=DatabaseConfigurationError.autodiscovered_databases_exceeds_limit.value,
+                    max_databases=self._max_databases,
                 ),
             )
 
-        items_parsed = [item[1] for item in items][:self._max_databases]
+        items_parsed = [item[1] for item in items][: self._max_databases]
         self._cache_filtered = items_parsed
         return items_parsed
 
