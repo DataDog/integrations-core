@@ -714,7 +714,7 @@ snmp.ironport.oldestMessageAge,gauge,,,,"[ASYNCOS-MAIL-MIB] The number of second
 snmp.ironport.openFilesOrSockets,gauge,,,,"[ASYNCOS-MAIL-MIB] This object notes how many files or sockets are open on the appliance. In normal operating conditions, the measurement is taken at least once every 5-15 seconds.",0,snmp,,
 snmp.ironport.outstandingDNSRequests,gauge,,,,"[ASYNCOS-MAIL-MIB] Number of DNS requests that have been sent but for which no reply has been received.",0,snmp,,
 snmp.ironport.pendingDNSRequests,gauge,,,,"[ASYNCOS-MAIL-MIB] Number of DNS requests waiting to be sent.",0,snmp,,
-snmp.ironport.perCentCPULoad,gauge,,,,"",0,snmp,,
+snmp.ironport.perCentCPULoad,gauge,,,,"[ASYNCOS-MAIL-MIB] This object provides a general idea of how many processes are waiting in ready queue for CPU. This measurment tells how much the CPU is loaded.",0,snmp,,
 snmp.ironport.perCentDiskIOUtilization,gauge,,,,"[ASYNCOS-MAIL-MIB] This object provides a general idea of how much disk I/O has been generated within the last 5-15 seconds.",0,snmp,,
 snmp.ironport.perCentQueueUtilization,gauge,,,,"[ASYNCOS-MAIL-MIB] Percent of total queue capacity used.",0,snmp,,
 snmp.ironport.powerSupply,gauge,,,,"[ASYNCOS-MAIL-MIB] A table of one or power supply entries. (Make 'sum by {X}' queries to count elements with the tag X.)",0,snmp,,
