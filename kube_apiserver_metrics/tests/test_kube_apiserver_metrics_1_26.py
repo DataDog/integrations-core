@@ -22,6 +22,7 @@ class TestKubeAPIServerMetrics:
     """Basic Test for kube_apiserver integration."""
 
     METRICS = [
+        'longrunning_gauge',
         'current_inflight_requests',
         'audit_event',
         'go_threads',
@@ -90,4 +91,6 @@ class TestKubeAPIServerMetrics:
             metric_to_assert = NAMESPACE + "." + metric
             aggregator.assert_metric(metric_to_assert)
             aggregator.assert_metric_has_tag(metric_to_assert, customtag)
+            if "aggregator_unavailable_apiservice" in metric:
+                aggregator.assert_metric_has_tag(metric_to_assert, "apiservice_name:v1.")
         aggregator.assert_all_metrics_covered()

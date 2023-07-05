@@ -12,6 +12,7 @@ import pytest
 import vcr
 from click.testing import CliRunner as __CliRunner
 from datadog_checks.dev.tooling.utils import set_root
+from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.config.file import ConfigFile
 from ddev.repo.core import Repository
@@ -35,6 +36,11 @@ class ClonedRepo:
 
             # Remove untracked files
             PLATFORM.check_command_output(['git', 'clean', '-fd'])
+
+            # Remove all tags
+            tags_dir = self.path / '.git' / 'refs' / 'tags'
+            if tags_dir.is_dir():
+                tags_dir.remove()
 
     @staticmethod
     def new_branch():
@@ -66,6 +72,11 @@ def platform() -> Platform:
 
 
 @pytest.fixture(scope='session')
+def terminal() -> Terminal:
+    return Terminal(verbosity=0, enable_color=False, interactive=False)
+
+
+@pytest.fixture(scope='session')
 def local_repo() -> Path:
     return Path(__file__).resolve().parent.parent.parent
 
@@ -84,8 +95,6 @@ def valid_integration(valid_integrations) -> str:
 @pytest.fixture(autouse=True)
 def config_file(tmp_path, monkeypatch) -> ConfigFile:
     for env_var in (
-        'DD_GITHUB_USER',
-        'DD_GITHUB_TOKEN',
         'DD_SITE',
         'DD_LOGS_CONFIG_DD_URL',
         'DD_DD_URL',
@@ -120,7 +129,9 @@ def isolation() -> Generator[Path, None, None]:
 def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
     cloned_repo_path = isolation / local_repo.name
 
-    PLATFORM.check_command_output(['git', 'clone', '--local', '--shared', str(local_repo), str(cloned_repo_path)])
+    PLATFORM.check_command_output(
+        ['git', 'clone', '--local', '--shared', '--no-tags', str(local_repo), str(cloned_repo_path)]
+    )
     with cloned_repo_path.as_cwd():
         PLATFORM.check_command_output(['git', 'config', 'user.name', 'Foo Bar'])
         PLATFORM.check_command_output(['git', 'config', 'user.email', 'foo@bar.baz'])

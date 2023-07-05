@@ -452,7 +452,9 @@ def test_statement_metadata(
 ):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
-    query = 'select * from sys.databases'
+    query = '''
+    -- Test comment
+    select * from sys.sysusers'''
     query_signature = '6d1d070f9b6c5647'
 
     def _run_query():
@@ -643,9 +645,6 @@ def test_statement_reported_hostname(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
-    with datadog_conn_docker.cursor() as cursor:
-        cursor.execute('DBCC FREEPROCCACHE')
-
     now = time.time()
     test_query = "select * from sys.databases"
 
@@ -668,7 +667,8 @@ def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
     # without the cast this is expected to fail with
     # pyodbc.ProgrammingError: ('ODBC SQL type -150 is not yet supported.  column-index=77  type=-150', 'HY106')
     with datadog_conn_docker.cursor() as cursor:
-        params = (math.ceil(time.time() - now),)
+        lookback_seconds = math.ceil(time.time() - now) + 60
+        params = (lookback_seconds,)
         logging.debug("running statement_metrics_query [%s] %s", statement_metrics_query, params)
         cursor.execute(statement_metrics_query, params)
 

@@ -29,6 +29,8 @@ The Cassandra check is included in the [Datadog Agent][2] package, so you don't 
 
 _Available for Agent versions >6.0_
 
+For containerized environments, follow the instructions on the [Kubernetes Log Collection][18] or [Docker Log Collection][19] pages.
+
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
    ```yaml
@@ -101,3 +103,5 @@ Need help? Contact [Datadog support][4].
 [15]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
 [16]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog
 [17]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containeragent#autodiscovery-annotations
+[18]: https://docs.datadoghq.com/containers/kubernetes/log/
+[19]: https://docs.datadoghq.com/containers/docker/log/

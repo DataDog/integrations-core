@@ -11,6 +11,7 @@ from datadog_checks.base.errors import CheckException
 
 METRICS = {
     'apiserver_current_inflight_requests': 'current_inflight_requests',
+    # Deprecated in 1.23 (replaced by apiserver_longrunning_requests)
     'apiserver_longrunning_gauge': 'longrunning_gauge',
     'go_threads': 'go_threads',
     'go_goroutines': 'go_goroutines',
@@ -40,7 +41,6 @@ METRICS = {
     # fmt: on
     # For Kubernetes >= 1.14
     # (https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.14.md#deprecated-metrics)
-    'aggregator_unavailable_apiservice': 'aggregator_unavailable_apiservice',
     'rest_client_request_duration_seconds': 'rest_client_request_latency_seconds',
     'apiserver_admission_webhook_admission_duration_seconds': 'admission_webhook_admission_latencies_seconds',
     'apiserver_admission_step_admission_duration_seconds': 'admission_step_admission_latencies_seconds',
@@ -63,6 +63,8 @@ METRICS = {
     # https://kubernetes.io/docs/reference/using-api/deprecation-policy/#rest-resources-aka-api-objects
     'apiserver_requested_deprecated_apis': 'requested_deprecated_apis',
     # For Kubernetes >= 1.23
+    # https://github.com/kubernetes/kubernetes/pull/103799
+    'apiserver_longrunning_requests': 'longrunning_gauge',
     # https://github.com/kubernetes/kubernetes/pull/104983
     'apiserver_storage_list_total': 'storage_list_total',
     'apiserver_storage_list_fetched_objects_total': 'storage_list_fetched_objects_total',
@@ -94,6 +96,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     def __init__(self, name, init_config, instances=None):
         # Set up metrics_transformers
         self.metric_transformers = {
+            'aggregator_unavailable_apiservice': self.aggregator_unavailable_apiservice,
             'apiserver_audit_event_total': self.apiserver_audit_event_total,
             'rest_client_requests_total': self.rest_client_requests_total,
             'apiserver_request_count': self.apiserver_request_count,
@@ -157,7 +160,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
 
         return kube_apiserver_metrics_instance
 
-    def submit_as_gauge_and_monotonic_count(self, metric_suffix, metric, scraper_config):
+    def submit_metric(self, metric_suffix, metric, scraper_config, gauge=True, monotonic_count=True):
         """
         submit a kube_apiserver_metrics metric both as a gauge (for compatibility) and as a monotonic_count
         """
@@ -168,34 +171,45 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
 
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 _tags.append('{}:{}'.format(label_name, label_value))
-            # submit raw metric
-            self.gauge(metric_name, sample[self.SAMPLE_VALUE], _tags)
-            # submit rate metric
-            self.monotonic_count(metric_name + '.count', sample[self.SAMPLE_VALUE], _tags)
+            if gauge:
+                # submit raw metric
+                self.gauge(metric_name, sample[self.SAMPLE_VALUE], _tags)
+            if monotonic_count:
+                # submit rate metric
+                self.monotonic_count(metric_name + '.count', sample[self.SAMPLE_VALUE], _tags)
+
+    def aggregator_unavailable_apiservice(self, metric, scraper_config):
+        """
+        This function replaces the tag "name" by "apiservice_name".
+        It assumes that every sample is tagged with `name`.
+        """
+        for sample in metric.samples:
+            sample[self.SAMPLE_LABELS]["apiservice_name"] = sample[self.SAMPLE_LABELS].pop("name")
+        self.submit_metric('.aggregator_unavailable_apiservice', metric, scraper_config, monotonic_count=False)
 
     def apiserver_audit_event_total(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.audit_event', metric, scraper_config)
+        self.submit_metric('.audit_event', metric, scraper_config)
 
     def rest_client_requests_total(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.rest_client_requests_total', metric, scraper_config)
+        self.submit_metric('.rest_client_requests_total', metric, scraper_config)
 
     def http_requests_total(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.http_requests_total', metric, scraper_config)
+        self.submit_metric('.http_requests_total', metric, scraper_config)
 
     def apiserver_request_count(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.apiserver_request_count', metric, scraper_config)
+        self.submit_metric('.apiserver_request_count', metric, scraper_config)
 
     def apiserver_dropped_requests_total(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.apiserver_dropped_requests_total', metric, scraper_config)
+        self.submit_metric('.apiserver_dropped_requests_total', metric, scraper_config)
 
     def authenticated_user_requests(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.authenticated_user_requests', metric, scraper_config)
+        self.submit_metric('.authenticated_user_requests', metric, scraper_config)
 
     def apiserver_request_total(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.apiserver_request_total', metric, scraper_config)
+        self.submit_metric('.apiserver_request_total', metric, scraper_config)
 
     def apiserver_request_terminations_total(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.apiserver_request_terminations_total', metric, scraper_config)
+        self.submit_metric('.apiserver_request_terminations_total', metric, scraper_config)
 
     def apiserver_admission_webhook_fail_open_count(self, metric, scraper_config):
-        self.submit_as_gauge_and_monotonic_count('.apiserver_admission_webhook_fail_open_count', metric, scraper_config)
+        self.submit_metric('.apiserver_admission_webhook_fail_open_count', metric, scraper_config)

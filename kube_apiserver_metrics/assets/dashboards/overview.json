@@ -104,12 +104,12 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.cpu.requests{$cluster,$scope,image_name:k8s.gcr.io/kube-apiserver} by {pod_name,host}",
+                                            "query": "sum:kubernetes.cpu.requests{$cluster,$scope,short_image:kube-apiserver} by {pod_name,host}",
                                             "data_source": "metrics",
                                             "name": "query5"
                                         },
                                         {
-                                            "query": "sum:kubernetes.cpu.usage.total{$cluster,$scope,image_name:k8s.gcr.io/kube-apiserver} by {pod_name,host}",
+                                            "query": "sum:kubernetes.cpu.usage.total{$cluster,$scope,short_image:kube-apiserver} by {pod_name,host}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -170,12 +170,12 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.memory.requests{$cluster,$scope,image_name:k8s.gcr.io/kube-apiserver} by {pod_name,host}",
+                                            "query": "sum:kubernetes.memory.requests{$cluster,$scope,short_image:kube-apiserver} by {pod_name,host}",
                                             "data_source": "metrics",
                                             "name": "query5"
                                         },
                                         {
-                                            "query": "sum:kubernetes.memory.usage{$cluster,$scope,image_name:k8s.gcr.io/kube-apiserver} by {pod_name,host}",
+                                            "query": "sum:kubernetes.memory.usage{$cluster,$scope,short_image:kube-apiserver} by {pod_name,host}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -380,7 +380,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:kube_apiserver.aggregator_unavailable_apiservice{$cluster,$scope} by {kube_namespace,name}",
+                                            "query": "max:kube_apiserver.aggregator_unavailable_apiservice{$cluster,$scope} by {kube_namespace, apiservice_name}",
                                             "aggregator": "avg"
                                         }
                                     ],

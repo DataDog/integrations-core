@@ -181,6 +181,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
 
+        # if regular samples is disabled, only need to collect as often as activity is sampled
+        if not is_affirmative(config.statement_samples_config.get('enabled', True)):
+            collection_interval = config.statement_activity_config.get(
+                'collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL
+            )
+
         self._conn_pool = MultiDatabaseConnectionPool(check._new_connection)
 
         def shutdown_cb():
@@ -191,7 +197,10 @@ class PostgresStatementSamples(DBMAsyncJob):
             check,
             rate_limit=1 / collection_interval,
             run_sync=is_affirmative(config.statement_samples_config.get('run_sync', False)),
-            enabled=is_affirmative(config.statement_samples_config.get('enabled', True)),
+            enabled=is_affirmative(
+                config.statement_samples_config.get('enabled', True)
+                or is_affirmative(config.statement_activity_config.get('enabled', True))
+            ),
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
@@ -235,6 +244,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
         self._activity_coll_enabled = is_affirmative(self._config.statement_activity_config.get('enabled', True))
+        self._explain_plan_coll_enabled = is_affirmative(self._config.statement_samples_config.get('enabled', True))
         # activity events cannot be reported more often than regular samples
         self._activity_coll_interval = max(
             self._config.statement_activity_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL),
@@ -263,9 +273,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         query = PG_ACTIVE_CONNECTIONS_QUERY.format(
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
-        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
-            cursor_factory=psycopg2.extras.DictCursor
-        ) as cursor:
+        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms) as conn:
+            cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
@@ -298,9 +307,8 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
         )
-        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
-            cursor_factory=psycopg2.extras.DictCursor
-        ) as cursor:
+        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms) as conn:
+            cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
@@ -317,9 +325,8 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
-        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
-            cursor_factory=psycopg2.extras.DictCursor
-        ) as cursor:
+        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms) as conn:
+            cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cursor.execute(
                 "select * from {pg_stat_activity_view} LIMIT 0".format(
                     pg_stat_activity_view=self._config.pg_stat_activity_view
@@ -439,11 +446,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         pg_activity_cols = self._get_pg_stat_activity_cols_cached(PG_STAT_ACTIVITY_COLS)
         rows = self._get_new_pg_stat_activity(pg_activity_cols)
         rows = self._filter_and_normalize_statement_rows(rows)
-        event_samples = self._collect_plans(rows)
         submitted_count = 0
-        for e in event_samples:
-            self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
-            submitted_count += 1
+        if self._explain_plan_coll_enabled:
+            event_samples = self._collect_plans(rows)
+            for e in event_samples:
+                self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
+                submitted_count += 1
 
         if self._report_activity_event():
             active_connections = self._get_active_connections()
@@ -579,7 +587,8 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
-        with self._conn_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms).cursor() as cursor:
+        with self._conn_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
+            cursor = conn.cursor()
             self._log.debug("Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement)
             cursor.execute(
                 """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
