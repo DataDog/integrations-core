@@ -28,9 +28,12 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
         'snmp_host:cisco-ironport-email.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-    ] + ['ironport.cache_admin:quaintly driving driving their quaintly',
- 'ironport.cache_software:but', 'ironport.cache_version:their forward Jaded',
- 'ironport.license_expiration:25']
+    ] + [
+        'ironport.cache_admin:quaintly driving driving their quaintly',
+        'ironport.cache_software:but',
+        'ironport.cache_version:their forward Jaded',
+        'ironport.license_expiration:25',
+    ]
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -89,55 +92,69 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
     aggregator.assert_metric('snmp.ironport.workQueueMessages', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-         ['ironport.power_supply_name:quaintly driving', 'ironport.power_supply_redundancy:power_supply_redundancy_ok', 'ironport.power_supply_status:power_supply_no_ac'],
-         ['ironport.power_supply_name:quaintly quaintly zombies zombies driving forward', 'ironport.power_supply_redundancy:power_supply_redundancy_lost', 'ironport.power_supply_status:power_supply_not_installed'],
-
+        [
+            'ironport.power_supply_name:quaintly driving',
+            'ironport.power_supply_redundancy:power_supply_redundancy_ok',
+            'ironport.power_supply_status:power_supply_no_ac',
+        ],
+        [
+            'ironport.power_supply_name:quaintly quaintly zombies zombies driving forward',
+            'ironport.power_supply_redundancy:power_supply_redundancy_lost',
+            'ironport.power_supply_status:power_supply_not_installed',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ironport.powerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['ironport.temperature_name:but quaintly'],
-         ['ironport.temperature_name:quaintly but but but kept quaintly oxen zombies'],
-
+        ['ironport.temperature_name:but quaintly'],
+        ['ironport.temperature_name:quaintly but but but kept quaintly oxen zombies'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ironport.degreesCelsius', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.ironport.degreesCelsius', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
-         ['ironport.fan_name:Jaded acted acted zombies forward quaintly quaintly but'],
-         ['ironport.fan_name:quaintly quaintly their quaintly but zombies forward but their'],
-
+        ['ironport.fan_name:Jaded acted acted zombies forward quaintly quaintly but'],
+        ['ironport.fan_name:quaintly quaintly their quaintly but zombies forward but their'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ironport.fanRPMs', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['ironport.key_description:driving', 'ironport.key_is_perpetual:false'],
-         ['ironport.key_description:oxen', 'ironport.key_is_perpetual:true'],
-
+        ['ironport.key_description:driving', 'ironport.key_is_perpetual:false'],
+        ['ironport.key_description:oxen', 'ironport.key_is_perpetual:true'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ironport.keySecondsUntilExpire', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.ironport.keySecondsUntilExpire', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
-         ['ironport.update_service_name:acted their acted'],
-         ['ironport.update_service_name:their'],
-
+        ['ironport.update_service_name:acted their acted'],
+        ['ironport.update_service_name:their'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ironport.updateFailures', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.ironport.updateFailures', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric('snmp.ironport.updates', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['ironport.raid_id:but oxen Jaded driving their zombies acted Jaded', 'ironport.raid_last_error:their quaintly Jaded but', 'ironport.raid_status:drive_rebuild'],
-         ['ironport.raid_id:oxen oxen quaintly zombies acted zombies forward', 'ironport.raid_last_error:forward but Jaded zombies but kept Jaded acted', 'ironport.raid_status:drive_failure'],
-
+        [
+            'ironport.raid_id:but oxen Jaded driving their zombies acted Jaded',
+            'ironport.raid_last_error:their quaintly Jaded but',
+            'ironport.raid_status:drive_rebuild',
+        ],
+        [
+            'ironport.raid_id:oxen oxen quaintly zombies acted zombies forward',
+            'ironport.raid_last_error:forward but Jaded zombies but kept Jaded acted',
+            'ironport.raid_status:drive_failure',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ironport.raid', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-
 
     # --- TEST METADATA ---
     device = {
