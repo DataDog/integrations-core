@@ -37,7 +37,7 @@ See the [sample temporal.d/conf.yaml][4] for all available configuration options
 
 3. Uncomment and edit the logs configuration block in your `temporal.d/conf.yaml` file, and set the `path` to point to the file you configured on your Temporal Cluster.
 
-3. [Restart the Agent][5].
+4. [Restart the Agent][5].
 
 ### Validation
 
