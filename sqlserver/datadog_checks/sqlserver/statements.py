@@ -353,7 +353,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
     def _to_metrics_payload(self, rows, max_queries):
         # sort by total_elapsed_time and return the top max_queries
-        rows = rows.sorted(key=lambda i: i['total_elapsed_time'], reverse=True)
+        rows = sorted(rows, key=lambda i: i['total_elapsed_time'], reverse=True)
         rows = rows[:max_queries]
         return {
             'host': self.check.resolved_hostname,
