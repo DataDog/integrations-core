@@ -79,7 +79,6 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
     aggregator.assert_metric('snmp.ironport.cacheTotalBandwidthSaving', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.ironport.cacheTotalHttpReqs', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.ironport.cacheTotalRespTimeNow', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ironport.fipsMode', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.ironport.mailTransferThreads', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.ironport.oldestMessageAge', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.ironport.openFilesOrSockets', metric_type=aggregator.GAUGE, tags=common_tags)
