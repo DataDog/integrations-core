@@ -26,37 +26,37 @@ metrics:
     symbol:
       name: ironport.perCentQueueUtilization
       OID: 1.3.6.1.4.1.15497.1.1.1.4.0
-  - MIB: ASYNCOS-MAIL-MIB
-    symbol:
-      name: ironport.queueAvailabilityStatus
-      OID: 1.3.6.1.4.1.15497.1.1.1.5.0
-      enum:
-        queueSpaceAvailable: 1
-        queueSpaceShortage: 2
-        queueFull: 3
-      TODO: enum in scalar metric is not supported yet (keep this metric and this
-        comment in profile until it's fixed)
-  - MIB: ASYNCOS-MAIL-MIB
-    symbol:
-      name: ironport.resourceConservationReason
-      OID: 1.3.6.1.4.1.15497.1.1.1.6.0
-      enum:
-        noResourceConservation: 1
-        memoryShortage: 2
-        queueSpaceShortage: 3
-        queueFull: 4
-      TODO: enum in scalar metric is not supported yet (keep this metric and this
-        comment in profile until it's fixed)
-  - MIB: ASYNCOS-MAIL-MIB
-    symbol:
-      name: ironport.memoryAvailabilityStatus
-      OID: 1.3.6.1.4.1.15497.1.1.1.7.0
-      enum:
-        memoryAvailable: 1
-        memoryShortage: 2
-        memoryFull: 3
-      TODO: enum in scalar metric is not supported yet (keep this metric and this
-        comment in profile until it's fixed)
+#  - MIB: ASYNCOS-MAIL-MIB
+#    symbol:
+#      name: ironport.queueAvailabilityStatus
+#      OID: 1.3.6.1.4.1.15497.1.1.1.5.0
+#      enum:
+#        queueSpaceAvailable: 1
+#        queueSpaceShortage: 2
+#        queueFull: 3
+#      TODO: enum in scalar metric is not supported yet (keep this metric and this
+#        comment in profile until it's fixed)
+#  - MIB: ASYNCOS-MAIL-MIB
+#    symbol:
+#      name: ironport.resourceConservationReason
+#      OID: 1.3.6.1.4.1.15497.1.1.1.6.0
+#      enum:
+#        noResourceConservation: 1
+#        memoryShortage: 2
+#        queueSpaceShortage: 3
+#        queueFull: 4
+#      TODO: enum in scalar metric is not supported yet (keep this metric and this
+#        comment in profile until it's fixed)
+#  - MIB: ASYNCOS-MAIL-MIB
+#    symbol:
+#      name: ironport.memoryAvailabilityStatus
+#      OID: 1.3.6.1.4.1.15497.1.1.1.7.0
+#      enum:
+#        memoryAvailable: 1
+#        memoryShortage: 2
+#        memoryFull: 3
+#      TODO: enum in scalar metric is not supported yet (keep this metric and this
+#        comment in profile until it's fixed)
   - MIB: ASYNCOS-MAIL-MIB
     table:
       name: powerSupplyTable
