@@ -11,7 +11,6 @@ from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
     assert_extend_generic_if,
-    assert_extend_generic_host_resources,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
@@ -34,12 +33,14 @@ def test_e2e_profile_audiocodes_mediant_sbc(dd_agent_check):
     # --- TEST EXTENDED METRICS ---
     # Examples:
     assert_extend_generic_if(aggregator, common_tags)
-    assert_extend_generic_host_resources(aggregator, common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
 
     # --- TEST METADATA ---
     device = {
@@ -50,7 +51,7 @@ def test_e2e_profile_audiocodes_mediant_sbc(dd_agent_check):
         'name': 'audiocodes-mediant-sbc.device.name',
         'profile': 'audiocodes-mediant-sbc',
         'status': 1,
-        'sys_object_id': '1.1.2.3.5.8.13.21.34',
+        'sys_object_id': '1.3.6.1.4.1.5003.8.1.1.71',
         'vendor': 'audiocodes',
     }
     device['tags'] = common_tags
