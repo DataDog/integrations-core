@@ -12,13 +12,12 @@
     "title": "Chatsworth Products",
     "media": [],
     "classifier_tags": [
+      "Category::Network",
+      "Category::Notification",
+      "Category::SNMP",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS",
-      "Category::Monitoring",
-      "Category::Notification",
-      "Category::Network",
-      "Category::SNMP"
+      "Supported OS::macOS"
     ]
   },
   "assets": {

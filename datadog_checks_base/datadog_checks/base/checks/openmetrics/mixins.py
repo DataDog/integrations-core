@@ -83,7 +83,8 @@ class OpenMetricsScraperMixin(object):
         if instance and endpoint is None:
             raise CheckException("You have to define a prometheus_url for each prometheus instance")
 
-        config['prometheus_url'] = endpoint
+        # Set the bearer token authorization to customer value, then get the bearer token
+        self.update_prometheus_url(instance, config, endpoint)
 
         # `NAMESPACE` is the prefix metrics will have. Need to be hardcoded in the
         # child check class.
@@ -349,26 +350,6 @@ class OpenMetricsScraperMixin(object):
         # INTERNAL FEATURE, might be removed in future versions
         config['_text_filter_blacklist'] = []
 
-        # Whether or not to use the service account bearer token for authentication.
-        # Can be explicitly set to true or false to send or not the bearer token.
-        # If set to the `tls_only` value, the bearer token will be sent only to https endpoints.
-        # If 'bearer_token_path' is not set, we use /var/run/secrets/kubernetes.io/serviceaccount/token
-        # as a default path to get the token.
-        bearer_token_auth = _get_setting('bearer_token_auth', False)
-        if bearer_token_auth == 'tls_only':
-            config['bearer_token_auth'] = config['prometheus_url'].startswith("https://")
-        else:
-            config['bearer_token_auth'] = is_affirmative(bearer_token_auth)
-
-        # Can be used to get a service account bearer token from files
-        # other than /var/run/secrets/kubernetes.io/serviceaccount/token
-        # 'bearer_token_auth' should be enabled.
-        config['bearer_token_path'] = instance.get('bearer_token_path', default_instance.get('bearer_token_path', None))
-
-        # The service account bearer token to be used for authentication
-        config['_bearer_token'] = self._get_bearer_token(config['bearer_token_auth'], config['bearer_token_path'])
-        config['_bearer_token_last_refresh'] = time.time()
-
         # Refresh the bearer token every 60 seconds by default.
         # Ref https://github.com/DataDog/datadog-agent/pull/11686
         config['bearer_token_refresh_interval'] = instance.get(
@@ -443,6 +424,33 @@ class OpenMetricsScraperMixin(object):
         check run, such as when polling an external resource like the Kubelet.
         """
         self._http_handlers.clear()
+
+    def update_prometheus_url(self, instance, config, endpoint):
+        if not endpoint:
+            return
+
+        config['prometheus_url'] = endpoint
+        # Whether or not to use the service account bearer token for authentication.
+        # Can be explicitly set to true or false to send or not the bearer token.
+        # If set to the `tls_only` value, the bearer token will be sent only to https endpoints.
+        # If 'bearer_token_path' is not set, we use /var/run/secrets/kubernetes.io/serviceaccount/token
+        # as a default path to get the token.
+        namespace = instance.get('namespace')
+        default_instance = self.default_instances.get(namespace, {})
+        bearer_token_auth = instance.get('bearer_token_auth', default_instance.get('bearer_token_auth', False))
+        if bearer_token_auth == 'tls_only':
+            config['bearer_token_auth'] = config['prometheus_url'].startswith("https://")
+        else:
+            config['bearer_token_auth'] = is_affirmative(bearer_token_auth)
+
+        # Can be used to get a service account bearer token from files
+        # other than /var/run/secrets/kubernetes.io/serviceaccount/token
+        # 'bearer_token_auth' should be enabled.
+        config['bearer_token_path'] = instance.get('bearer_token_path', default_instance.get('bearer_token_path', None))
+
+        # The service account bearer token to be used for authentication
+        config['_bearer_token'] = self._get_bearer_token(config['bearer_token_auth'], config['bearer_token_path'])
+        config['_bearer_token_last_refresh'] = time.time()
 
     def parse_metric_family(self, response, scraper_config):
         """
@@ -654,7 +662,7 @@ class OpenMetricsScraperMixin(object):
             sample_labels_keys = sample_labels.keys()
 
             if match_all or matching_labels.issubset(sample_labels_keys):
-                label_dict = dict()
+                label_dict = {}
 
                 if get_all:
                     for label_name, label_value in iteritems(sample_labels):

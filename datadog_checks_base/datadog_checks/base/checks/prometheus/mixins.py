@@ -186,7 +186,7 @@ class PrometheusScraperMixin(object):
 
         :param response: requests.Response
         :return: metrics_pb2.MetricFamily()
-        """
+        """  # noqa: E501
         if 'application/vnd.google.protobuf' in response.headers['Content-Type']:
             n = 0
             buf = response.content
@@ -275,13 +275,13 @@ class PrometheusScraperMixin(object):
         :return: value of the metric_name matched by the labels
         """
         metric_name = '{}_{}'.format(_m, metric_suffix)
-        expected_labels = set(
-            [(k, v) for k, v in iteritems(_metric["labels"]) if k not in PrometheusScraperMixin.UNWANTED_LABELS]
-        )
+        expected_labels = {
+            (k, v) for k, v in iteritems(_metric["labels"]) if k not in PrometheusScraperMixin.UNWANTED_LABELS
+        }
         for elt in messages[metric_name]:
-            current_labels = set(
-                [(k, v) for k, v in iteritems(elt["labels"]) if k not in PrometheusScraperMixin.UNWANTED_LABELS]
-            )
+            current_labels = {
+                (k, v) for k, v in iteritems(elt["labels"]) if k not in PrometheusScraperMixin.UNWANTED_LABELS
+            }
             # As we have two hashable objects we can compare them without any side effects
             if current_labels == expected_labels:
                 return float(elt["value"])

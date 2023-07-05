@@ -76,7 +76,7 @@ class ManifestV1:
     def add_dashboard(self, title, file_name):
         # Default manifest dashboards to an empty dictionary in the event the key isn't already in the manifest
         if not self._manifest_json['assets'].get('dashboards'):
-            self._manifest_json['assets']['dashboards'] = dict()
+            self._manifest_json['assets']['dashboards'] = {}
         self._manifest_json['assets']['dashboards'][title] = f'assets/dashboards/{file_name}'
 
     def get_path(self, path):
@@ -131,7 +131,7 @@ class ManifestV2:
     def add_dashboard(self, title, file_name):
         # Default manifest dashboards to an empty dictionary in the event the key isn't already in the manifest
         if not self._manifest_json['assets'].get('dashboards'):
-            self._manifest_json['assets']['dashboards'] = dict()
+            self._manifest_json['assets']['dashboards'] = {}
         self._manifest_json['assets']['dashboards'][title] = f'assets/dashboards/{file_name}'
 
     def get_path(self, path):
@@ -169,3 +169,6 @@ class ManifestV2:
 
     def has_integration(self):
         return self._manifest_json.get_path("/assets/integration") is not None
+
+    def has_metrics_integration(self):
+        return self._manifest_json.get_path("/assets/integration/metrics") is not None

@@ -1,10 +1,11 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections import defaultdict
 from fnmatch import fnmatch
-from os.path import exists, join, relpath
+from os.path import exists, join, realpath, relpath
 from time import time
-from typing import Any
+from typing import Any  # noqa: F401
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
@@ -78,6 +79,9 @@ class DirectoryCheck(AgentCheck):
         # Avoid repeated global lookups.
         get_length = len
 
+        # Avoid duplicate files for directory bytes
+        seen_files = defaultdict(lambda: defaultdict(int))
+
         for root, dirs, files in self._walk():
             matched_files = []
             adjust_max_filegauge = False
@@ -115,13 +119,25 @@ class DirectoryCheck(AgentCheck):
                 try:
                     self.log.debug('File entries in matched files: %s', str(file_entry))
                     file_stat = file_entry.stat(follow_symlinks=self._config.stat_follow_symlinks)
+                    real_path = realpath(file_entry.path)
                 except OSError as ose:
                     self.log.debug(
                         'DirectoryCheck: could not stat file %s, skipping it - %s', join(root, file_entry.name), ose
                     )
                 else:
+                    # Directory bytes metric
+                    if real_path not in seen_files.keys():
+                        directory_bytes += file_stat.st_size
+                        if self._config.stat_follow_symlinks:
+                            seen_files[real_path].setdefault('lnks', []).append(file_entry.path)
+                            seen_files[real_path]['size'] += file_stat.st_size
+                        else:
+                            seen_files[file_entry.name]['size'] += file_stat.st_size
+
+                    elif file_entry.is_symlink() and self._config.stat_follow_symlinks:
+                        seen_files[real_path].setdefault('lnks', []).append(file_entry.path)
+
                     # file specific metrics
-                    directory_bytes += file_stat.st_size
                     if self._config.filegauges and matched_files_length <= max_filegauge_balance:
                         self.log.debug('Matched files length: %s', matched_files_length)
                         filetags = ['{}:{}'.format(self._config.filetagname, join(root, file_entry.name))]
@@ -170,19 +186,26 @@ class DirectoryCheck(AgentCheck):
             self.gauge('system.disk.directory.bytes', directory_bytes, tags=dirtags)
             self.log.debug("`countonly` not enabled: Collecting system.disk.directory.bytes metric.")
 
+            # For troubleshooting. Contains files that contribute to system.disk.directory.bytes
+            # Debug level is too common and could pollute the logs; trace level better for manual check runs.
+            # seen_files = {'/path/to/real/file': [list of symlinks]}
+            self.log.trace("Processed files: %s", seen_files)
+
     def _walk(self):
         """
         Wraps walker iteration to handle errors and recursive option.
         """
-        walker = walk(self._config.abs_directory, self._config.follow_symlinks)
+
+        def log_error(e):
+            self.log.error("Error when traversing %s: %s", self._config.abs_directory, e)
+
+        walker = walk(self._config.abs_directory, onerror=log_error, followlinks=self._config.follow_symlinks)
 
         while True:
             try:
                 yield next(walker)
             except StopIteration:
                 break
-            except OSError as e:
-                self.log.error("Error when traversing %s: %s", self._config.abs_directory, e)
 
             # Only visit the first directory when we don't want recursive search
             if not self._config.recursive:

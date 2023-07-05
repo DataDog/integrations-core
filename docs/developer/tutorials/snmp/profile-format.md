@@ -275,6 +275,30 @@ External table indexes must be a subset of the indexes of the current table, or 
                 end: 6
     ```
 
+##### Mapping column to tag string value
+You can use the following syntax to map OID values to tag string values. In the example below, the submitted metrics will be `snmp.ifInOctets` with tags like `if_type:regular1822`. Available in Agent 7.45+.
+
+```yaml
+metrics:
+  - MIB: IP-MIB
+    table:
+      OID: 1.3.6.1.2.1.2.2
+      name: ifTable
+    symbols:
+      - OID: 1.3.6.1.2.1.2.2.1.10
+        name: ifInOctets
+    metric_tags:
+      - tag: if_type
+        column:
+          OID: 1.3.6.1.2.1.2.2.1.3
+          name: ifType
+        mapping:
+          1: other
+          2: regular1822
+          3: hdh1822
+          4: ddn-x25
+          29: ultra
+```
 
 ##### Using an index
 
@@ -485,7 +509,128 @@ This example will submit two metrics `snmp.upsBasicStateOutputState.OnLine` and 
 
 [Example of flag_stream usage in a profile](https://github.com/DataDog/integrations-core/blob/e64e2d18529c6c106f02435c5fdf2621667c16ad/snmp/datadog_checks/snmp/data/profiles/apc_ups.yaml#L60-L127).
 
-#### Extract value
+
+#### Report string OIDs
+
+To report statuses from your network devices, you can use the constant metrics feature available in Agent 7.45+.
+
+`constant_value_one` sends a constant metric, equal to one, that can be tagged with string properties.
+
+Example use case:
+
+```yaml
+metrics:
+  - MIB: MY-MIB
+    symbols:
+      - name: myDevice
+        constant_value_one: true
+    metric_tags:
+      - tag: status
+        column:
+          OID: 1.2.3.4
+          name: myStatus
+        mapping:
+          1: up
+          2: down
+    # ...
+```
+
+An `snmp.myDevice` metric is sent, with a value of 1 and tagged by statuses. This allows you to monitor status changes, number of devices per state, etc., in Datadog.
+
+### `metric_tags`
+
+_(Optional)_
+
+This field is used to apply tags to all metrics collected by the profile. It has the same meaning than the instance-level config option (see [`conf.yaml.example`](https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example)).
+
+Several collection methods are supported, as illustrated below:
+
+```yaml
+metric_tags:
+  - OID: 1.3.6.1.2.1.1.5.0
+    symbol: sysName
+    tag: snmp_host
+  - # With regular expression matching
+    OID: 1.3.6.1.2.1.1.5.0
+    symbol: sysName
+    match: (.*)-(.*)
+    tags:
+        device_type: \1
+        host: \2
+  - # With value mapping
+    OID: 1.3.6.1.2.1.1.7
+    symbol: sysServices
+    mapping:
+      4: routing
+      72: application
+```
+
+### `metadata`
+
+_(Optional)_
+
+This `metadata` section is used to declare where and how metadata should be collected.
+
+General structure:
+
+```yaml
+metadata:
+  <RESOURCCE>:  # example: device, interface
+    fields:
+      <FIELD_NAME>: # example: vendor, model, serial_number, etc
+        value: "dell"
+```
+
+Supported resources and fields can be found here: [payload.go](https://github.com/DataDog/datadog-agent/blob/main/pkg/collector/corechecks/snmp/internal/metadata/payload.go)
+
+#### Value from a static value
+
+```yaml
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "dell"
+```
+
+#### Value from an OID (symbol) value
+
+```yaml
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "dell"
+      serial_number:
+        symbol:
+          OID: 1.3.6.1.4.1.12124.2.51.1.3.1
+          name: chassisSerialNumber
+```
+
+#### Value from multiple OIDs (symbols)
+
+When the value might be from multiple symbols, we try to get the value from first symbol, if the value can't be fetched (e.g. OID not available from the device), we try to get the value from the second symbol, and so on.
+
+```yaml
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "dell"
+      model:
+        symbols:
+          - OID: 1.3.6.100.0
+            name: someSymbolName
+          - OID: 1.3.6.101.0
+            name: someSymbolName
+```
+
+All OID values are fetched, even if they might not be used in the end. In the example above, both `1.3.6.100.0` and `1.3.6.101.0` are retrieved.
+
+
+### Symbol modifiers
+
+#### `extract_value`
 
 If the metric value to be submitted is from a OID with string value and needs to be extracted from it, you can use extract value feature.
 
@@ -548,71 +693,7 @@ metrics:
           extract_value: '([a-zA-Z0-9_]+)' # will ignore surrounding non-printable characters
 ```
 
-### `metric_tags`
-
-_(Optional)_
-
-This field is used to apply tags to all metrics collected by the profile. It has the same meaning than the instance-level config option (see [`conf.yaml.example`](https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example)).
-
-Several collection methods are supported, as illustrated below:
-
-```yaml
-metric_tags:
-  - OID: 1.3.6.1.2.1.1.5.0
-    symbol: sysName
-    tag: snmp_host
-  - # With regular expression matching
-    OID: 1.3.6.1.2.1.1.5.0
-    symbol: sysName
-    match: (.*)-(.*)
-    tags:
-        device_type: \1
-        host: \2
-```
-
-### `metadata`
-
-_(Optional)_
-
-This `metadata` section is used to declare where and how metadata should be collected.
-
-General structure:
-
-```yaml
-metadata:
-  <RESOURCCE>:  # example: device, interface
-    fields:
-      <FIELD_NAME>: # example: vendor, model, serial_number, etc
-        value: "dell"
-```
-
-Supported resources and fields can be found here: [payload.go](https://github.com/DataDog/datadog-agent/blob/main/pkg/collector/corechecks/snmp/internal/metadata/payload.go)
-
-#### Value from a static value
-
-```yaml
-metadata:
-  device:
-    fields:
-      vendor:
-        value: "dell"
-```
-
-#### Value from an OID (symbol) value
-
-```yaml
-metadata:
-  device:
-    fields:
-      vendor:
-        value: "dell"
-      serial_number:
-        symbol:
-          OID: 1.3.6.1.4.1.12124.2.51.1.3.1
-          name: chassisSerialNumber
-```
-
-#### Value from an OID (symbol) value with regex match
+#### `match_pattern` and `match_value`
 
 ```yaml
 metadata:
@@ -631,22 +712,71 @@ metadata:
 
 Regex groups captured in `match_pattern` can be used in `match_value`. `$1` is the first captured group, `$2` is the second captured group, and so on.
 
-#### Value from multiple OIDs (symbols)
+#### `format: mac_address`
 
-When the value might be from multiple symbols, we try to get the value from first symbol, if the value can't be fetched (e.g. OID not available from the device), we try to get the value from the second symbol, and so on.
+If you see MAC Address in tags being encoded as `0x000000000000` instead of `00:00:00:00:00:00`,
+then you can use `format: mac_address` to format the MAC Address to `00:00:00:00:00:00` format.
+
+Example:
 
 ```yaml
-metadata:
-  device:
-    fields:
-      vendor:
-        value: "dell"
-      model:
-        symbols:
-          - OID: 1.3.6.100.0
-            name: someSymbolName
-          - OID: 1.3.6.101.0
-            name: someSymbolName
+metrics:
+  - MIB: MERAKI-CLOUD-CONTROLLER-MIB
+    table:
+      OID: 1.3.6.1.4.1.29671.1.1.4
+      name: devTable
+    symbols:
+      - OID: 1.3.6.1.4.1.29671.1.1.4.1.5
+        name: devClientCount
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.29671.1.1.4.1.1
+          name: devMac
+          format: mac_address
+        tag: mac_address
 ```
 
-All OID values are fetched, even if they might not be used in the end. In the example above, both `1.3.6.100.0` and `1.3.6.101.0` are retrieved.
+In this case, the metrics will be tagged with `mac_address:00:00:00:00:00:00`.
+
+#### `format: ip_address`
+
+If you see IP Address in tags being encoded as `0x0a430007` instead of `10.67.0.7`,
+then you can use `format: ip_address` to format the IP Address to `10.67.0.7` format.
+
+Example:
+
+```yaml
+metrics:
+  - MIB: MY-MIB
+    symbols:
+      - OID: 1.2.3.4.6.7.1.2
+        name: myOidSymbol
+    metric_tags:
+      - column:
+          OID: 1.2.3.4.6.7.1.3
+          name: oidValueWithIpAsBytes
+          format: ip_address
+        tag: connected_device
+```
+
+In this case, the metrics `snmp.myOidSymbol` will be tagged like this: `connected_device:10.67.0.7`.
+
+This `format: ip_address` formatter also works for IPv6 when the input bytes represent IPv6. 
+
+#### `scale_factor`
+
+In a value is in kilobytes and you would like to convert it to bytes, `scale_factor` can be used for that.  
+
+Example:
+
+```yaml
+
+metrics:
+  - MIB: AIRESPACE-SWITCHING-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.14179.1.1.5.3 # agentFreeMemory (in Kb)
+      scale_factor: 1000 # convert to bytes
+      name: memory.free
+```
+
+To scale down by 1000x: `scale_factor: 0.001`.

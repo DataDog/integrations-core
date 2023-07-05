@@ -52,7 +52,7 @@ IGNORED_DEPS = {
 # Dependencies for the downloader that are security-related and should be updated separately from the others
 SECURITY_DEPS = {'in-toto', 'tuf', 'securesystemslib'}
 
-SUPPORTED_PYTHON_MINOR_VERSIONS = {'2': '2.7', '3': '3.8'}
+SUPPORTED_PYTHON_MINOR_VERSIONS = {'2': '2.7', '3': '3.9'}
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')
@@ -191,7 +191,7 @@ async def scrape_version_data(urls):
             latest_py3 = None
 
             versions = []
-            for parsed_version, artifacts in reversed(sorted(filter_releases(releases))):
+            for parsed_version, artifacts in sorted(filter_releases(releases), reverse=True):
                 version = str(parsed_version)
                 versions.append(version)
 

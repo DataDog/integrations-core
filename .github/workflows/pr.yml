@@ -1,0 +1,18 @@
+name: PR
+
+on:
+  pull_request:
+    paths-ignore:
+    - datadog_checks_base/datadog_checks/**
+    - datadog_checks_dev/datadog_checks/dev/*.py
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    uses: ./.github/workflows/pr-test.yml
+    with:
+      repo: core
+    secrets: inherit

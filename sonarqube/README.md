@@ -84,7 +84,7 @@ instances:
     password: <password>  # Defined in SonarQube's sonar.properties file
 ```
 
-**Note**: Once the integration is configured, have SonarQube scan at least one project so that the metrics to populate in Datadog.
+**Note**: Once the integration is configured, have SonarQube scan at least one project to send metrics to Datadog.
 
 Metrics collected by this integration are tagged with a `component` tag by default. If you wish to change the tag
 name on a per component basis, specify the `tag` property within the component definition. To set it for all projects,

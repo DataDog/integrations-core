@@ -103,14 +103,13 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             'detached': True,
             'scripts': {
                 'style': [
-                    f'flake8 --config={settings_dir}/.flake8 .',
                     f'black --config {settings_dir}/pyproject.toml --check --diff .',
-                    f'isort --settings-path {settings_dir}/pyproject.toml --check-only --diff .',
+                    f'ruff --config {settings_dir}/pyproject.toml .',
                 ],
                 'fmt': [
-                    f'isort . --settings-path {settings_dir}/pyproject.toml',
                     f'black . --config {settings_dir}/pyproject.toml',
-                    'python -c "print(\'\\n[NOTE] flake8 may still report style errors for things '
+                    f'ruff --config {settings_dir}/pyproject.toml --fix .',
+                    'python -c "print(\'\\n[NOTE] ruff may still report style errors for things '
                     'black cannot fix, these will need to be fixed manually.\')"',
                     'style',
                 ],
@@ -119,12 +118,9 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             # We pin deps in order to make CI more stable/reliable.
             'dependencies': [
                 'black==22.12.0',
-                'flake8==5.0.4',
-                'flake8-bugbear==22.9.11',
-                'flake8-logging-format==0.9.0',
-                'isort==5.11.4',
+                'ruff==0.0.257',
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
-                'pydantic==1.10.4',
+                'pydantic==1.10.8',
             ],
         }
         config = {'lint': lint_env}
@@ -137,7 +133,8 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             lint_env['dependencies'].extend(
                 [
                     # TODO: remove extra when we drop Python 2
-                    'mypy[python2]==0.910',
+                    'mypy[python2]==0.910; python_version<"3"',
+                    'mypy[python2]==1.3.0; python_version>"3"',
                     # TODO: remove these when drop Python 2 and replace with --install-types --non-interactive
                     'types-python-dateutil==2.8.2',
                     'types-pyyaml==5.4.10',
@@ -147,8 +144,5 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 ]
             )
             lint_env['dependencies'].extend(self.mypy_deps)
-
-        if self.is_dev_package:
-            lint_env['dependencies'].append('flake8-tidy-imports==4.8.0')
 
         return config

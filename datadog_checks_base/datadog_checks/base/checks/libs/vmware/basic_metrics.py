@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# flake8: noqa
+# ruff: noqa
 
 BASIC_METRICS = {
     'cpu.extra': {'s_type': 'delta', 'unit': 'millisecond', 'rollup': 'summation', 'entity': ['VirtualMachine']},

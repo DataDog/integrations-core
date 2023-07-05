@@ -125,6 +125,7 @@ class InstanceConfig(BaseModel):
     histogram_buckets_as_distributions: Optional[bool]
     hostname_format: Optional[str]
     hostname_label: Optional[str]
+    ignore_connection_errors: Optional[bool]
     ignore_metrics: Optional[Sequence[str]]
     ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels]
     ignore_tags: Optional[Sequence[str]]

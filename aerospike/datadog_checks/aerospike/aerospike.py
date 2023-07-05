@@ -8,7 +8,7 @@ from __future__ import absolute_import
 
 import re
 from collections import defaultdict
-from typing import List
+from typing import List  # noqa: F401
 
 from six import PY2, iteritems
 

@@ -8,7 +8,7 @@ import os
 import re
 import warnings
 from base64 import urlsafe_b64encode
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple  # noqa: F401
 
 import pytest
 from six import PY2
@@ -186,12 +186,13 @@ def dd_agent_check(request, aggregator, datadog_agent):
         matches = re.findall(r'((?:\{ \[|\[).*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
 
         if not matches:
-            raise ValueError(
-                '{}{}\nCould not find valid check output'.format(
-                    result.stdout,
-                    result.stderr,
-                )
-            )
+            message_parts = []
+            debug_result = run_command(['docker', 'logs', 'dd_{}_{}'.format(check, env)], capture=True)
+            if not debug_result.code:
+                message_parts.append(debug_result.stdout + debug_result.stderr)
+
+            message_parts.append(result.stdout + result.stderr)
+            raise ValueError('{}\nCould not find valid check output'.format('\n'.join(message_parts)))
 
         for raw_json in matches:
             try:
@@ -374,7 +375,9 @@ def pytest_collection_modifyitems(config, items):
     if PY2:
         for option in ("--memray",):
             if config.getoption(option):
-                warnings.warn("`{}` option ignored as it's not supported for py2 environments.".format(option))
+                warnings.warn(  # noqa: B028
+                    "`{}` option ignored as it's not supported for py2 environments.".format(option)
+                )  # noqa: B028, E501
 
     skip_latest_metrics = pytest.mark.skip(reason="need --run-latest-metrics option to run")
     for item in items:

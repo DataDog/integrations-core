@@ -378,12 +378,14 @@ files:
           value:
             type: string
             example: sql_database
-        - name: name
+        - name: fully_qualified_domain_name
           description: |
             Equal to the name of the SQL Database, Managed Instance (SQL MI) or virtual machine.
+            
+            This value is optional if the value of `host` is already configured to the fully qualified domain name.
           value:
             type: string
-            example: my-sqlserver-instance
+            example: my-sqlserver-database.database.windows.net
 
     - name: obfuscator_options
       description: |
@@ -460,7 +462,7 @@ files:
       description: Timeout in seconds for the connection and each command run
       value:
         type: integer
-        example: 5
+        example: 10
     - template: instances/db
     - name: stored_procedure
       description: |
@@ -492,7 +494,7 @@ files:
         disable_generic_tags.enabled: True
         disable_generic_tags.description: |
             Generic tags such as `host` are replaced by `sqlserver_host` to avoid
-            getting mixed with other integraton tags.
+            getting mixed with other integration tags.
 
   - template: logs
     example:

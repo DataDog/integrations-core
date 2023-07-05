@@ -306,7 +306,7 @@ def test_proc_permissions_error(aggregator, caplog):
         assert 'Unable to read /proc/net/snmp.' in caplog.text
 
 
-@mock.patch('distutils.spawn.find_executable', return_value='/bin/ss')
+@mock.patch('datadog_checks.network.network.find_executable', return_value='/bin/ss')
 def test_ss_with_custom_procfs(aggregator):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = True

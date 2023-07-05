@@ -1,14 +1,13 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-# stdlib
 import os
 
-import mock
-import pytest
-
 from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
+
+from .common import HERE
+
+OM_RESPONSE_FIXTURES = os.path.join(HERE, 'fixtures', 'metrics_1.19.7.txt')
 
 customtag = "custom:tag"
 
@@ -19,79 +18,65 @@ instance = {
 }
 
 
-@pytest.fixture()
-def mock_get():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_1.19.7.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': "text/plain", 'Authorization': "Bearer XXX"},
-        ),
-    ):
-        yield
-
-
 class TestKubeAPIServerMetrics:
     """Basic Test for kube_apiserver integration."""
 
-    CHECK_NAME = 'kube_apiserver_metrics'
-    NAMESPACE = 'kube_apiserver'
     METRICS = [
-        NAMESPACE + '.longrunning_gauge',
-        NAMESPACE + '.current_inflight_requests',
-        NAMESPACE + '.audit_event',
-        NAMESPACE + '.go_threads',
-        NAMESPACE + '.go_goroutines',
-        NAMESPACE + '.etcd_object_counts',
-        NAMESPACE + '.etcd.db.total_size',
-        NAMESPACE + '.rest_client_requests_total',
-        NAMESPACE + '.authenticated_user_requests',
-        NAMESPACE + '.apiserver_request_total',
-        NAMESPACE + '.apiserver_request_terminations_total',
-        NAMESPACE + '.grpc_client_handled_total',
-        NAMESPACE + '.grpc_client_msg_received_total',
-        NAMESPACE + '.grpc_client_msg_sent_total',
-        NAMESPACE + '.grpc_client_started_total',
-        NAMESPACE + '.rest_client_request_latency_seconds.sum',
-        NAMESPACE + '.rest_client_request_latency_seconds.count',
-        NAMESPACE + '.admission_step_admission_latencies_seconds.sum',
-        NAMESPACE + '.admission_step_admission_latencies_seconds.count',
-        NAMESPACE + '.admission_step_admission_latencies_seconds_summary.sum',
-        NAMESPACE + '.admission_step_admission_latencies_seconds_summary.count',
-        NAMESPACE + '.admission_step_admission_latencies_seconds_summary.quantile',
-        NAMESPACE + '.admission_controller_admission_duration_seconds.sum',
-        NAMESPACE + '.admission_controller_admission_duration_seconds.count',
-        NAMESPACE + '.request_duration_seconds.sum',
-        NAMESPACE + '.request_duration_seconds.count',
-        NAMESPACE + '.registered_watchers',
-        NAMESPACE + '.process_resident_memory_bytes',
-        NAMESPACE + '.process_virtual_memory_bytes',
-        NAMESPACE + '.etcd_request_duration_seconds.sum',
-        NAMESPACE + '.etcd_request_duration_seconds.count',
-        NAMESPACE + '.watch_events_sizes.sum',
-        NAMESPACE + '.watch_events_sizes.count',
-        NAMESPACE + '.authentication_duration_seconds.sum',
-        NAMESPACE + '.authentication_duration_seconds.count',
-        NAMESPACE + '.authentication_attempts',
-        NAMESPACE + '.requested_deprecated_apis',
-    ]
-    COUNT_METRICS = [
-        NAMESPACE + '.audit_event.count',
-        NAMESPACE + '.rest_client_requests_total.count',
-        NAMESPACE + '.authenticated_user_requests.count',
-        NAMESPACE + '.apiserver_request_total.count',
-        NAMESPACE + '.apiserver_request_terminations_total.count',
+        'longrunning_gauge',
+        'current_inflight_requests',
+        'audit_event',
+        'go_threads',
+        'go_goroutines',
+        'etcd_object_counts',
+        'etcd.db.total_size',
+        'rest_client_requests_total',
+        'authenticated_user_requests',
+        'apiserver_request_total',
+        'apiserver_request_terminations_total',
+        'grpc_client_handled_total',
+        'grpc_client_msg_received_total',
+        'grpc_client_msg_sent_total',
+        'grpc_client_started_total',
+        'rest_client_request_latency_seconds.sum',
+        'rest_client_request_latency_seconds.count',
+        'admission_step_admission_latencies_seconds.sum',
+        'admission_step_admission_latencies_seconds.count',
+        'admission_step_admission_latencies_seconds_summary.sum',
+        'admission_step_admission_latencies_seconds_summary.count',
+        'admission_step_admission_latencies_seconds_summary.quantile',
+        'admission_controller_admission_duration_seconds.sum',
+        'admission_controller_admission_duration_seconds.count',
+        'request_duration_seconds.sum',
+        'request_duration_seconds.count',
+        'registered_watchers',
+        'process_resident_memory_bytes',
+        'process_virtual_memory_bytes',
+        'etcd_request_duration_seconds.sum',
+        'etcd_request_duration_seconds.count',
+        'watch_events_sizes.sum',
+        'watch_events_sizes.count',
+        'authentication_duration_seconds.sum',
+        'authentication_duration_seconds.count',
+        'authentication_attempts',
+        'requested_deprecated_apis',
+        'aggregator_unavailable_apiservice',
+        'envelope_encryption_dek_cache_fill_percent',
     ]
 
-    def test_check(self, dd_run_check, aggregator, mock_get):
+    COUNT_METRICS = [
+        'audit_event.count',
+        'rest_client_requests_total.count',
+        'authenticated_user_requests.count',
+        'apiserver_request_total.count',
+        'apiserver_request_terminations_total.count',
+    ]
+
+    def test_check(self, dd_run_check, aggregator, mock_http_response):
         """
         Testing kube_apiserver_metrics metrics collection.
         """
-
+        NAMESPACE = 'kube_apiserver'
+        mock_http_response(file_path=OM_RESPONSE_FIXTURES)
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [instance])
         dd_run_check(check)
 
@@ -99,6 +84,9 @@ class TestKubeAPIServerMetrics:
         dd_run_check(check)
 
         for metric in self.METRICS + self.COUNT_METRICS:
-            aggregator.assert_metric(metric)
-            aggregator.assert_metric_has_tag(metric, customtag)
+            metric_to_assert = NAMESPACE + "." + metric
+            aggregator.assert_metric(metric_to_assert)
+            aggregator.assert_metric_has_tag(metric_to_assert, customtag)
+            if "aggregator_unavailable_apiservice" in metric:
+                aggregator.assert_metric_has_tag(metric_to_assert, "apiservice_name:v1.")
         aggregator.assert_all_metrics_covered()

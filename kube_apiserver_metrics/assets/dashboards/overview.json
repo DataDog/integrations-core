@@ -1,1201 +1,1251 @@
 {
-	"title": "Kubernetes API Server Overview",
-	"description": "The core of Kubernetes' control plane is the API server. The API server exposes an HTTP API that lets end users, different parts of your cluster, and external components communicate with one another.\n\nThe Datadog Kubernetes API Server Overview dashboard gives you broad visibility into the status of the API server and the number of requests the server is handling.\n\nFurther reading around the Kubernetes API Server:\n\n- [Datadog Kubernetes API Server integration documentation](https://docs.datadoghq.com/integrations/kube_apiserver_metrics/)\n\n- [Kubernetes API official documentation](https://kubernetes.io/docs/concepts/overview/kubernetes-api/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\nCheck [the agent documentation](https://docs.datadoghq.com/agent/kubernetes/) if some of the graphs are empty.\nClone this template dashboard to make changes and add your own graph widgets. ",
-	"widgets": [
-		{
-			"id": 895563546267612,
-			"definition": {
-				"title": "New group",
-				"type": "group",
-				"banner_img": "/static/images/integration_dashboard/kubernetes_hero_2.jpeg",
-				"show_title": false,
-				"layout_type": "ordered",
-				"widgets": [
-					{
-						"id": 2538956346653136,
-						"definition": {
-							"type": "note",
-							"content": "### The core of Kubernetes' control plane is the API server. The API server exposes an HTTP API that lets end users, different parts of your cluster, and external components communicate with one another.\n\nThe Datadog Kubernetes API Server Overview dashboard gives you broad visibility into the status of the API server and the number of requests the server is handling.\n\nFurther reading around the Kubernetes API Server:\n\n- [Datadog Kubernetes API Server integration documentation](https://docs.datadoghq.com/integrations/kube_apiserver_metrics/)\n\n- [Kubernetes API official documentation](https://kubernetes.io/docs/concepts/overview/kubernetes-api/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)",
-							"background_color": "transparent",
-							"font_size": "14",
-							"text_align": "left",
-							"vertical_align": "top",
-							"show_tick": false,
-							"tick_pos": "50%",
-							"tick_edge": "left",
-							"has_padding": true
-						},
-						"layout": {
-							"x": 0,
-							"y": 0,
-							"width": 4,
-							"height": 2
-						}
-					}
-				]
-			},
-			"layout": {
-				"x": 0,
-				"y": 0,
-				"width": 4,
-				"height": 5
-			}
-		},
-		{
-			"id": 6390333099532916,
-			"definition": {
-				"title": "Kubernetes API Server Health",
-				"title_align": "left",
-				"type": "group",
-				"background_color": "blue",
-				"show_title": true,
-				"layout_type": "ordered",
-				"widgets": [
-					{
-						"id": 5997974745054737,
-						"definition": {
-							"title": "Replicas Up",
-							"title_size": "16",
-							"title_align": "left",
-							"type": "check_status",
-							"check": "kube_apiserver.prometheus.health",
-							"grouping": "cluster",
-							"group_by": [],
-							"tags": [
-								"$cluster",
-								"$scope"
-							]
-						},
-						"layout": {
-							"x": 0,
-							"y": 0,
-							"width": 2,
-							"height": 2
-						}
-					},
-					{
-						"id": 27112096702006,
-						"definition": {
-							"title": "Kubernetes API Server CPU usage vs requests",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": true,
-							"legend_layout": "horizontal",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"time": {},
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"alias": "requests",
-											"formula": "query5"
-										},
-										{
-											"alias": "usage",
-											"formula": "query1"
-										}
-									],
-									"queries": [
-										{
-											"query": "sum:kubernetes.cpu.requests{$cluster,$scope,image_name:k8s.gcr.io/kube-apiserver} by {pod_name,host}",
-											"data_source": "metrics",
-											"name": "query5"
-										},
-										{
-											"query": "sum:kubernetes.cpu.usage.total{$cluster,$scope,image_name:k8s.gcr.io/kube-apiserver} by {pod_name,host}",
-											"data_source": "metrics",
-											"name": "query1"
-										}
-									],
-									"response_format": "timeseries",
-									"style": {
-										"palette": "dog_classic",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "line"
-								}
-							],
-							"yaxis": {
-								"include_zero": true,
-								"scale": "linear",
-								"label": "",
-								"min": "auto",
-								"max": "auto"
-							},
-							"markers": []
-						},
-						"layout": {
-							"x": 2,
-							"y": 0,
-							"width": 3,
-							"height": 2
-						}
-					},
-					{
-						"id": 8896332570674297,
-						"definition": {
-							"title": "Kubernetes API Server memory usage vs requests",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": true,
-							"legend_layout": "horizontal",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"time": {},
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"alias": "requests",
-											"formula": "query5"
-										},
-										{
-											"alias": "usage",
-											"formula": "query1"
-										}
-									],
-									"queries": [
-										{
-											"query": "sum:kubernetes.memory.requests{$cluster,$scope,image_name:k8s.gcr.io/kube-apiserver} by {pod_name,host}",
-											"data_source": "metrics",
-											"name": "query5"
-										},
-										{
-											"query": "sum:kubernetes.memory.usage{$cluster,$scope,image_name:k8s.gcr.io/kube-apiserver} by {pod_name,host}",
-											"data_source": "metrics",
-											"name": "query1"
-										}
-									],
-									"response_format": "timeseries",
-									"style": {
-										"palette": "dog_classic",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "line"
-								}
-							],
-							"yaxis": {
-								"include_zero": true,
-								"scale": "linear",
-								"label": "",
-								"min": "auto",
-								"max": "auto"
-							},
-							"markers": []
-						},
-						"layout": {
-							"x": 5,
-							"y": 0,
-							"width": 3,
-							"height": 2
-						}
-					},
-					{
-						"id": 3781248964008133,
-						"definition": {
-							"title": "Registered watchers (by kind)",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": false,
-							"legend_layout": "auto",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "timeseries",
-									"queries": [
-										{
-											"query": "avg:kube_apiserver.registered_watchers{$cluster} by {kind}",
-											"data_source": "metrics",
-											"name": "query1"
-										}
-									],
-									"style": {
-										"palette": "dog_classic",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "line"
-								}
-							],
-							"yaxis": {
-								"include_zero": true,
-								"scale": "linear",
-								"label": "",
-								"min": "auto",
-								"max": "auto"
-							},
-							"markers": []
-						},
-						"layout": {
-							"x": 0,
-							"y": 2,
-							"width": 2,
-							"height": 2
-						}
-					},
-					{
-						"id": 5920148354640667,
-						"definition": {
-							"title": "Process virtual memory",
-							"title_size": "16",
-							"title_align": "left",
-							"type": "query_value",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "avg:kube_apiserver.process_virtual_memory_bytes{$cluster}",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "last"
-										}
-									]
-								}
-							],
-							"autoscale": true,
-							"precision": 2
-						},
-						"layout": {
-							"x": 2,
-							"y": 2,
-							"width": 2,
-							"height": 2
-						}
-					},
-					{
-						"id": 7672673412444547,
-						"definition": {
-							"title": "Process resident memory",
-							"title_size": "16",
-							"title_align": "left",
-							"type": "query_value",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "avg:kube_apiserver.process_resident_memory_bytes{$cluster}",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "last"
-										}
-									]
-								}
-							],
-							"autoscale": true,
-							"precision": 2
-						},
-						"layout": {
-							"x": 4,
-							"y": 2,
-							"width": 2,
-							"height": 2
-						}
-					},
-					{
-						"id": 2834102228932622,
-						"definition": {
-							"title": "Audit events",
-							"title_size": "16",
-							"title_align": "left",
-							"type": "query_value",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "avg:kube_apiserver.audit_event.count{$cluster}.as_count()",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "avg"
-										}
-									]
-								}
-							],
-							"autoscale": true,
-							"precision": 2
-						},
-						"layout": {
-							"x": 6,
-							"y": 2,
-							"width": 2,
-							"height": 2
-						}
-					}
-				]
-			},
-			"layout": {
-				"x": 4,
-				"y": 0,
-				"width": 8,
-				"height": 5
-			}
-		},
-		{
-			"id": 2358358132143955,
-			"definition": {
-				"title": "REST Client Requests",
-				"type": "group",
-				"background_color": "vivid_green",
-				"show_title": true,
-				"layout_type": "ordered",
-				"widgets": [
-					{
-						"id": 4569470578482436,
-						"definition": {
-							"title": "By code per second",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": true,
-							"legend_layout": "auto",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "timeseries",
-									"queries": [
-										{
-											"query": "sum:kube_apiserver.rest_client_requests_total.count{$cluster} by {code}.as_rate()",
-											"data_source": "metrics",
-											"name": "query1"
-										}
-									],
-									"style": {
-										"palette": "dog_classic",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "line"
-								}
-							],
-							"yaxis": {
-								"include_zero": true,
-								"scale": "linear",
-								"label": "",
-								"min": "auto",
-								"max": "auto"
-							},
-							"markers": []
-						},
-						"layout": {
-							"x": 0,
-							"y": 0,
-							"width": 6,
-							"height": 4
-						}
-					},
-					{
-						"id": 2735885062287005,
-						"definition": {
-							"title": "By method per second",
-							"title_size": "16",
-							"title_align": "left",
-							"type": "toplist",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1",
-											"limit": {
-												"count": 10,
-												"order": "desc"
-											}
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "avg:kube_apiserver.rest_client_requests_total.count{$cluster} by {method}.as_rate()",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "avg"
-										}
-									]
-								}
-							]
-						},
-						"layout": {
-							"x": 6,
-							"y": 0,
-							"width": 6,
-							"height": 4
-						}
-					}
-				]
-			},
-			"layout": {
-				"x": 0,
-				"y": 5,
-				"width": 12,
-				"height": 5
-			}
-		},
-		{
-			"id": 198604149898351,
-			"definition": {
-				"title": "etcd",
-				"type": "group",
-				"background_color": "orange",
-				"show_title": true,
-				"layout_type": "ordered",
-				"widgets": [
-					{
-						"id": 1854650651803550,
-						"definition": {
-							"title": "Current object count",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": false,
-							"legend_layout": "auto",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "timeseries",
-									"queries": [
-										{
-											"query": "sum:kube_apiserver.storage_objects{$cluster}",
-											"data_source": "metrics",
-											"name": "query1"
-										}
-									],
-									"style": {
-										"palette": "dog_classic",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "line"
-								}
-							],
-							"yaxis": {
-								"include_zero": true,
-								"scale": "linear",
-								"label": "",
-								"min": "auto",
-								"max": "auto"
-							},
-							"markers": []
-						},
-						"layout": {
-							"x": 0,
-							"y": 0,
-							"width": 6,
-							"height": 4
-						}
-					},
-					{
-						"id": 2044014202598226,
-						"definition": {
-							"title": "Object count (by resource)",
-							"title_size": "16",
-							"title_align": "left",
-							"type": "toplist",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1",
-											"limit": {
-												"count": 10,
-												"order": "desc"
-											}
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "sum:kube_apiserver.storage_objects{$cluster} by {resource}",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "last"
-										}
-									]
-								}
-							]
-						},
-						"layout": {
-							"x": 6,
-							"y": 0,
-							"width": 6,
-							"height": 4
-						}
-					}
-				]
-			},
-			"layout": {
-				"x": 0,
-				"y": 10,
-				"width": 12,
-				"height": 5
-			}
-		},
-		{
-			"id": 56137128632033,
-			"definition": {
-				"title": "Go Metrics",
-				"type": "group",
-				"background_color": "vivid_purple",
-				"show_title": true,
-				"layout_type": "ordered",
-				"widgets": [
-					{
-						"id": 5806566826736078,
-						"definition": {
-							"title": "Threads",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": false,
-							"legend_layout": "auto",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "timeseries",
-									"queries": [
-										{
-											"query": "avg:kube_apiserver.go_threads{$cluster,$scope}",
-											"data_source": "metrics",
-											"name": "query1"
-										}
-									],
-									"style": {
-										"palette": "dog_classic",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "line"
-								}
-							],
-							"custom_links": []
-						},
-						"layout": {
-							"x": 0,
-							"y": 0,
-							"width": 12,
-							"height": 2
-						}
-					},
-					{
-						"id": 1253715625043501,
-						"definition": {
-							"title": "Goroutines",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": false,
-							"legend_layout": "auto",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "timeseries",
-									"queries": [
-										{
-											"query": "avg:kube_apiserver.go_goroutines{$cluster,$scope}",
-											"data_source": "metrics",
-											"name": "query1"
-										}
-									],
-									"style": {
-										"palette": "dog_classic",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "line"
-								}
-							],
-							"custom_links": []
-						},
-						"layout": {
-							"x": 0,
-							"y": 2,
-							"width": 12,
-							"height": 2
-						}
-					}
-				]
-			},
-			"layout": {
-				"x": 0,
-				"y": 15,
-				"width": 12,
-				"height": 5
-			}
-		},
-		{
-			"id": 5832204887451464,
-			"definition": {
-				"title": "API Requests",
-				"type": "group",
-				"background_color": "vivid_blue",
-				"show_title": true,
-				"layout_type": "ordered",
-				"widgets": [
-					{
-						"id": 6687345934395117,
-						"definition": {
-							"title": "API requests per second (by code)",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": true,
-							"legend_layout": "auto",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "timeseries",
-									"queries": [
-										{
-											"query": "sum:kube_apiserver.apiserver_request_total.count{$cluster} by {code}.as_rate()",
-											"data_source": "metrics",
-											"name": "query1"
-										}
-									],
-									"style": {
-										"palette": "dog_classic",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "line"
-								}
-							],
-							"yaxis": {
-								"include_zero": true,
-								"scale": "linear",
-								"label": "",
-								"min": "auto",
-								"max": "auto"
-							},
-							"markers": []
-						},
-						"layout": {
-							"x": 0,
-							"y": 0,
-							"width": 6,
-							"height": 3
-						}
-					},
-					{
-						"id": 5236479568162961,
-						"definition": {
-							"title": "API requests per second (by resource)",
-							"title_size": "16",
-							"title_align": "left",
-							"type": "toplist",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1",
-											"limit": {
-												"count": 10,
-												"order": "desc"
-											}
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "sum:kube_apiserver.apiserver_request_total.count{$cluster} by {resource}.as_rate()",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "last"
-										}
-									]
-								}
-							]
-						},
-						"layout": {
-							"x": 6,
-							"y": 0,
-							"width": 6,
-							"height": 3
-						}
-					},
-					{
-						"id": 2268729153488065,
-						"definition": {
-							"title": "Current inflight requests (by host)",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": false,
-							"legend_layout": "auto",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "timeseries",
-									"queries": [
-										{
-											"query": "avg:kube_apiserver.current_inflight_requests{$cluster} by {host}",
-											"data_source": "metrics",
-											"name": "query1"
-										}
-									],
-									"style": {
-										"palette": "dog_classic",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "line"
-								}
-							],
-							"yaxis": {
-								"include_zero": true,
-								"scale": "linear",
-								"label": "",
-								"min": "auto",
-								"max": "auto"
-							},
-							"markers": []
-						},
-						"layout": {
-							"x": 0,
-							"y": 3,
-							"width": 6,
-							"height": 3
-						}
-					},
-					{
-						"id": 6003873287816990,
-						"definition": {
-							"title": "List requests (by host)",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": false,
-							"legend_layout": "horizontal",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "timeseries",
-									"queries": [
-										{
-											"query": "sum:kube_apiserver.apiserver_request_total.count{$cluster,verb:list} by {host}.as_count()",
-											"data_source": "metrics",
-											"name": "query1"
-										}
-									],
-									"style": {
-										"palette": "dog_classic",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "area"
-								}
-							],
-							"yaxis": {
-								"include_zero": true,
-								"scale": "linear",
-								"label": "",
-								"min": "auto",
-								"max": "auto"
-							},
-							"markers": []
-						},
-						"layout": {
-							"x": 6,
-							"y": 3,
-							"width": 6,
-							"height": 3
-						}
-					},
-					{
-						"id": 7985995634940654,
-						"definition": {
-							"title": "API requests (by verb)",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": false,
-							"legend_layout": "auto",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "timeseries",
-									"queries": [
-										{
-											"query": "sum:kube_apiserver.apiserver_request_total.count{$cluster} by {verb}.as_count()",
-											"data_source": "metrics",
-											"name": "query1"
-										}
-									],
-									"style": {
-										"palette": "dog_classic",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "bars"
-								}
-							],
-							"yaxis": {
-								"include_zero": true,
-								"scale": "linear",
-								"label": "",
-								"min": "auto",
-								"max": "auto"
-							},
-							"markers": []
-						},
-						"layout": {
-							"x": 0,
-							"y": 6,
-							"width": 6,
-							"height": 3
-						}
-					},
-					{
-						"id": 51164463602965,
-						"definition": {
-							"title": "Active long-running requests (by scope, verb)",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": false,
-							"legend_layout": "auto",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "timeseries",
-									"queries": [
-										{
-											"query": "sum:kube_apiserver.longrunning_gauge{$cluster} by {scope,verb}",
-											"data_source": "metrics",
-											"name": "query1"
-										}
-									],
-									"style": {
-										"palette": "dog_classic",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "line"
-								}
-							],
-							"yaxis": {
-								"include_zero": true,
-								"scale": "linear",
-								"label": "",
-								"min": "auto",
-								"max": "auto"
-							},
-							"markers": []
-						},
-						"layout": {
-							"x": 6,
-							"y": 6,
-							"width": 6,
-							"height": 3
-						}
-					}
-				]
-			},
-			"layout": {
-				"x": 0,
-				"y": 0,
-				"width": 12,
-				"height": 10,
-				"is_column_break": true
-			}
-		},
-		{
-			"id": 4643450728041347,
-			"definition": {
-				"title": "gRPC Requests",
-				"type": "group",
-				"background_color": "green",
-				"show_title": true,
-				"layout_type": "ordered",
-				"widgets": [
-					{
-						"id": 4629993350725904,
-						"definition": {
-							"title": "gRPC requests per second (by code)",
-							"title_size": "16",
-							"title_align": "left",
-							"show_legend": true,
-							"legend_layout": "horizontal",
-							"legend_columns": [
-								"avg",
-								"min",
-								"max",
-								"value",
-								"sum"
-							],
-							"type": "timeseries",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1"
-										}
-									],
-									"response_format": "timeseries",
-									"queries": [
-										{
-											"query": "sum:kube_apiserver.grpc_client_handled_total{$cluster} by {grpc_code}.as_rate()",
-											"data_source": "metrics",
-											"name": "query1"
-										}
-									],
-									"style": {
-										"palette": "dog_classic",
-										"line_type": "solid",
-										"line_width": "normal"
-									},
-									"display_type": "line"
-								}
-							],
-							"yaxis": {
-								"include_zero": true,
-								"scale": "linear",
-								"label": "",
-								"min": "auto",
-								"max": "auto"
-							},
-							"markers": []
-						},
-						"layout": {
-							"x": 0,
-							"y": 0,
-							"width": 6,
-							"height": 4
-						}
-					},
-					{
-						"id": 3519688698056604,
-						"definition": {
-							"title": "By (service, method) per second",
-							"title_size": "16",
-							"title_align": "left",
-							"type": "toplist",
-							"requests": [
-								{
-									"formulas": [
-										{
-											"formula": "query1",
-											"limit": {
-												"count": 10,
-												"order": "desc"
-											}
-										}
-									],
-									"response_format": "scalar",
-									"queries": [
-										{
-											"query": "sum:kube_apiserver.grpc_client_handled_total{$cluster} by {grpc_service,grpc_method}.as_rate()",
-											"data_source": "metrics",
-											"name": "query1",
-											"aggregator": "last"
-										}
-									]
-								}
-							]
-						},
-						"layout": {
-							"x": 6,
-							"y": 0,
-							"width": 6,
-							"height": 4
-						}
-					}
-				]
-			},
-			"layout": {
-				"x": 0,
-				"y": 10,
-				"width": 12,
-				"height": 5
-			}
-		},
-		{
-			"id": 1018697804875837,
-			"definition": {
-				"title": "Kube API Server Logs",
-				"type": "group",
-				"background_color": "pink",
-				"show_title": true,
-				"layout_type": "ordered",
-				"widgets": [
-					{
-						"id": 7674420530817556,
-						"definition": {
-							"title": "Kubernetes API Server Logs",
-							"title_size": "16",
-							"title_align": "left",
-							"type": "log_stream",
-							"indexes": [],
-							"query": "source:kube-apiserver",
-							"sort": {
-								"column": "time",
-								"order": "desc"
-							},
-							"columns": [
-								"host",
-								"service"
-							],
-							"show_date_column": true,
-							"show_message_column": true,
-							"message_display": "expanded-md"
-						},
-						"layout": {
-							"x": 0,
-							"y": 0,
-							"width": 12,
-							"height": 4
-						}
-					}
-				]
-			},
-			"layout": {
-				"x": 0,
-				"y": 15,
-				"width": 12,
-				"height": 5
-			}
-		},
-		{
+    "title": "Kubernetes API Server Overview",
+    "description": "The core of Kubernetes' control plane is the API server. The API server exposes an HTTP API that lets end users, different parts of your cluster, and external components communicate with one another.\n\nThe Datadog Kubernetes API Server Overview dashboard gives you broad visibility into the status of the API server and the number of requests the server is handling.\n\nFurther reading around the Kubernetes API Server:\n\n- [Datadog Kubernetes API Server integration documentation](https://docs.datadoghq.com/integrations/kube_apiserver_metrics/)\n\n- [Kubernetes API official documentation](https://kubernetes.io/docs/concepts/overview/kubernetes-api/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\nCheck [the agent documentation](https://docs.datadoghq.com/agent/kubernetes/) if some of the graphs are empty.\nClone this template dashboard to make changes and add your own graph widgets. ",
+    "widgets": [
+        {
+            "id": 895563546267612,
+            "definition": {
+                "title": "New group",
+                "type": "group",
+                "banner_img": "/static/images/integration_dashboard/kubernetes_hero_2.jpeg",
+                "show_title": false,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2538956346653136,
+                        "definition": {
+                            "type": "note",
+                            "content": "### The core of Kubernetes' control plane is the API server. The API server exposes an HTTP API that lets end users, different parts of your cluster, and external components communicate with one another.\n\nThe Datadog Kubernetes API Server Overview dashboard gives you broad visibility into the status of the API server and the number of requests the server is handling.\n\nFurther reading around the Kubernetes API Server:\n\n- [Datadog Kubernetes API Server integration documentation](https://docs.datadoghq.com/integrations/kube_apiserver_metrics/)\n\n- [Kubernetes API official documentation](https://kubernetes.io/docs/concepts/overview/kubernetes-api/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)",
+                            "background_color": "transparent",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 7
+            }
+        },
+        {
+            "id": 6390333099532916,
+            "definition": {
+                "title": "Kubernetes API Server Health",
+                "title_align": "left",
+                "type": "group",
+                "background_color": "blue",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5997974745054737,
+                        "definition": {
+                            "title": "Replicas Up",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "kube_apiserver.prometheus.health",
+                            "grouping": "cluster",
+                            "group_by": [],
+                            "tags": [
+                                "$cluster",
+                                "$scope"
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 27112096702006,
+                        "definition": {
+                            "title": "Kubernetes API Server CPU usage vs requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "requests",
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "alias": "usage",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "sum:kubernetes.cpu.requests{$cluster,$scope,short_image:kube-apiserver} by {pod_name,host}",
+                                            "data_source": "metrics",
+                                            "name": "query5"
+                                        },
+                                        {
+                                            "query": "sum:kubernetes.cpu.usage.total{$cluster,$scope,short_image:kube-apiserver} by {pod_name,host}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8896332570674297,
+                        "definition": {
+                            "title": "Kubernetes API Server memory usage vs requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "requests",
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "alias": "usage",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "sum:kubernetes.memory.requests{$cluster,$scope,short_image:kube-apiserver} by {pod_name,host}",
+                                            "data_source": "metrics",
+                                            "name": "query5"
+                                        },
+                                        {
+                                            "query": "sum:kubernetes.memory.usage{$cluster,$scope,short_image:kube-apiserver} by {pod_name,host}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 5,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3781248964008133,
+                        "definition": {
+                            "title": "Registered watchers (by kind)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_apiserver.registered_watchers{$cluster} by {kind}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5920148354640667,
+                        "definition": {
+                            "title": "Process virtual memory",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_apiserver.process_virtual_memory_bytes{$cluster}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7672673412444547,
+                        "definition": {
+                            "title": "Process resident memory",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_apiserver.process_resident_memory_bytes{$cluster}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2834102228932622,
+                        "definition": {
+                            "title": "Audit events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_apiserver.audit_event.count{$cluster}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2487021508874280,
+                        "definition": {
+                            "title": "Service status",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:kube_apiserver.aggregator_unavailable_apiservice{$cluster,$scope} by {kube_namespace, apiservice_name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<",
+                                            "value": 0.5,
+                                            "palette": "white_on_green"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 0.5,
+                                            "palette": "white_on_red"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 8,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 7
+            }
+        },
+        {
+            "id": 2358358132143955,
+            "definition": {
+                "title": "REST Client Requests",
+                "type": "group",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4569470578482436,
+                        "definition": {
+                            "title": "By code per second",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kube_apiserver.rest_client_requests_total.count{$cluster} by {code}.as_rate()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2735885062287005,
+                        "definition": {
+                            "title": "By method per second",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_apiserver.rest_client_requests_total.count{$cluster} by {method}.as_rate()",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 7,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
+            "id": 198604149898351,
+            "definition": {
+                "title": "etcd",
+                "type": "group",
+                "background_color": "orange",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1854650651803550,
+                        "definition": {
+                            "title": "Current object count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kube_apiserver.storage_objects{$cluster}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2044014202598226,
+                        "definition": {
+                            "title": "Object count (by resource)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kube_apiserver.storage_objects{$cluster} by {resource}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 12,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
+            "id": 56137128632033,
+            "definition": {
+                "title": "Go Metrics",
+                "type": "group",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5806566826736078,
+                        "definition": {
+                            "title": "Threads",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_apiserver.go_threads{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1253715625043501,
+                        "definition": {
+                            "title": "Goroutines",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_apiserver.go_goroutines{$cluster,$scope}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 12,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 17,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
+            "id": 5832204887451464,
+            "definition": {
+                "title": "API Requests",
+                "type": "group",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6687345934395117,
+                        "definition": {
+                            "title": "API requests per second (by code)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kube_apiserver.apiserver_request_total.count{$cluster} by {code}.as_rate()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5236479568162961,
+                        "definition": {
+                            "title": "API requests per second (by resource)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kube_apiserver.apiserver_request_total.count{$cluster} by {resource}.as_rate()",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2268729153488065,
+                        "definition": {
+                            "title": "Current inflight requests (by host)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "avg:kube_apiserver.current_inflight_requests{$cluster} by {host}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6003873287816990,
+                        "definition": {
+                            "title": "List requests (by host)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kube_apiserver.apiserver_request_total.count{$cluster,verb:list} by {host}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7985995634940654,
+                        "definition": {
+                            "title": "API requests (by verb)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kube_apiserver.apiserver_request_total.count{$cluster} by {verb}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 51164463602965,
+                        "definition": {
+                            "title": "Active long-running requests (by scope, verb)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kube_apiserver.longrunning_gauge{$cluster} by {scope,verb}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 6,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 10,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 4643450728041347,
+            "definition": {
+                "title": "gRPC Requests",
+                "type": "group",
+                "background_color": "green",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4629993350725904,
+                        "definition": {
+                            "title": "gRPC requests per second (by code)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kube_apiserver.grpc_client_handled_total{$cluster} by {grpc_code}.as_rate()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3519688698056604,
+                        "definition": {
+                            "title": "By (service, method) per second",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:kube_apiserver.grpc_client_handled_total{$cluster} by {grpc_service,grpc_method}.as_rate()",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 10,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
+            "id": 1018697804875837,
+            "definition": {
+                "title": "Kube API Server Logs",
+                "type": "group",
+                "background_color": "pink",
+                "show_title": true,
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7674420530817556,
+                        "definition": {
+                            "title": "Kubernetes API Server Logs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "log_stream",
+                            "indexes": [],
+                            "query": "source:kube-apiserver",
+                            "sort": {
+                                "column": "time",
+                                "order": "desc"
+                            },
+                            "columns": [
+                                "host",
+                                "service"
+                            ],
+                            "show_date_column": true,
+                            "show_message_column": true,
+                            "message_display": "expanded-md"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 15,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
             "id": 8438947378048636,
             "definition": {
                 "title": "Admission Webhooks",
@@ -1302,29 +1352,99 @@
             },
             "layout": {
                 "x": 0,
-                "y": 40,
+                "y": 20,
                 "width": 12,
                 "height": 4
             }
+        },
+        {
+            "id": 4164499709691014,
+            "definition": {
+                "title": "Kubernetes Feature Gates",
+                "background_color": "gray",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7610489188909648,
+                        "definition": {
+                            "title": "Feature Gates",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:kube_apiserver.kubernetes_feature_enabled{$cluster} by {name,stage}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">=",
+                                                    "palette": "white_on_green",
+                                                    "value": 1
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "white_on_red",
+                                                    "value": 1
+                                                }
+                                            ],
+                                            "cell_display_mode": "number",
+                                            "alias": "Enabled",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 7,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 7,
+                "height": 5
+            }
         }
-	],
-	"template_variables": [
-		{
-			"name": "scope",
-			"default": "*",
-			"prefix": "",
-			"available_values": []
-		},
-		{
-			"name": "cluster",
-			"default": "*",
-			"prefix": "kube_cluster_name",
-			"available_values": []
-		}
-	],
-	"layout_type": "ordered",
-	"is_read_only": false,
-	"notify_list": [],
-	"reflow_type": "fixed",
-	"id": "3tp-feu-jgd"
+    ],
+    "template_variables": [
+        {
+            "name": "scope",
+            "default": "*",
+            "prefix": "",
+            "available_values": []
+        },
+        {
+            "name": "cluster",
+            "default": "*",
+            "prefix": "kube_cluster_name",
+            "available_values": []
+        }
+    ],
+    "layout_type": "ordered",
+    "is_read_only": false,
+    "notify_list": [],
+    "reflow_type": "fixed"
 }

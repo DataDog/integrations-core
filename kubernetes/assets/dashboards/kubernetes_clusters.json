@@ -572,7 +572,7 @@
                             "custom_links": [
                                 {
                                     "label": "View Pods overview",
-                                    "link": "https://app.datadoghq.com/screen/integration/30322/kubernetes-pods-overview"
+                                    "link": "/dash/integration/Kubernetes%20-%20Pods"
                                 }
                             ],
                             "precision": 0,
@@ -600,7 +600,7 @@
                             "custom_links": [
                                 {
                                     "label": "View Pods overview",
-                                    "link": "https://app.datadoghq.com/screen/integration/30322/kubernetes-pods-overview"
+                                    "link": "/dash/integration/Kubernetes%20-%20Pods"
                                 }
                             ],
                             "precision": 0,
@@ -785,6 +785,41 @@
                             "width": 2,
                             "x": 10,
                             "y": 2
+                        }
+                    },
+                    {
+                        "id": 112162236360634,
+                        "definition": {
+                            "title": "CRDs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes_state.crd.count{$scope,$cluster}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": [],
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 2,
+                            "height": 2
                         }
                     }
                 ]
@@ -3170,7 +3205,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "View more in the [Kubernetes Pods Overview Dashboard](https://app.datadoghq.com/dash/integration/30322/kubernetes-pods-overview?tpl_var_cluster=$cluster.value&tpl_var_scope=$scope.value)",
+                            "content": "View more in the [Kubernetes Pods Overview Dashboard](/dash/integration/Kubernetes%20-%20Pods?tpl_var_cluster=$cluster.value&tpl_var_scope=$scope.value)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
