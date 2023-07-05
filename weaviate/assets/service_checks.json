@@ -28,7 +28,7 @@
             "weaviate_node"
         ],
         "name": "Health Status of Weaviate nodes",
-        "description": "Returns `CRITICAL` if the node is `UNAVAILABLE`, `WARNING` if `UNHEALTHY` and  `OK` if `HEALTHY."
+        "description": "Returns `CRITICAL` if the node is `UNAVAILABLE`, `WARNING` if `UNHEALTHY` and `OK` if `HEALTHY`."
     },
     {
         "agent_version": "7.47.0",
