@@ -45,7 +45,6 @@ def test_e2e_profile_extreme_switching(dd_agent_check):
     tag_rows = [
         ['mem:12719'],
         ['mem:63847'],
-
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
