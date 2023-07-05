@@ -6,7 +6,7 @@
 
 This Agent check only collects metrics for message offsets. If you want to collect JMX metrics from the Kafka brokers or Java-based consumers/producers, see the kafka check.
 
-If you would benefit from visualizing the topology of your streaming data pipelines, or investigating localized bottlenecks within your data streams set up, check out [Data Streams Monitoring][16].
+If you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring][16].
 
 This check fetches the highwater offsets from the Kafka brokers, consumer offsets that are stored in Kafka or zookeeper (for old-style consumers), and the calculated consumer lag (which is the difference between the broker offset and the consumer offset).
 

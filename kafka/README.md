@@ -13,7 +13,7 @@ This check has a limit of 350 metrics per instance. The number of returned metri
 
 To collect Kafka consumer metrics, see the [kafka_consumer check][3].
 
-If you would benefit from visualizing the topology of your streaming data pipelines, or investigating localized bottlenecks within your data streams set up, check out [Data Streams Monitoring][24].
+If you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring][24].
 
 **Note**: This integration attached sample configuration works only for Kafka >= 0.8.2.
 If you are running a version older than that, see the [Agent v5.2.x released sample files][22].
