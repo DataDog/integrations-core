@@ -103,7 +103,7 @@ class BorrowedStatus:
             return
 
         old_message, final_text = self.__messages.pop()
-        if self.__verbosity > 0:
+        if self.__verbosity > VerbosityLevels.INFO:
             if not final_text:
                 final_text = old_message.plain
                 final_text = f'Finished {final_text[:1].lower()}{final_text[1:]}'
