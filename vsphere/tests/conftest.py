@@ -191,7 +191,7 @@ def connect_exception():
 
 @pytest.fixture
 def get_timestamp():
-    with patch('datadog_checks.base.utils.time.epoch_offset') as mock_time:
+    with patch('datadog_checks.vsphere.vsphere.get_timestamp') as mock_time:
         yield mock_time
 
 
