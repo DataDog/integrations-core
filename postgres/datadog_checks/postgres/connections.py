@@ -140,6 +140,8 @@ class MultiDatabaseConnectionPool(object):
         make a new connection if the max_conn limit hasn't been reached.
         Blocks until a connection can be added to the pool,
         and optionally takes a timeout in seconds.
+        Note that leaving a connection context here does NOT close the connection in psycopg2;
+        connections must be manually closed by `close_all_connections()`.
         """
         try:
             with self._mu:
