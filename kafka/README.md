@@ -13,6 +13,8 @@ This check has a limit of 350 metrics per instance. The number of returned metri
 
 To collect Kafka consumer metrics, see the [kafka_consumer check][3].
 
+If you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring][24].
+
 **Note**: This integration attached sample configuration works only for Kafka >= 0.8.2.
 If you are running a version older than that, see the [Agent v5.2.x released sample files][22].
 
@@ -177,3 +179,4 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 [21]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
 [22]: https://raw.githubusercontent.com/DataDog/dd-agent/5.2.1/conf.d/kafka.yaml.example
 [23]: https://www.datadoghq.com/knowledge-center/apache-kafka/
+[24]: https://www.datadoghq.com/product/data-streams-monitoring/
