@@ -137,6 +137,11 @@ repo_server_histograms = [
     'redis.request.duration.seconds.sum',
 ]
 
+notifications_controller_counters = [
+    'notifications.deliveries.count',
+    'notifications.trigger_eval.count',
+]
+
 NOT_EXPOSED_METRICS = [
     'argocd.app_controller.cluster.api.resource_objects',
     'argocd.app_controller.cluster.api.resources',
@@ -160,8 +165,8 @@ E2E_NOT_EXPOSED_METRICS = [
     'argocd.api_server.redis.request.duration.sum',
     'argocd.api_server.redis.request.count',
     'argocd.app_controller.kubectl.exec.pending',
-    'argocd.notifications.deliveries.count',
-    'argocd.notifications.trigger_eval.count',
+    'argocd.notifications_controller.notifications.deliveries.count',
+    'argocd.notifications_controller.notifications.trigger_eval.count',
     'argocd.repo_server.repo.pending.request.total',
     'argocd.repo_server.git.request.count',
     'argocd.repo_server.git.request.duration.seconds.bucket',
@@ -178,7 +183,7 @@ general = general_gauges + general_counters + general_summaries
 app_controller = app_controller_counters + app_controller_gauges + app_controller_histograms + general
 api_server = api_server_counters + api_server_histograms + general
 repo_server = repo_server_counters + repo_server_gauges + repo_server_histograms + general
-notifications_controller = general
+notifications_controller = notifications_controller_counters + general
 
 
 def namespace_formatter(metrics, namespace):
