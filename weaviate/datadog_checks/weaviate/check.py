@@ -83,7 +83,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         endpoint = urljoin(self.api_url, DEFAULT_NODE_METRICS_ENDPOINT)
         response = self.http.get(endpoint)
         if not response.ok:
-            self.log.debug("Could not retrieve Node metrics. Request returned a: %s", str(response.status_code))
+            self.log.error("Could not retrieve Node metrics. Request returned a: %s", str(response.status_code))
             return
 
         data = response.json()
