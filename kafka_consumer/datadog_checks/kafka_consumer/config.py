@@ -23,7 +23,6 @@ class KafkaConfig:
         self._consumer_groups_regex = instance.get('consumer_groups_regex', {})
 
         self._consumer_groups_compiled_regex = self._compile_regex(self._consumer_groups_regex, self._consumer_groups) if self._consumer_groups_regex else ""
-        # self.config._consumer_groups_compiled_regex
 
         self._kafka_connect_str = instance.get('kafka_connect_str')
         self._kafka_version = instance.get('kafka_client_api_version')

@@ -56,7 +56,7 @@ class Producer(StoppableThread):
                     producer.produce('unconsumed_topic', b"extra message 4", partition=partition)
                     producer.produce('unconsumed_topic', b"extra message 5", partition=partition)
                 except Exception:
-                    raise
+                    pass
 
             time.sleep(1)
 
@@ -80,7 +80,7 @@ class Consumer(StoppableThread):
         consumer.subscribe(self.topics)
 
         while not self._shutdown_event.is_set():
-            consumer.poll(timeout=5)
+            consumer.poll(timeout=1)
 
     def __get_consumer_client(self):
         config = {
