@@ -198,31 +198,32 @@ class KafkaClient:
 
         for consumer_group in consumer_groups:
             # If topics are specified
-            if topics := consumer_groups[consumer_group]:
-                for topic in topics:
-                    topic_partitions = []
-                    # If partitions are defined
-                    if partitions := topics[topic]:
-                        topic_partitions = [TopicPartition(topic, partition) for partition in partitions]
-                    # If partitions are not defined
-                    else:
-                        # get all the partitions for this topic
-                        partitions = (
-                            self.kafka_client.list_topics(topic=topic, timeout=self.config._request_timeout)
-                            .topics[topic]
-                            .partitions
-                        )
-                        topic_partitions = [TopicPartition(topic, partition) for partition in partitions]
-
-                    futures.append(
-                        self._list_consumer_group_offsets(
-                            ConsumerGroupTopicPartitions(consumer_group, topic_partitions)
-                        )[consumer_group]
-                    )
-
-            else:
+            topics = consumer_groups.get(consumer_group)
+            if not topics:
                 futures.append(
                     self._list_consumer_group_offsets(ConsumerGroupTopicPartitions(consumer_group))[consumer_group]
+                )
+                continue
+
+            for topic in topics:
+                topic_partitions = []
+                # If partitions are defined
+                if partitions := topics[topic]:
+                    topic_partitions = [TopicPartition(topic, partition) for partition in partitions]
+                # If partitions are not defined
+                else:
+                    # get all the partitions for this topic
+                    partitions = (
+                        self.kafka_client.list_topics(topic=topic, timeout=self.config._request_timeout)
+                        .topics[topic]
+                        .partitions
+                    )
+                    topic_partitions = [TopicPartition(topic, partition) for partition in partitions]
+
+                futures.append(
+                    self._list_consumer_group_offsets(ConsumerGroupTopicPartitions(consumer_group, topic_partitions))[
+                        consumer_group
+                    ]
                 )
 
         return futures
