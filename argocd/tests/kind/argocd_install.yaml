@@ -9579,7 +9579,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app.kubernetes.io/name: argocd-notifications-controller-metrics
+    app.kubernetes.io/name: argocd-notifications-controller
   name: argocd-notifications-controller-metrics
 spec:
   ports:
