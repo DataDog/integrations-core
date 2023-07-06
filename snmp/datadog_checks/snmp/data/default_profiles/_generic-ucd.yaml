@@ -77,8 +77,10 @@ metrics:
     symbols:
       - name: ucd.diskIOReads
         OID: 1.3.6.1.4.1.2021.13.15.1.1.5
+        metric_type: monotonic_count
       - name: ucd.diskIOWrites
         OID: 1.3.6.1.4.1.2021.13.15.1.1.6
+        metric_type: monotonic_count
       - name: ucd.diskIOLA1
         OID: 1.3.6.1.4.1.2021.13.15.1.1.9
       - name: ucd.diskIOLA5
@@ -87,8 +89,10 @@ metrics:
         OID: 1.3.6.1.4.1.2021.13.15.1.1.11
       - name: ucd.diskIONReadX
         OID: 1.3.6.1.4.1.2021.13.15.1.1.12
+        metric_type: monotonic_count
       - name: ucd.diskIONWrittenX
         OID: 1.3.6.1.4.1.2021.13.15.1.1.13
+        metric_type: monotonic_count
     metric_tags:
       - tag: ucd_disk_io_device
         column:
@@ -110,28 +114,34 @@ metrics:
     symbol:
       name: ucd.ssCpuRawUser
       OID: 1.3.6.1.4.1.2021.11.50.0
+    forced_type: monotonic_count
   - MIB: UCD-SNMP-MIB
     symbol:
       name: ucd.ssCpuRawNice
       OID: 1.3.6.1.4.1.2021.11.51.0
+    forced_type: monotonic_count
   - MIB: UCD-SNMP-MIB
     symbol:
       name: ucd.ssCpuRawSystem
       OID: 1.3.6.1.4.1.2021.11.52.0
+    forced_type: monotonic_count
   - MIB: UCD-SNMP-MIB
     symbol:
       name: ucd.ssCpuRawIdle
       OID: 1.3.6.1.4.1.2021.11.53.0
+    forced_type: monotonic_count
   - MIB: UCD-SNMP-MIB
     symbol:
       name: ucd.ssCpuRawWait
       OID: 1.3.6.1.4.1.2021.11.54.0
+    forced_type: monotonic_count
   - MIB: UCD-SNMP-MIB
     symbol:
       name: ucd.ssCpuRawKernel
       OID: 1.3.6.1.4.1.2021.11.55.0
+    forced_type: monotonic_count
   - MIB: UCD-SNMP-MIB
     symbol:
       name: ucd.ssCpuRawInterrupt
       OID: 1.3.6.1.4.1.2021.11.56.0
-
+    forced_type: monotonic_count
