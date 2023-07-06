@@ -34,6 +34,7 @@ def test_e2e_profile_fortinet(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
     assert_extend_generic_if(aggregator, common_tags)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     # --- TEST METADATA ---
     device = {
@@ -54,3 +55,4 @@ def test_e2e_profile_fortinet(dd_agent_check):
         "vendor": "fortinet",
     }
     assert_device_metadata(aggregator, device)
+    
