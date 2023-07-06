@@ -110,22 +110,12 @@ def assert_extend_cisco_cpu_memory(aggregator, common_tags):
 
 
 def assert_extend_generic_host_resources_base(aggregator, common_tags):
+    # fmt: off
+    """Add the following to the snmprec
+1.3.6.1.2.1.25.1.1.0|67|201526890
+"""
+    # fmt: on
     aggregator.assert_metric("snmp.hrSystemUptime", metric_type=aggregator.GAUGE, tags=common_tags)
-
-    cpu_rows = ['10', '21']
-    for cpu_row in cpu_rows:
-        aggregator.assert_metric(
-            'snmp.hrProcessorLoad', metric_type=aggregator.GAUGE, tags=common_tags + ['processorid:' + cpu_row]
-        )
-
-    hr_mem_rows = [
-        ['storagedesc:kept but their Jaded but driving', 'storagetype:1.3.6.1.3.167.36'],
-        ['storagedesc:kept but their Jaded but driving', 'storagetype:1.3.6.1.3.167.36'],
-    ]
-    for mem_row in hr_mem_rows:
-        aggregator.assert_metric('snmp.hrStorageSize', metric_type=aggregator.GAUGE, tags=common_tags + mem_row)
-        aggregator.assert_metric('snmp.hrStorageUsed', metric_type=aggregator.GAUGE, tags=common_tags + mem_row)
-
 
 def assert_extend_generic_host_resources_cpu_mem(aggregator, common_tags):
     cpu_rows = ['10', '21']
