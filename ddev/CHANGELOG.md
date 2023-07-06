@@ -1,5 +1,14 @@
 # CHANGELOG - ddev
 
+## 3.2.0 / 2023-07-05
+
+***Added***:
+
+* Bump the minimum supported version of datadog-checks-dev. See [#15171](https://github.com/DataDog/integrations-core/pull/15171).
+* Move CLI plugins to ddev. See [#15166](https://github.com/DataDog/integrations-core/pull/15166).
+* Add VerbosityLevels class for ddev cli/terminal use. See [#14780](https://github.com/DataDog/integrations-core/pull/14780).
+* Add utilities for GitHub. See [#15036](https://github.com/DataDog/integrations-core/pull/15036).
+
 ## 3.1.0 / 2023-06-23
 
 ***Added***:
