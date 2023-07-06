@@ -144,3 +144,7 @@ def instance_use_collect_events_fallback(field, value):
 
 def instance_use_guest_hostname(field, value):
     return False
+
+
+def instance_vm_hostname_suffix_tag(field, value):
+    return get_default_field_value(field, value)

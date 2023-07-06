@@ -92,17 +92,11 @@ cli = [
     "wheel>=0.31.0",
 ]
 
-[project.scripts]
-ddev = "datadog_checks.dev.tooling.cli:ddev"
-
 [project.entry-points.pytest11]
 datadog_checks = "datadog_checks.dev.plugin.pytest"
 
 [project.entry-points.tox]
 datadog_checks = "datadog_checks.dev.plugin.tox"
-
-[project.entry-points.hatch]
-datadog_checks = "datadog_checks.dev.plugin.hatch"
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"

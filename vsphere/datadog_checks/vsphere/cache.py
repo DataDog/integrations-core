@@ -68,7 +68,7 @@ class MetricsMetadataCache(VSphereCache):
 
     def get_metadata(self, resource_type):
         # type: (Type[vim.ManagedEntity]) -> Dict[CounterId, MetricName]
-        return self._content[resource_type]
+        return self._content.get(resource_type, {})
 
     def set_metadata(self, resource_type, metadata):
         # type: (Type[vim.ManagedEntity], Dict[CounterId, MetricName]) -> None

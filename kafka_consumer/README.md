@@ -6,6 +6,8 @@
 
 This Agent check only collects metrics for message offsets. If you want to collect JMX metrics from the Kafka brokers or Java-based consumers/producers, see the kafka check.
 
+If you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring][16].
+
 This check fetches the highwater offsets from the Kafka brokers, consumer offsets that are stored in Kafka or zookeeper (for old-style consumers), and the calculated consumer lag (which is the difference between the broker offset and the consumer offset).
 
 **Note:** This integration ensures that consumer offsets are checked before broker offsets because worst case is that consumer lag is a little overstated. Doing it in reverse can understate consumer lag to the point of having negative values, which is a dire scenario usually indicating messages are being skipped.
@@ -128,3 +130,4 @@ sudo service datadog-agent restart
 [13]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
 [14]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [15]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
+[16]: https://www.datadoghq.com/product/data-streams-monitoring/

@@ -24,7 +24,7 @@ ASSERT_VALUE_METRICS = [
 ]
 
 # Profiles may contain symbols declared twice with different names and the same OID
-# Python check does handles one single metric name per OID symbol
+# Python check does handle one single metric name per OID symbol
 SKIPPED_CORE_ONLY_METRICS = [
     'snmp.memory.total',
     'snmp.memory.used',
@@ -37,6 +37,11 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.ifInSpeed',
     'snmp.ifOutSpeed',
     'snmp.peerConnectionByState',  # BGP4 constant metric, not handled by python check
+    'snmp.ltmVsStatus',  # F5-BIG-IP constant metric
+    'snmp.ospfNbr',  # OSPF constant metrics, not handled by python check
+    'snmp.ospfVirtNbr',
+    'snmp.ospfIf',
+    'snmp.ospfVirtIf',
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
@@ -284,6 +289,11 @@ def test_e2e_profile_apc_ups(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config, expected_total_count=64 + 5)
 
 
+def test_e2e_profile_apc_ups_user(dd_agent_check):
+    config = common.generate_container_profile_config('apc_ups_user')
+    assert_python_vs_core(dd_agent_check, config, expected_total_count=66 + 5)
+
+
 def test_e2e_profile_arista(dd_agent_check):
     config = common.generate_container_profile_config('arista')
     assert_python_vs_core(dd_agent_check, config, expected_total_count=16 + 5)
@@ -297,6 +307,7 @@ def test_e2e_profile_aruba(dd_agent_check):
         config,
         expected_total_count=67 + 5,
         metrics_to_skip=metrics_to_skip,
+        tags_to_skip=['neighbor_state', 'if_state'],  # Ignore tags that have a mapping
     )
 
 
@@ -305,8 +316,19 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config, expected_total_count=225 + 5)
 
 
+def test_e2e_profile_checkpoint(dd_agent_check):
+    config = common.generate_container_profile_config("checkpoint")
+    metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        expected_total_count=301 + 5,
+        metrics_to_skip=metrics_to_skip,
+    )
+
+
 def test_e2e_profile_checkpoint_firewall(dd_agent_check):
-    config = common.generate_container_profile_config("checkpoint-firewall")
+    config = common.generate_container_profile_config(community_string="checkpoint", profile="checkpoint-firewall")
     metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
     assert_python_vs_core(
         dd_agent_check,
@@ -324,6 +346,7 @@ def test_e2e_profile_cisco_3850(dd_agent_check):
         config,
         expected_total_count=5108 + 5,
         metrics_to_skip=metrics_to_skip,
+        tags_to_skip=['neighbor_state', 'if_state'],  # Ignore tags that have a mapping
     )
 
 
@@ -392,7 +415,7 @@ def test_e2e_profile_dell_poweredge(dd_agent_check):
     assert_python_vs_core(dd_agent_check, config, metrics_to_skip=metric_to_skip)
 
 
-def test_e2e_profile_f5_big_ip(dd_agent_check):
+def test_e2e_core_vs_python_profile_f5_big_ip(dd_agent_check):
     config = common.generate_container_profile_config("f5-big-ip")
     metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
     assert_python_vs_core(
@@ -444,11 +467,6 @@ def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
 
 def test_e2e_profile_netapp(dd_agent_check):
     config = common.generate_container_profile_config('netapp')
-    assert_python_vs_core(dd_agent_check, config)
-
-
-def test_e2e_profile_palo_alto(dd_agent_check):
-    config = common.generate_container_profile_config('palo-alto')
     assert_python_vs_core(dd_agent_check, config)
 
 

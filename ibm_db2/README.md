@@ -22,7 +22,7 @@ The [ibm_db][4] client library is required. To install it, ensure you have a wor
 sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install ibm_db==3.1.0
 ```
 
-Note: If you are on an Agent running Python 2, use `ibm_db==3.0.1` instead.
+Note: If you are on an Agent running Python 2, use `ibm_db==3.0.1` instead of `ibm_db=3.1.0`.
 
 ##### Windows
 
@@ -170,27 +170,35 @@ See [service_checks.json][11] for a list of service checks provided by this inte
 
 ### Installing `ibm_db` client library offline
 
-If you're in an air gapped environment, or on a restricted network where it's not possible to run `pip install ibm_db==3.0.1`, you can install `ibm_db` using the following method:
+If you're in an air gapped environment, or on a restricted network where it's not possible to run `pip install ibm_db==x.y.z` where `x.y.z` is the version number, you can install `ibm_db` using the following method:
 
-**Note**: The following example assumes an Ubuntu machine, but the steps should also be similar on most operating systems.
 
-1. On a machine with network access, download [the source tarball][14].
-
-   ```
-   curl -Lo ibm_db.tar.gz https://github.com/ibmdb/python-ibmdb/archive/refs/tags/v3.1.0.tar.gz
-   ```
-
-1. Transport the file over to the restricted host, and then extract the archive:
+1. On a machine with network access, download the source tarballs for [the `ibm_db` library][14] and [the ODBC and CLI][16]. The ODBC and CLI are required to be downloaded separately because the `ibm_db` library requires them, but it cannot download them via `pip`. The following script installs the archive file for `ibm_db==x.y.z` on a Linux machine, where `x.y.z` is the version number:
 
    ```
-   tar xvf ibm_db.tar.gz
+   curl -Lo ibm_db.tar.gz https://github.com/ibmdb/python-ibmdb/archive/refs/tags/vx.y.z.tar.gz
+
+   curl -Lo linuxx64_odbc_cli.tar.gz https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/linuxx64_odbc_cli.tar.gz
    ```
 
-1. Using the embedded [`pip`][15] on the Agent, run the following command:
+1. Transport the two files over to the restricted host, and then extract the archive.
 
    ```
-   /opt/datadog-agent/embedded/bin/pip install --no-index --no-deps --no-build-isolation  python-ibmdb- 
-   3.1.0/IBM_DB/ibm_db/
+   tar -xvf ibm_db.tar.gz
+
+   tar -xvf linuxx64_odbc_cli.tar.gz
+   ```
+
+1. Set the `IBM_DB_HOME` environment variable to the location of where `/clidriver` was extracted from `linuxx64_odbc_cli.tar.gz`. This will prevent the `ibm_db` library from installing a new version of the ODBC and CLI since that would fail.
+
+   ```
+   export IBM_DB_HOME=/path/to/clidriver
+   ```
+
+1. Using the embedded [`pip`][15] on the Agent, install the `ibm_db` library locally. This library's files are contained within the extracted `python-ibmdb-x.y.z` from `ibm_db.tar.gz`.
+
+   ```
+   /opt/datadog-agent/embedded/bin/pip install --no-index --no-deps --no-build-isolation  /path/to/python-ibmdb-x.y.z/IBM_DB/ibm_db/
    ```
 
 If you get the following error:
@@ -212,11 +220,7 @@ If you get the following error:
       [end of output]
 ```
 
-You may need to install `gcc`, which can be done using:
-
-```
-apt-get install gcc
-```
+You may need to install `gcc`.
 
 Need help? Contact [Datadog support][12].
 
@@ -241,3 +245,4 @@ Additional helpful documentation, links, and articles:
 [13]: https://www.datadoghq.com/blog/monitor-db2-with-datadog
 [14]: https://pypi.org/project/ibm-db/#files
 [15]: https://docs.datadoghq.com/developers/guide/custom-python-package/?tab=linux
+[16]: https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/

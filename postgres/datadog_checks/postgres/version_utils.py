@@ -49,8 +49,8 @@ class VersionUtils(object):
         except ValueError:
             pass
         try:
-            # Version may be missing minor eg: 10.0
-            version = raw_version.split(' ')[0].split('.')
+            # Version may be missing minor eg: 10.0 and it might have an edition suffix (e.g. 12.3_TDE_1.0)
+            version = re.split('[ _]', raw_version)[0].split('.')
             version = [int(part) for part in version]
             while len(version) < 3:
                 version.append(0)

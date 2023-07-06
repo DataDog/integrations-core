@@ -99,9 +99,9 @@ COMMON_DBS = ['dogs', 'postgres', 'dogs_nofunc', 'dogs_noschema', DB_NAME]
 requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `latest` is ever-changing, skipping')
 
 
-def _iterate_metric_name(columns):
-    for column in columns:
-        if column['type'] == 'tag':
+def _iterate_metric_name(query):
+    for column in query['columns']:
+        if column['type'].startswith('tag'):
             continue
         yield column['name']
 
@@ -148,8 +148,18 @@ def check_common_metrics(aggregator, expected_tags, count=1):
 
 
 def check_db_count(aggregator, expected_tags, count=1):
+    table_count = 5
+    # We create 2 additional partition tables when partition is available
+    if float(POSTGRES_VERSION) >= 11.0:
+        table_count = 7
+    # And PG >= 14 will also report the parent table
+    if float(POSTGRES_VERSION) >= 14.0:
+        table_count = 8
     aggregator.assert_metric(
-        'postgresql.table.count', value=5, count=count, tags=expected_tags + ['db:{}'.format(DB_NAME), 'schema:public']
+        'postgresql.table.count',
+        value=table_count,
+        count=count,
+        tags=expected_tags + ['db:{}'.format(DB_NAME), 'schema:public'],
     )
     aggregator.assert_metric('postgresql.db.count', value=106, count=1)
 
@@ -200,7 +210,7 @@ def check_wal_receiver_metrics(aggregator, expected_tags, count=1, connected=1):
             'postgresql.wal_receiver.connected', count=count, value=1, tags=expected_tags + ['status:disconnected']
         )
         return
-    for metric_name in _iterate_metric_name(QUERY_PG_STAT_WAL_RECEIVER['columns']):
+    for metric_name in _iterate_metric_name(QUERY_PG_STAT_WAL_RECEIVER):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
@@ -227,7 +237,7 @@ def check_logical_replication_slots(aggregator, expected_tags):
 def check_replication_slots(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 10.0:
         return
-    for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_SLOTS['columns']):
+    for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_SLOTS):
         if 'slot_type:physical' in expected_tags and metric_name in [
             'postgresql.replication_slot.confirmed_flush_delay_bytes',
         ]:
@@ -247,13 +257,13 @@ def check_replication_delay(aggregator, metrics_cache, expected_tags, count=1):
 
 
 def check_uptime_metrics(aggregator, expected_tags, count=1):
-    for column in QUERY_PG_UPTIME['columns']:
-        aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
+    for metric_name in _iterate_metric_name(QUERY_PG_UPTIME):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_control_metrics(aggregator, expected_tags, count=1):
-    for column in QUERY_PG_CONTROL_CHECKPOINT['columns']:
-        aggregator.assert_metric(column['name'], count=count, tags=expected_tags)
+    for metric_name in _iterate_metric_name(QUERY_PG_CONTROL_CHECKPOINT):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_conflict_metrics(aggregator, expected_tags, count=1):
@@ -285,7 +295,7 @@ def check_slru_metrics(aggregator, expected_tags, count=1):
 
 
 def check_snapshot_txid_metrics(aggregator, expected_tags, count=1):
-    for metric_name in _iterate_metric_name(SNAPSHOT_TXID_METRICS['columns']):
+    for metric_name in _iterate_metric_name(SNAPSHOT_TXID_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
@@ -293,7 +303,7 @@ def check_file_wal_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 10:
         return
 
-    for metric_name in _iterate_metric_name(WAL_FILE_METRICS['columns']):
+    for metric_name in _iterate_metric_name(WAL_FILE_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
@@ -301,5 +311,5 @@ def check_stat_wal_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 14.0:
         return
 
-    for metric_name in _iterate_metric_name(STAT_WAL_METRICS['columns']):
+    for metric_name in _iterate_metric_name(STAT_WAL_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
