@@ -4,7 +4,9 @@
 import os
 
 from datadog_checks.base import is_affirmative
+from datadog_checks.dev import get_here
 
+HERE = get_here()
 USE_AUTH = is_affirmative(os.environ.get('USE_AUTH'))
 
 MOCKED_INSTANCE = {
@@ -19,7 +21,6 @@ BATCH_OBJECTS = {
         {'class': 'Example', 'vector': [0.01, 0.7], 'properties': {'text': 'This is another object'}},
     ]
 }
-
 
 OM_METRICS = [
     'weaviate.go.gc.duration.seconds.count',
@@ -97,7 +98,6 @@ OM_METRICS = [
     'weaviate.http.latency_ms',
 ]
 
-
 API_METRICS = [
     'weaviate.node.status',
     'weaviate.node.shard.objects',
@@ -118,3 +118,7 @@ FLAKY_E2E_METRICS = [
 ]
 
 E2E_METRICS = OM_METRICS + API_METRICS
+
+
+def get_fixture_path(filename):
+    return os.path.join(HERE, 'fixtures', filename)

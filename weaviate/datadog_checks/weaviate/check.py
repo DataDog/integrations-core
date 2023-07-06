@@ -1,11 +1,13 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import time
 from urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.utils.common import round_value
+from datadog_checks.weaviate.config_models import ConfigMixin
 
 from .metrics import METRICS
 
@@ -13,8 +15,12 @@ DEFAULT_METADATA_ENDPOINT = '/v1/meta'
 DEFAULT_NODE_METRICS_ENDPOINT = '/v1/nodes'
 DEFAULT_LIVENESS_ENDPOINT = '/v1/.well-known/live'
 
+# Mapping service checks to HEALTHY = Ok, UNHEALTHY = Warning, UNAVAILABLE = Critical.
+# Defaults to unknown if not of the above (3).
+NODE_STATUS_VALUES = {'HEALTHY': 0, 'UNHEALTHY': 1, 'UNAVAILABLE': 2, 'UNKNOWN': 3}
 
-class WeaviateCheck(OpenMetricsBaseCheckV2):
+
+class WeaviateCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'weaviate'
 
@@ -38,14 +44,14 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
         if response.ok:
             try:
                 data = response.json()
-                version = data["version"]
+                version = data.get("version", "")
                 version_split = version.split(".")
                 if len(version_split) >= 3:
                     major = version_split[0]
                     minor = version_split[1]
                     patch = version_split[2]
 
-                    version_raw = '{}.{}.{}'.format(major, minor, patch)
+                    version_raw = f'{major}.{minor}.{patch}'
 
                     version_parts = {
                         'major': major,
@@ -62,7 +68,7 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
 
     def _submit_liveness_metrics(self):
         endpoint = urljoin(self.api_url, DEFAULT_LIVENESS_ENDPOINT)
-        tags = self.tags
+        tags = copy.deepcopy(self.tags)
         tags.append(f"weaviate_liveness_url:{endpoint}")
 
         start_time = time.time()
@@ -71,10 +77,10 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
 
         if response.ok:
             latency = round_value((end_time - start_time) * 1000, 2)
-            self.service_check('liveness.status', 0, tags)
+            self.service_check('liveness.status', AgentCheck.OK, tags)
             self.gauge('http.latency_ms', latency, tags=tags)
         else:
-            self.service_check('liveness.status', 2, tags)
+            self.service_check('liveness.status', AgentCheck.CRITICAL, tags)
 
     def _submit_node_metrics(self):
         endpoint = urljoin(self.api_url, DEFAULT_NODE_METRICS_ENDPOINT)
@@ -84,21 +90,20 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
             return
         try:
             data = response.json()
-            # Mapping service checks to HEALTHY = Ok, UNHEALTHY = Warning, UNAVAILABLE = Critical.
-            # Defaults to unknown if not of the above (3).
-            status_values = {'HEALTHY': 0, 'UNHEALTHY': 1, 'UNAVAILABLE': 2}
 
             for node in data.get('nodes', []):
-                tags = self.tags
+                tags = copy.deepcopy(self.tags)
 
-                tags.append(f"weaviate_node:{node.get('name')}")
-                tags.append(f"weaviate_version:{node.get('version')}")
-                tags.append(f"weaviate_githash:{node.get('gitHash')}")
+                tags.append(f"weaviate_node:{node.get('name', '')}")
+                tags.append(f"weaviate_version:{node.get('version', '')}")
+                tags.append(f"weaviate_githash:{node.get('gitHash', '')}")
 
                 if status := node.get('status'):
                     tags.append(f"weaviate_node_status:{status.lower()}")
-                    self.gauge('node.status', status_values.get(status, AgentCheck.UNKNOWN), tags=tags)
-                    self.service_check('node.status', status_values.get(status, AgentCheck.UNKNOWN), tags=tags)
+                    self.gauge('node.status', NODE_STATUS_VALUES.get(status, NODE_STATUS_VALUES['UNKNOWN']), tags=tags)
+                    self.service_check(
+                        'node.status', NODE_STATUS_VALUES.get(status, NODE_STATUS_VALUES['UNKNOWN']), tags=tags
+                    )
 
                 if stats := node.get('stats'):
                     self.gauge('node.stats.shards', stats.get('shardCount', 0), tags=tags)
@@ -106,23 +111,24 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
 
                 if shards := node.get('shards'):
                     for shard in shards:
-                        tags.append(f"shard_name:{shard.get('name')}")
-                        tags.append(f"class_name:{shard.get('class')}")
+                        tags.append(f"shard_name:{shard.get('name', '')}")
+                        tags.append(f"class_name:{shard.get('class', '')}")
                         self.gauge('node.shard.objects', shard.get('objectCount', 0), tags=tags)
 
         except Exception as e:
             self.log.debug("Error occurred during node metrics submission: %s", e)
 
     def check(self, instance):
-        try:
-            if self.instance.get("weaviate_api_endpoint"):
+        if self.api_url:
+            try:
                 self._submit_liveness_metrics()
                 self._submit_version_metadata()
                 self._submit_node_metrics()
-        except Exception as e:
-            self.log.error("Error while collecting Weaviate metrics from API: %s", e)
-        try:
-            if self.instance.get("openmetrics_endpoint"):
+            except Exception as e:
+                self.log.error("Error while collecting Weaviate metrics from API: %s", e)
+
+        if self.instance.get("openmetrics_endpoint"):
+            try:
                 super().check(instance)
-        except Exception as e:
-            self.log.error("Error while collecting Weaviate metrics from OpenMetrics endpoint: %s", e)
+            except Exception as e:
+                self.log.error("Error while collecting Weaviate metrics from OpenMetrics endpoint: %s", e)
