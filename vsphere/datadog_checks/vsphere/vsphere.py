@@ -211,7 +211,6 @@ class VSphereCheck(AgentCheck):
         t0 = Timer()
         infrastructure_data = self.api.get_infrastructure()
         collect_property_metrics = self._config.collect_property_metrics
-        self.log.debug("infra data: %s", infrastructure_data)
         self.gauge(
             "datadog.vsphere.refresh_infrastructure_cache.time",
             t0.total(),

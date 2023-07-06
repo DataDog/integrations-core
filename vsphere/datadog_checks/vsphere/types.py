@@ -52,6 +52,8 @@ InstanceConfig = TypedDict(
 MetricName = str
 CounterId = int
 
+VmomiObject = VmomiSupport.Object
+
 InfrastructureDataItem = TypedDict(
     'InfrastructureDataItem',
     {
@@ -65,23 +67,12 @@ InfrastructureDataItem = TypedDict(
         'summary.config.numVirtualDisks': int,
         'summary.quickStats.uptimeSeconds': int,
         'guest.guestFullName': str,
-        'guest.disk': List[vim.GuestDiskInfo],
-        'guest.net': List[vim.GuestNicInfo],
-        'guest.ipStack': List[vim.GuestStackInfo],
+        'guest.disk': List[VmomiObject],
+        'guest.net': List[VmomiObject],
+        'guest.ipStack': List[VmomiObject],
         'guest.toolsRunningStatus': str,
         'guest.toolsVersion': str,
         'config.hardware.numCoresPerSocket': str,
-        'hardware.cpuPowerManagementInfo.currentPolicy': str,
-        'summary.runtime.connectionState': str,
-        'summary.runtime.powerState': str,
-        'summary.runtime.inMaintenanceMode': bool,
-        'config.service': str,
-        'summary.capacity': int,
-        'summary.freeSpace': int,
-        'configuration.drsConfig.enabled': bool,
-        'configuration.drsConfig.defaultVmBehavior': str,
-        'configuration.drsConfig.vmotionRate': str,
-        'configuration.dasConfig.enabled': bool,
         'parent': Optional[vim.ManagedEntity],
         'attributes': List[str],
     },
@@ -95,5 +86,3 @@ TagAssociation = TypedDict('TagAssociation', {'object_id': Dict[str, str], 'tag_
 MetricFilters = Dict[str, List[Pattern]]
 
 MorBatch = Dict[vim.ManagedEntity, List[vim.PerformanceManager.MetricId]]
-
-VmomiObject = VmomiSupport.Object
