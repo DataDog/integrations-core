@@ -69,7 +69,7 @@ def make_weaviate_request(instance):
 
 
 def ready_check(endpoint, timeout=300):
-    # Sometimes the API endpoint isn't ready when the cluster is ready. This will tries to ensure the
+    # Sometimes the API endpoint isn't ready when the cluster is ready. This will try to ensure the
     # API is ready for requests before we seed some dummy data.
     stop_time = time.time() + timeout
     endpoint = f'{endpoint}{DEFAULT_LIVENESS_ENDPOINT}'

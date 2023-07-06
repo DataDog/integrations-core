@@ -8,8 +8,6 @@ python = ["3.9"]
 version = ["1.19"]
 auth = ["no-auth", "auth"]
 
-
-
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "WEAVIATE_VERSION", value = "1.19.1", if = ["1.19"] },
