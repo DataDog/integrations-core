@@ -34,39 +34,39 @@ def test_e2e_profile_avtech_roomalert_3s(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.roomalert3s.digital_sen1_1', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.roomalert3s.digital_sen1_2', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.roomalert3s.digital_sen1_3', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.roomalert3s.digital_sen1_4', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.roomalert3s.digital_sen1_5', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.roomalert3s.digital_sen1_6', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.roomalert3s.digital_sen1_7', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.roomalert.3s.digital_sen1_1', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.roomalert.3s.digital_sen1_2', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.roomalert.3s.digital_sen1_3', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.roomalert.3s.digital_sen1_4', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.roomalert.3s.digital_sen1_5', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.roomalert.3s.digital_sen1_6', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.roomalert.3s.digital_sen1_7', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric(
-        'snmp.roomalert3s.externalrelay1_element_eight', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.roomalert.3s.externalrelay1_element_eight', metric_type=aggregator.GAUGE, tags=common_tags
     )
     aggregator.assert_metric(
-        'snmp.roomalert3s.externalrelay1_element_five', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.roomalert.3s.externalrelay1_element_five', metric_type=aggregator.GAUGE, tags=common_tags
     )
     aggregator.assert_metric(
-        'snmp.roomalert3s.externalrelay1_element_four', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.roomalert.3s.externalrelay1_element_four', metric_type=aggregator.GAUGE, tags=common_tags
     )
     aggregator.assert_metric(
-        'snmp.roomalert3s.externalrelay1_element_one', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.roomalert.3s.externalrelay1_element_one', metric_type=aggregator.GAUGE, tags=common_tags
     )
     aggregator.assert_metric(
-        'snmp.roomalert3s.externalrelay1_element_seven', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.roomalert.3s.externalrelay1_element_seven', metric_type=aggregator.GAUGE, tags=common_tags
     )
     aggregator.assert_metric(
-        'snmp.roomalert3s.externalrelay1_element_six', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.roomalert.3s.externalrelay1_element_six', metric_type=aggregator.GAUGE, tags=common_tags
     )
     aggregator.assert_metric(
-        'snmp.roomalert3s.externalrelay1_element_three', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.roomalert.3s.externalrelay1_element_three', metric_type=aggregator.GAUGE, tags=common_tags
     )
     aggregator.assert_metric(
-        'snmp.roomalert3s.externalrelay1_element_two', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.roomalert.3s.externalrelay1_element_two', metric_type=aggregator.GAUGE, tags=common_tags
     )
-    aggregator.assert_metric('snmp.roomalert3s.internal_tempc', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.roomalert3s.internal_tempf', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.roomalert.3s.internal_tempc', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.roomalert.3s.internal_tempf', metric_type=aggregator.GAUGE, tags=common_tags)
 
     # --- TEST METADATA ---
     device = {
