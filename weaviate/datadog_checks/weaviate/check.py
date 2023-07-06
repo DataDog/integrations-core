@@ -85,22 +85,22 @@ class WeaviateCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         if not response.ok:
             self.log.debug("Could not retrieve Node metrics. Request returned a: %s", str(response.status_code))
             return
+
         data = response.json()
-        # Mapping service checks to HEALTHY = Ok, UNHEALTHY = Warning, UNAVAILABLE = Critical.
-        # Defaults to unknown if not of the above (3).
-        status_values = {'HEALTHY': 0, 'UNHEALTHY': 1, 'UNAVAILABLE': 2}
 
         for node in data.get('nodes', []):
-            tags = self.tags
+            tags = copy.deepcopy(self.tags)
 
-            tags.append(f"weaviate_node:{node.get('name')}")
-            tags.append(f"weaviate_version:{node.get('version')}")
-            tags.append(f"weaviate_githash:{node.get('gitHash')}")
+            tags.append(f"weaviate_node:{node.get('name', '')}")
+            tags.append(f"weaviate_version:{node.get('version', '')}")
+            tags.append(f"weaviate_githash:{node.get('gitHash', '')}")
 
             if status := node.get('status'):
                 tags.append(f"weaviate_node_status:{status.lower()}")
-                self.gauge('node.status', status_values.get(status, AgentCheck.UNKNOWN), tags=tags)
-                self.service_check('node.status', status_values.get(status, AgentCheck.UNKNOWN), tags=tags)
+                self.gauge('node.status', NODE_STATUS_VALUES.get(status, NODE_STATUS_VALUES['UNKNOWN']), tags=tags)
+                self.service_check(
+                    'node.status', NODE_STATUS_VALUES.get(status, NODE_STATUS_VALUES['UNKNOWN']), tags=tags
+                )
 
             if stats := node.get('stats'):
                 self.gauge('node.stats.shards', stats.get('shardCount', 0), tags=tags)
@@ -108,8 +108,8 @@ class WeaviateCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
             if shards := node.get('shards'):
                 for shard in shards:
-                    tags.append(f"shard_name:{shard.get('name')}")
-                    tags.append(f"class_name:{shard.get('class')}")
+                    tags.append(f"shard_name:{shard.get('name', '')}")
+                    tags.append(f"class_name:{shard.get('class', '')}")
                     self.gauge('node.shard.objects', shard.get('objectCount', 0), tags=tags)
 
     def check(self, instance):
