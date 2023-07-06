@@ -102,7 +102,6 @@ def test_e2e_profile_avtech_roomalert_32s(dd_agent_check):
     aggregator.assert_metric('snmp.roomalert32s.internal_tempc', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.roomalert32s.internal_tempf', metric_type=aggregator.GAUGE, tags=common_tags)
 
-
     # --- TEST METADATA ---
     device = {
         'description': 'avtech-roomalert-32s Device Description',
