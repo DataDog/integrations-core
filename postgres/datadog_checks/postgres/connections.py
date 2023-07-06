@@ -113,6 +113,9 @@ class MultiDatabaseConnectionPool(object):
                 db = self.connect_fn(dbname)
                 if startup_fn:
                     startup_fn(db)
+            else:
+                # if already in pool, retain persistence status
+                persistent = conn.persistent
 
             if db.status != psycopg2.extensions.STATUS_READY:
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that

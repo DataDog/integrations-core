@@ -120,11 +120,11 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
-        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms) as conn:
-            cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-            self._log.debug("Running query [%s]", PG_SETTINGS_QUERY)
-            self._time_since_last_settings_query = time.time()
-            cursor.execute(PG_SETTINGS_QUERY)
-            rows = cursor.fetchall()
-            self._log.debug("Loaded %s rows from pg_settings", len(rows))
-            return [dict(row) for row in rows]
+        with self._check._get_main_db() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                self._log.debug("Running query [%s]", PG_SETTINGS_QUERY)
+                self._time_since_last_settings_query = time.time()
+                cursor.execute(PG_SETTINGS_QUERY)
+                rows = cursor.fetchall()
+                self._log.debug("Loaded %s rows from pg_settings", len(rows))
+                return [dict(row) for row in rows]

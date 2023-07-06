@@ -156,6 +156,7 @@ class InstanceConfig(BaseModel):
     ignore_databases: Optional[Sequence[str]]
     log_unobfuscated_plans: Optional[bool]
     log_unobfuscated_queries: Optional[bool]
+    max_connections: Optional[int]
     max_relations: Optional[int]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]

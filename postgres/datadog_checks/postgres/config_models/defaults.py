@@ -114,6 +114,10 @@ def instance_log_unobfuscated_queries(field, value):
     return False
 
 
+def instance_max_connections(field, value):
+    return 30
+
+
 def instance_max_relations(field, value):
     return 300
 
