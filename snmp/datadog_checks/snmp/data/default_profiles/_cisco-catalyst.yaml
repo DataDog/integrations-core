@@ -38,7 +38,7 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.9.9.276.1.1.1
       name: cieIfPacketStatsTable
-    forced_type: gauge
+    metric_type: gauge
     symbols:
       - OID: 1.3.6.1.4.1.9.9.276.1.1.1.1.1
         name: cieIfLastInTime
