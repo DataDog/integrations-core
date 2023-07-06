@@ -657,13 +657,15 @@ class VSphereCheck(AgentCheck):
                 if tag_value is not None:
                     tags.append("{}:{}".format(tag_name, tag_value))
 
-        self.log.debug(
-            "Submit property metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
-            metric_name,
-            metric_value,
-            hostname,
-            tags,
-        )
+        # Use isEnabledFor to avoid unnecessary processing
+        if self.log.isEnabledFor(logging.DEBUG):
+            self.log.debug(
+                "Submit property metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
+                metric_name,
+                metric_value,
+                hostname,
+                tags,
+            )
         metric_method(metric_name, metric_value, tags=tags, hostname=hostname)
 
     def submit_disk_property_metrics(
