@@ -35,13 +35,12 @@ dependencies = [
 dynamic = [
     "version",
 ]
-
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
     "cachetools==3.1.1; python_version < '3.0'",
-    "cachetools==5.3.0; python_version > '3.0'",
+    "cachetools==5.3.1; python_version > '3.0'",
     "cryptography==3.3.2; python_version < '3.0'",
     "cryptography==39.0.1; python_version > '3.0'",
     "futures==3.4.0; python_version < '3.0'",

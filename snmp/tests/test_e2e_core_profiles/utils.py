@@ -201,7 +201,7 @@ def assert_extend_generic_ucd(aggregator, common_tags):
 1.3.6.1.4.1.2021.4.3.0|2|1048572
     """
     # fmt:on
-    aggregator.assert_metric("snmp.memTotalSwap", metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric("snmp.ucd.memTotalSwap", metric_type=aggregator.GAUGE, tags=common_tags)
 
 
 def assert_extend_cisco(aggregator, common_tags):
