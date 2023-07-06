@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+
+# Caddy will create host a site with the metrics to exposes
+  caddy:
+    image: caddy:2.7
+    container_name: caddy
+    ports:
+      - "9400:9400"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./serve:/site

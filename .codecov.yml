@@ -610,6 +610,10 @@ coverage:
         target: 75
         flags:
         - cert_manager
+      dcgm:
+        target: 75
+        flags:
+        - dcgm
       ddev:
         target: 75
         flags:
@@ -807,6 +811,11 @@ flags:
     paths:
     - datadog_cluster_agent/datadog_checks/datadog_cluster_agent
     - datadog_cluster_agent/tests
+  dcgm:
+    carryforward: true
+    paths:
+    - dcgm/datadog_checks/dcgm
+    - dcgm/tests
   ddev:
     carryforward: true
     paths:

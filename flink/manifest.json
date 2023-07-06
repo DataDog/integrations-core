@@ -41,7 +41,22 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "java org.apache.flink.client.python.PythonShellParser",
+        "java org.apache.flink.container.entrypoint.StandaloneApplicationClusterEntryPoint",
+        "java org.apache.flink.kubernetes.entrypoint.KubernetesSessionClusterEntrypoint",
+        "java org.apache.flink.kubernetes.entrypoint.KubernetesApplicationClusterEntrypoint",
+        "java org.apache.flink.kubernetes.taskmanager.KubernetesTaskExecutorRunner",
+        "java org.apache.flink.kubernetes.cli.KubernetesSessionCli",
+        "java org.apache.flink.runtime.taskexecutor.TaskManagerRunner",
+        "java org.apache.flink.runtime.zookeeper.FlinkZooKeeperQuorumPeer",
+        "java org.apache.flink.runtime.webmonitor.history.HistoryServer",
+        "java org.apache.flink.runtime.entrypoint.StandaloneSessionClusterEntrypoint",
+        "java org.apache.flink.table.gateway.SqlGateway",
+        "java org.apache.flink.table.client.SqlClient",
+        "java org.apache.flink.yarn.cli.FlinkYarnSessionCli"
+      ]
     },
     "dashboards": {
       "Flink Overview": "assets/dashboards/overview.json"

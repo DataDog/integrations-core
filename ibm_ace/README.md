@@ -95,6 +95,25 @@ The IBM ACE integration does not include any events.
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
+### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. To start collecting your IBM ACE logs, add this configuration block to your `ibm_ace.d/conf.yaml` file:
+
+    ```yaml
+    logs:
+      - type: file
+        path: /home/aceuser/ace-server/log/integration_server.txt
+        source: ibm_ace
+    ```
+
+    Change the `path` parameter value based on your environment. See the [sample `ibm_ace.d/conf.yaml` file][4] for all available configuration options.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].

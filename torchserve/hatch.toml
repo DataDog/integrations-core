@@ -6,5 +6,5 @@ version = ["0.8"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "TORCHSERVE_VERSION", value = "0.8.0", if = ["0.8"] },
+  { key = "TORCHSERVE_VERSION", value = "0.8.1", if = ["0.8"] },
 ]
