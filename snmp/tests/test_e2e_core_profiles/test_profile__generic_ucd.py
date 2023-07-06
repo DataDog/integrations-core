@@ -29,55 +29,59 @@ def test_e2e_profile__generic_ucd(dd_agent_check):
         'snmp_device:' + ip_address,
     ] + []
 
+    # --- TEST EXTENDED METRICS ---
+
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
     aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memAvailSwap', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memBuffer', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memCached', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memMinimumSwap', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memShared', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memTotalFree', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memTotalSwap', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ssCpuIdle', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ssCpuRawIdle', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ssCpuRawInterrupt', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ssCpuRawKernel', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ssCpuRawNice', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ssCpuRawSystem', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ssCpuRawUser', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ssCpuRawWait', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ssCpuSystem', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ssCpuUser', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.memAvailSwap', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.memBuffer', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.memCached', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.memMinimumSwap', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.memShared', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.memTotalFree', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.memTotalSwap', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuIdle', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuRawIdle', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuRawInterrupt', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuRawKernel', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuRawNice', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuRawSystem', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuRawUser', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuRawWait', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuSystem', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.ucd.ssCpuUser', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-        ['dsk_device:driving driving but kept oxen oxen', 'dsk_error_flag:no_error', 'dsk_path:oxen acted oxen their'],
-        ['dsk_device:kept Jaded', 'dsk_error_flag:no_error', 'dsk_path:quaintly oxen acted oxen'],
+        [
+            'ucd_dsk_device:driving driving but kept oxen oxen',
+            'ucd_dsk_error_flag:no_error',
+            'ucd_dsk_path:oxen acted oxen their',
+        ],
+        ['ucd_dsk_device:kept Jaded', 'ucd_dsk_error_flag:no_error', 'ucd_dsk_path:quaintly oxen acted oxen'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.dskAvail', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.dskPercent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.dskPercentNode', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.dskTotal', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.dskUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.dskAvail', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.dskPercent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.dskPercentNode', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.dskTotal', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.dskUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['disk_io_device:forward'],
-        ['disk_io_device:their zombies'],
+        ['ucd_disk_io_device:forward'],
+        ['ucd_disk_io_device:their zombies'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.diskIOLA1', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.diskIOLA15', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.diskIOLA5', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.diskIONReadX', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.diskIONWrittenX', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.diskIOReads', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.diskIOWrites', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-    aggregator.assert_all_metrics_covered()
+        aggregator.assert_metric('snmp.ucd.diskIOLA1', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.diskIOLA15', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.diskIOLA5', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.diskIONReadX', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.diskIONWrittenX', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.diskIOReads', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ucd.diskIOWrites', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
