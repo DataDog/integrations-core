@@ -107,8 +107,7 @@ class KafkaClient:
             cluster_metadata = self.kafka_client.list_topics(topic, timeout=self.config._request_timeout)
         except KafkaException as e:
             self.log.error("Received exception when getting partitions for topic %s: %s", topic, e)
-            raise
-            # return None
+            return None
         else:
             topic_metadata = cluster_metadata.topics[topic]
             partitions = list(topic_metadata.partitions.keys())
@@ -131,7 +130,6 @@ class KafkaClient:
                 response_offset_info = future.result()
             except KafkaException as e:
                 self.log.debug("Failed to read consumer offsets for future %s: %s", future, e)
-                raise
             else:
                 consumer_group = response_offset_info.group_id
                 topic_partitions = response_offset_info.topic_partitions
@@ -180,8 +178,6 @@ class KafkaClient:
                 )
             except Exception as e:
                 self.log.error("Failed to collect consumer groups: %s", e)
-                raise
-            # add debug log here to list the consumer groups result
             return consumer_groups
         else:
             return self.config._consumer_groups
