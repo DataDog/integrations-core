@@ -106,8 +106,8 @@ class WeaviateCheck(OpenMetricsBaseCheckV2):
 
                 if shards := node.get('shards'):
                     for shard in shards:
-                        tags.append(f"weaviate_shard_name:{shard.get('name')}")
-                        tags.append(f"weaviate_shard_class:{shard.get('class')}")
+                        tags.append(f"shard_name:{shard.get('name')}")
+                        tags.append(f"class_name:{shard.get('class')}")
                         self.gauge('node.shard.objects', shard.get('objectCount', 0), tags=tags)
 
         except Exception as e:
