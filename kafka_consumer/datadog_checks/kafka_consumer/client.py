@@ -161,7 +161,7 @@ class KafkaClient:
                         to_match = f"{consumer_group},{topic},{partition}"
                         if self.config._consumer_groups_compiled_regex.match(to_match):
                             if offset != OFFSET_INVALID:
-                                consumer_offsets[(consumer_group, topic, partition)] = offset                    
+                                consumer_offsets[(consumer_group, topic, partition)] = offset
 
         return consumer_offsets
 
