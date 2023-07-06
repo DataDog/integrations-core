@@ -113,12 +113,9 @@ class WeaviateCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                     self.gauge('node.shard.objects', shard.get('objectCount', 0), tags=tags)
 
     def check(self, instance):
-        if self.api_url:
-            try:
-                self._submit_liveness_metrics()
-                self._submit_version_metadata()
-                self._submit_node_metrics()
-            except Exception as e:
-                self.log.error("Error while collecting Weaviate metrics from API: %s", e)
         if self.instance.get("openmetrics_endpoint"):
             super().check(instance)
+        if self.api_url:
+            self._submit_liveness_metrics()
+            self._submit_version_metadata()
+            self._submit_node_metrics()
