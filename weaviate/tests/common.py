@@ -108,9 +108,7 @@ API_METRICS = [
     'weaviate.node.stats.shards',
 ]
 
-latency_metric = [
-    'weaviate.http.latency_ms'
-]
+latency_metric = ['weaviate.http.latency_ms']
 
 FLAKY_E2E_METRICS = [
     'weaviate.lsm.segment.size',
