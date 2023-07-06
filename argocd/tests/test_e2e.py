@@ -25,6 +25,7 @@ def test_e2e_openmetrics_v1(dd_agent_check):
     aggregator.assert_service_check('argocd.api_server.openmetrics.health', ServiceCheck.OK, count=2)
     aggregator.assert_service_check('argocd.repo_server.openmetrics.health', ServiceCheck.OK, count=2)
     aggregator.assert_service_check('argocd.app_controller.openmetrics.health', ServiceCheck.OK, count=2)
+    aggregator.assert_service_check('argocd.notifications_controller.openmetrics.health', ServiceCheck.OK, count=2)
 
     for metric in metrics:
         if metric in not_exposed_metrics:
