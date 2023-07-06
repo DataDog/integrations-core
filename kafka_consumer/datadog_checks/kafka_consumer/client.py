@@ -4,7 +4,7 @@
 from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
 from confluent_kafka.admin import AdminClient
 
-from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
+from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, OFFSET_INVALID
 
 
 class KafkaClient:
@@ -150,7 +150,8 @@ class KafkaClient:
                             topic_partition.topic,
                             str(topic_partition.partition),
                         )
-                    consumer_offsets[(consumer_group, topic, partition)] = offset
+                    if offset != OFFSET_INVALID:
+                        consumer_offsets[(consumer_group, topic, partition)] = offset
 
         return consumer_offsets
 
