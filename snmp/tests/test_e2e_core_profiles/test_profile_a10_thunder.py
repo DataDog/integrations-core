@@ -42,7 +42,7 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
 
     aggregator.assert_metric('snmp.axAppGlobalBufferConfigLimit', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.axAppGlobalBufferCurrentUsage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.axAppGlobalTotalCurrentConnections', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.axAppGlobalTotalCurrentConnections', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.axAppGlobalTotalL7Requests', metric_type=aggregator.COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.axAppGlobalTotalNewConnections', metric_type=aggregator.COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.axAppGlobalTotalNewIPNatConnections', metric_type=aggregator.COUNT, tags=common_tags)
