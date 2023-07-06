@@ -15,10 +15,12 @@ from datadog_checks.base.utils.containers import iter_unique
 from . import queries
 from .utils import get_version, scrub_connection_string, status_to_service_check
 
-IMPORT_ERROR = None
+
 try:
     import ibm_db
-except Exception as e:
+    IMPORT_ERROR = None
+except ModuleNotFoundError as e:
+    ibm_db = None
     IMPORT_ERROR = e
 
 
