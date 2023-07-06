@@ -284,6 +284,16 @@ files:
             type: boolean
             example: True
           hidden: true
+        - name: max_queries
+          description: |
+            Limit the number of queries sent to the backend. 
+            Note: The only time this value would need to be set is in special cases where the query limit
+            applied on the backend is being modified.
+          value:
+            type: integer
+            example: 250
+            display_default: 250
+          hidden: true
     - name: query_activity
       description: Configure collection of active sessions monitoring
       options:
