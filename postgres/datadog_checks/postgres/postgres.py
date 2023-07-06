@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import os
-import threading
 from contextlib import closing
 from time import time
 
@@ -90,6 +89,7 @@ class PostgreSql(AgentCheck):
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
+        self.db_pool = MultiDatabaseConnectionPool(self._new_connection, self._config.max_connections)
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
@@ -98,9 +98,6 @@ class PostgreSql(AgentCheck):
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
         self.check_initializations.append(self.set_resolved_hostname_metadata)
-        # map[dbname -> psycopg connection]
-        self._db_pool = {}
-        self._db_pool_lock = threading.Lock()
         self.autodiscovery_db_pool = MultiDatabaseConnectionPool(self._new_connection)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         self.autodiscovery = self._build_autodiscovery()
@@ -627,19 +624,6 @@ class PostgreSql(AgentCheck):
         conn.set_session(autocommit=True, readonly=True)
         return conn
 
-    def _connect(self):
-        """Get and memoize connections to instances"""
-        if self.db and self.db.closed:
-            # Reset the connection object to retry to connect
-            self.db = None
-
-        if self.db:
-            if self.db.status != psycopg2.extensions.STATUS_READY:
-                # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
-                self.db.rollback()
-        else:
-            self.db = self._new_connection(self._config.dbname)
-
     # Reload pg_settings on a new connection to the main db
     def _load_pg_settings(self, db):
         try:
@@ -663,38 +647,40 @@ class PostgreSql(AgentCheck):
                 hostname=self.resolved_hostname,
             )
 
-    def _get_db(self, dbname):
+    def _connect(self):
         """
-        Returns a memoized psycopg2 connection to `dbname` with autocommit
+        Get and memoize connections to instances.
+        The connection created here will be persistent. It will not be automatically
+        evicted from the connection pool.
+        """
+        if self.db and self.db.closed:
+            # Reset the connection object to retry to connect
+            self.db = None
+
+        if self.db:
+            if self.db.status != psycopg2.extensions.STATUS_READY:
+                # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
+                self.db.rollback()
+        else:
+            self.db = self._get_main_db()
+
+    def _get_main_db(self):
+        """
+        Returns a memoized, persistent psycopg2 connection to `self.dbname`.
         Threadsafe as long as no transactions are used
-        :param dbname:
         :return: a psycopg2 connection
         """
-        # TODO: migrate the rest of this check to use a connection from this pool
-        with self._db_pool_lock:
-            db = self._db_pool.get(dbname)
-            if not db or db.closed:
-                self.log.debug("initializing connection to dbname=%s", dbname)
-                db = self._new_connection(dbname)
-                self._db_pool[dbname] = db
-                if self._config.dbname == dbname:
-                    # reload settings for the main DB only once every time the connection is reestablished
-                    self._load_pg_settings(db)
-            if db.status != psycopg2.extensions.STATUS_READY:
-                # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
-                db.rollback()
-            return db
+        # reload settings for the main DB only once every time the connection is reestablished
+        conn = self.db_pool._get_connection_raw(
+            self._config.dbname,
+            self._config.idle_connection_timeout,
+            startup_fn=self._load_pg_settings,
+            persistent=True,
+        )
+        return conn
 
     def _close_db_pool(self):
-        # TODO: add automatic aging out of connections after some time
-        with self._db_pool_lock:
-            for dbname, db in self._db_pool.items():
-                if db and not db.closed:
-                    try:
-                        db.close()
-                    except Exception:
-                        self.log.exception("failed to close DB connection for db=%s", dbname)
-                self._db_pool[dbname] = None
+        self.db_pool.close_all_connections()
 
     def _collect_custom_queries(self, tags):
         """

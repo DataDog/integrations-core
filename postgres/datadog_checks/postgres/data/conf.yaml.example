@@ -119,6 +119,11 @@ instances:
     #
     # query_timeout: 5000
 
+    ## @param max_connections - integer - optional - default: 30
+    ## Sets the maximum number of connections the agent can make to the Postgres server concurrently.
+    #
+    # max_connections: 30
+
     ## @param relations - (list of string or mapping) - optional
     ## The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
     ## If enabled, `dbname` should be specified to collect database-specific relations metrics.

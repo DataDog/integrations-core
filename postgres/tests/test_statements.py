@@ -361,6 +361,7 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
 
     check = integration_check(dbm_instance)
     check._connect()
+    # print(check.db)
     cursor = check.db.cursor()
 
     # Execute the query once to begin tracking it. Execute again between checks to track the difference.
@@ -1366,10 +1367,10 @@ def test_pg_settings_caching(aggregator, integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     assert not check.pg_settings, "pg_settings should not have been initialized yet"
     check._connect()
-    check._get_db(dbm_instance["dbname"])
+    check._get_main_db()
     assert "track_activity_query_size" in check.pg_settings
     check.pg_settings["test_key"] = True
-    check._get_db(dbm_instance["dbname"])
+    check._get_main_db()
     assert (
         "test_key" in check.pg_settings
     ), "key should not have been blown away. If it was then pg_settings was not cached correctly"
@@ -1557,7 +1558,7 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     assert not check.statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
-    assert check._db_pool.get(dbm_instance['dbname']) is None, "db connection should be gone"
+    assert check.db_pool._conns.get(dbm_instance['dbname']) is None, "db connection should be gone"
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
             "dd.postgres.async_job.cancel",
@@ -1712,7 +1713,6 @@ def test_statement_metrics_database_errors(
     dbm_instance['query_samples']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
     check = integration_check(dbm_instance)
-    check._connect()
 
     with mock.patch(
         'datadog_checks.postgres.statements.PostgresStatementMetrics._get_pg_stat_statements_columns',

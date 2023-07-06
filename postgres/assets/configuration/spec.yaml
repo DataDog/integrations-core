@@ -145,6 +145,13 @@ files:
       value:
         type: integer
         example: 60000
+    - name: max_connections
+      description: |
+        Sets the maximum number of connections the agent can make to the Postgres server concurrently.
+      value:
+        type: integer
+        example: 30
+        display_default: 30
     - name: relations
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.

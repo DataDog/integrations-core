@@ -57,6 +57,9 @@ class PostgresConfig:
             raise ConfigurationError(
                 '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
             )
+        self.max_connections = instance.get('max_connections', 30)
+        if self.relations and not self.dbname:
+            raise ConfigurationError('"dbname" parameter must be set when using the "relations" parameter.')
 
         self.tags = self._build_tags(instance.get('tags', []))
 
