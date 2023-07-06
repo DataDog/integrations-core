@@ -27,7 +27,7 @@ SNAPSHOT_UPDATE_INTERVAL = 20
 
 def get_unique_name(check_id, topic_string):
     # https://www.ibm.com/docs/en/ibm-mq/9.2?topic=reference-crtmqmsub-create-mq-subscription#q084220___q084220SUBNAME
-    hostname = datadog_agent.gethostname()
+    hostname = datadog_agent.get_hostname()
     data = topic_string.encode('utf-8')
     return f'datadog-{check_id}-{hostname}-{hashlib.sha256(data).hexdigest()}'
 
