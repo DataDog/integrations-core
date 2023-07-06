@@ -22,7 +22,11 @@ class KafkaConfig:
         self._consumer_groups = instance.get('consumer_groups', {})
         self._consumer_groups_regex = instance.get('consumer_groups_regex', {})
 
-        self._consumer_groups_compiled_regex = self._compile_regex(self._consumer_groups_regex, self._consumer_groups) if self._consumer_groups_regex else ""
+        self._consumer_groups_compiled_regex = (
+            self._compile_regex(self._consumer_groups_regex, self._consumer_groups)
+            if self._consumer_groups_regex
+            else ""
+        )
 
         self._kafka_connect_str = instance.get('kafka_connect_str')
         self._kafka_version = instance.get('kafka_client_api_version')
@@ -115,15 +119,15 @@ class KafkaConfig:
             topics = consumer_groups.get(consumer_group)
 
             if not topics:
-                patterns += template.format(consumer_group,".+",".+")
+                patterns += template.format(consumer_group, ".+", ".+")
             else:
                 for topic in topics:
                     partitions = consumer_groups[consumer_group][topic]
                     if not partitions:
-                        patterns += template.format(consumer_group,topic,".+")
+                        patterns += template.format(consumer_group, topic, ".+")
                     else:
                         for partition in partitions:
-                            patterns += template.format(consumer_group,topic,partition)
+                            patterns += template.format(consumer_group, topic, partition)
         return patterns
 
     def _validate_consumer_groups(self):
