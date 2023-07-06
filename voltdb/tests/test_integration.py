@@ -43,6 +43,8 @@ class TestCheck:
         # type: (AggregatorStub, Instance) -> None
         instance = instance.copy()
         instance['url'] = 'http://doesnotexist:8080'
+        # Speed up the test
+        instance["timeout"] = 2
 
         check = VoltDBCheck('voltdb', {}, [instance])
 
