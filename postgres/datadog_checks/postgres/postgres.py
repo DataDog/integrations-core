@@ -98,9 +98,9 @@ class PostgreSql(AgentCheck):
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
         self.check_initializations.append(self.set_resolved_hostname_metadata)
-        self.autodiscovery_db_pool = MultiDatabaseConnectionPool(self._new_connection)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         self.autodiscovery = self._build_autodiscovery()
+        self.cancelled = False
 
         self._dynamic_queries = None
 
@@ -236,6 +236,7 @@ class PostgreSql(AgentCheck):
         """
         Cancels and waits for all threads to stop.
         """
+        self.cancelled = True
         self.statement_samples.cancel()
         self.statement_metrics.cancel()
         self.metadata_samples.cancel()
@@ -485,7 +486,7 @@ class PostgreSql(AgentCheck):
         start_time = time()
         databases = self.autodiscovery.get_items()
         for db in databases:
-            with self.autodiscovery_db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
+            with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
                 with conn.cursor() as cursor:
                     for scope in relations_scopes:
                         self._query_scope(cursor, scope, instance_tags, False, db)
@@ -808,6 +809,10 @@ class PostgreSql(AgentCheck):
                 self._collect_wal_metrics(tags)
 
         except Exception as e:
+            if self.cancelled == True:
+                self.log.warning("Check cancelled.")
+                return
+
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
             self.db = None

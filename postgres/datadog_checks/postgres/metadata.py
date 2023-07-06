@@ -47,11 +47,6 @@ class PostgresMetadata(DBMAsyncJob):
 
         # by default, send resources every 5 minutes
         self.collection_interval = min(collection_interval, self.pg_settings_collection_interval)
-        self._conn_pool = MultiDatabaseConnectionPool(check._new_connection)
-
-        def shutdown_cb():
-            self._conn_pool.close_all_connections()
-            return shutdown_callback()
 
         super(PostgresMetadata, self).__init__(
             check,
@@ -62,7 +57,7 @@ class PostgresMetadata(DBMAsyncJob):
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
             job_name="database-metadata",
-            shutdown_callback=shutdown_cb,
+            shutdown_callback=shutdown_callback,
         )
         self._check = check
         self._config = config
@@ -89,7 +84,7 @@ class PostgresMetadata(DBMAsyncJob):
         self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
         self.report_postgres_metadata()
-        self._conn_pool.prune_connections()
+        self._check.db_pool.prune_connections()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_postgres_metadata(self):
@@ -120,8 +115,7 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
-        with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+        with self._check._get_main_db().cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                 self._log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                 self._time_since_last_settings_query = time.time()
                 cursor.execute(PG_SETTINGS_QUERY)

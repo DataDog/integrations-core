@@ -361,7 +361,6 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
 
     check = integration_check(dbm_instance)
     check._connect()
-    # print(check.db)
     cursor = check.db.cursor()
 
     # Execute the query once to begin tracking it. Execute again between checks to track the difference.
@@ -396,11 +395,11 @@ def bob_conn():
 @pytest.fixture
 def dbm_instance(pg_instance):
     pg_instance['dbm'] = True
-    pg_instance['min_collection_interval'] = 0.1
+    pg_instance['min_collection_interval'] = 0.2
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
-    pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
-    pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.1}
-    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
+    pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.2}
+    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
     pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
@@ -1388,7 +1387,7 @@ def _check_until_time(check, dbm_instance, sleep_time, check_interval):
 
 def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the main collection loop rate limit
-    collection_interval = 0.1
+    collection_interval = 0.2
     # Don't need query metrics or activity for this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
@@ -1409,8 +1408,8 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
 
 def test_activity_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the activity collection loop rate limit
-    collection_interval = 0.1
-    activity_interval = 0.2  # double the main loop
+    collection_interval = 0.2
+    activity_interval = 0.4  # double the main loop
     # Don't need query metrics on this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['collection_interval'] = collection_interval

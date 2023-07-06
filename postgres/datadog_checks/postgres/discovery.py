@@ -32,7 +32,7 @@ class PostgresAutodiscovery(Discovery):
         self._db = global_view_db
         self._check = check
         self._log = self._check.log
-        self._conn_pool = self._check.autodiscovery_db_pool
+        self.db_pool = self._check.db_pool
         self._max_databases = autodiscovery_config.get("max_databases", DEFAULT_MAX_DATABASES)
         self._cache_filtered = []
 
@@ -69,7 +69,7 @@ class PostgresAutodiscovery(Discovery):
         return items_parsed
 
     def _get_databases(self) -> List[str]:
-        with self._conn_pool.get_connection(self._db, self._default_ttl) as conn:
+        with self.db_pool.get_connection(self._db, self._default_ttl) as conn:
             with conn.cursor() as cursor:
                 cursor.execute(AUTODISCOVERY_QUERY)
                 databases = list(cursor.fetchall())
