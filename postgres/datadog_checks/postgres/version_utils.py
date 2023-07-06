@@ -26,7 +26,6 @@ class VersionUtils(object):
     @staticmethod
     def get_raw_version(db):
         with db.cursor() as cursor:
-            cursor = db.cursor()
             cursor.execute('SHOW SERVER_VERSION;')
             raw_version = cursor.fetchone()[0]
             return raw_version
