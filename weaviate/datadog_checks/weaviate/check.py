@@ -42,24 +42,24 @@ class WeaviateCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         response = self.http.get(endpoint)
 
         if response.ok:
-                data = response.json()
-                version = data.get("version", "")
-                version_split = version.split(".")
-                if len(version_split) >= 3:
-                    major = version_split[0]
-                    minor = version_split[1]
-                    patch = version_split[2]
+            data = response.json()
+            version = data.get("version", "")
+            version_split = version.split(".")
+            if len(version_split) >= 3:
+                major = version_split[0]
+                minor = version_split[1]
+                patch = version_split[2]
 
-                    version_raw = f'{major}.{minor}.{patch}'
+                version_raw = f'{major}.{minor}.{patch}'
 
-                    version_parts = {
-                        'major': major,
-                        'minor': minor,
-                        'patch': patch,
-                    }
-                    self.set_metadata('version', version_raw, scheme='semver', part_map=version_parts)
-                else:
-                    self.log.debug("Invalid Weaviate version format: %s", version)
+                version_parts = {
+                    'major': major,
+                    'minor': minor,
+                    'patch': patch,
+                }
+                self.set_metadata('version', version_raw, scheme='semver', part_map=version_parts)
+            else:
+                self.log.debug("Invalid Weaviate version format: %s", version)
         else:
             self.log.debug("Could not retrieve version metadata from host.")
 
@@ -112,12 +112,10 @@ class WeaviateCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                     tags.append(f"class_name:{shard.get('class')}")
                     self.gauge('node.shard.objects', shard.get('objectCount', 0), tags=tags)
 
-
     def check(self, instance):
         if self.api_url:
-                self._submit_liveness_metrics()
-                self._submit_version_metadata()
-                self._submit_node_metrics()
-
+            self._submit_liveness_metrics()
+            self._submit_version_metadata()
+            self._submit_node_metrics()
         if self.instance.get("openmetrics_endpoint"):
-                super().check(instance)
+            super().check(instance)

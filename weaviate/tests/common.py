@@ -15,6 +15,11 @@ MOCKED_INSTANCE = {
     'tags': ['test:tag'],
 }
 
+OM_MOCKED_INSTANCE = {
+    'openmetrics_endpoint': 'http://weaviate:2112/metrics',
+    'tags': ['test:tag'],
+}
+
 BATCH_OBJECTS = {
     'objects': [
         {'class': 'Example', 'vector': [0.1, 0.3], 'properties': {'text': 'This is the first object'}},
@@ -94,8 +99,6 @@ OM_METRICS = [
     "weaviate.queries.durations_ms.count",
     "weaviate.queries.durations_ms.sum",
     "weaviate.query.dimensions.count",
-    # Latency metric since the mock response is 200
-    'weaviate.http.latency_ms',
 ]
 
 API_METRICS = [
@@ -103,7 +106,6 @@ API_METRICS = [
     'weaviate.node.shard.objects',
     'weaviate.node.stats.objects',
     'weaviate.node.stats.shards',
-    'weaviate.http.latency_ms',
 ]
 
 FLAKY_E2E_METRICS = [
