@@ -5,8 +5,14 @@ from __future__ import division
 
 from itertools import chain
 from time import time as timestamp
+import os
 
-import ibm_db
+IMPORT_ERROR = None
+try:
+    import ibm_db
+except Exception as e:
+    IMPORT_ERROR = e
+
 from requests import ConnectionError
 
 from datadog_checks.base import AgentCheck, is_affirmative
@@ -61,6 +67,12 @@ class IbmDb2Check(AgentCheck):
             self.query_transaction_log,
             self.query_custom,
         )
+
+        if IMPORT_ERROR:
+            self.log.error("Unable to run check, error importing ibm_db library, check if environment variables are set correctly.")
+            self.log.error("LD_LIBRARY_PATH env var: " + os.environ.get('LD_LIBRARY_PATH'))
+            self.log.error("DYLD_LIBRARY_PATH env var (for Mac): " + os.environ.get('DYLD_LIBRARY_PATH'))
+            raise e
 
     def check(self, instance):
         if self._conn is None:
