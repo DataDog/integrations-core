@@ -8,7 +8,7 @@ from datadog_checks.base.utils.platform import Platform
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
-
+PROC_CHAR_LIMIT = 500
 
 # Database is used to store both the name and physical_database_name
 # for a database, which is discovered via autodiscovery
@@ -48,7 +48,7 @@ def is_statement_proc(text):
     if text:
         # take first 500 chars, upper case and split into string
         # to get individual keywords
-        t = text[0:500].upper().split()
+        t = text[0:PROC_CHAR_LIMIT].upper().split()
         idx_create = _get_index_for_keyword(t, 'CREATE')
         idx_proc = _get_index_for_keyword(t, 'PROCEDURE')
         if idx_proc < 0:

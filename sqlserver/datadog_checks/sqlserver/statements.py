@@ -21,7 +21,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.sqlserver.utils import is_statement_proc
+from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments, is_statement_proc
 
 try:
     import datadog_agent
@@ -86,7 +86,7 @@ select
         WHEN -1 THEN DATALENGTH(text)
         ELSE statement_end_offset END
             - statement_start_offset) / 2) + 1) AS statement_text,
-    qt.text,
+    SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     encrypted as is_encrypted,
     * from qstats_aggr_split
     cross apply sys.dm_exec_sql_text(plan_handle) qt
@@ -118,7 +118,7 @@ select
         WHEN -1 THEN DATALENGTH(text)
         ELSE statement_end_offset
     END - statement_start_offset) / 2) + 1) AS statement_text,
-    qt.text,
+    SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     encrypted as is_encrypted,
     * from qstats_aggr_split
     cross apply sys.dm_exec_sql_text(plan_handle) qt
@@ -262,6 +262,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             query_metrics_column_sums=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
             collection_interval=int(math.ceil(self.collection_interval) * 2),
             limit=self.dm_exec_query_stats_row_limit,
+            proc_char_limit=PROC_CHAR_LIMIT,
         )
         return self._statement_metrics_query
 
