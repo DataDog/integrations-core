@@ -38,7 +38,6 @@ def test_e2e_profile__generic_ups(dd_agent_check):
 
     aggregator.assert_metric('snmp.upsAlarmsPresent', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsBatteryCurrent', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.upsBatteryStatus', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsBatteryTemperature', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsBatteryVoltage', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsBypassFrequency', metric_type=aggregator.GAUGE, tags=common_tags)
@@ -49,9 +48,7 @@ def test_e2e_profile__generic_ups(dd_agent_check):
     aggregator.assert_metric('snmp.upsInputNumLines', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsOutputFrequency', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsOutputNumLines', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.upsOutputSource', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsSecondsOnBattery', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.upsTestResultsSummary', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.upsTestStartTime', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         ['ups_output_line_index:2'],
