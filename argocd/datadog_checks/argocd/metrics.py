@@ -77,8 +77,8 @@ REPO_SERVER = {
 
 # https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/monitoring/
 NOTIFICATIONS_CONTROLLER = {
-    'argocd_notifications_deliveries': 'notifications.deliveries.total',
-    'argocd_notifications_trigger_eval': 'notifications.trigger_eval.total',
+    'argocd_notifications_deliveries': 'notifications.deliveries',
+    'argocd_notifications_trigger_eval': 'notifications.trigger_eval',
 }
 
 APPLICATION_CONTROLLER_METRICS = [{**APPLICATION_CONTROLLER, **GENERAL_METRICS}]

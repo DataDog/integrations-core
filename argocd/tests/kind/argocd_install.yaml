@@ -9580,7 +9580,7 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/name: argocd-notifications-controller
-  name: argocd-notifications-controller-metrics
+  name: argocd-notifications-controller
 spec:
   ports:
   - name: metrics

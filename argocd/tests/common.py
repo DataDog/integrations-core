@@ -138,8 +138,8 @@ repo_server_histograms = [
 ]
 
 notifications_controller_counters = [
-    'notifications.deliveries.total.count',
-    'notifications.trigger_eval.total.count',
+    'notifications.deliveries.count',
+    'notifications.trigger_eval.count',
 ]
 
 NOT_EXPOSED_METRICS = [
@@ -165,6 +165,8 @@ E2E_NOT_EXPOSED_METRICS = [
     'argocd.api_server.redis.request.duration.sum',
     'argocd.api_server.redis.request.count',
     'argocd.app_controller.kubectl.exec.pending',
+    'argocd.notifications.deliveries.count',
+    'argocd.notifications.trigger_eval.count',
     'argocd.repo_server.repo.pending.request.total',
     'argocd.repo_server.git.request.count',
     'argocd.repo_server.git.request.duration.seconds.bucket',
