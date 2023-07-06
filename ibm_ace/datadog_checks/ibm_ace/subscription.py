@@ -7,6 +7,7 @@ import traceback
 from abc import ABC, abstractmethod
 
 import pymqi
+import socket
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.utils.serialization import json
@@ -22,8 +23,9 @@ SNAPSHOT_UPDATE_INTERVAL = 20
 
 def get_unique_name(check_id, topic_string):
     # https://www.ibm.com/docs/en/ibm-mq/9.2?topic=reference-crtmqmsub-create-mq-subscription#q084220___q084220SUBNAME
+    hostname = socket.gethostname()
     data = topic_string.encode('utf-8')
-    return f'datadog-{check_id}-{hashlib.sha256(data).hexdigest()}'
+    return f'datadog-{check_id}-{hostname}-{hashlib.sha256(data).hexdigest()}'
 
 
 class Subscription(ABC):
