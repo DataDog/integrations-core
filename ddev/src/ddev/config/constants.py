@@ -13,3 +13,11 @@ class AppEnvVars:
 
 class ConfigEnvVars:
     CONFIG = 'DDEV_CONFIG'
+
+
+class VerbosityLevels:
+    ERROR = -2
+    WARNING = -1
+    INFO = 0
+    DEBUG = 1
+    TRACE = 2
