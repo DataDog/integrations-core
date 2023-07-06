@@ -137,11 +137,6 @@ repo_server_histograms = [
     'redis.request.duration.seconds.sum',
 ]
 
-notifications_controller_counters = [
-    'notifications.deliveries.count',
-    'notifications.trigger_eval.count',
-]
-
 NOT_EXPOSED_METRICS = [
     'argocd.app_controller.cluster.api.resource_objects',
     'argocd.app_controller.cluster.api.resources',
@@ -183,7 +178,7 @@ general = general_gauges + general_counters + general_summaries
 app_controller = app_controller_counters + app_controller_gauges + app_controller_histograms + general
 api_server = api_server_counters + api_server_histograms + general
 repo_server = repo_server_counters + repo_server_gauges + repo_server_histograms + general
-notifications_controller = notifications_controller_counters + general
+notifications_controller = general
 
 
 def namespace_formatter(metrics, namespace):
