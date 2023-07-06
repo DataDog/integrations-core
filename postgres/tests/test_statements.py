@@ -412,7 +412,7 @@ def dbm_instance_replica2(pg_instance):
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
-    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
     pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
@@ -1507,6 +1507,8 @@ def test_disabled_activity_or_explain_plans(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['query_activity']['enabled'] = query_activity_enabled
     dbm_instance['query_samples']['enabled'] = query_samples_enabled
+    dbm_instance['query_activity']['collection_interval'] = .1
+    dbm_instance['query_samples']['collection_interval'] = .1
     check = integration_check(dbm_instance)
     check._connect()
 
