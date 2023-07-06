@@ -100,7 +100,6 @@ class PostgreSql(AgentCheck):
         self.check_initializations.append(self.set_resolved_hostname_metadata)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         self.autodiscovery = self._build_autodiscovery()
-        self.cancelled = False
 
         self._dynamic_queries = None
 
@@ -236,7 +235,6 @@ class PostgreSql(AgentCheck):
         """
         Cancels and waits for all threads to stop.
         """
-        self.cancelled = True
         self.statement_samples.cancel()
         self.statement_metrics.cancel()
         self.metadata_samples.cancel()
@@ -809,10 +807,6 @@ class PostgreSql(AgentCheck):
                 self._collect_wal_metrics(tags)
 
         except Exception as e:
-            if self.cancelled == True:
-                self.log.warning("Check cancelled.")
-                return
-
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
             self.db = None
