@@ -1,0 +1,30 @@
+{
+    "name": "⛔️ DCGM: XID Errors Detected",
+    "type": "query alert",
+    "query": "avg(last_5m):avg:dcgm.xid_errors{*} > 5",
+    "message": "{{#is_alert}}\nAn XID error occurred.\n{{/is_alert}}",
+    "tags": [
+        "integration:dcgm"
+    ],
+    "options": {
+        "thresholds": {
+            "critical": 5,
+            "warning": 0
+        },
+        "notify_audit": false,
+        "require_full_window": false,
+        "notify_no_data": false,
+        "renotify_interval": 0,
+        "include_tags": false,
+        "avalanche_window": 10,
+        "new_host_delay": 300,
+        "silenced": {
+            "*": null
+        }
+    },
+    "priority": null,
+    "restricted_roles": null,
+    "recommended_monitor_metadata": {
+        "description": "Notify your team when at least one XID error occurs in the last 5 minutes."
+    }
+}
