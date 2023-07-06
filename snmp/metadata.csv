@@ -534,6 +534,8 @@ snmp.fmSysCpuUsageExcludedNice,gauge,,,,"[FORTINET-FORTIMANAGER-FORTIANALYZER-MI
 snmp.fmSysDiskCapacity,gauge,,,,"[FORTINET-FORTIMANAGER-FORTIANALYZER-MIB] Total hard disk capacity (MB)",0,snmp,,
 snmp.fmSysDiskUsage,gauge,,,,"[FORTINET-FORTIMANAGER-FORTIANALYZER-MIB] Current hard disk usage (MB)",0,snmp,,
 snmp.fruInformationStatus,gauge,,,,[Dell iDRAC] The status of the field replaceable unit information.,0,snmp,,
+snmp.fsSysDiskCapacity,gauge,,,,"[FORTINET-FORTISWITCH-MIB] Total hard disk capacity (KB), if disk is present",0,snmp,,
+snmp.fsSysDiskUsage,gauge,,,,"[FORTINET-FORTISWITCH-MIB] Current hard disk usage (KB), if disk is present",0,snmp,,
 snmp.fwAccepted,count,,packet,,[Checkpoint Firewall] Number of accepted packets.,0,snmp,,
 snmp.fwDropped,count,,packet,,[Checkpoint Firewall] Number of dropped packets.,0,snmp,,
 snmp.fwNumConn,gauge,,connection,,[Checkpoint Firewall] Number of concurrent IPv6 and IPv4 connections.,0,snmp,,
