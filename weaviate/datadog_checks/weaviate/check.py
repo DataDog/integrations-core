@@ -42,27 +42,24 @@ class WeaviateCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         response = self.http.get(endpoint)
 
         if response.ok:
-            try:
-                data = response.json()
-                version = data.get("version", "")
-                version_split = version.split(".")
-                if len(version_split) >= 3:
-                    major = version_split[0]
-                    minor = version_split[1]
-                    patch = version_split[2]
+            data = response.json()
+            version = data.get("version", "")
+            version_split = version.split(".")
+            if len(version_split) >= 3:
+                major = version_split[0]
+                minor = version_split[1]
+                patch = version_split[2]
 
-                    version_raw = f'{major}.{minor}.{patch}'
+                version_raw = f'{major}.{minor}.{patch}'
 
-                    version_parts = {
-                        'major': major,
-                        'minor': minor,
-                        'patch': patch,
-                    }
-                    self.set_metadata('version', version_raw, scheme='semver', part_map=version_parts)
-                else:
-                    self.log.debug("Invalid Weaviate version format: %s", version)
-            except Exception as e:
-                self.log.debug("Error while parsing Weaviate version: %s", e)
+                version_parts = {
+                    'major': major,
+                    'minor': minor,
+                    'patch': patch,
+                }
+                self.set_metadata('version', version_raw, scheme='semver', part_map=version_parts)
+            else:
+                self.log.debug("Invalid Weaviate version format: %s", version)
         else:
             self.log.debug("Could not retrieve version metadata from host.")
 
@@ -88,35 +85,32 @@ class WeaviateCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         if not response.ok:
             self.log.debug("Could not retrieve Node metrics. Request returned a: %s", str(response.status_code))
             return
-        try:
-            data = response.json()
 
-            for node in data.get('nodes', []):
-                tags = copy.deepcopy(self.tags)
+        data = response.json()
 
-                tags.append(f"weaviate_node:{node.get('name', '')}")
-                tags.append(f"weaviate_version:{node.get('version', '')}")
-                tags.append(f"weaviate_githash:{node.get('gitHash', '')}")
+        for node in data.get('nodes', []):
+            tags = copy.deepcopy(self.tags)
 
-                if status := node.get('status'):
-                    tags.append(f"weaviate_node_status:{status.lower()}")
-                    self.gauge('node.status', NODE_STATUS_VALUES.get(status, NODE_STATUS_VALUES['UNKNOWN']), tags=tags)
-                    self.service_check(
-                        'node.status', NODE_STATUS_VALUES.get(status, NODE_STATUS_VALUES['UNKNOWN']), tags=tags
-                    )
+            tags.append(f"weaviate_node:{node.get('name', '')}")
+            tags.append(f"weaviate_version:{node.get('version', '')}")
+            tags.append(f"weaviate_githash:{node.get('gitHash', '')}")
 
-                if stats := node.get('stats'):
-                    self.gauge('node.stats.shards', stats.get('shardCount', 0), tags=tags)
-                    self.gauge('node.stats.objects', stats.get('objectCount', 0), tags=tags)
+            if status := node.get('status'):
+                tags.append(f"weaviate_node_status:{status.lower()}")
+                self.gauge('node.status', NODE_STATUS_VALUES.get(status, NODE_STATUS_VALUES['UNKNOWN']), tags=tags)
+                self.service_check(
+                    'node.status', NODE_STATUS_VALUES.get(status, NODE_STATUS_VALUES['UNKNOWN']), tags=tags
+                )
 
-                if shards := node.get('shards'):
-                    for shard in shards:
-                        tags.append(f"shard_name:{shard.get('name', '')}")
-                        tags.append(f"class_name:{shard.get('class', '')}")
-                        self.gauge('node.shard.objects', shard.get('objectCount', 0), tags=tags)
+            if stats := node.get('stats'):
+                self.gauge('node.stats.shards', stats.get('shardCount', 0), tags=tags)
+                self.gauge('node.stats.objects', stats.get('objectCount', 0), tags=tags)
 
-        except Exception as e:
-            self.log.debug("Error occurred during node metrics submission: %s", e)
+            if shards := node.get('shards'):
+                for shard in shards:
+                    tags.append(f"shard_name:{shard.get('name', '')}")
+                    tags.append(f"class_name:{shard.get('class', '')}")
+                    self.gauge('node.shard.objects', shard.get('objectCount', 0), tags=tags)
 
     def check(self, instance):
         if self.api_url:
@@ -126,9 +120,5 @@ class WeaviateCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 self._submit_node_metrics()
             except Exception as e:
                 self.log.error("Error while collecting Weaviate metrics from API: %s", e)
-
         if self.instance.get("openmetrics_endpoint"):
-            try:
-                super().check(instance)
-            except Exception as e:
-                self.log.error("Error while collecting Weaviate metrics from OpenMetrics endpoint: %s", e)
+            super().check(instance)
