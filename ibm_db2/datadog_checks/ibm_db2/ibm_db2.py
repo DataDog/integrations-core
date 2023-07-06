@@ -3,15 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import os
 from itertools import chain
 from time import time as timestamp
-import os
-
-IMPORT_ERROR = None
-try:
-    import ibm_db
-except Exception as e:
-    IMPORT_ERROR = e
 
 from requests import ConnectionError
 
@@ -20,6 +14,12 @@ from datadog_checks.base.utils.containers import iter_unique
 
 from . import queries
 from .utils import get_version, scrub_connection_string, status_to_service_check
+
+IMPORT_ERROR = None
+try:
+    import ibm_db
+except Exception as e:
+    IMPORT_ERROR = e
 
 
 class IbmDb2Check(AgentCheck):
@@ -69,10 +69,12 @@ class IbmDb2Check(AgentCheck):
         )
 
         if IMPORT_ERROR:
-            self.log.error("Unable to run check, error importing ibm_db library, check if environment variables are set correctly.")
-            self.log.error("LD_LIBRARY_PATH env var: " + os.environ.get('LD_LIBRARY_PATH'))
-            self.log.error("DYLD_LIBRARY_PATH env var (for Mac): " + os.environ.get('DYLD_LIBRARY_PATH'))
-            raise e
+            self.log.error(
+                "Unable to run check, error importing ibm_db library, check if environment variables are set correctly."
+            )
+            self.log.error("LD_LIBRARY_PATH env var: %s", os.environ.get('LD_LIBRARY_PATH'))
+            self.log.error("DYLD_LIBRARY_PATH env var (for Mac): %s", os.environ.get('DYLD_LIBRARY_PATH'))
+            raise IMPORT_ERROR
 
     def check(self, instance):
         if self._conn is None:
