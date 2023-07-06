@@ -26,7 +26,7 @@ def test_check_mock_weaviate_responses(dd_run_check, aggregator, mock_http_respo
     dd_run_check(check)
 
     for metric in metrics:
-        aggregator.assert_metric(metric, at_least=1)
+        aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, 'test:tag')
 
     aggregator.assert_all_metrics_covered()
