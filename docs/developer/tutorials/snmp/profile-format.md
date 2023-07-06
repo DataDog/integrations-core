@@ -428,7 +428,7 @@ metrics:
       OID: 1.3.6.1.2.1.6.5
       name: tcpActiveOpens
       metric_type: monotonic_count
-  # On a table to apply same metric_type to all metrics:
+  # On a table, apply same metric_type to all metrics:
   - MIB: IP-MIB
     table:
       OID: 1.3.6.1.2.1.4.31.1
@@ -439,7 +439,7 @@ metrics:
       name: ipSystemStatsHCInReceives
     - OID: 1.3.6.1.2.1.4.31.1.1.6
       name: ipSystemStatsHCInOctets
-  # On a table to apply different metric_type per metric:
+  # On a table, apply different metric_type per metric:
   - MIB: IP-MIB
     table:
       OID: 1.3.6.1.2.1.4.31.1
