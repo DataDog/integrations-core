@@ -64,7 +64,6 @@ def test_empty_instance(dd_run_check):
         ({'weaviate_api_endpoint': 'https://localhost:2112/metrics'}),
     ],
 )
-@pytest.mark.unit
 def test_custom_validation(dd_run_check, instance):
     for k, v in instance.items():
         with pytest.raises(
