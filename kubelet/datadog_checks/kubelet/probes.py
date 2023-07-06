@@ -80,11 +80,11 @@ class ProbesPrometheusScraperMixin(object):
 
             result = labels.get('result')
             if result == 'successful':
-                metric_name_suffix = metric_name_suffix + '.success'
+                metric_name_suffix = metric_name_suffix + '.success.total'
             elif result == 'failed':
-                metric_name_suffix = metric_name_suffix + '.failure'
+                metric_name_suffix = metric_name_suffix + '.failure.total'
             elif result == 'unknown':
-                metric_name_suffix = metric_name_suffix + '.unknown'
+                metric_name_suffix = metric_name_suffix + '.unknown.total'
             else:
                 self.log.debug("Unsupported probe result %s", result)
                 continue
@@ -114,12 +114,4 @@ class ProbesPrometheusScraperMixin(object):
                     container_id,
                 )
 
-            self.send_probe_metrics(metric_name, sample[self.SAMPLE_VALUE], container_tags + self.instance_tags)
-
-    def send_probe_metrics(self, metric_name, value, tags):
-        """
-        Sends probe metrics as cumulative total for backwards compatibility
-        as well as a monotonic_count based metric
-        """
-        self.gauge(metric_name + ".total", value, tags)
-        self.monotonic_count(metric_name, value, tags)
+            self.gauge(metric_name, sample[self.SAMPLE_VALUE], container_tags + self.instance_tags)
