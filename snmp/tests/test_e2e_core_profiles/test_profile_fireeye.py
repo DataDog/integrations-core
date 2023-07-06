@@ -53,8 +53,9 @@ def test_e2e_profile_fireeye(dd_agent_check):
     aggregator.assert_metric('snmp.feTotalObjectAnalyzedCount', metric_type=aggregator.COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.feTotalUrlCount', metric_type=aggregator.COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.feeQuarantineUsage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.hrStorageUsed', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.feCachedMemory', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.feMemoryBuffers', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         ['hr_processor_frw_id:1.3.6.1.3.68.143.66.213.126.236.187.81'],
         ['hr_processor_frw_id:1.3.6.1.3.68.26.47'],

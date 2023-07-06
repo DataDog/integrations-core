@@ -31,13 +31,11 @@ metrics:
   - MIB: HOST-RESOURCES-MIB
     symbol:
       OID: 1.3.6.1.2.1.25.2.3.1.6.6 # hrStorageUsed.6 = Memory buffers
-      name: hrStorageUsed
-      tag: feMemoryBuffers
+      name: feMemoryBuffers
   - MIB: HOST-RESOURCES-MIB
     symbol:
       OID: 1.3.6.1.2.1.25.2.3.1.6.7 # hrStorageUsed.7 = Cached memory
-      name: hrStorageUsed
-      tag: feCachedMemory
+      name: feCachedMemory
   # - MIB: FE-FIREEYE-MIB
   #   symbol:
   #     OID: 1.3.6.1.4.1.25597.11.5.1.10.0
