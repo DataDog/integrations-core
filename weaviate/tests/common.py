@@ -108,6 +108,10 @@ API_METRICS = [
     'weaviate.node.stats.shards',
 ]
 
+latency_metric = [
+    'weaviate.http.latency_ms'
+]
+
 FLAKY_E2E_METRICS = [
     'weaviate.lsm.segment.size',
     'weaviate.lsm.segments',
@@ -119,7 +123,7 @@ FLAKY_E2E_METRICS = [
     "weaviate.query.dimensions.count",
 ]
 
-E2E_METRICS = OM_METRICS + API_METRICS
+E2E_METRICS = OM_METRICS + API_METRICS + latency_metric
 
 
 def get_fixture_path(filename):
