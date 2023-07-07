@@ -1,8 +1,6 @@
 metadata:
   device:
     fields:
-      vendor:
-        value: "hp"
       serial_number:
         symbol:
           MIB: CPQSINFO-MIB

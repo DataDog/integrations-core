@@ -2,7 +2,7 @@
 # For HP iLO4 devices, a separate hp-ilo4 profile is used
 
 extends:
-  - _base.yaml
+  - _hp.yaml
   - _hp-base.yaml
   - _hp-compaq-health.yaml
   - _hp-driver-stats.yaml
@@ -13,8 +13,6 @@ sysobjectid:
 metadata:
   device:
     fields:
-      vendor:
-        value: "hp"
       product_name:
         value: Integrated Lights-Out
 
