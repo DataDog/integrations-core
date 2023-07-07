@@ -10,8 +10,9 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
+    assert_extend_cisco,
     create_e2e_core_test_config,
-    get_device_ip_from_config, assert_extend_cisco,
+    get_device_ip_from_config,
 )
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
@@ -37,57 +38,123 @@ def test_e2e_profile_cisco_load_balancer(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     tag_rows = [
-         ['slb_entity:11128'],
-         ['slb_entity:52836'],
-
+        ['slb_entity:11128'],
+        ['slb_entity:52836'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.slbStatsCreatedConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.slbStatsCreatedHCConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.slbStatsDestroyedConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.slbStatsDestroyedHCConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.slbStatsEstablishedConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.slbStatsEstablishedHCConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.slbStatsReassignedConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.slbStatsReassignedHCConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.slbStatsCreatedConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.slbStatsCreatedHCConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.slbStatsDestroyedConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.slbStatsDestroyedHCConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.slbStatsEstablishedConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.slbStatsEstablishedHCConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.slbStatsReassignedConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.slbStatsReassignedHCConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
-         ['slb_entity:15396'],
-         ['slb_entity:2812'],
-
+        ['slb_entity:15396'],
+        ['slb_entity:2812'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cslbxStatsAclDenyHCRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsAclDenyRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsBadSslFormatRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsCurrConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsDroppedL4PolicyConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsDroppedL4PolicyHCConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsDroppedL7PolicyConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsDroppedL7PolicyHCConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsDroppedRedirectConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.cslbxStatsAclDenyHCRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsAclDenyRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsBadSslFormatRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsCurrConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsDroppedL4PolicyConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsDroppedL4PolicyHCConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsDroppedL7PolicyConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsDroppedL7PolicyHCConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsDroppedRedirectConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric('snmp.cslbxStatsFailedConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.cslbxStatsFtpConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsHttpRedirectConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsIpChecksumErrorPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsL4PolicyConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsL4PolicyHCConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsL7ParserErrorRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsL7PolicyConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsL7PolicyHCConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsMaxParseLenRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsNoActiveServerRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsNoCfgPolicyHCRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsNoCfgPolicyRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsNoMatchPolicyHCRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsNoMatchPolicyRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsOutOfMemoryRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsTcpChecksumErrorPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsTimedOutConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsVerMismatchHCRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cslbxStatsVerMismatchRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-
+        aggregator.assert_metric(
+            'snmp.cslbxStatsHttpRedirectConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsIpChecksumErrorPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsL4PolicyConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsL4PolicyHCConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsL7ParserErrorRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsL7PolicyConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsL7PolicyHCConns', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsMaxParseLenRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsNoActiveServerRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsNoCfgPolicyHCRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsNoCfgPolicyRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsNoMatchPolicyHCRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsNoMatchPolicyRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsOutOfMemoryRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsTcpChecksumErrorPkts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsTimedOutConnections', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsVerMismatchHCRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cslbxStatsVerMismatchRejects', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     # --- TEST METADATA ---
     device = {
