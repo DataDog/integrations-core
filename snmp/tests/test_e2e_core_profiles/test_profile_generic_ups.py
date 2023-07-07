@@ -18,13 +18,13 @@ from .utils import (
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
 
-def test_e2e_profile_ups(dd_agent_check):
-    config = create_e2e_core_test_config('ups')
+def test_e2e_profile_generic_ups(dd_agent_check):
+    config = create_e2e_core_test_config('generic-ups')
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
     common_tags = [
-        'snmp_profile:ups',
+        'snmp_profile:generic-ups',
         'snmp_host:generic-ups.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
@@ -43,7 +43,7 @@ def test_e2e_profile_ups(dd_agent_check):
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
         'name': 'generic-ups.device.name',
-        'profile': 'ups',
+        'profile': 'generic-ups',
         'status': 1,
         'sys_object_id': '1.3.6.1.2.1.33',
     }
