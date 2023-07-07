@@ -198,6 +198,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             if not rows:
                 return
             for event in self._rows_to_fqt_events(rows):
+                print("we are submitting some samples from here...")
                 self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
             payload = {
                 'host': self._check.resolved_hostname,

@@ -304,7 +304,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             extra_filters=extra_filters,
         )
         with self._check._get_main_db().cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-            self._log.debug("Running query [%s] %s", query, params)
+            self._log.warning("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
@@ -444,6 +444,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         submitted_count = 0
         if self._explain_plan_coll_enabled:
             self._log.warning("we are collecting explain plans here!!! samples should be populated!")
+            self._log.warning("rows are {}".format(rows))
             event_samples = self._collect_plans(rows)
             for e in event_samples:
                 self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
@@ -782,12 +783,14 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _collect_plans(self, rows):
         events = []
+        self._log.warning("In collect plans")
         for row in rows:
             try:
                 if row['statement'] is None or row.get('backend_type', 'client backend') != 'client backend':
                     continue
                 event = self._collect_plan_for_statement(row)
                 if event:
+                    self._log.warning("got event")
                     events.append(event)
             except Exception:
                 self._log.exception(
