@@ -589,6 +589,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
             with conn.cursor() as cursor:
                 cursor = conn.cursor()
+                self._log.warning("Executing explain query")
                 self._log.debug(
                     "Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement
                 )
