@@ -189,7 +189,7 @@ class MultiDatabaseConnectionPool(object):
             sorted_conns = sorted(self._conns.items(), key=lambda i: i[1].last_accessed)
             for name, conn_info in sorted_conns:
                 if not conn_info.active and not conn_info.persistent:
-                    print("got evicted {}".format(dbname))
+                    print("got evicted {}".format(name))
                     self._terminate_connection_unsafe(name)
                     return name
 
