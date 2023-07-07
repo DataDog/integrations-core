@@ -212,3 +212,12 @@ def assert_extend_cisco(aggregator, common_tags):
     # fmt:on
     tags = ['cpu:712']
     aggregator.assert_metric("snmp.cpmCPUMemoryUsed", metric_type=aggregator.GAUGE, tags=common_tags + tags)
+
+
+def assert_extend_generic_ups(aggregator, common_tags):
+    # fmt: off
+    """Add the following to the snmprec
+1.3.6.1.2.1.33.1.2.2.0|2|10
+    """
+    # fmt: on
+    aggregator.assert_metric('snmp.upsSecondsOnBattery', metric_type=aggregator.GAUGE, tags=common_tags)
