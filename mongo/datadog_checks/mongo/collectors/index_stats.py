@@ -30,3 +30,4 @@ class IndexStatsCollector(MongoCollector):
                     self.gauge('mongodb.collection.indexes.accesses.ops', val, idx_tags)
             except Exception as e:
                 self.log.error("Could not fetch indexes stats for collection %s: %s", coll_name, e)
+                raise e

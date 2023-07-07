@@ -22,8 +22,8 @@ class SessionStatsCollector(MongoCollector):
             sessions_count = next(
                 config_db['system.sessions'].aggregate([{"$listSessions": {"allUsers": True}}, {"$count": "total"}])
             )['total']
-        except Exception:
+        except Exception as e:
             self.log.info('Unable to fetch system.session statistics.')
-            return
+            raise e
         metric_name = self._normalize("sessions.count", AgentCheck.gauge)
         self.check.gauge(metric_name, sessions_count, tags=self.base_tags)

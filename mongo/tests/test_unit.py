@@ -51,7 +51,7 @@ def test_emits_critical_service_check_when_service_is_not_available(mock_command
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.CRITICAL)
 
 
-@mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'parsed': {}}])
+@mock.patch('pymongo.database.Database.command', side_effect=[{'parsed': {}}])
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
 @mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_when_service_is_available(
@@ -66,7 +66,7 @@ def test_emits_ok_service_check_when_service_is_available(
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
 
 
-@mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'parsed': {}}])
+@mock.patch('pymongo.database.Database.command', side_effect=[{'parsed': {}}])
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
 @mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_each_run_when_service_is_available(
@@ -82,7 +82,7 @@ def test_emits_ok_service_check_each_run_when_service_is_available(
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK, count=2)
 
 
-@mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'parsed': {}}])
+@mock.patch('pymongo.database.Database.command', side_effect=[{'parsed': {}}])
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
 @mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_version_metadata(
@@ -109,7 +109,7 @@ def test_version_metadata(
 
 @mock.patch(
     'pymongo.database.Database.command',
-    side_effect=[{'ok': 1}, Exception('getCmdLineOpts exception'), {'msg': 'isdbgrid'}],
+    side_effect=[Exception('getCmdLineOpts exception'), {'msg': 'isdbgrid'}],
 )
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
 @mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
@@ -123,7 +123,7 @@ def test_emits_ok_service_check_when_alibaba_mongos_deployment(
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
-    mock_command.assert_has_calls([mock.call('ping'), mock.call('getCmdLineOpts'), mock.call('isMaster')])
+    mock_command.assert_has_calls([mock.call('getCmdLineOpts'), mock.call('isMaster')])
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
 
@@ -131,7 +131,6 @@ def test_emits_ok_service_check_when_alibaba_mongos_deployment(
 @mock.patch(
     'pymongo.database.Database.command',
     side_effect=[
-        {'ok': 1},
         Exception('getCmdLineOpts exception'),
         {},
         {'configsvr': True, 'set': 'replset', "myState": 1},
@@ -150,7 +149,7 @@ def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deploymen
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
     mock_command.assert_has_calls(
-        [mock.call('ping'), mock.call('getCmdLineOpts'), mock.call('isMaster'), mock.call('replSetGetStatus')]
+        [mock.call('getCmdLineOpts'), mock.call('isMaster'), mock.call('replSetGetStatus')]
     )
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
@@ -159,7 +158,6 @@ def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deploymen
 @mock.patch(
     'pymongo.database.Database.command',
     side_effect=[
-        {'ok': 1},
         Exception('getCmdLineOpts exception'),
         {},
         {'configsvr': True, 'set': 'replset', "myState": 3},
@@ -178,7 +176,7 @@ def test_when_replicaset_state_recovering_then_database_names_not_called(
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
     mock_command.assert_has_calls(
-        [mock.call('ping'), mock.call('getCmdLineOpts'), mock.call('isMaster'), mock.call('replSetGetStatus')]
+        [mock.call('getCmdLineOpts'), mock.call('isMaster'), mock.call('replSetGetStatus')]
     )
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_not_called()
@@ -601,3 +599,13 @@ def test_when_version_lower_than_3_6_then_no_session_metrics_reported(aggregator
         dd_run_check(check)
     # Then
     aggregator.assert_metric('mongodb.sessions.count', count=0)
+
+def test_service_check_critical_when_connection_dies(aggregator, check, instance, dd_run_check):
+    check = check(instance)
+    with mock_pymongo('standalone') as mocked_client:
+        dd_run_check(check)
+        aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
+        aggregator.reset()
+        mocked_client.list_database_names = mock.MagicMock(side_effect=ConnectionFailure("Testing"))
+        dd_run_check(check)
+        aggregator.assert_service_check('mongodb.can_connect', MongoDb.CRITICAL)

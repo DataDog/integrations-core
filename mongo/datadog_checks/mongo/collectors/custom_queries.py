@@ -205,3 +205,4 @@ class CustomQueriesCollector(MongoCollector):
             except Exception as e:
                 metric_prefix = raw_query.get('metric_prefix')
                 self.log.warning("Errors while collecting custom metrics with prefix %s", metric_prefix, exc_info=e)
+                raise e
