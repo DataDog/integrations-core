@@ -304,6 +304,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             extra_filters=extra_filters,
         )
         with self._check._get_main_db().cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            self._log.warning("db is %s", self._check._get_main_db().info.dbname)
             self._log.warning("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
