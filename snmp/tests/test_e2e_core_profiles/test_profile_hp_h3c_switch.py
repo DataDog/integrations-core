@@ -43,11 +43,17 @@ def test_e2e_profile_hp_h3c_switch(dd_agent_check):
         aggregator.assert_metric('snmp.hh3cProcessUtil5Min', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['hh3c_entity_ext_physical_index:11'],
-        ['hh3c_entity_ext_physical_index:2'],
+        ['cpu:11', 'hh3c_entity_ext_physical_index:11'],
+        ['cpu:2', 'hh3c_entity_ext_physical_index:2'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
+        ['mem:11', 'hh3c_entity_ext_physical_index:11'],
+        ['mem:2', 'hh3c_entity_ext_physical_index:2'],
+    ]
+    for tag_row in tag_rows:
         aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     # --- TEST METADATA ---
