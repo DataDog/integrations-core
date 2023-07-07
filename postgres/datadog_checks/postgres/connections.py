@@ -199,6 +199,7 @@ class MultiDatabaseConnectionPool(object):
         if db is not None:
             try:
                 self._stats.connection_closed += 1
+                self._log.warning("closing database connection {}".format(dbname))
                 db.close()
             except Exception:
                 self._stats.connection_closed_failed += 1
