@@ -10,28 +10,28 @@ metrics:
     symbols:
       - OID: 1.3.6.1.4.1.9.9.161.1.1.1.1.6
         name: slbStatsCreatedConnections
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.161.1.1.1.1.7
         name: slbStatsCreatedHCConnections
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.161.1.1.1.1.8
         name: slbStatsEstablishedConnections
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.161.1.1.1.1.9
         name: slbStatsEstablishedHCConnections
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.161.1.1.1.1.10
         name: slbStatsDestroyedConnections
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.161.1.1.1.1.11
         name: slbStatsDestroyedHCConnections
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.161.1.1.1.1.12
         name: slbStatsReassignedConnections
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.161.1.1.1.1.13
         name: slbStatsReassignedHCConnections
-        forced_type: monotonic_count
+        metric_type: monotonic_count
     metric_tags:
       - index: 1  # index `slbEntity`
         tag: slb_entity
@@ -45,88 +45,88 @@ metrics:
         name: cslbxStatsCurrConnections
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.5
         name: cslbxStatsFailedConns
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.7
         name: cslbxStatsL4PolicyConns
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.8
         name: cslbxStatsL7PolicyConns
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.9
         name: cslbxStatsDroppedL4PolicyConns
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.10
         name: cslbxStatsDroppedL7PolicyConns
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.11
         name: cslbxStatsFtpConns
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.12
         name: cslbxStatsHttpRedirectConns
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.13
         name: cslbxStatsDroppedRedirectConns
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.14
         name: cslbxStatsNoMatchPolicyRejects
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.15
         name: cslbxStatsNoCfgPolicyRejects
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.16
         name: cslbxStatsNoActiveServerRejects
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.17
         name: cslbxStatsAclDenyRejects
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.18
         name: cslbxStatsMaxParseLenRejects
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.19
         name: cslbxStatsBadSslFormatRejects
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.20
         name: cslbxStatsL7ParserErrorRejects
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.21
         name: cslbxStatsVerMismatchRejects
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.22
         name: cslbxStatsOutOfMemoryRejects
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.23
         name: cslbxStatsTimedOutConnections
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.24
         name: cslbxStatsTcpChecksumErrorPkts
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.25
         name: cslbxStatsIpChecksumErrorPkts
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.26
         name: cslbxStatsL4PolicyHCConns
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.27
         name: cslbxStatsL7PolicyHCConns
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.28
         name: cslbxStatsDroppedL4PolicyHCConns
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.29
         name: cslbxStatsDroppedL7PolicyHCConns
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.30
         name: cslbxStatsNoMatchPolicyHCRejects
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.31
         name: cslbxStatsNoCfgPolicyHCRejects
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.32
         name: cslbxStatsAclDenyHCRejects
-        forced_type: monotonic_count
+        metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.9.9.254.1.1.1.1.33
         name: cslbxStatsVerMismatchHCRejects
-        forced_type: monotonic_count
+        metric_type: monotonic_count
     metric_tags:
       - index: 1  # index `slbEntity` of `slbStatsTable`
         tag: slb_entity
