@@ -167,6 +167,7 @@ class MultiDatabaseConnectionPool(object):
             now = datetime.datetime.now()
             for dbname, conn in list(self._conns.items()):
                 if conn.deadline < now:
+                    print("got pruned {}".format(dbname))
                     self._stats.connection_pruned += 1
                     self._terminate_connection_unsafe(dbname)
 
@@ -188,6 +189,7 @@ class MultiDatabaseConnectionPool(object):
             sorted_conns = sorted(self._conns.items(), key=lambda i: i[1].last_accessed)
             for name, conn_info in sorted_conns:
                 if not conn_info.active and not conn_info.persistent:
+                    print("got evicted {}".format(dbname))
                     self._terminate_connection_unsafe(name)
                     return name
 
