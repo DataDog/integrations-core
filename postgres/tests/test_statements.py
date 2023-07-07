@@ -1507,19 +1507,18 @@ def test_disabled_activity_or_explain_plans(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['query_activity']['enabled'] = query_activity_enabled
     dbm_instance['query_samples']['enabled'] = query_samples_enabled
+    dbm_instance['query_metrics']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
     conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
 
     try:
+        aggregator.reset()
         conn.cursor().execute(query, (arg,))
-        run_one_check(check, dbm_instance)
         run_one_check(check, dbm_instance)
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
-        check.log.error("Activity is {}, samples is {}, main collection interval is {}".format(dbm_activity, dbm_samples, check._config.min_collection_interval))
-
         if query_activity_enabled:
             assert len(dbm_activity) > 0
         else:
