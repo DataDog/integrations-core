@@ -1516,8 +1516,7 @@ def test_disabled_activity_or_explain_plans(
 
     try:
         conn.cursor().execute(query, (arg,))
-        check.check(dbm_instance)
-        check.cancel()
+        run_one_check(check, dbm_instance)
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
 
