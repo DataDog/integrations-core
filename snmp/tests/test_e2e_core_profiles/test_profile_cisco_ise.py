@@ -38,7 +38,7 @@ def test_e2e_profile_cisco_ise(dd_agent_check):
 
     # Extended metrics from `_generic-host-resources-base.yaml`
     aggregator.assert_metric("snmp.hrSystemUptime", metric_type=aggregator.GAUGE, tags=common_tags)
-    cpu_rows = ['1']
+    cpu_rows = ['0.0']
     for cpu_row in cpu_rows:
         aggregator.assert_metric(
             'snmp.hrProcessorLoad', metric_type=aggregator.GAUGE, tags=common_tags + ['processorid:' + cpu_row]
