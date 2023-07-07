@@ -241,7 +241,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._activity_coll_enabled = is_affirmative(self._config.statement_activity_config.get('enabled', True))
         self._explain_plan_coll_enabled = is_affirmative(self._config.statement_samples_config.get('enabled', True))
 
-        self.log.warning("samples enabled value is: {}".format(self._explain_plan_coll_enabled))
+        self._log.warning("samples enabled value is: {}".format(self._explain_plan_coll_enabled))
         # activity events cannot be reported more often than regular samples
         self._activity_coll_interval = max(
             self._config.statement_activity_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL),
@@ -443,7 +443,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         rows = self._filter_and_normalize_statement_rows(rows)
         submitted_count = 0
         if self._explain_plan_coll_enabled:
-            self.log.warning("we are collecting explain plans here!!! samples should be populated!")
+            self._log.warning("we are collecting explain plans here!!! samples should be populated!")
             event_samples = self._collect_plans(rows)
             for e in event_samples:
                 self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
