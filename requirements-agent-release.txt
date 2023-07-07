@@ -36,6 +36,7 @@ datadog-couch==5.2.0
 datadog-couchbase==2.2.0
 datadog-crio==2.3.0
 datadog-datadog-cluster-agent==2.6.1
+datadog-dcgm==1.0.0
 datadog-directory==1.14.3
 datadog-disk==4.9.0
 datadog-dns-check==2.3.0
@@ -143,6 +144,7 @@ datadog-sqlserver==11.2.2
 datadog-squid==2.2.0
 datadog-ssh-check==2.4.0
 datadog-statsd==1.10.0
+datadog-strimzi==1.0.0
 datadog-supervisord==2.4.0
 datadog-system-core==2.0.0
 datadog-system-swap==1.14.1
@@ -154,6 +156,7 @@ datadog-teradata==1.1.0; sys_platform != 'darwin'
 datadog-tls==2.10.0
 datadog-tokumx==3.2.0
 datadog-tomcat==1.11.1
+datadog-torchserve==1.0.0
 datadog-traffic-server==1.1.0
 datadog-twemproxy==1.13.0
 datadog-twistlock==3.2.0
@@ -162,6 +165,7 @@ datadog-vault==3.4.0
 datadog-vertica==3.4.1
 datadog-voltdb==2.1.2
 datadog-vsphere==6.2.2
+datadog-weaviate==1.0.0
 datadog-weblogic==1.1.1
 datadog-win32-event-log==2.13.2; sys_platform == 'win32'
 datadog-windows-performance-counters==1.5.0; sys_platform == 'win32'
