@@ -144,6 +144,7 @@ datadog-sqlserver==11.2.2
 datadog-squid==2.2.0
 datadog-ssh-check==2.4.0
 datadog-statsd==1.10.0
+datadog-strimzi==1.0.0
 datadog-supervisord==2.4.0
 datadog-system-core==2.0.0
 datadog-system-swap==1.14.1
