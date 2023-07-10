@@ -1,5 +1,18 @@
 # CHANGELOG - datadog_checks_base
 
+## 32.5.0 / 2023-07-10
+
+***Added***:
+
+* Bump dependencies for Agent 7.47. See [#15145](https://github.com/DataDog/integrations-core/pull/15145).
+* Upgrade ddtrace to 1.11.2 on Python 3. See [#14367](https://github.com/DataDog/integrations-core/pull/14367).
+
+***Fixed***:
+
+* Revert "Upgrade ddtrace to 1.11.2 on Python 3 (#14367)". See [#15143](https://github.com/DataDog/integrations-core/pull/15143).
+* Bump the confluent-kafka version. See [#14665](https://github.com/DataDog/integrations-core/pull/14665).
+* Allow non-443 port to be used in intermediate certs. See [#14817](https://github.com/DataDog/integrations-core/pull/14817).
+
 ## 32.4.0 / 2023-06-23
 
 ***Added***:
@@ -13,9 +26,9 @@
 * Update requests-toolbelt version. See [#14748](https://github.com/DataDog/integrations-core/pull/14748).
 * Update requests library. See [#14670](https://github.com/DataDog/integrations-core/pull/14670).
 * Bump snowflake connector python to 3.0.4. See [#14675](https://github.com/DataDog/integrations-core/pull/14675).
-* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 
-## 32.3.1 / 2023-06-02
+## 32.3.1 / 2023-06-02 / Agent 7.46.0
 
 ***Fixed***: 
 

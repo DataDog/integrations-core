@@ -1,5 +1,15 @@
 # CHANGELOG - network
 
+## 2.10.0 / 2023-07-10
+
+***Added***:
+
+* Add metric conntrack_allowance_available from Amazon ENA driver. See [#14634](https://github.com/DataDog/integrations-core/pull/14634). Thanks [radykal-com](https://github.com/radykal-com).
+
+***Fixed***:
+
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 2.9.4 / 2023-04-14 / Agent 7.45.0
 
 ***Fixed***: 

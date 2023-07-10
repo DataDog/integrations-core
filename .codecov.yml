@@ -586,6 +586,10 @@ coverage:
         target: 75
         flags:
         - wmi_check
+      Weaviate:
+        target: 75
+        flags:
+        - weaviate
       Win32:
         target: 75
         flags:
@@ -1386,6 +1390,11 @@ flags:
     paths:
     - vsphere/datadog_checks/vsphere
     - vsphere/tests
+  weaviate:
+    carryforward: true
+    paths:
+    - weaviate/datadog_checks/weaviate
+    - weaviate/tests
   win32_event_log:
     carryforward: true
     paths:

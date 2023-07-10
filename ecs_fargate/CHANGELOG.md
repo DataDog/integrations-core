@@ -1,5 +1,15 @@
 # CHANGELOG - ECS Fargate
 
+## 3.4.0 / 2023-07-10
+
+***Added***:
+
+* Add ephemeral storage metrics for fargate check. See [#14775](https://github.com/DataDog/integrations-core/pull/14775).
+
+***Fixed***:
+
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 3.3.0 / 2023-01-20 / Agent 7.43.0
 
 ***Added***: 
