@@ -395,10 +395,10 @@ def bob_conn():
 @pytest.fixture
 def dbm_instance(pg_instance):
     pg_instance['dbm'] = True
-    pg_instance['min_collection_interval'] =0.1
+    pg_instance['min_collection_interval'] = 0.1
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
-    pg_instance['query_activity'] = {'enabled': True, 'collection_interval':0.1}
+    pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.1}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
@@ -1479,7 +1479,7 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
     assert len(matching) > 0, "should have collected exactly at least one matching event"
 
 
-@pytest.mark.parametrize("pg_stat_activity_view", [ "datadog.pg_stat_activity()"])
+@pytest.mark.parametrize("pg_stat_activity_view", ["datadog.pg_stat_activity()"])
 @pytest.mark.parametrize("query_samples_enabled", [True, False])
 @pytest.mark.parametrize("query_activity_enabled", [True, False])
 @pytest.mark.parametrize(

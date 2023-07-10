@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import os
-from contextlib import closing
 from time import time
 
 import psycopg2
@@ -89,7 +88,7 @@ class PostgreSql(AgentCheck):
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
-        self.db_pool = MultiDatabaseConnectionPool(self._new_connection, self._config.max_connections, self.log)
+        self.db_pool = MultiDatabaseConnectionPool(self._new_connection, self._config.max_connections)
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
@@ -699,7 +698,7 @@ class PostgreSql(AgentCheck):
                 self.log.error("custom query field `columns` is required for metric_prefix `%s`", metric_prefix)
                 continue
 
-            with self.db.cursor() as cursor: 
+            with self.db.cursor() as cursor:
                 try:
                     self.log.debug("Running query: %s", query)
                     cursor.execute(query)
