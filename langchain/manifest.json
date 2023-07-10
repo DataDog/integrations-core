@@ -8,13 +8,13 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Optimize LangChain usage: cost estimates, prompt sampling and performance metrics.",
+    "description": "Optimize LangChain usage: prompt sampling and performance and cost metrics.",
     "title": "LangChain",
     "media": [],
     "classifier_tags": [
-      "Supported Data Type::Metrics",
-      "Supported Data Type::Logs",
-      "Supported Data Type::Traces",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Traces",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"
@@ -38,10 +38,7 @@
     },
     "dashboards": {
       "LangChain Overview Dashboard": "assets/dashboards/overview_dashboard.json"
-    },
-    "monitors": {},
-    "logs": {},
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
