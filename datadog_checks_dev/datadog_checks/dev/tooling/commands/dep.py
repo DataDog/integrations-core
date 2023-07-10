@@ -50,6 +50,9 @@ IGNORED_DEPS = {
     'protobuf', # 3.20.2->4.23.3 breaks kubernetes_state, kube_dns, gitlab and gitlab_runner tests.
     'service-identity', # 21.1->23.1 breaks tls tests.
     'pyvmomi', # 7->8 breaks vsphere tests.
+    # 4.3->4.4 changes the license field in the package metadata to something our validations cannot handle.
+    # We are tracking this problem in AITOOLS-198
+    'pymongo',
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
