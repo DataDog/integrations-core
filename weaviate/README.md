@@ -27,7 +27,7 @@ In addition, a small subset of metrics can be collected by communicating with di
 
 Prometheus-formatted metrics must be exposed in your Weaviate cluster. You can configure and customize this by following the [RESTful API page][11] in the Weaviate documentation. In order for the Agent to start collecting metrics, the Weaviate pods need to be annotated. Refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options in the [sample weaviate.d/conf.yaml][4] file.
 
-Note: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the object deletion metric will be exposed only when an object is deleted.
+**Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the object deletion metric is exposed only when an object is deleted.
 
 The two most important parameters for configuring the Weaviate check are as follows:
 - `openmetrics_endpoint`: This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is 2112, but it can be configured using the PROMETHEUS_MONITORING_PORT [environment variable][10]. In containerized environments, `%%host%%` can be used for host autodetection [3]. 
