@@ -16,16 +16,16 @@ The Weaviate check is included in the [Datadog Agent][2] package. No additional 
 
 ### Configuration
 
-Weaviate can be configured to expose Prometheus-formatted metrics. The Datadog Agent can collect these metrics using the integration described below. Follow the instructions to configure data collection from any or all of the components. For the required configurations, please refer to the [Weaviate documentation][11].
+Weaviate can be configured to expose Prometheus-formatted metrics. The Datadog Agent can collect these metrics using the integration described below. Follow the instructions to configure data collection for your Weaviate instances. For the required configurations to expose metrics on the Weaviate side, please refer to the [Weaviate documentation][10].
 
-In addition, a small subset of metrics can be collected by communicating with different [API endpoints][12].
+In addition, a small subset of metrics can be collected by communicating with different [API endpoints][11]. Specifically the /v1/meta, /v1/nodes and /v1/.well-known endpoints.
 
 **Note**: This check uses [OpenMetrics][12] for metric collection, which requires Python 3.
 
 #### Containerized
 ##### Metric collection
 
-Prometheus-formatted metrics must be exposed in your Weaviate cluster. You can configure and customize this by following the [RESTful API page][11] in the Weaviate documentation. In order for the Agent to start collecting metrics, the Weaviate pods need to be annotated. Refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options in the [sample weaviate.d/conf.yaml][4] file.
+Make sure that the Prometheus-formatted metrics are exposed in your Weaviate cluster. You can configure and customize this by following the [Weaviate documentation][10]. In order for the Agent to start collecting metrics, the Weaviate pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample weaviate.d/conf.yaml][4]
 
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the object deletion metric is exposed only when an object is deleted.
 
