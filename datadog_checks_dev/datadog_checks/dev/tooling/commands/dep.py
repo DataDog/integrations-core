@@ -47,6 +47,9 @@ IGNORED_DEPS = {
     'pyodbc',  # Breaking sqlserver tests
     'psutil',  # Breaking disk tests
     'aerospike',  # v8+ breaks agent build.
+    'protobuf', # 3.20.2->4.23.3 breaks kubernetes_state, kube_dns, gitlab and gitlab_runner tests.
+    'service-identity', # 21.1->23.1 breaks tls tests.
+    'pyvmomi', # 7->8 breaks vsphere tests.
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
