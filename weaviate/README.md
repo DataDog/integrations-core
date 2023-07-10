@@ -30,7 +30,7 @@ Prometheus-formatted metrics must be exposed in your Weaviate cluster. You can c
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the object deletion metric is exposed only when an object is deleted.
 
 The two most important parameters for configuring the Weaviate check are as follows:
-- `openmetrics_endpoint`: This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is 2112, but it can be configured using the PROMETHEUS_MONITORING_PORT [environment variable][10]. In containerized environments, `%%host%%` can be used for host autodetection [3]. 
+- `openmetrics_endpoint`: This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `2112`, but it can be configured using the `PROMETHEUS_MONITORING_PORT` [environment variable][10]. In containerized environments, `%%host%%` can be used for [host autodetection][3]. 
 - `weaviate_api_endpoint`: This parameter is optional. By default, this parameter is set to <hostname>:8080 and it specifies the configuration of the [RESTful API][11].
 
 If authentication is required for the RESTful API endpoints, the check can be configured to provide an API key as part of the [request header][13].
