@@ -35,7 +35,7 @@ datadog-coredns==2.4.1; sys_platform == 'linux2'
 datadog-couch==5.2.1
 datadog-couchbase==2.2.1
 datadog-crio==2.3.1
-datadog-datadog-cluster-agent==2.6.1
+datadog-datadog-cluster-agent==2.6.2
 datadog-dcgm==1.0.0
 datadog-directory==1.14.3
 datadog-disk==4.9.0
