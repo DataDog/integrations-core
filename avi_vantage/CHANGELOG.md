@@ -1,5 +1,11 @@
 # CHANGELOG - Avi Vantage
 
+## 3.3.1 / 2023-07-10
+
+***Fixed***:
+
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 3.3.0 / 2023-05-26
 
 ***Added***: 

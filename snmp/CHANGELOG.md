@@ -1,5 +1,71 @@
 # CHANGELOG - snmp
 
+## 6.0.0 / 2023-07-10
+
+***Changed***:
+
+* Rename vendor profiles to match vendor.yaml. See [#15039](https://github.com/DataDog/integrations-core/pull/15039).
+* Rename generic-router to generic-device. See [#14723](https://github.com/DataDog/integrations-core/pull/14723).
+
+***Added***:
+
+* [NDM] Add audiocodes-mediant-sbc profile. See [#15117](https://github.com/DataDog/integrations-core/pull/15117).
+* Add profile for fortinet-fortiswitch. See [#15192](https://github.com/DataDog/integrations-core/pull/15192).
+* Add profile for Fireeye. See [#15185](https://github.com/DataDog/integrations-core/pull/15185).
+* Add profile for fortinet-appliance. See [#15188](https://github.com/DataDog/integrations-core/pull/15188).
+* Add arista-switch profile. See [#15092](https://github.com/DataDog/integrations-core/pull/15092).
+* Add profile cisco-ironport-email. See [#15163](https://github.com/DataDog/integrations-core/pull/15163).
+* Add profile cisco-firepower. See [#15160](https://github.com/DataDog/integrations-core/pull/15160).
+* Add profile for extreme-switching. See [#15164](https://github.com/DataDog/integrations-core/pull/15164).
+* Add profile cisco-access-point. See [#15147](https://github.com/DataDog/integrations-core/pull/15147).
+* [NDM] [SNMP] Update F5 BIGIP profile. See [#15049](https://github.com/DataDog/integrations-core/pull/15049).
+* Add profile for Aruba-cx-switch. See [#15107](https://github.com/DataDog/integrations-core/pull/15107).
+* Add aruba-clearpass profile. See [#15088](https://github.com/DataDog/integrations-core/pull/15088).
+* Add profile for Exagrid. See [#15137](https://github.com/DataDog/integrations-core/pull/15137).
+* Add profile cisco-firepower-asa. See [#15157](https://github.com/DataDog/integrations-core/pull/15157).
+* [SNMP] Add profile for alcatel-lucent omni access WLC. See [#15101](https://github.com/DataDog/integrations-core/pull/15101).
+* [SNMP] Add profile for alcatel-lucent ind. See [#15095](https://github.com/DataDog/integrations-core/pull/15095).
+* [NDM] Add bluecat-server profile. See [#15125](https://github.com/DataDog/integrations-core/pull/15125).
+* [SNMP] Add profile for alcatel-lucent ent. See [#15094](https://github.com/DataDog/integrations-core/pull/15094).
+* Add profile chrysalis-luna-hsm. See [#15133](https://github.com/DataDog/integrations-core/pull/15133).
+* [NDM] Add avtech-roomalert-3s. See [#15076](https://github.com/DataDog/integrations-core/pull/15076).
+* Add profile watchguard. See [#15130](https://github.com/DataDog/integrations-core/pull/15130).
+* [SNMP] Add profile for Anue. See [#15123](https://github.com/DataDog/integrations-core/pull/15123).
+* Add profile for aruba mobility controller. See [#15109](https://github.com/DataDog/integrations-core/pull/15109).
+* [NDM] Add avtech roomalert 3e profile. See [#15075](https://github.com/DataDog/integrations-core/pull/15075).
+* [NDM] Add avtech-roomalert-32s. See [#15058](https://github.com/DataDog/integrations-core/pull/15058).
+* [SNMP] Add profile for generic UPS. See [#15068](https://github.com/DataDog/integrations-core/pull/15068).
+* Add profile brother-net-printer. See [#15102](https://github.com/DataDog/integrations-core/pull/15102).
+* Add profile brocade-fc-switch. See [#15065](https://github.com/DataDog/integrations-core/pull/15065).
+* Update profile a10-thunder with metric_type. See [#15086](https://github.com/DataDog/integrations-core/pull/15086).
+* Add profile _generic-ucd.yaml. See [#15046](https://github.com/DataDog/integrations-core/pull/15046).
+* [NDM] Add profiles for Nvidia. See [#15051](https://github.com/DataDog/integrations-core/pull/15051).
+* Add profile a10-thunder. See [#14712](https://github.com/DataDog/integrations-core/pull/14712).
+* Add `_generic-lldp` profile. See [#15061](https://github.com/DataDog/integrations-core/pull/15061).
+* Add per vendor generic profiles. See [#14721](https://github.com/DataDog/integrations-core/pull/14721).
+* Add profile 3com-huawei. See [#14694](https://github.com/DataDog/integrations-core/pull/14694).
+* Update profiles with missing devices. See [#14695](https://github.com/DataDog/integrations-core/pull/14695).
+* Add profile for hp-ilo. See [#14771](https://github.com/DataDog/integrations-core/pull/14771).
+* Add User Profiles support. See [#14752](https://github.com/DataDog/integrations-core/pull/14752).
+* Add profile 3com. See [#14693](https://github.com/DataDog/integrations-core/pull/14693).
+
+***Fixed***:
+
+* Update alcatel-lucent-ind with prefix . See [#15184](https://github.com/DataDog/integrations-core/pull/15184).
+* Update alcatel-lucent-ent with prefix. See [#15183](https://github.com/DataDog/integrations-core/pull/15183).
+* Add roomalert prefix to avtech-roomalert-32s.yaml. See [#15180](https://github.com/DataDog/integrations-core/pull/15180).
+* Add roomalert3s prefix to avtech-roomalert-3s.yaml. See [#15182](https://github.com/DataDog/integrations-core/pull/15182).
+* Add `roomalert3e` prefix to avtech-roomalert-3e.yaml. See [#15181](https://github.com/DataDog/integrations-core/pull/15181).
+* Add missing metric_type and ucd prefix for _generic-ucd. See [#15177](https://github.com/DataDog/integrations-core/pull/15177).
+* Add prefixes to `nvidia-cumulus-linux-switch`. See [#15176](https://github.com/DataDog/integrations-core/pull/15176).
+* Update _generic-ups.yaml. See [#15179](https://github.com/DataDog/integrations-core/pull/15179).
+* Update a10-thunder axAppGlobalTotalCurrentConnections metric_type. See [#15169](https://github.com/DataDog/integrations-core/pull/15169).
+* Document _cisco-cpu-memory.yaml metrics. See [#15149](https://github.com/DataDog/integrations-core/pull/15149).
+* Update metadata.csv for 3com-huawei profile. See [#15038](https://github.com/DataDog/integrations-core/pull/15038).
+* Refactor hp-ilo profile vendor. See [#14823](https://github.com/DataDog/integrations-core/pull/14823).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* Remove rules from test_profile_hierarchy. See [#14703](https://github.com/DataDog/integrations-core/pull/14703).
+
 ## 5.12.0 / 2023-05-26
 
 ***Added***: 
