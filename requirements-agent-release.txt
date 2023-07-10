@@ -147,7 +147,7 @@ datadog-statsd==1.10.1
 datadog-strimzi==1.0.0
 datadog-supervisord==2.4.1
 datadog-system-core==2.0.1
-datadog-system-swap==1.14.1
+datadog-system-swap==1.14.2
 datadog-tcp-check==4.6.0
 datadog-teamcity==3.1.0
 datadog-temporal==1.1.0
