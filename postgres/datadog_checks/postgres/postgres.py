@@ -89,7 +89,7 @@ class PostgreSql(AgentCheck):
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
-        self.db_pool = MultiDatabaseConnectionPool(self._new_connection, self._config.max_connections)
+        self.db_pool = MultiDatabaseConnectionPool(self._new_connection, self._config.max_connections, self.log)
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
@@ -164,9 +164,12 @@ class PostgreSql(AgentCheck):
         )
 
     def execute_query_raw(self, query):
-        with self.db.cursor() as cursor:
+        with self._get_main_db().cursor() as cursor:
+            self.log.warning("EXECUTING SOME QUERIES FROM EXECUTOR")
             cursor.execute(query)
-            return cursor.fetchall()
+            rows = cursor.fetchall()
+            self.log.warning(rows)
+            return rows
 
     @property
     def dynamic_queries(self):

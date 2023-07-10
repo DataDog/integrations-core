@@ -1519,6 +1519,8 @@ def test_disabled_activity_or_explain_plans(
         check.check(dbm_instance)
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+
+        assert None is not None
         if query_activity_enabled:
             assert len(dbm_activity) > 0
         else:

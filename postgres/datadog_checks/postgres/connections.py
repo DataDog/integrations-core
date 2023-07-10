@@ -66,11 +66,12 @@ class MultiDatabaseConnectionPool(object):
         def reset(self):
             self.__init__()
 
-    def __init__(self, connect_fn: Callable[[str], None], max_conns: int = None):
+    def __init__(self, connect_fn: Callable[[str], None], max_conns: int = None, log = None):
         self.max_conns: int = max_conns
         self._stats = self.Stats()
         self._mu = threading.RLock()
         self._conns: Dict[str, ConnectionInfo] = {}
+        self.log = log
 
         if hasattr(inspect, 'signature'):
             connect_sig = inspect.signature(connect_fn)
@@ -119,6 +120,7 @@ class MultiDatabaseConnectionPool(object):
 
             if db.status != psycopg2.extensions.STATUS_READY:
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
+                self.log.warning("ROLLING BACK")
                 db.rollback()
 
             deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)

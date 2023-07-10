@@ -90,7 +90,7 @@ PG_STAT_ACTIVITY_QUERY = re.sub(
     SELECT {current_time_func} {pg_stat_activity_cols} {pg_blocking_func} FROM {pg_stat_activity_view}
     WHERE
         {backend_type_predicate}
-        (coalesce(TRIM(query), '') != '' AND pid != pg_backend_pid() AND query_start IS NOT NULL {extra_filters})
+        (coalesce(TRIM(query), '') != '' AND query_start IS NOT NULL {extra_filters})
 """,
 ).strip()
 
@@ -303,11 +303,17 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
         )
+        with self._check.db_pool.get_connection("dogs_1", 100000) as conn:
+            print(conn.info.dbname)
+        
+        self._check.db_pool._terminate_connection_unsafe("dogs_1")
+
         with self._check._get_main_db().cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             self._log.warning("db is %s", self._check._get_main_db().info.dbname)
             self._log.warning("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
+        self._log.warning("rows are {}".format(rows))
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
