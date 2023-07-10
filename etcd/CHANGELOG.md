@@ -1,5 +1,15 @@
 # CHANGELOG - etcd
 
+## 5.0.0 / 2023-07-10
+
+***Changed***:
+
+* Drop support for etcd < v3.4. See [#14698](https://github.com/DataDog/integrations-core/pull/14698).
+
+***Fixed***:
+
+* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 4.0.0 / 2023-05-26
 
 ***Changed***: 
