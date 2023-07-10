@@ -1,5 +1,12 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 22.0.1 / 2023-07-10
+
+***Fixed***:
+
+* Exclude click 8.1.4 to solve mypy issues. See [#15201](https://github.com/DataDog/integrations-core/pull/15201).
+* Bump the minimal base check version in the integration templates. See [#15178](https://github.com/DataDog/integrations-core/pull/15178).
+
 ## 22.0.0 / 2023-07-05
 
 ***Changed***:
