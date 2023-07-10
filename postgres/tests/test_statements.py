@@ -1479,7 +1479,7 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
     assert len(matching) > 0, "should have collected exactly at least one matching event"
 
 
-@pytest.mark.parametrize("pg_stat_activity_view", ["datadog.pg_stat_activity()"])
+@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize("query_samples_enabled", [True, False])
 @pytest.mark.parametrize("query_activity_enabled", [True, False])
 @pytest.mark.parametrize(
@@ -1520,6 +1520,11 @@ def test_disabled_activity_or_explain_plans(
         run_one_check(check, dbm_instance)
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+
+        if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
+            # cannot catch any queries from other users
+            # only can see own queries
+            return
 
         if query_activity_enabled:
             assert len(dbm_activity) > 0
