@@ -18,15 +18,18 @@ HERE = path.dirname(path.abspath(__file__))
 
 def setup_calico():
     # Deploy calico
-    run_command(["kubectl", "apply", "-f", "https://projectcalico.docs.tigera.io/archive/v3.24/manifests/calico.yaml"])
+    run_command(["kubectl", "apply", "-f", path.join(HERE, 'kind', 'calico.yaml')])
 
     # Install calicoctl as a pod
     run_command(
-        ["kubectl", "apply", "-f", "https://projectcalico.docs.tigera.io/archive/v3.24/manifests/calicoctl.yaml"]
+        ["kubectl", "apply", "-f", path.join(HERE, 'kind', 'calicoctl.yaml')]
     )
 
     # Create felix metrics service
-    run_command(["kubectl", "apply", "-f", path.join(HERE, 'felix-service.yaml')])
+    run_command(["kubectl", "apply", "-f", path.join(HERE, 'kind', 'felix-service.yaml')])
+
+    # Create a network policy to populate metrics
+    run_command(["kubectl", "apply", "-f", path.join(HERE, 'kind', 'network-policy.yaml')])
 
     # Wait for pods
     run_command(["kubectl", "wait", "--for=condition=Ready", "pods", "--all", "--all-namespaces", "--timeout=300s"])
@@ -41,25 +44,23 @@ def setup_calico():
 @pytest.fixture(scope='session')
 def dd_environment():
 
-    with kind_run(
-        conditions=[setup_calico], kind_config=path.join(HERE, 'kind-calico.yaml'), sleep=10
-    ) as kubeconfig, port_forward(kubeconfig, 'kube-system', 9091, 'service', 'felix-metrics-svc') as (
-        calico_host,
-        calico_port,
-    ):
+    with (kind_run(
+            conditions=[setup_calico], kind_config=path.join(HERE, 'kind', 'kind-calico.yaml'), sleep=10
+        ) as kubeconfig, port_forward(kubeconfig, 'kube-system', 9091, 'service', 'felix-metrics-svc') as (
+            calico_host,
+            calico_port,
+        )):
         endpoint = 'http://{}:{}/metrics'.format(calico_host, calico_port)
 
         # We can't add this to `kind_run` because we don't know the URL at this moment
         condition = CheckEndpoints(endpoint, wait=2)
         condition()
 
-        instance = {
+        yield {
             "openmetrics_endpoint": endpoint,
             "namespace": NAMESPACE,
             "extra_metrics": EXTRA_METRICS,
         }
-
-        yield instance
 
 
 @pytest.fixture
