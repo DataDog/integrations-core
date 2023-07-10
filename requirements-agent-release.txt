@@ -6,7 +6,7 @@ datadog-airflow==3.2.1
 datadog-amazon-msk==3.5.0
 datadog-ambari==3.2.1; sys_platform != 'win32'
 datadog-apache==4.2.2
-datadog-arangodb==1.4.0
+datadog-arangodb==1.4.1
 datadog-argocd==1.1.0
 datadog-aspdotnet==1.12.0; sys_platform == 'win32'
 datadog-avi-vantage==3.3.0
