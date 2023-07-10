@@ -297,7 +297,6 @@ class VSphereCheck(AgentCheck):
                 )
                 continue
 
-
             # after retrieving tags, add hostname suffix if specified
             if isinstance(mor, vim.VirtualMachine):
                 if self._config.vm_hostname_suffix_tag is not None:
@@ -652,9 +651,11 @@ class VSphereCheck(AgentCheck):
         metric_method,  # type: Callable
         base_tags,  # type: List[str]
         hostname,  # type: str
+        resource_metric_suffix,  # type: str
         additional_tags=None,  # type: Optional[Dict[str, Optional[Any]]]
     ):
         # type: (...) -> None
+        metric_name = "{}.{}".format(resource_metric_suffix, metric_name)
         if metric_value is None:
             self.log.debug(
                 "Could not sumbit property metric name=`%s`, value=`%s`, hostname=`%s`, "
@@ -670,21 +671,23 @@ class VSphereCheck(AgentCheck):
         tags = []  # type: List[str]
         tags = tags + base_tags
 
-        if additional_tags is not None:
+        if additional_tags is None:
+            additional_tags = {}
 
-            if all(tag is None for tag in additional_tags) and metric_value == 1:
-                self.log.debug(
-                    "Property metric has no data to send: name=`%s`, value=`%s`, hostname=`%s`, "
-                    "base tags=`%s`, additional tags=`%s`",
-                    metric_name,
-                    metric_value,
-                    hostname,
-                    additional_tags,
-                    base_tags,
-                )
-            for tag_name, tag_value in additional_tags.items():
-                if tag_value is not None:
-                    tags.append("{}:{}".format(tag_name, tag_value))
+        if all(tag is None for tag in additional_tags.keys()) and metric_value == 1:
+            self.log.debug(
+                "Property metric has no data to send: name=`%s`, value=`%s`, hostname=`%s`, "
+                "base tags=`%s`, additional tags=`%s`",
+                metric_name,
+                metric_value,
+                hostname,
+                additional_tags,
+                base_tags,
+            )
+
+        for tag_name, tag_value in additional_tags.items():
+            if tag_value is not None:
+                tags.append("{}:{}".format(tag_name, tag_value))
 
         # Use isEnabledFor to avoid unnecessary processing
         if self.log.isEnabledFor(logging.DEBUG):
@@ -702,6 +705,7 @@ class VSphereCheck(AgentCheck):
         disks,  # type: List[VmomiObject]
         base_tags,  # type: List[str]
         hostname,  # type: str
+        resource_metric_suffix,  # type: str
     ):
         # type: (...) -> None
         for disk in disks:
@@ -712,20 +716,22 @@ class VSphereCheck(AgentCheck):
             disk_tags = {'disk_path': disk_path, 'file_system_type': file_system_type}
 
             self.submit_property_metric(
-                'vm.guest.disk.freeSpace',
+                'guest.disk.freeSpace',
                 free_space,
                 self.gauge,
                 base_tags,
                 hostname,
+                resource_metric_suffix,
                 additional_tags=disk_tags,
             )
 
             self.submit_property_metric(
-                'vm.guest.disk.capacity',
+                'guest.disk.capacity',
                 capacity,
                 self.gauge,
                 base_tags,
                 hostname,
+                resource_metric_suffix,
                 additional_tags=disk_tags,
             )
 
@@ -734,6 +740,7 @@ class VSphereCheck(AgentCheck):
         nics,  # type: List[VmomiObject]
         base_tags,  # type: List[str]
         hostname,  # type: str
+        resource_metric_suffix,  # type: str
     ):
         # type: (...) -> None
         for nic in nics:
@@ -741,18 +748,21 @@ class VSphereCheck(AgentCheck):
             is_connected = nic.connected
             mac_address = nic.macAddress
             nic_tags = {'device_id': device_id, 'is_connected': is_connected, 'nic_mac_address': mac_address}
-            self.submit_property_metric('vm.guest.net', 1, self.count, base_tags, hostname, additional_tags=nic_tags)
+            self.submit_property_metric(
+                'guest.net', 1, self.count, base_tags, hostname, resource_metric_suffix, additional_tags=nic_tags
+            )
             ip_addresses = nic.ipConfig.ipAddress
             for ip_address in ip_addresses:
                 ip_tags = deepcopy(nic_tags)
 
                 ip_tags['nic_ip_address'] = ip_address.ipAddress
                 self.submit_property_metric(
-                    'vm.guest.net.ipConfig.address',
+                    'guest.net.ipConfig.address',
                     1,
                     self.count,
                     base_tags,
                     hostname,
+                    resource_metric_suffix,
                     additional_tags=ip_tags,
                 )
 
@@ -761,6 +771,7 @@ class VSphereCheck(AgentCheck):
         ip_stacks,  # type: List[VmomiObject]
         base_tags,  # type: List[str]
         hostname,  # type: str
+        resource_metric_suffix,  # type: str
     ):
         # type: (...) -> None
         for ip_stack in ip_stacks:
@@ -785,11 +796,12 @@ class VSphereCheck(AgentCheck):
                 ip_tags.update(route_tags)
 
                 self.submit_property_metric(
-                    'vm.guest.ipStack.ipRoute',
+                    'guest.ipStack.ipRoute',
                     1,
                     self.count,
                     base_tags,
                     hostname,
+                    resource_metric_suffix,
                     additional_tags=ip_tags,
                 )
 
@@ -798,17 +810,28 @@ class VSphereCheck(AgentCheck):
         all_properties,  # type: Dict[str, Any]
         base_tags,  # type: List[str]
         hostname,  # type: str
+        resource_metric_suffix,  # type: str
     ):
         # type: (...) -> None
         for property_name in VM_SIMPLE_PROPERTIES:
             property_val = all_properties.get(property_name, None)
             try:
                 metric_val = float(property_val)
-                self.submit_property_metric(property_name, metric_val, self.gauge, base_tags, hostname)
+                self.submit_property_metric(
+                    property_name, metric_val, self.gauge, base_tags, hostname, resource_metric_suffix
+                )
             except Exception:
                 _, _, tag_name = property_name.rpartition('.')
                 property_tag = {tag_name: property_val}
-                self.submit_property_metric(property_name, 1, self.count, base_tags, hostname, property_tag)
+                self.submit_property_metric(
+                    property_name,
+                    1,
+                    self.gauge,
+                    base_tags,
+                    hostname,
+                    resource_metric_suffix,
+                    additional_tags=property_tag,
+                )
 
     def submit_property_metrics(
         self,
@@ -818,61 +841,25 @@ class VSphereCheck(AgentCheck):
     ):
         # type: (...) -> None
         if resource_type == vim.VirtualMachine:
+            resource_metric_suffix = MOR_TYPE_AS_STRING[resource_type]
             mor_name = to_string(mor_props.get("name", "unknown"))
             all_properties = mor_props.get('properties', None)
-            if all_properties is None:
+            if not all_properties:
                 self.log.warning("Could not retrieve properties for VM %s", mor_name)
                 return
 
             hostname = mor_props.get('hostname', 'unknown')
             base_tags = self._config.base_tags + resource_tags
             nics = all_properties.get('guest.net', [])
-            self.submit_nic_property_metrics(nics, base_tags, hostname)
+            self.submit_nic_property_metrics(nics, base_tags, hostname, resource_metric_suffix)
 
             ip_stacks = all_properties.get('guest.ipStack', [])
-            self.submit_ip_stack_property_metrics(ip_stacks, base_tags, hostname)
+            self.submit_ip_stack_property_metrics(ip_stacks, base_tags, hostname, resource_metric_suffix)
 
             disks = all_properties.get('guest.disk', [])
-            self.submit_disk_property_metrics(disks, base_tags, hostname)
+            self.submit_disk_property_metrics(disks, base_tags, hostname, resource_metric_suffix)
 
-            self.submit_basic_property_metrics(all_properties, base_tags, hostname)
-
-            cores_per_socket = all_properties.get('config.hardware.numCoresPerSocket', None)
-            self.submit_property_metric(
-                'vm.hardware.numCoresPerSocket',
-                cores_per_socket,
-                self.gauge,
-                base_tags,
-                hostname,
-            )
-
-            num_cpu = all_properties.get('summary.config.numCpu', None)
-            self.submit_property_metric('vm.numCpu', num_cpu, self.gauge, base_tags, hostname)
-
-            memory_size = all_properties.get('summary.config.memorySizeMB', None)
-            self.submit_property_metric('vm.memorySizeMB', memory_size, self.gauge, base_tags, hostname)
-
-            ethernet_cards = all_properties.get('summary.config.numEthernetCards', None)
-            self.submit_property_metric(
-                'vm.numEthernetCards',
-                ethernet_cards,
-                self.gauge,
-                base_tags,
-                hostname,
-            )
-
-            virtual_disks = all_properties.get('summary.config.numVirtualDisks', None)
-            self.submit_property_metric('vm.numVirtualDisks', virtual_disks, self.gauge, base_tags, hostname)
-
-            uptime = all_properties.get('summary.quickStats.uptimeSeconds', None)
-            self.submit_property_metric('vm.uptime', uptime, self.gauge, base_tags, hostname)
-
-            tools_version = all_properties.get('guest.toolsVersion', None)
-            tools_status = all_properties.get('guest.toolsRunningStatus', None)
-            tools_tags = {'tools_version': tools_version, 'tools_status': tools_status}
-            self.submit_property_metric(
-                'vm.guest.toolsVersion', 1, self.count, base_tags, hostname, additional_tags=tools_tags
-            )
+            self.submit_basic_property_metrics(all_properties, base_tags, hostname, resource_metric_suffix)
 
     def check(self, _):
         # type: (Any) -> None
