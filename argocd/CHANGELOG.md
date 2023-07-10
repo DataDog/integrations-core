@@ -1,5 +1,15 @@
 # CHANGELOG - Argo CD
 
+## 1.2.0 / 2023-07-10
+
+***Added***:
+
+* Add ArgoCD notifications controller metrics. See [#14690](https://github.com/DataDog/integrations-core/pull/14690). Thanks [maxknee](https://github.com/maxknee).
+
+***Fixed***:
+
+* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 1.1.0 / 2023-05-26
 
 ***Added***: 
