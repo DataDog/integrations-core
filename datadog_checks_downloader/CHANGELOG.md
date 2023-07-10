@@ -6,7 +6,7 @@
 
 * Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 
-## 4.2.1 / 2023-05-26
+## 4.2.1 / 2023-05-26 / Agent 7.46.0
 
 ***Fixed***: 
 

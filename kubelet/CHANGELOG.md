@@ -12,7 +12,7 @@
 * kubelet: fallback from image to imageID to align with Go counterpart. See [#15131](https://github.com/DataDog/integrations-core/pull/15131).
 * Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 
-## 7.7.0 / 2023-05-26
+## 7.7.0 / 2023-05-26 / Agent 7.46.0
 
 ***Added***: 
 

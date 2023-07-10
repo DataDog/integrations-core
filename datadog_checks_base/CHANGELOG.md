@@ -28,7 +28,7 @@
 * Bump snowflake connector python to 3.0.4. See [#14675](https://github.com/DataDog/integrations-core/pull/14675).
 * Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 
-## 32.3.1 / 2023-06-02
+## 32.3.1 / 2023-06-02 / Agent 7.46.0
 
 ***Fixed***: 
 

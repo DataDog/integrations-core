@@ -66,7 +66,7 @@
 * Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 * Remove rules from test_profile_hierarchy. See [#14703](https://github.com/DataDog/integrations-core/pull/14703).
 
-## 5.12.0 / 2023-05-26
+## 5.12.0 / 2023-05-26 / Agent 7.46.0
 
 ***Added***: 
 
