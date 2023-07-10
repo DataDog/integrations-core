@@ -1,5 +1,11 @@
 # CHANGELOG - Flink
 
+## 1.4.1 / 2023-07-10
+
+***Fixed***:
+
+* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 1.4.0 / 2022-02-19 / Agent 7.35.0
 
 ***Added***: 

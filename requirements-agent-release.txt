@@ -49,7 +49,7 @@ datadog-envoy==2.6.1
 datadog-etcd==5.0.0
 datadog-exchange-server==1.16.0; sys_platform == 'win32'
 datadog-external-dns==2.3.2
-datadog-flink==1.4.0
+datadog-flink==1.4.1
 datadog-fluentd==2.2.0
 datadog-foundationdb==1.2.0
 datadog-gearmand==2.3.0; sys_platform != 'win32'
