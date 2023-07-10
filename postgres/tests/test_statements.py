@@ -1479,7 +1479,7 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
     assert len(matching) > 0, "should have collected exactly at least one matching event"
 
 
-@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity"])
+@pytest.mark.parametrize("pg_stat_activity_view", [ "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize("query_samples_enabled", [True, False])
 @pytest.mark.parametrize("query_activity_enabled", [True, False])
 @pytest.mark.parametrize(
@@ -1508,19 +1508,19 @@ def test_disabled_activity_or_explain_plans(
     dbm_instance['query_activity']['enabled'] = query_activity_enabled
     dbm_instance['query_samples']['enabled'] = query_samples_enabled
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['collect_resources']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
     conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
 
     try:
-        aggregator.reset()
+        conn.autocommit = True
         conn.cursor().execute(query, (arg,))
-        check.check(dbm_instance)
-        dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+        run_one_check(check, dbm_instance)
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+        dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
-        assert None is not None
         if query_activity_enabled:
             assert len(dbm_activity) > 0
         else:

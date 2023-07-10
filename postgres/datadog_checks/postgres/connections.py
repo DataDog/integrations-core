@@ -66,12 +66,11 @@ class MultiDatabaseConnectionPool(object):
         def reset(self):
             self.__init__()
 
-    def __init__(self, connect_fn: Callable[[str], None], max_conns: int = None, log = None):
+    def __init__(self, connect_fn: Callable[[str], None], max_conns: int = None):
         self.max_conns: int = max_conns
         self._stats = self.Stats()
         self._mu = threading.RLock()
         self._conns: Dict[str, ConnectionInfo] = {}
-        self.log = log
 
         if hasattr(inspect, 'signature'):
             connect_sig = inspect.signature(connect_fn)
@@ -120,7 +119,6 @@ class MultiDatabaseConnectionPool(object):
 
             if db.status != psycopg2.extensions.STATUS_READY:
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
-                self.log.warning("ROLLING BACK")
                 db.rollback()
 
             deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
@@ -169,7 +167,6 @@ class MultiDatabaseConnectionPool(object):
             now = datetime.datetime.now()
             for dbname, conn in list(self._conns.items()):
                 if conn.deadline < now:
-                    print("got pruned {}".format(dbname))
                     self._stats.connection_pruned += 1
                     self._terminate_connection_unsafe(dbname)
 
@@ -191,7 +188,6 @@ class MultiDatabaseConnectionPool(object):
             sorted_conns = sorted(self._conns.items(), key=lambda i: i[1].last_accessed)
             for name, conn_info in sorted_conns:
                 if not conn_info.active and not conn_info.persistent:
-                    print("got evicted {}".format(name))
                     self._terminate_connection_unsafe(name)
                     return name
 
@@ -203,7 +199,6 @@ class MultiDatabaseConnectionPool(object):
         if db is not None:
             try:
                 self._stats.connection_closed += 1
-                print("closing database connection {}".format(dbname))
                 db.close()
             except Exception:
                 self._stats.connection_closed_failed += 1

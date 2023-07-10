@@ -90,7 +90,7 @@ PG_STAT_ACTIVITY_QUERY = re.sub(
     SELECT {current_time_func} {pg_stat_activity_cols} {pg_blocking_func} FROM {pg_stat_activity_view}
     WHERE
         {backend_type_predicate}
-        (coalesce(TRIM(query), '') != '' AND query_start IS NOT NULL {extra_filters})
+        (coalesce(TRIM(query), '') != '' AND pid != pg_backend_pid() AND query_start IS NOT NULL {extra_filters})
 """,
 ).strip()
 
@@ -241,7 +241,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._activity_coll_enabled = is_affirmative(self._config.statement_activity_config.get('enabled', True))
         self._explain_plan_coll_enabled = is_affirmative(self._config.statement_samples_config.get('enabled', True))
 
-        self._log.warning("samples enabled value is: {}".format(self._explain_plan_coll_enabled))
         # activity events cannot be reported more often than regular samples
         self._activity_coll_interval = max(
             self._config.statement_activity_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL),
@@ -303,17 +302,12 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
         )
-        with self._check.db_pool.get_connection("dogs_1", 100000) as conn:
-            print(conn.info.dbname)
-        
-        self._check.db_pool._terminate_connection_unsafe("dogs_1")
 
         with self._check._get_main_db().cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-            self._log.warning("db is %s", self._check._get_main_db().info.dbname)
-            self._log.warning("Running query [%s] %s", query, params)
+            self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
-        self._log.warning("rows are {}".format(rows))
+            
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
@@ -436,7 +430,6 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
-        print("job is running! activity: {} samples: {}".format(self._config.statement_activity_config.get('enabled', True), self._config.statement_samples_config.get('enabled', True)))
         self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
         self._collect_statement_samples()
@@ -450,13 +443,10 @@ class PostgresStatementSamples(DBMAsyncJob):
         rows = self._filter_and_normalize_statement_rows(rows)
         submitted_count = 0
         if self._explain_plan_coll_enabled:
-            self._log.warning("we are collecting explain plans here!!! samples should be populated!")
-            self._log.warning("rows are {}".format(rows))
             event_samples = self._collect_plans(rows)
             for e in event_samples:
                 self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
                 submitted_count += 1
-                self._log.warning("submitted num is {}".format(submitted_count))
 
         if self._report_activity_event():
             active_connections = self._get_active_connections()
@@ -594,8 +584,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         start_time = time.time()
         with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
             with conn.cursor() as cursor:
-                cursor = conn.cursor()
-                self._log.warning("Executing explain query")
                 self._log.debug(
                     "Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement
                 )
@@ -791,14 +779,12 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _collect_plans(self, rows):
         events = []
-        self._log.warning("In collect plans")
         for row in rows:
             try:
                 if row['statement'] is None or row.get('backend_type', 'client backend') != 'client backend':
                     continue
                 event = self._collect_plan_for_statement(row)
                 if event:
-                    self._log.warning("got event")
                     events.append(event)
             except Exception:
                 self._log.exception(
