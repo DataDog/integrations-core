@@ -68,7 +68,7 @@
 ***Fixed***: 
 
 * Revert "Capture stderr from docker compose to improve debugging experience" (#13949). See [#14714](https://github.com/DataDog/integrations-core/pull/14714).
-* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 * Allow typed-ast to work for python3.11. See [#14689](https://github.com/DataDog/integrations-core/pull/14689).
 * Rephrase the `--dev` description for the `start` command. See [#14681](https://github.com/DataDog/integrations-core/pull/14681).
 

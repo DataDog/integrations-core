@@ -26,7 +26,7 @@
 * Update requests-toolbelt version. See [#14748](https://github.com/DataDog/integrations-core/pull/14748).
 * Update requests library. See [#14670](https://github.com/DataDog/integrations-core/pull/14670).
 * Bump snowflake connector python to 3.0.4. See [#14675](https://github.com/DataDog/integrations-core/pull/14675).
-* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 
 ## 32.3.1 / 2023-06-02
 

@@ -5,7 +5,7 @@
 ***Fixed***:
 
 * Disable server info and version collection when collect_server_info is false. See [#14610](https://github.com/DataDog/integrations-core/pull/14610).
-* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 
 ## 2.6.0 / 2023-05-26
 

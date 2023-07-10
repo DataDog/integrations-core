@@ -10,7 +10,7 @@
 
 * Update mongo default config for multihost. See [#13454](https://github.com/DataDog/integrations-core/pull/13454).
 * Downgrade requirements to 3.8. See [#14711](https://github.com/DataDog/integrations-core/pull/14711).
-* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 * Add debug logs. See [#14626](https://github.com/DataDog/integrations-core/pull/14626).
 
 ## 5.0.1 / 2023-05-26

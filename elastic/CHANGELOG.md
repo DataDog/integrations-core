@@ -10,7 +10,7 @@
 
 * Catch only requests-related exceptions. See [#15089](https://github.com/DataDog/integrations-core/pull/15089).
 * Do not stop collecting metrics if the templates endpoint is not reachable. See [#15050](https://github.com/DataDog/integrations-core/pull/15050).
-* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 * Correctly compute the `templates.count` metric. See [#14636](https://github.com/DataDog/integrations-core/pull/14636).
 
 ## 5.4.2 / 2023-06-27

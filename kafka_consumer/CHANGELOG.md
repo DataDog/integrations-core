@@ -6,7 +6,7 @@
 
 * Fix unnecessary metrics. See [#15098](https://github.com/DataDog/integrations-core/pull/15098).
 * Bump the confluent-kafka version. See [#14665](https://github.com/DataDog/integrations-core/pull/14665).
-* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 
 ## 3.1.0 / 2023-05-26
 

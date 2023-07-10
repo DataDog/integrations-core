@@ -6,7 +6,7 @@
 
 * Deprecate apiserver_longrunning_gauge metric in favor of apiserver_longrunning_requests. See [#14856](https://github.com/DataDog/integrations-core/pull/14856).
 * [kube_apiserver_metrics] Rename aggregator_unavailable_apiservice `name` tag to `apiservice_name`. See [#14738](https://github.com/DataDog/integrations-core/pull/14738).
-* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 
 ## 3.6.1 / 2023-06-14
 

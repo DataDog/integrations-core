@@ -10,7 +10,7 @@
 
 * Fix Kubernetes probe total metrics type to gauge instead of count. See [#15167](https://github.com/DataDog/integrations-core/pull/15167).
 * kubelet: fallback from image to imageID to align with Go counterpart. See [#15131](https://github.com/DataDog/integrations-core/pull/15131).
-* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 
 ## 7.7.0 / 2023-05-26
 
