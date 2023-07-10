@@ -1,5 +1,15 @@
 # CHANGELOG - Hyper-V
 
+## 1.9.0 / 2023-07-10
+
+***Added***:
+
+* Upgrade Pydantic model code generator. See [#14779](https://github.com/DataDog/integrations-core/pull/14779).
+
+***Fixed***:
+
+* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 1.8.0 / 2022-07-18 / Agent 7.39.0
 
 ***Added***: 
