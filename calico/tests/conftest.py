@@ -21,9 +21,7 @@ def setup_calico():
     run_command(["kubectl", "apply", "-f", path.join(HERE, 'kind', 'calico.yaml')])
 
     # Install calicoctl as a pod
-    run_command(
-        ["kubectl", "apply", "-f", path.join(HERE, 'kind', 'calicoctl.yaml')]
-    )
+    run_command(["kubectl", "apply", "-f", path.join(HERE, 'kind', 'calicoctl.yaml')])
 
     # Create felix metrics service
     run_command(["kubectl", "apply", "-f", path.join(HERE, 'kind', 'felix-service.yaml')])
@@ -44,12 +42,12 @@ def setup_calico():
 @pytest.fixture(scope='session')
 def dd_environment():
 
-    with (kind_run(
-            conditions=[setup_calico], kind_config=path.join(HERE, 'kind', 'kind-calico.yaml'), sleep=10
-        ) as kubeconfig, port_forward(kubeconfig, 'kube-system', 9091, 'service', 'felix-metrics-svc') as (
-            calico_host,
-            calico_port,
-        )):
+    with kind_run(
+        conditions=[setup_calico], kind_config=path.join(HERE, 'kind-calico.yaml'), sleep=10
+    ) as kubeconfig, port_forward(kubeconfig, 'kube-system', 9091, 'service', 'felix-metrics-svc') as (
+        calico_host,
+        calico_port,
+    ):
         endpoint = 'http://{}:{}/metrics'.format(calico_host, calico_port)
 
         # We can't add this to `kind_run` because we don't know the URL at this moment
