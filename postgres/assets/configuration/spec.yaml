@@ -148,7 +148,7 @@ files:
     - name: max_connections
       hidden: true
       description: |
-        Sets the upper bound limit on the number of connections the agent can concurrently have on the database server. 
+        Sets the upper bound limit on the number of concurrent connections the Agent can have on the database server.
         The Agent needs to open additional connections to collect explain plans across databases. 
         Idle connections are cached, but pruned over time to balance the performance impact of opening connections and the cost of having many open connections. 
         Raising the default value should only be needed on workloads with >50 databases. 

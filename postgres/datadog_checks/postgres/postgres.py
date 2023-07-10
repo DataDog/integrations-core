@@ -164,10 +164,8 @@ class PostgreSql(AgentCheck):
 
     def execute_query_raw(self, query):
         with self._get_main_db().cursor() as cursor:
-            self.log.warning("EXECUTING SOME QUERIES FROM EXECUTOR")
             cursor.execute(query)
             rows = cursor.fetchall()
-            self.log.warning(rows)
             return rows
 
     @property
