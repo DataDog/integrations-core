@@ -1,5 +1,15 @@
 # CHANGELOG - win32_event_log
 
+## 2.14.0 / 2023-07-10
+
+***Added***:
+
+* Bump dependencies for Agent 7.47. See [#15145](https://github.com/DataDog/integrations-core/pull/15145).
+
+***Fixed***:
+
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 2.13.2 / 2022-09-16 / Agent 7.40.0
 
 ***Fixed***: 
