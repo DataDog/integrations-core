@@ -145,7 +145,7 @@ datadog-squid==2.2.1
 datadog-ssh-check==2.5.0
 datadog-statsd==1.10.1
 datadog-strimzi==1.0.0
-datadog-supervisord==2.4.0
+datadog-supervisord==2.4.1
 datadog-system-core==2.0.0
 datadog-system-swap==1.14.1
 datadog-tcp-check==4.6.0
