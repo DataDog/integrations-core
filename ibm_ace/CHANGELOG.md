@@ -1,5 +1,15 @@
 # CHANGELOG - IBM ACE
 
+## 1.2.0 / 2023-07-10
+
+***Added***:
+
+* Bump dependencies for Agent 7.47. See [#15145](https://github.com/DataDog/integrations-core/pull/15145).
+
+***Fixed***:
+
+* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 1.1.0 / 2023-06-05
 
 ***Fixed***: 
