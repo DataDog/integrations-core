@@ -1,5 +1,11 @@
 # CHANGELOG - mapr
 
+## 1.9.2 / 2023-07-10
+
+***Fixed***:
+
+* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 1.9.1 / 2022-08-05 / Agent 7.39.0
 
 ***Fixed***: 
