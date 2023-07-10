@@ -39,7 +39,7 @@ After installation, restart your terminal and ensure that your newly installed P
 === "Windows"
     Windows users have it the easiest.
 
-    Simply download the [Python 3.9 64-bit executable installer](https://www.python.org/downloads/release/python-3917/) and run it.
+    Download the [Python 3.9 64-bit executable installer](https://www.python.org/downloads/release/python-3917/) and run it.
     When prompted, be sure to select the option to add to your `PATH`. Also, it is recommended that you choose the per-user installation method.
 
     Verify successful `PATH` modification:
