@@ -1,5 +1,17 @@
 # CHANGELOG - mysql
 
+## 10.3.0 / 2023-07-10
+
+***Added***:
+
+* Bump dependencies for Agent 7.47. See [#15145](https://github.com/DataDog/integrations-core/pull/15145).
+* Make cancel() synchronous in DBMAsyncJob. See [#14717](https://github.com/DataDog/integrations-core/pull/14717).
+
+***Fixed***:
+
+* Move cancel waiting logic to test functions for DBMAsyncJob . See [#14773](https://github.com/DataDog/integrations-core/pull/14773).
+* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 10.2.2 / 2023-05-26
 
 ***Fixed***: 
