@@ -1,5 +1,11 @@
 # CHANGELOG - ddev
 
+## 3.2.1 / 2023-07-10
+
+***Fixed***:
+
+* Exclude click 8.1.4 to solve mypy issues. See [#15201](https://github.com/DataDog/integrations-core/pull/15201).
+
 ## 3.2.0 / 2023-07-05
 
 ***Added***:
