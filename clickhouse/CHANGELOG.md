@@ -1,5 +1,11 @@
 # CHANGELOG - ClickHouse
 
+## 2.8.3 / 2023-07-10
+
+***Fixed***:
+
+* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 2.8.2 / 2023-01-20 / Agent 7.43.0
 
 ***Fixed***: 
