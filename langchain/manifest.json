@@ -39,9 +39,7 @@
     "dashboards": {
       "LangChain Overview Dashboard": "assets/dashboards/overview_dashboard.json"
     },
-    "monitors": {
-      "Error Rate": "assets/recommended_monitors/error_rates.json"
-    },
+    "monitors": {},
     "logs": {},
     "saved_views": {}
   },
