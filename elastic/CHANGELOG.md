@@ -13,7 +13,7 @@
 * Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 * Correctly compute the `templates.count` metric. See [#14636](https://github.com/DataDog/integrations-core/pull/14636).
 
-## 5.4.2 / 2023-06-27
+## 5.4.2 / 2023-06-27 / Agent 7.46.0
 
 * [Fixed] Do not stop collecting metrics if the templates endpoint is not reachable. See [#15054](https://github.com/DataDog/integrations-core/pull/15054).
 

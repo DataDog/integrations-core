@@ -26,7 +26,7 @@
 * Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 * Properly close db connections for metadata check on cancel. See [#14709](https://github.com/DataDog/integrations-core/pull/14709).
 
-## 13.7.0 / 2023-05-26
+## 13.7.0 / 2023-05-26 / Agent 7.46.0
 
 ***Added***: 
 

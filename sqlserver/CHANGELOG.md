@@ -19,7 +19,7 @@
 * Move cancel waiting logic to test functions for DBMAsyncJob . See [#14773](https://github.com/DataDog/integrations-core/pull/14773).
 * Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 
-## 11.2.2 / 2023-06-08
+## 11.2.2 / 2023-06-08 / Agent 7.46.0
 
 ***Fixed***: 
 
