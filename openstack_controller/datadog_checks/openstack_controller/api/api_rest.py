@@ -319,28 +319,22 @@ class ApiRest(Api):
         return None
 
     def post_auth_unscoped(self):
-        data = '{{"auth": {{"identity": {{"methods": ["password"], ' '"password": {{"user": {}}}}}}}}}'.format(
-            json.dumps(self.config.user)
-        )
+        data = {"auth": {"identity": {"methods": ["password"], "password": {"user": self.config.user}}}}
         url = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
-        self.log.debug("POST %s data: %s", url, data)
-        response = self.http.post('{}/v3/auth/tokens'.format(self.config.keystone_server_url), data=data)
+        response = self.http.post(url, data=json.dumps(data))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         self.http.options['headers']['X-Auth-Token'] = response.headers['X-Subject-Token']
 
     def post_auth_domain(self, domain_id):
-        data = (
-            '{{"auth": {{"identity": {{"methods": ["password"], '
-            '"password": {{"user": {}}}}}, '
-            '"scope": {{"domain": {{"id": "{}"}}}}}}}}'.format(
-                json.dumps(self.config.user),
-                domain_id,
-            )
-        )
+        data = {
+            "auth": {
+                "identity": {"methods": ["password"], "password": {"user": self.config.user}},
+                "scope": {"domain": {"id": domain_id}},
+            }
+        }
         url = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
-        self.log.debug("POST %s data: %s", url, data)
-        response = self.http.post('{}/v3/auth/tokens'.format(self.config.keystone_server_url), data=data)
+        response = self.http.post(url, data=json.dumps(data))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         self._catalog = response.json()['token']['catalog']
@@ -350,17 +344,14 @@ class ApiRest(Api):
         self._catalog = {}
         self._components = {}
         self._endpoints = {}
-        data = (
-            '{{"auth": {{"identity": {{"methods": ["password"], '
-            '"password": {{"user": {}}}}}, '
-            '"scope": {{"project": {{"id": "{}"}}}}}}}}'.format(
-                json.dumps(self.config.user),
-                project_id,
-            )
-        )
+        data = {
+            "auth": {
+                "identity": {"methods": ["password"], "password": {"user": self.config.user}},
+                "scope": {"project": {"id": project_id}},
+            }
+        }
         url = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
-        self.log.debug("POST %s data: %s", url, data)
-        response = self.http.post('{}/v3/auth/tokens'.format(self.config.keystone_server_url), data=data)
+        response = self.http.post(url, data=json.dumps(data))
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
         self._catalog = response.json()['token']['catalog']
