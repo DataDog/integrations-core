@@ -46,6 +46,10 @@ def instance_collect_per_instance_filters(field, value):
     return get_default_field_value(field, value)
 
 
+def instance_collect_property_metrics(field, value):
+    return False
+
+
 def instance_collect_tags(field, value):
     return False
 
