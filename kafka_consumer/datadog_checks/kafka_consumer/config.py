@@ -117,10 +117,7 @@ class KafkaConfig:
             if topics := consumer_groups.get(consumer_group):
                 for topic in topics:
                     if partitions := consumer_groups[consumer_group][topic]:
-                        patterns.extend(
-                            template.format(consumer_group, topic, partition)
-                            for partition in partitions
-                        )
+                        patterns.extend(template.format(consumer_group, topic, partition) for partition in partitions)
                     else:
                         patterns.append(template.format(consumer_group, topic, ".+"))
             else:
