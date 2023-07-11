@@ -18,7 +18,10 @@ The Weaviate check is included in the [Datadog Agent][2] package. No additional 
 
 Weaviate can be configured to expose Prometheus-formatted metrics. The Datadog Agent can collect these metrics using the integration described below. Follow the instructions to configure data collection for your Weaviate instances. For the required configurations to expose the Prometheus metrics, see the [Monitoring][10] page in the Weaviate documentation.
 
-In addition, a small subset of metrics can be collected by communicating with different [API endpoints][11]. Specifically the `/v1/meta`, `/v1/nodes` and `/v1/.well-known` endpoints.
+In addition, a small subset of metrics can be collected by communicating with different [API endpoints][11]. Specifically:
+- `/v1/meta`: Version information
+- `/v1/nodes`: Node specific metrics such as objects and shards
+- `/v1/.well-known`: HTTP response time and service liveness
 
 **Note**: This check uses [OpenMetrics][12] for metric collection, which requires Python 3.
 
