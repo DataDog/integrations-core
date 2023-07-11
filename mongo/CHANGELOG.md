@@ -1,6 +1,19 @@
 # CHANGELOG - mongo
 
-## 5.0.1 / 2023-05-26
+## 5.1.0 / 2023-07-10
+
+***Added***:
+
+* Bump dependencies for Agent 7.47. See [#15145](https://github.com/DataDog/integrations-core/pull/15145).
+
+***Fixed***:
+
+* Update mongo default config for multihost. See [#13454](https://github.com/DataDog/integrations-core/pull/13454).
+* Downgrade requirements to 3.8. See [#14711](https://github.com/DataDog/integrations-core/pull/14711).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* Add debug logs. See [#14626](https://github.com/DataDog/integrations-core/pull/14626).
+
+## 5.0.1 / 2023-05-26 / Agent 7.46.0
 
 ***Fixed***: 
 

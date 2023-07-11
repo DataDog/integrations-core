@@ -1,6 +1,20 @@
 # CHANGELOG - vsphere
 
-## 6.2.2 / 2023-05-26
+## 6.3.0 / 2023-07-10
+
+***Added***:
+
+* Bump dependencies for Agent 7.47. See [#15145](https://github.com/DataDog/integrations-core/pull/15145).
+* Add ability to choose tag to append to VM hostname. See [#14657](https://github.com/DataDog/integrations-core/pull/14657).
+* Add new performance counter metrics. See [#14625](https://github.com/DataDog/integrations-core/pull/14625).
+
+***Fixed***:
+
+* Always filter tags when constructing tags recursively and add improve testing . See [#14583](https://github.com/DataDog/integrations-core/pull/14583).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* Handle None return value from RetrievePropertiesEx. See [#14699](https://github.com/DataDog/integrations-core/pull/14699).
+
+## 6.2.2 / 2023-05-26 / Agent 7.46.0
 
 ***Fixed***: 
 

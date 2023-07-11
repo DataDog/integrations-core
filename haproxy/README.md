@@ -393,7 +393,7 @@ Need help? Contact [Datadog support][20].
 - [HA Proxy Multi Process Configuration][24]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/prometheus/haproxy_exporter
 [4]: https://www.haproxy.com/blog/haproxy-exposes-a-prometheus-metrics-endpoint/
 [5]: https://www.haproxy.org/download/1.7/doc/management.txt

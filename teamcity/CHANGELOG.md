@@ -1,6 +1,13 @@
 # CHANGELOG - teamcity
 
-## 3.1.0 / 2023-05-26
+## 3.1.1 / 2023-07-10
+
+***Fixed***:
+
+* Allow all projects to be collected in REST implementation. See [#14433](https://github.com/DataDog/integrations-core/pull/14433). Thanks [njrs92](https://github.com/njrs92).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
+## 3.1.0 / 2023-05-26 / Agent 7.46.0
 
 ***Added***: 
 

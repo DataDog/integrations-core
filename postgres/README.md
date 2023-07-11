@@ -430,7 +430,7 @@ Additional helpful documentation, links, and articles:
 - [How to collect and monitor PostgreSQL data with Datadog][26]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postgres/images/postgresql_dashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/postgres/datadog_checks/postgres/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/tracing/send_traces/

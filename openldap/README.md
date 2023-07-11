@@ -179,7 +179,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][9].
 
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://github.com/DataDog/integrations-core/blob/master/openldap/datadog_checks/openldap/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/kubernetes/integrations/

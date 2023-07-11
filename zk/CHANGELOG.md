@@ -1,5 +1,11 @@
 # CHANGELOG - zk
 
+## 4.2.3 / 2023-07-10
+
+***Fixed***:
+
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 4.2.2 / 2023-02-13 / Agent 7.44.0
 
 ***Fixed***: 

@@ -72,7 +72,7 @@ The Exchange server check does not include any service checks.
 
 Need help? Contact [Datadog support][7].
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://github.com/DataDog/integrations-core/blob/master/exchange_server/datadog_checks/exchange_server/data/conf.yaml.example

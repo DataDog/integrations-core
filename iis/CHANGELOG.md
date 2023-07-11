@@ -1,5 +1,16 @@
 # CHANGELOG - iis
 
+## 2.19.0 / 2023-07-10
+
+***Added***:
+
+* Bump dependencies for Agent 7.47. See [#15145](https://github.com/DataDog/integrations-core/pull/15145).
+* Upgrade Pydantic model code generator. See [#14779](https://github.com/DataDog/integrations-core/pull/14779).
+
+***Fixed***:
+
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 2.18.3 / 2023-04-14 / Agent 7.45.0
 
 ***Fixed***: 

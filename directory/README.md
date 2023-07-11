@@ -63,7 +63,7 @@ For example, if there is a directory with 15,000 files and sub-directories, and 
 Need help? Contact [Datadog support][8].
 
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/directory/datadog_checks/directory/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

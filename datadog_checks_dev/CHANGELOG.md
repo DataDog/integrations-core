@@ -1,5 +1,12 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 22.0.1 / 2023-07-10
+
+***Fixed***:
+
+* Exclude click 8.1.4 to solve mypy issues. See [#15201](https://github.com/DataDog/integrations-core/pull/15201).
+* Bump the minimal base check version in the integration templates. See [#15178](https://github.com/DataDog/integrations-core/pull/15178).
+
 ## 22.0.0 / 2023-07-05
 
 ***Changed***:
@@ -61,7 +68,7 @@
 ***Fixed***: 
 
 * Revert "Capture stderr from docker compose to improve debugging experience" (#13949). See [#14714](https://github.com/DataDog/integrations-core/pull/14714).
-* Bump python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 * Allow typed-ast to work for python3.11. See [#14689](https://github.com/DataDog/integrations-core/pull/14689).
 * Rephrase the `--dev` description for the `start` command. See [#14681](https://github.com/DataDog/integrations-core/pull/14681).
 

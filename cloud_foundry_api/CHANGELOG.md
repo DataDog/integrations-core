@@ -1,5 +1,15 @@
 # CHANGELOG - Cloud Foundry API
 
+## 2.3.0 / 2023-07-10
+
+***Added***:
+
+* Bump dependencies for Agent 7.47. See [#15145](https://github.com/DataDog/integrations-core/pull/15145).
+
+***Fixed***:
+
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 2.2.1 / 2022-10-28 / Agent 7.41.0
 
 ***Fixed***: 
