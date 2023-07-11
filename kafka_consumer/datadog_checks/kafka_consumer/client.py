@@ -175,6 +175,7 @@ class KafkaClient:
 
                 consumer_groups.extend(
                     valid_consumer_group.group_id for valid_consumer_group in list_consumer_groups_result.valid
+                    if valid_consumer_group.group_id != ""
                 )
             except Exception as e:
                 self.log.error("Failed to collect consumer groups: %s", e)
