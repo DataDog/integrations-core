@@ -21,7 +21,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.sqlserver.utils import extract_sql_comments, is_statement_proc
+from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments, is_statement_proc
 
 try:
     import datadog_agent
@@ -86,9 +86,9 @@ select
         WHEN -1 THEN DATALENGTH(text)
         ELSE statement_end_offset END
             - statement_start_offset) / 2) + 1) AS statement_text,
-    qt.text,
+    SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     encrypted as is_encrypted,
-    * from qstats_aggr_split
+    s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
 
@@ -118,9 +118,9 @@ select
         WHEN -1 THEN DATALENGTH(text)
         ELSE statement_end_offset
     END - statement_start_offset) / 2) + 1) AS statement_text,
-    qt.text,
+    SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     encrypted as is_encrypted,
-    * from qstats_aggr_split
+    s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
 
@@ -219,6 +219,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._conn_key_prefix = "dbm-"
         self._statement_metrics_query = None
         self._last_stats_query_time = None
+        self._max_query_metrics = check.statement_metrics_config.get("max_queries", 250)
 
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -264,6 +265,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             query_metrics_column_sums=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
             collection_interval=int(math.ceil(self.collection_interval) * 2),
             limit=self.dm_exec_query_stats_row_limit,
+            proc_char_limit=PROC_CHAR_LIMIT,
         )
         return self._statement_metrics_query
 
@@ -344,9 +346,16 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         # to the backend
         if 'statement_text' in row:
             del row['statement_text']
+        # we're already able to link to the procedure via procedure_name and procedure_signature so we don't need
+        # the text in metrics payloads
+        if 'procedure_text' in row:
+            del row['procedure_text']
         return row
 
-    def _to_metrics_payload(self, rows):
+    def _to_metrics_payload(self, rows, max_queries):
+        # sort by total_elapsed_time and return the top max_queries
+        rows = sorted(rows, key=lambda i: i['total_elapsed_time'], reverse=True)
+        rows = rows[:max_queries]
         return {
             'host': self.check.resolved_hostname,
             'timestamp': time.time() * 1000,
@@ -378,7 +387,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     return
                 for event in self._rows_to_fqt_events(rows):
                     self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
-                payload = self._to_metrics_payload(rows)
+                payload = self._to_metrics_payload(rows, self._max_query_metrics)
                 self.check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
                 for event in self._collect_plans(rows, cursor, deadline):
                     self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))

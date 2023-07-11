@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 VERSION = VARS["version"]
 APP_NAME = "ddev"
-DISPLAY_NAME = "Datadog Agent integration developer tool"
+DISPLAY_NAME = "ddev"
 AUTHOR = "Datadog, Inc."
 
 
@@ -72,7 +72,7 @@ def make_macos_app_bundle():
     bundle = MacOsApplicationBundleBuilder(DISPLAY_NAME)
     bundle.set_info_plist_required_keys(
         display_name=DISPLAY_NAME,
-        identifier="com.datadoghq." + APP_NAME,         
+        identifier="com.datadoghq." + APP_NAME,
         version=VERSION,
         signature=APP_NAME,
         executable=APP_NAME,

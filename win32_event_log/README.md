@@ -2,9 +2,9 @@
 
 ## Overview
 
-The Win32 Event Log check watches for Windows Event Logs and forwards them to Datadog. 
+This integration watches for Windows Event Logs and forwards them to Datadog. 
 
-Enable this check to:
+Enable this integration to:
 
 - Track system and application events in Datadog.
 - Correlate system and application events with the rest of your application.
@@ -77,7 +77,7 @@ To find the channel name for an Event Log in the Windows Event Viewer, open the 
 
 To collect Windows Event Logs as Datadog events, configure channels under the `instances:` section of your `win32_event_log.d/conf.yaml` configuration file. 
 
-The Datadog Agent can be configured to collect Windows Event Logs as Datadog events in two ways. Each method has its own configuration syntax for channels and for filters (see [Filtering Events](?tab=events#filtering-events)). 
+The Datadog Agent can be configured to collect Windows Event Logs as Datadog events in two ways. Each method has its own configuration syntax for channels and for filters . For more information, see [Filtering Events](?tab=events#filtering-events). 
 
 * The latest method uses the Event Log API. Datadog recommends using the Event Log API because it has better performance than the legacy method below. 
 
@@ -214,7 +214,25 @@ Datadog recommends using the latest method for filters.
         - 7036
   ```
 
-The legacy method is the default mode for filters. 
+You can use the [`query` option][20] to filter events with an [XPATH or structured XML query][21]. Datadog recommends creating the query in Event Viewer's filter editor until the events shown in Event Viewer match what you want the Datadog Agent to collect. The `filters` option is ignored when the `query` option is used.
+
+  ```yaml
+  init_config:
+  instances:
+    # collect Critical, Warning, and Error events
+    - path: Application
+      legacy_mode: false
+      query: '*[System[(Level=1 or Level=2 or Level=3)]]'
+      
+    - path: Application
+      legacy_mode: false
+      query: |
+        <QueryList>
+          <Query Id="0" Path="Application">
+            <Select Path="Application">*[System[(Level=1 or Level=2 or Level=3)]]</Select>
+          </Query>
+        </QueryList>
+ ```
 
 * The legacy method includes the following filters:
 
@@ -223,11 +241,13 @@ The legacy method is the default mode for filters.
   - `source_name`: Any available source name
   - `event_id`: Windows EventLog ID
 
+* The legacy method does not support the `query` option. Only the latest method (setting `legacy_mode: false`) and the Logs Tailer supports the `query` option.
+
   This example filter uses the legacy method.
 
   ```yaml
   instances:
-    # Default
+    # Legacy
     # The following captures errors and warnings from SQL Server which
     # puts all events under the MSSQLSERVER source and tag them with #sqlserver.
     - tags:
@@ -252,7 +272,39 @@ The legacy method is the default mode for filters.
 <!-- xxz tab xxx -->
 <!-- xxx tab "Logs" xxx -->
 
-For each filter, add a log processing rule in the configuration file at `win32_event_log.d/conf.yaml`.
+You can use the `query`, as well as the `log_processing_rules` regex option, to filter event logs. Datadog recommends using the `query` option which is faster at high rates of Windows Event Log generation and requires less CPU and memory than the `log_processing_rules` filters. When using the `log_processing_rules` filters, the Agent is forced to process and format each event, even if it will be excluded by `log_processing_rules` regex. With the `query` option, these events are not reported to the Agent.
+
+You can use the `query` option to filter events with an [XPATH or structured XML query][21]. The `query` option can reduce the number of events that are processed by `log_processing_rules` and improve performance. There is an expression limit on the syntax of XPath and XML queries. For additional filtering, use `log_processing_rules` filters.
+
+Datadog recommends creating and testing the query in Event Viewer's filter editor until the events shown in Event Viewer match what you want the Agent to collect.
+
+![Filter Current Log][23]
+
+Then, copy and paste the query into the Agent configuration. 
+
+```yaml
+  # collect Critical, Warning, and Error events
+  - type: windows_event
+    channel_path: Application
+    source: windows.events
+    service: Windows       
+    query: '*[System[(Level=1 or Level=2 or Level=3)]]'
+      
+  - type: windows_event
+    channel_path: Application
+    source: windows.events
+    service: Windows       
+    query: |
+      <QueryList>
+        <Query Id="0" Path="Application">
+          <Select Path="Application">*[System[(Level=1 or Level=2 or Level=3)]]</Select>
+        </Query>
+      </QueryList>
+```
+
+![XML Query][24]
+
+In addition to the `query` option, events can be further filtered with log processing rules.
 
 Some example filters include the following:
 
@@ -357,7 +409,7 @@ When you're done setting up filters, [restart the Agent][4] using the Agent Mana
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Events" xxx -->
 
-Check the info page in the Datadog Agent Manager or run the [Agent's `status` subcommand][6] and look for `win32_event_log` under the Checks section. 
+Check the information page in the Datadog Agent Manager or run the [Agent's `status` subcommand][6] and look for `win32_event_log` under the Checks section. 
 
 It should display a section similar to the following:
 
@@ -376,7 +428,7 @@ Checks
 <!-- xxz tab xxx -->
 <!-- xxx tab "Logs" xxx -->
 
-Check the info page in the Datadog Agent Manager or run the [Agent's `status` subcommand][6] and look for `win32_event_log` under the Logs Agent section. 
+Check the information page in the Datadog Agent Manager or run the [Agent's `status` subcommand][6] and look for `win32_event_log` under the Logs Agent section. 
 
 It should display a section similar to the following:
 
@@ -400,7 +452,7 @@ Logs Agent
 
 ### Metrics
 
-The Win32 Event log check does not include any metrics.
+The Windows Event Log check does not include any metrics.
 
 ### Events
 
@@ -408,16 +460,37 @@ All Windows events are forwarded to Datadog.
 
 ### Service Checks
 
-The Win32 Event log check does not include any service checks.
+The Windows Event Log check does not include any service checks.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][7] with an [Agent Flare][25].
+
+### Log processing rules are not working
+
+If you are using log processing rules to filter out logs, verify that the raw logs match the regular expression (regex) pattern you configured. In the configuration below, log levels must be either `warning` or `error`. Any other value is excluded.
+
+```yaml
+    - type: windows_event
+      channel_path: System
+      source: windows.events
+      service: Windows       
+      log_processing_rules:
+      - type: include_at_match
+        name: system_errors_and_warnings
+        pattern: '"level":"((?i)warning|error)"'
+```
+
+To troubleshoot your log processing rules:
+1. Remove or comment out the `log_processing_rules` stanza.
+1. Restart the Agent.
+1. Send a test log that includes the values you're attempting to catch. If the log appears in Datadog, there is probably an issue with your regex. Compare your regex against the log file to make sure you're capturing the right phrases.
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
+- [Advanced Log Collection][26]
 - [Monitoring Windows Server 2012][9]
 - [How to collect Windows Server 2012 metrics][10]
 - [Monitoring Windows Server 2012 with Datadog][11]
@@ -440,3 +513,10 @@ Additional helpful documentation, links, and articles:
 [17]: https://docs.datadoghq.com/logs/
 [18]: https://docs.datadoghq.com/agent/logs/#activate-log-collection
 [19]: https://raw.githubusercontent.com/DataDog/integrations-core/master/win32_event_log/images/windows-defender-operational-event-log-properties.png
+[20]: https://github.com/DataDog/integrations-core/blob/10296a69722b75098ed0b45ce55f0309a1800afd/win32_event_log/datadog_checks/win32_event_log/data/conf.yaml.example#L74-L89
+[21]: https://learn.microsoft.com/en-us/windows/win32/wes/consuming-events
+[22]: https://github.com/DataDog/integrations-core/blob/master/win32_event_log/datadog_checks/win32_event_log/data/conf.yaml.example#L87C32-L87C32
+[23]: https://raw.githubusercontent.com/DataDog/integrations-core/master/win32_event_log/images/filter-event-viewer.png
+[24]: https://raw.githubusercontent.com/DataDog/integrations-core/master/win32_event_log/images/xml-query-event-viewer.png
+[25]: https://docs.datadoghq.com/agent/troubleshooting/send_a_flare/?tab=agentv6v7
+[26]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfile

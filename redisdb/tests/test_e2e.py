@@ -30,6 +30,9 @@ def assert_common_metrics(aggregator):
     aggregator.assert_metric('redis.mem.lua', count=2, tags=tags)
     aggregator.assert_metric('redis.net.instantaneous_ops_per_sec', count=2, tags=tags)
     aggregator.assert_metric('redis.perf.latest_fork_usec', count=2, tags=tags)
+    aggregator.assert_metric('redis.net.total_connections_received', count=2, tags=tags)
+    aggregator.assert_metric('redis.net.instantaneous_input', count=2, tags=tags)
+    aggregator.assert_metric('redis.net.instantaneous_output', count=2, tags=tags)
     aggregator.assert_metric('redis.keys.evicted', count=2, tags=tags)
     aggregator.assert_metric('redis.net.slaves', count=2, tags=tags)
     aggregator.assert_metric('redis.clients.blocked', count=2, tags=tags)
@@ -75,6 +78,9 @@ def assert_common_metrics(aggregator):
     aggregator.assert_metric('redis.key.length', count=2, tags=(['key:test_key1', 'key_type:list'] + tags_with_db))
     aggregator.assert_metric('redis.key.length', count=2, tags=(['key:test_key2', 'key_type:list'] + tags_with_db))
     aggregator.assert_metric('redis.key.length', count=2, tags=(['key:test_key3', 'key_type:list'] + tags_with_db))
+    aggregator.assert_metric(
+        'redis.key.length', count=2, value=2, tags=(['key:test_key4', 'key_type:stream'] + tags_with_db)
+    )
 
     aggregator.assert_metric('redis.replication.delay', count=2)
 

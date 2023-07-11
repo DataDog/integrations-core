@@ -63,7 +63,8 @@ cli = [
     "atomicwrites",
     "beautifulsoup4>=4.9.3",
     "build>=0.7.0",
-    "click~=8.1",
+    # TODO remove when https://github.com/pallets/click/issues/2558 is solved and unpin the version in the hatch files for ddev and datadog_checks_dev
+    "click~=8.1,!=8.1.4",
     "codespell",
     "colorama",
     "datamodel-code-generator~=0.20.0",
@@ -92,17 +93,11 @@ cli = [
     "wheel>=0.31.0",
 ]
 
-[project.scripts]
-ddev = "datadog_checks.dev.tooling.cli:ddev"
-
 [project.entry-points.pytest11]
 datadog_checks = "datadog_checks.dev.plugin.pytest"
 
 [project.entry-points.tox]
 datadog_checks = "datadog_checks.dev.plugin.tox"
-
-[project.entry-points.hatch]
-datadog_checks = "datadog_checks.dev.plugin.hatch"
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"

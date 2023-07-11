@@ -84,3 +84,17 @@ def test_collect_metadata_with_invalid_base_url(
     c._collect_metadata()
     datadog_agent.assert_metadata_count(0)
     c.log.debug.assert_called_with('Skipping server info collection due to malformed url: %s', b'')
+
+
+@requires_py3
+def test_collect_metadata_with_disabled_collect_server_info(
+    datadog_agent, fixture_path, mock_http_response, check, default_instance
+):
+    default_instance["collect_server_info"] = False
+    c = check(default_instance)
+    c.check_id = 'test:123'
+    c.log = mock.MagicMock()
+
+    c._collect_metadata()
+    datadog_agent.assert_metadata_count(0)
+    c.log.debug.assert_called_with('Skipping server info collection as it is disabled, collect_server_info')

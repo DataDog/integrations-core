@@ -65,6 +65,7 @@ class VSphereConfig(object):
         self.collection_level = instance.get("collection_level", 1)
         self.collection_type = instance.get("collection_type", "realtime")
         self.use_guest_hostname = instance.get("use_guest_hostname", False)
+        self.vm_hostname_suffix_tag = instance.get("vm_hostname_suffix_tag", None)
         self.max_historical_metrics = instance.get("max_historical_metrics", DEFAULT_MAX_QUERY_METRICS)
 
         # Check option
@@ -109,6 +110,7 @@ class VSphereConfig(object):
             instance.get("collect_per_instance_filters", {})
         )
         self.include_datastore_cluster_folder_tag = instance.get("include_datastore_cluster_folder_tag", True)
+        self.custom_tags = instance.get('tags', [])
         self.validate_config()
 
     def is_historical(self):
