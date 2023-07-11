@@ -51,7 +51,6 @@ IGNORED_DEPS = {
     'service-identity', # 21.1->23.1 breaks tls tests.
     'pyvmomi', # 7->8 breaks vsphere tests.
     # 4.3->4.4 changes the license field in the package metadata to something our validations cannot handle.
-    # We are tracking this problem in AITOOLS-198
     'pymongo',
 }
 
