@@ -52,6 +52,7 @@ def parse_metrics(stream):
 def get_options_text(options):
     return '\n{}\n' 'q - Quit'.format('\n'.join('{} - {}'.format(n, option) for n, option in enumerate(options, 1)))
 
+
 def set_up_stream(ctx, endpoint, filehandle):
     if endpoint and filehandle:
         ctx.fail("Please specify an endpoint or a file but not both.")
