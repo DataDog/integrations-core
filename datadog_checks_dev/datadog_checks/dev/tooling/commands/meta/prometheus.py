@@ -57,10 +57,9 @@ def set_up_stream(ctx, endpoint, filehandle):
         ctx.fail("Please specify an endpoint or a file but not both.")
     if endpoint:
         return requests.get(sanitize_endpoint(endpoint), stream=True).iter_lines(decode_unicode=True)
-    elif filehandle:
+    if filehandle:
         return filehandle
-    else:
-        ctx.fail("Please specify an endpoint or a file.")
+    ctx.fail("Please specify an endpoint or a file.")
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Prometheus utilities')
