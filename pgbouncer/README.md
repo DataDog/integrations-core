@@ -139,7 +139,7 @@ See [service_checks.json][10] for a list of service checks provided by this inte
 Need help? Contact [Datadog support][11].
 
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/datadog_checks/pgbouncer/data/conf.yaml.example
 [4]: https://www.postgresql.org/docs/9.1/libpq-ssl.html
