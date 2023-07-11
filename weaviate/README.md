@@ -16,7 +16,7 @@ The Weaviate check is included in the [Datadog Agent][2] package. No additional 
 
 ### Configuration
 
-Weaviate can be configured to expose Prometheus-formatted metrics. The Datadog Agent can collect these metrics using the integration described below. Follow the instructions to configure data collection for your Weaviate instances. For the required configurations to expose the Prometheus metrics, please refer to the [Monitoring][10] page in the Weaviate documentation.
+Weaviate can be configured to expose Prometheus-formatted metrics. The Datadog Agent can collect these metrics using the integration described below. Follow the instructions to configure data collection for your Weaviate instances. For the required configurations to expose the Prometheus metrics, see the [Monitoring][10] page in the Weaviate documentation.
 
 In addition, a small subset of metrics can be collected by communicating with different [API endpoints][11]. Specifically the /v1/meta, /v1/nodes and /v1/.well-known endpoints.
 
