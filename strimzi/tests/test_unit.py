@@ -143,9 +143,11 @@ def test_instance_without_operator_endpoint(dd_run_check, check, instance):
     ],
 )
 def test_parse_config_populates_only_configured_scrapers(
-    namespace, instance, endpoint_key
+    namespace, instance, endpoint_key, check
 ):
-    strimzi = StrimziCheck("strimzi", {}, [instance])
+    # Using a fixture simplifies the need to explicity define the class
+    #   This is equivalent to StrimziCheck('strimzi', {}, [instance])
+    strimzi = check(instance)
     strimzi.parse_config()
     assert len(strimzi.scraper_configs) == 1
     assert strimzi.scraper_configs[0][endpoint_key] == instance[endpoint_key]
