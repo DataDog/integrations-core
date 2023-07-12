@@ -55,42 +55,42 @@ metadata:
 metrics:
   # Memory stats
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: gauge
+    metric_type: gauge
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.1.44.0
       name: sysStatMemoryTotal
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: gauge
+    metric_type: gauge
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.1.45.0
       name: sysStatMemoryUsed
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: gauge
+    metric_type: gauge
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.21.28.0
       name: sysGlobalTmmStatMemoryTotal
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: gauge
+    metric_type: gauge
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.21.29.0
       name: sysGlobalTmmStatMemoryUsed
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: gauge
+    metric_type: gauge
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.20.44.0
       name: sysGlobalHostOtherMemoryTotal
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: gauge
+    metric_type: gauge
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.20.45.0
       name: sysGlobalHostOtherMemoryUsed
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: gauge
+    metric_type: gauge
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.20.46.0
       name: sysGlobalHostSwapTotal
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: gauge
+    metric_type: gauge
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.20.47.0
       name: sysGlobalHostSwapUsed
@@ -99,7 +99,7 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.3375.2.1.7.5.2
       name: sysMultiHostCpuTable
-    forced_type: gauge
+    metric_type: gauge
     symbols:
       - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.11
         name: sysMultiHostCpuUsageRatio
@@ -112,7 +112,7 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.3375.2.1.7.5.2
       name: sysMultiHostCpuTable
-    forced_type: percent
+    metric_type: percent
     symbols:
       - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.4
         name: sysMultiHostCpuUser
@@ -152,22 +152,22 @@ metrics:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.12.5.0
       name: sysTcpStatTimeWait
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.12.6.0
       name: sysTcpStatAccepts
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.12.7.0
       name: sysTcpStatAcceptfails
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.12.8.0
       name: sysTcpStatConnects
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.12.9.0
       name: sysTcpStatConnfails
@@ -177,22 +177,22 @@ metrics:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.13.2.0
       name: sysUdpStatOpen
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.13.3.0
       name: sysUdpStatAccepts
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.13.4.0
       name: sysUdpStatAcceptfails
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.13.5.0
       name: sysUdpStatConnects
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.13.6.0
       name: sysUdpStatConnfails
@@ -201,27 +201,27 @@ metrics:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.9.2.0
       name: sysClientsslStatCurConns
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.9.10.0
       name: sysClientsslStatEncryptedBytesIn
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.9.11.0
       name: sysClientsslStatEncryptedBytesOut
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.9.12.0
       name: sysClientsslStatDecryptedBytesIn
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.9.13.0
       name: sysClientsslStatDecryptedBytesOut
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.9.29.0
       name: sysClientsslStatHandshakeFailures
@@ -338,7 +338,7 @@ metrics:
         name: ltmVirtualServStatClientEvictedConns
       - OID: 1.3.6.1.4.1.3375.2.2.10.2.3.1.41
         name: ltmVirtualServStatClientSlowKilled
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     metric_tags:
       - tag: server
         column:
@@ -414,7 +414,7 @@ metrics:
         name: ltmNodeAddrStatServerTotConns
       - OID: 1.3.6.1.4.1.3375.2.2.4.2.3.1.17
         name: ltmNodeAddrStatTotRequests
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     metric_tags:
       - tag: node
         column:
@@ -486,7 +486,7 @@ metrics:
         name: ltmPoolStatConnqServiced
       - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.30
         name: ltmPoolStatTotRequests
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     metric_tags:
       - tag: pool
         column:
@@ -576,7 +576,7 @@ metrics:
         name: ltmPoolMemberStatTotRequests
       - OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.27
         name: ltmPoolMemberStatConnqServiced
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     metric_tags:
       - tag: pool
         column:
