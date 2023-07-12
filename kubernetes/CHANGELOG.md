@@ -6,13 +6,11 @@
 
 * Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-
 ## 1.6.0 / 2020-01-13
 
 ***Added***: 
 
 * Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
-
 
 ## 1.5.1 / 2018-09-04
 
@@ -21,13 +19,11 @@
 * Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
 * Only calculate filesystem usage when capacity is greater than 0. See [#1606](https://github.com/DataDog/integrations-core/pull/1606). Thanks [aaronbbrown](https://github.com/aaronbbrown).
 
-
 ## 1.5.0 / 2017-10-10
 
 ***Fixed***: 
 * remove namespace from pod_name tag. See [#770](https://github.com/DataDog/integrations-core/issues/770)
 * stop reporting cAdvisor metrics about non-container objects. See [#770](https://github.com/DataDog/integrations-core/issues/770)
-
 
 ## 1.4.0 / 2017-09-12
 
@@ -39,7 +35,6 @@
 
 * fix container_image names reported as sha checksums [#731](https://github.com/DataDog/integrations-core/issues/731)
 
-
 ## 1.3.0 / 2017-08-28
 
 ***Added***: 
@@ -48,7 +43,6 @@
 * add custom tags to service checks [#642](https://github.com/DataDog/integrations-core/issues/642)
 * skip cAdvisor metrics if port is set to 0. See [#655](https://github.com/DataDog/integrations-core/issues/655)
 * enable event collection according to agent leader status. See [#687](https://github.com/DataDog/integrations-core/issues/687)
-
 
 ## 1.2.0 / 2017-07-18
 
@@ -63,7 +57,6 @@
 * don't fail if cadvisor is unreachable, send integration warning and send other metrics. See [#538](https://github.com/DataDog/integrations-core/issues/538)
 * Fix typo in exception reporting when unable to collect metrics for a container. See [#493](https://github.com/DataDog/integrations-core/issues/493)
 
-
 ## 1.1.0 / 2017-06-05
 
 ***Added***: 
@@ -77,10 +70,8 @@
 
 * Fix missing docker.net metrics in Kubernetes. See [#418](https://github.com/DataDog/integrations-core/issues/418)
 
-
 ## 1.0.0 / 2017-02-23
 
 ***Added***: 
 
 * adds Kubernetes integration.
-

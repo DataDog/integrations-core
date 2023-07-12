@@ -16,13 +16,11 @@
 
 * Add functionality to load the legacy version of the integration. See [#12396](https://github.com/DataDog/integrations-core/pull/12396).
 
-
 ## 1.7.0 / 2022-04-05 / Agent 7.36.0
 
 ***Added***: 
 
 * Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
-
 
 ## 1.6.0 / 2022-02-19 / Agent 7.35.0
 
@@ -33,7 +31,6 @@
 ***Fixed***: 
 
 * Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
-
 
 ## 1.5.0 / 2022-01-08 / Agent 7.34.0
 
@@ -47,13 +44,11 @@
 * Properly hide legacy PDH config. See [#10858](https://github.com/DataDog/integrations-core/pull/10858).
 * Bump base package dependency. See [#10797](https://github.com/DataDog/integrations-core/pull/10797).
 
-
 ## 1.4.0 / 2021-10-04 / Agent 7.32.0
 
 ***Added***: 
 
 * Add runtime configuration validation. See [#8933](https://github.com/DataDog/integrations-core/pull/8933).
-
 
 ## 1.3.1 / 2020-12-11 / Agent 7.25.0
 
@@ -62,13 +57,11 @@
 * Remove active_directory references from config. See [#8111](https://github.com/DataDog/integrations-core/pull/8111).
 * Fix pdh configuration spec. See [#8106](https://github.com/DataDog/integrations-core/pull/8106).
 
-
 ## 1.3.0 / 2020-06-29 / Agent 7.21.0
 
 ***Added***: 
 
 * Add config and use new agent signature. See [#6779](https://github.com/DataDog/integrations-core/pull/6779).
-
 
 ## 1.2.0 / 2020-05-17 / Agent 7.20.0
 
@@ -76,13 +69,11 @@
 
 * Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-
 ## 1.1.0 / 2019-05-14 / Agent 6.12.0
 
 ***Added***: 
 
 * Adhere to code style. See [#3517](https://github.com/DataDog/integrations-core/pull/3517).
-
 
 ## 1.0.1 / 2019-03-29 / Agent 6.11.0
 
@@ -90,12 +81,10 @@
 
 * Add tags option to hyperv. See [#3337](https://github.com/DataDog/integrations-core/pull/3337).
 
-
 ## 1.0.0 / 2019-01-03 / Agent 6.9.0
 
 ***Added***: 
 
 * Add Hyper-V integration. See [#2607][1].
-
 
 [1]: https://github.com/DataDog/integrations-core/pull/2607

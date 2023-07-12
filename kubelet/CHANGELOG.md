@@ -22,7 +22,6 @@
 
 * Fix kubelet check failing to initialize when get_connection_info is empty. See [#14546](https://github.com/DataDog/integrations-core/pull/14546).
 
-
 ## 7.6.0 / 2023-04-14 / Agent 7.45.0
 
 ***Added***: 
@@ -33,20 +32,17 @@
 
 * Support Ephemeral Percistent volume claim. See [#14194](https://github.com/DataDog/integrations-core/pull/14194).
 
-
 ## 7.5.2 / 2022-12-09 / Agent 7.42.0
 
 ***Fixed***: 
 
 * Set the `prometheus_url` for the kubelet endpoints in the `__init__` function. See [#13360](https://github.com/DataDog/integrations-core/pull/13360).
 
-
 ## 7.5.1 / 2022-10-28 / Agent 7.41.0
 
 ***Fixed***: 
 
 * Ignore aberrant values for `kubernetes.memory.rss`. See [#13076](https://github.com/DataDog/integrations-core/pull/13076).
-
 
 ## 7.5.0 / 2022-09-16 / Agent 7.40.0
 
@@ -55,13 +51,11 @@
 * Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
 * Add `CreateContainerError` and `InvalidImageName` to waiting reasons. See [#12758](https://github.com/DataDog/integrations-core/pull/12758).
 
-
 ## 7.4.1 / 2022-08-05 / Agent 7.39.0
 
 ***Fixed***: 
 
 * Fix probe metrics collection when credentials are required. See [#12642](https://github.com/DataDog/integrations-core/pull/12642).
-
 
 ## 7.4.0 / 2022-05-15 / Agent 7.37.0
 
@@ -75,13 +69,11 @@
 * Sanitize the `url` tag. See [#11989](https://github.com/DataDog/integrations-core/pull/11989).
 * Apply container filter to `kubernetes.kubelet.container.log_filesystem.used_bytes`. See [#11974](https://github.com/DataDog/integrations-core/pull/11974).
 
-
 ## 7.3.1 / 2022-04-11 / Agent 7.36.0
 
 ***Fixed***: 
 
 * Handle probe metrics when the endpoint is not available (Kubernetes < 1.15). See [#11807](https://github.com/DataDog/integrations-core/pull/11807).
-
 
 ## 7.3.0 / 2022-04-05
 
@@ -96,13 +88,11 @@
 * Support newer versions of `click`. See [#11746](https://github.com/DataDog/integrations-core/pull/11746).
 * Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
 
-
 ## 7.2.1 / 2022-02-24 / Agent 7.35.0
 
 ***Fixed***: 
 
 * Apply namespace exclusion rules in cadvisor and summary metrics. See [#11559](https://github.com/DataDog/integrations-core/pull/11559).
-
 
 ## 7.2.0 / 2022-02-19
 
@@ -116,13 +106,11 @@
 * Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
 * Apply namespace exclusion rules for volume metrics. See [#11512](https://github.com/DataDog/integrations-core/pull/11512).
 
-
 ## 7.1.1 / 2022-01-08 / Agent 7.34.0
 
 ***Fixed***: 
 
 * Do not drop the first kubelet eviction event. See [#11032](https://github.com/DataDog/integrations-core/pull/11032).
-
 
 ## 7.1.0 / 2021-10-04 / Agent 7.32.0
 
@@ -136,20 +124,17 @@
 * Bump base package dependency. See [#10218](https://github.com/DataDog/integrations-core/pull/10218).
 * Don't call the tagger for pods not running. See [#10030](https://github.com/DataDog/integrations-core/pull/10030).
 
-
 ## 7.0.0 / 2021-05-28 / Agent 7.29.0
 
 ***Changed***: 
 
 * Increase default scraping time from 15s to 20s. See [#9193](https://github.com/DataDog/integrations-core/pull/9193).
 
-
 ## 6.1.0 / 2021-04-19 / Agent 7.28.0
 
 ***Added***: 
 
 * Allow configurability of the ignore_metrics option. See [#9161](https://github.com/DataDog/integrations-core/pull/9161).
-
 
 ## 6.0.0 / 2021-04-14
 
@@ -160,7 +145,6 @@
 ***Added***: 
 
 * Add logic to enable/disable metrics collected from the summary endpoint. See [#9155](https://github.com/DataDog/integrations-core/pull/9155).
-
 
 ## 5.2.0 / 2021-03-07 / Agent 7.27.0
 
@@ -173,13 +157,11 @@
 * Fix TypeError when retrieved pod_list is occasionally None. See [#8530](https://github.com/DataDog/integrations-core/pull/8530).
 * Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 
-
 ## 5.1.0 / 2021-01-25 / Agent 7.26.0
 
 ***Added***: 
 
 * Add new default for newly autodiscovered checks. See [#8177](https://github.com/DataDog/integrations-core/pull/8177).
-
 
 ## 5.0.0 / 2020-09-21 / Agent 7.23.0
 
@@ -192,13 +174,11 @@
 
 * Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
 
-
 ## 4.1.1 / 2020-06-29 / Agent 7.21.0
 
 ***Fixed***: 
 
 * Fix missing metrics for static pods. See [#6736](https://github.com/DataDog/integrations-core/pull/6736).
-
 
 ## 4.1.0 / 2020-05-17 / Agent 7.20.0
 
@@ -207,7 +187,6 @@
 * Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 * Add parsing from `/stats/summary` for Windows. See [#6497](https://github.com/DataDog/integrations-core/pull/6497).
 * Expose number of cfs enforcement periods. See [#6093](https://github.com/DataDog/integrations-core/pull/6093). Thanks [adammw](https://github.com/adammw).
-
 
 ## 4.0.0 / 2020-04-04 / Agent 7.19.0
 
@@ -221,13 +200,11 @@
 * Fix support for kubernetes v1.18. See [#6203](https://github.com/DataDog/integrations-core/pull/6203).
 * Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 
-
 ## 3.6.0 / 2020-02-22 / Agent 7.18.0
 
 ***Added***: 
 
 * Add pod tags to volume metrics. See [#5453](https://github.com/DataDog/integrations-core/pull/5453).
-
 
 ## 3.5.2 / 2020-01-31 / Agent 7.17.1
 
@@ -235,13 +212,11 @@
 
 * Ignore insecure warnings for kubelet requests. See [#5607](https://github.com/DataDog/integrations-core/pull/5607).
 
-
 ## 3.5.1 / 2020-01-15 / Agent 7.17.0
 
 ***Fixed***: 
 
 * Fix Kubelet credentials handling. See [#5455](https://github.com/DataDog/integrations-core/pull/5455).
-
 
 ## 3.5.0 / 2020-01-13
 
@@ -258,7 +233,6 @@
 
 * Improve url join to not mutate the base url when proxying a call. See [#5416](https://github.com/DataDog/integrations-core/pull/5416).
 
-
 ## 3.4.0 / 2019-12-02 / Agent 7.16.0
 
 ***Added***: 
@@ -266,13 +240,11 @@
 * Collect a new metric: kubelet.evictions. See [#5076](https://github.com/DataDog/integrations-core/pull/5076).
 * Add a gauge for effective usage of ephemeral storage per POD. See [#5052](https://github.com/DataDog/integrations-core/pull/5052).
 
-
 ## 3.3.4 / 2019-10-30 / Agent 6.15.0
 
 ***Fixed***: 
 
 * Fix container collection for k8s 1.16. See [#4925](https://github.com/DataDog/integrations-core/pull/4925).
-
 
 ## 3.3.3 / 2019-10-11
 
@@ -280,13 +252,11 @@
 
 * Send kubelet metrics with tags only. See [#4659](https://github.com/DataDog/integrations-core/pull/4659).
 
-
 ## 3.3.2 / 2019-08-14 / Agent 6.14.0
 
 ***Fixed***: 
 
 * Enforce unicode output in requests.iter_lines call. See [#4360](https://github.com/DataDog/integrations-core/pull/4360).
-
 
 ## 3.3.1 / 2019-07-16 / Agent 6.13.0
 
@@ -294,13 +264,11 @@
 
 * Update tagger usage to match prefix update. See [#4109](https://github.com/DataDog/integrations-core/pull/4109).
 
-
 ## 3.3.0 / 2019-07-04
 
 ***Added***: 
 
 * Add swap memory checks to cadvisor kubelet checks. See [#3808](https://github.com/DataDog/integrations-core/pull/3808). Thanks [adammw](https://github.com/adammw).
-
 
 ## 3.2.1 / 2019-06-28 / Agent 6.12.1
 
@@ -308,13 +276,11 @@
 
 * Make the kubelet and ECS fargate checks resilient to the tagger returning None. See [#4004](https://github.com/DataDog/integrations-core/pull/4004).
 
-
 ## 3.2.0 / 2019-06-13 / Agent 6.12.0
 
 ***Fixed***: 
 
 * Revert "Collect network usage metrics (#3740)". See [#3914](https://github.com/DataDog/integrations-core/pull/3914).
-
 
 ## 3.1.0 / 2019-05-14
 
@@ -324,14 +290,12 @@
 * add useful prometheus labels to metric tags. See [#3735](https://github.com/DataDog/integrations-core/pull/3735).
 * Adhere to code style. See [#3525](https://github.com/DataDog/integrations-core/pull/3525).
 
-
 ## 3.0.1 / 2019-04-04 / Agent 6.11.0
 
 ***Fixed***: 
 
 * Fix podlist multiple iterations when using pod expiration. See [#3456](https://github.com/DataDog/integrations-core/pull/3456).
 * Fix health check during first check run. See [#3457](https://github.com/DataDog/integrations-core/pull/3457).
-
 
 ## 3.0.0 / 2019-03-29
 
@@ -342,7 +306,6 @@
 ***Added***: 
 
 * Allow to filter out old pods when parsing the podlist to reduce memory usage. See [#3189](https://github.com/DataDog/integrations-core/pull/3189).
-
 
 ## 2.4.0 / 2019-02-18 / Agent 6.10.0
 
@@ -356,7 +319,6 @@
 * Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).
 * Fix pods/container.running metrics to exclude non running ones. See [#3025](https://github.com/DataDog/integrations-core/pull/3025).
 
-
 ## 2.3.1 / 2019-01-04 / Agent 6.9.0
 
 ***Fixed***: 
@@ -364,7 +326,6 @@
 * document kubernetes.pods.running and kubernetes.containers.running. See [#2792][1].
 * Fix default yaml instance. See [#2756][2].
 * Make the check robust to an unresponsive kubelet. See [#2719][3].
-
 
 ## 2.3.0 / 2018-11-30 / Agent 6.8.0
 
@@ -378,13 +339,11 @@
 
 * [kubelet] correctly ignore pods that are neither running or pending for resource limits&requests. See [#2597][9].
 
-
 ## 2.2.0 / 2018-10-12 / Agent 6.6.0
 
 ***Added***: 
 
 * Add kubelet rss and working set memory metrics. See [#2390][10].
-
 
 ## 2.1.0 / 2018-10-10
 
@@ -398,7 +357,6 @@
 * Fix parsing errors when the podlist is in an inconsistent state. See [#2338][11].
 * Fix kubelet input filtering. See [#2344][12].
 * Fix pod metric filtering for containerd. See [#2283][13].
-
 
 ## 2.0.0 / 2018-09-04 / Agent 6.5.0
 
@@ -419,20 +377,17 @@
 * Reduce log spam on kubernetes tagging. See [#1830][23].
 * Add data files to the wheel package. See [#1727][24].
 
-
 ## 1.4.0 / 2018-06-14 / Agent 6.3.1
 
 ***Changed***: 
 
 * Kubelet check: better encapsulate the pod list retrieval. See [#1648][25].
 
-
 ## 1.3.0 / 2018-06-07
 
 ***Added***: 
 
 * Support for gathering metrics from prometheus endpoint for the kubelet itself.. See [#1581][26].
-
 
 ## 1.2.0 / 2018-05-11
 
@@ -449,13 +404,11 @@
 * Fix submission of CPU metrics on multi-threaded containers. See [#1489][32]
 * Fix SSL when specifying certificate files
 
-
 ## 1.1.0 / 2018-03-23
 
 ***Added***: 
 
 * Support TLS
-
 
 ## 1.0.0 / 2018-02-28
 

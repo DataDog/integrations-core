@@ -16,13 +16,11 @@
 
 * Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
 
-
 ## 3.3.1 / 2021-03-07 / Agent 7.27.0
 
 ***Fixed***: 
 
 * Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
-
 
 ## 3.3.0 / 2020-05-17 / Agent 7.20.0
 
@@ -30,14 +28,12 @@
 
 * Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-
 ## 3.2.1 / 2020-04-04 / Agent 7.19.0
 
 ***Fixed***: 
 
 * Update prometheus_client. See [#6200](https://github.com/DataDog/integrations-core/pull/6200).
 * Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
-
 
 ## 3.2.0 / 2019-05-14 / Agent 6.12.0
 
@@ -49,13 +45,11 @@
 
 * Fix type override values in example config. See [#3717](https://github.com/DataDog/integrations-core/pull/3717).
 
-
 ## 3.1.0 / 2019-02-18 / Agent 6.10.0
 
 ***Added***: 
 
 * Support Python 3. See [#3048](https://github.com/DataDog/integrations-core/pull/3048).
-
 
 ## 3.0.1 / 2019-01-04 / Agent 6.9.0
 
@@ -63,7 +57,6 @@
 
 * Added crucial words to make sentence clearer. See [#2811][1]. Thanks [someword][2].
 * Change the prometheus example to use prometheus_url. See [#2790][3]. Thanks [someword][2].
-
 
 ## 3.0.0 / 2018-10-12 / Agent 6.6.0
 
@@ -74,7 +67,6 @@
 ***Fixed***: 
 
 * Temporarily increase the limit of prometheus metrics sent for 6.5. See [#2214][5].
-
 
 ## 2.0.0 / 2018-09-04 / Agent 6.5.0
 
@@ -91,7 +83,6 @@
 
 * Make sure all checks' versions are exposed. See [#1945][7].
 * Add data files to the wheel package. See [#1727][10].
-
 
 ## 1.0.0/ 2018-03-23
 

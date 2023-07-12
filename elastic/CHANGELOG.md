@@ -23,7 +23,6 @@
 
 * Correctly compute the `templates.count` metric. See [#14636](https://github.com/DataDog/integrations-core/pull/14636).
 
-
 ## 5.4.0 / 2023-05-26
 
 ***Added***: 
@@ -39,13 +38,11 @@
 * Improve description of config field. See [#14524](https://github.com/DataDog/integrations-core/pull/14524).
 * More metrics match metadata. See [#14506](https://github.com/DataDog/integrations-core/pull/14506).
 
-
 ## 5.3.0 / 2022-09-16 / Agent 7.40.0
 
 ***Added***: 
 
 * Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
-
 
 ## 5.2.0 / 2022-06-27 / Agent 7.38.0
 
@@ -53,13 +50,11 @@
 
 * Collect the count version of certain rate metrics. See [#12352](https://github.com/DataDog/integrations-core/pull/12352).
 
-
 ## 5.1.1 / 2022-05-15 / Agent 7.37.0
 
 ***Fixed***: 
 
 * Update metrics. See [#11783](https://github.com/DataDog/integrations-core/pull/11783).
-
 
 ## 5.1.0 / 2022-04-05 / Agent 7.36.0
 
@@ -71,7 +66,6 @@
 ***Fixed***: 
 
 * Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
-
 
 ## 5.0.0 / 2022-02-19 / Agent 7.35.0
 
@@ -87,14 +81,12 @@
 
 * Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
 
-
 ## 4.0.1 / 2022-01-13 / Agent 7.34.0
 
 ***Fixed***: 
 
 * Validate custom query column type. See [#11106](https://github.com/DataDog/integrations-core/pull/11106).
 * Continue other custom queries when one fails. See [#11105](https://github.com/DataDog/integrations-core/pull/11105).
-
 
 ## 4.0.0 / 2022-01-08
 
@@ -114,7 +106,6 @@
 * Bump base package dependency. See [#10930](https://github.com/DataDog/integrations-core/pull/10930).
 * Lower log level for expected condition. See [#10825](https://github.com/DataDog/integrations-core/pull/10825).
 
-
 ## 3.3.0 / 2021-10-04 / Agent 7.32.0
 
 ***Added***: 
@@ -126,7 +117,6 @@
 
 * Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
 
-
 ## 3.2.0 / 2021-09-10
 
 ***Added***: 
@@ -134,13 +124,11 @@
 * Support opensearch. See [#10093](https://github.com/DataDog/integrations-core/pull/10093).
 * Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
 
-
 ## 3.1.0 / 2021-08-22 / Agent 7.31.0
 
 ***Added***: 
 
 * Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
-
 
 ## 3.0.1 / 2021-07-20
 
@@ -148,20 +136,17 @@
 
 * Fix log line . See [#9621](https://github.com/DataDog/integrations-core/pull/9621).
 
-
 ## 3.0.0 / 2021-05-28 / Agent 7.29.0
 
 ***Added***: 
 
 * Add .count monotonic_count metrics. See [#9354](https://github.com/DataDog/integrations-core/pull/9354).
 
-
 ## 2.2.0 / 2021-05-17
 
 ***Added***: 
 
 * Update version supported for Cat Allocation metrics. See [#9339](https://github.com/DataDog/integrations-core/pull/9339).
-
 
 ## 2.1.0 / 2021-04-19 / Agent 7.28.0
 
@@ -173,7 +158,6 @@
 
 * Sync config models. See [#9168](https://github.com/DataDog/integrations-core/pull/9168).
 
-
 ## 2.0.0 / 2021-04-09
 
 ***Changed***: 
@@ -183,7 +167,6 @@
 ***Added***: 
 
 * Support Cat allocation metrics. See [#8861](https://github.com/DataDog/integrations-core/pull/8861).
-
 
 ## 1.24.0 / 2021-02-10 / Agent 7.27.0
 
@@ -196,7 +179,6 @@
 * Disable SLM metrics by default. See [#8511](https://github.com/DataDog/integrations-core/pull/8511).
 * Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 
-
 ## 1.23.0 / 2021-01-15
 
 ***Added***: 
@@ -205,13 +187,11 @@
 * Add index.health.reverse metric. See [#8362](https://github.com/DataDog/integrations-core/pull/8362).
 * Add additional node metrics to monitor cpu throttling. See [#8290](https://github.com/DataDog/integrations-core/pull/8290). Thanks [onurdialpad](https://github.com/onurdialpad).
 
-
 ## 1.22.1 / 2020-12-17 / Agent 7.25.0
 
 ***Fixed***: 
 
 * Fix tags memory leak. See [#8213](https://github.com/DataDog/integrations-core/pull/8213).
-
 
 ## 1.22.0 / 2020-12-11
 
@@ -223,7 +203,6 @@
 
 * Update check signature. See [#8114](https://github.com/DataDog/integrations-core/pull/8114).
 
-
 ## 1.21.0 / 2020-10-31 / Agent 7.24.0
 
 ***Added***: 
@@ -231,13 +210,11 @@
 * Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
 * [doc] Add encoding in log config sample. See [#7708](https://github.com/DataDog/integrations-core/pull/7708).
 
-
 ## 1.20.1 / 2020-09-28
 
 ***Fixed***: 
 
 * Extra debug for missing metrics. See [#7673](https://github.com/DataDog/integrations-core/pull/7673).
-
 
 ## 1.20.0 / 2020-09-21 / Agent 7.23.0
 
@@ -248,7 +225,6 @@
 ***Fixed***: 
 
 * Update proxy section in conf.yaml. See [#7336](https://github.com/DataDog/integrations-core/pull/7336).
-
 
 ## 1.19.0 / 2020-08-10 / Agent 7.22.0
 
@@ -262,7 +238,6 @@
 * DOCS-838 Template wording. See [#7038](https://github.com/DataDog/integrations-core/pull/7038).
 * Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
 
-
 ## 1.18.0 / 2020-06-29 / Agent 7.21.0
 
 ***Added***: 
@@ -274,20 +249,17 @@
 
 * Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
 
-
 ## 1.17.0 / 2020-05-17 / Agent 7.20.0
 
 ***Added***: 
 
 * Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
-
 ## 1.16.1 / 2020-04-04 / Agent 7.19.0
 
 ***Fixed***: 
 
 * Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
-
 
 ## 1.16.0 / 2020-01-13 / Agent 7.17.0
 
@@ -296,13 +268,11 @@
 * Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 * Add OOTB support for AWS Signature Version 4 Signing. See [#5289](https://github.com/DataDog/integrations-core/pull/5289).
 
-
 ## 1.15.0 / 2019-12-02 / Agent 7.16.0
 
 ***Added***: 
 
 * Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
-
 
 ## 1.14.0 / 2019-10-11 / Agent 6.15.0
 
@@ -312,13 +282,11 @@
 * Add external refresh metrics. See [#4554](https://github.com/DataDog/integrations-core/pull/4554). Thanks [clandry94](https://github.com/clandry94).
 * Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
 
-
 ## 1.13.2 / 2019-08-30 / Agent 6.14.0
 
 ***Fixed***: 
 
 * Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
-
 
 ## 1.13.1 / 2019-07-18 / Agent 6.13.0
 
@@ -326,13 +294,11 @@
 
 * Add missing HTTP options to example config. See [#4129](https://github.com/DataDog/integrations-core/pull/4129).
 
-
 ## 1.13.0 / 2019-07-13
 
 ***Added***: 
 
 * Use the new RequestsWrapper for connecting to services. See [#4100](https://github.com/DataDog/integrations-core/pull/4100).
-
 
 ## 1.12.0 / 2019-05-14 / Agent 6.12.0
 
@@ -340,13 +306,11 @@
 
 * Adhere to code style. See [#3504](https://github.com/DataDog/integrations-core/pull/3504).
 
-
 ## 1.11.0 / 2019-02-18 / Agent 6.10.0
 
 ***Added***: 
 
 * Support unicode for Python 3 bindings. See [#2869](https://github.com/DataDog/integrations-core/pull/2869).
-
 
 ## 1.10.0 / 2019-01-04 / Agent 6.9.0
 
@@ -355,13 +319,11 @@
 * Add completed metric for all ES thread pools. See [#2803](https://github.com/DataDog/integrations-core/pull/2803).
 * Capture metrics for ES scroll requests . See [#2687](https://github.com/DataDog/integrations-core/pull/2687).
 
-
 ## 1.9.1 / 2018-11-30 / Agent 6.8.0
 
 ***Fixed***: 
 
 * Add elasticsearch-oss as an auto_conf.yaml Elasticsearch identifier. See [#2644](https://github.com/DataDog/integrations-core/pull/2644). Thanks [jcassee](https://github.com/jcassee).
-
 
 ## 1.9.0 / 2018-10-23
 
@@ -374,7 +336,6 @@
 
 * Move metrics definition and logic into its own module. See [#2381](https://github.com/DataDog/integrations-core/pull/2381).
 
-
 ## 1.8.0 / 2018-10-12 / Agent 6.6.0
 
 ***Added***: 
@@ -386,14 +347,12 @@
 
 * Move config parser to its own module. See [#2370](https://github.com/DataDog/integrations-core/pull/2370).
 
-
 ## 1.7.1 / 2018-09-04 / Agent 6.5.0
 
 ***Fixed***: 
 
 * Add thread write queue to fix Elasticsearch 6.3.x compatibility. See [#1943](https://github.com/DataDog/integrations-core/pull/1943).
 * Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
-
 
 ## 1.7.0 / 2018-06-07
 
@@ -405,14 +364,12 @@
 
 * [FIXED] Ensure base url path isn't removed when admin_forwarder is used. See [#1202](https://github.com/DataDog/integrations-core/pull/1202).
 
-
 ## 1.6.0 / 2018-05-11
 
 ***Added***: 
 
 * Hardcode the 9200 port in the Autodiscovery template. See [#1444](https://github.com/DataDog/integrations-core/issues/1444).
 * adds `index_stats` to collect index level metrics. See [#1312](https://github.com/DataDog/integrations-core/issues/1312).
-
 
 ## 1.5.0 / 2018-02-13
 
@@ -425,13 +382,11 @@
 
 * Fixes bug that causes poor failovers when authentication fails. See [#1026](https://github.com/DataDog/integrations-core/issues/1026).
 
-
 ## 1.4.0 / 2018-01-10
 
 ***Fixed***: 
 
 * Fix missing fs metrics for elastic >= 5. See [#997](https://github.com/DataDog/integrations-core/pull/997).
-
 
 ## 1.3.0 / 2018-01-10
 
@@ -443,13 +398,11 @@
 
 * get rid of pretty json. See [#893](https://github.com/DataDog/integrations-core/issues/893).
 
-
 ## 1.2.0 / 2017-11-21
 
 ***Added***: 
 
 * Update auto_conf template to support agent 6 and 5.20+. See [#860](https://github.com/DataDog/integrations-core/issues/860)
-
 
 ## 1.1.0 / 2017-11-21
 
@@ -462,17 +415,14 @@
 
 * Fixes bug for retreiving indices count. See [#806](https://github.com/DataDog/integrations-core/issues/806)
 
-
 ## 1.0.1 / 2017-08-28
 
 ***Added***: 
 
 * Add metric for index count. See [#617](https://github.com/DataDog/integrations-core/issues/617)
 
-
 ## 1.0.0 / 2017-03-22
 
 ***Added***: 
 
 * adds elastic integration.
-

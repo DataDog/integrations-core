@@ -5,4 +5,3 @@
 ***Added***: 
 
 * adds `datadog_checks_tests_helper`
-

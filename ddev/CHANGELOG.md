@@ -43,7 +43,6 @@
 
 * Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
 
-
 ## 2.1.0 / 2023-05-26
 
 ***Added***: 
@@ -56,13 +55,11 @@
 * Account for dependency upgrades in CI matrix logic. See [#14366](https://github.com/DataDog/integrations-core/pull/14366).
 * Fix edge case in CI matrix construction. See [#14355](https://github.com/DataDog/integrations-core/pull/14355).
 
-
 ## 2.0.0 / 2023-04-11
 
 ***Changed***: 
 
 * Replace flake8 and isort with Ruff. See [#14212](https://github.com/DataDog/integrations-core/pull/14212).
-
 
 ## 1.6.0 / 2023-03-31
 
@@ -70,13 +67,11 @@
 
 * Add GitHub Actions workflows. See [#14187](https://github.com/DataDog/integrations-core/pull/14187).
 
-
 ## 1.5.0 / 2023-03-23
 
 ***Added***: 
 
 * Bump datadog-checks-dev to 18.x. See [#14225](https://github.com/DataDog/integrations-core/pull/14225).
-
 
 ## 1.4.3 / 2023-03-01
 
@@ -84,20 +79,17 @@
 
 * Bump datadog_checks_dev dependency version. See [#14064](https://github.com/DataDog/integrations-core/pull/14064).
 
-
 ## 1.4.2 / 2023-02-27
 
 ***Fixed***: 
 
 * Bump datadog_checks_dev dependency version. See [#14040](https://github.com/DataDog/integrations-core/pull/14040).
 
-
 ## 1.4.1 / 2023-01-25
 
 ***Fixed***: 
 
 * Pin and bump the datadog_checks_dev version. See [#13557](https://github.com/DataDog/integrations-core/pull/13557).
-
 
 ## 1.4.0 / 2023-01-20
 
@@ -109,7 +101,6 @@
 ***Fixed***: 
 
 * And fallbacks to some org config options. See [#13629](https://github.com/DataDog/integrations-core/pull/13629).
-
 
 ## 1.3.0 / 2022-12-09
 
@@ -125,13 +116,11 @@
 * Bump datadog_checks_dev dependency to 17.5.0. See [#13490](https://github.com/DataDog/integrations-core/pull/13490).
 * Output non-critical information to stderr. See [#13459](https://github.com/DataDog/integrations-core/pull/13459).
 
-
 ## 1.2.0 / 2022-11-23
 
 ***Added***: 
 
 * Upgrade dependencies. See [#13375](https://github.com/DataDog/integrations-core/pull/13375).
-
 
 ## 1.1.0 / 2022-10-28
 
@@ -142,18 +131,14 @@
 * Add utilities for filtering integrations. See [#13156](https://github.com/DataDog/integrations-core/pull/13156).
 * Add more utilities. See [#13136](https://github.com/DataDog/integrations-core/pull/13136).
 
-
 ## 1.0.1 / 2022-09-16
 
 ***Fixed***: 
 
 * Fix legacy tooling initialization when using the --here flag. See [#12823](https://github.com/DataDog/integrations-core/pull/12823).
 
-
 ## 1.0.0 / 2022-08-05
 
 ***Added***: 
 
 * Make ddev a standalone package. See [#12565](https://github.com/DataDog/integrations-core/pull/12565).
-
-

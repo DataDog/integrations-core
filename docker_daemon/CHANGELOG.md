@@ -7,20 +7,17 @@
 * Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
 * Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 
-
 ## 1.11.0 / 2019-05-14
 
 ***Added***: 
 
 * Support docker.kmem.usage. See [#3339](https://github.com/DataDog/integrations-core/pull/3339). Thanks [wolf31o2](https://github.com/wolf31o2).
 
-
 ## 1.10.2 / 2019-01-04
 
 ***Fixed***: 
 
 * Demote critical log levels to error. See [#2795](https://github.com/DataDog/integrations-core/pull/2795).
-
 
 ## 1.10.1 / 2018-09-04
 
@@ -29,13 +26,11 @@
 * Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
 * Log debug, not warning, for missing /proc/net/dev files. See [#1583](https://github.com/DataDog/integrations-core/pull/1583). Thanks [lachlancooper](https://github.com/lachlancooper).
 
-
 ## 1.10.0 / 2018-05-11
 
 ***Added***: 
 
 * Add docker.cpu.shares metric. See [#1358]()
-
 
 ## 1.9.0 / 2018-03-23
 
@@ -43,13 +38,11 @@
 
 * add the new `exec_die` event type to default exclusion list. See [#1240]()
 
-
 ## 1.8.0 / 2018-02-13
 
 ***Added***: 
 
 * Add `short_image` tag to container metrics. See [#986]()
-
 
 ## 1.7.0 / 2018-01-10
 
@@ -57,7 +50,6 @@
 
 * Honor global collect_labels_as_tags if integration's collect_labels_as_tags is empty. See [#881]()
 * Improve logging when cgroup metrics can't be retrieved. See [#914]()
-
 
 ## 1.6.0 / 2017-11-21
 
@@ -67,13 +59,11 @@
 * Add docker memory soft limit metric. See [#760](https://github.com/DataDog/integrations-core/issues/760)
 * Add docker.containers.running.total & docker.containers.stopped.total metrics. See [#859](https://github.com/DataDog/integrations-core/issues/859)
 
-
 ## 1.5.1 / 2017-11-08
 
 ***Fixed***: 
 
 * Fix lost kubernetes tags in 1.5.0. See [#817](https://github.com/DataDog/integrations-core/issues/817)
-
 
 ## 1.5.0 / 2017-10-10
 
@@ -81,14 +71,12 @@
 
 * Remove namespace from pod_name tag. See [#770](https://github.com/DataDog/integrations-core/issues/770)
 
-
 ## 1.4.0 / 2017-09-12
 
 ***Added***: 
 
 * Add an option to wait for docker if it's not ready at start time. See [#722](https://github.com/DataDog/integrations-core/issues/722)
 * Add client-side event filtering by event type. See [#744](https://github.com/DataDog/integrations-core/issues/744)
-
 
 ## 1.3.2 / 2017-08-28
 
@@ -101,13 +89,11 @@
 * safely check volume list before accessing. See [#544](https://github.com/DataDog/integrations-core/issues/544)
 * make it a bit safer. See [#701](https://github.com/DataDog/integrations-core/issues/701)
 
-
 ## 1.3.1 / 2017-07-26
 
 ***Fixed***: 
 
 * fix event collection on ecs and nomad. See [#616](https://github.com/DataDog/integrations-core/issues/616)
-
 
 ## 1.3.0 / 2017-07-18
 
@@ -117,7 +103,6 @@
 * add kube_container_name tag to kubernetes and docker integrations. See [#509](https://github.com/DataDog/integrations-core/issues/509), thanks [@sophaskins](https://github.com/sophaskins)
 * remove NomadUtil & ECSUtil from docker_daemon, MetadataCollector proxies them. See [#486](https://github.com/DataDog/integrations-core/issues/486)
 * use the new orchestrator.Tagger class to retrieve the Mesos tags for docker metrics. See [#466](https://github.com/DataDog/integrations-core/issues/466)
-
 
 ## 1.2.0 / 2017-06-05
 
@@ -134,14 +119,12 @@
 
 * Docker events are tagged with the image name when docker reports its checksum. See [#415](https://github.com/DataDog/integrations-core/issues/415)
 
-
 ## 1.1.1 / 2017-05-11
 
 ***Fixed***: 
 
 * catch IOError exception when container exits in the middle of a check run. See [#408](https://github.com/DataDog/integrations-core/issues/408)
 * fix image name when using sha256 for specs. See [#393](https://github.com/DataDog/integrations-core/issues/393)
-
 
 ## 1.1.0 / 2017-04-24
 
@@ -154,7 +137,6 @@
 * adds docker_network tagging to `docker.net.bytes_*` metrics, needs dd-agent >= 5.13.0. See [#277](https://github.com/DataDog/integrations-core/issues/277)
 * adds the ability to monitor for docker exits failure with service check `docker.exit`. See [#290](https://github.com/DataDog/integrations-core/issues/290)
 * collect rancher label container name as tag. See [#282](https://github.com/DataDog/integrations-core/issues/282)
-
 
 ## 1.0.0 / 2017-03-22
 
