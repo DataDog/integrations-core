@@ -29,7 +29,7 @@ DCGM_FI_PROF_PCIE_TX_BYTES,              counter, Total number of bytes transmit
 DCGM_FI_PROF_PCIE_RX_BYTES,              counter, Total number of bytes received through PCIe RX (in KB) via NVML.
 ```
 
-NVIDIA devs also recommend enabling the following default counters and labels:
+It is also recommended enabling the following default counters and labels:
 - `DCGM_FI_DEV_MEMORY_TEMP`
 - `DCGM_FI_DEV_GPU_TEMP`
 - `DCGM_FI_DEV_POWER_USAGE`
@@ -43,7 +43,7 @@ NVIDIA devs also recommend enabling the following default counters and labels:
 - `DCGM_FI_DEV_BRAND`
 - `DCGM_FI_DEV_SERIAL`
 
-They also recommend adding the following non-default fields and labels:
+The following non-default fields and labels are also recommended:
 ```
 DCGM_FI_DEV_SLOWDOWN_TEMP,              gauge, Slowdown temperature for the device.
 DCGM_FI_DEV_POWER_MGMT_LIMIT,           gauge, Current power limit for the device.
