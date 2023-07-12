@@ -94,11 +94,11 @@ See [metadata.csv][4] for a list of metrics provided by this integration.
 
 ### Events
 
-The OpenAI integration does not include any events.
+The LangChain integration does not include any events.
 
 ### Service Checks
 
-The OpenAI integration does not include any service checks.
+The LangChain integration does not include any service checks.
 
 
 ## Troubleshooting

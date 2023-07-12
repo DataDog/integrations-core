@@ -195,7 +195,6 @@
                 }
               ],
               "autoscale": true,
-              "custom_unit": "tokens/req",
               "precision": 2
             },
             "layout": {
@@ -211,7 +210,6 @@
               "title": "OpenAI Estimated Cost (USD)",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -735,7 +733,6 @@
                 }
               ],
               "autoscale": true,
-              "custom_unit": "tokens/req",
               "precision": 2,
               "timeseries_background": {
                 "yaxis": {
@@ -752,11 +749,12 @@
             }
           },
           {
-            "id": 3928932451085724,
+            "id": 1438739786594214,
             "definition": {
               "title": "Avg Completion Tokens per Request",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -765,7 +763,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:openai.tokens.completion{!langchain.request.type:chain,$env,$service,$version,$provider,$model,$api_key}",
+                      "query": "avg:langchain.tokens.completion{!langchain.request.type:chain,$env,$service,$version,$provider,$model,$api_key}",
                       "aggregator": "avg"
                     }
                   ],
@@ -777,7 +775,6 @@
                 }
               ],
               "autoscale": true,
-              "custom_unit": "tokens/req",
               "precision": 2,
               "timeseries_background": {
                 "yaxis": {
@@ -876,7 +873,6 @@
                 }
               ],
               "autoscale": true,
-              "custom_unit": "tokens/req",
               "precision": 2,
               "timeseries_background": {
                 "yaxis": {
