@@ -2323,10 +2323,20 @@ def test_vm_property_metrics(
 
     base_tags = ['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_host:unknown', 'vsphere_type:vm']
     check = VSphereCheck('vsphere', {}, [realtime_instance])
+    caplog.set_level(logging.DEBUG)
     dd_run_check(check)
     aggregator.assert_metric('vsphere.vm.count', value=2, count=2, tags=base_tags)
 
     # VM 1
+    aggregator.assert_metric(
+        'vsphere.vm.guest.guestFullName',
+        count=0,
+        hostname='vm1',
+    )
+    assert "Could not sumbit property metric- no metric data: name=`vm.guest.guestFullName`, "
+    "value=`None`, hostname=`vm1`, base tags=`['vcenter_server:FAKE', 'vsphere_host:unknown', "
+    "'vsphere_folder:unknown', 'vsphere_type:vm']` additional tags=`{}`" in caplog.text
+
     aggregator.assert_metric(
         'vsphere.vm.summary.quickStats.uptimeSeconds',
         count=1,
@@ -2348,7 +2358,6 @@ def test_vm_property_metrics(
         tags=base_tags,
         hostname='vm1',
     )
-
     aggregator.assert_metric(
         'vsphere.vm.summary.config.numVirtualDisks',
         count=1,
@@ -2382,6 +2391,9 @@ def test_vm_property_metrics(
         count=0,
         hostname='vm1',
     )
+    assert "Could not sumbit property metric- no metric data: name=`vm.guest.toolsRunningStatus`, "
+    "value=`None`, hostname=`vm1`, base tags=`['vcenter_server:FAKE', 'vsphere_host:unknown', "
+    "'vsphere_folder:unknown', 'vsphere_type:vm']` additional tags=`{}`" in caplog.text
 
     aggregator.assert_metric(
         'vsphere.vm.guest.net',
@@ -2457,16 +2469,30 @@ def test_vm_property_metrics(
         tags=base_tags,
         hostname='vm1',
     )
+
+    assert "Submit property metric: name=`vm.config.memoryAllocation.limit`, value=`-1.0`, "
+    "hostname=`vm1`, tags=`['vcenter_server:FAKE', 'vsphere_host:unknown', "
+    "'vsphere_folder:unknown', 'vsphere_type:vm']`, count=`False`" in caplog.text
+
     aggregator.assert_metric(
         'vsphere.vm.config.cpuAllocation.overheadLimit',
         count=0,
         hostname='vm1',
     )
+    assert "Could not sumbit property metric- unexpected metric value: "
+    "name=`vm.config.cpuAllocation.overheadLimit`, value=`None`, hostname=`vm1`, "
+    "base tags=`['vcenter_server:FAKE', 'vsphere_host:unknown', 'vsphere_folder:unknown', "
+    "'vsphere_type:vm']` additional tags=`{}`" in caplog.text
+
     aggregator.assert_metric(
         'vsphere.vm.config.memoryAllocation.overheadLimit',
         count=0,
         hostname='vm1',
     )
+    assert "Could not sumbit property metric- unexpected metric value: "
+    "name=`vm.config.memoryAllocation.overheadLimit`, value=`None`, hostname=`vm1`, "
+    "base tags=`['vcenter_server:FAKE', 'vsphere_host:unknown', 'vsphere_folder:unknown', "
+    "'vsphere_type:vm']` additional tags=`{}`" in caplog.text
 
     # VM 3
     aggregator.assert_metric(
@@ -2502,6 +2528,10 @@ def test_vm_property_metrics(
         count=0,
         hostname='vm3',
     )
+    assert "Could not sumbit property metric- unexpected metric value: name=`vm.summary.config.memorySizeMB`, "
+    "value=`None`, hostname=`vm3`, base tags=`['vcenter_server:FAKE', 'vsphere_host:unknown', "
+    "'vsphere_folder:unknown', 'vsphere_type:vm']` additional tags=`{}`" in caplog.text
+
     aggregator.assert_metric(
         'vsphere.vm.config.hardware.numCoresPerSocket',
         count=1,
@@ -2550,13 +2580,6 @@ def test_vm_property_metrics(
         count=1,
         value=59,
         tags=base_tags,
-        hostname='vm3',
-    )
-    aggregator.assert_metric(
-        'vsphere.vm.guest.guestFullName',
-        count=1,
-        value=1,
-        tags=base_tags + ['guestFullName:Debian GNU/Linux 12 (32-bit)'],
         hostname='vm3',
     )
     aggregator.assert_metric(

@@ -530,7 +530,7 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     ),
                     vmodl.DynamicProperty(
                         name='guest.guestFullName',
-                        val='Debian GNU/Linux 11 (32-bit)',
+                        val=None,
                     ),
                     vmodl.DynamicProperty(
                         name='guest.disk',
