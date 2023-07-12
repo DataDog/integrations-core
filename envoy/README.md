@@ -49,7 +49,7 @@ admin:
     socket_address:
       protocol: TCP
       address: 127.0.0.1
-      port_value: 8081
+      port_value: 8001
 static_resources:
   listeners:
     - address:
