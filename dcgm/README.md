@@ -107,6 +107,8 @@ instances:
     - openmetrics_endpoint: http://localhost:9400/metrics
 ```
 
+Use the `extra_metrics` configuration field to add metrics that go beyond the ones [we support out of the box][6]. See [here][10] for the full list of metrics that dcgm-exporter can collect. Make sure to [enable these fields in the dcgm-exporter configuration][9] as well.
+
 <!-- xxx tab xxx -->
 <!-- xxx tab "Docker" xxx -->
 
