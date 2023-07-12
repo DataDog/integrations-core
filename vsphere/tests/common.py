@@ -462,6 +462,38 @@ ip_stack3.ipRouteConfig = ip_route_config3
 IP_STACKS_3 = vim.ArrayOfAnyType()
 IP_STACKS_3.append(ip_stack3)
 
+VM_QUERY_PERF = mock.MagicMock(
+    return_value=[
+        vim.PerformanceManager.EntityMetric(
+            entity=vim.VirtualMachine(moId="vm1"),
+            value=[
+                vim.PerformanceManager.IntSeries(
+                    value=[47, 52],
+                    id=vim.PerformanceManager.MetricId(counterId=103),
+                )
+            ],
+        ),
+        vim.PerformanceManager.EntityMetric(
+            entity=vim.VirtualMachine(moId="vm2"),
+            value=[
+                vim.PerformanceManager.IntSeries(
+                    value=[30, 11],
+                    id=vim.PerformanceManager.MetricId(counterId=103),
+                )
+            ],
+        ),
+        vim.PerformanceManager.EntityMetric(
+            entity=vim.VirtualMachine(moId="vm3"),
+            value=[
+                vim.PerformanceManager.IntSeries(
+                    value=[30, 11],
+                    id=vim.PerformanceManager.MetricId(counterId=103),
+                )
+            ],
+        ),
+    ]
+)
+
 VM_PROPERTIES_EX = mock.MagicMock(
     return_value=vim.PropertyCollector.RetrieveResult(
         objects=[
@@ -511,10 +543,6 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     vmodl.DynamicProperty(
                         name='guest.ipStack',
                         val=IP_STACKS,
-                    ),
-                    vmodl.DynamicProperty(
-                        name='guest.toolsRunningStatus',
-                        val='guestToolsRunning',
                     ),
                     vmodl.DynamicProperty(
                         name='guest.toolsVersion',

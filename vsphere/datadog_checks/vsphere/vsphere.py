@@ -25,6 +25,7 @@ from datadog_checks.vsphere.constants import (
     DEFAULT_MAX_QUERY_METRICS,
     HISTORICAL_RESOURCES,
     MAX_QUERY_METRICS_OPTION,
+    PROPERTY_COUNT_METRICS,
     REALTIME_METRICS_INTERVAL_ID,
     REALTIME_RESOURCES,
     VM_SIMPLE_PROPERTIES,
@@ -44,6 +45,7 @@ from datadog_checks.vsphere.types import (
 )
 from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,
+    add_additional_tags,
     format_metric_name,
     get_mapped_instance_tag,
     get_tags_recursively,
@@ -648,57 +650,85 @@ class VSphereCheck(AgentCheck):
         self,
         metric_name,  # type: str
         metric_value,  # type: Any
-        metric_method,  # type: Callable
         base_tags,  # type: List[str]
         hostname,  # type: str
         resource_metric_suffix,  # type: str
         additional_tags=None,  # type: Optional[Dict[str, Optional[Any]]]
     ):
         # type: (...) -> None
-        metric_name = "{}.{}".format(resource_metric_suffix, metric_name)
-        if metric_value is None:
-            self.log.debug(
-                "Could not sumbit property metric name=`%s`, value=`%s`, hostname=`%s`, "
-                "base tags=`%s` additional tags=`%s`",
-                metric_name,
-                metric_value,
-                hostname,
-                base_tags,
-                additional_tags,
-            )
-            return
+        """
+        Submits a property metric:
+        - If the metric is a count metric (expecting tag data)
+            1. Check if should have any tags added (metric value)
+            2. Add the tag
+            3. If there are still no valuable tags/data, then discard the metric
+            4. Submit the metric as a count
+        - If the metric is a guage
+            1. Convert value to a float
+            2. Discard if there is no float data
 
-        tags = []  # type: List[str]
-        tags = tags + base_tags
+        Then combine all tags and submit the metric.
+        """
+        metric_full_name = "{}.{}".format(resource_metric_suffix, metric_name)
+        is_count_metric = metric_name in PROPERTY_COUNT_METRICS
 
         if additional_tags is None:
             additional_tags = {}
 
-        if all(tag is None for tag in additional_tags.keys()) and metric_value == 1:
-            self.log.debug(
-                "Property metric has no data to send: name=`%s`, value=`%s`, hostname=`%s`, "
-                "base tags=`%s`, additional tags=`%s`",
-                metric_name,
-                metric_value,
-                hostname,
-                additional_tags,
-                base_tags,
-            )
+        if is_count_metric:
+            no_additional_tags = all(tag is None for tag in additional_tags.values())
+            if no_additional_tags:
+                if metric_value is None:
+                    self.log.debug(
+                        "Could not sumbit property metric- no metric data: name=`%s`, value=`%s`, hostname=`%s`, "
+                        "base tags=`%s` additional tags=`%s`",
+                        metric_full_name,
+                        metric_value,
+                        hostname,
+                        base_tags,
+                        additional_tags,
+                    )
+                    return
 
-        for tag_name, tag_value in additional_tags.items():
-            if tag_value is not None:
-                tags.append("{}:{}".format(tag_name, tag_value))
+                _, _, tag_name = metric_name.rpartition('.')
+                property_tag = {tag_name: metric_value}
+                additional_tags.update(property_tag)
+
+            # set metric value to 1 since it is not a float
+            metric_value = 1
+
+        else:
+            try:
+                metric_value = float(metric_value)
+            except Exception:
+                self.log.debug(
+                    "Could not sumbit property metric- unexpected metric value: name=`%s`, value=`%s`, hostname=`%s`, "
+                    "base tags=`%s` additional tags=`%s`",
+                    metric_full_name,
+                    metric_value,
+                    hostname,
+                    base_tags,
+                    additional_tags,
+                )
+                return
+
+        tags = []  # type: List[str]
+        tags = tags + base_tags
+
+        add_additional_tags(tags, additional_tags)
 
         # Use isEnabledFor to avoid unnecessary processing
         if self.log.isEnabledFor(logging.DEBUG):
             self.log.debug(
-                "Submit property metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
-                metric_name,
+                "Submit property metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`, count=`%s`",
+                metric_full_name,
                 metric_value,
                 hostname,
                 tags,
+                is_count_metric,
             )
-        metric_method(metric_name, metric_value, tags=tags, hostname=hostname)
+        metric_method = self.count if is_count_metric else self.gauge
+        metric_method(metric_full_name, metric_value, tags=tags, hostname=hostname)
 
     def submit_disk_property_metrics(
         self,
@@ -718,7 +748,6 @@ class VSphereCheck(AgentCheck):
             self.submit_property_metric(
                 'guest.disk.freeSpace',
                 free_space,
-                self.gauge,
                 base_tags,
                 hostname,
                 resource_metric_suffix,
@@ -728,7 +757,6 @@ class VSphereCheck(AgentCheck):
             self.submit_property_metric(
                 'guest.disk.capacity',
                 capacity,
-                self.gauge,
                 base_tags,
                 hostname,
                 resource_metric_suffix,
@@ -749,7 +777,7 @@ class VSphereCheck(AgentCheck):
             mac_address = nic.macAddress
             nic_tags = {'device_id': device_id, 'is_connected': is_connected, 'nic_mac_address': mac_address}
             self.submit_property_metric(
-                'guest.net', 1, self.count, base_tags, hostname, resource_metric_suffix, additional_tags=nic_tags
+                'guest.net', 1, base_tags, hostname, resource_metric_suffix, additional_tags=nic_tags
             )
             ip_addresses = nic.ipConfig.ipAddress
             for ip_address in ip_addresses:
@@ -759,7 +787,6 @@ class VSphereCheck(AgentCheck):
                 self.submit_property_metric(
                     'guest.net.ipConfig.address',
                     1,
-                    self.count,
                     base_tags,
                     hostname,
                     resource_metric_suffix,
@@ -798,7 +825,6 @@ class VSphereCheck(AgentCheck):
                 self.submit_property_metric(
                     'guest.ipStack.ipRoute',
                     1,
-                    self.count,
                     base_tags,
                     hostname,
                     resource_metric_suffix,
@@ -815,23 +841,14 @@ class VSphereCheck(AgentCheck):
         # type: (...) -> None
         for property_name in VM_SIMPLE_PROPERTIES:
             property_val = all_properties.get(property_name, None)
-            try:
-                metric_val = float(property_val)
-                self.submit_property_metric(
-                    property_name, metric_val, self.gauge, base_tags, hostname, resource_metric_suffix
-                )
-            except Exception:
-                _, _, tag_name = property_name.rpartition('.')
-                property_tag = {tag_name: property_val}
-                self.submit_property_metric(
-                    property_name,
-                    1,
-                    self.gauge,
-                    base_tags,
-                    hostname,
-                    resource_metric_suffix,
-                    additional_tags=property_tag,
-                )
+
+            self.submit_property_metric(
+                property_name,
+                property_val,
+                base_tags,
+                hostname,
+                resource_metric_suffix,
+            )
 
     def submit_property_metrics(
         self,

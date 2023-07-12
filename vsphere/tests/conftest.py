@@ -24,6 +24,7 @@ from .common import (
     PROPERTIES_EX,
     REALTIME_INSTANCE,
     VM_PROPERTIES_EX,
+    VM_QUERY_PERF,
     VSPHERE_VERSION,
     MockHttpV6,
     MockHttpV7,
@@ -154,6 +155,11 @@ def properties_ex():
 @pytest.fixture
 def vm_properties_ex():
     return VM_PROPERTIES_EX
+
+
+@pytest.fixture
+def vm_query_perf():
+    return VM_QUERY_PERF
 
 
 @pytest.fixture

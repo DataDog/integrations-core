@@ -2310,44 +2310,16 @@ def test_two_checks(aggregator, dd_run_check, realtime_instance, get_timestamp):
     get_timestamp.call_count == 3
 
 
-def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog, service_instance, vm_properties_ex):
+def test_vm_property_metrics(
+    aggregator, realtime_instance, dd_run_check, caplog, service_instance, vm_properties_ex, vm_query_perf
+):
     realtime_instance['collect_property_metrics'] = True
 
     service_instance.content.rootFolder = mock.MagicMock(return_value=vim.Folder(moId="root"))
 
     service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
 
-    service_instance.content.perfManager.QueryPerf = mock.MagicMock(
-        return_value=[
-            vim.PerformanceManager.EntityMetric(
-                entity=vim.VirtualMachine(moId="vm1"),
-                value=[
-                    vim.PerformanceManager.IntSeries(
-                        value=[47, 52],
-                        id=vim.PerformanceManager.MetricId(counterId=103),
-                    )
-                ],
-            ),
-            vim.PerformanceManager.EntityMetric(
-                entity=vim.VirtualMachine(moId="vm2"),
-                value=[
-                    vim.PerformanceManager.IntSeries(
-                        value=[30, 11],
-                        id=vim.PerformanceManager.MetricId(counterId=103),
-                    )
-                ],
-            ),
-            vim.PerformanceManager.EntityMetric(
-                entity=vim.VirtualMachine(moId="vm3"),
-                value=[
-                    vim.PerformanceManager.IntSeries(
-                        value=[30, 11],
-                        id=vim.PerformanceManager.MetricId(counterId=103),
-                    )
-                ],
-            ),
-        ]
-    )
+    service_instance.content.perfManager.QueryPerf = vm_query_perf
 
     base_tags = ['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_host:unknown', 'vsphere_type:vm']
     check = VSphereCheck('vsphere', {}, [realtime_instance])
@@ -2401,15 +2373,13 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
     aggregator.assert_metric(
         'vsphere.vm.guest.toolsVersion',
         count=1,
-        value=11296,
-        tags=base_tags,
+        value=1,
+        tags=base_tags + ['toolsVersion:11296'],
         hostname='vm1',
     )
     aggregator.assert_metric(
         'vsphere.vm.guest.toolsRunningStatus',
-        count=1,
-        value=1,
-        tags=base_tags + ['toolsRunningStatus:guestToolsRunning'],
+        count=0,
         hostname='vm1',
     )
 
@@ -2474,23 +2444,9 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         hostname='vm1',
     )
     aggregator.assert_metric(
-        'vsphere.vm.config.cpuAllocation.overheadLimit',
-        count=1,
-        value=1,
-        tags=base_tags,
-        hostname='vm1',
-    )
-    aggregator.assert_metric(
         'vsphere.vm.config.cpuAllocation.limit',
         count=1,
         value=-1,
-        tags=base_tags,
-        hostname='vm1',
-    )
-    aggregator.assert_metric(
-        'vsphere.vm.config.memoryAllocation.overheadLimit',
-        count=1,
-        value=1,
         tags=base_tags,
         hostname='vm1',
     )
@@ -2502,13 +2458,24 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         hostname='vm1',
     )
     aggregator.assert_metric(
+        'vsphere.vm.config.cpuAllocation.overheadLimit',
+        count=0,
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.config.memoryAllocation.overheadLimit',
+        count=0,
+        hostname='vm1',
+    )
+
+    # VM 3
+    aggregator.assert_metric(
         'vsphere.vm.guest.guestFullName',
         count=1,
         value=1,
         tags=base_tags + ['guestFullName:Debian GNU/Linux 12 (32-bit)'],
         hostname='vm3',
     )
-
     aggregator.assert_metric(
         'vsphere.vm.summary.config.numCpu',
         value=1,
@@ -2516,7 +2483,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         hostname='vm3',
         tags=base_tags,
     )
-
     aggregator.assert_metric(
         'vsphere.vm.summary.config.numEthernetCards',
         count=1,
@@ -2524,7 +2490,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         tags=base_tags,
         hostname='vm3',
     )
-
     aggregator.assert_metric(
         'vsphere.vm.summary.config.numVirtualDisks',
         count=1,
@@ -2534,9 +2499,7 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
     )
     aggregator.assert_metric(
         'vsphere.vm.summary.config.memorySizeMB',
-        count=1,
-        value=1,
-        tags=base_tags,
+        count=0,
         hostname='vm3',
     )
     aggregator.assert_metric(
@@ -2561,7 +2524,6 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         tags=base_tags + ['device_id:43', 'is_connected:False', 'nic_ip_address:fe70::150:46ff:fe47:6311'],
         hostname='vm3',
     )
-
     aggregator.assert_metric(
         'vsphere.vm.guest.ipStack.ipRoute',
         count=1,
@@ -2604,13 +2566,11 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
         tags=base_tags,
         hostname='vm3',
     )
-
     aggregator.assert_metric(
         'vsphere.vm.guest.disk.freeSpace',
         count=0,
         hostname='vm3',
     )
-
     aggregator.assert_metric(
         'vsphere.vm.guest.disk.capacity',
         count=0,
@@ -2627,3 +2587,54 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
     aggregator.assert_metric('datadog.vsphere.query_metrics.time')
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_vm_property_metrics_filtered(
+    aggregator, realtime_instance, dd_run_check, service_instance, vm_properties_ex, vm_query_perf
+):
+    realtime_instance['collect_property_metrics'] = True
+    realtime_instance['resource_filters'] = [
+        {
+            'type': 'whitelist',
+            'resource': 'vm',
+            'property': 'name',
+            'patterns': [
+                'vm1.*',
+            ],
+        }
+    ]
+
+    service_instance.content.rootFolder = mock.MagicMock(return_value=vim.Folder(moId="root"))
+
+    service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
+
+    service_instance.content.perfManager.QueryPerf = vm_query_perf
+
+    base_tags = ['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_host:unknown', 'vsphere_type:vm']
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    aggregator.assert_metric('vsphere.vm.count', value=1, count=1, tags=base_tags)
+    aggregator.assert_metric(
+        'vsphere.vm.summary.quickStats.uptimeSeconds',
+        count=1,
+        value=12184573.0,
+        tags=base_tags,
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.summary.quickStats.uptimeSeconds',
+        count=0,
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.config.cpuAllocation.limit',
+        count=1,
+        value=-1,
+        tags=base_tags,
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.config.cpuAllocation.limit',
+        count=0,
+        hostname='vm3',
+    )
