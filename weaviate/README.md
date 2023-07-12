@@ -20,7 +20,7 @@ Weaviate can be configured to expose Prometheus-formatted metrics. The Datadog A
 
 In addition, a small subset of metrics can be collected by communicating with different [API endpoints][11]. Specifically:
 - `/v1/meta`: Version information
-- `/v1/nodes`: Node specific metrics such as objects and shards
+- `/v1/nodes`: Node-specific metrics such as objects and shards
 - `/v1/.well-known`: HTTP response time and service liveness
 
 **Note**: This check uses [OpenMetrics][12] for metric collection, which requires Python 3.
