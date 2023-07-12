@@ -24,11 +24,26 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize(
-    'namespace, instance, metrics, tag',
+    "namespace, instance, metrics, tag",
     [
-        ('cluster_operator', MOCKED_CLUSTER_OPERATOR_INSTANCE, CLUSTER_OPERATOR_METRICS, MOCKED_CLUSTER_OPERATOR_TAG),
-        ('topic_operator', MOCKED_TOPIC_OPERATOR_INSTANCE, TOPIC_OPERATOR_METRICS, MOCKED_TOPIC_OPERATOR_TAG),
-        ('user_operator', MOCKED_USER_OPERATOR_INSTANCE, USER_OPERATOR_METRICS, MOCKED_USER_OPERATOR_TAG),
+        (
+            "cluster_operator",
+            MOCKED_CLUSTER_OPERATOR_INSTANCE,
+            CLUSTER_OPERATOR_METRICS,
+            MOCKED_CLUSTER_OPERATOR_TAG,
+        ),
+        (
+            "topic_operator",
+            MOCKED_TOPIC_OPERATOR_INSTANCE,
+            TOPIC_OPERATOR_METRICS,
+            MOCKED_TOPIC_OPERATOR_TAG,
+        ),
+        (
+            "user_operator",
+            MOCKED_USER_OPERATOR_INSTANCE,
+            USER_OPERATOR_METRICS,
+            MOCKED_USER_OPERATOR_TAG,
+        ),
     ],
 )
 def test_check_unique_operator(
@@ -41,7 +56,7 @@ def test_check_unique_operator(
     tag,
     mocker,
 ):
-    mocker.patch('requests.get', wraps=mock_http_responses)
+    mocker.patch("requests.get", wraps=mock_http_responses)
     dd_run_check(check(instance))
 
     for expected_metric in metrics:
@@ -61,7 +76,7 @@ def test_check_unique_operator(
 
 
 def test_check_all_operators(dd_run_check, aggregator, check, mocker):
-    mocker.patch('requests.get', wraps=mock_http_responses)
+    mocker.patch("requests.get", wraps=mock_http_responses)
     dd_run_check(
         check(
             {
@@ -71,14 +86,18 @@ def test_check_all_operators(dd_run_check, aggregator, check, mocker):
             }
         )
     )
-    for endpoint_metrics in (CLUSTER_OPERATOR_METRICS, TOPIC_OPERATOR_METRICS, USER_OPERATOR_METRICS):
+    for endpoint_metrics in (
+        CLUSTER_OPERATOR_METRICS,
+        TOPIC_OPERATOR_METRICS,
+        USER_OPERATOR_METRICS,
+    ):
         for expected_metric in endpoint_metrics:
             aggregator.assert_metric(expected_metric)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
-    for namespace in ('cluster_operator', 'topic_operator', 'user_operator'):
+    for namespace in ("cluster_operator", "topic_operator", "user_operator"):
         aggregator.assert_service_check(
             f"strimzi.{namespace}.openmetrics.health",
             status=StrimziCheck.OK,
@@ -88,10 +107,10 @@ def test_check_all_operators(dd_run_check, aggregator, check, mocker):
 
 
 @pytest.mark.parametrize(
-    'instance',
+    "instance",
     [
         {},
-        {'openmetrics_endpoint': 'http://cluster-operator:8080/metrics'},
+        {"openmetrics_endpoint": "http://cluster-operator:8080/metrics"},
     ],
 )
 def test_instance_without_operator_endpoint(dd_run_check, check, instance):
@@ -101,3 +120,34 @@ def test_instance_without_operator_endpoint(dd_run_check, check, instance):
         "`cluster_operator_endpoint`, `topic_operator_endpoint` or `user_operator_endpoint`.",
     ):
         dd_run_check(check(instance))
+
+
+@pytest.mark.parametrize(
+    "namespace, instance, endpoint_key",
+    [
+        (
+            "cluster_operator",
+            MOCKED_CLUSTER_OPERATOR_INSTANCE,
+            "cluster_operator_endpoint",
+        ),
+        (
+            "topic_operator",
+            MOCKED_TOPIC_OPERATOR_INSTANCE,
+            "topic_operator_endpoint",
+        ),
+        (
+            "user_operator",
+            MOCKED_USER_OPERATOR_INSTANCE,
+            "user_operator_endpoint",
+        ),
+    ],
+)
+def test_parse_config_populates_only_configured_scrapers(
+    namespace, instance, endpoint_key
+):
+    strimzi = StrimziCheck("strimzi", {}, [instance])
+    strimzi.parse_config()
+    assert len(strimzi.scraper_configs) == 1
+    assert strimzi.scraper_configs[0][endpoint_key] == instance[endpoint_key]
+    assert strimzi.scraper_configs[0]["openmetrics_endpoint"] == instance[endpoint_key]
+    assert strimzi.scraper_configs[0]["namespace"] == "strimzi." + namespace
