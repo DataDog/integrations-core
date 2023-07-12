@@ -44,7 +44,6 @@ def test_e2e_profile_nasuni_filer(dd_agent_check):
         'filer_support_service_connected:24',
         'filer_support_service_enabled:26',
         'filer_support_service_running:6',
-        'filer_total_memory:-2818360862971856896',
         'filer_version:forward driving',
     ]
 
