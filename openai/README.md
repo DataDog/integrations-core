@@ -119,8 +119,7 @@ docker run -d
 npm install dd-trace
 ```
 
-
-3. Inject your OpenAI Node.js application with Datadog.
+3. Inject the library into your OpenAI Node.js application.
 
 ```shell
 DD_TRACE_DEBUG=1 DD_TRACE_BEAUTIFUL_LOGS=1 DD_SERVICE="my-service" \
