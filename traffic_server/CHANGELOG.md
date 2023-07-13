@@ -8,7 +8,7 @@
 
 ## 1.1.0 / 2022-09-16 / Agent 7.40.0
 
-***Added***: 
+***Added***:
 
 * Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
 
@@ -16,13 +16,13 @@
 
 ## 1.0.1 / 2022-04-20 / Agent 7.36.0
 
-***Fixed***: 
+***Fixed***:
 
 * Add `traffic_server_url` tag. See [#11862](https://github.com/DataDog/integrations-core/pull/11862).
 * Add more default metrics. See [#11858](https://github.com/DataDog/integrations-core/pull/11858).
 
 ## 1.0.0 / 2022-04-05
 
-***Added***: 
+***Added***:
 
 * Add Traffic Server integration. See [#11471](https://github.com/DataDog/integrations-core/pull/11471).
