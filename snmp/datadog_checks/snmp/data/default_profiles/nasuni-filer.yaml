@@ -13,213 +13,225 @@ metrics:
 #  - MIB: NASUNI-FILER-MIB
 #    symbol:
 #      OID: 1.3.6.1.4.1.42040.1.5.0
-#      name: filerUpdateAvailable
+#      name: nasuni.filerUpdateAvailable
 # string metric is not supported yet (keep this metric and this comment in profile until it's fixed)
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.6.0
-      name: filerTotalUnprotectedData
+      name: nasuni.filerTotalUnprotectedData
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.7.0
-      name: filerPushesCompleted
+      name: nasuni.filerPushesCompleted
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.8.0
-      name: filerTotalPushed
+      name: nasuni.filerTotalPushed
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.9.0
-      name: filerTotalRead
+      name: nasuni.filerTotalRead
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.10.0
-      name: filerOpensForRead
+      name: nasuni.filerOpensForRead
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.11.0
-      name: filerOpensForWrite
+      name: nasuni.filerOpensForWrite
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.12.0
-      name: filerMergeConflicts
+      name: nasuni.filerMergeConflicts
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.13.0
-      name: filerReadHits
+      name: nasuni.filerReadHits
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.14.0
-      name: filerReadMisses
+      name: nasuni.filerReadMisses
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.100.1.0
-      name: filerCacheTotal
+      name: nasuni.filerCacheTotal
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.100.2.0
-      name: filerCacheUsed
+      name: nasuni.filerCacheUsed
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.100.3.0
-      name: filerCacheFree
+      name: nasuni.filerCacheFree
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.103.1.0
-      name: filerTotalShares
+      name: nasuni.filerTotalShares
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.103.2.0
-      name: filerTotalShareLocks
+      name: nasuni.filerTotalShareLocks
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.103.3.0
-      name: filerTotalShareClients
+      name: nasuni.filerTotalShareClients
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.104.1.0
-      name: filerTotalExports
+      name: nasuni.filerTotalExports
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.105.1.0
-      name: filerTotalIscsiTargets
+      name: nasuni.filerTotalIscsiTargets
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.105.2.0
-      name: filerTotalIscsiClients
+      name: nasuni.filerTotalIscsiClients
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.109.1.0
-      name: filerTotalFtpdirs
+      name: nasuni.filerTotalFtpdirs
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.106.1.0
-      name: filerTotalMobileLicenses
+      name: nasuni.filerTotalMobileLicenses
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.106.2.0
-      name: filerNumIOSLicenses
+      name: nasuni.filerNumIOSLicenses
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.106.3.0
-      name: filerNumAndroidLicenses
+      name: nasuni.filerNumAndroidLicenses
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.108.1.0
-      name: filerCloudOut
+      name: nasuni.filerCloudOut
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.108.2.0
-      name: filerCloudIn
+      name: nasuni.filerCloudIn
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.108.3.0
-      name: filerMobileOut
+      name: nasuni.filerMobileOut
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.108.4.0
-      name: filerMobileIn
+      name: nasuni.filerMobileIn
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.108.5.0
-      name: filerUIOut
+      name: nasuni.filerUIOut
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.108.6.0
-      name: filerUIIn
+      name: nasuni.filerUIIn
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.108.7.0
-      name: filerClientsOut
+      name: nasuni.filerClientsOut
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.108.8.0
-      name: filerClientsIn
+      name: nasuni.filerClientsIn
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.108.9.0
-      name: filerMigrationOut
+      name: nasuni.filerMigrationOut
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.108.10.0
-      name: filerMigrationIn
+      name: nasuni.filerMigrationIn
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.3.1.0
-      name: accountLicensedCapacity
+      name: nasuni.accountLicensedCapacity
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.3.2.0
-      name: accountUsedCapacity
+      name: nasuni.accountUsedCapacity
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.3.3.0
-      name: accountPercentUsedCapacity
+      name: nasuni.accountPercentUsedCapacity
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.102.1.0
-      name: filerAmbientTemp
+      name: nasuni.filerAmbientTemp
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.102.2.0
-      name: filerInletTemp
+      name: nasuni.filerInletTemp
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.102.3.0
-      name: filerExhaustTemp
+      name: nasuni.filerExhaustTemp
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.102.4.0
-      name: filerNumPowerSupplies
+      name: nasuni.filerNumPowerSupplies
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.102.5.0
-      name: filerPowerSupplyErrors
+      name: nasuni.filerPowerSupplyErrors
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.102.6.0
-      name: filerNumRaidArrays
+      name: nasuni.filerNumRaidArrays
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.102.7.0
-      name: filerRaidArrayErrors
+      name: nasuni.filerRaidArrayErrors
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.102.8.0
-      name: filerNumRaidDisks
+      name: nasuni.filerNumRaidDisks
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.1.102.9.0
-      name: filerRaidDiskErrors
+      name: nasuni.filerRaidDiskErrors
+  - MIB: NASUNI-FILER-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.42040.1.101.10.0
+      name: nasuni.filerDiskCount
+  - MIB: NASUNI-FILER-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.42040.1.101.6.0
+      name: nasuni.filerPhysCpuCount
+  - MIB: NASUNI-FILER-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.42040.1.101.7.0
+      name: nasuni.filerCoreCount
   - MIB: NASUNI-FILER-MIB
     symbol:
       OID: 1.3.6.1.4.1.42040.2.1.0
-      name: volumeCount
+      name: nasuni.volumeCount
   - MIB: NASUNI-FILER-MIB
     table:
       OID: 1.3.6.1.4.1.42040.2.2
       name: volumeTable
     symbols:
       - OID: 1.3.6.1.4.1.42040.2.2.1.6
-        name: volumeTableAccessibleData
+        name: nasuni.volumeTableAccessibleData
       - OID: 1.3.6.1.4.1.42040.2.2.1.7
-        name: volumeTableUnprotectedData
+        name: nasuni.volumeTableUnprotectedData
       - OID: 1.3.6.1.4.1.42040.2.2.1.10
-        name: volumeTableLastSnapshotDuration
+        name: nasuni.volumeTableLastSnapshotDuration
       - OID: 1.3.6.1.4.1.42040.2.2.1.11
-        name: volumeTableLastSnapshotVersion
+        name: nasuni.volumeTableLastSnapshotVersion
       - OID: 1.3.6.1.4.1.42040.2.2.1.19
-        name: volumeTableQuota
+        name: nasuni.volumeTableQuota
       - OID: 1.3.6.1.4.1.42040.2.2.1.20
-        name: volumeTableNumAVViolations
+        name: nasuni.volumeTableNumAVViolations
       - OID: 1.3.6.1.4.1.42040.2.2.1.21
-        name: volumeTableNumFileAlerts
+        name: nasuni.volumeTableNumFileAlerts
       - OID: 1.3.6.1.4.1.42040.2.2.1.22
-        name: volumeTableNumExports
+        name: nasuni.volumeTableNumExports
       - OID: 1.3.6.1.4.1.42040.2.2.1.23
-        name: volumeTableNumShares
+        name: nasuni.volumeTableNumShares
       - OID: 1.3.6.1.4.1.42040.2.2.1.24
-        name: volumeTableNumFtpdirs
+        name: nasuni.volumeTableNumFtpdirs
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.42040.2.2.1.2
@@ -311,24 +323,16 @@ metric_tags:
   - OID: 1.3.6.1.4.1.42040.1.101.5.0
     symbol: filerCpuModel
     tag: filer_cpu_model
-  - OID: 1.3.6.1.4.1.42040.1.101.6.0
-    symbol: filerPhysCpuCount
-    tag: filer_phys_cpu_count
-  - OID: 1.3.6.1.4.1.42040.1.101.7.0
-    symbol: filerCoreCount
-    tag: filer_core_count
   - OID: 1.3.6.1.4.1.42040.1.101.8.0
     symbol: filerCpuArch
     tag: filer_cpu_arch
-  - OID: 1.3.6.1.4.1.42040.1.101.10.0
-    symbol: filerDiskCount
-    tag: filer_disk_count
-  - OID: 1.3.6.1.4.1.42040.1.107.1.0
-    symbol: filerSupportServiceEnabled
-    tag: filer_support_service_enabled
-  - OID: 1.3.6.1.4.1.42040.1.107.2.0
-    symbol: filerSupportServiceConnected
-    tag: filer_support_service_connected
-  - OID: 1.3.6.1.4.1.42040.1.107.3.0
-    symbol: filerSupportServiceRunning
-    tag: filer_support_service_running
+# Awaiting support for reporting string scalar OIDs for the following
+#  - OID: 1.3.6.1.4.1.42040.1.107.1.0
+#    symbol: filerSupportServiceEnabled
+#    tag: filer_support_service_enabled
+#  - OID: 1.3.6.1.4.1.42040.1.107.2.0
+#    symbol: filerSupportServiceConnected
+#    tag: filer_support_service_connected
+#  - OID: 1.3.6.1.4.1.42040.1.107.3.0
+#    symbol: filerSupportServiceRunning
+#    tag: filer_support_service_running

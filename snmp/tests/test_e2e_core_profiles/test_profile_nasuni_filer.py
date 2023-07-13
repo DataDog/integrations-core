@@ -31,19 +31,13 @@ def test_e2e_profile_nasuni_filer(dd_agent_check):
         'snmp_device:' + ip_address,
     ] + [
         'filer_bios_version:quaintly zombies zombies but',
-        'filer_core_count:20',
         'filer_cpu_arch:their zombies',
         'filer_cpu_model:Jaded but their quaintly forward kept their',
-        'filer_disk_count:1',
         'filer_identifier:but forward acted quaintly zombies',
         'filer_package_format:driving Jaded Jaded oxen zombies Jaded',
-        'filer_phys_cpu_count:20',
         'filer_platform_name:their acted driving forward forward Jaded kept driving',
         'filer_platform_type:quaintly',
         'filer_serial_number:kept quaintly forward',
-        'filer_support_service_connected:24',
-        'filer_support_service_enabled:26',
-        'filer_support_service_running:6',
         'filer_version:forward driving',
     ]
 
@@ -54,51 +48,54 @@ def test_e2e_profile_nasuni_filer(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.accountLicensedCapacity', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.accountPercentUsedCapacity', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.accountUsedCapacity', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerAmbientTemp', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerCacheFree', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerCacheTotal', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerCacheUsed', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerClientsIn', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerClientsOut', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerCloudIn', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerCloudOut', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerExhaustTemp', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerInletTemp', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerMergeConflicts', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerMigrationIn', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerMigrationOut', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerMobileIn', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerMobileOut', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerNumAndroidLicenses', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerNumIOSLicenses', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerNumPowerSupplies', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerNumRaidArrays', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerNumRaidDisks', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerOpensForRead', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerOpensForWrite', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerPowerSupplyErrors', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerPushesCompleted', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerRaidArrayErrors', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerRaidDiskErrors', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerReadHits', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerReadMisses', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerTotalExports', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerTotalFtpdirs', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerTotalIscsiClients', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerTotalIscsiTargets', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerTotalMobileLicenses', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerTotalPushed', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerTotalRead', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerTotalShareClients', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerTotalShareLocks', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerTotalShares', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerTotalUnprotectedData', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerUIIn', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.filerUIOut', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.volumeCount', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.accountLicensedCapacity', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.accountPercentUsedCapacity', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.accountUsedCapacity', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerAmbientTemp', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerCacheFree', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerCacheTotal', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerCacheUsed', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerClientsIn', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerClientsOut', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerCloudIn', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerCloudOut', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerCoreCount', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerDiskCount', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerExhaustTemp', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerInletTemp', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerMergeConflicts', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerMigrationIn', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerMigrationOut', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerMobileIn', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerMobileOut', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerNumAndroidLicenses', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerNumIOSLicenses', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerNumPowerSupplies', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerNumRaidArrays', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerNumRaidDisks', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerOpensForRead', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerOpensForWrite', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerPhysCpuCount', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerPowerSupplyErrors', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerPushesCompleted', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerRaidArrayErrors', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerRaidDiskErrors', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerReadHits', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerReadMisses', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerTotalExports', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerTotalFtpdirs', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerTotalIscsiClients', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerTotalIscsiTargets', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerTotalMobileLicenses', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerTotalPushed', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerTotalRead', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerTotalShareClients', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerTotalShareLocks', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerTotalShares', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerTotalUnprotectedData', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerUIIn', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.filerUIOut', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.nasuni.volumeCount', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         [
             'volume_table_description:forward driving their oxen forward their quaintly quaintly forward',
@@ -115,26 +112,26 @@ def test_e2e_profile_nasuni_filer(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.volumeTableAccessibleData', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.nasuni.volumeTableAccessibleData', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.volumeTableLastSnapshotDuration', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.nasuni.volumeTableLastSnapshotDuration', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.volumeTableLastSnapshotVersion', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.nasuni.volumeTableLastSnapshotVersion', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.volumeTableNumAVViolations', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.nasuni.volumeTableNumAVViolations', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric('snmp.volumeTableNumExports', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.nasuni.volumeTableNumExports', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.volumeTableNumFileAlerts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.nasuni.volumeTableNumFileAlerts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric('snmp.volumeTableNumFtpdirs', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.volumeTableNumShares', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.volumeTableQuota', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.nasuni.volumeTableNumFtpdirs', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.nasuni.volumeTableNumShares', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.nasuni.volumeTableQuota', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.volumeTableUnprotectedData', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.nasuni.volumeTableUnprotectedData', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     # --- TEST METADATA ---
