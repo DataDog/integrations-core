@@ -813,9 +813,8 @@ def stats_for_version(version, jvm_rate=False):
         metrics.update(ADDITIONAL_METRICS_PRE_7_0_0)
     if version < [8, 0, 0]:
         metrics.update(ADDITIONAL_METRIC_PRE_8_0_0)
-    if version < [9, 0, 0]:
-        if version >= [8, 0, 0]:
-            metrics.update(ADDITIONAL_METRIC_POST_8_0_0)
+    if version >= [8, 0, 0]:
+        metrics.update(ADDITIONAL_METRIC_POST_8_0_0)
 
     for ver in VERSIONS_THAT_ADD_METRICS[: bisect(VERSIONS_THAT_ADD_METRICS, tuple(version))]:
         metrics.update(ADDITIONAL_METRICS_BY_VERSION[ver])
