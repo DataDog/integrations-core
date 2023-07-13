@@ -133,7 +133,7 @@ See the [APM Node.js OpenAI documentation][8] for more advanced usage.
 
 ### Configuration
 
-See the [APM Node.js library documentation][8] for all the available configuration options.
+See the [APM Node.js library documentation][9] for all the available configuration options.
 
 
 #### Log prompt and completion sampling
