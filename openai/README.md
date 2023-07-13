@@ -129,7 +129,7 @@ DD_TRACE_DEBUG=1 DD_TRACE_BEAUTIFUL_LOGS=1 DD_SERVICE="my-service" \
 
 **Note**: If the Agent is using a non-default hostname or port, you must also set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
 
-See the [APM Node.js OpenAI documentation][9] for more advanced usage.
+See the [APM Node.js OpenAI documentation][8] for more advanced usage.
 
 ### Configuration
 
