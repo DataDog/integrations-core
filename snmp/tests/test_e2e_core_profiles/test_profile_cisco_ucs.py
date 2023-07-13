@@ -56,15 +56,24 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
         aggregator.assert_metric('snmp.cucsComputeMbPowerStatsInputVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['cucs_compute_rack_unit_admin_power:admin_up', 'cucs_compute_rack_unit_admin_state:out_of_service', 'cucs_compute_rack_unit_association:removing', 'cucs_compute_rack_unit_availability:unavailable', 'cucs_compute_rack_unit_check_point:discovered', 'cucs_compute_rack_unit_dn:zombies zombies quaintly Jaded Jaded kept kept oxen driving', 'cucs_compute_rack_unit_model:their Jaded but oxen forward their forward Jaded', 'cucs_compute_rack_unit_name:but kept their acted their their Jaded kept', 'cucs_compute_rack_unit_num_of_cores:1392027044', 'cucs_compute_rack_unit_num_of_cpus:3337463896', 'cucs_compute_rack_unit_num_of_threads:431335899', 'cucs_compute_rack_unit_oper_power:test', 'cucs_compute_rack_unit_oper_state:unassociated', 'cucs_compute_rack_unit_operability:degraded', 'cucs_compute_rack_unit_presence:equipped_identity_unestablishable', 'cucs_compute_rack_unit_serial:but oxen Jaded driving', 'cucs_compute_rack_unit_uuid:driving acted forward acted oxen forward their but acted',
- 'cucs_compute_rack_unit_vendor:acted quaintly zombies their Jaded Jaded'],
-         ['cucs_compute_rack_unit_admin_power:cycle_wait', 'cucs_compute_rack_unit_admin_state:in_maintenance', 'cucs_compute_rack_unit_association:removing', 'cucs_compute_rack_unit_availability:available', 'cucs_compute_rack_unit_check_point:removing', 'cucs_compute_rack_unit_dn:quaintly', 'cucs_compute_rack_unit_model:zombies driving zombies quaintly oxen forward', 'cucs_compute_rack_unit_name:oxen oxen quaintly zombies Jaded but but', 'cucs_compute_rack_unit_num_of_cores:3097236775', 'cucs_compute_rack_unit_num_of_cpus:128161696', 'cucs_compute_rack_unit_num_of_threads:78797133', 'cucs_compute_rack_unit_oper_power:ok', 'cucs_compute_rack_unit_oper_state:power_off', 'cucs_compute_rack_unit_operability:identity_unestablishable', 'cucs_compute_rack_unit_presence:inaccessible', 'cucs_compute_rack_unit_serial:driving', 'cucs_compute_rack_unit_uuid:zombies oxen', 'cucs_compute_rack_unit_vendor:kept their Jaded acted driving Jaded but quaintly'],
+         ['mem:28682'],
+         ['mem:33619'],
 
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
+         ['cucs_compute_rack_unit_admin_power:admin_up', 'cucs_compute_rack_unit_admin_state:out_of_service', 'cucs_compute_rack_unit_association:removing', 'cucs_compute_rack_unit_availability:unavailable', 'cucs_compute_rack_unit_check_point:discovered', 'cucs_compute_rack_unit_dn:zombies zombies quaintly Jaded Jaded kept kept oxen driving', 'cucs_compute_rack_unit_model:their Jaded but oxen forward their forward Jaded', 'cucs_compute_rack_unit_name:but kept their acted their their Jaded kept', 'cucs_compute_rack_unit_num_of_cores:1392027044', 'cucs_compute_rack_unit_num_of_cpus:3337463896', 'cucs_compute_rack_unit_num_of_threads:431335899', 'cucs_compute_rack_unit_oper_power:test', 'cucs_compute_rack_unit_oper_state:unassociated', 'cucs_compute_rack_unit_operability:degraded', 'cucs_compute_rack_unit_presence:equipped_identity_unestablishable', 'cucs_compute_rack_unit_serial:but oxen Jaded driving', 'cucs_compute_rack_unit_uuid:driving acted forward acted oxen forward their but acted',
+ 'cucs_compute_rack_unit_vendor:acted quaintly zombies their Jaded Jaded'],
+         ['cucs_compute_rack_unit_admin_power:cycle_wait', 'cucs_compute_rack_unit_admin_state:in_maintenance', 'cucs_compute_rack_unit_association:removing', 'cucs_compute_rack_unit_availability:available', 'cucs_compute_rack_unit_check_point:removing', 'cucs_compute_rack_unit_dn:quaintly', 'cucs_compute_rack_unit_model:zombies driving zombies quaintly oxen forward', 'cucs_compute_rack_unit_name:oxen oxen quaintly zombies Jaded but but', 'cucs_compute_rack_unit_num_of_cores:3097236775', 'cucs_compute_rack_unit_num_of_cpus:128161696', 'cucs_compute_rack_unit_num_of_threads:78797133', 'cucs_compute_rack_unit_oper_power:ok', 'cucs_compute_rack_unit_oper_state:power_off', 'cucs_compute_rack_unit_operability:identity_unestablishable', 'cucs_compute_rack_unit_presence:inaccessible', 'cucs_compute_rack_unit_serial:driving', 'cucs_compute_rack_unit_uuid:zombies oxen', 'cucs_compute_rack_unit_vendor:kept their Jaded acted driving Jaded but quaintly'],
+
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.cucsComputeRackUnitAvailableMemory', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cucsComputeRackUnitTotalMemory', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
          ['cucs_compute_rack_unit_mb_temp_stats_dn:oxen forward zombies forward their acted quaintly kept'],
