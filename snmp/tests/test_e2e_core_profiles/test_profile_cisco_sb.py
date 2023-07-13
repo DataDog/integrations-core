@@ -33,12 +33,10 @@ def test_e2e_profile_cisco_sb(dd_agent_check):
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
 
-
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
     aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-
 
     # --- TEST METADATA ---
     device = {
