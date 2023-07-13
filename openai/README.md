@@ -137,7 +137,7 @@ See the [APM Node.js OpenAI documentation][9] for more advanced usage.
 See the [APM Node.js library documentation][8] for all the available configuration options.
 
 
-#### Log Prompt & Completion Sampling
+#### Log prompt and completion sampling
 
 To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED=1` environment variable. By default, 10% of traced requests will emit logs containing the prompts and completions.
 
