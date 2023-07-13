@@ -1,0 +1,7 @@
+# Metadata mixin for Cisco devices.
+
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "cisco"
