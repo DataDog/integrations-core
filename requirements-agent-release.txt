@@ -8,7 +8,7 @@ datadog-ambari==3.2.1; sys_platform != 'win32'
 datadog-apache==4.2.2
 datadog-arangodb==1.4.1
 datadog-argocd==1.2.0
-datadog-aspdotnet==1.13.0; sys_platform == 'win32'
+datadog-aspdotnet==1.13.1; sys_platform == 'win32'
 datadog-avi-vantage==3.3.1
 datadog-azure-iot-edge==3.3.2
 datadog-boundary==1.2.1
