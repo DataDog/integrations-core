@@ -148,7 +148,7 @@ To adjust the log sample rate, see the [APM library documentation][3].
 
 ### Validation
 
-Validate that the APM Node.js library can communicate with your Agent by examining the debugging output from the application process. Within the section titled "Encoding payload" you should see an entry with a `name` field and a correlating value of `openai.request`. A truncated version of this output looks like this:
+Validate that the APM Node.js library can communicate with your Agent by examining the debugging output from the application process. Within the section titled "Encoding payload," you should see an entry with a `name` field and a correlating value of `openai.request`. A truncated version of the output looks like this:
 
 ```json
 {
