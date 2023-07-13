@@ -231,8 +231,20 @@ metrics:
       OID: 1.3.6.1.4.1.9.9.719.1.9.35
     symbols:
       - name: memory.free
-        OID: 1.3.6.1.4.1.9.9.719.1.9.35.1.9
+        OID: 1.3.6.1.4.1.9.9.719.1.9.35.1.9  # cucsComputeRackUnitAvailableMemory
       - name: memory.total
+        OID: 1.3.6.1.4.1.9.9.719.1.9.35.1.49  # cucsComputeRackUnitTotalMemory
+    metric_tags:
+      - index: 1
+        tag: mem
+  - MIB: CISCO-UNIFIED-COMPUTING-COMPUTE-MIB
+    table:
+      name: cucsComputeRackUnitTable
+      OID: 1.3.6.1.4.1.9.9.719.1.9.35
+    symbols:
+      - name: cucsComputeRackUnitAvailableMemory
+        OID: 1.3.6.1.4.1.9.9.719.1.9.35.1.9
+      - name: cucsComputeRackUnitTotalMemory
         OID: 1.3.6.1.4.1.9.9.719.1.9.35.1.49
     metric_tags:
       - column:
