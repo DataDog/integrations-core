@@ -469,7 +469,7 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
     for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:
         aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=tags)
 
-    interface_tags = ['interface:mgmt', 'interface_alias:desc1'] + tags
+    interface_tags = ['interface:mgmt', 'interface_alias:desc1', 'interface_index:32'] + tags
     aggregator.assert_metric(
         'snmp.ifInErrors',
         metric_type=aggregator.COUNT,
