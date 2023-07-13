@@ -1,5 +1,11 @@
 # CHANGELOG - Aspdotnet
 
+## 1.13.1 / 2023-07-13
+
+***Fixed***:
+
+* Bump the minimum datadog-checks-base version. See [#15217](https://github.com/DataDog/integrations-core/pull/15217).
+
 ## 1.13.0 / 2023-07-10
 
 ***Added***:
