@@ -152,7 +152,7 @@ datadog-tcp-check==4.6.1
 datadog-teamcity==3.1.1
 datadog-temporal==1.1.1
 datadog-tenable==1.4.1
-datadog-teradata==1.1.1; sys_platform != 'darwin'
+datadog-teradata==1.1.2; sys_platform != 'darwin'
 datadog-tls==2.11.0
 datadog-tokumx==3.2.0
 datadog-tomcat==1.11.2
