@@ -544,6 +544,17 @@ ADDITIONAL_METRICS_BY_VERSION = {
 }
 VERSIONS_THAT_ADD_METRICS = sorted(ADDITIONAL_METRICS_BY_VERSION)
 
+ADDITIONAL_METRIC_POST_8_0_0 = {
+    # The in_flight_requests stat has been renamed inflight_requests in logs and diagnostic APIs.
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html#breaking_80_rest_api_changes
+    'elasticsearch.breakers.inflight_requests.tripped': ('gauge', 'breakers.inflight_requests.tripped'),
+    'elasticsearch.breakers.inflight_requests.overhead': ('gauge', 'breakers.inflight_requests.overhead'),
+    'elasticsearch.breakers.inflight_requests.estimated_size_in_bytes': (
+        'gauge',
+        'breakers.inflight_requests.estimated_size_in_bytes',
+    ),
+}
+
 # These metrics have been deleted on ES8
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html
 ADDITIONAL_METRIC_PRE_8_0_0 = {
@@ -802,6 +813,9 @@ def stats_for_version(version, jvm_rate=False):
         metrics.update(ADDITIONAL_METRICS_PRE_7_0_0)
     if version < [8, 0, 0]:
         metrics.update(ADDITIONAL_METRIC_PRE_8_0_0)
+    if version < [9, 0, 0]:
+        if version >= [8, 0, 0]:
+            metrics.update(ADDITIONAL_METRIC_POST_8_0_0)
 
     for ver in VERSIONS_THAT_ADD_METRICS[: bisect(VERSIONS_THAT_ADD_METRICS, tuple(version))]:
         metrics.update(ADDITIONAL_METRICS_BY_VERSION[ver])
