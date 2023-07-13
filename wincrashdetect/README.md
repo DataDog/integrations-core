@@ -4,7 +4,7 @@
 
 Get Windows kernel memory usage to create visualizations and monitors in Datadog.
 
-**Note:** The list of metrics collected by this integration may change between minor Agent versions. Such changes may not be mentioned in the Agent's changelog.
+**Note**: The list of metrics collected by this integration may change between minor Agent versions. Such changes may not be mentioned in the Agent's changelog.
 
 ## Setup
 
