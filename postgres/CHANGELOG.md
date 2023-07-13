@@ -1,5 +1,11 @@
 # CHANGELOG - postgres
 
+## 14.0.1 / 2023-07-13
+
+***Fixed***:
+
+* Bump the minimum datadog-checks-base version. See [#15238](https://github.com/DataDog/integrations-core/pull/15238).
+
 ## 14.0.0 / 2023-07-10
 
 ***Changed***:

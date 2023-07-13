@@ -1,5 +1,11 @@
 # CHANGELOG - exchange_server
 
+## 1.16.1 / 2023-07-13
+
+***Fixed***:
+
+* Bump the minimum datadog-checks-base version. See [#15217](https://github.com/DataDog/integrations-core/pull/15217).
+
 ## 1.16.0 / 2023-07-10
 
 ***Added***:

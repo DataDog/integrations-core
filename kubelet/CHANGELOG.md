@@ -1,5 +1,11 @@
 # CHANGELOG - kubelet
 
+## 7.8.1 / 2023-07-13
+
+***Fixed***:
+
+* Bump the minimum datadog-checks-base version. See [#15218](https://github.com/DataDog/integrations-core/pull/15218).
+
 ## 7.8.0 / 2023-07-10
 
 ***Added***:

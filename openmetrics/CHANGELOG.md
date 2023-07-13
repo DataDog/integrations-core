@@ -1,5 +1,11 @@
 # CHANGELOG - OpenMetrics
 
+## 3.0.2 / 2023-07-13
+
+***Fixed***:
+
+* Bump the minimum datadog-checks-base version. See [#15219](https://github.com/DataDog/integrations-core/pull/15219).
+
 ## 3.0.1 / 2023-07-10
 
 ***Fixed***:
