@@ -139,7 +139,7 @@ See the [APM Node.js library documentation][8] for all the available configurati
 
 #### Log prompt and completion sampling
 
-To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED=1` environment variable. By default, 10% of traced requests will emit logs containing the prompts and completions.
+To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED=1` environment variable. By default, 10% of traced requests emit logs containing the prompts and completions.
 
 To adjust the log sample rate, see the [APM library documentation][3].
 
