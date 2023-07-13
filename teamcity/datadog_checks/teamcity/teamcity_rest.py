@@ -107,7 +107,7 @@ class TeamCityRest(AgentCheck):
                 self.bc_store.set_last_build_id(project_id, build_config_id, last_build_id)
 
     def _initialize_multi_build_config(self):
-        filtered_projects = None
+        filtered_projects = {}
         build_configs_list = None
         projects = get_response(self, 'projects')
         if projects and projects.get('project'):
@@ -120,41 +120,35 @@ class TeamCityRest(AgentCheck):
                     len(filtered_projects),
                 )
 
-        if filtered_projects is not None and len(filtered_projects) >= 1:
-            for project_id in filtered_projects:
-                build_configs = get_response(self, 'build_configs', project_id=project_id)
-                if build_configs and build_configs.get('buildType'):
-                    build_configs_list = [build_config['id'] for build_config in build_configs['buildType']]
-
-                else:
-                    build_configs_list = []
-                """
-                Handle case where the `include` build_config element is a string. Assign `{}` as its filter config.
-                # projects:
-                #   project_regex:
-                #     include:
-                #       - build_config_regex
-
-                `build_config_regex` == `build_config_regex: {}`
-                """
-                build_config_filter_config = (
-                    filtered_projects.get(project_id) if isinstance(filtered_projects.get(project_id), dict) else {}
+        for project_id in filtered_projects:
+            build_configs_list = [
+                build_config['id']
+                for build_config in get_response(self, 'build_configs', project_id=project_id).get('buildType', [])
+            ]
+            # Handle case where the `include` build_config element is a string. Assign `{}` as its filter config.
+            # projects:
+            #   project_regex:
+            #     include:
+            #       - build_config_regex
+            # `build_config_regex` == `build_config_regex: {}`
+            build_config_filter_config = (
+                filtered_projects.get(project_id) if isinstance(filtered_projects.get(project_id), dict) else {}
+            )
+            filtered_build_configs, build_configs_limit_reached = filter_build_configs(
+                self, build_configs_list, project_id, build_config_filter_config
+            )
+            if build_configs_limit_reached:
+                self.log.warning(
+                    "Reached build configurations limit of %s. Update your `projects` "
+                    "configuration using the `include` and `exclude` filter options or "
+                    "increase the `default_build_configs_limit` option.",
+                    len(filtered_build_configs),
                 )
-                filtered_build_configs, build_configs_limit_reached = filter_build_configs(
-                    self, build_configs_list, project_id, build_config_filter_config
-                )
-                if build_configs_limit_reached:
-                    self.log.warning(
-                        "Reached build configurations limit of %s. Update your `projects` "
-                        "configuration using the `include` and `exclude` filter options or "
-                        "increase the `default_build_configs_limit` option.",
-                        len(filtered_build_configs),
-                    )
-                for build_config_id in list(filtered_build_configs):
-                    if not self.bc_store.get_build_config(project_id, build_config_id):
-                        build_config_type = self._get_build_config_type(build_config_id)
-                        self.bc_store.set_build_config(project_id, build_config_id, build_config_type)
-                        self._get_last_build_id(project_id, build_config_id)
+            for build_config_id in filtered_build_configs:
+                if not self.bc_store.get_build_config(project_id, build_config_id):
+                    build_config_type = self._get_build_config_type(build_config_id)
+                    self.bc_store.set_build_config(project_id, build_config_id, build_config_type)
+                    self._get_last_build_id(project_id, build_config_id)
 
     def _initialize_single_build_config(self):
         build_config_id = self.current_build_config

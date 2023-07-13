@@ -125,6 +125,7 @@ def get_response(check, resource, **kwargs):
             return json_payload
         elif json_payload.get("count", 0) == 0:
             check.log.debug("No results found for resource %s url: %s", resource_name, resource_url)
+            return {}
         else:
             check.log.debug("Results found for resource %s url: %s", resource_name, resource_url)
             return json_payload
