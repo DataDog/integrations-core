@@ -34,8 +34,6 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.9.9.762.1.2.1.2.0
       name: cwoTfoStatsActiveOptConn
-      tag: active_connections
-      TODO_tag: Handle unknown tag `active_connections` (remove this field once fixed)
   - MIB: CISCO-WAN-OPTIMIZATION-MIB
     symbol:
       OID: 1.3.6.1.4.1.9.9.762.1.2.1.4.0
