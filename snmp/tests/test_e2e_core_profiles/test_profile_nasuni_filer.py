@@ -123,13 +123,21 @@ def test_e2e_profile_nasuni_filer(dd_agent_check):
         aggregator.assert_metric(
             'snmp.nasuni.volumeTableNumAVViolations', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric('snmp.nasuni.volumeTableNumExports', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.nasuni.volumeTableNumExports', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric(
             'snmp.nasuni.volumeTableNumFileAlerts', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric('snmp.nasuni.volumeTableNumFtpdirs', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.nasuni.volumeTableNumShares', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.nasuni.volumeTableQuota', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.nasuni.volumeTableNumFtpdirs', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.nasuni.volumeTableNumShares', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.nasuni.volumeTableQuota', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric(
             'snmp.nasuni.volumeTableUnprotectedData', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
