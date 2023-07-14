@@ -14,8 +14,8 @@
             "id": 7080454066802084,
             "definition": {
               "type": "image",
-              "url": "https://miro.medium.com/v2/resize:fit:4800/format:webp/0*Iy9LzhTAPht6ghwU.png",
-              "url_dark_theme": "https://miro.medium.com/v2/resize:fit:4800/format:webp/0*Iy9LzhTAPht6ghwU.png",
+              "url": "/static/images/logos/langchain_large.svg",
+              "url_dark_theme": "/static/images/logos/langchain_reversed_large.svg",
               "sizing": "cover",
               "has_background": true,
               "has_border": false,
@@ -920,7 +920,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
