@@ -754,7 +754,6 @@
               "title": "Avg Completion Tokens per Request",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -921,25 +920,26 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
                       "alias": "Error Rate",
-                      "formula": "(query1 / query2) * 100"
+                      "formula": "(query1 / query2)"
                     }
                   ],
                   "queries": [
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "sum:langchain.request.error{$env,$service,$version,$provider,$model,$api_key}.as_count()"
+                      "query": "sum:trace.langchain.request.errors{$env,$service,$version,$provider,$model,$api_key}.as_count()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "count:langchain.request.duration{$env,$service,$version,$provider,$model,$api_key}.as_count()"
+                      "query": "sum:trace.langchain.request.hits{$env,$service,$version,$provider,$model,$api_key}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
