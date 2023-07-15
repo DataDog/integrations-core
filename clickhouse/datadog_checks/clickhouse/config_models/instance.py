@@ -58,6 +58,7 @@ class InstanceConfig(BaseModel):
     tls_verify: Optional[bool]
     use_global_custom_queries: Optional[str]
     username: Optional[str]
+    clustername: Optional[str]
 
     @root_validator(pre=True)
     def _initial_validation(cls, values):
