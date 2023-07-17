@@ -145,6 +145,18 @@ files:
       value:
         type: integer
         example: 60000
+    - name: max_connections
+      hidden: true
+      description: |
+        Sets the upper bound limit on the number of concurrent connections the Agent can have on the database server.
+        The Agent needs to open additional connections to collect explain plans across databases. 
+        Idle connections are cached, but pruned over time to balance the performance impact of opening connections and the cost of having many open connections. 
+        Raising the default value should only be needed on workloads with >50 databases. 
+        Lowering the default value can reduce the number of explain plans collected and is not recommended in most cases.
+      value:
+        type: integer
+        example: 30
+        display_default: 30
     - name: relations
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.

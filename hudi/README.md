@@ -105,7 +105,7 @@ Need help? Contact [Datadog support][9].
 
 [1]: https://hudi.apache.org/
 [2]: https://github.com/apache/hudi/releases
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://hudi.apache.org/docs/configurations#Metrics-Configurations
 [5]: https://hudi.apache.org/docs/metrics/#jmxmetricsreporter
 [6]: https://github.com/DataDog/integrations-core/blob/master/hudi/datadog_checks/hudi/data/conf.yaml.example
