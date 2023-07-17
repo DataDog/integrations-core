@@ -37,7 +37,7 @@ def assert_extend_generic_if(aggregator, common_tags):
 def assert_extend_generic_ip(aggregator, common_tags):
     # fmt: off
     """Add the following to the snmprec
-1.3.6.1.2.1.4.31.1.1.4.1 = Counter64: 310637142
+1.3.6.1.2.1.4.31.1.1.4.1|70|310637142
     """
     # fmt: on
     aggregator.assert_metric(
