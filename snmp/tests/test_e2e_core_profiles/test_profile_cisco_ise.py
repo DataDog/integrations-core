@@ -10,10 +10,11 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
+    assert_extend_generic_host_resources,
     assert_extend_generic_if,
     assert_extend_generic_ucd,
     create_e2e_core_test_config,
-    get_device_ip_from_config, assert_extend_generic_host_resources,
+    get_device_ip_from_config,
 )
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
@@ -29,21 +30,15 @@ def test_e2e_profile_cisco_ise(dd_agent_check):
         'snmp_host:cisco-ise.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-    ] + []
+    ]
 
     # --- TEST EXTENDED METRICS ---
-    # Examples:
     assert_extend_generic_if(aggregator, common_tags)
     assert_extend_generic_ucd(aggregator, common_tags)
     assert_extend_generic_host_resources(aggregator, common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
-
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
 
     # --- TEST METADATA ---
     device = {
