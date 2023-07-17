@@ -1759,12 +1759,12 @@ def test_proliant(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     interfaces = [
-        ('eth0', 'quaintly zombies quaintly forward'),
-        ('eth1', 'quaintly but quaintly quaintly'),
+        (3, 'eth0', 'quaintly zombies quaintly forward'),
+        (4, 'eth1', 'quaintly but quaintly quaintly'),
     ]
 
-    for interface, desc in interfaces:
-        if_tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + common_tags
+    for index, interface, desc in interfaces:
+        if_tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc), 'interface_index:{}'.format(index)] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
