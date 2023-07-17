@@ -1947,7 +1947,7 @@ def assert_cisco_asa(aggregator, profile):
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
         )
 
-    if_tags = ['interface:eth0'] + common_tags
+    if_tags = ['interface:eth0', 'interface_index:11'] + common_tags
     for metric in IF_COUNTS:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
