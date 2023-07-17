@@ -105,7 +105,12 @@ def test_metadata_integration(aggregator, datadog_agent):
     c.check_id = 'test:123'
     c.check(INSTANCE)
 
-    parsed_version = version.parse(MARKLOGIC_VERSION)
+    if MARKLOGIC_VERSION.startswith("10."):
+        expected_version = "10.0-10"
+    else:
+        expected_version = MARKLOGIC_VERSION
+
+    parsed_version = version.parse(expected_version)
     version_metadata = {
         'version.scheme': 'marklogic',
         'version.major': str(parsed_version.major),
