@@ -1158,6 +1158,17 @@ def test_cisco_nexus(aggregator):
     profile = "cisco-nexus"
     run_profile_check(profile)
 
+
+    indexes = {
+        'GigabitEthernet1/0/1': '2',
+        'GigabitEthernet1/0/2': '13',
+        'GigabitEthernet1/0/3': '20',
+        'GigabitEthernet1/0/4': '22',
+        'GigabitEthernet1/0/5': '23',
+        'GigabitEthernet1/0/6': '25',
+        'GigabitEthernet1/0/7': '29',
+        'GigabitEthernet1/0/8': '30',
+    }
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
 
     common_tags = common.CHECK_TAGS + [
@@ -1175,7 +1186,7 @@ def test_cisco_nexus(aggregator):
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
     for interface in interfaces:
-        tags = ['interface:{}'.format(interface), 'interface_alias:'] + common_tags
+        tags = ['interface:{}'.format(interface), 'interface_alias:', 'interface_index:{}'.format(indexes.get(interface))] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
