@@ -14,6 +14,8 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.postgres import aws
+from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
+from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import (
@@ -47,6 +49,7 @@ from .util import (
     DatabaseConfigurationError,  # noqa: F401
     fmt,
     get_schema_field,
+    warning_with_tags,
 )
 from .version_utils import V9, V9_2, V10, V13, V14, VersionUtils
 
@@ -98,9 +101,30 @@ class PostgreSql(AgentCheck):
         # map[dbname -> psycopg connection]
         self._db_pool = {}
         self._db_pool_lock = threading.Lock()
+        self.autodiscovery_db_pool = MultiDatabaseConnectionPool(self._new_connection)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
+        self.autodiscovery = self._build_autodiscovery()
 
         self._dynamic_queries = None
+
+    def _build_autodiscovery(self):
+        if not self._config.discovery_config['enabled']:
+            return None
+
+        if not self._config.relations:
+            self.log.warning(
+                "Database autodiscovery is enabled, but relation-level metrics are not being collected."
+                "All metrics will be gathered from global view, and autodiscovery will not run."
+            )
+            return None
+
+        discovery = PostgresAutodiscovery(
+            self,
+            'postgres',
+            self._config.discovery_config,
+            self._config.idle_connection_timeout,
+        )
+        return discovery
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
@@ -391,7 +415,7 @@ class PostgreSql(AgentCheck):
 
         return results
 
-    def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics):
+    def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics, dbname=None):
         if scope is None:
             return None
         # build query
@@ -437,6 +461,11 @@ class PostgreSql(AgentCheck):
             # connection.
             if not scope['relation'] and not scope.get('use_global_db_tag', False):
                 tags = copy.copy(self.tags_without_db)
+            elif dbname is not None:
+                # if dbname is specified in this function, we are querying an autodiscovered database
+                # and we need to tag it
+                tags = copy.copy(self.tags_without_db)
+                tags.append("db:{}".format(dbname))
             else:
                 tags = copy.copy(instance_tags)
 
@@ -451,6 +480,37 @@ class PostgreSql(AgentCheck):
             num_results += 1
 
         return num_results
+
+    def _collect_relations_autodiscovery(self, instance_tags, relations_scopes):
+        if not self.autodiscovery:
+            return
+
+        start_time = time()
+        databases = self.autodiscovery.get_items()
+        for db in databases:
+            with self.autodiscovery_db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
+                with conn.cursor() as cursor:
+                    for scope in relations_scopes:
+                        self._query_scope(cursor, scope, instance_tags, False, db)
+        elapsed_ms = (time() - start_time) * 1000
+        self.histogram(
+            "dd.postgres._collect_relations_autodiscovery.time",
+            elapsed_ms,
+            tags=self.tags + self._get_debug_tags(),
+            hostname=self.resolved_hostname,
+        )
+        if elapsed_ms > self._config.min_collection_interval * 1000:
+            self.record_warning(
+                DatabaseConfigurationError.autodiscovered_metrics_exceeds_collection_interval,
+                warning_with_tags(
+                    "Collecting metrics on autodiscovery metrics took %d ms, which is longer than "
+                    "the minimum collection interval. Consider increasing the min_collection_interval parameter "
+                    "in the postgres yaml configuration.",
+                    int(elapsed_ms),
+                    code=DatabaseConfigurationError.autodiscovered_metrics_exceeds_collection_interval.value,
+                    min_collection_interval=self._config.min_collection_interval,
+                ),
+            )
 
     def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
@@ -473,9 +533,17 @@ class PostgreSql(AgentCheck):
 
         # Do we need relation-specific metrics?
         if self._config.relations:
-            metric_scope.extend(RELATION_METRICS)
+            relations_scopes = list(RELATION_METRICS)
+
             if self._config.collect_bloat_metrics:
-                metric_scope.extend([INDEX_BLOAT, TABLE_BLOAT])
+                relations_scopes.extend([INDEX_BLOAT, TABLE_BLOAT])
+
+            # If autodiscovery is enabled, get relation metrics from all databases found
+            if self.autodiscovery:
+                self._collect_relations_autodiscovery(instance_tags, relations_scopes)
+            # otherwise, continue just with dbname
+            else:
+                metric_scope.extend(relations_scopes)
 
         replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
         if replication_metrics:
