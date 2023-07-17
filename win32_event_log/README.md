@@ -494,8 +494,9 @@ Additional helpful documentation, links, and articles:
 - [Monitoring Windows Server 2012][9]
 - [How to collect Windows Server 2012 metrics][10]
 - [Monitoring Windows Server 2012 with Datadog][11]
+- [Monitor Windows event logs with Datadog][27]
 
-[1]: https://app.datadoghq.com/account/settings#agent/windows
+[1]: https://app.datadoghq.com/account/settings/agent/latest?platform=windows
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/win32_event_log/datadog_checks/win32_event_log/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -520,3 +521,4 @@ Additional helpful documentation, links, and articles:
 [24]: https://raw.githubusercontent.com/DataDog/integrations-core/master/win32_event_log/images/xml-query-event-viewer.png
 [25]: https://docs.datadoghq.com/agent/troubleshooting/send_a_flare/?tab=agentv6v7
 [26]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfile
+[27]: https://www.datadoghq.com/blog/monitor-windows-event-logs-with-datadog/
