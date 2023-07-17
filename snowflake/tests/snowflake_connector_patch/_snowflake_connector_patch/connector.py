@@ -56,9 +56,6 @@ class Cursor(object):
         else:
             self.__data = []
 
-    def fetchall(self):
-        return self.__data
-
     def fetchone(self):
         try:
             return self.__data.pop(0)
