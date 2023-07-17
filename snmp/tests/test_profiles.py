@@ -3037,7 +3037,7 @@ def test_cisco_asr_9001(aggregator):
     aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags)
 
-    _check_common_asr(aggregator, tags=common_tags + ['interface:eth/0'])
+    _check_common_asr(aggregator, tags=common_tags + ['interface:eth/0', 'interface_index:19'])
     for metric in TCP_COUNTS + ['udpInErrors', 'udpNoPorts']:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.tcpCurrEstab', metric_type=aggregator.GAUGE, tags=common_tags)
@@ -3094,7 +3094,7 @@ def test_cisco_asr_9901(aggregator):
     aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags)
 
-    _check_common_asr(aggregator, common_tags + ['interface:eth0'])
+    _check_common_asr(aggregator, common_tags + ['interface:eth0', 'interface_index:39'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
