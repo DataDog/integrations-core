@@ -122,8 +122,10 @@ class KafkaClient:
         consumer_offsets = {}
 
         consumer_groups = self._get_consumer_groups()
+        self.log.debug('Identified %s consumer groups', len(consumer_groups))
 
         futures = self._get_consumer_offset_futures(consumer_groups)
+        self.log.debug('%s futures to be waited on', len(futures))
 
         for future in as_completed(futures):
             try:
@@ -165,6 +167,7 @@ class KafkaClient:
                         if self.config._consumer_groups_compiled_regex.match(to_match):
                             consumer_offsets[(consumer_group, topic, partition)] = offset
 
+        self.log.debug('%s consumer offsets', len(consumer_offsets))
         return consumer_offsets
 
     def _get_consumer_groups(self):
