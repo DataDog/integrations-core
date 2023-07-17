@@ -6,6 +6,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 import pytest
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
+from .utils import run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -39,11 +40,16 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     assert event['kind'] == "pg_settings"
     assert len(event["metadata"]) > 0
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_collect_schemas(integration_check, dbm_instance, aggregator):
     dbm_instance["collect_schemas"] =  {'enabled': True, 'collection_interval': 0.5}
-    dbm_instance['relations'] = {'relation_regex': ".*"}
+    dbm_instance['relations'] = [{'relation_regex': ".*"}]
+    dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
+    del dbm_instance['dbname']
     check = integration_check(dbm_instance)
-    check.check(dbm_instance)
+    run_one_check(check,dbm_instance)
+    run_one_check(check,dbm_instance)
     assert None is not None
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = dbm_metadata[0]

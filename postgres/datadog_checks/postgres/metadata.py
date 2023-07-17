@@ -136,6 +136,7 @@ class PostgresMetadata(DBMAsyncJob):
         )
         self._check = check
         self._config = config
+        self.db_pool = self._check.db_pool
         self._collect_pg_settings_enabled = is_affirmative(config.settings_metadata_config.get('enabled', False))
         self._collect_schemas_enabled = is_affirmative(config.schemas_metadata_config.get('enabled', False))
         self._pg_settings_cached = None
@@ -246,15 +247,41 @@ class PostgresMetadata(DBMAsyncJob):
         schemas = [dict(row) for row in rows]
         return schemas
 
-    def _sort_and_limit_table_info(self, table_info: List[Dict[str, Union[str, bool]]], limit: int) -> List[Dict[str, Union[str, bool]]]:
+    def _sort_and_limit_table_info(self, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int) -> List[Dict[str, Union[str, bool]]]:
+        """
+        If relation metrics is enabled, sort tables by the number of total accesses (index_rel_scans + seq_scans).
+        If they are not enabled, the table list will be blindly truncated to the limit.
+
+        If any tables are partitioned, the partitioned table will be returned and not counted against the limit. However, partitions
+        of the table are counted against the limit.
+        """
+        self.partitioned_tables = 0
+        def sort_tables(info):
+            cache = self._check.metrics_cache.table_activity_metrics
+            # partition master tables won't get any metrics reported on them, 
+            # so we assign them a high number and don't count them against the table limit
+            if not info["has_partitions"]:
+                return cache[dbname][info['name']]['postgresql.index_scans'] + cache[dbname][info['name']]['postgresql.seq_scans']
+            else:
+                self.partitioned_tables += 1
+                return float("inf")
+
         # if relation metrics are enabled, sorted based on last activity information
-        activity_metrics_cache = self._check.metrics_cache.get_activity_metrics(self._check.version)
-        if activity_metrics_cache:
-            self._log.warning(activity_metrics_cache)
+        table_metrics_cache = self._check.metrics_cache.table_activity_metrics
+        if table_metrics_cache:
+            self._log.warning(table_metrics_cache)
+
+            table_info = sorted(
+                table_info, 
+                key=sort_tables,
+                reverse=True
+                )
+            return table_info[:limit + self.partitioned_tables]
 
         # else, blindly truncate
+        return table_info[:limit]
 
-    def _query_table_information_for_schema(self, cursor: psycopg2.extensions.cursor, schemaname: str) -> List[Dict[str, Union[str, Dict]]]:
+    def _query_table_information_for_schema(self, cursor: psycopg2.extensions.cursor, schemaname: str, dbname: str) -> List[Dict[str, Union[str, Dict]]]:
         """
         Collect table information per schema. Returns a list of dictionaries 
         with key/values:
@@ -277,7 +304,7 @@ class PostgresMetadata(DBMAsyncJob):
         cursor.execute(PG_TABLES_QUERY.format(schemaname=schemaname))
         rows = cursor.fetchall()
         tables_info =  [dict(row) for row in rows]
-        self._sort_and_limit_table_info(tables_info, 1000)
+        tables_info = self._sort_and_limit_table_info(dbname, tables_info, 1000)
         self._log.warning(tables_info)
         table_payloads = []
         for table in tables_info:
@@ -312,20 +339,21 @@ class PostgresMetadata(DBMAsyncJob):
             if rows:
                 this_payload.update({'foreign_keys': {}})
                 
-            # Get columns
-            cursor.execute(COLUMNS_QUERY.format(tablename=name))
-            rows = cursor.fetchall()
-            self._log.warning(rows)
-            columns = [dict(row) for row in rows]
-            this_payload.update({'columns': columns})
-            
+            # Get columns 
+            if not table['is_partition']:
+                cursor.execute(COLUMNS_QUERY.format(tablename=name))
+                rows = cursor.fetchall()
+                self._log.warning(rows)
+                columns = [dict(row) for row in rows]
+                this_payload.update({'columns': columns})
+                
             table_payloads.append(this_payload)
 
         return table_payloads
 
     def _collect_metadata_for_database(self, dbname):
         metadata = {}
-        with self._conn_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
+        with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
             with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                 database_info = self._query_database_information(cursor, dbname)
                 metadata.update( 
@@ -342,7 +370,7 @@ class PostgresMetadata(DBMAsyncJob):
                 schema_info = self._query_schema_information(cursor, dbname)
                 self._log.warning(schema_info)
                 for schema in schema_info:
-                    tables_info = self._query_table_information_for_schema(cursor, schema['name'])
+                    tables_info = self._query_table_information_for_schema(cursor, schema['name'], dbname)
                     self._log.warning(tables_info)
                     metadata['schemas'].append( 
                         {

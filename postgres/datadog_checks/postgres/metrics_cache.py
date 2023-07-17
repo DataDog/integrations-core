@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
 import logging
+from collections import defaultdict
 
 from .util import (
     ACTIVITY_DD_METRICS,
@@ -44,7 +45,8 @@ class PostgresMetricsCache:
         self.replication_stats_metrics = None
         self.activity_metrics = None
         self._count_metrics = None
-        self.table_activity_metrics = None
+        if self.config.relations:
+            self.table_activity_metrics = dict()
 
     def clean_state(self):
         self.instance_metrics = None
@@ -53,7 +55,8 @@ class PostgresMetricsCache:
         self.replication_metrics = None
         self.replication_stats_metrics = None
         self.activity_metrics = None
-        self.table_activity_metrics = None
+        if self.config.relations:
+            self.table_activity_metrics = dict()
 
     def get_instance_metrics(self, version):
         """
