@@ -498,6 +498,9 @@ class PostgreSql(AgentCheck):
                 name, submit_metric = scope['metrics'][column]
                 submit_metric(self, name, value, tags=set(tags), hostname=self.resolved_hostname)
 
+                # TODO: if relation-level metrics idx_scan or seq_scan, cache it
+
+
             num_results += 1
 
         return num_results
