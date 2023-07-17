@@ -184,7 +184,8 @@ def assert_extend_generic_host_resources(aggregator, common_tags):
 1.3.6.1.2.1.25.3.3.1.1.10|2|10
 1.3.6.1.2.1.25.3.3.1.1.21|2|21
 1.3.6.1.2.1.25.3.3.1.2.10|2|31
-1.3.6.1.2.1.25.3.3.1.2.21|2|15"""
+1.3.6.1.2.1.25.3.3.1.2.21|2|15
+"""
     # fmt: on
     assert_extend_generic_host_resources_cpu_mem(aggregator, common_tags)
     assert_extend_generic_host_resources_base(aggregator, common_tags)
