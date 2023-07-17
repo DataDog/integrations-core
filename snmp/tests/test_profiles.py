@@ -820,7 +820,7 @@ def test_meraki_cloud_controller(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
     # IF-MIB
-    if_tags = ['interface:eth0'] + common_tags
+    if_tags = ['interface:eth0', 'interface_index:11'] + common_tags
     for metric in IF_COUNTS:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
