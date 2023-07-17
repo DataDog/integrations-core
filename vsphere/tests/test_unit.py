@@ -2661,3 +2661,81 @@ def test_vm_property_metrics_filtered(
         count=0,
         hostname='vm3',
     )
+
+
+def test_vm_property_metrics_expired_cache(
+    aggregator, realtime_instance, dd_run_check, service_instance, vm_properties_ex, vm_query_perf
+):
+
+    with mock.patch('datadog_checks.vsphere.cache.time') as time:
+
+        realtime_instance['collect_property_metrics'] = True
+
+        service_instance.content.rootFolder = mock.MagicMock(return_value=vim.Folder(moId="root"))
+
+        service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
+
+        service_instance.content.perfManager.QueryPerf = vm_query_perf
+
+        base_tags = ['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_host:unknown', 'vsphere_type:vm']
+
+        # run check with expired cache once
+        base_time = 1576263848
+        mocked_timestamps = [base_time + 160 * i for i in range(10)]
+        time.time = mock.MagicMock(side_effect=mocked_timestamps)
+
+        check = VSphereCheck('vsphere', {}, [realtime_instance])
+        check.infrastructure_cache._last_ts = base_time
+        dd_run_check(check)
+        aggregator.assert_metric('vsphere.vm.count', value=2, count=2, tags=base_tags)
+
+        aggregator.assert_metric(
+            'vsphere.vm.summary.quickStats.uptimeSeconds',
+            count=1,
+            value=12184573.0,
+            tags=base_tags,
+            hostname='vm1',
+        )
+        aggregator.assert_metric(
+            'vsphere.vm.config.cpuAllocation.limit',
+            count=1,
+            value=-1,
+            tags=base_tags,
+            hostname='vm1',
+        )
+
+        # run check with non-expired cache once and confirm no property metrics are collected
+        aggregator.reset()
+        mocked_timestamps = [base_time + 100 * i for i in range(10)]
+        time.time = mock.MagicMock(side_effect=mocked_timestamps)
+        check.infrastructure_cache._last_ts = base_time
+
+        assert not check.infrastructure_cache.is_expired()
+
+        dd_run_check(check)
+        aggregator.assert_metric('vsphere.vm.count')
+        aggregator.assert_metric('datadog.vsphere.collect_events.time')
+        aggregator.assert_metric('datadog.vsphere.query_metrics.time')
+        aggregator.assert_metric('vsphere.cpu.costop.sum')
+        aggregator.assert_all_metrics_covered()
+
+        assert not check.infrastructure_cache.is_expired()
+        assert check.infrastructure_cache.is_expired()
+
+        # run check with expired cache again and confirm property metrics are collected again
+        aggregator.reset()
+        dd_run_check(check)
+        aggregator.assert_metric(
+            'vsphere.vm.summary.quickStats.uptimeSeconds',
+            count=1,
+            value=12184573.0,
+            tags=base_tags,
+            hostname='vm1',
+        )
+        aggregator.assert_metric(
+            'vsphere.vm.config.cpuAllocation.limit',
+            count=1,
+            value=-1,
+            tags=base_tags,
+            hostname='vm1',
+        )
