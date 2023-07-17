@@ -284,11 +284,11 @@ def test_f5(aggregator):
     cpu_gauges = ['sysMultiHostCpuUsageRatio', 'cpu.usage']
 
     interfaces = [
-        ('1.0', 'desc2'),
-        ('mgmt', 'desc1'),
-        ('/Common/internal', 'desc5'),
-        ('/Common/http-tunnel', 'desc3'),
-        ('/Common/socks-tunnel', 'desc4'),
+        (32, 'mgmt', 'desc1'),
+        (48, '1.0', 'desc2'),
+        (80, '/Common/http-tunnel', 'desc3'),
+        (96, '/Common/socks-tunnel', 'desc4'),
+        (112, '/Common/internal', 'desc5'),
     ]
     interfaces_with_bandwidth_usage = {
         '1.0',
@@ -317,8 +317,8 @@ def test_f5(aggregator):
 
     for metric in IF_SCALAR_GAUGE:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
-    for interface, desc in interfaces:
-        interface_tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + tags
+    for index, interface, desc in interfaces:
+        interface_tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc), 'interface_index:{}'.format(index)] + tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=interface_tags, count=1
@@ -419,11 +419,11 @@ def test_device(aggregator):
     for metric in IF_SCALAR_GAUGE:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     interfaces = [
-        ('eth0', 'kept'),
-        ('eth1', 'their forward oxen'),
+        (13, 'eth0', 'kept'),
+        (15, 'eth1', 'their forward oxen'),
     ]
-    for interface, if_desc in interfaces:
-        tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(if_desc)] + common_tags
+    for index, interface, if_desc in interfaces:
+        tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(if_desc), 'interface_index:{}'.format(index)] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
