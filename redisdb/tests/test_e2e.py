@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import os
-
 import pytest
 
 from datadog_checks.base import is_affirmative
@@ -10,6 +8,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.redisdb import Redis
 
 from . import common
+from .common import REDIS_VERSION
 
 pytestmark = pytest.mark.e2e
 
@@ -86,7 +85,7 @@ def assert_common_metrics(aggregator):
 
 
 def test_e2e(dd_agent_check, master_instance):
-    redis_version = os.environ.get('REDIS_VERSION').split('.')[0]
+    redis_version = REDIS_VERSION.split('.')[0]
     aggregator = dd_agent_check(master_instance, rate=True)
     assert_common_metrics(aggregator)
 
