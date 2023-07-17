@@ -154,14 +154,16 @@ class KafkaClient:
                             str(topic_partition.partition),
                         )
                         continue
+
+                    if offset == OFFSET_INVALID:
+                        continue
+
                     if self.config._monitor_unlisted_consumer_groups or not self.config._consumer_groups_compiled_regex:
-                        if offset != OFFSET_INVALID:
-                            consumer_offsets[(consumer_group, topic, partition)] = offset
+                        consumer_offsets[(consumer_group, topic, partition)] = offset
                     else:
                         to_match = f"{consumer_group},{topic},{partition}"
                         if self.config._consumer_groups_compiled_regex.match(to_match):
-                            if offset != OFFSET_INVALID:
-                                consumer_offsets[(consumer_group, topic, partition)] = offset
+                            consumer_offsets[(consumer_group, topic, partition)] = offset
 
         return consumer_offsets
 
@@ -206,7 +208,6 @@ class KafkaClient:
                 continue
 
             for topic in topics:
-                topic_partitions = []
                 # If partitions are defined
                 if partitions := topics[topic]:
                     topic_partitions = [TopicPartition(topic, partition) for partition in partitions]

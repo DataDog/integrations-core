@@ -2,7 +2,6 @@
 
 ## 1.0.0 / 2018-05-11
 
-***Added***: 
+***Added***:
 
 * adds `datadog_checks_tests_helper`
-

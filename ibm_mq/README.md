@@ -305,7 +305,7 @@ Additional helpful documentation, links, and articles:
 - [Monitor IBM MQ metrics and logs with Datadog][13]
 
 [1]: https://www.ibm.com/products/mq
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://www.ibm.com/support/pages/mqc9-ibm-mq-9-clients
 [4]: https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/RuntimeProtections/RuntimeProtections.html#//apple_ref/doc/uid/TP40016462-CH3-SW1
 [5]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/datadog_checks/ibm_mq/data/conf.yaml.example

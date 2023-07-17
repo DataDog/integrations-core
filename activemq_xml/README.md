@@ -90,7 +90,7 @@ Need help? Contact [Datadog support][6].
 
 - [Monitor ActiveMQ metrics and performance][11]
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/activemq_xml/datadog_checks/activemq_xml/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/developers/metrics/custom_metrics/

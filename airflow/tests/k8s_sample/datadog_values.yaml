@@ -21,7 +21,7 @@ targetSystem: "linux"
 datadog:
   ## @param apiKey - string - required
   ## Set this to your Datadog API key before the Agent runs.
-  ## ref: https://app.datadoghq.com/account/settings#agent/kubernetes
+  ## ref: https://app.datadoghq.com/account/settings/agent/latest?platform=kubernetes
   #
   # API US
   apiKey: "00000000000000000000000000000000"
