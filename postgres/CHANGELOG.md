@@ -1,6 +1,32 @@
 # CHANGELOG - postgres
 
-## 13.7.0 / 2023-05-26
+## 14.0.0 / 2023-07-10
+
+***Changed***:
+
+* Require Python 3 for Postgres integration. See [#14813](https://github.com/DataDog/integrations-core/pull/14813).
+
+***Added***:
+
+* Bump dependencies for Agent 7.47. See [#15145](https://github.com/DataDog/integrations-core/pull/15145).
+* Add limited pool + LRU cache to MultiDatabaseConnectionPool. See [#14786](https://github.com/DataDog/integrations-core/pull/14786).
+* Rewrite Postgres size query and add `postgresql.relation.{tuples,pages,all_visible}` + toast_size metrics. See [#14500](https://github.com/DataDog/integrations-core/pull/14500).
+* Add metrics for timeline id and checkpoint delay. See [#14759](https://github.com/DataDog/integrations-core/pull/14759).
+* Add `postgresql.wal.*` metrics from `pg_stat_wal` . See [#13768](https://github.com/DataDog/integrations-core/pull/13768).
+* PG: Add metrics for wal files: count, size and age. See [#13725](https://github.com/DataDog/integrations-core/pull/13725).
+*  Allow explain plan collection to be configured separately from activity collection in pg agent. See [#14673](https://github.com/DataDog/integrations-core/pull/14673).
+* Make cancel() synchronous in DBMAsyncJob. See [#14717](https://github.com/DataDog/integrations-core/pull/14717).
+* Postgres: Add `postgres.snapshot.{xmin,xmax,xip_count}` metric. See [#13777](https://github.com/DataDog/integrations-core/pull/13777).
+* Report per-index disk usage metrics for PostgreSQL. See [#13880](https://github.com/DataDog/integrations-core/pull/13880). Thanks [jcoleman](https://github.com/jcoleman).
+
+***Fixed***:
+
+* Fix version parsing of version strings with an edition suffix. See [#14803](https://github.com/DataDog/integrations-core/pull/14803).
+* Move cancel waiting logic to test functions for DBMAsyncJob . See [#14773](https://github.com/DataDog/integrations-core/pull/14773).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+* Properly close db connections for metadata check on cancel. See [#14709](https://github.com/DataDog/integrations-core/pull/14709).
+
+## 13.7.0 / 2023-05-26 / Agent 7.46.0
 
 ***Added***: 
 

@@ -1,5 +1,11 @@
 # CHANGELOG - cisco_aci
 
+## 2.2.2 / 2023-07-10
+
+***Fixed***:
+
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 2.2.1 / 2022-12-09 / Agent 7.42.0
 
 ***Fixed***: 

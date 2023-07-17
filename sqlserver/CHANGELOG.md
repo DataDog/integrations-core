@@ -1,6 +1,25 @@
 # CHANGELOG - sqlserver
 
-## 11.2.2 / 2023-06-08
+## 12.0.0 / 2023-07-10
+
+***Changed***:
+
+* Add a limit on the number of queries in the query metrics payload at the Agent. See [#15139](https://github.com/DataDog/integrations-core/pull/15139).
+* Do not fetch the full procedure_text in the SQLServer Qstats query. See [#15105](https://github.com/DataDog/integrations-core/pull/15105).
+
+***Added***:
+
+* Bump dependencies for Agent 7.47. See [#15145](https://github.com/DataDog/integrations-core/pull/15145).
+* Make cancel() synchronous in DBMAsyncJob. See [#14717](https://github.com/DataDog/integrations-core/pull/14717).
+
+***Fixed***:
+
+* sqlserver: remove unused `procedure_text` from metrics payloads. See [#15097](https://github.com/DataDog/integrations-core/pull/15097).
+* SQL Server query metrics: avoid sending procedure text twice. See [#15091](https://github.com/DataDog/integrations-core/pull/15091).
+* Move cancel waiting logic to test functions for DBMAsyncJob . See [#14773](https://github.com/DataDog/integrations-core/pull/14773).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
+## 11.2.2 / 2023-06-08 / Agent 7.46.0
 
 ***Fixed***: 
 

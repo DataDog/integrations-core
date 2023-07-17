@@ -1,5 +1,15 @@
 # CHANGELOG - Windows performance counters
 
+## 1.6.0 / 2023-07-10
+
+***Added***:
+
+* Upgrade Pydantic model code generator. See [#14779](https://github.com/DataDog/integrations-core/pull/14779).
+
+***Fixed***:
+
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 1.5.0 / 2022-12-09 / Agent 7.42.0
 
 ***Added***: 

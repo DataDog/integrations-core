@@ -1,5 +1,15 @@
 # CHANGELOG - Openstack_controller
 
+## 3.1.0 / 2023-07-10
+
+***Added***:
+
+* Add runtime configuration validation. See [#14362](https://github.com/DataDog/integrations-core/pull/14362).
+
+***Fixed***:
+
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
 ## 3.0.0 / 2023-03-07 / Agent 7.44.0
 
 ***Changed***: 

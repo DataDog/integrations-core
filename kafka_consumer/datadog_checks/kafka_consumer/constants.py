@@ -18,3 +18,5 @@ KAFKA_INTERNAL_TOPICS = {
     '_confluent-telemetry-metrics',
     '_confluent-command',
 }
+
+OFFSET_INVALID = -1001
