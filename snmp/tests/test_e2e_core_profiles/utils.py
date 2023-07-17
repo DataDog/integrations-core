@@ -131,10 +131,13 @@ def assert_extend_generic_host_resources_base(aggregator, common_tags):
     # fmt: on
     aggregator.assert_metric("snmp.hrSystemUptime", metric_type=aggregator.GAUGE, tags=common_tags)
 
-    cpu_rows = ['10', '21']
+    cpu_rows = [('10', '10'), ('21', '21')]
     for cpu_row in cpu_rows:
+        processorid, hr_device_index = cpu_row
         aggregator.assert_metric(
-            'snmp.hrProcessorLoad', metric_type=aggregator.GAUGE, tags=common_tags + ['processorid:' + cpu_row]
+            'snmp.hrProcessorLoad',
+            metric_type=aggregator.GAUGE,
+            tags=common_tags + ['processorid:' + processorid, 'hr_device_index:' + hr_device_index],
         )
 
     hr_mem_rows = [
