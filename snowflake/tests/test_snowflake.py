@@ -123,7 +123,7 @@ def test_version_metadata(dd_run_check, instance, datadog_agent):
         'version.raw': '4.30.2',
         'version.scheme': 'semver',
     }
-    with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_version):
+    with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=iter(expected_version)):
         check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check.check_id = 'test:123'
         check._conn = mock.MagicMock()
