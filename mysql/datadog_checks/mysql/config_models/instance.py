@@ -75,6 +75,7 @@ class Options(BaseModel):
     class Config:
         allow_mutation = False
 
+    disable_binlog_size_metrics: Optional[bool]
     disable_innodb_metrics: Optional[bool]
     extra_innodb_metrics: Optional[bool]
     extra_performance_metrics: Optional[bool]

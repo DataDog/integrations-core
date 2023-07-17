@@ -327,6 +327,18 @@ files:
                   type: boolean
                   example: false
 
+              - name: disable_binlog_size_metrics
+                description: |
+                  Set to `true` to disable the collection of binary log sizes.
+
+                  Some MySQL implementations like Aurora can keep thousands of files, leading to `SHOW BINARY LOGS;`
+                  taking seconds to run.
+
+                  This impacts the `mysql.binlog.disk_use` metric.
+                value:
+                  type: boolean
+                  example: false
+
           - name: dbm
             description: |
               Set to `true` enable Database Monitoring.
