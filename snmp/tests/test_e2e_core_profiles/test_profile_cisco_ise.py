@@ -13,7 +13,7 @@ from .utils import (
     assert_extend_generic_if,
     assert_extend_generic_ucd,
     create_e2e_core_test_config,
-    get_device_ip_from_config,
+    get_device_ip_from_config, assert_extend_generic_host_resources,
 )
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
@@ -35,21 +35,7 @@ def test_e2e_profile_cisco_ise(dd_agent_check):
     # Examples:
     assert_extend_generic_if(aggregator, common_tags)
     assert_extend_generic_ucd(aggregator, common_tags)
-
-    # Extended metrics from `_generic-host-resources-base.yaml`
-    aggregator.assert_metric("snmp.hrSystemUptime", metric_type=aggregator.GAUGE, tags=common_tags)
-    cpu_rows = ['0.0']
-    for cpu_row in cpu_rows:
-        aggregator.assert_metric(
-            'snmp.hrProcessorLoad', metric_type=aggregator.GAUGE, tags=common_tags + ['processorid:' + cpu_row]
-        )
-
-    hr_mem_rows = [
-        ['storagedesc:my-storage-descr'],
-    ]
-    for mem_row in hr_mem_rows:
-        aggregator.assert_metric('snmp.hrStorageSize', metric_type=aggregator.GAUGE, tags=common_tags + mem_row)
-        aggregator.assert_metric('snmp.hrStorageUsed', metric_type=aggregator.GAUGE, tags=common_tags + mem_row)
+    assert_extend_generic_host_resources(aggregator, common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
