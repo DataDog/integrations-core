@@ -473,11 +473,11 @@ def test_f5_router(aggregator):
     check.check(instance)
 
     interfaces = [
-        ('1.0', 'desc2'),
-        ('mgmt', 'desc1'),
-        ('/Common/internal', 'desc5'),
-        ('/Common/http-tunnel', 'desc3'),
-        ('/Common/socks-tunnel', 'desc4'),
+        (32, 'mgmt', 'desc1'),
+        (48, '1.0', 'desc2'),
+        (80, '/Common/http-tunnel', 'desc3'),
+        (96, '/Common/socks-tunnel', 'desc4'),
+        (112, '/Common/internal', 'desc5'),
     ]
     interfaces_with_bandwidth_usage = {
         '1.0',
@@ -494,8 +494,8 @@ def test_f5_router(aggregator):
 
     for metric in IF_SCALAR_GAUGE:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
-    for interface, desc in interfaces:
-        tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + common_tags
+    for index, interface, desc in interfaces:
+        tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc), 'interface_index:{}'.format(index)] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
