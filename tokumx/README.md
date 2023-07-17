@@ -116,7 +116,7 @@ Need help? Contact [Datadog support][10].
 
 - [Monitor key TokuMX metrics for MongoDB applications][11].
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.mongodb.com/manual/security/
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/tokumx/datadog_checks/tokumx/data/conf.yaml.example

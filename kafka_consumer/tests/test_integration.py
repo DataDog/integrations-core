@@ -62,21 +62,21 @@ def test_no_partitions(aggregator, check, kafka_instance, dd_run_check):
 
 
 @pytest.mark.parametrize(
-    'is_enabled, metric_count, topic_tags',
+    'is_enabled, broker_offset_metric_count, topic_tags',
     [
-        pytest.param(True, 4, ['topic:marvel', 'topic:dc'], id="Enabled"),
-        pytest.param(False, 2, ['topic:marvel'], id="Disabled"),
+        pytest.param(True, 6, ['topic:marvel', 'topic:dc'], id="Monitor all broker highwatermarks Enabled"),
+        pytest.param(False, 2, ['topic:marvel'], id="Monitor all broker highwatermarks Disabled"),
     ],
 )
 def test_monitor_broker_highwatermarks(
-    dd_run_check, check, aggregator, kafka_instance, is_enabled, metric_count, topic_tags
+    dd_run_check, check, aggregator, kafka_instance, is_enabled, broker_offset_metric_count, topic_tags
 ):
     kafka_instance['consumer_groups'] = {'my_consumer': {'marvel': None}}
     kafka_instance['monitor_all_broker_highwatermarks'] = is_enabled
     dd_run_check(check(kafka_instance))
 
     # After refactor and library migration, write unit tests to assert expected metric values
-    aggregator.assert_metric('kafka.broker_offset', count=metric_count)
+    aggregator.assert_metric('kafka.broker_offset', count=broker_offset_metric_count)
 
     for tag in topic_tags:
         for partition in range(2):
@@ -158,6 +158,12 @@ def test_monitor_broker_highwatermarks(
             does_not_raise(),
             1,
             id="One consumer group, one topic, one partition",
+        ),
+        pytest.param(
+            {'consumer_groups': {'my_consumer': {'unconsumed_topic': None}}},
+            does_not_raise(),
+            0,
+            id="One consumer group and one unconsumed topic for that consumer",
         ),
     ],
 )
@@ -302,7 +308,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
         pytest.param(
             {
                 'consumer_groups': {},
-                'consumer_groups_regex': {'my_consume*': {'dc': []}},
+                'consumer_groups_regex': {'my_consume.+': {'dc': []}},
                 'monitor_unlisted_consumer_groups': False,
             },
             2,
@@ -314,7 +320,7 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
         pytest.param(
             {
                 'consumer_groups': {},
-                'consumer_groups_regex': {'foo': {'bar': []}, 'my_consume*': {'dc': []}},
+                'consumer_groups_regex': {'foo': {'bar': []}, 'my_consume.+': {'dc': []}},
                 'monitor_unlisted_consumer_groups': False,
             },
             2,
@@ -357,6 +363,17 @@ def test_config(dd_run_check, check, kafka_instance, override, aggregator, expec
             2,
             '',
             id="Using the same consumer_groups and consumer_groups_regex values",
+        ),
+        pytest.param(
+            {
+                'consumer_groups': {},
+                'consumer_groups_regex': {'my_consumer': {'unconsumed_*': []}},
+            },
+            0,
+            0,
+            0,
+            '',
+            id="Specified consumer with unconsumed topic regex for that consumer",
         ),
     ],
 )

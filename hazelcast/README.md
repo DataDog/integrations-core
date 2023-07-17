@@ -168,7 +168,7 @@ Need help? Contact [Datadog support][5].
 
 
 [1]: https://hazelcast.org
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/hazelcast/datadog_checks/hazelcast/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/integrations/java/
 [5]: https://docs.datadoghq.com/help/

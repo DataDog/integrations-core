@@ -48,6 +48,7 @@ TESTABLE_FILE_PATTERN = re.compile(
   | hatch\.toml
   | metadata\.csv
   | pyproject\.toml
+  | snmp/data/default_profiles/.+
     """,
     re.VERBOSE,
 )

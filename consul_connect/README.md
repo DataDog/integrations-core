@@ -74,7 +74,7 @@ Need help? Contact [Datadog support][15].
 [1]: https://www.consul.io/docs/connect#connect
 [2]: https://docs.datadoghq.com/integrations/envoy/
 [3]: https://www.consul.io/docs/connect/proxies/envoy#envoy-integration
-[4]: https://app.datadoghq.com/account/settings#agent
+[4]: https://app.datadoghq.com/account/settings/agent/latest
 [5]: https://www.consul.io/commands/connect/envoy#admin-bind
 [6]: https://docs.datadoghq.com/integrations/envoy/?tab=host#metric-collection
 [7]: https://docs.datadoghq.com/integrations/envoy/?tab=host#log-collection

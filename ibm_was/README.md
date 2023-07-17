@@ -122,7 +122,7 @@ Need help? Contact [Datadog support][10].
 [1]: https://www.ibm.com/cloud/websphere-application-platform
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/datadog_checks/ibm_was/data/conf.yaml.example
-[4]: https://app.datadoghq.com/account/settings#agent
+[4]: https://app.datadoghq.com/account/settings/agent/latest
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/kubernetes/log/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
