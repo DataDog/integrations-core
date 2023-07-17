@@ -3005,7 +3005,7 @@ def test_cisco_asr_1001x(aggregator):
     aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags)
 
-    _check_common_asr(aggregator, common_tags + ['interface:eth/0'])
+    _check_common_asr(aggregator, common_tags + ['interface:eth/0', 'interface_index:3'])
 
     for metric in TCP_COUNTS + ['udpInErrors', 'udpNoPorts']:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
