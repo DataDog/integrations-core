@@ -421,7 +421,14 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
     aggregator.assert_metric(
         'snmp.interface.status',
         metric_type=aggregator.GAUGE,
-        tags=['interface:eth0', 'interface_index:11', 'status:warning', 'admin_status:down', 'oper_status:lower_layer_down'] + common_tags,
+        tags=[
+            'interface:eth0',
+            'interface_index:11',
+            'status:warning',
+            'admin_status:down',
+            'oper_status:lower_layer_down',
+        ]
+        + common_tags,
         value=1,
     )
     aggregator.assert_all_metrics_covered()
@@ -554,7 +561,11 @@ def test_e2e_cisco_nexus(dd_agent_check):
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.COUNT, tags=tags, count=1)
 
     for interface in interfaces:
-        tags = ['interface:{}'.format(interface), 'interface_alias:', 'interface_index:{}'.format(indexes.get(interface))] + common_tags
+        tags = [
+            'interface:{}'.format(interface),
+            'interface_alias:',
+            'interface_index:{}'.format(indexes.get(interface)),
+        ] + common_tags
         for metric in metrics.IF_COUNTS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
         for metric in metrics.IF_RATES:
