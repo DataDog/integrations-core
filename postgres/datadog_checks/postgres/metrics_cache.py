@@ -44,6 +44,7 @@ class PostgresMetricsCache:
         self.replication_stats_metrics = None
         self.activity_metrics = None
         self._count_metrics = None
+        self.table_activity_metrics = None
 
     def clean_state(self):
         self.instance_metrics = None
@@ -52,6 +53,7 @@ class PostgresMetricsCache:
         self.replication_metrics = None
         self.replication_stats_metrics = None
         self.activity_metrics = None
+        self.table_activity_metrics = None
 
     def get_instance_metrics(self, version):
         """
@@ -180,7 +182,7 @@ class PostgresMetricsCache:
         if version >= V10 and self.replication_stats_metrics is None:
             self.replication_stats_metrics = dict(REPLICATION_STATS_METRICS)
         return self.replication_stats_metrics
-
+        
     def get_activity_metrics(self, version):
         """Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2
         depending on the postgres version in conjunction with ACTIVITY_QUERY_10 or ACTIVITY_QUERY_LT_10.

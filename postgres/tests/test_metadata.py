@@ -41,6 +41,7 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
 
 def test_collect_schemas(integration_check, dbm_instance, aggregator):
     dbm_instance["collect_schemas"] =  {'enabled': True, 'collection_interval': 0.5}
+    dbm_instance['relations'] = {'relation_regex': ".*"}
     check = integration_check(dbm_instance)
     check.check(dbm_instance)
     assert None is not None
@@ -48,5 +49,5 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
     event = dbm_metadata[0]
     assert event['host'] == "stubbed.hostname"
     assert event['dbms'] == "postgres"
-    assert event['kind'] == "pg_settings"
+    assert event['kind'] == "pg_databases"
     assert len(event["metadata"]) > 0
