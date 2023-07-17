@@ -18,6 +18,7 @@ from .common import (
     HERE,
     MANAGE_ADMIN_USERNAME,
     MANAGE_USER_USERNAME,
+    MARKLOGIC_VERSION,
     PASSWORD,
 )
 
@@ -28,6 +29,17 @@ def dd_environment():
 
     # Standalone
     compose_file = os.path.join(HERE, 'compose', 'standalone/docker-compose.yml')
+
+    conditions = []
+
+    if MARKLOGIC_VERSION.startswith("9."):
+        conditions.append(CheckDockerLogs(compose_file, r'Deleted'))
+    else:
+        conditions.append(CheckDockerLogs(compose_file, r'Cluster config complete'))
+
+    conditions.append(WaitFor(setup_admin_user))
+    conditions.append(WaitFor(setup_datadog_users))
+
     with docker_run(
         compose_file=compose_file,
         conditions=[
@@ -42,7 +54,7 @@ def dd_environment():
 def setup_admin_user():
     # type: () -> None
     # From https://docs.marklogic.com/10.0/guide/admin-api/cluster
-    # Reset admin user password (usefull for cluster setup)
+    # Reset admin user password (useful for cluster setup)
     requests.post(
         'http://localhost:8001/admin/v1/instance-admin',
         data={
