@@ -107,18 +107,14 @@ class TeamCityRest(AgentCheck):
                 self.bc_store.set_last_build_id(project_id, build_config_id, last_build_id)
 
     def _initialize_multi_build_config(self):
-        filtered_projects = {}
-        build_configs_list = None
-        projects = get_response(self, 'projects')
-        if projects and projects.get('project'):
-            projects_list = [project['id'] for project in projects['project']]
-            filtered_projects, projects_limit_reached = filter_projects(self, projects_list)
-            if projects_limit_reached:
-                self.log.warning(
-                    "Reached projects limit of %s. Update your `projects` configuration using the `include` and "
-                    "`exclude` filter options or increase the `default_projects_limit` option.",
-                    len(filtered_projects),
-                )
+        project_ids = [project['id'] for project in get_response(self, 'projects').get('project', [])]
+        filtered_projects, projects_limit_reached = filter_projects(self, project_ids)
+        if projects_limit_reached:
+            self.log.warning(
+                "Reached projects limit of %s. Update your `projects` configuration using the `include` and "
+                "`exclude` filter options or increase the `default_projects_limit` option.",
+                len(filtered_projects),
+            )
 
         for project_id in filtered_projects:
             build_configs_list = [
