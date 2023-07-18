@@ -251,8 +251,10 @@ class SqlserverActivity(DBMAsyncJob):
         return {key: val for key, val in row.items() if val is not None}
 
     @staticmethod
-    def _sanitize_row(row):
-        del row['text']
+    def _sanitize_row(row, obfuscated_statement):
+        # rename the statement_text field to 'text' because that
+        # is what our backend is expecting
+        row['text'] = obfuscated_statement
         if 'query_hash' in row:
             row['query_hash'] = _hash_to_hex(row['query_hash'])
         if 'query_plan_hash' in row:
