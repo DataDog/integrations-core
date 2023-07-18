@@ -108,10 +108,7 @@ app_controller_histograms = [
     'redis.request.duration.sum',
 ]
 
-appset_controller_counters = [
-    'reconcile.errors.total',
-    'runtime.reconcile.total'
-]
+appset_controller_counters = ['reconcile.errors.total', 'runtime.reconcile.total']
 
 appset_controller_gauges = [
     'active.workers',
