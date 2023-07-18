@@ -11,14 +11,17 @@ MOCKED_APP_CONTROLLER_WITH_OTHER_PARAMS = {
     'collect_histogram_buckets': True,
 }
 
+MOCKED_APPSET_CONTROLLER_INSTANCE = {'appset_controller_endpoint': 'http://appset_controller:8085'}
+
 MOCKED_API_SERVER_INSTANCE = {'api_server_endpoint': 'http://api_server:8083'}
 
 MOCKED_REPO_SERVER_INSTANCE = {'repo_server_endpoint': 'http://repo_server:8084'}
 
 MOCKED_NOTIFICATIONS_CONTROLLER_INSTANCE = {'notifications_controller_endpoint': 'http://notifications_controller:9001'}
 
-app_controller_ns, api_server_ns, repo_server_ns, notifications_controller_ns = (
+app_controller_ns, appset_controller_ns, api_server_ns, repo_server_ns, notifications_controller_ns = (
     "argocd.app_controller",
+    "argocd.appset_controller",
     "argocd.api_server",
     "argocd.repo_server",
     "argocd.notifications_controller",
@@ -103,6 +106,14 @@ app_controller_histograms = [
     'redis.request.duration.bucket',
     'redis.request.duration.count',
     'redis.request.duration.sum',
+]
+
+appset_controller_counters = [
+    'reconcile.errors.total',
+]
+
+appset_controller_histograms = [
+
 ]
 
 api_server_counters = [

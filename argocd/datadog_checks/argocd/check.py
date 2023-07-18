@@ -58,7 +58,7 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             raise ConfigurationError(
                 "Must specify at least one of the following:"
                 "`app_controller_endpoint`, `appset_controller_endpoint`, `repo_server_endpoint`, `api_server_endpoint`"
-                "  or `notifications_controller_endpoint`."
+                " or `notifications_controller_endpoint`."
             )
 
         if app_controller_endpoint:
