@@ -84,7 +84,7 @@ As a part of your pull request, please do the following:
 1. Update your README file with an `## Uninstallation` section under `## Setup` that includes the following instructions (along with any custom instructions you would like to add):
        - Once this integration has been uninstalled, any previous authorizations are revoked. 
        - Additionally, ensure that all API keys associated with this integration have been disabled by searching for the integration name on the [API Keys page][10].
-2. Update your manifest.json file to reference this new Unininstallation section. This reference should appear directly beneath the support field:
+2. Update your manifest.json file to reference this new Uninstallation section. This reference should appear directly beneath the support field:
        - ```
            "support": "README.md#Support",
            "uninstallation": "README.md#Uninstallation",
