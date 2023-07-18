@@ -474,27 +474,17 @@ class PostgreSql(AgentCheck):
                 submit_metric(self, name, value, tags=set(tags), hostname=self.resolved_hostname)
 
                 # TODO: if relation-level metrics idx_scan or seq_scan, cache it
-                if desc_map['table'] == 'test_part1':
-                    print(desc_map)
                 if name in ('postgresql.index_scans', 'postgresql.seq_scans'):
                     db = dbname if self.autodiscovery else self._config.dbname
                     tablename = desc_map['table']
-                    try: 
-                        partition_of = desc_map['partition_of'] 
-                        print("partition of {}".format(partition_of))
-                    except KeyError:
-                        partition_of = None
                     if db not in self.metrics_cache.table_activity_metrics.keys():
                         self.metrics_cache.table_activity_metrics[db] = {}
                     if tablename not in self.metrics_cache.table_activity_metrics[db].keys():
-                        self.metrics_cache.table_activity_metrics[db][tablename] = {'postgresql.index_scans': 0, 'postgresql.seq_scans': 0, 'partitioned': False}
-                        # all partitions activity should aggregate under their parent, 
-                        # so store a list of partitions per parent to parse later
-                        if partition_of and partition_of not in self.metrics_cache.table_activity_metrics[db].keys():
-                            self.metrics_cache.table_activity_metrics[db][partition_of] = {'partitioned': True, 'partitions': set()}
+                        self.metrics_cache.table_activity_metrics[db][tablename] = {
+                            'postgresql.index_scans': 0,
+                            'postgresql.seq_scans': 0,
+                        }
 
-                    if partition_of is not None:
-                        self.metrics_cache.table_activity_metrics[db][partition_of].update(tablename)
                     self.metrics_cache.table_activity_metrics[db][tablename][name] = value
 
             num_results += 1
