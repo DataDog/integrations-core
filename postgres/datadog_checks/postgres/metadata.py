@@ -35,23 +35,29 @@ SELECT db.oid as id, datname as name, pg_encoding_to_char(encoding) as encoding,
 
 
 PG_STAT_TABLES_QUERY = """
-SELECT st.relname as name,seq_scan,idx_scan,relhasindex as hasindexes,relowner::regrole as owner,relispartition as is_partition
-FROM pg_stat_all_tables st  
-LEFT JOIN pg_class c ON c.relname = st.relname
-AND relkind IN ('r', 'p')
-WHERE schemaname = '{schemaname}'
+SELECT st.relname as name,seq_scan,idx_scan,c.relhasindex as hasindexes,c.relowner::regrole as owner,
+(CASE WHEN c.relkind = 'p' THEN true ELSE false END) AS has_partitions, 
+(CASE WHEN pg_relation_size(c.reltoastrelid) > 500000 THEN t.relname ELSE null END) AS toast_table
+FROM pg_class c   
+LEFT JOIN pg_stat_all_tables st ON c.relname = st.relname
+LEFT JOIN pg_class t on c.reltoastrelid = t.oid 
+WHERE schemaname = 'public'
+AND c.relkind IN ('r', 'p')
+AND c.relispartition != 't'
 ORDER BY coalesce(seq_scan, 0) + coalesce(idx_scan, 0) DESC;
 """
 
 PG_TABLES_QUERY = """
-SELECT tablename as name, hasindexes,relowner::regrole as owner,relispartition as is_partition, 
-(case when relkind = 'p' then true else false end) as has_partitions
+SELECT tablename as name, hasindexes, c.relowner::regrole AS owner, 
+(CASE WHEN c.relkind = 'p' THEN true ELSE false END) AS has_partitions, 
+(CASE WHEN pg_relation_size(c.reltoastrelid) > 500000 THEN t.relname ELSE null END) AS toast_table
 FROM pg_tables st  
 LEFT JOIN pg_class c ON relname = tablename
-AND relkind IN ('r', 'p')
-WHERE schemaname = '{schemaname}';
+LEFT JOIN pg_class t on c.reltoastrelid = t.oid 
+WHERE c.relkind IN ('r', 'p')
+AND c.relispartition != 't'
+AND schemaname = '{schemaname}';
 """
-
 
 SCHEMA_QUERY = """
     SELECT nspname as name, nspowner::regrole as owner FROM
@@ -82,18 +88,15 @@ AND    attnum > 0
 AND    NOT attisdropped;
 """
 
-PARTITION_PARENT_AND_RANGE_QUERY = """
-SELECT parent, child, pg_get_expr(c.relpartbound, c.oid, true) as partition_range
-    FROM 
-        (SELECT inhparent::regclass as parent, inhrelid::regclass as child 
-        FROM pg_inherits 
-        WHERE inhrelid = '{tablename}'::regclass::oid) AS inherits
-    LEFT JOIN pg_class c ON c.oid = child::regclass::oid;
-"""
-
 PARTITION_KEY_QUERY = """
     SELECT relname, pg_get_partkeydef(oid) as partition_key 
 FROM pg_class WHERE '{parent}' = relname; 
+"""
+
+NUM_PARTITIONS_QUERY = """
+SELECT count(inhrelid::regclass) as num_partitions
+        FROM pg_inherits 
+        WHERE inhparent = '{parent}'::regclass::oid
 """
 
 
@@ -247,39 +250,49 @@ class PostgresMetadata(DBMAsyncJob):
         schemas = [dict(row) for row in rows]
         return schemas
 
-    def _sort_and_limit_table_info(self, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int) -> List[Dict[str, Union[str, bool]]]:
+    def _get_table_info(self, cursor, dbname, schemaname, limit):
         """
         If relation metrics is enabled, sort tables by the number of total accesses (index_rel_scans + seq_scans).
-        If they are not enabled, the table list will be blindly truncated to the limit.
+        If they are not enabled, the table list will be retrieved from pg_stat_all_tables and sorted in the query.
 
         If any tables are partitioned, the partitioned table will be returned and not counted against the limit. However, partitions
         of the table are counted against the limit.
         """
+        if self._config.relations:
+            cursor.execute(PG_TABLES_QUERY.format(schemaname=schemaname))
+            rows = cursor.fetchall()
+            table_info =  [dict(row) for row in rows]
+            return self._sort_and_limit_table_info(dbname, table_info, limit)
+
+        else:
+            table_info = cursor.execute(PG_STAT_TABLES_QUERY.format(schemaname=schemaname))
+
+    def _sort_and_limit_table_info(self, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int) -> List[Dict[str, Union[str, bool]]]:
         self.partitioned_tables = 0
         def sort_tables(info):
             cache = self._check.metrics_cache.table_activity_metrics
             # partition master tables won't get any metrics reported on them, 
-            # so we assign them a high number and don't count them against the table limit
+            # so we assign them a high number to ensure they're captured in the sort
+            # and don't count them against the table limit
             if not info["has_partitions"]:
                 return cache[dbname][info['name']]['postgresql.index_scans'] + cache[dbname][info['name']]['postgresql.seq_scans']
             else:
-                self.partitioned_tables += 1
-                return float("inf")
+                partitions = cache[dbname][info['name']]['partitions']
+                main_partition_activity = 0
+                for partition in partitions:
+                    main_partition_activity += (cache[dbname][partition]['postgresql.index_scans'] + cache[dbname][partition]['postgresql.seq_scans'])
+                return main_partition_activity
 
         # if relation metrics are enabled, sorted based on last activity information
         table_metrics_cache = self._check.metrics_cache.table_activity_metrics
-        if table_metrics_cache:
-            self._log.warning(table_metrics_cache)
+        self._log.warning(table_metrics_cache)
 
-            table_info = sorted(
-                table_info, 
-                key=sort_tables,
-                reverse=True
-                )
-            return table_info[:limit + self.partitioned_tables]
-
-        # else, blindly truncate
-        return table_info[:limit]
+        table_info = sorted(
+            table_info, 
+            key=sort_tables,
+            reverse=True
+            )
+        return table_info[:limit + self.partitioned_tables]
 
     def _query_table_information_for_schema(self, cursor: psycopg2.extensions.cursor, schemaname: str, dbname: str) -> List[Dict[str, Union[str, Dict]]]:
         """
@@ -287,8 +300,6 @@ class PostgresMetadata(DBMAsyncJob):
         with key/values:
             "name": str 
             "owner": str 
-            "partition_key": str (if has partitions)
-            "partition_of": str (if a partition)
             "foreign_keys": dict (if has foreign keys)
                 name: str
                 definition: str
@@ -300,11 +311,12 @@ class PostgresMetadata(DBMAsyncJob):
                 data_type: str 
                 default: str
                 nullable: bool
+            "toast_table": str (if associated toast table is > 500kb)
+            "partition_key": str (if has partitions)
+            "num_partitions": int (if has partitions)
         """
-        cursor.execute(PG_TABLES_QUERY.format(schemaname=schemaname))
-        rows = cursor.fetchall()
-        tables_info =  [dict(row) for row in rows]
-        tables_info = self._sort_and_limit_table_info(dbname, tables_info, 1000)
+        tables_info = self._get_table_info(cursor, dbname, schemaname, 1000)
+        # tables_info = self._sort_and_limit_table_info(dbname, tables_info, 1000)
         self._log.warning(tables_info)
         table_payloads = []
         for table in tables_info:
@@ -318,19 +330,18 @@ class PostgresMetadata(DBMAsyncJob):
                 indexes = {row[0]:row[1] for row in rows}
                 this_payload.update({'indexes': indexes})
 
-            if table['is_partition']:
-                cursor.execute(PARTITION_PARENT_AND_RANGE_QUERY.format(tablename=name))
-                row =  cursor.fetchone()
-                partition_of = row['parent']
-                partition_range = row['partition_range']
-                this_payload.update({'partition_of': partition_of})
-                this_payload.update({'partition_range': partition_range})
-
             if table['has_partitions']:
                 cursor.execute(PARTITION_KEY_QUERY.format(parent=name))
                 row = cursor.fetchone()
                 self._log.warning(row)
                 this_payload.update({'partition_key':row['partition_key']})
+
+                cursor.execute(NUM_PARTITIONS_QUERY.format(parent=name))
+                row = cursor.fetchone()
+                this_payload.update({'num_partitions':row['num_partitions']})
+
+            if table['toast_table'] != None:
+                this_payload.update({'toast_table':row['toast_table']})
 
             # Get foreign keys
             cursor.execute(PG_CONSTRAINTS_QUERY.format(tablename=table['name']))
@@ -340,12 +351,11 @@ class PostgresMetadata(DBMAsyncJob):
                 this_payload.update({'foreign_keys': {}})
                 
             # Get columns 
-            if not table['is_partition']:
-                cursor.execute(COLUMNS_QUERY.format(tablename=name))
-                rows = cursor.fetchall()
-                self._log.warning(rows)
-                columns = [dict(row) for row in rows]
-                this_payload.update({'columns': columns})
+            cursor.execute(COLUMNS_QUERY.format(tablename=name))
+            rows = cursor.fetchall()
+            self._log.warning(rows)
+            columns = [dict(row) for row in rows]
+            this_payload.update({'columns': columns})
                 
             table_payloads.append(this_payload)
 
