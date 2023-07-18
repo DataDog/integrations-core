@@ -110,9 +110,17 @@ app_controller_histograms = [
 
 appset_controller_counters = [
     'reconcile.errors.total',
+    'runtime.reconcile.total'
 ]
 
-appset_controller_histograms = []
+appset_controller_gauges = [
+    'active.workers',
+    'max.concurrent.reconciles',
+]
+
+appset_controller_histograms = [
+    'reconcile.time_seconds',
+]
 
 api_server_counters = [
     'redis.request.count',
@@ -190,6 +198,7 @@ E2E_NOT_EXPOSED_METRICS = [
 general = general_gauges + general_counters + general_summaries
 
 app_controller = app_controller_counters + app_controller_gauges + app_controller_histograms + general
+appset_controller = appset_controller_counters + appset_controller_gauges + appset_controller_histograms + general
 api_server = api_server_counters + api_server_histograms + general
 repo_server = repo_server_counters + repo_server_gauges + repo_server_histograms + general
 notifications_controller = notifications_controller_counters + general
@@ -203,6 +212,7 @@ def namespace_formatter(metrics, namespace):
 
 
 APP_CONTROLLER_METRICS = namespace_formatter(app_controller, app_controller_ns)
+APPSET_CONTROLLER_METRICS = namespace_formatter(appset_controller, appset_controller_ns)
 API_SERVER_METRICS = namespace_formatter(api_server, api_server_ns)
 REPO_SERVER_METRICS = namespace_formatter(repo_server, repo_server_ns)
 NOTIFICATIONS_CONTROLLER_METRICS = namespace_formatter(notifications_controller, notifications_controller_ns)
