@@ -158,7 +158,7 @@ class SqlserverActivity(DBMAsyncJob):
         self.log.debug("collecting sql server activity")
         query = ACTIVITY_QUERY.format(
             exec_request_columns=', '.join(['req.{}'.format(r) for r in exec_request_columns]),
-            proc_char_limit=PROC_CHAR_LIMIT
+            proc_char_limit=PROC_CHAR_LIMIT,
         )
         self.log.debug("Running query [%s]", query)
         cursor.execute(query)
@@ -251,10 +251,8 @@ class SqlserverActivity(DBMAsyncJob):
         return {key: val for key, val in row.items() if val is not None}
 
     @staticmethod
-    def _sanitize_row(row, obfuscated_statement):
-        # rename the statement_text field to 'text' because that
-        # is what our backend is expecting
-        row['text'] = obfuscated_statement
+    def _sanitize_row(row):
+        del row['text']
         if 'query_hash' in row:
             row['query_hash'] = _hash_to_hex(row['query_hash'])
         if 'query_plan_hash' in row:
