@@ -112,9 +112,7 @@ appset_controller_counters = [
     'reconcile.errors.total',
 ]
 
-appset_controller_histograms = [
-
-]
+appset_controller_histograms = []
 
 api_server_counters = [
     'redis.request.count',

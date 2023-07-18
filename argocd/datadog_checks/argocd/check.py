@@ -17,7 +17,13 @@ from .metrics import (
     REPO_SERVER_METRICS,
 )
 
-API_SERVER_NAMESPACE, APP_CONTROLLER_NAMESPACE, APPSET_CONTROLLER_NAMESPACE, REPO_SERVER_NAMESPACE, NOTIFICATIONS_CONTROLLER_NAMESPACE = [
+(
+    API_SERVER_NAMESPACE,
+    APP_CONTROLLER_NAMESPACE,
+    APPSET_CONTROLLER_NAMESPACE,
+    REPO_SERVER_NAMESPACE,
+    NOTIFICATIONS_CONTROLLER_NAMESPACE,
+) = [
     'argocd.api_server',
     'argocd.app_controller',
     'argocd.appset_controller',
@@ -49,11 +55,11 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         notifications_controller_endpoint = self.instance.get("notifications_controller_endpoint")
 
         if (
-                not app_controller_endpoint
-                and not appset_controller_endpoint
-                and not repo_server_endpoint
-                and not api_server_endpoint
-                and not notifications_controller_endpoint
+            not app_controller_endpoint
+            and not appset_controller_endpoint
+            and not repo_server_endpoint
+            and not api_server_endpoint
+            and not notifications_controller_endpoint
         ):
             raise ConfigurationError(
                 "Must specify at least one of the following:"
