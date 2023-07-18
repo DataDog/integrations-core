@@ -1,0 +1,68 @@
+extends:
+  - _base.yaml
+  - _generic-if.yaml
+
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "riverbed"
+
+sysobjectid:
+  - 1.3.6.1.4.1.17163.1.3  # Steelhead Interceptor 9200
+metrics:
+  - MIB: HOST-RESOURCES-MIB
+    symbol:
+      name: memory.total
+      OID: 1.3.6.1.2.1.25.2.3.1.5.1
+  - MIB: HOST-RESOURCES-MIB
+    symbol:
+      name: memory.used
+      OID: 1.3.6.1.2.1.25.2.3.1.6.1
+  - MIB: INTERCEPTOR-MIB
+    symbol:
+      name: cpu.usage
+      OID: 1.3.6.1.4.1.17163.1.3.5.1.4.0
+  - MIB: INTERCEPTOR-MIB
+    symbol:
+      name: reverbed.interceptor.health
+      OID: 1.3.6.1.4.1.17163.1.3.2.2.0
+  - MIB: INTERCEPTOR-MIB
+    symbol:
+      name: reverbed.interceptor.serviceStatus
+      OID: 1.3.6.1.4.1.17163.1.3.2.3.0
+  - MIB: INTERCEPTOR-MIB
+    table:
+      name: procTable
+      OID: 1.3.6.1.4.1.17163.1.3.2.5
+    symbols:
+      - name: reverbed.interceptor.proc
+        constant_value_one: true
+    metric_tags:
+      - column:
+          name: reverbed.interceptor.procName
+          OID: 1.3.6.1.4.1.17163.1.3.2.5.1.2
+        tag: reverbed_interceptor_proc_name
+      - column:
+          OID: 1.3.6.1.4.1.17163.1.3.2.5.1.3
+          name: reverbed.interceptor.procStatus
+        tag: reverbed_interceptor_proc_status
+  - MIB: INTERCEPTOR-MIB
+    table:
+      name: neighborTable
+      OID: 1.3.6.1.4.1.17163.1.3.2.6
+    symbols:
+      - name: reverbed.interceptor.neighborConnectionCount
+        OID: 1.3.6.1.4.1.17163.1.3.2.6.1.4
+    metric_tags:
+      - column:
+          name: reverbed.interceptor.neighborName
+          OID: 1.3.6.1.4.1.17163.1.3.2.6.1.3
+        tag: reverbed_interceptor_neighbor_name
+metric_tags:
+  - OID: 1.3.6.1.4.1.17163.1.3.1.1.0
+    symbol: model
+    tag: reverbed_interceptor_model
+  - OID: 1.3.6.1.4.1.17163.1.3.1.2.0
+    symbol: serialNumber
+    tag: reverbed_interceptor_serial_number
