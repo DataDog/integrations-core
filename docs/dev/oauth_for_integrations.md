@@ -79,11 +79,16 @@ The client is the component of an application that enables users to authorize th
 
 In order to publish an OAuth client, you first need to open a pull request for your integration in either the [`integrations-extras`][5] or [Marketplace][6] GitHub repositories. 
 
-As a part of your pull request, update your README file with an **uninstallation** section under `## Setup` that includes the following instructions (along with any custom instructions you would like to add):
+As a part of your pull request, please do the following:
 
-- Once this integration has been uninstalled, any previous authorizations are revoked. 
-- Additionally, ensure that all API keys associated with this integration have been disabled by searching for the integration name on the [API Keys page][10].
-
+1. Update your README file with an `## Uninstallation` section under `## Setup` that includes the following instructions (along with any custom instructions you would like to add):
+       - Once this integration has been uninstalled, any previous authorizations are revoked. 
+       - Additionally, ensure that all API keys associated with this integration have been disabled by searching for the integration name on the [API Keys page][10].
+2. Update your manifest.json file to reference this new Unininstallation section. This reference should appear directly beneath the support field:
+       - ```
+           "support": "README.md#Support",
+           "uninstallation": "README.md#Uninstallation",
+         ```
 
 To start the publishing process in the [Developer Platform][4]:
 
