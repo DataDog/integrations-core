@@ -1,5 +1,11 @@
 # CHANGELOG - kafka_consumer
 
+## 3.2.2-beta.1 / 2023-07-18
+
+***Fixed***:
+
+* Simplify regex compilation. See [#15239](https://github.com/DataDog/integrations-core/pull/15239).
+
 ## 3.1.2 / 2023-07-13
 
 ***Fixed***:
