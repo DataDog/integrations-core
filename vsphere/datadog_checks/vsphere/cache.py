@@ -153,5 +153,4 @@ class InfrastructureCache(VSphereCache):
         # type: () -> None
         for _, mors in self._mors.items():
             for _, mor_props in mors.items():
-                if mor_props.get('properties') is not None:
-                    del mor_props['properties']
+                mor_props.pop('properties', None)

@@ -8,7 +8,6 @@ import logging
 from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
-from copy import deepcopy
 from typing import Any, Callable, Dict, Generator, Iterable, List, Optional, Set, Type, cast  # noqa: F401
 
 from pyVmomi import vim, vmodl
@@ -781,16 +780,14 @@ class VSphereCheck(AgentCheck):
             )
             ip_addresses = nic.ipConfig.ipAddress
             for ip_address in ip_addresses:
-                ip_tags = deepcopy(nic_tags)
-
-                ip_tags['nic_ip_address'] = ip_address.ipAddress
+                nic_tags['nic_ip_address'] = ip_address.ipAddress
                 self.submit_property_metric(
                     'guest.net.ipConfig.address',
                     1,
                     base_tags,
                     hostname,
                     resource_metric_suffix,
-                    additional_tags=ip_tags,
+                    additional_tags=nic_tags,
                 )
 
     def submit_ip_stack_property_metrics(

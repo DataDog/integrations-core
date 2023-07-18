@@ -283,8 +283,8 @@ class VSphereAPI(object):
             attribute_keys = {x.key: x.name for x in self._fetch_all_attributes()}
             for props in itervalues(infrastructure_data):
                 mor_attributes = []
-                all_properties = {}
                 if self.config.collect_property_metrics:
+                    all_properties = {}
                     for attribute_name in VM_PROPERTIES:
                         attribute_val = props.pop(attribute_name, None)
                         if attribute_val is not None:
