@@ -75,6 +75,8 @@ def test_partition_relation(aggregator, integration_check, pg_instance):
     part_1_tags = _get_expected_tags(
         check, pg_instance, db=pg_instance['dbname'], table='test_part1', partition_of='test_part', schema='public'
     )
+    print(check.metrics_cache.table_activity_metrics)
+    assert None is not None
     aggregator.assert_metric('postgresql.relation.pages', value=3, count=1, tags=part_1_tags)
     aggregator.assert_metric('postgresql.relation.tuples', value=499, count=1, tags=part_1_tags)
     aggregator.assert_metric('postgresql.relation.all_visible', value=3, count=1, tags=part_1_tags)
