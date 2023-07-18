@@ -71,6 +71,7 @@ InfrastructureDataItem = TypedDict(
         'guest.net': List[VmomiObject],
         'guest.ipStack': List[VmomiObject],
         'guest.toolsRunningStatus': str,
+        'guest.toolsVersionStatus2': str,
         'guest.toolsVersion': str,
         'config.hardware.numCoresPerSocket': str,
         'parent': Optional[vim.ManagedEntity],

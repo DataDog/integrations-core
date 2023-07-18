@@ -2546,6 +2546,13 @@ def test_vm_property_metrics(
         tags=base_tags + ['toolsRunningStatus:guestToolsRunning'],
         hostname='vm3',
     )
+    aggregator.assert_metric(
+        'vsphere.vm.guest.toolsVersionStatus2',
+        count=1,
+        value=1,
+        tags=base_tags + ['toolsVersionStatus2:guestToolsSupportedOld'],
+        hostname='vm3',
+    )
 
     aggregator.assert_metric(
         'vsphere.vm.guest.net.ipConfig.address',

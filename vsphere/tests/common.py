@@ -623,6 +623,10 @@ VM_PROPERTIES_EX = mock.MagicMock(
                         val='guestToolsRunning',
                     ),
                     vmodl.DynamicProperty(
+                        name='guest.toolsVersionStatus2',
+                        val='guestToolsSupportedOld',
+                    ),
+                    vmodl.DynamicProperty(
                         name='guest.toolsVersion',
                         val='11296',
                     ),

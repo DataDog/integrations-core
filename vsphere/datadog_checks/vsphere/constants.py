@@ -63,6 +63,7 @@ PROPERTY_COUNT_METRICS = [
     "guest.ipStack.ipRoute",
     "guest.net.ipConfig.address",
     "guest.toolsRunningStatus",
+    "guest.toolsVersionStatus2",
     "guest.toolsVersion",
     "guest.guestFullName",
 ]
@@ -70,6 +71,7 @@ VM_OBJECT_PROPERTIES = ["guest.disk", "guest.net", "guest.ipStack"]
 
 VM_SIMPLE_PROPERTIES = [
     "guest.toolsRunningStatus",
+    "guest.toolsVersionStatus2",
     "guest.toolsVersion",
     "config.hardware.numCoresPerSocket",
     "config.cpuAllocation.limit",
