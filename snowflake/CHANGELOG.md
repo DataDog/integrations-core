@@ -1,5 +1,11 @@
 # CHANGELOG - Snowflake
 
+## 4.5.4 / 2023-07-18
+
+***Fixed***:
+
+* Process query rows one at a time to reduce memory footprint. See [#15268](https://github.com/DataDog/integrations-core/pull/15268).
+
 ## 4.5.3 / 2023-07-10
 
 ***Fixed***:
