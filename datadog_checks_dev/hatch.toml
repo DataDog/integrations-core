@@ -7,10 +7,6 @@ mypy-args = [
   "datadog_checks/dev/tooling/commands/release/trello/testable.py",
   "datadog_checks/dev/tooling/commands/release/trello/status.py",
 ]
-# TODO remove once https://github.com/pallets/click/issues/2558 is solved
-mypy-deps = [
-  "click~=8.1,!=8.1.4",
-]
 
 [envs.default]
 e2e-env = false
