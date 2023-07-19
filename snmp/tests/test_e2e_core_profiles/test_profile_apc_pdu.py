@@ -30,11 +30,6 @@ def test_e2e_profile_apc_pdu(dd_agent_check):
         'device_namespace:default',
         'snmp_device:' + ip_address,
     ] + [
-        'r_pdu_ident_device_breaker_rating:16',
-        'r_pdu_ident_device_num_breakers:18',
-        'r_pdu_ident_device_num_outlets:21',
-        'r_pdu_ident_device_num_phases:26',
-        'r_pdu_ident_device_rating:8',
         'r_pdu_ident_firmware_rev:kept zombies forward acted zombies but kept forward',
         'r_pdu_ident_hardware_rev:zombies forward their',
         'r_pdu_ident_model_number:zombies kept their kept zombies kept Jaded zombies ' 'but',
