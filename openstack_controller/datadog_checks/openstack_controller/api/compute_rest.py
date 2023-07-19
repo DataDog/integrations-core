@@ -158,10 +158,11 @@ class ComputeRest:
         self.log.debug("response: %s", response.json())
         hypervisors_detail_metrics = {}
         for hypervisor in response.json()['hypervisors']:
+            hypervisor_type = hypervisor['hypervisor_type']
             hypervisors_detail_metrics[str(hypervisor['id'])] = {
                 'name': hypervisor['hypervisor_hostname'],
                 'state': hypervisor.get('state'),
-                'type': hypervisor['hypervisor_type'],
+                'type': hypervisor_type,
                 'status': hypervisor['status'],
                 'metrics': get_normalized_metrics(hypervisor, NOVA_HYPERVISOR_METRICS_PREFIX, NOVA_HYPERVISOR_METRICS),
             }
@@ -169,7 +170,7 @@ class ComputeRest:
             load_averages = []
             if uptime:
                 load_averages = _load_averages_from_uptime(uptime)
-            else:
+            elif hypervisor_type != 'ironic':
                 try:
                     response_uptime = self.http.get(
                         '{}/os-hypervisors/{}/uptime'.format(self.endpoint, hypervisor['id'])
@@ -181,10 +182,15 @@ class ComputeRest:
                             load_averages = _load_averages_from_uptime(uptime)
                 except Exception as e:
                     self.log.info(
-                        "Could not query the uptime for hypervisor %s, perhaps it is a bare metal: %s",
+                        "Could not query the uptime for hypervisor %s: %s",
                         hypervisor.get('id'),
                         e,
                     )
+            else:
+                self.log.debug(
+                    "Skipping uptime metrics for bare metal hypervisor %s",
+                    hypervisor.get('id'),
+                )
 
             if load_averages and len(load_averages) == 3:
                 for i, avg in enumerate([1, 5, 15]):

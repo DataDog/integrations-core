@@ -146,9 +146,9 @@ NOVA_HYPERVISOR_METRICS = {
     f"{NOVA_HYPERVISOR_METRICS_PREFIX}.vcpus": {"max_version": "2.87"},
     f"{NOVA_HYPERVISOR_METRICS_PREFIX}.vcpus_used": {"max_version": "2.87"},
     f"{NOVA_HYPERVISOR_METRICS_PREFIX}.up": {},
-    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.load_1": {"min_version": "2.88"},
-    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.load_5": {"min_version": "2.88"},
-    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.load_15": {"min_version": "2.88"},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.load_1": {},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.load_5": {},
+    f"{NOVA_HYPERVISOR_METRICS_PREFIX}.load_15": {},
 }
 
 NEUTRON_METRICS_PREFIX = "openstack.neutron"

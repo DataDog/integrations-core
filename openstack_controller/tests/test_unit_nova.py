@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
 import mock
 import pytest
 
@@ -342,11 +343,12 @@ def test_hypervisor_metrics(aggregator, dd_run_check, instance, hypervisor_id, m
     assert not_found_metrics == [], f"No nova hypervisor metrics found: {not_found_metrics}"
 
 
-def test_nova_metrics_ironic(aggregator, dd_run_check, instance_ironic_nova_microversion_latest, monkeypatch):
+def test_nova_metrics_ironic(aggregator, caplog, dd_run_check, instance_ironic_nova_microversion_latest, monkeypatch):
     http = MockHttp("agent-integrations-openstack-ironic")
     monkeypatch.setattr('requests.get', mock.MagicMock(side_effect=http.get))
     monkeypatch.setattr('requests.post', mock.MagicMock(side_effect=http.post))
 
+    caplog.set_level(logging.DEBUG)
     check = OpenStackControllerCheck('test', {}, [instance_ironic_nova_microversion_latest])
     dd_run_check(check)
 
@@ -373,6 +375,10 @@ def test_nova_metrics_ironic(aggregator, dd_run_check, instance_ironic_nova_micr
     for metric in aggregator.metric_names:
         if metric in NOVA_HYPERVISOR_METRICS:
             found = True
+    assert found, "No flavor metrics found"
+
+    aggregator.assert_metric('openstack.nova.hypervisor.load_15', count=0)
+    assert "Skipping uptime metrics for bare metal hypervisor 9d72cf53-19c8-4942-9314-005fa5d2a6a0" in caplog.text
 
 
 def test_latest_service_metrics(aggregator, dd_run_check, instance_nova_microversion_latest, monkeypatch):
