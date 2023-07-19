@@ -2,19 +2,19 @@
 
 ## Overview
 
-This check submits metrics exposed by the [Nvidia DCGM][15] [Exporter][16] in Datadog Agent format.
+<div class="alert alert-info">
+Coming soon: This integration is included in the upcoming 7.47.0 release of the Datadog Agent.
+</div>
 
-**Note**: This check requires Agent v7.47.0 or later.
+This check submits metrics exposed by the [Nvidia DCGM][15] [Exporter][16] in Datadog Agent format.
 
 ## Setup
 
 ### Installation
 
-<div class="alert alert-warning">
-The Nvidia DCGM GPU monitoring check will be included in the [Datadog Agent][1] package starting version 7.47 and later. If you would like to install it beforehand on an Agent 7.46, you can do so using the [Intergration][17] command to install datadog-dcgm==1.0.0. 
-</div>
+Starting from Agent release 7.47.0, The DCGM check is included in the [Datadog Agent][1] package.
 
-For the collection of this data by the agent, the DCGM Exporter containers needs to be up and exposing GPU metrics.
+To start collecting data with the Agent, the DCGM Exporter container needs to be up and exposing GPU metrics.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host | Docker" xxx -->
@@ -88,6 +88,7 @@ To configure the Exporter in an Operator environment, please review the template
 
 - https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/getting-started.html#gpu-telemetry
 
+<!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 
@@ -115,7 +116,7 @@ instances:
 
 Use the `extra_metrics` configuration field to add metrics that go beyond the ones [we support out of the box][6]. See [here][10] for the full list of metrics that dcgm-exporter can collect. Make sure to [enable these fields in the dcgm-exporter configuration][9] as well.
 
-<!-- xxx tab xxx -->
+<!-- xxz tab xxx -->
 <!-- xxx tab "Docker" xxx -->
 
 #### Docker
@@ -188,7 +189,7 @@ spec:
     - name: dcgm
 ```
 
-
+<!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 2. [Restart the Agent][4].
@@ -266,4 +267,3 @@ Additional helpful documentation, links, and articles:
 [14]: https://github.com/NVIDIA/dcgm-exporter/issues/163#issuecomment-1577506512
 [15]: https://developer.nvidia.com/dcgm
 [16]: https://github.com/NVIDIA/dcgm-exporter
-[17]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux
