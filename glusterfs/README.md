@@ -103,7 +103,7 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://www.redhat.com/en/technologies/storage/gluster
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/glusterfs/datadog_checks/glusterfs/data/conf.yaml.example
 [5]: https://github.com/gluster/gstatus#install
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

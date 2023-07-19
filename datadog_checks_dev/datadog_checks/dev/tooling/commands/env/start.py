@@ -6,7 +6,6 @@ import platform
 import time
 
 import click
-import pyperclip
 
 from ....ci import running_on_ci
 from ....fs import dir_exists, path_join
@@ -22,7 +21,7 @@ dev_option = click.option(
     '--dev/--prod',
     default=None,
     help=(
-        'By default we use the local version of the check. Pass --prod to use the one shipped with the agent. '
+        'By default we use version of the check that is shipped with the agent you are using.'
         'Pass --dev to explicitly enforce the local version. Also see the `--base` option.'
     ),
 )
@@ -105,18 +104,12 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         _start_sampling(environment)
 
     click.echo()
-    try:
-        pyperclip.copy(environment.config_file)
-    except Exception:
-        config_message = 'Config file: '
-    else:
-        config_message = 'Config file (copied to your clipboard): '
+
+    echo_success('Config file: ', nl=False)
+    echo_info(environment.config_file)
 
     echo_success('To edit config file, do: ', nl=False)
     echo_info(f'ddev env edit {check} {env}')
-
-    echo_success(config_message, nl=False)
-    echo_info(environment.config_file)
 
     echo_success('To reload the config file, do: ', nl=False)
     echo_info(f'ddev env reload {check} {env}')

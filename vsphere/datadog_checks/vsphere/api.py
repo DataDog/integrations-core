@@ -213,6 +213,14 @@ class VSphereAPI(object):
 
             # Collect the objects and their properties
             res = content.propertyCollector.RetrievePropertiesEx([filter_spec], retr_opts)
+            if res is None:
+                self.log.warning(
+                    "Did not retrieve any properties from the vCenter. Metric collection cannot continue. "
+                    "Ensure your user has correct permissions."
+                )
+                obj_content_list = []
+                return obj_content_list
+
             obj_content_list = res.objects
             # Results can be paginated
             while res.token is not None:

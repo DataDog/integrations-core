@@ -151,6 +151,7 @@ def dep(check, require_base_check_version, min_base_check_version):
     """
     This command will:
 
+    \b
     * Verify the uniqueness of dependency versions across all checks, or optionally a single check
     * Verify all the dependencies are pinned.
     * Verify the embedded Python environment defined in the base check and requirements

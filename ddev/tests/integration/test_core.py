@@ -198,9 +198,9 @@ class TestPackageFiles:
 
         expected_files = []
         for root, _, files in os.walk(integration.package_directory):
-            for file in files:
-                if file.endswith(".py"):
-                    expected_files.append(os.path.join(root, file))
+            for f in files:
+                if f.endswith(".py"):
+                    expected_files.append(os.path.join(root, f))
 
         assert integration.package_files == expected_files
 
@@ -211,3 +211,17 @@ class TestPackageFiles:
         expected_files = []
 
         assert integration.package_files == expected_files
+
+
+class TestReleaseTagPattern:
+    def test_shipped(self, local_repo):
+        repo = Repository(local_repo.name, str(local_repo))
+        integration = repo.integrations.get('datadog_checks_base')
+
+        assert integration.release_tag_pattern == r'datadog_checks_base-\d+\.\d+\.\d+'
+
+    def test_ddev(self, local_repo):
+        repo = Repository(local_repo.name, str(local_repo))
+        integration = repo.integrations.get('ddev')
+
+        assert integration.release_tag_pattern == r'ddev-v\d+\.\d+\.\d+'

@@ -1,14 +1,13 @@
 base_package:
 - datadog_checks_base/**/*
 changelog/no-changelog:
-- requirements-agent-release.txt
-- '*/__about__.py'
+- any:
+  - requirements-agent-release.txt
+  - '*/__about__.py'
 - all:
-  - '*/!(datadog_checks)/**'
-- all:
-  - '*/!(pyproject.toml)'
-- all:
-  - '*/(!ddev)/**'
+  - '!*/datadog_checks/**'
+  - '!*/pyproject.toml'
+  - '!ddev/src/**'
 ddev:
 - ddev/**/*
 dependencies:
@@ -16,7 +15,7 @@ dependencies:
 dependency_provider:
 - datadog_checks_dependency_provider/**/*
 dev/testing:
-- .azure-pipelines/**
+- .github/workflows/**
 - .codecov.yml
 dev/tooling:
 - .github/workflows/**
@@ -126,6 +125,8 @@ integration/datadog_cluster_agent:
 - datadog_cluster_agent/**/*
 integration/datadog_operator:
 - datadog_operator/**/*
+integration/dcgm:
+- dcgm/**/*
 integration/directory:
 - directory/**/*
 integration/disk:
@@ -400,6 +401,8 @@ integration/ssh_check:
 - ssh_check/**/*
 integration/statsd:
 - statsd/**/*
+integration/strimzi:
+- strimzi/**/*
 integration/supervisord:
 - supervisord/**/*
 integration/system_core:
@@ -428,6 +431,8 @@ integration/tokumx:
 - tokumx/**/*
 integration/tomcat:
 - tomcat/**/*
+integration/torchserve:
+- torchserve/**/*
 integration/traffic_server:
 - traffic_server/**/*
 integration/twemproxy:
@@ -444,6 +449,8 @@ integration/voltdb:
 - voltdb/**/*
 integration/vsphere:
 - vsphere/**/*
+integration/weaviate:
+- weaviate/**/*
 integration/weblogic:
 - weblogic/**/*
 integration/win32_event_log:

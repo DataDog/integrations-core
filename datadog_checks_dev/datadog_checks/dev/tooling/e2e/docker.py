@@ -302,8 +302,7 @@ class DockerInterface(object):
             'DD_API_KEY': self.api_key,
             # Set agent hostname for CI
             'DD_HOSTNAME': get_hostname(),
-            # Run expvar on a random port
-            'DD_EXPVAR_PORT': 0,
+            'DD_EXPVAR_PORT': 5000,
             # Run API on a random port
             'DD_CMD_PORT': find_free_port(get_ip()),
             # Disable trace agent
@@ -314,6 +313,7 @@ class DockerInterface(object):
             # More info: https://github.com/DataDog/integrations-core/pull/5454
             # TODO: Remove PYTHONDONTWRITEBYTECODE env var when Python 2 support is removed
             'PYTHONDONTWRITEBYTECODE': "1",
+            "DD_TELEMETRY_ENABLED": "1",
         }
         if self.dd_site:
             env_vars['DD_SITE'] = self.dd_site

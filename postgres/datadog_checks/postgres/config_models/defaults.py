@@ -54,6 +54,10 @@ def instance_collect_function_metrics(field, value):
     return False
 
 
+def instance_collect_settings(field, value):
+    return get_default_field_value(field, value)
+
+
 def instance_collect_wal_metrics(field, value):
     return False
 
@@ -64,6 +68,10 @@ def instance_custom_queries(field, value):
 
 def instance_data_directory(field, value):
     return '/usr/local/pgsql/data'
+
+
+def instance_database_autodiscovery(field, value):
+    return get_default_field_value(field, value)
 
 
 def instance_dbm(field, value):
@@ -104,6 +112,10 @@ def instance_log_unobfuscated_plans(field, value):
 
 def instance_log_unobfuscated_queries(field, value):
     return False
+
+
+def instance_max_connections(field, value):
+    return 30
 
 
 def instance_max_relations(field, value):

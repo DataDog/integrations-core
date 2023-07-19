@@ -275,7 +275,6 @@ class VSphereCheck(AgentCheck):
 
             # Attach tags from fetched attributes.
             tags.extend(properties.get('attributes', []))
-
             resource_tags = self.infrastructure_cache.get_mor_tags(mor) + tags
             if not is_resource_collected_by_filters(
                 mor,
@@ -288,6 +287,34 @@ class VSphereCheck(AgentCheck):
                     "Skipping resource not matched by filters. resource=`%s` tags=`%s`", mor_name, resource_tags
                 )
                 continue
+
+            # after retrieving tags, add hostname suffix if specified
+            if isinstance(mor, vim.VirtualMachine):
+                if self._config.vm_hostname_suffix_tag is not None:
+                    hostname_suffix = None
+
+                    all_tags = resource_tags + self._config.custom_tags
+                    sorted_tags = sorted(all_tags)
+                    for resource_tag in sorted_tags:
+                        resource_tag_key, _, resource_tag_value = resource_tag.partition(":")
+                        if resource_tag_key == self._config.vm_hostname_suffix_tag:
+                            hostname_suffix = resource_tag_value
+                            break
+
+                    if hostname_suffix is not None:
+                        hostname = "{}-{}".format(hostname, hostname_suffix)
+                        self.log.debug(
+                            "Attached hostname suffix key %s, new hostname: %s",
+                            self._config.vm_hostname_suffix_tag,
+                            hostname,
+                        )
+
+                    else:
+                        self.log.debug(
+                            "Could not attach hostname suffix key %s for host: %s",
+                            self._config.vm_hostname_suffix_tag,
+                            hostname,
+                        )
 
             mor_payload = {"tags": tags}  # type: Dict[str, Any]
 
@@ -313,7 +340,9 @@ class VSphereCheck(AgentCheck):
             metadata = self.metrics_metadata_cache.get_metadata(resource_type)
             for result in results_per_mor.value:
                 if result.id.instance:
-                    have_instance_value[resource_type].add(metadata[result.id.counterId])
+                    counter_id = metadata.get(result.id.counterId)
+                    if counter_id:
+                        have_instance_value[resource_type].add(counter_id)
 
         for results_per_mor in query_results:
             mor_props = self.infrastructure_cache.get_mor_props(results_per_mor.entity)

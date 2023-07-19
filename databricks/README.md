@@ -82,8 +82,8 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
 
   # WAITING UNTIL MASTER PARAMS ARE LOADED, THEN GRABBING IP AND PORT
   while [ -z \$gotparams ]; do
-    if [ -e "/tmp/master-params" ]; then
-      DB_DRIVER_PORT=\$(cat /tmp/master-params | cut -d' ' -f2)
+    if [ -e "/tmp/driver-env.sh" ]; then
+      DB_DRIVER_PORT=\$(cat /tmp/driver-env.sh | cut -d' ' -f2)
       gotparams=TRUE
     fi
     sleep 2
@@ -135,13 +135,13 @@ After creating the `datadog-install-driver-workers.sh` script, add the init scri
 
 dbutils.fs.put("dbfs:/<init-script-folder>/datadog-install-driver-workers.sh","""
 #!/bin/bash
-cat <<EOF > /tmp/start_datadog.sh
-
-#!/bin/bash
 
 date -u +"%Y-%m-%d %H:%M:%S UTC"
 echo "Running on the driver? $DB_IS_DRIVER"
 echo "Driver ip: $DB_DRIVER_IP"
+
+cat <<EOF > /tmp/start_datadog.sh
+#!/bin/bash
 
 if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
 
@@ -360,7 +360,7 @@ Need help? Contact [Datadog support][10].
 [1]: https://databricks.com/
 [2]: https://docs.datadoghq.com/integrations/spark/?tab=host
 [3]: https://app.datadoghq.com/integrations/spark
-[4]: https://app.datadoghq.com/account/settings#agent
+[4]: https://app.datadoghq.com/account/settings/agent/latest
 [6]: https://docs.databricks.com/clusters/init-scripts.html#configure-a-cluster-scoped-init-script-using-the-ui
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
 [8]: https://docs.datadoghq.com/integrations/spark/#metrics

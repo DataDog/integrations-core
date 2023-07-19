@@ -60,7 +60,9 @@ class TestKubeAPIServerMetrics:
         'authentication_attempts',
         'requested_deprecated_apis',
         'aggregator_unavailable_apiservice',
+        'envelope_encryption_dek_cache_fill_percent',
     ]
+
     COUNT_METRICS = [
         'audit_event.count',
         'rest_client_requests_total.count',
@@ -85,4 +87,6 @@ class TestKubeAPIServerMetrics:
             metric_to_assert = NAMESPACE + "." + metric
             aggregator.assert_metric(metric_to_assert)
             aggregator.assert_metric_has_tag(metric_to_assert, customtag)
+            if "aggregator_unavailable_apiservice" in metric:
+                aggregator.assert_metric_has_tag(metric_to_assert, "apiservice_name:v1.")
         aggregator.assert_all_metrics_covered()

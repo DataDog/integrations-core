@@ -308,13 +308,12 @@ For containerized environments, see the [Autodiscovery Integration Templates][8]
 
 ## Custom query
 
-Providing custom queries is also supported. Each query must have three parameters:
+Providing custom queries is also supported. Each query must have two parameters:
 
 | Parameter       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `metric_prefix` | This is what each metric starts with.                                                                                                                                                                                                                                                                                                                                                                                                         |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |                                                                                                                                                                
 | `query`         | This is the SQL to execute. It can be a simple statement or a multi-line script. All rows of the result are evaluated.                                                                                                                                                                                                                                                                                                                        |
-| `columns`       | This is a list representing each column, ordered sequentially from left to right. There are two required pieces of data: <br> a. `type` - This is the submission method (`gauge`, `count`, etc.). <br> b. name - This is the suffix to append to the `metric_prefix` in order to form the full metric name. If `type` is `tag`, this column is instead considered as a tag which is applied to every metric collected by this particular query. |
+| `columns`       | This is a list representing each column, ordered sequentially from left to right. There are two required pieces of data: <br> a. `type` - This is the submission method (`gauge`, `count`, etc.). <br> b. name - This is the suffix used to form the full metric name. If `type` is `tag`, this column is instead considered as a tag which is applied to every metric collected by this particular query. |
 
 Optionally use the `tags` parameter to apply a list of tags to each metric collected.
 
@@ -328,8 +327,7 @@ self.count('oracle.custom_query.metric2', value, tags=['tester:oracle', 'tag1:va
 is what the following example configuration would become:
 
 ```yaml
-- metric_prefix: oracle.custom_query
-  query: | # Use the pipe if you require a multi-line script.
+- query: | # Use the pipe if you require a multi-line script.
     SELECT columns
     FROM tester.test_table
     WHERE conditions
@@ -365,8 +363,7 @@ Create a query configuration to help identify database locks:
         tags:
           - db:oracle
         custom_queries:
-          - metric_prefix: oracle.custom_query.locks
-            query: |
+          - query: |
               select blocking_session, username, osuser, sid, serial# as serial, wait_class, seconds_in_wait
               from v_$session
               where blocking_session is not NULL order by blocking_session

@@ -47,12 +47,17 @@ IGNORED_DEPS = {
     'pyodbc',  # Breaking sqlserver tests
     'psutil',  # Breaking disk tests
     'aerospike',  # v8+ breaks agent build.
+    'protobuf',  # 3.20.2->4.23.3 breaks kubernetes_state, kube_dns, gitlab and gitlab_runner tests.
+    'service-identity',  # 21.1->23.1 breaks tls tests.
+    'pyvmomi',  # 7->8 breaks vsphere tests.
+    # 4.3->4.4 changes the license field in the package metadata to something our validations cannot handle.
+    'pymongo',
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
 SECURITY_DEPS = {'in-toto', 'tuf', 'securesystemslib'}
 
-SUPPORTED_PYTHON_MINOR_VERSIONS = {'2': '2.7', '3': '3.8'}
+SUPPORTED_PYTHON_MINOR_VERSIONS = {'2': '2.7', '3': '3.9'}
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')

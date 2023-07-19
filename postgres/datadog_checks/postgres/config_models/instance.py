@@ -24,6 +24,7 @@ class Aws(BaseModel):
         allow_mutation = False
 
     instance_endpoint: Optional[str]
+    region: Optional[str]
 
 
 class Azure(BaseModel):
@@ -32,6 +33,25 @@ class Azure(BaseModel):
 
     deployment_type: Optional[str]
     fully_qualified_domain_name: Optional[str]
+
+
+class CollectSettings(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    collection_interval: Optional[float]
+    enabled: Optional[bool]
+
+
+class DatabaseAutodiscovery(BaseModel):
+    class Config:
+        allow_mutation = False
+
+    enabled: Optional[bool]
+    exclude: Optional[Sequence[str]]
+    include: Optional[Sequence[str]]
+    max_databases: Optional[int]
+    refresh: Optional[int]
 
 
 class Gcp(BaseModel):
@@ -120,9 +140,11 @@ class InstanceConfig(BaseModel):
     collect_database_size_metrics: Optional[bool]
     collect_default_database: Optional[bool]
     collect_function_metrics: Optional[bool]
+    collect_settings: Optional[CollectSettings]
     collect_wal_metrics: Optional[bool]
     custom_queries: Optional[Sequence[Mapping[str, Any]]]
     data_directory: Optional[str]
+    database_autodiscovery: Optional[DatabaseAutodiscovery]
     dbm: Optional[bool]
     dbname: Optional[str]
     dbstrict: Optional[bool]
@@ -134,6 +156,7 @@ class InstanceConfig(BaseModel):
     ignore_databases: Optional[Sequence[str]]
     log_unobfuscated_plans: Optional[bool]
     log_unobfuscated_queries: Optional[bool]
+    max_connections: Optional[int]
     max_relations: Optional[int]
     metric_patterns: Optional[MetricPatterns]
     min_collection_interval: Optional[float]

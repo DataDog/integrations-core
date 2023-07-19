@@ -25,6 +25,8 @@ class MockedMOR(Mock):
         # Mocking
         super(MockedMOR, self).__init__(**kwargs)
 
+        self._serverGuid = None
+        self._moId = kwargs.get('moId', None)
         self.name = kwargs.get('name')
         self.parent = None
         self.parent_name = kwargs.get('parent_name', None)
@@ -147,10 +149,10 @@ def get_mocked_server():
 def mock_alarm_event(from_status='green', to_status='red', message='Some error', key=0, created_time=None):
     if created_time is None:
         created_time = datetime.utcnow()
-    vm = MockedMOR(spec='VirtualMachine')
-    dc = MockedMOR(spec="Datacenter")
+    vm = MockedMOR(moId="vm1", spec='VirtualMachine')
+    dc = MockedMOR(moId="dc1", spec="Datacenter")
     dc_arg = vim.event.DatacenterEventArgument(datacenter=dc, name='dc1')
-    alarm = MockedMOR(spec="Alarm")
+    alarm = MockedMOR(moId="dc1", spec="Alarm")
     alarm_arg = vim.event.AlarmEventArgument(alarm=alarm, name='alarm1')
     entity = vim.event.ManagedEntityEventArgument(entity=vm, name='vm1')
     event = vim.event.AlarmStatusChangedEvent(

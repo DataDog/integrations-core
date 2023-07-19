@@ -1,14 +1,12 @@
 [build-system]
-requires = [
-    "hatchling>=1.5.0",
-]
+requires = ["hatchling>=1.17.1", "hatch-vcs>=0.3.0"]
 build-backend = "hatchling.build"
 
 [project]
 name = "ddev"
 description = "The Datadog Agent integration developer tool"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = "BSD-3-Clause"
 keywords = [
     "datadog",
@@ -25,14 +23,14 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
 ]
 dependencies = [
-    "datadog-checks-dev[cli]~=19.0",
+    "datadog-checks-dev[cli]~=22.0",
     "hatch>=1.6.3",
     "httpx",
     "jsonpointer",
-    "pyperclip",
+    "pluggy",
     "rich>=12.5.1",
     "tomli; python_version < '3.11'",
     "tomli-w",
@@ -40,15 +38,31 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
+
 [project.scripts]
 ddev = "ddev.cli:main"
 ddev-starship = "ddev.plugin.external.starship.prompt:main"
 
-[project.urls]
-Source = "https://github.com/DataDog/integrations-core"
+[project.entry-points.hatch]
+datadog_checks = "ddev.plugin.external.hatch"
 
 [tool.hatch.version]
-path = "src/ddev/__about__.py"
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+root = ".."
+version_scheme = "python-simplified-semver"
+local_scheme = "no-local-version"
+parentdir_prefix_version = "ddev-"
+git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "ddev-v*"]
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/ddev/_version.py"
+
+[tool.hatch.build.targets.app]
+scripts = ["ddev"]
 
 [tool.black]
 include = '\.pyi?$'
@@ -57,15 +71,7 @@ skip-string-normalization = true
 target-version = ["py38"]
 
 [tool.ruff]
-exclude = [
-    ".eggs",
-    ".tox",
-    "build",
-    "compat.py",
-    "__init__.py",
-    "**/datadog_checks/dev/tooling/templates/*",
-    "**/datadog_checks/*/vendor/*",
-]
+exclude = []
 target-version = "py38"
 line-length = 120
 # Rules were ported over from the legacy flake8 settings for parity

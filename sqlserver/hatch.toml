@@ -2,7 +2,7 @@
 base-package-features = ["deps", "db", "json"]
 
 [[envs.default.matrix]]
-python = ["3.8"]
+python = ["3.9"]
 os = ["linux"]
 version = ["2017", "2019"]
 setup = ["single", "ha"]
@@ -12,7 +12,7 @@ setup = ["single", "ha"]
 # time out. until we're able to modify and parallelize the work we'll limit the per-driver tests to only a single
 # sqlserver version
 [[envs.default.matrix]]
-python = ["3.8"]
+python = ["3.9"]
 os = ["windows"]
 driver = ["SQLOLEDB", "SQLNCLI11", "MSOLEDBSQL", "odbc"]
 version = ["2019"]
@@ -20,7 +20,7 @@ setup = ["single"]
 
 # temporarily exclude high cardinality windows env. to be fixed in a follow-up PR
 [[envs.default.matrix]]
-python = ["3.8"]
+python = ["3.9"]
 os = ["linux"]
 driver = ["odbc"]
 version = ["2019"]
@@ -32,7 +32,7 @@ COMPOSE_FOLDER = "compose"
 PIP_EXTRA_INDEX_URL = "https://datadoghq.dev/ci-wheels/bin"
 
 [envs.default.overrides]
-platform.windows.e2e-env = { value = false }
+env.GITHUB_ACTIONS.e2e-env = { value = false, if = ["true"], platform = ["windows"] }
 platform.windows.env-vars = [
   "COMPOSE_FOLDER=compose-windows",
   # we need SETUPTOOLS_USE_DISTUTILS=stdlib for setuptools versions 60+ in order for adodbapi to be able to install
@@ -50,6 +50,7 @@ matrix.setup.env-vars = [
 ]
 matrix.version.env-vars = [
   { key = "SQLSERVER_MAJOR_VERSION" },
+  { key = "SQLSERVER_ENGINE_EDITION" },
   { key = "SQLSERVER_IMAGE_TAG", value = "2017-CU24-ubuntu-16.04", if = ["2017"], platform = ["linux"] },
   { key = "SQLSERVER_IMAGE_TAG", value = "2019-CU11-ubuntu-16.04", if = ["2019"], platform = ["linux"] },
   { key = "SQLSERVER_BASE_IMAGE", value = "datadog/docker-library:sqlserver_{matrix:version}", platform = ["windows"] },

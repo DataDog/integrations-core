@@ -1,0 +1,26 @@
+{
+    "name": "⚠️ DCGM: GPU Memory Usage is High",
+    "type": "query alert",
+    "query": "avg(last_5m):avg:dcgm.mem.copy_utilization{*} > 90",
+    "message": "{{#is_alert}}\nYour GPU memory usage is high: {{value}}%.\n{{/is_alert}}",
+    "tags": [
+        "integration:dcgm"
+    ],
+    "options": {
+        "thresholds": {
+            "critical": 90
+        },
+        "notify_audit": false,
+        "require_full_window": false,
+        "notify_no_data": false,
+        "renotify_interval": 0,
+        "include_tags": false,
+        "avalanche_window": 10,
+        "silenced": {}
+    },
+    "priority": null,
+    "restricted_roles": null,
+    "recommended_monitor_metadata": {
+        "description": "Notify your team when a GPU's memory usage is too high."
+    }
+}
