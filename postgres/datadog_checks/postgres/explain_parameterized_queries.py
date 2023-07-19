@@ -79,6 +79,7 @@ class ExplainParameterizedQueries:
         if not self._create_prepared_statement(dbname, statement, obfuscated_statement, query_signature):
             return None
 
+        # TODO: need to fix this now we use a diff cursor
         result = self._explain_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
         self._deallocate_prepared_statement(dbname, query_signature)
         if result:
@@ -161,16 +162,19 @@ class ExplainParameterizedQueries:
             )
 
     def _execute_query(self, dbname, query):
-        # TODO: fix this for psycopg3 upgrade
-        # Psycopg2 connections do not get closed when context ends;
-        # leaving context will just mark the connection as inactive in MultiDatabaseConnectionPool
-        with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
+        conn = self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout)
+        try:
             with conn.cursor(row_factory=dict_row) as cursor:
                 logger.debug('Executing query=[%s]', query)
                 cursor.execute(query)
+        finally:
+            self._check.db_pool.set_conn_inactive(dbname)
 
     def _execute_query_and_fetch_rows(self, dbname, query):
-        with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
+        conn = self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout)
+        try:
             with conn.cursor(row_factory=dict_row) as cursor:
                 cursor.execute(query)
                 return cursor.fetchall()
+        finally:
+            self._check.db_pool.set_conn_inactive(dbname)

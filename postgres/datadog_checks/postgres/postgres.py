@@ -165,7 +165,7 @@ class PostgreSql(AgentCheck):
         )
 
     def execute_query_raw(self, query):
-        with self._get_main_db().cursor() as cursor:
+        with self.db.cursor() as cursor:
             cursor.execute(query)
             rows = cursor.fetchall()
             return rows
@@ -183,13 +183,15 @@ class PostgreSql(AgentCheck):
         queries = []
         if self.version >= V9_2:
             q_pg_stat_database = copy.deepcopy(QUERY_PG_STAT_DATABASE)
-            q_pg_stat_database["query"] += " WHERE " + " AND ".join(
-                "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
-            )
+            if len(self._config.ignore_databases) > 0:
+                q_pg_stat_database["query"] += " WHERE " + " AND ".join(
+                    "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
+                )
             q_pg_stat_database_conflicts = copy.deepcopy(QUERY_PG_STAT_DATABASE_CONFLICTS)
-            q_pg_stat_database_conflicts["query"] += " WHERE " + " AND ".join(
-                "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
-            )
+            if len(self._config.ignore_databases) > 0:
+                q_pg_stat_database_conflicts["query"] += " WHERE " + " AND ".join(
+                    "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
+                )
 
             if self._config.dbstrict:
                 q_pg_stat_database["query"] += " AND datname in('{}')".format(self._config.dbname)
@@ -311,7 +313,7 @@ class PostgreSql(AgentCheck):
         if self._version is None:
             raw_version = self._version_utils.get_raw_version(self.db)
             self._version = self._version_utils.parse_version(raw_version)
-            self.set_metadata('version', raw_version)
+            self.set_metadata('version', self._version)
         return self._version
 
     @property
@@ -486,10 +488,12 @@ class PostgreSql(AgentCheck):
         start_time = time()
         databases = self.autodiscovery.get_items()
         for db in databases:
-            with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
-                with conn.cursor() as cursor:
+            try:
+                with self.db.cursor() as cursor:
                     for scope in relations_scopes:
                         self._query_scope(cursor, scope, instance_tags, False, db)
+            finally:
+                self.db_pool.set_conn_inactive(db)
         elapsed_ms = (time() - start_time) * 1000
         self.histogram(
             "dd.postgres._collect_relations_autodiscovery.time",
@@ -586,7 +590,12 @@ class PostgreSql(AgentCheck):
             )
             if self._config.query_timeout:
                 connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
-            conn = psycopg.connect(conninfo=connection_string, autocommit=True, cursor_factory=ClientCursor)
+            try:
+                conn = psycopg.connect(conninfo=connection_string, autocommit=True, cursor_factory=ClientCursor)
+                return conn
+            except Exception as exe:
+                self.log.error("failed to establish new connection to {}, conn_str {}, error {}".format(dbname, connection_string, exe))
+                return None
         else:
             password = self._config.password
             region = self._config.cloud_metadata.get('aws', {}).get('region', None)
@@ -618,8 +627,12 @@ class PostgreSql(AgentCheck):
                 args['sslkey'] = self._config.ssl_key
             if self._config.ssl_password:
                 args['sslpassword'] = self._config.ssl_password
-            conn = psycopg.connect(**args, autocommit=True, cursor_factory=ClientCursor)
-        return conn
+            try:
+                conn = psycopg.connect(**args, autocommit=True, cursor_factory=ClientCursor)
+                return conn
+            except Exception as exe:
+                self.log.error("failed to establish new connection to {}, error {}".format(dbname, exe))
+                return None
 
     def _connect(self):
         """
@@ -660,9 +673,9 @@ class PostgreSql(AgentCheck):
 
     def _get_main_db(self):
         """
-        Returns a memoized, persistent psycopg2 connection to `self.dbname`.
+        Returns a memoized, persistent psycopg connection to `self.dbname`.
         Threadsafe as long as no transactions are used
-        :return: a psycopg2 connection
+        :return: a psycopg connection
         """
         # reload settings for the main DB only once every time the connection is reestablished
         conn = self.db_pool._get_connection_raw(

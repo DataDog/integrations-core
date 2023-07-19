@@ -69,7 +69,8 @@ class PostgresAutodiscovery(Discovery):
         return items_parsed
 
     def _get_databases(self) -> List[str]:
-        with self.db_pool.get_connection(self._db, self._default_ttl) as conn:
+        conn = self.db_pool.get_connection(self._db, self._default_ttl, log_msg="called from _get_databases")
+        try:
             with conn.cursor() as cursor:
                 cursor.execute(AUTODISCOVERY_QUERY)
                 databases = list(cursor.fetchall())
@@ -78,3 +79,5 @@ class PostgresAutodiscovery(Discovery):
                 ]  # fetchall returns list of tuples representing rows, so need to parse
                 self._log.debug("Autodiscovered databases were: {}".format(databases))
                 return databases
+        finally:
+            self.db_pool.set_conn_inactive(self._db)

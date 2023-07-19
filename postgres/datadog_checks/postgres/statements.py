@@ -128,6 +128,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             shutdown_callback=shutdown_callback,
         )
         self._check = check
+        self.db_pool = check.db_pool
         self._metrics_collection_interval = collection_interval
         self._pg_stat_statements_max_warning_threshold = config.statement_metrics_config.get(
             'pg_stat_statements_max_warning_threshold', 10000
@@ -174,6 +175,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._execute_query(cursor, query, params=())
             col_names = [desc[0] for desc in cursor.description] if cursor.description else []
             self._stat_column_cache = col_names
+            self._log.warning("col_names returned are {}".format(col_names))
             return col_names
 
     def run_job(self):
@@ -356,13 +358,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
         if self._check.version < V14:
             return
         try:
-            with self._check._get_main_db().cursor(row_factory=dict_row) as cursor:
+            with self._check._get_main_db().cursor() as cursor:
                 rows = self._execute_query(
                     cursor,
                     PG_STAT_STATEMENTS_DEALLOC,
                 )
             if rows:
-                dealloc = rows[0][0]
+                dealloc = list(rows[0].values())[0]
                 self._check.monotonic_count(
                     "postgresql.pg_stat_statements.dealloc",
                     dealloc,
@@ -376,7 +378,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _emit_pg_stat_statements_metrics(self):
         query = PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 if self._check.version < V9_4 else PG_STAT_STATEMENTS_COUNT_QUERY
         try:
-            with self._check._get_main_db().cursor(row_factory=dict_row) as cursor:
+            with self._check._get_main_db().cursor() as cursor:
                 rows = self._execute_query(
                     cursor,
                     query,

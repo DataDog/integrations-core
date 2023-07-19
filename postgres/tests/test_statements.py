@@ -1042,6 +1042,31 @@ def test_activity_snapshot_collection(
     finally:
         blocking_conn.close()
 
+# TODO add this back in
+#         # ... now run the check again after closing blocking_bob's conn.
+#         # this means we should report bob as no longer blocked
+#         # close blocking_bob's tx
+#         blocking_conn.close()
+#         # Wait collection interval to make sure dbm events are reported
+#         time.sleep(dbm_instance['query_activity']['collection_interval'])
+#         run_one_check(check, dbm_instance)
+#         dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
+#         event = dbm_activity_event[1]
+#         assert len(event['postgres_activity']) > 0
+#         # find bob's query
+#         bobs_query = None
+#         for query_json in event['postgres_activity']:
+#             if 'usename' in query_json and query_json['usename'] == "bob":
+#                 bobs_query = query_json
+#         assert bobs_query is not None
+#         assert len(bobs_query['blocking_pids']) == 0
+#         # state should be idle now that it's no longer blocked
+#         assert bobs_query['state'] == "idle in transaction"
+#
+#     finally:
+#     conn.close()
+#     blocking_conn.close()
+
 
 @pytest.mark.parametrize(
     "reported_hostname,expected_hostname",

@@ -102,9 +102,6 @@ class MultiDatabaseConnectionPool(object):
             conn = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None, None))
             db = conn.connection
             if db is None or db.closed:
-                self.log.warning("opening a new connection for dbname {}".format(dbname))
-                self.log.warning("max conns is {}".format(self.max_conns))
-                self.log.warning("conns in use {}".format(len([c for c in self._conns.values() if c.active == True])))
                 if self.max_conns is not None:
                     # try to free space until we succeed
                     while len(self._conns) >= self.max_conns:
@@ -137,8 +134,15 @@ class MultiDatabaseConnectionPool(object):
             )
             return db
 
-    @contextlib.contextmanager
-    def get_connection(self, dbname: str, ttl_ms: int, timeout: int = None, persistent: bool = False):
+    def set_conn_inactive(self, dbname):
+        with self._mu:
+            try:
+                self._conns[dbname].active = False
+            except KeyError:
+                # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
+                pass
+
+    def get_connection(self, dbname: str, ttl_ms: int, timeout: int = None, persistent: bool = False, startup_fn: Callable[[psycopg.Connection], None] = None, log_msg: str = None):
         """
         Grab a connection from the pool if the database is already connected.
         If max_conns is specified, and the database isn't already connected,
@@ -148,17 +152,8 @@ class MultiDatabaseConnectionPool(object):
         Note that leaving a connection context here does NOT close the connection in psycopg2;
         connections must be manually closed by `close_all_connections()`.
         """
-        try:
-            with self._mu:
-                db = self._get_connection_raw(dbname, ttl_ms, timeout, persistent)
-            yield db
-        finally:
-            with self._mu:
-                try:
-                    self._conns[dbname].active = False
-                except KeyError:
-                    # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
-                    pass
+        with self._mu:
+            return self._get_connection_raw(dbname=dbname, ttl_ms=ttl_ms, timeout=timeout, startup_fn=startup_fn, persistent=persistent, log_msg=log_msg)
 
     def prune_connections(self):
         """
@@ -172,7 +167,6 @@ class MultiDatabaseConnectionPool(object):
             now = datetime.datetime.now()
             for dbname, conn in list(self._conns.items()):
                 if conn.deadline < now:
-                    self.log.warning("pruned old connection! {}".format(conn))
                     self._stats.connection_pruned += 1
                     self._terminate_connection_unsafe(dbname)
 
@@ -180,9 +174,9 @@ class MultiDatabaseConnectionPool(object):
         success = True
         with self._mu:
             while self._conns:
-                dbname = next(iter(self._conns))
-                if not self._terminate_connection_unsafe(dbname):
-                    success = False
+                for dbname, conn in list(self._conns.items()):
+                    if not self._terminate_connection_unsafe(dbname):
+                        success = False
         return success
 
     def evict_lru(self) -> str:
@@ -194,7 +188,6 @@ class MultiDatabaseConnectionPool(object):
             sorted_conns = sorted(self._conns.items(), key=lambda i: i[1].last_accessed)
             for name, conn_info in sorted_conns:
                 if not conn_info.active and not conn_info.persistent:
-                    self.log.warning("terming conn {} bc it is inactive {} and LRU".format(name, conn_info.active))
                     self._terminate_connection_unsafe(name)
                     return name
 

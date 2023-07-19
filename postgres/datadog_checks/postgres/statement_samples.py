@@ -270,7 +270,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         query = PG_ACTIVE_CONNECTIONS_QUERY.format(
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
-        with self._check._get_main_db().cursor(row_factory=dict_row) as cursor:
+        conn = self.db_pool.get_connection(self._config.dbname, self._config.idle_connection_timeout, log_msg="_get_active_connections")
+        with conn.cursor(row_factory=dict_row) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
@@ -525,7 +526,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_db_explain_setup_state(self, dbname):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
-            self.db_pool.get_connection(dbname, self._conn_ttl_ms)
+            self.db_pool.get_connection(dbname, self._conn_ttl_ms, log_msg="_get_db_explain_setup_state")
         except psycopg.OperationalError as e:
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
@@ -567,6 +568,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                 ),
             )
             return DBExplainError.failed_function, e
+        finally:
+            self.db_pool.set_conn_inactive(dbname)
 
         if not result:
             return DBExplainError.invalid_result, None
@@ -589,7 +592,8 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
-        with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
+        conn = self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms, log_msg="_run_explain")
+        try:
             with conn.cursor() as cursor:
                 self._log.debug(
                     "Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement
@@ -609,6 +613,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                 if not result or len(result) < 1 or len(result[0]) < 1:
                     return None
                 return result[0][0]
+        finally:
+            self.db_pool.set_conn_inactive(dbname)
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _run_and_track_explain(self, dbname, statement, obfuscated_statement, query_signature):
