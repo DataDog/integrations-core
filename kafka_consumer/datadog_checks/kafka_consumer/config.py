@@ -22,7 +22,11 @@ class KafkaConfig:
         self._consumer_groups = instance.get('consumer_groups', {})
         self._consumer_groups_regex = instance.get('consumer_groups_regex', {})
 
-        self._consumer_groups_compiled_regex = self._compile_regex(self._consumer_groups_regex)
+        self._consumer_groups_compiled_regex = (
+            self._compile_regex(self._consumer_groups_regex, self._consumer_groups)
+            if self._consumer_groups_regex
+            else ""
+        )
 
         self._kafka_connect_str = instance.get('kafka_connect_str')
         self._kafka_version = instance.get('kafka_client_api_version')
@@ -96,20 +100,28 @@ class KafkaConfig:
 
         self._validate_consumer_groups()
 
-    def _compile_regex(self, consumer_groups_regex):
-        patterns = {}
+    def _compile_regex(self, consumer_groups_regex, consumer_groups):
+        # Turn the dict of regex dicts into a single string and compile
+        # (<CONSUMER_REGEX>,(TOPIC_REGEX),(PARTITION_REGEX))|(...)
+        patterns = self.get_patterns(consumer_groups)
+        patterns.extend(self.get_patterns(consumer_groups_regex))
 
-        for consumer_group_regex in consumer_groups_regex:
-            consumer_group_pattern = re.compile(consumer_group_regex)
-            patterns[consumer_group_pattern] = {}
+        return re.compile("|".join(patterns))
 
-            topics_regex = consumer_groups_regex.get(consumer_group_regex)
+    @staticmethod
+    def get_patterns(consumer_groups):
+        template = "({0},{1},{2})"
+        patterns = []
 
-            for topic_regex in topics_regex:
-                topic_pattern = re.compile(topic_regex)
-
-                partitions = self._consumer_groups_regex[consumer_group_regex][topic_regex]
-                patterns[consumer_group_pattern].update({topic_pattern: partitions})
+        for consumer_group in consumer_groups:
+            if topics := consumer_groups.get(consumer_group):
+                for topic in topics:
+                    if partitions := consumer_groups[consumer_group][topic]:
+                        patterns.extend(template.format(consumer_group, topic, partition) for partition in partitions)
+                    else:
+                        patterns.append(template.format(consumer_group, topic, ".+"))
+            else:
+                patterns.append(template.format(consumer_group, ".+", ".+"))
 
         return patterns
 

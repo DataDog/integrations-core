@@ -449,6 +449,8 @@ integration/voltdb:
 - voltdb/**/*
 integration/vsphere:
 - vsphere/**/*
+integration/weaviate:
+- weaviate/**/*
 integration/weblogic:
 - weblogic/**/*
 integration/win32_event_log:

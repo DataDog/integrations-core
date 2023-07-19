@@ -75,6 +75,13 @@ REPO_SERVER = {
     'argocd_repo_pending_request_total': 'repo.pending.request.total',
 }
 
+# https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/monitoring/
+NOTIFICATIONS_CONTROLLER = {
+    'argocd_notifications_deliveries': 'notifications.deliveries',
+    'argocd_notifications_trigger_eval': 'notifications.trigger_eval',
+}
+
 APPLICATION_CONTROLLER_METRICS = [{**APPLICATION_CONTROLLER, **GENERAL_METRICS}]
 API_SERVER_METRICS = [{**API_SERVER, **GENERAL_METRICS}]
 REPO_SERVER_METRICS = [{**REPO_SERVER, **GENERAL_METRICS}]
+NOTIFICATIONS_CONTROLLER_METRICS = [{**NOTIFICATIONS_CONTROLLER, **GENERAL_METRICS}]

@@ -205,6 +205,7 @@ OPTIONAL_BY_BUCKET_METRICS = [
     'couchbase.by_bucket.cas_hits',
     'couchbase.by_bucket.cas_misses',
     'couchbase.by_bucket.cmd_get',
+    'couchbase.by_bucket.cmd_lookup',
     'couchbase.by_bucket.cmd_set',
     'couchbase.by_bucket.couch_docs_actual_disk_size',
     'couchbase.by_bucket.couch_docs_data_size',
