@@ -13,6 +13,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .common import (
     API_SERVER_METRICS,
     APP_CONTROLLER_METRICS,
+    APPSET_CONTROLLER_METRICS,
     MOCKED_API_SERVER_INSTANCE,
     MOCKED_APP_CONTROLLER_INSTANCE,
     MOCKED_APP_CONTROLLER_WITH_OTHER_PARAMS,
@@ -21,7 +22,6 @@ from .common import (
     MOCKED_REPO_SERVER_INSTANCE,
     NOT_EXPOSED_METRICS,
     NOTIFICATIONS_CONTROLLER_METRICS,
-    APPSET_CONTROLLER_METRICS,
     REPO_SERVER_METRICS,
 )
 from .utils import get_fixture_path
