@@ -391,7 +391,7 @@ class PostgresMetadata(DBMAsyncJob):
                     {
                         "description": database_info['description'],
                         "name": database_info['name'],
-                        "id": database_info['id'],
+                        "id": str(database_info['id']),
                         "encoding": database_info['encoding'],
                         "owner": database_info['owner'],
                         "schemas": [],
