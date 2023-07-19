@@ -130,7 +130,7 @@ class PostgresMetadata(DBMAsyncJob):
             'collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )
         self.schemas_collection_interval = config.schemas_metadata_config.get(
-            'collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
+            'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
 
         collection_interval = config.resources_metadata_config.get(
@@ -201,9 +201,23 @@ class PostgresMetadata(DBMAsyncJob):
         }
         self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
-        elapsed_s = time.time() - self._time_since_last_schemas_query
-        if elapsed_s >= self.schemas_collection_interval and self._collect_schemas_enabled:
+        elapsed_s_schemas = time.time() - self._time_since_last_schemas_query
+        if elapsed_s_schemas >= self.schemas_collection_interval and self._collect_schemas_enabled:
             self._collect_schema_info()
+            event = {
+                "host": self._check.resolved_hostname,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "postgres",
+                "kind": "pg_databases",
+                "collection_interval": self.schemas_collection_interval,
+                "dbms_version": self._payload_pg_version(),
+                "tags": self._tags_no_db,
+                "timestamp": time.time() * 1000,
+                "cloud_metadata": self._config.cloud_metadata,
+                "metadata": metadata,
+            }
+            self._log.debug("Reporting the following payload: {}".format(event))
+            self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
     def _payload_pg_version(self):
         version = self._check.version
@@ -224,20 +238,10 @@ class PostgresMetadata(DBMAsyncJob):
         metadata = []
         for database in databases:
             metadata.append(self._collect_metadata_for_database(database))
-        event = {
-            "host": self._check.resolved_hostname,
-            "agent_version": datadog_agent.get_version(),
-            "dbms": "postgres",
-            "kind": "pg_databases",
-            "collection_interval": self.schemas_collection_interval,
-            "dbms_version": self._payload_pg_version(),
-            "tags": self._tags_no_db,
-            "timestamp": time.time() * 1000,
-            "cloud_metadata": self._config.cloud_metadata,
-            "metadata": metadata,
-        }
-        self._log.debug("Reporting the following payload: {}".format(event))
-        self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+        
+        self._time_since_last_schemas_query = time.time()
+        return metadata
+        
 
     def _query_database_information(
         self, cursor: psycopg2.extensions.cursor, dbname: str
