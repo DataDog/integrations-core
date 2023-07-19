@@ -1,5 +1,7 @@
 # CHANGELOG - pgbouncer
 
+## Unreleased
+
 ## 4.4.2 / 2023-07-10
 
 ***Fixed***:

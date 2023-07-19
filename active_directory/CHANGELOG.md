@@ -1,5 +1,7 @@
 # CHANGELOG - active_directory
 
+## Unreleased
+
 ## 1.17.1 / 2023-07-13
 
 ***Fixed***:

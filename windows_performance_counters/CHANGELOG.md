@@ -1,5 +1,7 @@
 # CHANGELOG - Windows performance counters
 
+## Unreleased
+
 ## 1.6.1 / 2023-07-13
 
 ***Fixed***:

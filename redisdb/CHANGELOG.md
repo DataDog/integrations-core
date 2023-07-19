@@ -1,5 +1,7 @@
 # CHANGELOG - redisdb
 
+## Unreleased
+
 ## 4.8.0 / 2023-07-10
 
 ***Added***:

@@ -1,5 +1,7 @@
 # CHANGELOG - ProxySQL
 
+## Unreleased
+
 ## 4.0.1 / 2023-07-10
 
 ***Fixed***:

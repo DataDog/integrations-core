@@ -1,5 +1,7 @@
 # CHANGELOG - cassandra
 
+## Unreleased
+
 ## 1.16.1 / 2023-07-10
 
 ***Fixed***:

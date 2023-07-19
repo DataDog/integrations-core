@@ -1,5 +1,7 @@
 # CHANGELOG - RethinkDB
 
+## Unreleased
+
 ## 2.3.2 / 2023-07-10
 
 ***Fixed***:

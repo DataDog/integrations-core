@@ -1,5 +1,7 @@
 # CHANGELOG - HiveMQ
 
+## Unreleased
+
 ## 1.6.2 / 2023-07-10
 
 ***Fixed***:

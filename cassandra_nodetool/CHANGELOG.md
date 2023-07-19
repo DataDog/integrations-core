@@ -1,5 +1,7 @@
 # CHANGELOG - Cassandra Nodetool Check
 
+## Unreleased
+
 ## 1.11.1 / 2023-07-10
 
 ***Fixed***:

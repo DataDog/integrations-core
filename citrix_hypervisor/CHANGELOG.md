@@ -1,5 +1,7 @@
 # CHANGELOG - citrix_hypervisor
 
+## Unreleased
+
 ## 2.2.1 / 2023-07-10
 
 ***Fixed***:

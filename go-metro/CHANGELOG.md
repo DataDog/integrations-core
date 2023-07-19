@@ -1,5 +1,7 @@
 # CHANGELOG - go-metro
 
+## Unreleased
+
 ## 1.3.1 / 2021-03-07
 
 ***Fixed***:

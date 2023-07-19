@@ -1,5 +1,7 @@
 # CHANGELOG - Hyper-V
 
+## Unreleased
+
 ## 1.9.0 / 2023-07-10
 
 ***Added***:

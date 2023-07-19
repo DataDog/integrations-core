@@ -1,5 +1,7 @@
 # CHANGELOG - datadog_checks_base
 
+## Unreleased
+
 ## 32.5.1 / 2023-07-19
 
 ***Fixed***:

@@ -1,5 +1,7 @@
 # CHANGELOG - Kube Metrics Server
 
+## Unreleased
+
 ## 3.0.2 / 2023-07-10
 
 ***Fixed***:

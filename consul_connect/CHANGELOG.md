@@ -1,2 +1,4 @@
 # CHANGELOG - Consul Connect
 
+## Unreleased
+

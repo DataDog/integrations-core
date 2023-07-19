@@ -1,5 +1,7 @@
 # CHANGELOG - Kube_apiserver_metrics
 
+## Unreleased
+
 ## 3.6.2 / 2023-07-10
 
 ***Fixed***:

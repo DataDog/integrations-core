@@ -1,5 +1,7 @@
 # CHANGELOG - JBoss/WildFly
 
+## Unreleased
+
 ## 2.0.2 / 2023-07-10
 
 ***Fixed***:

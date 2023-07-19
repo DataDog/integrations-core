@@ -1,5 +1,7 @@
 # CHANGELOG - Argo CD
 
+## Unreleased
+
 ## 1.2.0 / 2023-07-10
 
 ***Added***:

@@ -1,5 +1,7 @@
 # CHANGELOG - Snowflake
 
+## Unreleased
+
 ## 4.5.4 / 2023-07-18
 
 ***Fixed***:

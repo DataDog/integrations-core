@@ -1,5 +1,7 @@
 # CHANGELOG - Confluent Platform
 
+## Unreleased
+
 ## 1.8.2 / 2023-07-10
 
 ***Fixed***:

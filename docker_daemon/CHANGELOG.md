@@ -1,5 +1,7 @@
 # CHANGELOG - docker_daemon
 
+## Unreleased
+
 ## 1.12.0 / 2020-01-13
 
 ***Added***:

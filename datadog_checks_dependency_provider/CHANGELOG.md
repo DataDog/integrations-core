@@ -1,5 +1,7 @@
 # CHANGELOG - datadog_checks_dependency_provider
 
+## Unreleased
+
 ## 1.3.1 / 2023-07-10
 
 ***Fixed***:

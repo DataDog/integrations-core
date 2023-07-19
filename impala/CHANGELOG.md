@@ -1,5 +1,7 @@
 # CHANGELOG - Impala
 
+## Unreleased
+
 ## 1.1.2 / 2023-07-13
 
 ***Fixed***:

@@ -1,5 +1,7 @@
 # CHANGELOG - sqlserver
 
+## Unreleased
+
 ## 12.0.0 / 2023-07-10
 
 ***Changed***:

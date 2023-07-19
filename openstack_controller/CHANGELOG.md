@@ -1,5 +1,7 @@
 # CHANGELOG - Openstack_controller
 
+## Unreleased
+
 ## 3.1.0 / 2023-07-10
 
 ***Added***:

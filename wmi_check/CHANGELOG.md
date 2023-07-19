@@ -1,5 +1,7 @@
 # CHANGELOG - wmi_check
 
+## Unreleased
+
 ## 1.16.0 / 2023-07-10
 
 ***Added***:

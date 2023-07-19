@@ -1,5 +1,7 @@
 # CHANGELOG - OpenMetrics
 
+## Unreleased
+
 ## 3.0.2 / 2023-07-13
 
 ***Fixed***:

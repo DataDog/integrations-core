@@ -1,5 +1,7 @@
 # CHANGELOG - ECS Fargate
 
+## Unreleased
+
 ## 3.4.0 / 2023-07-10
 
 ***Added***:

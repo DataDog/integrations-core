@@ -1,5 +1,7 @@
 # CHANGELOG - MarkLogic
 
+## Unreleased
+
 ## 3.2.1 / 2023-07-10
 
 ***Fixed***:

@@ -1,5 +1,7 @@
 # CHANGELOG - SonarQube
 
+## Unreleased
+
 ## 2.2.5 / 2023-07-10
 
 ***Fixed***:
