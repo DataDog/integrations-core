@@ -203,7 +203,7 @@ class PostgresMetadata(DBMAsyncJob):
 
         elapsed_s_schemas = time.time() - self._time_since_last_schemas_query
         if elapsed_s_schemas >= self.schemas_collection_interval and self._collect_schemas_enabled:
-            self._collect_schema_info()
+            metadata = self._collect_schema_info()
             event = {
                 "host": self._check.resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
@@ -216,8 +216,9 @@ class PostgresMetadata(DBMAsyncJob):
                 "cloud_metadata": self._config.cloud_metadata,
                 "metadata": metadata,
             }
-            self._log.debug("Reporting the following payload: {}".format(event))
-            self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+            json_event = json.dumps(event, default=default_json_event_encoding)
+            self._log.debug("Reporting the following payload: {}".format(json_event))
+            self._check.database_monitoring_metadata(json_event)
 
     def _payload_pg_version(self):
         version = self._check.version
