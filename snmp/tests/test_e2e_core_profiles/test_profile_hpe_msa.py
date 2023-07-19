@@ -42,11 +42,15 @@ def test_e2e_profile_hpe_msa(dd_agent_check):
 
     tag_rows = [
         [
-            'conn_unit_sensor_characteristic:airflow',
-            'conn_unit_sensor_name:oxen zombies but driving kept driving',
-            'conn_unit_sensor_status:ok',
+            'hpe_msa_conn_unit_sensor_characteristic:airflow',
+            'hpe_msa_conn_unit_sensor_name:oxen zombies but driving kept driving',
+            'hpe_msa_conn_unit_sensor_status:ok',
         ],
-        ['conn_unit_sensor_characteristic:other', 'conn_unit_sensor_name:Jaded their', 'conn_unit_sensor_status:ok'],
+        [
+            'hpe_msa_conn_unit_sensor_characteristic:other',
+            'hpe_msa_conn_unit_sensor_name:Jaded their',
+            'hpe_msa_conn_unit_sensor_status:ok',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -55,24 +59,24 @@ def test_e2e_profile_hpe_msa(dd_agent_check):
 
     tag_rows = [
         [
-            'conn_unit_port_module_type:gbic_not_installed',
-            'conn_unit_port_name:oxen oxen oxen kept kept forward',
-            'conn_unit_port_speed:25',
-            'conn_unit_port_state:unknown',
-            'conn_unit_port_status:notparticipating',
-            'conn_unit_port_transmitter_type:longwave_no_ofc',
-            'conn_unit_port_type:escon',
-            'conn_unit_port_wwn:quaintly',
+            'hpe_msa_conn_unit_port_module_type:gbic_not_installed',
+            'hpe_msa_conn_unit_port_name:oxen oxen oxen kept kept forward',
+            'hpe_msa_conn_unit_port_speed:25',
+            'hpe_msa_conn_unit_port_state:unknown',
+            'hpe_msa_conn_unit_port_status:notparticipating',
+            'hpe_msa_conn_unit_port_transmitter_type:longwave_no_ofc',
+            'hpe_msa_conn_unit_port_type:escon',
+            'hpe_msa_conn_unit_port_wwn:quaintly',
         ],
         [
-            'conn_unit_port_module_type:small_form_factor',
-            'conn_unit_port_name:driving forward oxen but but',
-            'conn_unit_port_speed:14',
-            'conn_unit_port_state:diagnostics',
-            'conn_unit_port_status:bypass',
-            'conn_unit_port_transmitter_type:unused',
-            'conn_unit_port_type:domain-ctl',
-            'conn_unit_port_wwn:but kept',
+            'hpe_msa_conn_unit_port_module_type:small_form_factor',
+            'hpe_msa_conn_unit_port_name:driving forward oxen but but',
+            'hpe_msa_conn_unit_port_speed:14',
+            'hpe_msa_conn_unit_port_state:diagnostics',
+            'hpe_msa_conn_unit_port_status:bypass',
+            'hpe_msa_conn_unit_port_transmitter_type:unused',
+            'hpe_msa_conn_unit_port_type:domain-ctl',
+            'hpe_msa_conn_unit_port_wwn:but kept',
         ],
     ]
     for tag_row in tag_rows:
