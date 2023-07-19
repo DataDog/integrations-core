@@ -35,13 +35,12 @@ dependencies = [
 dynamic = [
     "version",
 ]
-
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
     "paramiko==2.12.0; python_version < '3.0'",
-    "paramiko==3.1.0; python_version > '3.0'",
+    "paramiko==3.2.0; python_version > '3.0'",
 ]
 
 [project.urls]

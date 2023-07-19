@@ -32,6 +32,8 @@ class DatabaseConfigurationError(Enum):
     pg_stat_statements_not_loaded = 'pg-stat-statements-not-loaded'
     undefined_explain_function = 'undefined-explain-function'
     high_pg_stat_statements_max = 'high-pg-stat-statements-max-configuration'
+    autodiscovered_databases_exceeds_limit = 'autodiscovered-databases-exceeds-limit'
+    autodiscovered_metrics_exceeds_collection_interval = "autodiscovered-metrics-exceeds-collection-interval"
 
 
 def warning_with_tags(warning_message, *args, **kwargs):

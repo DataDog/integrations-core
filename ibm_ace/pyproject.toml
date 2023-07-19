@@ -28,17 +28,16 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=25.1.0",
+    "datadog-checks-base>=32.3.0",
 ]
 dynamic = [
     "version",
 ]
-
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "pymqi==1.12.8; sys_platform != 'darwin' or platform_machine != 'arm64'",
+    "pymqi==1.12.10; sys_platform != 'darwin' or platform_machine != 'arm64'",
 ]
 
 [project.urls]

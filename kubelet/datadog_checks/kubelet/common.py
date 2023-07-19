@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import re
+
 from datadog_checks.base.utils.tagging import tagger
 
 try:
@@ -197,7 +199,17 @@ class PodListUtils(object):
             self.cache[cid] = True
             return True
 
-        excluded = c_is_excluded(ctr.get("name"), ctr.get("image"), self.container_id_to_namespace.get(cid, ""))
+        # Image cannot be always used as-is as it may be a sha256, like:
+        # image: sha256:86700713f90f670eefce301d0bada81d3e44f16917fe5da072c34d8814cc1f09
+        # imageID: gcr.io/foo@sha256:2babda8ec819e24d5a6342095e8f8a25a67b44eb7231ae253ecc2c448632f07e
+        # If we identify a sha256, we'll fallback to `imageID` as we, at least, get the image path.
+        # Image and ImageID are populated by Kubelet from CRI API:
+        # https://github.com/kubernetes/kubernetes/blob/8c33d3ef7b2f099c7bb81f340f332dbf3a959548/pkg/kubelet/kuberuntime/kuberuntime_container.go#L586C6-L622
+        image = ctr.get("image")
+        if image.startswith("sha256:") and len(image) == 71:  # 7 + 64
+            image = re.sub(r"^[a-z-]+://", "", ctr.get("imageID"))
+
+        excluded = c_is_excluded(ctr.get("name"), image, self.container_id_to_namespace.get(cid, ""))
         self.cache[cid] = excluded
         return excluded
 

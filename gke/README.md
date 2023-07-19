@@ -97,7 +97,7 @@ Deploy a [containerized version of the Datadog Agent][7] on your Kubernetes clus
 [4]: https://cloud.google.com/sdk/docs/initializing
 [5]: /integrations/google_cloud_platform/
 [6]: https://app.datadoghq.com/screen/integration/gce
-[7]: https://app.datadoghq.com/account/settings#agent/kubernetes
+[7]: https://app.datadoghq.com/account/settings/agent/latest?platform=kubernetes
 [8]: https://docs.datadoghq.com/containers/kubernetes/installation?tab=operator
 [9]: https://github.com/DataDog/helm-charts/tree/master/charts/datadog#values
 [10]: https://www.datadoghq.com/blog/gke-autopilot-monitoring/

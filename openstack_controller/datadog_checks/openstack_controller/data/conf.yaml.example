@@ -33,12 +33,12 @@ init_config:
 #
 instances:
 
-    ## @param name - string - required
+    ## @param name - string - optional
     ## Unique identifier for this instance.
     #
   - name: <INSTANCE_NAME>
 
-    ## @param user - mapping - required
+    ## @param user - mapping - optional
     ## Password authentication is the only auth method supported
     ## User expects username, password, and user domain id
     ## `user` should resolve to a structure like
