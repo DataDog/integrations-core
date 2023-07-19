@@ -82,6 +82,9 @@ logs:
     echo "Datadog Agent is installed"
   fi
 
+  # Avoid conflicts on port 6062
+  echo "process_config.expvar_port: 6063" >> /etc/datadog-agent/datadog.yaml
+
   echo "Waiting 15 seconds"
   sleep 15
 

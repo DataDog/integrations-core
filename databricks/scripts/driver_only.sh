@@ -29,6 +29,9 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
     sleep 2
   done
 
+  # Avoid conflicts on port 6062
+  echo "process_config.expvar_port: 6063" >> /etc/datadog-agent/datadog.yaml
+
   echo "Datadog Agent is installed"
 
   while [ -z \$DB_DRIVER_PORT ]; do
