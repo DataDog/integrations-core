@@ -152,7 +152,7 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
       name: upsBasicStateOutputState
-    forced_type: flag_stream
+    metric_type: flag_stream
     options:
       placement: 4
       metric_suffix: OnLine
@@ -160,7 +160,7 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
       name: upsBasicStateOutputState
-    forced_type: flag_stream
+    metric_type: flag_stream
     options:
       placement: 5
       metric_suffix: ReplaceBattery
@@ -168,7 +168,7 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
       name: upsBasicStateOutputState
-    forced_type: flag_stream
+    metric_type: flag_stream
     options:
       placement: 8
       metric_suffix: AVRTrimActive
@@ -176,7 +176,7 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
       name: upsBasicStateOutputState
-    forced_type: flag_stream
+    metric_type: flag_stream
     options:
       placement: 11
       metric_suffix: BatteriesDischarged
@@ -184,7 +184,7 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
       name: upsBasicStateOutputState
-    forced_type: flag_stream
+    metric_type: flag_stream
     options:
       placement: 19
       metric_suffix: "On"
@@ -192,7 +192,7 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
       name: upsBasicStateOutputState
-    forced_type: flag_stream
+    metric_type: flag_stream
     options:
       placement: 30
       metric_suffix: LowBatteryOnBattery
@@ -200,7 +200,7 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
       name: upsBasicStateOutputState
-    forced_type: flag_stream
+    metric_type: flag_stream
     options:
       placement: 33
       metric_suffix: NoBatteriesAttached
