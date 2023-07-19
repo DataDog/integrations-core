@@ -33,7 +33,7 @@ def test():
     assert len(model_definitions) == 1
 
     files = model_definitions['test.yaml']
-    assert len(files) == 5
+    assert len(files) == 4
 
     validators_contents, validators_errors = files['validators.py']
     assert not validators_errors
@@ -61,22 +61,6 @@ def test():
         """
     )
 
-    defaults_contents, defaults_errors = files['defaults.py']
-    assert not defaults_errors
-    assert defaults_contents == normalize_yaml(
-        """
-        from datadog_checks.base.utils.models.fields import get_default_field_value
-
-
-        def shared_foo(field, value):
-            return get_default_field_value(field, value)
-
-
-        def instance_foo(field, value):
-            return get_default_field_value(field, value)
-        """
-    )
-
     shared_model_contents, shared_model_errors = files['shared.py']
     assert not shared_model_errors
     assert shared_model_contents == normalize_yaml(
@@ -85,41 +69,41 @@ def test():
 
         from typing import Optional
 
-        from pydantic import BaseModel, root_validator, validator
+        from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
         from datadog_checks.base.utils.functions import identity
         from datadog_checks.base.utils.models import validation
 
-        from . import defaults, validators
+        from . import validators
 
 
         class SharedConfig(BaseModel):
-            class Config:
-                allow_mutation = False
+            model_config = ConfigDict(
+                validate_default=True,
+                frozen=True,
+            )
+            foo: Optional[str] = None
 
-            foo: Optional[str]
-
-            @root_validator(pre=True)
+            @model_validator(mode='before')
             def _initial_validation(cls, values):
                 return validation.core.initialize_config(getattr(validators, 'initialize_shared', identity)(values))
 
-            @validator('*', pre=True, always=True)
-            def _ensure_defaults(cls, v, field):
-                if v is not None or field.required:
-                    return v
+            @field_validator('*')
+            def _run_validations(cls, value, info):
+                field = cls.model_fields[info.field_name]
+                field_name = field.alias or info.field_name
+                if field_name not in info.context['configured_fields']:
+                    return value
 
-                return getattr(defaults, f'shared_{field.name}')(field, v)
+                return getattr(validators, f'shared_{info.field_name}', identity)(value, field=field)
 
-            @validator('*')
-            def _run_validations(cls, v, field):
-                if not v:
-                    return v
+            @field_validator('*', mode='after')
+            def _make_immutable(cls, value):
+                return validation.utils.make_immutable(value)
 
-                return getattr(validators, f'shared_{field.name}', identity)(v, field=field)
-
-            @root_validator(pre=False)
-            def _final_validation(cls, values):
-                return validation.core.finalize_config(getattr(validators, 'finalize_shared', identity)(values))
+            @model_validator(mode='after')
+            def _final_validation(cls, model):
+                return validation.core.check_model(getattr(validators, 'check_shared', identity)(model))
         """
     )
 
@@ -131,40 +115,40 @@ def test():
 
         from typing import Optional
 
-        from pydantic import BaseModel, root_validator, validator
+        from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
         from datadog_checks.base.utils.functions import identity
         from datadog_checks.base.utils.models import validation
 
-        from . import defaults, validators
+        from . import validators
 
 
         class InstanceConfig(BaseModel):
-            class Config:
-                allow_mutation = False
+            model_config = ConfigDict(
+                validate_default=True,
+                frozen=True,
+            )
+            foo: Optional[str] = None
 
-            foo: Optional[str]
-
-            @root_validator(pre=True)
+            @model_validator(mode='before')
             def _initial_validation(cls, values):
                 return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-            @validator('*', pre=True, always=True)
-            def _ensure_defaults(cls, v, field):
-                if v is not None or field.required:
-                    return v
+            @field_validator('*')
+            def _run_validations(cls, value, info):
+                field = cls.model_fields[info.field_name]
+                field_name = field.alias or info.field_name
+                if field_name not in info.context['configured_fields']:
+                    return value
 
-                return getattr(defaults, f'instance_{field.name}')(field, v)
+                return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
 
-            @validator('*')
-            def _run_validations(cls, v, field):
-                if not v:
-                    return v
+            @field_validator('*', mode='after')
+            def _make_immutable(cls, value):
+                return validation.utils.make_immutable(value)
 
-                return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
-
-            @root_validator(pre=False)
-            def _final_validation(cls, values):
-                return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+            @model_validator(mode='after')
+            def _final_validation(cls, model):
+                return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))
         """
     )

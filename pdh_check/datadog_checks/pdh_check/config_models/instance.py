@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Optional, Sequence
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -20,50 +20,59 @@ from . import defaults, validators
 
 
 class MetricPatterns(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    exclude: Optional[Sequence[str]] = None
+    include: Optional[Sequence[str]] = None
 
 
 class InstanceConfig(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    additional_metrics: Optional[Sequence[Sequence[str]]]
-    admin_share: Optional[str]
-    counter_data_types: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        validate_default=True,
+        frozen=True,
+    )
+    additional_metrics: Optional[Sequence[Sequence[str]]] = None
+    admin_share: Optional[str] = None
+    counter_data_types: Optional[Sequence[str]] = None
     countersetname: str
-    disable_generic_tags: Optional[bool]
-    empty_default_hostname: Optional[bool]
-    host: Optional[str]
-    metric_patterns: Optional[MetricPatterns]
+    disable_generic_tags: Optional[bool] = None
+    empty_default_hostname: Optional[bool] = None
+    host: Optional[str] = None
+    metric_patterns: Optional[MetricPatterns] = None
     metrics: Sequence[Sequence[str]]
-    min_collection_interval: Optional[float]
-    password: Optional[str]
-    service: Optional[str]
-    tags: Optional[Sequence[str]]
-    username: Optional[str]
+    min_collection_interval: Optional[float] = None
+    password: Optional[str] = None
+    service: Optional[str] = None
+    tags: Optional[Sequence[str]] = None
+    username: Optional[str] = None
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
     def _initial_validation(cls, values):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-    @validator('*', pre=True, always=True)
-    def _ensure_defaults(cls, v, field):
-        if v is not None or field.required:
-            return v
+    @field_validator('*', mode='before')
+    def _ensure_defaults(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name in info.context['configured_fields']:
+            return value
 
-        return getattr(defaults, f'instance_{field.name}')(field, v)
+        return getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-    @validator('*')
-    def _run_validations(cls, v, field):
-        if not v:
-            return v
+    @field_validator('*')
+    def _run_validations(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name not in info.context['configured_fields']:
+            return value
 
-        return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
+        return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
 
-    @root_validator(pre=False)
-    def _final_validation(cls, values):
-        return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+    @field_validator('*', mode='after')
+    def _make_immutable(cls, value):
+        return validation.utils.make_immutable(value)
+
+    @model_validator(mode='after')
+    def _final_validation(cls, model):
+        return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))

@@ -52,8 +52,9 @@ def filter_items(items, key, default_limit, default_include, default_exclude, co
     include_patterns = config_key.get('include', default_include)
     exclude_patterns = config_key.get('exclude', default_exclude)
     filtered_items = filter_list(items, include_patterns, exclude_patterns)
-    ordered_items = OrderedDict(list(filtered_items.items())[0:limit])
-    reached_limit = len(ordered_items) < len(list(filtered_items.items()))
+    # TODO: Use plain dict when we drop Python 2 support.
+    ordered_items = OrderedDict(list(filtered_items.items())[:limit])
+    reached_limit = len(ordered_items) < len(filtered_items)
     return ordered_items, reached_limit
 
 
@@ -125,6 +126,7 @@ def get_response(check, resource, **kwargs):
             return json_payload
         elif json_payload.get("count", 0) == 0:
             check.log.debug("No results found for resource %s url: %s", resource_name, resource_url)
+            return {}
         else:
             check.log.debug("Results found for resource %s url: %s", resource_name, resource_url)
             return json_payload

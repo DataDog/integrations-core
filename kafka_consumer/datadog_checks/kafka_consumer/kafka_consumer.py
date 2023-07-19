@@ -26,7 +26,7 @@ class KafkaCheck(AgentCheck):
         self.config = KafkaConfig(self.init_config, self.instance, self.log)
         self._context_limit = self.config._context_limit
         self.client = KafkaClient(self.config, self.get_tls_context(), self.log)
-        self.check_initializations.append(self.config.validate_config)
+        self.check_initializations.insert(0, self.config.validate_config)
 
     def check(self, _):
         """The main entrypoint of the check."""

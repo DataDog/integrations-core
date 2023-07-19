@@ -217,7 +217,7 @@ metrics:
 ```yaml
 metrics:
   - MIB: CISCO-IF-EXTENSION-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     table:
       OID: 1.3.6.1.4.1.9.9.276.1.1.2
       name: cieIfInterfaceTable
@@ -359,7 +359,7 @@ metrics:
   table:
     OID: 1.3.6.1.2.1.4.31.1
     name: ipSystemStatsTable
-  forced_type: monotonic_count
+  metric_type: monotonic_count
   symbols:
   - OID: 1.3.6.1.2.1.4.31.1.1.4
     name: ipSystemStatsHCInReceives
@@ -407,7 +407,7 @@ SNMP types not listed in this table are submitted as `gauge` by default.
 
 Sometimes the inferred type may not be what you want. Typically, OIDs that represent "total number of X" are defined as `Counter32` in MIBs, but you probably want to submit them `monotonic_count` instead of a `rate`.
 
-For such cases, you can define a `forced_type`. Possible values and their effect are listed below.
+For such cases, you can define a `metric_type`. Possible values and their effect are listed below.
 
 | Forced type                | Description                                                  |
 | -------------------------- | ------------------------------------------------------------ |
@@ -424,61 +424,38 @@ This works on both symbol and table metrics:
 metrics:
   # On a symbol:
   - MIB: TCP-MIB
-    forced_type: monotonic_count
     symbol:
       OID: 1.3.6.1.2.1.6.5
       name: tcpActiveOpens
-  # On a table:
+      metric_type: monotonic_count
+  # On a table, apply same metric_type to all metrics:
   - MIB: IP-MIB
     table:
       OID: 1.3.6.1.2.1.4.31.1
       name: ipSystemStatsTable
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbols:
     - OID: 1.3.6.1.2.1.4.31.1.1.4
       name: ipSystemStatsHCInReceives
     - OID: 1.3.6.1.2.1.4.31.1.1.6
       name: ipSystemStatsHCInOctets
+  # On a table, apply different metric_type per metric:
+  - MIB: IP-MIB
+    table:
+      OID: 1.3.6.1.2.1.4.31.1
+      name: ipSystemStatsTable
+    symbols:
+    - OID: 1.3.6.1.2.1.4.31.1.1.4
+      name: ipSystemStatsHCInReceives
+      metric_type: monotonic_count
+    - OID: 1.3.6.1.2.1.4.31.1.1.6
+      name: ipSystemStatsHCInOctets
+      metric_type: gauge
 ```
-
-!!! note
-    When used on a table metrics entry, `forced_type` is applied to _all_ symbols in the entry.
-
-    So, if a table contains symbols of varying types, you should use multiple `metrics` entries: one for symbols with inferred metric types, and one for each `forced_type`.
-
-    For example:
-
-    ```yaml
-    metrics:
-      - MIB: F5-BIGIP-LOCAL-MIB
-        table:
-          OID: 1.3.6.1.4.1.3375.2.2.5.2.3
-          name: ltmPoolStatTable
-        # No `forced_type` specified => metric types will be inferred.
-        symbols:
-          - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.2
-            name: ltmPoolStatServerPktsIn
-          - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.4
-            name: ltmPoolStatServerPktsOut
-          # ...
-
-      - MIB: F5-BIGIP-LOCAL-MIB
-        table:
-          OID: 1.3.6.1.4.1.3375.2.2.5.2.3
-          name: ltmPoolStatTable
-        forced_type: monotonic_count
-        # All these symbols will be submitted as monotonic counts.
-        symbols:
-          - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.7
-            name: ltmPoolStatServerTotConns
-          - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.23
-            name: ltmPoolStatConnqServiced
-          # ...
-    ```
 
 ##### Flag stream
 
-When the value is a flag stream like `010101`, you can use `forced_type: flag_stream` to submit each flag as individual metric with value `0` or `1`. Two options are required when using `flag_stream`:
+When the value is a flag stream like `010101`, you can use `metric_type: flag_stream` to submit each flag as individual metric with value `0` or `1`. Two options are required when using `flag_stream`:
 
 - `options.placement`: position of the flag in the flag stream (1-based indexing, first element is placement 1).
 - `options.metric_suffix`: suffix appended to the metric name for a specific flag, usually matching the name of the flag. 
@@ -491,7 +468,7 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
       name: upsBasicStateOutputState
-    forced_type: flag_stream
+    metric_type: flag_stream
     options:
       placement: 4
       metric_suffix: OnLine
@@ -499,7 +476,7 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
       name: upsBasicStateOutputState
-    forced_type: flag_stream
+    metric_type: flag_stream
     options:
       placement: 5
       metric_suffix: ReplaceBattery

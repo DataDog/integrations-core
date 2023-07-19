@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -20,63 +20,72 @@ from . import defaults, validators
 
 
 class CustomQuery(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    columns: Optional[Sequence[Mapping[str, Any]]]
-    query: Optional[str]
-    tags: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    columns: Optional[Sequence[Mapping[str, Any]]] = None
+    query: Optional[str] = None
+    tags: Optional[Sequence[str]] = None
 
 
 class MetricPatterns(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    exclude: Optional[Sequence[str]] = None
+    include: Optional[Sequence[str]] = None
 
 
 class InstanceConfig(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    custom_queries: Optional[Sequence[CustomQuery]]
-    disable_generic_tags: Optional[bool]
-    empty_default_hostname: Optional[bool]
-    jdbc_driver_path: Optional[str]
-    jdbc_truststore_password: Optional[str]
-    jdbc_truststore_path: Optional[str]
-    jdbc_truststore_type: Optional[str]
-    metric_patterns: Optional[MetricPatterns]
-    min_collection_interval: Optional[float]
-    only_custom_queries: Optional[bool]
+    model_config = ConfigDict(
+        validate_default=True,
+        frozen=True,
+    )
+    custom_queries: Optional[Sequence[CustomQuery]] = None
+    disable_generic_tags: Optional[bool] = None
+    empty_default_hostname: Optional[bool] = None
+    jdbc_driver_path: Optional[str] = None
+    jdbc_truststore_password: Optional[str] = None
+    jdbc_truststore_path: Optional[str] = None
+    jdbc_truststore_type: Optional[str] = None
+    metric_patterns: Optional[MetricPatterns] = None
+    min_collection_interval: Optional[float] = None
+    only_custom_queries: Optional[bool] = None
     password: str
-    protocol: Optional[str]
+    protocol: Optional[str] = None
     server: str
-    service: Optional[str]
+    service: Optional[str] = None
     service_name: str
-    tags: Optional[Sequence[str]]
-    use_global_custom_queries: Optional[str]
+    tags: Optional[Sequence[str]] = None
+    use_global_custom_queries: Optional[str] = None
     username: str
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
     def _initial_validation(cls, values):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-    @validator('*', pre=True, always=True)
-    def _ensure_defaults(cls, v, field):
-        if v is not None or field.required:
-            return v
+    @field_validator('*', mode='before')
+    def _ensure_defaults(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name in info.context['configured_fields']:
+            return value
 
-        return getattr(defaults, f'instance_{field.name}')(field, v)
+        return getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-    @validator('*')
-    def _run_validations(cls, v, field):
-        if not v:
-            return v
+    @field_validator('*')
+    def _run_validations(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name not in info.context['configured_fields']:
+            return value
 
-        return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
+        return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
 
-    @root_validator(pre=False)
-    def _final_validation(cls, values):
-        return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+    @field_validator('*', mode='after')
+    def _make_immutable(cls, value):
+        return validation.utils.make_immutable(value)
+
+    @model_validator(mode='after')
+    def _final_validation(cls, model):
+        return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))

@@ -59,7 +59,7 @@ class KafkaConfig:
         if not self._kafka_connect_str:
             raise ConfigurationError('`kafka_connect_str` is required')
 
-        if not isinstance(self._kafka_connect_str, (str, list)):
+        if self._kafka_connect_str is not None and not isinstance(self._kafka_connect_str, (str, list)):
             raise ConfigurationError('`kafka_connect_str` should be string or list of strings')
 
         if isinstance(self._kafka_connect_str, list):
@@ -103,31 +103,26 @@ class KafkaConfig:
     def _compile_regex(self, consumer_groups_regex, consumer_groups):
         # Turn the dict of regex dicts into a single string and compile
         # (<CONSUMER_REGEX>,(TOPIC_REGEX),(PARTITION_REGEX))|(...)
-        patterns = ""
-        patterns += self.make_pattern(consumer_groups)
-        patterns += self.make_pattern(consumer_groups_regex)
+        patterns = self.get_patterns(consumer_groups)
+        patterns.extend(self.get_patterns(consumer_groups_regex))
 
-        # Remove last "|"
-        patterns = patterns.rstrip(patterns[-1])
-        final_pattern = re.compile(patterns)
-        return final_pattern
+        return re.compile("|".join(patterns))
 
-    def make_pattern(self, consumer_groups):
-        template = "({0},{1},{2})|"
-        patterns = ""
+    @staticmethod
+    def get_patterns(consumer_groups):
+        template = "({0},{1},{2})"
+        patterns = []
+
         for consumer_group in consumer_groups:
-            topics = consumer_groups.get(consumer_group)
-
-            if not topics:
-                patterns += template.format(consumer_group, ".+", ".+")
-            else:
+            if topics := consumer_groups.get(consumer_group):
                 for topic in topics:
-                    partitions = consumer_groups[consumer_group][topic]
-                    if not partitions:
-                        patterns += template.format(consumer_group, topic, ".+")
+                    if partitions := consumer_groups[consumer_group][topic]:
+                        patterns.extend(template.format(consumer_group, topic, partition) for partition in partitions)
                     else:
-                        for partition in partitions:
-                            patterns += template.format(consumer_group, topic, partition)
+                        patterns.append(template.format(consumer_group, topic, ".+"))
+            else:
+                patterns.append(template.format(consumer_group, ".+", ".+"))
+
         return patterns
 
     def _validate_consumer_groups(self):
