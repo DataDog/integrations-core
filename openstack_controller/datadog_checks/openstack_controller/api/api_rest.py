@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from enum import Enum
 
-from datadog_checks.base.utils.serialization import json
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.baremetal_rest import BaremetalRest
 from datadog_checks.openstack_controller.api.block_storage_rest import BlockStorageRest
@@ -324,7 +323,11 @@ class ApiRest(Api):
                 "identity": {
                     "methods": ["password"],
                     "password": {
-                        "user": {"name": self.config.username, "password": self.config.password, "domain": {"id": self.config.domain_id}}
+                        "user": {
+                            "name": self.config.username,
+                            "password": self.config.password,
+                            "domain": {"id": self.config.domain_id},
+                        }
                     },
                 }
             }
@@ -341,7 +344,11 @@ class ApiRest(Api):
                 "identity": {
                     "methods": ["password"],
                     "password": {
-                        "user": {"name": self.config.username, "password": self.config.password, "domain": {"id": domain_id}}
+                        "user": {
+                            "name": self.config.username,
+                            "password": self.config.password,
+                            "domain": {"id": domain_id},
+                        }
                     },
                 },
                 "scope": {"domain": {"id": domain_id}},
@@ -363,7 +370,11 @@ class ApiRest(Api):
                 "identity": {
                     "methods": ["password"],
                     "password": {
-                        "user": {"name": self.config.username, "password": self.config.password, "domain": {"id": self.config.domain_id}}
+                        "user": {
+                            "name": self.config.username,
+                            "password": self.config.password,
+                            "domain": {"id": self.config.domain_id},
+                        }
                     },
                 },
                 "scope": {"project": {"id": project_id}},

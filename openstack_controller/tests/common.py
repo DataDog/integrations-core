@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime
-import json
 import os
 from urllib.parse import urlparse
 
@@ -493,7 +492,7 @@ class MockHttp:
         elif self._defaults and subpath in self._defaults:
             return self._defaults[subpath]
         elif path_and_args == '/identity/v3/auth/tokens':
-            data = json.loads(kwargs['data'])
+            data = kwargs['json']
             project_id = data.get('auth', {}).get('scope', {}).get('project', {}).get('id')
             if project_id:
                 if self._defaults and f'{subpath}/project' in self._defaults:
