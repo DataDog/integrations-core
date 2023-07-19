@@ -236,6 +236,7 @@ class PostgresMetadata(DBMAsyncJob):
             "cloud_metadata": self._config.cloud_metadata,
             "metadata": metadata,
         }
+        self._log.debug("Reporting the following payload: {}".format(event))
         self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
     def _query_database_information(
