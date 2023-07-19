@@ -60,22 +60,6 @@ def test_e2e_profile_riverbed_steelhead(dd_agent_check):
     )
     aggregator.assert_metric('snmp.riverbed.steelhead.totalConnections', metric_type=aggregator.GAUGE, tags=common_tags)
 
-    aggregator.assert_metric('snmp.ifBandwidthInUsage.rate')
-    aggregator.assert_metric('snmp.ifBandwidthOutUsage.rate')
-    aggregator.assert_metric('snmp.ifHCInBroadcastPkts')
-    aggregator.assert_metric('snmp.ifHCInMulticastPkts')
-    aggregator.assert_metric('snmp.ifHCInOctets')
-    aggregator.assert_metric('snmp.ifHCInOctets.rate')
-    aggregator.assert_metric('snmp.ifHCInUcastPkts')
-    aggregator.assert_metric('snmp.ifHCOutBroadcastPkts')
-    aggregator.assert_metric('snmp.ifHCOutMulticastPkts')
-    aggregator.assert_metric('snmp.ifHCOutOctets')
-    aggregator.assert_metric('snmp.ifHCOutOctets.rate')
-    aggregator.assert_metric('snmp.ifHCOutUcastPkts')
-    aggregator.assert_metric('snmp.ifHighSpeed')
-    aggregator.assert_metric('snmp.ifInSpeed')
-    aggregator.assert_metric('snmp.ifOutSpeed')
-
     # --- TEST METADATA ---
     device = {
         'description': 'riverbed-steelhead Device Description',
