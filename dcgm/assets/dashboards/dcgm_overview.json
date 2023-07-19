@@ -471,7 +471,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Memory Copy Utilisation",
+                            "title": "Memory Copy Utilization",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
