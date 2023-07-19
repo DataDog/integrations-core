@@ -116,7 +116,9 @@ appset_controller_gauges = [
 ]
 
 appset_controller_histograms = [
-    'reconcile.time_seconds',
+    'reconcile.time_seconds.bucket',
+    'reconcile.time_seconds.count',
+    'reconcile.time_seconds.sum',
 ]
 
 api_server_counters = [
@@ -161,6 +163,9 @@ NOT_EXPOSED_METRICS = [
     'argocd.app_controller.cluster.api.resources',
     'argocd.app_controller.cluster.cache.age.seconds',
     'argocd.app_controller.redis.request.duration',
+    'argocd.appset_controller.reconcile.errors.total',
+    'argocd.appset_controller.runtime.reconcile.total',
+    'argocd.appset_controller.reconcile.time_seconds'
 ]
 
 # Additional metrics that aren't exposed in the E2E environment
