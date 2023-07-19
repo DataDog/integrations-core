@@ -5,7 +5,6 @@
 import pytest
 
 from datadog_checks.ibm_i.config_models import InstanceConfig
-from datadog_checks.ibm_i.config_models.instance import MessageQueueInfo
 from datadog_checks.ibm_i.queries import query_map
 
 
@@ -35,10 +34,11 @@ def test_get_message_queue_info(selected_message_queues, expected):
         "job_query_timeout": 2,
         "system_mq_query_timeout": 3,
         "severity_threshold": 50,
+        "message_queue_info": {"selected_message_queues": selected_message_queues},
     }
-    instance_conf = InstanceConfig(
-        **instance_conf_attr,
-        message_queue_info=MessageQueueInfo(selected_message_queues=selected_message_queues),
+    instance_conf = InstanceConfig.model_validate(
+        instance_conf_attr,
+        context={'configured_fields': frozenset(instance_conf_attr)},
     )
     qmap_output = query_map(instance_conf)
     assert qmap_output['message_queue_info']['name'] == 'message_queue_info'

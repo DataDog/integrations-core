@@ -27,7 +27,7 @@ files:
     - name: timeout
       description: Timeout of the TCP query in second.
       value:
-        type: integer
+        type: number
         example: 10
     - name: collect_response_time
       description: |

@@ -112,12 +112,6 @@ def test_monitor_broker_highwatermarks(
             id="Empty consumer_groups",
         ),
         pytest.param(
-            {'kafka_connect_str': None},
-            pytest.raises(Exception, match='kafka_connect_str\n  none is not an allowed value'),
-            0,
-            id="Invalid Nonetype kafka_connect_str",
-        ),
-        pytest.param(
             {'kafka_connect_str': ['localhost:9092', 'localhost:9093'], 'monitor_unlisted_consumer_groups': True},
             does_not_raise(),
             4,

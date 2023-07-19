@@ -7,76 +7,38 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-from datadog_checks.base.utils.models.fields import get_default_field_value
 
-
-def shared_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags():
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname():
     return False
 
 
-def instance_expected_mode(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_metric_patterns(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval():
     return 15
 
 
-def instance_port(field, value):
+def instance_port():
     return 2181
 
 
-def instance_report_instance_mode(field, value):
+def instance_report_instance_mode():
     return True
 
 
-def instance_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tags(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_timeout(field, value):
+def instance_timeout():
     return 3
 
 
-def instance_tls_ca_cert(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tls_cert(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tls_private_key(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tls_private_key_password(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tls_validate_hostname(field, value):
+def instance_tls_validate_hostname():
     return True
 
 
-def instance_tls_verify(field, value):
+def instance_tls_verify():
     return True
 
 
-def instance_use_tls(field, value):
+def instance_use_tls():
     return False

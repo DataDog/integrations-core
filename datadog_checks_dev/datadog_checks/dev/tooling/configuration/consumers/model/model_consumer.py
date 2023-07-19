@@ -1,10 +1,13 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import warnings
 from typing import Dict, List, Tuple
 
 import yaml
+from datamodel_code_generator import DataModelType
 from datamodel_code_generator.format import CodeFormatter, PythonVersion
+from datamodel_code_generator.model import get_data_model_types
 from datamodel_code_generator.parser import LiteralType
 from datamodel_code_generator.parser.openapi import OpenAPIParser
 
@@ -96,10 +99,15 @@ class ModelConsumer:
         package_info.append((model_id, schema_name))
         (section_openapi_document, model_info) = build_openapi_document(section, model_id, schema_name, errors)
 
+        model_types = get_data_model_types(DataModelType.PydanticV2BaseModel, target_python_version=PYTHON_VERSION)
         try:
             section_parser = OpenAPIParser(
                 yaml.safe_dump(section_openapi_document),
-                target_python_version=PythonVersion.PY_38,
+                data_model_type=model_types.data_model,
+                data_model_root_type=model_types.root_model,
+                data_model_field_type=model_types.field_model,
+                data_type_manager_type=model_types.data_type_manager,
+                dump_resolve_reference_action=model_types.dump_resolve_reference_action,
                 enum_field_as_literal=LiteralType.All,
                 encoding='utf-8',
                 use_generic_container_types=True,
@@ -110,7 +118,11 @@ class ModelConsumer:
                 # https://github.com/koxudaxi/datamodel-code-generator/pull/173
                 field_constraints=True,
             )
-            parsed_section = section_parser.parse()
+            # https://github.com/pydantic/pydantic/issues/6422
+            # https://github.com/pydantic/pydantic/issues/6467#issuecomment-1623680485
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+                parsed_section = section_parser.parse()
         except Exception as e:
             errors.append(f'Error parsing the OpenAPI schema `{schema_name}`: {e}')
             model_files[model_file_name] = ('', errors)
@@ -149,7 +161,7 @@ class ModelConsumer:
         model_files = {}
         if model_info.defaults_file_lines:
             defaults_file_contents = self._build_defaults_file(model_info)
-            model_files['defaults.py'] = (defaults_file_contents, [])
+            model_files['defaults.py'] = (f'\n{defaults_file_contents}', [])
 
         if model_info.deprecation_data:
             deprecations_file_contents = self._build_deprecation_file(model_info.deprecation_data)
@@ -239,11 +251,6 @@ class ModelConsumer:
         return package_root_lines
 
     def _build_defaults_file(self, model_info: ModelInfo):
-        if model_info.defaults_file_needs_dynamic_values:
-            model_info.defaults_file_lines.insert(
-                0, 'from datadog_checks.base.utils.models.fields import get_default_field_value'
-            )
-
         model_info.defaults_file_lines.append('')
         defaults_file_contents = '\n'.join(model_info.defaults_file_lines)
         if model_info.defaults_file_needs_value_normalization:
