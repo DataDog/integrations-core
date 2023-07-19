@@ -505,7 +505,7 @@
                     {
                         "definition": {
                             "background_color": "green",
-                            "content": "Power usage is directly correlated with temperature, demand and cost of running your GPU-supplemented infrastructure. The chart on the left shows power consumed by host currently. The graph on the right surfaces power over time by host, with measures of the average, min and max power usage across the selected time range. ",
+                            "content": "Power usage is directly correlated with temperature, demand, and cost of running your GPU-supplemented infrastructure. The chart on the left shows power consumed by host currently. The graph on the right surfaces power over time by host, with measures of the average, min, and max power usage across the selected time range. ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
