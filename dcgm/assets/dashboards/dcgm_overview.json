@@ -631,7 +631,7 @@
                     {
                         "definition": {
                             "background_color": "green",
-                            "content": "Framebuffer is a reserved memory bank within a GPU, and high usage can indicate performance slowdowns. Peripheral Component Interconnect Express (PCIe) is a serial expansion bus standard for connecting a computer to one or more peripheral devices. PCIe transmission is a measure for latency and data transfer rates. Higher clock frequencies provides performance increases. \n",
+                            "content": "Framebuffer is a reserved memory bank within a GPU, and high usage can indicate performance slowdowns. Peripheral Component Interconnect Express (PCIe) is a serial expansion bus standard for connecting a computer to one or more peripheral devices. PCIe transmission is a measure for latency and data transfer rates. Higher clock frequencies provide performance increases. \n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
