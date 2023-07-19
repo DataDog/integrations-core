@@ -1,5 +1,5 @@
 #!/bin/bash
-cat <<EOF >> /tmp/start_datadog.sh
+cat <<EOF > /tmp/start_datadog.sh
 #!/bin/bash
 
 date -u +"%Y-%m-%d %H:%M:%S UTC"
@@ -24,28 +24,21 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
     bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
   # WAIT FOR DATADOG AGENT TO BE INSTALLED
-  while [ -z \$datadoginstalled ]; do
-    if [ -e "/etc/datadog-agent/datadog.yaml" ]; then
-      datadoginstalled=TRUE
-    fi
+  while [ ! -f "/etc/datadog-agent/datadog.yaml" ]; do
+    echo "Waiting 2 seconds for the Datadog Agent to be installed"
     sleep 2
   done
 
+  # Avoid conflicts on port 6062
+  echo "process_config.expvar_port: 6063" >> /etc/datadog-agent/datadog.yaml
+
   echo "Datadog Agent is installed"
 
-  # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
-  sed -i '/.*logs_enabled:.*/a logs_enabled: true' /etc/datadog-agent/datadog.yaml
-
-  # CONFIGURE HOSTNAME EXPLICITLY IN datadog.yaml TO PREVENT AGENT FROM FAILING ON VERSION 7.40+
-  # SEE https://github.com/DataDog/datadog-agent/issues/14152 FOR CHANGE
-  hostname=\$(hostname | xargs)
-  echo "hostname: \$hostname" >> /etc/datadog-agent/datadog.yaml
-
-  while [ -z \$gotparams ]; do
+  while [ -z \$DB_DRIVER_PORT ]; do
     if [ -e "/tmp/driver-env.sh" ]; then
-      DB_DRIVER_PORT=\$(grep -i "CONF_UI_PORT" /tmp/driver-env.sh | cut -d'=' -f2)
-      gotparams=TRUE
+      DB_DRIVER_PORT="\$(grep -i "CONF_UI_PORT" /tmp/driver-env.sh | cut -d'=' -f2)"
     fi
+    echo "Waiting 2 seconds for DB_DRIVER_PORT"
     sleep 2
   done
 
@@ -67,14 +60,13 @@ logs:
           name: new_log_start_with_date
           pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.d/spark.yaml
 
-  # RESTARTING AGENT
+  echo "Waiting 15 seconds"
   sleep 15
-  sudo service datadog-agent restart
 
+  echo "Restart the agent"
+  sudo service datadog-agent restart
 fi
 EOF
 
-if [ \$DB_IS_DRIVER ]; then
-  chmod a+x /tmp/start_datadog.sh
-  /tmp/start_datadog.sh >> /tmp/datadog_start.log 2>&1 & disown
-fi
+chmod a+x /tmp/start_datadog.sh
+/tmp/start_datadog.sh >> /tmp/datadog_start.log 2>&1 & disown

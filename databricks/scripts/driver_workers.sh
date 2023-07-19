@@ -7,7 +7,6 @@ echo "Running on the driver? \$DB_IS_DRIVER"
 echo "Driver ip: \$DB_DRIVER_IP"
 
 DB_CLUSTER_NAME=$(echo "$DB_CLUSTER_NAME" | sed -e 's/ /_/g' -e "s/'/_/g")
-DD_API_KEY=''
 
 if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
   echo "Installing Datadog Agent on the driver (master node)."

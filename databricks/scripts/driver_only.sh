@@ -9,7 +9,7 @@ echo "Driver ip: \$DB_DRIVER_IP"
 DB_CLUSTER_NAME=$(echo "$DB_CLUSTER_NAME" | sed -e 's/ /_/g' -e "s/'/_/g")
 
 if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
-  echo "Installing Datadog Agent on the driver (master node)."
+  echo "Installing Datadog Agent on the driver..."
 
   # CONFIGURE HOST TAGS FOR DRIVER
   DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${DB_DRIVER_IP}","spark_node:driver"
