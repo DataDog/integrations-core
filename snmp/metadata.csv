@@ -1123,7 +1123,7 @@ snmp.receptacleEnergyoutlet8s,count,,,,"[Legacy Chatsworth] The outlet8 receptac
 snmp.receptacleEnergyoutlet9s,count,,,,"[Legacy Chatsworth] The outlet9 receptacle energy accumulated in decaWatt-secs, divide by 360 to obtain Watt-hr.",0,snmp,,
 snmp.reverbed.interceptor.health,gauge,,,,"[INTERCEPTOR-MIB] Current health",0,snmp,,
 snmp.reverbed.interceptor.neighborConnectionCount,gauge,,,,"[INTERCEPTOR-MIB] The number of optimized connections",0,snmp,,
-snmp.reverbed.interceptor.proc,gauge,,,,"[INTERCEPTOR-MIB] (Make 'sum by {X}' queries to count elements with the tag X.)",0,snmp,,
+snmp.reverbed.interceptor.proc,gauge,,,,"[INTERCEPTOR-MIB] Managed processes (Make 'sum by {X}' queries to count elements with the tag X.)",0,snmp,,
 snmp.reverbed.interceptor.serviceStatus,gauge,,,,"[INTERCEPTOR-MIB] Current service status",0,snmp,,
 snmp.roomalert.32s.digital_sen1_1,gauge,,,,"[ROOMALERT32S-MIB] The sensor's current temperature in Celsius.",0,snmp,,
 snmp.roomalert.32s.digital_sen1_2,gauge,,,,"[ROOMALERT32S-MIB] The sensor's current temperature in Fahrenheit.",0,snmp,,
