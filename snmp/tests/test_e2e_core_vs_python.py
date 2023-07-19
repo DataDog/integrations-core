@@ -42,6 +42,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.ospfVirtNbr',
     'snmp.ospfIf',
     'snmp.ospfVirtIf',
+    'snmp.upsOutletGroupStatus',  # APC UPS constant metric
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
@@ -286,12 +287,16 @@ def test_e2e_custom_metrics_cases(dd_agent_check):
 
 def test_e2e_profile_apc_ups(dd_agent_check):
     config = common.generate_container_profile_config('apc_ups')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=64 + 5)
+    assert_python_vs_core(
+        dd_agent_check, config, expected_total_count=64 + 5, tags_to_skip=["ups_outlet_group_status_group_state"]
+    )
 
 
 def test_e2e_profile_apc_ups_user(dd_agent_check):
     config = common.generate_container_profile_config('apc_ups_user')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=66 + 5)
+    assert_python_vs_core(
+        dd_agent_check, config, expected_total_count=66 + 5, tags_to_skip=["ups_outlet_group_status_group_state"]
+    )
 
 
 def test_e2e_profile_arista(dd_agent_check):
@@ -497,7 +502,14 @@ def test_e2e_discovery(dd_agent_check):
     ]
     # we don't assert count, since the count might be off by 1 due to devices not being discovered at first check run
     assert_python_vs_core(
-        dd_agent_check, config, rate=False, pause=300, times=3, metrics_to_skip=skip_metrics, assert_count=False
+        dd_agent_check,
+        config,
+        rate=False,
+        pause=300,
+        times=3,
+        metrics_to_skip=skip_metrics,
+        assert_count=False,
+        tags_to_skip=['ups_outlet_group_status_group_state'],  # Skipping tag with a mapping
     )
 
 

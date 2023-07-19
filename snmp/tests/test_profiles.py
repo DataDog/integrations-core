@@ -2578,7 +2578,11 @@ def test_apc_ups(aggregator):
     aggregator.assert_metric(
         'snmp.upsOutletGroupStatusGroupState',
         metric_type=aggregator.GAUGE,
-        tags=['outlet_group_name:test_outlet'] + tags,
+        tags=[
+            'outlet_group_name:test_outlet',
+            'ups_outlet_group_status_group_state:3',
+        ]
+        + tags,
     )
 
     for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:

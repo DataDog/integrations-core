@@ -192,18 +192,26 @@ def assert_apc_ups_metrics(dd_agent_check, config):
 
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
     aggregator.assert_metric(
-        'datadog.snmp.submitted_metrics', metric_type=aggregator.GAUGE, tags=tags + ['loader:core'], value=31
+        'datadog.snmp.submitted_metrics', metric_type=aggregator.GAUGE, tags=tags + ['loader:core'], value=32
     )
 
     for metric in metrics.APC_UPS_METRICS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=2)
+
+    for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:
+        aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=tags)
+
+    group_state_tags = tags + [
+        'outlet_group_name:test_outlet',
+        'ups_outlet_group_status_group_state:ups_outlet_group_status_unknown',
+    ]
+
     aggregator.assert_metric(
         'snmp.upsOutletGroupStatusGroupState',
         metric_type=aggregator.GAUGE,
-        tags=['outlet_group_name:test_outlet'] + tags,
+        tags=group_state_tags,
     )
-    for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:
-        aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=tags)
+    aggregator.assert_metric('snmp.upsOutletGroupStatus', metric_type=aggregator.GAUGE, tags=group_state_tags, value=1)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -468,13 +476,19 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
     aggregator.assert_metric(
         'snmp.upsAdvBatteryFullCapacity_userMetric', metric_type=aggregator.GAUGE, tags=tags, count=2
     )
+    for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:
+        aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=tags)
+
+    group_state_tags = tags + [
+        'outlet_group_name:test_outlet',
+        'ups_outlet_group_status_group_state:ups_outlet_group_status_unknown',
+    ]
+
     aggregator.assert_metric(
         'snmp.upsOutletGroupStatusGroupState',
         metric_type=aggregator.GAUGE,
-        tags=['outlet_group_name:test_outlet'] + tags,
+        tags=group_state_tags,
     )
-    for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:
-        aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=tags)
 
     interface_tags = ['interface:mgmt', 'interface_alias:desc1', 'interface_index:32'] + tags
     aggregator.assert_metric(
