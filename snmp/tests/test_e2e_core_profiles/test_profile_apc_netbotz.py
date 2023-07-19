@@ -70,7 +70,7 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
     ]
 
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.enclosure', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.netbotz.enclosure', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['din_port_id:but forward their their driving kept', 'din_port_index:3777091038', 'din_port_status:normal'],
@@ -80,7 +80,7 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
     ]
 
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.dinPort', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.netbotz.dinPort', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         [
@@ -114,7 +114,7 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
     ]
 
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.otherPort', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.netbotz.otherPort', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         [
@@ -148,8 +148,8 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
     ]
 
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.tempSensorValueInt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.tempSensorValueIntF', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.netbotz.tempSensorValueInt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.netbotz.tempSensorValueIntF', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         [
@@ -183,7 +183,7 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
     ]
 
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.humiSensorValueInt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.netbotz.humiSensorValueInt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         [
@@ -213,12 +213,8 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
     ]
 
     for tag_row in tag_rows:
-        aggregator.assert_metric(
-            'snmp.dewPointSensorValueInt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.dewPointSensorValueIntF', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.netbotz.dewPointSensorValueInt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.netbotz.dewPointSensorValueIntF', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         [
@@ -256,9 +252,7 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
     ]
 
     for tag_row in tag_rows:
-        aggregator.assert_metric(
-            'snmp.otherNumericSensorValueInt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.netbotz.otherNumericSensorValueInt', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         [
@@ -296,7 +290,7 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
     ]
 
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.doorSwitchSensor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.netbotz.doorSwitchSensor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         [
@@ -330,7 +324,7 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
     ]
 
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.otherStateSensor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.netbotz.otherStateSensor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         [
@@ -380,7 +374,7 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
     ]
 
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.errorCond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.netbotz.errorCond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {

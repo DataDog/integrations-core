@@ -8,7 +8,7 @@ metrics:
       OID: 1.3.6.1.4.1.5528.100.2.1
       name: enclosureTable
     symbols:
-      - name: enclosure
+      - name: netbotz.enclosure
         constant_value_one: true
     metric_tags:
       - column:
@@ -47,7 +47,7 @@ metrics:
       OID: 1.3.6.1.4.1.5528.100.3.1
       name: dinPortTable
     symbols:
-      - name: dinPort
+      - name: netbotz.dinPort
         constant_value_one: true
     metric_tags:
       - column:
@@ -71,7 +71,7 @@ metrics:
       OID: 1.3.6.1.4.1.5528.100.3.10
       name: otherPortTable
     symbols:
-      - name: otherPort
+      - name: netbotz.otherPort
         constant_value_one: true
     metric_tags:
       - column:
@@ -104,9 +104,9 @@ metrics:
       name: tempSensorTable
     symbols:
       - OID: 1.3.6.1.4.1.5528.100.4.1.1.1.8
-        name: tempSensorValueInt
+        name: netbotz.tempSensorValueInt
       - OID: 1.3.6.1.4.1.5528.100.4.1.1.1.9
-        name: tempSensorValueIntF
+        name: netbotz.tempSensorValueIntF
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.1.1.10
@@ -141,7 +141,7 @@ metrics:
       name: humiSensorTable
     symbols:
       - OID: 1.3.6.1.4.1.5528.100.4.1.2.1.8
-        name: humiSensorValueInt
+        name: netbotz.humiSensorValueInt
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.2.1.9
@@ -176,9 +176,9 @@ metrics:
       name: dewPointSensorTable
     symbols:
       - OID: 1.3.6.1.4.1.5528.100.4.1.3.1.8
-        name: dewPointSensorValueInt
+        name: netbotz.dewPointSensorValueInt
       - OID: 1.3.6.1.4.1.5528.100.4.1.3.1.9
-        name: dewPointSensorValueIntF
+        name: netbotz.dewPointSensorValueIntF
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.3.1.10
@@ -202,7 +202,7 @@ metrics:
       name: otherNumericSensorTable
     symbols:
       - OID: 1.3.6.1.4.1.5528.100.4.1.10.1.8
-        name: otherNumericSensorValueInt
+        name: netbotz.otherNumericSensorValueInt
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.10.1.12
@@ -240,7 +240,7 @@ metrics:
       OID: 1.3.6.1.4.1.5528.100.4.2.2
       name: doorSwitchSensorTable
     symbols:
-      - name: doorSwitchSensor
+      - name: netbotz.doorSwitchSensor
         constant_value_one: true
     metric_tags:
       - column:
@@ -276,7 +276,7 @@ metrics:
       OID: 1.3.6.1.4.1.5528.100.4.2.10
       name: otherStateSensorTable
     symbols:
-      - name: otherStateSensor
+      - name: netbotz.otherStateSensor
         constant_value_one: true
     metric_tags:
       - column:
@@ -311,7 +311,7 @@ metrics:
       OID: 1.3.6.1.4.1.5528.100.5.1
       name: errorCondTable
     symbols:
-      - name: errorCond
+      - name: netbotz.errorCond
         constant_value_one: true
     metric_tags:
       - column:
