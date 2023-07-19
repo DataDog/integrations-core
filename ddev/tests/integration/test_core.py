@@ -209,9 +209,7 @@ class TestPackageFiles:
         repo = Repository(local_repo.name, str(local_repo))
         integration = repo.integrations.get('agent_metrics')
 
-        expected_files = []
-
-        assert list(integration.package_files()) == expected_files
+        assert not list(integration.package_files())
 
 
 class TestReleaseTagPattern:
