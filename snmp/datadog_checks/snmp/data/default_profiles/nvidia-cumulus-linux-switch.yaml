@@ -1,238 +1,219 @@
 extends:
   - _generic-host-resources-base.yaml
+  - _generic-ucd.yaml
   - nvidia.yaml
 sysobjectid:
   - 1.3.6.1.4.1.40310
 metrics:
-  - MIB: UCD-SNMP-MIB
-    symbol:
-      name: cpu.usage
-      OID: 1.3.6.1.4.1.2021.10.1.5.1
-  - MIB: UCD-SNMP-MIB
-    symbol:
-      name: memory.total
-      OID: 1.3.6.1.4.1.2021.4.5.0
-  - MIB: UCD-SNMP-MIB
-    symbol:
-      name: memory.free
-      OID: 1.3.6.1.4.1.2021.4.11.0
-  - MIB: UCD-SNMP-MIB
-    symbol:
-      name: memBuffer
-      OID: 1.3.6.1.4.1.2021.4.14.0
-  - MIB: UCD-SNMP-MIB
-    symbol:
-      name: memCached
-      OID: 1.3.6.1.4.1.2021.4.15.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: l3HostTableCurrentEntries
+      name: cumulus.l3HostTableCurrentEntries
       OID: 1.3.6.1.4.1.40310.1.1.1.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: l3HostTableMaxEntries
+      name: cumulus.l3HostTableMaxEntries
       OID: 1.3.6.1.4.1.40310.1.1.2.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: l3RoutingTableCurrentEntries
+      name: cumulus.l3RoutingTableCurrentEntries
       OID: 1.3.6.1.4.1.40310.1.1.3.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: l3RoutingTableMaxEntries
+      name: cumulus.l3RoutingTableMaxEntries
       OID: 1.3.6.1.4.1.40310.1.1.4.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: l3NextHopTableCurrentEntries
+      name: cumulus.l3NextHopTableCurrentEntries
       OID: 1.3.6.1.4.1.40310.1.1.5.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: l3NextHopTableMaxEntries
+      name: cumulus.l3NextHopTableMaxEntries
       OID: 1.3.6.1.4.1.40310.1.1.6.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: l3EcmpNextHopTableCurrentEntries
+      name: cumulus.l3EcmpNextHopTableCurrentEntries
       OID: 1.3.6.1.4.1.40310.1.1.9.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: l3EcmpNextHopTableMaxEntries
+      name: cumulus.l3EcmpNextHopTableMaxEntries
       OID: 1.3.6.1.4.1.40310.1.1.10.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: ingressAclCurrentEntries
+      name: cumulus.ingressAclCurrentEntries
       OID: 1.3.6.1.4.1.40310.1.1.11.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: ingressAclMaxEntries
+      name: cumulus.ingressAclMaxEntries
       OID: 1.3.6.1.4.1.40310.1.1.12.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: ingressAclCurrentCounters
+      name: cumulus.ingressAclCurrentCounters
       OID: 1.3.6.1.4.1.40310.1.1.13.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: ingressAclMaxCounters
+      name: cumulus.ingressAclMaxCounters
       OID: 1.3.6.1.4.1.40310.1.1.14.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: ingressAclCurrentMeters
+      name: cumulus.ingressAclCurrentMeters
       OID: 1.3.6.1.4.1.40310.1.1.15.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: ingressAclMaxMeters
+      name: cumulus.ingressAclMaxMeters
       OID: 1.3.6.1.4.1.40310.1.1.16.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: ingressAclCurrentSlices
+      name: cumulus.ingressAclCurrentSlices
       OID: 1.3.6.1.4.1.40310.1.1.17.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: ingressAclMaxSlices
+      name: cumulus.ingressAclMaxSlices
       OID: 1.3.6.1.4.1.40310.1.1.18.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: egressAclCurrentEntries
+      name: cumulus.egressAclCurrentEntries
       OID: 1.3.6.1.4.1.40310.1.1.19.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: egressAclMaxEntries
+      name: cumulus.egressAclMaxEntries
       OID: 1.3.6.1.4.1.40310.1.1.20.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: egressAclCurrentCounters
+      name: cumulus.egressAclCurrentCounters
       OID: 1.3.6.1.4.1.40310.1.1.21.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: egressAclMaxCounters
+      name: cumulus.egressAclMaxCounters
       OID: 1.3.6.1.4.1.40310.1.1.22.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: egressAclCurrentMeters
+      name: cumulus.egressAclCurrentMeters
       OID: 1.3.6.1.4.1.40310.1.1.23.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: egressAclMaxMeters
+      name: cumulus.egressAclMaxMeters
       OID: 1.3.6.1.4.1.40310.1.1.24.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: egressAclCurrentSlices
+      name: cumulus.egressAclCurrentSlices
       OID: 1.3.6.1.4.1.40310.1.1.25.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: egressAclMaxSlices
+      name: cumulus.egressAclMaxSlices
       OID: 1.3.6.1.4.1.40310.1.1.26.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: l2MacTableCurrentEntries
+      name: cumulus.l2MacTableCurrentEntries
       OID: 1.3.6.1.4.1.40310.1.2.1.0
   - MIB: CUMULUS-RESOURCES-MIB
     symbol:
-      name: l2MacTableMaxEntries
+      name: cumulus.l2MacTableMaxEntries
       OID: 1.3.6.1.4.1.40310.1.2.2.0
   - MIB: CUMULUS-COUNTERS-MIB
     table:
       name: discardClCountersTable
       OID: 1.3.6.1.4.1.40310.2.1.2
     symbols:
-      - name: clL3v4InDiscards
+      - name: cumulus.clL3v4InDiscards
         OID: 1.3.6.1.4.1.40310.2.1.2.1.2
-      - name: clBufferOverflowDiscards
+      - name: cumulus.clBufferOverflowDiscards
         OID: 1.3.6.1.4.1.40310.2.1.2.1.3
-      - name: clL3AclDiscards
+      - name: cumulus.clL3AclDiscards
         OID: 1.3.6.1.4.1.40310.2.1.2.1.4
-      - name: clEgressQOverflowDiscards
+      - name: cumulus.clEgressQOverflowDiscards
         OID: 1.3.6.1.4.1.40310.2.1.2.1.6
-      - name: clEgressNonQDiscards
+      - name: cumulus.clEgressNonQDiscards
         OID: 1.3.6.1.4.1.40310.2.1.2.1.7
     metric_tags:
       - column:
-          name: clPortName
+          name: cumulus.clPortName
           OID: 1.3.6.1.4.1.40310.2.1.2.1.1
-        tag: cl_port_name
+        tag: cumulus_cl_port_name
   - MIB: CUMULUS-COUNTERS-MIB
     table:
       name: interfaceClCountersTable
       OID: 1.3.6.1.4.1.40310.2.2.2
     symbols:
-      - name: clIntInOctets
+      - name: cumulus.clIntInOctets
         OID: 1.3.6.1.4.1.40310.2.2.2.1.2
-      - name: clIntInUcastPkts
+      - name: cumulus.clIntInUcastPkts
         OID: 1.3.6.1.4.1.40310.2.2.2.1.3
-      - name: clIntInBcastPkts
+      - name: cumulus.clIntInBcastPkts
         OID: 1.3.6.1.4.1.40310.2.2.2.1.4
-      - name: clIntInMcastPkts
+      - name: cumulus.clIntInMcastPkts
         OID: 1.3.6.1.4.1.40310.2.2.2.1.5
-      - name: clIntOutOctets
+      - name: cumulus.clIntOutOctets
         OID: 1.3.6.1.4.1.40310.2.2.2.1.6
-      - name: clIntOutUcastPkts
+      - name: cumulus.clIntOutUcastPkts
         OID: 1.3.6.1.4.1.40310.2.2.2.1.7
-      - name: clIntOutBcastPkts
+      - name: cumulus.clIntOutBcastPkts
         OID: 1.3.6.1.4.1.40310.2.2.2.1.8
-      - name: clIntOutMcastPkts
+      - name: cumulus.clIntOutMcastPkts
         OID: 1.3.6.1.4.1.40310.2.2.2.1.9
     metric_tags:
       - column:
-          name: clIntPortName
+          name: cumulus.clIntPortName
           OID: 1.3.6.1.4.1.40310.2.2.2.1.1
-        tag: cl_int_port_name
+        tag: cumulus_cl_int_port_name
   - MIB: CUMULUS-COUNTERS-MIB
     table:
       name: pfcClCountersTable
       OID: 1.3.6.1.4.1.40310.2.2.3
     symbols:
-      - name: clIntInPausePkt
+      - name: cumulus.clIntInPausePkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.2
-      - name: clIntOutPausePkt
+      - name: cumulus.clIntOutPausePkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.3
-      - name: clIntInPfc0Pkt
+      - name: cumulus.clIntInPfc0Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.4
-      - name: clIntOutPfc0Pkt
+      - name: cumulus.clIntOutPfc0Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.5
-      - name: clIntInPfc1Pkt
+      - name: cumulus.clIntInPfc1Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.6
-      - name: clIntOutPfc1Pkt
+      - name: cumulus.clIntOutPfc1Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.7
-      - name: clIntInPfc2Pkt
+      - name: cumulus.clIntInPfc2Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.8
-      - name: clIntOutPfc2Pkt
+      - name: cumulus.clIntOutPfc2Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.9
-      - name: clIntInPfc3Pkt
+      - name: cumulus.clIntInPfc3Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.10
-      - name: clIntOutPfc3Pkt
+      - name: cumulus.clIntOutPfc3Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.11
-      - name: clIntInPfc4Pkt
+      - name: cumulus.clIntInPfc4Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.12
-      - name: clIntOutPfc4Pkt
+      - name: cumulus.clIntOutPfc4Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.13
-      - name: clIntInPfc5Pkt
+      - name: cumulus.clIntInPfc5Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.14
-      - name: clIntOutPfc5Pkt
+      - name: cumulus.clIntOutPfc5Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.15
-      - name: clIntInPfc6Pkt
+      - name: cumulus.clIntInPfc6Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.16
-      - name: clIntOutPfc6Pkt
+      - name: cumulus.clIntOutPfc6Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.17
-      - name: clIntInPfc7Pkt
+      - name: cumulus.clIntInPfc7Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.18
-      - name: clIntOutPfc7Pkt
+      - name: cumulus.clIntOutPfc7Pkt
         OID: 1.3.6.1.4.1.40310.2.2.3.1.19
     metric_tags:
       - column:
-          name: clIntPfcPortName
+          name: cumulus.clIntPfcPortName
           OID: 1.3.6.1.4.1.40310.2.2.3.1.1
-        tag: cl_int_pfc_port_name
+        tag: cumulus_cl_int_pfc_port_name
   - MIB: CUMULUS-POE-MIB
     symbol:
-      name: poeTotalSystemPower
+      name: cumulus.poeTotalSystemPower
       OID: 1.3.6.1.4.1.40310.3.1.1.0
   - MIB: CUMULUS-POE-MIB
     symbol:
-      name: poeTotalUsedPower
+      name: cumulus.poeTotalUsedPower
       OID: 1.3.6.1.4.1.40310.3.1.2.0
   - MIB: CUMULUS-POE-MIB
     symbol:
-      name: poeTotalAvailablePower
+      name: cumulus.poeTotalAvailablePower
       OID: 1.3.6.1.4.1.40310.3.1.3.0
   - MIB: CUMULUS-POE-MIB
     symbol:
-      name: poeLastUpdateTime
+      name: cumulus.poeLastUpdateTime
       OID: 1.3.6.1.4.1.40310.3.1.4.0

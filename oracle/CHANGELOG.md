@@ -1,194 +1,323 @@
 # CHANGELOG - oracle
 
-## 4.1.1 / 2023-05-26
+## 4.2.0 / 2023-07-10
 
-* [Fixed] Update dependencies. See [#14594](https://github.com/DataDog/integrations-core/pull/14594).
+***Added***:
+
+* Bump dependencies for Agent 7.47. See [#15145](https://github.com/DataDog/integrations-core/pull/15145).
+
+***Fixed***:
+
+* Downgrade requirements to 3.8. See [#14711](https://github.com/DataDog/integrations-core/pull/14711).
+* Bump Python version from py3.8 to py3.9. See [#14701](https://github.com/DataDog/integrations-core/pull/14701).
+
+## 4.1.1 / 2023-05-26 / Agent 7.46.0
+
+***Fixed***:
+
+* Update dependencies. See [#14594](https://github.com/DataDog/integrations-core/pull/14594).
 
 ## 4.1.0 / 2023-04-14 / Agent 7.45.0
 
-* [Added] Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).
-* [Added] Add thick mode for oracledb. See [#14166](https://github.com/DataDog/integrations-core/pull/14166).
-* [Fixed] Update GV$PROCESS query. See [#14143](https://github.com/DataDog/integrations-core/pull/14143). Thanks [jake-condello](https://github.com/jake-condello).
+***Added***:
+
+* Update dependencies. See [#14357](https://github.com/DataDog/integrations-core/pull/14357).
+* Add thick mode for oracledb. See [#14166](https://github.com/DataDog/integrations-core/pull/14166).
+
+***Fixed***:
+
+* Update GV$PROCESS query. See [#14143](https://github.com/DataDog/integrations-core/pull/14143). Thanks [jake-condello](https://github.com/jake-condello).
 
 ## 4.0.1 / 2023-01-20 / Agent 7.43.0
 
-* [Fixed] Do not add `can_use_jdbc` to `check_initializations`. See [#13521](https://github.com/DataDog/integrations-core/pull/13521).
+***Fixed***:
+
+* Do not add `can_use_jdbc` to `check_initializations`. See [#13521](https://github.com/DataDog/integrations-core/pull/13521).
 
 ## 4.0.0 / 2022-12-09 / Agent 7.42.0
 
-* [Fixed] Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
-* [Fixed] Skip empty columns when metric_prefix is used for custom queries. See [#13234](https://github.com/DataDog/integrations-core/pull/13234).
-* [Changed] Update Oracle check to use python-oracledb library. See [#13298](https://github.com/DataDog/integrations-core/pull/13298).
+***Changed***:
+
+* Update Oracle check to use python-oracledb library. See [#13298](https://github.com/DataDog/integrations-core/pull/13298).
+
+***Fixed***:
+
+* Update dependencies. See [#13478](https://github.com/DataDog/integrations-core/pull/13478).
+* Skip empty columns when metric_prefix is used for custom queries. See [#13234](https://github.com/DataDog/integrations-core/pull/13234).
 
 ## 3.9.5 / 2022-08-05 / Agent 7.39.0
 
-* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+***Fixed***:
+
+* Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
 
 ## 3.9.4 / 2022-05-15 / Agent 7.37.0
 
-* [Fixed] Add a lock around jdbc connection. See [#11877](https://github.com/DataDog/integrations-core/pull/11877).
-* [Fixed] Do not close closed connection. See [#11874](https://github.com/DataDog/integrations-core/pull/11874).
+***Fixed***:
+
+* Add a lock around jdbc connection. See [#11877](https://github.com/DataDog/integrations-core/pull/11877).
+* Do not close closed connection. See [#11874](https://github.com/DataDog/integrations-core/pull/11874).
 
 ## 3.9.3 / 2022-04-14 / Agent 7.36.0
 
-* [Fixed] Handle NoneType protocol validation. See [#11837](https://github.com/DataDog/integrations-core/pull/11837).
+***Fixed***:
+
+* Handle NoneType protocol validation. See [#11837](https://github.com/DataDog/integrations-core/pull/11837).
 
 ## 3.9.2 / 2022-04-11
 
-* [Fixed] Ensure connect raises exception on failure. See [#11787](https://github.com/DataDog/integrations-core/pull/11787).
+***Fixed***:
+
+* Ensure connect raises exception on failure. See [#11787](https://github.com/DataDog/integrations-core/pull/11787).
 
 ## 3.9.1 / 2022-04-07
 
-* [Fixed] Fix protocol validation. See [#11791](https://github.com/DataDog/integrations-core/pull/11791).
+***Fixed***:
+
+* Fix protocol validation. See [#11791](https://github.com/DataDog/integrations-core/pull/11791).
 
 ## 3.9.0 / 2022-04-05
 
-* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
+***Added***:
+
+* Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
 
 ## 3.8.0 / 2022-03-25
 
-* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
-* [Fixed] Properly report a critical service check status if connection to database fails using the Oracle client. See [#11691](https://github.com/DataDog/integrations-core/pull/11691).
-* [Fixed] Fix validation for the `protocol` param. See [#11675](https://github.com/DataDog/integrations-core/pull/11675).
+***Added***:
+
+* Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+
+***Fixed***:
+
+* Properly report a critical service check status if connection to database fails using the Oracle client. See [#11691](https://github.com/DataDog/integrations-core/pull/11691).
+* Fix validation for the `protocol` param. See [#11675](https://github.com/DataDog/integrations-core/pull/11675).
 
 ## 3.7.0 / 2022-02-19 / Agent 7.35.0
 
-* [Added] Add `pyproject.toml` file. See [#11410](https://github.com/DataDog/integrations-core/pull/11410).
-* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+***Added***:
+
+* Add `pyproject.toml` file. See [#11410](https://github.com/DataDog/integrations-core/pull/11410).
+
+***Fixed***:
+
+* Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
 
 ## 3.6.0 / 2022-01-08 / Agent 7.34.0
 
-* [Added] Add TCPS support for Oracle DB. See [#10591](https://github.com/DataDog/integrations-core/pull/10591).
-* [Fixed] Add comment to autogenerated model files. See [#10945](https://github.com/DataDog/integrations-core/pull/10945).
+***Added***:
+
+* Add TCPS support for Oracle DB. See [#10591](https://github.com/DataDog/integrations-core/pull/10591).
+
+***Fixed***:
+
+* Add comment to autogenerated model files. See [#10945](https://github.com/DataDog/integrations-core/pull/10945).
 
 ## 3.5.0 / 2021-10-04 / Agent 7.32.0
 
-* [Added] Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
-* [Added] Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
-* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
-* [Fixed] Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
+***Added***:
+
+* Sync configs with new option and bump base requirement. See [#10315](https://github.com/DataDog/integrations-core/pull/10315).
+* Update dependencies. See [#10258](https://github.com/DataDog/integrations-core/pull/10258).
+* Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
+
+***Fixed***:
+
+* Add server as generic tag. See [#10100](https://github.com/DataDog/integrations-core/pull/10100).
 
 ## 3.4.0 / 2021-09-02
 
-* [Added] Add new service check `oracle.can_query`. See [#10004](https://github.com/DataDog/integrations-core/pull/10004).
+***Added***:
+
+* Add new service check `oracle.can_query`. See [#10004](https://github.com/DataDog/integrations-core/pull/10004).
 
 ## 3.3.4 / 2021-08-04 / Agent 7.31.0
 
-* [Fixed] Create dns with instant client. See [#9712](https://github.com/DataDog/integrations-core/pull/9712).
+***Fixed***:
+
+* Create dns with instant client. See [#9712](https://github.com/DataDog/integrations-core/pull/9712).
 
 ## 3.3.3 / 2021-07-30
 
-* [Fixed] Explicitly close connection after query error. See [#9800](https://github.com/DataDog/integrations-core/pull/9800).
+***Fixed***:
+
+* Explicitly close connection after query error. See [#9800](https://github.com/DataDog/integrations-core/pull/9800).
 
 ## 3.3.2 / 2021-07-22 / Agent 7.30.0
 
-* [Fixed] Properly allow deprecated required config. See [#9750](https://github.com/DataDog/integrations-core/pull/9750).
-* [Fixed] Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
+***Fixed***:
+
+* Properly allow deprecated required config. See [#9750](https://github.com/DataDog/integrations-core/pull/9750).
+* Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
 
 ## 3.3.1 / 2021-07-12
 
-* [Fixed] Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
-* [Fixed] Dont use connection string for client. See [#9219](https://github.com/DataDog/integrations-core/pull/9219).
+***Fixed***:
+
+* Bump base package dependency. See [#9666](https://github.com/DataDog/integrations-core/pull/9666).
+* Dont use connection string for client. See [#9219](https://github.com/DataDog/integrations-core/pull/9219).
 
 ## 3.3.0 / 2021-04-19 / Agent 7.28.0
 
-* [Added] Add runtime configuration validation. See [#8966](https://github.com/DataDog/integrations-core/pull/8966).
+***Added***:
+
+* Add runtime configuration validation. See [#8966](https://github.com/DataDog/integrations-core/pull/8966).
 
 ## 3.2.0 / 2021-03-07 / Agent 7.27.0
 
-* [Added] Upgrade JPype1 to 1.2.1. See [#8479](https://github.com/DataDog/integrations-core/pull/8479).
-* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+***Added***:
+
+* Upgrade JPype1 to 1.2.1. See [#8479](https://github.com/DataDog/integrations-core/pull/8479).
+
+***Fixed***:
+
+* Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
 
 ## 3.1.1 / 2021-01-25 / Agent 7.26.0
 
-* [Fixed] Make more explicit which connection was established. See [#8416](https://github.com/DataDog/integrations-core/pull/8416).
-* [Fixed] Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
+***Fixed***:
+
+* Make more explicit which connection was established. See [#8416](https://github.com/DataDog/integrations-core/pull/8416).
+* Correct default template usage. See [#8233](https://github.com/DataDog/integrations-core/pull/8233).
 
 ## 3.1.0 / 2020-11-25 / Agent 7.25.0
 
-* [Added] Cache the client connection when there are no errors. See [#8083](https://github.com/DataDog/integrations-core/pull/8083).
-* [Fixed] Add config spec. See [#7988](https://github.com/DataDog/integrations-core/pull/7988).
+***Added***:
+
+* Cache the client connection when there are no errors. See [#8083](https://github.com/DataDog/integrations-core/pull/8083).
+
+***Fixed***:
+
+* Add config spec. See [#7988](https://github.com/DataDog/integrations-core/pull/7988).
 
 ## 3.0.0 / 2020-10-31 / Agent 7.24.0
 
-* [Changed] QueryManager - Prevent queries leaking between check instances. See [#7750](https://github.com/DataDog/integrations-core/pull/7750).
+***Changed***:
+
+* QueryManager - Prevent queries leaking between check instances. See [#7750](https://github.com/DataDog/integrations-core/pull/7750).
 
 ## 2.1.1 / 2020-09-21 / Agent 7.23.0
 
-* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
-* [Fixed] Bump jaydebeapi and jpype1. See [#6963](https://github.com/DataDog/integrations-core/pull/6963).
+***Fixed***:
+
+* Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+* Bump jaydebeapi and jpype1. See [#6963](https://github.com/DataDog/integrations-core/pull/6963).
 
 ## 2.1.0 / 2020-05-17 / Agent 7.20.0
 
-* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+***Added***:
+
+* Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 
 ## 2.0.1 / 2020-04-04 / Agent 7.19.0
 
-* [Fixed] Lazy import of JDBC libraries. See [#6118](https://github.com/DataDog/integrations-core/pull/6118).
+***Fixed***:
+
+* Lazy import of JDBC libraries. See [#6118](https://github.com/DataDog/integrations-core/pull/6118).
 
 ## 2.0.0 / 2020-02-22 / Agent 7.18.0
 
-* [Changed] Migrate to QueryManager. See [#5529](https://github.com/DataDog/integrations-core/pull/5529).
+***Changed***:
+
+* Migrate to QueryManager. See [#5529](https://github.com/DataDog/integrations-core/pull/5529).
 
 ## 1.12.0 / 2020-02-04
 
-* [Added] Add ability to only collect data defined in `custom_queries`. See [#5217](https://github.com/DataDog/integrations-core/pull/5217). Thanks [nowhammies](https://github.com/nowhammies).
+***Added***:
+
+* Add ability to only collect data defined in `custom_queries`. See [#5217](https://github.com/DataDog/integrations-core/pull/5217). Thanks [nowhammies](https://github.com/nowhammies).
 
 ## 1.11.0 / 2020-01-13 / Agent 7.17.0
 
-* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
-* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
-* [Fixed] Fix deprecated exception. See [#5182](https://github.com/DataDog/integrations-core/pull/5182).
+***Added***:
+
+* Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+***Fixed***:
+
+* Fix deprecated exception. See [#5182](https://github.com/DataDog/integrations-core/pull/5182).
 
 ## 1.10.1 / 2019-10-07 / Agent 6.15.0
 
-* [Fixed] Use fetchall instead of iterating cursor for custom queries. This fixes an issue with the JDBC driver. See [#4664](https://github.com/DataDog/integrations-core/pull/4664).
+***Fixed***:
+
+* Use fetchall instead of iterating cursor for custom queries. This fixes an issue with the JDBC driver. See [#4664](https://github.com/DataDog/integrations-core/pull/4664).
 
 ## 1.10.0 / 2019-08-24 / Agent 6.14.0
 
-* [Added] Upgrade JPype1 to 0.7.0. See [#4211](https://github.com/DataDog/integrations-core/pull/4211).
+***Added***:
+
+* Upgrade JPype1 to 0.7.0. See [#4211](https://github.com/DataDog/integrations-core/pull/4211).
 
 ## 1.9.0 / 2019-07-08 / Agent 6.13.0
 
-* [Added] Upgrade dependencies for Python 3.7 binary wheels. See [#4030](https://github.com/DataDog/integrations-core/pull/4030).
+***Added***:
+
+* Upgrade dependencies for Python 3.7 binary wheels. See [#4030](https://github.com/DataDog/integrations-core/pull/4030).
 
 ## 1.8.0 / 2019-06-01 / Agent 6.12.0
 
-* [Added] Support multiple results in custom queries. See [#3765](https://github.com/DataDog/integrations-core/pull/3765).
+***Added***:
+
+* Support multiple results in custom queries. See [#3765](https://github.com/DataDog/integrations-core/pull/3765).
 
 ## 1.7.0 / 2019-05-14
 
-* [Added] Turn an info log into debug. See [#3661](https://github.com/DataDog/integrations-core/pull/3661).
-* [Added] Adhere to code style. See [#3552](https://github.com/DataDog/integrations-core/pull/3552).
+***Added***:
+
+* Turn an info log into debug. See [#3661](https://github.com/DataDog/integrations-core/pull/3661).
+* Adhere to code style. See [#3552](https://github.com/DataDog/integrations-core/pull/3552).
 
 ## 1.6.0 / 2019-03-29 / Agent 6.11.0
 
-* [Added] Add custom_queries config globally. See [#3231](https://github.com/DataDog/integrations-core/pull/3231).
+***Added***:
+
+* Add custom_queries config globally. See [#3231](https://github.com/DataDog/integrations-core/pull/3231).
 
 ## 1.5.0 / 2019-02-18 / Agent 6.10.0
 
-* [Added] Support Python 3. See [#3037](https://github.com/DataDog/integrations-core/pull/3037).
-* [Fixed] Fix tablespace metrics. See [#2841](https://github.com/DataDog/integrations-core/pull/2841).
+***Added***:
+
+* Support Python 3. See [#3037](https://github.com/DataDog/integrations-core/pull/3037).
+
+***Fixed***:
+
+* Fix tablespace metrics. See [#2841](https://github.com/DataDog/integrations-core/pull/2841).
 
 ## 1.4.0 / 2018-09-04 / Agent 6.5.0
 
-* [Added] Add process metrics. See [#1856](https://github.com/DataDog/integrations-core/pull/1856).
-* [Fixed] Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
+***Added***:
+
+* Add process metrics. See [#1856](https://github.com/DataDog/integrations-core/pull/1856).
+
+***Fixed***:
+
+* Add data files to the wheel package. See [#1727](https://github.com/DataDog/integrations-core/pull/1727).
 
 ## 1.3.0 / 2018-06-07
 
-* [Added] Support custom queries. See [#1528](https://github.com/DataDog/integrations-core/pull/1528).
-* [Added] [oracle]  Add ability to use the JDBC Driver instead of cx_Oracle. See [#1459](https://github.com/DataDog/integrations-core/pull/1459).
-* [FEATURE] ability to use the JDBC Driver instead of `cx_Oracle` to connect to the database. See [#1459](https://github.com/DataDog/integrations-core/issues/1459)
+***Added***:
+
+* Support custom queries. See [#1528](https://github.com/DataDog/integrations-core/pull/1528).
+* Add ability to use the JDBC Driver instead of cx_Oracle. See [#1459](https://github.com/DataDog/integrations-core/pull/1459).
+* ability to use the JDBC Driver instead of `cx_Oracle` to connect to the database. See [#1459](https://github.com/DataDog/integrations-core/issues/1459)
 
 ## 1.2.0 / 2018-05-11
 
-* [FEATURE] adds metric `oracle.tablespace.offline`. See [#1402](https://github.com/DataDog/integrations-core/issues/1402)
-* [BUGFIX] fix for DB with offline tablespace. See #1402
+***Added***:
+
+* adds metric `oracle.tablespace.offline`. See [#1402](https://github.com/DataDog/integrations-core/issues/1402)
+
+***Fixed***:
+
+* fix for DB with offline tablespace. See #1402
 
 ## 1.1.0 / 2018-05-11
 
-* [FEATURE] adds custom tag support to service checks.
+***Added***:
+
+* adds custom tag support to service checks.
 
 ## 1.0.1 / 2018-05-11
 
@@ -197,9 +326,16 @@
 The metric `oracle.gc_cr_receive_time` has been renamed to `oracle.gc_cr_block_received`
 to address an erroneous metric name. Please update your dashboards and monitors.
 
-* [BUGFIX] fix metric name to: `gc_cr_block_received`. See #1179
+***Fixed***:
+
+* fix metric name to: `gc_cr_block_received`. See #1179
 
 ## 1.0.0 / 2017-10-10
 
-* [FEATURE] adds oracle integration. See [#680](https://github.com/DataDog/integrations-core/issues/680).
-* [BUGFIX] adds oracle integration. See [#690](https://github.com/DataDog/integrations-core/issues/690). (Thanks [@dwjvaughan](https://github.com/dwjvaughan))
+***Added***:
+
+* adds oracle integration. See [#680](https://github.com/DataDog/integrations-core/issues/680).
+
+***Fixed***:
+
+* adds oracle integration. See [#690](https://github.com/DataDog/integrations-core/issues/690). (Thanks [@dwjvaughan](https://github.com/dwjvaughan))

@@ -155,8 +155,9 @@ class SnowflakeCheck(AgentCheck):
 
             if cursor.rowcount is None or cursor.rowcount < 1:
                 self.log.debug("Failed to fetch records from query: `%s`", query)
-                return []
-            return cursor.fetchall()
+                return
+            # Iterating on the cursor provides one row at a time without loading all of them at once
+            yield from cursor
 
     def connect(self):
         self.log.debug(
@@ -209,8 +210,8 @@ class SnowflakeCheck(AgentCheck):
     @AgentCheck.metadata_entrypoint
     def _collect_version(self):
         try:
-            raw_version = self.execute_query_raw("select current_version();")
-            version = raw_version[0][0]
+            raw_version = next(self.execute_query_raw("select current_version();"))
+            version = raw_version[0]
         except Exception as e:
             self.log.error("Error collecting version for Snowflake: %s", e)
         else:
