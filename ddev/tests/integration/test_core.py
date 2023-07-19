@@ -4,6 +4,7 @@
 import os
 
 from ddev.repo.core import Repository
+from ddev.utils.fs import Path
 
 
 def test_attributes(local_repo, valid_integration):
@@ -200,9 +201,9 @@ class TestPackageFiles:
         for root, _, files in os.walk(integration.package_directory):
             for f in files:
                 if f.endswith(".py"):
-                    expected_files.append(os.path.join(root, f))
+                    expected_files.append(Path(root, f))
 
-        assert integration.package_files == expected_files
+        assert list(integration.package_files()) == expected_files
 
     def test_tile_only_package_file(self, local_repo):
         repo = Repository(local_repo.name, str(local_repo))
@@ -210,7 +211,7 @@ class TestPackageFiles:
 
         expected_files = []
 
-        assert integration.package_files == expected_files
+        assert list(integration.package_files()) == expected_files
 
 
 class TestReleaseTagPattern:

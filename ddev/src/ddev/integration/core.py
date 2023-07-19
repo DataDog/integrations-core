@@ -5,14 +5,14 @@ from __future__ import annotations
 
 import os
 from functools import cached_property
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterator
 
 from ddev.repo.constants import NOT_SHIPPABLE
+from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
     from ddev.integration.manifest import Manifest
     from ddev.repo.config import RepositoryConfig
-    from ddev.utils.fs import Path
 
 
 class Integration:
@@ -60,6 +60,12 @@ class Integration:
 
             return self.path / 'datadog_checks' / directory
 
+    def package_files(self) -> Iterator[Path]:
+        for root, _, files in os.walk(self.package_directory):
+            for f in files:
+                if f.endswith('.py'):
+                    yield Path(root, f)
+
     @property
     def release_tag_pattern(self) -> str:
         version_part = r'\d+\.\d+\.\d+'
@@ -80,13 +86,6 @@ class Integration:
             return name
         else:
             return self.manifest.get('/assets/integration/source_type_name', self.name)
-
-    @cached_property
-    def package_files(self) -> list:
-        for root, _, files in os.walk(self.package_directory):
-            for file in files:
-                if file.endswith(".py"):
-                    yield os.path.join(root, file)
 
     @cached_property
     def is_valid(self) -> bool:
