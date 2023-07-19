@@ -433,7 +433,7 @@ def licenses(ctx, sync):
 
     agent_requirements_file = get_agent_requirements()
     if not file_exists(agent_requirements_file):
-        abort('Out of sync, run again with the --sync flag')
+        abort("Out of sync, run 'ddev validate licenses --sync'")
 
     packages = defaultdict(set)
     for i, line in enumerate(read_file_lines(agent_requirements_file)):

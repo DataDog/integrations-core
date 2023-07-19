@@ -126,7 +126,7 @@ Additional helpful documentation, links, and articles:
 - [Use HiveMQ and OpenTelemetry to monitor IoT applications in Datadog][12]
 
 [1]: https://www.hivemq.com/hivemq/
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/hivemq/datadog_checks/hivemq/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/integrations/java
 [5]: https://docs.datadoghq.com/help

@@ -56,8 +56,6 @@ class TestDockerRun:
         ],
     )
     def test_retry_on_failed_conditions(self, attempts, expected_call_count):
-        compose_file = os.path.join(DOCKER_DIR, "test_default.yaml")
-
         condition = mock.MagicMock()
         condition.side_effect = Exception("exception")
 
@@ -69,16 +67,19 @@ class TestDockerRun:
                 expected_exception = Exception
 
         with pytest.raises(expected_exception):
-            with docker_run(compose_file, attempts=attempts, conditions=[condition]):
+            with docker_run(
+                up=mock.MagicMock(), down=mock.MagicMock(), attempts=attempts, conditions=[condition], attempts_wait=0
+            ):
                 pass
 
         assert condition.call_count == expected_call_count
 
     def test_retry_condition_failed_only_on_first_run(self):
-        compose_file = os.path.join(DOCKER_DIR, "test_default.yaml")
+        up = mock.MagicMock()
+        up.return_value = ""
 
         condition = mock.MagicMock()
         condition.side_effect = [Exception("exception"), None, None]
 
-        with docker_run(compose_file, attempts=3, conditions=[condition]):
+        with docker_run(up=up, down=mock.MagicMock(), attempts=3, conditions=[condition], attempts_wait=0):
             assert condition.call_count == 2
