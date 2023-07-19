@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "**DCGM Exporter**\n\nThe DCGM exporter is a tool that uses Go-based APIs to connect with Nvidia DCGM and exposes GPU telemetry in containerized environments. This dashboard gives you insights into your GPU metrics by service and host. \n\n\n**Useful Links**\n\n* [Blog Post](https://www.datadoghq.com/blog/monitor-nvidia-gpus-with-datadog/)\n* [List of GPUs supported](https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/getting-started.html)\n",
+    "description": "**DCGM Exporter**\n\nThe DCGM exporter is a tool to connect with Nvidia DCGM and exposes GPU telemetry in containerized environments. This dashboard gives you GPU metrics so you can monitor your GPU's health and performance effectively. \n\n\n**Useful Links**\n\n* [Blog Post](https://www.datadoghq.com/blog/monitor-nvidia-gpus-with-datadog/)\n* [List of GPUs supported](https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/getting-started.html)\n",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -29,7 +29,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**DCGM Exporter**\n\nThe DCGM exporter is a tool to connect with Nvidia DCGM and exposes GPU telemetry in containerized environments. This dashboard gives you GPU metrics by service and host. ",
+                            "content": "**DCGM Exporter**\n\nThe DCGM exporter is a tool to connect with Nvidia DCGM and exposes GPU telemetry in containerized environments. This dashboard gives you GPU metrics so you can monitor your GPU's health and performance effectively. ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -318,27 +318,6 @@
                                             "style": {
                                                 "palette": "purple"
                                             }
-                                        },
-                                        {
-                                            "alias": "(Extra) Shutdown Temp",
-                                            "formula": "query1 - 10",
-                                            "style": {
-                                                "palette": "purple"
-                                            }
-                                        },
-                                        {
-                                            "alias": "(Extra) Slowdown Temp",
-                                            "formula": "query1 - 5",
-                                            "style": {
-                                                "palette": "purple"
-                                            }
-                                        },
-                                        {
-                                            "alias": "(Extra) Memory Temp",
-                                            "formula": "query1 + 10",
-                                            "style": {
-                                                "palette": "purple"
-                                            }
                                         }
                                     ],
                                     "queries": [
@@ -357,6 +336,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "GPU Temperature",
                             "title_align": "left",
                             "title_size": "16",
