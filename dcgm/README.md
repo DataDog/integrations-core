@@ -4,11 +4,17 @@
 
 This check submits metrics exposed by the [Nvidia DCGM][15] [Exporter][16] in Datadog Agent format.
 
+**Note**: This check requires Agent v7.47.0 or later.
+
 ## Setup
 
 ### Installation
 
-The DCGM check is included in the [Datadog Agent][1] package. However, you need to spin up the DCGM Exporter container to expose the GPU metrics in order for the Agent to collect this data.
+<div class="alert alert-warning">
+The Nvidia DCGM GPU monitoring check will be included in the [Datadog Agent][1] package starting version 7.47 and later. If you would like to install it beforehand on an Agent 7.46, you can do so using the [Intergration][17] command to install datadog-dcgm==1.0.0. 
+</div>
+
+For the collection of this data by the agent, the DCGM Exporter containers needs to be up and exposing GPU metrics.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host | Docker" xxx -->
@@ -260,3 +266,4 @@ Additional helpful documentation, links, and articles:
 [14]: https://github.com/NVIDIA/dcgm-exporter/issues/163#issuecomment-1577506512
 [15]: https://developer.nvidia.com/dcgm
 [16]: https://github.com/NVIDIA/dcgm-exporter
+[17]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux
