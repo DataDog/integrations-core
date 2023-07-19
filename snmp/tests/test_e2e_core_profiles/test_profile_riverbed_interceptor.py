@@ -28,9 +28,10 @@ def test_e2e_profile_riverbed_interceptor(dd_agent_check):
         'snmp_host:riverbed-interceptor.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+    ] + [
         'reverbed_interceptor_model:kept zombies Jaded but driving their but',
         'reverbed_interceptor_serial_number:but zombies quaintly acted but',
-    ] + []
+    ]
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -39,6 +40,48 @@ def test_e2e_profile_riverbed_interceptor(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
+    # aggregator.assert_metric(
+    #     'snmp.reverbed.interceptor.serviceStatus', metric_type=aggregator.GAUGE, tags=common_tags
+    # )
+    tag_rows = [
+        [
+            'reverbed_interceptor_proc_name:but acted Jaded but zombies their but',
+            'reverbed_interceptor_proc_status:acted kept their Jaded Jaded driving Jaded acted',
+        ],
+        [
+            'reverbed_interceptor_proc_name:forward zombies',
+            'reverbed_interceptor_proc_status:their driving oxen acted oxen but acted',
+        ],
+        [
+            'reverbed_interceptor_proc_name:oxen their oxen acted quaintly their oxen',
+            'reverbed_interceptor_proc_status:driving quaintly zombies but',
+        ],
+        [
+            'reverbed_interceptor_proc_name:quaintly quaintly acted kept',
+            'reverbed_interceptor_proc_status:acted driving acted Jaded oxen',
+        ],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric(
+            'snmp.reverbed.interceptor.proc', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+
+    tag_rows = [
+        ['reverbed_interceptor_neighbor_name:acted zombies their quaintly Jaded forward'],
+        ['reverbed_interceptor_neighbor_name:driving'],
+        ['reverbed_interceptor_neighbor_name:forward acted quaintly but oxen oxen their acted Jaded'],
+        ['reverbed_interceptor_neighbor_name:oxen acted but'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric(
+            'snmp.reverbed.interceptor.neighborConnectionCount',
+            metric_type=aggregator.GAUGE,
+            tags=common_tags + tag_row,
+        )
+
     aggregator.assert_metric('snmp.ifBandwidthInUsage.rate')
     aggregator.assert_metric('snmp.ifBandwidthOutUsage.rate')
     aggregator.assert_metric('snmp.ifHCInBroadcastPkts')
@@ -54,8 +97,6 @@ def test_e2e_profile_riverbed_interceptor(dd_agent_check):
     aggregator.assert_metric('snmp.ifHighSpeed')
     aggregator.assert_metric('snmp.ifInSpeed')
     aggregator.assert_metric('snmp.ifOutSpeed')
-    aggregator.assert_metric('snmp.reverbed.interceptor.proc')
-    aggregator.assert_metric('snmp.reverbed.interceptor.neighborConnectionCount')
 
     # --- TEST METADATA ---
     device = {
