@@ -89,7 +89,7 @@
                     {
                         "definition": {
                             "background_color": "green",
-                            "content": "This section provides you with key system information. There are DCGM alerts on the most important metrics. The service check speaks to the health of your DCGM environment, the license status tells you what [kind](https://docs.nvidia.com/grid/13.0/grid-licensing-user-guide/index.html#:~:text=This%20example%20shows%20how%20to%20configure%20a%20licensed%20Linux%20client%20for%20NVIDIA%20Virtual%20Compute%20Server.) of licensed Linux client you are leveraging. ",
+                            "content": "This section provides you with key system information. There are DCGM alerts on the most important metrics. The service check speaks to the health of your DCGM environment, and the license status tells you what [kind](https://docs.nvidia.com/grid/13.0/grid-licensing-user-guide/index.html#:~:text=This%20example%20shows%20how%20to%20configure%20a%20licensed%20Linux%20client%20for%20NVIDIA%20Virtual%20Compute%20Server.) of licensed Linux client you are leveraging. ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
