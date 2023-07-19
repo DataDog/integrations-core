@@ -246,33 +246,31 @@ class PostgresStatementMetrics(DBMAsyncJob):
             if self._check.pg_settings.get("track_io_timing") != "on":
                 desired_columns -= PG_STAT_STATEMENTS_TIMING_COLUMNS
 
-            # TODO: make this work again with upgraded psycopg
-            # this is just for monitoring & isn't important for the actual functionality in the check
-            # pg_stat_statements_max = int(self._check.pg_settings.get("pg_stat_statements.max"))
-            # if pg_stat_statements_max > self._pg_stat_statements_max_warning_threshold:
-            #     self._check.record_warning(
-            #         DatabaseConfigurationError.high_pg_stat_statements_max,
-            #         warning_with_tags(
-            #             "pg_stat_statements.max is set to %d which is higher than the supported "
-            #             "value of %d. This can have a negative impact on database and collection of "
-            #             "query metrics performance. Consider lowering the pg_stat_statements.max value to %d. "
-            #             "Alternatively, you may acknowledge the potential performance impact by increasing the "
-            #             "query_metrics.pg_stat_statements_max_warning_threshold to equal or greater than %d to "
-            #             "silence this warning. "
-            #             "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
-            #             "troubleshooting#%s for more details",
-            #             pg_stat_statements_max,
-            #             self._pg_stat_statements_max_warning_threshold,
-            #             self._pg_stat_statements_max_warning_threshold,
-            #             self._pg_stat_statements_max_warning_threshold,
-            #             DatabaseConfigurationError.high_pg_stat_statements_max.value,
-            #             host=self._check.resolved_hostname,
-            #             dbname=self._config.dbname,
-            #             code=DatabaseConfigurationError.high_pg_stat_statements_max.value,
-            #             value=pg_stat_statements_max,
-            #             threshold=self._pg_stat_statements_max_warning_threshold,
-            #         ),
-            #     )
+            pg_stat_statements_max = int(self._check.pg_settings.get("pg_stat_statements.max"))
+            if pg_stat_statements_max > self._pg_stat_statements_max_warning_threshold:
+                self._check.record_warning(
+                    DatabaseConfigurationError.high_pg_stat_statements_max,
+                    warning_with_tags(
+                        "pg_stat_statements.max is set to %d which is higher than the supported "
+                        "value of %d. This can have a negative impact on database and collection of "
+                        "query metrics performance. Consider lowering the pg_stat_statements.max value to %d. "
+                        "Alternatively, you may acknowledge the potential performance impact by increasing the "
+                        "query_metrics.pg_stat_statements_max_warning_threshold to equal or greater than %d to "
+                        "silence this warning. "
+                        "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                        "troubleshooting#%s for more details",
+                        pg_stat_statements_max,
+                        self._pg_stat_statements_max_warning_threshold,
+                        self._pg_stat_statements_max_warning_threshold,
+                        self._pg_stat_statements_max_warning_threshold,
+                        DatabaseConfigurationError.high_pg_stat_statements_max.value,
+                        host=self._check.resolved_hostname,
+                        dbname=self._config.dbname,
+                        code=DatabaseConfigurationError.high_pg_stat_statements_max.value,
+                        value=pg_stat_statements_max,
+                        threshold=self._pg_stat_statements_max_warning_threshold,
+                    ),
+                )
 
             query_columns = sorted(available_columns & desired_columns)
             params = ()

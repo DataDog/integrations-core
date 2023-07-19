@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
 
-import psycopg2
+import psycopg
 import pytest
 
 from .common import POSTGRES_VERSION
@@ -27,7 +27,7 @@ requires_over_14 = pytest.mark.skipif(
 
 
 def _get_conn(db_instance, dbname=None, user=None, password=None, application_name='test'):
-    conn = psycopg2.connect(
+    conn = psycopg.connect(
         host=db_instance['host'],
         port=db_instance['port'],
         dbname=dbname or db_instance['dbname'],

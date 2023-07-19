@@ -4,7 +4,7 @@
 import copy
 
 import mock
-import psycopg2
+import psycopg
 import pytest
 from mock import MagicMock
 from pytest import fail
@@ -124,7 +124,7 @@ def test_malformed_get_custom_queries(check):
     # Make sure we gracefully handle an error while performing custom queries
     malformed_custom_query_column = {}
     malformed_custom_query['columns'] = [malformed_custom_query_column]
-    db.cursor().__enter__().execute.side_effect = psycopg2.ProgrammingError('FOO')
+    db.cursor().__enter__().execute.side_effect = psycopg.ProgrammingError('FOO')
     check._collect_custom_queries([])
     check.log.error.assert_called_once_with(
         "Error executing query for metric_prefix %s: %s", malformed_custom_query['metric_prefix'], 'FOO'
@@ -294,9 +294,9 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
     check = integration_check(pg_instance)
     try:
         check.db_pool.get_connection(pg_instance['dbname'], 100)
-    except psycopg2.ProgrammingError as e:
+    except psycopg.ProgrammingError as e:
         fail(str(e))
-    except psycopg2.OperationalError:
+    except psycopg.OperationalError:
         # could not connect to server because there is no server running
         pass
 

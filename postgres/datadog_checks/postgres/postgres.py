@@ -6,8 +6,8 @@ import os
 from time import time
 
 import psycopg
+from psycopg import ClientCursor
 from psycopg.rows import dict_row
-from psycopg_pool import ConnectionPool
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
@@ -90,7 +90,7 @@ class PostgreSql(AgentCheck):
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
-        self.db_pool = MultiDatabaseConnectionPool(self._new_connection, self._config.max_connections)
+        self.db_pool = MultiDatabaseConnectionPool(self, self._new_connection, self._config.max_connections)
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
         self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
@@ -586,7 +586,7 @@ class PostgreSql(AgentCheck):
             )
             if self._config.query_timeout:
                 connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
-            conn = psycopg.connect(conninfo=connection_string, autocommit=True)
+            conn = psycopg.connect(conninfo=connection_string, autocommit=True, cursor_factory=ClientCursor)
         else:
             password = self._config.password
             region = self._config.cloud_metadata.get('aws', {}).get('region', None)
@@ -618,7 +618,7 @@ class PostgreSql(AgentCheck):
                 args['sslkey'] = self._config.ssl_key
             if self._config.ssl_password:
                 args['sslpassword'] = self._config.ssl_password
-            conn = psycopg.connect(**args, autocommit=True)
+            conn = psycopg.connect(**args, autocommit=True, cursor_factory=ClientCursor)
         return conn
 
     def _connect(self):
@@ -646,7 +646,8 @@ class PostgreSql(AgentCheck):
                 rows = cursor.fetchall()
                 self.pg_settings.clear()
                 for setting in rows:
-                    name, val = setting
+                    name = setting['name']
+                    val = setting['setting']
                     self.pg_settings[name] = val
         except (psycopg.DatabaseError, psycopg.OperationalError) as err:
             self.log.warning("Failed to query for pg_settings: %s", repr(err))

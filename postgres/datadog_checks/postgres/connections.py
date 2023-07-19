@@ -9,6 +9,7 @@ import time
 from typing import Callable, Dict
 
 import psycopg
+from datadog_checks.base import AgentCheck
 
 
 class ConnectionPoolFullError(Exception):
@@ -66,7 +67,8 @@ class MultiDatabaseConnectionPool(object):
         def reset(self):
             self.__init__()
 
-    def __init__(self, connect_fn: Callable[[str], None], max_conns: int = None):
+    def __init__(self, check: AgentCheck, connect_fn: Callable[[str], None], max_conns: int = None):
+        self.log = check.log
         self.max_conns: int = max_conns
         self._stats = self.Stats()
         self._mu = threading.RLock()
@@ -100,6 +102,9 @@ class MultiDatabaseConnectionPool(object):
             conn = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None, None))
             db = conn.connection
             if db is None or db.closed:
+                self.log.warning("opening a new connection for dbname {}".format(dbname))
+                self.log.warning("max conns is {}".format(self.max_conns))
+                self.log.warning("conns in use {}".format(len([c for c in self._conns.values() if c.active == True])))
                 if self.max_conns is not None:
                     # try to free space until we succeed
                     while len(self._conns) >= self.max_conns:
@@ -167,6 +172,7 @@ class MultiDatabaseConnectionPool(object):
             now = datetime.datetime.now()
             for dbname, conn in list(self._conns.items()):
                 if conn.deadline < now:
+                    self.log.warning("pruned old connection! {}".format(conn))
                     self._stats.connection_pruned += 1
                     self._terminate_connection_unsafe(dbname)
 
@@ -188,6 +194,7 @@ class MultiDatabaseConnectionPool(object):
             sorted_conns = sorted(self._conns.items(), key=lambda i: i[1].last_accessed)
             for name, conn_info in sorted_conns:
                 if not conn_info.active and not conn_info.persistent:
+                    self.log.warning("terming conn {} bc it is inactive {} and LRU".format(name, conn_info.active))
                     self._terminate_connection_unsafe(name)
                     return name
 

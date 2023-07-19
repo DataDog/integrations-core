@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import psycopg2
+import psycopg
 import pytest
 
 from .common import DB_NAME, HOST, assert_metric_at_least
@@ -14,7 +14,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 def test_physical_replication_slots(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     redo_lsn_age = 0
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute("select pg_wal_lsn_diff(pg_current_wal_lsn(), redo_lsn) from pg_control_checkpoint();")
             redo_lsn_age = int(cur.fetchall()[0][0])
@@ -84,7 +84,7 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
 @requires_over_10
 def test_logical_replication_slots(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn) FROM pg_replication_slots;")
             restart_age = cur.fetchall()[0][0]

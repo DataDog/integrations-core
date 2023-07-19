@@ -49,9 +49,9 @@ EXPLICIT_LICENSES = {
     'paramiko': ['LGPL-2.1-only'],
     # https://github.com/oracle/python-oracledb/blob/main/LICENSE.txt
     'oracledb': ['Apache-2.0'],
-    # https://github.com/psycopg/psycopg2/blob/master/LICENSE
-    # https://github.com/psycopg/psycopg2/blob/master/doc/COPYING.LESSER
-    'psycopg2-binary': ['LGPL-3.0-only', 'BSD-3-Clause'],
+    # https://github.com/psycopg/psycopg/blob/master/LICENSE.txt
+    # https://github.com/psycopg/psycopg/blob/master/doc/COPYING.LESSER
+    'psycopg-binary': ['LGPL-3.0-only', 'BSD-3-Clause'],
     # https://github.com/Legrandin/pycryptodome/blob/master/LICENSE.rst
     'pycryptodomex': ['Unlicense', 'BSD-2-Clause'],
     # https://github.com/requests/requests-kerberos/pull/123
@@ -157,7 +157,7 @@ PACKAGE_REPO_OVERRIDES = {
     'packaging': 'https://github.com/pypa/packaging',
     'paramiko': 'https://github.com/paramiko/paramiko',
     'protobuf': 'https://github.com/protocolbuffers/protobuf',
-    'psycopg2-binary': 'https://github.com/psycopg/psycopg2',
+    'psycopg': 'https://github.com/psycopg/psycopg',
     'pycryptodomex': 'https://github.com/Legrandin/pycryptodome',
     'redis': 'https://github.com/redis/redis-py',
     'requests': 'https://github.com/psf/requests',
