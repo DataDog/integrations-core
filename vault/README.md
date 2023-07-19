@@ -219,7 +219,7 @@ Additional helpful documentation, links, and articles:
 - [How to monitor HashiCorp Vault with Datadog][20]
 
 [1]: https://www.vaultproject.io
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://www.vaultproject.io/docs/configuration/telemetry#prometheus
 [4]: https://www.vaultproject.io/docs/configuration/listener/tcp#unauthenticated_metrics_access
 [5]: https://www.vaultproject.io/docs/auth

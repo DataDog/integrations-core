@@ -288,7 +288,6 @@ def test_conn_pool_context_managed(pg_instance):
     pool = MultiDatabaseConnectionPool(check._new_connection, limit)
     threadpool = []
     for i in range(limit):
-        print(i)
         thread = threading.Thread(target=pretend_to_run_query, args=(pool, 'dogs_{}'.format(i)))
         threadpool.append(thread)
         thread.start()

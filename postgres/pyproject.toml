@@ -30,20 +30,22 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=32.1.0",
+    "datadog-checks-base>=32.5.0",
 ]
 dynamic = [
     "version",
 ]
-
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "boto3==1.26.138; python_version > '3.0'",
-    "cachetools==5.3.0; python_version > '3.0'",
+    "boto3==1.17.112; python_version < '3.0'",
+    "boto3==1.27.0; python_version > '3.0'",
+    "cachetools==3.1.1; python_version < '3.0'",
+    "cachetools==5.3.1; python_version > '3.0'",
     "psycopg2-binary==2.8.6; sys_platform != 'darwin' or platform_machine != 'arm64'",
-    "semver==2.13.0",
+    "semver==2.13.0; python_version < '3.0'",
+    "semver==3.0.1; python_version > '3.0'",
 ]
 
 [project.urls]

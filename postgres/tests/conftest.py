@@ -114,7 +114,7 @@ def mock_cursor_for_replica_stats():
         data = deque()
         connect.return_value = mock.MagicMock(cursor=mock.MagicMock(return_value=cursor))
 
-        def cursor_execute(query):
+        def cursor_execute(query, second_arg=""):
             if "FROM pg_stat_replication" in query:
                 data.appendleft(['app1', 'streaming', 'async', '1.1.1.1', 12, 12, 12, 12])
                 data.appendleft(['app2', 'backup', 'sync', '1.1.1.1', 13, 13, 13, 13])
@@ -128,8 +128,8 @@ def mock_cursor_for_replica_stats():
         def cursor_fetchone():
             return data.pop()
 
-        cursor.execute = cursor_execute
-        cursor.fetchall = cursor_fetchall
-        cursor.fetchone = cursor_fetchone
+        cursor.__enter__().execute = cursor_execute
+        cursor.__enter__().fetchall = cursor_fetchall
+        cursor.__enter__().fetchone = cursor_fetchone
 
         yield

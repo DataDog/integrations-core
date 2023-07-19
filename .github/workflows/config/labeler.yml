@@ -125,6 +125,8 @@ integration/datadog_cluster_agent:
 - datadog_cluster_agent/**/*
 integration/datadog_operator:
 - datadog_operator/**/*
+integration/dcgm:
+- dcgm/**/*
 integration/directory:
 - directory/**/*
 integration/disk:
@@ -447,6 +449,8 @@ integration/voltdb:
 - voltdb/**/*
 integration/vsphere:
 - vsphere/**/*
+integration/weaviate:
+- weaviate/**/*
 integration/weblogic:
 - weblogic/**/*
 integration/win32_event_log:

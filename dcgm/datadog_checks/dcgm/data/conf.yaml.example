@@ -1,0 +1,620 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param proxy - mapping - optional
+    ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
+    ## to specify hosts that must bypass proxies.
+    ##
+    ## The SOCKS protocol is also supported like so:
+    ##
+    ##   socks5://user:pass@host:port
+    ##
+    ## Using the scheme `socks5` causes the DNS resolution to happen on the
+    ## client, rather than on the proxy server. This is in line with `curl`,
+    ## which uses the scheme to decide whether to do the DNS resolution on
+    ## the client or proxy. If you want to resolve the domains on the proxy
+    ## server, use `socks5h` as the scheme.
+    #
+    # proxy:
+    #   http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
+    #   https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
+    #   no_proxy:
+    #   - <HOSTNAME_1>
+    #   - <HOSTNAME_2>
+
+    ## @param skip_proxy - boolean - optional - default: false
+    ## If set to `true`, this makes the check bypass any proxy
+    ## settings enabled and attempt to reach services directly.
+    #
+    # skip_proxy: false
+
+    ## @param timeout - number - optional - default: 10
+    ## The timeout for connecting to services.
+    #
+    # timeout: 10
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independently of the others.
+#
+instances:
+
+    ## @param openmetrics_endpoint - string - required
+    ## Set this to the port of the dcgm-exporter exposing the metrics in the OpenMetrics format.
+    #
+  - openmetrics_endpoint: http://localhost:9400/metrics
+
+    ## @param raw_metric_prefix - string - optional
+    ## A prefix that is removed from all exposed metric names, if present.
+    ## All configuration options will use the prefix-less name.
+    #
+    # raw_metric_prefix: <PREFIX>_
+
+    ## @param extra_metrics - (list of string or mapping) - optional
+    ## This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
+    ## what the check collects by default. If the check already collects a metric, then
+    ## metric definitions here take precedence. Metrics may be defined in 3 ways:
+    ##
+    ## 1. If the item is a string, then it represents the exposed metric name, and
+    ##    the sent metric name will be identical. For example:
+    ##
+    ##      extra_metrics:
+    ##      - <METRIC_1>
+    ##      - <METRIC_2>
+    ## 2. If the item is a mapping, then the keys represent the exposed metric names.
+    ##
+    ##      a. If a value is a string, then it represents the sent metric name. For example:
+    ##
+    ##           extra_metrics:
+    ##           - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
+    ##           - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
+    ##      b. If a value is a mapping, then it must have a `name` and/or `type` key.
+    ##         The `name` represents the sent metric name, and the `type` represents how
+    ##         the metric should be handled, overriding any type information the endpoint
+    ##         may provide. For example:
+    ##
+    ##           extra_metrics:
+    ##           - <EXPOSED_METRIC_1>:
+    ##               name: <SENT_METRIC_1>
+    ##               type: <METRIC_TYPE_1>
+    ##           - <EXPOSED_METRIC_2>:
+    ##               name: <SENT_METRIC_2>
+    ##               type: <METRIC_TYPE_2>
+    ##
+    ##         The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
+    ##
+    ## Note: To collect counter metrics with names ending in `_total`, specify the metric name without the `_total`
+    ## suffix. For example, to collect the counter metric `promhttp_metric_handler_requests_total`, specify
+    ## `promhttp_metric_handler_requests`. This submits to Datadog the metric name appended with `.count`.
+    ## For more information, see:
+    ## https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
+    ##
+    ## Regular expressions may be used to match the exposed metric names, for example:
+    ##
+    ##   extra_metrics:
+    ##   - ^network_(ingress|egress)_.+
+    ##   - .+:
+    ##       type: gauge
+    #
+    # extra_metrics: []
+
+    ## @param exclude_metrics - list of strings - optional
+    ## A list of metrics to exclude, with each entry being either
+    ## the exact metric name or a regular expression.
+    ## In order to exclude all metrics but the ones matching a specific filter,
+    ## you can use a negative lookahead regex like:
+    ##   - ^(?!foo).*$
+    #
+    # exclude_metrics: []
+
+    ## @param exclude_metrics_by_labels - mapping - optional
+    ## A mapping of labels to exclude metrics with matching label name and their corresponding metric values. To match
+    ## all values of a label, set it to `true`.
+    ##
+    ## Note: Label filtering happens before `rename_labels`.
+    ##
+    ## For example, the following configuration instructs the check to exclude all metrics with
+    ## a label `worker` or a label `pid` with the value of either `23` or `42`.
+    ##
+    ##   exclude_metrics_by_labels:
+    ##     worker: true
+    ##     pid:
+    ##     - '23'
+    ##     - '42'
+    #
+    # exclude_metrics_by_labels: {}
+
+    ## @param exclude_labels - list of strings - optional
+    ## A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
+    ## May be used in conjunction with `include_labels`.
+    ## Labels defined in `exclude_labels` will take precedence in case of overlap.
+    ##
+    ## Note: Label filtering happens before `rename_labels`.
+    #
+    # exclude_labels: []
+
+    ## @param include_labels - list of strings - optional
+    ## A list of labels to include. May be used in conjunction with `exclude_labels`.
+    ## Labels defined in `exclude_labels` will take precedence in case of overlap.
+    ##
+    ## Note: Label filtering happens before `rename_labels`.
+    #
+    # include_labels: []
+
+    ## @param rename_labels - mapping - optional
+    ## A mapping of label names to their new names.
+    #
+    # rename_labels:
+    #   <LABEL_NAME_1>: <NEW_LABEL_NAME_1>
+    #   <LABEL_NAME_2>: <NEW_LABEL_NAME_2>
+
+    ## @param enable_health_service_check - boolean - optional - default: true
+    ## Whether or not to send a service check named `<NAMESPACE>.openmetrics.health` which reports
+    ## the health of the `openmetrics_endpoint`.
+    #
+    # enable_health_service_check: true
+
+    ## @param ignore_connection_errors - boolean - optional - default: false
+    ## Whether or not to ignore connection errors when scraping `openmetrics_endpoint`.
+    #
+    # ignore_connection_errors: false
+
+    ## @param hostname_label - string - optional
+    ## Override the hostname for every metric submission with the value of one of its labels.
+    #
+    # hostname_label: <HOSTNAME_LABEL>
+
+    ## @param hostname_format - string - optional
+    ## When `hostname_label` is set, this instructs the check how to format the values. The string
+    ## `<HOSTNAME>` is replaced by the value of the label defined by `hostname_label`.
+    #
+    # hostname_format: <HOSTNAME>
+
+    ## @param collect_histogram_buckets - boolean - optional - default: true
+    ## Whether or not to send histogram buckets.
+    #
+    # collect_histogram_buckets: true
+
+    ## @param non_cumulative_histogram_buckets - boolean - optional - default: false
+    ## Whether or not histogram buckets are non-cumulative and to come with a `lower_bound` tag.
+    #
+    # non_cumulative_histogram_buckets: false
+
+    ## @param histogram_buckets_as_distributions - boolean - optional - default: false
+    ## Whether or not to send histogram buckets as Datadog distribution metrics. This implicitly
+    ## enables the `collect_histogram_buckets` and `non_cumulative_histogram_buckets` options.
+    ##
+    ## Learn more about distribution metrics:
+    ## https://docs.datadoghq.com/developers/metrics/types/?tab=distribution#metric-types
+    #
+    # histogram_buckets_as_distributions: false
+
+    ## @param collect_counters_with_distributions - boolean - optional - default: false
+    ## Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
+    ## when sending histogram buckets as Datadog distribution metrics. This implicitly enables the
+    ## `histogram_buckets_as_distributions` option.
+    #
+    # collect_counters_with_distributions: false
+
+    ## @param use_process_start_time - boolean - optional - default: false
+    ## Whether to enable a heuristic for reporting counter values on the first scrape. When true,
+    ## the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
+    ## initial value can be assumed for counters. This requires keeping metrics in memory until the entire
+    ## response is received.
+    #
+    # use_process_start_time: false
+
+    ## @param share_labels - mapping - optional
+    ## This mapping allows for the sharing of labels across multiple metrics. The keys represent the
+    ## exposed metrics from which to share labels, and the values are mappings that configure the
+    ## sharing behavior. Each mapping must have at least one of the following keys:
+    ##
+    ##   labels - This is a list of labels to share. All labels are shared if this is not set.
+    ##   match - This is a list of labels to match on other metrics as a condition for sharing.
+    ##   values - This is a list of allowed values as a condition for sharing.
+    ##
+    ## To unconditionally share all labels of a metric, set it to `true`.
+    ##
+    ## For example, the following configuration instructs the check to apply all labels from `metric_a`
+    ## to all other metrics, the `node` label from `metric_b` to only those metrics that have a `pod`
+    ## label value that matches the `pod` label value of `metric_b`, and all labels from `metric_c`
+    ## to all other metrics if their value is equal to `23` or `42`.
+    ##
+    ##   share_labels:
+    ##     metric_a: true
+    ##     metric_b:
+    ##       labels:
+    ##       - node
+    ##       match:
+    ##       - pod
+    ##     metric_c:
+    ##       values:
+    ##       - 23
+    ##       - 42
+    #
+    # share_labels: {}
+
+    ## @param cache_shared_labels - boolean - optional - default: true
+    ## When `share_labels` is set, it instructs the check to cache labels collected from the first payload
+    ## for improved performance.
+    ##
+    ## Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
+    #
+    # cache_shared_labels: true
+
+    ## @param raw_line_filters - list of strings - optional
+    ## A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`
+    ## from being parsed.
+    #
+    # raw_line_filters: []
+
+    ## @param cache_metric_wildcards - boolean - optional - default: true
+    ## Whether or not to cache data from metrics that are defined by regular expressions rather
+    ## than the full metric name.
+    #
+    # cache_metric_wildcards: true
+
+    ## @param telemetry - boolean - optional - default: false
+    ## Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.
+    #
+    # telemetry: false
+
+    ## @param ignore_tags - list of strings - optional
+    ## A list of regular expressions used to ignore tags added by Autodiscovery and entries in the `tags` option.
+    #
+    # ignore_tags:
+    #   - <FULL:TAG>
+    #   - <TAG_PREFIX:.*>
+    #   - <TAG_SUFFIX$>
+
+    ## @param proxy - mapping - optional
+    ## This overrides the `proxy` setting in `init_config`.
+    ##
+    ## Set HTTP or HTTPS proxies for this instance. Use the `no_proxy` list
+    ## to specify hosts that must bypass proxies.
+    ##
+    ## The SOCKS protocol is also supported, for example:
+    ##
+    ##   socks5://user:pass@host:port
+    ##
+    ## Using the scheme `socks5` causes the DNS resolution to happen on the
+    ## client, rather than on the proxy server. This is in line with `curl`,
+    ## which uses the scheme to decide whether to do the DNS resolution on
+    ## the client or proxy. If you want to resolve the domains on the proxy
+    ## server, use `socks5h` as the scheme.
+    #
+    # proxy:
+    #   http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
+    #   https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
+    #   no_proxy:
+    #   - <HOSTNAME_1>
+    #   - <HOSTNAME_2>
+
+    ## @param skip_proxy - boolean - optional - default: false
+    ## This overrides the `skip_proxy` setting in `init_config`.
+    ##
+    ## If set to `true`, this makes the check bypass any proxy
+    ## settings enabled and attempt to reach services directly.
+    #
+    # skip_proxy: false
+
+    ## @param auth_type - string - optional - default: basic
+    ## The type of authentication to use. The available types (and related options) are:
+    ##
+    ##   - basic
+    ##     |__ username
+    ##     |__ password
+    ##     |__ use_legacy_auth_encoding
+    ##   - digest
+    ##     |__ username
+    ##     |__ password
+    ##   - ntlm
+    ##     |__ ntlm_domain
+    ##     |__ password
+    ##   - kerberos
+    ##     |__ kerberos_auth
+    ##     |__ kerberos_cache
+    ##     |__ kerberos_delegate
+    ##     |__ kerberos_force_initiate
+    ##     |__ kerberos_hostname
+    ##     |__ kerberos_keytab
+    ##     |__ kerberos_principal
+    ##   - aws
+    ##     |__ aws_region
+    ##     |__ aws_host
+    ##     |__ aws_service
+    ##
+    ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
+    ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
+    #
+    # auth_type: basic
+
+    ## @param use_legacy_auth_encoding - boolean - optional - default: true
+    ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
+    #
+    # use_legacy_auth_encoding: true
+
+    ## @param username - string - optional
+    ## The username to use if services are behind basic or digest auth.
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## The password to use if services are behind basic or NTLM auth.
+    #
+    # password: <PASSWORD>
+
+    ## @param ntlm_domain - string - optional
+    ## If your services use NTLM authentication, specify
+    ## the domain used in the check. For NTLM Auth, append
+    ## the username to domain, not as the `username` parameter.
+    #
+    # ntlm_domain: <NTLM_DOMAIN>\<USERNAME>
+
+    ## @param kerberos_auth - string - optional - default: disabled
+    ## If your services use Kerberos authentication, you can specify the Kerberos
+    ## strategy to use between:
+    ##
+    ##   - required
+    ##   - optional
+    ##   - disabled
+    ##
+    ## See https://github.com/requests/requests-kerberos#mutual-authentication
+    #
+    # kerberos_auth: disabled
+
+    ## @param kerberos_cache - string - optional
+    ## Sets the KRB5CCNAME environment variable.
+    ## It should point to a credential cache with a valid TGT.
+    #
+    # kerberos_cache: <KERBEROS_CACHE>
+
+    ## @param kerberos_delegate - boolean - optional - default: false
+    ## Set to `true` to enable Kerberos delegation of credentials to a server that requests delegation.
+    ##
+    ## See https://github.com/requests/requests-kerberos#delegation
+    #
+    # kerberos_delegate: false
+
+    ## @param kerberos_force_initiate - boolean - optional - default: false
+    ## Set to `true` to preemptively initiate the Kerberos GSS exchange and
+    ## present a Kerberos ticket on the initial request (and all subsequent).
+    ##
+    ## See https://github.com/requests/requests-kerberos#preemptive-authentication
+    #
+    # kerberos_force_initiate: false
+
+    ## @param kerberos_hostname - string - optional
+    ## Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't
+    ## match its Kerberos hostname, for example: behind a content switch or load balancer.
+    ##
+    ## See https://github.com/requests/requests-kerberos#hostname-override
+    #
+    # kerberos_hostname: <KERBEROS_HOSTNAME>
+
+    ## @param kerberos_principal - string - optional
+    ## Set an explicit principal, to force Kerberos to look for a
+    ## matching credential cache for the named user.
+    ##
+    ## See https://github.com/requests/requests-kerberos#explicit-principal
+    #
+    # kerberos_principal: <KERBEROS_PRINCIPAL>
+
+    ## @param kerberos_keytab - string - optional
+    ## Set the path to your Kerberos key tab file.
+    #
+    # kerberos_keytab: <KEYTAB_FILE_PATH>
+
+    ## @param auth_token - mapping - optional
+    ## This allows for the use of authentication information from dynamic sources.
+    ## Both a reader and writer must be configured.
+    ##
+    ## The available readers are:
+    ##
+    ##   - type: file
+    ##     path (required): The absolute path for the file to read from.
+    ##     pattern: A regular expression pattern with a single capture group used to find the
+    ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##   - type: oauth
+    ##     url (required): The token endpoint.
+    ##     client_id (required): The client identifier.
+    ##     client_secret (required): The client secret.
+    ##     basic_auth: Whether the provider expects credentials to be transmitted in
+    ##                 an HTTP Basic Auth header. The default is: false
+    ##
+    ## The available writers are:
+    ##
+    ##   - type: header
+    ##     name (required): The name of the field, for example: Authorization
+    ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
+    ##     placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
+    #
+    # auth_token:
+    #   reader:
+    #     type: <READER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
+    #   writer:
+    #     type: <WRITER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
+
+    ## @param aws_region - string - optional
+    ## If your services require AWS Signature Version 4 signing, set the region.
+    ##
+    ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
+    #
+    # aws_region: <AWS_REGION>
+
+    ## @param aws_host - string - optional
+    ## If your services require AWS Signature Version 4 signing, set the host.
+    ## This only needs the hostname and does not require the protocol (HTTP, HTTPS, and more).
+    ## For example, if connecting to https://us-east-1.amazonaws.com/, set `aws_host` to `us-east-1.amazonaws.com`.
+    ##
+    ## Note: This setting is not necessary for official integrations.
+    ##
+    ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
+    #
+    # aws_host: <AWS_HOST>
+
+    ## @param aws_service - string - optional
+    ## If your services require AWS Signature Version 4 signing, set the service code. For a list
+    ## of available service codes, see https://docs.aws.amazon.com/general/latest/gr/rande.html
+    ##
+    ## Note: This setting is not necessary for official integrations.
+    ##
+    ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
+    #
+    # aws_service: <AWS_SERVICE>
+
+    ## @param tls_verify - boolean - optional - default: true
+    ## Instructs the check to validate the TLS certificate of services.
+    #
+    # tls_verify: true
+
+    ## @param tls_use_host_header - boolean - optional - default: false
+    ## If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
+    #
+    # tls_use_host_header: false
+
+    ## @param tls_ignore_warning - boolean - optional - default: false
+    ## If `tls_verify` is disabled, security warnings are logged by the check.
+    ## Disable those by setting `tls_ignore_warning` to true.
+    #
+    # tls_ignore_warning: false
+
+    ## @param tls_cert - string - optional
+    ## The path to a single file in PEM format containing a certificate as well as any
+    ## number of CA certificates needed to establish the certificate's authenticity for
+    ## use when connecting to services. It may also contain an unencrypted private key to use.
+    #
+    # tls_cert: <CERT_PATH>
+
+    ## @param tls_private_key - string - optional
+    ## The unencrypted private key to use for `tls_cert` when connecting to services. This is
+    ## required if `tls_cert` is set and it does not already contain a private key.
+    #
+    # tls_private_key: <PRIVATE_KEY_PATH>
+
+    ## @param tls_ca_cert - string - optional
+    ## The path to a file of concatenated CA certificates in PEM format or a directory
+    ## containing several CA certificates in PEM format. If a directory, the directory
+    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
+    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+    #
+    # tls_ca_cert: <CA_CERT_PATH>
+
+    ## @param tls_protocols_allowed - list of strings - optional
+    ## The expected versions of TLS/SSL when fetching intermediate certificates.
+    ## Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+    ##   SSLv3
+    ##   TLSv1
+    ##   TLSv1.1
+    ##   TLSv1.2
+    ##   TLSv1.3
+    #
+    # tls_protocols_allowed:
+    #   - SSLv3
+    #   - TLSv1.2
+    #   - TLSv1.3
+
+    ## @param headers - mapping - optional
+    ## The headers parameter allows you to send specific headers with every request.
+    ## You can use it for explicitly specifying the host header or adding headers for
+    ## authorization purposes.
+    ##
+    ## This overrides any default headers.
+    #
+    # headers:
+    #   Host: <ALTERNATIVE_HOSTNAME>
+    #   X-Auth-Token: <AUTH_TOKEN>
+
+    ## @param extra_headers - mapping - optional
+    ## Additional headers to send with every request.
+    #
+    # extra_headers:
+    #   Host: <ALTERNATIVE_HOSTNAME>
+    #   X-Auth-Token: <AUTH_TOKEN>
+
+    ## @param timeout - number - optional - default: 10
+    ## The timeout for accessing services.
+    ##
+    ## This overrides the `timeout` setting in `init_config`.
+    #
+    # timeout: 10
+
+    ## @param connect_timeout - number - optional
+    ## The connect timeout for accessing services. Defaults to `timeout`.
+    #
+    # connect_timeout: <CONNECT_TIMEOUT>
+
+    ## @param read_timeout - number - optional
+    ## The read timeout for accessing services. Defaults to `timeout`.
+    #
+    # read_timeout: <READ_TIMEOUT>
+
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
+    ## @param log_requests - boolean - optional - default: false
+    ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
+    #
+    # log_requests: false
+
+    ## @param persist_connections - boolean - optional - default: false
+    ## Whether or not to persist cookies and use connection pooling for improved performance.
+    #
+    # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

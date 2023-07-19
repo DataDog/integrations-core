@@ -114,4 +114,4 @@ class ProbesPrometheusScraperMixin(object):
                     container_id,
                 )
 
-            self.count(metric_name, sample[self.SAMPLE_VALUE], container_tags + self.instance_tags)
+            self.gauge(metric_name, sample[self.SAMPLE_VALUE], container_tags + self.instance_tags)

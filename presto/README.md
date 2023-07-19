@@ -77,7 +77,7 @@ Need help? Contact [Datadog support][6].
 
 [1]: https://docs.datadoghq.com/integrations/presto/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/presto/datadog_checks/presto/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/integrations/java/
 [6]: https://docs.datadoghq.com/help/

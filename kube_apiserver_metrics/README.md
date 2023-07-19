@@ -59,7 +59,7 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kube_apiserver_metrics/images/screenshot.png
 [2]: https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/
 [5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [6]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/#set-up-cluster-checks
