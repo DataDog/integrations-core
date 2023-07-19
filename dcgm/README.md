@@ -1,10 +1,10 @@
 # Agent Check: DCGM
 
-## Overview
-
 <div class="alert alert-info">
 Coming soon: This integration is included in the upcoming 7.47.0 release of the Datadog Agent.
 </div>
+
+## Overview
 
 This check submits metrics exposed by the [Nvidia DCGM][15] [Exporter][16] in Datadog Agent format.
 
