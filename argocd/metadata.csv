@@ -105,6 +105,7 @@ argocd.app_controller.workqueue.unfinished_work.seconds,gauge,,second,,The numbe
 argocd.app_controller.workqueue.work.duration.seconds.bucket,count,,second,,The histogram bucket for time in seconds it takes for processing of an item in the workqueue ,0,argocd,app_controller workqueue work duration seconds bucket,
 argocd.app_controller.workqueue.work.duration.seconds.count,count,,,,The total number of events in the workqueue item processing duration histogram ,0,argocd,app_controller workqueue work duration seconds count,
 argocd.app_controller.workqueue.work.duration.seconds.sum,count,,,,The sum of events in the workqueue item processing duration histogram ,0,argocd,app_controller workqueue work duration seconds sum,
+argocd.appset_controller.active.workers,gauge,,,,Number of currently used workers per controller,
 argocd.repo_server.git.request.count,count,,request,,The total number of Git Requests performed by the Repo Server,0,argocd,repo_server git request,
 argocd.repo_server.git.request.duration.seconds.bucket,count,,second,,The histogram bucket for duration of Git Requests in seconds,0,argocd,repo_server git request duration seconds,
 argocd.repo_server.git.request.duration.seconds.count,count,,,,The count aggregation of the Git Request duration histogram,0,argocd,repo_server git request duration seconds,
