@@ -39,6 +39,13 @@ class PostgresConfig:
         self.dbstrict = is_affirmative(instance.get('dbstrict', False))
         self.disable_generic_tags = is_affirmative(instance.get('disable_generic_tags', False)) if instance else False
 
+        self.discovery_config = instance.get('database_autodiscovery', {"enabled": False})
+        if self.discovery_config['enabled'] and self.dbname != 'postgres':
+            raise ConfigurationError(
+                "'dbname' parameter should not be set when `database_autodiscovery` is enabled."
+                "To monitor more databases, add them to the `database_autodiscovery` includelist."
+            )
+
         self.application_name = instance.get('application_name', 'datadog-agent')
         if not self.isascii(self.application_name):
             raise ConfigurationError("Application name can include only ASCII characters: %s", self.application_name)
@@ -46,9 +53,11 @@ class PostgresConfig:
         self.query_timeout = int(instance.get('query_timeout', 5000))
         self.idle_connection_timeout = instance.get('idle_connection_timeout', 60000)
         self.relations = instance.get('relations', [])
-        if self.relations and not self.dbname:
-            raise ConfigurationError('"dbname" parameter must be set when using the "relations" parameter.')
-
+        if self.relations and not (self.dbname or self.discovery_config['enabled']):
+            raise ConfigurationError(
+                '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
+            )
+        self.max_connections = instance.get('max_connections', 30)
         self.tags = self._build_tags(instance.get('tags', []))
 
         ssl = instance.get('ssl', False)
