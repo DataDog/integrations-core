@@ -406,7 +406,7 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=2)
 
     # IF-MIB
-    if_tags = ['interface:eth0'] + common_tags
+    if_tags = ['interface:eth0', 'interface_index:11'] + common_tags
     for metric in metrics.IF_COUNTS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=if_tags, count=1)
 
@@ -419,7 +419,7 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
     for metric in metrics.IF_BANDWIDTH_USAGE:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
-    custom_speed_tags = if_tags + ['speed_source:device']
+    custom_speed_tags = ['interface:eth0', 'interface_index:11', 'speed_source:device'] + common_tags
     for metric in metrics.IF_CUSTOM_SPEED_GAUGES:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=custom_speed_tags, count=2
@@ -429,7 +429,14 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
     aggregator.assert_metric(
         'snmp.interface.status',
         metric_type=aggregator.GAUGE,
-        tags=if_tags + ['interface_index:11', 'status:warning', 'admin_status:down', 'oper_status:lower_layer_down'],
+        tags=[
+            'interface:eth0',
+            'interface_index:11',
+            'status:warning',
+            'admin_status:down',
+            'oper_status:lower_layer_down',
+        ]
+        + common_tags,
         value=1,
     )
     aggregator.assert_all_metrics_covered()
@@ -483,7 +490,7 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
         tags=group_state_tags,
     )
 
-    interface_tags = ['interface:mgmt', 'interface_alias:desc1'] + tags
+    interface_tags = ['interface:mgmt', 'interface_alias:desc1', 'interface_index:32'] + tags
     aggregator.assert_metric(
         'snmp.ifInErrors',
         metric_type=aggregator.COUNT,
@@ -550,6 +557,16 @@ def test_e2e_cisco_nexus(dd_agent_check):
 
     common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
 
+    indexes = {
+        'GigabitEthernet1/0/1': '2',
+        'GigabitEthernet1/0/2': '13',
+        'GigabitEthernet1/0/3': '20',
+        'GigabitEthernet1/0/4': '22',
+        'GigabitEthernet1/0/5': '23',
+        'GigabitEthernet1/0/6': '25',
+        'GigabitEthernet1/0/7': '29',
+        'GigabitEthernet1/0/8': '30',
+    }
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
     for metric in metrics.IF_SCALAR_GAUGE:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
@@ -558,7 +575,11 @@ def test_e2e_cisco_nexus(dd_agent_check):
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.COUNT, tags=tags, count=1)
 
     for interface in interfaces:
-        tags = ['interface:{}'.format(interface), 'interface_alias:'] + common_tags
+        tags = [
+            'interface:{}'.format(interface),
+            'interface_alias:',
+            'interface_index:{}'.format(indexes.get(interface)),
+        ] + common_tags
         for metric in metrics.IF_COUNTS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
         for metric in metrics.IF_RATES:
@@ -675,7 +696,7 @@ def test_e2e_cisco_legacy_wlc(dd_agent_check):
     for metric in SYSTEM_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
 
-    if_tags = ["interface:If1"] + tags
+    if_tags = ["interface:If1", "interface_index:1"] + tags
 
     for metric in metrics.IF_COUNTS:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=if_tags)

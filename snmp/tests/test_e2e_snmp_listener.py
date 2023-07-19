@@ -63,11 +63,15 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
 
     common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
     interfaces = [
-        ('eth0', 'kept'),
-        ('eth1', 'their forward oxen'),
+        (13, 'eth0', 'kept'),
+        (15, 'eth1', 'their forward oxen'),
     ]
-    for interface, if_desc in interfaces:
-        tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(if_desc)] + common_tags
+    for index, interface, if_desc in interfaces:
+        tags = [
+            'interface:{}'.format(interface),
+            'interface_alias:{}'.format(if_desc),
+            'interface_index:{}'.format(index),
+        ] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
         for metric in IF_RATES:
