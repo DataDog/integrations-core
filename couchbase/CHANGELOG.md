@@ -1,5 +1,9 @@
 # CHANGELOG - couchbase
 
+## 2.3.0 / 2023-07-19
+
+* [Added] [Couchbase] Adds cmd_lookup per bucket and cleans metadata. See [#15299](https://github.com/DataDog/integrations-core/pull/15299).
+
 ## 2.2.1 / 2023-07-10
 
 ***Fixed***:
