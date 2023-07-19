@@ -105,17 +105,9 @@ The LangChain integration does not include any service checks.
 
 Need help? Contact [Datadog support][5].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Monitor your OpenAI usage with Datadog][6]
-- [Monitor Azure OpenAI with Datadog][7]
 
 [1]: https://docs.langchain.com/docs/
 [2]: https://ddtrace.readthedocs.io/en/stable/installation_quickstart.html
 [3]: https://ddtrace.readthedocs.io/en/stable/integrations.html#langchain
 [4]: https://github.com/DataDog/integrations-core/blob/master/langchain/metadata.csv
 [5]: https://docs.datadoghq.com/help/
-[6]: https://www.datadoghq.com/blog/monitor-openai-with-datadog/
-[7]: https://www.datadoghq.com/blog/monitor-azure-openai-with-datadog/
