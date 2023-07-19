@@ -371,7 +371,7 @@
                     {
                         "definition": {
                             "background_color": "green",
-                            "content": "This section shows percent of utilization for GPU and memory metrics. By monitoring GPU and memory utilization, you can ensure that your high-compute workloads are running at maximum efficiency. GPU utilization can also be measured by alternate metrics like [this](https://docs.nvidia.com/datacenter/dcgm/latest/dcgm-api/dcgm-api-field-ids.html#c.DCGM_FI_PROF_GR_ENGINE_ACTIVE) one. You can update your integration template and DCGM exporter template to collect such additional metrics. \n\n",
+                            "content": "This section shows percent of utilization for GPU and memory metrics. By monitoring GPU and memory utilization, you can ensure that your high-compute workloads are running at maximum efficiency. GPU utilization can also be measured by alternate metrics like [this one](https://docs.nvidia.com/datacenter/dcgm/latest/dcgm-api/dcgm-api-field-ids.html#c.DCGM_FI_PROF_GR_ENGINE_ACTIVE). You can update your integration template and DCGM exporter template to collect such additional metrics. \n\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
