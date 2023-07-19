@@ -42,7 +42,7 @@ metrics:
       - index: 1
         tag: cpu
   - MIB: CISCO-IF-EXTENSION-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     table:
       OID: 1.3.6.1.4.1.9.9.276.1.1.2
       name: cieIfInterfaceTable

@@ -45,6 +45,12 @@ def parse_metrics(metrics, resolver, logger, bulk_threshold=0):
     parsed_metrics = []  # type: List[ParsedMetric]
 
     for metric in metrics:
+        # Backward compatibility layer for python related to renaming of forced_type to metric_type
+        # https://github.com/DataDog/datadog-agent/pull/17900
+        metric_type = metric.get('metric_type')
+        if metric_type is not None:
+            metric['forced_type'] = metric_type
+
         result = _parse_metric(metric, logger)
 
         for oid in result.oids_to_fetch:
