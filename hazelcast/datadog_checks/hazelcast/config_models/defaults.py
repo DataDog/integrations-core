@@ -7,272 +7,110 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-from datadog_checks.base.utils.models.fields import get_default_field_value
 
-
-def shared_collect_default_metrics(field, value):
+def shared_collect_default_metrics():
     return False
 
 
-def shared_conf(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_is_jmx(field, value):
+def shared_is_jmx():
     return False
 
 
-def shared_new_gc_metrics(field, value):
+def shared_new_gc_metrics():
     return False
 
 
-def shared_proxy(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_service_check_prefix(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_skip_proxy(field, value):
+def shared_skip_proxy():
     return False
 
 
-def shared_timeout(field, value):
+def shared_timeout():
     return 10
 
 
-def instance_allow_redirects(field, value):
+def instance_allow_redirects():
     return True
 
 
-def instance_auth_token(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_auth_type(field, value):
+def instance_auth_type():
     return 'basic'
 
 
-def instance_aws_host(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_aws_region(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_aws_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_collect_default_jvm_metrics(field, value):
+def instance_collect_default_jvm_metrics():
     return True
 
 
-def instance_connect_timeout(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname():
     return False
 
 
-def instance_extra_headers(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_headers(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_host(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_is_jmx(field, value):
+def instance_is_jmx():
     return False
 
 
-def instance_java_bin_path(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_java_options(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_jmx_url(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_kerberos_auth(field, value):
+def instance_kerberos_auth():
     return 'disabled'
 
 
-def instance_kerberos_cache(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_kerberos_delegate(field, value):
+def instance_kerberos_delegate():
     return False
 
 
-def instance_kerberos_force_initiate(field, value):
+def instance_kerberos_force_initiate():
     return False
 
 
-def instance_kerberos_hostname(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_kerberos_keytab(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_kerberos_principal(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_key_store_password(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_key_store_path(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_log_requests(field, value):
+def instance_log_requests():
     return False
 
 
-def instance_mc_cluster_states(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_mc_health_check_endpoint(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval():
     return 15
 
 
-def instance_name(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_ntlm_domain(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_password(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_persist_connections(field, value):
+def instance_persist_connections():
     return False
 
 
-def instance_port(field, value):
+def instance_port():
     return 1099
 
 
-def instance_process_name_regex(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_proxy(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_read_timeout(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_request_size(field, value):
+def instance_request_size():
     return 16
 
 
-def instance_rmi_client_timeout(field, value):
+def instance_rmi_client_timeout():
     return 15000
 
 
-def instance_rmi_connection_timeout(field, value):
+def instance_rmi_connection_timeout():
     return 20000
 
 
-def instance_rmi_registry_ssl(field, value):
+def instance_rmi_registry_ssl():
     return False
 
 
-def instance_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_skip_proxy(field, value):
+def instance_skip_proxy():
     return False
 
 
-def instance_tags(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_timeout(field, value):
+def instance_timeout():
     return 10
 
 
-def instance_tls_ca_cert(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tls_cert(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tls_ignore_warning(field, value):
+def instance_tls_ignore_warning():
     return False
 
 
-def instance_tls_private_key(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tls_protocols_allowed(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tls_use_host_header(field, value):
+def instance_tls_use_host_header():
     return False
 
 
-def instance_tls_verify(field, value):
+def instance_tls_verify():
     return True
 
 
-def instance_tools_jar_path(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_trust_store_password(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_trust_store_path(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_use_legacy_auth_encoding(field, value):
+def instance_use_legacy_auth_encoding():
     return True
-
-
-def instance_user(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_username(field, value):
-    return get_default_field_value(field, value)

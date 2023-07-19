@@ -7,96 +7,46 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-from datadog_checks.base.utils.models.fields import get_default_field_value
 
-
-def shared_global_custom_queries(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_account(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_auth_data(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_auth_mechanism(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_collect_res_usage_metrics(field, value):
+def instance_collect_res_usage_metrics():
     return False
 
 
-def instance_collect_table_disk_metrics(field, value):
+def instance_collect_table_disk_metrics():
     return False
 
 
-def instance_custom_queries(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags():
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname():
     return False
 
 
-def instance_https_port(field, value):
+def instance_https_port():
     return 443
 
 
-def instance_metric_patterns(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval():
     return 15
 
 
-def instance_only_custom_queries(field, value):
+def instance_only_custom_queries():
     return False
 
 
-def instance_password(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_port(field, value):
+def instance_port():
     return 1025
 
 
-def instance_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_ssl_mode(field, value):
+def instance_ssl_mode():
     return 'Prefer'
 
 
-def instance_ssl_protocol(field, value):
+def instance_ssl_protocol():
     return 'TLSv1.2'
 
 
-def instance_tables(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_tags(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_use_global_custom_queries(field, value):
+def instance_use_global_custom_queries():
     return 'true'
-
-
-def instance_username(field, value):
-    return get_default_field_value(field, value)

@@ -29,7 +29,7 @@ def test_config_unknown_service_type(service_type):
     assert (
         exception_info.value.args[0]
         == 'Detected 1 error while loading configuration model `InstanceConfig`:\nservice_type\n  '
-        'unexpected value; permitted: \'daemon\', \'statestore\', \'catalog\''
+        'Input should be \'daemon\', \'statestore\' or \'catalog\''
     )
 
 
@@ -45,7 +45,7 @@ def test_config_service_type_mandatory():
     assert (
         exception_info.value.args[0]
         == 'Detected 1 error while loading configuration model `InstanceConfig`:\nservice_type\n  '
-        'field required'
+        'Field required'
     )
 
 
@@ -62,7 +62,7 @@ def test_config_service_type_can_not_be_none():
     assert (
         exception_info.value.args[0]
         == 'Detected 1 error while loading configuration model `InstanceConfig`:\nservice_type\n  '
-        'none is not an allowed value'
+        'Input should be \'daemon\', \'statestore\' or \'catalog\''
     )
 
 
