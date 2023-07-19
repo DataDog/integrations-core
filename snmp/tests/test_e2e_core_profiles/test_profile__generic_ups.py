@@ -23,7 +23,7 @@ def test_e2e_profile__generic_ups(dd_agent_check):
 
     ip_address = get_device_ip_from_config(config)
     common_tags = [
-        'snmp_profile:generic-ups',
+        'snmp_profile:abstract-generic-ups',
         'snmp_host:_generic-ups.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
@@ -93,7 +93,7 @@ def test_e2e_profile__generic_ups(dd_agent_check):
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
         'name': '_generic-ups.device.name',
-        'profile': 'generic-ups',
+        'profile': 'abstract-generic-ups',
         'status': 1,
         'sys_object_id': '1.2.3.4.5.6.7.8.999',
     }
