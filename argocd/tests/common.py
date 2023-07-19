@@ -165,7 +165,7 @@ NOT_EXPOSED_METRICS = [
     'argocd.app_controller.redis.request.duration',
     'argocd.appset_controller.reconcile.errors.total',
     'argocd.appset_controller.runtime.reconcile.total',
-    'argocd.appset_controller.reconcile.time_seconds'
+    'argocd.appset_controller.reconcile.time_seconds',
 ]
 
 # Additional metrics that aren't exposed in the E2E environment
