@@ -128,3 +128,6 @@ snowflake-connector-python = 'https://github.com/snowflakedb/snowflake-connector
 supervisor = 'https://github.com/Supervisor/supervisor'
 tuf = 'https://github.com/theupdateframework/python-tuf'
 typing = 'https://github.com/python/typing'
+
+[overrides.validate.openmetrics]
+exclude = ["openmetrics"]

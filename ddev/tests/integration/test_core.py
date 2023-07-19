@@ -1,7 +1,10 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 from ddev.repo.core import Repository
+from ddev.utils.fs import Path
 
 
 def test_attributes(local_repo, valid_integration):
@@ -187,6 +190,26 @@ class TestPackageDirectory:
         integration = repo.integrations.get('go-metro')
 
         assert integration.package_directory == local_repo / integration.name / 'datadog_checks' / 'go_metro'
+
+
+class TestPackageFiles:
+    def test_base_package_file(self, local_repo):
+        repo = Repository(local_repo.name, str(local_repo))
+        integration = repo.integrations.get('datadog_checks_base')
+
+        expected_files = []
+        for root, _, files in os.walk(integration.package_directory):
+            for f in files:
+                if f.endswith(".py"):
+                    expected_files.append(Path(root, f))
+
+        assert list(integration.package_files()) == expected_files
+
+    def test_tile_only_package_file(self, local_repo):
+        repo = Repository(local_repo.name, str(local_repo))
+        integration = repo.integrations.get('agent_metrics')
+
+        assert not list(integration.package_files())
 
 
 class TestReleaseTagPattern:
