@@ -1,5 +1,11 @@
 # CHANGELOG - datadog_checks_base
 
+## 32.5.1 / 2023-07-19
+
+***Fixed***:
+
+* Revert to requesting Prometheus format by default. See [#15292](https://github.com/DataDog/integrations-core/pull/15292).
+
 ## 32.5.0 / 2023-07-10
 
 ***Added***:
