@@ -42,8 +42,8 @@ metrics:
         table: entPhysicalTable
         tag: ent_physical_name
       - tag: cpu
-        index: 1
-        
+        index: 1 # hh3cEntityExtPhysicalIndex
+
   - MIB: HH3C-ENTITY-EXT-MIB
     table:
       OID: 1.3.6.1.4.1.25506.2.6.1.1.1
@@ -64,5 +64,4 @@ metrics:
         table: entPhysicalTable
         tag: ent_physical_name
       - tag: mem
-        index: 1
-        
+        index: 1 # hh3cEntityExtPhysicalIndex
