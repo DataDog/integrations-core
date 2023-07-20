@@ -14,19 +14,19 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.5528.100.2.1.1.7
           name: enclosureIndex
-        tag: enclosure_index
+        tag: netbotz_enclosure_index
       - column:
           OID: 1.3.6.1.4.1.5528.100.2.1.1.1
           name: enclosureId
-        tag: enclosure_id
+        tag: netbotz_enclosure_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.2.1.1.4
           name: enclosureLabel
-        tag: enclosure_label
+        tag: netbotz_enclosure_label
       - column:
           OID: 1.3.6.1.4.1.5528.100.2.1.1.2
           name: enclosureStatus
-        tag: enclosure_status
+        tag: netbotz_enclosure_status
         mapping:
           0: disconnected
           1: error
@@ -34,7 +34,7 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.5528.100.2.1.1.3
           name: enclosureErrorStatus
-        tag: enclosure_error_status
+        tag: netbotz_enclosure_error_status
         mapping:
           0: normal
           1: info
@@ -53,15 +53,15 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.5528.100.3.1.1.9
           name: dinPortIndex
-        tag: din_port_index
+        tag: netbotz_din_port_index
       - column:
           OID: 1.3.6.1.4.1.5528.100.3.1.1.1
           name: dinPortId
-        tag: din_port_id
+        tag: netbotz_din_port_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.3.1.1.2
           name: dinPortStatus
-        tag: din_port_status
+        tag: netbotz_din_port_status
         mapping:
           0: disconnected
           1: error
@@ -77,23 +77,23 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.5528.100.3.10.1.5
           name: otherPortIndex
-        tag: other_port_index
+        tag: netbotz_other_port_index
       - column:
           OID: 1.3.6.1.4.1.5528.100.3.10.1.1
           name: otherPortId
-        tag: other_port_id
+        tag: netbotz_other_port_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.3.10.1.3
           name: otherPortLabel
-        tag: other_port_label
+        tag: netbotz_other_port_label
       - column:
           OID: 1.3.6.1.4.1.5528.100.3.10.1.4
           name: otherPortEncId
-        tag: other_port_enc_id
+        tag: netbotz_other_port_enc_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.3.10.1.2
           name: otherPortStatus
-        tag: other_port_status
+        tag: netbotz_other_port_status
         mapping:
           0: disconnected
           1: error
@@ -111,23 +111,23 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.1.1.10
           name: tempSensorIndex
-        tag: temp_sensor_index
+        tag: netbotz_temp_sensor_index
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.1.1.1
           name: tempSensorId
-        tag: temp_sensor_id
+        tag: netbotz_temp_sensor_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.1.1.4
           name: tempSensorLabel
-        tag: temp_sensor_label
+        tag: netbotz_temp_sensor_label
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.1.1.5
           name: tempSensorEncId
-        tag: temp_sensor_enc_id
+        tag: netbotz_temp_sensor_enc_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.1.1.3
           name: tempSensorErrorStatus
-        tag: temp_sensor_error_status
+        tag: netbotz_temp_sensor_error_status
         mapping:
           0: normal
           1: info
@@ -146,23 +146,23 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.2.1.9
           name: humiSensorIndex
-        tag: humi_sensor_index
+        tag: netbotz_humi_sensor_index
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.2.1.1
           name: humiSensorId
-        tag: humi_sensor_id
+        tag: netbotz_humi_sensor_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.2.1.4
           name: humiSensorLabel
-        tag: humi_sensor_label
+        tag: netbotz_humi_sensor_label
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.2.1.5
           name: humiSensorEncId
-        tag: humi_sensor_enc_id
+        tag: netbotz_humi_sensor_enc_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.2.1.3
           name: humiSensorErrorStatus
-        tag: humi_sensor_error_status
+        tag: netbotz_humi_sensor_error_status
         mapping:
           0: normal
           1: info
@@ -183,19 +183,19 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.3.1.10
           name: dewPointSensorIndex
-        tag: dew_point_sensor_index
+        tag: netbotz_dew_point_sensor_index
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.3.1.1
           name: dewPointSensorId
-        tag: dew_point_sensor_id
+        tag: netbotz_dew_point_sensor_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.3.1.4
           name: dewPointSensorLabel
-        tag: dew_point_sensor_label
+        tag: netbotz_dew_point_sensor_label
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.3.1.5
           name: dewPointSensorEncId
-        tag: dew_point_sensor_enc_id
+        tag: netbotz_dew_point_sensor_enc_id
   - MIB: NETBOTZV2-MIB
     table:
       OID: 1.3.6.1.4.1.5528.100.4.1.10
@@ -207,27 +207,27 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.10.1.12
           name: otherNumericSensorIndex
-        tag: other_numeric_sensor_index
+        tag: netbotz_other_numeric_sensor_index
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.10.1.1
           name: otherNumericSensorId
-        tag: other_numeric_sensor_id
+        tag: netbotz_other_numeric_sensor_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.10.1.4
           name: otherNumericSensorLabel
-        tag: other_numeric_sensor_label
+        tag: netbotz_other_numeric_sensor_label
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.10.1.5
           name: otherNumericSensorEncId
-        tag: other_numeric_sensor_enc_id
+        tag: netbotz_other_numeric_sensor_enc_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.10.1.9
           name: otherNumericSensorUnits
-        tag: other_numeric_sensor_units
+        tag: netbotz_other_numeric_sensor_units
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.1.10.1.3
           name: otherNumericSensorErrorStatus
-        tag: other_numeric_sensor_error_status
+        tag: netbotz_other_numeric_sensor_error_status
         mapping:
           0: normal
           1: info
@@ -246,27 +246,27 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.2.2.1.8
           name: doorSwitchSensorIndex
-        tag: door_switch_sensor_index
+        tag: netbotz_door_switch_sensor_index
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.2.2.1.1
           name: doorSwitchSensorId
-        tag: door_switch_sensor_id
+        tag: netbotz_door_switch_sensor_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.2.2.1.4
           name: doorSwitchSensorLabel
-        tag: door_switch_sensor_label
+        tag: netbotz_door_switch_sensor_label
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.2.2.1.5
           name: doorSwitchSensorEncId
-        tag: door_switch_sensor_enc_id
+        tag: netbotz_door_switch_sensor_enc_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.2.2.1.7
           name: doorSwitchSensorValueStr
-        tag: door_switch_sensor_value_str
+        tag: netbotz_door_switch_sensor_value_str
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.2.2.1.2
           name: doorSwitchSensorValue
-        tag: door_switch_sensor_value
+        tag: netbotz_door_switch_sensor_value
         mapping:
           -1: none
           0: open
@@ -282,23 +282,23 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.2.10.1.4
           name: otherStateSensorLabel
-        tag: other_state_sensor_label
+        tag: netbotz_other_state_sensor_label
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.2.10.1.5
           name: otherStateSensorEncId
-        tag: other_state_sensor_enc_id
+        tag: netbotz_other_state_sensor_enc_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.2.10.1.7
           name: otherStateSensorValueStr
-        tag: other_state_sensor_value_str
+        tag: netbotz_other_state_sensor_value_str
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.2.10.1.1
           name: otherStateSensorId
-        tag: other_state_sensor_id
+        tag: netbotz_other_state_sensor_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.4.2.10.1.3
           name: otherStateSensorErrorStatus
-        tag: other_state_sensor_error_status
+        tag: netbotz_other_state_sensor_error_status
         mapping:
           0: normal
           1: info
@@ -317,35 +317,27 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.5528.100.5.1.1.12
           name: errorCondIndex
-        tag: error_cond_index
+        tag: netbotz_error_cond_index
       - column:
           OID: 1.3.6.1.4.1.5528.100.5.1.1.1
           name: errorCondId
-        tag: error_cond_id
+        tag: netbotz_error_cond_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.5.1.1.3
           name: errorCondTypeId
-        tag: error_cond_type_id
-      - column:
-          OID: 1.3.6.1.4.1.5528.100.5.1.1.5
-          name: errorCondStartTimeStr
-        tag: error_cond_start_time_str
-      - column:
-          OID: 1.3.6.1.4.1.5528.100.5.1.1.8
-          name: errorCondResolvedTimeStr
-        tag: error_cond_resolved_time_str
+        tag: netbotz_error_cond_type_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.5.1.1.9
           name: errorCondEncId
-        tag: error_cond_enc_id
+        tag: netbotz_error_cond_enc_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.5.1.1.11
           name: errorCondSensorId
-        tag: error_cond_sensor_id
+        tag: netbotz_error_cond_sensor_id
       - column:
           OID: 1.3.6.1.4.1.5528.100.5.1.1.2
           name: errorCondSeverity
-        tag: error_cond_severity
+        tag: netbotz_error_cond_severity
         mapping:
           0: normal
           1: info
@@ -356,7 +348,7 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.5528.100.5.1.1.6
           name: errorCondResolved
-        tag: error_cond_resolved
+        tag: netbotz_error_cond_resolved
         mapping:
           0: no
           1: yes
