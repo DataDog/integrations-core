@@ -33,7 +33,7 @@ def test_e2e_profile_avaya_aura_media_server(dd_agent_check):
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
-    #assert_extend_generic_host_resources_base(aggregator, common_tags)
+    assert_extend_generic_host_resources_base(aggregator, common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
