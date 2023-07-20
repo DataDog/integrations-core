@@ -565,7 +565,7 @@ def test_e2e_core_metadata_aruba_switch(dd_agent_check):
         'profile': 'aruba-switch',
         'serial_number': 'CV0009200',
         'status': 1,
-        'sys_object_id': '1.3.6.1.4.1.14823.1.1.32',
+        'sys_object_id': '1.3.6.1.4.1.14823.1.1.999',
         'tags': [
             'device_namespace:default',
             'device_vendor:aruba',

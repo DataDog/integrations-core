@@ -98,7 +98,7 @@ metrics:
         name: cpqSm2NicRecvErrorPackets
       - OID: 1.3.6.1.4.1.232.9.2.5.2.1.15
         name: cpqSm2NicRecvUnknownPackets
-    forced_type: monotonic_count # Sent as Counter (would be ingested as rates if not forced).
+    metric_type: monotonic_count # Sent as Counter (would be ingested as rates if not forced).
     metric_tags:
       - # Location of the controller (embedded controller vs. PC card).
         # NOTE: other(1), embedded(2), pcmcia(3)
@@ -135,7 +135,7 @@ metrics:
       - # Number of octets sent.
         OID: 1.3.6.1.4.1.232.18.2.3.1.1.38
         name: cpqNicIfPhysAdapterOutOctets
-    forced_type: monotonic_count  # Sent as Counters (not forcing would make us ingest them as rates).
+    metric_type: monotonic_count  # Sent as Counters (not forcing would make us ingest them as rates).
     metric_tags:
       - tag: interface
         column:
@@ -155,7 +155,7 @@ metrics:
       - # Estimate of current bandwidth in Mbps.
         OID: 1.3.6.1.4.1.232.18.2.3.1.1.36
         name: cpqNicIfPhysAdapterSpeedMbps
-    # NOTE: no 'forced_type', as these are correctly sent as gauges.
+    # NOTE: no 'metric_type', as these are correctly sent as gauges.
     metric_tags:
       - tag: interface
         column:

@@ -7,144 +7,74 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-from datadog_checks.base.utils.models.fields import get_default_field_value
 
-
-def shared_queue_manager_process(field, value):
-    return get_default_field_value(field, value)
-
-
-def shared_queue_manager_process_limit(field, value):
+def shared_queue_manager_process_limit():
     return 1
 
 
-def shared_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_auto_discover_channels(field, value):
+def instance_auto_discover_channels():
     return True
 
 
-def instance_auto_discover_queues(field, value):
+def instance_auto_discover_queues():
     return False
 
 
-def instance_channel_status_mapping(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_channels(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_collect_reset_queue_metrics(field, value):
+def instance_collect_reset_queue_metrics():
     return True
 
 
-def instance_collect_statistics_metrics(field, value):
+def instance_collect_statistics_metrics():
     return False
 
 
-def instance_connection_name(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_convert_endianness(field, value):
+def instance_convert_endianness():
     return False
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags():
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname():
     return False
 
 
-def instance_host(field, value):
+def instance_host():
     return 'localhost'
 
 
-def instance_metric_patterns(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval():
     return 15
 
 
-def instance_mqcd_version(field, value):
+def instance_mqcd_version():
     return 6
 
 
-def instance_override_hostname(field, value):
+def instance_override_hostname():
     return False
 
 
-def instance_password(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_port(field, value):
+def instance_port():
     return 1414
 
 
-def instance_queue_manager_process(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_queue_manager_timezone(field, value):
+def instance_queue_manager_timezone():
     return 'Etc/UTC'
 
 
-def instance_queue_patterns(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_queue_regex(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_queue_tag_re(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_queues(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_ssl_auth(field, value):
+def instance_ssl_auth():
     return False
 
 
-def instance_ssl_certificate_label(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_ssl_cipher_spec(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_ssl_key_repository_location(field, value):
+def instance_ssl_key_repository_location():
     return '/var/mqm/ssl-db/client/KeyringClient'
 
 
-def instance_tags(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_timeout(field, value):
+def instance_timeout():
     return 5
 
 
-def instance_try_basic_auth(field, value):
+def instance_try_basic_auth():
     return True
-
-
-def instance_username(field, value):
-    return get_default_field_value(field, value)

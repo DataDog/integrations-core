@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Optional, Sequence, Union
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -20,141 +20,150 @@ from . import defaults, validators
 
 
 class AuthToken(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    reader: Optional[Mapping[str, Any]]
-    writer: Optional[Mapping[str, Any]]
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    reader: Optional[Mapping[str, Any]] = None
+    writer: Optional[Mapping[str, Any]] = None
 
 
 class IgnoreMetricsByLabels(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    target_label_key: Optional[str]
-    target_label_value_list: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    target_label_key: Optional[str] = None
+    target_label_value_list: Optional[Sequence[str]] = None
 
 
 class TargetMetric(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    label_to_match: Optional[str]
-    labels_to_get: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    label_to_match: Optional[str] = None
+    labels_to_get: Optional[Sequence[str]] = None
 
 
 class LabelJoins(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    target_metric: Optional[TargetMetric]
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    target_metric: Optional[TargetMetric] = None
 
 
 class MetricPatterns(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    exclude: Optional[Sequence[str]] = None
+    include: Optional[Sequence[str]] = None
 
 
 class Proxy(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    http: Optional[str]
-    https: Optional[str]
-    no_proxy: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    http: Optional[str] = None
+    https: Optional[str] = None
+    no_proxy: Optional[Sequence[str]] = None
 
 
 class InstanceConfig(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    allow_redirects: Optional[bool]
-    auth_token: Optional[AuthToken]
-    auth_type: Optional[str]
-    aws_host: Optional[str]
-    aws_region: Optional[str]
-    aws_service: Optional[str]
-    bearer_token_auth: Optional[Union[bool, str]]
-    bearer_token_path: Optional[str]
-    bearer_token_refresh_interval: Optional[int]
-    connect_timeout: Optional[float]
-    disable_generic_tags: Optional[bool]
-    empty_default_hostname: Optional[bool]
-    exclude_labels: Optional[Sequence[str]]
-    extra_headers: Optional[Mapping[str, Any]]
-    headers: Optional[Mapping[str, Any]]
-    health_service_check: Optional[bool]
-    ignore_metrics: Optional[Sequence[str]]
-    ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels]
-    ignore_tags: Optional[Sequence[str]]
-    include_labels: Optional[Sequence[str]]
-    kerberos_auth: Optional[str]
-    kerberos_cache: Optional[str]
-    kerberos_delegate: Optional[bool]
-    kerberos_force_initiate: Optional[bool]
-    kerberos_hostname: Optional[str]
-    kerberos_keytab: Optional[str]
-    kerberos_principal: Optional[str]
-    label_joins: Optional[LabelJoins]
-    label_to_hostname: Optional[str]
-    labels_mapper: Optional[Mapping[str, Any]]
-    log_requests: Optional[bool]
-    metric_patterns: Optional[MetricPatterns]
-    metrics: Optional[Sequence[Union[str, Mapping[str, str]]]]
-    min_collection_interval: Optional[float]
-    namespace: Optional[str]
-    ntlm_domain: Optional[str]
-    password: Optional[str]
-    persist_connections: Optional[bool]
-    prometheus_metrics_prefix: Optional[str]
+    model_config = ConfigDict(
+        validate_default=True,
+        frozen=True,
+    )
+    allow_redirects: Optional[bool] = None
+    auth_token: Optional[AuthToken] = None
+    auth_type: Optional[str] = None
+    aws_host: Optional[str] = None
+    aws_region: Optional[str] = None
+    aws_service: Optional[str] = None
+    bearer_token_auth: Optional[Union[bool, str]] = None
+    bearer_token_path: Optional[str] = None
+    bearer_token_refresh_interval: Optional[int] = None
+    connect_timeout: Optional[float] = None
+    disable_generic_tags: Optional[bool] = None
+    empty_default_hostname: Optional[bool] = None
+    exclude_labels: Optional[Sequence[str]] = None
+    extra_headers: Optional[Mapping[str, Any]] = None
+    headers: Optional[Mapping[str, Any]] = None
+    health_service_check: Optional[bool] = None
+    ignore_metrics: Optional[Sequence[str]] = None
+    ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels] = None
+    ignore_tags: Optional[Sequence[str]] = None
+    include_labels: Optional[Sequence[str]] = None
+    kerberos_auth: Optional[str] = None
+    kerberos_cache: Optional[str] = None
+    kerberos_delegate: Optional[bool] = None
+    kerberos_force_initiate: Optional[bool] = None
+    kerberos_hostname: Optional[str] = None
+    kerberos_keytab: Optional[str] = None
+    kerberos_principal: Optional[str] = None
+    label_joins: Optional[LabelJoins] = None
+    label_to_hostname: Optional[str] = None
+    labels_mapper: Optional[Mapping[str, Any]] = None
+    log_requests: Optional[bool] = None
+    metric_patterns: Optional[MetricPatterns] = None
+    metrics: Optional[Sequence[Union[str, Mapping[str, str]]]] = None
+    min_collection_interval: Optional[float] = None
+    namespace: Optional[str] = None
+    ntlm_domain: Optional[str] = None
+    password: Optional[str] = None
+    persist_connections: Optional[bool] = None
+    prometheus_metrics_prefix: Optional[str] = None
     prometheus_url: str
-    proxy: Optional[Proxy]
-    read_timeout: Optional[float]
-    request_size: Optional[float]
-    scheme: Optional[str]
-    send_distribution_buckets: Optional[bool]
-    send_distribution_counts_as_monotonic: Optional[bool]
-    send_distribution_sums_as_monotonic: Optional[bool]
-    send_histograms_buckets: Optional[bool]
-    send_monotonic_counter: Optional[bool]
-    send_monotonic_with_gauge: Optional[bool]
-    service: Optional[str]
-    skip_proxy: Optional[bool]
-    tags: Optional[Sequence[str]]
-    timeout: Optional[float]
-    tls_ca_cert: Optional[str]
-    tls_cert: Optional[str]
-    tls_ignore_warning: Optional[bool]
-    tls_private_key: Optional[str]
-    tls_protocols_allowed: Optional[Sequence[str]]
-    tls_use_host_header: Optional[bool]
-    tls_verify: Optional[bool]
-    type_overrides: Optional[Mapping[str, Any]]
-    use_legacy_auth_encoding: Optional[bool]
-    use_process_start_time: Optional[bool]
-    username: Optional[str]
+    proxy: Optional[Proxy] = None
+    read_timeout: Optional[float] = None
+    request_size: Optional[float] = None
+    scheme: Optional[str] = None
+    send_distribution_buckets: Optional[bool] = None
+    send_distribution_counts_as_monotonic: Optional[bool] = None
+    send_distribution_sums_as_monotonic: Optional[bool] = None
+    send_histograms_buckets: Optional[bool] = None
+    send_monotonic_counter: Optional[bool] = None
+    send_monotonic_with_gauge: Optional[bool] = None
+    service: Optional[str] = None
+    skip_proxy: Optional[bool] = None
+    tags: Optional[Sequence[str]] = None
+    timeout: Optional[float] = None
+    tls_ca_cert: Optional[str] = None
+    tls_cert: Optional[str] = None
+    tls_ignore_warning: Optional[bool] = None
+    tls_private_key: Optional[str] = None
+    tls_protocols_allowed: Optional[Sequence[str]] = None
+    tls_use_host_header: Optional[bool] = None
+    tls_verify: Optional[bool] = None
+    type_overrides: Optional[Mapping[str, Any]] = None
+    use_legacy_auth_encoding: Optional[bool] = None
+    use_process_start_time: Optional[bool] = None
+    username: Optional[str] = None
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
     def _initial_validation(cls, values):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-    @validator('*', pre=True, always=True)
-    def _ensure_defaults(cls, v, field):
-        if v is not None or field.required:
-            return v
+    @field_validator('*', mode='before')
+    def _ensure_defaults(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name in info.context['configured_fields']:
+            return value
 
-        return getattr(defaults, f'instance_{field.name}')(field, v)
+        return getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-    @validator('*')
-    def _run_validations(cls, v, field):
-        if not v:
-            return v
+    @field_validator('*')
+    def _run_validations(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name not in info.context['configured_fields']:
+            return value
 
-        return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
+        return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
 
-    @root_validator(pre=False)
-    def _final_validation(cls, values):
-        return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+    @field_validator('*', mode='after')
+    def _make_immutable(cls, value):
+        return validation.utils.make_immutable(value)
+
+    @model_validator(mode='after')
+    def _final_validation(cls, model):
+        return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))

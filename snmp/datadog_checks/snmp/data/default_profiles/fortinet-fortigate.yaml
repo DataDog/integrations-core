@@ -81,7 +81,7 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.12356.101.4.4.2
       name: fgProcessorTable
-    forced_type: monotonic_count_and_rate
+    metric_type: monotonic_count_and_rate
     symbols:
       # The total number of packets received by this processor.
       - OID: 1.3.6.1.4.1.12356.101.4.4.2.1.6
@@ -257,7 +257,7 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.12356.101.5.1.2.1
       name: fgFwPolStatsTable
-    forced_type: monotonic_count_and_rate
+    metric_type: monotonic_count_and_rate
     symbols:
       # Number of packets matched to policy (passed or blocked, depending on policy action). Count is from the time the policy became active.
       - OID: 1.3.6.1.4.1.12356.101.5.1.2.1.1.2
@@ -277,7 +277,7 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.12356.101.5.1.2.2
       name: fgFwPol6StatsTable
-    forced_type: monotonic_count_and_rate
+    metric_type: monotonic_count_and_rate
     symbols:
       # Number of packets matched to policy (passed or blocked, depending on policy action). Count is from the time the policy became active.
       - OID: 1.3.6.1.4.1.12356.101.5.1.2.2.1.2

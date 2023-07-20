@@ -7,54 +7,28 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-from datadog_checks.base.utils.models.fields import get_default_field_value
 
-
-def shared_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_connection_string(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags():
     return False
 
 
-def instance_driver(field, value):
+def instance_driver():
     return 'iSeries Access ODBC Driver'
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname():
     return False
 
 
-def instance_hostname(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_job_query_timeout(field, value):
+def instance_job_query_timeout():
     return 240
 
 
-def instance_message_queue_info(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_metric_patterns(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval():
     return 15
 
 
-def instance_password(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_queries(field, value):
+def instance_queries():
     return [
         {'name': 'disk_usage'},
         {'name': 'cpu_usage'},
@@ -68,29 +42,13 @@ def instance_queries(field, value):
     ]
 
 
-def instance_query_timeout(field, value):
+def instance_query_timeout():
     return 30
 
 
-def instance_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_severity_threshold(field, value):
+def instance_severity_threshold():
     return 50
 
 
-def instance_system(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_system_mq_query_timeout(field, value):
+def instance_system_mq_query_timeout():
     return 80
-
-
-def instance_tags(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_username(field, value):
-    return get_default_field_value(field, value)
