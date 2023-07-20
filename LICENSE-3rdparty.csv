@@ -68,7 +68,7 @@ psycopg2-binary,PyPI,LGPL-3.0-only,Copyright (C) 2013 Federico Di Gregorio
 pyasn1,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
 pycryptodomex,PyPI,BSD-2-Clause,Copyright 2014 Helder Eijs
 pycryptodomex,PyPI,Unlicense,Helder Eijs. pycryptodomex is dedicated to the public domain under Unlicense.
-pydantic,PyPI,MIT,"Copyright (c) 2017, 2018, 2019, 2020, 2021 Samuel Colvin and other contributors"
+pydantic,PyPI,MIT,Copyright (c) 2017 to present Pydantic Services Inc. and individual contributors.
 pymongo,PyPI,Apache-2.0,Copyright 2009 The MongoDB Python Team
 pymqi,PyPI,PSF,Copyright (c) Zato Source s.r.o.
 pymysql,PyPI,MIT,"Copyright (c) 2010, 2013 PyMySQL contributors"

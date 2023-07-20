@@ -30,11 +30,11 @@ def test_e2e_profile_apc_pdu(dd_agent_check):
         'device_namespace:default',
         'snmp_device:' + ip_address,
     ] + [
-        'r_pdu_ident_firmware_rev:kept zombies forward acted zombies but kept forward',
-        'r_pdu_ident_hardware_rev:zombies forward their',
-        'r_pdu_ident_model_number:zombies kept their kept zombies kept Jaded zombies ' 'but',
-        'r_pdu_ident_name:oxen',
-        'r_pdu_ident_serial_number:Jaded kept',
+        'powernet_r_pdu_ident_firmware_rev:kept zombies forward acted zombies but kept forward',
+        'powernet_r_pdu_ident_hardware_rev:zombies forward their',
+        'powernet_r_pdu_ident_model_number:zombies kept their kept zombies kept Jaded zombies ' 'but',
+        'powernet_r_pdu_ident_name:oxen',
+        'powernet_r_pdu_ident_serial_number:Jaded kept',
     ]
 
     # --- TEST EXTENDED METRICS ---
@@ -44,86 +44,112 @@ def test_e2e_profile_apc_pdu(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.rPDUPowerSupplyAlarm', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.powernet.rPDUPowerSupplyAlarm', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-        ['r_pdu_load_status_index:0', 'r_pdu_load_status_load_state:phase_load_overload'],
-        ['r_pdu_load_status_index:18', 'r_pdu_load_status_load_state:phase_load_overload'],
+        ['powernet_r_pdu_load_status_index:0', 'powernet_r_pdu_load_status_load_state:phase_load_overload'],
+        ['powernet_r_pdu_load_status_index:18', 'powernet_r_pdu_load_status_load_state:phase_load_overload'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.rPDULoadStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.powernet.rPDULoadStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
         [
-            'r_pdu_outlet_status_index:14',
-            'r_pdu_outlet_status_outlet_name:forward kept zombies oxen oxen driving their',
+            'powernet_r_pdu_outlet_status_index:14',
+            'powernet_r_pdu_outlet_status_outlet_name:forward kept zombies oxen oxen driving their',
         ],
         [
-            'r_pdu_outlet_status_index:9',
-            'r_pdu_outlet_status_outlet_name:forward kept zombies forward kept',
-            'r_pdu_outlet_status_outlet_state:outlet_status_on',
+            'powernet_r_pdu_outlet_status_index:9',
+            'powernet_r_pdu_outlet_status_outlet_name:forward kept zombies forward kept',
+            'powernet_r_pdu_outlet_status_outlet_state:outlet_status_on',
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.rPDUOutletStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-    tag_rows = [
-        ['r_pdu_status_bank_index:13', 'r_pdu_status_bank_number:8', 'r_pdu_status_bank_state:bank_load_near_overload'],
-        ['r_pdu_status_bank_index:21', 'r_pdu_status_bank_number:13', 'r_pdu_status_bank_state:bank_load_normal'],
-    ]
-
-    for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.rPDUStatusBank', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-    tag_rows = [
-        ['r_pdu_status_phase_index:20', 'r_pdu_status_phase_number:20', 'r_pdu_status_phase_state:phase_load_overload'],
-        ['r_pdu_status_phase_index:26', 'r_pdu_status_phase_number:28', 'r_pdu_status_phase_state:phase_load_overload'],
-    ]
-
-    for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.rPDUStatusPhase', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.powernet.rPDUOutletStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
         [
-            'r_pdu_status_outlet_index:20',
-            'r_pdu_status_outlet_number:21',
-            'r_pdu_status_outlet_state:outlet_load_normal',
+            'powernet_r_pdu_status_bank_index:13',
+            'powernet_r_pdu_status_bank_number:8',
+            'powernet_r_pdu_status_bank_state:bank_load_near_overload',
         ],
         [
-            'r_pdu_status_outlet_index:26',
-            'r_pdu_status_outlet_number:28',
-            'r_pdu_status_outlet_state:outlet_load_overload',
-        ],
-    ]
-
-    for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.rPDUStatusOutlet', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-    tag_rows = [
-        [
-            'r_pdu2_sensor_temp_humidity_status_humidity_status:above_max',
-            'r_pdu2_sensor_temp_humidity_status_name:their but acted quaintly zombies Jaded zombies',
-            'r_pdu2_sensor_temp_humidity_status_temp_status:above_high',
-            'r_pdu2_sensor_temp_humidity_status_type:not_installed',
-        ],
-        [
-            'r_pdu2_sensor_temp_humidity_status_humidity_status:below_min',
-            'r_pdu2_sensor_temp_humidity_status_name:but acted quaintly their forward driving Jaded',
-            'r_pdu2_sensor_temp_humidity_status_temp_status:normal',
-            'r_pdu2_sensor_temp_humidity_status_type:temperature_only',
+            'powernet_r_pdu_status_bank_index:21',
+            'powernet_r_pdu_status_bank_number:13',
+            'powernet_r_pdu_status_bank_state:bank_load_normal',
         ],
     ]
 
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.rPDU2SensorTempHumidityStatusRelativeHumidity',
+            'snmp.powernet.rPDUStatusBank', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+
+    tag_rows = [
+        [
+            'powernet_r_pdu_status_phase_index:20',
+            'powernet_r_pdu_status_phase_number:20',
+            'powernet_r_pdu_status_phase_state:phase_load_overload',
+        ],
+        [
+            'powernet_r_pdu_status_phase_index:26',
+            'powernet_r_pdu_status_phase_number:28',
+            'powernet_r_pdu_status_phase_state:phase_load_overload',
+        ],
+    ]
+
+    for tag_row in tag_rows:
+        aggregator.assert_metric(
+            'snmp.powernet.rPDUStatusPhase', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+
+    tag_rows = [
+        [
+            'powernet_r_pdu_status_outlet_index:20',
+            'powernet_r_pdu_status_outlet_number:21',
+            'powernet_r_pdu_status_outlet_state:outlet_load_normal',
+        ],
+        [
+            'powernet_r_pdu_status_outlet_index:26',
+            'powernet_r_pdu_status_outlet_number:28',
+            'powernet_r_pdu_status_outlet_state:outlet_load_overload',
+        ],
+    ]
+
+    for tag_row in tag_rows:
+        aggregator.assert_metric(
+            'snmp.powernet.rPDUStatusOutlet', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+
+    tag_rows = [
+        [
+            'powernet_r_pdu2_sensor_temp_humidity_status_humidity_status:above_max',
+            'powernet_r_pdu2_sensor_temp_humidity_status_name:their but acted quaintly zombies Jaded zombies',
+            'powernet_r_pdu2_sensor_temp_humidity_status_temp_status:above_high',
+            'powernet_r_pdu2_sensor_temp_humidity_status_type:not_installed',
+        ],
+        [
+            'powernet_r_pdu2_sensor_temp_humidity_status_humidity_status:below_min',
+            'powernet_r_pdu2_sensor_temp_humidity_status_name:but acted quaintly their forward driving Jaded',
+            'powernet_r_pdu2_sensor_temp_humidity_status_temp_status:normal',
+            'powernet_r_pdu2_sensor_temp_humidity_status_type:temperature_only',
+        ],
+    ]
+
+    for tag_row in tag_rows:
+        aggregator.assert_metric(
+            'snmp.powernet.rPDU2SensorTempHumidityStatusRelativeHumidity',
             metric_type=aggregator.GAUGE,
             tags=common_tags + tag_row,
         )
         aggregator.assert_metric(
-            'snmp.rPDU2SensorTempHumidityStatusTempC', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.powernet.rPDU2SensorTempHumidityStatusTempC', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.rPDU2SensorTempHumidityStatusTempF', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.powernet.rPDU2SensorTempHumidityStatusTempF', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     # --- TEST METADATA ---
