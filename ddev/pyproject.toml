@@ -26,6 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
 ]
 dependencies = [
+    "click~=8.1.6",
     "datadog-checks-dev[cli]~=22.0",
     "hatch>=1.6.3",
     "httpx",
