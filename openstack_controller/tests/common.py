@@ -472,7 +472,7 @@ class MockHttp:
                 self._host,
                 microversion_path,
                 subpath,
-                'get.json',
+                'GET.json',
             )
             response = MockResponse(file_path=file_path, status_code=200).json()
             if self._replace and subpath in self._replace:
@@ -539,7 +539,7 @@ class MockHttp:
                 self._host,
                 microversion_path,
                 subpath,
-                'post.json',
+                'POST.json',
             )
         response = MockResponse(file_path=file_path, status_code=200).json()
         if self._replace and subpath in self._replace:
