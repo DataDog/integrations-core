@@ -1,0 +1,87 @@
+# HELP Requests5XX Torchserve prometheus counter metric with unit: Count
+# TYPE Requests5XX counter
+Requests5XX{Level="Host",Hostname="21c5890122fc",} 60.0
+# HELP HandlerTime Torchserve prometheus gauge metric with unit: ms
+# TYPE HandlerTime gauge
+HandlerTime{ModelName="linear_regression_1_2",Level="Model",Hostname="21c5890122fc",} 0.78
+HandlerTime{ModelName="linear_regression_3_2",Level="Model",Hostname="21c5890122fc",} 0.84
+HandlerTime{ModelName="linear_regression_1_1",Level="Model",Hostname="21c5890122fc",} 0.79
+HandlerTime{ModelName="linear_regression_2_2",Level="Model",Hostname="21c5890122fc",} 0.84
+HandlerTime{ModelName="linear_regression_2_3",Level="Model",Hostname="21c5890122fc",} 0.92
+# HELP ts_inference_requests_total Torchserve prometheus counter metric with unit: Count
+# TYPE ts_inference_requests_total counter
+ts_inference_requests_total{model_name="linear_regression_1_1",model_version="default",hostname="21c5890122fc",} 11.0
+ts_inference_requests_total{model_name="linear_regression_3_2",model_version="default",hostname="21c5890122fc",} 11.0
+ts_inference_requests_total{model_name="linear_regression_1_2",model_version="default",hostname="21c5890122fc",} 11.0
+ts_inference_requests_total{model_name="linear_regression_2_3",model_version="default",hostname="21c5890122fc",} 11.0
+ts_inference_requests_total{model_name="linear_regression_2_2",model_version="default",hostname="21c5890122fc",} 11.0
+# HELP PredictionTime Torchserve prometheus gauge metric with unit: ms
+# TYPE PredictionTime gauge
+PredictionTime{ModelName="linear_regression_1_2",Level="Model",Hostname="21c5890122fc",} 1.28
+PredictionTime{ModelName="linear_regression_3_2",Level="Model",Hostname="21c5890122fc",} 1.34
+PredictionTime{ModelName="linear_regression_1_1",Level="Model",Hostname="21c5890122fc",} 1.54
+PredictionTime{ModelName="linear_regression_2_2",Level="Model",Hostname="21c5890122fc",} 1.28
+PredictionTime{ModelName="linear_regression_2_3",Level="Model",Hostname="21c5890122fc",} 1.38
+# HELP MemoryUtilization Torchserve prometheus gauge metric with unit: Percent
+# TYPE MemoryUtilization gauge
+MemoryUtilization{Level="Host",Hostname="21c5890122fc",} 7.2
+# HELP CPUUtilization Torchserve prometheus gauge metric with unit: Percent
+# TYPE CPUUtilization gauge
+CPUUtilization{Level="Host",Hostname="21c5890122fc",} 93.3
+# HELP Requests2XX Torchserve prometheus counter metric with unit: Count
+# TYPE Requests2XX counter
+Requests2XX{Level="Host",Hostname="21c5890122fc",} 58.0
+# HELP Requests4XX Torchserve prometheus counter metric with unit: Count
+# TYPE Requests4XX counter
+Requests4XX{Level="Host",Hostname="21c5890122fc",} 59.0
+# HELP WorkerLoadTime Torchserve prometheus gauge metric with unit: Milliseconds
+# TYPE WorkerLoadTime gauge
+WorkerLoadTime{WorkerName="W-9004-linear_regression_3_2_1",Level="Host",Hostname="21c5890122fc",} 12059.0
+WorkerLoadTime{WorkerName="W-9000-linear_regression_1_1_1",Level="Host",Hostname="21c5890122fc",} 11992.0
+WorkerLoadTime{WorkerName="W-9001-linear_regression_1_2_1",Level="Host",Hostname="21c5890122fc",} 12618.0
+WorkerLoadTime{WorkerName="W-9002-linear_regression_2_2_1",Level="Host",Hostname="21c5890122fc",} 11898.0
+WorkerLoadTime{WorkerName="W-9003-linear_regression_2_3_1",Level="Host",Hostname="21c5890122fc",} 12006.0
+# HELP GPUMemoryUtilization Torchserve prometheus gauge metric with unit: Percent
+# TYPE GPUMemoryUtilization gauge
+GPUMemoryUtilization{Level="Host",Hostname="21c5890122fc",} 2.0
+# HELP MemoryUsed Torchserve prometheus gauge metric with unit: Megabytes
+# TYPE MemoryUsed gauge
+MemoryUsed{Level="Host",Hostname="21c5890122fc",} 1616.35546875
+# HELP MemoryAvailable Torchserve prometheus gauge metric with unit: Megabytes
+# TYPE MemoryAvailable gauge
+MemoryAvailable{Level="Host",Hostname="21c5890122fc",} 29758.09375
+# HELP DiskAvailable Torchserve prometheus gauge metric with unit: Gigabytes
+# TYPE DiskAvailable gauge
+DiskAvailable{Level="Host",Hostname="21c5890122fc",} 107.06270599365234
+# HELP QueueTime Torchserve prometheus gauge metric with unit: Milliseconds
+# TYPE QueueTime gauge
+QueueTime{Level="Host",Hostname="21c5890122fc",} 1.0
+# HELP ts_queue_latency_microseconds Torchserve prometheus counter metric with unit: Microseconds
+# TYPE ts_queue_latency_microseconds counter
+ts_queue_latency_microseconds{model_name="linear_regression_1_1",model_version="default",hostname="21c5890122fc",} 9043769.588
+ts_queue_latency_microseconds{model_name="linear_regression_3_2",model_version="default",hostname="21c5890122fc",} 4246.4169999999995
+ts_queue_latency_microseconds{model_name="linear_regression_1_2",model_version="default",hostname="21c5890122fc",} 600973.0850000001
+ts_queue_latency_microseconds{model_name="linear_regression_2_3",model_version="default",hostname="21c5890122fc",} 2638.626
+ts_queue_latency_microseconds{model_name="linear_regression_2_2",model_version="default",hostname="21c5890122fc",} 3052.8740000000003
+# HELP GPUUtilization Torchserve prometheus gauge metric with unit: Percent
+# TYPE GPUUtilization gauge
+GPUUtilization{Level="Host",Hostname="21c5890122fc",} 1.0
+# HELP WorkerThreadTime Torchserve prometheus gauge metric with unit: Milliseconds
+# TYPE WorkerThreadTime gauge
+WorkerThreadTime{Level="Host",Hostname="21c5890122fc",} 4.0
+# HELP GPUMemoryUsed Torchserve prometheus gauge metric with unit: Megabytes
+# TYPE GPUMemoryUsed gauge
+GPUMemoryUsed{Level="Host",Hostname="21c5890122fc",} 4.0
+# HELP ts_inference_latency_microseconds Torchserve prometheus counter metric with unit: Microseconds
+# TYPE ts_inference_latency_microseconds counter
+ts_inference_latency_microseconds{model_name="linear_regression_1_1",model_version="default",hostname="21c5890122fc",} 9136028.087
+ts_inference_latency_microseconds{model_name="linear_regression_3_2",model_version="default",hostname="21c5890122fc",} 86784.501
+ts_inference_latency_microseconds{model_name="linear_regression_1_2",model_version="default",hostname="21c5890122fc",} 683356.875
+ts_inference_latency_microseconds{model_name="linear_regression_2_3",model_version="default",hostname="21c5890122fc",} 92203.917
+ts_inference_latency_microseconds{model_name="linear_regression_2_2",model_version="default",hostname="21c5890122fc",} 102805.04
+# HELP DiskUtilization Torchserve prometheus gauge metric with unit: Percent
+# TYPE DiskUtilization gauge
+DiskUtilization{Level="Host",Hostname="21c5890122fc",} 55.2
+# HELP DiskUsage Torchserve prometheus gauge metric with unit: Gigabytes
+# TYPE DiskUsage gauge
+DiskUsage{Level="Host",Hostname="21c5890122fc",} 131.79601669311523
