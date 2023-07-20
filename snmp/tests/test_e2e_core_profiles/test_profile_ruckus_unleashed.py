@@ -29,7 +29,7 @@ def test_e2e_profile_ruckus_unleashed(dd_agent_check):
         'device_namespace:default',
         'snmp_device:' + ip_address,
     ] + [
-        'ruckus_unleashed_system_licensed_a_ps:34750',
+        'ruckus_unleashed_system_licensed_aps:34750',
         'ruckus_unleashed_system_serial_number:acted but',
         'ruckus_unleashed_system_model:forward driving',
     ]
