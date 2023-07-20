@@ -12,10 +12,11 @@
     "title": "Avi Vantage",
     "media": [],
     "classifier_tags": [
+      "Category::Cloud",
+      "Category::Network",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Network"
+      "Supported OS::macOS"
     ]
   },
   "author": {

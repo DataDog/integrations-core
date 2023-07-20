@@ -72,15 +72,15 @@ def test_config(dd_run_check, extra_config, expected_http_kwargs):
     with patch('datadog_checks.base.utils.http.requests.get') as r:
         dd_run_check(check)
 
-        http_wargs = dict(
-            auth=ANY,
-            cert=ANY,
-            headers=ANY,
-            proxies=ANY,
-            timeout=ANY,
-            verify=ANY,
-            allow_redirects=ANY,
-        )
+        http_wargs = {
+            'auth': ANY,
+            'cert': ANY,
+            'headers': ANY,
+            'proxies': ANY,
+            'timeout': ANY,
+            'verify': ANY,
+            'allow_redirects': ANY,
+        }
         http_wargs.update(expected_http_kwargs)
 
         r.assert_called_with(ANY, **http_wargs)
@@ -89,12 +89,10 @@ def test_config(dd_run_check, extra_config, expected_http_kwargs):
 @pytest.mark.parametrize(
     'build_config, expected_error',
     [
-        pytest.param(
-            {'projects': {'project_id': {}}}, 'Failed to establish a new connection', id="One `projects` config"
-        ),
+        pytest.param({'projects': {'project_id': {}}}, "Failed to resolve 'server.name'", id="One `projects` config"),
         pytest.param(
             {'build_configuration': 'build_config_id'},
-            'Failed to establish a new connection',
+            "Failed to resolve 'server.name'",
             id="One `build_configurations` config",
         ),
         pytest.param(
@@ -107,8 +105,9 @@ def test_config(dd_run_check, extra_config, expected_http_kwargs):
 def test_validate_config(dd_run_check, build_config, expected_error, caplog):
     """
     Test that the `build_configuration` config options are properly configured in Python 2 prior to running check.
-    Note: The properly configured test cases would be expected to have a `Failed to establish a new connection`
+    Note: The properly configured test cases would be expected to have a `Failed to resolve 'server.name'`
     exception.
+    Note2: With requests < 2.31, we expect "Failed to establish a new connection"
     """
     caplog.clear()
     config = {'server': 'server.name', 'use_openmetrics': False}
@@ -118,11 +117,14 @@ def test_validate_config(dd_run_check, build_config, expected_error, caplog):
 
     check = TeamCityRest('teamcity', {}, [instance])
 
-    if PY2 and instance.get('projects'):
-        expected_error = (
-            '`projects` option is not supported for Python 2. '
-            'Use the `build_configuration` option or upgrade to Python 3.'
-        )
+    if PY2:
+        if instance.get('projects'):
+            expected_error = (
+                '`projects` option is not supported for Python 2. '
+                'Use the `build_configuration` option or upgrade to Python 3.'
+            )
+        else:
+            expected_error = "Failed to establish a new connection"
 
     with pytest.raises(Exception, match=expected_error):
         dd_run_check(check)

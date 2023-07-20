@@ -5,7 +5,7 @@
 import abc
 import json
 import os
-from typing import Dict
+from typing import Dict  # noqa: F401
 
 import six
 
@@ -283,6 +283,7 @@ class LogsCategoryValidator(BaseManifestValidator):
         'altostra',
         'hasura_cloud',
         'sqreen',
+        'openai',  # Logs are submitted to the logs intake API
     }
 
     def validate(self, check_name, decoded, fix):

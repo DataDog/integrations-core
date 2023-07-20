@@ -1,6 +1,6 @@
 [env.collectors.datadog-checks]
 base-package-features = ["deps", "db", "json"]
-check-types = true
+check-types = false
 mypy-args = [
   "--py2",
   "--check-untyped-defs",
@@ -15,23 +15,25 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["3.9"]
 version = [
   "5.7",  # EOL October 21, 2023
   "8.0",  # EOL April, 2026
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["3.9"]
 version = ["8.0"]
 replication = ["group"]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.8"]
+python = ["3.9"]
 flavor = ["mariadb"]
 version = [
   "10.2",  # EOL 23 May 2022
   "10.5",  # EOL 24 June 2025
+  "10.8",
+  "10.9",
   "10.10", # EOL 17 November 2023
 ]
 

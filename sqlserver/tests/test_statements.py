@@ -320,8 +320,9 @@ def test_statement_metrics_and_plans(
                 cursor, SQL_SERVER_QUERY_METRICS_COLUMNS
             )
 
-    expected_instance_tags = set(dbm_instance.get('tags', []))
-    expected_instance_tags_with_db = set(dbm_instance.get('tags', [])) | {"db:{}".format(database)}
+    instance_tags = dbm_instance.get('tags', [])
+    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
+    expected_instance_tags_with_db = expected_instance_tags | {"db:{}".format(database)}
 
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
@@ -331,7 +332,9 @@ def test_statement_metrics_and_plans(
     assert payload['sqlserver_version'].startswith("Microsoft SQL Server"), "invalid version"
     assert payload['host'] == "stubbed.hostname", "wrong hostname"
     assert payload['ddagenthostname'] == datadog_agent.get_hostname()
-    assert set(payload['tags']) == expected_instance_tags, "wrong instance tags for dbm-metrics event"
+    tags = set(payload['tags'])
+    assert tags == expected_instance_tags, "wrong instance tags for dbm-metrics event"
+    assert not any("dd.internal" in m for m in tags), "emitted dd.internal metrics from check"
     assert type(payload['min_collection_interval']) in (float, int), "invalid min_collection_interval"
     # metrics rows
     sqlserver_rows = payload.get('sqlserver_rows', [])
@@ -432,6 +435,56 @@ def test_statement_metrics_and_plans(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
+    "database,query,expected_queries_patterns,",
+    [
+        [
+            "master",
+            "EXEC multiQueryProc",
+            [
+                r"select @total = @total \+ count\(\*\) from sys\.databases where name like '%_'",
+                r"select @total = @total \+ count\(\*\) from sys\.sysobjects where type = 'U'",
+            ],
+        ]
+    ],
+)
+def test_statement_metrics_limit(
+    aggregator, dd_run_check, dbm_instance, bob_conn, database, query, expected_queries_patterns
+):
+    dbm_instance['query_metrics']['max_queries'] = 5
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    # the check must be run three times:
+    # 1) set _last_stats_query_time (this needs to happen before the 1st test queries to ensure the query time
+    # interval is correct)
+    # 2) load the test queries into the StatementMetrics state
+    # 3) emit the query metrics based on the diff of current and last state
+    dd_run_check(check)
+    bob_conn.execute_with_retries(query, (), database=database)
+    dd_run_check(check)
+    aggregator.reset()
+    bob_conn.execute_with_retries(query, (), database=database)
+    dd_run_check(check)
+
+    instance_tags = dbm_instance.get('tags', [])
+    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
+    expected_instance_tags | {"db:{}".format(database)}
+
+    # dbm-metrics
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
+    payload = dbm_metrics[0]
+    # metrics rows
+    sqlserver_rows = payload.get('sqlserver_rows', [])
+    assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
+    assert len(sqlserver_rows) == dbm_instance['query_metrics']['max_queries']
+
+    # check that it's sorted
+    assert sqlserver_rows == sorted(sqlserver_rows, key=lambda i: i['total_elapsed_time'], reverse=True)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
     "metadata,expected_metadata_payload",
     [
         (
@@ -451,7 +504,7 @@ def test_statement_metadata(
 
     query = '''
     -- Test comment
-    select * from sys.databases'''
+    select * from sys.sysusers'''
     query_signature = '6d1d070f9b6c5647'
 
     def _run_query():
@@ -499,36 +552,80 @@ def test_statement_metadata(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
-    "cloud_metadata",
+    "input_cloud_metadata,output_cloud_metadata",
     [
-        {},
-        {
-            'azure': {
-                'deployment_type': 'managed_instance',
-                'database_name': 'my-instance',
+        ({}, {}),
+        (
+            {
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance.abcea3661b20.database.windows.net',
+                },
             },
-        },
-        {
-            'aws': {
-                'instance_endpoint': 'foo.aws.com',
+            {
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance.abcea3661b20.database.windows.net',
+                },
             },
-            'azure': {
-                'deployment_type': 'managed_instance',
-                'database_name': 'my-instance',
+        ),
+        (
+            {
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'fully_qualified_domain_name': 'my-instance.abcea3661b20.database.windows.net',
+                },
             },
-        },
-        {
-            'gcp': {
-                'project_id': 'foo-project',
-                'instance_id': 'bar',
-                'extra_field': 'included',
+            {
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance.abcea3661b20.database.windows.net',
+                },
             },
-        },
+        ),
+        (
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance.abcea3661b20.database.windows.net',
+                },
+            },
+            {
+                'aws': {
+                    'instance_endpoint': 'foo.aws.com',
+                },
+                'azure': {
+                    'deployment_type': 'managed_instance',
+                    'name': 'my-instance.abcea3661b20.database.windows.net',
+                },
+            },
+        ),
+        (
+            {
+                'gcp': {
+                    'project_id': 'foo-project',
+                    'instance_id': 'bar',
+                    'extra_field': 'included',
+                },
+            },
+            {
+                'gcp': {
+                    'project_id': 'foo-project',
+                    'instance_id': 'bar',
+                    'extra_field': 'included',
+                },
+            },
+        ),
     ],
 )
-def test_statement_cloud_metadata(aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, cloud_metadata):
-    if cloud_metadata:
-        for k, v in cloud_metadata.items():
+def test_statement_cloud_metadata(
+    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, input_cloud_metadata, output_cloud_metadata
+):
+    if input_cloud_metadata:
+        for k, v in input_cloud_metadata.items():
             dbm_instance[k] = v
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
@@ -558,9 +655,9 @@ def test_statement_cloud_metadata(aggregator, dd_run_check, dbm_instance, bob_co
     assert payload['host'] == "stubbed.hostname", "wrong hostname"
     assert payload['ddagenthostname'] == datadog_agent.get_hostname()
     # cloud metadata
-    assert payload['cloud_metadata'] == cloud_metadata, "wrong cloud_metadata"
+    assert payload['cloud_metadata'] == output_cloud_metadata, "wrong cloud_metadata"
     # test that we're reading the edition out of the db instance. Note that this edition is what
-    # is running in our test docker containers so it's not expected to match the test cloud metadata
+    # is running in our test docker containers, so it's not expected to match the test cloud metadata
     assert payload['sqlserver_engine_edition'] in SELF_HOSTED_ENGINE_EDITIONS, "wrong edition"
 
 
@@ -620,7 +717,8 @@ def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
     # without the cast this is expected to fail with
     # pyodbc.ProgrammingError: ('ODBC SQL type -150 is not yet supported.  column-index=77  type=-150', 'HY106')
     with datadog_conn_docker.cursor() as cursor:
-        params = (math.ceil(time.time() - now),)
+        lookback_seconds = math.ceil(time.time() - now) + 60
+        params = (lookback_seconds,)
         logging.debug("running statement_metrics_query [%s] %s", statement_metrics_query, params)
         cursor.execute(statement_metrics_query, params)
 

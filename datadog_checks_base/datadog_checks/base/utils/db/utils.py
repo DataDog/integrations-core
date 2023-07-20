@@ -11,13 +11,13 @@ import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from itertools import chain
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
 from cachetools import TTLCache
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
-from datadog_checks.base.utils.db.types import Transformer
+from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
 
@@ -101,7 +101,6 @@ def create_extra_transformer(column_transformer, source=None):
 
     # Extra transformers that call regular transformers will want to pass values directly.
     else:
-
         transformer = column_transformer
 
     return transformer
@@ -256,6 +255,9 @@ class DBMAsyncJob(object):
         self._job_name = job_name
 
     def cancel(self):
+        """
+        Send a signal to cancel the job loop asynchronously.
+        """
         self._cancel_event.set()
 
     def run_job_loop(self, tags):
@@ -335,7 +337,8 @@ class DBMAsyncJob(object):
 
     def _run_job_rate_limited(self):
         self._run_job_traced()
-        self._rate_limiter.sleep()
+        if not self._cancel_event.isSet():
+            self._rate_limiter.sleep()
 
     @_traced_dbm_async_job_method
     def _run_job_traced(self):

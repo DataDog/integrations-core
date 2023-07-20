@@ -551,7 +551,7 @@
           "name":"host",
           "prefix":"host",
           "available_values":[
-             
+
           ],
           "default":"*"
        },
@@ -559,7 +559,7 @@
           "name":"replica_server",
           "prefix":"replica_server_name",
           "available_values":[
-             
+
           ],
           "default":"*"
        },
@@ -567,15 +567,13 @@
           "name":"availability_group",
           "prefix":"availability_group_name",
           "available_values":[
-             
+
           ],
           "default":"*"
        }
     ],
     "layout_type":"ordered",
     "notify_list":[
-       
     ],
-    "reflow_type":"fixed",
-    "id":"hhu-5vj-tjv"
+    "reflow_type":"fixed"
  }

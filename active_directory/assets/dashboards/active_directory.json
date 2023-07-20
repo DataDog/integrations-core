@@ -493,6 +493,5 @@
   "layout_type": "ordered",
   "is_read_only": true,
   "notify_list": [],
-  "reflow_type": "fixed",
-  "id": 30388
+  "reflow_type": "fixed"
 }

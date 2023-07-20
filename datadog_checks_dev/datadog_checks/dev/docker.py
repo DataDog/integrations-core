@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from contextlib import contextmanager
-from typing import Iterator
+from typing import Iterator  # noqa: F401
 
 from six import string_types
 from six.moves.urllib.parse import urlparse

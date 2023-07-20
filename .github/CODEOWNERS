@@ -12,7 +12,7 @@ conf.yaml.example     @DataDog/documentation @DataDog/agent-integrations
 conf.yaml.default     @DataDog/documentation @DataDog/agent-integrations @DataDog/agent-metrics-logs
 auto_conf.yaml        @DataDog/documentation @DataDog/agent-integrations @DataDog/container-integrations
 manifest.json         @DataDog/documentation @DataDog/agent-integrations
-assets/               @DataDog/agent-integrations
+assets/               @DataDog/documentation @DataDog/agent-integrations
 
 # Checks base
 /datadog_checks_base/                                          @DataDog/agent-integrations

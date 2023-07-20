@@ -1,0 +1,24 @@
+# HELP build_timestamp Build information
+# TYPE build_timestamp gauge
+build_timestamp{tag="v22.2.8",go_version="go1.19.6"} 1.681737728e+09
+# HELP admission_io_overload 1-normalized float indicating whether IO admission control considers the store as overloaded with respect to compaction out of L0 (considers sub-level and file counts).
+# TYPE admission_io_overload gauge
+admission_io_overload{store="1",node_id="1"} 0
+# HELP queue_replicate_replacedecommissioningreplica_error Number of failed decommissioning replica replica replacements processed by the replicate queue
+# TYPE queue_replicate_replacedecommissioningreplica_error counter
+queue_replicate_replacedecommissioningreplica_error{store="1",node_id="1"} 0
+# HELP jobs_auto_create_stats_currently_paused Number of auto_create_stats jobs currently considered Paused
+# TYPE jobs_auto_create_stats_currently_paused gauge
+jobs_auto_create_stats_currently_paused{node_id="1"} 0
+# HELP jobs_backup_currently_paused Number of backup jobs currently considered Paused
+# TYPE jobs_backup_currently_paused gauge
+jobs_backup_currently_paused{node_id="1"} 0
+# HELP jobs_changefeed_currently_paused Number of changefeed jobs currently considered Paused
+# TYPE jobs_changefeed_currently_paused gauge
+jobs_changefeed_currently_paused{node_id="1"} 0
+# HELP jobs_changefeed_protected_age_sec The age of the oldest PTS record protected by changefeed jobs
+# TYPE jobs_changefeed_protected_age_sec gauge
+jobs_changefeed_protected_age_sec{node_id="1"} 0
+# HELP jobs_row_level_ttl_currently_paused Number of row_level_ttl jobs currently considered Paused
+# TYPE jobs_row_level_ttl_currently_paused gauge
+jobs_row_level_ttl_currently_paused{node_id="1"} 0

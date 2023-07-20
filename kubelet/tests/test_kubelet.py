@@ -72,6 +72,10 @@ EXPECTED_METRICS_COMMON = [
     'kubernetes.kubelet.cpu.usage',
     'kubernetes.kubelet.memory.usage',
     'kubernetes.kubelet.memory.rss',
+    'kubernetes.node.filesystem.usage',
+    'kubernetes.node.filesystem.usage_pct',
+    'kubernetes.node.image.filesystem.usage',
+    'kubernetes.node.image.filesystem.usage_pct',
 ]
 
 EXPECTED_METRICS_PROMETHEUS = [
@@ -178,6 +182,10 @@ EXPECTED_METRICS_PROMETHEUS_1_21 = [
     'kubernetes.runtime.cpu.usage',
     'kubernetes.runtime.memory.usage',
     'kubernetes.runtime.memory.rss',
+    'kubernetes.node.filesystem.usage',
+    'kubernetes.node.filesystem.usage_pct',
+    'kubernetes.node.image.filesystem.usage',
+    'kubernetes.node.image.filesystem.usage_pct',
 ]
 
 COMMON_TAGS = {
@@ -776,7 +784,7 @@ def test_report_container_spec_metrics(monkeypatch, tagger):
         mock.call('kubernetes.memory.limits', 536870912.0, ['kube_container_name:datadog-agent'] + instance_tags),
         mock.call('kubernetes.cpu.requests', 0.1, ["pod_name:demo-app-success-c485bc67b-klj45"] + instance_tags),
     ]
-    if any(map(lambda e: 'pod_name:pi-kff76' in e, [x[0][2] for x in check.gauge.call_args_list])):
+    if any(('pod_name:pi-kff76' in e for e in [x[0][2] for x in check.gauge.call_args_list])):
         raise AssertionError("kubernetes.cpu.requests was submitted for a non-running pod")
     check.gauge.assert_has_calls(calls, any_order=True)
 
@@ -833,9 +841,9 @@ def test_report_container_state_metrics(monkeypatch, tagger):
     container_state_gauges = [
         x[0][2] for x in check.gauge.call_args_list if x[0][0].startswith('kubernetes.containers.state')
     ]
-    if any(map(lambda e: 'reason:TransientReason' in e, container_state_gauges)):
+    if any(('reason:TransientReason' in e for e in container_state_gauges)):
         raise AssertionError('kubernetes.containers.state.* was submitted with a transient reason')
-    if any(map(lambda e: not any(x for x in e if x.startswith('reason:')), container_state_gauges)):
+    if any((not any(x for x in e if x.startswith('reason:')) for e in container_state_gauges)):
         raise AssertionError('kubernetes.containers.state.* was submitted without a reason')
 
 
@@ -893,6 +901,10 @@ def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
     aggregator.assert_metric('kubernetes.rest.client.latency.count')
     aggregator.assert_metric('kubernetes.rest.client.latency.sum')
     aggregator.assert_metric('kubernetes.rest.client.requests')
+    aggregator.assert_metric('kubernetes.node.filesystem.usage')
+    aggregator.assert_metric('kubernetes.node.filesystem.usage_pct')
+    aggregator.assert_metric('kubernetes.node.image.filesystem.usage')
+    aggregator.assert_metric('kubernetes.node.image.filesystem.usage_pct')
     aggregator.assert_all_metrics_covered()
 
 
@@ -1226,6 +1238,7 @@ def test_process_stats_summary_as_source_filtering_by_namespace(monkeypatch):
     monkeypatch.setattr(check, 'rate', mock.Mock())
     pod_list_utils = PodListUtils(json.loads(mock_from_file('pods_windows.json')))
     stats = json.loads(mock_from_file('stats_summary_windows.json'))
+    del stats['node']
 
     # Namespace is excluded, so it shouldn't report any metrics
     monkeypatch.setattr(pod_list_utils, 'is_namespace_excluded', mock.Mock(return_value=True))
@@ -1265,6 +1278,12 @@ def test_create_pod_tags_by_pvc(monkeypatch, tagger):
     pod_tags_by_pvc = check._create_pod_tags_by_pvc(pod_list)
 
     expected_result = {
+        'default/web-2-ephemeralvolume': {
+            'kube_namespace:default',
+            'kube_service:nginx',
+            'kube_stateful_set:web',
+            'namespace:default',
+        },
         'default/www-web-2': {
             'kube_namespace:default',
             'kube_service:nginx',

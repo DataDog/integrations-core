@@ -12,8 +12,9 @@
     "title": "CRI",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Category::Containers"
+      "Category::Containers",
+      "Category::Kubernetes",
+      "Supported OS::Linux"
     ]
   },
   "author": {

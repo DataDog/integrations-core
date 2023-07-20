@@ -12,6 +12,8 @@ from .types import Instance
 class AzureIoTEdgeCheck(OpenMetricsBaseCheck):
     __NAMESPACE__ = 'azure.iot_edge'  # Child of `azure.` namespace.
 
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, name, init_config, instances):
         self._config = Config(cast(Instance, instances[0]))
         super(AzureIoTEdgeCheck, self).__init__(

@@ -1,2 +1,1 @@
 # CHANGELOG - Amazon EKS
-

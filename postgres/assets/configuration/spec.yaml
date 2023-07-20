@@ -145,6 +145,18 @@ files:
       value:
         type: integer
         example: 60000
+    - name: max_connections
+      hidden: true
+      description: |
+        Sets the upper bound limit on the number of concurrent connections the Agent can have on the database server.
+        The Agent needs to open additional connections to collect explain plans across databases. 
+        Idle connections are cached, but pruned over time to balance the performance impact of opening connections and the cost of having many open connections. 
+        Raising the default value should only be needed on workloads with >50 databases. 
+        Lowering the default value can reduce the number of explain plans collected and is not recommended in most cases.
+      value:
+        type: integer
+        example: 30
+        display_default: 30
     - name: relations
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
@@ -258,6 +270,7 @@ files:
       description: |
         Collect metrics about WAL file age.
         NOTE: You must be running the check local to your database if you want to enable this option.
+        Starting PG10, wal metrics are collected by default using `pg_ls_waldir` and don't need local access anymore.
       value:
         type: boolean
         example: false
@@ -299,6 +312,62 @@ files:
                   type: <COLUMNS_2_TYPE>
               tags:
                 - <TAG_KEY>:<TAG_VALUE>
+    - name: database_autodiscovery 
+      description: |
+        Define the configuration for database autodiscovery.
+        Complete this section if you want to auto-discover databases on this host
+        instead of specifying each using dbname. 
+      options:
+        - name: enabled
+          description: Enable database autodiscovery.
+          value:
+            type: boolean
+            example: false
+            display_default: false 
+        - name: max_databases
+          description: The maximum number of databases this host should monitor.
+          value:
+            type: integer
+            example: 100
+            display_default: 100
+        - name: include
+          description: |
+            Regular expression for database names to include as part of 
+            database autodiscovery.
+            Will report metrics for databases that are found in this instance, 
+            ignores databases listed but not found.
+            Character casing is ignored. The regular expressions start matching from 
+            the beginning, so to match anywhere, prepend `.*`. For exact matches append `$`.
+            Defaults to `.*` to include everything.
+          value: 
+            type: array
+            items:
+              type: string
+            example:
+              - "master$"
+              - "AdventureWorks.*"
+            display_default:
+              - ".*"
+        - name: exclude
+          description: |
+            Regular expression for database names to exclude as part of `database_autodiscovery`.
+            Character casing is ignored. The regular expressions start matching from the beginning,
+            so to match anywhere, prepend `.*`. For exact matches append `$`.
+            In case of conflicts, database exclusion via `exclude` takes precedence over
+            those found via `include`
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "model"
+              - "msdb"
+        - name: refresh
+          description: Frequency in seconds of scans for new databases. Defaults to 10 minutes.
+          value:
+            type: integer
+            example: 600
+            display_default: 600
     - name: application_name
       description: |
         The application_name can be any string of less than NAMEDATALEN characters (64 characters in a standard build).
@@ -399,17 +468,17 @@ files:
             example: 10000
         - name: explain_parameterized_queries
           description: |
-            Note, this is a BETA feature. This option will enable the ability to explain parameterized queries.
+            This option will enable the ability to explain parameterized queries.
             This is useful if your SQL clients are using the extended query protocol or prepared statements.
           value:
             type: boolean
-            example: false
+            example: true
     - name: query_activity
       description: Configure collection of query activity
       options:
         - name: enabled
           description: |
-            Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
+            Enable collection of query activity. Requires `dbm: true`.
           value:
             type: boolean
             example: true
@@ -427,6 +496,22 @@ files:
           value:
             type: number
             example: 3500
+    - name: collect_settings
+      description: Configure collection of pg_settings. This is an alpha feature.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of pg_settings. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the database settings collection interval (in seconds). Each collection involves a single query to
+            `pg_settings`.
+          value:
+            type: number
+            example: 600
 
     - name: aws
       description: |
@@ -448,6 +533,13 @@ files:
           value:
             type: string
             example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+        - name: region
+          description: |
+            Equal to the region of the instance the agent is connecting to. 
+            This value is used to configure IAM authentication.
+          value:
+            type: string
+            example: us-east-1
 
     - name: gcp
       description: |
@@ -501,12 +593,14 @@ files:
           value:
             type: string
             example: flexible_server
-        - name: name
+        - name: fully_qualified_domain_name
           description: |
-            Equal to the name of the Azure PostgreSQL database.
+            Equal to the full qualified domain name of the Azure PostgreSQL database.
+            
+            This value is optional if the value of `host` is already configured to the fully qualified domain name.
           value:
             type: string
-            example: my-postgres-database
+            example: my-postgres-database.database.windows.net
 
     - name: obfuscator_options
       description: |

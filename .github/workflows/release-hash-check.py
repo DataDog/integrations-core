@@ -19,7 +19,7 @@ def error(*args):
 
 
 updated_link_files = [f for f in sys.argv[1:] if fnmatch(f, '.in-toto/tag.*.link')]
-if len(updated_link_files) < 0:
+if not updated_link_files:
     error("The release-hash-check should only run upon modification of a link file.")
 if len(updated_link_files) > 1:
     error("There should never be two different link files modified at the same time.")

@@ -129,6 +129,13 @@ instances:
     #
     # try_sudo: false
 
+    ## @param pid_cache_duration - integer - optional - default: 120
+    ## Changes the check refresh rate of the matching pid list every X seconds except if it
+    ## detects a change before. You might want to set it low if you want to
+    ## alert on process service checks.
+    #
+    # pid_cache_duration: 120
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

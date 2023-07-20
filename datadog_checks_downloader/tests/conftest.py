@@ -58,6 +58,11 @@ def distribution_version(request):
     return request.config.getoption("--distribution-version")
 
 
+def pytest_generate_tests(metafunc):
+    if "disable_verification" in metafunc.fixturenames:
+        metafunc.parametrize("disable_verification", [False, True])
+
+
 @pytest.fixture(autouse=True)
 def temporary_local_repo(monkeypatch, tmp_path):
     """

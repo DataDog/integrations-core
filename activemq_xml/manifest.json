@@ -12,12 +12,11 @@
     "title": "ActiveMQ XML",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Processing",
       "Category::Log Collection",
-      "Category::Messaging"
+      "Category::Messaging",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

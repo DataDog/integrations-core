@@ -425,7 +425,7 @@ def get_check_files(check_name, file_suffix='.py', abs_file_path=True, include_t
 
 
 def get_valid_checks():
-    return {path for path in os.listdir(get_root()) if file_exists(get_version_file(path))}
+    return {path for path in os.listdir(get_root()) if path == 'ddev' or file_exists(get_version_file(path))}
 
 
 def get_valid_integrations():
@@ -510,9 +510,15 @@ def get_version_string(check_name, tag_prefix='v', pattern=None):
     # Check the version file of the integration if available
     # Otherwise, get the latest SemVer git tag for the project
     if check_name:
-        version = VERSION.search(read_version_file(check_name))
-        if version:
-            return version.group(1)
+        if check_name == 'ddev':
+            with open(os.path.join(get_root(), check_name, 'CHANGELOG.md'), encoding='utf-8') as f:
+                for line in f:
+                    if line.startswith('## ') and line.strip() != '## Unreleased':
+                        return line.split()[1].strip()
+        else:
+            version = VERSION.search(read_version_file(check_name))
+            if version:
+                return version.group(1)
     else:
         return get_latest_tag(pattern=pattern, tag_prefix=tag_prefix)
 

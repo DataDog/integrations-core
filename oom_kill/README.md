@@ -24,7 +24,7 @@ yum install -y kernel-devel-$(uname -r)
 ```
 
 **Note**: Kernel version 4.11 or later is required for the OOM Kill check to work.
-In addition, Windows, Container-Optimized OS, and CentOS/RHEL versions earlier than 8 are not supported.
+In addition, Windows and CentOS/RHEL versions earlier than 8 are not supported.
 
 ### Configuration
 
@@ -66,6 +66,37 @@ In addition to mounting `system-probe.yaml` and `oom_kill.d/conf.yaml` as descri
 
 With the [Datadog Helm chart][4], ensure that the `datadog.systemProbe` and `datadog.systemProbe.enableOOMKill` parameters are enabled in the `values.yaml` file.
 
+### Configuration with the Operator (v1.0.0+)
+
+Set the `features.oomKill.enabled` parameter in the DatadogAgent manifest:
+```yaml
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+spec:
+  features:
+    oomKill:
+      enabled: true
+```
+
+**Note**: When using COS (Container Optimized OS), override the `src` volume in the node Agent:
+```yaml
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+spec:
+  features:
+    oomKill:
+      enabled: true
+  override:
+    nodeAgent:
+      volumes: 
+      - emptyDir: {}
+        name: src
+```
+
 ### Validation
 
 [Run the Agent's status subcommand][5] and look for `oom_kill` under the Checks section.
@@ -88,10 +119,10 @@ The OOM Kill check submits an event for each OOM Kill that includes the killed p
 
 Need help? Contact [Datadog support][7].
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/oom_kill.d/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[4]: https://github.com/helm/charts/tree/master/stable/datadog
+[4]: https://github.com/DataDog/helm-charts
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/oom_kill/metadata.csv
 [7]: https://docs.datadoghq.com/help/

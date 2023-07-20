@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 from itertools import chain
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
-from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.db.types import QueriesExecutor, QueriesSubmitter, Transformer
+from datadog_checks.base import AgentCheck  # noqa: F401
+from datadog_checks.base.utils.db.types import QueriesExecutor, QueriesSubmitter, Transformer  # noqa: F401
 
 from ...config import is_affirmative
 from ..containers import iter_unique
@@ -105,6 +105,9 @@ class QueryExecutor(object):
                         continue
                     elif column_type == 'tag':
                         tags.append(transformer(None, column_value))  # get_tag transformer
+                    elif column_type == 'tag_not_null':
+                        if column_value is not None:
+                            tags.append(transformer(None, column_value))  # get_tag transformer
                     elif column_type == 'tag_list':
                         tags.extend(transformer(None, column_value))  # get_tag_list transformer
                     else:

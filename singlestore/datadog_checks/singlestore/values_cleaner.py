@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import AnyStr, Callable, Sequence, Union
+from typing import AnyStr, Callable, Sequence, Union  # noqa: F401
 
 from datadog_checks.singlestore.queries import AGGREGATORS, MV_GLOBAL_STATUS
 

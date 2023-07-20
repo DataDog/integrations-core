@@ -28,7 +28,7 @@ def assert_metadata_events(aggregator, events):
     assert events == actual_events, "ACTUAL EVENTS: " + json.dumps(actual_events, indent=4)
 
 
-def assert_device_metadata(aggregator, device_metadata):
+def assert_device_metadata(aggregator, expected_device):
     events = get_events(aggregator)
 
     assert len(events) >= 1
@@ -37,7 +37,11 @@ def assert_device_metadata(aggregator, device_metadata):
     pprint.pprint(event1['devices'])
     assert len(event1['devices']) == 1
 
-    assert device_metadata == event1['devices'][0]
+    actual_device = event1['devices'][0]
+    for device in [actual_device, expected_device]:
+        device.get('tags', []).sort()
+
+    assert actual_device == expected_device
 
 
 def test_e2e_core_metadata_f5(dd_agent_check):
@@ -151,7 +155,6 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                 {"interface_id": "default:{}:32".format(device_ip), "ip_address": "10.164.0.51", "prefixlen": 32}
             ],
             u'namespace': u'default',
-            u'subnet': u'',
         },
     ]
     assert_metadata_events(aggregator, events)
@@ -173,8 +176,8 @@ def test_e2e_core_metadata_cisco_3850(dd_agent_check):
 
     events = get_events(aggregator)
 
-    # since there are >100 resources (device+interfaces), the interfaces are split into 2 events
-    assert len(events) == 2
+    # since there are >100 resources (device+interfaces+links), the metadata is split into 3 events
+    assert len(events) == 3
     event1 = events[0]
 
     # assert device (there is only one device)
@@ -562,7 +565,7 @@ def test_e2e_core_metadata_aruba_switch(dd_agent_check):
         'profile': 'aruba-switch',
         'serial_number': 'CV0009200',
         'status': 1,
-        'sys_object_id': '1.3.6.1.4.1.14823.1.1.32',
+        'sys_object_id': '1.3.6.1.4.1.14823.1.1.999',
         'tags': [
             'device_namespace:default',
             'device_vendor:aruba',
@@ -687,14 +690,13 @@ def test_e2e_core_metadata_palo_alto(dd_agent_check):
         'model': 'PA-3020',
         'os_name': 'PAN-OS',
         'os_version': '9.0.5',
-        'product_name': 'PA-3000 series firewall',
+        'product_name': 'user palo-alto product name',
         'profile': 'palo-alto',
         'serial_number': '015351000009999',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.25461.2.3.18',
         'tags': [
             'device_namespace:default',
-            'device_vendor:paloaltonetworks',
             'snmp_device:' + device_ip,
             'snmp_profile:palo-alto',
         ],
@@ -748,13 +750,56 @@ def test_e2e_core_metadata_netapp(dd_agent_check):
     assert_device_metadata(aggregator, device)
 
 
+def test_e2e_core_metadata_checkpoint(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'checkpoint',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        'description': 'Linux host1 3.10.0-957.21.3cpx86_64 #1 SMP Tue Jan 28 17:26:12 IST 2020 x86_64',
+        'id': 'default:' + device_ip,
+        'id_tags': [
+            'device_namespace:default',
+            'snmp_device:' + device_ip,
+        ],
+        'ip_address': device_ip,
+        'model': 'Check Point 3200',
+        'os_name': 'Gaia',
+        'os_version': '3.10.0',
+        'product_name': 'SVN Foundation',
+        'profile': 'checkpoint',
+        'serial_number': '1711BA4008',
+        'status': 1,
+        'sys_object_id': '1.3.6.1.4.1.2620.1.1',
+        'tags': [
+            'device_namespace:default',
+            'device_vendor:checkpoint',
+            'snmp_device:' + device_ip,
+            'snmp_profile:checkpoint',
+        ],
+        'vendor': 'checkpoint',
+        'version': 'R80.10',
+    }
+    assert_device_metadata(aggregator, device)
+
+
 def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
     config = common.generate_container_instance_config([])
     instance = config['instances'][0]
     instance.update(
         {
-            'community_string': 'checkpoint-firewall',
+            'community_string': 'checkpoint',
             'loader': 'core',
+            'profile': 'checkpoint-firewall',
         }
     )
 
@@ -1185,3 +1230,42 @@ def test_e2e_core_metadata_cisco_cdp_lldp(dd_agent_check):
 
     assert events[0]['links'][0] == topology_link
     assert len(events[0]['links']) == 1
+
+
+def test_e2e_core_metadata_cisco_wlc(dd_agent_check):
+    config = common.generate_container_instance_config([])
+    instance = config['instances'][0]
+    instance.update(
+        {
+            'community_string': 'cisco-5500-wlc',
+            'loader': 'core',
+        }
+    )
+
+    aggregator = dd_agent_check(config, rate=False)
+
+    device_ip = instance['ip_address']
+
+    device = {
+        u'description': u'Cisco Controller',
+        u'id': u'default:' + device_ip,
+        u'id_tags': [
+            u'device_namespace:default',
+            u'snmp_device:' + device_ip,
+        ],
+        u'ip_address': device_ip,
+        u'location': 'Datadog Paris',
+        u'name': 'DDOGWLC',
+        u'profile': u'cisco-legacy-wlc',
+        u'status': 1,
+        u'sys_object_id': u'1.3.6.1.4.1.9.1.1069',
+        u'tags': [
+            u'device_namespace:default',
+            u'device_vendor:cisco',
+            u'snmp_device:' + device_ip,
+            u'snmp_host:DDOGWLC',
+            u'snmp_profile:cisco-legacy-wlc',
+        ],
+        u'vendor': u'cisco',
+    }
+    assert_device_metadata(aggregator, device)

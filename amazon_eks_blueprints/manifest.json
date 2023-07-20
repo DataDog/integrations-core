@@ -12,12 +12,13 @@
     "title": "Datadog Blueprints Add-on",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::AWS",
+      "Category::Configuration & Deployment",
       "Category::Containers",
-      "Category::Orchestration"
+      "Category::Orchestration",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {

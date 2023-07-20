@@ -13,6 +13,9 @@ from .metrics import METRIC_MAP
 
 class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     __NAMESPACE__ = 'arangodb'
+
+    DEFAULT_METRIC_LIMIT = 0
+
     SERVER_MODE_ENDPOINT = '/_admin/server/mode'
     SERVER_ID_ENDPOINT = '/_admin/server/id'
     SERVER_TAGS = {'mode': SERVER_MODE_ENDPOINT, 'id': SERVER_ID_ENDPOINT}

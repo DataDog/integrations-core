@@ -9,8 +9,8 @@ files:
     options:
       - name: use_preview
         description: |
-          Enable this option to run the Prometheus-based check of etcd.
-          Note: This requires etcd v3 or greater.
+          Deprecated and unused. The Prometheus-based check is the default and only implementation.
+        hidden: true
         value:
           type: boolean
           example: true
@@ -22,13 +22,6 @@ files:
         value:
           type: boolean
           example: true
-      - name: url
-        description: |
-          Note: the following configuration option is only available when `use_preview` option is set to `false`.
-          The API endpoint of your etcd instance.
-        value:
-          type: string
-          example: https://server:port
 
   - template: logs
     example:
@@ -63,8 +56,6 @@ files:
       description: |
         Prometheus endpoint of your etcd instance.
         One of possible_prometheus_urls or prometheus_url parameter is required.
-
-        Note: To monitor ETCD versions pre-3.x.x, set `use_preview` to `false` and use the `url` configuration option.
       required: false
       value:
         example: http://%%host%%:2379/metrics

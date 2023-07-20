@@ -20,7 +20,7 @@ SUPERVISOR_VERSION = os.getenv('SUPERVISOR_VERSION')
 # Supervisord should run 3 programs for 10, 20 and 30 seconds
 # respectively.
 # The following dictionnary shows the processes by state for each iteration.
-PROCESSES_BY_STATE_BY_ITERATION = [dict(up=PROCESSES[x:], down=PROCESSES[:x], unknown=[]) for x in range(4)]
+PROCESSES_BY_STATE_BY_ITERATION = [{"up": PROCESSES[x:], "down": PROCESSES[:x], "unknown": []} for x in range(4)]
 
 # Configs for Integration Tests
 SUPERVISORD_CONFIG = {'name': "travis", 'host': HOST, 'port': '19001'}

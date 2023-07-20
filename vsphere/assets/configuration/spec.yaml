@@ -338,6 +338,15 @@ files:
         value:
           type: boolean
           example: false
+      - name: vm_hostname_suffix_tag
+        description: |
+          If specified, the integration will submit hostnames as <VM_NAME-SUFFIX> where suffix is the
+          value of the given tag key
+
+          If a VM does not have a matching tag with the key, the integration will leave out the suffix
+        value:
+          type: string
+          example: <TAG_KEY>
       - name: threads_count
         description: |
           This integration is using threads internally when making queries against the vCenter API.

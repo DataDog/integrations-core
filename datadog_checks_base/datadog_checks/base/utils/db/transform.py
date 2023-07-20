@@ -6,10 +6,10 @@ from __future__ import division
 import re
 import time
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
-from datadog_checks.base.types import ServiceCheckStatus
-from datadog_checks.base.utils.db.types import Transformer, TransformerFactory
+from datadog_checks.base.types import ServiceCheckStatus  # noqa: F401
+from datadog_checks.base.utils.db.types import Transformer, TransformerFactory  # noqa: F401
 
 from ... import is_affirmative
 from ...constants import ServiceCheck
@@ -491,6 +491,7 @@ COLUMN_TRANSFORMERS = {
     'temporal_percent': get_temporal_percent,
     'monotonic_gauge': get_monotonic_gauge,
     'tag': get_tag,
+    'tag_not_null': get_tag,
     'tag_list': get_tag_list,
     'match': get_match,
     'service_check': get_service_check,

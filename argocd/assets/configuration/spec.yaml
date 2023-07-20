@@ -28,6 +28,13 @@ files:
         display_default: null
         example: http://argocd-repo-server:8084/metrics
         type: string
+    - name: notifications_controller_endpoint
+      description: |
+        Endpoint exposing Notification Controller's Prometheus metrics.
+      value:
+        display_default: null
+        example: http://argocd-notifications-controller:9001/metrics
+        type: string
     - template: instances/openmetrics
       overrides:
         openmetrics_endpoint.required: false

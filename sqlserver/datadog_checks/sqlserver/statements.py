@@ -21,7 +21,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.sqlserver.utils import is_statement_proc
+from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments, is_statement_proc
 
 try:
     import datadog_agent
@@ -56,9 +56,9 @@ STATEMENT_METRICS_QUERY = """\
 with qstats as (
     select query_hash, query_plan_hash, last_execution_time, last_elapsed_time,
             CONCAT(
-                CONVERT(binary(64), plan_handle),
-                CONVERT(binary(4), statement_start_offset),
-                CONVERT(binary(4), statement_end_offset)) as plan_handle_and_offsets,
+                CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
+                CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
+                CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1)) as plan_handle_and_offsets,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
            {query_metrics_columns}
     from sys.dm_exec_query_stats
@@ -74,9 +74,9 @@ qstats_aggr as (
     group by query_hash, query_plan_hash, S.dbid, D.name
 ),
 qstats_aggr_split as (select TOP {limit}
-    convert(varbinary(64), substring(plan_handle_and_offsets, 1, 64)) as plan_handle,
-    convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+1, 4))) as statement_start_offset,
-    convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+6, 4))) as statement_end_offset,
+    convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
+    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
+    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
     * from qstats_aggr
     where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
 )
@@ -86,9 +86,9 @@ select
         WHEN -1 THEN DATALENGTH(text)
         ELSE statement_end_offset END
             - statement_start_offset) / 2) + 1) AS statement_text,
-    qt.text,
+    SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     encrypted as is_encrypted,
-    * from qstats_aggr_split
+    s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
 
@@ -98,18 +98,18 @@ STATEMENT_METRICS_QUERY_NO_AGGREGATES = """\
 with qstats_aggr as (
     select TOP {limit} query_hash, query_plan_hash,
         max(CONCAT(
-            CONVERT(binary(64), plan_handle),
-            CONVERT(binary(4), statement_start_offset),
-            CONVERT(binary(4), statement_end_offset))) as plan_handle_and_offsets,
+            CONVERT(VARCHAR(64), CONVERT(binary(64), plan_handle), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_start_offset), 1),
+            CONVERT(VARCHAR(10), CONVERT(varbinary(4), statement_end_offset), 1))) as plan_handle_and_offsets,
         {query_metrics_column_sums}
         from sys.dm_exec_query_stats S
         where last_execution_time > dateadd(second, -?, getdate())
         group by query_hash, query_plan_hash
 ),
 qstats_aggr_split as (select
-    convert(varbinary(64), substring(plan_handle_and_offsets, 1, 64)) as plan_handle,
-    convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+1, 4))) as statement_start_offset,
-    convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+6, 4))) as statement_end_offset,
+    convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
+    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
+    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
     * from qstats_aggr
 )
 select
@@ -118,9 +118,9 @@ select
         WHEN -1 THEN DATALENGTH(text)
         ELSE statement_end_offset
     END - statement_start_offset) / 2) + 1) AS statement_text,
-    qt.text,
+    SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     encrypted as is_encrypted,
-    * from qstats_aggr_split
+    s.* from qstats_aggr_split s
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
 
@@ -185,6 +185,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
     def __init__(self, check):
         self.check = check
+        # do not emit any dd.internal metrics for DBM specific check code
+        self.tags = [t for t in self.check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         collection_interval = float(
             check.statement_metrics_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
@@ -217,6 +219,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._conn_key_prefix = "dbm-"
         self._statement_metrics_query = None
         self._last_stats_query_time = None
+        self._max_query_metrics = check.statement_metrics_config.get("max_queries", 250)
 
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -239,7 +242,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
     def _get_available_query_metrics_columns(self, cursor, all_expected_columns):
         cursor.execute("select top 0 * from sys.dm_exec_query_stats")
-        all_columns = set([i[0] for i in cursor.description])
+        all_columns = {i[0] for i in cursor.description}
         available_columns = [c for c in all_expected_columns if c in all_columns]
         missing_columns = set(all_expected_columns) - set(available_columns)
         if missing_columns:
@@ -262,6 +265,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             query_metrics_column_sums=', '.join(['sum({}) as {}'.format(c, c) for c in available_columns]),
             collection_interval=int(math.ceil(self.collection_interval) * 2),
             limit=self.dm_exec_query_stats_row_limit,
+            proc_char_limit=PROC_CHAR_LIMIT,
         )
         return self._statement_metrics_query
 
@@ -305,6 +309,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 )
                 continue
             obfuscated_statement = statement['query']
+            comments = extract_sql_comments(row['text'])
+            row['dd_comments'] = comments
             # update 'text' field to be obfuscated stmt
             row['text'] = obfuscated_statement
             if procedure_statement:
@@ -319,7 +325,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             metadata = statement['metadata']
             row['dd_tables'] = metadata.get('tables', None)
             row['dd_commands'] = metadata.get('commands', None)
-            row['dd_comments'] = metadata.get('comments', None)
+            if not comments:
+                row['dd_comments'] = metadata.get('comments', None)
             normalized_rows.append(row)
         return normalized_rows
 
@@ -335,20 +342,25 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     @staticmethod
     def _to_metrics_payload_row(row):
         row = {k: v for k, v in row.items()}
-        if 'dd_comments' in row:
-            del row['dd_comments']
         # remove the statement_text field, so we do not forward deobfuscated text
         # to the backend
         if 'statement_text' in row:
             del row['statement_text']
+        # we're already able to link to the procedure via procedure_name and procedure_signature so we don't need
+        # the text in metrics payloads
+        if 'procedure_text' in row:
+            del row['procedure_text']
         return row
 
-    def _to_metrics_payload(self, rows):
+    def _to_metrics_payload(self, rows, max_queries):
+        # sort by total_elapsed_time and return the top max_queries
+        rows = sorted(rows, key=lambda i: i['total_elapsed_time'], reverse=True)
+        rows = rows[:max_queries]
         return {
             'host': self.check.resolved_hostname,
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
-            'tags': self.check.tags,
+            'tags': self.tags,
             'cloud_metadata': self.check.cloud_metadata,
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
@@ -375,7 +387,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     return
                 for event in self._rows_to_fqt_events(rows):
                     self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
-                payload = self._to_metrics_payload(rows)
+                payload = self._to_metrics_payload(rows, self._max_query_metrics)
                 self.check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
                 for event in self._collect_plans(rows, cursor, deadline):
                     self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
@@ -401,7 +413,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
-            tags = list(self.check.tags)
+            tags = list(self.tags)
             if 'database_name' in row:
                 tags += ["db:{}".format(row['database_name'])]
             yield {
@@ -475,7 +487,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         1,
                         **self.check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))])
                     )
-                tags = list(self.check.tags)
+                tags = list(self.tags)
 
                 # for stored procedures, we want to send the plan
                 # events with the full procedure text, not the text
@@ -497,6 +509,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "ddtags": ",".join(tags),
                     "timestamp": time.time() * 1000,
                     "dbm_type": "plan",
+                    "cloud_metadata": self.check.cloud_metadata,
+                    'sqlserver_version': self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+                    'sqlserver_engine_edition': self.check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
                     "db": {
                         "instance": row.get("database_name", None),
                         "plan": {

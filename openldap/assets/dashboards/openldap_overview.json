@@ -603,6 +603,5 @@
   "layout_type": "ordered",
   "is_read_only": true,
   "notify_list": [],
-  "reflow_type": "fixed",
-  "id": "be8-8nz-b6u"
+  "reflow_type": "fixed"
 }

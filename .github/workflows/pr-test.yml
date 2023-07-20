@@ -54,7 +54,20 @@ jobs:
   submit-traces:
     needs:
     - test
-    if: inputs.repo == 'core' && (success() || failure())
+    if: inputs.repo == 'core' && (success() || failure()) && github.event.pull_request.head.repo.full_name == github.repository
 
     uses: ./.github/workflows/submit-traces.yml
     secrets: inherit
+
+  check:
+    needs:
+    - test
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check status of required jobs
+      uses: re-actors/alls-green@release/v1
+      with:
+        jobs: ${{ toJSON(needs) }}
+        allowed-skips: test

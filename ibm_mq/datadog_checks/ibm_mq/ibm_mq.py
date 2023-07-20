@@ -15,7 +15,7 @@ from .config import IBMMQConfig
 from .process_matcher import QueueManagerProcessMatcher
 
 try:
-    from typing import Any, Dict, List
+    from typing import Any, Dict, List  # noqa: F401
 except ImportError:
     pass
 

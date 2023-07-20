@@ -66,8 +66,8 @@ init_config:
     # profiles:
     #   f5-big-ip:
     #     definition_file: f5-big-ip.yaml
-    #   router:
-    #     definition_file: generic-router.yaml
+    #   cisco-asr:
+    #     definition_file: cisco-asr.yaml
 
     ## @param refresh_oids_cache_interval - integer - optional - default: 0
     ## Note: Beta feature, only available using python SNMP integration.

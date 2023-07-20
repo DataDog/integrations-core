@@ -196,6 +196,21 @@ KNOWN_COUNTERS = {
     'jobs_backup_resume_failed',
     'jobs_backup_resume_retry_error',
     'jobs_backup_resume_completed',
+    'rebalancing_queriespersecond',
+    'range_merges',
+    'sql_new_conns',
+    'txnwaitqueue_deadlocks_total',
+    'txn_restarts_writetoooldmulti',
+    'txn_restarts_unknown',
+    'txn_restarts_txnpush',
+    'txn_restarts_txnaborted',
+    'jobs_auto_create_stats_resume_failed',
+    'changefeed_emitted_bytes',
+    'jobs_row_level_ttl_resume_completed',
+    'jobs_row_level_ttl_resume_failed',
+    'jobs_row_level_ttl_rows_selected',
+    'jobs_row_level_ttl_rows_deleted',
+    'schedules_scheduled_row_level_ttl_executor_failed',
 }
 
 EXPECTED_METRICS = []

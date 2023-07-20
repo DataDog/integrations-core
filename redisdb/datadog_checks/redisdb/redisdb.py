@@ -71,6 +71,9 @@ class Redis(AgentCheck):
         'bytes_sent_per_sec': 'redis.bytes_sent_per_sec',
         # Note: 'bytes_received_per_sec' and 'bytes_sent_per_sec' are only
         # available on Azure Redis
+        'instantaneous_input_kbps': 'redis.net.instantaneous_input',
+        'instantaneous_output_kbps': 'redis.net.instantaneous_output',
+        'total_connections_received': 'redis.net.total_connections_received',
         # pubsub
         'pubsub_channels': 'redis.pubsub.channels',
         'pubsub_patterns': 'redis.pubsub.patterns',
@@ -173,7 +176,7 @@ class Redis(AgentCheck):
 
                 # Set a default timeout (in seconds) if no timeout is specified in the instance config
                 instance_config['socket_timeout'] = instance_config.get('socket_timeout', 5)
-                connection_params = dict((k, instance_config[k]) for k in list_params if k in instance_config)
+                connection_params = {k: instance_config[k] for k in list_params if k in instance_config}
                 # If caching is disabled, we overwrite the dictionary value so the old connection
                 # will be closed as soon as the corresponding Python object gets garbage collected
                 self.connections[key] = redis.Redis(**connection_params)
@@ -194,19 +197,19 @@ class Redis(AgentCheck):
         return tags
 
     def _check_db(self):
+        tags = list(self.tags)
         conn = self._get_conn(self.instance)
+
         # Ping the database for info, and track the latency.
         # Process the service check: the check passes if we can connect to Redis
-        start = (
-            time.time() if PY2 else time.process_time()
-        )  # New in python 3.3: time.process_time (It does not include time elapsed during sleep)
-        tags = list(self.tags)
         try:
-            info = conn.info()
-            cur_time = (
-                time.time() if PY2 else time.process_time()
-            )  # New in python 3.3: time.process_time (It does not include time elapsed during sleep)
-            latency_ms = round_value((cur_time - start) * 1000, 2)
+            # By running a ping first, we get a recent connection in an attempt to
+            # reduce the chance of connection time affecting our latency measurements
+            conn.ping()
+
+            info, info_latency_ms = _call_and_time(conn.info)
+            _, ping_latency_ms = _call_and_time(conn.ping)
+
             self._collect_metadata(info)
         except ValueError as e:
             self.service_check('redis.can_connect', AgentCheck.CRITICAL, message=str(e), tags=self.tags)
@@ -222,7 +225,8 @@ class Redis(AgentCheck):
         else:
             self.log.debug("Redis role was not found")
 
-        self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
+        self.gauge('redis.info.latency_ms', info_latency_ms, tags=tags)
+        self.gauge('redis.ping.latency_ms', ping_latency_ms, tags=tags)
 
         try:
             config = conn.config_get("maxclients")
@@ -380,8 +384,8 @@ class Redis(AgentCheck):
                         lengths_overall[text_key] += 1
                     elif key_type == 'stream':
                         keylen = db_conn.xlen(key)
-                        lengths[text_key]["length"] += 1
-                        lengths_overall[text_key] += 1
+                        lengths[text_key]["length"] += keylen
+                        lengths_overall[text_key] += keylen
                     else:
                         # If the type is unknown, it might be because the key doesn't exist,
                         # which can be because the list is empty. So always send 0 in that case.
@@ -559,3 +563,13 @@ class Redis(AgentCheck):
     def _collect_metadata(self, info):
         if info and 'redis_version' in info:
             self.set_metadata('version', info['redis_version'])
+
+
+_timer = time.time if PY2 else time.perf_counter
+
+
+def _call_and_time(func):
+    start_time = _timer()
+    rv = func()
+    end_time = _timer()
+    return rv, round_value((end_time - start_time) * 1000, 2)

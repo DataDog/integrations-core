@@ -213,7 +213,7 @@ Need help? Contact [Datadog support][12].
 
 - [Track performance impact of code changes with TeamCity and Datadog.][13]
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://www.jetbrains.com/help/teamcity/enabling-guest-login.html
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/teamcity/datadog_checks/teamcity/data/conf.yaml.example

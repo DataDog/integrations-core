@@ -11,7 +11,7 @@ from click.testing import CliRunner
 from datadog_checks.dev import run_command
 
 # E501: line too long (XXX > 120 characters)
-# flake8: noqa: E501
+# ruff: noqa: E501
 HEADER = "metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric"
 
 

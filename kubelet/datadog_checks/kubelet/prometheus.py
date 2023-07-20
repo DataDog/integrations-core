@@ -17,8 +17,8 @@ from .common import get_container_label, get_pod_by_uid, is_static_pending_pod, 
 METRIC_TYPES = ['counter', 'gauge', 'summary']
 
 # container-specific metrics should have all these labels
-PRE_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container_name', 'pod_name'])
-POST_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container', 'pod'])
+PRE_1_16_CONTAINER_LABELS = {'namespace', 'name', 'image', 'id', 'container_name', 'pod_name'}
+POST_1_16_CONTAINER_LABELS = {'namespace', 'name', 'image', 'id', 'container', 'pod'}
 
 # Value above which the figure can be discarded because it's an aberrant transient value
 MAX_MEMORY_RSS = 2**63
@@ -74,7 +74,9 @@ class CadvisorPrometheusScraperMixin(object):
         This is so the base class can create a scraper_config with the proper values.
         """
         kubelet_conn_info = get_connection_info()
-        endpoint = kubelet_conn_info.get('url')
+
+        # dummy needed in case kubelet isn't running when the check is first
+        endpoint = kubelet_conn_info.get('url') if kubelet_conn_info is not None else "dummy_url/cadvisor"
 
         cadvisor_instance = deepcopy(instance)
         cadvisor_instance.update(

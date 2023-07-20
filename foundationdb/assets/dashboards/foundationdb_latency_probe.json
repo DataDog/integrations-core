@@ -50,7 +50,7 @@
                 "max":"auto"
              },
              "markers":[
-                
+
              ]
           },
           "layout":{
@@ -126,7 +126,7 @@
                 "max":"auto"
              },
              "markers":[
-                
+
              ]
           },
           "layout":{
@@ -184,7 +184,7 @@
                 "max":"auto"
              },
              "markers":[
-                
+
              ]
           },
           "layout":{
@@ -222,15 +222,14 @@
           "default":"*",
           "prefix":"service",
           "available_values":[
-             
+
           ]
        }
     ],
     "layout_type":"ordered",
     "is_read_only":false,
     "notify_list":[
-       
+
     ],
-    "reflow_type":"fixed",
-    "id":"e9c-35y-64x"
+    "reflow_type":"fixed"
  }

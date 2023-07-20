@@ -3,16 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import random
+import re
 import string
 from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
 from packaging.version import Version
-from tests.common import query_time_series
 
 from datadog_checks.base.types import ServiceCheck
 from datadog_checks.cloudera.metrics import NATIVE_METRICS, TIMESERIES_METRICS
+from tests.common import query_time_series
 
 pytestmark = [pytest.mark.unit]
 
@@ -25,7 +26,7 @@ pytestmark = [pytest.mark.unit]
             [],
             pytest.raises(
                 Exception,
-                match='Setting `include` must be an array',
+                match=re.escape('clusters -> include\n  Input should be an instance of Sequence'),
             ),
             [
                 {
@@ -43,7 +44,7 @@ pytestmark = [pytest.mark.unit]
             [],
             pytest.raises(
                 Exception,
-                match='Setting `include` must be an array',
+                match=re.escape('clusters -> include\n  Input should be an instance of Sequence'),
             ),
             [
                 {
@@ -61,7 +62,12 @@ pytestmark = [pytest.mark.unit]
             [],
             pytest.raises(
                 Exception,
-                match='`include` entries must be a map or a string',
+                match=re.escape(
+                    'clusters -> include -> 1 -> str\n'
+                    '  Input should be a valid string\n'
+                    'clusters -> include -> 1 -> dict[str,any]\n'
+                    '  Input should be a valid dictionary'
+                ),
             ),
             [
                 {
@@ -79,7 +85,12 @@ pytestmark = [pytest.mark.unit]
             [],
             pytest.raises(
                 Exception,
-                match='`include` entries must be a map or a string',
+                match=re.escape(
+                    'clusters -> include -> 1 -> str\n'
+                    '  Input should be a valid string\n'
+                    'clusters -> include -> 1 -> dict[str,any]\n'
+                    '  Input should be a valid dictionary'
+                ),
             ),
             [
                 {

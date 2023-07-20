@@ -3,12 +3,12 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import time
 from contextlib import contextmanager
-from typing import Any, Dict, Generator, Iterator, List, Type
+from typing import Any, Dict, Generator, Iterator, List, Type  # noqa: F401
 
-from pyVmomi import vim
+from pyVmomi import vim  # noqa: F401
 from six import iterkeys
 
-from datadog_checks.vsphere.types import CounterId, MetricName, ResourceTags
+from datadog_checks.vsphere.types import CounterId, MetricName, ResourceTags  # noqa: F401
 
 
 class VSphereCache(object):
@@ -68,7 +68,7 @@ class MetricsMetadataCache(VSphereCache):
 
     def get_metadata(self, resource_type):
         # type: (Type[vim.ManagedEntity]) -> Dict[CounterId, MetricName]
-        return self._content[resource_type]
+        return self._content.get(resource_type, {})
 
     def set_metadata(self, resource_type, metadata):
         # type: (Type[vim.ManagedEntity], Dict[CounterId, MetricName]) -> None

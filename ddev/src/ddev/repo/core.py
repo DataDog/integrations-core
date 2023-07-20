@@ -7,7 +7,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Dict, Iterable
 
 from ddev.integration.core import Integration
-from ddev.repo.constants import CONFIG_DIRECTORY
+from ddev.repo.constants import CONFIG_DIRECTORY, FULL_NAMES
 from ddev.utils.fs import Path
 from ddev.utils.git import GitManager
 
@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 class Repository:
     def __init__(self, name: str, path: str):
         self.__name = name
+        self.__full_name = FULL_NAMES.get(name, name)
         self.__path = Path(path).expand()
         self.__git = GitManager(self.__path)
         self.__integrations = IntegrationRegistry(self)
@@ -25,6 +26,10 @@ class Repository:
     @property
     def name(self) -> str:
         return self.__name
+
+    @property
+    def full_name(self) -> str:
+        return self.__full_name
 
     @property
     def path(self) -> Path:
@@ -43,6 +48,10 @@ class Repository:
         from ddev.repo.config import RepositoryConfig
 
         return RepositoryConfig(self.path / CONFIG_DIRECTORY / 'config.toml')
+
+    @cached_property
+    def agent_requirements(self) -> Path:
+        return self.path / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
 
 
 class IntegrationRegistry:

@@ -54,10 +54,11 @@ SERVER_METRICS = [
 ]
 
 SQLSERVER_MAJOR_VERSION = int(os.environ.get('SQLSERVER_MAJOR_VERSION'))
+SQLSERVER_ENGINE_EDITION = int(os.environ.get('SQLSERVER_ENGINE_EDITION'))
 
 
 def get_expected_file_stats_metrics():
-    query_file_stats = get_query_file_stats(SQLSERVER_MAJOR_VERSION)
+    query_file_stats = get_query_file_stats(SQLSERVER_MAJOR_VERSION, SQLSERVER_ENGINE_EDITION)
     return ["sqlserver." + c["name"] for c in query_file_stats["columns"] if c["type"] != "tag"]
 
 
@@ -89,9 +90,9 @@ EXPECTED_METRICS = (
     + CUSTOM_METRICS
 )
 
-DBM_MIGRATED_METRICS_NAMES = set(m[0] for m in DBM_MIGRATED_METRICS)
+DBM_MIGRATED_METRICS_NAMES = {m[0] for m in DBM_MIGRATED_METRICS}
 EXPECTED_METRICS_DBM_ENABLED = [m for m in EXPECTED_METRICS if m not in DBM_MIGRATED_METRICS_NAMES]
-DB_PERF_COUNT_METRICS_NAMES = set(m[0] for m in INSTANCE_METRICS_DATABASE)
+DB_PERF_COUNT_METRICS_NAMES = {m[0] for m in INSTANCE_METRICS_DATABASE}
 
 # These AO metrics are collected using the new QueryExecutor API instead of BaseSqlServerMetric.
 EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY = [

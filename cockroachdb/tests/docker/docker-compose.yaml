@@ -12,6 +12,8 @@ services:
     ports:
       - "26257:26257"
       - "8080:8080"
+    volumes:
+      - ./sql.sh:/sql.sh
     networks:
      - roachnet
 

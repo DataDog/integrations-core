@@ -1567,6 +1567,5 @@
   "layout_type": "ordered",
   "is_read_only": true,
   "notify_list": [],
-  "reflow_type": "fixed",
-  "id": "exk-fsj-54w"
+  "reflow_type": "fixed"
 }

@@ -1181,8 +1181,8 @@ def test_integration_standalone(aggregator, dd_run_check):
     )
     optional_metric_values = (SPARK_STREAMING_STATISTICS_METRIC_VALUES,)
     # Extract all keys
-    expected_metrics = set(k for j in expected_metric_values for k in j)
-    optional_metrics = set(k for j in optional_metric_values for k in j)
+    expected_metrics = {k for j in expected_metric_values for k in j}
+    optional_metrics = {k for j in optional_metric_values for k in j}
     # Check the running job metrics
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
@@ -1214,8 +1214,8 @@ def test_integration_driver_1(aggregator, dd_run_check):
         SPARK_EXECUTOR_METRIC_VALUES,
     )
     # Extract all keys
-    expected_metrics = set(k for j in all_metric_values for k in j)
-    optional_metrics = set(k for j in optional_metric_values for k in j)
+    expected_metrics = {k for j in all_metric_values for k in j}
+    optional_metrics = {k for j in optional_metric_values for k in j}
 
     # Check the running job metrics
     for metric in expected_metrics:
@@ -1249,8 +1249,8 @@ def test_integration_driver_2(aggregator, dd_run_check):
         SPARK_JOB_SUCCEEDED_METRIC_VALUES,
     )
     # Extract all keys
-    expected_metrics = set(k for j in all_metric_values for k in j)
-    optional_metrics = set(k for j in optional_metric_values for k in j)
+    expected_metrics = {k for j in all_metric_values for k in j}
+    optional_metrics = {k for j in optional_metric_values for k in j}
 
     # Check the running job metrics
     for metric in expected_metrics:

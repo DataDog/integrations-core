@@ -217,7 +217,7 @@ metrics:
 ```yaml
 metrics:
   - MIB: CISCO-IF-EXTENSION-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     table:
       OID: 1.3.6.1.4.1.9.9.276.1.1.2
       name: cieIfInterfaceTable
@@ -359,7 +359,7 @@ metrics:
   table:
     OID: 1.3.6.1.2.1.4.31.1
     name: ipSystemStatsTable
-  forced_type: monotonic_count
+  metric_type: monotonic_count
   symbols:
   - OID: 1.3.6.1.2.1.4.31.1.1.4
     name: ipSystemStatsHCInReceives
@@ -377,56 +377,6 @@ metrics:
 
 See meaning of index as used here in [Using an index](#using-an-index) section.
 
-##### Formatting MAC Addresses
-
-If you see MAC Address in tags being encoded as `0x000000000000` instead of `00:00:00:00:00:00`,
-then you can use `format: mac_address` to format the MAC Address to `00:00:00:00:00:00` format.
-
-Example:
-
-```yaml
-metrics:
-  - MIB: MERAKI-CLOUD-CONTROLLER-MIB
-    table:
-      OID: 1.3.6.1.4.1.29671.1.1.4
-      name: devTable
-    symbols:
-      - OID: 1.3.6.1.4.1.29671.1.1.4.1.5
-        name: devClientCount
-    metric_tags:
-      - column:
-          OID: 1.3.6.1.4.1.29671.1.1.4.1.1
-          name: devMac
-          format: mac_address
-        tag: mac_address
-```
-
-In this case, the metrics will be tagged with `mac_address:00:00:00:00:00:00`.
-
-##### Formatting IP Addresses
-
-If you see IP Address in tags being encoded as `0x0a430007` instead of `10.67.0.7`,
-then you can use `format: ip_address` to format the IP Address to `10.67.0.7` format.
-
-Example:
-
-```yaml
-metrics:
-  - MIB: MY-MIB
-    symbols:
-      - OID: 1.2.3.4.6.7.1.2
-        name: myOidSymbol
-    metric_tags:
-      - column:
-          OID: 1.2.3.4.6.7.1.3
-          name: oidValueWithIpAsBytes
-          format: ip_address
-        tag: connected_device
-```
-
-In this case, the metrics `snmp.myOidSymbol` will be tagged like this: `connected_device:10.67.0.7`.
-
-This `format: ip_address` formatter also works for IPv6 when the input bytes represent IPv6. 
 
 ##### Tagging tips
 
@@ -457,7 +407,7 @@ SNMP types not listed in this table are submitted as `gauge` by default.
 
 Sometimes the inferred type may not be what you want. Typically, OIDs that represent "total number of X" are defined as `Counter32` in MIBs, but you probably want to submit them `monotonic_count` instead of a `rate`.
 
-For such cases, you can define a `forced_type`. Possible values and their effect are listed below.
+For such cases, you can define a `metric_type`. Possible values and their effect are listed below.
 
 | Forced type                | Description                                                  |
 | -------------------------- | ------------------------------------------------------------ |
@@ -474,61 +424,38 @@ This works on both symbol and table metrics:
 metrics:
   # On a symbol:
   - MIB: TCP-MIB
-    forced_type: monotonic_count
     symbol:
       OID: 1.3.6.1.2.1.6.5
       name: tcpActiveOpens
-  # On a table:
+      metric_type: monotonic_count
+  # On a table, apply same metric_type to all metrics:
   - MIB: IP-MIB
     table:
       OID: 1.3.6.1.2.1.4.31.1
       name: ipSystemStatsTable
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbols:
     - OID: 1.3.6.1.2.1.4.31.1.1.4
       name: ipSystemStatsHCInReceives
     - OID: 1.3.6.1.2.1.4.31.1.1.6
       name: ipSystemStatsHCInOctets
+  # On a table, apply different metric_type per metric:
+  - MIB: IP-MIB
+    table:
+      OID: 1.3.6.1.2.1.4.31.1
+      name: ipSystemStatsTable
+    symbols:
+    - OID: 1.3.6.1.2.1.4.31.1.1.4
+      name: ipSystemStatsHCInReceives
+      metric_type: monotonic_count
+    - OID: 1.3.6.1.2.1.4.31.1.1.6
+      name: ipSystemStatsHCInOctets
+      metric_type: gauge
 ```
-
-!!! note
-    When used on a table metrics entry, `forced_type` is applied to _all_ symbols in the entry.
-
-    So, if a table contains symbols of varying types, you should use multiple `metrics` entries: one for symbols with inferred metric types, and one for each `forced_type`.
-
-    For example:
-
-    ```yaml
-    metrics:
-      - MIB: F5-BIGIP-LOCAL-MIB
-        table:
-          OID: 1.3.6.1.4.1.3375.2.2.5.2.3
-          name: ltmPoolStatTable
-        # No `forced_type` specified => metric types will be inferred.
-        symbols:
-          - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.2
-            name: ltmPoolStatServerPktsIn
-          - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.4
-            name: ltmPoolStatServerPktsOut
-          # ...
-
-      - MIB: F5-BIGIP-LOCAL-MIB
-        table:
-          OID: 1.3.6.1.4.1.3375.2.2.5.2.3
-          name: ltmPoolStatTable
-        forced_type: monotonic_count
-        # All these symbols will be submitted as monotonic counts.
-        symbols:
-          - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.7
-            name: ltmPoolStatServerTotConns
-          - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.23
-            name: ltmPoolStatConnqServiced
-          # ...
-    ```
 
 ##### Flag stream
 
-When the value is a flag stream like `010101`, you can use `forced_type: flag_stream` to submit each flag as individual metric with value `0` or `1`. Two options are required when using `flag_stream`:
+When the value is a flag stream like `010101`, you can use `metric_type: flag_stream` to submit each flag as individual metric with value `0` or `1`. Two options are required when using `flag_stream`:
 
 - `options.placement`: position of the flag in the flag stream (1-based indexing, first element is placement 1).
 - `options.metric_suffix`: suffix appended to the metric name for a specific flag, usually matching the name of the flag. 
@@ -541,7 +468,7 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
       name: upsBasicStateOutputState
-    forced_type: flag_stream
+    metric_type: flag_stream
     options:
       placement: 4
       metric_suffix: OnLine
@@ -549,7 +476,7 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.318.1.1.1.11.1.1.0
       name: upsBasicStateOutputState
-    forced_type: flag_stream
+    metric_type: flag_stream
     options:
       placement: 5
       metric_suffix: ReplaceBattery
@@ -559,68 +486,33 @@ This example will submit two metrics `snmp.upsBasicStateOutputState.OnLine` and 
 
 [Example of flag_stream usage in a profile](https://github.com/DataDog/integrations-core/blob/e64e2d18529c6c106f02435c5fdf2621667c16ad/snmp/datadog_checks/snmp/data/profiles/apc_ups.yaml#L60-L127).
 
-#### Extract value
 
-If the metric value to be submitted is from a OID with string value and needs to be extracted from it, you can use extract value feature.
+#### Report string OIDs
 
-`extract_value` is a regex pattern with one capture group like `(\d+)C`, where the capture group is `(\d+)`.
+To report statuses from your network devices, you can use the constant metrics feature available in Agent 7.45+.
 
-Example use cases respective regex patterns:
+`constant_value_one` sends a constant metric, equal to one, that can be tagged with string properties.
 
-- stripping the C unit from a temperature value: `(\d+)C`
-- stripping the USD unit from a currency value: `USD(\d+)`
-- stripping the F unit from a temperature value with spaces between the metric and the unit: `(\d+) *F`
-
-Example:
-
-**Scalar Metric Example:**
+Example use case:
 
 ```yaml
 metrics:
   - MIB: MY-MIB
-    symbol:
-      OID: 1.2.3.4.5.6.7
-      name: temperature
-      extract_value: '(\d+)C'
-```
-
-**Table Column Metric Example:**
-
-```yaml
-metrics:
-  - MIB: MY-MIB
-    table:
-      OID: 1.2.3.4.5.6
-      name: myTable
     symbols:
-      - OID: 1.2.3.4.5.6.7
-        name: temperature
-        extract_value: '(\d+)C'
+      - name: myDevice
+        constant_value_one: true
+    metric_tags:
+      - tag: status
+        column:
+          OID: 1.2.3.4
+          name: myStatus
+        mapping:
+          1: up
+          2: down
     # ...
 ```
 
-In the examples above, the OID value is a snmp OctetString value `22C` and we want `22` to be submitted as value for `snmp.temperature`.
-
-##### `extract_value` can be used to trim surrounding non-printable characters
-
-If the raw SNMP OctetString value contains leading or trailing non-printable characters, you can use `extract_value` regex like `([a-zA-Z0-9_]+)` to ignore them.
-
-```yaml
-metrics:
-  - MIB: IF-MIB
-    table:
-      OID: 1.3.6.1.2.1.2.2
-      name: ifTable
-    symbols:
-      - OID: 1.3.6.1.2.1.2.2.1.14
-        name: ifInErrors
-    metric_tags:
-      - tag: interface
-        column:
-          OID: 1.3.6.1.2.1.2.2.1.2
-          name: ifDescr
-          extract_value: '([a-zA-Z0-9_]+)' # will ignore surrounding non-printable characters
-```
+An `snmp.myDevice` metric is sent, with a value of 1 and tagged by statuses. This allows you to monitor status changes, number of devices per state, etc., in Datadog.
 
 ### `metric_tags`
 
@@ -692,25 +584,6 @@ metadata:
           name: chassisSerialNumber
 ```
 
-#### Value from an OID (symbol) value with regex match
-
-```yaml
-metadata:
-  device:
-    fields:
-      vendor:
-        value: "dell"
-      version:
-        symbol:
-          OID: 1.3.6.1.2.1.1.1.0
-          name: sysDescr
-          match_pattern: 'Isilon OneFS v(\S+)'
-          match_value: '$1'
-          # Will match `8.2.0.0` in `device-name-3 263829375 Isilon OneFS v8.2.0.0`
-```
-
-Regex groups captured in `match_pattern` can be used in `match_value`. `$1` is the first captured group, `$2` is the second captured group, and so on.
-
 #### Value from multiple OIDs (symbols)
 
 When the value might be from multiple symbols, we try to get the value from first symbol, if the value can't be fetched (e.g. OID not available from the device), we try to get the value from the second symbol, and so on.
@@ -730,3 +603,157 @@ metadata:
 ```
 
 All OID values are fetched, even if they might not be used in the end. In the example above, both `1.3.6.100.0` and `1.3.6.101.0` are retrieved.
+
+
+### Symbol modifiers
+
+#### `extract_value`
+
+If the metric value to be submitted is from a OID with string value and needs to be extracted from it, you can use extract value feature.
+
+`extract_value` is a regex pattern with one capture group like `(\d+)C`, where the capture group is `(\d+)`.
+
+Example use cases respective regex patterns:
+
+- stripping the C unit from a temperature value: `(\d+)C`
+- stripping the USD unit from a currency value: `USD(\d+)`
+- stripping the F unit from a temperature value with spaces between the metric and the unit: `(\d+) *F`
+
+Example:
+
+**Scalar Metric Example:**
+
+```yaml
+metrics:
+  - MIB: MY-MIB
+    symbol:
+      OID: 1.2.3.4.5.6.7
+      name: temperature
+      extract_value: '(\d+)C'
+```
+
+**Table Column Metric Example:**
+
+```yaml
+metrics:
+  - MIB: MY-MIB
+    table:
+      OID: 1.2.3.4.5.6
+      name: myTable
+    symbols:
+      - OID: 1.2.3.4.5.6.7
+        name: temperature
+        extract_value: '(\d+)C'
+    # ...
+```
+
+In the examples above, the OID value is a snmp OctetString value `22C` and we want `22` to be submitted as value for `snmp.temperature`.
+
+##### `extract_value` can be used to trim surrounding non-printable characters
+
+If the raw SNMP OctetString value contains leading or trailing non-printable characters, you can use `extract_value` regex like `([a-zA-Z0-9_]+)` to ignore them.
+
+```yaml
+metrics:
+  - MIB: IF-MIB
+    table:
+      OID: 1.3.6.1.2.1.2.2
+      name: ifTable
+    symbols:
+      - OID: 1.3.6.1.2.1.2.2.1.14
+        name: ifInErrors
+    metric_tags:
+      - tag: interface
+        column:
+          OID: 1.3.6.1.2.1.2.2.1.2
+          name: ifDescr
+          extract_value: '([a-zA-Z0-9_]+)' # will ignore surrounding non-printable characters
+```
+
+#### `match_pattern` and `match_value`
+
+```yaml
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "dell"
+      version:
+        symbol:
+          OID: 1.3.6.1.2.1.1.1.0
+          name: sysDescr
+          match_pattern: 'Isilon OneFS v(\S+)'
+          match_value: '$1'
+          # Will match `8.2.0.0` in `device-name-3 263829375 Isilon OneFS v8.2.0.0`
+```
+
+Regex groups captured in `match_pattern` can be used in `match_value`. `$1` is the first captured group, `$2` is the second captured group, and so on.
+
+#### `format: mac_address`
+
+If you see MAC Address in tags being encoded as `0x000000000000` instead of `00:00:00:00:00:00`,
+then you can use `format: mac_address` to format the MAC Address to `00:00:00:00:00:00` format.
+
+Example:
+
+```yaml
+metrics:
+  - MIB: MERAKI-CLOUD-CONTROLLER-MIB
+    table:
+      OID: 1.3.6.1.4.1.29671.1.1.4
+      name: devTable
+    symbols:
+      - OID: 1.3.6.1.4.1.29671.1.1.4.1.5
+        name: devClientCount
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.29671.1.1.4.1.1
+          name: devMac
+          format: mac_address
+        tag: mac_address
+```
+
+In this case, the metrics will be tagged with `mac_address:00:00:00:00:00:00`.
+
+#### `format: ip_address`
+
+If you see IP Address in tags being encoded as `0x0a430007` instead of `10.67.0.7`,
+then you can use `format: ip_address` to format the IP Address to `10.67.0.7` format.
+
+Example:
+
+```yaml
+metrics:
+  - MIB: MY-MIB
+    symbols:
+      - OID: 1.2.3.4.6.7.1.2
+        name: myOidSymbol
+    metric_tags:
+      - column:
+          OID: 1.2.3.4.6.7.1.3
+          name: oidValueWithIpAsBytes
+          format: ip_address
+        tag: connected_device
+```
+
+In this case, the metrics `snmp.myOidSymbol` will be tagged like this: `connected_device:10.67.0.7`.
+
+This `format: ip_address` formatter also works for IPv6 when the input bytes represent IPv6. 
+
+#### `scale_factor`
+
+In a value is in kilobytes and you would like to convert it to bytes, `scale_factor` can be used for that.  
+
+Example:
+
+```yaml
+
+metrics:
+  - MIB: AIRESPACE-SWITCHING-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.14179.1.1.5.3 # agentFreeMemory (in Kb)
+      scale_factor: 1000 # convert to bytes
+      name: memory.free
+```
+
+To scale down by 1000x: `scale_factor: 0.001`.

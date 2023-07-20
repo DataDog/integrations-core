@@ -25,24 +25,22 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=25.1.0",
+    "datadog-checks-base>=32.0.0",
 ]
 dynamic = [
     "version",
 ]
-
-[project.license]
-text = "BSD-3-Clause"
+license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
     "boto3==1.17.112; python_version < '3.0'",
-    "boto3==1.26.51; python_version > '3.0'",
+    "boto3==1.27.0; python_version > '3.0'",
 ]
 
 [project.urls]

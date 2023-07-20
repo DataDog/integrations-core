@@ -23,7 +23,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
@@ -34,12 +34,11 @@ dynamic = [
     "version",
 ]
 
-[project.license]
-text = "BSD-3-Clause"
+license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "snowflake-connector-python==3.0.1; python_version > '3.0'",
+    "snowflake-connector-python==3.0.4; python_version > '3.0'",
 ]
 
 [project.urls]

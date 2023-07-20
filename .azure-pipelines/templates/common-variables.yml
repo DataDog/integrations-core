@@ -1,8 +1,0 @@
-variables:
-  - group: core-variables
-  - name: PIP_CACHE_DIR
-    value: $(Pipeline.Workspace)/.cache/pip
-  - name: DDEV_COLOR
-    value: 1
-  - name: DD_TRACE_AGENT_PORT
-    value: 8127

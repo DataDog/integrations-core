@@ -20,7 +20,7 @@ from dateutil import parser
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS
-from datadog_checks.sqlserver.utils import is_statement_proc
+from datadog_checks.sqlserver.utils import extract_sql_comments, is_statement_proc
 
 from .common import CHECK_NAME
 from .conftest import DEFAULT_TIMEOUT
@@ -58,19 +58,21 @@ def dbm_instance(instance_docker):
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize("use_autocommit", [True, False])
 @pytest.mark.parametrize(
-    "database,query,match_pattern,is_proc",
+    "database,query,match_pattern,is_proc,expected_comments",
     [
         [
             "datadog_test",
-            "SELECT * FROM ϑings",
+            "/*test=foo*/ SELECT * FROM ϑings",
             r"SELECT \* FROM ϑings",
             False,
+            ["/*test=foo*/"],
         ],
         [
             "datadog_test",
             "EXEC bobProc",
             r"SELECT \* FROM ϑings",
             True,
+            [],
         ],
     ],
 )
@@ -84,6 +86,7 @@ def test_collect_load_activity(
     query,
     match_pattern,
     is_proc,
+    expected_comments,
 ):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     blocking_query = "INSERT INTO ϑings WITH (TABLOCK, HOLDLOCK) (name) VALUES ('puppy')"
@@ -128,7 +131,8 @@ def test_collect_load_activity(
     fred_conn.close()
     executor.shutdown(wait=True)
 
-    expected_instance_tags = set(dbm_instance.get('tags', []))
+    instance_tags = set(dbm_instance.get('tags', []))
+    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert len(dbm_activity) == 1, "should have collected exactly one dbm-activity payload"
@@ -161,6 +165,7 @@ def test_collect_load_activity(
     assert blocked_row['now'], "missing current timestamp"
     assert blocked_row['last_request_start_time'], "missing last_request_start_time"
     assert blocked_row['now'], "missing current time"
+    assert blocked_row['dd_comments'] == expected_comments, "missing expected comments"
     # assert that the current timestamp is being collected as an ISO timestamp with TZ info
     assert parser.isoparse(blocked_row['now']).tzinfo, "current timestamp not formatted correctly"
     assert blocked_row["query_start"], "missing query_start"
@@ -205,8 +210,8 @@ def test_collect_load_activity(
             {'tables': ['ϑings'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
         ),
         (
-            {'tables_csv': '', 'commands': None, 'comments': None},
-            {'tables': None, 'commands': None, 'comments': None},
+            {'tables_csv': '', 'commands': None, 'comments': ['-- Test comment']},
+            {'tables': None, 'commands': None, 'comments': ['-- Test comment']},
         ),
     ],
 )
@@ -529,6 +534,144 @@ def test_is_statement_procedure(query, is_proc, expected_name):
     p, name = is_statement_proc(query)
     assert p == is_proc
     assert re.match(name, expected_name, re.IGNORECASE) if expected_name else expected_name == name
+
+
+@pytest.mark.parametrize(
+    "query,expected_comments",
+    [
+        [
+            None,
+            [],
+        ],
+        [
+            "",
+            [],
+        ],
+        [
+            "/*",
+            [],
+        ],
+        [
+            "--",
+            [],
+        ],
+        [
+            "/*justonecomment*/",
+            ["/*justonecomment*/"],
+        ],
+        [
+            """\
+            /* a comment */
+            -- Single comment
+            """,
+            ["/* a comment */", "-- Single comment"],
+        ],
+        [
+            "/*tag=foo*/ SELECT * FROM foo;",
+            ["/*tag=foo*/"],
+        ],
+        [
+            "/*tag=foo*/ SELECT * FROM /*other=tag,incomment=yes*/ foo;",
+            ["/*tag=foo*/", "/*other=tag,incomment=yes*/"],
+        ],
+        [
+            "/*tag=foo*/ SELECT * FROM /*other=tag,incomment=yes*/ foo /*lastword=yes*/",
+            ["/*tag=foo*/", "/*other=tag,incomment=yes*/", "/*lastword=yes*/"],
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            ["-- My Comment"],
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            BEGIN
+                SELECT name FROM bob
+            END;
+            """,
+            ["-- My Comment", "-- In the middle"],
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            ["-- My Comment", "-- In the middle", "-- And at the end"],
+        ],
+        [
+            """\
+            -- My Comment
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            /*mixed with mult-line foo*/
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            ["-- My Comment", "-- In the middle", "/*mixed with mult-line foo*/", "-- And at the end"],
+        ],
+        [
+            """\
+            /* hello
+            this is a mult-line-comment
+            tag=foo,blah=tag
+            */
+            /*
+            second multi-line
+            comment
+            */
+            CREATE PROCEDURE bobProcedure
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            [
+                "/* hello this is a mult-line-comment tag=foo,blah=tag */",
+                "/* second multi-line comment */",
+                "-- And at the end",
+            ],
+        ],
+        [
+            """\
+            /* hello
+            this is a mult-line-commet
+            tag=foo,blah=tag
+            */
+            CREATE PROCEDURE bobProcedure
+            -- In the middle
+            /*mixed with mult-line foo*/
+            BEGIN
+                SELECT name FROM bob
+            END;
+            -- And at the end
+            """,
+            [
+                "/* hello this is a mult-line-commet tag=foo,blah=tag */",
+                "-- In the middle",
+                "/*mixed with mult-line foo*/",
+                "-- And at the end",
+            ],
+        ],
+    ],
+)
+def test_extract_sql_comments(query, expected_comments):
+    comments = extract_sql_comments(query)
+    assert comments == expected_comments
 
 
 def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):

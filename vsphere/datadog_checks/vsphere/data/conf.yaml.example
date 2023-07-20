@@ -305,6 +305,14 @@ instances:
     #
     # use_guest_hostname: false
 
+    ## @param vm_hostname_suffix_tag - string - optional
+    ## If specified, the integration will submit hostnames as <VM_NAME-SUFFIX> where suffix is the
+    ## value of the given tag key
+    ##
+    ## If a VM does not have a matching tag with the key, the integration will leave out the suffix
+    #
+    # vm_hostname_suffix_tag: <TAG_KEY>
+
     ## @param threads_count - integer - optional - default: 4
     ## This integration is using threads internally when making queries against the vCenter API.
     ## Increasing this value will put more charge onto your vCenter server but may improve performances.

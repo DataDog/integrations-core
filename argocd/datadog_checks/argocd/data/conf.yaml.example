@@ -61,6 +61,11 @@ instances:
     #
     # repo_server_endpoint: http://argocd-repo-server:8084/metrics
 
+    ## @param notifications_controller_endpoint - string - optional
+    ## Endpoint exposing Notification Controller's Prometheus metrics.
+    #
+    # notifications_controller_endpoint: http://argocd-notifications-controller:9001/metrics
+
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.
@@ -171,6 +176,11 @@ instances:
     #
     # enable_health_service_check: true
 
+    ## @param ignore_connection_errors - boolean - optional - default: false
+    ## Whether or not to ignore connection errors when scraping `openmetrics_endpoint`.
+    #
+    # ignore_connection_errors: false
+
     ## @param hostname_label - string - optional
     ## Override the hostname for every metric submission with the value of one of its labels.
     #
@@ -265,11 +275,6 @@ instances:
     ## than the full metric name.
     #
     # cache_metric_wildcards: true
-
-    ## @param use_latest_spec - boolean - optional - default: false
-    ## Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
-    #
-    # use_latest_spec: false
 
     ## @param telemetry - boolean - optional - default: false
     ## Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.

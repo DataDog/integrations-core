@@ -6,7 +6,7 @@ import copy
 import re
 import time
 from enum import Enum
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple  # noqa: F401
 
 import psycopg2
 from cachetools import TTLCache
@@ -29,7 +29,6 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.explain_parameterized_queries import ExplainParameterizedQueries
 
 from .util import DatabaseConfigurationError, warning_with_tags
@@ -181,27 +180,33 @@ class PostgresStatementSamples(DBMAsyncJob):
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
 
-        self._conn_pool = MultiDatabaseConnectionPool(check._new_connection)
+        # if regular samples is disabled, only need to collect as often as activity is sampled
+        if not is_affirmative(config.statement_samples_config.get('enabled', True)):
+            collection_interval = config.statement_activity_config.get(
+                'collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL
+            )
 
-        def shutdown_cb():
-            self._conn_pool.close_all_connections()
-            return shutdown_callback()
+        self.db_pool = check.db_pool
 
         super(PostgresStatementSamples, self).__init__(
             check,
             rate_limit=1 / collection_interval,
             run_sync=is_affirmative(config.statement_samples_config.get('run_sync', False)),
-            enabled=is_affirmative(config.statement_samples_config.get('enabled', True)),
+            enabled=is_affirmative(
+                config.statement_samples_config.get('enabled', True)
+                or is_affirmative(config.statement_activity_config.get('enabled', True))
+            ),
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg2.errors.DatabaseError,),
             job_name="query-samples",
-            shutdown_callback=shutdown_cb,
+            shutdown_callback=shutdown_callback,
         )
         self._check = check
         self._config = config
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
+        self.tags = None
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
@@ -234,6 +239,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
         self._activity_coll_enabled = is_affirmative(self._config.statement_activity_config.get('enabled', True))
+        self._explain_plan_coll_enabled = is_affirmative(self._config.statement_samples_config.get('enabled', True))
+
         # activity events cannot be reported more often than regular samples
         self._activity_coll_interval = max(
             self._config.statement_activity_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL),
@@ -262,9 +269,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         query = PG_ACTIVE_CONNECTIONS_QUERY.format(
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
-        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
-            cursor_factory=psycopg2.extras.DictCursor
-        ) as cursor:
+        with self._check._get_main_db().cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
@@ -297,12 +302,12 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
         )
-        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
-            cursor_factory=psycopg2.extras.DictCursor
-        ) as cursor:
+
+        with self._check._get_main_db().cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             self._log.debug("Running query [%s] %s", query, params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
+
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
@@ -316,15 +321,13 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
-        with self._conn_pool.get_connection(self._config.dbname, ttl_ms=self._conn_ttl_ms).cursor(
-            cursor_factory=psycopg2.extras.DictCursor
-        ) as cursor:
+        with self._check._get_main_db().cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             cursor.execute(
                 "select * from {pg_stat_activity_view} LIMIT 0".format(
                     pg_stat_activity_view=self._config.pg_stat_activity_view
                 )
             )
-            all_columns = set([i[0] for i in cursor.description])
+            all_columns = {i[0] for i in cursor.description}
             available_columns = [c for c in all_expected_columns if c in all_columns]
             missing_columns = set(all_expected_columns) - set(available_columns)
             if missing_columns:
@@ -361,7 +364,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 insufficient_privilege_count,
-                tags=self._tags + ["error:insufficient-privilege"] + self._check._get_debug_tags(),
+                tags=self.tags + ["error:insufficient-privilege"] + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
             )
         return normalized_rows
@@ -415,20 +418,22 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._check.histogram(
             "dd.postgres.{}.time".format(method_name),
             (time.time() - start_time) * 1000,
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
         self._check.histogram(
             "dd.postgres.{}.rows".format(method_name),
             row_len,
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
 
     def run_job(self):
-        self._tags_no_db = [t for t in self._tags if not t.startswith('db:')]
+        # do not emit any dd.internal metrics for DBM specific check code
+        self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
+        self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
         self._collect_statement_samples()
-        self._conn_pool.prune_connections()
+        self.db_pool.prune_connections()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_statement_samples(self):
@@ -436,11 +441,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         pg_activity_cols = self._get_pg_stat_activity_cols_cached(PG_STAT_ACTIVITY_COLS)
         rows = self._get_new_pg_stat_activity(pg_activity_cols)
         rows = self._filter_and_normalize_statement_rows(rows)
-        event_samples = self._collect_plans(rows)
         submitted_count = 0
-        for e in event_samples:
-            self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
-            submitted_count += 1
+        if self._explain_plan_coll_enabled:
+            event_samples = self._collect_plans(rows)
+            for e in event_samples:
+                self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
+                submitted_count += 1
 
         if self._report_activity_event():
             active_connections = self._get_active_connections()
@@ -449,37 +455,37 @@ class PostgresStatementSamples(DBMAsyncJob):
                 json.dumps(activity_event, default=default_json_event_encoding)
             )
             self._check.histogram(
-                "dd.postgres.collect_activity_snapshot.time", (time.time() - start_time) * 1000, tags=self._tags
+                "dd.postgres.collect_activity_snapshot.time", (time.time() - start_time) * 1000, tags=self.tags
             )
         elapsed_ms = (time.time() - start_time) * 1000
         self._check.histogram(
             "dd.postgres.collect_statement_samples.time",
             elapsed_ms,
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
         self._check.count(
             "dd.postgres.collect_statement_samples.events_submitted.count",
             submitted_count,
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.seen_samples_cache.len",
             len(self._seen_samples_ratelimiter),
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.explained_statements_cache.len",
             len(self._explained_statements_ratelimiter),
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.explain_errors_cache.len",
             len(self._explain_errors_cache),
-            tags=self._tags + self._check._get_debug_tags(),
+            tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
 
@@ -512,7 +518,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_db_explain_setup_state(self, dbname):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
-            self._check._get_db(dbname)
+            self.db_pool.get_connection(dbname, self._conn_ttl_ms)
         except psycopg2.OperationalError as e:
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
@@ -574,26 +580,28 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         return db_explain_error, err
 
-    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
-        with self._conn_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms).cursor() as cursor:
-            self._log.debug("Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement)
-            cursor.execute(
-                """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
-                    explain_function=self._explain_function, statement=statement
+        with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
+            with conn.cursor() as cursor:
+                self._log.debug(
+                    "Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement
                 )
-            )
-            result = cursor.fetchone()
-            self._check.histogram(
-                "dd.postgres.run_explain.time",
-                (time.time() - start_time) * 1000,
-                tags=self._dbtags(dbname) + self._check._get_debug_tags(),
-                hostname=self._check.resolved_hostname,
-            )
-            if not result or len(result) < 1 or len(result[0]) < 1:
-                return None
-            return result[0][0]
+                cursor.execute(
+                    """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
+                        explain_function=self._explain_function, statement=statement
+                    )
+                )
+                result = cursor.fetchone()
+                self._check.histogram(
+                    "dd.postgres.run_explain.time",
+                    (time.time() - start_time) * 1000,
+                    tags=self._dbtags(dbname) + self._check._get_debug_tags(),
+                    hostname=self._check.resolved_hostname,
+                )
+                if not result or len(result) < 1 or len(result[0]) < 1:
+                    return None
+                return result[0][0]
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _run_and_track_explain(self, dbname, statement, obfuscated_statement, query_signature):
@@ -612,6 +620,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             )
         return plan_dict, explain_err_code, err_msg
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _run_explain_safe(self, dbname, statement, obfuscated_statement, query_signature):
         # type: (str, str, str, str) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]
         if not self._can_explain_statement(obfuscated_statement):
@@ -642,7 +651,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
                 repr(e),
             )
-            if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', False)):
+            if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', True)):
                 plan = self._explain_parameterized_queries.explain_statement(dbname, statement, obfuscated_statement)
                 if plan:
                     return plan, DBExplainError.explained_with_prepared_statement, None
@@ -718,10 +727,12 @@ class PostgresStatementSamples(DBMAsyncJob):
         if self._seen_samples_ratelimiter.acquire(statement_plan_sig):
             event = {
                 "host": self._check.resolved_hostname,
+                "dbm_type": "plan",
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "postgres",
                 "ddtags": ",".join(self._dbtags(row['datname'])),
                 "timestamp": time.time() * 1000,
+                "cloud_metadata": self._config.cloud_metadata,
                 "network": {
                     "client": {
                         "ip": row.get('client_addr', None),
@@ -782,7 +793,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 self._check.count(
                     "dd.postgres.statement_samples.error",
                     1,
-                    tags=self._tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
+                    tags=self.tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
                     hostname=self._check.resolved_hostname,
                 )
         return events
@@ -804,6 +815,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "collection_interval": self._activity_coll_interval,
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
+            "cloud_metadata": self._config.cloud_metadata,
             "postgres_activity": active_sessions,
             "postgres_connections": active_connections,
         }

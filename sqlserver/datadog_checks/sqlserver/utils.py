@@ -5,10 +5,11 @@ import os
 import re
 
 from datadog_checks.base.utils.platform import Platform
+from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
-
+PROC_CHAR_LIMIT = 500
 
 # Database is used to store both the name and physical_database_name
 # for a database, which is discovered via autodiscovery
@@ -48,7 +49,7 @@ def is_statement_proc(text):
     if text:
         # take first 500 chars, upper case and split into string
         # to get individual keywords
-        t = text[0:500].upper().split()
+        t = text[0:PROC_CHAR_LIMIT].upper().split()
         idx_create = _get_index_for_keyword(t, 'CREATE')
         idx_proc = _get_index_for_keyword(t, 'PROCEDURE')
         if idx_proc < 0:
@@ -72,6 +73,38 @@ def _get_index_for_keyword(text, keyword):
         return -1
 
 
+def extract_sql_comments(text):
+    if not text:
+        return []
+    in_single_line_comment = False
+    in_multi_line_comment = False
+    comment_start = None
+    result = []
+
+    for i in range(len(text)):
+        if in_multi_line_comment:
+            if i < len(text) - 1 and text[i : i + 2] == '*/':
+                in_multi_line_comment = False
+                # strip all non-space/newline chars from multi-line comments
+                lines = [line.strip() for line in text[comment_start : i + 2].split('\n')]
+                result.append(' '.join(lines))
+        elif in_single_line_comment:
+            if text[i] == '\n':
+                in_single_line_comment = False
+                # strip any extra whitespace at the end
+                # of the single line comment
+                result.append(text[comment_start:i].rstrip())
+        else:
+            if i < len(text) - 1 and text[i : i + 2] == '--':
+                in_single_line_comment = True
+                comment_start = i
+            elif i < len(text) - 1 and text[i : i + 2] == '/*':
+                in_multi_line_comment = True
+                comment_start = i
+
+    return result
+
+
 def parse_sqlserver_major_version(version):
     """
     Parses the SQL Server major version out of the full version
@@ -82,3 +115,12 @@ def parse_sqlserver_major_version(version):
     if not match:
         return None
     return int(match.group(1))
+
+
+def is_azure_database(engine_edition):
+    """
+    Checks if engine edition matches Azure SQL MI or Azure SQL DB
+    :param engine_edition: The engine version of the database host
+    :return: bool
+    """
+    return engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE or engine_edition == ENGINE_EDITION_SQL_DATABASE

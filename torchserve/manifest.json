@@ -1,0 +1,59 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "d5400c22-0f0a-4ce4-894d-c3cda48140e9",
+  "app_id": "torchserve",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of TorchServe",
+    "title": "TorchServe",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "TorchServe",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "torchserve.",
+        "check": [
+          "torchserve.openmetrics.inference.count",
+          "torchserve.management_api.models"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "torchserve"
+      ]
+    },
+    "monitors": {
+      "error_ratio": "assets/monitors/error_ratio.json"
+    },
+    "logs": {
+      "source": "torchserve"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {}
+}

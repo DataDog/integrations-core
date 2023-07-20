@@ -25,6 +25,16 @@ ENGINE_EDITION_AZURE_SYNAPSE_SERVERLESS_POOL = 11
 STATIC_INFO_VERSION = 'version'
 STATIC_INFO_MAJOR_VERSION = 'major_version'
 STATIC_INFO_ENGINE_EDITION = 'engine_edition'
+AWS_RDS_HOSTNAME_SUFFIX = ".rds.amazonaws.com"
+AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES = {
+    # azure sql database has a special case, where we should emit
+    # a resource for both the server and the database because
+    # azure treats these as two separate entities, and both can have
+    # related tags and metrics
+    "sql_database": "azure_sql_server_database,azure_sql_server",
+    "managed_instance": "azure_sql_server_managed_instance",
+    "virtual_machine": "azure_virtual_machine_instance",
+}
 
 # Metric discovery queries
 COUNTER_TYPE_QUERY = """select distinct cntr_type

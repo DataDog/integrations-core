@@ -9,7 +9,7 @@ on:
 
       python-version:
         required: false
-        default: "3.8"
+        default: ""
         type: string
       standard:
         required: false
@@ -866,6 +866,25 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
+  j69f9754:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: dcgm
+      target: dcgm
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+    secrets: inherit
   jc8f84c3:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1132,10 +1151,10 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
-  j0860f26:
+  j4f2c848:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: fluentd
+      job-name: Fluentd
       target: fluentd
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2519,10 +2538,10 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
-  je00811b:
+  j5987374:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: pulsar
+      job-name: Pulsar
       target: pulsar
       platform: linux
       runner: '["ubuntu-22.04"]'
@@ -2899,6 +2918,25 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
+  j6f0ded4:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Strimzi
+      target: strimzi
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+    secrets: inherit
   jf04a052:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3013,6 +3051,25 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
+  j840fec7:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Temporal
+      target: temporal
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+    secrets: inherit
   jeefbe37:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3075,6 +3132,25 @@ jobs:
     with:
       job-name: Tomcat
       target: tomcat
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+    secrets: inherit
+  j4baeba2:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: TorchServe
+      target: torchserve
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
@@ -3241,6 +3317,25 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
+  je95095e:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Weaviate
+      target: weaviate
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+    secrets: inherit
   j40e5c98:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3260,10 +3355,10 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
-  j72589e8:
+  j70c9219:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Win32
+      job-name: Windows Event Log
       target: win32_event_log
       platform: windows
       runner: '["windows-2022"]'

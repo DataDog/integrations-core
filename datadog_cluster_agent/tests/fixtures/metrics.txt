@@ -14,6 +14,22 @@ admission_webhooks_reconcile_errors{controller="secrets"} 5
 # TYPE admission_webhooks_reconcile_success gauge
 admission_webhooks_reconcile_success{controller="secrets"} 221
 admission_webhooks_reconcile_success{controller="webhooks"} 7
+# HELP admission_webhooks_response_duration Webhook response duration distribution (in seconds).
+# TYPE admission_webhooks_response_duration histogram
+admission_webhooks_response_duration_bucket{le="0.005"} 65
+admission_webhooks_response_duration_bucket{le="0.01"} 102
+admission_webhooks_response_duration_bucket{le="0.025"} 108
+admission_webhooks_response_duration_bucket{le="0.05"} 108
+admission_webhooks_response_duration_bucket{le="0.1"} 108
+admission_webhooks_response_duration_bucket{le="0.25"} 108
+admission_webhooks_response_duration_bucket{le="0.5"} 108
+admission_webhooks_response_duration_bucket{le="1"} 108
+admission_webhooks_response_duration_bucket{le="2.5"} 108
+admission_webhooks_response_duration_bucket{le="5"} 108
+admission_webhooks_response_duration_bucket{le="10"} 108
+admission_webhooks_response_duration_bucket{le="+Inf"} 108
+admission_webhooks_response_duration_sum 0.4897835529999999
+admission_webhooks_response_duration_count 108
 # HELP admission_webhooks_webhooks_received Number of mutation webhook requests received.
 # TYPE admission_webhooks_webhooks_received gauge
 admission_webhooks_webhooks_received 300
@@ -86,6 +102,40 @@ datadog_requests{join_leader="true",status="success"} 13006
 # HELP external_metrics Number of external metrics tagged.
 # TYPE external_metrics gauge
 external_metrics{join_leader="true"} 100
+# HELP external_metrics_api_elapsed Count of API Requests received
+# TYPE external_metrics_api_elapsed histogram
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="0.005"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="0.01"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="0.025"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="0.05"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="0.1"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="0.25"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="0.5"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="1"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="2.5"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="5"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="10"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="+Inf"} 24
+external_metrics_api_elapsed_sum{handler="get",in_error="true",namespace="datadog"} 1.696529e+07
+external_metrics_api_elapsed_count{handler="get",in_error="true",namespace="datadog"} 24
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="0.005"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="0.01"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="0.025"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="0.05"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="0.1"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="0.25"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="0.5"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="1"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="2.5"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="5"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="10"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="+Inf"} 97
+external_metrics_api_elapsed_sum{handler="list",in_error="false",namespace=""} 4.8232774e+07
+external_metrics_api_elapsed_count{handler="list",in_error="false",namespace=""} 97
+# HELP external_metrics_api_requests Count of API Requests received
+# TYPE external_metrics_api_requests gauge
+external_metrics_api_requests{handler="get",in_error="true",namespace="datadog"} 24
+external_metrics_api_requests{handler="list",in_error="false",namespace=""} 97
 # HELP external_metrics_datadog_metrics The label valid is true if the DatadogMetric CR is valid, false otherwise
 # TYPE external_metrics_datadog_metrics gauge
 external_metrics_datadog_metrics{join_leader="true",name="dcaautogen-776576e7e4e1d57e7df8d30d63fdabe2c60edc",namespace="default",valid="false"} 1

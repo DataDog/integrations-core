@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from collections import defaultdict, namedtuple
-from datetime import datetime
+from datetime import date, datetime
 from io import StringIO
 
 import click
@@ -30,6 +30,7 @@ ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, autho
 @click.option('--quiet', '-q', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.option('--output-file', '-o', default='CHANGELOG.md', show_default=True)
+@click.option('--tag-pattern', default=None, hidden=True)
 @click.option('--tag-prefix', '-tp', default='v', show_default=True)
 @click.option('--no-semver', '-ns', default=False, is_flag=True)
 @click.option('--exclude-branch', default=None, help="Exclude changes comming from a specific branch")
@@ -44,6 +45,7 @@ def changelog(
     quiet,
     dry_run,
     output_file,
+    tag_pattern,
     tag_prefix,
     no_semver,
     organization,
@@ -57,7 +59,7 @@ def changelog(
         abort(f'Check `{check}` is not an Agent-based Integration')
 
     # sanity check on the version provided
-    cur_version = old_version or get_version_string(check, tag_prefix=tag_prefix)
+    cur_version = old_version or get_version_string(check, pattern=tag_pattern, tag_prefix=tag_prefix)
     if not cur_version:
         abort(
             'Failed to retrieve the latest version. Please ensure your project or check has a proper set of tags '
@@ -83,9 +85,21 @@ def changelog(
     if not quiet:
         echo_info(f'Found {len(pr_numbers)} PRs merged since tag: {target_tag}')
 
+    # read the old contents
+    if check:
+        changelog_path = os.path.join(get_root(), check, output_file)
+    else:
+        changelog_path = os.path.join(get_root(), output_file)
+    old = list(stream_file_lines(changelog_path))
+
     if initial:
-        # Only use the first one
-        del pr_numbers[:-1]
+        # For initial releases, just keep the ddev generated CHANGELOG but update the date to today
+        for idx, line in enumerate(old):
+            if line.startswith("## 1.0.0"):
+                old[idx] = f"## 1.0.0 / {date.today()}\n"
+                break
+        write_result(dry_run, changelog_path, ''.join(old), num_changes=1)
+        return
 
     user_config = ctx.obj
     entries = defaultdict(list)
@@ -115,7 +129,7 @@ def changelog(
 
         author = payload.get('user', {}).get('login')
         author_url = payload.get('user', {}).get('html_url')
-        title = f"[{changelog_type}] {payload.get('title')}"
+        title = f"{payload.get('title')}"
 
         entry = ChangelogEntry(pr_num, title, payload.get('html_url'), author, author_url, from_contributor(payload))
 
@@ -129,8 +143,9 @@ def changelog(
     new_entry.write(header)
 
     # one bullet point for each PR
-    new_entry.write('\n')
     for changelog_type in CHANGELOG_TYPES_ORDERED:
+        if entries[changelog_type]:
+            new_entry.write(f"\n***{changelog_type}***:\n\n")
         for entry in entries[changelog_type]:
             thanks_note = ''
             if entry.from_contributor:
@@ -138,13 +153,6 @@ def changelog(
             title_period = "." if not entry.title.endswith(".") else ""
             new_entry.write(f'* {entry.title}{title_period} See [#{entry.number}]({entry.url}).{thanks_note}\n')
     new_entry.write('\n')
-
-    # read the old contents
-    if check:
-        changelog_path = os.path.join(get_root(), check, output_file)
-    else:
-        changelog_path = os.path.join(get_root(), output_file)
-    old = list(stream_file_lines(changelog_path))
 
     # write the new changelog in memory
     changelog_buffer = StringIO()
@@ -160,10 +168,14 @@ def changelog(
     # append the rest of the old changelog
     changelog_buffer.write(''.join(old[2:]))
 
+    write_result(dry_run, changelog_path, changelog_buffer.getvalue(), generated_changelogs)
+
+
+def write_result(dry_run, changelog_path, final_output, num_changes):
     # print on the standard out in case of a dry run
     if dry_run:
-        echo_info(changelog_buffer.getvalue())
+        echo_info(final_output)
     else:
         # overwrite the old changelog
-        write_file(changelog_path, changelog_buffer.getvalue())
-        echo_success(f"Successfully generated {generated_changelogs} change{'s' if generated_changelogs > 1 else ''}")
+        write_file(changelog_path, final_output)
+        echo_success(f"Successfully generated {num_changes} change{'s' if num_changes > 1 else ''}")

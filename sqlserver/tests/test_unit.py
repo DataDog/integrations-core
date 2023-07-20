@@ -12,11 +12,6 @@ from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
-from datadog_checks.sqlserver.const import (
-    ENGINE_EDITION_SQL_DATABASE,
-    ENGINE_EDITION_STANDARD,
-    STATIC_INFO_ENGINE_EDITION,
-)
 from datadog_checks.sqlserver.metrics import SqlMasterDatabaseFileStats
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import Database, parse_sqlserver_major_version, set_default_driver_conf
@@ -46,11 +41,13 @@ def test_missing_db(instance_docker, dd_run_check):
         with pytest.raises(ConfigurationError):
             check = SQLServer(CHECK_NAME, {}, [instance])
             check.initialize_connection()
+            check.make_metric_list_to_collect()
 
     instance['ignore_missing_database'] = True
     with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
         check = SQLServer(CHECK_NAME, {}, [instance])
         check.initialize_connection()
+        check.make_metric_list_to_collect()
         dd_run_check(check)
         assert check.do_check is False
 
@@ -80,24 +77,28 @@ def test_db_exists(get_cursor, mock_connect, instance_docker_defaults, dd_run_ch
     # check base case of lowercase for lowercase and case-insensitive db
     check = SQLServer(CHECK_NAME, {}, [instance])
     check.initialize_connection()
+    check.make_metric_list_to_collect()
     assert check.do_check is True
 
     # check all caps for case insensitive db
     instance['database'] = 'MASTER'
     check = SQLServer(CHECK_NAME, {}, [instance])
     check.initialize_connection()
+    check.make_metric_list_to_collect()
     assert check.do_check is True
 
     # check mixed case against mixed case but case-insensitive db
     instance['database'] = 'AdventureWORKS2017'
     check = SQLServer(CHECK_NAME, {}, [instance])
     check.initialize_connection()
+    check.make_metric_list_to_collect()
     assert check.do_check is True
 
     # check case sensitive but matched db
     instance['database'] = 'CaseSensitive2018'
     check = SQLServer(CHECK_NAME, {}, [instance])
     check.initialize_connection()
+    check.make_metric_list_to_collect()
     assert check.do_check is True
 
     # check case sensitive but mismatched db
@@ -105,17 +106,19 @@ def test_db_exists(get_cursor, mock_connect, instance_docker_defaults, dd_run_ch
     check = SQLServer(CHECK_NAME, {}, [instance])
     with pytest.raises(ConfigurationError):
         check.initialize_connection()
+        check.make_metric_list_to_collect()
 
     # check offline but exists db
     instance['database'] = 'Offlinedb'
     check = SQLServer(CHECK_NAME, {}, [instance])
     check.initialize_connection()
+    check.make_metric_list_to_collect()
     assert check.do_check is True
 
 
 def test_autodiscovery_matches_all_by_default(instance_autodiscovery):
     fetchall_results, mock_cursor = _mock_database_list()
-    all_dbs = set([Database(r.name) for r in fetchall_results])
+    all_dbs = {Database(r.name) for r in fetchall_results}
     # check base case of default filters
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     check.autodiscover_databases(mock_cursor)
@@ -124,7 +127,7 @@ def test_autodiscovery_matches_all_by_default(instance_autodiscovery):
 
 def test_azure_autodiscovery_matches_all_by_default(instance_autodiscovery):
     fetchall_results, mock_cursor = _mock_database_list_azure()
-    all_dbs = set([Database(r.name, r.physical_database_name) for r in fetchall_results])
+    all_dbs = {Database(r.name, r.physical_database_name) for r in fetchall_results}
 
     # check base case of default filters
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
@@ -197,7 +200,7 @@ def test_autodiscovery_exclude_override(instance_autodiscovery):
     instance_autodiscovery['autodiscovery_exclude'] = ['.*2020db$', 'm.*']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     check.autodiscover_databases(mock_cursor)
-    assert check.databases == set([Database("tempdb")])
+    assert check.databases == {Database("tempdb")}
 
 
 def test_azure_autodiscovery_exclude_override(instance_autodiscovery):
@@ -206,7 +209,7 @@ def test_azure_autodiscovery_exclude_override(instance_autodiscovery):
     instance_autodiscovery['autodiscovery_exclude'] = ['.*2020db$', 'm.*']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     check.autodiscover_databases(mock_cursor)
-    assert check.databases == set([Database("tempdb", "tempdb")])
+    assert check.databases == {Database("tempdb", "tempdb")}
 
 
 @pytest.mark.parametrize(
@@ -250,7 +253,6 @@ def _mock_database_list():
     fetchall_results = [
         Row('master'),
         Row('tempdb'),
-        Row('model'),
         Row('msdb'),
         Row('AdventureWorks2017'),
         Row('CaseSensitive2018'),
@@ -268,7 +270,6 @@ def _mock_database_list_azure():
     fetchall_results = [
         Row('master', 'master'),
         Row('tempdb', 'tempdb'),
-        Row('model', 'model'),
         Row('msdb', 'msdb'),
         Row('AdventureWorks2017', 'fce04774'),
         Row('CaseSensitive2018', 'jub3j8kh'),
@@ -345,48 +346,6 @@ def test_parse_sqlserver_major_version(version, expected_major_version):
 def test_split_sqlserver_host(instance_host, split_host, split_port):
     s_host, s_port = split_sqlserver_host_port(instance_host)
     assert (s_host, s_port) == (split_host, split_port)
-
-
-@pytest.mark.parametrize(
-    "dbm_enabled, instance_host, database, reported_hostname, engine_edition, expected_hostname",
-    [
-        (False, 'localhost,1433,some-typo', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
-        (True, 'localhost,1433', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
-        (False, 'localhost', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
-        (False, '8.8.8.8', None, '', ENGINE_EDITION_STANDARD, 'stubbed.hostname'),
-        (True, 'localhost', None, 'forced_hostname', ENGINE_EDITION_STANDARD, 'forced_hostname'),
-        (True, 'datadoghq.com,1433', None, '', ENGINE_EDITION_STANDARD, 'datadoghq.com'),
-        (True, 'datadoghq.com', None, '', ENGINE_EDITION_STANDARD, 'datadoghq.com'),
-        (True, 'datadoghq.com', None, 'forced_hostname', ENGINE_EDITION_STANDARD, 'forced_hostname'),
-        (True, '8.8.8.8,1433', None, '', ENGINE_EDITION_STANDARD, '8.8.8.8'),
-        (False, '8.8.8.8', None, 'forced_hostname', ENGINE_EDITION_STANDARD, 'forced_hostname'),
-        (True, 'foo.database.windows.net', None, None, ENGINE_EDITION_SQL_DATABASE, 'foo/master'),
-        (True, 'foo.database.windows.net', 'master', None, ENGINE_EDITION_SQL_DATABASE, 'foo/master'),
-        (True, 'foo.database.windows.net', 'bar', None, ENGINE_EDITION_SQL_DATABASE, 'foo/bar'),
-        (
-            True,
-            'foo.database.windows.net',
-            'bar',
-            'override-reported',
-            ENGINE_EDITION_SQL_DATABASE,
-            'override-reported',
-        ),
-        (True, 'foo-custom-dns', 'bar', None, ENGINE_EDITION_SQL_DATABASE, 'foo-custom-dns/bar'),
-    ],
-)
-def test_resolved_hostname(dbm_enabled, instance_host, database, reported_hostname, engine_edition, expected_hostname):
-    instance = {
-        'host': instance_host,
-        'dbm': dbm_enabled,
-    }
-    if database:
-        instance['database'] = database
-    if reported_hostname:
-        instance['reported_hostname'] = reported_hostname
-    sqlserver_check = SQLServer(CHECK_NAME, {}, [instance])
-    sqlserver_check.static_info_cache[STATIC_INFO_ENGINE_EDITION] = engine_edition
-    sqlserver_check._resolved_hostname = None
-    assert sqlserver_check.resolved_hostname == expected_hostname
 
 
 def test_database_state(aggregator, dd_run_check, init_config, instance_docker):

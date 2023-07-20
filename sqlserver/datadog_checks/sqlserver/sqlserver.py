@@ -32,6 +32,8 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
     AUTODISCOVERY_QUERY,
+    AWS_RDS_HOSTNAME_SUFFIX,
+    AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
     DATABASE_FRAGMENTATION_METRICS,
@@ -40,6 +42,7 @@ from datadog_checks.sqlserver.const import (
     DATABASE_SERVICE_CHECK_NAME,
     DBM_MIGRATED_METRICS,
     DEFAULT_AUTODISCOVERY_INTERVAL,
+    ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
     ENGINE_EDITION_SQL_DATABASE,
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
@@ -65,7 +68,7 @@ from datadog_checks.sqlserver.queries import (
     get_query_ao_availability_groups,
     get_query_file_stats,
 )
-from datadog_checks.sqlserver.utils import set_default_driver_conf
+from datadog_checks.sqlserver.utils import is_azure_database, set_default_driver_conf
 
 try:
     import adodbapi
@@ -101,7 +104,7 @@ class SQLServer(AgentCheck):
         self.reported_hostname = self.instance.get('reported_hostname')
         self.autodiscovery = is_affirmative(self.instance.get('database_autodiscovery'))
         self.autodiscovery_include = self.instance.get('autodiscovery_include', ['.*'])
-        self.autodiscovery_exclude = self.instance.get('autodiscovery_exclude', [])
+        self.autodiscovery_exclude = self.instance.get('autodiscovery_exclude', ['model'])
         self.autodiscovery_db_service_check = is_affirmative(self.instance.get('autodiscovery_db_service_check', True))
         self.min_collection_interval = self.instance.get('min_collection_interval', 15)
         self._compile_patterns()
@@ -124,6 +127,8 @@ class SQLServer(AgentCheck):
         aws = self.instance.get('aws', {})
         gcp = self.instance.get('gcp', {})
         azure = self.instance.get('azure', {})
+        # Remap fully_qualified_domain_name to name
+        azure = {k if k != 'fully_qualified_domain_name' else 'name': v for k, v in azure.items()}
         if aws:
             self.cloud_metadata.update({'aws': aws})
         if gcp:
@@ -160,23 +165,16 @@ class SQLServer(AgentCheck):
             # cache these for a full day
             ttl=60 * 60 * 24,
         )
-
+        self.check_initializations.append(self.initialize_connection)
+        self.check_initializations.append(self.set_resolved_hostname)
         self.check_initializations.append(self.set_resolved_hostname_metadata)
+        self.check_initializations.append(self.config_checks)
+        self.check_initializations.append(self.make_metric_list_to_collect)
 
         # Query declarations
-        self.server_state_queries = self._new_query_executor([QUERY_SERVER_STATIC_INFO])
-        self.check_initializations.append(self.server_state_queries.compile_queries)
-
-        # use QueryManager to process custom queries
-        self._query_manager = QueryManager(
-            self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
-        )
-
+        self._query_manager = None
         self._dynamic_queries = None
-
-        self.check_initializations.append(self.config_checks)
-        self.check_initializations.append(self._query_manager.compile_queries)
-        self.check_initializations.append(self.initialize_connection)
+        self.server_state_queries = None
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -205,8 +203,49 @@ class SQLServer(AgentCheck):
     def set_resolved_hostname_metadata(self):
         self.set_metadata('resolved_hostname', self.resolved_hostname)
 
-    @property
-    def resolved_hostname(self):
+    def set_resource_tags(self):
+        if self.cloud_metadata.get("gcp") is not None:
+            self.tags.append(
+                "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
+                    self.cloud_metadata.get("gcp")["project_id"], self.cloud_metadata.get("gcp")["instance_id"]
+                )
+            )
+        if self.cloud_metadata.get("aws") is not None:
+            self.tags.append(
+                "dd.internal.resource:aws_rds_instance:{}".format(
+                    self.cloud_metadata.get("aws")["instance_endpoint"],
+                )
+            )
+        elif AWS_RDS_HOSTNAME_SUFFIX in self._resolved_hostname:
+            # allow for detecting if the host is an RDS host, and emit
+            # the resource properly even if the `aws` config is unset
+            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self._resolved_hostname))
+        if self.cloud_metadata.get("azure") is not None:
+            deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
+            name = self.cloud_metadata.get("azure")["name"]
+            db_instance = None
+            if "sql_database" in deployment_type and self.dbm_enabled:
+                # azure sql databases have a special format, which is set for DBM
+                # customers in the resolved_hostname.
+                # If user is not DBM customer, the resource_name should just be set to the `name`
+                db_instance = self._resolved_hostname
+            # some `deployment_type`s map to multiple `resource_type`s
+            resource_types = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES.get(deployment_type).split(",")
+            for r_type in resource_types:
+                if 'azure_sql_server_database' in r_type and db_instance:
+                    self.tags.append("dd.internal.resource:{}:{}".format(r_type, db_instance))
+                else:
+                    self.tags.append("dd.internal.resource:{}:{}".format(r_type, name))
+        # finally, emit a `database_instance` resource for this instance
+        self.tags.append(
+            "dd.internal.resource:database_instance:{}".format(
+                self._resolved_hostname,
+            )
+        )
+
+    def set_resolved_hostname(self):
+        # load static information cache
+        self.load_static_information()
         if self._resolved_hostname is None:
             if self.reported_hostname:
                 self._resolved_hostname = self.reported_hostname
@@ -236,6 +275,11 @@ class SQLServer(AgentCheck):
                     self._resolved_hostname = "{}/{}".format(host, configured_database)
             else:
                 self._resolved_hostname = self.agent_hostname
+        # set resource tags to properly tag with updated hostname
+        self.set_resource_tags()
+
+    @property
+    def resolved_hostname(self):
         return self._resolved_hostname
 
     def load_static_information(self):
@@ -252,6 +296,14 @@ class SQLServer(AgentCheck):
                             self.static_info_cache[STATIC_INFO_VERSION] = version
                             self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = parse_sqlserver_major_version(version)
                             if not self.static_info_cache[STATIC_INFO_MAJOR_VERSION]:
+                                cursor.execute(
+                                    "SELECT CAST(ServerProperty('ProductMajorVersion') AS INT) AS MajorVersion"
+                                )
+                                result = cursor.fetchone()
+                                if result:
+                                    self.static_info_cache[STATIC_INFO_MAJOR_VERSION] = result[0]
+                                else:
+                                    self.log.warning("failed to load version static information due to empty results")
                                 self.log.warning("failed to parse SQL Server major version from version: %s", version)
                         else:
                             self.log.warning("failed to load version static information due to empty results")
@@ -288,11 +340,11 @@ class SQLServer(AgentCheck):
     def initialize_connection(self):
         self.connection = Connection(self, self.init_config, self.instance, self.handle_service_check)
 
+    def make_metric_list_to_collect(self):
         # Pre-process the list of metrics to collect
         try:
             # check to see if the database exists before we try any connections to it
             db_exists, context = self.connection.check_database()
-
             if db_exists:
                 if self.instance.get('stored_procedure') is None:
                     with self.connection.open_managed_default_connection():
@@ -376,11 +428,11 @@ class SQLServer(AgentCheck):
             cursor.execute(query)
             rows = list(cursor.fetchall())
             if len(rows[0]) == 2:
-                all_dbs = set(Database(row.name, row.physical_database_name) for row in rows)
+                all_dbs = {Database(row.name, row.physical_database_name) for row in rows}
             else:
-                all_dbs = set(Database(row.name) for row in rows)
-            excluded_dbs = set([d for d in all_dbs if self._exclude_patterns.match(d.name)])
-            included_dbs = set([d for d in all_dbs if self._include_patterns.match(d.name)])
+                all_dbs = {Database(row.name) for row in rows}
+            excluded_dbs = {d for d in all_dbs if self._exclude_patterns.match(d.name)}
+            included_dbs = {d for d in all_dbs if self._include_patterns.match(d.name)}
 
             self.log.debug(
                 'Autodiscovered databases: %s, excluding: %s, including: %s', all_dbs, excluded_dbs, included_dbs
@@ -409,7 +461,7 @@ class SQLServer(AgentCheck):
         # support 'physical_database_name' column. The 'name' column will always be present &
         # will be returned as the first column in the autodiscovery query
         cursor.execute("select top 0 * from sys.databases")
-        all_columns = set([i[0] for i in cursor.description])
+        all_columns = {i[0] for i in cursor.description}
         available_columns = [c for c in all_expected_columns if c in all_columns]
         self.log.debug("found available sys.databases columns: %s", available_columns)
         return available_columns
@@ -663,7 +715,16 @@ class SQLServer(AgentCheck):
 
     def check(self, _):
         if self.do_check:
-            self.load_static_information()
+            # configure custom queries for the check
+            if self._query_manager is None:
+                # use QueryManager to process custom queries
+                self._query_manager = QueryManager(
+                    self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
+                )
+                self._query_manager.compile_queries()
+            if self.server_state_queries is None:
+                self.server_state_queries = self._new_query_executor([QUERY_SERVER_STATIC_INFO])
+                self.server_state_queries.compile_queries()
             if self.proc:
                 self.do_stored_procedure_check()
             else:
@@ -692,14 +753,15 @@ class SQLServer(AgentCheck):
             return self._dynamic_queries
 
         major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
-        if not major_version:
+        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+        # need either major_version or engine_edition to generate queries
+        if not major_version and not is_azure_database(engine_edition):
             self.log.warning("missing major_version, cannot initialize dynamic queries")
             return None
-
-        queries = [get_query_file_stats(major_version)]
+        queries = [get_query_file_stats(major_version, engine_edition)]
 
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
-            if major_version > 2012:
+            if major_version > 2012 or engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE:
                 queries.extend(
                     [
                         get_query_ao_availability_groups(major_version),
@@ -710,7 +772,7 @@ class SQLServer(AgentCheck):
             else:
                 self.log.warning('AlwaysOn metrics are not supported on version 2012')
         if is_affirmative(self.instance.get('include_fci_metrics', False)):
-            if major_version > 2012:
+            if major_version > 2012 or engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE:
                 queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
             else:
                 self.log.warning('Failover Cluster Instance metrics are not supported on version 2012')

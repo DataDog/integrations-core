@@ -6,7 +6,7 @@ from __future__ import division
 import os
 import re
 from decimal import ROUND_HALF_UP, Decimal
-from typing import TYPE_CHECKING, Text, Union
+from typing import TYPE_CHECKING, Text, Union  # noqa: F401
 
 from six import PY3, iteritems, text_type
 from six.moves.urllib.parse import urlparse

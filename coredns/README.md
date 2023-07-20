@@ -10,7 +10,10 @@ Get metrics from CoreDNS in real time to visualize and monitor DNS failures and 
 
 The CoreDNS check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
 
-**Note**: The current version of the check (1.11.0+) uses [OpenMetrics][17] (OpenMetricsBaseCheckV2) for metric collection, which requires Python 3. For hosts unable to use Python 3, or to use the legacy OpenMetricsBaseCheckV1 version of this check, see the following [config][18]. There is an exception to that for Autodiscovery users relying on the `coredns.d/auto_conf.yaml` file, which enables the `prometheus_url` option for the OpenMetricsBaseCheckV1 legacy version of the check by default. See the sample [coredns.d/auto_conf.yaml][19] for the default configuration options and the sample [coredns.d/conf.yaml.example][20] for all available configuration options.
+**Note**: The current version of the check (1.11.0+) uses [OpenMetrics][17] (OpenMetricsBaseCheckV2) for metric collection, which requires Python 3.
+For hosts unable to use Python 3, or if you previously implemented this integration version, see the [legacy OpenMetricsBaseCheckV1 example][18].
+There is an exception to that for Autodiscovery users relying on the `coredns.d/auto_conf.yaml` file, which enables the `prometheus_url` option for the OpenMetricsBaseCheckV1 legacy version of the check by default.
+See the sample [coredns.d/auto_conf.yaml][19] for the default configuration options and the sample [coredns.d/conf.yaml.example][20] for all available configuration options.
 
 **Note**: The OpenMetricsBaseCheckV2 version of the CoreDNS check now submits `.bucket` metrics and submits the `.sum` and `.count` histogram samples as monotonic count type. These metrics were previously submitted as gauge type in OpenMetricsBaseCheckV1. See the [metadata.csv][14] for the list of metrics available in each version. 
 
@@ -245,7 +248,7 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 Need help? Contact [Datadog support][16].
 
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: http://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [3]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation
 [4]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations

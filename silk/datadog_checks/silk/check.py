@@ -30,7 +30,7 @@ class SilkCheck(AgentCheck):
         if server is None:
             raise ConfigurationError("host_address is a required parameter.")
 
-        self.latest_event_query = int(get_timestamp())
+        self.latest_event_query = get_timestamp()
         self.url = "{}/api/v2/".format(server)
 
         host = urlparse(server).netloc
@@ -94,7 +94,7 @@ class SilkCheck(AgentCheck):
                 ]
 
                 self._submit_version_metadata(data.get('system_version'))
-                self.service_check(self.STATE_SERVICE_CHECK, STATE_MAP[state], tags=system_tags[0:] + self._tags[0:])
+                self.service_check(self.STATE_SERVICE_CHECK, STATE_MAP[state], tags=system_tags + self._tags)
             else:
                 msg = (
                     "Could not access system state and version info, got response code `{}` from endpoint `{}`".format(
@@ -192,12 +192,11 @@ class SilkCheck(AgentCheck):
             response.raise_for_status()
             response_json = response.json()
             code = response.status_code
-            if response_json:
-                if 'error_msg' in response_json:
-                    msg = "Received error message: " + response_json.get('error_msg')
-                    self.log.warning(msg)
-                    self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.WARNING, message=msg, tags=self._tags)
-                    return None, code
+            if response_json and 'error_msg' in response_json:
+                msg = "Received error message: " + response_json.get('error_msg')
+                self.log.warning(msg)
+                self.service_check(self.CONNECT_SERVICE_CHECK, AgentCheck.WARNING, message=msg, tags=self._tags)
+                return None, code
             return response_json.get("hits"), code
         except Exception as e:
             self.log.warning("Encountered error while getting data from %s: %s", path, str(e))
@@ -205,36 +204,27 @@ class SilkCheck(AgentCheck):
 
     def collect_events(self, system_tags):
         self.log.debug("Starting events collection (query start time: %s).", self.latest_event_query)
-        last_event_time = None
-        collect_events_start_time = get_timestamp()
-        try:
-            # Use latest event query as starting time
-            event_query = EVENT_PATH.format(self.latest_event_query)
-            raw_events, code = self._get_data(event_query)
 
+        # Get the time that events collection starts. This will be the new `self.latest_event_query` value afterwards.
+        collect_events_timestamp = get_timestamp()
+        try:
+            event_query = EVENT_PATH.format(
+                start_time=int(self.latest_event_query), end_time=int(collect_events_timestamp)
+            )
+            raw_events, _ = self._get_data(event_query)
+            tags = self._tags + system_tags
             for event in raw_events:
                 try:
-                    tags = self._tags + system_tags
                     normalized_event = SilkEvent(event, tags)
                     event_payload = normalized_event.get_datadog_payload()
                     self.event(event_payload)
                 except ValueError as e:
-                    self.log.warning(str(e))
-
-                # If this is the first valid event or this event timestamp is newer, update last event time checked
-                if (last_event_time is None and event_payload is not None) or event_payload.get(
-                    "timestamp"
-                ) > last_event_time:
-                    last_event_time = event_payload.get("timestamp")
+                    self.log.error(str(e))
 
         except Exception as e:
             # Don't get stuck on a failure to fetch an event
             # Ignore them for next pass
-            self.log.warning("Unable to fetch events: %s", str(e))
-
-        # Update latest event query to last event time
-        if last_event_time is not None:
-            self.latest_event_query = int(last_event_time)
-        else:
-            # In case no events were collected
-            self.latest_event_query = int(collect_events_start_time)
+            self.log.error("Unable to fetch events: %s", str(e))
+        finally:
+            # Update latest event query to last event time
+            self.latest_event_query = collect_events_timestamp

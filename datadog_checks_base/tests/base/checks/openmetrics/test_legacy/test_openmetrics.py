@@ -741,7 +741,7 @@ def test_filter_sample_on_gauge(p_check, mocked_prometheus_scraper_config):
     response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
     mocked_prometheus_scraper_config['_text_filter_blacklist'] = ["deployment=\"kube-dns\""]
-    metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
+    metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
     assert 1 == len(metrics)
     current_metric = metrics[0]
@@ -773,7 +773,7 @@ def test_parse_one_gauge(p_check, mocked_prometheus_scraper_config):
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
+    metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
     assert 1 == len(metrics)
     current_metric = metrics[0]
@@ -805,7 +805,7 @@ def test_parse_one_counter(p_check, mocked_prometheus_scraper_config):
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
+    metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
     assert 1 == len(metrics)
     current_metric = metrics[0]
@@ -863,7 +863,7 @@ def test_parse_one_histograms_with_label(p_check, mocked_prometheus_scraper_conf
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
+    metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
     assert 1 == len(metrics)
     current_metric = metrics[0]
@@ -997,7 +997,7 @@ def test_parse_one_histogram(p_check, mocked_prometheus_scraper_config):
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
+    metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
     assert 1 == len(metrics)
     current_metric = metrics[0]
     assert expected_etcd_metric.documentation == current_metric.documentation
@@ -1099,7 +1099,7 @@ def test_parse_two_histograms_with_label(p_check, mocked_prometheus_scraper_conf
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
+    metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
     assert 1 == len(metrics)
 
@@ -1137,7 +1137,7 @@ def test_decumulate_histogram_buckets(p_check, mocked_prometheus_scraper_config)
 
     response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
+    metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
     assert 1 == len(metrics)
 
@@ -1226,7 +1226,7 @@ def test_decumulate_histogram_buckets_single_bucket(p_check, mocked_prometheus_s
 
     response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
+    metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
     assert 1 == len(metrics)
 
@@ -1289,7 +1289,7 @@ def test_decumulate_histogram_buckets_multiple_contexts(p_check, mocked_promethe
 
     response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
+    metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
     assert 1 == len(metrics)
 
@@ -1357,7 +1357,7 @@ def test_decumulate_histogram_buckets_negative_buckets(p_check, mocked_prometheu
 
     response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
+    metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
     assert 1 == len(metrics)
 
@@ -1409,7 +1409,7 @@ def test_decumulate_histogram_buckets_no_buckets(p_check, mocked_prometheus_scra
 
     response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
+    metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
     assert 1 == len(metrics)
 
@@ -1480,7 +1480,7 @@ def test_parse_one_summary(p_check, mocked_prometheus_scraper_config):
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
+    metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
     assert 1 == len(metrics)
     current_metric = metrics[0]
@@ -1523,7 +1523,7 @@ def test_parse_one_summary_with_no_quantile(p_check, mocked_prometheus_scraper_c
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
+    metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
     assert 1 == len(metrics)
     current_metric = metrics[0]
@@ -1578,7 +1578,7 @@ def test_parse_two_summaries_with_labels(p_check, mocked_prometheus_scraper_conf
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
+    metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
 
     assert 1 == len(metrics)
 
@@ -1619,7 +1619,7 @@ def test_parse_one_summary_with_none_values(p_check, mocked_prometheus_scraper_c
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, headers={'Content-Type': text_content_type})
     check = p_check
-    metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
+    metrics = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
     assert 1 == len(metrics)
     current_metric = metrics[0]
     assert expected_etcd_metric.documentation == current_metric.documentation
@@ -2575,7 +2575,7 @@ def test_text_filter_input(mocked_prometheus_check, mocked_prometheus_scraper_co
     ]
     expected_out = ["line with string3", "line with string"]
 
-    filtered = [x for x in check._text_filter_input(lines_in, mocked_prometheus_scraper_config)]
+    filtered = list(check._text_filter_input(lines_in, mocked_prometheus_scraper_config))
     assert filtered == expected_out
 
 
@@ -2678,7 +2678,7 @@ def test_ssl_verify_not_raise_warning(caplog, mocked_openmetrics_check_factory, 
     check = mocked_openmetrics_check_factory(instance)
     scraper_config = check.get_scraper_config(instance)
 
-    with caplog.at_level(logging.DEBUG):
+    with caplog.at_level(logging.DEBUG), mock.patch('requests.get', return_value=MockResponse('httpbin.org')):
         resp = check.send_request('https://httpbin.org/get', scraper_config)
 
     assert "httpbin.org" in resp.content.decode('utf-8')
@@ -2703,7 +2703,7 @@ def test_send_request_with_dynamic_prometheus_url(caplog, mocked_openmetrics_che
     # `prometheus_url` changed just before calling `send_request`
     scraper_config['prometheus_url'] = 'https://www.example.com/foo/bar'
 
-    with caplog.at_level(logging.DEBUG):
+    with caplog.at_level(logging.DEBUG), mock.patch('requests.get', return_value=MockResponse('httpbin.org')):
         resp = check.send_request('https://httpbin.org/get', scraper_config)
 
     assert "httpbin.org" in resp.content.decode('utf-8')
