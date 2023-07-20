@@ -54,7 +54,7 @@ def test_check_failed_liveness(aggregator, mock_http_response):
 def test_empty_instance(dd_run_check):
     with pytest.raises(
         Exception,
-        match='InstanceConfig`:\nopenmetrics_endpoint\n  field required',
+        match='InstanceConfig`:\nopenmetrics_endpoint\n  Field required',
     ):
         check = WeaviateCheck('weaviate', {}, [{}])
         dd_run_check(check)

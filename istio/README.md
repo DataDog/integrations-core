@@ -225,7 +225,7 @@ Additional helpful documentation, links, and articles:
 [2]: https://docs.datadoghq.com/tracing/setup_overview/proxy_setup/?tab=istio
 [3]: https://www.datadoghq.com/blog/istio-datadog/
 [4]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[5]: https://app.datadoghq.com/account/settings#agent
+[5]: https://app.datadoghq.com/account/settings/agent/latest
 [6]: https://github.com/DataDog/integrations-core/tree/master/envoy#istio
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [8]: https://github.com/DataDog/integrations-core/blob/master/istio/datadog_checks/istio/data/conf.yaml.example

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Optional, Sequence
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -20,68 +20,77 @@ from . import defaults, validators
 
 
 class MessageQueueInfo(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    selected_message_queues: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    selected_message_queues: Optional[Sequence[str]] = None
 
 
 class MetricPatterns(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    exclude: Optional[Sequence[str]] = None
+    include: Optional[Sequence[str]] = None
 
 
 class Query(BaseModel):
-    class Config:
-        allow_mutation = False
-
+    model_config = ConfigDict(
+        frozen=True,
+    )
     name: str
 
 
 class InstanceConfig(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    connection_string: Optional[str]
-    disable_generic_tags: Optional[bool]
-    driver: Optional[str]
-    empty_default_hostname: Optional[bool]
+    model_config = ConfigDict(
+        validate_default=True,
+        frozen=True,
+    )
+    connection_string: Optional[str] = None
+    disable_generic_tags: Optional[bool] = None
+    driver: Optional[str] = None
+    empty_default_hostname: Optional[bool] = None
     hostname: Optional[str] = Field(None, max_length=255, min_length=1)
     job_query_timeout: Optional[int] = Field(None, gt=0)
-    message_queue_info: Optional[MessageQueueInfo]
-    metric_patterns: Optional[MetricPatterns]
-    min_collection_interval: Optional[float]
-    password: Optional[str]
-    queries: Optional[Sequence[Query]]
+    message_queue_info: Optional[MessageQueueInfo] = None
+    metric_patterns: Optional[MetricPatterns] = None
+    min_collection_interval: Optional[float] = None
+    password: Optional[str] = None
+    queries: Optional[Sequence[Query]] = None
     query_timeout: Optional[int] = Field(None, gt=0)
-    service: Optional[str]
+    service: Optional[str] = None
     severity_threshold: Optional[int] = Field(None, ge=0, le=99)
-    system: Optional[str]
+    system: Optional[str] = None
     system_mq_query_timeout: Optional[int] = Field(None, gt=0)
-    tags: Optional[Sequence[str]]
-    username: Optional[str]
+    tags: Optional[Sequence[str]] = None
+    username: Optional[str] = None
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
     def _initial_validation(cls, values):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-    @validator('*', pre=True, always=True)
-    def _ensure_defaults(cls, v, field):
-        if v is not None or field.required:
-            return v
+    @field_validator('*', mode='before')
+    def _ensure_defaults(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name in info.context['configured_fields']:
+            return value
 
-        return getattr(defaults, f'instance_{field.name}')(field, v)
+        return getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-    @validator('*')
-    def _run_validations(cls, v, field):
-        if not v:
-            return v
+    @field_validator('*')
+    def _run_validations(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name not in info.context['configured_fields']:
+            return value
 
-        return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
+        return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
 
-    @root_validator(pre=False)
-    def _final_validation(cls, values):
-        return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+    @field_validator('*', mode='after')
+    def _make_immutable(cls, value):
+        return validation.utils.make_immutable(value)
+
+    @model_validator(mode='after')
+    def _final_validation(cls, model):
+        return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))

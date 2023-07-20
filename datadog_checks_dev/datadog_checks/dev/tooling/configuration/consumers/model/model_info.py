@@ -11,7 +11,6 @@ NO_DEFAULT = object()
 class ModelInfo:
     def __init__(self):
         self.defaults_file_needs_value_normalization = False
-        self.defaults_file_needs_dynamic_values = False
         # Contains function definitions as text for options that are optional so they have a default value
         self.defaults_file_lines: List[str] = []
         self.validator_data = []
@@ -22,7 +21,6 @@ class ModelInfo:
         Updates this model with another ModelInfo
         """
         self.defaults_file_needs_value_normalization += section_model.defaults_file_needs_value_normalization
-        self.defaults_file_needs_dynamic_values += section_model.defaults_file_needs_dynamic_values
         self.defaults_file_lines.extend(section_model.defaults_file_lines)
         self.validator_data.extend(section_model.validator_data)
         self.deprecation_data.update(section_model.deprecation_data)
@@ -65,15 +63,11 @@ class ModelInfo:
         :param normalized_option_name: Used to build the function name
         :type_data: dict containing all the relevant information to build the function
         """
-        self.defaults_file_lines.extend(['', '', f'def {model_id}_{normalized_option_name}(field, value):'])
-
         default_value = self._get_default_value(type_data)
         if default_value is not NO_DEFAULT:
             self.defaults_file_needs_value_normalization = True
+            self.defaults_file_lines.extend(['', '', f'def {model_id}_{normalized_option_name}():'])
             self.defaults_file_lines.append(f'    return {default_value!r}')
-        else:
-            self.defaults_file_needs_dynamic_values = True
-            self.defaults_file_lines.append('    return get_default_field_value(field, value)')
 
     @staticmethod
     def _get_default_value(type_data):

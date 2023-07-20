@@ -395,11 +395,11 @@ def bob_conn():
 @pytest.fixture
 def dbm_instance(pg_instance):
     pg_instance['dbm'] = True
-    pg_instance['min_collection_interval'] = 0.1
+    pg_instance['min_collection_interval'] = 0.2
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
-    pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
-    pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.1}
-    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
+    pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.2}
+    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
     pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
@@ -412,7 +412,7 @@ def dbm_instance_replica2(pg_instance):
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
-    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
     pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
@@ -1366,10 +1366,10 @@ def test_pg_settings_caching(aggregator, integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     assert not check.pg_settings, "pg_settings should not have been initialized yet"
     check._connect()
-    check._get_db(dbm_instance["dbname"])
+    check._get_main_db()
     assert "track_activity_query_size" in check.pg_settings
     check.pg_settings["test_key"] = True
-    check._get_db(dbm_instance["dbname"])
+    check._get_main_db()
     assert (
         "test_key" in check.pg_settings
     ), "key should not have been blown away. If it was then pg_settings was not cached correctly"
@@ -1387,7 +1387,7 @@ def _check_until_time(check, dbm_instance, sleep_time, check_interval):
 
 def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the main collection loop rate limit
-    collection_interval = 0.1
+    collection_interval = 0.2
     # Don't need query metrics or activity for this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
@@ -1408,8 +1408,8 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
 
 def test_activity_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the activity collection loop rate limit
-    collection_interval = 0.1
-    activity_interval = 0.2  # double the main loop
+    collection_interval = 0.2
+    activity_interval = 0.4  # double the main loop
     # Don't need query metrics on this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['collection_interval'] = collection_interval
@@ -1479,9 +1479,9 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
     assert len(matching) > 0, "should have collected exactly at least one matching event"
 
 
-@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity"])
-@pytest.mark.parametrize("query_samples_enabled", [(True), (False)])
-@pytest.mark.parametrize("query_activity_enabled", [(True), (False)])
+@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
+@pytest.mark.parametrize("query_samples_enabled", [True, False])
+@pytest.mark.parametrize("query_activity_enabled", [True, False])
 @pytest.mark.parametrize(
     "user,password,dbname,query,arg",
     [("bob", "bob", "datadog_test", "BEGIN TRANSACTION; SELECT city FROM persons WHERE city = %s;", "hello")],
@@ -1507,17 +1507,24 @@ def test_disabled_activity_or_explain_plans(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['query_activity']['enabled'] = query_activity_enabled
     dbm_instance['query_samples']['enabled'] = query_samples_enabled
+    dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['collect_resources']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
     conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
 
     try:
+        conn.autocommit = True
         conn.cursor().execute(query, (arg,))
-        check.check(dbm_instance)
-        check.cancel()
-        dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+        run_one_check(check, dbm_instance)
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+        dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+
+        if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
+            # cannot catch any queries from other users
+            # only can see own queries
+            return
 
         if query_activity_enabled:
             assert len(dbm_activity) > 0
@@ -1557,7 +1564,7 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     assert not check.statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
-    assert check._db_pool.get(dbm_instance['dbname']) is None, "db connection should be gone"
+    assert check.db_pool._conns.get(dbm_instance['dbname']) is None, "db connection should be gone"
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
             "dd.postgres.async_job.cancel",
@@ -1712,7 +1719,6 @@ def test_statement_metrics_database_errors(
     dbm_instance['query_samples']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
     check = integration_check(dbm_instance)
-    check._connect()
 
     with mock.patch(
         'datadog_checks.postgres.statements.PostgresStatementMetrics._get_pg_stat_statements_columns',

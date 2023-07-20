@@ -128,7 +128,7 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv
 [2]: https://raw.githubusercontent.com/DataDog/dd-agent/5.10.1/conf.d/activemq.yaml.example
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://github.com/DataDog/jmxfetch
 [5]: https://activemq.apache.org/jmx.html
 [6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

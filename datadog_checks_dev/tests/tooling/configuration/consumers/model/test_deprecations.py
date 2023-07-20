@@ -43,7 +43,7 @@ def test():
 
     model_definitions = consumer.render()
     files = model_definitions['test.yaml']
-    assert len(files) == 6
+    assert len(files) == 5
 
     _, validators_errors = files['validators.py']
     assert not validators_errors

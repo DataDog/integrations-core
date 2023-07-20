@@ -29,7 +29,7 @@ DCGM_FI_PROF_PCIE_TX_BYTES,              counter, Total number of bytes transmit
 DCGM_FI_PROF_PCIE_RX_BYTES,              counter, Total number of bytes received through PCIe RX (in KB) via NVML.
 ```
 
-NVIDIA devs also recommend enabling the following default counters and labels:
+It is also recommended enabling the following default counters and labels:
 - `DCGM_FI_DEV_MEMORY_TEMP`
 - `DCGM_FI_DEV_GPU_TEMP`
 - `DCGM_FI_DEV_POWER_USAGE`
@@ -43,7 +43,7 @@ NVIDIA devs also recommend enabling the following default counters and labels:
 - `DCGM_FI_DEV_BRAND`
 - `DCGM_FI_DEV_SERIAL`
 
-They also recommend adding the following non-default fields and labels:
+The following non-default fields and labels are also recommended:
 ```
 DCGM_FI_DEV_SLOWDOWN_TEMP,              gauge, Slowdown temperature for the device.
 DCGM_FI_DEV_POWER_MGMT_LIMIT,           gauge, Current power limit for the device.
@@ -106,6 +106,8 @@ instances:
     #
     - openmetrics_endpoint: http://localhost:9400/metrics
 ```
+
+Use the `extra_metrics` configuration field to add metrics that go beyond the ones [we support out of the box][6]. See [here][10] for the full list of metrics that dcgm-exporter can collect. Make sure to [enable these fields in the dcgm-exporter configuration][9] as well.
 
 <!-- xxx tab xxx -->
 <!-- xxx tab "Docker" xxx -->
@@ -242,7 +244,7 @@ Contact [Datadog support][8].
 
 Additional helpful documentation, links, and articles:
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/dcgm/datadog_checks/dcgm/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

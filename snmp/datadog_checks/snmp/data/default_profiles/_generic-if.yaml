@@ -46,7 +46,7 @@ metrics:
   table:
     OID: 1.3.6.1.2.1.2.2
     name: ifTable
-  forced_type: monotonic_count_and_rate
+  metric_type: monotonic_count_and_rate
   symbols:
   - OID: 1.3.6.1.2.1.2.2.1.14
     name: ifInErrors
@@ -67,6 +67,8 @@ metrics:
       name: ifAlias
     table: ifXTable
     tag: interface_alias
+  - index: 1  # ifIndex
+    tag: interface_index
 - MIB: IF-MIB
   table:
     OID: 1.3.6.1.2.1.2.2
@@ -89,11 +91,13 @@ metrics:
       name: ifAlias
     table: ifXTable
     tag: interface_alias
+  - index: 1  # ifIndex
+    tag: interface_index
 - MIB: IF-MIB
   table:
     OID: 1.3.6.1.2.1.31.1.1
     name: ifXTable
-  forced_type: monotonic_count
+  metric_type: monotonic_count
   symbols:
   - OID: 1.3.6.1.2.1.31.1.1.1.7
     name: ifHCInUcastPkts
@@ -117,11 +121,13 @@ metrics:
       name: ifAlias
     table: ifXTable
     tag: interface_alias
+  - index: 1  # ifIndex
+    tag: interface_index
 - MIB: IF-MIB
   table:
     OID: 1.3.6.1.2.1.31.1.1
     name: ifXTable
-  forced_type: monotonic_count_and_rate
+  metric_type: monotonic_count_and_rate
   symbols:
   - OID: 1.3.6.1.2.1.31.1.1.1.6
     name: ifHCInOctets
@@ -137,6 +143,8 @@ metrics:
       name: ifAlias
     table: ifXTable
     tag: interface_alias
+  - index: 1  # ifIndex
+    tag: interface_index
 - MIB: IF-MIB
   table:
     OID: 1.3.6.1.2.1.31.1.1
@@ -154,3 +162,5 @@ metrics:
       name: ifAlias
     table: ifXTable
     tag: interface_alias
+  - index: 1  # ifIndex
+    tag: interface_index

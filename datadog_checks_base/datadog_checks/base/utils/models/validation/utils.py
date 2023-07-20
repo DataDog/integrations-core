@@ -1,14 +1,18 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from .helpers import get_initialization_data
+from ..types import make_immutable_check_config
 
 
-def handle_deprecations(config_section, deprecations, values):
-    warning_method = get_initialization_data(values)['warning']
+def make_immutable(value):
+    return make_immutable_check_config(value)
+
+
+def handle_deprecations(config_section, deprecations, fields, context):
+    warning_method = context['warning']
 
     for option, data in deprecations.items():
-        if option not in values:
+        if option not in fields:
             continue
 
         message = f'Option `{option}` in `{config_section}` is deprecated ->\n'
