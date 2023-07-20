@@ -14,7 +14,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import extract_sql_comments, is_statement_proc
+from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments, is_statement_proc
 
 try:
     import datadog_agent
@@ -58,7 +58,7 @@ SELECT
         WHEN -1 THEN DATALENGTH(qt.text)
         ELSE req.statement_end_offset END
             - req.statement_start_offset) / 2) + 1) AS statement_text,
-    qt.text,
+    SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
@@ -157,7 +157,8 @@ class SqlserverActivity(DBMAsyncJob):
     def _get_activity(self, cursor, exec_request_columns):
         self.log.debug("collecting sql server activity")
         query = ACTIVITY_QUERY.format(
-            exec_request_columns=', '.join(['req.{}'.format(r) for r in exec_request_columns])
+            exec_request_columns=', '.join(['req.{}'.format(r) for r in exec_request_columns]),
+            proc_char_limit=PROC_CHAR_LIMIT,
         )
         self.log.debug("Running query [%s]", query)
         cursor.execute(query)
