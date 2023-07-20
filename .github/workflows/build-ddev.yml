@@ -23,7 +23,7 @@ defaults:
 
 env:
   APP_NAME: ddev
-  PYTHON_VERSION: "3.9"
+  PYTHON_VERSION: "3.8"
   PYOXIDIZER_VERSION: "0.24.0"
 
 jobs:
