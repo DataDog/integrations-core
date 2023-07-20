@@ -25,13 +25,13 @@ metrics:
       name: systemPowerSupplyTable
       OID: 1.3.6.1.4.1.13742.3.1.3
     symbols:
-      - name: raritan.dominion.systemPowerSupply
+      - name: raritan.remotekvm.systemPowerSupply
         constant_value_one: true
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.13742.3.1.3.1.2
-          name: raritan.dominion.systemPowerSupplyPowerOn
-        tag: raritan_dominion_system_power_supply_power_on
+          name: raritan.remotekvm.systemPowerSupplyPowerOn
+        tag: raritan_remotekvm_system_power_supply_power_on
         mapping:
           0: 'false'
           1: 'true'
@@ -40,21 +40,21 @@ metrics:
       name: portDataTable
       OID: 1.3.6.1.4.1.13742.3.1.4
     symbols:
-      - name: raritan.dominion.portData
+      - name: raritan.remotekvm.portData
         constant_value_one: true
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.13742.3.1.4.1.3
-          name: raritan.dominion.portDataName
-        tag: raritan_dominion_port_data_name
+          name: raritan.remotekvm.portDataName
+        tag: raritan_remotekvm_port_data_name
       - column:
           OID: 1.3.6.1.4.1.13742.3.1.4.1.4
-          name: raritan.dominion.portDataType
-        tag: raritan_dominion_port_data_type
+          name: raritan.remotekvm.portDataType
+        tag: raritan_remotekvm_port_data_type
       - column:
           OID: 1.3.6.1.4.1.13742.3.1.4.1.5
-          name: raritan.dominion.portDataStatus
-        tag: raritan_dominion_port_data_status
+          name: raritan.remotekvm.portDataStatus
+        tag: raritan_remotekvm_port_data_status
         mapping:
           0: inactive
           1: available

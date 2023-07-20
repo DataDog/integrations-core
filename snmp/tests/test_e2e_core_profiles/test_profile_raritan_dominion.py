@@ -39,27 +39,27 @@ def test_e2e_profile_raritan_dominion(dd_agent_check):
     aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-        ['raritan_dominion_system_power_supply_power_on:true'],
+        ['raritan_remotekvm_system_power_supply_power_on:true'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.raritan.dominion.systemPowerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.raritan.remotekvm.systemPowerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     tag_rows = [
         [
-            'raritan_dominion_port_data_name:kept kept oxen acted Jaded but',
-            'raritan_dominion_port_data_status:available',
-            'raritan_dominion_port_data_type:their oxen oxen acted',
+            'raritan_remotekvm_port_data_name:kept kept oxen acted Jaded but',
+            'raritan_remotekvm_port_data_status:available',
+            'raritan_remotekvm_port_data_type:their oxen oxen acted',
         ],
         [
-            'raritan_dominion_port_data_name:oxen oxen driving acted forward',
-            'raritan_dominion_port_data_type:but Jaded their quaintly quaintly',
+            'raritan_remotekvm_port_data_name:oxen oxen driving acted forward',
+            'raritan_remotekvm_port_data_type:but Jaded their quaintly quaintly',
         ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.raritan.dominion.portData', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.raritan.remotekvm.portData', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     # --- TEST METADATA ---
