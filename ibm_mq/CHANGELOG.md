@@ -1,5 +1,7 @@
 # CHANGELOG - IBM MQ
 
+## Unreleased
+
 ## 4.2.0 / 2023-07-10
 
 ***Added***:

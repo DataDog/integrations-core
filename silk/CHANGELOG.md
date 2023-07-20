@@ -1,5 +1,7 @@
 # CHANGELOG - Silk
 
+## Unreleased
+
 ## 1.2.3 / 2023-07-10
 
 ***Fixed***:

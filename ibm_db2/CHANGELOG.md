@@ -1,5 +1,7 @@
 # CHANGELOG - IBM Db2
 
+## Unreleased
+
 ## 1.11.3 / 2023-07-10
 
 ***Fixed***:
