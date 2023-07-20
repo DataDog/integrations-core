@@ -1,6 +1,4 @@
 extends:
-  - _base.yaml
-  - _generic-if.yaml
   - riverbed.yaml
 
 sysobjectid:
