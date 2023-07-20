@@ -9536,6 +9536,24 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: argocd-applicationset-controller-metrics
+  labels:
+    app.kubernetes.io/name: argocd-applicationset-controller-metrics
+    app.kubernetes.io/component: applicationset-controller
+    app.kubernetes.io/part-of: argocd-applicationset
+spec:
+  ports:
+  - name:  http-metrics
+    protocol: TCP
+    port: 8085
+    targetPort: metrics
+  selector:
+    app.kubernetes.io/name: argocd-applicationset-controller
+    app.kubernetes.io/instance: argocd
+---
+apiVersion: v1
+kind: Service
+metadata:
   labels:
     app.kubernetes.io/component: dex-server
     app.kubernetes.io/name: argocd-dex-server
