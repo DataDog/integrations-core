@@ -88,33 +88,33 @@ metrics:
       name: procNum
     # Memory
   - MIB: CHECKPOINT-MIB
-    forced_type: gauge
+    metric_type: gauge
     symbol:
       OID: 1.3.6.1.4.1.2620.1.6.7.4.3.0
       name: memTotalReal64
   - MIB: CHECKPOINT-MIB
-    forced_type: gauge
+    metric_type: gauge
     symbol:
       OID: 1.3.6.1.4.1.2620.1.6.7.4.4.0
       name: memActiveReal64
   - MIB: CHECKPOINT-MIB
-    forced_type: gauge
+    metric_type: gauge
     symbol:
       OID: 1.3.6.1.4.1.2620.1.6.7.4.5.0
       name: memFreeReal64
   - MIB: CHECKPOINT-MIB
-    forced_type: gauge
+    metric_type: gauge
     symbol:
       OID: 1.3.6.1.4.1.2620.1.6.7.4.1.0
       name: memTotalVirtual64
   - MIB: CHECKPOINT-MIB
-    forced_type: gauge
+    metric_type: gauge
     symbol:
       OID: 1.3.6.1.4.1.2620.1.6.7.4.2.0
       name: memActiveVirtual64
     # Disk
   - MIB: CHECKPOINT-MIB
-    forced_type: gauge
+    metric_type: gauge
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.2620.1.6.7.6.1.1
@@ -179,17 +179,17 @@ metrics:
       name: tempertureSensorTable
     # Network
   - MIB: CHECKPOINT-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.2620.1.1.4.0
       name: fwAccepted
   - MIB: CHECKPOINT-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.2620.1.1.6.0
       name: fwDropped
   - MIB: CHECKPOINT-MIB
-    forced_type: monotonic_count
+    metric_type: monotonic_count
     symbol:
       OID: 1.3.6.1.4.1.2620.1.1.5.0
       name: fwRejected

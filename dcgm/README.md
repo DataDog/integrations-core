@@ -8,7 +8,7 @@ This check submits metrics exposed by the [Nvidia DCGM][15] [Exporter][16] in Da
 
 ### Installation
 
-The DCGM check is included in the [Datadog Agent][1] package, however we will need to spin up the DCGM Exporter container to expose the GPU metrics for the Agent to collect.
+The DCGM check is included in the [Datadog Agent][1] package. However, you need to spin up the DCGM Exporter container to expose the GPU metrics in order for the Agent to collect this data.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host | Docker" xxx -->
@@ -17,9 +17,9 @@ The DCGM check is included in the [Datadog Agent][1] package, however we will ne
 
 To configure the exporter in a Docker environment:
 
-1. Create the following file `$PWD/default-counters.csv` which contains the default fields from `etc/default-counters.csv`. Using this file we can add more fields for collection. Follow [these instructions][9] to add more fields. For the complete list of fields see the [DCGM API reference manual][10].
+1. Create the following file `$PWD/default-counters.csv` which contains the default fields from `etc/default-counters.csv`. To add more fields for collection, follow [these instructions][9]. For the complete list of fields, see the [DCGM API reference manual][10].
 
-<div class="alert alert-info">We recommend adding the following fields to cover the same ground as our <a href="https://docs.datadoghq.com/integrations/nvml/#metrics">NVML integration</a>:
+<div class="alert alert-info">Datadog recommends adding the following fields to cover the same ground as the <a href="https://docs.datadoghq.com/integrations/nvml/#metrics">NVML integration</a>:
 
 ```
 DCGM_FI_DEV_COUNT,                       counter, Number of Devices on the node.
@@ -29,7 +29,7 @@ DCGM_FI_PROF_PCIE_TX_BYTES,              counter, Total number of bytes transmit
 DCGM_FI_PROF_PCIE_RX_BYTES,              counter, Total number of bytes received through PCIe RX (in KB) via NVML.
 ```
 
-NVIDIA devs also recommend enabling the following default counters and labels:
+It is also recommended enabling the following default counters and labels:
 - `DCGM_FI_DEV_MEMORY_TEMP`
 - `DCGM_FI_DEV_GPU_TEMP`
 - `DCGM_FI_DEV_POWER_USAGE`
@@ -43,7 +43,7 @@ NVIDIA devs also recommend enabling the following default counters and labels:
 - `DCGM_FI_DEV_BRAND`
 - `DCGM_FI_DEV_SERIAL`
 
-They also recommend adding the following non-default fields and labels:
+The following non-default fields and labels are also recommended:
 ```
 DCGM_FI_DEV_SLOWDOWN_TEMP,              gauge, Slowdown temperature for the device.
 DCGM_FI_DEV_POWER_MGMT_LIMIT,           gauge, Current power limit for the device.
@@ -94,7 +94,7 @@ To configure the Exporter in an Operator environment, please review the template
 
 ##### Metric collection
 
-1. Edit the `dcgm.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your GPU Metrics. See the [sample dcgm.d/conf.yaml][3] for all available configuration options.
+1. Edit the `dcgm.d/conf.yaml` file (located in the `conf.d/` folder at the root of your Agent's configuration directory) to start collecting your GPU Metrics. See the [sample dcgm.d/conf.yaml][3] for all available configuration options.
 
 ```
 instances:
@@ -106,6 +106,8 @@ instances:
     #
     - openmetrics_endpoint: http://localhost:9400/metrics
 ```
+
+Use the `extra_metrics` configuration field to add metrics that go beyond the ones [we support out of the box][6]. See [here][10] for the full list of metrics that dcgm-exporter can collect. Make sure to [enable these fields in the dcgm-exporter configuration][9] as well.
 
 <!-- xxx tab xxx -->
 <!-- xxx tab "Docker" xxx -->
@@ -192,14 +194,14 @@ spec:
 
 ### Adjusting Monitors
 
-The monitors that come with this integration out of the box have some common-sense default values for their alert thresholds. For instance, the GPU temperature was determined based on [acceptable range for industrial devices][13].
-However we recommend you check to make sure these values suit your particular needs.
+The out-of-the-box monitors that come with this integration have some default values based on their alert thresholds. For example, the GPU temperature is determined based on an [acceptable range for industrial devices][13].
+However, Datadog recommends that you check to make sure these values suit your particular needs.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics that this integration provides.
 
 ### Events
 
@@ -207,13 +209,13 @@ The DCGM integration does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][7] for a list of service checks provided by this integration.
+See [service_checks.json][7] for a list of service checks that this integration provides.
 
 ## Troubleshooting
 
 ### Metric Mapping
 
-If you have added some metrics that don't appear in the [metadata.csv][6] above and appear in your account with the format `DCGM_FI_DEV_NEW_METRIC`, it is important to remap these metrics in the [dcgm.d/conf.yaml][3] configuration file:
+If you have added some metrics that don't appear in the [metadata.csv][6] above but appear in your account with the format `DCGM_FI_DEV_NEW_METRIC`, it is important to remap these metrics in the [dcgm.d/conf.yaml][3] configuration file:
 ```yaml
     ## @param extra_metrics - (list of string or mapping) - optional
     ## This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
@@ -221,20 +223,20 @@ If you have added some metrics that don't appear in the [metadata.csv][6] above 
     ## metric definitions here take precedence. Metrics may be defined in 3 ways:
     ...
 ```
-The example below will append the part in `NEW_METRIC` to the namespace (`dcgm.`), giving `dcgm.new_metric`:
+The example below appends the part in `NEW_METRIC` to the namespace (`dcgm.`), giving `dcgm.new_metric`:
 
 ```yaml
     extra_metrics:
     - DCGM_FI_DEV_NEW_METRIC: new_metric
 ```
 
-### DCGM Field is Enabled but not Being Submitted?
+### DCGM field is enabled but not being submitted?
 
-It may happen that you enable the collection of a field in `default-counters.csv` but it doesn't show up in Datadog, nor in fact if you make a `curl` request to `host:9400/metrics`.
-To figure out why this field is not being collected [dcgm-exporter devs recommend][14] looking at the file `var/log/nv-hostengine.log`.
+It may happen that you've enabled the collection of a field in `default-counters.csv`, but it doesn't appear up in Datadog, even after making a `curl` request to `host:9400/metrics`.
+To figure out why this field is not being collected, [dcgm-exporter devs recommend][14] looking at the file `var/log/nv-hostengine.log`.
 Keep in mind that `dcgm-exporter` is a thin wrapper around lower-level libraries and drivers which do the actual reporting.
 
-### Need Help?
+### Need help?
 
 Contact [Datadog support][8].
 
@@ -242,7 +244,7 @@ Contact [Datadog support][8].
 
 Additional helpful documentation, links, and articles:
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/dcgm/datadog_checks/dcgm/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

@@ -36,29 +36,12 @@ def test_e2e_profile_alcatel_lucent_ind(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
+    aggregator.assert_metric(
+        'snmp.alcatel.ind.healthDeviceTemperatureChas1MinAvg', metric_type=aggregator.GAUGE, tags=common_tags
+    )
     aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.healthDeviceTemperatureChas1MinAvg', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-
     tag_rows = [
-        [
-            'chas_ent_phys_admin_status:reset_all',
-            'chas_ent_phys_led_status_backup_ps:not_applicable',
-            'chas_ent_phys_led_status_control:off',
-            'chas_ent_phys_led_status_fabric:amber_on',
-            'chas_ent_phys_led_status_fan1:amber_on',
-            'chas_ent_phys_led_status_fan2:green_on',
-            'chas_ent_phys_led_status_fan3:amber_blink',
-            'chas_ent_phys_led_status_fan:not_applicable',
-            'chas_ent_phys_led_status_internal_ps:not_applicable',
-            'chas_ent_phys_led_status_ok1:amber_blink',
-            'chas_ent_phys_led_status_ok2:green_blink',
-            'chas_ent_phys_led_status_primary_cmm:green_on',
-            'chas_ent_phys_led_status_psu:green_blink',
-            'chas_ent_phys_led_status_secondary_cmm:off',
-            'chas_ent_phys_led_status_temperature:amber_blink',
-            'chas_ent_phys_oper_status:testing',
-        ],
         [
             'chas_ent_phys_admin_status:power_on',
             'chas_ent_phys_led_status_backup_ps:green_blink',
@@ -77,9 +60,29 @@ def test_e2e_profile_alcatel_lucent_ind(dd_agent_check):
             'chas_ent_phys_led_status_temperature:amber_blink',
             'chas_ent_phys_oper_status:not_present',
         ],
+        [
+            'chas_ent_phys_admin_status:reset_all',
+            'chas_ent_phys_led_status_backup_ps:not_applicable',
+            'chas_ent_phys_led_status_control:off',
+            'chas_ent_phys_led_status_fabric:amber_on',
+            'chas_ent_phys_led_status_fan1:amber_on',
+            'chas_ent_phys_led_status_fan2:green_on',
+            'chas_ent_phys_led_status_fan3:amber_blink',
+            'chas_ent_phys_led_status_fan:not_applicable',
+            'chas_ent_phys_led_status_internal_ps:not_applicable',
+            'chas_ent_phys_led_status_ok1:amber_blink',
+            'chas_ent_phys_led_status_ok2:green_blink',
+            'chas_ent_phys_led_status_primary_cmm:green_on',
+            'chas_ent_phys_led_status_psu:green_blink',
+            'chas_ent_phys_led_status_secondary_cmm:off',
+            'chas_ent_phys_led_status_temperature:amber_blink',
+            'chas_ent_phys_oper_status:testing',
+        ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.chasEntPhysical', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.alcatel.ind.chasEntPhysical', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     # --- TEST METADATA ---
     device = {

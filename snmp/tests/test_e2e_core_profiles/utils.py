@@ -37,7 +37,7 @@ def assert_extend_generic_if(aggregator, common_tags):
 def assert_extend_generic_ip(aggregator, common_tags):
     # fmt: off
     """Add the following to the snmprec
-1.3.6.1.2.1.4.31.1.1.4.1 = Counter64: 310637142
+1.3.6.1.2.1.4.31.1.1.4.1|70|310637142
     """
     # fmt: on
     aggregator.assert_metric(
@@ -110,12 +110,34 @@ def assert_extend_cisco_cpu_memory(aggregator, common_tags):
 
 
 def assert_extend_generic_host_resources_base(aggregator, common_tags):
+    # fmt: off
+    """Add the following to the snmprec
+1.3.6.1.2.1.25.1.1.0|67|201526890
+1.3.6.1.2.1.25.2.3.1.1.4|2|4
+1.3.6.1.2.1.25.2.3.1.1.31|2|31
+1.3.6.1.2.1.25.2.3.1.2.4|6|1.3.6.1.3.167.36
+1.3.6.1.2.1.25.2.3.1.2.31|6|1.3.6.1.3
+1.3.6.1.2.1.25.2.3.1.3.4|4x|6b65707420627574207468656972204a61646564206275742064726976696e67
+1.3.6.1.2.1.25.2.3.1.3.31|4x|7a6f6d62696573206f78656e206b657074204a6164656420717561696e746c79207a6f6d62696573
+1.3.6.1.2.1.25.2.3.1.5.4|2|17
+1.3.6.1.2.1.25.2.3.1.5.31|2|21
+1.3.6.1.2.1.25.2.3.1.6.4|2|30
+1.3.6.1.2.1.25.2.3.1.6.31|2|4
+1.3.6.1.2.1.25.3.3.1.1.10|2|10
+1.3.6.1.2.1.25.3.3.1.1.21|2|21
+1.3.6.1.2.1.25.3.3.1.2.10|2|31
+1.3.6.1.2.1.25.3.3.1.2.21|2|15
+"""
+    # fmt: on
     aggregator.assert_metric("snmp.hrSystemUptime", metric_type=aggregator.GAUGE, tags=common_tags)
 
-    cpu_rows = ['10', '21']
+    cpu_rows = [('10', '10'), ('21', '21')]
     for cpu_row in cpu_rows:
+        processorid, hr_device_index = cpu_row
         aggregator.assert_metric(
-            'snmp.hrProcessorLoad', metric_type=aggregator.GAUGE, tags=common_tags + ['processorid:' + cpu_row]
+            'snmp.hrProcessorLoad',
+            metric_type=aggregator.GAUGE,
+            tags=common_tags + ['processorid:' + processorid, 'hr_device_index:' + hr_device_index],
         )
 
     hr_mem_rows = [
@@ -162,7 +184,8 @@ def assert_extend_generic_host_resources(aggregator, common_tags):
 1.3.6.1.2.1.25.3.3.1.1.10|2|10
 1.3.6.1.2.1.25.3.3.1.1.21|2|21
 1.3.6.1.2.1.25.3.3.1.2.10|2|31
-1.3.6.1.2.1.25.3.3.1.2.21|2|15"""
+1.3.6.1.2.1.25.3.3.1.2.21|2|15
+"""
     # fmt: on
     assert_extend_generic_host_resources_cpu_mem(aggregator, common_tags)
     assert_extend_generic_host_resources_base(aggregator, common_tags)
@@ -201,7 +224,7 @@ def assert_extend_generic_ucd(aggregator, common_tags):
 1.3.6.1.4.1.2021.4.3.0|2|1048572
     """
     # fmt:on
-    aggregator.assert_metric("snmp.memTotalSwap", metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric("snmp.ucd.memTotalSwap", metric_type=aggregator.GAUGE, tags=common_tags)
 
 
 def assert_extend_cisco(aggregator, common_tags):
@@ -212,3 +235,12 @@ def assert_extend_cisco(aggregator, common_tags):
     # fmt:on
     tags = ['cpu:712']
     aggregator.assert_metric("snmp.cpmCPUMemoryUsed", metric_type=aggregator.GAUGE, tags=common_tags + tags)
+
+
+def assert_extend_generic_ups(aggregator, common_tags):
+    # fmt: off
+    """Add the following to the snmprec
+1.3.6.1.2.1.33.1.2.2.0|2|10
+    """
+    # fmt: on
+    aggregator.assert_metric('snmp.upsSecondsOnBattery', metric_type=aggregator.GAUGE, tags=common_tags)

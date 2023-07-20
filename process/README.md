@@ -91,7 +91,7 @@ Need help? Contact [Datadog support][9].
 To get a better idea of how (or why) to monitor process resource consumption with Datadog, check out this [series of blog posts][10] about it.
 
 [1]: https://docs.datadoghq.com/monitors/create/types/process_check/?tab=checkalert
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/process/datadog_checks/process/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

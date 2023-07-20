@@ -340,7 +340,9 @@ class VSphereCheck(AgentCheck):
             metadata = self.metrics_metadata_cache.get_metadata(resource_type)
             for result in results_per_mor.value:
                 if result.id.instance:
-                    have_instance_value[resource_type].add(metadata[result.id.counterId])
+                    counter_id = metadata.get(result.id.counterId)
+                    if counter_id:
+                        have_instance_value[resource_type].add(counter_id)
 
         for results_per_mor in query_results:
             mor_props = self.infrastructure_cache.get_mor_props(results_per_mor.entity)

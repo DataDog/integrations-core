@@ -37,8 +37,8 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     tag_rows = [
-        ['health_module_chassis_id:0', 'cpu:21'],
-        ['health_module_chassis_id:1', 'cpu:27'],
+        ['cpu:21', 'health_module_chassis_id:0'],
+        ['cpu:27', 'health_module_chassis_id:1'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -81,21 +81,25 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.chasEntPhysical', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.alcatel.ent.chasEntPhysical', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
         ['chas_ent_temp_status:not_present'],
         ['chas_ent_temp_status:unknown'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.chasEntTempCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.alcatel.ent.chasEntTempCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
         ['ala_chas_ent_phys_fan_status:running'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.alaChasEntPhysFanSpeed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.alcatel.ent.alaChasEntPhysFanSpeed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     tag_rows = [
@@ -111,7 +115,9 @@ def test_e2e_profile_alcatel_lucent_ent(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.alaChasBpsPowerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.alcatel.ent.alaChasBpsPowerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     # --- TEST METADATA ---
     device = {

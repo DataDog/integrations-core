@@ -35,13 +35,12 @@ dependencies = [
 dynamic = [
     "version",
 ]
-
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
     "boto3==1.17.112; python_version < '3.0'",
-    "boto3==1.26.138; python_version > '3.0'",
+    "boto3==1.27.0; python_version > '3.0'",
 ]
 
 [project.urls]
