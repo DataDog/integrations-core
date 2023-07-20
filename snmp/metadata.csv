@@ -1180,6 +1180,8 @@ snmp.radPolicyEvalTime,gauge,,millisecond,,"[CPPM-MIB] Total time taken (ms) for
 snmp.radServerCounterCount,gauge,,,,"[CPPM-MIB] Total RADIUS request count.",0,snmp,,
 snmp.radServerCounterFailure,gauge,,,,"[CPPM-MIB] Failed RADIUS request count.",0,snmp,,
 snmp.radServerCounterSuccess,gauge,,,,"[CPPM-MIB] Successful RADIUS request count.",0,snmp,,
+snmp.raritan.dominion.portData,gauge,,,,"[RemoteKVMDevice-MIB] Retrieve data for all ports (Make 'sum by {X}' queries to count elements with the tag X.)",0,snmp,,
+snmp.raritan.dominion.systemPowerSupply,gauge,,,,"[RemoteKVMDevice-MIB] Status of all power supplies (Make 'sum by {X}' queries to count elements with the tag X.)",0,snmp,,
 snmp.receptacleEnergyoutlet10s,count,,,,"[Legacy Chatsworth] The outlet10 receptacle energy accumulated in decaWatt-secs, divide by 360 to obtain Watt-hr.",0,snmp,,
 snmp.receptacleEnergyoutlet11s,count,,,,"[Legacy Chatsworth] The outlet11 receptacle energy accumulated in decaWatt-secs, divide by 360 to obtain Watt-hr.",0,snmp,,
 snmp.receptacleEnergyoutlet12s,count,,,,"[Legacy Chatsworth] The outlet12 receptacle energy accumulated in decaWatt-secs, divide by 360 to obtain Watt-hr.",0,snmp,,
