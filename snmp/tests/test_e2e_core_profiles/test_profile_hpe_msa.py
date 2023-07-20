@@ -29,9 +29,9 @@ def test_e2e_profile_hpe_msa(dd_agent_check):
         'device_namespace:default',
         'snmp_device:' + ip_address,
     ] + [
-        'cpq_si_product_name:forward driving forward but',
-        'cpq_si_sys_product_id:kept',
-        'cpq_si_sys_serial_num:kept Jaded driving',
+        'hpe_msa_cpq_si_product_name:forward driving forward but',
+        'hpe_msa_cpq_si_sys_product_id:kept',
+        'hpe_msa_cpq_si_sys_serial_num:kept Jaded driving',
     ]
 
     # --- TEST EXTENDED METRICS ---
