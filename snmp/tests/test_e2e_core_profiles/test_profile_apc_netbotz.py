@@ -73,13 +73,22 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
         aggregator.assert_metric('snmp.netbotz.enclosure', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['netbotz_din_port_id:but forward their their driving kept', 'netbotz_din_port_index:3777091038',
-         'netbotz_din_port_status:normal'],
+        [
+            'netbotz_din_port_id:but forward their their driving kept',
+            'netbotz_din_port_index:3777091038',
+            'netbotz_din_port_status:normal',
+        ],
         ['netbotz_din_port_id:driving', 'netbotz_din_port_index:2491939166', 'netbotz_din_port_status:normal'],
-        ['netbotz_din_port_id:driving but Jaded forward forward', 'netbotz_din_port_index:325729673',
-         'netbotz_din_port_status:disconnected'],
-        ['netbotz_din_port_id:forward quaintly but acted', 'netbotz_din_port_index:595713748',
-         'netbotz_din_port_status:disconnected'],
+        [
+            'netbotz_din_port_id:driving but Jaded forward forward',
+            'netbotz_din_port_index:325729673',
+            'netbotz_din_port_status:disconnected',
+        ],
+        [
+            'netbotz_din_port_id:forward quaintly but acted',
+            'netbotz_din_port_index:595713748',
+            'netbotz_din_port_status:disconnected',
+        ],
     ]
 
     for tag_row in tag_rows:
