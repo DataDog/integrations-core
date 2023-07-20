@@ -1,0 +1,4 @@
+:9400 {
+  root * /site
+  file_server
+}
