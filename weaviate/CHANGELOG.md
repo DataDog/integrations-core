@@ -5,3 +5,9 @@
 ***Added***:
 
 * Add the Weaviate integration. See [#15081](https://github.com/DataDog/integrations-core/pull/15081).
+
+## 0.1.0 / 2023-07-20
+
+***Added***:
+
+* Add the Weaviate integration for python 3.8. See [#15081](https://github.com/DataDog/integrations-core/pull/15081).

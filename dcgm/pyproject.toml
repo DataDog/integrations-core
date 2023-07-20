@@ -10,7 +10,7 @@ name = "datadog-dcgm"
 description = "The dcgm-exporter check"
 readme = "README.md"
 license = "BSD-3-Clause"
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 keywords = [
     "datadog",
     "datadog agent",
@@ -26,7 +26,7 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Private :: Do Not Upload",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.8",
     "Topic :: System :: Monitoring",
 ]
 dependencies = [

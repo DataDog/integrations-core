@@ -10,7 +10,7 @@ name = "datadog-weaviate"
 description = "The Weaviate check"
 readme = "README.md"
 license = {text = "BSD-3-Clause"}
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 keywords = [
     "datadog",
     "datadog agent",
@@ -26,11 +26,11 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Private :: Do Not Upload",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.8",
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=32.4.0",
+    "datadog-checks-base>=32.3.1",
 ]
 dynamic = [
     "version",
