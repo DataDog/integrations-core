@@ -213,8 +213,8 @@ class PostgresMetadata(DBMAsyncJob):
                 "dbms_version": self._payload_pg_version(),
                 "tags": self._tags_no_db,
                 "timestamp": time.time() * 1000,
-                "cloud_metadata": self._config.cloud_metadata,
                 "metadata": metadata,
+                "cloud_metadata": self._config.cloud_metadata,
             }
             json_event = json.dumps(event, default=default_json_event_encoding)
             self._log.debug("Reporting the following payload: {}".format(json_event))
@@ -348,8 +348,7 @@ class PostgresMetadata(DBMAsyncJob):
             if table["hasindexes"]:
                 cursor.execute(PG_INDEXES_QUERY.format(tablename=name))
                 rows = cursor.fetchall()
-                indexes = {row[0]: row[1] for row in rows}
-                this_payload.update({'indexes': indexes})
+                this_payload.update({'indexes': rows})
 
             if table['has_partitions']:
                 cursor.execute(PARTITION_KEY_QUERY.format(parent=name))
@@ -369,13 +368,13 @@ class PostgresMetadata(DBMAsyncJob):
             rows = cursor.fetchall()
             self._log.warning("foreign keys {}".format(rows))
             if rows:
-                this_payload.update({'foreign_keys': {}})
+                this_payload.update({'foreign_keys': rows})
 
             # Get columns
             cursor.execute(COLUMNS_QUERY.format(tablename=name))
             rows = cursor.fetchall()
             self._log.warning(rows)
-            columns = [dict(row) for row in rows]
+            # columns = [dict(row) for row in rows]
             this_payload.update({'columns': columns})
 
             table_payloads.append(this_payload)
