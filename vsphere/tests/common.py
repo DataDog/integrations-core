@@ -15,6 +15,10 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 
 VSPHERE_VERSION = os.environ.get('VSPHERE_VERSION')
 
+VSPHERE_USERNAME = 'FAKE'
+VSPHERE_PASSWORD = 'FAKE'
+VSPHERE_URL = 'FAKE'
+
 LAB_USERNAME = os.environ.get('TEST_VSPHERE_USER')
 LAB_PASSWORD = os.environ.get('TEST_VSPHERE_PASS')
 
@@ -40,9 +44,9 @@ LEGACY_DEFAULT_INSTANCE = {
     'event_config': {
         'collect_vcenter_alarms': True,
     },
-    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'host': VSPHERE_URL,
+    'username': VSPHERE_USERNAME,
+    'password': VSPHERE_PASSWORD,
 }
 
 LEGACY_REALTIME_INSTANCE = {
@@ -52,9 +56,9 @@ LEGACY_REALTIME_INSTANCE = {
     'event_config': {
         'collect_vcenter_alarms': True,
     },
-    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'host': VSPHERE_URL,
+    'username': VSPHERE_USERNAME,
+    'password': VSPHERE_PASSWORD,
     'collect_realtime_only': True,
 }
 
@@ -65,27 +69,27 @@ LEGACY_HISTORICAL_INSTANCE = {
     'event_config': {
         'collect_vcenter_alarms': True,
     },
-    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'host': VSPHERE_URL,
+    'username': VSPHERE_USERNAME,
+    'password': VSPHERE_PASSWORD,
     'collect_historical_only': True,
 }
 
 DEFAULT_INSTANCE = {
     'use_legacy_check_version': False,
     'empty_default_hostname': True,
-    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'host': VSPHERE_URL,
+    'username': VSPHERE_USERNAME,
+    'password': VSPHERE_PASSWORD,
     'ssl_verify': False,
 }
 
 REALTIME_INSTANCE = {
     'use_legacy_check_version': False,
     'empty_default_hostname': True,
-    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'host': VSPHERE_URL,
+    'username': VSPHERE_USERNAME,
+    'password': VSPHERE_PASSWORD,
     'ssl_verify': False,
     'collection_level': 4,
     'rest_api_options': None,
@@ -94,9 +98,9 @@ REALTIME_INSTANCE = {
 HISTORICAL_INSTANCE = {
     'use_legacy_check_version': False,
     'empty_default_hostname': True,
-    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'host': VSPHERE_URL,
+    'username': VSPHERE_USERNAME,
+    'password': VSPHERE_PASSWORD,
     'ssl_verify': False,
     'collection_level': 4,
     'collection_type': 'historical',
@@ -105,9 +109,9 @@ HISTORICAL_INSTANCE = {
 EVENTS_ONLY_INSTANCE = {
     'empty_default_hostname': True,
     'use_legacy_check_version': False,
-    'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-    'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-    'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+    'host': VSPHERE_URL,
+    'username': VSPHERE_USERNAME,
+    'password': VSPHERE_PASSWORD,
     'ssl_verify': False,
     'collect_events_only': True,
 }
