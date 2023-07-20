@@ -29,9 +29,6 @@
       "configuration": {},
       "events": {
         "creates_events": true
-      },
-      "service_checks": {
-        "metadata_path": "assets/service_checks.json"
       }
     }
   }
