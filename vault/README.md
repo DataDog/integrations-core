@@ -12,7 +12,7 @@ The Vault check is included in the [Datadog Agent][2] package.
 
 #### Prerequisites
 
-This OpenMetrics-based integration has a latest version (`use_openmetrics`: true) and a legacy version (`use_openmetrics`: false). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see the [Latest and Legacy Versioning For OpenMetrics-based Integrations][22].
+This OpenMetrics-based integration has a latest version (`use_openmetrics`: true) and a legacy version (`use_openmetrics`: false). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][22].
 
 1. Ensure you have enabled [Prometheus metrics in the Vault configuration][3].
 
