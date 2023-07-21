@@ -66,7 +66,7 @@ instances:
 ```
 
 
-Customize each project's build configuration monitoring using the optional `include` and `exclude` filters to specify build configuration IDs to include or exclude from monitoring, respectively. RegEx patterns are supported in the `include` and `exclude` keys to specify build configuration ID matching patterns. If both `include` and `exclude` filters are omitted, all build configurations are monitored for the specified project. 
+Customize each project's build configuration monitoring using the optional `include` and `exclude` filters to specify build configuration IDs to include or exclude from monitoring, respectively. Regular expression patterns are supported in the `include` and `exclude` keys to specify build configuration ID matching patterns. If both `include` and `exclude` filters are omitted, all build configurations are monitored for the specified project. 
 
 For Python version 2, configure one build configuration ID per instance using the `build_configuration` option:
 
