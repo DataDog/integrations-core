@@ -11,7 +11,7 @@
             "critical": 1
         },
         "notify_audit": false,
-        "include_tags": true,
+        "include_tags": false,
         "new_group_delay": 60,
         "notify_no_data": false,
         "avalanche_window": 10,
