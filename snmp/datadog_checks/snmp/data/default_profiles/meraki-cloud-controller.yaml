@@ -18,7 +18,7 @@ metrics:
       OID: 1.3.6.1.4.1.29671.1.1.4
       name: devTable
       # devTable INDEX is: devMac
-    forced_type: gauge
+    metric_type: gauge
     symbols:
       - OID: 1.3.6.1.4.1.29671.1.1.4.1.3
         name: devStatus
@@ -48,7 +48,7 @@ metrics:
       OID: 1.3.6.1.4.1.29671.1.1.5
       name: devInterfaceTable
       # devInterfaceTable INDEX is: devInterfaceDevMac, devInterfaceIndex
-    forced_type: gauge
+    metric_type: gauge
     symbols:
       - OID: 1.3.6.1.4.1.29671.1.1.5.1.4
         name: devInterfaceSentPkts

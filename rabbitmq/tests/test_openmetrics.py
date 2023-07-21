@@ -251,7 +251,7 @@ def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd
         ),
         pytest.param(
             {'url': "http://localhost", "unaggregated_endpoint": []},
-            "expected string or bytes-like object",
+            "Input should be a valid string",
             id="Unaggregated_endpoint value must be a string.",
         ),
         pytest.param(

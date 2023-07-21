@@ -1,29 +1,30 @@
 import pytest
 
 
+@pytest.mark.usefixtures('repository')
 @pytest.mark.parametrize(
-    "check_name",
+    "check_name, classes",
     [
-        pytest.param("aerospike", id="Aerospike check.py OpenMetricsV2"),
-        pytest.param("amazon_msk", id="Amazon MSK amazon_msk.py OpenMetricsV1 and V2"),
+        pytest.param("aerospike", 1, id="Aerospike check.py OpenMetricsV2"),
+        pytest.param("amazon_msk", 2, id="Amazon MSK amazon_msk.py OpenMetricsV1 and V2"),
     ],
 )
-def test_openmetrics_pass_single_parameter(ddev, repository, check_name, helpers, network_replay):
+def test_openmetrics_pass_single_parameter(ddev, helpers, check_name, classes):
     result = ddev("validate", "openmetrics", check_name)
 
     assert result.exit_code == 0, result.output
 
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Validating default metric limit for OpenMetrics integrations ...
-        OpenMetrics Metric limit
+        OpenMetrics metric limit
 
-        Passed: 1
+        Passed: {classes}
         """
     )
 
 
-def test_openmetrics_fail_single_parameter(ddev, helpers, repository, network_replay):
+def test_openmetrics_fail_single_parameter(ddev, helpers, repository):
     missing_metric_limit = '''
             class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             __NAMESPACE__ = 'arangodb'
@@ -44,7 +45,8 @@ def test_openmetrics_fail_single_parameter(ddev, helpers, repository, network_re
     assert "Errors: 1" in helpers.remove_trailing_spaces(result.output)
 
 
-def test_openmetrics_skip_openmetrics(ddev, helpers, repository, network_replay):
+@pytest.mark.usefixtures('repository')
+def test_openmetrics_skip_openmetrics(ddev, helpers):
     result = ddev("validate", "openmetrics", "openmetrics")
 
     assert result.exit_code == 0, result.output
@@ -53,6 +55,7 @@ def test_openmetrics_skip_openmetrics(ddev, helpers, repository, network_replay)
     assert "Errors" not in helpers.remove_trailing_spaces(result.output)
 
 
+@pytest.mark.usefixtures('repository')
 @pytest.mark.parametrize(
     "repo, expected_message",
     [
@@ -64,7 +67,7 @@ def test_openmetrics_skip_openmetrics(ddev, helpers, repository, network_replay)
         ),
     ],
 )
-def test_openmetrics_validate_repo(repo, repository, expected_message, ddev, helpers, config_file):
+def test_openmetrics_validate_repo(repo, expected_message, ddev, helpers, config_file):
     config_file.model.repo = repo
     config_file.save()
 

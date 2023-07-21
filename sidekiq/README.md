@@ -119,7 +119,7 @@ Need help? Contact [Datadog support][12].
 [1]: https://sidekiq.org/
 [2]: https://docs.datadoghq.com/developers/dogstatsd/
 [3]: https://github.com/DataDog/dogstatsd-ruby
-[4]: https://app.datadoghq.com/account/settings#agent
+[4]: https://app.datadoghq.com/account/settings/agent/latest
 [5]: https://github.com/mperham/sidekiq/wiki/Pro-Metrics
 [6]: https://github.com/mperham/sidekiq/wiki/Ent-Historical-Metrics
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/

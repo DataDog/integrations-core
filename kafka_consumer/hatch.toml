@@ -1,10 +1,6 @@
 [env.collectors.datadog-checks]
 
 [envs.default]
-dependencies = [
-  "datadog_checks_tests_helper @ {root:uri}/../datadog_checks_tests_helper",
-]
-e2e-env = true
 # If you bump the `confluent-kafka` version, also bump the `librdkafka` version in the `32_install_kerberos.sh` file
 post-install-commands = [
   "python -m pip uninstall -y confluent-kafka",

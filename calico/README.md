@@ -146,7 +146,7 @@ Additional helpful documentation, links, and articles:
 - [Monitor Calico with Datadog][15]
 
 [1]: https://www.tigera.io/project-calico/
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/calico/datadog_checks/calico/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
@@ -155,7 +155,7 @@ Additional helpful documentation, links, and articles:
 [8]: https://docs.datadoghq.com/help/
 [9]: https://docs.tigera.io/calico/3.25/operations/monitor/monitor-component-metrics
 [10]: https://docs.datadoghq.com/developers/integrations/python/
-[11]: https://app.datadoghq.com/account/settings#agent
+[11]: https://app.datadoghq.com/account/settings/agent/latest
 [12]: https://docs.datadoghq.com/agent/kubernetes
 [13]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [14]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
