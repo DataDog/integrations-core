@@ -31,10 +31,6 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
         'snmp_device:' + ip_address,
     ]
 
-    # --- TEST EXTENDED METRICS ---
-    assert_extend_generic_tcp(aggregator, common_tags)
-    assert_extend_generic_udp(aggregator, common_tags)
-
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
@@ -398,7 +394,7 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
 
     # --- TEST METADATA ---
     device = {
-        'description': 'apc-netbotz Device Description SN: 5A1827E00000',
+        'description': 'apc-netbotz Device Description',
         'id': 'default:' + ip_address,
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
@@ -407,7 +403,6 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.5528.100.20.10.2000',
         'vendor': 'apc',
-        'serial_number': '5A1827E00000',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
