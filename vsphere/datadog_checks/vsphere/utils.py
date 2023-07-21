@@ -122,9 +122,8 @@ def get_tags_recursively(mor, infrastructure_data, config, include_only=None):
         tags.append('vsphere_datastore:{}'.format(entity_name))
 
     parent = infrastructure_data.get(mor, {}).get('parent')
-    if parent is None:
-        return tags
-    tags.extend(get_tags_recursively(parent, infrastructure_data, config))
+    if parent is not None:
+        tags.extend(get_tags_recursively(parent, infrastructure_data, config))
     if not include_only:
         return tags
     filtered_tags = []

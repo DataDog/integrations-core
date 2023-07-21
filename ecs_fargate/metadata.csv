@@ -30,3 +30,5 @@ ecs.fargate.net.packet.in_dropped,gauge,,packet,,Number of ingoing packets dropp
 ecs.fargate.net.packet.out_dropped,gauge,,packet,,Number of outgoing packets dropped (Fargate 1.4.0+ required).,-1,amazon_fargate,out packets dropped,
 ecs.fargate.net.bytes_rcvd,rate,,byte,,Number of bytes received (Fargate 1.4.0+ required).,0,amazon_fargate, bytes received,
 ecs.fargate.net.bytes_sent,rate,,byte,,Number of bytes sent (Fargate 1.4.0+ required).,0,amazon_fargate,bytes sent,
+ecs.fargate.ephemeral_storage.utilized,gauge,,mebibyte,,The current ephemeral storage usage of this task. (Fargate 1.4.0+ required).,0,amazon_fargate,ephemeral storage utilized,
+ecs.fargate.ephemeral_storage.reserved,gauge,,mebibyte,,The reserved ephemeral storage of this task. (Fargate 1.4.0+ required).,0,amazon_fargate,ephemeral storage reserved,

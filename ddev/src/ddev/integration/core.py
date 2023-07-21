@@ -3,15 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import os
 from functools import cached_property
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterator
 
 from ddev.repo.constants import NOT_SHIPPABLE
+from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
     from ddev.integration.manifest import Manifest
     from ddev.repo.config import RepositoryConfig
-    from ddev.utils.fs import Path
 
 
 class Integration:
@@ -58,6 +59,20 @@ class Integration:
                 directory = self.package_directory_name
 
             return self.path / 'datadog_checks' / directory
+
+    def package_files(self) -> Iterator[Path]:
+        for root, _, files in os.walk(self.package_directory):
+            for f in files:
+                if f.endswith('.py'):
+                    yield Path(root, f)
+
+    @property
+    def release_tag_pattern(self) -> str:
+        version_part = r'\d+\.\d+\.\d+'
+        if self.name == 'ddev':
+            version_part = f'v{version_part}'
+
+        return f'{self.name}-{version_part}'
 
     @cached_property
     def manifest(self) -> Manifest:

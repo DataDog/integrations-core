@@ -15,14 +15,13 @@ files:
     - template: instances
       options:
         - name: name
-          required: true
           description: |
             Unique identifier for this instance.
           value:
             example: <INSTANCE_NAME>
             type: string
+          enabled: true
         - name: user
-          required: true
           description: |
            Password authentication is the only auth method supported
            User expects username, password, and user domain id
@@ -36,6 +35,7 @@ files:
               domain:
                 id: <DOMAIN_ID>
             type: object
+          enabled: true
         - name: whitelist_project_names
           description: |
            IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)

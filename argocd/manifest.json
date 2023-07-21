@@ -33,7 +33,8 @@
         "check": [
           "argocd.api_server.go.goroutines",
           "argocd.app_controller.go.goroutines",
-          "argocd.repo_server.go.goroutines"
+          "argocd.repo_server.go.goroutines",
+          "argocd.notifications_controller.go.goroutines"
         ],
         "metadata_path": "metadata.csv"
       },
@@ -43,10 +44,13 @@
       "process_signatures": [
         "argocd-application-controller",
         "argocd-repo-server",
-        "argocd-server"
+        "argocd-server",
+        "argocd-notifications-controller"
       ]
     },
-    "logs": {},
+    "logs": {
+      "source": "argocd"
+    },
     "dashboards": {
       "Argo CD Overview": "assets/dashboards/argo_cd_overview.json"
     },

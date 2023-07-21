@@ -8,11 +8,13 @@ Integration that allows to:
 
 See [Monitoring GitLab with Prometheus][1] for more information.
 
+For more in-depth monitoring of your GitLab pipelines, check out [CI Pipeline Visibility][17]. CI Pipeline Visibility provides granular insights into your user workflow, lets you access detailed Git metadata, and tracks pipeline performance over time.
+
 ## Setup
 
 ### Prerequisites
 
-This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see the [Latest and Legacy Versioning For OpenMetrics-based Integrations][17].
+This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see the [Latest and Legacy Versioning For OpenMetrics-based Integrations][18].
 
 Metrics marked as `[Legacy]`, `[OpenMetricsV1]`, or `[OpenMetricsV2]` are only available using the corresponding version of the GitLab integration. Metrics not marked are collected by all three versions.
 
@@ -122,7 +124,7 @@ See [service_checks.json][13] for a list of service checks provided by this inte
 Need help? Contact [Datadog support][14].
 
 [1]: https://docs.gitlab.com/ee/administration/monitoring/prometheus
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/gitlab_metrics.html#collecting-the-metrics
 [5]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/data/conf.yaml.example
@@ -137,4 +139,5 @@ Need help? Contact [Datadog support][14].
 [14]: https://docs.datadoghq.com/help/
 [15]: https://docs.gitlab.com/ee/user/admin_area/monitoring/health_check.html#readiness
 [16]: https://github.com/DataDog/integrations-core/blob/7.43.x/gitlab/datadog_checks/gitlab/data/conf.yaml.example
-[17]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
+[17]: https://app.datadoghq.com/ci/getting-started
+[18]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
