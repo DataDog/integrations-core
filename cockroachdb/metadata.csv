@@ -1,3 +1,4 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 cockroachdb.addsstable.applications,count,,operation,,[OpenMetrics v1] Number of SSTable ingestions applied (i.e. applied by Replicas),0,cockroachdb,,
 cockroachdb.addsstable.copies,count,,operation,,[OpenMetrics v1] number of SSTable ingestions that required copying files during application,0,cockroachdb,,
 cockroachdb.addsstable.proposals,count,,operation,,[OpenMetrics v1] Number of SSTable ingestions proposed (i.e. sent to Raft by lease holders),0,cockroachdb,,
