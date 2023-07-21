@@ -8,7 +8,7 @@ Get metrics from CoreDNS in real time to visualize and monitor DNS failures and 
 
 ### Prerequisites
 
-This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see the [Latest and Legacy Versioning For OpenMetrics-based Integrations][21].
+This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][21].
 
 The CoreDNS check version 1.11.0 or later uses [OpenMetrics][17]-otherwise known as the latest version (OpenMetricsBaseCheckV2)-for metric collection, which requires Python 3. The `latest` version of the CoreDNS check submits `.bucket` metrics and submits the `.sum` and `.count` histogram samples as monotonic count type. These metrics were previously submitted as `gauge` type in the legacy version OpenMetricsBaseCheckV1. See the [`metadata.csv` file][14] for a list of metrics available in each version. 
 
