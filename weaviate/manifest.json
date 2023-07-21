@@ -31,6 +31,9 @@
         "check": "weaviate.go.goroutines",
         "metadata_path": "metadata.csv"
       },
+      "monitors": {
+        "node_status": "assets/monitors/node_status.json"
+      },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
