@@ -126,6 +126,7 @@ class InstanceConfig(BaseModel):
     collect_events: Optional[bool]
     collect_events_only: Optional[bool]
     collect_per_instance_filters: Optional[CollectPerInstanceFilters]
+    collect_property_metrics: Optional[bool]
     collect_tags: Optional[bool]
     collection_level: Optional[int]
     collection_type: Optional[str]
