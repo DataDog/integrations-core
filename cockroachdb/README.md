@@ -13,7 +13,7 @@ need to install anything else on your server.
 
 ### Prerequisities
 
-This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see the [Latest and Legacy Versioning For OpenMetrics-based Integrations][14].
+This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][14].
 
 Version 1.9.0 and later of this check uses the [latest version][12] for metric collection, which requires Python 3. For hosts unable to use Python 3, or to use the legacy version of this check, see the following [configuration][13].
 
