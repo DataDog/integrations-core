@@ -14,7 +14,7 @@ Capture HAProxy activity in Datadog to:
 
 ### Prerequisites
 
-This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version (enterprise version 1.9rc1 or later) to enable the Prometheus endpoint on HAProxy. If you are using the legacy version, use the [HAProxy Prometheus exporter][3], or set up the [socket-based integration](#using-the-stats-endpoint). For more information, see the [Latest and Legacy Versioning For OpenMetrics-based Integrations][29].
+This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version (enterprise version 1.9rc1 or later) to enable the Prometheus endpoint on HAProxy. If you are using the legacy version, use the [HAProxy Prometheus exporter][3], or set up the [socket-based integration](#using-the-stats-endpoint). For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][29].
 
 The `use_openmetrics` option uses [OpenMetrics V2][26] for metric collection, which requires Agent v7.35 or later, or for you to [enable Python 3][27] in Agent v6.35 or later. For hosts that are unable to use Python 3 or are on Agent v7.34 or earlier, use the OpenMetrics V1 implementation or the [socket-based legacy integration](#using-the-stats-endpoint). 
 
