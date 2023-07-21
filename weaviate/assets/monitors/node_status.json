@@ -3,7 +3,9 @@
     "type": "query alert",
     "query": "min(last_10m):avg:weaviate.node.status{*} by {host,weaviate_node,weaviate_node_status} >= 1",
     "message": "{{#is_alert}}\n\nWeaviate Node {weaviate_node.name} on {host.name} has been {weaviate_node_status.name} for the last 10 mins.\n\n{{/is_alert}} \n\n{{#is_recovery}}\n\nWeaviate Node {weaviate_node.name} on {host.name} has recovered back to {weaviate_node_status.name} status for the last 10 mins.\n\n{{/is_recovery}}",
-    "tags": [],
+    "tags": [
+        "integration:weaviate"
+    ],
     "options": {
         "thresholds": {
             "critical": 1
