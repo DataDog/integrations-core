@@ -27,7 +27,7 @@ from datadog_checks.vsphere.constants import (
     PROPERTY_COUNT_METRICS,
     REALTIME_METRICS_INTERVAL_ID,
     REALTIME_RESOURCES,
-    VM_SIMPLE_PROPERTIES,
+    SIMPLE_PROPERTIES_BY_RESOURCE_TYPE,
 )
 from datadog_checks.vsphere.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
@@ -237,6 +237,9 @@ class VSphereCheck(AgentCheck):
             hostname = None
             tags = []
             mor_payload = {}  # type: Dict[str, Any]
+            if self._config.collect_property_metrics:
+                all_properties = properties.get('properties', {})
+                mor_payload['properties'] = all_properties
 
             if isinstance(mor, vim.VirtualMachine):
                 power_state = properties.get("runtime.powerState")
@@ -258,16 +261,13 @@ class VSphereCheck(AgentCheck):
                 runtime_hostname = to_string(runtime_host_props.get("name", "unknown"))
                 tags.append('vsphere_host:{}'.format(runtime_hostname))
 
-                if self._config.collect_property_metrics:
-                    all_properties = properties.get('properties', {})
-                    mor_payload['properties'] = all_properties
-
                 if self._config.use_guest_hostname:
                     hostname = properties.get("guest.hostName", mor_name)
                 else:
                     hostname = mor_name
             elif isinstance(mor, vim.HostSystem):
                 hostname = mor_name
+
             else:
                 tags.append('vsphere_{}:{}'.format(mor_type_str, mor_name))
 
@@ -828,7 +828,7 @@ class VSphereCheck(AgentCheck):
                     additional_tags=ip_tags,
                 )
 
-    def submit_basic_property_metrics(
+    def submit_simple_property_metrics(
         self,
         all_properties,  # type: Dict[str, Any]
         base_tags,  # type: List[str]
@@ -836,7 +836,8 @@ class VSphereCheck(AgentCheck):
         resource_metric_suffix,  # type: str
     ):
         # type: (...) -> None
-        for property_name in VM_SIMPLE_PROPERTIES:
+        simple_properties = SIMPLE_PROPERTIES_BY_RESOURCE_TYPE[resource_metric_suffix]
+        for property_name in simple_properties:
             property_val = all_properties.get(property_name, None)
 
             self.submit_property_metric(
@@ -854,16 +855,18 @@ class VSphereCheck(AgentCheck):
         resource_tags,  # type: List[str]
     ):
         # type: (...) -> None
-        if resource_type == vim.VirtualMachine:
-            resource_metric_suffix = MOR_TYPE_AS_STRING[resource_type]
-            mor_name = to_string(mor_props.get("name", "unknown"))
-            all_properties = mor_props.get('properties', None)
-            if not all_properties:
-                self.log.warning("Could not retrieve properties for VM %s", mor_name)
-                return
+        resource_metric_suffix = MOR_TYPE_AS_STRING[resource_type]
+        mor_name = to_string(mor_props.get('name', 'unknown'))
+        hostname = mor_props.get('hostname', 'unknown')
 
-            hostname = mor_props.get('hostname', 'unknown')
-            base_tags = self._config.base_tags + resource_tags
+        all_properties = mor_props.get('properties', None)
+        if not all_properties:
+            self.log.warning('Could not retrieve properties for resource %s hostname=%s', mor_name, hostname)
+            return
+
+        base_tags = self._config.base_tags + resource_tags
+
+        if resource_type == vim.VirtualMachine:
             nics = all_properties.get('guest.net', [])
             self.submit_nic_property_metrics(nics, base_tags, hostname, resource_metric_suffix)
 
@@ -873,7 +876,7 @@ class VSphereCheck(AgentCheck):
             disks = all_properties.get('guest.disk', [])
             self.submit_disk_property_metrics(disks, base_tags, hostname, resource_metric_suffix)
 
-            self.submit_basic_property_metrics(all_properties, base_tags, hostname, resource_metric_suffix)
+        self.submit_simple_property_metrics(all_properties, base_tags, hostname, resource_metric_suffix)
 
     def check(self, _):
         # type: (Any) -> None
@@ -946,7 +949,6 @@ class VSphereCheck(AgentCheck):
                 for resource_type in self._config.collected_resource_types:
                     for mor in self.infrastructure_cache.get_mors(resource_type):
                         mor_props = self.infrastructure_cache.get_mor_props(mor)
-                        # Explicitly do not attach any host to those metrics.
                         resource_tags = mor_props.get('tags', [])
                         self.submit_property_metrics(resource_type, mor_props, resource_tags)
                 # delete property data from the cache since it won't be used until next cache refresh

@@ -201,6 +201,15 @@ PERF_ENTITY_METRICS = [
         ],
     ),
     vim.PerformanceManager.EntityMetric(
+        entity=vim.VirtualMachine(moId="vm3"),
+        value=[
+            vim.PerformanceManager.IntSeries(
+                value=[32, 92],
+                id=vim.PerformanceManager.MetricId(counterId=103),
+            )
+        ],
+    ),
+    vim.PerformanceManager.EntityMetric(
         entity=vim.Datastore(moId="ds1"),
         value=[
             vim.PerformanceManager.IntSeries(
@@ -243,7 +252,6 @@ PERF_ENTITY_METRICS = [
                 value=[1, 3],
                 id=vim.PerformanceManager.MetricId(
                     counterId=102,
-                    # instance='dc2',
                 ),
             )
         ],
@@ -255,7 +263,17 @@ PERF_ENTITY_METRICS = [
                 value=[34, 61],
                 id=vim.PerformanceManager.MetricId(
                     counterId=103,
-                    # instance='host1',
+                ),
+            )
+        ],
+    ),
+    vim.PerformanceManager.EntityMetric(
+        entity=vim.HostSystem(moId="host2"),
+        value=[
+            vim.PerformanceManager.IntSeries(
+                value=[34, 61],
+                id=vim.PerformanceManager.MetricId(
+                    counterId=103,
                 ),
             )
         ],
@@ -462,37 +480,6 @@ ip_stack3.ipRouteConfig = ip_route_config3
 IP_STACKS_3 = vim.ArrayOfAnyType()
 IP_STACKS_3.append(ip_stack3)
 
-VM_QUERY_PERF = mock.MagicMock(
-    return_value=[
-        vim.PerformanceManager.EntityMetric(
-            entity=vim.VirtualMachine(moId="vm1"),
-            value=[
-                vim.PerformanceManager.IntSeries(
-                    value=[47, 52],
-                    id=vim.PerformanceManager.MetricId(counterId=103),
-                )
-            ],
-        ),
-        vim.PerformanceManager.EntityMetric(
-            entity=vim.VirtualMachine(moId="vm2"),
-            value=[
-                vim.PerformanceManager.IntSeries(
-                    value=[30, 11],
-                    id=vim.PerformanceManager.MetricId(counterId=103),
-                )
-            ],
-        ),
-        vim.PerformanceManager.EntityMetric(
-            entity=vim.VirtualMachine(moId="vm3"),
-            value=[
-                vim.PerformanceManager.IntSeries(
-                    value=[30, 11],
-                    id=vim.PerformanceManager.MetricId(counterId=103),
-                )
-            ],
-        ),
-    ]
-)
 
 VM_PROPERTIES_EX = mock.MagicMock(
     return_value=vim.PropertyCollector.RetrieveResult(
@@ -571,6 +558,10 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     vmodl.DynamicProperty(
                         name='parent',
                         val=vim.Folder(moId="root"),
+                    ),
+                    vmodl.DynamicProperty(
+                        name='runtime.host',
+                        val=vim.HostSystem(moId="host1"),
                     ),
                 ],
             ),
@@ -654,6 +645,10 @@ VM_PROPERTIES_EX = mock.MagicMock(
                         name='parent',
                         val=vim.Folder(moId="root"),
                     ),
+                    vmodl.DynamicProperty(
+                        name='runtime.host',
+                        val=vim.HostSystem(moId="host2"),
+                    ),
                 ],
             ),
             vim.ObjectContent(
@@ -731,6 +726,56 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     vmodl.DynamicProperty(
                         name='parent',
                         val=vim.Folder(moId="root"),
+                    ),
+                    vmodl.DynamicProperty(
+                        name='runtime.host',
+                        val=vim.HostSystem(moId="host2"),
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
+                obj=vim.HostSystem(moId="host1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='host1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='hardware.cpuPowerManagementInfo.currentPolicy',
+                        val='Balanced',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.runtime.connectionState',
+                        val='connected',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.runtime.powerState',
+                        val='poweredOn',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.runtime.inMaintenanceMode',
+                        val='False',
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
+                obj=vim.HostSystem(moId="host2"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='host2',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.runtime.connectionState',
+                        val='notResponding',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.runtime.powerState',
+                        val='unknown',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.runtime.inMaintenanceMode',
+                        val='True',
                     ),
                 ],
             ),
