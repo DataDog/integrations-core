@@ -9,7 +9,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence, Union
+from types import MappingProxyType
+from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
@@ -21,32 +22,36 @@ from . import defaults, validators
 
 class AuthToken(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    reader: Optional[Mapping[str, Any]] = None
-    writer: Optional[Mapping[str, Any]] = None
+    reader: Optional[MappingProxyType[str, Any]] = None
+    writer: Optional[MappingProxyType[str, Any]] = None
 
 
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    exclude: Optional[Sequence[str]] = None
-    include: Optional[Sequence[str]] = None
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class Proxy(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     http: Optional[str] = None
     https: Optional[str] = None
-    no_proxy: Optional[Sequence[str]] = None
+    no_proxy: Optional[tuple[str, ...]] = None
 
 
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     allow_redirects: Optional[bool] = None
@@ -59,13 +64,13 @@ class InstanceConfig(BaseModel):
     collect_response_time: Optional[bool] = None
     connect_timeout: Optional[float] = None
     content_match: Optional[str] = None
-    data: Optional[Union[Mapping[str, Any], str]] = None
+    data: Optional[Union[MappingProxyType[str, Any], str]] = None
     days_critical: Optional[int] = None
     days_warning: Optional[int] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
-    extra_headers: Optional[Mapping[str, Any]] = None
-    headers: Optional[Mapping[str, Any]] = None
+    extra_headers: Optional[MappingProxyType[str, Any]] = None
+    headers: Optional[MappingProxyType[str, Any]] = None
     http_response_status_code: Optional[str] = None
     include_content: Optional[bool] = None
     include_default_headers: Optional[bool] = None
@@ -94,14 +99,14 @@ class InstanceConfig(BaseModel):
     skip_proxy: Optional[bool] = None
     ssl_server_name: Optional[str] = None
     stream: Optional[bool] = None
-    tags: Optional[Sequence[str]] = None
+    tags: Optional[tuple[str, ...]] = None
     timeout: Optional[float] = None
     tls_ca_cert: Optional[str] = None
     tls_cert: Optional[str] = None
     tls_ignore_warning: Optional[bool] = None
     tls_private_key: Optional[str] = None
     tls_private_key_password: Optional[str] = None
-    tls_protocols_allowed: Optional[Sequence[str]] = None
+    tls_protocols_allowed: Optional[tuple[str, ...]] = None
     tls_retrieve_non_validated_cert: Optional[bool] = None
     tls_use_host_header: Optional[bool] = None
     tls_validate_hostname: Optional[bool] = None
@@ -115,25 +120,14 @@ class InstanceConfig(BaseModel):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
     @field_validator('*', mode='before')
-    def _ensure_defaults(cls, value, info):
+    def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
-            return value
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{info.field_name}', lambda: value)()
-
-    @field_validator('*')
-    def _run_validations(cls, value, info):
-        field = cls.model_fields[info.field_name]
-        field_name = field.alias or info.field_name
-        if field_name not in info.context['configured_fields']:
-            return value
-
-        return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-
-    @field_validator('*', mode='after')
-    def _make_immutable(cls, value):
         return validation.utils.make_immutable(value)
 
     @model_validator(mode='after')
