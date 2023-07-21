@@ -16,7 +16,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Prerequisites
 
-This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see the [Latest and Legacy Versioning For OpenMetrics-based Integrations][25].
+This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][25].
 
 When you enable the `use_openmetrics` configuration option, the Istio integration uses the OpenMetrics V2 implementation of the check. In OpenMetrics V2, metrics are submitted more accurately by default and behave closer to Prometheus metric types. For example, Prometheus metrics ending in  `_count` and `_sum` are submitted as `monotonic_count` by default.
 
