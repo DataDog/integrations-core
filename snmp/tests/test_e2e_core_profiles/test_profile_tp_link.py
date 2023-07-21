@@ -37,15 +37,15 @@ def test_e2e_profile_tp_link(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     tag_rows = [
-        ['tp_sys_monitor_cpu_5_minutes:18'],
-        ['tp_sys_monitor_cpu_5_minutes:31'],
+        ['cpu:21', 'tp_sys_monitor_cpu_5_minutes:31'],
+        ['cpu:3', 'tp_sys_monitor_cpu_5_minutes:18'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['tp_sys_monitor_memory_unit_number:20'],
-        ['tp_sys_monitor_memory_unit_number:21'],
+        ['mem:20'],
+        ['mem:21'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -60,7 +60,7 @@ def test_e2e_profile_tp_link(dd_agent_check):
         'profile': 'tp-link',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.11863.5.1',
-        'vendor': 'tp_link',
+        'vendor': 'TP-Link',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
