@@ -22,8 +22,7 @@
 		"thresholds": {
 			"critical": 1,
 			"warning": 0,
-			"critical_recovery": 0,
-			"warning_recovery": 0
+			"critical_recovery": 0
 		}
 	},
 	"priority": null,
