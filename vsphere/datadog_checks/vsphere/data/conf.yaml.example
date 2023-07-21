@@ -279,6 +279,17 @@ instances:
     #
     # collect_attributes: false
 
+    ## @param collect_property_metrics - boolean - optional - default: false
+    ## If true, the vSphere integration will collect additional metrics about the resource types
+    ## you have configured to monitor. These are configuration properties such as disk information
+    ## in a VM and DRS config status in clusters.
+    ##
+    ## Note: These metrics are collected at a frequency of `refresh_infrastructure_cache_interval`.
+    ## Warning: Depending on the size of the vSphere environment, property metric collection can be slow,
+    ## very CPU intensive and put pressure on the vCenter Server.
+    #
+    # collect_property_metrics: false
+
     ## @param attributes_prefix - string - optional
     ## Custom attributes attached to vSphere resources will be prefixed with this prefix when collected.
     ## Example use cases:
