@@ -32,7 +32,7 @@ The Linkerd check is included in the [Datadog Agent][2] package, so you don't ne
 To configure this check for an Agent running on a host:
 
 1. Edit the `linkerd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3].
-   See [sample linkerd.d/conf.yaml][4] for all available configuration options using the latest OpenMetrics check example. If you previously implemented this integration, see the [legacy example][5].
+   See the [sample `linkerd.d/conf.yaml`][4] for all available configuration options using the latest OpenMetrics check example. If you previously implemented this integration, see the [legacy example][5].
 
 2. [Restart the Agent][6].
 
