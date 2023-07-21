@@ -47,7 +47,7 @@ Conntrack metrics are available by default in Kubernetes < v1.11 or when using t
 In order to collect [AWS ENA metrics][12]:
 
 - Update `network` check to enable collection of AWS ENA metrics with `collect_aws_ena_metrics: true`.
-- Update agent containers to use `host` network mode and add `NET_ADMIN` capabilities. 
+- Update Agent containers to use `host` network mode and add `NET_ADMIN` capabilities. 
 
 For Datadog [Helm Chart][11] deployment, update chart values with:
 
@@ -93,7 +93,7 @@ spec:
               - NET_ADMIN
 ```
 
-Note: you may need to add `hostPort: 8125` for other containers in the DaemonSet as `hostNetwork: true` will apply to all containers.
+**Note**: You may need to add `hostPort: 8125` for other containers in the DaemonSet as `hostNetwork: true` will apply to all containers.
 
 ### Validation
 
