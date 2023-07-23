@@ -13,4 +13,3 @@ openai.usage.n_context,count,60,token,,Number of context tokens used,0,openai,n 
 openai.usage.n_context_tokens_total,count,60,token,,Total number of context tokens used,0,openai,n context tokens total,
 openai.usage.n_generated,count,60,token,,Number of generated response tokens,0,openai,n generated,
 openai.usage.n_generated_tokens_total,count,60,token,,Total number of generated response tokens,0,openai,n generated tokens total,
-
