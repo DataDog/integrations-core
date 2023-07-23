@@ -2,7 +2,7 @@
 
 ## Overview
 
-Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [OpenAI][1] Python and Node.js library requests using Datadog metrics, APM, and logs.
+Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [OpenAI][1] account-level, Python, and Node.js library requests using Datadog metrics, APM, and logs.
 
 ## Setup
 
@@ -11,6 +11,10 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 <!-- xxx tab "Python" xxx -->
 
 ### Installation
+
+NOTE: This section is overwritten by the openai configuration component exported in
+web-ui. Make sure to update the markdown / code there to see any changes take
+effect on the tile.
 
 1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
 
