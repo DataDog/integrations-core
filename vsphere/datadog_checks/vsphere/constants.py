@@ -70,6 +70,9 @@ PROPERTY_COUNT_METRICS = [
     "summary.runtime.connectionState",
     "summary.runtime.powerState",
     "summary.runtime.inMaintenanceMode",
+    "configuration.drsConfig.enabled",
+    "configuration.drsConfig.defaultVmBehavior",
+    "configuration.dasConfig.enabled",
 ]
 VM_OBJECT_PROPERTIES = ["guest.disk", "guest.net", "guest.ipStack"]
 
@@ -97,18 +100,29 @@ HOST_SIMPLE_PROPERTIES = [
     "summary.runtime.inMaintenanceMode",
 ]
 
+CLUSTER_SIMPLE_PROPERTIES = [
+    "configuration.drsConfig.enabled",
+    "configuration.drsConfig.defaultVmBehavior",
+    "configuration.drsConfig.vmotionRate",
+    "configuration.dasConfig.enabled",
+]
+
+CLUSTER_PROPERTIES = CLUSTER_SIMPLE_PROPERTIES
+
 HOST_PROPERTIES = HOST_SIMPLE_PROPERTIES
 
 VM_PROPERTIES = VM_OBJECT_PROPERTIES + VM_SIMPLE_PROPERTIES
 
-ALL_PROPERTIES = VM_PROPERTIES + HOST_PROPERTIES
+ALL_PROPERTIES = VM_PROPERTIES + HOST_PROPERTIES + CLUSTER_PROPERTIES
 
 SIMPLE_PROPERTIES_BY_RESOURCE_TYPE = {
     'vm': VM_SIMPLE_PROPERTIES,
     'host': HOST_SIMPLE_PROPERTIES,
+    'cluster': CLUSTER_SIMPLE_PROPERTIES,
 }
 
 PROPERTIES_BY_RESOURCE_TYPE = {
     'vm': VM_PROPERTIES,
     'host': HOST_PROPERTIES,
+    'cluster': CLUSTER_PROPERTIES,
 }
