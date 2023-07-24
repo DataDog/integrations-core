@@ -37,7 +37,9 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
+    # scalar string metric is not supported yet
     # aggregator.assert_metric('snmp.netgear.nasMgrSoftwareVersion', metric_type=aggregator.GAUGE, tags=common_tags)
+
     tag_rows = [
         [
             'netgear_disk_id:forward their oxen their acted driving',
@@ -56,20 +58,17 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.netgear.ataError', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        # aggregator.assert_metric(
-        #     'snmp.netgear.diskCapacity', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        #     )
+        aggregator.assert_metric('snmp.netgear.diskCapacity', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
             'snmp.netgear.diskTemperature', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     tag_rows = [
-        ['netgear_fan_type:forward oxen acted Jaded driving forward'],
-        ['netgear_fan_type:quaintly their'],
+        ['netgear_fan_status:1', 'netgear_fan_type:forward oxen acted Jaded driving forward'],
+        ['netgear_fan_status:0', 'netgear_fan_type:quaintly their'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.netgear.fanRPM', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        # aggregator.assert_metric('snmp.netgear.fanStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['netgear_temperature_type:their their'],
@@ -84,16 +83,16 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
         aggregator.assert_metric('snmp.netgear.temperatureValue', metric_type=aggregator.GAUGE, tags=common_tags)
 
     tag_rows = [
-        ['netgear_volume_name:Jaded'],
-        ['netgear_volume_name:but but forward Jaded acted forward forward'],
+        ['netgear_volume_raid_level:Jaded their', 'netgear_volume_name:Jaded'],
+        [
+            'netgear_volume_raid_level:acted kept zombies zombies driving driving forward kept',
+            'netgear_volume_name:but but forward Jaded acted forward forward',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
             'snmp.netgear.volumeFreeSpace', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        # aggregator.assert_metric(
-        #     'snmp.netgear.volumeRAIDLevel', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        # )
         aggregator.assert_metric('snmp.netgear.volumeSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [

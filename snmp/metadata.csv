@@ -1529,7 +1529,7 @@ snmp.netgear.diskTemperature,gauge,,,,"[READYNASOS-MIB] temperature of this disk
 snmp.netgear.fanRPM,gauge,,,,"[READYNASOS-MIB] The current speed of the fan.",0,snmp,,
 snmp.netgear.fanStatus,gauge,,,,"[READYNASOS-MIB] The status of Fan",0,snmp,,
 snmp.netgear.nasMgrSoftwareVersion,gauge,,,,"[READYNASOS-MIB] Version information for the ReadyNASOS ngNasManager software.",0,snmp,,
-snmp.netgear.psu,gauge,,,,"[READYNASOS-MIB] (Make 'sum by {X}' queries to count elements with the tag X.)",0,snmp,,
+snmp.netgear.psu,gauge,,,,"[READYNASOS-MIB] Power Supply Unit entry. (Make 'sum by {X}' queries to count elements with the tag X.)",0,snmp,,
 snmp.netgear.temperatureMax,gauge,,,,"[READYNASOS-MIB] The max temperature of this probe (in Fahrenheit unit).",0,snmp,,
 snmp.netgear.temperatureMin,gauge,,,,"[READYNASOS-MIB] The min temperature of this probe (in Fahrenheit unit).",0,snmp,,
 snmp.netgear.temperatureValue,gauge,,,,"[READYNASOS-MIB] The current temperature of this probe (in Fahrenheit unit).",0,snmp,,
