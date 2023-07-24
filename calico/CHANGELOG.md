@@ -1,5 +1,7 @@
 # CHANGELOG - calico
 
+## Unreleased
+
 ## 1.2.1 / 2023-07-10
 
 ***Fixed***:

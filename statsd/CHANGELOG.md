@@ -1,5 +1,7 @@
 # CHANGELOG - statsd
 
+## Unreleased
+
 ## 1.10.1 / 2023-07-10
 
 ***Fixed***:

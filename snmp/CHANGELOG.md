@@ -1,5 +1,7 @@
 # CHANGELOG - snmp
 
+## Unreleased
+
 ## 6.0.0 / 2023-07-10
 
 ***Changed***:

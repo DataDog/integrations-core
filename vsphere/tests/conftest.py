@@ -23,6 +23,8 @@ from .common import (
     PERF_METRIC_ID,
     PROPERTIES_EX,
     REALTIME_INSTANCE,
+    VM_PROPERTIES_EX,
+    VM_QUERY_PERF,
     VSPHERE_VERSION,
     MockHttpV6,
     MockHttpV7,
@@ -148,6 +150,16 @@ def query_perf_counter_by_level():
 @pytest.fixture
 def properties_ex():
     return PROPERTIES_EX
+
+
+@pytest.fixture
+def vm_properties_ex():
+    return VM_PROPERTIES_EX
+
+
+@pytest.fixture
+def vm_query_perf():
+    return VM_QUERY_PERF
 
 
 @pytest.fixture

@@ -1,5 +1,7 @@
 # CHANGELOG - mysql
 
+## Unreleased
+
 ## 10.3.0 / 2023-07-10
 
 ***Added***:
