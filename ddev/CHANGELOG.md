@@ -1,5 +1,20 @@
 # CHANGELOG - ddev
 
+## Unreleased
+
+## 3.3.0 / 2023-07-20
+
+***Added***:
+
+* Upgrade datadog-checks-dev to 22.1. See [#15325](https://github.com/DataDog/integrations-core/pull/15325).
+* Upgrade click to 8.1.6. See [#15272](https://github.com/DataDog/integrations-core/pull/15272).
+* Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
+
+***Fixed***:
+
+* Add logic for integration package files. See [#14544](https://github.com/DataDog/integrations-core/pull/14544).
+* Add `snmp/data/default_profiles` to matrix TESTABLE_FILE_PATTERN. See [#15267](https://github.com/DataDog/integrations-core/pull/15267).
+
 ## 3.2.1 / 2023-07-10
 
 ***Fixed***:

@@ -1,5 +1,7 @@
 # CHANGELOG - IBM i
 
+## Unreleased
+
 ## 1.5.1 / 2023-07-10
 
 ***Fixed***:

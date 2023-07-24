@@ -1,5 +1,7 @@
 # CHANGELOG - SingleStore
 
+## Unreleased
+
 ## 1.3.2 / 2023-07-10
 
 ***Fixed***:

@@ -1,5 +1,7 @@
 # CHANGELOG - postfix
 
+## Unreleased
+
 ## 1.12.1 / 2023-07-10
 
 ***Fixed***:

@@ -1,5 +1,7 @@
 # CHANGELOG - supervisord
 
+## Unreleased
+
 ## 2.4.1 / 2023-07-10
 
 ***Fixed***:

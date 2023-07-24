@@ -1,5 +1,7 @@
 # CHANGELOG - varnish
 
+## Unreleased
+
 ## 1.14.4 / 2023-07-10
 
 ***Fixed***:
