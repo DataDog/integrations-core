@@ -1,8 +1,12 @@
 # Agent Check: Weaviate
 
+<div class="alert alert-info">
+Coming soon: This integration is included in the upcoming 7.47.0 release of the Datadog Agent.
+</div>
+
 ## Overview
 
-This check monitors [Weaviate][1] through the Datadog Agent.
+This check monitors [Weaviate][1] through the Datadog Agent. For more information, see [Weaviate monitoring][10].
 
 ## Setup
 
@@ -10,7 +14,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Weaviate check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
+Starting from Agent release 7.47.0, The Weaviate check is included in the [Datadog Agent][2] package. 
 
 **Note**: This check requires Agent v7.47.0 or later.
 
@@ -89,7 +93,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][9].
 
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://weaviate.io/developers/weaviate
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/weaviate/datadog_checks/weaviate/data/conf.yaml.example
