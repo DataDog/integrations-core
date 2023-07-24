@@ -12,9 +12,9 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 
 ### Installation
 
-NOTE: This section is overwritten by the openai configuration component exported in
-web-ui. Make sure to update the markdown / code there to see any changes take
-effect on the tile.
+<!-- NOTE: This section is overwritten by the OpenAI configuration component exported in -->
+<!-- web-ui. Make sure to update the markdown / code there to see any changes take -->
+<!-- effect on the tile. -->
 
 1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
 
