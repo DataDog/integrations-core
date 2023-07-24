@@ -1308,7 +1308,7 @@ snmp.roomalert.3s.internal_tempf,gauge,,,,"[ROOMALERT3S-MIB] The internal temper
 snmp.rttMonCtrlOperTimeoutOccurred,gauge,,,,This object will change its value for all RttMonRttTypes.,0,snmp,,
 snmp.rttMonLatestRttOperCompletionTime,gauge,,millisecond,,The completion time of the latest RTT operation successfully completed.,0,snmp,,
 snmp.rttMonLatestRttOperSense,gauge,,,,A sense code for the completion status of the latest RTT operation.,0,snmp,,
-snmp.silverpeak.mgmt.spsActiveAlarm,gauge,,,,"[SILVERPEAK-MGMT-MIB] A list of the active alarm entries. This represents the fault conditions that are still active in the appliance. (Make 'sum by {X}' queries to count elements with the tag X.)",0,snmp,,
+snmp.silverpeak.mgmt.spsActiveAlarm,gauge,,,,"[SILVERPEAK-MGMT-MIB] A list of the active alarm entries. This represents the fault conditions that are still active in the appliance.",0,snmp,,
 snmp.silverpeak.mgmt.spsActiveAlarmCount,gauge,,,,"[SILVERPEAK-MGMT-MIB] The number of active alarm entries in the alarm table - spsActiveAlarmTable, defined under silverpeakMgmtMIBTables subtree.",0,snmp,,
 snmp.slbStatsCreatedConnections,count,,,,"[CISCO-SLB-MIB] The number of TCP and UDP connections created since SLB was configured. TCP connections are created after seeing a SYN for a connection. UDP connections are created based on the source and destination and are removed based on a timer.",0,snmp,,
 snmp.slbStatsCreatedHCConnections,count,,,,"[CISCO-SLB-MIB] The number of connections created by SLB since it was configured. TCP connections are created after seeing a SYN for a connection. UDP connections are created based on the source and destination and are removed based on a timer. This is the 64-bit version of slbStatsCreatedConnections.",0,snmp,,
