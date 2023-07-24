@@ -28,6 +28,10 @@ def instance_collect_events_only():
     return False
 
 
+def instance_collect_property_metrics():
+    return False
+
+
 def instance_collect_tags():
     return False
 

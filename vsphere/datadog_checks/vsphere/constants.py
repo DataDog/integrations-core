@@ -57,3 +57,33 @@ REFERENCE_METRIC = "cpu.usage.avg"
 
 DEFAULT_VSPHERE_TAG_PREFIX = ""
 DEFAULT_VSPHERE_ATTR_PREFIX = ""
+
+PROPERTY_COUNT_METRICS = [
+    "guest.net",
+    "guest.ipStack.ipRoute",
+    "guest.net.ipConfig.address",
+    "guest.toolsRunningStatus",
+    "guest.toolsVersionStatus2",
+    "guest.toolsVersion",
+    "guest.guestFullName",
+]
+VM_OBJECT_PROPERTIES = ["guest.disk", "guest.net", "guest.ipStack"]
+
+VM_SIMPLE_PROPERTIES = [
+    "guest.toolsRunningStatus",
+    "guest.toolsVersionStatus2",
+    "guest.toolsVersion",
+    "config.hardware.numCoresPerSocket",
+    "config.cpuAllocation.limit",
+    "config.cpuAllocation.overheadLimit",
+    "config.memoryAllocation.limit",
+    "config.memoryAllocation.overheadLimit",
+    "summary.config.numCpu",
+    "summary.config.memorySizeMB",
+    "summary.config.numEthernetCards",
+    "summary.config.numVirtualDisks",
+    "summary.quickStats.uptimeSeconds",
+    "guest.guestFullName",
+]
+
+VM_PROPERTIES = VM_OBJECT_PROPERTIES + VM_SIMPLE_PROPERTIES
