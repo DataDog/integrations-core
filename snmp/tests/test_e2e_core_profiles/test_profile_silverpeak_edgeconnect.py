@@ -38,33 +38,12 @@ def test_e2e_profile_silverpeak_edgeconnect(dd_agent_check):
 
     aggregator.assert_metric('snmp.silverpeak.mgmt.spsActiveAlarmCount', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-        [
-            'silverpeak_mgmt_sps_active_alarm_acked:no',
-            'silverpeak_mgmt_sps_active_alarm_active:yes',
-            'silverpeak_mgmt_sps_active_alarm_clearable:no',
-            'silverpeak_mgmt_sps_active_alarm_descr:forward acted driving quaintly kept zombies but Jaded',
-            'silverpeak_mgmt_sps_active_alarm_name:Jaded but zombies their zombies',
-            'silverpeak_mgmt_sps_active_alarm_service_affect:yes',
-            'silverpeak_mgmt_sps_active_alarm_severity:acknowledged',
-            'silverpeak_mgmt_sps_active_alarm_source:Jaded driving Jaded oxen driving quaintly quaintly but forward',
-            'silverpeak_mgmt_sps_active_alarm_type:acted forward driving driving oxen kept zombies acted driving',
-        ],
-        [
-            'silverpeak_mgmt_sps_active_alarm_acked:no',
-            'silverpeak_mgmt_sps_active_alarm_active:yes',
-            'silverpeak_mgmt_sps_active_alarm_clearable:yes',
-            'silverpeak_mgmt_sps_active_alarm_descr:Jaded oxen oxen their acted acted kept',
-            'silverpeak_mgmt_sps_active_alarm_name:their Jaded but forward oxen zombies kept Jaded acted',
-            'silverpeak_mgmt_sps_active_alarm_service_affect:no',
-            'silverpeak_mgmt_sps_active_alarm_severity:info',
-            'silverpeak_mgmt_sps_active_alarm_source:forward quaintly quaintly driving quaintly',
-            'silverpeak_mgmt_sps_active_alarm_type:but forward forward Jaded driving quaintly forward',
-        ],
+         ['silverpeak_mgmt_sps_active_alarm_acked:no', 'silverpeak_mgmt_sps_active_alarm_active:yes', 'silverpeak_mgmt_sps_active_alarm_clearable:no', 'silverpeak_mgmt_sps_active_alarm_descr:forward acted driving quaintly kept zombies but Jaded', 'silverpeak_mgmt_sps_active_alarm_name:Jaded but zombies their zombies', 'silverpeak_mgmt_sps_active_alarm_service_affect:yes', 'silverpeak_mgmt_sps_active_alarm_severity:acknowledged', 'silverpeak_mgmt_sps_active_alarm_source:Jaded driving Jaded oxen driving quaintly quaintly but forward', 'silverpeak_mgmt_sps_active_alarm_type:acted forward driving driving oxen kept zombies acted driving'],
+         ['silverpeak_mgmt_sps_active_alarm_acked:no', 'silverpeak_mgmt_sps_active_alarm_active:yes', 'silverpeak_mgmt_sps_active_alarm_clearable:yes', 'silverpeak_mgmt_sps_active_alarm_descr:Jaded oxen oxen their acted acted kept', 'silverpeak_mgmt_sps_active_alarm_name:their Jaded but forward oxen zombies kept Jaded acted', 'silverpeak_mgmt_sps_active_alarm_service_affect:no', 'silverpeak_mgmt_sps_active_alarm_severity:info', 'silverpeak_mgmt_sps_active_alarm_source:forward quaintly quaintly driving quaintly', 'silverpeak_mgmt_sps_active_alarm_type:but forward forward Jaded driving quaintly forward'],
+
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric(
-            'snmp.silverpeak.mgmt.spsActiveAlarm', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.silverpeak.mgmt.spsActiveAlarm', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
@@ -73,7 +52,10 @@ def test_e2e_profile_silverpeak_edgeconnect(dd_agent_check):
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
         'name': 'silverpeak-edgeconnect.device.name',
+        'os_version': '9.2',
+        'product_name': 'NX-1700',
         'profile': 'silverpeak-edgeconnect',
+        'serial_number': '01972WA81B1D',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.23867.1.2.1',
         'vendor': 'silverpeak',
