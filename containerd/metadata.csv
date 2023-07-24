@@ -12,7 +12,7 @@ containerd.mem.cache,gauge,,byte,,The cache amount used (Linux only),0,container
 containerd.mem.rss,gauge,,byte,,The rss amount used (Linux only),0,containerd, mem_rss,
 containerd.mem.commit,gauge,,byte,,The committed memory (Windows only),0,containerd,mem_commit,
 containerd.mem.commit_peak,gauge,,byte,,The peak committed memory (Windows only),0,containerd,mem_commit_peak,
-containerd.mem.private_working_set,gauge,,byte,,The private working set usage (Windows only),0,containerd,mem_private_working_set,
+containerd.mem.working_set,gauge,,byte,,The container working set usage,0,containerd,mem_working_set,
 containerd.cpu.throttled.periods,rate,,nanosecond,,The total CPU throttled time (Linux only),0,containerd,cpu_throttled_time,
 containerd.cpu.system,rate,,nanosecond,,The total CPU time,0,containerd,cpu_system,
 containerd.cpu.total,rate,,nanosecond,,The total CPU time,0,containerd,cpu_total,
