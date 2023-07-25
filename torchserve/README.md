@@ -43,7 +43,7 @@ This configuration file exposes the three different endpoints that can be used b
 To enable the Prometheus endpoint, you need to configure two options: 
 
 - `metrics_address`: Metrics API binding address. Defaults to `http://127.0.0.1:8082`
-- `metrics_mode`: Two metric modes are supported by Torchserve: `log` and `prometheus`. Defaults to `log`. You have to set it to `prometheus` to collect metrics from this endpoint.
+- `metrics_mode`: Two metric modes are supported by TorchServe: `log` and `prometheus`. Defaults to `log`. You have to set it to `prometheus` to collect metrics from this endpoint.
 
 For instance:
 
