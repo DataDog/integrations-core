@@ -28,9 +28,11 @@ def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
         'snmp_host:sophos-xgs-firewall.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-    ] + ['sfos_device_fw_version:forward zombies zombies oxen their',
- 'sfos_device_type:Jaded forward kept acted but quaintly but',
- 'sfos_ips_version:forward but quaintly their']
+    ] + [
+        'sfos_device_fw_version:forward zombies zombies oxen their',
+        'sfos_device_type:Jaded forward kept acted but quaintly but',
+        'sfos_ips_version:forward but quaintly their',
+    ]
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -52,12 +54,27 @@ def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
     aggregator.assert_metric('snmp.sfosSwapCapacity', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.sfosSwapPercentUsage', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-         ['sfos_ip_sec_vpn_conn_des:oxen but forward their', 'sfos_ip_sec_vpn_conn_mode:forward Jaded oxen oxen their forward', 'sfos_ip_sec_vpn_conn_name:kept Jaded', 'sfos_ip_sec_vpn_conn_type:site_to_site', 'sfos_ip_sec_vpn_localgw_port:quaintly driving forward forward kept their forward', 'sfos_ip_sec_vpn_policy_name:driving oxen forward quaintly quaintly but but'],
-         ['sfos_ip_sec_vpn_conn_des:oxen zombies acted forward kept', 'sfos_ip_sec_vpn_conn_mode:zombies zombies kept zombies', 'sfos_ip_sec_vpn_conn_name:but oxen acted oxen', 'sfos_ip_sec_vpn_conn_type:host_to_host', 'sfos_ip_sec_vpn_localgw_port:acted kept zombies Jaded Jaded but Jaded', 'sfos_ip_sec_vpn_policy_name:oxen forward'],
-
+        [
+            'sfos_ip_sec_vpn_conn_des:oxen but forward their',
+            'sfos_ip_sec_vpn_conn_mode:forward Jaded oxen oxen their forward',
+            'sfos_ip_sec_vpn_conn_name:kept Jaded',
+            'sfos_ip_sec_vpn_conn_type:site_to_site',
+            'sfos_ip_sec_vpn_localgw_port:quaintly driving forward forward kept their forward',
+            'sfos_ip_sec_vpn_policy_name:driving oxen forward quaintly quaintly but but',
+        ],
+        [
+            'sfos_ip_sec_vpn_conn_des:oxen zombies acted forward kept',
+            'sfos_ip_sec_vpn_conn_mode:zombies zombies kept zombies',
+            'sfos_ip_sec_vpn_conn_name:but oxen acted oxen',
+            'sfos_ip_sec_vpn_conn_type:host_to_host',
+            'sfos_ip_sec_vpn_localgw_port:acted kept zombies Jaded Jaded but Jaded',
+            'sfos_ip_sec_vpn_policy_name:oxen forward',
+        ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.sfosIPSecVpnActiveTunnel', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.sfosIPSecVpnActiveTunnel', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric('snmp.sfosIPSecVpnTunnel', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     # --- TEST METADATA ---
