@@ -13,6 +13,6 @@
             "warning"
         ],
         "name": "Can Connect",
-        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Confluent Platform component instance, `WARNING` if no metrics are collected, `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Confluent Platform component instance, `WARNING` if no metrics are collected, and `OK` otherwise."
     }
 ]
