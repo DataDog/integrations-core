@@ -1,0 +1,8 @@
+{
+  "limits": [],
+  "links": {
+    "next": null,
+    "self": "http://10.164.0.11/identity/v3/limits",
+    "previous": null
+  }
+}

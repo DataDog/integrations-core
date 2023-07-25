@@ -4,6 +4,7 @@
 
 import pytest
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
@@ -25,13 +26,16 @@ def test_connect_exception(aggregator, dd_run_check, caplog):
     assert 'Exception while reporting identity response time' in caplog.text
 
 
-def test_connect_http_error(aggregator, dd_run_check, caplog):
+def test_connect_ok(aggregator, dd_run_check, caplog):
     instance = {
         'keystone_server_url': 'http://127.0.0.1:8080/identity',
-        'username': 'xxxx',
-        'password': 'xxxx',
+        'username': 'admin',
+        'password': 'password',
     }
     check = OpenStackControllerCheck('test', {}, [instance])
     dd_run_check(check)
-    aggregator.assert_service_check('openstack.keystone.api.up', status=check.CRITICAL)
-    assert 'HTTPError while reporting identity response time' in caplog.text
+    aggregator.assert_service_check('openstack.keystone.api.up', status=AgentCheck.OK)
+    aggregator.assert_service_check('openstack.nova.api.up', status=AgentCheck.OK)
+    aggregator.assert_service_check('openstack.neutron.api.up', status=AgentCheck.OK)
+    aggregator.assert_service_check('openstack.ironic.api.up', status=AgentCheck.OK)
+    aggregator.assert_service_check('openstack.octavia.api.up', status=AgentCheck.OK)

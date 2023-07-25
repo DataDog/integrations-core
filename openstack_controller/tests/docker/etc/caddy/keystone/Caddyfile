@@ -4,30 +4,122 @@
 }
 :80 {
     root * /usr/share/caddy/
-    @get_root {
+    @get_identity_v3 {
         method GET
         path /identity/v3
     }
-    route @get_root {
+    route @get_identity_v3 {
         rewrite /identity/v3 /identity/v3/get.json
         file_server
     }
-    @post_auth_tokens {
+    @post_identity_v3_auth_tokens_unscoped {
         method POST
+        header "X-Auth-Type" "unscoped"
         path /identity/v3/auth/tokens
     }
-    route @post_auth_tokens {
-        rewrite /identity/v3/auth/tokens /identity/v3/auth/tokens/post.json
-        header /identity/v3/auth/tokens/post.json X-Subject-Token "demo_test"
+    route @post_identity_v3_auth_tokens_unscoped {
+        rewrite /identity/v3/auth/tokens /identity/v3/auth/tokens/unscoped.json
+        header /identity/v3/auth/tokens/unscoped.json X-Subject-Token "demo_test"
         file_server
     }
-    @get_auth_projects {
+    @get_identity_v3_auth_projects {
         method GET
         header "X-Auth-Token" "demo_test"
         path /identity/v3/auth/projects
     }
-    route @get_auth_projects {
+    route @get_identity_v3_auth_projects {
         rewrite /identity/v3/auth/projects /identity/v3/auth/projects/get.json
+        file_server
+    }
+    @post_identity_v3_auth_tokens_domain_default {
+        method POST
+        header "X-Auth-Type" "domain_default"
+        path /identity/v3/auth/tokens
+    }
+    route @post_identity_v3_auth_tokens_domain_default {
+        rewrite /identity/v3/auth/tokens /identity/v3/auth/tokens/domain_default.json
+        header /identity/v3/auth/tokens/domain_default.json X-Subject-Token "demo_test"
+        file_server
+    }
+    @get_identity_v3_domains {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/domains
+    }
+    route @get_identity_v3_domains {
+        rewrite /identity/v3/domains /identity/v3/domains/get.json
+        file_server
+    }
+    @get_identity_v3_projects {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/projects
+    }
+    route @get_identity_v3_projects {
+        rewrite /identity/v3/projects /identity/v3/projects/get.json
+        file_server
+    }
+    @get_identity_v3_groups {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/groups
+    }
+    route @get_identity_v3_groups {
+        rewrite /identity/v3/groups /identity/v3/groups/get.json
+        file_server
+    }
+    @get_identity_v3_users {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/users
+    }
+    route @get_identity_v3_users {
+        rewrite /identity/v3/users /identity/v3/users/get.json
+        file_server
+    }
+    @get_identity_v3_groups_9acda6caf16e4828935f4f681ee8b3e5_users {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/groups/9acda6caf16e4828935f4f681ee8b3e5/users
+    }
+    route @get_identity_v3_groups_9acda6caf16e4828935f4f681ee8b3e5_users {
+        rewrite /identity/v3/groups/9acda6caf16e4828935f4f681ee8b3e5/users /identity/v3/groups/9acda6caf16e4828935f4f681ee8b3e5/users/get.json
+        file_server
+    }
+    @get_identity_v3_groups_89b36a4c32c44b0ea8856b6357f101ea_users {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/groups/89b36a4c32c44b0ea8856b6357f101ea/users
+    }
+    route @get_identity_v3_groups_89b36a4c32c44b0ea8856b6357f101ea_users {
+        rewrite /identity/v3/groups/89b36a4c32c44b0ea8856b6357f101ea/users /identity/v3/groups/89b36a4c32c44b0ea8856b6357f101ea/users/get.json
+        file_server
+    }
+    @get_identity_v3_services {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/services
+    }
+    route @get_identity_v3_services {
+        rewrite /identity/v3/services /identity/v3/services/get.json
+        file_server
+    }
+    @get_identity_v3_registered_limits {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/registered_limits
+    }
+    route @get_identity_v3_registered_limits {
+        rewrite /identity/v3/registered_limits /identity/v3/registered_limits/get.json
+        file_server
+    }
+    @get_identity_v3_limits {
+        method GET
+        header "X-Auth-Token" "demo_test"
+        path /identity/v3/limits
+    }
+    route @get_identity_v3_limits {
+        rewrite /identity/v3/limits /identity/v3/limits/get.json
         file_server
     }
     file_server browse

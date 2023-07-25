@@ -333,6 +333,8 @@ class ApiRest(Api):
             }
         }
         url = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
+        # Testing purposes
+        self.http.options['headers']['X-Auth-Type'] = 'unscoped'
         response = self.http.post(url, json=data)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
@@ -355,6 +357,8 @@ class ApiRest(Api):
             }
         }
         url = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
+        # Testing purposes
+        self.http.options['headers']['X-Auth-Type'] = 'domain_{}'.format(domain_id)
         response = self.http.post(url, json=data)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
@@ -381,6 +385,8 @@ class ApiRest(Api):
             }
         }
         url = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
+        # Testing purposes
+        self.http.options['headers']['X-Auth-Type'] = 'project_{}'.format(project_id)
         response = self.http.post(url, json=data)
         response.raise_for_status()
         self.log.debug("response: %s", response.json())
