@@ -28,7 +28,8 @@ def test_e2e_profile_kyocera_printer(dd_agent_check):
         'snmp_host:kyocera-printer.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-    ] + []
+    ] + ['kcprt_general_model_name:kept but oxen Jaded',
+ 'kcprt_serial_number:kept kept']
 
     # --- TEST EXTENDED METRICS ---
 
