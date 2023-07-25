@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 3.1.3-beta.3 / 2023-07-25
+
+***Added***:
+
+* Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
+
+***Fixed***:
+
+* Simplify regex compilation. See [#15239](https://github.com/DataDog/integrations-core/pull/15239).
+
 ## 3.1.2 / 2023-07-13
 
 ***Fixed***:
