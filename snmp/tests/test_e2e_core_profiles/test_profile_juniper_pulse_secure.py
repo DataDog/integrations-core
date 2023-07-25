@@ -75,7 +75,7 @@ def test_e2e_profile_juniper_pulse_secure(dd_agent_check):
         'profile': 'juniper-pulse-secure',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.12532.256.999',
-        'vendor': 'juniper',
+        'vendor': 'juniper-networks',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
