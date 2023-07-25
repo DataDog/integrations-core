@@ -30,9 +30,11 @@ def test_e2e_profile_infoblox_ipam(dd_agent_check):
         'snmp_host:infoblox-ipam.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-    ] + ['ib_hardware_type:Jaded oxen Jaded forward but zombies forward their',
- 'ib_nios_version:zombies driving forward oxen but acted oxen',
- 'ib_serial_number:driving but zombies kept kept']
+    ] + [
+        'ib_hardware_type:Jaded oxen Jaded forward but zombies forward their',
+        'ib_nios_version:zombies driving forward oxen but acted oxen',
+        'ib_serial_number:driving but zombies kept kept',
+    ]
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_host_resources_base(aggregator, common_tags)
@@ -51,9 +53,8 @@ def test_e2e_profile_infoblox_ipam(dd_agent_check):
     aggregator.assert_metric('snmp.ibDnsQueryRate', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-         ['ib_bind_zone_name:acted'],
-         ['ib_bind_zone_name:their'],
-
+        ['ib_bind_zone_name:acted'],
+        ['ib_bind_zone_name:their'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ibBindZoneFailure', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
@@ -64,18 +65,16 @@ def test_e2e_profile_infoblox_ipam(dd_agent_check):
         aggregator.assert_metric('snmp.ibBindZoneSuccess', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['ib_node_ip_address:Jaded', 'ib_node_replication_status:forward Jaded zombies forward forward'],
-         ['ib_node_ip_address:driving', 'ib_node_replication_status:forward zombies'],
-
+        ['ib_node_ip_address:Jaded', 'ib_node_replication_status:forward Jaded zombies forward forward'],
+        ['ib_node_ip_address:driving', 'ib_node_replication_status:forward zombies'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ibNodeQueueFromMaster', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.ibNodeQueueToMaster', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['ib_service_description:forward oxen oxen', 'ib_service_name:enet-mgmt', 'ib_service_status:inactive'],
-         ['ib_service_description:kept zombies kept', 'ib_service_name:fan3', 'ib_service_status:warning'],
-
+        ['ib_service_description:forward oxen oxen', 'ib_service_name:enet-mgmt', 'ib_service_status:inactive'],
+        ['ib_service_description:kept zombies kept', 'ib_service_name:fan3', 'ib_service_status:warning'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ibMemberServiceStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
