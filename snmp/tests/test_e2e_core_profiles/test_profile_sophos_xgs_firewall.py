@@ -28,9 +28,11 @@ def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
         'snmp_host:sophos-xgs-firewall.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-    ] + ['sfos_device_fw_version:but but zombies oxen forward',
- 'sfos_device_type:their forward their but oxen',
- 'sfos_ips_version:zombies but zombies but quaintly acted their']
+    ] + [
+        'sfos_device_fw_version:but but zombies oxen forward',
+        'sfos_device_type:their forward their but oxen',
+        'sfos_ips_version:zombies but zombies but quaintly acted their',
+    ]
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -42,7 +44,9 @@ def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
     aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.sfosBaseFWLicExpiryDate', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.sfosCentralOrchestrationLicExpiryDate', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric(
+        'snmp.sfosCentralOrchestrationLicExpiryDate', metric_type=aggregator.GAUGE, tags=common_tags
+    )
     aggregator.assert_metric('snmp.sfosDiskCapacity', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.sfosDiskPercentUsage', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.sfosEnhancedPlusLicExpiryDate', metric_type=aggregator.GAUGE, tags=common_tags)
@@ -59,16 +63,31 @@ def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
     aggregator.assert_metric('snmp.sfosSwapCapacity', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.sfosSwapPercentUsage', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.sfosWebProtectionLicExpiryDate', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.sfosWebServerProtectionLicExpiryDate', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric(
+        'snmp.sfosWebServerProtectionLicExpiryDate', metric_type=aggregator.GAUGE, tags=common_tags
+    )
     tag_rows = [
-         ['sfos_ip_sec_vpn_conn_des:kept kept', 'sfos_ip_sec_vpn_conn_name:oxen quaintly Jaded acted', 'sfos_ip_sec_vpn_conn_type:site_to_site', 'sfos_ip_sec_vpn_policy_name:quaintly quaintly forward Jaded acted forward but'],
-         ['sfos_ip_sec_vpn_conn_des:oxen but acted but driving oxen their forward quaintly', 'sfos_ip_sec_vpn_conn_name:kept forward acted forward Jaded forward', 'sfos_ip_sec_vpn_conn_type:site_to_site', 'sfos_ip_sec_vpn_policy_name:quaintly Jaded but kept'],
-
+        [
+            'sfos_ip_sec_vpn_conn_des:kept kept',
+            'sfos_ip_sec_vpn_conn_name:oxen quaintly Jaded acted',
+            'sfos_ip_sec_vpn_conn_type:site_to_site',
+            'sfos_ip_sec_vpn_policy_name:quaintly quaintly forward Jaded acted forward but',
+        ],
+        [
+            'sfos_ip_sec_vpn_conn_des:oxen but acted but driving oxen their forward quaintly',
+            'sfos_ip_sec_vpn_conn_name:kept forward acted forward Jaded forward',
+            'sfos_ip_sec_vpn_conn_type:site_to_site',
+            'sfos_ip_sec_vpn_policy_name:quaintly Jaded but kept',
+        ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.sfosIPSecVpnActiveTunnel', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.sfosIPSecVpnActiveTunnel', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric('snmp.sfosIPSecVpnConnMode', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.sfosIPSecVpnLocalgwPort', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.sfosIPSecVpnLocalgwPort', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     # --- TEST METADATA ---
     device = {
