@@ -12,7 +12,12 @@ from six import itervalues
 
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
-from datadog_checks.vsphere.constants import ALL_RESOURCES, MAX_QUERY_METRICS_OPTION, UNLIMITED_HIST_METRICS_PER_QUERY
+from datadog_checks.vsphere.constants import (
+    ALL_RESOURCES,
+    MAX_QUERY_METRICS_OPTION,
+    UNLIMITED_HIST_METRICS_PER_QUERY,
+    VM_PROPERTIES,
+)
 from datadog_checks.vsphere.event import ALLOWED_EVENTS
 from datadog_checks.vsphere.types import InfrastructureData
 
@@ -184,6 +189,10 @@ class VSphereAPI(object):
                 property_spec.pathSet.append("runtime.powerState")
                 property_spec.pathSet.append("runtime.host")
                 property_spec.pathSet.append("guest.hostName")
+                if self.config.collect_property_metrics:
+                    for vm_property in VM_PROPERTIES:
+                        property_spec.pathSet.append(vm_property)
+
             property_specs.append(property_spec)
 
         # Specify the attribute of the root object to traverse to obtain all the attributes
@@ -267,13 +276,21 @@ class VSphereAPI(object):
         root_folder = self._conn.content.rootFolder
         infrastructure_data[root_folder] = {"name": root_folder.name, "parent": None}
 
-        if self.config.should_collect_attributes:
+        if self.config.should_collect_attributes or self.config.collect_property_metrics:
             # Clean up attributes in infrastructure_data,
             # at this point they are custom pyvmomi objects and the attribute keys are not resolved.
 
             attribute_keys = {x.key: x.name for x in self._fetch_all_attributes()}
             for props in itervalues(infrastructure_data):
                 mor_attributes = []
+                if self.config.collect_property_metrics:
+                    all_properties = {}
+                    for attribute_name in VM_PROPERTIES:
+                        attribute_val = props.pop(attribute_name, None)
+                        if attribute_val is not None:
+                            all_properties[attribute_name] = attribute_val
+                    props['properties'] = all_properties
+
                 if 'customValue' not in props:
                     continue
                 for attribute in props.pop('customValue'):

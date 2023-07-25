@@ -1,0 +1,25 @@
+{
+    "name": "Weaviate Node {weaviate_node.name} on {host.name} is {weaviate_node_status.name}",
+    "type": "query alert",
+    "query": "min(last_10m):avg:weaviate.node.status{*} by {host,weaviate_node,weaviate_node_status} >= 1",
+    "message": "{{#is_alert}}\n\nWeaviate Node {{weaviate_node.name}} on {{host.name}} has been {{weaviate_node_status.name}} for the last 10 mins.\n\n{{/is_alert}} \n\n{{#is_recovery}}\n\nWeaviate Node {{weaviate_node.name}} on {{host.name}} has recovered back to {{weaviate_node_status.name}} status for the last 10 mins.\n\n{{/is_recovery}}",
+    "tags": [
+        "integration:weaviate"
+    ],
+    "options": {
+        "thresholds": {
+            "critical": 1
+        },
+        "notify_audit": false,
+        "include_tags": false,
+        "new_group_delay": 60,
+        "notify_no_data": false,
+        "avalanche_window": 10,
+        "silenced": {}
+    },
+    "priority": null,
+    "restricted_roles": null,
+    "recommended_monitor_metadata": {
+        "description": "Notify your team when a Weaviate Node is not 'Healthy'"
+    }
+}

@@ -1,5 +1,7 @@
 # CHANGELOG - Sidekiq
 
+## Unreleased
+
 ## 1.3.1 / 2023-07-10
 
 ***Fixed***:

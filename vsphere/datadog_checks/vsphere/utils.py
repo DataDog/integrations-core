@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import List, Optional, Type  # noqa: F401
+from typing import Any, Dict, List, Optional, Type  # noqa: F401
 
 from pyVmomi import vim
 from six import iteritems
@@ -153,3 +153,10 @@ def get_mapped_instance_tag(metric_name):
         if metric_name.startswith(prefix):
             return tag_key
     return 'instance'
+
+
+def add_additional_tags(tags, additional_tags):
+    # type: (List[str], Dict[str, Optional[Any]]) -> List[str]
+    for tag_name, tag_value in additional_tags.items():
+        if tag_value is not None:
+            tags.append("{}:{}".format(tag_name, tag_value))
