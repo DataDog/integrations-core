@@ -19,9 +19,9 @@ metrics:
       name: shelfTable
     symbols:
       - OID: 1.3.6.1.4.1.42229.1.2.3.1.1.1.3
-        name: coriant.groove.shelfInletTemperature  # CoriantTypesTemperature is a string that represents a float in Celcius e.g. 23.8
+        name: coriant.groove.shelfInletTemperature  # Type CoriantTypesTemperature is a string that represents a float in Celcius e.g. 23.8
       - OID: 1.3.6.1.4.1.42229.1.2.3.1.1.1.4
-        name: coriant.groove.shelfOutletTemperature  # CoriantTypesTemperature is a string that represents a float in Celcius e.g. 23.8
+        name: coriant.groove.shelfOutletTemperature  # Type CoriantTypesTemperature is a string that represents a float in Celcius e.g. 23.8
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.42229.1.2.3.1.1.1.2
@@ -78,7 +78,7 @@ metrics:
       - OID: 1.3.6.1.4.1.42229.1.2.3.3.1.1.7
         name: coriant.groove.cardFanSpeedRate
       - OID: 1.3.6.1.4.1.42229.1.2.3.3.1.1.9
-        name: coriant.groove.cardTemperature  # CoriantTypesTemperature is a string that represents a float in Celcius e.g. 23.8
+        name: coriant.groove.cardTemperature  # Type CoriantTypesTemperature is a string that represents a float in Celcius e.g. 23.8
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.42229.1.2.3.3.1.1.1
@@ -171,9 +171,9 @@ metrics:
       name: portTable
     symbols:
       - OID: 1.3.6.1.4.1.42229.1.2.3.6.1.1.4
-        name: coriant.groove.portRxOpticalPower  # CoriantTypesOpticalPower is a string that represents a float in dBm unit e.g. -14.5
+        name: coriant.groove.portRxOpticalPower  # Type CoriantTypesOpticalPower is a string that represents a float in dBm unit e.g. -14.5
       - OID: 1.3.6.1.4.1.42229.1.2.3.6.1.1.5
-        name: coriant.groove.portTxOpticalPower  # CoriantTypesOpticalPower is a string that represents a float in dBm unit e.g. -14.5
+        name: coriant.groove.portTxOpticalPower  # Type CoriantTypesOpticalPower is a string that represents a float in dBm unit e.g. -14.5
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.42229.1.2.3.6.1.1.16
@@ -199,7 +199,7 @@ metrics:
       - OID: 1.3.6.1.4.1.42229.1.2.4.1.19.1.1.23
         name: coriant.groove.ochOsCD
       - OID: 1.3.6.1.4.1.42229.1.2.4.1.19.1.1.24
-        name: coriant.groove.ochOsOSNR
+        name: coriant.groove.ochOsOSNR  # Type CoriantTypesOpticalDB is a string that represents a float in dB unit e.g. 33.5
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.42229.1.2.4.1.19.1.1.21
