@@ -14,7 +14,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-Starting from Agent release 7.47.0, The Weaviate check is included in the [Datadog Agent][2] package. 
+Starting from Agent release 7.47.0, the Weaviate check is included in the [Datadog Agent][2] package. 
 
 **Note**: This check requires Agent v7.47.0 or later.
 
