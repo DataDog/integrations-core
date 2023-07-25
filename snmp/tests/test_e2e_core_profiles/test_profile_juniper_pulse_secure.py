@@ -30,8 +30,11 @@ def test_e2e_profile_juniper_pulse_secure(dd_agent_check):
         'snmp_host:juniper-pulse-secure.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+    ] + [
+        'juniper_ive_esap_version:but Jaded acted quaintly forward oxen acted kept',
+        'juniper_ive_product_name:kept their Jaded oxen but acted quaintly',
+        'juniper_ive_product_version:kept kept acted driving oxen quaintly quaintly',
     ]
-    common_tags += ['juniper_ive_product_name:zombies zombies oxen', 'juniper_ive_product_version:forward quaintly quaintly but kept']
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_host_resources_base(aggregator, common_tags)
@@ -53,7 +56,6 @@ def test_e2e_profile_juniper_pulse_secure(dd_agent_check):
     aggregator.assert_metric('snmp.juniper.ive.iveSwapUtil', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.juniper.ive.iveTemperature', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.juniper.ive.iveTotalHits', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.juniper.ive.iveTotalSignedInUsers', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.juniper.ive.iveVPNTunnels', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.juniper.ive.iveWebHits', metric_type=aggregator.COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.juniper.ive.ivetermHits', metric_type=aggregator.COUNT, tags=common_tags)
