@@ -19,152 +19,152 @@ metrics:
       OID: 1.3.6.1.4.1.1230.2.7.2.5.15.0
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stMalwareDetected
+      name: mcafee.mwg.stMalwareDetected
       OID: 1.3.6.1.4.1.1230.2.7.2.1.2.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stConnectionsLegitimate
+      name: mcafee.mwg.stConnectionsLegitimate
       OID: 1.3.6.1.4.1.1230.2.7.2.1.3.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stBlockedByAntiMalware
+      name: mcafee.mwg.stBlockedByAntiMalware
       OID: 1.3.6.1.4.1.1230.2.7.2.1.4.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stConnectionsBlocked
+      name: mcafee.mwg.stConnectionsBlocked
       OID: 1.3.6.1.4.1.1230.2.7.2.1.5.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stBlockedByMediaFilter
+      name: mcafee.mwg.stBlockedByMediaFilter
       OID: 1.3.6.1.4.1.1230.2.7.2.1.6.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stBlockedByURLFilter
+      name: mcafee.mwg.stBlockedByURLFilter
       OID: 1.3.6.1.4.1.1230.2.7.2.1.7.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stMimeType
+      name: mcafee.mwg.stMimeType
       OID: 1.3.6.1.4.1.1230.2.7.2.1.8.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stCategories
+      name: mcafee.mwg.stCategories
       OID: 1.3.6.1.4.1.1230.2.7.2.1.9.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stHttpRequests
+      name: mcafee.mwg.stHttpRequests
       OID: 1.3.6.1.4.1.1230.2.7.2.2.1.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stHttpTraffic
+      name: mcafee.mwg.stHttpTraffic
       OID: 1.3.6.1.4.1.1230.2.7.2.2.2.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stHttpBytesFromClient
+      name: mcafee.mwg.stHttpBytesFromClient
       OID: 1.3.6.1.4.1.1230.2.7.2.2.3.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stHttpBytesFromServer
+      name: mcafee.mwg.stHttpBytesFromServer
       OID: 1.3.6.1.4.1.1230.2.7.2.2.4.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stHttpBytesToClient
+      name: mcafee.mwg.stHttpBytesToClient
       OID: 1.3.6.1.4.1.1230.2.7.2.2.5.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stHttpBytesToServer
+      name: mcafee.mwg.stHttpBytesToServer
       OID: 1.3.6.1.4.1.1230.2.7.2.2.6.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stHttpsRequests
+      name: mcafee.mwg.stHttpsRequests
       OID: 1.3.6.1.4.1.1230.2.7.2.3.1.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stHttpsTraffic
+      name: mcafee.mwg.stHttpsTraffic
       OID: 1.3.6.1.4.1.1230.2.7.2.3.2.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stHttpsBytesFromClient
+      name: mcafee.mwg.stHttpsBytesFromClient
       OID: 1.3.6.1.4.1.1230.2.7.2.3.3.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stHttpsBytesFromServer
+      name: mcafee.mwg.stHttpsBytesFromServer
       OID: 1.3.6.1.4.1.1230.2.7.2.3.4.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stHttpsBytesToClient
+      name: mcafee.mwg.stHttpsBytesToClient
       OID: 1.3.6.1.4.1.1230.2.7.2.3.5.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stHttpsBytesToServer
+      name: mcafee.mwg.stHttpsBytesToServer
       OID: 1.3.6.1.4.1.1230.2.7.2.3.6.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stFtpTraffic
+      name: mcafee.mwg.stFtpTraffic
       OID: 1.3.6.1.4.1.1230.2.7.2.4.1.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stFtpBytesFromClient
+      name: mcafee.mwg.stFtpBytesFromClient
       OID: 1.3.6.1.4.1.1230.2.7.2.4.2.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stFtpBytesFromServer
+      name: mcafee.mwg.stFtpBytesFromServer
       OID: 1.3.6.1.4.1.1230.2.7.2.4.3.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stFtpBytesToClient
+      name: mcafee.mwg.stFtpBytesToClient
       OID: 1.3.6.1.4.1.1230.2.7.2.4.4.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stFtpBytesToServer
+      name: mcafee.mwg.stFtpBytesToServer
       OID: 1.3.6.1.4.1.1230.2.7.2.4.5.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stClientCount
+      name: mcafee.mwg.stClientCount
       OID: 1.3.6.1.4.1.1230.2.7.2.5.2.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stConnectedSockets
+      name: mcafee.mwg.stConnectedSockets
       OID: 1.3.6.1.4.1.1230.2.7.2.5.3.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stResolveHostViaDNS
+      name: mcafee.mwg.stResolveHostViaDNS
       OID: 1.3.6.1.4.1.1230.2.7.2.5.6.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stTimeConsumedByRuleEngine
+      name: mcafee.mwg.stTimeConsumedByRuleEngine
       OID: 1.3.6.1.4.1.1230.2.7.2.5.7.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
     symbol:
-      name: stTimeForTransaction
+      name: mcafee.mwg.stTimeForTransaction
       OID: 1.3.6.1.4.1.1230.2.7.2.5.8.0
     metric_type: monotonic_count
   - MIB: MCAFEE-MWG-MIB
@@ -172,57 +172,57 @@ metrics:
       name: stCategoriesTable
       OID: 1.3.6.1.4.1.1230.2.7.2.1.10
     symbols:
-      - name: stCategoryCount
+      - name: mcafee.mwg.stCategoryCount
         OID: 1.3.6.1.4.1.1230.2.7.2.1.10.1.2
         metric_type: monotonic_count
     metric_tags:
       - column:
-          name: stCategoryName
+          name: mcafee.mwg.stCategoryName
           OID: 1.3.6.1.4.1.1230.2.7.2.1.10.1.1
-        tag: st_category_name
+        tag: mcafee_mwg_st_category_name
 metric_tags:
   - OID: 1.3.6.1.4.1.1230.2.7.1.1.0
     symbol: kProductName
-    tag: k_product_name
+    tag: mcafee_mwg_k_product_name
   - OID: 1.3.6.1.4.1.1230.2.7.1.2.0
     symbol: kCompanyName
-    tag: k_company_name
+    tag: mcafee_mwg_k_company_name
   - OID: 1.3.6.1.4.1.1230.2.7.1.3.0
     symbol: kProductVersion
-    tag: k_product_version
+    tag: mcafee_mwg_k_product_version
   - OID: 1.3.6.1.4.1.1230.2.7.1.4.0
     symbol: kMajorVersion
-    tag: k_major_version
+    tag: mcafee_mwg_k_major_version
   - OID: 1.3.6.1.4.1.1230.2.7.1.5.0
     symbol: kMinorVersion
-    tag: k_minor_version
+    tag: mcafee_mwg_k_minor_version
   - OID: 1.3.6.1.4.1.1230.2.7.1.6.0
     symbol: kMicroVersion
-    tag: k_micro_version
+    tag: mcafee_mwg_k_micro_version
   - OID: 1.3.6.1.4.1.1230.2.7.1.7.0
     symbol: kHotfixVersion
-    tag: k_hotfix_version
+    tag: mcafee_mwg_k_hotfix_version
   - OID: 1.3.6.1.4.1.1230.2.7.1.8.0
     symbol: kCustomVersion
-    tag: k_custom_version
+    tag: mcafee_mwg_k_custom_version
   - OID: 1.3.6.1.4.1.1230.2.7.1.9.0
     symbol: kRevision
-    tag: k_revision
+    tag: mcafee_mwg_k_revision
   - OID: 1.3.6.1.4.1.1230.2.7.1.10.0
     symbol: kBuildNumber
-    tag: k_build_number
+    tag: mcafee_mwg_k_build_number
   - OID: 1.3.6.1.4.1.1230.2.7.1.20.1.0
     symbol: pAMEngineVersion
-    tag: p_am_engine_version
+    tag: mcafee_mwg_p_am_engine_version
   - OID: 1.3.6.1.4.1.1230.2.7.1.20.3.0
     symbol: pMFEEngineVersion
-    tag: p_mfe_engine_version
+    tag: mcafee_mwg_p_mfe_engine_version
   - OID: 1.3.6.1.4.1.1230.2.7.1.20.4.0
     symbol: pMFEDATVersion
-    tag: p_mfedat_version
+    tag: mcafee_mwg_p_mfedat_version
   - OID: 1.3.6.1.4.1.1230.2.7.1.20.5.0
     symbol: pAMProactiveVersion
-    tag: p_am_proactive_version
+    tag: mcafee_mwg_p_am_proactive_version
   - OID: 1.3.6.1.4.1.1230.2.7.1.20.6.0
     symbol: pTSDBVersion
-    tag: p_tsdb_version
+    tag: mcafee_mwg_p_tsdb_version
