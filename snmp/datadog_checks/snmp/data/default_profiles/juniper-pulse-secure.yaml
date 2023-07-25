@@ -3,6 +3,7 @@ extends:
   - _generic-host-resources-base.yaml
   - _generic-if.yaml
   - _generic-ucd.yaml
+  - _juniper.yaml
 sysobjectid: 1.3.6.1.4.1.12532.256.*
 metrics:
   - MIB: JUNIPER-IVE-MIB
