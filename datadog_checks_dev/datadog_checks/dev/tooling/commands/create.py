@@ -137,9 +137,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
             template_fields['author'] = author_name
 
             eula = 'assets/eula.pdf'
-            template_fields[
-                'terms'
-            ] = f'\n  "terms": {{\n    "eula": "{eula}"\n  }},'
+            template_fields['terms'] = f'\n  "terms": {{\n    "eula": "{eula}"\n  }},'
             template_fields[
                 'author_info'
             ] = f'\n  "author": {{\n    "name": "{author_name}",\n    "homepage": "{homepage}",\n    "vendor_id": "{TODO_FILL_IN}",\n    "sales_email": "{sales_email}",\n    "support_email": "{support_email}"\n  }},'  # noqa
