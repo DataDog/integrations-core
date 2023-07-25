@@ -256,3 +256,14 @@ def assert_extend_juniper_cos(aggregator, common_tags):
     # fmt: on
     tags = ['interface:jnxCosIfsetDescr value1', 'queue_number:25'] + common_tags
     aggregator.assert_metric('snmp.jnxCosIfsetQstatQedPkts', metric_type=aggregator.COUNT, tags=tags)
+
+
+def assert_extend_juniper_dcu(aggregator, common_tags):
+    # fmt: off
+    """Add the following to the snmprec
+1.3.6.1.2.1.31.1.1.1.1.83|4|eth111
+1.3.6.1.4.1.2636.3.6.2.1.4.83.1.5.116.104.101.105.114|70|12317383665498203792
+    """
+    # fmt: on
+    tags = ['interface:eth111'] + common_tags
+    aggregator.assert_metric('snmp.jnxDcuStatsPackets', metric_type=aggregator.COUNT, tags=tags)
