@@ -55,7 +55,9 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.servertech.sentry4.UnitMonitor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.servertech.sentry4.UnitMonitor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
         [
@@ -99,11 +101,21 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
         )
 
     tag_rows = [
-        ['servertech_sentry4_line_current_status:normal', 'servertech_sentry4_line_state:unknown', 'servertech_sentry4_line_status:high_warning'],
-        ['servertech_sentry4_line_current_status:pwr_error', 'servertech_sentry4_line_state:unknown', 'servertech_sentry4_line_status:disabled'],
+        [
+            'servertech_sentry4_line_current_status:normal',
+            'servertech_sentry4_line_state:unknown',
+            'servertech_sentry4_line_status:high_warning',
+        ],
+        [
+            'servertech_sentry4_line_current_status:pwr_error',
+            'servertech_sentry4_line_state:unknown',
+            'servertech_sentry4_line_status:disabled',
+        ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.servertech.sentry4.LineCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.servertech.sentry4.LineCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric(
             'snmp.servertech.sentry4.LineCurrentUtilized', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
@@ -131,15 +143,21 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
         aggregator.assert_metric(
             'snmp.servertech.sentry4.PhaseApparentPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric('snmp.servertech.sentry4.PhaseCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.servertech.sentry4.PhaseCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric(
             'snmp.servertech.sentry4.PhaseCurrentCrestFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric('snmp.servertech.sentry4.PhaseEnergy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.servertech.sentry4.PhaseEnergy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric(
             'snmp.servertech.sentry4.PhasePowerFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric('snmp.servertech.sentry4.PhaseVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.servertech.sentry4.PhaseVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric(
             'snmp.servertech.sentry4.PhaseVoltageDeviation', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
@@ -167,14 +185,26 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
         ['servertech_sentry4_ocp_status:profile_error'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.servertech.sentry4.OcpMonitor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.servertech.sentry4.OcpMonitor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
-        ['servertech_sentry4_branch_current_status:over_limit', 'servertech_sentry4_branch_state:on', 'servertech_sentry4_branch_status:settle'],
-        ['servertech_sentry4_branch_current_status:under_limit', 'servertech_sentry4_branch_state:off', 'servertech_sentry4_branch_status:normal'],
+        [
+            'servertech_sentry4_branch_current_status:over_limit',
+            'servertech_sentry4_branch_state:on',
+            'servertech_sentry4_branch_status:settle',
+        ],
+        [
+            'servertech_sentry4_branch_current_status:under_limit',
+            'servertech_sentry4_branch_state:off',
+            'servertech_sentry4_branch_status:normal',
+        ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.servertech.sentry4.BranchCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.servertech.sentry4.BranchCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric(
             'snmp.servertech.sentry4.BranchCurrentUtilized', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
@@ -208,7 +238,9 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
         ['servertech_sentry4_outlet_state:on', 'servertech_sentry4_outlet_status:lost'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.servertech.sentry4.OutletMonitor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.servertech.sentry4.OutletMonitor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
         ['servertech_sentry4_temp_sensor_status:purged'],

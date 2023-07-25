@@ -27,14 +27,19 @@ def test_e2e_profile_servertech_pdu3(dd_agent_check):
         'snmp_host:servertech-pdu3.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-    ] + ['servertech_sentry3_system_nic_serial_number:oxen', 'servertech_sentry3_system_version:zombies acted kept quaintly but but']
+    ] + [
+        'servertech_sentry3_system_nic_serial_number:oxen',
+        'servertech_sentry3_system_version:zombies acted kept quaintly but but',
+    ]
 
     # --- TEST EXTENDED METRICS ---
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.servertech.sentry3.systemConfigModifiedCount', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric(
+        'snmp.servertech.sentry3.systemConfigModifiedCount', metric_type=aggregator.GAUGE, tags=common_tags
+    )
     aggregator.assert_metric('snmp.servertech.sentry3.systemTotalPower', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         [
@@ -59,7 +64,9 @@ def test_e2e_profile_servertech_pdu3(dd_agent_check):
         aggregator.assert_metric(
             'snmp.servertech.sentry3.towerApparentPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric('snmp.servertech.sentry3.towerEnergy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.servertech.sentry3.towerEnergy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric(
             'snmp.servertech.sentry3.towerInfeedCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
@@ -105,7 +112,9 @@ def test_e2e_profile_servertech_pdu3(dd_agent_check):
         aggregator.assert_metric(
             'snmp.servertech.sentry3.infeedCapacityUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric('snmp.servertech.sentry3.infeedEnergy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.servertech.sentry3.infeedEnergy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric(
             'snmp.servertech.sentry3.infeedLoadValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
@@ -118,8 +127,12 @@ def test_e2e_profile_servertech_pdu3(dd_agent_check):
         aggregator.assert_metric(
             'snmp.servertech.sentry3.infeedPhaseVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric('snmp.servertech.sentry3.infeedPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.servertech.sentry3.infeedVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.servertech.sentry3.infeedPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.servertech.sentry3.infeedVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
         [
@@ -138,14 +151,26 @@ def test_e2e_profile_servertech_pdu3(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.servertech.sentry3.outlet', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.servertech.sentry3.outlet', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
-        ['servertech_sentry3_env_mon_id:k', 'servertech_sentry3_env_mon_name:acted', 'servertech_sentry3_env_mon_status:no_comm'],
-        ['servertech_sentry3_env_mon_id:k', 'servertech_sentry3_env_mon_name:but', 'servertech_sentry3_env_mon_status:no_comm'],
+        [
+            'servertech_sentry3_env_mon_id:k',
+            'servertech_sentry3_env_mon_name:acted',
+            'servertech_sentry3_env_mon_status:no_comm',
+        ],
+        [
+            'servertech_sentry3_env_mon_id:k',
+            'servertech_sentry3_env_mon_name:but',
+            'servertech_sentry3_env_mon_status:no_comm',
+        ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.servertech.sentry3.envMon', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.servertech.sentry3.envMon', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
         [
@@ -167,7 +192,9 @@ def test_e2e_profile_servertech_pdu3(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.servertech.sentry3.tempHumidSensorHumidValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.servertech.sentry3.tempHumidSensorHumidValue',
+            metric_type=aggregator.GAUGE,
+            tags=common_tags + tag_row,
         )
         aggregator.assert_metric(
             'snmp.servertech.sentry3.tempHumidSensorTempValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
