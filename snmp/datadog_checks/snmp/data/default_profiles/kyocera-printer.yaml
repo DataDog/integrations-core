@@ -9,7 +9,7 @@ metadata:
       vendor:
         value: "kyocera"
 metrics:
-  - MIB: KYOCERA-PRIVATE-MIB
+  - MIB: KYOCERA-Private-MIB
     table:
       OID: 1.3.6.1.4.1.1347.43.18.2
       name: kcprtAlertStateTable
@@ -21,7 +21,7 @@ metrics:
           OID: 1.3.6.1.4.1.1347.43.18.2.1.2
           name: kcprtAlertStateDisplay
         tag: kcprt_alert_state_display
-  - MIB: KYOCERA-PRIVATE-MIB
+  - MIB: KYOCERA-Private-MIB
     table:
       OID: 1.3.6.1.4.1.1347.43.20
       name: kcprtMemoryResource#
