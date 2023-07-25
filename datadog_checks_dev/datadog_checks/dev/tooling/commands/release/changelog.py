@@ -11,9 +11,6 @@ from semver import VersionInfo
 
 from ....fs import stream_file_lines, write_file
 from ...constants import CHANGELOG_TYPE_NONE, CHANGELOG_TYPES_ORDERED, get_root
-from ...git import get_commits_since
-from ...github import from_contributor, get_changelog_types, get_pr, parse_pr_numbers
-from ...release import get_release_tag_string
 from ...utils import complete_testable_checks, get_valid_checks, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, validate_check_arg
 
@@ -117,7 +114,7 @@ def changelog(
 
     # write the new changelog in memory
     changelog_buffer = StringIO()
-    
+
     # preserve the title and unreleased section
     changelog_buffer.write(''.join(old[:4]))
 
