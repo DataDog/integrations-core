@@ -1,5 +1,7 @@
 # CHANGELOG - elastic
 
+## Unreleased
+
 ## 5.5.0 / 2023-07-10
 
 ***Added***:

@@ -1,5 +1,7 @@
 # CHANGELOG - kafka
 
+## Unreleased
+
 ## 2.13.2 / 2023-07-10
 
 ***Fixed***:

@@ -2308,3 +2308,441 @@ def test_two_checks(aggregator, dd_run_check, realtime_instance, get_timestamp):
     dd_run_check(check)
     dd_run_check(check)
     get_timestamp.call_count == 3
+
+
+def test_vm_property_metrics(
+    aggregator, realtime_instance, dd_run_check, caplog, service_instance, vm_properties_ex, vm_query_perf
+):
+    realtime_instance['collect_property_metrics'] = True
+
+    service_instance.content.rootFolder = mock.MagicMock(return_value=vim.Folder(moId="root"))
+
+    service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
+
+    service_instance.content.perfManager.QueryPerf = vm_query_perf
+
+    base_tags = ['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_host:unknown', 'vsphere_type:vm']
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+    aggregator.assert_metric('vsphere.vm.count', value=2, count=2, tags=base_tags)
+
+    # VM 1
+    aggregator.assert_metric(
+        'vsphere.vm.guest.guestFullName',
+        count=0,
+        hostname='vm1',
+    )
+    assert "Could not sumbit property metric- no metric data: name=`vm.guest.guestFullName`, "
+    "value=`None`, hostname=`vm1`, base tags=`['vcenter_server:FAKE', 'vsphere_host:unknown', "
+    "'vsphere_folder:unknown', 'vsphere_type:vm']` additional tags=`{}`" in caplog.text
+
+    aggregator.assert_metric(
+        'vsphere.vm.summary.quickStats.uptimeSeconds',
+        count=1,
+        value=12184573.0,
+        tags=base_tags,
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.summary.config.numCpu',
+        count=1,
+        value=2.0,
+        tags=base_tags,
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.summary.config.numEthernetCards',
+        count=1,
+        value=1.0,
+        tags=base_tags,
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.summary.config.numVirtualDisks',
+        count=1,
+        value=1.0,
+        tags=base_tags,
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.summary.config.memorySizeMB',
+        count=1,
+        value=2048,
+        tags=base_tags,
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.config.hardware.numCoresPerSocket',
+        count=1,
+        value=2.0,
+        tags=base_tags,
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.guest.toolsVersion',
+        count=1,
+        value=1,
+        tags=base_tags + ['toolsVersion:11296'],
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.guest.toolsRunningStatus',
+        count=0,
+        hostname='vm1',
+    )
+    assert "Could not sumbit property metric- no metric data: name=`vm.guest.toolsRunningStatus`, "
+    "value=`None`, hostname=`vm1`, base tags=`['vcenter_server:FAKE', 'vsphere_host:unknown', "
+    "'vsphere_folder:unknown', 'vsphere_type:vm']` additional tags=`{}`" in caplog.text
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net',
+        count=1,
+        value=1,
+        tags=base_tags + ['device_id:0', 'is_connected:True', 'nic_mac_address:00:61:58:72:53:13'],
+        hostname='vm1',
+    )
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net',
+        count=1,
+        value=1,
+        tags=base_tags + ['device_id:0', 'is_connected:True', 'nic_mac_address:00:61:58:72:53:13'],
+        hostname='vm1',
+    )
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net.ipConfig.address',
+        count=1,
+        value=1,
+        tags=base_tags
+        + [
+            'device_id:0',
+            'is_connected:True',
+            'nic_ip_address:fe70::150:46ff:fe47:6311',
+            'nic_mac_address:00:61:58:72:53:13',
+        ],
+        hostname='vm1',
+    )
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.ipStack.ipRoute',
+        count=1,
+        value=1,
+        tags=base_tags
+        + [
+            'device:0',
+            'network_dest_ip:fe83::',
+            'route_domain_name:example.com',
+            'route_hostname:test-hostname',
+            'prefix_length:64',
+        ],
+        hostname='vm1',
+    )
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.disk.freeSpace',
+        count=1,
+        value=1270075392,
+        tags=base_tags + ['disk_path:\\', 'file_system_type:ext4'],
+        hostname='vm1',
+    )
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.disk.capacity',
+        count=1,
+        value=2064642048,
+        tags=base_tags + ['disk_path:\\', 'file_system_type:ext4'],
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.config.cpuAllocation.limit',
+        count=1,
+        value=-1,
+        tags=base_tags,
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.config.memoryAllocation.limit',
+        count=1,
+        value=-1,
+        tags=base_tags,
+        hostname='vm1',
+    )
+
+    assert "Submit property metric: name=`vm.config.memoryAllocation.limit`, value=`-1.0`, "
+    "hostname=`vm1`, tags=`['vcenter_server:FAKE', 'vsphere_host:unknown', "
+    "'vsphere_folder:unknown', 'vsphere_type:vm']`, count=`False`" in caplog.text
+
+    aggregator.assert_metric(
+        'vsphere.vm.config.cpuAllocation.overheadLimit',
+        count=0,
+        hostname='vm1',
+    )
+    assert "Could not sumbit property metric- unexpected metric value: "
+    "name=`vm.config.cpuAllocation.overheadLimit`, value=`None`, hostname=`vm1`, "
+    "base tags=`['vcenter_server:FAKE', 'vsphere_host:unknown', 'vsphere_folder:unknown', "
+    "'vsphere_type:vm']` additional tags=`{}`" in caplog.text
+
+    aggregator.assert_metric(
+        'vsphere.vm.config.memoryAllocation.overheadLimit',
+        count=0,
+        hostname='vm1',
+    )
+    assert "Could not sumbit property metric- unexpected metric value: "
+    "name=`vm.config.memoryAllocation.overheadLimit`, value=`None`, hostname=`vm1`, "
+    "base tags=`['vcenter_server:FAKE', 'vsphere_host:unknown', 'vsphere_folder:unknown', "
+    "'vsphere_type:vm']` additional tags=`{}`" in caplog.text
+
+    # VM 3
+    aggregator.assert_metric(
+        'vsphere.vm.guest.guestFullName',
+        count=1,
+        value=1,
+        tags=base_tags + ['guestFullName:Debian GNU/Linux 12 (32-bit)'],
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.summary.config.numCpu',
+        value=1,
+        count=1,
+        hostname='vm3',
+        tags=base_tags,
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.summary.config.numEthernetCards',
+        count=1,
+        value=3.0,
+        tags=base_tags,
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.summary.config.numVirtualDisks',
+        count=1,
+        value=3.0,
+        tags=base_tags,
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.summary.config.memorySizeMB',
+        count=0,
+        hostname='vm3',
+    )
+    assert "Could not sumbit property metric- unexpected metric value: name=`vm.summary.config.memorySizeMB`, "
+    "value=`None`, hostname=`vm3`, base tags=`['vcenter_server:FAKE', 'vsphere_host:unknown', "
+    "'vsphere_folder:unknown', 'vsphere_type:vm']` additional tags=`{}`" in caplog.text
+
+    aggregator.assert_metric(
+        'vsphere.vm.config.hardware.numCoresPerSocket',
+        count=1,
+        value=2.0,
+        tags=base_tags,
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.guest.toolsRunningStatus',
+        count=1,
+        value=1,
+        tags=base_tags + ['toolsRunningStatus:guestToolsRunning'],
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.guest.toolsVersionStatus2',
+        count=1,
+        value=1,
+        tags=base_tags + ['toolsVersionStatus2:guestToolsSupportedOld'],
+        hostname='vm3',
+    )
+
+    aggregator.assert_metric(
+        'vsphere.vm.guest.net.ipConfig.address',
+        count=1,
+        value=1,
+        tags=base_tags + ['device_id:43', 'is_connected:False', 'nic_ip_address:fe70::150:46ff:fe47:6311'],
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.guest.ipStack.ipRoute',
+        count=1,
+        value=1,
+        tags=base_tags + ['device:0', 'gateway_address:0.0.0.0', 'network_dest_ip:fe83::', 'prefix_length:32'],
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.config.cpuAllocation.overheadLimit',
+        count=1,
+        value=24,
+        tags=base_tags,
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.config.cpuAllocation.limit',
+        count=1,
+        value=10,
+        tags=base_tags,
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.config.memoryAllocation.overheadLimit',
+        count=1,
+        value=59,
+        tags=base_tags,
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.config.memoryAllocation.limit',
+        count=1,
+        value=-1,
+        tags=base_tags,
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.guest.disk.freeSpace',
+        count=0,
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.guest.disk.capacity',
+        count=0,
+        hostname='vm3',
+    )
+
+    # assert we still get VM performance counter metrics
+    aggregator.assert_metric('vsphere.cpu.costop.sum', count=1, hostname='vm1')
+    aggregator.assert_metric('vsphere.cpu.costop.sum', count=1, hostname='vm3')
+
+    aggregator.assert_metric('datadog.vsphere.collect_events.time')
+    aggregator.assert_metric('datadog.vsphere.refresh_metrics_metadata_cache.time')
+    aggregator.assert_metric('datadog.vsphere.refresh_infrastructure_cache.time')
+    aggregator.assert_metric('datadog.vsphere.query_metrics.time')
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_vm_property_metrics_filtered(
+    aggregator, realtime_instance, dd_run_check, service_instance, vm_properties_ex, vm_query_perf
+):
+    realtime_instance['collect_property_metrics'] = True
+    realtime_instance['resource_filters'] = [
+        {
+            'type': 'whitelist',
+            'resource': 'vm',
+            'property': 'name',
+            'patterns': [
+                'vm1.*',
+            ],
+        }
+    ]
+
+    service_instance.content.rootFolder = mock.MagicMock(return_value=vim.Folder(moId="root"))
+
+    service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
+
+    service_instance.content.perfManager.QueryPerf = vm_query_perf
+
+    base_tags = ['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_host:unknown', 'vsphere_type:vm']
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    aggregator.assert_metric('vsphere.vm.count', value=1, count=1, tags=base_tags)
+    aggregator.assert_metric(
+        'vsphere.vm.summary.quickStats.uptimeSeconds',
+        count=1,
+        value=12184573.0,
+        tags=base_tags,
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.summary.quickStats.uptimeSeconds',
+        count=0,
+        hostname='vm3',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.config.cpuAllocation.limit',
+        count=1,
+        value=-1,
+        tags=base_tags,
+        hostname='vm1',
+    )
+    aggregator.assert_metric(
+        'vsphere.vm.config.cpuAllocation.limit',
+        count=0,
+        hostname='vm3',
+    )
+
+
+def test_vm_property_metrics_expired_cache(
+    aggregator, realtime_instance, dd_run_check, service_instance, vm_properties_ex, vm_query_perf
+):
+
+    with mock.patch('datadog_checks.vsphere.cache.time') as time:
+
+        realtime_instance['collect_property_metrics'] = True
+
+        service_instance.content.rootFolder = mock.MagicMock(return_value=vim.Folder(moId="root"))
+
+        service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
+
+        service_instance.content.perfManager.QueryPerf = vm_query_perf
+
+        base_tags = ['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_host:unknown', 'vsphere_type:vm']
+
+        # run check with expired cache once
+        base_time = 1576263848
+        mocked_timestamps = [base_time + 160 * i for i in range(10)]
+        time.time = mock.MagicMock(side_effect=mocked_timestamps)
+
+        check = VSphereCheck('vsphere', {}, [realtime_instance])
+        check.infrastructure_cache._last_ts = base_time
+        dd_run_check(check)
+        aggregator.assert_metric('vsphere.vm.count', value=2, count=2, tags=base_tags)
+
+        aggregator.assert_metric(
+            'vsphere.vm.summary.quickStats.uptimeSeconds',
+            count=1,
+            value=12184573.0,
+            tags=base_tags,
+            hostname='vm1',
+        )
+        aggregator.assert_metric(
+            'vsphere.vm.config.cpuAllocation.limit',
+            count=1,
+            value=-1,
+            tags=base_tags,
+            hostname='vm1',
+        )
+
+        # run check with non-expired cache once and confirm no property metrics are collected
+        aggregator.reset()
+        mocked_timestamps = [base_time + 100 * i for i in range(10)]
+        time.time = mock.MagicMock(side_effect=mocked_timestamps)
+        check.infrastructure_cache._last_ts = base_time
+
+        assert not check.infrastructure_cache.is_expired()
+
+        dd_run_check(check)
+        aggregator.assert_metric('vsphere.vm.count')
+        aggregator.assert_metric('datadog.vsphere.collect_events.time')
+        aggregator.assert_metric('datadog.vsphere.query_metrics.time')
+        aggregator.assert_metric('vsphere.cpu.costop.sum')
+        aggregator.assert_all_metrics_covered()
+
+        assert not check.infrastructure_cache.is_expired()
+        assert check.infrastructure_cache.is_expired()
+
+        # run check with expired cache again and confirm property metrics are collected again
+        aggregator.reset()
+        dd_run_check(check)
+        aggregator.assert_metric(
+            'vsphere.vm.summary.quickStats.uptimeSeconds',
+            count=1,
+            value=12184573.0,
+            tags=base_tags,
+            hostname='vm1',
+        )
+        aggregator.assert_metric(
+            'vsphere.vm.config.cpuAllocation.limit',
+            count=1,
+            value=-1,
+            tags=base_tags,
+            hostname='vm1',
+        )

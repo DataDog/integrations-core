@@ -1,5 +1,7 @@
 # CHANGELOG - win32_event_log
 
+## Unreleased
+
 ## 2.14.1 / 2023-07-13
 
 ***Fixed***:

@@ -157,8 +157,15 @@ def changelog(
     # write the new changelog in memory
     changelog_buffer = StringIO()
 
-    # preserve the title
-    changelog_buffer.write(''.join(old[:2]))
+    # find the first header below the Unreleased section
+    header_index = 2
+    for index in range(2, len(old)):
+        if old[index].startswith("##") and "## Unreleased" not in old[index]:
+            header_index = index
+            break
+
+    # preserve the title and unreleased section
+    changelog_buffer.write(''.join(old[:header_index]))
 
     # prepend the new changelog to the old contents
     # make the command idempotent
@@ -166,7 +173,7 @@ def changelog(
         changelog_buffer.write(new_entry.getvalue())
 
     # append the rest of the old changelog
-    changelog_buffer.write(''.join(old[2:]))
+    changelog_buffer.write(''.join(old[header_index:]))
 
     write_result(dry_run, changelog_path, changelog_buffer.getvalue(), generated_changelogs)
 

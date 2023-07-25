@@ -12,10 +12,6 @@ Follow the instructions below to install and configure this check for an Agent r
 
 The Cilium check is included in the [Datadog Agent][3] package, but it requires additional setup steps to expose Prometheus metrics.
 
-### Prerequisites
-
-This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see the [Latest and Legacy Versioning For OpenMetrics-based Integrations][14].
-
 1. In order to enable Prometheus metrics in both the `cilium-agent` and `cilium-operator`, deploy Cilium with the following Helm values set according to your version of Cilium:
    * Cilium < v1.8.x:
      `global.prometheus.enabled=true`
@@ -86,7 +82,8 @@ To configure this check for an Agent running on a host:
    ```
    
    
-    **Note**: The `use_openmetrics` option is enabled by default for the latest version of the integration in the `conf.yaml.example` file. Set the `use_openmetrics` configuration option to `false` to use the legacy version of the integration. To view the configuration parameters for the legacy version, see [the `conf.yaml.example` file][12] and the [Agent Integrations documentation][13].
+    **NOTE**: By default, the `use_openmetrics` option is enabled in the conf.yaml.example. Set the `use_openmetrics` configuration option to `false` to use the OpenMetrics V1 implementation. To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][12].
+    
 2. [Restart the Agent][5].
 
 ##### Log collection
@@ -188,5 +185,3 @@ Need help? Contact [Datadog support][11].
 [10]: https://github.com/DataDog/integrations-core/blob/master/cilium/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
 [12]: https://github.com/DataDog/integrations-core/blob/7.33.x/cilium/datadog_checks/cilium/data/conf.yaml.example
-[13]: https://datadoghq.dev/integrations-core/base/openmetrics/
-[14]: https://docs.datadohgq.com/integrations/guide/versions-for-openmetrics-based-integrations
