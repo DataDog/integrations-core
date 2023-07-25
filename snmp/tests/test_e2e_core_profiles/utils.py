@@ -267,3 +267,14 @@ def assert_extend_juniper_dcu(aggregator, common_tags):
     # fmt: on
     tags = ['interface:eth111'] + common_tags
     aggregator.assert_metric('snmp.jnxDcuStatsPackets', metric_type=aggregator.COUNT, tags=tags)
+
+
+def assert_extend_juniper_firewall(aggregator, common_tags):
+    # fmt: off
+    """Add the following to the snmprec
+1.3.6.1.4.1.2636.3.5.2.1.1.37.116.104.101.105.114.32.100.114.105.118.105.110.103.32.113.117.97.105.110.116.108.121.32.98.117.116.32.74.97.100.101.100.32.111.120.101.110.38.74.97.100.101.100.32.111.120.101.110.32.107.101.112.116.32.116.104.101.105.114.32.100.114.105.118.105.110.103.32.98.117.116.32.107.101.112.116.4|4|filter111
+1.3.6.1.4.1.2636.3.5.2.1.4.37.116.104.101.105.114.32.100.114.105.118.105.110.103.32.113.117.97.105.110.116.108.121.32.98.117.116.32.74.97.100.101.100.32.111.120.101.110.38.74.97.100.101.100.32.111.120.101.110.32.107.101.112.116.32.116.104.101.105.114.32.100.114.105.118.105.110.103.32.98.117.116.32.107.101.112.116.4|70|4454094099404974412
+    """
+    # fmt: on
+    tags = ['firewall_filter_name:filter111'] + common_tags
+    aggregator.assert_metric('snmp.jnxFWCounterPacketCount', metric_type=aggregator.COUNT, tags=tags)
