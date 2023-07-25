@@ -50,8 +50,6 @@ def test_e2e_profile_juniper_qfx(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-
-
     # --- TEST METADATA ---
     device = {
         'description': 'juniper-qfx Device Description',
