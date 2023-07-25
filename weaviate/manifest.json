@@ -37,6 +37,9 @@
       "process_signatures": [
         "/bin/weaviate"
       ]
+    },
+    "monitors": {
+      "node_status": "assets/monitors/node_status.json"
     }
   },
   "author": {

@@ -4,7 +4,6 @@
 #   https://www.juniper.net/documentation/en_US/junos/topics/concept/enterprise-specific-mibs-overview.html
 
 extends:
-  - _base.yaml
   - _generic-if.yaml
   - _generic-ip.yaml
   - _generic-tcp.yaml
@@ -15,6 +14,7 @@ extends:
   - _juniper-virtualchassis.yaml
   - _juniper-firewall.yaml
   - _juniper-junos-generic.yaml
+  - _juniper.yaml
 
 device:
   vendor: "juniper-networks"
