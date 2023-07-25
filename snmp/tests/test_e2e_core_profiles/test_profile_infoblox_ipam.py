@@ -30,9 +30,9 @@ def test_e2e_profile_infoblox_ipam(dd_agent_check):
         'snmp_host:infoblox-ipam.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-    ] + ['ib_hardware_type:forward quaintly acted',
- 'ib_nios_version:forward their acted forward acted kept quaintly',
- 'ib_serial_number:forward zombies Jaded oxen quaintly driving']
+    ] + ['ib_hardware_type:Jaded oxen Jaded forward but zombies forward their',
+ 'ib_nios_version:zombies driving forward oxen but acted oxen',
+ 'ib_serial_number:driving but zombies kept kept']
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_host_resources_base(aggregator, common_tags)
@@ -52,9 +52,7 @@ def test_e2e_profile_infoblox_ipam(dd_agent_check):
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
          ['ib_bind_zone_name:acted'],
-         ['ib_bind_zone_name:driving acted driving driving'],
-         ['ib_bind_zone_name:forward oxen driving'],
-         ['ib_bind_zone_name:quaintly zombies zombies'],
+         ['ib_bind_zone_name:their'],
 
     ]
     for tag_row in tag_rows:
@@ -66,8 +64,8 @@ def test_e2e_profile_infoblox_ipam(dd_agent_check):
         aggregator.assert_metric('snmp.ibBindZoneSuccess', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['ib_node_ip_address:driving', 'ib_node_replication_status:oxen Jaded but forward Jaded acted oxen'],
-         ['ib_node_ip_address:kept kept but', 'ib_node_replication_status:forward oxen quaintly oxen driving forward their acted forward'],
+         ['ib_node_ip_address:Jaded', 'ib_node_replication_status:forward Jaded zombies forward forward'],
+         ['ib_node_ip_address:driving', 'ib_node_replication_status:forward zombies'],
 
     ]
     for tag_row in tag_rows:
@@ -75,8 +73,8 @@ def test_e2e_profile_infoblox_ipam(dd_agent_check):
         aggregator.assert_metric('snmp.ibNodeQueueToMaster', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['ib_service_description:quaintly Jaded quaintly driving driving', 'ib_service_name:radius', 'ib_service_status:working'],
-         ['ib_service_description:their quaintly but acted', 'ib_service_name:memory', 'ib_service_status:failed'],
+         ['ib_service_description:forward oxen oxen', 'ib_service_name:enet-mgmt', 'ib_service_status:inactive'],
+         ['ib_service_description:kept zombies kept', 'ib_service_name:fan3', 'ib_service_status:warning'],
 
     ]
     for tag_row in tag_rows:
