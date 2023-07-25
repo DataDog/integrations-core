@@ -10,7 +10,6 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
-
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
@@ -28,31 +27,35 @@ def test_e2e_profile_kyocera_printer(dd_agent_check):
         'snmp_host:kyocera-printer.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-    ] + ['kcprt_general_model_name:kept but oxen Jaded',
- 'kcprt_serial_number:kept kept']
+    ] + ['kcprt_general_model_name:kept but oxen Jaded', 'kcprt_serial_number:kept kept']
 
     # --- TEST EXTENDED METRICS ---
-
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
     tag_rows = [
-         ['kcprt_alert_state_display:zombies acted zombies kept oxen'],
-         ['kcprt_alert_state_display:zombies kept but acted acted'],
-
+        ['kcprt_alert_state_display:zombies acted zombies kept oxen'],
+        ['kcprt_alert_state_display:zombies kept but acted acted'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.kcprtAlertStateCode', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['kcprt_memory_device_location:ic_card_slot_a', 'kcprt_memory_device_status:ready_read_write'],
-         ['kcprt_memory_device_location:resident_font', 'kcprt_memory_device_status:not_accessible', 'kcprt_memory_device_type:rom'],
-
+        ['kcprt_memory_device_location:ic_card_slot_a', 'kcprt_memory_device_status:ready_read_write'],
+        [
+            'kcprt_memory_device_location:resident_font',
+            'kcprt_memory_device_status:not_accessible',
+            'kcprt_memory_device_type:rom',
+        ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.kcprtMemoryDeviceTotalSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.kcprtMemoryDeviceUsedSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.kcprtMemoryDeviceTotalSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.kcprtMemoryDeviceUsedSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     # --- TEST METADATA ---
     device = {
