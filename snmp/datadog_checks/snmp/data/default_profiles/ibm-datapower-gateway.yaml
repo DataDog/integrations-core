@@ -184,10 +184,11 @@ metrics:
           2: warning
           3: failure
           4: suspended
-      - column:
-          OID: 1.3.6.1.4.1.14685.3.1.28.1.6
-          name: ibm.dpStatusLogTargetStatusErrorInfo
-        tag: ibm_dp_status_log_target_status_error_info
+#      - column:
+#          OID: 1.3.6.1.4.1.14685.3.1.28.1.6
+#          name: ibm.dpStatusLogTargetStatusErrorInfo
+#        tag: ibm_dp_status_log_target_status_error_info
+# TODO : This tag might have high cardinality, to be investigated before adding
   - MIB: DATAPOWER-STATUS-MIB
     table:
       name: dpStatusNetworkInterfaceStatusTable

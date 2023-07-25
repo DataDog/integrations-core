@@ -107,12 +107,10 @@ def test_e2e_profile_ibm_datapower_gateway(dd_agent_check):
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         [
-            'ibm_dp_status_log_target_status_error_info:but but their but forward but',
             'ibm_dp_status_log_target_status_log_target:Jaded zombies their',
             'ibm_dp_status_log_target_status_status:active',
         ],
         [
-            'ibm_dp_status_log_target_status_error_info:oxen forward kept but Jaded acted but',
             'ibm_dp_status_log_target_status_log_target:acted their zombies oxen oxen',
             'ibm_dp_status_log_target_status_status:suspended',
         ],
