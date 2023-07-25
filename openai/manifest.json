@@ -37,7 +37,7 @@
       }
     },
     "dashboards": {
-      "OpenAI Overview Dashboard": "assets/dashboards/overview_dashboard.json"
+      "OpenAI Overview Dashboard": "assets/dashboards/overview_dashboard.json",
       "OpenAI Usage Overview": "assets/dashboards/usage_overview_dashboard.json"
     },
     "monitors": {
