@@ -17,7 +17,7 @@ from .utils import (
     assert_extend_juniper_cos,
     assert_extend_juniper_dcu,
     assert_extend_juniper_firewall,
-    # assert_extend_juniper_virtualchassis,
+    assert_extend_juniper_virtualchassis,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
@@ -45,7 +45,7 @@ def test_e2e_profile_juniper_qfx(dd_agent_check):
     assert_extend_juniper_cos(aggregator, common_tags)
     assert_extend_juniper_dcu(aggregator, common_tags)
     assert_extend_juniper_firewall(aggregator, common_tags)
-    # assert_extend_juniper_virtualchassis(aggregator, common_tags)
+    assert_extend_juniper_virtualchassis(aggregator, common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)

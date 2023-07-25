@@ -278,3 +278,12 @@ def assert_extend_juniper_firewall(aggregator, common_tags):
     # fmt: on
     tags = ['firewall_filter_name:filter111'] + common_tags
     aggregator.assert_metric('snmp.jnxFWCounterPacketCount', metric_type=aggregator.COUNT, tags=tags)
+
+
+def assert_extend_juniper_virtualchassis(aggregator, common_tags):
+    # fmt: off
+    """Add the following to the snmprec
+    """
+    # fmt: on
+    tags = ['port_name:port111'] + common_tags
+    aggregator.assert_metric('snmp.jnxVirtualChassisPortInPkts', metric_type=aggregator.COUNT, tags=tags)
