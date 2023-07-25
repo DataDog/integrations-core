@@ -28,18 +28,23 @@ def test_e2e_profile_mcafee_web_gateway(dd_agent_check):
         'snmp_host:mcafee-web-gateway.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-    ] + ['mcafee_mwg_k_build_number:9',
- 'mcafee_mwg_k_company_name:driving zombies kept',
- 'mcafee_mwg_k_custom_version:2', 'mcafee_mwg_k_hotfix_version:22',
- 'mcafee_mwg_k_major_version:27', 'mcafee_mwg_k_micro_version:6',
- 'mcafee_mwg_k_minor_version:18',
- 'mcafee_mwg_k_product_name:driving acted quaintly forward forward',
- 'mcafee_mwg_k_product_version:forward zombies acted quaintly kept kept',
- 'mcafee_mwg_k_revision:forward acted',
- 'mcafee_mwg_p_am_engine_version:quaintly',
- 'mcafee_mwg_p_am_proactive_version:Jaded',
- 'mcafee_mwg_p_mfe_engine_version:Jaded their',
- 'mcafee_mwg_p_mfedat_version:forward', 'mcafee_mwg_p_tsdb_version:oxen']
+    ] + [
+        'mcafee_mwg_k_build_number:9',
+        'mcafee_mwg_k_company_name:driving zombies kept',
+        'mcafee_mwg_k_custom_version:2',
+        'mcafee_mwg_k_hotfix_version:22',
+        'mcafee_mwg_k_major_version:27',
+        'mcafee_mwg_k_micro_version:6',
+        'mcafee_mwg_k_minor_version:18',
+        'mcafee_mwg_k_product_name:driving acted quaintly forward forward',
+        'mcafee_mwg_k_product_version:forward zombies acted quaintly kept kept',
+        'mcafee_mwg_k_revision:forward acted',
+        'mcafee_mwg_p_am_engine_version:quaintly',
+        'mcafee_mwg_p_am_proactive_version:Jaded',
+        'mcafee_mwg_p_mfe_engine_version:Jaded their',
+        'mcafee_mwg_p_mfedat_version:forward',
+        'mcafee_mwg_p_tsdb_version:oxen',
+    ]
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -76,16 +81,19 @@ def test_e2e_profile_mcafee_web_gateway(dd_agent_check):
     aggregator.assert_metric('snmp.mcafee.mwg.stMalwareDetected', metric_type=aggregator.COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.mcafee.mwg.stMimeType', metric_type=aggregator.COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.mcafee.mwg.stResolveHostViaDNS', metric_type=aggregator.COUNT, tags=common_tags)
-    aggregator.assert_metric('snmp.mcafee.mwg.stTimeConsumedByRuleEngine', metric_type=aggregator.COUNT, tags=common_tags)
+    aggregator.assert_metric(
+        'snmp.mcafee.mwg.stTimeConsumedByRuleEngine', metric_type=aggregator.COUNT, tags=common_tags
+    )
     aggregator.assert_metric('snmp.mcafee.mwg.stTimeForTransaction', metric_type=aggregator.COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-         ['mcafee_mwg_st_category_name:driving their forward'],
-         ['mcafee_mwg_st_category_name:kept forward zombies their Jaded oxen'],
-
+        ['mcafee_mwg_st_category_name:driving their forward'],
+        ['mcafee_mwg_st_category_name:kept forward zombies their Jaded oxen'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.mcafee.mwg.stCategoryCount', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.mcafee.mwg.stCategoryCount', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+        )
 
     # --- TEST METADATA ---
     device = {
