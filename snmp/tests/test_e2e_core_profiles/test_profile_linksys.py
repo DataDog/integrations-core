@@ -36,8 +36,6 @@ def test_e2e_profile_linksys(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-
-
     # --- TEST METADATA ---
     device = {
         'description': 'linksys Device Description',
