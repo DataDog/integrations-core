@@ -244,3 +244,15 @@ def assert_extend_generic_ups(aggregator, common_tags):
     """
     # fmt: on
     aggregator.assert_metric('snmp.upsSecondsOnBattery', metric_type=aggregator.GAUGE, tags=common_tags)
+
+
+def assert_extend_juniper_cos(aggregator, common_tags):
+    # fmt: off
+    """Add the following to the snmprec
+1.3.6.1.4.1.2636.3.15.9.1.2.170|4|jnxCosIfsetDescr value1
+1.3.6.1.4.1.2636.3.15.10.1.3.170.25|70|12770856836917969245
+1.3.6.1.4.1.2636.3.15.10.1.2.170.25|2|25
+    """
+    # fmt: on
+    tags = ['interface:jnxCosIfsetDescr value1', 'queue_number:25'] + common_tags
+    aggregator.assert_metric('snmp.jnxCosIfsetQstatQedPkts', metric_type=aggregator.GAUGE, tags=tags)

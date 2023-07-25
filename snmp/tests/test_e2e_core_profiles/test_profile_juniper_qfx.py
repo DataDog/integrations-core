@@ -14,7 +14,7 @@ from .utils import (
     assert_extend_generic_host_resources,
     assert_extend_generic_if,
     assert_extend_generic_ospf,
-    # assert_extend_juniper_cos,
+    assert_extend_juniper_cos,
     # assert_extend_juniper_dcu,
     # assert_extend_juniper_firewall,
     # assert_extend_juniper_virtualchassis,
@@ -42,7 +42,7 @@ def test_e2e_profile_juniper_qfx(dd_agent_check):
     assert_extend_generic_host_resources(aggregator, common_tags)
     assert_extend_generic_if(aggregator, common_tags)
     assert_extend_generic_ospf(aggregator, common_tags)
-    # assert_extend_juniper_cos(aggregator, common_tags)
+    assert_extend_juniper_cos(aggregator, common_tags)
     # assert_extend_juniper_dcu(aggregator, common_tags)
     # assert_extend_juniper_firewall(aggregator, common_tags)
     # assert_extend_juniper_virtualchassis(aggregator, common_tags)
