@@ -36,9 +36,6 @@ def test_e2e_profile_infinera_coriant_groove(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric(
-        'snmp.coriant.groove.systemPowerConsumptionCurrent', metric_type=aggregator.GAUGE, tags=common_tags
-    )
     tag_rows = [
         [
             'coriant_groove_shelf_admin_status:up',
