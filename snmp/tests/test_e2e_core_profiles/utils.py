@@ -255,4 +255,4 @@ def assert_extend_juniper_cos(aggregator, common_tags):
     """
     # fmt: on
     tags = ['interface:jnxCosIfsetDescr value1', 'queue_number:25'] + common_tags
-    aggregator.assert_metric('snmp.jnxCosIfsetQstatQedPkts', metric_type=aggregator.GAUGE, tags=tags)
+    aggregator.assert_metric('snmp.jnxCosIfsetQstatQedPkts', metric_type=aggregator.COUNT, tags=tags)
