@@ -15,6 +15,7 @@ extends:
   - _juniper-virtualchassis.yaml
   - _juniper-firewall.yaml
   - _juniper-junos-generic.yaml
+  - _juniper.yaml
 
 device:
   vendor: "juniper-networks"
