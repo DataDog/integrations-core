@@ -54,15 +54,15 @@ def test_e2e_profile_juniper_qfx(dd_agent_check):
 
     # --- TEST METADATA ---
     device = {
-        'description': 'None',
+        'description': 'juniper-qfx Device Description',
         'id': 'default:' + ip_address,
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
         'name': 'juniper-qfx.device.name',
         'profile': 'juniper-qfx',
         'status': 1,
-        'sys_object_id': 'None',
-        'vendor': 'juniper',
+        'sys_object_id': '1.3.6.1.4.1.2636.1.1.1.2.82',
+        'vendor': 'juniper-networks',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
