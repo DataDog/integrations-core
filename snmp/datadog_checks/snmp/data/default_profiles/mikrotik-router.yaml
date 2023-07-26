@@ -1,0 +1,118 @@
+extends:
+  - _base.yaml
+  - _generic-if.yaml
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "mikrotik"
+sysobjectid:
+  - 1.3.6.1.4.1.14988.1.*
+metrics:
+  - MIB: MIKROTIK-MIB
+    table:
+      OID: 1.3.6.1.4.1.14988.1.1.19.1
+      name: mtxrOpticalTable
+    symbols:
+      - OID: 1.3.6.1.4.1.14988.1.1.19.1.1.6
+        name: mikrotik.mtxrOpticalTemperature
+      - OID: 1.3.6.1.4.1.14988.1.1.19.1.1.10
+        name: mikrotik.mtxrOpticalRxPower
+      - OID: 1.3.6.1.4.1.14988.1.1.19.1.1.7
+        name: mikrotik.mtxrOpticalSupplyVoltage
+      - OID: 1.3.6.1.4.1.14988.1.1.19.1.1.8
+        name: mikrotik.mtxrOpticalTxBiasCurrent
+      - OID: 1.3.6.1.4.1.14988.1.1.19.1.1.5
+        name: mikrotik.mtxrOpticalWavelength
+      - OID: 1.3.6.1.4.1.14988.1.1.19.1.1.9
+        name: mikrotik.mtxrOpticalTxPower
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.14988.1.1.19.1.1.1
+          name: mikrotik.mtxrOpticalIndex
+        tag: mikrotik_mtxr_optical_index
+      - column:
+          OID: 1.3.6.1.4.1.14988.1.1.19.1.1.2
+          name: mikrotik.mtxrOpticalName
+        tag: mikrotik_mtxr_optical_name
+      - column:
+          OID: 1.3.6.1.4.1.14988.1.1.19.1.1.4
+          name: mikrotik.mtxrOpticalTxFault
+        tag: mikrotik_mtxr_optical_tx_fault
+        mapping:
+          0: 'false'
+          1: 'true'
+      - column:
+          OID: 1.3.6.1.4.1.14988.1.1.19.1.1.3
+          name: mikrotik.mtxrOpticalRxLoss
+        tag: mikrotik_mtxr_optical_rx_loss
+        mapping:
+          0: 'false'
+          1: 'true'
+  - MIB: MIKROTIK-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.14988.1.1.3.6
+      name: mikrotik.mtxrHlCpuTemperature
+  - MIB: MIKROTIK-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.14988.1.1.3.10
+      name: mikrotik.mtxrHlTemperature
+  - MIB: MIKROTIK-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.14988.1.1.3.8
+      name: mikrotik.mtxrHlVoltage
+  - MIB: MIKROTIK-MIB
+    table:
+      OID: 1.3.6.1.4.1.14988.1.1.15.1
+      name: mtxrPOETable
+    symbols:
+      - OID: 1.3.6.1.4.1.14988.1.1.15.1.1.6
+        name: mikrotik.mtxrPOEPower
+      - OID: 1.3.6.1.4.1.14988.1.1.15.1.1.4
+        name: mikrotik.mtxrPOEVoltage
+      - OID: 1.3.6.1.4.1.14988.1.1.15.1.1.5
+        name: mikrotik.mtxrPOECurrent
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.14988.1.1.15.1.1.1
+          name: mikrotik.mtxrPOEInterfaceIndex
+        tag: mikrotik_mtxr_poe_interface_index
+      - column:
+          OID: 1.3.6.1.4.1.14988.1.1.15.1.1.2
+          name: mikrotik.mtxrPOEName
+        tag: mikrotik_mtxr_poe_name
+      - column:
+          OID: 1.3.6.1.4.1.14988.1.1.15.1.1.3
+          name: mikrotik.mtxrPOEStatus
+        tag: mikrotik_mtxr_poe_status
+        mapping:
+          1: disabled
+          2: waiting_for_load
+          3: powered_on
+          4: overload
+#  - MIB: MIKROTIK-MIB
+#    symbol:
+#      OID: 1.3.6.1.4.1.14988.1.1.3.17
+#      name: mikrotik.mtxrHlFanSpeed1
+# string metric is not supported yet (keep this metric and this comment in profile until it's fixed)
+#  - MIB: MIKROTIK-MIB
+#    symbol:
+#      OID: 1.3.6.1.4.1.14988.1.1.3.18
+#      name: mikrotik.mtxrHlFanSpeed2
+# string metric is not supported yet (keep this metric and this comment in profile until it's fixed)
+  - MIB: HOST-RESOURCES-MIB
+    symbol:
+      OID: 1.3.6.1.2.1.25.3.3.1.2.1
+      name: cpu.usage
+  - MIB: HOST-RESOURCES-MIB
+    table:
+      OID: 1.3.6.1.2.1.25.2.3
+      name: hrStorageTable
+    symbols:
+      - OID: 1.3.6.1.2.1.25.2.3.1.5
+        name: memory.total
+      - OID: 1.3.6.1.2.1.25.2.3.1.6
+        name: memory.used
+    metric_tags:
+      - tag: mem
+        index: 1
