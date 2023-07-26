@@ -13,10 +13,12 @@ from six import itervalues
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
 from datadog_checks.vsphere.constants import (
+    ALL_PROPERTIES,
     ALL_RESOURCES,
     MAX_QUERY_METRICS_OPTION,
+    MOR_TYPE_AS_STRING,
+    PROPERTIES_BY_RESOURCE_TYPE,
     UNLIMITED_HIST_METRICS_PER_QUERY,
-    VM_PROPERTIES,
 )
 from datadog_checks.vsphere.event import ALLOWED_EVENTS
 from datadog_checks.vsphere.types import InfrastructureData
@@ -189,9 +191,11 @@ class VSphereAPI(object):
                 property_spec.pathSet.append("runtime.powerState")
                 property_spec.pathSet.append("runtime.host")
                 property_spec.pathSet.append("guest.hostName")
-                if self.config.collect_property_metrics:
-                    for vm_property in VM_PROPERTIES:
-                        property_spec.pathSet.append(vm_property)
+
+            if self.config.collect_property_metrics:
+                properties = PROPERTIES_BY_RESOURCE_TYPE.get(MOR_TYPE_AS_STRING.get(resource), [])
+                for property in properties:
+                    property_spec.pathSet.append(property)
 
             property_specs.append(property_spec)
 
@@ -285,7 +289,7 @@ class VSphereAPI(object):
                 mor_attributes = []
                 if self.config.collect_property_metrics:
                     all_properties = {}
-                    for attribute_name in VM_PROPERTIES:
+                    for attribute_name in ALL_PROPERTIES:
                         attribute_val = props.pop(attribute_name, None)
                         if attribute_val is not None:
                             all_properties[attribute_name] = attribute_val
