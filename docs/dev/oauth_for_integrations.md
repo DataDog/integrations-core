@@ -63,7 +63,7 @@ The client is the component of an application that enables users to authorize th
 
 Once you have implemented the OAuth protocol, you should test your OAuth client to ensure that you can send data into Datadog, or pull data out, according to your use case. 
 
-**Note**: Until your OAuth client is published, you can only authorize the client from your sandbox organization. This means that you can only send data into or pull data out of your sandbox account until the client is published. 
+**Note**: Until your integration tile is published, you can only authorize the OAuth client from your sandbox organization. This means that you can only send data into or pull data out of your sandbox account. 
 
 To test your OAuth client, complete the following steps:
 
