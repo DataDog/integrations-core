@@ -98,10 +98,13 @@ class VSphereConfig(object):
         # Utility
         if self.collection_type == 'both':
             self.collected_resource_types = ALL_RESOURCES_WITH_METRICS
+            self.collected_metric_types = ['realtime', 'historical']
         elif self.collection_type == 'historical':
             self.collected_resource_types = RESOURCES_WITH_HISTORICAL_METRICS
+            self.collected_metric_types = ['historical']
         else:
             self.collected_resource_types = RESOURCES_WITH_REALTIME_METRICS
+            self.collected_metric_types = ['realtime']
 
         # Filters
         self.resource_filters = self._parse_resource_filters(instance.get("resource_filters", []))

@@ -8,7 +8,6 @@ import logging
 from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
-from itertools import chain
 from typing import Any, Callable, Dict, Generator, Iterable, List, Optional, Set, Type, cast  # noqa: F401
 
 from pyVmomi import vim, vmodl
@@ -475,50 +474,38 @@ class VSphereCheck(AgentCheck):
         server_current_time = self.api.get_current_time()
         self.log.debug("Server current datetime: %s", server_current_time)
         for resource_type in self._config.collected_resource_types:
-            mors = self.infrastructure_cache.get_mors(resource_type)
-            counters = self.metrics_metadata_cache.get_metadata(resource_type)
-            historical_metric_ids = []  # type: List[vim.PerformanceManager.MetricId]
-            realtime_metric_ids = []  # type: List[vim.PerformanceManager.MetricId]
-            for counter_key, metric_name in iteritems(counters):
-                # PerformanceManager.MetricId `instance` kwarg:
-                # - An asterisk (*) to specify all instances of the metric for the specified counterId
-                # - Double-quotes ("") to specify aggregated statistics
-                # More info https://code.vmware.com/apis/704/vsphere/vim.PerformanceManager.MetricId.html
-                if should_collect_per_instance_values(self._config, metric_name, resource_type):
-                    instance = "*"
-                else:
-                    instance = ''
-
-                if metric_name in ALLOWED_METRICS_FOR_MOR[resource_type]['historical']:
-                    historical_metric_ids.append(
-                        vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance)
-                    )
-                else:
-                    realtime_metric_ids.append(
-                        vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance)
-                    )
-            historical_metrics = self.make_batch(mors, historical_metric_ids, resource_type, is_historical=True)
-            realtime_metrics = self.make_batch(mors, realtime_metric_ids, resource_type)
-            all_metrics = chain(historical_metrics, realtime_metrics)
-            historical_metric_ids = [metric.counterId for metric in historical_metric_ids]
-            for batch in all_metrics:
-                query_specs = []
-                for mor, metrics in iteritems(batch):
-                    query_spec = vim.PerformanceManager.QuerySpec()  # type: vim.PerformanceManager.QuerySpec
-                    query_spec.entity = mor
-                    query_spec.metricId = metrics
-                    is_historical = False
-                    for metric_id in metrics:
-                        if metric_id.counterId in historical_metric_ids:
-                            is_historical = True
-                    if is_historical:
-                        query_spec.startTime = server_current_time - dt.timedelta(hours=2)
+            for metric_type in self._config.collected_metric_types:
+                mors = self.infrastructure_cache.get_mors(resource_type)
+                counters = self.metrics_metadata_cache.get_metadata(resource_type)
+                metric_ids = []  # type: List[vim.PerformanceManager.MetricId]
+                is_historical = metric_type == 'historical'
+                for counter_key, metric_name in iteritems(counters):
+                    # PerformanceManager.MetricId `instance` kwarg:
+                    # - An asterisk (*) to specify all instances of the metric for the specified counterId
+                    # - Double-quotes ("") to specify aggregated statistics
+                    # More info https://code.vmware.com/apis/704/vsphere/vim.PerformanceManager.MetricId.html
+                    if should_collect_per_instance_values(self._config, metric_name, resource_type):
+                        instance = "*"
                     else:
-                        query_spec.intervalId = REALTIME_METRICS_INTERVAL_ID
-                        query_spec.maxSample = 1  # Request a single datapoint
-                    query_specs.append(query_spec)
-                if query_specs:
-                    yield query_specs
+                        instance = ''
+
+                    if metric_name in ALLOWED_METRICS_FOR_MOR[resource_type][metric_type]:
+                        metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance))
+
+                for batch in self.make_batch(mors, metric_ids, resource_type, is_historical=is_historical):
+                    query_specs = []
+                    for mor, metrics in iteritems(batch):
+                        query_spec = vim.PerformanceManager.QuerySpec()  # type: vim.PerformanceManager.QuerySpec
+                        query_spec.entity = mor
+                        query_spec.metricId = metrics
+                        if is_historical:
+                            query_spec.startTime = server_current_time - dt.timedelta(hours=2)
+                        else:
+                            query_spec.intervalId = REALTIME_METRICS_INTERVAL_ID
+                            query_spec.maxSample = 1  # Request a single datapoint
+                        query_specs.append(query_spec)
+                    if query_specs:
+                        yield query_specs
 
     def collect_metrics_async(self):
         # type: () -> None
