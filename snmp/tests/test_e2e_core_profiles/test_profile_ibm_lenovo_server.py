@@ -31,8 +31,8 @@ def test_e2e_profile_ibm_lenovo_server(dd_agent_check):
         'device_namespace:default',
         'snmp_device:' + ip_address,
     ] + [
-        'ibm_machine_level_product_name:Jaded acted their but acted kept driving ' 'Jaded Jaded',
-        'ibm_machine_level_serial_number:driving quaintly quaintly but driving',
+        'ibm_imm_machine_level_product_name:Jaded acted their but acted kept driving ' 'Jaded Jaded',
+        'ibm_imm_machine_level_serial_number:driving quaintly quaintly but driving',
     ]
 
     # --- TEST EXTENDED METRICS ---
@@ -44,77 +44,82 @@ def test_e2e_profile_ibm_lenovo_server(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     tag_rows = [
-        ['ibm_temp_descr:acted oxen oxen their but', 'ibm_temp_health_status:but quaintly forward'],
-        ['ibm_temp_descr:quaintly acted kept', 'ibm_temp_health_status:acted quaintly acted zombies'],
+        ['ibm_imm_temp_descr:acted oxen oxen their but', 'ibm_imm_temp_health_status:but quaintly forward'],
+        ['ibm_imm_temp_descr:quaintly acted kept', 'ibm_imm_temp_health_status:acted quaintly acted zombies'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ibm.tempReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ibm.imm.tempReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['ibm_volt_descr:kept Jaded quaintly kept their', 'ibm_volt_health_status:quaintly Jaded zombies oxen'],
-        ['ibm_volt_descr:zombies acted their their', 'ibm_volt_health_status:acted forward kept forward'],
+        ['ibm_imm_volt_descr:kept Jaded quaintly kept their', 'ibm_imm_volt_health_status:quaintly Jaded zombies oxen'],
+        ['ibm_imm_volt_descr:zombies acted their their', 'ibm_imm_volt_health_status:acted forward kept forward'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ibm.voltReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ibm.imm.voltReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['ibm_fan_descr:kept but quaintly acted Jaded', 'ibm_fan_health_status:acted acted forward acted'],
-        ['ibm_fan_descr:their but quaintly oxen', 'ibm_fan_health_status:kept'],
+        ['ibm_imm_fan_descr:kept but quaintly acted Jaded', 'ibm_imm_fan_health_status:acted acted forward acted'],
+        ['ibm_imm_fan_descr:their but quaintly oxen', 'ibm_imm_fan_health_status:kept'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ibm.fanSpeed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ibm.imm.fanSpeed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         [
-            'ibm_system_health_summary_description:acted Jaded their quaintly zombies but oxen',
-            'ibm_system_health_summary_severity:Jaded',
+            'ibm_imm_system_health_summary_description:acted Jaded their quaintly zombies but oxen',
+            'ibm_imm_system_health_summary_severity:Jaded',
         ],
         [
-            'ibm_system_health_summary_description:driving driving acted but',
-            'ibm_system_health_summary_severity:oxen Jaded',
+            'ibm_imm_system_health_summary_description:driving driving acted but',
+            'ibm_imm_system_health_summary_severity:oxen Jaded',
         ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.ibm.systemHealthSummary', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.ibm.imm.systemHealthSummary', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     tag_rows = [
         [
-            'ibm_cpu_vpd_description:Jaded driving',
-            'ibm_cpu_vpd_health_status:driving driving their kept quaintly driving their but kept',
+            'ibm_imm_cpu_vpd_description:Jaded driving',
+            'ibm_imm_cpu_vpd_health_status:driving driving their kept quaintly driving their but kept',
         ],
-        ['ibm_cpu_vpd_description:their quaintly', 'ibm_cpu_vpd_health_status:acted driving kept zombies driving kept'],
+        [
+            'ibm_imm_cpu_vpd_description:their quaintly',
+            'ibm_imm_cpu_vpd_health_status:acted driving kept zombies driving kept',
+        ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ibm.systemCPUVpd', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ibm.imm.systemCPUVpd', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         [
-            'ibm_memory_health_status:but acted',
-            'ibm_memory_vpd_description:quaintly acted forward quaintly their zombies',
+            'ibm_imm_memory_health_status:but acted',
+            'ibm_imm_memory_vpd_description:quaintly acted forward quaintly their zombies',
         ],
         [
-            'ibm_memory_health_status:their kept quaintly Jaded kept',
-            'ibm_memory_vpd_description:their Jaded acted their their',
+            'ibm_imm_memory_health_status:their kept quaintly Jaded kept',
+            'ibm_imm_memory_vpd_description:their Jaded acted their their',
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ibm.systemMemoryVpd', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.ibm.imm.systemMemoryVpd', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
-        ['ibm_power_fru_name:driving driving', 'ibm_power_health_status:but forward but their but'],
-        ['ibm_power_fru_name:forward', 'ibm_power_health_status:Jaded'],
+        ['ibm_imm_power_fru_name:driving driving', 'ibm_imm_power_health_status:but forward but their but'],
+        ['ibm_imm_power_fru_name:forward', 'ibm_imm_power_health_status:Jaded'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ibm.power', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ibm.imm.power', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['ibm_disk_fru_name:acted Jaded', 'ibm_disk_health_status:driving driving zombies Jaded'],
-        ['ibm_disk_fru_name:oxen', 'ibm_disk_health_status:forward'],
+        ['ibm_imm_disk_fru_name:acted Jaded', 'ibm_imm_disk_health_status:driving driving zombies Jaded'],
+        ['ibm_imm_disk_fru_name:oxen', 'ibm_imm_disk_health_status:forward'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ibm.disk', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.ibm.imm.disk', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
