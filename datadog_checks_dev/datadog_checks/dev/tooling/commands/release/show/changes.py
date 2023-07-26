@@ -4,7 +4,6 @@
 import os
 
 import click
-import os
 
 from .....fs import stream_file_lines
 from ....constants import get_root
