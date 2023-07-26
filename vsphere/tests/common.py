@@ -808,6 +808,23 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     ),
                 ],
             ),
+            vim.ObjectContent(
+                obj=vim.Datastore(moId="ds1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='ds1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.freeSpace',
+                        val=305,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='summary.capacity',
+                        val=100,
+                    ),
+                ],
+            ),
         ],
     )
 )
