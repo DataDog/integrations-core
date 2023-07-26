@@ -135,7 +135,7 @@ The DCGM exporter can quickly be installed in a Kubernetes environment using the
 ```bash
 helm repo add gpu-helm-charts https://nvidia.github.io/dcgm-exporter/helm-charts && helm repo update
 ```
-2. Create a `ConfigMap` holding the Datadog-recommended metrics from [Installation](#Installation), as well as the `RoleBinding` and `Role` used by the DCGM pods to retrieve the `ConfigMap` using the manifest below :
+2. Create a `ConfigMap` containing the Datadog-recommended metrics from [Installation](#Installation), as well as the `RoleBinding` and `Role` used by the DCGM pods to retrieve the `ConfigMap` using the manifest below :
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
