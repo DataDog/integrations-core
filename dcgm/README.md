@@ -209,7 +209,7 @@ helm install dcgm-datadog gpu-helm-charts/dcgm-exporter -n default -f dcgm-value
 The DCGM exporter can be installed in a Kubernetes environment by using NVIDIA GPU Operator. The instructions below are derived from the template provided by NVIDIA [here](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html).
 
 1. Add the NVIDIA GPU Operator Helm repository and ensure it is up-to-date :
-```bash
+   ```bash
 helm repo add nvidia https://helm.ngc.nvidia.com/nvidia && helm repo update
 ```
 2. Follow the [Custom Metrics Config](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#custom-metrics-config) instructions with the CSV from [Installation](#installation) :
