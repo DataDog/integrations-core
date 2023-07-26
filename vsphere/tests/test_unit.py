@@ -2725,6 +2725,7 @@ def test_cluster_property_metrics(aggregator, historical_instance, dd_run_check,
     )
     aggregator.assert_metric('vsphere.cluster.configuration.drsConfig.vmotionRate', count=1, value=2, tags=base_tags)
 
+
 def test_property_metrics_filtered(
     aggregator,
     realtime_instance,
