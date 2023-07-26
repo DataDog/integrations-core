@@ -27,6 +27,7 @@ from datadog_checks.vsphere.constants import (
     EXTRA_FILTER_PROPERTIES_FOR_VMS,
     MOR_TYPE_AS_STRING,
 )
+from datadog_checks.vsphere.metrics import RESOURCES_WITH_HISTORICAL_METRICS, RESOURCES_WITH_REALTIME_METRICS
 from datadog_checks.vsphere.resource_filters import ResourceFilter, create_resource_filter  # noqa: F401
 from datadog_checks.vsphere.types import (  # noqa: F401
     InstanceConfig,
@@ -34,7 +35,6 @@ from datadog_checks.vsphere.types import (  # noqa: F401
     MetricFilters,
     ResourceFilterConfig,
 )
-from datadog_checks.vsphere.metrics import RESOURCES_WITH_HISTORICAL_METRICS, RESOURCES_WITH_REALTIME_METRICS
 
 
 class VSphereConfig(object):
