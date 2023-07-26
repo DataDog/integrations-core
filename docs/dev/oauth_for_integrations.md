@@ -60,29 +60,30 @@ The client is the component of an application that enables users to authorize th
    For more information about implementing the OAuth protocol with Datadog, see [Datadog OAuth2][1]. For more information about building and publishing an integration, see the [Integrations developer documentation][5].
 
 ### Test the OAuth client
-Once you have implemented the OAuth protocol, you should test your OAuth client to ensure that you can send data into Datadog and/or pull data out according to your use case. 
 
-**Note**: Until your OAuth client is published, you will only be able to authorize the client from your sandbox organization. That means you will only be able to send data into/pull data out of your sandbox account until the client is published. 
+Once you have implemented the OAuth protocol, you should test your OAuth client to ensure that you can send data into Datadog, or pull data out, according to your use case. 
 
-To test your OAuth client, it's recommended to completing the following:
+**Note**: Until your OAuth client is published, you can only authorize the client from your sandbox organization. This means that you can only send data into or pull data out of your sandbox account until the client is published. 
+
+To test your OAuth client, complete the following steps:
 
 #### Test that authorization is working properly
 Ensure that you do not hit any errors when going through the basic authorization flow. 
 
-   1. Navigate to the Developer Platform, click edit on your app, and open the **OAuth and Permissions** tab. 
+   1. Navigate to the Developer Platform, click the Edit icon on your app, and open the **OAuth and Permissions** tab. 
    2. Select your OAuth client, and click the  **Test Authorization** button on your client's details page.
-   3. This directs you to the onboarding URL and starts the authorization flow that a customer takes. By clicking this button, the `domain` parameter will be provided on redirect to the `onboarding_url`. 
+   3. This directs you to the onboarding URL and starts the authorization flow that a customer takes. By clicking this button, the `domain` parameter is provided on the redirect to the `onboarding_url`. 
    4. Go through the OAuth flow and authorize your integration.
 
 #### Create an API Key
-If your OAuth client requests the api_keys_write scope, ensure that you can successfully make a request to the `marketplace_create_api` endpoint with your token in the headers of the request. 
+If your OAuth client requests the `api_keys_write` scope, ensure that you can successfully make a request to the `marketplace_create_api` endpoint with your token in the headers of the request. 
 
 If successful, this request returns an API key that you can find on the [API Keys Management page][12]. You must securely save this key to use it for submitting data into Datadog on behalf of the user. **You cannot access this API key value again after the initial request response**.
 
 #### Test multiple Datadog sites
 Test that your OAuth client can work across multiple [Datadog sites][8] by kicking off authorization from your EU Datadog sandbox organization.
    1. If you do not have access to a sandbox account on a different site, contact `ecosystems@datadog.com`. 
-   2. Export your app manifest from the organization in the *original* US1 Datadog site by navigating to the app you've created in the Developer Platform, clicking the gear icon on the top right, and clicking **Export App Manifest**. 
+   2. Export your app manifest from the organization in the *original* US1 Datadog site by navigating to the app you've created in the Developer Platform, clicking the Gear icon to the right of **Documentation**, and clicking **Export App Manifest**. 
    3. In your EU sandbox organization, navigate to the Developer Platform and import your app manifest from Step 2.
    4. After successfully importing your manifest, navigate to the **OAuth & Permissions** tab to find your OAuth client, along with its client ID and client secret. Update your OAuth implementation to use these credentials. 
    5. Navigate to the **Test Authorization** button, click it, and go through the OAuth flow. 
@@ -95,7 +96,7 @@ Ensure that you are able to send data in, pull data out, or edit data for each s
 #### Create or update your pull request
 In order to publish an OAuth client, you first need to open a pull request for your integration in either the [`integrations-extras`][5] or [Marketplace][6] GitHub repositories if you haven't already. 
 
-As a part of your pull request, please do the following:
+As a part of your pull request, complete the following steps:
 
 1. Update your README file with an `## Uninstallation` section under `## Setup` that includes the following instructions (along with any custom instructions you would like to add):
        - Once this integration has been uninstalled, any previous authorizations are revoked. 
@@ -109,7 +110,7 @@ As a part of your pull request, please do the following:
 #### Initiate publishing process in Developer Platform
 To start the publishing process in the [Developer Platform][4]:
 
-1. Navigate to the **Publishing** tab under **General**. In Step 1 of the publishing flow, you receive your published client ID and secret. The OAuth implementation will need to be updated to include these new client credentials. **Important**: Save your client ID and client secret in a secure location. This information will not be shown again.
+1. Navigate to the **Publishing** tab under **General**. In Step 1 of the publishing flow, you receive your published client ID and secret. The OAuth implementation needs to be updated to include these client credentials. **Note:** Save your client ID and client secret in a secure location. This information is not shown again.
 
 2. In Step 2, you can enter additional information about your integration and see the published `app_uuid` to use below.
 
@@ -117,7 +118,7 @@ To start the publishing process in the [Developer Platform][4]:
 
 Once an OAuth client is submitted for publishing, the team is notified. When your pull request is approved by all required parties and is ready to be merged, at that point your OAuth client gets published as well. Your integration tile is then published to your sandbox account (_not_ for all customers), and your OAuth client can then be authorized by any Datadog organization (not only your Sandbox organization).
 
-At this point, we recommend doing final testing with your OAuth client to ensure authorization is working smoothly. 
+At this point, Datadog recommends doing final testing with your OAuth client to ensure authorization is working smoothly. 
 
 #### Making changes after submitting your client for publishing
 
