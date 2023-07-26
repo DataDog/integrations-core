@@ -278,7 +278,7 @@ vsphere.vm.guest.net,count,300,,,"Number of network adapters on this guest OS. T
 vsphere.vm.guest.toolsVersion,count,300,,,"Information about the current version of VMware Tools, tagged by `toolsversion`.",0,vsphere,vm tools version,
 vsphere.vm.guest.toolsRunningStatus,count,300,,,"Information about the current status of VMware Tools, tagged by `toolsstatus`.",0,vsphere,vm tools status,
 vsphere.vm.guest.toolsVersionStatus2,count,300,,,"Information about the current version status of VMware Tools, tagged by `toolsversionstatus2`.",0,vsphere,vm tools version status,
-vsphere.vm.config.hardware.numCoresPerSocket,gauge,300,,,Number of cores used to distribute virtual CPUs among sockets in this virtual machine. If the value is unset it implies to numCoresPerSocket = 1.",0,vsphere,vm num cores,
+vsphere.vm.config.hardware.numCoresPerSocket,gauge,300,,,"Number of cores used to distribute virtual CPUs among sockets in this virtual machine. If the value is unset it implies to numCoresPerSocket = 1.",0,vsphere,vm num cores,
 vsphere.vm.summary.config.memorySizeMB,gauge,300,megabyte,,"Memory size of the virtual machine, in MB.",0,vsphere,vm memory size,
 vsphere.vm.summary.config.numCpu,gauge,300,,,"Number of processors present in this virtual machine.",0,vsphere,vm num cpu,
 vsphere.vm.summary.config.numEthernetCards,gauge,300,,,Number of virtual network adapters.,0,vsphere,vm ethernet cards,
