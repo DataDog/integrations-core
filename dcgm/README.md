@@ -213,7 +213,7 @@ The DCGM exporter can be installed in a Kubernetes environment by using NVIDIA G
 helm repo add nvidia https://helm.ngc.nvidia.com/nvidia && helm repo update
 ```
 2. Follow the [Custom Metrics Config](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#custom-metrics-config) instructions with the CSV from [Installation](#installation) :
-    * Fetch the metrics file and save as dcgm-metrics.csv : `curl https://raw.githubusercontent.com/NVIDIA/dcgm-exporter/main/etc/dcp-metrics-included.csv > dcgm-metrics.csv`
+    * Fetch the metrics file and save as `dcgm-metrics.csv`: `curl https://raw.githubusercontent.com/NVIDIA/dcgm-exporter/main/etc/dcp-metrics-included.csv > dcgm-metrics.csv`
     * Edit the metrics file by replacing its content with the Datadog-provided mapping.
     * Create a namespace `gpu-operator` if one is not already present : `kubectl create namespace gpu-operator`.
     * Create a ConfigMap using the file edited above : `kubectl create configmap metrics-config -n gpu-operator --from-file=dcgm-metrics.csv`
