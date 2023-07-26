@@ -183,7 +183,7 @@ labels:
 <!-- xxz tab xxx -->
 <!-- xxx tab "Kubernetes" xxx -->
 
-This example demonstrates the complete configuration leveraging the three different APIs described in the previous sections as Kubernetes annotation on your Torchserve pods:
+This example demonstrates the complete configuration leveraging the three different APIs described in the previous sections as Kubernetes annotations on your Torchserve pods:
 
 ```yaml
 apiVersion: v1
