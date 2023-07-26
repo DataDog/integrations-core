@@ -60,7 +60,7 @@ psutil==5.9.0
 psycopg2-binary==2.8.6; sys_platform != 'darwin' or platform_machine != 'arm64'
 pyasn1==0.4.6
 pycryptodomex==3.10.1
-pydantic==2.0; python_version > '3.0'
+pydantic==2.1.1; python_version > '3.0'
 pyjwt==1.7.1; python_version < '3.0'
 pyjwt==2.7.0; python_version > '3.0'
 pymongo[srv]==4.3.3; python_version >= '3.8'
