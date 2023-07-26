@@ -129,7 +129,7 @@ sudo docker run --pid=host --privileged -e DCGM_EXPORTER_INTERVAL=3 --gpus all -
 
 #### Kubernetes (DCGM exporter Helm chart)
 
-The DCGM exporter can quickly be installed in a Kubernetes environment using NVIDIA DCGM Exporter Helm chart. The instructions below are derived from the template provided by NVIDIA [here](https://github.com/NVIDIA/dcgm-exporter#quickstart-on-kubernetes).
+The DCGM exporter can quickly be installed in a Kubernetes environment using the NVIDIA DCGM Exporter Helm chart. The instructions below are derived from the template provided by NVIDIA [here](https://github.com/NVIDIA/dcgm-exporter#quickstart-on-kubernetes).
 
 1. Add the NVIDIA DCGM Exporter Helm repository and ensure it is up-to-date :
 ```bash
