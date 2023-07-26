@@ -5,7 +5,7 @@
 ***Fixed***:
 
 * test
-  * test
+  * testing
 
 ## 4.2.2 / 2023-07-10
 
