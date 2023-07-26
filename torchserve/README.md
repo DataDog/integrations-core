@@ -173,7 +173,7 @@ instances:
 <!-- xxz tab xxx -->
 <!-- xxx tab "Docker" xxx -->
 
-This example demonstrates the complete configuration leveraging the three different APIs described in the previous sections as a Docker label inside a `docker-compose.yml`:
+This example demonstrates the complete configuration leveraging the three different APIs described in the previous sections as a Docker label inside `docker-compose.yml`:
 
 ```yaml
 labels:
