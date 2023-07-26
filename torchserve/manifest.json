@@ -47,6 +47,9 @@
     },
     "logs": {
       "source": "torchserve"
+    },
+    "dashboards": {
+      "torchserve_overview": "assets/dashboards/overview.json"
     }
   },
   "author": {
