@@ -220,7 +220,12 @@ class VSphereCheck(AgentCheck):
             hostname=self._hostname,
         )
         self.log.debug("Infrastructure cache refreshed in %.3f seconds.", t0.total())
-        self.log.debug("Infrastructure cache: %s", infrastructure_data)
+
+        # When collecting property metrics, there are pyVmomi objects in the cache at this point
+        if collect_property_metrics:
+            self.log.trace("Infrastructure cache with properties: %s", infrastructure_data)
+        else:
+            self.log.debug("Infrastructure cache: %s", infrastructure_data)
 
         all_tags = {}
         if self._config.should_collect_tags:

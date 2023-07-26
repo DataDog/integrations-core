@@ -6,54 +6,54 @@ sysobjectid:
 metrics:
   - MIB: SENTRY3-MIB
     symbol:
-      name: sentry3.systemTotalPower
+      name: servertech.sentry3.systemTotalPower
       OID: 1.3.6.1.4.1.1718.3.1.6.0
   - MIB: SENTRY3-MIB
     symbol:
-      name: sentry3.systemConfigModifiedCount
+      name: servertech.sentry3.systemConfigModifiedCount
       OID: 1.3.6.1.4.1.1718.3.1.15.0
   - MIB: SENTRY3-MIB
     table:
       name: towerTable
       OID: 1.3.6.1.4.1.1718.3.2.1
     symbols:
-      - name: sentry3.towerInfeedCount
+      - name: servertech.sentry3.towerInfeedCount
         OID: 1.3.6.1.4.1.1718.3.2.1.1.5
-      - name: sentry3.towerVACapacity
+      - name: servertech.sentry3.towerVACapacity
         OID: 1.3.6.1.4.1.1718.3.2.1.1.9
-      - name: sentry3.towerVACapacityUsed
+      - name: servertech.sentry3.towerVACapacityUsed
         OID: 1.3.6.1.4.1.1718.3.2.1.1.10
-      - name: sentry3.towerActivePower
+      - name: servertech.sentry3.towerActivePower
         OID: 1.3.6.1.4.1.1718.3.2.1.1.11
-      - name: sentry3.towerApparentPower
+      - name: servertech.sentry3.towerApparentPower
         OID: 1.3.6.1.4.1.1718.3.2.1.1.12
-      - name: sentry3.towerPowerFactor
+      - name: servertech.sentry3.towerPowerFactor
         OID: 1.3.6.1.4.1.1718.3.2.1.1.13
-      - name: sentry3.towerEnergy
+      - name: servertech.sentry3.towerEnergy
         OID: 1.3.6.1.4.1.1718.3.2.1.1.14
-      - name: sentry3.towerLineFrequency
+      - name: servertech.sentry3.towerLineFrequency
         OID: 1.3.6.1.4.1.1718.3.2.1.1.15
     metric_tags:
       - column:
-          name: sentry3.towerID
+          name: servertech.sentry3.towerID
           OID: 1.3.6.1.4.1.1718.3.2.1.1.2
-        tag: sentry3_tower_id
+        tag: servertech_sentry3_tower_id
       - column:
-          name: sentry3.towerName
+          name: servertech.sentry3.towerName
           OID: 1.3.6.1.4.1.1718.3.2.1.1.3
-        tag: sentry3_tower_name
+        tag: servertech_sentry3_tower_name
       - column:
-          name: sentry3.towerProductSN
+          name: servertech.sentry3.towerProductSN
           OID: 1.3.6.1.4.1.1718.3.2.1.1.6
-        tag: sentry3_tower_product_sn
+        tag: servertech_sentry3_tower_product_sn
       - column:
-          name: sentry3.towerModelNumber
+          name: servertech.sentry3.towerModelNumber
           OID: 1.3.6.1.4.1.1718.3.2.1.1.7
-        tag: sentry3_tower_model_number
+        tag: servertech_sentry3_tower_model_number
       - column:
           OID: 1.3.6.1.4.1.1718.3.2.1.1.4
-          name: sentry3.towerStatus
-        tag: sentry3_tower_status
+          name: servertech.sentry3.towerStatus
+        tag: servertech_sentry3_tower_status
         mapping:
           0: normal
           1: no_comm
@@ -66,49 +66,49 @@ metrics:
       name: infeedTable
       OID: 1.3.6.1.4.1.1718.3.2.2
     symbols:
-      - name: sentry3.infeedLoadValue
+      - name: servertech.sentry3.infeedLoadValue
         OID: 1.3.6.1.4.1.1718.3.2.2.1.7
-      - name: sentry3.infeedOutletCount
+      - name: servertech.sentry3.infeedOutletCount
         OID: 1.3.6.1.4.1.1718.3.2.2.1.9
-      - name: sentry3.infeedCapacity
+      - name: servertech.sentry3.infeedCapacity
         OID: 1.3.6.1.4.1.1718.3.2.2.1.10
-      - name: sentry3.infeedVoltage
+      - name: servertech.sentry3.infeedVoltage
         OID: 1.3.6.1.4.1.1718.3.2.2.1.11
-      - name: sentry3.infeedPower
+      - name: servertech.sentry3.infeedPower
         OID: 1.3.6.1.4.1.1718.3.2.2.1.12
-      - name: sentry3.infeedEnergy
+      - name: servertech.sentry3.infeedEnergy
         OID: 1.3.6.1.4.1.1718.3.2.2.1.16
-      - name: sentry3.infeedPhaseVoltage
+      - name: servertech.sentry3.infeedPhaseVoltage
         OID: 1.3.6.1.4.1.1718.3.2.2.1.18
-      - name: sentry3.infeedPhaseCurrent
+      - name: servertech.sentry3.infeedPhaseCurrent
         OID: 1.3.6.1.4.1.1718.3.2.2.1.19
-      - name: sentry3.infeedCapacityUsed
+      - name: servertech.sentry3.infeedCapacityUsed
         OID: 1.3.6.1.4.1.1718.3.2.2.1.20
     metric_tags:
       - column:
-          name: sentry3.infeedID
+          name: servertech.sentry3.infeedID
           OID: 1.3.6.1.4.1.1718.3.2.2.1.2
-        tag: sentry3_infeed_id
+        tag: servertech_sentry3_infeed_id
       - column:
-          name: sentry3.infeedName
+          name: servertech.sentry3.infeedName
           OID: 1.3.6.1.4.1.1718.3.2.2.1.3
-        tag: sentry3_infeed_name
+        tag: servertech_sentry3_infeed_name
       - column:
-          name: sentry3.infeedLineID
+          name: servertech.sentry3.infeedLineID
           OID: 1.3.6.1.4.1.1718.3.2.2.1.21
-        tag: sentry3_infeed_line_id
+        tag: servertech_sentry3_infeed_line_id
       - column:
-          name: sentry3.infeedLineToLineID
+          name: servertech.sentry3.infeedLineToLineID
           OID: 1.3.6.1.4.1.1718.3.2.2.1.22
-        tag: sentry3_infeed_line_to_line_id
+        tag: servertech_sentry3_infeed_line_to_line_id
       - column:
-          name: sentry3.infeedPhaseID
+          name: servertech.sentry3.infeedPhaseID
           OID: 1.3.6.1.4.1.1718.3.2.2.1.23
-        tag: sentry3_infeed_phase_id
+        tag: servertech_sentry3_infeed_phase_id
       - column:
           OID: 1.3.6.1.4.1.1718.3.2.2.1.5
-          name: sentry3.infeedStatus
-        tag: sentry3_infeed_status
+          name: servertech.sentry3.infeedStatus
+        tag: servertech_sentry3_infeed_status
         mapping:
           0: off
           1: on
@@ -122,8 +122,8 @@ metrics:
           9: on_fuse
       - column:
           OID: 1.3.6.1.4.1.1718.3.2.2.1.6
-          name: sentry3.infeedLoadStatus
-        tag: sentry3_infeed_load_status
+          name: servertech.sentry3.infeedLoadStatus
+        tag: servertech_sentry3_infeed_load_status
         mapping:
           0: normal
           1: not_on
@@ -135,8 +135,8 @@ metrics:
           7: no_comm
       - column:
           OID: 1.3.6.1.4.1.1718.3.2.2.1.17
-          name: sentry3.infeedReactance
-        tag: sentry3_infeed_reactance
+          name: servertech.sentry3.infeedReactance
+        tag: servertech_sentry3_infeed_reactance
         mapping:
           0: unknown
           1: capacitive
@@ -147,21 +147,21 @@ metrics:
       name: outletTable
       OID: 1.3.6.1.4.1.1718.3.2.3
     symbols:
-      - name: sentry3.outlet
+      - name: servertech.sentry3.outlet
         constant_value_one: true
     metric_tags:
       - column:
-          name: sentry3.outletID
+          name: servertech.sentry3.outletID
           OID: 1.3.6.1.4.1.1718.3.2.3.1.2
-        tag: sentry3_outlet_id
+        tag: servertech_sentry3_outlet_id
       - column:
-          name: sentry3.outletName
+          name: servertech.sentry3.outletName
           OID: 1.3.6.1.4.1.1718.3.2.3.1.3
-        tag: sentry3_outlet_name
+        tag: servertech_sentry3_outlet_name
       - column:
           OID: 1.3.6.1.4.1.1718.3.2.3.1.5
-          name: sentry3.outletStatus
-        tag: sentry3_outlet_status
+          name: servertech.sentry3.outletStatus
+        tag: servertech_sentry3_outlet_status
         mapping:
           0: off
           1: on
@@ -175,8 +175,8 @@ metrics:
           9: on_fuse
       - column:
           OID: 1.3.6.1.4.1.1718.3.2.3.1.10
-          name: sentry3.outletControlState
-        tag: sentry3_outlet_control_state
+          name: servertech.sentry3.outletControlState
+        tag: servertech_sentry3_outlet_control_state
         mapping:
           0: idle_off
           1: idle_on
@@ -198,8 +198,8 @@ metrics:
           17: event_shutdown
       - column:
           OID: 1.3.6.1.4.1.1718.3.2.3.1.19
-          name: sentry3.outletWakeupState
-        tag: sentry3_outlet_wakeup_state
+          name: servertech.sentry3.outletWakeupState
+        tag: servertech_sentry3_outlet_wakeup_state
         mapping:
           1: last
           2: off
@@ -209,21 +209,21 @@ metrics:
       name: envMonTable
       OID: 1.3.6.1.4.1.1718.3.2.4
     symbols:
-      - name: sentry3.envMon
+      - name: servertech.sentry3.envMon
         constant_value_one: true
     metric_tags:
       - column:
-          name: sentry3.envMonID
+          name: servertech.sentry3.envMonID
           OID: 1.3.6.1.4.1.1718.3.2.4.1.2
-        tag: sentry3_env_mon_id
+        tag: servertech_sentry3_env_mon_id
       - column:
-          name: sentry3.envMonName
+          name: servertech.sentry3.envMonName
           OID: 1.3.6.1.4.1.1718.3.2.4.1.3
-        tag: sentry3_env_mon_name
+        tag: servertech_sentry3_env_mon_name
       - column:
           OID: 1.3.6.1.4.1.1718.3.2.4.1.4
-          name: sentry3.envMonStatus
-        tag: sentry3_env_mon_status
+          name: servertech.sentry3.envMonStatus
+        tag: servertech_sentry3_env_mon_status
         mapping:
           0: normal
           1: no_comm
@@ -232,23 +232,23 @@ metrics:
       name: tempHumidSensorTable
       OID: 1.3.6.1.4.1.1718.3.2.5
     symbols:
-      - name: sentry3.tempHumidSensorTempValue
+      - name: servertech.sentry3.tempHumidSensorTempValue
         OID: 1.3.6.1.4.1.1718.3.2.5.1.6
-      - name: sentry3.tempHumidSensorHumidValue
+      - name: servertech.sentry3.tempHumidSensorHumidValue
         OID: 1.3.6.1.4.1.1718.3.2.5.1.10
     metric_tags:
       - column:
-          name: sentry3.tempHumidSensorID
+          name: servertech.sentry3.tempHumidSensorID
           OID: 1.3.6.1.4.1.1718.3.2.5.1.2
-        tag: sentry3_temp_humid_sensor_id
+        tag: servertech_sentry3_temp_humid_sensor_id
       - column:
-          name: sentry3.tempHumidSensorName
+          name: servertech.sentry3.tempHumidSensorName
           OID: 1.3.6.1.4.1.1718.3.2.5.1.3
-        tag: sentry3_temp_humid_sensor_name
+        tag: servertech_sentry3_temp_humid_sensor_name
       - column:
           OID: 1.3.6.1.4.1.1718.3.2.5.1.4
-          name: sentry3.tempHumidSensorStatus
-        tag: sentry3_temp_humid_sensor_status
+          name: servertech.sentry3.tempHumidSensorStatus
+        tag: servertech_sentry3_temp_humid_sensor_status
         mapping:
           0: found
           1: not_found
@@ -256,8 +256,8 @@ metrics:
           3: no_comm
       - column:
           OID: 1.3.6.1.4.1.1718.3.2.5.1.5
-          name: sentry3.tempHumidSensorTempStatus
-        tag: sentry3_temp_humid_sensor_temp_status
+          name: servertech.sentry3.tempHumidSensorTempStatus
+        tag: servertech_sentry3_temp_humid_sensor_temp_status
         mapping:
           0: normal
           1: not_found
@@ -269,8 +269,8 @@ metrics:
           7: no_comm
       - column:
           OID: 1.3.6.1.4.1.1718.3.2.5.1.9
-          name: sentry3.tempHumidSensorHumidStatus
-        tag: sentry3_temp_humid_sensor_humid_status
+          name: servertech.sentry3.tempHumidSensorHumidStatus
+        tag: servertech_sentry3_temp_humid_sensor_humid_status
         mapping:
           0: normal
           1: not_found
@@ -282,15 +282,15 @@ metrics:
           7: no_comm
       - column:
           OID: 1.3.6.1.4.1.1718.3.2.5.1.13
-          name: sentry3.tempHumidSensorTempScale
-        tag: sentry3_temp_humid_sensor_temp_scale
+          name: servertech.sentry3.tempHumidSensorTempScale
+        tag: servertech_sentry3_temp_humid_sensor_temp_scale
         mapping:
           0: celsius
           1: fahrenheit
 metric_tags:
   - OID: 1.3.6.1.4.1.1718.3.1.1.0
     symbol: systemVersion
-    tag: sentry3_system_version
+    tag: servertech_sentry3_system_version
   - OID: 1.3.6.1.4.1.1718.3.1.2.0
     symbol: systemNICSerialNumber
-    tag: sentry3_system_nic_serial_number
+    tag: servertech_sentry3_system_nic_serial_number
