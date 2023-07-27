@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 from typing_extensions import Literal
@@ -22,26 +22,29 @@ from . import defaults, validators
 
 class Filters(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    id: Optional[Sequence[int]] = None
-    source: Optional[Sequence[str]] = None
+    id: Optional[tuple[int, ...]] = None
+    source: Optional[tuple[str, ...]] = None
     type: Optional[
-        Sequence[Literal['success', 'error', 'warning', 'information', 'success audit', 'failure audit']]
+        tuple[Literal['success', 'error', 'warning', 'information', 'success audit', 'failure audit'], ...]
     ] = None
 
 
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    exclude: Optional[Sequence[str]] = None
-    include: Optional[Sequence[str]] = None
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     auth_type: Optional[Literal['default', 'negotiate', 'kerberos', 'ntlm']] = None
@@ -49,17 +52,17 @@ class InstanceConfig(BaseModel):
     disable_generic_tags: Optional[bool] = None
     domain: Optional[str] = None
     empty_default_hostname: Optional[bool] = None
-    event_format: Optional[Sequence[str]] = None
-    event_id: Optional[Sequence[str]] = None
+    event_format: Optional[tuple[str, ...]] = None
+    event_id: Optional[tuple[str, ...]] = None
     event_priority: Optional[Literal['normal', 'low']] = None
-    excluded_messages: Optional[Sequence[str]] = None
+    excluded_messages: Optional[tuple[str, ...]] = None
     filters: Optional[Filters] = None
     host: Optional[str] = None
-    included_messages: Optional[Sequence[str]] = None
+    included_messages: Optional[tuple[str, ...]] = None
     interpret_messages: Optional[bool] = None
     legacy_mode: Optional[bool] = None
-    log_file: Optional[Sequence[str]] = None
-    message_filters: Optional[Sequence[str]] = None
+    log_file: Optional[tuple[str, ...]] = None
+    message_filters: Optional[tuple[str, ...]] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     password: Optional[str] = None
@@ -68,13 +71,13 @@ class InstanceConfig(BaseModel):
     query: Optional[str] = None
     server: Optional[str] = None
     service: Optional[str] = None
-    source_name: Optional[Sequence[str]] = None
+    source_name: Optional[tuple[str, ...]] = None
     start: Optional[Literal['now', 'oldest']] = None
     tag_event_id: Optional[bool] = None
     tag_sid: Optional[bool] = None
-    tags: Optional[Sequence[str]] = None
+    tags: Optional[tuple[str, ...]] = None
     timeout: Optional[float] = None
-    type: Optional[Sequence[str]] = None
+    type: Optional[tuple[str, ...]] = None
     user: Optional[str] = None
 
     @model_validator(mode='before')
@@ -82,25 +85,14 @@ class InstanceConfig(BaseModel):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
     @field_validator('*', mode='before')
-    def _ensure_defaults(cls, value, info):
+    def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
-            return value
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{info.field_name}', lambda: value)()
-
-    @field_validator('*')
-    def _run_validations(cls, value, info):
-        field = cls.model_fields[info.field_name]
-        field_name = field.alias or info.field_name
-        if field_name not in info.context['configured_fields']:
-            return value
-
-        return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-
-    @field_validator('*', mode='after')
-    def _make_immutable(cls, value):
         return validation.utils.make_immutable(value)
 
     @model_validator(mode='after')

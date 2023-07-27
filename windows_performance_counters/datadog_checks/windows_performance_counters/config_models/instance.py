@@ -9,7 +9,8 @@
 
 from __future__ import annotations
 
-from typing import Mapping, Optional, Sequence, Union
+from types import MappingProxyType
+from typing import Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from typing_extensions import Literal
@@ -22,6 +23,7 @@ from . import defaults, validators
 
 class Counter(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         extra='allow',
         frozen=True,
     )
@@ -34,6 +36,7 @@ class Counter(BaseModel):
 
 class InstanceCounts(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     monitored: Optional[str] = None
@@ -43,11 +46,12 @@ class InstanceCounts(BaseModel):
 
 class ExtraMetrics(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    counters: Sequence[Mapping[str, Union[str, Counter]]]
-    exclude: Optional[Sequence[str]] = None
-    include: Optional[Sequence[str]] = None
+    counters: tuple[MappingProxyType[str, Union[str, Counter]], ...]
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
     instance_counts: Optional[InstanceCounts] = None
     name: str
     tag_name: Optional[str] = None
@@ -56,19 +60,21 @@ class ExtraMetrics(BaseModel):
 
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    exclude: Optional[Sequence[str]] = None
-    include: Optional[Sequence[str]] = None
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class Metrics(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    counters: Sequence[Mapping[str, Union[str, Counter]]]
-    exclude: Optional[Sequence[str]] = None
-    include: Optional[Sequence[str]] = None
+    counters: tuple[MappingProxyType[str, Union[str, Counter]], ...]
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
     instance_counts: Optional[InstanceCounts] = None
     name: str
     tag_name: Optional[str] = None
@@ -78,21 +84,22 @@ class Metrics(BaseModel):
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_health_service_check: Optional[bool] = None
-    extra_metrics: Optional[Mapping[str, ExtraMetrics]] = None
+    extra_metrics: Optional[MappingProxyType[str, ExtraMetrics]] = None
     metric_patterns: Optional[MetricPatterns] = None
-    metrics: Mapping[str, Metrics]
+    metrics: MappingProxyType[str, Metrics]
     min_collection_interval: Optional[float] = None
     namespace: Optional[str] = Field(None, pattern='\\w*')
     password: Optional[str] = None
     server: Optional[str] = None
     server_tag: Optional[str] = None
     service: Optional[str] = None
-    tags: Optional[Sequence[str]] = None
+    tags: Optional[tuple[str, ...]] = None
     use_legacy_check_version: Optional[bool] = None
     username: Optional[str] = None
 
@@ -101,25 +108,14 @@ class InstanceConfig(BaseModel):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
     @field_validator('*', mode='before')
-    def _ensure_defaults(cls, value, info):
+    def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
-            return value
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{info.field_name}', lambda: value)()
-
-    @field_validator('*')
-    def _run_validations(cls, value, info):
-        field = cls.model_fields[info.field_name]
-        field_name = field.alias or info.field_name
-        if field_name not in info.context['configured_fields']:
-            return value
-
-        return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-
-    @field_validator('*', mode='after')
-    def _make_immutable(cls, value):
         return validation.utils.make_immutable(value)
 
     @model_validator(mode='after')

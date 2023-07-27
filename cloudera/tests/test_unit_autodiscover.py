@@ -22,11 +22,11 @@ pytestmark = [pytest.mark.unit]
     'instance, read_clusters, expected_exception, expected_can_connects, expected_cluster_healths, expected_metrics',
     [
         (
-            {'api_url': 'http://localhost:8080/api/v48/', 'clusters': {'include': {'^cluster.*'}}},
+            {'api_url': 'http://localhost:8080/api/v48/', 'clusters': {'include': 9000}},
             [],
             pytest.raises(
                 Exception,
-                match=re.escape('clusters -> include\n  Input should be an instance of Sequence'),
+                match=re.escape('clusters -> include\n  Input should be a valid tuple'),
             ),
             [
                 {
@@ -40,11 +40,11 @@ pytestmark = [pytest.mark.unit]
             [{'count': 0}],
         ),
         (
-            {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag'], 'clusters': {'include': {'^cluster.*'}}},
+            {'api_url': 'http://localhost:8080/api/v48/', 'tags': ['new_tag'], 'clusters': {'include': 9000}},
             [],
             pytest.raises(
                 Exception,
-                match=re.escape('clusters -> include\n  Input should be an instance of Sequence'),
+                match=re.escape('clusters -> include\n  Input should be a valid tuple'),
             ),
             [
                 {
@@ -65,8 +65,8 @@ pytestmark = [pytest.mark.unit]
                 match=re.escape(
                     'clusters -> include -> 1 -> str\n'
                     '  Input should be a valid string\n'
-                    'clusters -> include -> 1 -> dict[str,any]\n'
-                    '  Input should be a valid dictionary'
+                    'clusters -> include -> 1 -> is-instance[mappingproxy]\n'
+                    '  Input should be an instance of mappingproxy'
                 ),
             ),
             [
@@ -88,8 +88,8 @@ pytestmark = [pytest.mark.unit]
                 match=re.escape(
                     'clusters -> include -> 1 -> str\n'
                     '  Input should be a valid string\n'
-                    'clusters -> include -> 1 -> dict[str,any]\n'
-                    '  Input should be a valid dictionary'
+                    'clusters -> include -> 1 -> is-instance[mappingproxy]\n'
+                    '  Input should be an instance of mappingproxy'
                 ),
             ),
             [
