@@ -17,23 +17,43 @@ All steps below are needed for the Airflow integration to work properly. Before 
 
 ```yaml
    dogstatsd_mapper_profiles:
-     - name: airbyte
-       prefix: "airbyte."
+     - name: airbyte_worker
+       prefix: "worker."
        mappings:
-         - match: "temporal_workflow_*"
-           name: "airbyte.temporal_workflow.$1"
-         - match: "state_commit_*"
-           name: "airbyte.state_commit.$1"
-         - match: "job_*"
-           name: "airbyte.job.$1"
-         - match: "activity_*"
-           name: "airbyte.activity.$1"
-         - match: "attempt_*"
-           name: "airbyte.attempt.$1"
-         - match: "cron_*"
+         - match: "worker.temporal_workflow_*"
+           name: "airbyte.worker.temporal_workflow.$1"
+         - match: "worker.worker_*"
+           name: "airbyte.worker.$1"
+         - match: "worker.state_commit_*"
+           name: "airbyte.worker.state_commit.$1"
+         - match: "worker.job_*"
+           name: "airbyte.worker.job.$1"
+         - match: "worker.attempt_*"
+           name: "airbyte.worker.attempt.$1"
+         - match: "worker.activity_*"
+           name: "airbyte.worker.activity.$1"
+         - match: "*"
            name: "airbyte.$1"
-         - match: "worker_*"
+     - name: airbyte_cron
+       prefix: "cron."
+       mappings:
+         - match: "cron.cron_jobs_run"
+           name: "airbyte.cron.jobs_run"
+         - match: "*"
            name: "airbyte.$1"
+     - name: airbyte_metrics_reporter
+       prefix: "metrics_reporter."
+       mappings:
+         - match: "*"
+           name: "airbyte.$1"
+     - name: airbyte_orchestrator
+       prefix: "orchestrator."
+       mappings:
+         - match: "*"
+           name: "airbyte.$1"
+     - name: airbyte_server
+       prefix: "server."
+       mappings:
          - match: "*"
            name: "airbyte.$1"
 ```
