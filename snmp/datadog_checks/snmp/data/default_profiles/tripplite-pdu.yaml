@@ -208,3 +208,4 @@ metrics:
         tag: tlp_alarm_acknowledged
         mapping:
           1: not_acknowledged
+          2: acknowledged
