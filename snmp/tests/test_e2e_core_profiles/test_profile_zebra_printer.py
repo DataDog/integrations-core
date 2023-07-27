@@ -53,12 +53,12 @@ def test_e2e_profile_zebra_printer(dd_agent_check):
         'ip_address': '' + ip_address,
         'model': 'ZT410',
         'name': 'zebra-printer.device.name',
-        'os_version': 'P430i V2.00.00',
+        'os_version': '6.7',
         'profile': 'zebra-printer',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.10642.1.1',
         'vendor': 'zebra',
-        'version': '6.7',
+        'version': 'P430i V2.00.00',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
