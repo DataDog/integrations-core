@@ -1,15 +1,10 @@
 extends:
   - _base.yaml
   - _generic-if.yaml
+  - ubiquiti.yaml
 
 sysobjectid:
   - 1.3.6.1.4.1.41112  # Ubiquiti Networks, Inc.
-
-metadata:
-  device:
-    fields:
-      vendor:
-        value: "ubiquiti"
 
 metrics:
   - MIB: FROGFOOT-RESOURCES-MIB
