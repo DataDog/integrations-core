@@ -2,10 +2,8 @@
 
 [[envs.default.matrix]]
 python = ["2.7", "3.9"]
-version = ["7.9", "8.5", "9.3"]
-
-# You can use M1 env if you want to run on M1 processor machine
-# version = ["7.9", "8.5", "9.3", "M1"]
+# You can only use 9.9 on M1s
+version = ["7.9", "8.5", "9.9"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
@@ -13,13 +11,10 @@ matrix.version.env-vars = [
   { key = "DOCKERFILE_VERSION", value = "7.x", if = ["7.9"] },
 
   { key = "SONARQUBE_VERSION", value = "8.5", if = ["8.5"] },
-  { key = "DOCKERFILE_VERSION", value = "8+", if = ["8.5"] },
+  { key = "DOCKERFILE_VERSION", value = "8.x", if = ["8.5"] },
 
-  { key = "SONARQUBE_VERSION", value = "9.3", if = ["9.3"] },
-  { key = "DOCKERFILE_VERSION", value = "8+", if = ["9.3"] },
-
-  { key = "SONARQUBE_VERSION", value = "9.3", if = ["M1"] },
-  { key = "DOCKERFILE_VERSION", value = "M1", if = ["M1"] },
+  { key = "SONARQUBE_VERSION", value = "9.9.0", if = ["9.9"] },
+  { key = "DOCKERFILE_VERSION", value = "9.x", if = ["9.9"] },
 ]
 
 [envs.default.env-vars]

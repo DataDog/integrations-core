@@ -13,7 +13,6 @@ from datadog_checks.sonarqube import SonarqubeCheck
 
 from . import common
 
-
 @pytest.fixture(scope='session')
 def dd_environment():
     compose_file = os.path.join(common.HERE, 'docker', common.COMPOSE_FILE)
@@ -23,18 +22,20 @@ def dd_environment():
         project_dir = os.path.join(temp_dir, 'project')
         if not os.path.isdir(project_dir):
             shutil.copytree(os.path.join(common.HERE, 'docker', 'project'), project_dir)
+
         with docker_run(
-            compose_file,
-            env_vars={'PROJECT_DIR': project_dir},
-            conditions=[
-                CheckDockerLogs('sonarqube', ['SonarQube is up'], attempts=100, wait=3),
-                CheckDockerLogs('sonar-scanner', ['ANALYSIS SUCCESSFUL'], attempts=100, wait=3),
-                CheckDockerLogs(
-                    'sonarqube', ['Executed task | project=org.sonarqube:sonarqube-scanner'], attempts=100, wait=3
-                ),
-            ],
-            mount_logs=True,
-            sleep=10,
+                compose_file,
+                env_vars={'PROJECT_DIR': project_dir},
+                build=True,
+                conditions=[
+                    CheckDockerLogs('sonarqube', ['SonarQube is (operational|up)'], attempts=100, wait=3),
+                    CheckDockerLogs('sonar-scanner', ['ANALYSIS SUCCESSFUL'], attempts=100, wait=3),
+                    CheckDockerLogs(
+                        'sonarqube', ['Executed task | project=org.sonarqube:sonarqube-scanner'], attempts=100, wait=3
+                    ),
+                ],
+                mount_logs=True,
+                sleep=10,
         ):
             yield common.CHECK_CONFIG, {'use_jmx': True}
 
