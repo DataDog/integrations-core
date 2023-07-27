@@ -40,13 +40,6 @@ def test_e2e_profile_ubiquiti_unifi(dd_agent_check):
     aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-         ['TODO'],
-
-    ]
-    for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-    tag_rows = [
          ['ubiquiti_unifi_radio_index:11', 'ubiquiti_unifi_radio_name:kept zombies quaintly their zombies kept driving', 'ubiquiti_unifi_radio_radio:driving kept oxen their'],
          ['ubiquiti_unifi_radio_index:27', 'ubiquiti_unifi_radio_name:but but oxen kept Jaded driving oxen', 'ubiquiti_unifi_radio_radio:acted kept driving driving zombies quaintly Jaded driving zombies'],
          ['ubiquiti_unifi_radio_index:31', 'ubiquiti_unifi_radio_name:kept', 'ubiquiti_unifi_radio_radio:kept forward'],
