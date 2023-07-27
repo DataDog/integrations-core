@@ -120,9 +120,9 @@ To configure the exporter in a Docker environment:
 
 1. Create the file `$PWD/default-counters.csv` which contains the default fields from NVIDIA `etc/default-counters.csv` as well as additional Datadog-recommended fields. To add more fields for collection, follow [these instructions][9]. For the complete list of fields, see the [DCGM API reference manual][10].
 2. Run the Docker container using the following command:
-```
-sudo docker run --pid=host --privileged -e DCGM_EXPORTER_INTERVAL=3 --gpus all -d -v /proc:/proc -v $PWD/default-counters.csv:/etc/dcgm-exporter/default-counters.csv -p 9400:9400 --name dcgm-exporter nvcr.io/nvidia/k8s/dcgm-exporter:3.1.7-3.1.4-ubuntu20.04
-```
+   ```
+   sudo docker run --pid=host --privileged -e DCGM_EXPORTER_INTERVAL=3 --gpus all -d -v /proc:/proc -v $PWD/default-counters.csv:/etc/dcgm-exporter/default-counters.csv -p 9400:9400 --name dcgm-exporter nvcr.io/nvidia/k8s/dcgm-exporter:3.1.7-3.1.4-ubuntu20.04
+   ```
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Kubernetes" xxx -->
@@ -132,72 +132,71 @@ sudo docker run --pid=host --privileged -e DCGM_EXPORTER_INTERVAL=3 --gpus all -
 The DCGM exporter can quickly be installed in a Kubernetes environment using the NVIDIA DCGM Exporter Helm chart. The instructions below are derived from the template provided by NVIDIA [here](https://github.com/NVIDIA/dcgm-exporter#quickstart-on-kubernetes).
 
 1. Add the NVIDIA DCGM Exporter Helm repository and ensure it is up-to-date :
-```bash
-helm repo add gpu-helm-charts https://nvidia.github.io/dcgm-exporter/helm-charts && helm repo update
-```
+   ```bash
+   helm repo add gpu-helm-charts https://nvidia.github.io/dcgm-exporter/helm-charts && helm repo update
+   ```
 2. Create a `ConfigMap` containing the Datadog-recommended metrics from [Installation](#Installation), as well as the `RoleBinding` and `Role` used by the DCGM pods to retrieve the `ConfigMap` using the manifest below :
-```yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: dcgm-exporter-read-datadog-cm
-  namespace: default
-rules:
-- apiGroups: [""]
-  resources: ["configmaps"]
-  resourceNames: ["datadog-dcgm-exporter-configmap"]
-  verbs: ["get"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: dcgm-exporter-datadog
-  namespace: default
-subjects:
-- kind: ServiceAccount
-  name: dcgm-datadog-dcgm-exporter
-  namespace: default
-roleRef:
-  kind: Role 
-  name: dcgm-exporter-read-datadog-cm
-  apiGroup: rbac.authorization.k8s.io
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: datadog-dcgm-exporter-configmap
-  namespace: default
-data:
-  metrics: |
-      # Copy the content from the Installation section.
-```
+   ```yaml
+   apiVersion: rbac.authorization.k8s.io/v1
+   kind: Role
+   metadata:
+     name: dcgm-exporter-read-datadog-cm
+     namespace: default
+   rules:
+   - apiGroups: [""]
+     resources: ["configmaps"]
+     resourceNames: ["datadog-dcgm-exporter-configmap"]
+     verbs: ["get"]
+   ---
+   apiVersion: rbac.authorization.k8s.io/v1
+   kind: RoleBinding
+   metadata:
+     name: dcgm-exporter-datadog
+     namespace: default
+   subjects:
+   - kind: ServiceAccount
+     name: dcgm-datadog-dcgm-exporter
+     namespace: default
+   roleRef:
+     kind: Role 
+     name: dcgm-exporter-read-datadog-cm
+     apiGroup: rbac.authorization.k8s.io
+   ---
+   apiVersion: v1
+   kind: ConfigMap
+   metadata:
+     name: datadog-dcgm-exporter-configmap
+     namespace: default
+   data:
+     metrics: |
+         # Copy the content from the Installation section.
+   ```
 3. Create your DCGM Exporter Helm chart `dcgm-values.yaml` with the following content : 
-```yaml
-# Exposing more metrics than the default for additional monitoring - this requires the use of a dedicated ConfigMap for which the Kubernetes ServiceAccount used by the exporter has access thanks to step 1.
-# Ref: https://github.com/NVIDIA/dcgm-exporter/blob/e55ec750def325f9f1fdbd0a6f98c932672002e4/deployment/values.yaml#L38
-arguments: ["-m", "default:datadog-dcgm-exporter-configmap"]
+   ```yaml
+   # Exposing more metrics than the default for additional monitoring - this requires the use of a dedicated ConfigMap for which the Kubernetes ServiceAccount used by the exporter has access thanks to step 1.
+   # Ref: https://github.com/NVIDIA/dcgm-exporter/blob/e55ec750def325f9f1fdbd0a6f98c932672002e4/deployment/values.yaml#L38
+   arguments: ["-m", "default:datadog-dcgm-exporter-configmap"]
 
-# Datadog Autodiscovery V2 annotations
-podAnnotations:
-  ad.datadoghq.com/exporter.checks: |-
-    {
-      "dcgm": {
-        "instances": [
-          {
-            "openmetrics_endpoint": "http://%%host%%:9400/metrics"
-          }
-        ]
-      }
-    }
-
-# Optional - Disabling the ServiceMonitor which requires Prometheus CRD - can be re-enabled if Prometheus CRDs are installed in your cluster
-serviceMonitor:
-  enabled: false
-```
+   # Datadog Autodiscovery V2 annotations
+   podAnnotations:
+     ad.datadoghq.com/exporter.checks: |-
+       {
+         "dcgm": {
+           "instances": [
+             {
+               "openmetrics_endpoint": "http://%%host%%:9400/metrics"
+             }
+           ]
+         }
+       }
+   # Optional - Disabling the ServiceMonitor which requires Prometheus CRD - can be re-enabled if Prometheus CRDs are installed in your cluster
+   serviceMonitor:
+     enabled: false
+   ```
 4. Install the DCGM Exporter Helm chart in the `default` namespace with the following command, while being in the directory with your `dcgm-values.yaml` :
-```bash
-helm install dcgm-datadog gpu-helm-charts/dcgm-exporter -n default -f dcgm-values.yaml
-```
+   ```bash
+   helm install dcgm-datadog gpu-helm-charts/dcgm-exporter -n default -f dcgm-values.yaml
+   ```
 
 **Note**: You can modify the release name `dcgm-datadog` as well as the namespace, but you must modify accordingly the manifest from step 1.
 
@@ -210,47 +209,46 @@ The DCGM exporter can be installed in a Kubernetes environment by using NVIDIA G
 
 1. Add the NVIDIA GPU Operator Helm repository and ensure it is up-to-date :
    ```bash
-    helm repo add nvidia https://helm.ngc.nvidia.com/nvidia && helm repo update
-```
+   helm repo add nvidia https://helm.ngc.nvidia.com/nvidia && helm repo update
+   ```
 2. Follow the [Custom Metrics Config](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#custom-metrics-config) instructions with the CSV from [Installation](#installation) :
     * Fetch the metrics file and save as `dcgm-metrics.csv`: `curl https://raw.githubusercontent.com/NVIDIA/dcgm-exporter/main/etc/dcp-metrics-included.csv > dcgm-metrics.csv`
     * Edit the metrics file by replacing its content with the Datadog-provided mapping.
     * Create a namespace `gpu-operator` if one is not already present: `kubectl create namespace gpu-operator`.
     * Create a ConfigMap using the file edited above: `kubectl create configmap metrics-config -n gpu-operator --from-file=dcgm-metrics.csv`
 3. Create your GPU Operator Helm chart `dcgm-values.yaml` with the following content: 
-```yaml
-# Refer to NVIDIA documentation for the driver and toolkit for your GPU-enabled nodes - example below for Amazon Linux 2 g5.xlarge
-driver:
-  enabled: true
-toolkit:
-  version: v1.13.5-centos7
-# Using custom metrics configuration to collect recommended Datadog additional metrics - requires the creation of the metrics-config ConfigMap from the previous step
-# Ref: https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#custom-metrics-config
-dcgmExporter:
-  config:
-    name: metrics-config
-  env:
-  - name: DCGM_EXPORTER_COLLECTORS
-    value: /etc/dcgm-exporter/dcgm-metrics.csv
-
-# Adding Datadog autodiscovery V2 annotations
-daemonsets:
-  annotations:
-    ad.datadoghq.com/nvidia-dcgm-exporter.checks: |-
-      {
-        "dcgm": {
-          "instances": [
-            {
-              "openmetrics_endpoint": "http://%%host%%:9400/metrics"
-            }
-          ]
-        }
-      }
-```
+   ```yaml
+   # Refer to NVIDIA documentation for the driver and toolkit for your GPU-enabled nodes - example below for Amazon Linux 2 g5.xlarge
+   driver:
+     enabled: true
+   toolkit:
+     version: v1.13.5-centos7
+   # Using custom metrics configuration to collect recommended Datadog additional metrics - requires the creation of the metrics-config ConfigMap from the previous step
+   # Ref: https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#custom-metrics-config
+   dcgmExporter:
+     config:
+       name: metrics-config
+     env:
+     - name: DCGM_EXPORTER_COLLECTORS
+       value: /etc/dcgm-exporter/dcgm-metrics.csv
+   # Adding Datadog autodiscovery V2 annotations
+   daemonsets:
+     annotations:
+       ad.datadoghq.com/nvidia-dcgm-exporter.checks: |-
+         {
+           "dcgm": {
+             "instances": [
+               {
+                 "openmetrics_endpoint": "http://%%host%%:9400/metrics"
+               }
+             ]
+           }
+         }
+   ```
 4. Install the DCGM Exporter Helm chart in the `default` namespace with the following command, while being in the directory with your `dcgm-values.yaml`:
-```bash
-helm install datadog-dcgm-gpu-operator -n gpu-operator nvidia/gpu-operator -f dcgm-values.yaml
-```
+   ```bash
+   helm install datadog-dcgm-gpu-operator -n gpu-operator nvidia/gpu-operator -f dcgm-values.yaml
+   ```
 
 <!-- xxz tabs xxx -->
 
