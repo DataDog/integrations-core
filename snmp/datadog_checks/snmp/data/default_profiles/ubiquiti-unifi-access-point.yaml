@@ -1,10 +1,9 @@
 extends:
   - _base.yaml
   - _generic-if.yaml
-  - ubiquiti.yaml
 
 sysobjectid:
-  - 1.3.6.1.4.1.41112
+  - 1.3.6.1.4.1.41112  # Ubiquiti Networks, Inc.
 
 metadata:
   device:
@@ -45,29 +44,29 @@ metrics:
       name: unifiRadioTable
     symbols:
       - OID: 1.3.6.1.4.1.41112.1.6.1.1.1.4
-        name: unifiRadioRxPackets
+        name: ubiquiti.unifiRadioRxPackets
         metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.41112.1.6.1.1.1.5
-        name: unifiRadioTxPackets
+        name: ubiquiti.unifiRadioTxPackets
         metric_type: monotonic_count
       - OID: 1.3.6.1.4.1.41112.1.6.1.1.1.6
-        name: unifiRadioCuTotal
+        name: ubiquiti.unifiRadioCuTotal
       - OID: 1.3.6.1.4.1.41112.1.6.1.1.1.7
-        name: unifiRadioCuSelfRx
+        name: ubiquiti.unifiRadioCuSelfRx
       - OID: 1.3.6.1.4.1.41112.1.6.1.1.1.8
-        name: unifiRadioCuSelfTx
+        name: ubiquiti.unifiRadioCuSelfTx
       - OID: 1.3.6.1.4.1.41112.1.6.1.1.1.9
-        name: unifiRadioOtherBss
+        name: ubiquiti.unifiRadioOtherBss
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.41112.1.6.1.1.1.1
-          name: unifiRadioIndex
-        tag: unifi_radio_index
+          name: ubiquiti.unifiRadioIndex
+        tag: ubiquiti_unifi_radio_index
       - column:
           OID: 1.3.6.1.4.1.41112.1.6.1.1.1.2
-          name: unifiRadioName
-        tag: unifi_radio_name
+          name: ubiquiti.unifiRadioName
+        tag: ubiquiti_unifi_radio_name
       - column:
           OID: 1.3.6.1.4.1.41112.1.6.1.1.1.3
-          name: unifiRadioRadio
-        tag: unifi_radio_radio
+          name: ubiquiti.unifiRadioRadio
+        tag: ubiquiti_unifi_radio_radio
