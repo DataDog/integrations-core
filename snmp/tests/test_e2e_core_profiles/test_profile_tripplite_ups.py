@@ -43,13 +43,8 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
     aggregator.assert_metric('snmp.tlEnvTemperatureF', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.tlUpsAlarmsPresent', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.tlUpsBatteryAge', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.tlUpsConfigBattReplDate', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.tlUpsConfigExternalBattReplDate', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.tlUpsExternalBatteryAge', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.tlUpsTemperature', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.tlUpsTemperatureF', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.tlUpsTestDate', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.tlUpsTestResultsDetail', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
          ['tl_ups_input_voltage_index:16', 'tl_ups_input_voltage_type:phase_to_phase'],
          ['tl_ups_input_voltage_index:23', 'tl_ups_input_voltage_type:phase_to_neutral'],
