@@ -59,7 +59,8 @@ def test_e2e_profile_ixsystems_truenas(dd_agent_check):
     aggregator.assert_metric('snmp.freenas.zfsZilstatOps1sec', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.freenas.zfsZilstatOps5sec', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-         ['TODO'],
+         ['freenas_zpool_descr:Jaded Jaded'],
+         ['freenas_zpool_descr:quaintly Jaded oxen kept forward their their quaintly but'],
 
     ]
     for tag_row in tag_rows:
@@ -78,7 +79,8 @@ def test_e2e_profile_ixsystems_truenas(dd_agent_check):
         aggregator.assert_metric('snmp.freenas.zpoolWriteOps1sec', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['TODO'],
+         ['freenas_dataset_descr:quaintly driving quaintly zombies'],
+         ['freenas_dataset_descr:their forward'],
 
     ]
     for tag_row in tag_rows:
@@ -88,7 +90,8 @@ def test_e2e_profile_ixsystems_truenas(dd_agent_check):
         aggregator.assert_metric('snmp.freenas.datasetUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['TODO'],
+         ['freenas_zvol_descr:zombies Jaded kept'],
+         ['freenas_zvol_descr:zombies quaintly forward Jaded'],
 
     ]
     for tag_row in tag_rows:
