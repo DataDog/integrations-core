@@ -1,10 +1,8 @@
 # Agent Check: DCGM
 
-<div class="alert alert-info">
-Coming soon: This integration is included in the upcoming 7.47.0 release of the Datadog Agent.
-</div>
-
 ## Overview
+
+**Coming soon**: This integration is included in the upcoming 7.47.0 release of the Datadog Agent.
 
 This check submits metrics exposed by the [NVIDIA DCGM Exporter][16] in Datadog Agent format. For more information on NVIDIA Data Center GPU Manager (DCGM), see [NVIDIA DCGM][15].
 
