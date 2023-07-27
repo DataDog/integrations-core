@@ -131,19 +131,20 @@ def test_e2e_profile_tripplite_pdu(dd_agent_check):
 
     tag_rows = [
         [
+            'tlp_alarm_acknowledged:acknowledged',
+            'tlp_alarm_descr:1.3.6.1.3.143.120.207',
+            'tlp_alarm_detail:quaintly but oxen Jaded oxen acted quaintly acted',
+            'tlp_alarm_id:26514',
+            'tlp_alarm_state:inactive',
+            'tlp_alarm_time:384377879',
+        ],
+        [
             'tlp_alarm_acknowledged:not_acknowledged',
             'tlp_alarm_descr:1.3.6.1.3.191',
             'tlp_alarm_detail:forward zombies but Jaded acted oxen zombies zombies',
             'tlp_alarm_id:17623',
             'tlp_alarm_state:inactive',
             'tlp_alarm_time:265254086',
-        ],
-        [
-            'tlp_alarm_descr:1.3.6.1.3.143.120.207',
-            'tlp_alarm_detail:quaintly but oxen Jaded oxen acted quaintly acted',
-            'tlp_alarm_id:26514',
-            'tlp_alarm_state:inactive',
-            'tlp_alarm_time:384377879',
         ],
     ]
     for tag_row in tag_rows:
