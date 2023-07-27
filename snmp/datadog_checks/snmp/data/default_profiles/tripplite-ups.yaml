@@ -7,7 +7,7 @@ sysobjectid:
   - 1.3.6.1.4.1.850.1.4   # SMART500RT1U
 
 metrics:
-#  - MIB: TRIPPLITE-MIB
+#  - MIB: TRIPPLITE-12X
 #    symbol:
 #      OID: 1.3.6.1.4.1.850.100.1.12.1.0
 #      name: tlUpsMainOutletState
@@ -18,56 +18,55 @@ metrics:
 #        mixed: 3
 #      TODO: enum in scalar metric is not supported yet (keep this metric and this
 #        comment in profile until it's fixed)
-  - MIB: TRIPPLITE-MIB
+  - MIB: TRIPPLITE-12X
     symbol:
       OID: 1.3.6.1.4.1.850.100.1.13.1.0
       name: tlUpsTemperature
-  - MIB: TRIPPLITE-MIB
+  - MIB: TRIPPLITE-12X
     symbol:
       OID: 1.3.6.1.4.1.850.100.1.2.1.0
       name: tlUpsBatteryAge  # The age of the battery in years.
-  - MIB: TRIPPLITE-MIB
+  - MIB: TRIPPLITE-12X
     symbol:
       OID: 1.3.6.1.4.1.850.100.1.2.2.0
       name: tlUpsTemperatureF
-# TODO: tlUpsExternalBatteryAge is not present in TRIPPLITE-MIB we have
-#  - MIB: TRIPPLITE-MIB
-#    symbol:
-#      OID: 1.3.6.1.4.1.850.100.1.2.3.0
-#      name: tlUpsExternalBatteryAge  # The age of the battery in years.
-  - MIB: TRIPPLITE-MIB
+  - MIB: TRIPPLITE-12X
+    symbol:
+      OID: 1.3.6.1.4.1.850.100.1.2.3.0
+      name: tlUpsExternalBatteryAge  # The age of the battery in years.
+  - MIB: TRIPPLITE-12X
     symbol:
       OID: 1.3.6.1.4.1.850.100.1.6.1.0
       name: tlUpsAlarmsPresent
-#  - MIB: TRIPPLITE-MIB
+#  - MIB: TRIPPLITE-12X
 #    symbol:
 #      OID: 1.3.6.1.4.1.850.100.1.7.1.0
 #      name: tlUpsTestDate  # The date of the last self-test run on the ups, in the format YYYYMMDD.
 #    TODO: this is not a numerical value and possibly not suitable as global metric tags since it might have high cardinality
-#  - MIB: TRIPPLITE-MIB
+#  - MIB: TRIPPLITE-12X
 #    symbol:
 #      OID: 1.3.6.1.4.1.850.100.1.7.2.0
 #      name: tlUpsTestResultsDetail
 #    TODO: this is not a numerical value
-#  - MIB: TRIPPLITE-MIB
+#  - MIB: TRIPPLITE-12X
 #    symbol:
 #      OID: 1.3.6.1.4.1.850.100.1.9.1.0
 #      name: tlUpsConfigBattReplDate  # The date on which the battery was last replaced, in the format YYYYMMDD.
 #    TODO: this is not a numerical value and possibly not suitable as global metric tags since it might have high cardinality
-#  - MIB: TRIPPLITE-MIB
+#  - MIB: TRIPPLITE-12X
 #    symbol:
 #      OID: 1.3.6.1.4.1.850.100.1.9.5.0
 #      name: tlUpsConfigExternalBattReplDate  # The date on which the external battery was last replaced, in the format YYYYMMDD.
 #    TODO: this is not a numerical value and possibly not suitable as global metric tags since it might have high cardinality
-  - MIB: TRIPPLITE-MIB
+  - MIB: TRIPPLITE-12X
     symbol:
       OID: 1.3.6.1.4.1.850.101.1.1.1.0
       name: tlEnvTemperatureC
-  - MIB: TRIPPLITE-MIB
+  - MIB: TRIPPLITE-12X
     symbol:
       OID: 1.3.6.1.4.1.850.101.1.1.2.0
       name: tlEnvTemperatureF
-#  - MIB: TRIPPLITE-MIB
+#  - MIB: TRIPPLITE-12X
 #    symbol:
 #      OID: 1.3.6.1.4.1.850.101.1.1.5.0
 #      name: tlEnvTemperatureInAlarm
@@ -76,11 +75,11 @@ metrics:
 #        false: 2
 #      TODO: enum in scalar metric is not supported yet (keep this metric and this
 #        comment in profile until it's fixed)
-  - MIB: TRIPPLITE-MIB
+  - MIB: TRIPPLITE-12X
     symbol:
       OID: 1.3.6.1.4.1.850.101.1.2.1.0
       name: tlEnvHumidity
-#  - MIB: TRIPPLITE-MIB
+#  - MIB: TRIPPLITE-12X
 #    symbol:
 #      OID: 1.3.6.1.4.1.850.101.1.2.4.0
 #      name: tlEnvHumidityInAlarm
@@ -89,7 +88,7 @@ metrics:
 #        false: 2
 #      TODO: enum in scalar metric is not supported yet (keep this metric and this
 #        comment in profile until it's fixed)
-  - MIB: TRIPPLITE-MIB
+  - MIB: TRIPPLITE-12X
     table:
       OID: 1.3.6.1.4.1.850.100.1.3.2
       name: tlUpsInputVoltageTable
@@ -108,7 +107,7 @@ metrics:
         mapping:
           0: phase_to_neutral
           1: phase_to_phase
-  - MIB: TRIPPLITE-MIB
+  - MIB: TRIPPLITE-12X
     table:
       OID: 1.3.6.1.4.1.850.100.1.4.7
       name: tlUpsOutputCircuitTable
@@ -127,7 +126,7 @@ metrics:
         mapping:
           0: open
           1: closed
-  - MIB: TRIPPLITE-MIB
+  - MIB: TRIPPLITE-12X
     table:
       OID: 1.3.6.1.4.1.850.101.2.1
       name: tlEnvContactTable
@@ -153,7 +152,7 @@ metrics:
         mapping:
           0: normal
           1: alarm
-  - MIB: TRIPPLITE-MIB
+  - MIB: TRIPPLITE-12X
     table:
       OID: 1.3.6.1.4.1.850.100.1.10.2
       name: tlUpsOutletTable
