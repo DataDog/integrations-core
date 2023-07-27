@@ -1,10 +1,18 @@
 # Agent Check: Weaviate
 
+<div class="msgbox info">
+msgbox_info Coming soon: This integration is included in the upcoming 7.47.0 release of the Datadog Agent.
+</div>
+
+## Overview
+
 <div class="alert alert-info">
 Coming soon: This integration is included in the upcoming 7.47.0 release of the Datadog Agent.
 </div>
 
-## Overview
+<div class="msgbox info">
+msgbox_info inside overview Coming soon: This integration is included in the upcoming 7.47.0 release of the Datadog Agent.
+</div>
 
 This check monitors [Weaviate][1] through the Datadog Agent. For more information, see [Weaviate monitoring][10].
 
