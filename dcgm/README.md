@@ -1,4 +1,4 @@
-# Agent Check: DCGM Exporter
+# Agent Check: DCGM
 
 ## Overview
 
