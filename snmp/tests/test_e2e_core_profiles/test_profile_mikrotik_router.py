@@ -37,85 +37,66 @@ def test_e2e_profile_mikrotik_router(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.mikrotik.mtxrHlCpuTemperature', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.mikrotik.mtxrHlTemperature', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.mikrotik.mtxrHlVoltage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.mtxrHlCpuTemperature', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.mtxrHlTemperature', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.mtxrHlVoltage', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         [
-            'mikrotik_mtxr_optical_index:10',
-            'mikrotik_mtxr_optical_name:oxen acted',
-            'mikrotik_mtxr_optical_rx_loss:true',
-            'mikrotik_mtxr_optical_tx_fault:false',
+            'mtxr_optical_index:10',
+            'mtxr_optical_name:oxen acted',
+            'mtxr_optical_rx_loss:true',
+            'mtxr_optical_tx_fault:false',
+        ],
+        ['mtxr_optical_index:13', 'mtxr_optical_name:kept', 'mtxr_optical_rx_loss:true', 'mtxr_optical_tx_fault:true'],
+        [
+            'mtxr_optical_index:17',
+            'mtxr_optical_name:quaintly their Jaded kept quaintly quaintly acted',
+            'mtxr_optical_rx_loss:false',
+            'mtxr_optical_tx_fault:true',
         ],
         [
-            'mikrotik_mtxr_optical_index:13',
-            'mikrotik_mtxr_optical_name:kept',
-            'mikrotik_mtxr_optical_rx_loss:true',
-            'mikrotik_mtxr_optical_tx_fault:true',
-        ],
-        [
-            'mikrotik_mtxr_optical_index:17',
-            'mikrotik_mtxr_optical_name:quaintly their Jaded kept quaintly quaintly acted',
-            'mikrotik_mtxr_optical_rx_loss:false',
-            'mikrotik_mtxr_optical_tx_fault:true',
-        ],
-        [
-            'mikrotik_mtxr_optical_index:8',
-            'mikrotik_mtxr_optical_name:oxen acted',
-            'mikrotik_mtxr_optical_rx_loss:true',
-            'mikrotik_mtxr_optical_tx_fault:false',
+            'mtxr_optical_index:8',
+            'mtxr_optical_name:oxen acted',
+            'mtxr_optical_rx_loss:true',
+            'mtxr_optical_tx_fault:false',
         ],
     ]
     for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.mtxrOpticalRxPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.mikrotik.mtxrOpticalRxPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.mtxrOpticalSupplyVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.mikrotik.mtxrOpticalSupplyVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.mtxrOpticalTemperature', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.mikrotik.mtxrOpticalTemperature', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.mtxrOpticalTxBiasCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric(
-            'snmp.mikrotik.mtxrOpticalTxBiasCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.mikrotik.mtxrOpticalTxPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.mikrotik.mtxrOpticalWavelength', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.mtxrOpticalTxPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.mtxrOpticalWavelength', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         [
-            'mikrotik_mtxr_poe_interface_index:18',
-            'mikrotik_mtxr_poe_name:Jaded driving Jaded their kept driving oxen Jaded',
-            'mikrotik_mtxr_poe_status:overload',
+            'mtxr_poe_interface_index:18',
+            'mtxr_poe_name:Jaded driving Jaded their kept driving oxen Jaded',
+            'mtxr_poe_status:overload',
+        ],
+        ['mtxr_poe_interface_index:24', 'mtxr_poe_name:quaintly their acted', 'mtxr_poe_status:disabled'],
+        [
+            'mtxr_poe_interface_index:3',
+            'mtxr_poe_name:Jaded driving kept Jaded driving acted oxen',
+            'mtxr_poe_status:overload',
         ],
         [
-            'mikrotik_mtxr_poe_interface_index:24',
-            'mikrotik_mtxr_poe_name:quaintly their acted',
-            'mikrotik_mtxr_poe_status:disabled',
-        ],
-        [
-            'mikrotik_mtxr_poe_interface_index:3',
-            'mikrotik_mtxr_poe_name:Jaded driving kept Jaded driving acted oxen',
-            'mikrotik_mtxr_poe_status:overload',
-        ],
-        [
-            'mikrotik_mtxr_poe_interface_index:30',
-            'mikrotik_mtxr_poe_name:Jaded acted zombies Jaded but driving but driving',
-            'mikrotik_mtxr_poe_status:waiting_for_load',
+            'mtxr_poe_interface_index:30',
+            'mtxr_poe_name:Jaded acted zombies Jaded but driving but driving',
+            'mtxr_poe_status:waiting_for_load',
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric(
-            'snmp.mikrotik.mtxrPOECurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric('snmp.mikrotik.mtxrPOEPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric(
-            'snmp.mikrotik.mtxrPOEVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.mtxrPOECurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.mtxrPOEPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.mtxrPOEVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['mem:24'],
