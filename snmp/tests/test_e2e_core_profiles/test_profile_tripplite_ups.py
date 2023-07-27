@@ -28,12 +28,9 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
         'snmp_host:tripplite-ups.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-    ] + [
-        'tl_ups_ident_id:11',
-        'tl_ups_ident_serial_num:kept driving Jaded Jaded zombies acted',
-        'tl_ups_location:but kept quaintly Jaded forward',
-        'tl_ups_snmp_card_serial_num:but Jaded but',
-    ]
+    ] + ['tl_ups_ident_id:25', 'tl_ups_ident_serial_num:Jaded but oxen',
+ 'tl_ups_location:forward quaintly their acted',
+ 'tl_ups_snmp_card_serial_num:zombies acted driving Jaded kept driving oxen']
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_ups(aggregator, common_tags)
@@ -54,51 +51,34 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
     aggregator.assert_metric('snmp.tlUpsTestDate', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.tlUpsTestResultsDetail', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-        ['tl_ups_input_voltage_index:11', 'tl_ups_input_voltage_type:phase_to_phase'],
-        ['tl_ups_input_voltage_index:23', 'tl_ups_input_voltage_type:phase_to_neutral'],
+         ['tl_ups_input_voltage_index:16', 'tl_ups_input_voltage_type:phase_to_phase'],
+         ['tl_ups_input_voltage_index:23', 'tl_ups_input_voltage_type:phase_to_neutral'],
+
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.tlUpsInputVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['tl_ups_output_circuit_status:open'],
+         ['tl_ups_output_circuit_status:closed'],
+
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric(
-            'snmp.tlUpsOutputCircuitLoadCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.tlUpsOutputCircuitPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.tlUpsOutputCircuitVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.tlUpsOutputCircuitLoadCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tlUpsOutputCircuitPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.tlUpsOutputCircuitVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        [
-            'tl_env_contact_config:normally_closed',
-            'tl_env_contact_name:acted driving Jaded',
-            'tl_env_contact_status:normal',
-        ],
-        [
-            'tl_env_contact_config:normally_open',
-            'tl_env_contact_name:Jaded forward their zombies their',
-            'tl_env_contact_status:normal',
-        ],
+         ['tl_env_contact_config:normally_closed', 'tl_env_contact_name:but kept acted kept acted', 'tl_env_contact_status:normal'],
+         ['tl_env_contact_config:normally_open', 'tl_env_contact_name:their their but Jaded quaintly', 'tl_env_contact_status:alarm'],
+
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.tlEnvContact', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        [
-            'tl_ups_outlet_group_desc:but oxen',
-            'tl_ups_outlet_group_name:forward acted oxen',
-            'ups_outlet_group_status_group_state:ups_outlet_group_status_off',
-        ],
-        [
-            'tl_ups_outlet_group_desc:driving but kept but oxen acted their their',
-            'tl_ups_outlet_group_name:forward but',
-        ],
+         ['tl_ups_outlet_group_desc:oxen acted driving forward zombies but their', 'tl_ups_outlet_group_name:their quaintly their', 'ups_outlet_group_status_group_state:ups_outlet_group_status_off'],
+         ['tl_ups_outlet_group_desc:oxen their zombies zombies acted', 'tl_ups_outlet_group_name:kept'],
+
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.tlUpsOutlet', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
