@@ -12,8 +12,8 @@
 		"ghcr.io/devcontainers/features/python:1": {}
 	},
 
-	// Install the local ddev cli at start time.
-	"postCreateCommand": "pip install -e /workspaces/integrations-core/ddev"
+	// Install the local ddev cli at start time. (force the cython version to avoid ddev build error)
+	"postCreateCommand": "pip install \"cython<3.0.0\" && pip install --no-build-isolation \"pytest-memray>=1.4.0\" && pip install -e /workspaces/integrations-core/ddev"
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
