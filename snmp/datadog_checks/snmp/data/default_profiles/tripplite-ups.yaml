@@ -95,9 +95,16 @@ metrics:
         name: tlUpsInputVoltage
     metric_tags:
       - column:
-          OID: 1.2.3.4.5.6.7.8.9
-          name: TODO
-        tag: todo
+          OID: 1.3.6.1.4.1.850.100.1.3.2.1.1
+          name: tlUpsInputVoltageIndex
+        tag: tl_ups_input_voltage_index
+      - column:
+          OID: 1.3.6.1.4.1.850.100.1.3.2.1.2
+          name: tlUpsInputVoltageType
+        tag: tl_ups_input_voltage_type
+        mapping:
+          0: phase_to_neutral
+          1: phase_to_phase
   - MIB: TRIPPLITE-MIB
     table:
       OID: 1.3.6.1.4.1.850.100.1.4.7
