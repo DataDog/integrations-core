@@ -102,7 +102,7 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
         'name': 'tripplite-ups.device.name',
         'profile': 'tripplite-ups',
         'status': 1,
-        'sys_object_id': '1.3.6.1.4.1.850.1.4',
+        'sys_object_id': '1.3.6.1.4.1.850.1.1.3.1',
         'vendor': 'tripplite',
     }
     device['tags'] = common_tags
