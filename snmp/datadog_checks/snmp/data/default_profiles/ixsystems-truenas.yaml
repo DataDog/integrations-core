@@ -1,16 +1,20 @@
+# TrueNAS vs FreeNAS:
+#   TrueNAS is commercially-supported, while FreeNAS is community-supported.
+#   FreeNAS is an open-source network attached storage platform.
+#   TrueNAS is a set of open-source NAS operating systems developed by iXsystems.
 extends:
   - _base.yaml
   - _generic-host-resources-base.yaml
   - _generic-if.yaml
   - _generic-ucd.yaml
 
-sysobjectid: 1.3.6.1.4.1.50536.3.2
+sysobjectid: 1.3.6.1.4.1.50536.3.2  # TrueNAS
 
 metadata:
   device:
     fields:
       vendor:
-        value: "truenas"
+        value: "iXsystems"
 
 metrics:
   - MIB: FREENAS-MIB
