@@ -40,6 +40,9 @@
     },
     "monitors": {
       "node_status": "assets/monitors/node_status.json"
+    },
+    "dashboards": {
+      "Weaviate Overview Dashboard": "assets/dashboards/overview_dashboard.json"
     }
   },
   "author": {
