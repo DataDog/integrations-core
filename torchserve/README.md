@@ -1,10 +1,8 @@
 # Agent Check: TorchServe
 
-<div class="alert alert-info">
-Coming soon: This integration is included in the upcoming 7.47.0 release of the Datadog Agent.
-</div>
-
 ## Overview
+
+**Coming soon**: This integration is included in the upcoming 7.47.0 release of the Datadog Agent.
 
 This check monitors [TorchServe][1] through the Datadog Agent. 
 
