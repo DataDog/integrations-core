@@ -27,7 +27,7 @@ OPTIONAL_HEADERS = {'description', 'interval', 'unit_name', 'per_unit_name', 'sh
 
 ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
 
-VALID_METRIC_TYPE = {'count', 'gauge', 'rate'}
+VALID_METRIC_TYPE = {'count', 'gauge', 'rate', 'distribution'}
 
 VALID_ORIENTATION = {'0', '1', '-1'}
 
