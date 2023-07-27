@@ -29,10 +29,10 @@ def test_e2e_profile_zyxel_switch(dd_agent_check):
         'device_namespace:default',
         'snmp_device:' + ip_address,
     ] + [
-        'sys_product_model:but Jaded acted but acted Jaded zombies',
-        'sys_product_serial_number:oxen quaintly Jaded their oxen',
-        'sys_sw_platform:2',
-        'sys_sw_version_string:Jaded Jaded quaintly acted',
+        'zyxel_sys_product_model:but Jaded acted but acted Jaded zombies',
+        'zyxel_sys_product_serial_number:oxen quaintly Jaded their oxen',
+        'zyxel_sys_sw_platform:2',
+        'zyxel_sys_sw_version_string:Jaded Jaded quaintly acted',
     ]
 
     # --- TEST EXTENDED METRICS ---
