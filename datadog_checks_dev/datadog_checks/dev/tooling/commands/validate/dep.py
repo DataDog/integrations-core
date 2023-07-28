@@ -99,7 +99,10 @@ def verify_base_dependency(source, check_name, dependency, force_pinned=True, mi
 
 def verify_dependency(source, name, python_versions, file):
     for dependency_definitions in python_versions.values():
-        if len(dependency_definitions) > 1:
+        # Identify dependencies that are defined multiple times for the same set of environment markers
+        requirements = [Requirement(dep) for dep in dependency_definitions]
+        markers = {req.marker for req in requirements}
+        if len(markers) != len(requirements):
             message = f'Multiple dependency definitions found for dependency `{name}`:\n'
             for dependency_definition, checks in dependency_definitions.items():
                 message += f'    {dependency_definition} from: {format_check_usage([checks])}\n'
