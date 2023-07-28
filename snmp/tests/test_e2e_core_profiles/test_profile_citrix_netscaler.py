@@ -29,9 +29,9 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
         'device_namespace:default',
         'snmp_device:' + ip_address,
     ] + [
-        'netscaler_sys_build_version:their',
-        'netscaler_sys_hardware_serial_number:but but acted',
-        'netscaler_sys_hardware_version_desc:but',
+        'netscaler_sys_build_version:kept forward oxen but zombies forward Jaded',
+        'netscaler_sys_hardware_serial_number:Jaded but acted acted',
+        'netscaler_sys_hardware_version_desc:oxen Jaded oxen zombies acted quaintly ' 'quaintly acted zombies',
     ]
 
     # --- TEST EXTENDED METRICS ---
@@ -45,9 +45,6 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     aggregator.assert_metric('snmp.netscaler.curConfigGslbVservers', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.netscaler.curConfigLbVservers', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.netscaler.curConfigVservers', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.haCurState', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.haCurStatus', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.haPeerState', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric(
         'snmp.netscaler.haTimeofLastStateTransition', metric_type=aggregator.GAUGE, tags=common_tags
     )
@@ -77,7 +74,6 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     aggregator.assert_metric('snmp.netscaler.svcTotalServers', metric_type=aggregator.COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.netscaler.svcgroupCount', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.netscaler.svcgroupmemCount', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.sysHighAvailabilityMode', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.netscaler.syssvcCount', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.netscaler.sysupsvcCount', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.netscaler.sysupsvcitmCount', metric_type=aggregator.GAUGE, tags=common_tags)
@@ -96,16 +92,16 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     aggregator.assert_metric('snmp.netscaler.vsvrSvcGrpBindCount', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         [
-            'netscaler_vsvr_name:Jaded quaintly driving kept',
-            'netscaler_vsvr_port:1',
-            'netscaler_vsvr_state:up',
-            'netscaler_vsvr_type:ssl_bridge',
+            'netscaler_vsvr_name:acted oxen driving their forward their kept Jaded',
+            'netscaler_vsvr_port:12',
+            'netscaler_vsvr_state:transition_to_out_of_service',
+            'netscaler_vsvr_type:sslvpn_udp',
         ],
         [
-            'netscaler_vsvr_name:their Jaded but forward their zombies Jaded acted but',
-            'netscaler_vsvr_port:25',
-            'netscaler_vsvr_state:unknown',
-            'netscaler_vsvr_type:ha',
+            'netscaler_vsvr_name:oxen kept their driving',
+            'netscaler_vsvr_port:8',
+            'netscaler_vsvr_state:up',
+            'netscaler_vsvr_type:rpc_client',
         ],
     ]
     for tag_row in tag_rows:
@@ -114,8 +110,8 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
         )
 
     tag_rows = [
-        ['netscaler_sys_health_disk_name:oxen driving Jaded kept'],
-        ['netscaler_sys_health_disk_name:quaintly'],
+        ['netscaler_sys_health_disk_name:forward acted oxen forward but acted forward'],
+        ['netscaler_sys_health_disk_name:their Jaded'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -132,11 +128,8 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
         )
 
     tag_rows = [
-        ['netscaler_if_media:forward zombies', 'netscaler_if_name:their'],
-        [
-            'netscaler_if_media:quaintly Jaded quaintly kept quaintly but acted',
-            'netscaler_if_name:but oxen driving Jaded acted zombies oxen kept kept',
-        ],
+        ['netscaler_if_media:Jaded driving Jaded', 'netscaler_if_name:zombies'],
+        ['netscaler_if_media:but driving acted zombies oxen zombies Jaded', 'netscaler_if_name:driving kept Jaded'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -163,14 +156,14 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
 
     tag_rows = [
         [
-            'netscaler_vserver_full_name:forward oxen driving',
-            'netscaler_vsvr_service_full_name:forward quaintly zombies Jaded but',
-            'netscaler_vsvr_service_name:their oxen acted but driving forward',
+            'netscaler_vserver_full_name:acted driving kept zombies forward Jaded quaintly kept their',
+            'netscaler_vsvr_service_full_name:oxen their their',
+            'netscaler_vsvr_service_name:kept oxen oxen acted kept forward',
         ],
         [
-            'netscaler_vserver_full_name:kept quaintly oxen their forward zombies acted kept oxen',
-            'netscaler_vsvr_service_full_name:driving',
-            'netscaler_vsvr_service_name:Jaded driving acted acted driving',
+            'netscaler_vserver_full_name:driving quaintly Jaded driving driving acted',
+            'netscaler_vsvr_service_full_name:forward oxen kept acted kept their driving quaintly zombies',
+            'netscaler_vsvr_service_name:driving forward driving oxen acted oxen oxen their',
         ],
     ]
     for tag_row in tag_rows:
@@ -182,15 +175,15 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
         )
 
     tag_rows = [
-        ['netscaler_ns_cp_uname:Jaded driving quaintly'],
-        ['netscaler_ns_cp_uname:acted forward their zombies but their oxen zombies'],
+        ['netscaler_ns_cp_uname:driving'],
+        ['netscaler_ns_cp_uname:kept forward their oxen forward'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.netscaler.nsCPUusage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['netscaler_lbvsvr_lb_method:asynchronous_mac', 'netscaler_lbvsvr_persistance_type:group_source_id'],
-        ['netscaler_lbvsvr_lb_method:least_packets', 'netscaler_lbvsvr_persistance_type:source_i_pdestination_ip'],
+        ['netscaler_lbvsvr_lb_method:source_ip_source_port', 'netscaler_lbvsvr_persistance_type:cookie_insert'],
+        ['netscaler_lbvsvr_lb_method:source_ip_source_port', 'netscaler_lbvsvr_persistance_type:source_ip'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -205,16 +198,16 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
 
     tag_rows = [
         [
-            'netscaler_svcgrp_svc_group_full_name:oxen driving forward quaintly',
-            'netscaler_svcgrp_svc_group_name:quaintly but kept oxen',
-            'netscaler_svcgrp_svc_group_state:disabled',
-            'netscaler_svcgrp_svc_group_type:nat',
+            'netscaler_svcgrp_svc_group_full_name:forward Jaded but their but but driving',
+            'netscaler_svcgrp_svc_group_name:driving zombies zombies Jaded forward quaintly',
+            'netscaler_svcgrp_svc_group_state:enabled',
+            'netscaler_svcgrp_svc_group_type:rpcserver',
         ],
         [
-            'netscaler_svcgrp_svc_group_full_name:oxen oxen oxen kept forward Jaded',
-            'netscaler_svcgrp_svc_group_name:Jaded',
+            'netscaler_svcgrp_svc_group_full_name:forward their forward kept driving driving oxen',
+            'netscaler_svcgrp_svc_group_name:but acted forward driving oxen acted',
             'netscaler_svcgrp_svc_group_state:disabled',
-            'netscaler_svcgrp_svc_group_type:ha',
+            'netscaler_svcgrp_svc_group_type:rpcserver',
         ],
     ]
     for tag_row in tag_rows:
@@ -223,8 +216,8 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
         )
 
     tag_rows = [
-        ['netscaler_ssl_cert_key_name:Jaded but kept kept'],
-        ['netscaler_ssl_cert_key_name:forward'],
+        ['netscaler_ssl_cert_key_name:driving but acted zombies quaintly oxen their their'],
+        ['netscaler_ssl_cert_key_name:quaintly driving forward zombies kept Jaded zombies'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -232,8 +225,8 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
         )
 
     tag_rows = [
-        ['netscaler_vsvr_active_active_state:backup', 'netscaler_vsvr_full_name:Jaded kept acted but'],
-        ['netscaler_vsvr_active_active_state:not_applicable', 'netscaler_vsvr_full_name:but'],
+        ['netscaler_vsvr_active_active_state:backup', 'netscaler_vsvr_full_name:but quaintly'],
+        ['netscaler_vsvr_active_active_state:not_applicable', 'netscaler_vsvr_full_name:their'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -247,7 +240,16 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
         )
         aggregator.assert_metric('snmp.netscaler.vsvrHealth', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
+            'snmp.netscaler.vsvrRequestRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.netscaler.vsvrRxBytesRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
             'snmp.netscaler.vsvrSoThreshold', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.netscaler.vsvrSynfloodRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
             'snmp.netscaler.vsvrTotSpillOvers', metric_type=aggregator.COUNT, tags=common_tags + tag_row
@@ -273,19 +275,22 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
         aggregator.assert_metric(
             'snmp.netscaler.vsvrTotalServicesBound', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
+        aggregator.assert_metric(
+            'snmp.netscaler.vsvrTxBytesRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
         [
-            'netscaler_svc_port:11',
-            'netscaler_svc_service_full_name:forward quaintly oxen driving',
-            'netscaler_svc_service_name:Jaded forward quaintly quaintly their',
-            'netscaler_svc_service_type:monitor',
+            'netscaler_svc_port:13',
+            'netscaler_svc_service_full_name:zombies quaintly acted zombies kept driving driving Jaded',
+            'netscaler_svc_service_name:quaintly driving quaintly their acted',
+            'netscaler_svc_service_type:httpserver',
         ],
         [
-            'netscaler_svc_port:20',
-            'netscaler_svc_service_full_name:acted zombies',
-            'netscaler_svc_service_name:driving their driving their acted but Jaded',
-            'netscaler_svc_service_type:rip',
+            'netscaler_svc_port:19',
+            'netscaler_svc_service_full_name:quaintly kept Jaded Jaded zombies quaintly but',
+            'netscaler_svc_service_name:their oxen zombies kept oxen Jaded zombies forward forward',
+            'netscaler_svc_service_type:http',
         ],
     ]
     for tag_row in tag_rows:
@@ -308,6 +313,12 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
             'snmp.netscaler.svcEstablishedConn', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
+            'snmp.netscaler.svcRequestRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.netscaler.svcRxBytesRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
             'snmp.netscaler.svcSurgeCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
@@ -328,10 +339,16 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
         aggregator.assert_metric(
             'snmp.netscaler.svcTotalResponses', metric_type=aggregator.COUNT, tags=common_tags + tag_row
         )
+        aggregator.assert_metric(
+            'snmp.netscaler.svcTxBytesRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
-        ['netscaler_server_name:kept forward driving oxen kept forward', 'netscaler_server_state:unknown'],
-        ['netscaler_server_name:oxen zombies acted', 'netscaler_server_state:busy'],
+        [
+            'netscaler_server_name:acted forward acted but their oxen Jaded quaintly quaintly',
+            'netscaler_server_state:unknown',
+        ],
+        ['netscaler_server_name:quaintly kept kept but driving oxen', 'netscaler_server_state:unknown'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.netscaler.server', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
