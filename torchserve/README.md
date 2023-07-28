@@ -2,6 +2,8 @@
 
 ## Overview
 
+**Coming soon**: This integration is included in the upcoming 7.47.0 release of the Datadog Agent.
+
 This check monitors [TorchServe][1] through the Datadog Agent. 
 
 ## Setup
@@ -10,7 +12,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The TorchServe check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
+Starting from Agent release 7.47.0, the TorchServe check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
 <div class="alert alert-warning">This check uses <a href="https://docs.datadoghq.com/integrations/openmetrics/">OpenMetrics</a> to collect metrics from the OpenMetrics endpoint TorchServe can expose, which requires Python 3.</div>
 

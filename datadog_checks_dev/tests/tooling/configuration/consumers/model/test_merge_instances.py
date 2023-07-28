@@ -87,6 +87,7 @@ def test():
         class InstanceConfig(BaseModel):
             model_config = ConfigDict(
                 validate_default=True,
+                arbitrary_types_allowed=True,
                 frozen=True,
             )
             bar: str
@@ -96,17 +97,13 @@ def test():
             def _initial_validation(cls, values):
                 return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-            @field_validator('*')
-            def _run_validations(cls, value, info):
+            @field_validator('*', mode='before')
+            def _validate(cls, value, info):
                 field = cls.model_fields[info.field_name]
                 field_name = field.alias or info.field_name
-                if field_name not in info.context['configured_fields']:
-                    return value
+                if field_name in info.context['configured_fields']:
+                    value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
 
-                return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-
-            @field_validator('*', mode='after')
-            def _make_immutable(cls, value):
                 return validation.utils.make_immutable(value)
 
             @model_validator(mode='after')

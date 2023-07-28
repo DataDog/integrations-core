@@ -2,13 +2,15 @@
 
 ## Overview
 
-This check submits metrics exposed by the [Nvidia DCGM][15] [Exporter][16] in Datadog Agent format.
+**Coming soon**: This integration is included in the upcoming 7.47.0 release of the Datadog Agent.
+
+This check submits metrics exposed by the [NVIDIA DCGM Exporter][16] in Datadog Agent format. For more information on NVIDIA Data Center GPU Manager (DCGM), see [NVIDIA DCGM][15].
 
 ## Setup
 
 ### Installation
 
-The DCGM check is included in the [Datadog Agent][1] package. However, you need to spin up the DCGM Exporter container to expose the GPU metrics in order for the Agent to collect this data. As the default counters are not sufficient, Datadog recommends using the following DCGM configuration to cover the same ground as the NVML integration in addition to having useful metrics.
+Starting from Agent release 7.47.0, the DCGM check is included in the [Datadog Agent][1] package. However, you need to spin up the DCGM Exporter container to expose the GPU metrics in order for the Agent to collect this data. As the default counters are not sufficient, Datadog recommends using the following DCGM configuration to cover the same ground as the NVML integration in addition to having useful metrics.
 
 ```
 # Format
@@ -120,7 +122,7 @@ To configure the exporter in a Docker environment:
 
 1. Create the file `$PWD/default-counters.csv` which contains the default fields from NVIDIA `etc/default-counters.csv` as well as additional Datadog-recommended fields. To add more fields for collection, follow [these instructions][9]. For the complete list of fields, see the [DCGM API reference manual][10].
 2. Run the Docker container using the following command:
-   ```
+   ```shell
    sudo docker run --pid=host --privileged -e DCGM_EXPORTER_INTERVAL=3 --gpus all -d -v /proc:/proc -v $PWD/default-counters.csv:/etc/dcgm-exporter/default-counters.csv -p 9400:9400 --name dcgm-exporter nvcr.io/nvidia/k8s/dcgm-exporter:3.1.7-3.1.4-ubuntu20.04
    ```
 
@@ -132,7 +134,7 @@ To configure the exporter in a Docker environment:
 The DCGM exporter can quickly be installed in a Kubernetes environment using the NVIDIA DCGM Exporter Helm chart. The instructions below are derived from the template provided by NVIDIA [here](https://github.com/NVIDIA/dcgm-exporter#quickstart-on-kubernetes).
 
 1. Add the NVIDIA DCGM Exporter Helm repository and ensure it is up-to-date :
-   ```bash
+   ```shell
    helm repo add gpu-helm-charts https://nvidia.github.io/dcgm-exporter/helm-charts && helm repo update
    ```
 2. Create a `ConfigMap` containing the Datadog-recommended metrics from [Installation](#Installation), as well as the `RoleBinding` and `Role` used by the DCGM pods to retrieve the `ConfigMap` using the manifest below :
@@ -194,7 +196,7 @@ The DCGM exporter can quickly be installed in a Kubernetes environment using the
      enabled: false
    ```
 4. Install the DCGM Exporter Helm chart in the `default` namespace with the following command, while being in the directory with your `dcgm-values.yaml` :
-   ```bash
+   ```shell
    helm install dcgm-datadog gpu-helm-charts/dcgm-exporter -n default -f dcgm-values.yaml
    ```
 
@@ -208,7 +210,7 @@ The DCGM exporter can quickly be installed in a Kubernetes environment using the
 The DCGM exporter can be installed in a Kubernetes environment by using NVIDIA GPU Operator. The instructions below are derived from the template provided by NVIDIA [here](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html).
 
 1. Add the NVIDIA GPU Operator Helm repository and ensure it is up-to-date :
-   ```bash
+   ```shell
    helm repo add nvidia https://helm.ngc.nvidia.com/nvidia && helm repo update
    ```
 2. Follow the [Custom Metrics Config](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html#custom-metrics-config) instructions with the CSV from [Installation](#installation) :
@@ -250,6 +252,7 @@ The DCGM exporter can be installed in a Kubernetes environment by using NVIDIA G
    helm install datadog-dcgm-gpu-operator -n gpu-operator nvidia/gpu-operator -f dcgm-values.yaml
    ```
 
+<!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 
@@ -264,25 +267,23 @@ The DCGM exporter can be installed in a Kubernetes environment by using NVIDIA G
 
 1. Edit the `dcgm.d/conf.yaml` file (located in the `conf.d/` folder at the root of your Agent's configuration directory) to start collecting your GPU Metrics. See the [sample dcgm.d/conf.yaml][3] for all available configuration options.
 
-```
-instances:
+   ```
+   instances:
 
-    ## @param openmetrics_endpoint - string - required
-    ## The URL exposing metrics in the OpenMetrics format.
-    ##
-    ## Set this to <listenAddress>/<handlerPath> as configured in your DCGM Server
-    #
-    - openmetrics_endpoint: http://localhost:9400/metrics
-```
+      ## @param openmetrics_endpoint - string - required
+      ## The URL exposing metrics in the OpenMetrics format.
+      ##
+      ## Set this to <listenAddress>/<handlerPath> as configured in your DCGM Server
+      #
+      - openmetrics_endpoint: http://localhost:9400/metrics
+   ```
 
-Use the `extra_metrics` configuration field to add metrics that go beyond the ones [we support out of the box][6]. See [here][10] for the full list of metrics that dcgm-exporter can collect. Make sure to [enable these fields in the dcgm-exporter configuration][9] as well.
+Use the `extra_metrics` configuration field to add metrics that go beyond the ones Datadog [supports out of the box][6]. See the [NVIDIA docs][10] for the full list of metrics that dcgm-exporter can collect. Make sure to [enable these fields in the dcgm-exporter configuration][9] as well.
 
-<!-- xxx tab xxx -->
+<!-- xxz tab xxx -->
 <!-- xxx tab "Docker" xxx -->
 
 #### Docker
-
-1. To configure this check for an Agent running on a container:
 
 ##### Metric collection
 
@@ -331,10 +332,10 @@ spec:
     - name: dcgm
 ```
 
-
+<!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-2. [Restart the Agent][4].
+When you're finished making configuration changes, [restart the Agent][4].
 
 ### Validation
 
@@ -364,7 +365,7 @@ See [service_checks.json][7] for a list of service checks that this integration 
 
 ### Metric Mapping
 
-If you have added some metrics that don't appear in the [metadata.csv][6] above but appear in your account with the format `DCGM_FI_DEV_NEW_METRIC`, it is important to remap these metrics in the [dcgm.d/conf.yaml][3] configuration file:
+If you have added some metrics that don't appear in the [metadata.csv][6] above but appear in your account with the format `DCGM_FI_DEV_NEW_METRIC`, remap these metrics in the [dcgm.d/conf.yaml][3] configuration file:
 ```yaml
     ## @param extra_metrics - (list of string or mapping) - optional
     ## This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
@@ -381,9 +382,9 @@ The example below appends the part in `NEW_METRIC` to the namespace (`dcgm.`), g
 
 ### DCGM field is enabled but not being submitted?
 
-It may happen that you've enabled the collection of a field in `default-counters.csv`, but it doesn't appear up in Datadog, even after making a `curl` request to `host:9400/metrics`.
-To figure out why this field is not being collected, [dcgm-exporter developers recommend][14] looking at the file `var/log/nv-hostengine.log`.
-Keep in mind that `dcgm-exporter` is a thin wrapper around lower-level libraries and drivers which do the actual reporting.
+If a field is not being collected even after enabling it in `default-counters.csv` and performing a `curl` request to `host:9400/metrics`, the [dcgm-exporter developers recommend][14] looking at the log file at `var/log/nv-hostengine.log`.
+
+**Note:** The `dcgm-exporter` is a thin wrapper around lower-level libraries and drivers which do the actual reporting.
 
 ### Need help?
 
@@ -409,3 +410,4 @@ Additional helpful documentation, links, and articles:
 [14]: https://github.com/NVIDIA/dcgm-exporter/issues/163#issuecomment-1577506512
 [15]: https://developer.nvidia.com/dcgm
 [16]: https://github.com/NVIDIA/dcgm-exporter
+[17]: https://docs.datadoghq.com/integrations/nvml/#metrics

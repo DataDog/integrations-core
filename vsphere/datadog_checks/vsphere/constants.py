@@ -66,6 +66,10 @@ PROPERTY_COUNT_METRICS = [
     "guest.toolsVersionStatus2",
     "guest.toolsVersion",
     "guest.guestFullName",
+    "hardware.cpuPowerManagementInfo.currentPolicy",
+    "summary.runtime.connectionState",
+    "summary.runtime.powerState",
+    "summary.runtime.inMaintenanceMode",
 ]
 VM_OBJECT_PROPERTIES = ["guest.disk", "guest.net", "guest.ipStack"]
 
@@ -86,4 +90,25 @@ VM_SIMPLE_PROPERTIES = [
     "guest.guestFullName",
 ]
 
+HOST_SIMPLE_PROPERTIES = [
+    "hardware.cpuPowerManagementInfo.currentPolicy",
+    "summary.runtime.connectionState",
+    "summary.runtime.powerState",
+    "summary.runtime.inMaintenanceMode",
+]
+
+HOST_PROPERTIES = HOST_SIMPLE_PROPERTIES
+
 VM_PROPERTIES = VM_OBJECT_PROPERTIES + VM_SIMPLE_PROPERTIES
+
+ALL_PROPERTIES = VM_PROPERTIES + HOST_PROPERTIES
+
+SIMPLE_PROPERTIES_BY_RESOURCE_TYPE = {
+    'vm': VM_SIMPLE_PROPERTIES,
+    'host': HOST_SIMPLE_PROPERTIES,
+}
+
+PROPERTIES_BY_RESOURCE_TYPE = {
+    'vm': VM_PROPERTIES,
+    'host': HOST_PROPERTIES,
+}
