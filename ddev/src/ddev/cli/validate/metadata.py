@@ -194,8 +194,7 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
                 error_message += (
                     f"{current_check.name}:{line} `{row['unit_name']}/{row['per_unit_name']}` unit is invalid, "
                 )
-                error_message += f"use the fraction unit instead. If `{row['unit_name']}` and `{row['per_unit_name']}` "
-                error_message += "are not the same unit, eg ms/s, note that in the description.\n"
+                error_message += f"use the fraction unit instead.\n"
 
             # integration header
             integration = row['integration']

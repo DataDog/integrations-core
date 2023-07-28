@@ -242,9 +242,7 @@ def test_invalid_unit_fraction(ddev, repository, helpers):
         └── Apache
             └── apache/metadata.csv
 
-                apache:7 `day/second` unit is invalid, use the fraction unit instead. If
-                `day` and `second` are not the same unit, eg ms/s, note that in the
-                description.
+                apache:7 `day/second` unit is invalid, use the fraction unit instead.
 
         Passed: 1
         Errors: 1
@@ -335,7 +333,7 @@ def test_invalid_vbar(ddev, repository, helpers):
 
 def test_invalid_unicode(ddev, repository, helpers):
     metrics_file = repository.path / 'apache' / 'metadata.csv'
-    with open(metrics_file, 'r') as file:
+    with open(metrics_file, 'r', encoding="utf-8") as file:
         metrics = file.readlines()
 
     metrics[6] = metrics[6].replace('The number', 'The ± number')
