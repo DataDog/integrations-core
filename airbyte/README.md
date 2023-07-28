@@ -8,7 +8,7 @@ This check monitors [Airbyte][1]. Metrics are sent to Datadog via [DogStatsD][2]
 
 ### Installation
 
-All steps below are needed for the Airflow integration to work properly. Before you begin, [install the Datadog Agent][3] version `>=6.17` or `>=7.17`, which includes the StatsD/DogStatsD mapping feature.
+All steps below are needed for the Airbyte integration to work properly. Before you begin, [install the Datadog Agent][3] version `>=6.17` or `>=7.17`, which includes the StatsD/DogStatsD mapping feature.
 
 ### Configuration
 
