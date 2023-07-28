@@ -19,13 +19,13 @@ pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_onl
 
 
 def test_e2e_profile_netgear(dd_agent_check):
-    config = create_e2e_core_test_config('netgear-generic')
+    config = create_e2e_core_test_config('netgear')
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
     ip_address = get_device_ip_from_config(config)
 
     common_tags = [
-        'snmp_profile:netgear-generic',
-        'snmp_host:netgear-generic.device.name',
+        'snmp_profile:netgear',
+        'snmp_host:netgear.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
     ]
@@ -38,13 +38,13 @@ def test_e2e_profile_netgear(dd_agent_check):
 
     # --- TEST METADATA ---
     device = {
-        'description': 'netgear-generic Device Description',
+        'description': 'netgear Device Description',
         'id': 'default:' + ip_address,
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
-        'name': 'netgear-generic.device.name',
+        'name': 'netgear.device.name',
         'status': 1,
-        'profile': 'netgear-generic',
+        'profile': 'netgear',
         'location': '123 Fake Blvd, San Francisco, CA 94158, USA',
         'sys_object_id': '1.3.6.1.4.1.4526.100.1.2',
         'vendor': 'netgear',
