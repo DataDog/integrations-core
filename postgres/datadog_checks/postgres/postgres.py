@@ -196,7 +196,10 @@ class PostgreSql(AgentCheck):
                     "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
                 )
 
-            if self._config.dbstrict:
+            if self._config.dbstrict and len(self._config.ignore_databases) == 0:
+                q_pg_stat_database["query"] += " WHERE datname in('{}')".format(self._config.dbname)
+                q_pg_stat_database_conflicts["query"] += " WHERE datname in('{}')".format(self._config.dbname)
+            elif self._config.dbstrict and len(self._config.ignore_databases) > 0:
                 q_pg_stat_database["query"] += " AND datname in('{}')".format(self._config.dbname)
                 q_pg_stat_database_conflicts["query"] += " AND datname in('{}')".format(self._config.dbname)
 

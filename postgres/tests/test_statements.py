@@ -114,7 +114,7 @@ def test_statement_metrics_version(integration_check, dbm_instance, version, exp
 @pytest.mark.parametrize("dbstrict,ignore_databases", [(True, []), (False, ['dogs']), (False, [])])
 @pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
 @pytest.mark.parametrize("track_io_timing_enabled", [True, False])
-def test_statement_metrics(
+def test_statement_metrics_foo(
     aggregator,
     integration_check,
     dbm_instance,
@@ -132,13 +132,12 @@ def test_statement_metrics(
     dbm_instance['query_activity'] = {'enabled': False}
     # very low collection interval for test purposes
     dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
-    connections = {}
 
     def _run_queries():
         for user, password, dbname, query, arg in SAMPLE_QUERIES:
-            if dbname not in connections:
-                connections[dbname] = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password)
-            connections[dbname].cursor().execute(query, (arg,))
+            with psycopg.connect(host=HOST, dbname=dbname, user=user, password=password) as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(query, (arg,))
 
     check = integration_check(dbm_instance)
     check._connect()
@@ -232,9 +231,6 @@ def test_statement_metrics(
             "db:" + fqt_event['postgres']['datname'],
             "rolname:" + fqt_event['postgres']['rolname'],
         }
-
-    for conn in connections.values():
-        conn.close()
 
 
 @pytest.mark.parametrize(
@@ -952,6 +948,11 @@ def test_activity_snapshot_collection(
     expected_keys,
     expected_conn_out,
 ):
+
+    if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
+        # cannot catch any queries from other users
+        # only can see own queries
+        return
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
@@ -982,10 +983,6 @@ def test_activity_snapshot_collection(
         t.start()
         run_one_check(check, dbm_instance)
         dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
-        if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
-            # cannot catch any queries from other users
-            # only can see own queries
-            return
 
         event = dbm_activity_event[0]
         assert event['host'] == "stubbed.hostname"
