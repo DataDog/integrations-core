@@ -114,7 +114,7 @@ def test_statement_metrics_version(integration_check, dbm_instance, version, exp
 @pytest.mark.parametrize("dbstrict,ignore_databases", [(True, []), (False, ['dogs']), (False, [])])
 @pytest.mark.parametrize("pg_stat_statements_view", ["pg_stat_statements", "datadog.pg_stat_statements()"])
 @pytest.mark.parametrize("track_io_timing_enabled", [True, False])
-def test_statement_metrics_foo(
+def test_statement_metrics(
     aggregator,
     integration_check,
     dbm_instance,
