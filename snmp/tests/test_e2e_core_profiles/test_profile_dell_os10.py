@@ -41,7 +41,7 @@ def test_e2e_profile_dell_os10(dd_agent_check):
     aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.os10ChassisTemp', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.dell.os10ChassisTemp', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         ['hr_processor_frw_id:1.3.6.1.3.28.242.101.186.129'],
         ['hr_processor_frw_id:1.3.6.1.3.97.114.168'],
