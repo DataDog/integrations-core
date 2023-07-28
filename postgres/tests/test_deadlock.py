@@ -2,14 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import copy
-import select
+import threading
 import time
 
 import psycopg
-from psycopg import ClientCursor
-import threading
 import pytest
+from psycopg import ClientCursor
 
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
 
@@ -40,7 +38,7 @@ def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
 
     def execute_in_thread(q, args):
         with psycopg.connect(
-                host=HOST, dbname=DB_NAME, user="bob", password="bob", cursor_factory=ClientCursor
+            host=HOST, dbname=DB_NAME, user="bob", password="bob", cursor_factory=ClientCursor
         ) as tconn:
             with tconn.cursor() as cur:
                 # this will block, and eventually throw when
@@ -73,7 +71,9 @@ begin transaction;
 {};
 {};
 commit;
-""".format(update_sql, update_sql)
+""".format(
+        update_sql, update_sql
+    )
     # ... now execute the test query in a separate thread
     lock_task = threading.Thread(target=execute_in_thread, args=(query, args))
     lock_task.start()

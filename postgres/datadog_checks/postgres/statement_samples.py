@@ -9,8 +9,8 @@ from enum import Enum
 from typing import Dict, Optional, Tuple  # noqa: F401
 
 import psycopg
-from psycopg.rows import dict_row
 from cachetools import TTLCache
+from psycopg.rows import dict_row
 from six import PY2
 
 try:
@@ -444,24 +444,18 @@ class PostgresStatementSamples(DBMAsyncJob):
         if self._explain_plan_coll_enabled:
             event_samples = self._collect_plans(rows)
             for e in event_samples:
-                try:
-                    self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
-                    submitted_count += 1
-                except TypeError as exe:
-                    self._log.warning("error encoding event to json {}".format(repr(exe)))
+                self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
+                submitted_count += 1
 
         if self._report_activity_event():
             active_connections = self._get_active_connections()
             activity_event = self._create_activity_event(rows, active_connections)
-            try:
-                self._check.database_monitoring_query_activity(
-                    json.dumps(activity_event, default=default_json_event_encoding)
-                )
-                self._check.histogram(
-                    "dd.postgres.collect_activity_snapshot.time", (time.time() - start_time) * 1000, tags=self.tags
-                )
-            except TypeError as exe:
-                self._log.warning("error encoding event to json {}".format(repr(exe)))
+            self._check.database_monitoring_query_activity(
+                json.dumps(activity_event, default=default_json_event_encoding)
+            )
+            self._check.histogram(
+                "dd.postgres.collect_activity_snapshot.time", (time.time() - start_time) * 1000, tags=self.tags
+            )
         elapsed_ms = (time.time() - start_time) * 1000
         self._check.histogram(
             "dd.postgres.collect_statement_samples.time",

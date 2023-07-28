@@ -4,7 +4,6 @@
 
 import logging
 
-import psycopg
 from psycopg.rows import dict_row
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature

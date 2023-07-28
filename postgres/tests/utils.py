@@ -1,11 +1,11 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import threading
 import time
 
 import psycopg
 import pytest
-import threading
 
 from .common import POSTGRES_VERSION
 

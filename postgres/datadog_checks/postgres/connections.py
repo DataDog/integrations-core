@@ -9,6 +9,7 @@ import time
 from typing import Callable, Dict
 
 import psycopg
+
 from datadog_checks.base import AgentCheck
 
 

@@ -7,8 +7,8 @@ import copy
 import time
 
 import psycopg
-from psycopg.rows import dict_row
 from cachetools import TTLCache
+from psycopg.rows import dict_row
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string

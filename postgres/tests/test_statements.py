@@ -3,16 +3,16 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime
 import re
+import threading
 import time
 from collections import Counter
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import mock
 import psycopg
-from psycopg import ClientCursor
-import threading
 import pytest
 from dateutil import parser
+from psycopg import ClientCursor
 from semver import VersionInfo
 from six import string_types
 
@@ -27,7 +27,7 @@ from datadog_checks.postgres.statement_samples import (
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
 
 from .common import DB_NAME, HOST, PORT, PORT_REPLICA2, POSTGRES_VERSION
-from .utils import _get_conn, _get_superconn, requires_over_10, run_one_check, WaitGroup
+from .utils import WaitGroup, _get_conn, _get_superconn, requires_over_10, run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -145,12 +145,14 @@ def test_statement_metrics(
     run_one_check(check, dbm_instance)
 
     if not track_io_timing_enabled:
-        with mock.patch('datadog_checks.postgres.PostgreSql.get_pg_settings',
-        return_value={
-            'pg_stat_statements.max': '10000',
-            'track_activity_query_size': '1024',
-            'track_io_timing': 'off'
-        }):
+        with mock.patch(
+            'datadog_checks.postgres.PostgreSql.get_pg_settings',
+            return_value={
+                'pg_stat_statements.max': '10000',
+                'track_activity_query_size': '1024',
+                'track_io_timing': 'off',
+            },
+        ):
             _run_queries()
             run_one_check(check, dbm_instance)
             _run_queries()
@@ -965,6 +967,7 @@ def test_activity_snapshot_collection(
         with conn.cursor() as cursor:
             cursor.execute(q)
             wg.done()
+
     # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg uses
     # the simple query protocol, sending the whole query as a plain string to postgres.
     # if a client is using the extended query protocol with prepare then the query would appear as

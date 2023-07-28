@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import string
-import json
-from ipaddress import IPv4Address
 from enum import Enum
 from typing import Any, List, Tuple  # noqa: F401
 

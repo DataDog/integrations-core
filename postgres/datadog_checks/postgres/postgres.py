@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import copy
 import concurrent.futures
+import copy
 import os
 from time import time
 
@@ -245,12 +245,15 @@ class PostgreSql(AgentCheck):
         """
         with concurrent.futures.ThreadPoolExecutor() as executor:
             tasks = [
-                executor.submit(thread.cancel) for thread in [
-                    self.statement_samples, self.statement_metrics, self.metadata_samples
-                ]
+                executor.submit(thread.cancel)
+                for thread in [self.statement_samples, self.statement_metrics, self.metadata_samples]
             ]
-            concurrent.futures.wait(tasks)
-        # close all connections gracefully
+
+            try:
+                concurrent.futures.wait(tasks, timeout=self._config.min_collection_interval)
+            except concurrent.futures.TimeoutError:
+                self.log.warning("timeout reached on cancel, proceeding with unclean shutdown.")
+
         self._close_db_pool()
         self.check_cancelled = True
 
@@ -863,5 +866,5 @@ class PostgreSql(AgentCheck):
                 try:
                     # once check finishes on a cancel, shut down main connection gracefully
                     self.db.close()
-                except Exception as e:
+                except Exception:
                     self.log.exception("failed to close DB connection for db=%s", self._config.dbname)

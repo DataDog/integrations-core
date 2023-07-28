@@ -8,8 +8,8 @@ import time
 from contextlib import contextmanager
 
 import psycopg
-from psycopg import sql
 import pytest
+from psycopg import sql
 
 from datadog_checks.base import ConfigurationError
 
@@ -130,9 +130,7 @@ def test_autodiscovery_refresh(integration_check, pg_instance):
             assert len(databases) == expected_len + 1
         finally:
             # Need to drop the new database to clean up the environment for next tests.
-            cursor.execute(
-                sql.SQL("DROP DATABASE {} WITH (FORCE);").format(sql.Identifier(database_to_find))
-            )
+            cursor.execute(sql.SQL("DROP DATABASE {} WITH (FORCE);").format(sql.Identifier(database_to_find)))
 
 
 @pytest.mark.integration

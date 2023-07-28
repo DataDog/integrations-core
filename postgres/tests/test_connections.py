@@ -8,11 +8,12 @@ import time
 import uuid
 
 import psycopg
-from psycopg.rows import dict_row
 import pytest
+from psycopg.rows import dict_row
 
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.connections import ConnectionPoolFullError, MultiDatabaseConnectionPool
+
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN
 from .utils import WaitGroup
 
@@ -75,7 +76,7 @@ def test_conn_pool_no_leaks_on_close(pg_instance):
     # Iterate in the test many times to detect flakiness
     for _ in range(20):
 
-        def exec_connection(dbname):
+        def exec_connection(pool, wg, dbname):
             db = pool._get_connection_raw(dbname, 10 * 1000)
             with db.cursor(row_factory=dict_row) as cursor:
                 cursor.execute("select current_database()")
@@ -89,7 +90,7 @@ def test_conn_pool_no_leaks_on_close(pg_instance):
         pool = MultiDatabaseConnectionPool(check, check._new_connection)
         wg = WaitGroup()
         for i in range(conn_count):
-            thread = threading.Thread(target=exec_connection, args=('dogs_{}'.format(i),))
+            thread = threading.Thread(target=exec_connection, args=(pool, wg, 'dogs_{}'.format(i)))
             threadpool.append(thread)
             wg.add(1)
             thread.start()
