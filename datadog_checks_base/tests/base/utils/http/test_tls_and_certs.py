@@ -5,6 +5,7 @@ import logging
 
 import mock
 import pytest
+from requests.exceptions import SSLError
 
 from datadog_checks.base.utils.http import RequestsWrapper
 
@@ -207,3 +208,27 @@ class TestAIAChasing:
         with caplog.at_level(logging.ERROR), pytest.raises(Exception):
             http.get("https://incomplete-chain.badssl.com/")
             assert "Protocol version `TLSv1.2` not in the allowed list ['TLSv1.1']" in caplog.text
+
+    @pytest.mark.parametrize(
+        "port",
+        [
+            pytest.param(443, id="443 default https port"),
+            pytest.param(444, id="444 non-default https port"),
+        ],
+    )
+    def test_fetch_intermediate_certs(self, port):
+        instance = {
+            'auth_token': {
+                'reader': {'type': 'oauth', 'url': 'foo', 'client_id': 'bar', 'client_secret': 'baz'},
+                'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+            }
+        }
+        http = RequestsWrapper(instance, {})
+
+        with mock.patch('datadog_checks.base.utils.http.create_socket_connection') as mock_create_socket_connection:
+            with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.handle_auth_token'):
+                with pytest.raises(SSLError):
+                    with mock.patch('requests.get', side_effect=SSLError):
+                        http.get('https://localhost:{}'.format(port))
+
+        mock_create_socket_connection.assert_called_with('localhost', port)

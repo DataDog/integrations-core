@@ -62,6 +62,30 @@ OpenMetrics configurations with generic wildcard values for the `metrics` option
 
 Datadog recommends that you use specific metric names or partial metric name matches for more precise collection.
 
+### Errors parsing the OpenMetrics payload with Agent 7.46 and above
+
+Starting with version 3.0.0 of this integration, which is shipped by default with Agent 7.46 and above, the integration sends by default the `Accept` header set to `application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,text/plain;version=0.0.4;q=0.5,*/*;q=0.1`. Previous versions set the `Accept` header to `text/plain`. The integration then dynamically determines which scraper to use based on the `Content-type` it receives from the server.
+
+If you see errors scraping the OpenMetrics endpoint with this new version because the scraper is stricter than before, manually set the `Accept` header that the integration sends to `text/plain` using the `headers` option in the [configuration file][14]. For instance: 
+
+```yaml
+## All options defined here are available to all instances.
+#
+init_config:
+  ...
+instances:
+  - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
+  ...
+    headers:
+      - Accept: text/plain
+```
+
+With this configuration, the endpoint returns the `Content-type` set to `text/plain`, causing the integration to use the previous scraper.
+
+The OpenMetrics integration reports an error parsing the payload when the system you are monitoring sends data that does not match their `Content-type` header. Setting the integration to accept `text/plain` content creates a workaround to address the problem in the short term.
+
+To fix the root cause of the problem, reach out to the maintainers of the upstream system. Submit a bug report and ask them to fix the system so the payload and the Content-type set in the header match.
+
 Need help? Contact [Datadog support][8].
 
 ## Further Reading
@@ -82,3 +106,4 @@ Need help? Contact [Datadog support][8].
 [11]: https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
 [12]: https://prometheus.io/docs/instrumenting/exposition_formats/#text-based-format
 [13]: https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
+[14]: https://github.com/DataDog/integrations-core/blob/7.46.x/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example#L537-L546

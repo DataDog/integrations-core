@@ -88,7 +88,7 @@ def test(
     for check, envs in check_envs:
         if not envs:
             echo_warning(
-                f'No end-to-end environments found for `{check}`. Make sure to add them to the {check}/tox.ini file.'
+                f'No end-to-end environments found for `{check}`. Make sure to add them to the {check}/hatch.toml file.'
             )
             continue
 

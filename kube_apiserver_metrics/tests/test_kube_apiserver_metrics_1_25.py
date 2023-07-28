@@ -41,6 +41,7 @@ class TestKubeAPIServerMetrics:
     CHECK_NAME = 'kube_apiserver_metrics'
     NAMESPACE = 'kube_apiserver'
     METRICS = [
+        NAMESPACE + '.longrunning_gauge',
         NAMESPACE + '.current_inflight_requests',
         NAMESPACE + '.audit_event',
         NAMESPACE + '.go_threads',
@@ -113,4 +114,6 @@ class TestKubeAPIServerMetrics:
         for metric in self.METRICS + self.COUNT_METRICS:
             aggregator.assert_metric(metric)
             aggregator.assert_metric_has_tag(metric, customtag)
+            if "aggregator_unavailable_apiservice" in metric:
+                aggregator.assert_metric_has_tag(metric, "apiservice_name:v1.")
         aggregator.assert_all_metrics_covered()

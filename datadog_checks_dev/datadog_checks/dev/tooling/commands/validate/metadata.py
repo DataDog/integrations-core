@@ -227,6 +227,7 @@ VALID_UNIT_NAMES = {
     'hop',
     'alert',
     'token',
+    'step',
 }
 
 ALLOWED_PREFIXES = ['system', 'jvm', 'http', 'datadog', 'sftp', 'process', 'runtime']

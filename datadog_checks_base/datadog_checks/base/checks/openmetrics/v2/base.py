@@ -57,7 +57,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         self.refresh_scrapers()
 
         for endpoint, scraper in self.scrapers.items():
-            self.log.info('Scraping OpenMetrics endpoint: %s', endpoint)
+            self.log.debug('Scraping OpenMetrics endpoint: %s', endpoint)
 
             with self.adopt_namespace(scraper.namespace):
                 try:

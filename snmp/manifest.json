@@ -47,12 +47,15 @@
     },
     "dashboards": {
       "Interface Performance": "assets/dashboards/interface_performance.json",
-      "Datacenter Overview": "assets/dashboards/datacenter_overview.json"
+      "Datacenter Overview": "assets/dashboards/datacenter_overview.json",
+      "Netflow Monitoring": "assets/dashboards/netflow_monitoring.json",
+      "Datadog NDM Environment": "assets/dashboards/datadog_ndm_environment.json"
     },
     "monitors": {
       "[SNMP] Device Down Alert": "assets/monitors/device_down.json",
       "[SNMP] Device Unreachable Alert": "assets/monitors/device_unreachable.json",
-      "[SNMP] Interface Down Alert": "assets/monitors/interface_down.json"
+      "[SNMP] Interface Down Alert": "assets/monitors/interface_down.json",
+      "[SNMP] LinkDown Trap Alert": "assets/monitors/traps_linkDown.json"
     }
   }
 }

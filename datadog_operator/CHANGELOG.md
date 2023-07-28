@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Operator
 
+## Unreleased
+
 ## 1.0.0 / 2023-03-30
 
-* [Added] Datadog Operator Dashboard for the GA.
+***Added***:
+
+* Datadog Operator Dashboard for the GA.
+

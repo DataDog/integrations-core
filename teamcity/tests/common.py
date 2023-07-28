@@ -44,6 +44,13 @@ REST_INSTANCE = {
     'tags': ['build_env:test', 'test_tag:ci_builds'],
 }
 
+REST_INSTANCE_ALL_PROJECTS = {
+    'server': SERVER_URL,
+    'host_affected': 'buildhost42.dtdg.co',
+    'projects': {},
+    'tags': ['build_env:test', 'test_tag:ci_builds'],
+}
+
 OPENMETRICS_INSTANCE = {
     'server': 'http://localhost:8111',
     'use_openmetrics': True,

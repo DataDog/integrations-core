@@ -81,12 +81,56 @@ def setup_cilium():
             "prometheus.enabled=true",
             "--set",
             "operator.prometheus.enabled=true",
+            "--set",
+            "prometheus.metrics[0]=+cilium_bpf_map_pressure",
         ]
     )
     run_command(
         ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "cilium", "--timeout=300s"]
     )
     run_command(["kubectl", "wait", "pods", "-n", "cilium", "--all", "--for=condition=Ready", "--timeout=300s"])
+
+    # Hack below...
+    # Some metrics like cilium_api_limiter_adjustment_factor are not emitted until there are at least
+    # one call to rate limited api. So we need to go through all our cilium pods and do at least one
+    # call to list endpoint (which is rate limited) to be able to collect api_limiter metrics
+    result = run_command(
+        [
+            "kubectl",
+            "get",
+            "pods",
+            "-n",
+            "cilium",
+            "-l",
+            "k8s-app=cilium",
+            "-o",
+            "jsonpath={.items[*].metadata.name}",
+        ],
+        capture=True,
+    )
+    if result.stderr:
+        raise Exception(result.stderr)
+    pods = result.stdout.split(' ')
+
+    for pod in pods:
+        result = run_command(
+            [
+                "kubectl",
+                "exec",
+                "-n",
+                "cilium",
+                "-c",
+                "cilium-agent",
+                pod.strip(),
+                "--",
+                "cilium",
+                "endpoint",
+                "list",
+            ],
+            capture=True,
+        )
+        if result.stderr:
+            raise Exception(result.stderr)
 
 
 def get_instances(agent_host, agent_port, operator_host, operator_port, use_openmetrics):

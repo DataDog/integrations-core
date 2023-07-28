@@ -458,7 +458,7 @@ class AgentCheck(object):
 
             if isinstance(models_config, BaseModel):
                 # Also add aliases, if any
-                known_options.update(set(models_config.dict(by_alias=True)))
+                known_options.update(set(models_config.model_dump(by_alias=True)))
 
         unknown_options = [option for option in user_configs.keys() if option not in known_options]  # type: List[str]
 
@@ -485,33 +485,29 @@ class AgentCheck(object):
             module_parts = self.__module__.split('.')
             package_path = '{}.config_models'.format('.'.join(module_parts[:2]))
         if self._config_model_shared is None:
-            raw_shared_config = self._get_config_model_initialization_data()
-            intg_shared_config = self._get_shared_config()
-            raw_shared_config.update(intg_shared_config)
-
-            shared_config = self.load_configuration_model(package_path, 'SharedConfig', raw_shared_config)
+            shared_config = copy.deepcopy(self.init_config)
+            context = self._get_config_model_context(shared_config)
+            shared_model = self.load_configuration_model(package_path, 'SharedConfig', shared_config, context)
             try:
-                self.log_typos_in_options(intg_shared_config, shared_config, 'init_config')
+                self.log_typos_in_options(shared_config, shared_model, 'init_config')
             except Exception as e:
                 self.log.debug("Failed to detect typos in `init_config` section: %s", e)
-            if shared_config is not None:
-                self._config_model_shared = shared_config
+            if shared_model is not None:
+                self._config_model_shared = shared_model
 
         if self._config_model_instance is None:
-            raw_instance_config = self._get_config_model_initialization_data()
-            intg_instance_config = self._get_instance_config()
-            raw_instance_config.update(intg_instance_config)
-
-            instance_config = self.load_configuration_model(package_path, 'InstanceConfig', raw_instance_config)
+            instance_config = copy.deepcopy(self.instance)
+            context = self._get_config_model_context(instance_config)
+            instance_model = self.load_configuration_model(package_path, 'InstanceConfig', instance_config, context)
             try:
-                self.log_typos_in_options(intg_instance_config, instance_config, 'instances')
+                self.log_typos_in_options(instance_config, instance_model, 'instances')
             except Exception as e:
                 self.log.debug("Failed to detect typos in `instances` section: %s", e)
-            if instance_config is not None:
-                self._config_model_instance = instance_config
+            if instance_model is not None:
+                self._config_model_instance = instance_model
 
     @staticmethod
-    def load_configuration_model(import_path, model_name, config):
+    def load_configuration_model(import_path, model_name, config, context):
         try:
             package = importlib.import_module(import_path)
         # TODO: remove the type ignore when we drop Python 2
@@ -525,7 +521,7 @@ class AgentCheck(object):
         model = getattr(package, model_name, None)
         if model is not None:
             try:
-                config_model = model(**config)
+                config_model = model.model_validate(config, context=context)
             # TODO: remove the type ignore when we drop Python 2
             except ValidationError as e:  # type: ignore
                 errors = e.errors()
@@ -550,17 +546,8 @@ class AgentCheck(object):
             else:
                 return config_model
 
-    def _get_shared_config(self):
-        # Any extra fields will be available during a config model's initial validation stage
-        return copy.deepcopy(self.init_config)
-
-    def _get_instance_config(self):
-        # Any extra fields will be available during a config model's initial validation stage
-        return copy.deepcopy(self.instance)
-
-    def _get_config_model_initialization_data(self):
-        # Allow for advanced functionality during the initial root validation stage
-        return {'__data': {'logger': self.log, 'warning': self.warning}}
+    def _get_config_model_context(self, config):
+        return {'logger': self.log, 'warning': self.warning, 'configured_fields': frozenset(config)}
 
     def register_secret(self, secret):
         # type: (str) -> None
@@ -647,6 +634,13 @@ class AgentCheck(object):
             return
 
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-activity")
+
+    def database_monitoring_metadata(self, raw_event):
+        # type: (str) -> None
+        if raw_event is None:
+            return
+
+        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metadata")
 
     def should_send_metric(self, metric_name):
         return not self._metric_excluded(metric_name) and self._metric_included(metric_name)

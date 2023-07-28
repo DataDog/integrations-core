@@ -1,7 +1,7 @@
 {
 	"name": "[MySQL] Replica {{host.name}} is not running properly",
 	"type": "service check",
-	"query": "\"mysql.replication.replica_running\".over(\"*\").last(2).count_by_status()",
+	"query": "\"mysql.replication.replica_running\".over(\"*\").by(\"*\").last(2).count_by_status()",
 	"message": "Replica_IO_Running and/or Replica_SQL_Running is not running on replica {{host.name}}. Consider investigating to restore full data replication.",
 	"tags": [
         "integration:mysql"

@@ -25,12 +25,12 @@ from .common import CHECK_NAME, TEST_OPENSTACK_NO_AUTH_CONFIG_PATH
         ),
     ],
 )
-def test_config_invalid(instance, exception_msg):
+def test_config_invalid(instance, exception_msg, dd_run_check):
 
     check = OpenStackControllerCheck(CHECK_NAME, {}, [instance])
 
     with pytest.raises(Exception, match=exception_msg):
-        check.check(instance)
+        dd_run_check(check)
 
 
 @pytest.mark.parametrize(
@@ -67,12 +67,12 @@ def test_config_invalid(instance, exception_msg):
         ),
     ],
 )
-def test_config_invalid_openstack_auth(instance, exception_msg):
+def test_config_invalid_openstack_auth(instance, exception_msg, dd_run_check):
 
     check = OpenStackControllerCheck(CHECK_NAME, {}, [instance])
 
     with pytest.raises(Exception, match=exception_msg):
-        check.check(instance)
+        dd_run_check(check)
 
 
 @pytest.mark.parametrize(
@@ -113,10 +113,10 @@ def test_config_invalid_openstack_auth(instance, exception_msg):
         ),
     ],
 )
-def test_config_warning(instance, warning_msg, caplog):
+def test_config_warning(instance, warning_msg, caplog, dd_run_check):
     caplog.set_level(logging.WARN)
 
     check = OpenStackControllerCheck(CHECK_NAME, {}, [instance])
 
-    check.check(instance)
+    dd_run_check(check)
     assert warning_msg in caplog.text

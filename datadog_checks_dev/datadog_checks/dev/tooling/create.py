@@ -43,7 +43,7 @@ To install the {integration_name} check on your host:
 
 
 1. Install the [developer toolkit]
-(https://docs.datadoghq.com/developers/integrations/new_check_howto/#developer-toolkit)
+(https://docs.datadoghq.com/developers/integrations/python/)
  on any machine.
 
 2. Run `ddev release build {normalized_integration_name}` to build the package.

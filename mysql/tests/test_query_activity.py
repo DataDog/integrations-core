@@ -131,7 +131,6 @@ def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, quer
     )
     assert blocked_row['sql_text'] == expected_sql_text
     assert blocked_row['processlist_state'], "missing state"
-    assert blocked_row['wait_event'] == 'wait/io/table/sql/handler'
     assert blocked_row['thread_id'], "missing thread id"
     assert blocked_row['processlist_id'], "missing processlist id"
     assert blocked_row['wait_timer_start'], "missing wait timer start"

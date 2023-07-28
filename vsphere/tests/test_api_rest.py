@@ -1,10 +1,11 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
 import logging
 
 import pytest
-from mock import MagicMock
+from mock import MagicMock, patch
 from pyVmomi import vim
 
 from datadog_checks.vsphere import VSphereCheck
@@ -32,6 +33,65 @@ def test_get_resource_tags(realtime_instance):
         vim.ClusterComputeResource: {},
     }
     assert expected_resource_tags == resource_tags
+
+
+@pytest.mark.usefixtures("mock_rest_api", "mock_type", "mock_api", "mock_threadpool")
+def test_tagging_tags_get_exception(realtime_instance, dd_run_check, caplog, aggregator):
+
+    instance = copy.deepcopy(realtime_instance)
+    instance['collect_tags'] = True
+    instance['excluded_host_tags'] = ['my_cat_name_1']
+    check = VSphereCheck('vsphere', {}, [instance])
+
+    with patch('datadog_checks.vsphere.api_rest.VSphereRestClient.tagging_tags_get', side_effect=Exception("test")):
+        dd_run_check(check)
+        assert "Exception in get_tags for `tag_id_1`: test" in caplog.text
+        assert "Result resource tags: {<class 'pyVmomi.VmomiSupport.vim.VirtualMachine'>: "
+        "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.HostSystem'>: "
+        "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.Datacenter'>: "
+        "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.Datastore'>: "
+        "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.ClusterComputeResource'>: "
+        "defaultdict(<class 'list'>, {})}" in caplog.text
+
+        aggregator.assert_metric_has_tag('vsphere.net.bytesTx.avg', 'my_cat_name_1:my_tag_name_1', count=0)
+
+
+@pytest.mark.usefixtures("mock_rest_api", "mock_type", "mock_api", "mock_threadpool")
+def test_tagging_category_get_exception(realtime_instance, dd_run_check, caplog, aggregator):
+
+    instance = copy.deepcopy(realtime_instance)
+    instance['collect_tags'] = True
+    instance['excluded_host_tags'] = ['my_cat_name_1']
+    check = VSphereCheck('vsphere', {}, [instance])
+
+    with patch('datadog_checks.vsphere.api_rest.VSphereRestClient.tagging_category_get', side_effect=Exception("test")):
+        dd_run_check(check)
+        assert "Exception in get_tags for `tag_id_1`: test" in caplog.text
+        assert "Result resource tags: {<class 'pyVmomi.VmomiSupport.vim.VirtualMachine'>: "
+        "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.HostSystem'>: "
+        "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.Datacenter'>: "
+        "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.Datastore'>: "
+        "defaultdict(<class 'list'>, {}), <class 'pyVmomi.VmomiSupport.vim.ClusterComputeResource'>: "
+        "defaultdict(<class 'list'>, {})}" in caplog.text
+
+        aggregator.assert_metric_has_tag('vsphere.net.bytesTx.avg', 'my_cat_name_1:my_tag_name_1', count=0)
+
+
+@pytest.mark.usefixtures("mock_rest_api", "mock_type", "mock_threadpool", "mock_api")
+def test_get_tags_log(realtime_instance, dd_run_check, caplog, aggregator):
+
+    instance = copy.deepcopy(realtime_instance)
+    instance['collect_tags'] = True
+    instance['excluded_host_tags'] = ['my_cat_name_1']
+
+    check = VSphereCheck('vsphere', {}, [instance])
+
+    dd_run_check(check)
+    assert "Result resource tags: {<class 'pyVmomi.VmomiSupport.vim.VirtualMachine'>: "
+    "defaultdict(<class 'list'>, {'VM4-4-1': ['my_cat_name_1:my_tag_name_1', "
+    "'my_cat_name_2:my_tag_name_2']})" in caplog.text
+
+    aggregator.assert_metric_has_tag('vsphere.net.bytesTx.avg', 'my_cat_name_1:my_tag_name_1')
 
 
 @pytest.mark.parametrize(

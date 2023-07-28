@@ -86,7 +86,7 @@ jobs:
     runs-on: ${{ fromJson(inputs.runner) }}
 
     env:
-      PYTHON_VERSION: "${{ inputs.python-version || '3.8' }}"
+      PYTHON_VERSION: "${{ inputs.python-version || '3.9' }}"
       SKIP_ENV_NAME: "${{ (inputs.test-py2 && !inputs.test-py3) && 'py3.*' || (!inputs.test-py2 && inputs.test-py3) && 'py2.*' || '' }}"
       # Windows E2E requires Windows containers
       DDEV_E2E_AGENT: "${{ inputs.platform == 'windows' && (inputs.agent-image-windows || 'datadog/agent-dev:master-py3-win-servercore') || inputs.agent-image }}"
@@ -115,9 +115,18 @@ jobs:
 
     - name: Set up Python 2.7
       if: inputs.test-py2
-      uses: actions/setup-python@v4
-      with:
-        python-version: "2.7"
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          sudo apt update
+          sudo apt install python2 python2-dev
+          sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 1
+        elif [ "$RUNNER_OS" == "Windows" ]; then
+          choco install python2
+        else
+          echo "$RUNNER_OS not supported"
+          exit 1
+        fi
+      shell: bash
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@v4
@@ -164,13 +173,17 @@ jobs:
             "DOCKER_ACCESS_TOKEN": "{1}",
             "ORACLE_DOCKER_USERNAME": "{2}",
             "ORACLE_DOCKER_PASSWORD": "{3}",
-            "SINGLESTORE_LICENSE": "{4}"
+            "SINGLESTORE_LICENSE": "{4}",
+            "DD_GITHUB_USER": "{5}",
+            "DD_GITHUB_TOKEN": "{6}"
           }}',
           secrets.DOCKER_USERNAME,
           secrets.DOCKER_ACCESS_TOKEN,
           secrets.ORACLE_DOCKER_USERNAME,
           secrets.ORACLE_DOCKER_PASSWORD,
-          secrets.SINGLESTORE_LICENSE
+          secrets.SINGLESTORE_LICENSE,
+          github.actor,
+          secrets.GITHUB_TOKEN
         ))}}
       run: ddev ci setup ${{ inputs.target }}
 

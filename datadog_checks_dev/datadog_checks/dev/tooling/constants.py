@@ -52,7 +52,7 @@ VERSION_BUMP = {
     'beta': lambda v: semver.bump_prerelease(v, 'beta'),
 }
 
-CHANGELOG_TYPES_ORDERED = ['Added', 'Fixed', 'Security', 'Changed', 'Deprecated', 'Removed']
+CHANGELOG_TYPES_ORDERED = ['Removed', 'Changed', 'Security', 'Deprecated', 'Added', 'Fixed']
 
 AGENT_V5_ONLY = {'agent_metrics', 'docker_daemon', 'go-metro', 'kubernetes', 'ntp'}
 
@@ -87,7 +87,7 @@ NOT_TILES = [
 
 CHECK_LINKS = """\
 [1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/{repository}/blob/master/{name}/datadog_checks/{name}/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -99,7 +99,7 @@ CHECK_LINKS = """\
 
 LOGS_LINKS = """\
 [1]: https://docs.datadoghq.com/help/
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: **LINK_TO_INTEGRATION_SITE**
 [5]: https://github.com/DataDog/{repository}/blob/master/{name}/assets/service_checks.json
@@ -107,7 +107,7 @@ LOGS_LINKS = """\
 
 JMX_LINKS = """\
 [1]: **LINK_TO_INTEGERATION_SITE**
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/{repository}/blob/master/{name}/datadog_checks/{name}/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://docs.datadoghq.com/integrations/java/
@@ -126,7 +126,7 @@ SNMP_TILE_LINKS = """\
 
 TILE_LINKS = """\
 [1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/help/
 """
 

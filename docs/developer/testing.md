@@ -135,11 +135,11 @@ automatically resolve the most common errors caught by the style checker.
 
 There are a number of shortcut options available that correspond to [pytest options][pytest-usage].
 
-- `--marker`/`-m` (`pytest`: `-m`) - Only run tests matching a given marker expression e.g. `ddev test elastic:py38-7.2 -m unit`
-- `--filter`/`-k` (`pytest`: `-k`) - Only run tests matching a given substring expression e.g.`ddev test redisdb -k replication`
-- `--debug`/`-d` (`pytest`: `--log-level=debug -s`) - Set the log level to debug
-- `--pdb` (`pytest`: `--pdb -x`) - Drop to PDB on first failure, then end test session
-- `--verbose`/`-v` (`pytest`: `-v --tb=auto`) - Increase verbosity (can be used additively) and disables shortened tracebacks
+- `--marker`/`-m` (`pytest`: `-m`) - Only run tests matching a given marker expression e.g. `ddev test elastic:py38-7.2 -m unit`.
+- `--filter`/`-k` (`pytest`: `-k`) - Only run tests matching a given substring expression e.g.`ddev test redisdb -k replication`.
+- `--debug`/`-d` (`pytest`: `--log-level=debug -s`) - Set the log level to debug and stop pytest from capturing stdout.
+- `--pdb` (`pytest`: `--pdb -x`) - Drop to PDB on first failure, then end test session.
+- `--verbose`/`-v` (`pytest`: `-v --tb=auto`) - Increase verbosity (can be used additively) and disables shortened tracebacks.
 - `--ddtrace` (`pytest`: `--ddtrace`) - Submit test traces to a local Datadog Agent using the [`ddtrace`][pytest-ddtrace] Python package. For example:`ddev test --ddtrace consul`. This does not work if you are testing a Python 2 Windows environment.
 
 You may also pass arguments directly to `pytest` using the `--pytest-args`/`-pa` option. For example, you could

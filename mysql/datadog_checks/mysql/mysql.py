@@ -402,7 +402,6 @@ class MySql(AgentCheck):
                 db.close()
 
     def _collect_metrics(self, db, tags):
-
         # Get aggregate of all VARS we want to collect
         metrics = copy.deepcopy(STATUS_VARS)
 
@@ -492,8 +491,14 @@ class MySql(AgentCheck):
         if is_affirmative(self._config.options.get('system_table_size_metrics', False)):
             # report size of tables in MiB to Datadog
             (table_index_size, table_data_size) = self._query_size_per_table(db, system_tables=True)
-            results['information_table_index_size'] = table_index_size
-            results['information_table_data_size'] = table_data_size
+            if results.get('information_table_index_size'):
+                results['information_table_index_size'].update(table_index_size)
+            else:
+                results['information_table_index_size'] = table_index_size
+            if results.get('information_table_data_size'):
+                results['information_table_data_size'].update(table_data_size)
+            else:
+                results['information_table_data_size'] = table_data_size
             metrics.update(TABLE_VARS)
 
         if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):

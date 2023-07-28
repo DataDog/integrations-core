@@ -1,0 +1,26 @@
+name: Weaviate
+files:
+- name: weaviate.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.required: true
+        openmetrics_endpoint.hidden: false
+        openmetrics_endpoint.display_priority: 2
+        openmetrics_endpoint.value.example: http://localhost:2112/metrics
+        openmetrics_endpoint.description: |
+          Endpoint exposing the Weaviate's Prometheus metrics. For more information refer to:
+          https://weaviate.io/developers/weaviate/configuration/monitoring
+    - name: weaviate_api_endpoint
+      display_priority: 1
+      description: |
+        Endpoint of the Weaviate Restful API. For more information see: https://weaviate.io/developers/weaviate/api/rest
+      value:
+        display_default: null
+        example: http://localhost:8080
+        type: string

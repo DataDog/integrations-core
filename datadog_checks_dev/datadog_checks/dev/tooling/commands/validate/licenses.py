@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import asyncio
+import concurrent.futures
 import difflib
 import io
 import os
@@ -14,8 +14,6 @@ from zipfile import ZipFile
 import click
 import orjson
 import requests
-from aiohttp import request
-from aiomultiprocess import Pool
 from packaging.requirements import Requirement
 
 from ....fs import file_exists, read_file_lines, write_file_lines
@@ -35,8 +33,6 @@ EXPLICIT_LICENSES = {
     'aerospike': ['Apache-2.0'],
     # https://github.com/baztian/jaydebeapi/blob/master/COPYING
     'JayDeBeApi': ['LGPL-3.0-only'],
-    # https://github.com/mhammond/pywin32/blob/master/adodbapi/license.txt
-    'adodbapi': ['LGPL-2.1-only'],
     # https://github.com/pyca/cryptography/blob/main/LICENSE
     'cryptography': ['Apache-2.0', 'BSD-3-Clause', 'PSF'],
     # https://github.com/rthalley/dnspython/blob/master/LICENSE
@@ -206,18 +202,20 @@ def get_known_spdx_licenses():
     return {data['licenseId'] for data in license_list}
 
 
-async def get_data(url):
-    async with request('GET', url) as response:
-        return orjson.loads(await response.read())
+def get_data(url):
+    with requests.get(url) as response:
+        return orjson.loads(response.content)
 
 
-async def scrape_license_data(urls):
+def scrape_license_data(urls):
     package_data = defaultdict(
         lambda: {'copyright': {}, 'licenses': set(), 'classifiers': set(), 'home_page': None, 'author': None}
     )
 
-    async with Pool() as pool:
-        async for resp in pool.map(get_data, urls):
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        future_to_url = {executor.submit(get_data, url): url for url in urls}
+        for future in concurrent.futures.as_completed(future_to_url):
+            resp = future.result()
             info = resp['info']
             data = package_data[(info['name'], info['version'])]
             data['urls'] = resp['urls']
@@ -435,7 +433,7 @@ def licenses(ctx, sync):
 
     agent_requirements_file = get_agent_requirements()
     if not file_exists(agent_requirements_file):
-        abort('Out of sync, run again with the --sync flag')
+        abort("Out of sync, run 'ddev validate licenses --sync'")
 
     packages = defaultdict(set)
     for i, line in enumerate(read_file_lines(agent_requirements_file)):
@@ -453,7 +451,7 @@ def licenses(ctx, sync):
         for version in versions:
             api_urls.append(f'https://pypi.org/pypi/{package}/{version}/json')
 
-    package_data = asyncio.run(scrape_license_data(api_urls))
+    package_data = scrape_license_data(api_urls)
     known_spdx_licenses = {license_id.lower(): license_id for license_id in get_known_spdx_licenses()}
 
     package_license_errors = defaultdict(list)

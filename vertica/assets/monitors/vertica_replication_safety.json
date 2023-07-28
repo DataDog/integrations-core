@@ -20,10 +20,7 @@
 		"no_data_timeframe": null,
 		"include_tags": true,
 		"thresholds": {
-			"critical": 1,
-			"warning": 0,
-			"critical_recovery": 0,
-			"warning_recovery": 0
+			"critical": 1
 		}
 	},
 	"priority": null,

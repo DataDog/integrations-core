@@ -9,9 +9,11 @@
 
 from __future__ import annotations
 
-from typing import Literal, Mapping, Optional, Sequence, Union
+from types import MappingProxyType
+from typing import Optional, Union
 
-from pydantic import BaseModel, Extra, Field, root_validator, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -20,122 +22,105 @@ from . import defaults, validators
 
 
 class Counter(BaseModel):
-    class Config:
-        extra = Extra.allow
-        allow_mutation = False
-
-    aggregate: Optional[Union[bool, Literal['only']]]
-    average: Optional[bool]
-    metric_name: Optional[str]
-    name: Optional[str]
-    type: Optional[str]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        extra='allow',
+        frozen=True,
+    )
+    aggregate: Optional[Union[bool, Literal['only']]] = None
+    average: Optional[bool] = None
+    metric_name: Optional[str] = None
+    name: Optional[str] = None
+    type: Optional[str] = None
 
 
 class InstanceCounts(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    monitored: Optional[str]
-    total: Optional[str]
-    unique: Optional[str]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    monitored: Optional[str] = None
+    total: Optional[str] = None
+    unique: Optional[str] = None
 
 
 class ExtraMetrics(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    counters: Sequence[Mapping[str, Union[str, Counter]]]
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
-    instance_counts: Optional[InstanceCounts]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    counters: tuple[MappingProxyType[str, Union[str, Counter]], ...]
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+    instance_counts: Optional[InstanceCounts] = None
     name: str
-    tag_name: Optional[str]
-    use_localized_counters: Optional[bool]
+    tag_name: Optional[str] = None
+    use_localized_counters: Optional[bool] = None
 
 
 class MetricPatterns(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
-
-
-class Counter1(BaseModel):
-    class Config:
-        extra = Extra.allow
-        allow_mutation = False
-
-    aggregate: Optional[Union[bool, Literal['only']]]
-    average: Optional[bool]
-    metric_name: Optional[str]
-    name: Optional[str]
-    type: Optional[str]
-
-
-class InstanceCounts1(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    monitored: Optional[str]
-    total: Optional[str]
-    unique: Optional[str]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class Metrics(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    counters: Sequence[Mapping[str, Union[str, Counter1]]]
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
-    instance_counts: Optional[InstanceCounts1]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    counters: tuple[MappingProxyType[str, Union[str, Counter]], ...]
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+    instance_counts: Optional[InstanceCounts] = None
     name: str
-    tag_name: Optional[str]
-    use_localized_counters: Optional[bool]
+    tag_name: Optional[str] = None
+    use_localized_counters: Optional[bool] = None
 
 
 class InstanceConfig(BaseModel):
-    class Config:
-        allow_mutation = False
+    model_config = ConfigDict(
+        validate_default=True,
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    additional_metrics: Optional[tuple[tuple[str, ...], ...]] = None
+    counter_data_types: Optional[tuple[str, ...]] = None
+    disable_generic_tags: Optional[bool] = None
+    empty_default_hostname: Optional[bool] = None
+    enable_health_service_check: Optional[bool] = None
+    extra_metrics: Optional[MappingProxyType[str, ExtraMetrics]] = None
+    host: Optional[str] = None
+    metric_patterns: Optional[MetricPatterns] = None
+    metrics: Optional[MappingProxyType[str, Metrics]] = None
+    min_collection_interval: Optional[float] = None
+    namespace: Optional[str] = Field(None, pattern='\\w*')
+    password: Optional[str] = None
+    server: Optional[str] = None
+    server_tag: Optional[str] = None
+    service: Optional[str] = None
+    tags: Optional[tuple[str, ...]] = None
+    use_legacy_check_version: Optional[bool] = None
+    username: Optional[str] = None
 
-    additional_metrics: Optional[Sequence[Sequence[str]]]
-    counter_data_types: Optional[Sequence[str]]
-    disable_generic_tags: Optional[bool]
-    empty_default_hostname: Optional[bool]
-    enable_health_service_check: Optional[bool]
-    extra_metrics: Optional[Mapping[str, ExtraMetrics]]
-    host: Optional[str]
-    metric_patterns: Optional[MetricPatterns]
-    metrics: Optional[Mapping[str, Metrics]]
-    min_collection_interval: Optional[float]
-    namespace: Optional[str] = Field(None, regex='\\w*')
-    password: Optional[str]
-    server: Optional[str]
-    server_tag: Optional[str]
-    service: Optional[str]
-    tags: Optional[Sequence[str]]
-    use_legacy_check_version: Optional[bool]
-    username: Optional[str]
-
-    @root_validator(pre=True)
+    @model_validator(mode='before')
     def _initial_validation(cls, values):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-    @validator('*', pre=True, always=True)
-    def _ensure_defaults(cls, v, field):
-        if v is not None or field.required:
-            return v
+    @field_validator('*', mode='before')
+    def _validate(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name in info.context['configured_fields']:
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{field.name}')(field, v)
+        return validation.utils.make_immutable(value)
 
-    @validator('*')
-    def _run_validations(cls, v, field):
-        if not v:
-            return v
-
-        return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
-
-    @root_validator(pre=False)
-    def _final_validation(cls, values):
-        return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+    @model_validator(mode='after')
+    def _final_validation(cls, model):
+        return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))
