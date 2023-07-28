@@ -53,74 +53,74 @@ def test_e2e_profile_dell_os10(dd_agent_check):
 
     tag_rows = [
         [
-            'os10_card_description:quaintly their forward their driving Jaded acted driving',
-            'os10_card_service_tag:oxen',
-            'os10_card_status:down',
+            'dell_os10_card_description:quaintly their forward their driving Jaded acted driving',
+            'dell_os10_card_service_tag:oxen',
+            'dell_os10_card_status:down',
         ],
         [
-            'os10_card_description:quaintly zombies driving driving',
-            'os10_card_service_tag:but',
-            'os10_card_status:down',
+            'dell_os10_card_description:quaintly zombies driving driving',
+            'dell_os10_card_service_tag:but',
+            'dell_os10_card_status:down',
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.os10CardTemp', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dell.os10CardTemp', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['os10_power_supply_oper_status:down'],
-        ['os10_power_supply_oper_status:not_present'],
+        ['dell_os10_power_supply_oper_status:down'],
+        ['dell_os10_power_supply_oper_status:not_present'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.os10PowerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dell.os10PowerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['os10_fan_tray_oper_status:not_present'],
-        ['os10_fan_tray_oper_status:testing'],
+        ['dell_os10_fan_tray_oper_status:not_present'],
+        ['dell_os10_fan_tray_oper_status:testing'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.os10FanTray', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dell.os10FanTray', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['os10_fan_oper_status:failed'],
-        ['os10_fan_oper_status:lower_layer_down'],
+        ['dell_os10_fan_oper_status:failed'],
+        ['dell_os10_fan_oper_status:lower_layer_down'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.os10Fan', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dell.os10Fan', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         [
-            'os10bgp4_v2_peer_admin_status:halted',
-            'os10bgp4_v2_peer_description:driving kept but but Jaded their kept their',
-            'os10bgp4_v2_peer_local_addr:forward acted zombies',
-            'os10bgp4_v2_peer_local_addr_type:ipv4',
-            'os10bgp4_v2_peer_local_as:6566',
-            'os10bgp4_v2_peer_local_identifier:0x00000000',
-            'os10bgp4_v2_peer_local_port:30492',
-            'os10bgp4_v2_peer_remote_addr:acted kept driving kept quaintly',
-            'os10bgp4_v2_peer_remote_addr_type:ipv4',
-            'os10bgp4_v2_peer_remote_as:58448',
-            'os10bgp4_v2_peer_remote_identifier:0x00000000',
-            'os10bgp4_v2_peer_remote_port:46732',
-            'os10bgp4_v2_peer_state:openconfirm',
+            'dell_os10bgp4_v2_peer_admin_status:halted',
+            'dell_os10bgp4_v2_peer_description:driving kept but but Jaded their kept their',
+            'dell_os10bgp4_v2_peer_local_addr:forward acted zombies',
+            'dell_os10bgp4_v2_peer_local_addr_type:ipv4',
+            'dell_os10bgp4_v2_peer_local_as:6566',
+            'dell_os10bgp4_v2_peer_local_identifier:0x00000000',
+            'dell_os10bgp4_v2_peer_local_port:30492',
+            'dell_os10bgp4_v2_peer_remote_addr:acted kept driving kept quaintly',
+            'dell_os10bgp4_v2_peer_remote_addr_type:ipv4',
+            'dell_os10bgp4_v2_peer_remote_as:58448',
+            'dell_os10bgp4_v2_peer_remote_identifier:0x00000000',
+            'dell_os10bgp4_v2_peer_remote_port:46732',
+            'dell_os10bgp4_v2_peer_state:openconfirm',
         ],
         [
-            'os10bgp4_v2_peer_admin_status:running',
-            'os10bgp4_v2_peer_description:kept zombies',
-            'os10bgp4_v2_peer_local_addr:zombies driving quaintly but but but',
-            'os10bgp4_v2_peer_local_addr_type:ipv4z',
-            'os10bgp4_v2_peer_local_as:49005',
-            'os10bgp4_v2_peer_local_identifier:0x00000000',
-            'os10bgp4_v2_peer_local_port:47120',
-            'os10bgp4_v2_peer_remote_addr:acted Jaded quaintly acted their Jaded Jaded zombies zombies',
-            'os10bgp4_v2_peer_remote_addr_type:unknown',
-            'os10bgp4_v2_peer_remote_as:57330',
-            'os10bgp4_v2_peer_remote_identifier:0x00000000',
-            'os10bgp4_v2_peer_remote_port:25857',
-            'os10bgp4_v2_peer_state:established',
+            'dell_os10bgp4_v2_peer_admin_status:running',
+            'dell_os10bgp4_v2_peer_description:kept zombies',
+            'dell_os10bgp4_v2_peer_local_addr:zombies driving quaintly but but but',
+            'dell_os10bgp4_v2_peer_local_addr_type:ipv4z',
+            'dell_os10bgp4_v2_peer_local_as:49005',
+            'dell_os10bgp4_v2_peer_local_identifier:0x00000000',
+            'dell_os10bgp4_v2_peer_local_port:47120',
+            'dell_os10bgp4_v2_peer_remote_addr:acted Jaded quaintly acted their Jaded Jaded zombies zombies',
+            'dell_os10bgp4_v2_peer_remote_addr_type:unknown',
+            'dell_os10bgp4_v2_peer_remote_as:57330',
+            'dell_os10bgp4_v2_peer_remote_identifier:0x00000000',
+            'dell_os10bgp4_v2_peer_remote_port:25857',
+            'dell_os10bgp4_v2_peer_state:established',
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.os10bgp4V2Peer', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.dell.os10bgp4V2Peer', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
