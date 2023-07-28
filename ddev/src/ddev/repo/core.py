@@ -121,6 +121,13 @@ class IntegrationRegistry:
     def iter_changed(self) -> Iterable[Integration]:
         yield from self.iter_all()
 
+    def iter_changed_code(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        for integration in self.__iter_filtered(selection):
+            for relative_path in self.repo.git.changed_files:
+                if integration.requires_changelog_entry(self.repo.path / relative_path):
+                    yield integration
+                    break
+
     def __iter_filtered(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
         selected = self.__finalize_selection(selection)
         if selected is None:

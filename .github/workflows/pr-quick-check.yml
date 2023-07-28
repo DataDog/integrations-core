@@ -1,0 +1,50 @@
+name: Quick check PR
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        required: true
+        type: string
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PYTHON_VERSION: "3.11"
+  CHECK_SCRIPT: "ddev/src/ddev/utils/scripts/check_pr.py"
+
+jobs:
+  check:
+    name: Check PR
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v3
+      if: inputs.repo == 'core'
+      with:
+        ref: "${{ github.event.pull_request.head.sha }}"
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: "${{ env.PYTHON_VERSION }}"
+
+    - name: Fetch PR data
+      env:
+        GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      run: |-
+        diff_url=$(cat "$GITHUB_EVENT_PATH" | jq -r '.pull_request.diff_url')
+        curl --header "Authorization: Bearer $GITHUB_TOKEN" -sLo /tmp/diff "$diff_url"
+        cat "$GITHUB_EVENT_PATH" | jq -r '.pull_request.number' > /tmp/number
+
+    - name: Fetch script
+      if: inputs.repo != 'core'
+      run: |-
+        mkdir -p $(dirname ${{ env.CHECK_SCRIPT }})
+        curl -sLo ${{ env.CHECK_SCRIPT }} https://raw.githubusercontent.com/DataDog/integrations-core/master/${{ env.CHECK_SCRIPT }}
+
+    - name: Check
+      run: |-
+        python ${{ env.CHECK_SCRIPT }} changelog --diff-file /tmp/diff --pr-number $(cat /tmp/number)

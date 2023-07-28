@@ -47,7 +47,8 @@ class GitManager:
 
     @cached_property
     def latest_commit(self) -> GitCommit:
-        return GitCommit(self.capture('rev-parse', 'HEAD').strip())
+        sha, subject = self.capture('log', '-1', '--format=%H%n%s').splitlines()
+        return GitCommit(sha, subject=subject)
 
     def get_latest_commit(self) -> GitCommit:
         with suppress(AttributeError):
