@@ -5,9 +5,8 @@ from __future__ import annotations
 
 import csv
 import io
-import os
 from collections import defaultdict
-from typing import TYPE_CHECKING, DefaultDict, Set
+from typing import TYPE_CHECKING
 
 import click
 
@@ -51,13 +50,12 @@ def check_duplicate_values(current_check, line, row, header_name, duplicates, fa
     if row[header_name] and row[header_name] not in duplicates:
         duplicates.add(row[header_name])
     elif row[header_name] != '':
-        message = f"{current_check}:{line} `{row[header_name]}` is a duplicate {header_name}"
+        message = f"{current_check.name}:{line} `{row[header_name]}` is a duplicate {header_name}\n"
         if fail:
-            Application.display_error(message)
-            return True
+            return (True, message)
         else:
-            Application.display_warning(message)
-    return False
+            return (False, message)
+    return (False, '')
 
 
 @click.command(short_help='Validate `metadata.csv` files')
@@ -86,29 +84,24 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
 
         errors = False
         error_message = ""
+        warning_message = ""
 
-        display_queue = []
         if current_check.name.startswith('datadog_checks_'):
             continue
 
-        try:
-            metric_prefix = current_check.manifest.get("/assets/integration/metrics/prefix", "").rstrip()
-        except KeyError:
-            metric_prefix = None
-
+        metric_prefix = current_check.manifest.get("/assets/integration/metrics/prefix", "")
         metadata_file = current_check.metrics_file
-        display_queue.append((app.display_info, f"Checking {metadata_file}"))
 
         # To make logging less verbose, common errors are counted for current check
-        metric_prefix_count: DefaultDict[str, int] = defaultdict(int)
-        empty_count: DefaultDict[str, int] = defaultdict(int)
-        empty_warning_count: DefaultDict[str, int] = defaultdict(int)
-        duplicate_name_set: Set = set()
-        duplicate_short_name_set: Set = set()
-        duplicate_description_set: Set = set()
+        metric_prefix_count: defaultdict[str, int] = defaultdict(int)
+        empty_count: defaultdict[str, int] = defaultdict(int)
+        empty_warning_count: defaultdict[str, int] = defaultdict(int)
+        duplicate_name_set: set = set()
+        duplicate_short_name_set: set = set()
+        duplicate_description_set: set = set()
 
         metric_prefix_error_shown = False
-        if os.stat(metadata_file).st_size == 0:
+        if metadata_file.stat().st_size == 0:
             errors = True
 
             error_message += (
@@ -139,13 +132,22 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
                     error_message += f"{current_check.name}:{line} Missing columns {missing_headers}.\n"
                 continue
 
-            errors = errors or check_duplicate_values(
+            # check duplicate metric name
+            duplicate_metric_name = check_duplicate_values(
                 current_check, line, row, 'metric_name', duplicate_name_set, fail=True
             )
+            if duplicate_metric_name[0]:
+                errors = True
+
+                error_message += duplicate_metric_name[1]
 
             if check_duplicates:
-                check_duplicate_values(current_check, line, row, 'short_name', duplicate_short_name_set)
-                check_duplicate_values(current_check, line, row, 'description', duplicate_description_set)
+                warning_message += check_duplicate_values(
+                    current_check, line, row, 'short_name', duplicate_short_name_set
+                )[1]
+                warning_message += check_duplicate_values(
+                    current_check, line, row, 'description', duplicate_description_set
+                )[1]
 
             normalized_metric_name = normalize_metric_name(row['metric_name'])
             if row['metric_name'] != normalized_metric_name:
@@ -194,7 +196,7 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
                 error_message += (
                     f"{current_check.name}:{line} `{row['unit_name']}/{row['per_unit_name']}` unit is invalid, "
                 )
-                error_message += f"use the fraction unit instead.\n"
+                error_message += "use the fraction unit instead.\n"
 
             # integration header
             integration = row['integration']
@@ -277,15 +279,20 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
         error_message = error_message[:-1]
         if errors:
             validation_tracker.error(
-                (current_check.display_name, f'{current_check.name}/metadata.csv'),
+                (current_check.display_name, str(metadata_file.relative_to(app.repo.path))),
                 message=error_message,
             )
+        else:
+            validation_tracker.success()
 
-        if show_warnings:
+        if show_warnings or warning_message:
             for header, count in empty_warning_count.items():
-                app.display_warning(f'{current_check}: {header} is empty in {count} rows.')
+                warning_message += f'{current_check.name}: {header} is empty in {count} rows.'
 
-        validation_tracker.success()
+            validation_tracker.warning(
+                (current_check.display_name, str(metadata_file.relative_to(app.repo.path))),
+                message=warning_message,
+            )
 
     validation_tracker.display()
 

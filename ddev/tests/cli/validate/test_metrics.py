@@ -18,7 +18,6 @@ def test_metrics_empty(ddev, repository, helpers):
                 apache metadata file is empty. This file needs the header row at the
                 minimum.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -45,7 +44,6 @@ def test_column_amount(ddev, repository, helpers):
 
                 apache:2 apache.conns_total has the wrong amount of columns.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -83,7 +81,6 @@ def test_header_missing_invalid(ddev, repository, helpers):
                 apache:7 Invalid column {'curated_metric_badheader'}.
                 apache:7 Missing columns {'curated_metric'}.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -111,7 +108,6 @@ def test_normalized_metrics(ddev, repository, helpers):
                 apache:2 Metric name 'apache.conns-total' is not valid, it should be
                 normalized as apache.conns_total.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -136,7 +132,6 @@ def test_manifest_metric_prefix_dne(ddev, repository, helpers):
 
                 apache:2 metric_prefix does not exist in manifest.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -163,7 +158,6 @@ def test_invalid_metric_type(ddev, repository, helpers):
 
                 apache:2 `invalid_metric_type` is an invalid metric_type.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -190,7 +184,6 @@ def test_invalid_unit_name(ddev, repository, helpers):
 
                 apache:2 `invalid_unit_name` is an invalid unit_name.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -217,7 +210,6 @@ def test_invalid_per_unit_name(ddev, repository, helpers):
 
                 apache:7 `invalid_per_unit_name` is an invalid per_unit_name.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -244,7 +236,6 @@ def test_invalid_unit_fraction(ddev, repository, helpers):
 
                 apache:7 `day/second` unit is invalid, use the fraction unit instead.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -271,7 +262,6 @@ def test_integration_header(ddev, repository, helpers):
 
                 apache:7 integration: `apache___` should be: apache.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -298,7 +288,6 @@ def test_invalid_orientation(ddev, repository, helpers):
 
                 apache:7 `2` is an invalid orientation.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -325,7 +314,6 @@ def test_invalid_vbar(ddev, repository, helpers):
 
                 apache:7 `apache.net.bytes_per_s` description contains a `|`.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -353,7 +341,6 @@ def test_invalid_unicode(ddev, repository, helpers):
                 apache:7 `apache.net.bytes_per_s` description contains unicode
                 characters.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -383,7 +370,6 @@ def test_max_length(ddev, repository, helpers):
                 apache:7 `apache.net.bytes_per_s` description exceeds the max length:
                 400 for descriptions.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -410,7 +396,6 @@ def test_interval_integer(ddev, repository, helpers):
 
                 apache:7 interval should be an int, found 'not_a_digit'.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -438,7 +423,6 @@ def test_duplicate_curated_metric(ddev, repository, helpers):
                 apache:7 `apache.net.bytes_per_s` contains duplicate curated_metric
                 types.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -466,7 +450,6 @@ def test_invalid_curated_metric(ddev, repository, helpers):
                 apache:7 `apache.net.bytes_per_s` contains invalid curated metric type:
                 invalid_curated_metric
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -493,7 +476,6 @@ def test_header_empty(ddev, repository, helpers):
 
                 apache: metric_type is empty in 1 rows.
 
-        Passed: 1
         Errors: 1
         """
     )
@@ -521,8 +503,62 @@ def test_prefix_match(ddev, repository, helpers):
                 apache: `invalid_metric_prefix` appears 1 time(s) and does not match
                 metric_prefix defined in the manifest.
 
-        Passed: 1
         Errors: 1
+        """
+    )
+
+
+def test_duplicate_metric_name(ddev, repository, helpers):
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    with open(metrics_file, 'r') as file:
+        metrics = file.readlines()
+
+    metrics[2] = metrics[2].replace('apache.conns_async_writing', 'apache.conns_total')
+
+    with open(metrics_file, 'w') as file:
+        file.writelines(metrics)
+
+    result = ddev("validate", "metadata", 'apache')
+
+    assert result.exit_code == 1, result.output
+    assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
+        """
+        Metrics validation
+        └── Apache
+            └── apache/metadata.csv
+
+                apache:3 `apache.conns_total` is a duplicate metric_name
+
+        Errors: 1
+        """
+    )
+
+
+def test_warnings(ddev, repository, helpers):
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    with open(metrics_file, 'r') as file:
+        metrics = file.readlines()
+
+    metrics[1] = metrics[1].replace('The total number of connections performed.', '')
+    metrics[2] = metrics[2].replace('ConnsAsyncWriting', 'ConnsTotal')
+
+    with open(metrics_file, 'w') as file:
+        file.writelines(metrics)
+
+    result = ddev("validate", "metadata", 'apache', '--check-duplicates', '--show-warnings')
+
+    assert result.exit_code == 0, result.output
+    assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
+        """
+        Metrics validation
+        └── Apache
+            └── apache/metadata.csv
+
+                apache:3 `ConnsTotal` is a duplicate short_name
+                apache: description is empty in 1 rows.
+
+        Passed: 1
+        Warnings: 1
         """
     )
 
