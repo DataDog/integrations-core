@@ -334,8 +334,8 @@ instances:
     ##     in_speed: 50         # (optional) inbound speed value in bits per sec, no value or 0 means no override
     ##     out_speed: 25        # (optional) outbound speed value in bits per sec, no value or 0 means no override
     ##     tags:                # (optional) interface level tags
-    ##         - "testTagKey:testTagValue"
-    ##         - "tagKey2:tagValue2"
+    ##       - "testTagKey:testTagValue"
+    ##       - "tagKey2:tagValue2"
     #
     # interface_configs:
     #   - match_field: name
@@ -349,8 +349,8 @@ instances:
     #   - match_field: name
     #     match_value: eth4
     #     tags:
-    #       - "monitored:true"
-    #       - "customKey:customValue"
+    #     - monitored:true
+    #     - customKey:customValue
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
