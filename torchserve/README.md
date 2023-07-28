@@ -2,6 +2,8 @@
 
 ## Overview
 
+**Coming soon**: This integration is included in the upcoming 7.47.0 release of the Datadog Agent.
+
 This check monitors [TorchServe][1] through the Datadog Agent. 
 
 ## Setup
@@ -10,7 +12,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The TorchServe check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
+Starting from Agent release 7.47.0, the TorchServe check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
 <div class="alert alert-warning">This check uses <a href="https://docs.datadoghq.com/integrations/openmetrics/">OpenMetrics</a> to collect metrics from the OpenMetrics endpoint TorchServe can expose, which requires Python 3.</div>
 
@@ -43,7 +45,7 @@ This configuration file exposes the three different endpoints that can be used b
 To enable the Prometheus endpoint, you need to configure two options: 
 
 - `metrics_address`: Metrics API binding address. Defaults to `http://127.0.0.1:8082`
-- `metrics_mode`: Two metric modes are supported: `log` and `prometheus`. Defaults to `log`. You have to set it to `prometheus` to collect metrics from this endpoint.
+- `metrics_mode`: Two metric modes are supported by TorchServe: `log` and `prometheus`. Defaults to `log`. You have to set it to `prometheus` to collect metrics from this endpoint.
 
 For instance:
 
@@ -143,6 +145,9 @@ By default, the integration retrieves the full list of the models every time the
 
 #### Complete configuration 
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 This example demonstrates the complete configuration leveraging the three different APIs described in the previous sections:
 
 ```yaml
@@ -166,6 +171,63 @@ instances:
 ```
 
 [Restart the Agent][5] after modifying the configuration.
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Docker" xxx -->
+
+This example demonstrates the complete configuration leveraging the three different APIs described in the previous sections as a Docker label inside `docker-compose.yml`:
+
+```yaml
+labels:
+  com.datadoghq.ad.checks: '{"torchserve":{"instances":[{"openmetrics_endpoint":"http://%%host%%:8082/metrics","extra_metrics":["my_custom_torchserve_metric"]},{"inference_api_url":"http://%%host%%:8080"},{"management_api_url":"http://%%host%%:8081","include":["my_models.*"],"exclude":[".*-test"],"interval":3600}]}}'
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+This example demonstrates the complete configuration leveraging the three different APIs described in the previous sections as Kubernetes annotations on your Torchserve pods:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: '<POD_NAME>'
+  annotations:
+    ad.datadoghq.com/torchserve.checks: |-
+      {
+        "torchserve": {
+          "instances": [
+            {
+              "openmetrics_endpoint": "http://%%host%%:8082/metrics",
+              "extra_metrics": [
+                "my_custom_torchserve_metric"
+              ]
+            },
+            {
+              "inference_api_url": "http://%%host%%:8080"
+            },
+            {
+              "management_api_url": "http://%%host%%:8081",
+              "include": [
+                ".*"
+              ],
+              "exclude": [
+                ".*-test"
+              ],
+              "interval": 3600
+            }
+          ]
+        }
+      }
+    # (...)
+spec:
+  containers:
+    - name: 'torchserve'
+# (...)
+```
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 

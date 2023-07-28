@@ -9,7 +9,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from types import MappingProxyType
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -21,22 +22,24 @@ from . import defaults, validators
 
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    exclude: Optional[Sequence[str]] = None
-    include: Optional[Sequence[str]] = None
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     auto_discover_channels: Optional[bool] = None
     auto_discover_queues: Optional[bool] = None
     channel: str = Field(..., min_length=1)
-    channel_status_mapping: Optional[Mapping[str, Any]] = None
-    channels: Optional[Sequence[str]] = None
+    channel_status_mapping: Optional[MappingProxyType[str, Any]] = None
+    channels: Optional[tuple[str, ...]] = None
     collect_reset_queue_metrics: Optional[bool] = None
     collect_statistics_metrics: Optional[bool] = None
     connection_name: Optional[str] = Field(None, min_length=1)
@@ -53,16 +56,16 @@ class InstanceConfig(BaseModel):
     queue_manager: str = Field(..., min_length=1)
     queue_manager_process: Optional[str] = None
     queue_manager_timezone: Optional[str] = Field(None, min_length=1)
-    queue_patterns: Optional[Sequence[str]] = None
-    queue_regex: Optional[Sequence[str]] = None
-    queue_tag_re: Optional[Mapping[str, Any]] = None
-    queues: Optional[Sequence[str]] = None
+    queue_patterns: Optional[tuple[str, ...]] = None
+    queue_regex: Optional[tuple[str, ...]] = None
+    queue_tag_re: Optional[MappingProxyType[str, Any]] = None
+    queues: Optional[tuple[str, ...]] = None
     service: Optional[str] = None
     ssl_auth: Optional[bool] = None
     ssl_certificate_label: Optional[str] = None
     ssl_cipher_spec: Optional[str] = None
     ssl_key_repository_location: Optional[str] = Field(None, min_length=1)
-    tags: Optional[Sequence[str]] = None
+    tags: Optional[tuple[str, ...]] = None
     timeout: Optional[int] = None
     try_basic_auth: Optional[bool] = None
     username: Optional[str] = Field(None, min_length=1)
@@ -72,25 +75,14 @@ class InstanceConfig(BaseModel):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
     @field_validator('*', mode='before')
-    def _ensure_defaults(cls, value, info):
+    def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
-            return value
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{info.field_name}', lambda: value)()
-
-    @field_validator('*')
-    def _run_validations(cls, value, info):
-        field = cls.model_fields[info.field_name]
-        field_name = field.alias or info.field_name
-        if field_name not in info.context['configured_fields']:
-            return value
-
-        return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-
-    @field_validator('*', mode='after')
-    def _make_immutable(cls, value):
         return validation.utils.make_immutable(value)
 
     @model_validator(mode='after')
