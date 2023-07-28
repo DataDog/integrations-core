@@ -215,25 +215,25 @@ def dep(check, require_base_check_version, min_base_check_version):
         ):
             failed = True
 
-    # If validating a single check, whether all Agent dependencies are included in check dependencies is irrelevant.
-    if check is not None:
-        agent_dependencies = {}
-
     for name, python_versions in sorted(agent_dependencies.items()):
         if not verify_dependency('Agent', name, python_versions, agent_dependencies_file):
             failed = True
 
-        if name not in check_dependencies:  # Looks like this fails because of the per check run....
+        # Check that this dependency defined on the agent requirements is actually used
+        # This only makes sense when we take all check dependencies into account
+        if checks is None and name not in check_dependencies:
             failed = True
             message = f'Stale dependency needs to be removed by syncing: {name}'
             echo_failure(message)
             annotate_error(agent_dependencies_file, message)
             continue
 
+        # Look for version mismatches for this dependency against individual checks
         agent_dependency_definitions = get_dependency_set(python_versions)
         check_dependency_definitions = get_dependency_set(check_dependencies[name])
 
-        if agent_dependency_definitions != check_dependency_definitions:
+        # Only report mismatches when this dependency is actually present within the checks specified
+        if check_dependency_definitions and agent_dependency_definitions != check_dependency_definitions:
             failed = True
             message = (
                 f'Mismatch for dependency `{name}`:\n'
