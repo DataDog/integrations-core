@@ -3,7 +3,7 @@ extends:
   - _generic-host-resources-base.yaml
   - _generic-ucd.yaml
 #  - dell.yaml  # TODO: check hierarchy
-#  - if32-mib.yaml  # TODO: later (https://datadoghq.atlassian.net/browse/NDM-1933)
+#  - if32-mib.yaml  # TODO: later (NDM-1933)
 
 metadata:
   device:
