@@ -314,13 +314,12 @@ def test_statement_metrics_cloud_metadata(
     if input_cloud_metadata:
         for k, v in input_cloud_metadata.items():
             dbm_instance[k] = v
-    connections = {}
 
     def _run_queries():
         for user, password, dbname, query, arg in SAMPLE_QUERIES:
-            if dbname not in connections:
-                connections[dbname] = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password)
-            connections[dbname].cursor().execute(query, (arg,))
+            with psycopg.connect(host=HOST, dbname=dbname, user=user, password=password) as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(query, (arg,))
 
     check = integration_check(dbm_instance)
     check._connect()
@@ -340,9 +339,6 @@ def test_statement_metrics_cloud_metadata(
     assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     assert event['cloud_metadata'] == output_cloud_metadata, "wrong cloud_metadata"
-
-    for conn in connections.values():
-        conn.close()
 
 
 def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_instance, datadog_agent):
