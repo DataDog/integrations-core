@@ -9,7 +9,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from types import MappingProxyType
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
@@ -21,34 +22,37 @@ from . import defaults, validators
 
 class CustomQuery(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    columns: Optional[Sequence[Mapping[str, Any]]] = None
+    columns: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     query: Optional[str] = None
-    tags: Optional[Sequence[str]] = None
+    tags: Optional[tuple[str, ...]] = None
 
 
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    exclude: Optional[Sequence[str]] = None
-    include: Optional[Sequence[str]] = None
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    backup_servers: Optional[Sequence[Mapping[str, Any]]] = None
+    backup_servers: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     client_lib_log_level: Optional[str] = None
     connection_load_balance: Optional[bool] = None
-    custom_queries: Optional[Sequence[CustomQuery]] = None
+    custom_queries: Optional[tuple[CustomQuery, ...]] = None
     db: Optional[str] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
-    metric_groups: Optional[Sequence[str]] = None
+    metric_groups: Optional[tuple[str, ...]] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     only_custom_queries: Optional[bool] = None
@@ -56,7 +60,7 @@ class InstanceConfig(BaseModel):
     port: Optional[int] = None
     server: Optional[str] = None
     service: Optional[str] = None
-    tags: Optional[Sequence[str]] = None
+    tags: Optional[tuple[str, ...]] = None
     timeout: Optional[int] = None
     tls_ca_cert: Optional[str] = None
     tls_cert: Optional[str] = None
@@ -73,25 +77,14 @@ class InstanceConfig(BaseModel):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
     @field_validator('*', mode='before')
-    def _ensure_defaults(cls, value, info):
+    def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
-            return value
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{info.field_name}', lambda: value)()
-
-    @field_validator('*')
-    def _run_validations(cls, value, info):
-        field = cls.model_fields[info.field_name]
-        field_name = field.alias or info.field_name
-        if field_name not in info.context['configured_fields']:
-            return value
-
-        return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-
-    @field_validator('*', mode='after')
-    def _make_immutable(cls, value):
         return validation.utils.make_immutable(value)
 
     @model_validator(mode='after')
