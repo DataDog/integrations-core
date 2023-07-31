@@ -113,7 +113,7 @@ DCGM_FI_DEV_BRAND                                                 ,label        
 DCGM_FI_DEV_SERIAL                                                ,label                  ,
 ```
 
-In certain set ups `DCGM_FI_DEV_GPU_UTIL` metric can cause heavier resource consumption. In that case disable this metric and replace it instead with the following:
+In certain set ups `DCGM_FI_DEV_GPU_UTIL` metric can cause heavier resource consumption. In that case disable this metric and replace it with the following:
 
 ```
 DCGM_FI_PROF_GR_ENGINE_ACTIVE                                     ,gauge                  ,Ratio of time the graphics engine is active. The graphics engine is active if a graphics/compute context is bound and the graphics pipe or compute pipe is busy.
