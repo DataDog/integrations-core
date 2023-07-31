@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Airbyte][1]. Metrics are sent to Datadog via [DogStatsD][2].
+This check monitors [Airbyte][1]. Metrics are sent to Datadog through [DogStatsD][2].
 
 ## Setup
 
@@ -12,7 +12,7 @@ All steps below are needed for the Airbyte integration to work properly. Before 
 
 ### Configuration
 
-1. Configure your Airbyte deployment [to send metrics to Datadog][6]
+1. Configure your Airbyte deployment [to send metrics to Datadog][6].
 2. Update the [Datadog Agent main configuration file][7] `datadog.yaml` by adding the following configuration:
 
 ```yaml
@@ -74,6 +74,7 @@ dogstatsd_mapper_profiles:
       - match: "airbyte.cron.cron_jobs_run"
         name: "airbyte.cron.jobs_run"
 ```
+
 3. [Restart the Agent][5] and Airbyte.
 
 ## Data Collected
@@ -84,11 +85,11 @@ See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Service Checks
 
-Airbyte does not include any service checks.
+The Airbyte check does not include any service checks.
 
 ### Events
 
-Airbyte does not include any events.
+The Airbyte check does not include any events.
 
 ## Troubleshooting
 
