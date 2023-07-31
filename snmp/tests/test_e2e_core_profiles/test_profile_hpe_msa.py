@@ -29,9 +29,9 @@ def test_e2e_profile_hpe_msa(dd_agent_check):
         'device_namespace:default',
         'snmp_device:' + ip_address,
     ] + [
-        'hpe_msa_cpq_si_product_name:forward driving forward but',
-        'hpe_msa_cpq_si_sys_product_id:kept',
-        'hpe_msa_cpq_si_sys_serial_num:kept Jaded driving',
+        'hpe_fibrechannel_cpq_si_product_name:forward driving forward but',
+        'hpe_fibrechannel_cpq_si_sys_product_id:kept',
+        'hpe_fibrechannel_cpq_si_sys_serial_num:kept Jaded driving',
     ]
 
     # --- TEST EXTENDED METRICS ---
@@ -42,45 +42,45 @@ def test_e2e_profile_hpe_msa(dd_agent_check):
 
     tag_rows = [
         [
-            'hpe_msa_conn_unit_sensor_characteristic:airflow',
-            'hpe_msa_conn_unit_sensor_name:oxen zombies but driving kept driving',
-            'hpe_msa_conn_unit_sensor_status:ok',
+            'hpe_fibrechannel_conn_unit_sensor_characteristic:airflow',
+            'hpe_fibrechannel_conn_unit_sensor_name:oxen zombies but driving kept driving',
+            'hpe_fibrechannel_conn_unit_sensor_status:ok',
         ],
         [
-            'hpe_msa_conn_unit_sensor_characteristic:other',
-            'hpe_msa_conn_unit_sensor_name:Jaded their',
-            'hpe_msa_conn_unit_sensor_status:ok',
+            'hpe_fibrechannel_conn_unit_sensor_characteristic:other',
+            'hpe_fibrechannel_conn_unit_sensor_name:Jaded their',
+            'hpe_fibrechannel_conn_unit_sensor_status:ok',
         ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.hpe_msa.connUnitSensor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.hpe.fibrechannel.connUnitSensor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     tag_rows = [
         [
-            'hpe_msa_conn_unit_port_module_type:gbic_not_installed',
-            'hpe_msa_conn_unit_port_name:oxen oxen oxen kept kept forward',
-            'hpe_msa_conn_unit_port_speed:25',
-            'hpe_msa_conn_unit_port_state:unknown',
-            'hpe_msa_conn_unit_port_status:notparticipating',
-            'hpe_msa_conn_unit_port_transmitter_type:longwave_no_ofc',
-            'hpe_msa_conn_unit_port_type:escon',
-            'hpe_msa_conn_unit_port_wwn:quaintly',
+            'hpe_fibrechannel_conn_unit_port_module_type:gbic_not_installed',
+            'hpe_fibrechannel_conn_unit_port_name:oxen oxen oxen kept kept forward',
+            'hpe_fibrechannel_conn_unit_port_speed:25',
+            'hpe_fibrechannel_conn_unit_port_state:unknown',
+            'hpe_fibrechannel_conn_unit_port_status:notparticipating',
+            'hpe_fibrechannel_conn_unit_port_transmitter_type:longwave_no_ofc',
+            'hpe_fibrechannel_conn_unit_port_type:escon',
+            'hpe_fibrechannel_conn_unit_port_wwn:quaintly',
         ],
         [
-            'hpe_msa_conn_unit_port_module_type:small_form_factor',
-            'hpe_msa_conn_unit_port_name:driving forward oxen but but',
-            'hpe_msa_conn_unit_port_speed:14',
-            'hpe_msa_conn_unit_port_state:diagnostics',
-            'hpe_msa_conn_unit_port_status:bypass',
-            'hpe_msa_conn_unit_port_transmitter_type:unused',
-            'hpe_msa_conn_unit_port_type:domain-ctl',
-            'hpe_msa_conn_unit_port_wwn:but kept',
+            'hpe_fibrechannel_conn_unit_port_module_type:small_form_factor',
+            'hpe_fibrechannel_conn_unit_port_name:driving forward oxen but but',
+            'hpe_fibrechannel_conn_unit_port_speed:14',
+            'hpe_fibrechannel_conn_unit_port_state:diagnostics',
+            'hpe_fibrechannel_conn_unit_port_status:bypass',
+            'hpe_fibrechannel_conn_unit_port_transmitter_type:unused',
+            'hpe_fibrechannel_conn_unit_port_type:domain-ctl',
+            'hpe_fibrechannel_conn_unit_port_wwn:but kept',
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.hpe_msa.connUnitPort', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.hpe.fibrechannel.connUnitPort', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
