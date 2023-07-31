@@ -82,13 +82,13 @@ DCGM_FI_DEV_ROW_REMAP_FAILURE                                     ,gauge        
 
 # DCP metrics
 DCGM_FI_PROF_GR_ENGINE_ACTIVE                                     ,gauge                  ,Ratio of time the graphics engine is active (in %).
-# DCGM_FI_PROF_SM_ACTIVE                                          ,gauge                  ,The ratio of cycles an SM has at least 1 warp assigned (in %).
-# DCGM_FI_PROF_SM_OCCUPANCY                                       ,gauge                  ,The ratio of number of warps resident on an SM (in %).
+DCGM_FI_PROF_SM_ACTIVE                                            ,gauge                  ,The ratio of cycles an SM has at least 1 warp assigned (in %).
+DCGM_FI_PROF_SM_OCCUPANCY                                         ,gauge                  ,The ratio of number of warps resident on an SM (in %).
 DCGM_FI_PROF_PIPE_TENSOR_ACTIVE                                   ,gauge                  ,Ratio of cycles the tensor (HMMA) pipe is active (in %).
 DCGM_FI_PROF_DRAM_ACTIVE                                          ,gauge                  ,Ratio of cycles the device memory interface is active sending or receiving data (in %).
-# DCGM_FI_PROF_PIPE_FP64_ACTIVE                                   ,gauge                  ,Ratio of cycles the fp64 pipes are active (in %).
-# DCGM_FI_PROF_PIPE_FP32_ACTIVE                                   ,gauge                  ,Ratio of cycles the fp32 pipes are active (in %).
-# DCGM_FI_PROF_PIPE_FP16_ACTIVE                                   ,gauge                  ,Ratio of cycles the fp16 pipes are active (in %).
+DCGM_FI_PROF_PIPE_FP64_ACTIVE                                     ,gauge                  ,Ratio of cycles the fp64 pipes are active (in %).
+DCGM_FI_PROF_PIPE_FP32_ACTIVE                                     ,gauge                  ,Ratio of cycles the fp32 pipes are active (in %).
+DCGM_FI_PROF_PIPE_FP16_ACTIVE                                     ,gauge                  ,Ratio of cycles the fp16 pipes are active (in %).
 DCGM_FI_PROF_PCIE_TX_BYTES                                        ,counter                ,The number of bytes of active pcie tx data including both header and payload.
 DCGM_FI_PROF_PCIE_RX_BYTES                                        ,counter                ,The number of bytes of active pcie rx data including both header and payload.
 
@@ -113,17 +113,9 @@ DCGM_FI_DEV_BRAND                                                 ,label        
 DCGM_FI_DEV_SERIAL                                                ,label                  ,
 ```
 
-In some cases, the `DCGM_FI_DEV_GPU_UTIL` metric can cause heavier resource consumption. If you're experiencing this issue, disable `DCGM_FI_DEV_GPU_UTIL` and replace it with the following configuration:
+In some cases, the `DCGM_FI_DEV_GPU_UTIL` metric can cause heavier resource consumption. If you're experiencing this issue, disable `DCGM_FI_DEV_GPU_UTIL` and add the following:
 
 ```
-DCGM_FI_PROF_GR_ENGINE_ACTIVE                                     ,gauge                  ,Ratio of time the graphics engine is active. The graphics engine is active if a graphics/compute context is bound and the graphics pipe or compute pipe is busy.
-DCGM_FI_PROF_SM_ACTIVE                                            ,gauge                  ,The ratio of cycles an SM has at least 1 warp assigned (computed from the number of cycles and elapsed cycles)
-DCGM_FI_PROF_SM_OCCUPANCY                                         ,gauge                  ,The ratio of number of warps resident on an SM. (number of resident as a ratio of the theoretical maximum number of warps per elapsed cycle)
-DCGM_FI_PROF_PIPE_TENSOR_ACTIVE                                   ,gauge                  ,The ratio of cycles the any tensor pipe is active (off the peak sustained elapsed cycles)
-DCGM_FI_PROF_DRAM_ACTIVE                                          ,gauge                  ,The ratio of cycles the device memory interface is active sending or receiving data.
-DCGM_FI_PROF_PIPE_FP64_ACTIVE                                     ,gauge                  ,Ratio of cycles the fp64 pipe is active.
-DCGM_FI_PROF_PIPE_FP32_ACTIVE                                     ,gauge                  ,Ratio of cycles the fp32 pipe is active.
-DCGM_FI_PROF_PIPE_FP16_ACTIVE                                     ,gauge                  ,Ratio of cycles the fp16 pipe is active. This does not include HMMA.
 DCGM_FI_PROF_NVLINK_TX_BYTES                                      ,counter                ,The total number of bytes of active NvLink tx (transmit) data including both header and payload.
 ```
 
