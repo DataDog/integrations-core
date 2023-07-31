@@ -15,26 +15,27 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     redo_lsn_age = 0
 
-    def execute_query(query):
-        with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", autocommit=True) as conn:
-            with conn.cursor() as cur:
-                try:
-                    cur.execute(query)
-                except psycopg.errors.DuplicateObject:
-                    pass
+    conn = psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", autocommit=True)
+
+    def execute_query(conn, query):
+        with conn.cursor() as cur:
+            try:
+                cur.execute(query)
+            except psycopg.errors.DuplicateObject:
+                pass
 
     replication_slot_queries = [
         "select * from pg_create_physical_replication_slot('phys_1');",
         "select * from pg_create_physical_replication_slot('phys_2', true);",
         "select * from pg_create_physical_replication_slot('phys_3', true, true);",
     ]
-    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
-        with conn.cursor() as cur:
-            cur.execute("select pg_wal_lsn_diff(pg_current_wal_lsn(), redo_lsn) from pg_control_checkpoint();")
-            redo_lsn_age = int(cur.fetchall()[0][0])
+
+    with conn.cursor() as cur:
+        cur.execute("select pg_wal_lsn_diff(pg_current_wal_lsn(), redo_lsn) from pg_control_checkpoint();")
+        redo_lsn_age = int(cur.fetchall()[0][0])
 
     for query in replication_slot_queries:
-        execute_query(query)
+        execute_query(conn, query)
 
     check.check(pg_instance)
 
@@ -78,7 +79,6 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
         tags=expected_phys2_tags,
         count=1,
     )
-
     assert_metric_at_least(
         aggregator,
         'postgresql.replication_slot.restart_delay_bytes',
@@ -93,6 +93,8 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
         tags=expected_repslot_tags,
         count=1,
     )
+
+    conn.close()
 
 
 @requires_over_10
