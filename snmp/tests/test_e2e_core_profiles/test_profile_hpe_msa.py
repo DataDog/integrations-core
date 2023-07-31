@@ -80,7 +80,9 @@ def test_e2e_profile_hpe_msa(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.hpe.fibrechannel.connUnitPort', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.hpe.fibrechannel.connUnitPort', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     # --- TEST METADATA ---
     device = {
