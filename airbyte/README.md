@@ -42,9 +42,9 @@ dogstatsd_mapper_profiles:
       - match: "cron.*"
         name: "airbyte.cron.$1"
   - name: airbyte_metrics_reporter
-    prefix: "metrics_reporter."
+    prefix: "metrics-reporter."
     mappings:
-      - match: "metrics_reporter.*"
+      - match: "metrics-reporter.*"
         name: "airbyte.metrics_reporter.$1"
   - name: airbyte_orchestrator
     prefix: "orchestrator."
