@@ -1,5 +1,7 @@
 # CHANGELOG - Vertica
 
+## 3.4.2-beta.1 / 2023-07-31
+
 ## 3.4.1 / 2022-08-05 / Agent 7.39.0
 
 * [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
