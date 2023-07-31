@@ -107,6 +107,8 @@ def test_metadata_integration(aggregator, datadog_agent):
 
     if MARKLOGIC_VERSION.startswith("10."):
         expected_version = "10.0-10"
+    elif MARKLOGIC_VERSION.startswith("11."):
+        expected_version = "11.0-3"
     else:
         expected_version = MARKLOGIC_VERSION
 
