@@ -56,6 +56,23 @@ dogstatsd_mapper_profiles:
     mappings:
       - match: "server.*"
         name: "airbyte.server.$1"
+  - name: airbyte_general
+    prefix: "airbyte."
+    mappings:
+      - match: "airbyte.worker.temporal_workflow_*"
+        name: "airbyte.worker.temporal_workflow.$1"
+      - match: "airbyte.worker.worker_*"
+        name: "airbyte.worker.$1"
+      - match: "airbyte.worker.state_commit_*"
+        name: "airbyte.worker.state_commit.$1"
+      - match: "airbyte.worker.job_*"
+        name: "airbyte.worker.job.$1"
+      - match: "airbyte.worker.attempt_*"
+        name: "airbyte.worker.attempt.$1"
+      - match: "airbyte.worker.activity_*"
+        name: "airbyte.worker.activity.$1"
+      - match: "airbyte.cron.cron_jobs_run"
+        name: "airbyte.cron.jobs_run"
 ```
 3. [Restart the Agent][5] and Airbyte.
 
