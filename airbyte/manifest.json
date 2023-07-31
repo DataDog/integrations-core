@@ -29,6 +29,9 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
+    "dashboards": {
+        "airbyte_overview": "assets/dashboards/airbyte_overview.json"
+    },
     "monitors": {
         "long_running_jobs": "assets/monitors/long_running_jobs.json"
     }
