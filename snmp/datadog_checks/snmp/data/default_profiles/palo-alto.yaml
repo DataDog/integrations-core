@@ -15,7 +15,7 @@
 extends:
   - _palo-alto.yaml
   - _generic-if.yaml
-  - _generic-host-resources-base.yaml
+  - _generic-host-resources.yaml
   - _generic-ospf.yaml
   - _generic-tcp.yaml
   - _generic-udp.yaml
