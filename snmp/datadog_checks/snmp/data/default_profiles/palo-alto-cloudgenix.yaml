@@ -1,5 +1,7 @@
 extends:
   - _palo-alto.yaml
+  - _generic-if.yaml
+  - _generic-host-resources-base.yaml
   - _generic-ucd.yaml
 
 sysobjectid:
