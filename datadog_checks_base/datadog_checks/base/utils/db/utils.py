@@ -10,11 +10,11 @@ import socket
 import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
+from ipaddress import IPv4Address
 from itertools import chain
 from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
 from cachetools import TTLCache
-from ipaddress import IPv4Address
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
