@@ -698,6 +698,8 @@ snmp.hawk.i2.pduRMSAmpsValue,gauge,,,,"[HAWK-I2-MIB] RMS current value in 0.1 Am
 snmp.hawk.i2.pduRMSVoltsValue,gauge,,,,"[HAWK-I2-MIB] RMS Volts value in volts",0,snmp,,
 snmp.hawk.i2.pduTotalEnergyValue,gauge,,,,"[HAWK-I2-MIB] Total energy value in 0.1 kWh",0,snmp,,
 snmp.hh3cProcessUtil5Min,gauge,,,,"[HH3C-ENTITY-EXT-MIB] This object provides a general idea of how busy a process caused the processor to be over a 5 minute period. The ratio is calculated by the overall CPU usage caused by the process.",0,snmp,,
+snmp.hpe.fibrechannel.connUnitPort,gauge,,,,"[FCMGMT-MIB] Generic information on ports for a specific connUnit. (Make 'sum by {X}' queries to count elements with the tag X.)",0,snmp,,
+snmp.hpe.fibrechannel.connUnitSensor,gauge,,,,"[FCMGMT-MIB] Table of the sensors supported by each connectivity unit managed by this agent. (Make 'sum by {X}' queries to count elements with the tag X.)",0,snmp,,
 snmp.hrCachedMemory,gauge,,,,"[HOST-RESOURCES-MIB] Cached memory",0,snmp,,
 snmp.hrMemoryBuffers,gauge,,,,"[HOST-RESOURCES-MIB] Memory buffers",0,snmp,,
 snmp.hrProcessorLoad,gauge,,,,"[HOST-RESOURCES-MIB] The average, over the last minute, of the percentage of time that this processor was not idle. Implementations may approximate this one minute smoothing period if necessary.",0,snmp,,
