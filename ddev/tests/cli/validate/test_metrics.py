@@ -2,6 +2,8 @@ import json
 import os
 from pathlib import Path
 
+OUTFILE = os.path.join('apache', 'metadata.csv')
+
 
 def test_metrics_empty(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
@@ -11,10 +13,10 @@ def test_metrics_empty(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache metadata file is empty. This file needs the header row at the
                 minimum.
@@ -38,10 +40,10 @@ def test_column_amount(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:2 apache.conns_total has the wrong amount of columns.
 
@@ -64,23 +66,23 @@ def test_header_missing_invalid(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
-                apache:2 Invalid column {'curated_metric_badheader'}.
-                apache:2 Missing columns {'curated_metric'}.
-                apache:3 Invalid column {'curated_metric_badheader'}.
-                apache:3 Missing columns {'curated_metric'}.
-                apache:4 Invalid column {'curated_metric_badheader'}.
-                apache:4 Missing columns {'curated_metric'}.
-                apache:5 Invalid column {'curated_metric_badheader'}.
-                apache:5 Missing columns {'curated_metric'}.
-                apache:6 Invalid column {'curated_metric_badheader'}.
-                apache:6 Missing columns {'curated_metric'}.
-                apache:7 Invalid column {'curated_metric_badheader'}.
-                apache:7 Missing columns {'curated_metric'}.
+                apache:2 Invalid column {{'curated_metric_badheader'}}.
+                apache:2 Missing columns {{'curated_metric'}}.
+                apache:3 Invalid column {{'curated_metric_badheader'}}.
+                apache:3 Missing columns {{'curated_metric'}}.
+                apache:4 Invalid column {{'curated_metric_badheader'}}.
+                apache:4 Missing columns {{'curated_metric'}}.
+                apache:5 Invalid column {{'curated_metric_badheader'}}.
+                apache:5 Missing columns {{'curated_metric'}}.
+                apache:6 Invalid column {{'curated_metric_badheader'}}.
+                apache:6 Missing columns {{'curated_metric'}}.
+                apache:7 Invalid column {{'curated_metric_badheader'}}.
+                apache:7 Missing columns {{'curated_metric'}}.
 
         Errors: 1
         """
@@ -101,10 +103,10 @@ def test_normalized_metrics(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:2 Metric name 'apache.conns-total' is not valid, it should be
                 normalized as apache.conns_total.
@@ -126,10 +128,10 @@ def test_manifest_metric_prefix_dne(ddev, repository, helpers):
     assert result.exit_code == 1, result.output
 
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:2 metric_prefix does not exist in manifest.
 
@@ -152,10 +154,10 @@ def test_invalid_metric_type(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:2 `invalid_metric_type` is an invalid metric_type.
 
@@ -178,10 +180,10 @@ def test_invalid_unit_name(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:2 `invalid_unit_name` is an invalid unit_name.
 
@@ -204,10 +206,10 @@ def test_invalid_per_unit_name(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:7 `invalid_per_unit_name` is an invalid per_unit_name.
 
@@ -230,10 +232,10 @@ def test_invalid_unit_fraction(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:7 `day/second` unit is invalid, use the fraction unit instead.
 
@@ -256,10 +258,10 @@ def test_integration_header(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:7 integration: `apache___` should be: apache.
 
@@ -282,10 +284,10 @@ def test_invalid_orientation(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:7 `2` is an invalid orientation.
 
@@ -308,10 +310,10 @@ def test_invalid_vbar(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:7 `apache.net.bytes_per_s` description contains a `|`.
 
@@ -322,7 +324,7 @@ def test_invalid_vbar(ddev, repository, helpers):
 
 def test_invalid_unicode(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
-    with open(metrics_file, 'r', encoding="utf-8") as file:
+    with open(metrics_file, 'r', encoding="unicode_escape") as file:
         metrics = file.readlines()
 
     metrics[6] = metrics[6].replace('The number', 'The ± number')
@@ -334,10 +336,10 @@ def test_invalid_unicode(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:7 `apache.net.bytes_per_s` description contains unicode
                 characters.
@@ -363,10 +365,10 @@ def test_max_length(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:7 `apache.net.bytes_per_s` description exceeds the max length:
                 400 for descriptions.
@@ -390,10 +392,10 @@ def test_interval_integer(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:7 interval should be an int, found 'not_a_digit'.
 
@@ -416,10 +418,10 @@ def test_duplicate_curated_metric(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:7 `apache.net.bytes_per_s` contains duplicate curated_metric
                 types.
@@ -443,10 +445,10 @@ def test_invalid_curated_metric(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:7 `apache.net.bytes_per_s` contains invalid curated metric type:
                 invalid_curated_metric
@@ -470,10 +472,10 @@ def test_header_empty(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache: metric_type is empty in 1 rows.
 
@@ -496,10 +498,10 @@ def test_prefix_match(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache: `invalid_metric_prefix` appears 1 time(s) and does not match
                 metric_prefix defined in the manifest.
@@ -523,10 +525,10 @@ def test_duplicate_metric_name(ddev, repository, helpers):
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:3 `apache.conns_total` is a duplicate metric_name
 
@@ -550,10 +552,10 @@ def test_warnings(ddev, repository, helpers):
 
     assert result.exit_code == 0, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── Apache
-            └── apache/metadata.csv
+            └── {OUTFILE}
 
                 apache:3 `ConnsTotal` is a duplicate short_name
                 apache: description is empty in 1 rows.
