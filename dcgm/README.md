@@ -113,6 +113,8 @@ DCGM_FI_DEV_BRAND                                                 ,label        
 DCGM_FI_DEV_SERIAL                                                ,label                  ,
 ```
 
+It is recommended that users configure collection of extra metrics 1000 to 1010 for GPU utilization (1001) and other information (1002 to 1010) if the default set of metrics is causing heavier resource consumption in certain set-ups.
+
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host | Docker" xxx -->
 
