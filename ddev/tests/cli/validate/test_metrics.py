@@ -1,9 +1,10 @@
 import json
+import os
 from pathlib import Path
 
 
 def test_metrics_empty(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     Path(metrics_file).write_text('')
 
     result = ddev("validate", "metadata", 'apache')
@@ -24,7 +25,7 @@ def test_metrics_empty(ddev, repository, helpers):
 
 
 def test_column_amount(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -50,7 +51,7 @@ def test_column_amount(ddev, repository, helpers):
 
 
 def test_header_missing_invalid(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -87,7 +88,7 @@ def test_header_missing_invalid(ddev, repository, helpers):
 
 
 def test_normalized_metrics(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -123,7 +124,7 @@ def test_manifest_metric_prefix_dne(ddev, repository, helpers):
     result = ddev("validate", "metadata", 'apache')
 
     assert result.exit_code == 1, result.output
-    # print(result.output)
+
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
         """
         Metrics validation
@@ -138,7 +139,7 @@ def test_manifest_metric_prefix_dne(ddev, repository, helpers):
 
 
 def test_invalid_metric_type(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -164,7 +165,7 @@ def test_invalid_metric_type(ddev, repository, helpers):
 
 
 def test_invalid_unit_name(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -190,7 +191,7 @@ def test_invalid_unit_name(ddev, repository, helpers):
 
 
 def test_invalid_per_unit_name(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -216,7 +217,7 @@ def test_invalid_per_unit_name(ddev, repository, helpers):
 
 
 def test_invalid_unit_fraction(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -242,7 +243,7 @@ def test_invalid_unit_fraction(ddev, repository, helpers):
 
 
 def test_integration_header(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -268,7 +269,7 @@ def test_integration_header(ddev, repository, helpers):
 
 
 def test_invalid_orientation(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -294,7 +295,7 @@ def test_invalid_orientation(ddev, repository, helpers):
 
 
 def test_invalid_vbar(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -320,7 +321,7 @@ def test_invalid_vbar(ddev, repository, helpers):
 
 
 def test_invalid_unicode(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r', encoding="utf-8") as file:
         metrics = file.readlines()
 
@@ -349,7 +350,7 @@ def test_invalid_unicode(ddev, repository, helpers):
 def test_max_length(ddev, repository, helpers):
     long_string = "Lorem ipsum dolor sit amet consectetur adipiscing elit finibus vulputate commodo"
     max_length = long_string * 5
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -376,7 +377,7 @@ def test_max_length(ddev, repository, helpers):
 
 
 def test_interval_integer(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -402,7 +403,7 @@ def test_interval_integer(ddev, repository, helpers):
 
 
 def test_duplicate_curated_metric(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -429,7 +430,7 @@ def test_duplicate_curated_metric(ddev, repository, helpers):
 
 
 def test_invalid_curated_metric(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -456,7 +457,7 @@ def test_invalid_curated_metric(ddev, repository, helpers):
 
 
 def test_header_empty(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -482,7 +483,7 @@ def test_header_empty(ddev, repository, helpers):
 
 
 def test_prefix_match(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -509,7 +510,7 @@ def test_prefix_match(ddev, repository, helpers):
 
 
 def test_duplicate_metric_name(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -535,7 +536,7 @@ def test_duplicate_metric_name(ddev, repository, helpers):
 
 
 def test_warnings(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
+    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
     with open(metrics_file, 'r') as file:
         metrics = file.readlines()
 
@@ -564,7 +565,6 @@ def test_warnings(ddev, repository, helpers):
 
 
 def test_metrics_passing(ddev, repository, helpers):
-
     result = ddev('validate', 'metadata', 'postgres')
 
     assert result.exit_code == 0, result.output
