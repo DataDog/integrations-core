@@ -113,7 +113,19 @@ DCGM_FI_DEV_BRAND                                                 ,label        
 DCGM_FI_DEV_SERIAL                                                ,label                  ,
 ```
 
-It is recommended that users configure collection of extra metrics 1000 to 1010 for GPU utilization (1001) and other information (1002 to 1010) if the default set of metrics is causing heavier resource consumption in certain set-ups.
+In certain set ups `DCGM_FI_DEV_GPU_UTIL` metric can cause heavier resource consumption. In that case disable this metric and replace it instead with the following:
+
+```
+DCGM_FI_PROF_GR_ENGINE_ACTIVE                                     ,gauge                  ,Ratio of time the graphics engine is active. The graphics engine is active if a graphics/compute context is bound and the graphics pipe or compute pipe is busy.
+DCGM_FI_PROF_SM_ACTIVE                                            ,gauge                  ,The ratio of cycles an SM has at least 1 warp assigned (computed from the number of cycles and elapsed cycles)
+DCGM_FI_PROF_SM_OCCUPANCY                                         ,gauge                  ,The ratio of number of warps resident on an SM. (number of resident as a ratio of the theoretical maximum number of warps per elapsed cycle)
+DCGM_FI_PROF_PIPE_TENSOR_ACTIVE                                   ,gauge                  ,The ratio of cycles the any tensor pipe is active (off the peak sustained elapsed cycles)
+DCGM_FI_PROF_DRAM_ACTIVE                                          ,gauge                  ,The ratio of cycles the device memory interface is active sending or receiving data.
+DCGM_FI_PROF_PIPE_FP64_ACTIVE                                     ,gauge                  ,Ratio of cycles the fp64 pipe is active.
+DCGM_FI_PROF_PIPE_FP32_ACTIVE                                     ,gauge                  ,Ratio of cycles the fp32 pipe is active.
+DCGM_FI_PROF_PIPE_FP16_ACTIVE                                     ,gauge                  ,Ratio of cycles the fp16 pipe is active. This does not include HMMA.
+DCGM_FI_PROF_NVLINK_TX_BYTES                                      ,counter                ,The total number of bytes of active NvLink tx (transmit) data including both header and payload.
+```
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host | Docker" xxx -->
