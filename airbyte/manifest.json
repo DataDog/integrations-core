@@ -28,6 +28,9 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "monitors": {
+        "long_running_jobs": "assets/monitors/long_running_jobs.json"
     }
   },
   "author": {
