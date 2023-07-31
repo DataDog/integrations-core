@@ -135,7 +135,7 @@ exclude = ["openmetrics"]
 [overrides.validate.metrics]
 exclude = [
     'disk',
-    'go-expvar',
+    'go_expvar',
     'go-metro',
     'http',
     'kubelet',

@@ -2,11 +2,11 @@ import json
 import os
 from pathlib import Path
 
-OUTFILE = os.path.join('apache', 'metadata.csv')
-
 
 def test_metrics_empty(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     Path(metrics_file).write_text('')
 
     result = ddev("validate", "metadata", 'apache')
@@ -16,7 +16,7 @@ def test_metrics_empty(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache metadata file is empty. This file needs the header row at the
                 minimum.
@@ -26,8 +26,10 @@ def test_metrics_empty(ddev, repository, helpers):
     )
 
 
-def test_column_amount(ddev, repository, helpers):
+def test_column_number(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -43,9 +45,9 @@ def test_column_amount(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
-                apache:2 apache.conns_total has the wrong amount of columns.
+                apache:2 apache.conns_total has the wrong number of columns.
 
         Errors: 1
         """
@@ -54,6 +56,8 @@ def test_column_amount(ddev, repository, helpers):
 
 def test_header_missing_invalid(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -69,7 +73,7 @@ def test_header_missing_invalid(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:2 Invalid column {{'curated_metric_badheader'}}.
                 apache:2 Missing columns {{'curated_metric'}}.
@@ -91,6 +95,8 @@ def test_header_missing_invalid(ddev, repository, helpers):
 
 def test_normalized_metrics(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -106,7 +112,7 @@ def test_normalized_metrics(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:2 Metric name 'apache.conns-total' is not valid, it should be
                 normalized as apache.conns_total.
@@ -119,6 +125,8 @@ def test_normalized_metrics(ddev, repository, helpers):
 def test_manifest_metric_prefix_dne(ddev, repository, helpers):
     check = 'apache'
     manifest_file = repository.path / check / 'manifest.json'
+    outfile = os.path.join('apache', 'metadata.csv')
+
     manifest = json.loads(manifest_file.read_text())
     del manifest['assets']['integration']['metrics']['prefix']
     manifest_file.write_text(json.dumps(manifest))
@@ -131,7 +139,7 @@ def test_manifest_metric_prefix_dne(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:2 metric_prefix does not exist in manifest.
 
@@ -142,6 +150,8 @@ def test_manifest_metric_prefix_dne(ddev, repository, helpers):
 
 def test_invalid_metric_type(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -157,7 +167,7 @@ def test_invalid_metric_type(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:2 `invalid_metric_type` is an invalid metric_type.
 
@@ -168,6 +178,8 @@ def test_invalid_metric_type(ddev, repository, helpers):
 
 def test_invalid_unit_name(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -183,7 +195,7 @@ def test_invalid_unit_name(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:2 `invalid_unit_name` is an invalid unit_name.
 
@@ -194,6 +206,8 @@ def test_invalid_unit_name(ddev, repository, helpers):
 
 def test_invalid_per_unit_name(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -209,7 +223,7 @@ def test_invalid_per_unit_name(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:7 `invalid_per_unit_name` is an invalid per_unit_name.
 
@@ -220,6 +234,8 @@ def test_invalid_per_unit_name(ddev, repository, helpers):
 
 def test_invalid_unit_fraction(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -235,7 +251,7 @@ def test_invalid_unit_fraction(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:7 `day/second` unit is invalid, use the fraction unit instead.
 
@@ -246,6 +262,8 @@ def test_invalid_unit_fraction(ddev, repository, helpers):
 
 def test_integration_header(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -261,7 +279,7 @@ def test_integration_header(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:7 integration: `apache___` should be: apache.
 
@@ -272,6 +290,8 @@ def test_integration_header(ddev, repository, helpers):
 
 def test_invalid_orientation(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -287,7 +307,7 @@ def test_invalid_orientation(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:7 `2` is an invalid orientation.
 
@@ -298,6 +318,8 @@ def test_invalid_orientation(ddev, repository, helpers):
 
 def test_invalid_vbar(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -313,7 +335,7 @@ def test_invalid_vbar(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:7 `apache.net.bytes_per_s` description contains a `|`.
 
@@ -324,6 +346,8 @@ def test_invalid_vbar(ddev, repository, helpers):
 
 def test_invalid_unicode(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -339,7 +363,7 @@ def test_invalid_unicode(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:7 `apache.net.bytes_per_s` description contains unicode
                 characters.
@@ -352,7 +376,10 @@ def test_invalid_unicode(ddev, repository, helpers):
 def test_max_length(ddev, repository, helpers):
     long_string = "Lorem ipsum dolor sit amet consectetur adipiscing elit finibus vulputate commodo"
     max_length = long_string * 5
+
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -368,7 +395,7 @@ def test_max_length(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:7 `apache.net.bytes_per_s` description exceeds the max length:
                 400 for descriptions.
@@ -380,6 +407,8 @@ def test_max_length(ddev, repository, helpers):
 
 def test_interval_integer(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -395,7 +424,7 @@ def test_interval_integer(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:7 interval should be an int, found 'not_a_digit'.
 
@@ -406,6 +435,8 @@ def test_interval_integer(ddev, repository, helpers):
 
 def test_duplicate_curated_metric(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -421,7 +452,7 @@ def test_duplicate_curated_metric(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:7 `apache.net.bytes_per_s` contains duplicate curated_metric
                 types.
@@ -433,6 +464,8 @@ def test_duplicate_curated_metric(ddev, repository, helpers):
 
 def test_invalid_curated_metric(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -448,7 +481,7 @@ def test_invalid_curated_metric(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:7 `apache.net.bytes_per_s` contains invalid curated metric type:
                 invalid_curated_metric
@@ -460,6 +493,8 @@ def test_invalid_curated_metric(ddev, repository, helpers):
 
 def test_header_empty(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -475,7 +510,7 @@ def test_header_empty(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache: metric_type is empty in 1 rows.
 
@@ -486,6 +521,8 @@ def test_header_empty(ddev, repository, helpers):
 
 def test_prefix_match(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -501,7 +538,7 @@ def test_prefix_match(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache: `invalid_metric_prefix` appears 1 time(s) and does not match
                 metric_prefix defined in the manifest.
@@ -513,6 +550,8 @@ def test_prefix_match(ddev, repository, helpers):
 
 def test_duplicate_metric_name(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -528,7 +567,7 @@ def test_duplicate_metric_name(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:3 `apache.conns_total` is a duplicate metric_name
 
@@ -539,6 +578,8 @@ def test_duplicate_metric_name(ddev, repository, helpers):
 
 def test_warnings(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    outfile = os.path.join('apache', 'metadata.csv')
+
     with open(metrics_file, 'r', encoding='utf-8') as file:
         metrics = file.readlines()
 
@@ -555,7 +596,7 @@ def test_warnings(ddev, repository, helpers):
         f"""
         Metrics validation
         └── Apache
-            └── {OUTFILE}
+            └── {outfile}
 
                 apache:3 `ConnsTotal` is a duplicate short_name
                 apache: description is empty in 1 rows.

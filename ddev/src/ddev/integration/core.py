@@ -100,7 +100,6 @@ class Integration:
     def metrics_file(self) -> Path:
         relative_path = self.manifest.get('/assets/integration/metrics/metadata_path', 'metadata.csv')
         return self.path / relative_path
-        # return self.path / 'metadata.csv'
 
     @cached_property
     def is_valid(self) -> bool:

@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import csv
-import io
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
@@ -18,7 +17,7 @@ def read_metadata_rows(metadata_file):
     """
     Iterate over the rows of a `metadata.csv` file.
     """
-    with io.open(metadata_file, 'r', encoding='utf-8') as f:
+    with open(metadata_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f, delimiter=',')
 
         # Read header
@@ -37,8 +36,6 @@ def normalize_metric_name(metric_name):
     """
     from ddev.cli.validate import metadata_utils
 
-    if not isinstance(metric_name, str):
-        metric_name = str(metric_name)
     metric_name = metadata_utils.METRIC_REPLACEMENT.sub("_", metric_name)
     return metadata_utils.METRIC_DOTUNDERSCORE_CLEANUP.sub(".", metric_name).strip("_")
 
@@ -109,11 +106,12 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
             )
 
         for line, row in read_metadata_rows(metadata_file):
-            # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
+            # determine if number of columns is complete by checking for None values
+            # DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader
             if None in row.values():
                 errors = True
 
-                error_message += f"{current_check.name}:{line} {row['metric_name']} has the wrong amount of columns.\n"
+                error_message += f"{current_check.name}:{line} {row['metric_name']} has the wrong number of columns.\n"
                 continue
 
             # all headers exist, no invalid headers
@@ -228,7 +226,7 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
                 error_message += f"{current_check.name}:{line} `{row['metric_name']}` description contains a `|`.\n"
 
             # check if there is unicode
-            elif any(not content.isascii() for _, content in row.items()):
+            elif any(not content.isascii() for content in row.values()):
                 errors = True
 
                 error_message += (
