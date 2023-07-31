@@ -324,7 +324,7 @@ def test_invalid_vbar(ddev, repository, helpers):
 
 def test_invalid_unicode(ddev, repository, helpers):
     metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
-    with open(metrics_file, 'r', encoding="unicode_escape") as file:
+    with open(metrics_file, 'r', encoding="latin1", errors = 'ignore') as file:
         metrics = file.readlines()
 
     metrics[6] = metrics[6].replace('The number', 'The ± number')
