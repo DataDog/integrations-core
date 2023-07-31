@@ -1,0 +1,1316 @@
+extends:
+  - _base.yaml
+  - _generic-if.yaml
+  - netapp.yaml
+sysobjectid:
+  - 1.3.6.1.4.1.789.2.3
+  - 1.3.6.1.4.1.789.2.5
+metrics:
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.1.1.0
+      name: netapp.productType
+      enum:
+        eisa-based: 1
+        pci-based: 2
+      TODO: enum in scalar metric is not supported yet (keep this metric and this
+        comment in profile until it's fixed)
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.1.2.0
+      name: netapp.productVersion
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.1.4.0
+      name: netapp.productVendor
+      enum:
+        netapp: 1
+        dell: 2
+        ibm: 3
+      TODO: enum in scalar metric is not supported yet (keep this metric and this
+        comment in profile until it's fixed)
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.1.6.0
+      name: netapp.productFirmwareVersion
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.1.9.0
+      name: netapp.productSerialNum
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.1.11.0
+      name: netapp.productCPUArch
+      enum:
+        x86: 1
+        alpha: 2
+        mips: 3
+        sparc: 4
+      TODO: enum in scalar metric is not supported yet (keep this metric and this
+        comment in profile until it's fixed)
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.1.3.0
+      name: cpu.usage
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.1.6.0
+      name: netapp.cpuCount
+  - MIB: NETAPP-MIB
+    table:
+      OID: 1.3.6.1.4.1.789.1.2.1.14
+      name: cDOTCpuTable
+    symbols:
+      - OID: 1.3.6.1.4.1.789.1.2.1.14.1.4
+        name: netapp.cDOTCpuBusyTimePerCent
+      - OID: 1.3.6.1.4.1.789.1.2.1.14.1.12
+        name: netapp.cDOTCpuCPInterruptPercent
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.789.1.2.1.14.1.1
+          name: netapp.cDOTCpuNodeName
+        tag: netapp_c_dot_cpu_node_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.2.1.14.1.7
+          name: netapp.cDOTCpuCount
+        tag: netapp_c_dot_cpu_count
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.2.4.0
+      name: netapp.miscGlobalStatus
+      enum:
+        other: 1
+        unknown: 2
+        ok: 3
+        nonCritical: 4
+        critical: 5
+        nonRecoverable: 6
+      TODO: enum in scalar metric is not supported yet (keep this metric and this
+        comment in profile until it's fixed)
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.2.23.0
+      name: netapp.miscCacheAge
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.2.25.0
+      name: netapp.miscGlobalStatusMessage
+      format: TODO_handle_conversion_to_one
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.3.2.0
+      name: netapp.cfState
+      enum:
+        dead: 1
+        canTakeover: 2
+        cannotTakeover: 3
+        takeover: 4
+      TODO: enum in scalar metric is not supported yet (keep this metric and this
+        comment in profile until it's fixed)
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.3.4.0
+      name: netapp.cfPartnerStatus
+      enum:
+        maybeDown: 1
+        ok: 2
+        dead: 3
+      TODO: enum in scalar metric is not supported yet (keep this metric and this
+        comment in profile until it's fixed)
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.3.6.0
+      name: netapp.cfPartnerName
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.3.8.0
+      name: netapp.cfInterconnectStatus
+      enum:
+        notPresent: 1
+        down: 2
+        partialFailure: 3
+        up: 4
+      TODO: enum in scalar metric is not supported yet (keep this metric and this
+        comment in profile until it's fixed)
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.6.2.0
+      name: netapp.cpFromTimerOps
+    metric_type: monotonic_count
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.6.3.0
+      name: netapp.cpFromSnapshotOps
+    metric_type: monotonic_count
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.6.4.0
+      name: netapp.cpFromLowWaterOps
+    metric_type: monotonic_count
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.6.5.0
+      name: netapp.cpFromHighWaterOps
+    metric_type: monotonic_count
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.6.6.0
+      name: netapp.cpFromLogFullOps
+    metric_type: monotonic_count
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.6.7.0
+      name: netapp.cpFromCpOps
+    metric_type: monotonic_count
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.6.8.0
+      name: netapp.cpTotalOps
+    metric_type: monotonic_count
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.6.9.0
+      name: netapp.cpFromFlushOps
+    metric_type: monotonic_count
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.6.10.0
+      name: netapp.cpFromSyncOps
+    metric_type: monotonic_count
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.6.12.0
+      name: netapp.cpFromCpDeferredOps
+    metric_type: monotonic_count
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.6.13.0
+      name: netapp.cpFromLowDatavecsOps
+    metric_type: monotonic_count
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.7.1.0
+      name: netapp.autosupportStatus
+      enum:
+        ok: 1
+        smtpFailure: 2
+        postFailure: 3
+        smtp-postFailure: 4
+        unknown: 5
+      TODO: enum in scalar metric is not supported yet (keep this metric and this
+        comment in profile until it's fixed)
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.7.2.0
+      name: netapp.autosupportStatusMessage
+      format: TODO_handle_conversion_to_one
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.7.3.0
+      name: netapp.autosupportSuccessfulSends
+    metric_type: monotonic_count
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.2.7.4.0
+      name: netapp.autosupportFailedSends
+    metric_type: monotonic_count
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.5.6.0
+      name: netapp.dfNumber
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.5.9.0
+      name: netapp.volNumber
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.5.12.0
+      name: netapp.aggrNumber
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.6.4.1.0
+      name: netapp.diskTotalCount
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.6.4.2.0
+      name: netapp.diskActiveCount
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.6.4.3.0
+      name: netapp.diskReconstructingCount
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.6.4.4.0
+      name: netapp.diskReconstructingParityCount
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.6.4.5.0
+      name: netapp.diskVerifyingParityCount
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.6.4.6.0
+      name: netapp.diskScrubbingCount
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.6.4.7.0
+      name: netapp.diskFailedCount
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.6.4.8.0
+      name: netapp.diskSpareCount
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.6.4.9.0
+      name: netapp.diskAddingSpareCount
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.6.4.10.0
+      name: netapp.diskFailedMessage
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.6.4.11.0
+      name: netapp.diskPrefailedCount
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.6.5.0
+      name: netapp.raidVNumber
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.6.6.0
+      name: netapp.spareNumber
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.6.7.0
+      name: netapp.otherDiskNumber
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.6.8.0
+      name: netapp.raidPNumber
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.6.12.0
+      name: netapp.outOfDateDiskCount
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.8.3.6.36.0
+      name: netapp.ncHttpActiveCliConns
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.21.1.1.0
+      name: netapp.enclNumber
+  - MIB: NETAPP-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.789.1.26.8.0
+      name: netapp.extcache64Hits
+    metric_type: monotonic_count
+  - MIB: NETAPP-MIB
+    table:
+      OID: 1.3.6.1.4.1.789.1.4.4
+      name: qvStateTable
+    symbols:
+      - OID: 1.3.6.1.4.1.789.1.4.4.1.4
+        name: netapp.qvStateInitPercent
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.789.1.4.4.1.2
+          name: netapp.qvStateName
+        tag: netapp_qv_state_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.4.4.1.5
+          name: netapp.qvStateVserver
+        tag: netapp_qv_state_vserver
+      - column:
+          OID: 1.3.6.1.4.1.789.1.4.4.1.3
+          name: netapp.qvStateStat
+        tag: netapp_qv_state_stat
+        mapping:
+          1: quota_state_off
+          2: quota_state_on
+          3: quota_state_init
+          4: quota_state_corrupt
+  - MIB: NETAPP-MIB
+    table:
+      OID: 1.3.6.1.4.1.789.1.5.4
+      name: dfTable
+    symbols:
+      - OID: 1.3.6.1.4.1.789.1.5.4.1.6
+        name: netapp.dfPerCentKBytesCapacity
+      - OID: 1.3.6.1.4.1.789.1.5.4.1.7
+        name: netapp.dfInodesUsed
+      - OID: 1.3.6.1.4.1.789.1.5.4.1.8
+        name: netapp.dfInodesFree
+      - OID: 1.3.6.1.4.1.789.1.5.4.1.9
+        name: netapp.dfPerCentInodeCapacity
+      - OID: 1.3.6.1.4.1.789.1.5.4.1.11
+        name: netapp.dfMaxFilesAvail
+      - OID: 1.3.6.1.4.1.789.1.5.4.1.12
+        name: netapp.dfMaxFilesUsed
+      - OID: 1.3.6.1.4.1.789.1.5.4.1.22
+        name: netapp.dfPlexCount
+      - OID: 1.3.6.1.4.1.789.1.5.4.1.28
+        name: netapp.dfPerCentSaved
+      - OID: 1.3.6.1.4.1.789.1.5.4.1.29
+        name: netapp.df64TotalKBytes
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.789.1.5.4.1.30
+        name: netapp.df64UsedKBytes
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.789.1.5.4.1.31
+        name: netapp.df64AvailKBytes
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.789.1.5.4.1.43
+        name: netapp.df64TotalReservedKBytes
+        metric_type: monotonic_count
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.4.1.2
+          name: netapp.dfFileSys
+        tag: netapp_df_file_sys
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.4.1.10
+          name: netapp.dfMountedOn
+        tag: netapp_df_mounted_on
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.4.1.23
+          name: netapp.dfType
+        tag: netapp_df_type
+        mapping:
+          1: traditional_volume
+          2: flexible_volume
+          3: aggregate
+          4: striped_aggregate
+          5: striped_volume
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.4.1.34
+          name: netapp.dfVserver
+        tag: netapp_df_vserver
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.4.1.20
+          name: netapp.dfStatus
+        tag: netapp_df_status
+        mapping:
+          0: unsupported
+          1: unmounted
+          2: mounted
+          3: frozen
+          4: destroying
+          5: creating
+          6: mounting
+          7: unmounting
+          8: nofsinfo
+          9: replaying
+          10: replayed
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.4.1.21
+          name: netapp.dfMirrorStatus
+        tag: netapp_df_mirror_status
+        mapping:
+          0: unsupported
+          1: invalid
+          2: uninitialized
+          3: needcpcheck
+          4: cpcheckwait
+          5: unmirrored
+          6: normal
+          7: degraded
+          8: resyncing
+          9: failed
+          10: limbo
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.4.1.35
+          name: netapp.dfStateOnline
+        tag: netapp_df_state_online
+        mapping:
+          0: 'false'
+          1: 'true'
+  - MIB: NETAPP-MIB
+    table:
+      OID: 1.3.6.1.4.1.789.1.5.8
+      name: volTable
+    symbols:
+      - name: netapp.vol
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.8.1.2
+          name: netapp.volName
+        tag: netapp_vol_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.8.1.3
+          name: netapp.volFSID
+        tag: netapp_vol_fsid
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.8.1.7
+          name: netapp.volOptions
+        tag: netapp_vol_options
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.8.1.8
+          name: netapp.volUUID
+        tag: netapp_vol_uuid
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.8.1.9
+          name: netapp.volAggrName
+        tag: netapp_vol_aggr_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.8.1.5
+          name: netapp.volState
+        tag: netapp_vol_state
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.8.1.6
+          name: netapp.volStatus
+        tag: netapp_vol_status
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.8.1.10
+          name: netapp.volType
+        tag: netapp_vol_type
+        mapping:
+          1: traditional
+          2: flexible
+          3: striped
+          4: asis
+          5: snaplock
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.8.1.11
+          name: netapp.volClone
+        tag: netapp_vol_clone
+        mapping:
+          1: 'false'
+          2: 'true'
+  - MIB: NETAPP-MIB
+    table:
+      OID: 1.3.6.1.4.1.789.1.5.10
+      name: qtreeTable
+    symbols:
+      - name: netapp.qtree
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.10.1.2
+          name: netapp.qtreeVolume
+        tag: netapp_qtree_volume
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.10.1.3
+          name: netapp.qtreeVolumeName
+        tag: netapp_qtree_volume_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.10.1.4
+          name: netapp.qtreeId
+        tag: netapp_qtree_id
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.10.1.5
+          name: netapp.qtreeName
+        tag: netapp_qtree_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.10.1.6
+          name: netapp.qtreeStyle
+        tag: netapp_qtree_style
+        mapping:
+          1: unix
+          2: ntfs
+          3: mixed
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.10.1.7
+          name: netapp.qtreeStatus
+        tag: netapp_qtree_status
+        mapping:
+          1: normal
+          2: snapmirrored
+          3: snapvaulted
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.10.1.8
+          name: netapp.qtreeOplock
+        tag: netapp_qtree_oplock
+        mapping:
+          1: enabled
+          2: disabled
+  - MIB: NETAPP-MIB
+    table:
+      OID: 1.3.6.1.4.1.789.1.5.11
+      name: aggrTable
+    symbols:
+      - name: netapp.aggr
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.11.1.2
+          name: netapp.aggrName
+        tag: netapp_aggr_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.11.1.3
+          name: netapp.aggrFSID
+        tag: netapp_aggr_fsid
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.11.1.7
+          name: netapp.aggrOptions
+        tag: netapp_aggr_options
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.11.1.8
+          name: netapp.aggrUUID
+        tag: netapp_aggr_uuid
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.11.1.5
+          name: netapp.aggrState
+        tag: netapp_aggr_state
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.11.1.6
+          name: netapp.aggrStatus
+        tag: netapp_aggr_status
+      - column:
+          OID: 1.3.6.1.4.1.789.1.5.11.1.10
+          name: netapp.aggrType
+        tag: netapp_aggr_type
+        mapping:
+          0: unknown
+          1: traditional
+          2: aggregate
+          3: striped
+  - MIB: NETAPP-MIB
+    table:
+      OID: 1.3.6.1.4.1.789.1.6.2
+      name: raidVTable
+    symbols:
+      - OID: 1.3.6.1.4.1.789.1.6.2.1.7
+        name: netapp.raidVUsedMb
+      - OID: 1.3.6.1.4.1.789.1.6.2.1.9
+        name: netapp.raidVTotalMb
+      - OID: 1.3.6.1.4.1.789.1.6.2.1.11
+        name: netapp.raidVCompletionPerCent
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.2
+          name: netapp.raidVDiskName
+        tag: netapp_raid_v_disk_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.12
+          name: netapp.raidVVol
+        tag: netapp_raid_v_vol
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.13
+          name: netapp.raidVGroup
+        tag: netapp_raid_v_group
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.14
+          name: netapp.raidVDiskNumber
+        tag: netapp_raid_v_disk_number
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.15
+          name: netapp.raidVGroupNumber
+        tag: netapp_raid_v_group_number
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.19
+          name: netapp.raidVShelf
+        tag: netapp_raid_v_shelf
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.20
+          name: netapp.raidVBay
+        tag: netapp_raid_v_bay
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.21
+          name: netapp.raidVPlex
+        tag: netapp_raid_v_plex
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.22
+          name: netapp.raidVPlexGroup
+        tag: netapp_raid_v_plex_group
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.23
+          name: netapp.raidVPlexNumber
+        tag: netapp_raid_v_plex_number
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.24
+          name: netapp.raidVPlexName
+        tag: netapp_raid_v_plex_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.25
+          name: netapp.raidVSectorSize
+        tag: netapp_raid_v_sector_size
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.26
+          name: netapp.raidVDiskSerialNumber
+        tag: netapp_raid_v_disk_serial_number
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.27
+          name: netapp.raidVDiskVendor
+        tag: netapp_raid_v_disk_vendor
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.28
+          name: netapp.raidVDiskModel
+        tag: netapp_raid_v_disk_model
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.29
+          name: netapp.raidVDiskFirmwareRevision
+        tag: netapp_raid_v_disk_firmware_revision
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.30
+          name: netapp.raidVDiskRPM
+        tag: netapp_raid_v_disk_rpm
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.31
+          name: netapp.raidVDiskType
+        tag: netapp_raid_v_disk_type
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.32
+          name: netapp.raidVDiskPool
+        tag: netapp_raid_v_disk_pool
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.33
+          name: netapp.raidVDiskCopyDestDiskName
+        tag: netapp_raid_v_disk_copy_dest_disk_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.2.1.3
+          name: netapp.raidVStatus
+        tag: netapp_raid_v_status
+        mapping:
+          1: active
+          2: reconstruction_in_progress
+          3: parity_reconstruction_in_progress
+          4: parity_verification_in_progress
+          5: scrubbing_in_progress
+          6: failed
+          9: prefailed
+          10: offline
+  - MIB: NETAPP-MIB
+    table:
+      OID: 1.3.6.1.4.1.789.1.6.3
+      name: spareTable
+    symbols:
+      - OID: 1.3.6.1.4.1.789.1.6.3.1.7
+        name: netapp.spareTotalMb
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.3.1.2
+          name: netapp.spareDiskName
+        tag: netapp_spare_disk_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.3.1.12
+          name: netapp.spareShelf
+        tag: netapp_spare_shelf
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.3.1.13
+          name: netapp.spareBay
+        tag: netapp_spare_bay
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.3.1.14
+          name: netapp.sparePool
+        tag: netapp_spare_pool
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.3.1.15
+          name: netapp.spareSectorSize
+        tag: netapp_spare_sector_size
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.3.1.16
+          name: netapp.spareDiskSerialNumber
+        tag: netapp_spare_disk_serial_number
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.3.1.17
+          name: netapp.spareDiskVendor
+        tag: netapp_spare_disk_vendor
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.3.1.18
+          name: netapp.spareDiskModel
+        tag: netapp_spare_disk_model
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.3.1.19
+          name: netapp.spareDiskFirmwareRevision
+        tag: netapp_spare_disk_firmware_revision
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.3.1.20
+          name: netapp.spareDiskRPM
+        tag: netapp_spare_disk_rpm
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.3.1.21
+          name: netapp.spareDiskType
+        tag: netapp_spare_disk_type
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.3.1.3
+          name: netapp.spareStatus
+        tag: netapp_spare_status
+        mapping:
+          1: spare
+          2: addingspare
+          3: bypassed
+          4: unknown
+          10: offline
+  - MIB: NETAPP-MIB
+    table:
+      OID: 1.3.6.1.4.1.789.1.6.10
+      name: raidPTable
+    symbols:
+      - OID: 1.3.6.1.4.1.789.1.6.10.1.20
+        name: netapp.raidPUsedMb
+      - OID: 1.3.6.1.4.1.789.1.6.10.1.22
+        name: netapp.raidPTotalMb
+      - OID: 1.3.6.1.4.1.789.1.6.10.1.24
+        name: netapp.raidPCompletionPerCent
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.3
+          name: netapp.raidPVol
+        tag: netapp_raid_p_vol
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.4
+          name: netapp.raidPPlex
+        tag: netapp_raid_p_plex
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.5
+          name: netapp.raidPGroup
+        tag: netapp_raid_p_group
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.6
+          name: netapp.raidPPlexNumber
+        tag: netapp_raid_p_plex_number
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.7
+          name: netapp.raidPGroupNumber
+        tag: netapp_raid_p_group_number
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.8
+          name: netapp.raidPDiskNumber
+        tag: netapp_raid_p_disk_number
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.9
+          name: netapp.raidPPlexName
+        tag: netapp_raid_p_plex_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.10
+          name: netapp.raidPDiskName
+        tag: netapp_raid_p_disk_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.17
+          name: netapp.raidPShelf
+        tag: netapp_raid_p_shelf
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.18
+          name: netapp.raidPBay
+        tag: netapp_raid_p_bay
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.19
+          name: netapp.raidPSectorSize
+        tag: netapp_raid_p_sector_size
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.25
+          name: netapp.raidPDiskSerialNumber
+        tag: netapp_raid_p_disk_serial_number
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.26
+          name: netapp.raidPDiskVendor
+        tag: netapp_raid_p_disk_vendor
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.27
+          name: netapp.raidPDiskModel
+        tag: netapp_raid_p_disk_model
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.28
+          name: netapp.raidPDiskFirmwareRevision
+        tag: netapp_raid_p_disk_firmware_revision
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.29
+          name: netapp.raidPDiskRPM
+        tag: netapp_raid_p_disk_rpm
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.30
+          name: netapp.raidPDiskType
+        tag: netapp_raid_p_disk_type
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.31
+          name: netapp.raidPDiskPool
+        tag: netapp_raid_p_disk_pool
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.32
+          name: netapp.raidPDiskCopyDestDiskName
+        tag: netapp_raid_p_disk_copy_dest_disk_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.10.1.2
+          name: netapp.raidPStatus
+        tag: netapp_raid_p_status
+        mapping:
+          1: active
+          2: reconstruction_in_progress
+          3: parity_reconstruction_in_progress
+          4: parity_verification_in_progress
+          5: scrubbing_in_progress
+          6: failed
+          9: prefailed
+          10: offline
+  - MIB: NETAPP-MIB
+    table:
+      OID: 1.3.6.1.4.1.789.1.6.11
+      name: plexTable
+    symbols:
+      - OID: 1.3.6.1.4.1.789.1.6.11.1.5
+        name: netapp.plexPercentResyncing
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.11.1.2
+          name: netapp.plexName
+        tag: netapp_plex_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.11.1.3
+          name: netapp.plexVolName
+        tag: netapp_plex_vol_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.6.11.1.4
+          name: netapp.plexStatus
+        tag: netapp_plex_status
+        mapping:
+          1: offline
+          2: resyncing
+          3: online
+  - MIB: NETAPP-MIB
+    table:
+      OID: 1.3.6.1.4.1.789.1.19.11
+      name: snapvaultStatusTable
+    symbols:
+      - OID: 1.3.6.1.4.1.789.1.19.11.1.9
+        name: netapp.svTotalFailures
+        metric_type: monotonic_count
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.789.1.19.11.1.2
+          name: netapp.svSrc
+        tag: netapp_sv_src
+      - column:
+          OID: 1.3.6.1.4.1.789.1.19.11.1.3
+          name: netapp.svDst
+        tag: netapp_sv_dst
+      - column:
+          OID: 1.3.6.1.4.1.789.1.19.11.1.5
+          name: netapp.svState
+        tag: netapp_sv_state
+        mapping:
+          1: uninitialized
+          2: snapvaulted
+          3: broken_off
+          4: quiesced
+          5: source
+          6: unknown
+          7: restoring
+  - MIB: NETAPP-MIB
+    table:
+      OID: 1.3.6.1.4.1.789.1.9.20
+      name: snapmirrorStatusTable
+    symbols:
+      - OID: 1.3.6.1.4.1.789.1.9.20.1.6
+        name: netapp.snapmirrorLag
+      - OID: 1.3.6.1.4.1.789.1.9.20.1.9
+        name: netapp.snapmirrorTotalFailures
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.789.1.9.20.1.17
+        name: netapp.snapmirrorLastTransMBs
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.789.1.9.20.1.18
+        name: netapp.snapmirrorLastTransTimeSeconds
+        metric_type: monotonic_count
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.789.1.9.20.1.2
+          name: netapp.snapmirrorSrc
+        tag: netapp_snapmirror_src
+      - column:
+          OID: 1.3.6.1.4.1.789.1.9.20.1.3
+          name: netapp.snapmirrorDst
+        tag: netapp_snapmirror_dst
+      - column:
+          OID: 1.3.6.1.4.1.789.1.9.20.1.14
+          name: netapp.snapmirrorMirrorTimestamp
+        tag: netapp_snapmirror_mirror_timestamp
+      - column:
+          OID: 1.3.6.1.4.1.789.1.9.20.1.16
+          name: netapp.snapmirrorLastTransType
+        tag: netapp_snapmirror_last_trans_type
+      - column:
+          OID: 1.3.6.1.4.1.789.1.9.20.1.4
+          name: netapp.snapmirrorStatus
+        tag: netapp_snapmirror_status
+        mapping:
+          1: idle
+          2: transferring
+          3: pending
+          4: aborting
+          5: migrating
+          6: quiescing
+          7: resyncing
+          8: waiting
+          9: syncing
+          10: in_sync
+      - column:
+          OID: 1.3.6.1.4.1.789.1.9.20.1.5
+          name: netapp.snapmirrorState
+        tag: netapp_snapmirror_state
+        mapping:
+          1: uninitialized
+          2: snapmirrored
+          3: broken_off
+          4: quiesced
+          5: source
+          6: unknown
+  - MIB: NETAPP-MIB
+    table:
+      OID: 1.3.6.1.4.1.789.1.21.1.2
+      name: enclTable
+    symbols:
+      - name: netapp.encl
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.3
+          name: netapp.enclChannelShelfAddr
+        tag: netapp_encl_channel_shelf_addr
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.4
+          name: netapp.enclProductLogicalID
+        tag: netapp_encl_product_logical_id
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.5
+          name: netapp.enclProductID
+        tag: netapp_encl_product_id
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.6
+          name: netapp.enclProductVendor
+        tag: netapp_encl_product_vendor
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.7
+          name: netapp.enclProductModel
+        tag: netapp_encl_product_model
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.8
+          name: netapp.enclProductRevision
+        tag: netapp_encl_product_revision
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.9
+          name: netapp.enclProductSerialNo
+        tag: netapp_encl_product_serial_no
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.10
+          name: netapp.enclNumberDiskBays
+        tag: netapp_encl_number_disk_bays
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.11
+          name: netapp.enclDisksPresent
+        tag: netapp_encl_disks_present
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.65
+          name: netapp.enclNodeName
+        tag: netapp_encl_node_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.2
+          name: netapp.enclContactState
+        tag: netapp_encl_contact_state
+        mapping:
+          1: initializing
+          2: transitioning
+          3: active
+          4: inactive
+          5: reconfiguring
+          6: nonexistent
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.15
+          name: netapp.enclPowerSuppliesFailed
+        tag: netapp_encl_power_supplies_failed
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.18
+          name: netapp.enclFansFailed
+        tag: netapp_encl_fans_failed
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.21
+          name: netapp.enclTempSensorsOverTempFail
+        tag: netapp_encl_temp_sensors_over_temp_fail
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.22
+          name: netapp.enclTempSensorsOverTempWarn
+        tag: netapp_encl_temp_sensors_over_temp_warn
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.23
+          name: netapp.enclTempSensorsUnderTempFail
+        tag: netapp_encl_temp_sensors_under_temp_fail
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.24
+          name: netapp.enclTempSensorsUnderTempWarn
+        tag: netapp_encl_temp_sensors_under_temp_warn
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.25
+          name: netapp.enclTempSensorsCurrentTemp
+        tag: netapp_encl_temp_sensors_current_temp
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.33
+          name: netapp.enclElectronicsFailed
+        tag: netapp_encl_electronics_failed
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.36
+          name: netapp.enclVoltSensorsOverVoltFail
+        tag: netapp_encl_volt_sensors_over_volt_fail
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.37
+          name: netapp.enclVoltSensorsOverVoltWarn
+        tag: netapp_encl_volt_sensors_over_volt_warn
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.38
+          name: netapp.enclVoltSensorsUnderVoltFail
+        tag: netapp_encl_volt_sensors_under_volt_fail
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.39
+          name: netapp.enclVoltSensorsUnderVoltWarn
+        tag: netapp_encl_volt_sensors_under_volt_warn
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.40
+          name: netapp.enclVoltSensorsCurrentVolt
+        tag: netapp_encl_volt_sensors_current_volt
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.47
+          name: netapp.enclCurSensorsOverCurFail
+        tag: netapp_encl_cur_sensors_over_cur_fail
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.48
+          name: netapp.enclCurSensorsOverCurWarn
+        tag: netapp_encl_cur_sensors_over_cur_warn
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.49
+          name: netapp.enclCurSensorsCurrentCur
+        tag: netapp_encl_cur_sensors_current_cur
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.1.2.1.62
+          name: netapp.enclFansSpeed
+        tag: netapp_encl_fans_speed
+  - MIB: NETAPP-MIB
+    table:
+      OID: 1.3.6.1.4.1.789.1.21.2
+      name: haTable
+    symbols:
+      - name: netapp.ha
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.2.1.1
+          name: netapp.haNodeName
+        tag: netapp_ha_node_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.2.1.8
+          name: netapp.haPartnerName
+        tag: netapp_ha_partner_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.2.1.4
+          name: netapp.haState
+        tag: netapp_ha_state
+        mapping:
+          1: dead
+          2: can_takeover
+          3: cannot_takeover
+          4: takeover
+          5: partial_giveback
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.2.1.5
+          name: netapp.haCannotTakeoverCause
+        tag: netapp_ha_cannot_takeover_cause
+        mapping:
+          1: ok
+          2: unknown_reason
+          3: disabled_by_operator
+          4: interconnect_offline
+          5: disabled_by_partner
+          6: takeover_failed
+          7: mailbox_is_in_degraded_state
+          8: partnermailbox_is_in_uninitialised_state
+          9: mailbox_version_mismatch
+          10: nvram_size_mismatch
+          11: kernel_version_mismatch
+          12: partner_is_in_booting_stage
+          13: diskshelf_is_too_hot
+          14: partner_is_performing_revert
+          15: node_is_performing_revert
+          16: sametime_partner_is_also_trying_to_take_us_over
+          17: already_in_takenover_mode
+          18: nvram_log_unsynchronized
+          19: stateof_backup_mailbox_is_doubtful
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.2.1.6
+          name: netapp.haPartnerStatus
+        tag: netapp_ha_partner_status
+        mapping:
+          1: maybe_down
+          2: ok
+          3: dead
+      - column:
+          OID: 1.3.6.1.4.1.789.1.21.2.1.10
+          name: netapp.haInterconnectStatus
+        tag: netapp_ha_interconnect_status
+        mapping:
+          1: not_present
+          2: down
+          3: partial_failure
+          4: up
+  - MIB: NETAPP-MIB
+    table:
+      OID: 1.3.6.1.4.1.789.1.22.1.2
+      name: netifTable
+    symbols:
+      - OID: 1.3.6.1.4.1.789.1.22.1.2.1.25
+        name: netapp.if64InOctets
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.789.1.22.1.2.1.28
+        name: netapp.if64InDiscards
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.789.1.22.1.2.1.29
+        name: netapp.if64InErrors
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.789.1.22.1.2.1.31
+        name: netapp.if64OutOctets
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.789.1.22.1.2.1.34
+        name: netapp.if64OutDiscards
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.789.1.22.1.2.1.35
+        name: netapp.if64OutErrors
+        metric_type: monotonic_count
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.789.1.22.1.2.1.2
+          name: netapp.netifDesc
+        tag: netapp_netif_desc
+  - MIB: NETAPP-MIB
+    table:
+      OID: 1.3.6.1.4.1.789.1.2.2.36
+      name: cDOTMiscTable
+    symbols:
+      - name: netapp.cDOTMisc
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.789.1.2.2.36.1.1
+          name: netapp.cDOTNodeName
+        tag: netapp_c_dot_node_name
+      - column:
+          OID: 1.3.6.1.4.1.789.1.2.2.36.1.3
+          name: netapp.cDOTMiscGlobalStatusMessage
+        tag: netapp_c_dot_misc_global_status_message
+      - column:
+          OID: 1.3.6.1.4.1.789.1.2.2.36.1.2
+          name: netapp.cDOTMiscGlobalStatus
+        tag: netapp_c_dot_misc_global_status
+        mapping:
+          1: other
+          2: unknown
+          3: ok
+          4: non_critical
+          5: critical
+          6: non_recoverable
+  - MIB: NETAPP-MIB
+    table:
+      name: nodeTable
+      OID: 1.3.6.1.4.1.789.1.25.2
+    symbols:
+      - name: netapp.nodeUptime
+        OID: 1.3.6.1.4.1.789.1.25.2.1.7
+      - name: netapp.nodeCpuUptime
+        OID: 1.3.6.1.4.1.789.1.25.2.1.15
+      - name: netapp.nodeEnvFailedFanCount
+        OID: 1.3.6.1.4.1.789.1.25.2.1.19
+      - name: netapp.nodeEnvFailedPowerSupplyCount
+        OID: 1.3.6.1.4.1.789.1.25.2.1.21
+    metric_tags:
+      - column:
+          name: netapp.nodeName
+          OID: 1.3.6.1.4.1.789.1.25.2.1.1
+        tag: netapp_node_name
+      - column:
+          name: netapp.nodeProductVersion
+          OID: 1.3.6.1.4.1.789.1.25.2.1.23
+        tag: netapp_node_product_version
+      - column:
+          OID: 1.3.6.1.4.1.789.1.25.2.1.11
+          name: netapp.nodeHealth
+        tag: netapp_node_health
+        mapping:
+          0: 'false'
+          1: 'true'
+      - column:
+          OID: 1.3.6.1.4.1.789.1.25.2.1.17
+          name: netapp.nodeNvramBatteryStatus
+        tag: netapp_node_nvram_battery_status
+        mapping:
+          1: ok
+          2: partially_discharged
+          3: fully_discharged
+          4: not_present
+          5: near_end_of_life
+          6: at_end_of_life
+          7: unknown
+          8: over_charged
+          9: fully_charged
+      - column:
+          OID: 1.3.6.1.4.1.789.1.25.2.1.18
+          name: netapp.nodeEnvOverTemperature
+        tag: netapp_node_env_over_temperature
+        mapping:
+          1: no
+          2: yes
+      - column:
+          OID: 1.3.6.1.4.1.789.1.25.2.1.20
+          name: netapp.nodeEnvFailedFanMessage
+        tag: netapp_node_env_failed_fan_message
+      - column:
+          OID: 1.3.6.1.4.1.789.1.25.2.1.22
+          name: netapp.nodeEnvFailedPowerSupplyMessage
+        tag: netapp_node_env_failed_power_supply_message
+  - MIB: NETAPP-MIB
+    table:
+      name: snapmirrorRelStatusTable
+      OID: 1.3.6.1.4.1.789.1.29.1
+    symbols:
+      - name: netapp.snapmirrorRelStatus
+        constant_value_one: true
+    metric_tags:
+      - column:
+          name: netapp.snapmirrorRelSrcPath
+          OID: 1.3.6.1.4.1.789.1.29.1.1.2
+        tag: netapp_snapmirror_rel_src_path
+      - column:
+          name: netapp.snapmirrorRelDestPath
+          OID: 1.3.6.1.4.1.789.1.29.1.1.3
+        tag: netapp_snapmirror_rel_dest_path
+      - column:
+          name: netapp.snapmirrorRelType
+          OID: 1.3.6.1.4.1.789.1.29.1.1.4
+        tag: netapp_snapmirror_rel_type
+        mapping:
+          0: dp
+          1: ls
+          2: xdp
+          3: rst
+          4: tdp
+      - column:
+          OID: 1.3.6.1.4.1.789.1.29.1.1.5
+          name: netapp.snapmirrorRelStatus
+        tag: netapp_snapmirror_rel_status
+        mapping:
+          0: idle
+          1: transferring
+          2: restoring
+          3: checking
+          4: quiescing
+          5: quiesced
+          6: queued
+          7: preparing
+          8: waiting
+          9: finalizing
+          10: resyncing
+          11: aborting
+          12: breaking
+      - column:
+          OID: 1.3.6.1.4.1.789.1.29.1.1.6
+          name: netapp.snapmirrorRelState
+        tag: netapp_snapmirror_rel_state
+        mapping:
+          0: uninitialized
+          1: snapmirrored
+          2: broken_off
+      - column:
+          OID: 1.3.6.1.4.1.789.1.29.1.1.16
+          name: netapp.snapmirrorRelHealthy
+        tag: netapp_snapmirror_rel_healthy
+        mapping:
+          0: fale
+          1: 'true'
+      - column:
+          OID: 1.3.6.1.4.1.789.1.29.1.1.17
+          name: netapp.snapmirrorRelUnHealthyReason
+        tag: netapp_snapmirror_rel_un_healthy_reason
