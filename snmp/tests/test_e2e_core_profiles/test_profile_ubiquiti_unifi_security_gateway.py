@@ -38,8 +38,6 @@ def test_e2e_profile_ubiquiti_unifi_security_gateway(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-
-
     # --- TEST METADATA ---
     device = {
         'description': 'ubiquiti-unifi-security-gateway Device Description',
