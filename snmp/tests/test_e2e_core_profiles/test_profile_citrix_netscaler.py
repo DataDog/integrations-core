@@ -78,7 +78,9 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
     aggregator.assert_metric('snmp.netscaler.sysupsvcCount', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.netscaler.sysupsvcitmCount', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.netscaler.tcpCurClientConn', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.netscaler.tcpCurClientConnEstablished', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric(
+        'snmp.netscaler.tcpCurClientConnEstablished', metric_type=aggregator.GAUGE, tags=common_tags
+    )
     aggregator.assert_metric(
         'snmp.netscaler.tcpCurServerConnEstablished', metric_type=aggregator.GAUGE, tags=common_tags
     )
