@@ -1990,6 +1990,8 @@ snmp.virtualDiskComponentStatus,gauge,,,,[Dell iDRAC] The status of the virtual 
 snmp.virtualDiskSizeInMB,gauge,,mebibyte,,[Dell iDRAC] The size of the virtual disk in megabytes.,0,snmp,,
 snmp.virtualDiskState,gauge,,,,[Dell iDRAC] The current state of this virtual disk.,0,snmp,,
 snmp.virtualDiskT10PIStatus,gauge,,,,[Dell iDRAC] The virtual disk supports the T10 PI (Protection Information).,0,snmp,,
+snmp.vmwEnv,gauge,,,,"[VMWARE-ENV-MIB] This table is populated from monitoring IPMI BMC device. One conceptual row is maintained for each reporting component. This table may be cleared by operational request to BMC and normally is configured to stop adding new entries when full. (Make 'sum by {X}' queries to count elements with the tag X.)",0,snmp,,
+snmp.vmwHostBusAdapter,gauge,,,,"[VMWARE-RESOURCES-MIB] Inventory of Host Bus Adatpers found in this system. (Make 'sum by {X}' queries to count elements with the tag X.)",0,snmp,,
 snmp.voltageProbeReading,gauge,,,,[Dell iDRAC] The reading for a voltage probe of type.,0,snmp,,
 snmp.voltageProbeStatus,gauge,,,,[Dell iDRAC] The probe status of the voltage probe.,0,snmp,,
 snmp.voltagexy1,gauge,,,,[Legacy Chatsworth] The branch XY1 voltage in 1/10 volts.,0,snmp,,
