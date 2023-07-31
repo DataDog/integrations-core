@@ -134,7 +134,7 @@ metrics:
       OID: 1.3.6.1.4.1.5951.4.1.1.47.3.0
   - MIB: NS-ROOT-MIB
     symbol:
-      name: netscaler.tcpCurClientEstablished
+      name: netscaler.tcpCurClientConnEstablished
       OID: 1.3.6.1.4.1.5951.4.1.1.46.12.0
   - MIB: NS-ROOT-MIB
     symbol:
