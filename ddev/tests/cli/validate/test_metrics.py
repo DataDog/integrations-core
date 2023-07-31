@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def test_metrics_empty(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
     Path(metrics_file).write_text('')
@@ -27,15 +27,15 @@ def test_metrics_empty(ddev, repository, helpers):
 
 
 def test_column_number(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[1] = metrics[1][:-2] + '\n'
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -55,15 +55,15 @@ def test_column_number(ddev, repository, helpers):
 
 
 def test_header_missing_invalid(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[0] = metrics[0][:-1] + "_badheader\n"
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics[:7])
 
     result = ddev("validate", "metadata", 'apache')
@@ -94,15 +94,15 @@ def test_header_missing_invalid(ddev, repository, helpers):
 
 
 def test_normalized_metrics(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[1] = metrics[1].replace('_', '-')
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -149,15 +149,15 @@ def test_manifest_metric_prefix_dne(ddev, repository, helpers):
 
 
 def test_invalid_metric_type(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[1] = metrics[1].replace('gauge', 'invalid_metric_type')
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -177,15 +177,15 @@ def test_invalid_metric_type(ddev, repository, helpers):
 
 
 def test_invalid_unit_name(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[1] = metrics[1].replace('connection', 'invalid_unit_name')
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -205,15 +205,15 @@ def test_invalid_unit_name(ddev, repository, helpers):
 
 
 def test_invalid_per_unit_name(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[6] = metrics[6].replace('second', 'invalid_per_unit_name')
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -233,15 +233,15 @@ def test_invalid_per_unit_name(ddev, repository, helpers):
 
 
 def test_invalid_unit_fraction(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[6] = metrics[6].replace(',,byte,', ',,day,')
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -261,15 +261,15 @@ def test_invalid_unit_fraction(ddev, repository, helpers):
 
 
 def test_integration_header(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[6] = metrics[6].replace(',apache,', ',apache___,')
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -289,15 +289,15 @@ def test_integration_header(ddev, repository, helpers):
 
 
 def test_invalid_orientation(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[6] = metrics[6].replace(',0,', ',2,')
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -317,15 +317,15 @@ def test_invalid_orientation(ddev, repository, helpers):
 
 
 def test_invalid_vbar(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[6] = metrics[6].replace('The number', 'The | number')
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -345,15 +345,15 @@ def test_invalid_vbar(ddev, repository, helpers):
 
 
 def test_invalid_unicode(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[6] = metrics[6].replace('The number', 'The ± number')
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -377,15 +377,15 @@ def test_max_length(ddev, repository, helpers):
     long_string = "Lorem ipsum dolor sit amet consectetur adipiscing elit finibus vulputate commodo"
     max_length = long_string * 5
 
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[6] = metrics[6].replace('The number', max_length)
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -406,15 +406,15 @@ def test_max_length(ddev, repository, helpers):
 
 
 def test_interval_integer(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[6] = metrics[6].replace('gauge,,', 'gauge,not_a_digit,')
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -434,15 +434,15 @@ def test_interval_integer(ddev, repository, helpers):
 
 
 def test_duplicate_curated_metric(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[6] = metrics[6][:-1] + "cpu|cpu\n"
-    print(metrics[6])
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -463,15 +463,15 @@ def test_duplicate_curated_metric(ddev, repository, helpers):
 
 
 def test_invalid_curated_metric(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[6] = metrics[6][:-1] + "invalid_curated_metric\n"
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -492,15 +492,15 @@ def test_invalid_curated_metric(ddev, repository, helpers):
 
 
 def test_header_empty(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[6] = metrics[6].replace('gauge', '')
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -520,15 +520,15 @@ def test_header_empty(ddev, repository, helpers):
 
 
 def test_prefix_match(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[6] = metrics[6].replace('apache.', 'invalid_metric_prefix.')
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -549,15 +549,15 @@ def test_prefix_match(ddev, repository, helpers):
 
 
 def test_duplicate_metric_name(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[2] = metrics[2].replace('apache.conns_async_writing', 'apache.conns_total')
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache')
@@ -577,16 +577,16 @@ def test_duplicate_metric_name(ddev, repository, helpers):
 
 
 def test_warnings(ddev, repository, helpers):
-    metrics_file = os.path.join(repository.path, 'apache', 'metadata.csv')
+    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with open(metrics_file, 'r', encoding='utf-8') as file:
+    with metrics_file.open(encoding='utf-8') as file:
         metrics = file.readlines()
 
     metrics[1] = metrics[1].replace('The total number of connections performed.', '')
     metrics[2] = metrics[2].replace('ConnsAsyncWriting', 'ConnsTotal')
 
-    with open(metrics_file, 'w', encoding='utf-8') as file:
+    with metrics_file.open(mode='w', encoding='utf-8') as file:
         file.writelines(metrics)
 
     result = ddev("validate", "metadata", 'apache', '--check-duplicates', '--show-warnings')
