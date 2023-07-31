@@ -92,12 +92,28 @@ DCGM_FI_PROF_DRAM_ACTIVE                                          ,gauge        
 DCGM_FI_PROF_PCIE_TX_BYTES                                        ,counter                ,The number of bytes of active pcie tx data including both header and payload.
 DCGM_FI_PROF_PCIE_RX_BYTES                                        ,counter                ,The number of bytes of active pcie rx data including both header and payload.
 
+# Profiling Fields
+DCGM_FI_PROF_GR_ENGINE_ACTIVE                                     ,gauge                  ,Ratio of time the graphics engine is active. The graphics engine is active if a graphics/compute context is bound and the graphics pipe or compute pipe is busy.
+DCGM_FI_PROF_SM_ACTIVE                                            ,gauge                  ,The ratio of cycles an SM has at least 1 warp assigned (computed from the number of cycles and elapsed cycles)
+DCGM_FI_PROF_SM_OCCUPANCY                                         ,gauge                  ,The ratio of number of warps resident on an SM. (number of resident as a ratio of the theoretical maximum number of warps per elapsed cycle)
+DCGM_FI_PROF_PIPE_TENSOR_ACTIVE                                   ,gauge                  ,The ratio of cycles the any tensor pipe is active (off the peak sustained elapsed cycles)
+DCGM_FI_PROF_DRAM_ACTIVE                                          ,gauge                  ,The ratio of cycles the device memory interface is active sending or receiving data.
+DCGM_FI_PROF_PIPE_FP64_ACTIVE                                     ,gauge                  ,Ratio of cycles the fp64 pipe is active.
+DCGM_FI_PROF_PIPE_FP32_ACTIVE                                     ,gauge                  ,Ratio of cycles the fp32 pipe is active.
+DCGM_FI_PROF_PIPE_FP16_ACTIVE                                     ,gauge                  ,Ratio of cycles the fp16 pipe is active. This does not include HMMA.
+DCGM_FI_PROF_NVLINK_TX_BYTES                                      ,counter                ,The total number of bytes of active NvLink tx (transmit) data including both header and payload.
+DCGM_FI_PROF_NVLINK_RX_BYTES                                      ,counter                ,The total number of bytes of active NvLink rx (read) data including both header and payload.
+DCGM_FI_PROF_PIPE_TENSOR_IMMA_ACTIVE                              ,gauge                  ,The ratio of cycles the tensor (IMMA) pipe is active (off the peak sustained elapsed cycles)
+DCGM_FI_PROF_PIPE_TENSOR_HMMA_ACTIVE                              ,gauge                  ,The ratio of cycles the tensor (HMMA) pipe is active (off the peak sustained elapsed cycles)
+DCGM_FI_PROF_PIPE_TENSOR_DFMA_ACTIVE                              ,gauge                  ,The ratio of cycles the tensor (DFMA) pipe is active (off the peak sustained elapsed cycles)
+DCGM_FI_PROF_PCIE_TX_BYTES                                        ,counter                ,Total number of bytes transmitted through PCIe TX (in KB) via NVML.
+DCGM_FI_PROF_PCIE_RX_BYTES                                        ,counter                ,Total number of bytes received through PCIe RX (in KB) via NVML.
+
+
 # Datadog additional recommended fields
 DCGM_FI_DEV_COUNT                                                 ,counter                ,Number of Devices on the node.
 DCGM_FI_DEV_FAN_SPEED                                             ,gauge                  ,Fan speed for the device in percent 0-100.
 DCGM_FI_PROCESS_NAME                                              ,label                  ,The Process Name.
-DCGM_FI_PROF_PCIE_TX_BYTES                                        ,counter                ,Total number of bytes transmitted through PCIe TX (in KB) via NVML.
-DCGM_FI_PROF_PCIE_RX_BYTES                                        ,counter                ,Total number of bytes received through PCIe RX (in KB) via NVML.
 DCGM_FI_DEV_SLOWDOWN_TEMP                                         ,gauge                  ,Slowdown temperature for the device.
 DCGM_FI_DEV_POWER_MGMT_LIMIT                                      ,gauge                  ,Current power limit for the device.
 DCGM_FI_DEV_PSTATE                                                ,gauge                  ,Performance state (P-State) 0-15. 0=highest
