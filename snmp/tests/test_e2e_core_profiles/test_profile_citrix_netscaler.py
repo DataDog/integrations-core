@@ -28,10 +28,6 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
         'snmp_host:citrix-netscaler.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-    ] + [
-        'netscaler_sys_build_version:kept forward oxen but zombies forward Jaded',
-        'netscaler_sys_hardware_serial_number:Jaded but acted acted',
-        'netscaler_sys_hardware_version_desc:oxen Jaded oxen zombies acted quaintly ' 'quaintly acted zombies',
     ]
 
     # --- TEST EXTENDED METRICS ---
@@ -363,9 +359,11 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
         'ip_address': '' + ip_address,
         'name': 'citrix-netscaler.device.name',
         'profile': 'citrix-netscaler',
+        'serial_number': 'Jaded but acted acted',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.5951.1',
         'vendor': 'citrix',
+        'version': 'kept forward oxen but zombies forward Jaded',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
