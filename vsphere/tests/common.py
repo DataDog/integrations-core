@@ -783,6 +783,31 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     ),
                 ],
             ),
+            vim.ObjectContent(
+                obj=vim.ClusterComputeResource(moId="c1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='c1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.dasConfig.enabled',
+                        val=True,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.drsConfig.enabled',
+                        val=True,
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.drsConfig.defaultVmBehavior',
+                        val='fullyAutomated',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='configuration.drsConfig.vmotionRate',
+                        val=2,
+                    ),
+                ],
+            ),
         ],
     )
 )
