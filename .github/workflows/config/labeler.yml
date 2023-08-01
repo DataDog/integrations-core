@@ -345,6 +345,8 @@ integration/pulsar:
 - pulsar/**/*
 integration/rabbitmq:
 - rabbitmq/**/*
+integration/ray:
+- ray/**/*
 integration/redisdb:
 - redisdb/**/*
 integration/rethinkdb:
