@@ -62,9 +62,9 @@ OpenMetrics configurations with generic wildcard values for the `metrics` option
 
 Datadog recommends that you use specific metric names or partial metric name matches for more precise collection.
 
-### Errors parsing the OpenMetrics payload with Agent 7.46 and above
+### Errors parsing the OpenMetrics payload with Agent 7.46
 
-Starting with version 3.0.0 of this integration, which is shipped by default with Agent 7.46 and above, the integration gives preference by default to the OpenMetrics format when requesting metrics from the metrics endpoint. It does so by setting the `Accept` header to `application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,text/plain;version=0.0.4;q=0.5,*/*;q=0.1`. This was done in combination with dynamically determining which scraper to use based on the `Content-Type` it receives from the server, to reduce the need for manual setup.
+The version of this integration shipped with version 7.46 of the Agent gives preference by default to the OpenMetrics format when requesting metrics from the metrics endpoint. It does so by setting the `Accept` header to `application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,text/plain;version=0.0.4;q=0.5,*/*;q=0.1`. This was done in combination with dynamically determining which scraper to use based on the `Content-Type` it receives from the server, to reduce the need for manual setup.
 
 Previous versions defaulted to `text/plain`, which normally results in the server returning metrics in the Prometheus exposition format. This means that updating to this version of the integration may result in switching from the Prometheus format to the OpenMetrics format.
 
