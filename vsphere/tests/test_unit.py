@@ -2726,6 +2726,17 @@ def test_cluster_property_metrics(aggregator, historical_instance, dd_run_check,
     aggregator.assert_metric('vsphere.cluster.configuration.drsConfig.vmotionRate', count=1, value=2, tags=base_tags)
 
 
+def test_datastore_property_metrics(aggregator, historical_instance, dd_run_check, service_instance, vm_properties_ex):
+    historical_instance['collect_property_metrics'] = True
+
+    service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
+    base_tags = ['vcenter_server:FAKE', 'vsphere_datastore:ds1', 'vsphere_type:datastore']
+    check = VSphereCheck('vsphere', {}, [historical_instance])
+    dd_run_check(check)
+    aggregator.assert_metric('vsphere.datastore.summary.freeSpace', count=1, value=305, tags=base_tags)
+    aggregator.assert_metric('vsphere.datastore.summary.capacity', count=1, value=100, tags=base_tags)
+
+
 def test_property_metrics_filtered(
     aggregator,
     realtime_instance,
