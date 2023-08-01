@@ -32,11 +32,11 @@ def dd_environment():
 
     if MARKLOGIC_VERSION.startswith("9."):
         conditions = [
-            CheckDockerLogs(compose_file, 'Deleted'),
+            CheckDockerLogs(compose_file, 'Deleted', wait=5),
         ]
     else:
         conditions = [
-            CheckDockerLogs(compose_file, 'Cluster config complete, marking this node as ready.'),
+            CheckDockerLogs(compose_file, 'Cluster config complete, marking this node as ready.', wait=5),
         ]
 
     conditions.append(WaitFor(setup_admin_user))

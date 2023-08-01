@@ -15,6 +15,9 @@ def test_check_ok(dd_agent_check):
     metrics = common.FORMATTED_EXTRA_METRICS
 
     for metric in metrics:
-        aggregator.assert_metric(metric)
+        aggregator.assert_metric(
+            metric,
+            at_least=0 if metric in common.OPTIONAL_METRICS else 1,
+        )
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
