@@ -262,6 +262,9 @@ class DBMAsyncJob(object):
         Send a signal to cancel the job loop asynchronously.
         """
         self._cancel_event.set()
+        # after setting cancel event, wait for job loop to fully shutdown
+        if self._job_loop_future:
+            self._job_loop_future.result()
 
     def run_job_loop(self, tags):
         """
