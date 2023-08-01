@@ -1,4 +1,0 @@
-extends:
-  - _generic-ip.yaml
-  - _generic-tcp.yaml
-  - _generic-udp.yaml
