@@ -135,14 +135,6 @@ class MultiDatabaseConnectionPool(object):
             )
             return db
 
-    def set_conn_inactive(self, dbname):
-        with self._mu:
-            try:
-                self._conns[dbname].active = False
-            except KeyError:
-                # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
-                pass
-
     @contextlib.contextmanager
     def get_connection(self, dbname: str, ttl_ms: int, timeout: int = None, persistent: bool = False):
         """

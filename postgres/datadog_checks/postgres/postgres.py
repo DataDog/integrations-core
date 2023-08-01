@@ -98,7 +98,7 @@ class PostgreSql(AgentCheck):
         self.statement_samples = PostgresStatementSamples(self, self._config)
         self.metadata_samples = PostgresMetadata(self, self._config)
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
-        self.check_cancelled = False
+        self._check_cancelled = False
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
         self.check_initializations.append(self.set_resolved_hostname_metadata)
@@ -258,7 +258,7 @@ class PostgreSql(AgentCheck):
                 self.log.warning("timeout reached on cancel, proceeding with unclean shutdown.")
 
         self._close_db_pool()
-        self.check_cancelled = True
+        self._check_cancelled = True
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
@@ -865,7 +865,7 @@ class PostgreSql(AgentCheck):
         finally:
             # Add the warnings saved during the execution of the check
             self._report_warnings()
-            if self.check_cancelled and self.db:
+            if self._check_cancelled and self.db:
                 try:
                     # once check finishes on a cancel, shut down main connection gracefully
                     self.db.close()

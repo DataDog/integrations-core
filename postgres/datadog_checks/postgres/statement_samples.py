@@ -517,7 +517,8 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_db_explain_setup_state(self, dbname):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
-            self.db_pool.get_connection(dbname, self._conn_ttl_ms)
+            with self.db_pool.get_connection(dbname, self._conn_ttl_ms):
+                pass
         except psycopg.OperationalError as e:
             self._log.warning(
                 "cannot collect execution plans due to failed DB connection to dbname=%s: %s", dbname, repr(e)
@@ -528,8 +529,6 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "cannot collect execution plans due to a database error in dbname=%s: %s", dbname, repr(e)
             )
             return DBExplainError.database_error, e
-        finally:
-            self.db_pool.set_conn_inactive(dbname)
 
         try:
             result = self._run_explain(dbname, EXPLAIN_VALIDATION_QUERY, EXPLAIN_VALIDATION_QUERY)
@@ -647,15 +646,16 @@ class PostgresStatementSamples(DBMAsyncJob):
         try:
             return self._run_explain(dbname, statement, obfuscated_statement), None, None
         except psycopg.errors.UndefinedParameter as e:
-            self._log.debug(
-                "Unable to collect execution plan, clients using the extended query protocol or prepared statements"
-                " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
-                repr(e),
-            )
             if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', True)):
                 plan = self._explain_parameterized_queries.explain_statement(dbname, statement, obfuscated_statement)
                 if plan:
                     return plan, DBExplainError.explained_with_prepared_statement, None
+            else:
+                self._log.debug(
+                    "Unable to collect execution plan, clients using the extended query protocol or prepared statements"
+                    " can't be explained due to the separation of the parsed query and raw bind parameters: %s",
+                    repr(e),
+                )
             error_response = None, DBExplainError.parameterized_query, '{}'.format(type(e))
             self._explain_errors_cache[query_signature] = error_response
             self._emit_run_explain_error(dbname, DBExplainError.parameterized_query, e)

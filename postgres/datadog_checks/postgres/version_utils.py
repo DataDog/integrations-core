@@ -22,7 +22,7 @@ V14 = VersionInfo.parse("14.0.0")
 class VersionUtils(object):
     def __init__(self):
         self.log = get_check_logger()
-        self.seen_aurora_exception = False
+        self._seen_aurora_exception = False
 
     @staticmethod
     def get_raw_version(db):
@@ -32,7 +32,7 @@ class VersionUtils(object):
             return raw_version
 
     def is_aurora(self, db):
-        if self.seen_aurora_exception:
+        if self._seen_aurora_exception:
             return False
         try:
             with db.cursor() as cursor:
@@ -42,7 +42,7 @@ class VersionUtils(object):
         except Exception as e:
             self.log.debug("Captured exception %s while determining if the DB is aurora. Assuming is not", str(e))
             db.rollback()
-            self.seen_aurora_exception = True
+            self._seen_aurora_exception = True
             return False
 
     @staticmethod
