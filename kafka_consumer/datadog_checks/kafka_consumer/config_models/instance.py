@@ -9,7 +9,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence, Union
+from types import MappingProxyType
+from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
@@ -21,14 +22,16 @@ from . import defaults, validators
 
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    exclude: Optional[Sequence[str]] = None
-    include: Optional[Sequence[str]] = None
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class SaslOauthTokenProvider(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     client_id: Optional[str] = None
@@ -39,14 +42,15 @@ class SaslOauthTokenProvider(BaseModel):
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    consumer_groups: Optional[Mapping[str, Any]] = None
-    consumer_groups_regex: Optional[Mapping[str, Any]] = None
+    consumer_groups: Optional[MappingProxyType[str, Any]] = None
+    consumer_groups_regex: Optional[MappingProxyType[str, Any]] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     kafka_client_api_version: Optional[str] = None
-    kafka_connect_str: Union[str, Sequence[str]]
+    kafka_connect_str: Union[str, tuple[str, ...]]
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     monitor_all_broker_highwatermarks: Optional[bool] = None
@@ -61,7 +65,7 @@ class InstanceConfig(BaseModel):
     sasl_plain_username: Optional[str] = None
     security_protocol: Optional[str] = None
     service: Optional[str] = None
-    tags: Optional[Sequence[str]] = None
+    tags: Optional[tuple[str, ...]] = None
     tls_ca_cert: Optional[str] = None
     tls_cert: Optional[str] = None
     tls_crlfile: Optional[str] = None
@@ -75,25 +79,14 @@ class InstanceConfig(BaseModel):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
     @field_validator('*', mode='before')
-    def _ensure_defaults(cls, value, info):
+    def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
-            return value
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{info.field_name}', lambda: value)()
-
-    @field_validator('*')
-    def _run_validations(cls, value, info):
-        field = cls.model_fields[info.field_name]
-        field_name = field.alias or info.field_name
-        if field_name not in info.context['configured_fields']:
-            return value
-
-        return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-
-    @field_validator('*', mode='after')
-    def _make_immutable(cls, value):
         return validation.utils.make_immutable(value)
 
     @model_validator(mode='after')

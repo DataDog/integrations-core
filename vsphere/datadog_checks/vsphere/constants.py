@@ -107,6 +107,7 @@ CLUSTER_SIMPLE_PROPERTIES = [
     "configuration.dasConfig.enabled",
 ]
 
+
 DATASTORE_SIMPLE_PROPERTIES = [
     "summary.capacity",
     "summary.freeSpace",

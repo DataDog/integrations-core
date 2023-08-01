@@ -15,7 +15,6 @@ from datadog_checks.dev.tooling.commands.validate.imports import imports
 from datadog_checks.dev.tooling.commands.validate.integration_style import integration_style
 from datadog_checks.dev.tooling.commands.validate.jmx_metrics import jmx_metrics
 from datadog_checks.dev.tooling.commands.validate.license_headers import license_headers
-from datadog_checks.dev.tooling.commands.validate.metadata import metadata
 from datadog_checks.dev.tooling.commands.validate.models import models
 from datadog_checks.dev.tooling.commands.validate.package import package
 from datadog_checks.dev.tooling.commands.validate.readmes import readmes
@@ -27,6 +26,7 @@ from datadog_checks.dev.tooling.commands.validate.typos import typos
 from ddev.cli.validate.ci import ci
 from ddev.cli.validate.licenses import licenses
 from ddev.cli.validate.manifest import manifest
+from ddev.cli.validate.metadata import metadata
 from ddev.cli.validate.openmetrics import openmetrics
 
 
