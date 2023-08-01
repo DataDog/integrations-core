@@ -1,8 +1,8 @@
 extends:
   - _dell-generic-if.yaml
 
-#sysobjectid:
-#  - 1.3.6.1.4.1.6027.1.3.*  # Dell Networking S Family
+sysobjectid:
+  - 1.3.6.1.4.1.6027.1.3.*  # Dell Networking S Family
 
 metrics:
   - MIB: F10-S-SERIES-CHASSIS-MIB
