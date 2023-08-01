@@ -48,3 +48,5 @@ MOCK_CALICO_INSTANCE = {
     "namespace": "calico",
     "extra_metrics": EXTRA_METRICS,
 }
+
+OPTIONAL_METRICS = {'calico.felix.ipset.calls.count'}
