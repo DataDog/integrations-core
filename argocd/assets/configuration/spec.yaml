@@ -19,7 +19,7 @@ files:
         Endpoint exposing the ApplicationSet Controller's Prometheus metrics.
       value:
         display_default: null
-        example: http://argocd-applicationset-controller-metrics:8085/metrics
+        example: http://argocd-applicationset-controller:8080/metrics
         type: string
     - name: api_server_endpoint
       description: |

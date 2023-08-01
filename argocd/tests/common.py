@@ -11,7 +11,7 @@ MOCKED_APP_CONTROLLER_WITH_OTHER_PARAMS = {
     'collect_histogram_buckets': True,
 }
 
-MOCKED_APPSET_CONTROLLER_INSTANCE = {'appset_controller_endpoint': 'http://appset_controller:8085'}
+MOCKED_APPSET_CONTROLLER_INSTANCE = {'appset_controller_endpoint': 'http://appset_controller:8080'}
 
 MOCKED_API_SERVER_INSTANCE = {'api_server_endpoint': 'http://api_server:8083'}
 
@@ -165,7 +165,9 @@ NOT_EXPOSED_METRICS = [
     'argocd.app_controller.redis.request.duration',
     'argocd.appset_controller.reconcile.errors.total',
     'argocd.appset_controller.runtime.reconcile.total',
-    'argocd.appset_controller.reconcile.time_seconds',
+    'argocd.appset_controller.reconcile.time_seconds.bucket',
+    'argocd.appset_controller.reconcile.time_seconds.count',
+    'argocd.appset_controller.reconcile.time_seconds.sum',
 ]
 
 # Additional metrics that aren't exposed in the E2E environment

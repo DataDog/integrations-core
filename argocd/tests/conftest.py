@@ -45,7 +45,7 @@ def dd_environment(dd_save_state):
                 port_forward(kubeconfig, 'argocd', 8082, 'service', 'argocd-metrics')
             )
             appset_controller_host, appset_controller_port = stack.enter_context(
-                port_forward(kubeconfig, 'argocd', 8085, 'service', 'argocd-applicationset-controller-metrics')
+                port_forward(kubeconfig, 'argocd', 8080, 'service', 'argocd-applicationset-controller')
             )
             api_server_host, api_server_port = stack.enter_context(
                 port_forward(kubeconfig, 'argocd', 8083, 'service', 'argocd-server-metrics')
