@@ -79,13 +79,12 @@ def test_e2e_profile_dell_sonicwall(dd_agent_check):
         'ip_address': '' + ip_address,
         'model': 'TZ 400',
         'name': 'dell-sonicwall.device.name',
-        'os_version': '01972WA81B1D',
         'profile': 'dell-sonicwall',
         'serial_number': 'S16195058',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.8741.1',
         'vendor': 'dell',
-        'version': '8.0',
+        'version': '01972WA81B1D',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

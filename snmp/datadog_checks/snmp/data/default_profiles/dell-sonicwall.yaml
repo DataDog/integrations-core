@@ -13,21 +13,21 @@ metadata:
           MIB: SONICWALL-COMMON-MIB
           OID: 1.3.6.1.4.1.8741.2.1.1.2.0
           name: snwlSysSerialNumber
+#      TODO:
+#        symbol:
+#          MIB: SONICWALL-COMMON-MIB
+#          OID: 1.3.6.1.4.1.8741.2.1.1.4.0
+#          name: snwlSysROMVersion
       version:
         symbol:
           MIB: SONICWALL-COMMON-MIB
-          OID: 1.3.6.1.4.1.8741.2.1.1.4.0
-          name: snwlSysROMVersion
+          OID: 1.3.6.1.4.1.8741.2.1.1.3.0
+          name: snwlSysFirmwareVersion
       model:
         symbol:
           MIB: SONICWALL-COMMON-MIB
           OID: 1.3.6.1.4.1.8741.2.1.1.1.0
           name: snwlSysModel
-      os_version:
-        symbol:
-          MIB: SONICWALL-COMMON-MIB
-          OID: 1.3.6.1.4.1.8741.2.1.1.3.0
-          name: snwlSysFirmwareVersion
 
 sysobjectid:
   - 1.3.6.1.4.1.8741.1  # SonicWALL TZ 400
