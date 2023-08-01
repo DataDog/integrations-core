@@ -255,7 +255,11 @@ class PostgreSql(AgentCheck):
             try:
                 concurrent.futures.wait(tasks, timeout=self._config.min_collection_interval)
             except concurrent.futures.TimeoutError:
-                self.log.warning("timeout reached on cancel, proceeding with unclean shutdown.")
+                self.log.warning(
+                    "Not all job loops were completed in time when cancelling the main check. "
+                    "Proceeding with the check cancellation. "
+                    "Some unexpected errors related to closed connections may occur after this message."
+                )
 
         self._close_db_pool()
         self._check_cancelled = True
