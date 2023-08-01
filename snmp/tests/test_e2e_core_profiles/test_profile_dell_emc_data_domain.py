@@ -36,213 +36,220 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    # aggregator.assert_metric('snmp.fileSystemVirtualSpace', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.hrCachedMemory', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.hrMemoryBuffers', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-        ['data_domain_power_module_description:kept acted kept acted Jaded', 'data_domain_power_module_status:ok'],
-        ['data_domain_power_module_description:oxen acted but Jaded zombies', 'data_domain_power_module_status:faulty'],
         [
-            'data_domain_power_module_description:their driving quaintly zombies their forward',
-            'data_domain_power_module_status:failed',
+            'dell_data_domain_power_module_description:kept acted kept acted Jaded',
+            'dell_data_domain_power_module_status:ok',
         ],
-        ['data_domain_power_module_description:their kept zombies but', 'data_domain_power_module_status:absent'],
-    ]
-    for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.powerModule', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-    tag_rows = [
         [
-            'data_domain_temp_sensor_description:Jaded their quaintly',
-            'data_domain_temp_sensor_status:overheat_critical',
+            'dell_data_domain_power_module_description:oxen acted but Jaded zombies',
+            'dell_data_domain_power_module_status:faulty',
         ],
-        ['data_domain_temp_sensor_description:driving', 'data_domain_temp_sensor_status:overheat_critical'],
-        ['data_domain_temp_sensor_description:oxen acted but zombies', 'data_domain_temp_sensor_status:failed'],
         [
-            'data_domain_temp_sensor_description:their acted acted driving but their',
-            'data_domain_temp_sensor_status:overheat_critical',
+            'dell_data_domain_power_module_description:their driving quaintly zombies their forward',
+            'dell_data_domain_power_module_status:failed',
+        ],
+        [
+            'dell_data_domain_power_module_description:their kept zombies but',
+            'dell_data_domain_power_module_status:absent',
         ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.tempSensorCurrentValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.dell.data_domain.powerModule', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     tag_rows = [
         [
-            'data_domain_fan_description:Jaded kept quaintly driving oxen driving oxen',
-            'data_domain_fan_level:unknown',
-            'data_domain_fan_status:notfound',
+            'dell_data_domain_temp_sensor_description:Jaded their quaintly',
+            'dell_data_domain_temp_sensor_status:overheat_critical',
+        ],
+        ['dell_data_domain_temp_sensor_description:driving', 'dell_data_domain_temp_sensor_status:overheat_critical'],
+        [
+            'dell_data_domain_temp_sensor_description:oxen acted but zombies',
+            'dell_data_domain_temp_sensor_status:failed',
         ],
         [
-            'data_domain_fan_description:but forward kept acted their zombies acted',
-            'data_domain_fan_level:low',
-            'data_domain_fan_status:fail',
-        ],
-        [
-            'data_domain_fan_description:oxen forward but their zombies but but driving',
-            'data_domain_fan_level:low',
-            'data_domain_fan_status:notfound',
-        ],
-        [
-            'data_domain_fan_description:their zombies kept their driving',
-            'data_domain_fan_level:low',
-            'data_domain_fan_status:ok',
+            'dell_data_domain_temp_sensor_description:their acted acted driving but their',
+            'dell_data_domain_temp_sensor_status:overheat_critical',
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.fanProperties', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.tempSensorCurrentValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
         [
-            'data_domain_file_system_resource_name:driving their oxen forward Jaded forward but kept',
-            'data_domain_file_system_resource_tier:their acted Jaded quaintly their acted',
+            'dell_data_domain_fan_description:Jaded kept quaintly driving oxen driving oxen',
+            'dell_data_domain_fan_level:unknown',
+            'dell_data_domain_fan_status:notfound',
         ],
         [
-            'data_domain_file_system_resource_name:quaintly but oxen Jaded acted oxen kept',
-            'data_domain_file_system_resource_tier:quaintly but kept driving Jaded',
+            'dell_data_domain_fan_description:but forward kept acted their zombies acted',
+            'dell_data_domain_fan_level:low',
+            'dell_data_domain_fan_status:fail',
         ],
         [
-            'data_domain_file_system_resource_name:zombies kept driving quaintly forward',
-            'data_domain_file_system_resource_tier:forward forward acted their but kept kept but',
+            'dell_data_domain_fan_description:oxen forward but their zombies but but driving',
+            'dell_data_domain_fan_level:low',
+            'dell_data_domain_fan_status:notfound',
         ],
         [
-            'data_domain_file_system_resource_name:zombies quaintly',
-            'data_domain_file_system_resource_tier:zombies Jaded Jaded acted forward forward Jaded kept',
+            'dell_data_domain_fan_description:their zombies kept their driving',
+            'dell_data_domain_fan_level:low',
+            'dell_data_domain_fan_status:ok',
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.fileSystemPercentUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        # These are not found
-
-        # aggregator.assert_metric('snmp.fileSystemSpaceAvail', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        # aggregator.assert_metric(
-        #     'snmp.fileSystemSpaceCleanable', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        # )
-        # aggregator.assert_metric('snmp.fileSystemSpaceSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        # aggregator.assert_metric('snmp.fileSystemSpaceUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-    # These are not found either, as well as the tag_rows are empty for some reason,
-    # though snmprec seems to be complete
-
-    # tag_rows = [
-    #     ['TODO'],
-    # ]
-    # for tag_row in tag_rows:
-    #     aggregator.assert_metric(
-    #         'snmp.fileSystemCompressionEndTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-    #     )
-    #     aggregator.assert_metric(
-    #         'snmp.fileSystemCompressionStartTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-    #     )
-    #     aggregator.assert_metric(
-    #         'snmp.fileSystemGlobalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-    #     )
-    #     aggregator.assert_metric(
-    #         'snmp.fileSystemLocalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-    #     )
-    #     aggregator.assert_metric(
-    #         'snmp.fileSystemPostCompressionSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-    #     )
-    #     aggregator.assert_metric(
-    #         'snmp.fileSystemPreCompressionSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-    #     )
-    #     aggregator.assert_metric(
-    #         'snmp.fileSystemReductionPercent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-    #     )
-    #     aggregator.assert_metric(
-    #         'snmp.fileSystemTotalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-    #     )
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.fanProperties', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
-        ['data_domain_system_stats_index:13'],
-        ['data_domain_system_stats_index:31'],
-        ['data_domain_system_stats_index:9'],
+        [
+            'dell_data_domain_file_system_resource_name:driving their oxen forward Jaded forward but kept',
+            'dell_data_domain_file_system_resource_tier:their acted Jaded quaintly their acted',
+        ],
+        [
+            'dell_data_domain_file_system_resource_name:quaintly but oxen Jaded acted oxen kept',
+            'dell_data_domain_file_system_resource_tier:quaintly but kept driving Jaded',
+        ],
+        [
+            'dell_data_domain_file_system_resource_name:zombies kept driving quaintly forward',
+            'dell_data_domain_file_system_resource_tier:forward forward acted their but kept kept but',
+        ],
+        [
+            'dell_data_domain_file_system_resource_name:zombies quaintly',
+            'dell_data_domain_file_system_resource_tier:zombies Jaded Jaded acted forward forward Jaded kept',
+        ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cifsOpsPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.fileSystemPercentUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+
+    tag_rows = [
+        ['dell_data_domain_system_stats_index:13'],
+        ['dell_data_domain_system_stats_index:31'],
+        ['dell_data_domain_system_stats_index:9'],
+    ]
+    for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cpuMaxPercentageBusy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.diskBusyPercentage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.diskReadKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.dell.data_domain.cifsOpsPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.diskWriteKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric('snmp.nfsIdlePercentage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.nfsOpsPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.nfsProcPercentage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.nfsReceivePercentage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.nfsSendPercentage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric(
-            'snmp.nvramReadKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.dell.data_domain.cpuMaxPercentageBusy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.nvramWriteKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.dell.data_domain.diskBusyPercentage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric('snmp.relOutKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.replInKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.diskReadKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.diskWriteKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.nfsIdlePercentage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.nfsOpsPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.nfsProcPercentage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.nfsReceivePercentage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.nfsSendPercentage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.nvramReadKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.nvramWriteKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.relOutKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.replInKBytesPerSecond', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
         [
-            'data_domain_disk_capacity:Jaded forward',
-            'data_domain_disk_firmware_version:driving kept',
-            'data_domain_disk_model:zombies quaintly acted their quaintly zombies',
-            'data_domain_disk_pack:pack4',
-            'data_domain_disk_prop_enclosure_id:10',
-            'data_domain_disk_prop_index:12',
-            'data_domain_disk_prop_state:absent',
-            'data_domain_disk_serial_number:oxen zombies zombies quaintly driving',
+            'dell_data_domain_disk_capacity:Jaded forward',
+            'dell_data_domain_disk_firmware_version:driving kept',
+            'dell_data_domain_disk_model:zombies quaintly acted their quaintly zombies',
+            'dell_data_domain_disk_pack:pack4',
+            'dell_data_domain_disk_prop_enclosure_id:10',
+            'dell_data_domain_disk_prop_index:12',
+            'dell_data_domain_disk_prop_state:absent',
+            'dell_data_domain_disk_serial_number:oxen zombies zombies quaintly driving',
         ],
         [
-            'data_domain_disk_capacity:but their but their',
-            'data_domain_disk_firmware_version:oxen forward forward driving quaintly Jaded kept Jaded',
-            'data_domain_disk_model:but forward forward oxen kept acted acted',
-            'data_domain_disk_pack:notapplicable',
-            'data_domain_disk_prop_enclosure_id:28',
-            'data_domain_disk_prop_index:27',
-            'data_domain_disk_prop_state:unknown',
-            'data_domain_disk_serial_number:quaintly quaintly',
+            'dell_data_domain_disk_capacity:but their but their',
+            'dell_data_domain_disk_firmware_version:oxen forward forward driving quaintly Jaded kept Jaded',
+            'dell_data_domain_disk_model:but forward forward oxen kept acted acted',
+            'dell_data_domain_disk_pack:notapplicable',
+            'dell_data_domain_disk_prop_enclosure_id:28',
+            'dell_data_domain_disk_prop_index:27',
+            'dell_data_domain_disk_prop_state:unknown',
+            'dell_data_domain_disk_serial_number:quaintly quaintly',
         ],
         [
-            'data_domain_disk_capacity:oxen zombies driving',
-            'data_domain_disk_firmware_version:kept their oxen but oxen Jaded driving acted',
-            'data_domain_disk_model:zombies quaintly oxen oxen their kept',
-            'data_domain_disk_pack:pack2',
-            'data_domain_disk_prop_enclosure_id:12',
-            'data_domain_disk_prop_index:6',
-            'data_domain_disk_prop_state:failed',
-            'data_domain_disk_serial_number:Jaded their but acted driving oxen acted',
+            'dell_data_domain_disk_capacity:oxen zombies driving',
+            'dell_data_domain_disk_firmware_version:kept their oxen but oxen Jaded driving acted',
+            'dell_data_domain_disk_model:zombies quaintly oxen oxen their kept',
+            'dell_data_domain_disk_pack:pack2',
+            'dell_data_domain_disk_prop_enclosure_id:12',
+            'dell_data_domain_disk_prop_index:6',
+            'dell_data_domain_disk_prop_state:failed',
+            'dell_data_domain_disk_serial_number:Jaded their but acted driving oxen acted',
         ],
         [
-            'data_domain_disk_capacity:their',
-            'data_domain_disk_firmware_version:Jaded their quaintly',
-            'data_domain_disk_model:Jaded their Jaded kept',
-            'data_domain_disk_pack:notapplicable',
-            'data_domain_disk_prop_enclosure_id:29',
-            'data_domain_disk_prop_index:15',
-            'data_domain_disk_prop_state:unknown',
-            'data_domain_disk_serial_number:zombies oxen quaintly forward driving forward kept',
+            'dell_data_domain_disk_capacity:their',
+            'dell_data_domain_disk_firmware_version:Jaded their quaintly',
+            'dell_data_domain_disk_model:Jaded their Jaded kept',
+            'dell_data_domain_disk_pack:notapplicable',
+            'dell_data_domain_disk_prop_enclosure_id:29',
+            'dell_data_domain_disk_prop_index:15',
+            'dell_data_domain_disk_prop_state:unknown',
+            'dell_data_domain_disk_serial_number:zombies oxen quaintly forward driving forward kept',
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.diskProperties', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.diskProperties', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
-        ['data_domain_disk_perf_state:failed'],
-        ['data_domain_disk_perf_state:available'],
+        ['dell_data_domain_disk_perf_index:10', 'dell_data_domain_disk_perf_state:failed'],
+        ['dell_data_domain_disk_perf_index:29', 'dell_data_domain_disk_perf_state:available'],
+        ['dell_data_domain_disk_perf_index:29', 'dell_data_domain_disk_perf_state:failed'],
+        ['dell_data_domain_disk_perf_index:31', 'dell_data_domain_disk_perf_state:available'],
     ]
-
-    # diskTotalKBytes is not found with tag_rows, but when without tag_rows, diskSectorsWritten is not found, etc.
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.diskBusy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.diskSectorsWritten', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.diskSectorsRead', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.diskTotalKBytes', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.diskBusy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.diskSectorsRead', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.diskSectorsWritten', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.dell.data_domain.diskTotalKBytes', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     # --- TEST METADATA ---
     device = {
