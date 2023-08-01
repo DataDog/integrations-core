@@ -4,4 +4,4 @@ extends:
   - _generic-ucd.yaml
   - _ubiquiti.yaml
 sysobjectid:
-  - 1.3.6.1.4.1.41112.1.5  # Ubiquiti EdgeMax`
+  - 1.3.6.1.4.1.41112.1.5  # Ubiquiti EdgeMax
