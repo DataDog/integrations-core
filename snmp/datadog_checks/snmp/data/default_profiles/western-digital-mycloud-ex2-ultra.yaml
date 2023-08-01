@@ -110,23 +110,23 @@ metrics:
     metric_tags:
       - column:
           name: wdmycloudex2UPSNum
-          OID: 1.3.6.1.4.1.5127.1.1.1.8.1.11.1
+          OID: 1.3.6.1.4.1.5127.1.1.1.8.1.11.1.1
         tag: wdmycloudex2_ups_num
       - column:
           name: wdmycloudex2UPSMode
-          OID: 1.3.6.1.4.1.5127.1.1.1.8.1.11.2
+          OID: 1.3.6.1.4.1.5127.1.1.1.8.1.11.1.2
         tag: wdmycloudex2_ups_mode
       - column:
           name: wdmycloudex2UPSManufacturer
-          OID: 1.3.6.1.4.1.5127.1.1.1.8.1.11.3
+          OID: 1.3.6.1.4.1.5127.1.1.1.8.1.11.1.3
         tag: wdmycloudex2_ups_manufacturer
       - column:
           name: wdmycloudex2UPSProduct
-          OID: 1.3.6.1.4.1.5127.1.1.1.8.1.11.4
+          OID: 1.3.6.1.4.1.5127.1.1.1.8.1.11.1.4
         tag: wdmycloudex2_ups_product
       - column:
           name: wdmycloudex2UPSStatus
-          OID: 1.3.6.1.4.1.5127.1.1.1.8.1.11.6
+          OID: 1.3.6.1.4.1.5127.1.1.1.8.1.11.1.6
         tag: wdmycloudex2_ups_status
 
 metric_tags:

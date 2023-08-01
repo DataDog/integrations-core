@@ -109,30 +109,34 @@ def test_e2e_profile_western_digital_mycloud_ex2_ultra(dd_agent_check):
         aggregator.assert_metric('snmp.wdmycloudex2Disk', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['wdmycloudex2_ups_num:15'],
-        ['wdmycloudex2_ups_num:23'],
-        ['wdmycloudex2_ups_num:30'],
-        ['wdmycloudex2_ups_num:4'],
-        ['wdmycloudex2_ups_num:Jaded but acted kept quaintly Jaded'],
-        ['wdmycloudex2_ups_num:Jaded driving'],
-        ['wdmycloudex2_ups_num:Jaded kept kept kept their'],
-        ['wdmycloudex2_ups_num:Jaded oxen'],
-        ['wdmycloudex2_ups_num:acted forward forward forward'],
-        ['wdmycloudex2_ups_num:acted their kept oxen their but'],
-        ['wdmycloudex2_ups_num:but kept oxen forward kept quaintly their their zombies'],
-        ['wdmycloudex2_ups_num:driving acted oxen forward'],
-        ['wdmycloudex2_ups_num:driving driving driving acted kept forward driving Jaded'],
-        ['wdmycloudex2_ups_num:driving kept forward oxen quaintly'],
-        ['wdmycloudex2_ups_num:driving zombies but quaintly their'],
-        ['wdmycloudex2_ups_num:forward'],
-        ['wdmycloudex2_ups_num:quaintly quaintly'],
-        ['wdmycloudex2_ups_num:their but quaintly kept but acted'],
-        ['wdmycloudex2_ups_num:their their zombies forward Jaded zombies quaintly'],
-        ['wdmycloudex2_ups_num:zombies Jaded'],
-        ['wdmycloudex2_ups_num:zombies acted forward'],
-        ['wdmycloudex2_ups_num:zombies oxen kept oxen kept forward'],
-        ['wdmycloudex2_ups_num:zombies oxen their acted acted but their driving'],
-        ['wdmycloudex2_ups_num:zombies zombies acted zombies forward their zombies kept'],
+        [
+            'wdmycloudex2_ups_manufacturer:Jaded but acted kept quaintly Jaded',
+            'wdmycloudex2_ups_mode:zombies oxen their acted acted but their driving',
+            'wdmycloudex2_ups_num:30',
+            'wdmycloudex2_ups_product:but kept oxen forward kept quaintly their their zombies',
+            'wdmycloudex2_ups_status:acted their kept oxen their but',
+        ],
+        [
+            'wdmycloudex2_ups_manufacturer:Jaded driving',
+            'wdmycloudex2_ups_mode:their their zombies forward Jaded zombies quaintly',
+            'wdmycloudex2_ups_num:4',
+            'wdmycloudex2_ups_product:driving driving driving acted kept forward driving Jaded',
+            'wdmycloudex2_ups_status:driving acted oxen forward',
+        ],
+        [
+            'wdmycloudex2_ups_manufacturer:forward',
+            'wdmycloudex2_ups_mode:Jaded kept kept kept their',
+            'wdmycloudex2_ups_num:23',
+            'wdmycloudex2_ups_product:zombies acted forward',
+            'wdmycloudex2_ups_status:zombies oxen kept oxen kept forward',
+        ],
+        [
+            'wdmycloudex2_ups_manufacturer:quaintly quaintly',
+            'wdmycloudex2_ups_mode:Jaded oxen',
+            'wdmycloudex2_ups_num:15',
+            'wdmycloudex2_ups_product:their but quaintly kept but acted',
+            'wdmycloudex2_ups_status:zombies Jaded',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.wdmycloudex2UPS', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
