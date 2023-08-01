@@ -1,5 +1,6 @@
 extends:
-  - _dell-generic-if.yaml
+  - _dell.yaml
+  - _generic-if.yaml
 
 metadata:
   device:

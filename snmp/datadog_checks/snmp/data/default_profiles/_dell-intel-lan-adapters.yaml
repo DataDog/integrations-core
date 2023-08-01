@@ -1,3 +1,0 @@
-extends:
-  - _dell.yaml
-  - _intel-lan-adapters.yaml
