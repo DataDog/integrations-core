@@ -95,16 +95,11 @@ sysobjectid:
   - 1.3.6.1.4.1.674.10895.3115    # PowerConnect N1108EP-ON
 
 metrics:
-  - MIB: RADLAN-MIB
+  - MIB: DNOS-SWITCHING-MIB
     symbol:
       name: cpu.usage
-      OID: 1.3.6.1.4.1.89.1.8.0
-#  - MIB: DNOS-SWITCHING-MIB
-#    symbol:
-#      name: cpu.usage
-#      OID: 1.3.6.1.4.1.674.10895.5000.2.6132.1.1.1.1.4.9.0
-#      extract_value: 60 Secs.*?(\d+)
-# TODO: not supported yet (?)
+      OID: 1.3.6.1.4.1.674.10895.5000.2.6132.1.1.1.1.4.9.0
+      extract_value: 60 Secs.*?(\d+[.]?\d+)
   - MIB: DNOS-SWITCHING-MIB
     symbol:
       name: memory.free

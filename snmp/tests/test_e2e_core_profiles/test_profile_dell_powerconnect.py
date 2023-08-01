@@ -36,7 +36,7 @@ def test_e2e_profile_dell_powerconnect(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, value=41.14, tags=common_tags)
     aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
