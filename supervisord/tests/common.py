@@ -276,9 +276,7 @@ TEST_CASES = [
         },
     },
     {
-        'instances': [
-            {'name': 'server0', 'host': 'localhost', 'port': 9001, 'proc_regex_exclude': ['^py.*$']}
-        ],
+        'instances': [{'name': 'server0', 'host': 'localhost', 'port': 9001, 'proc_regex_exclude': ['^py.*$']}],
         'expected_metrics': {
             'server0': [
                 (
@@ -310,9 +308,7 @@ TEST_CASES = [
         },
     },
     {
-        'instances': [
-            {'name': 'server0', 'host': 'localhost', 'port': 9001, 'proc_names_exclude': ['python']}
-        ],
+        'instances': [{'name': 'server0', 'host': 'localhost', 'port': 9001, 'proc_names_exclude': ['python']}],
         'expected_metrics': {
             'server0': [
                 (

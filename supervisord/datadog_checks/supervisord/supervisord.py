@@ -145,9 +145,11 @@ class SupervisordCheck(AgentCheck):
             reverse_process_status = {v: k for k, v in PROCESS_STATUS.items()}
             for status, ddstatus in status_mapping_override.items():
                 if ddstatus in PROCESS_STATUS.values():
-                    status_mapping[status] = reverse_process_status[ddstatus];
+                    status_mapping[status] = reverse_process_status[ddstatus]
                 else:
-                    raise Exception("'status_mapping_override' should be a mapping between Supervisord status and Datadog status. e.g. %s => %s" % [status, ddstatus])
+                    raise Exception(
+                        "'status_mapping_override' should be a status mapping e.g. %s => %s" % [status, ddstatus]
+                    )
 
         # Collect information on each monitored process
         monitored_processes = []
