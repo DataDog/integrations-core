@@ -236,7 +236,7 @@ Use the Databricks UI to edit the cluster to run the init script:
 
 1. Choose the script that suits your needs below.
 2. Modify it to your convenience. You can for instance add tags or define a specific configuration for the integration.
-3. Save the script into your workspace.
+3. Save the script into your workspace with the `Workspace` menu on the left.
 4. On the cluster configuration page, click the `Advanced` options toggle.
 5. In the `Environment variables`, specify the `DD_API_KEY` environment variable and, optionally, the `DD_ENV` and the `DD_SITE` environment variables.
 6. Go to the `Init Scripts` tab.
