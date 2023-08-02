@@ -83,11 +83,15 @@ def test_get_table_info_relations_enabled(integration_check, dbm_instance, aggre
     assert 'public' == schema_metadata['name']
 
     # check that all expected tables are present
-    tables_set = {"test_part", 'persons', "personsdup1", "personsdup2", "pgtable", "pg_newtable"}
+    tables_set = {'persons', "personsdup1", "personsdup2", "pgtable", "pg_newtable"}
     tables_not_reported_set = {'test_part1', 'test_part2'}
-
-    # TODO if version is 9 or 10, partitions are not in table, check that
     for table in schema_metadata['tables']:
         assert tables_set.remove(table['name']) is None
         assert table['name'] not in tables_not_reported_set
+    
     assert tables_set == set()
+
+    # TODO if version isn't 9 or 10, check that partition master is in table
+    if not (POSTGRES_VERSION.split('.')[0] == 9) and  not (POSTGRES_VERSION.split('.')[0] == 10):
+        assert "test_part" in schema_metadata['tables']
+
