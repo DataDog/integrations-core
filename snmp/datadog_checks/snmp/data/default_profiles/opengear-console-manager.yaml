@@ -35,9 +35,9 @@ metrics:
           OID: 1.3.6.1.4.1.25049.17.2.1.4
         tag: og_serial_port_data_bits
       - column:
-          name: ogSerialPortPortParity
+          name: ogSerialPortParity
           OID: 1.3.6.1.4.1.25049.17.2.1.5
-        tag: og_serial_port_port_parity
+        tag: og_serial_port_parity
         mapping:
           1: none
           2: odd
@@ -124,6 +124,16 @@ metrics:
         OID: 1.3.6.1.4.1.25049.17.17.1.16
         metric_type: monotonic_count
     metric_tags:
+      - index: 1  # ogCellModemIndex
+        tag: og_cell_modem_index
+      - column:
+          name: ogCellModemVendor
+          OID: 1.3.6.1.4.1.25049.17.17.1.2
+        tag: og_cell_modem_vendor
+      - column:
+          name: ogCellModemModel
+          OID: 1.3.6.1.4.1.25049.17.17.1.3
+        tag: og_cell_modem_model
       - column:
           name: ogCellModemEnabled
           OID: 1.3.6.1.4.1.25049.17.17.1.4
