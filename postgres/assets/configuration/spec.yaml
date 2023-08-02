@@ -512,7 +512,8 @@ files:
           value:
             type: number
             example: 600
-      - name: collect_schemas
+
+    - name: collect_schemas
       description: |
         Enable collection of database schemas. In order to collect schemas from all user databases, 
         enable `database_autodiscovery`. To collect from a single database, set `dbname` to collect 
@@ -520,11 +521,11 @@ files:
       options:
         - name: enabled
           description: |
-            Enable collection of database schemas. Requires `dbm: true`.
+            Enable collection of database schemas. Requires `dbm: true` and relation metrics must be enabled.
           value:
             type: boolean
             example: false
-        - name: enabled
+        - name: max_tables
           description: |
             Maximum amount of tables the agent will collect from the instance.
           value:
