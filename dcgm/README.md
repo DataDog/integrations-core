@@ -358,31 +358,31 @@ If a field is not being collected even after enabling it in `default-counters.cs
 
 In some cases, the `DCGM_FI_DEV_GPU_UTIL` metric can cause heavier resource consumption. If you're experiencing this issue:
 
-1. disable `DCGM_FI_DEV_GPU_UTIL` in `default-counters.csv`.
-2. add the following to `default-counters.csv`:
-```
-DCGM_FI_PROF_GR_ENGINE_ACTIVE                                   ,gauge                  ,Ratio of time the graphics engine is active (in %).
-DCGM_FI_PROF_SM_ACTIVE                                          ,gauge                  ,The ratio of cycles an SM has at least 1 warp assigned (in %).
-DCGM_FI_PROF_SM_OCCUPANCY                                       ,gauge                  ,The ratio of number of warps resident on an SM (in %).
-DCGM_FI_PROF_PIPE_TENSOR_ACTIVE                                 ,gauge                  ,Ratio of cycles the tensor (HMMA) pipe is active (in %).
-DCGM_FI_PROF_DRAM_ACTIVE                                        ,gauge                  ,Ratio of cycles the device memory interface is active sending or receiving data (in %).
-DCGM_FI_PROF_PIPE_FP64_ACTIVE                                   ,gauge                  ,Ratio of cycles the fp64 pipes are active (in %).
-DCGM_FI_PROF_PIPE_FP32_ACTIVE                                   ,gauge                  ,Ratio of cycles the fp32 pipes are active (in %).
-DCGM_FI_PROF_PIPE_FP16_ACTIVE                                   ,gauge                  ,Ratio of cycles the fp16 pipes are active (in %).
-```
+1. Disable `DCGM_FI_DEV_GPU_UTIL` in `default-counters.csv`.
+2. Add the following to `default-counters.csv`:
+   ```
+   DCGM_FI_PROF_GR_ENGINE_ACTIVE                                   ,gauge                  ,Ratio of time the graphics engine is active (in %).
+   DCGM_FI_PROF_SM_ACTIVE                                          ,gauge                  ,The ratio of cycles an SM has at least 1 warp assigned (in %).
+   DCGM_FI_PROF_SM_OCCUPANCY                                       ,gauge                  ,The ratio of number of warps resident on an SM (in %).
+   DCGM_FI_PROF_PIPE_TENSOR_ACTIVE                                 ,gauge                  ,Ratio of cycles the tensor (HMMA) pipe is active (in %).
+   DCGM_FI_PROF_DRAM_ACTIVE                                        ,gauge                  ,Ratio of cycles the device memory interface is active sending or receiving data (in %).
+   DCGM_FI_PROF_PIPE_FP64_ACTIVE                                   ,gauge                  ,Ratio of cycles the fp64 pipes are active (in %).
+   DCGM_FI_PROF_PIPE_FP32_ACTIVE                                   ,gauge                  ,Ratio of cycles the fp32 pipes are active (in %).
+   DCGM_FI_PROF_PIPE_FP16_ACTIVE                                   ,gauge                  ,Ratio of cycles the fp16 pipes are active (in %).
+   ```
 3. Add the following to `dcgm/conf.yaml` inside your instance:
-```
-extra_metrics:
-  DCGM_FI_PROF_GR_ENGINE_ACTIVE: dcgm.gr_engine_active
-  DCGM_FI_PROF_SM_ACTIVE: dcgm.sm_active
-  DCGM_FI_PROF_SM_OCCUPANCY: dcgm.sm_occupancy
-  DCGM_FI_PROF_PIPE_TENSOR_ACTIVE: dcgm.pipe.tensor_active
-  DCGM_FI_PROF_DRAM_ACTIVE: dcgm.dram.active
-  DCGM_FI_PROF_PIPE_FP64_ACTIVE: dcgm.pipe.fp64_active
-  DCGM_FI_PROF_PIPE_FP32_ACTIVE: dcgm.pipe.fp32_active
-  DCGM_FI_PROF_PIPE_FP16_ACTIVE: dcgm.pipe.fp16_active
-```
-4. Restart both dcgm-exporter and the datadog agent.
+   ```
+   extra_metrics:
+     DCGM_FI_PROF_GR_ENGINE_ACTIVE: dcgm.gr_engine_active
+     DCGM_FI_PROF_SM_ACTIVE: dcgm.sm_active
+     DCGM_FI_PROF_SM_OCCUPANCY: dcgm.sm_occupancy
+     DCGM_FI_PROF_PIPE_TENSOR_ACTIVE: dcgm.pipe.tensor_active
+     DCGM_FI_PROF_DRAM_ACTIVE: dcgm.dram.active
+     DCGM_FI_PROF_PIPE_FP64_ACTIVE: dcgm.pipe.fp64_active
+     DCGM_FI_PROF_PIPE_FP32_ACTIVE: dcgm.pipe.fp32_active
+     DCGM_FI_PROF_PIPE_FP16_ACTIVE: dcgm.pipe.fp16_active
+   ```
+4. Restart both dcgm-exporter and the Datadog Agent.
 
 ### Need help?
 
