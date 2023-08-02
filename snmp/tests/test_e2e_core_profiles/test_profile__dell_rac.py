@@ -40,8 +40,8 @@ def test_e2e_profile__dell_rac(dd_agent_check):
     aggregator.assert_metric('snmp.drsPowerCurrStatus', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.drsRedCurrStatus', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-        ['chassis_index:10', 'system_state_power_supply_status_combined:unknown'],
-        ['chassis_index:27', 'system_state_power_supply_status_combined:unknown'],
+        ['chassis_index:10', 'system_state_power_supply_status_combined:noncritical'],
+        ['chassis_index:13', 'system_state_power_supply_status_combined:unknown'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -90,10 +90,8 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         )
 
     tag_rows = [
-        ['disk_name:but quaintly Jaded acted but quaintly'],
-        ['disk_name:kept oxen driving their their'],
-        ['disk_name:oxen driving their acted forward driving'],
-        ['disk_name:quaintly'],
+        ['disk_name:but zombies their quaintly forward zombies kept quaintly Jaded'],
+        ['disk_name:oxen Jaded but zombies driving kept driving'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -109,28 +107,16 @@ def test_e2e_profile__dell_rac(dd_agent_check):
 
     tag_rows = [
         [
-            'enclosure_power_supply_fqdd:but driving oxen quaintly kept their',
-            'enclosure_power_supply_number:7',
-            'enclosure_power_supply_state:ready',
-            'supply_name:oxen oxen driving oxen',
+            'enclosure_power_supply_fqdd:forward Jaded oxen kept Jaded oxen zombies their their',
+            'enclosure_power_supply_number:23',
+            'enclosure_power_supply_state:failed',
+            'supply_name:forward quaintly acted Jaded quaintly',
         ],
         [
-            'enclosure_power_supply_fqdd:kept',
-            'enclosure_power_supply_number:3',
-            'enclosure_power_supply_state:ready',
-            'supply_name:oxen but kept oxen acted',
-        ],
-        [
-            'enclosure_power_supply_fqdd:their Jaded acted forward but oxen acted',
-            'enclosure_power_supply_number:15',
+            'enclosure_power_supply_fqdd:quaintly driving kept quaintly quaintly their kept kept',
+            'enclosure_power_supply_number:25',
             'enclosure_power_supply_state:unknown',
-            'supply_name:forward their Jaded quaintly oxen acted',
-        ],
-        [
-            'enclosure_power_supply_fqdd:their driving their Jaded their acted kept Jaded',
-            'enclosure_power_supply_number:16',
-            'enclosure_power_supply_state:ready',
-            'supply_name:their but',
+            'supply_name:quaintly but',
         ],
     ]
     for tag_row in tag_rows:
@@ -140,38 +126,24 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         )
 
     tag_rows = [
-        ['battery_fqdd:but Jaded kept driving', 'battery_name:zombies their'],
-        ['battery_fqdd:forward but', 'battery_name:kept driving but oxen Jaded zombies driving driving forward'],
-        ['battery_fqdd:kept zombies Jaded zombies', 'battery_name:oxen'],
-        ['battery_fqdd:their zombies', 'battery_name:but oxen quaintly but quaintly zombies kept forward'],
+        ['battery_fqdd:kept acted forward zombies driving zombies', 'battery_name:but zombies quaintly their but'],
+        ['battery_fqdd:zombies zombies kept acted forward oxen oxen', 'battery_name:their zombies forward'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.batteryState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         [
-            'controller_fqdd:forward Jaded their',
-            'controller_name:but Jaded acted driving oxen zombies quaintly',
-            'controller_number:4',
-            'controller_pci_slot:acted oxen driving acted but quaintly kept but',
+            'controller_fqdd:forward their acted but forward kept driving acted',
+            'controller_name:zombies quaintly their',
+            'controller_number:29',
+            'controller_pci_slot:zombies oxen quaintly acted forward their Jaded acted',
         ],
         [
-            'controller_fqdd:kept but zombies oxen forward their',
-            'controller_name:oxen Jaded kept their zombies',
-            'controller_number:20',
-            'controller_pci_slot:quaintly kept quaintly their Jaded',
-        ],
-        [
-            'controller_fqdd:kept oxen quaintly acted',
-            'controller_name:Jaded zombies zombies',
-            'controller_number:26',
-            'controller_pci_slot:zombies their kept zombies acted',
-        ],
-        [
-            'controller_fqdd:zombies acted quaintly',
-            'controller_name:zombies quaintly',
-            'controller_number:15',
-            'controller_pci_slot:zombies but forward zombies',
+            'controller_fqdd:oxen oxen driving but acted but but zombies oxen',
+            'controller_name:zombies but acted',
+            'controller_number:5',
+            'controller_pci_slot:acted',
         ],
     ]
     for tag_row in tag_rows:
@@ -180,64 +152,48 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         )
 
     tag_rows = [
-        ['chassis_index:1', 'device_descr_name:oxen'],
-        ['chassis_index:11', 'device_descr_name:forward their oxen kept their their zombies their zombies'],
-        ['chassis_index:23', 'device_descr_name:kept but'],
-        ['chassis_index:30', 'device_descr_name:kept driving forward quaintly kept kept zombies but'],
+        ['chassis_index:31', 'device_descr_name:oxen forward oxen their but'],
+        ['chassis_index:7', 'device_descr_name:kept acted zombies forward driving oxen their oxen'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.pCIDeviceStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:16', 'slot_name:their'],
-        ['chassis_index:24', 'slot_name:acted forward forward'],
-        ['chassis_index:26', 'slot_name:quaintly Jaded zombies'],
-        ['chassis_index:6', 'slot_name:kept driving oxen oxen oxen zombies their'],
+        ['chassis_index:20', 'slot_name:quaintly zombies zombies oxen quaintly their but'],
+        ['chassis_index:21', 'slot_name:kept acted quaintly quaintly acted'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.systemSlotStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:2', 'device_fqdd:their'],
-        ['chassis_index:20', 'device_fqdd:zombies'],
-        ['chassis_index:29', 'device_fqdd:acted acted kept'],
-        ['chassis_index:9', 'device_fqdd:oxen oxen Jaded zombies'],
+        ['chassis_index:18', 'device_fqdd:kept Jaded acted forward their their', 'mac_addr:cdbdew'],
+        ['chassis_index:26', 'device_fqdd:quaintly acted forward', 'mac_addr:abcdge'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.networkDeviceStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:18', 'system_bios_index:7'],
-        ['chassis_index:31', 'system_bios_index:16'],
-        ['chassis_index:8', 'system_bios_index:17'],
-        ['chassis_index:8', 'system_bios_index:29'],
+        ['chassis_index:27', 'system_bios_index:15'],
+        ['chassis_index:5', 'system_bios_index:3'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.systemBIOSStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        [
-            'chassis_index:25',
-            'intrusion_index:4',
-            'intrusion_location_name:forward oxen but driving oxen Jaded zombies forward acted',
-        ],
-        [
-            'chassis_index:29',
-            'intrusion_index:28',
-            'intrusion_location_name:oxen but driving Jaded Jaded Jaded driving',
-        ],
-        ['chassis_index:4', 'intrusion_index:6', 'intrusion_location_name:oxen oxen'],
-        ['chassis_index:6', 'intrusion_index:26', 'intrusion_location_name:oxen forward driving'],
+        ['chassis_index:3', 'intrusion_index:26', 'intrusion_location_name:oxen Jaded'],
+        ['chassis_index:7', 'intrusion_index:9', 'intrusion_location_name:quaintly'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.intrusionReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.intrusionStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:17', 'device_fqdd:acted their', 'power_supply_index:4'],
-        ['chassis_index:23', 'device_fqdd:oxen', 'power_supply_index:27'],
-        ['chassis_index:26', 'device_fqdd:zombies but forward Jaded zombies their zombies but', 'power_supply_index:4'],
-        ['chassis_index:9', 'device_fqdd:zombies Jaded quaintly', 'power_supply_index:4'],
+        ['chassis_index:18', 'device_fqdd:their quaintly forward', 'power_supply_index:11'],
+        [
+            'chassis_index:23',
+            'device_fqdd:driving oxen acted their forward Jaded kept driving oxen',
+            'power_supply_index:22',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -251,57 +207,47 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         )
 
     tag_rows = [
-        ['amperage_probe_index:24', 'chassis_index:23', 'probe_type:26'],
-        ['amperage_probe_index:28', 'chassis_index:27', 'probe_type:4'],
-        ['amperage_probe_index:4', 'chassis_index:11', 'probe_type:13'],
-        ['amperage_probe_index:9', 'chassis_index:4', 'probe_type:7'],
+        ['amperage_probe_index:13', 'chassis_index:10', 'probe_type:12'],
+        ['amperage_probe_index:13', 'chassis_index:12', 'probe_type:2'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.amperageProbeReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.amperageProbeStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:11', 'power_usage_entity_name:forward zombies Jaded', 'power_usage_index:24'],
-        ['chassis_index:13', 'power_usage_entity_name:oxen Jaded kept', 'power_usage_index:24'],
-        ['chassis_index:3', 'power_usage_entity_name:acted', 'power_usage_index:30'],
-        ['chassis_index:5', 'power_usage_entity_name:forward forward acted their', 'power_usage_index:1'],
+        ['chassis_index:23', 'power_usage_entity_name:but', 'power_usage_index:12'],
+        ['chassis_index:24', 'power_usage_entity_name:but acted their but forward', 'power_usage_index:20'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.powerUsageStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:11', 'probe_type:9', 'voltage_probe_index:28'],
-        ['chassis_index:19', 'probe_type:13', 'voltage_probe_index:22'],
-        ['chassis_index:21', 'probe_type:7', 'voltage_probe_index:2'],
-        ['chassis_index:5', 'probe_type:19', 'voltage_probe_index:29'],
+        ['chassis_index:15', 'probe_type:3', 'voltage_probe_index:31'],
+        ['chassis_index:4', 'probe_type:2', 'voltage_probe_index:19'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.voltageProbeReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.voltageProbeStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:11', 'system_battery_index:26', 'system_battery_location_name:kept acted oxen quaintly'],
         [
-            'chassis_index:21',
+            'chassis_index:1',
             'system_battery_index:27',
-            'system_battery_location_name:zombies forward acted quaintly acted acted quaintly driving oxen',
+            'system_battery_location_name:forward forward forward forward driving their Jaded acted',
         ],
-        ['chassis_index:27', 'system_battery_index:9', 'system_battery_location_name:zombies'],
-        ['chassis_index:7', 'system_battery_index:27', 'system_battery_location_name:quaintly'],
+        ['chassis_index:25', 'system_battery_index:1', 'system_battery_location_name:forward their quaintly Jaded'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.systemBatteryReading', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.systemBatteryStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:16', 'cooling_unit_index:10', 'cooling_unit_name:kept their kept'],
         [
-            'chassis_index:17',
-            'cooling_unit_index:11',
-            'cooling_unit_name:Jaded kept driving their their their kept acted',
+            'chassis_index:16',
+            'cooling_unit_index:9',
+            'cooling_unit_name:quaintly driving zombies acted their zombies oxen quaintly',
         ],
-        ['chassis_index:18', 'cooling_unit_index:25', 'cooling_unit_name:but but their zombies zombies zombies acted'],
-        ['chassis_index:8', 'cooling_unit_index:12', 'cooling_unit_name:their kept forward forward zombies'],
+        ['chassis_index:7', 'cooling_unit_index:21', 'cooling_unit_name:forward zombies driving quaintly'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -311,32 +257,18 @@ def test_e2e_profile__dell_rac(dd_agent_check):
 
     tag_rows = [
         [
-            'chassis_index:17',
-            'cooling_device_fqdd:Jaded forward but forward acted',
-            'cooling_device_location_name:Jaded their kept quaintly oxen but acted quaintly',
-            'cooling_device_name:11',
-            'cooling_device_type:11',
+            'chassis_index:19',
+            'cooling_device_fqdd:zombies their but their but forward',
+            'cooling_device_location_name:zombies but zombies forward driving quaintly',
+            'cooling_device_name:1',
+            'cooling_device_type:10',
         ],
         [
-            'chassis_index:22',
-            'cooling_device_fqdd:driving oxen acted',
-            'cooling_device_location_name:but but forward quaintly forward Jaded acted',
-            'cooling_device_name:24',
-            'cooling_device_type:6',
-        ],
-        [
-            'chassis_index:30',
-            'cooling_device_fqdd:quaintly Jaded zombies quaintly quaintly driving their acted Jaded',
-            'cooling_device_location_name:Jaded',
-            'cooling_device_name:15',
-            'cooling_device_type:9',
-        ],
-        [
-            'chassis_index:31',
-            'cooling_device_fqdd:forward their quaintly acted zombies their quaintly',
-            'cooling_device_location_name:zombies kept',
-            'cooling_device_name:26',
-            'cooling_device_type:9',
+            'chassis_index:21',
+            'cooling_device_fqdd:but zombies acted their forward acted',
+            'cooling_device_location_name:their',
+            'cooling_device_name:10',
+            'cooling_device_type:1',
         ],
     ]
     for tag_row in tag_rows:
@@ -348,28 +280,16 @@ def test_e2e_profile__dell_rac(dd_agent_check):
 
     tag_rows = [
         [
-            'chassis_index:20',
-            'temperature_probe_index:25',
-            'temperature_probe_location_name:driving quaintly their acted oxen forward',
+            'chassis_index:13',
+            'temperature_probe_index:26',
+            'temperature_probe_location_name:quaintly',
             'temperature_probe_type:2',
         ],
         [
-            'chassis_index:20',
-            'temperature_probe_index:4',
-            'temperature_probe_location_name:driving zombies oxen zombies forward Jaded but forward',
+            'chassis_index:14',
+            'temperature_probe_index:8',
+            'temperature_probe_location_name:but kept Jaded Jaded their driving zombies zombies',
             'temperature_probe_type:16',
-        ],
-        [
-            'chassis_index:22',
-            'temperature_probe_index:3',
-            'temperature_probe_location_name:Jaded',
-            'temperature_probe_type:2',
-        ],
-        [
-            'chassis_index:4',
-            'temperature_probe_index:10',
-            'temperature_probe_location_name:Jaded but driving kept but acted forward zombies',
-            'temperature_probe_type:3',
         ],
     ]
     for tag_row in tag_rows:
@@ -385,28 +305,16 @@ def test_e2e_profile__dell_rac(dd_agent_check):
 
     tag_rows = [
         [
-            'chassis_index:18',
-            'processor_device_brand_name:but kept',
-            'processor_device_fqdd:oxen forward but Jaded but driving driving zombies',
+            'chassis_index:13',
+            'processor_device_brand_name:acted kept quaintly acted kept their zombies Jaded their',
+            'processor_device_fqdd:zombies',
             'processor_device_index:20',
         ],
         [
-            'chassis_index:18',
-            'processor_device_brand_name:zombies',
-            'processor_device_fqdd:oxen driving oxen zombies but quaintly quaintly driving',
-            'processor_device_index:9',
-        ],
-        [
-            'chassis_index:26',
-            'processor_device_brand_name:their driving quaintly oxen quaintly driving zombies',
-            'processor_device_fqdd:oxen quaintly',
-            'processor_device_index:3',
-        ],
-        [
-            'chassis_index:8',
-            'processor_device_brand_name:but Jaded acted but',
-            'processor_device_fqdd:driving oxen acted Jaded Jaded zombies zombies zombies',
-            'processor_device_index:26',
+            'chassis_index:13',
+            'processor_device_brand_name:kept acted driving',
+            'processor_device_fqdd:kept zombies oxen zombies zombies',
+            'processor_device_index:11',
         ],
     ]
     for tag_row in tag_rows:
@@ -423,25 +331,11 @@ def test_e2e_profile__dell_rac(dd_agent_check):
 
     tag_rows = [
         [
-            'chassis_index:11',
-            'processor_device_status_index:20',
-            'processor_device_status_location_name:zombies their acted acted quaintly',
+            'chassis_index:14',
+            'processor_device_status_index:16',
+            'processor_device_status_location_name:but but but forward quaintly driving',
         ],
-        [
-            'chassis_index:16',
-            'processor_device_status_index:8',
-            'processor_device_status_location_name:driving forward Jaded forward',
-        ],
-        [
-            'chassis_index:20',
-            'processor_device_status_index:23',
-            'processor_device_status_location_name:but but forward driving oxen',
-        ],
-        [
-            'chassis_index:8',
-            'processor_device_status_index:14',
-            'processor_device_status_location_name:driving Jaded driving driving',
-        ],
+        ['chassis_index:4', 'processor_device_status_index:25', 'processor_device_status_location_name:zombies'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -452,40 +346,30 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         )
 
     tag_rows = [
-        ['chassis_index:12', 'device_index:22', 'device_type:7'],
-        ['chassis_index:17', 'device_index:4', 'device_type:17'],
-        ['chassis_index:24', 'device_index:1', 'device_type:9'],
-        ['chassis_index:24', 'device_index:13', 'device_type:26'],
+        ['chassis_index:18', 'device_index:11', 'device_type:18'],
+        ['chassis_index:21', 'device_index:30', 'device_type:12'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.memoryDeviceStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:13', 'fru_fqdd:driving kept acted', 'fru_index:7'],
-        ['chassis_index:17', 'fru_fqdd:oxen forward kept kept', 'fru_index:3'],
-        ['chassis_index:17', 'fru_fqdd:quaintly forward acted oxen their but quaintly but their', 'fru_index:30'],
-        ['chassis_index:19', 'fru_fqdd:zombies forward but their acted but', 'fru_index:19'],
+        ['chassis_index:21', 'fru_fqdd:driving but but driving but oxen driving', 'fru_index:19'],
+        ['chassis_index:23', 'fru_fqdd:driving oxen zombies driving driving quaintly acted oxen acted', 'fru_index:12'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.fruInformationStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         [
-            'virtual_disk_fqdd:Jaded but zombies their oxen',
-            'virtual_disk_name:their oxen but forward forward driving zombies zombies',
-            'virtual_disk_number:31',
+            'virtual_disk_fqdd:driving but kept but their quaintly their',
+            'virtual_disk_name:kept Jaded zombies quaintly their but kept kept',
+            'virtual_disk_number:1',
         ],
         [
-            'virtual_disk_fqdd:Jaded oxen oxen their quaintly forward',
-            'virtual_disk_name:oxen',
-            'virtual_disk_number:28',
-        ],
-        [
-            'virtual_disk_fqdd:quaintly quaintly their acted their acted zombies Jaded Jaded',
-            'virtual_disk_name:kept quaintly oxen but kept forward driving',
+            'virtual_disk_fqdd:zombies quaintly kept but',
+            'virtual_disk_name:Jaded Jaded quaintly forward oxen',
             'virtual_disk_number:4',
         ],
-        ['virtual_disk_fqdd:zombies but their', 'virtual_disk_name:their quaintly', 'virtual_disk_number:26'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
