@@ -35,20 +35,21 @@ FROM sys.dm_exec_sessions
     GROUP BY login_name, status, DB_NAME(database_id)
 """
 
-# Query to check idle
+# Query to check idle blocking sessions exists or not
 IDLE_BLOCKING_SESSIONS_QUERY = """
 SELECT
     TOP(1) req.blocking_session_id
-FROM
-    sys.dm_exec_requests req INNDER
-    JOIN sys.dm_exec_sessions sess ON req.blocking_session_id = sess.session_id
+FROM sys.dm_exec_requests req
+    INNER JOIN sys.dm_exec_sessions sess
+        ON req.blocking_session_id = sess.session_id
 WHERE
-    sess.status = 'sleeping'
+    sess.session_id != @@spid
+    AND sess.status = 'sleeping'
 """
 
-# Base query collects active session load on db,
-# common to both ACTIVITY_QUERY and ACTIVITY_QUERY_SIMPLIFIED
-ACTIVITY_QUERY = re.sub(
+# The activity query that includes non-sleeping sessions
+# and idle sessions that are blocking
+ACTIVITY_QUERY_ALL = re.sub(
     r'\s+',
     ' ',
     """\
@@ -235,9 +236,11 @@ class SqlserverActivity(DBMAsyncJob):
         # Only run the full version of activity query to fetch
         # both non-sleeping and idle blocking sessions
         # when (at least 1) idle blocking sessions found
-        query = ACTIVITY_QUERY if self._has_idle_blocking_sessions(cursor) else ACTIVITY_QUERY_SIMPLIFIED
-        query = query.format(exec_request_columns=', '.join(['req.{}'.format(r) for r in exec_request_columns]),
-            proc_char_limit=PROC_CHAR_LIMIT,)
+        query = ACTIVITY_QUERY_ALL if self._has_idle_blocking_sessions(cursor) else ACTIVITY_QUERY_SIMPLIFIED
+        query = query.format(
+            exec_request_columns=', '.join(['req.{}'.format(r) for r in exec_request_columns]),
+            proc_char_limit=PROC_CHAR_LIMIT,
+        )
         self.log.debug("Running query [%s]", query)
         cursor.execute(query)
         columns = [i[0] for i in cursor.description]

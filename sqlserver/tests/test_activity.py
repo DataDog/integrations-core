@@ -250,7 +250,12 @@ def test_activity_nested_blocking_transactions(
         cur.execute("USE {}".format("datadog_test"))
         cur.execute("BEGIN TRANSACTION")
         for q in queries:
-            cur.execute(q)
+            try:
+                cur.execute(q)
+            except pyodbc.OperationalError as err:
+                print(err)
+                # This is expected since the query (might be) blocked
+                print("Timeout on query: {}".format(q))
         # Do not allow the conn to be garbage collected and closed until the global lock is released
         while not close_conns.is_set():
             time.sleep(0.1)
