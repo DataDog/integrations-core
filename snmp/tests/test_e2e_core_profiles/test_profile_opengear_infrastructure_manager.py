@@ -39,27 +39,46 @@ def test_e2e_profile_opengear_infrastructure_manager(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     tag_rows = [
-         ['og_serial_port_status_cts:off', 'og_serial_port_status_dcd:off', 'og_serial_port_status_dsr:on', 'og_serial_port_status_dtr:off', 'og_serial_port_status_label:driving', 'og_serial_port_status_port:10', 'og_serial_port_status_rts:on', 'og_serial_port_status_speed:7'],
-         ['og_serial_port_status_cts:off', 'og_serial_port_status_dcd:on', 'og_serial_port_status_dsr:off', 'og_serial_port_status_dtr:on', 'og_serial_port_status_label:their quaintly zombies Jaded oxen kept oxen their', 'og_serial_port_status_port:6', 'og_serial_port_status_rts:on', 'og_serial_port_status_speed:29'],
-
+        [
+            'og_serial_port_status_cts:off',
+            'og_serial_port_status_dcd:off',
+            'og_serial_port_status_dsr:on',
+            'og_serial_port_status_dtr:off',
+            'og_serial_port_status_label:driving',
+            'og_serial_port_status_port:10',
+            'og_serial_port_status_rts:on',
+            'og_serial_port_status_speed:7',
+        ],
+        [
+            'og_serial_port_status_cts:off',
+            'og_serial_port_status_dcd:on',
+            'og_serial_port_status_dsr:off',
+            'og_serial_port_status_dtr:on',
+            'og_serial_port_status_label:their quaintly zombies Jaded oxen kept oxen their',
+            'og_serial_port_status_port:6',
+            'og_serial_port_status_rts:on',
+            'og_serial_port_status_speed:29',
+        ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ogSerialPortStatusRxBytes', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.ogSerialPortStatusTxBytes', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.ogSerialPortStatusRxBytes', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.ogSerialPortStatusTxBytes', metric_type=aggregator.COUNT, tags=common_tags + tag_row
+        )
 
     tag_rows = [
-         ['og_rpc_status_name:driving driving'],
-         ['og_rpc_status_name:their but but their forward'],
-
+        ['og_rpc_status_name:driving driving'],
+        ['og_rpc_status_name:their but but their forward'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ogRpcStatusAlertCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.ogRpcStatusMaxTemp', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['og_emd_status_name:driving Jaded kept kept'],
-         ['og_emd_status_name:their'],
-
+        ['og_emd_status_name:driving Jaded kept kept'],
+        ['og_emd_status_name:their'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ogEmdStatusAlertCount', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
