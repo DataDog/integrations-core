@@ -148,9 +148,7 @@ def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deploymen
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
-    mock_command.assert_has_calls(
-        [mock.call('getCmdLineOpts'), mock.call('isMaster'), mock.call('replSetGetStatus')]
-    )
+    mock_command.assert_has_calls([mock.call('getCmdLineOpts'), mock.call('isMaster'), mock.call('replSetGetStatus')])
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
 
@@ -175,9 +173,7 @@ def test_when_replicaset_state_recovering_then_database_names_not_called(
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
-    mock_command.assert_has_calls(
-        [mock.call('getCmdLineOpts'), mock.call('isMaster'), mock.call('replSetGetStatus')]
-    )
+    mock_command.assert_has_calls([mock.call('getCmdLineOpts'), mock.call('isMaster'), mock.call('replSetGetStatus')])
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_not_called()
 
@@ -599,6 +595,7 @@ def test_when_version_lower_than_3_6_then_no_session_metrics_reported(aggregator
         dd_run_check(check)
     # Then
     aggregator.assert_metric('mongodb.sessions.count', count=0)
+
 
 def test_service_check_critical_when_connection_dies(aggregator, check, instance, dd_run_check):
     check = check(instance)

@@ -8,7 +8,7 @@ from copy import deepcopy
 from packaging.version import Version
 
 from datadog_checks.base import AgentCheck, is_affirmative
-from datadog_checks.mongo.api import MongoApi, ConnectionFailure
+from datadog_checks.mongo.api import ConnectionFailure, MongoApi
 from datadog_checks.mongo.collectors import (
     CollStatsCollector,
     CustomQueriesCollector,
@@ -162,10 +162,7 @@ class MongoDb(AgentCheck):
         return metrics_to_collect
 
     def _refresh_replica_role(self):
-        if (
-            self.api_client.deployment_type is None
-            or isinstance(self.api_client.deployment_type, ReplicaSetDeployment)
-        ):
+        if self.api_client.deployment_type is None or isinstance(self.api_client.deployment_type, ReplicaSetDeployment):
             self.log.debug("Refreshing deployment type")
             self.api_client.refresh_deployment_type()
 
@@ -215,7 +212,7 @@ class MongoDb(AgentCheck):
                 self.log.info(
                     "Unable to collect logs from collector %s. Some metrics will be missing.", collector, exc_info=True
                 )
-                raise e # Connection failures must bubble up to trigger a CRITICAL service check.
+                raise e  # Connection failures must bubble up to trigger a CRITICAL service check.
             except Exception:
                 self.log.info(
                     "Unable to collect logs from collector %s. Some metrics will be missing.", collector, exc_info=True
