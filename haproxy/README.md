@@ -61,6 +61,8 @@ To configure this check for an Agent running on a host:
    ```
    **Note**: The `use_openmetrics` option uses [OpenMetrics v2][26] for metric collection, which requires Agent v7.35+ or [enabling Python 3][27] in Agent v6.35+. For hosts that are unable to use Python 3 or are on Agent v7.34 and below, use the OpenMetrics v1 implementation or the [socket-based legacy integration](#using-the-stats-endpoint). 
 
+   To use Prometheus/OpenMetrics v1 instead of OpenMetrics v2, change the `use_openmetrics` option to `use_prometheus`, and change the `openmetrics_endpoint` option to `prometheus_url`. You can read more about the difference between these options in our [Prometheus and OpenMetrics metrics collection from a host documentation][29]
+
    To view configuration options for the legacy implementation, see the [sample haproxy.d/conf.yaml][25] file for Agent v7.34.
 
 
@@ -420,3 +422,4 @@ Need help? Contact [Datadog support][20].
 [26]: https://datadoghq.dev/integrations-core/base/openmetrics/
 [27]: https://docs.datadoghq.com/agent/guide/agent-v6-python-3/?tab=helm#use-python-3-with-datadog-agent-v6
 [28]: https://github.com/DataDog/integrations-core/blob/0e34b3309cc1371095762bfcaf121b0b45a4e263/haproxy/datadog_checks/haproxy/data/conf.yaml.example#L631
+[29]: https://docs.datadoghq.com/integrations/guide/prometheus-host-collection/
