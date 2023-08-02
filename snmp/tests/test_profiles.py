@@ -878,16 +878,17 @@ def test_idrac(aggregator):
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     tag_mappings = [
-        ('supply1', '13', 'forward their oxen acted acted'),
-        ('supply2', '16', 'quaintly but acted'),
+        ('5', 'supply1', '13', 'forward their oxen acted acted'),
+        ('1', 'supply2', '16', 'quaintly but acted'),
     ]
-    for name, number, fqdd in tag_mappings:
+    for state, name, number, fqdd in tag_mappings:
         tags = [
+            'enclosure_power_supply_state:{}'.format(state),
             'supply_name:{}'.format(name),
             'enclosure_power_supply_number:{}'.format(number),
             'enclosure_power_supply_fqdd:{}'.format(fqdd),
         ] + common_tags
-        aggregator.assert_metric('snmp.enclosurePowerSupplyState', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.enclosurePowerSupplyState', metric_type=aggregator.GAUGE, tags=tags)
 
     disks = ['disk1', 'disk2']
     for disk in disks:

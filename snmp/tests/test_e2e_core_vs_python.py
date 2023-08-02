@@ -43,6 +43,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.ospfIf',
     'snmp.ospfVirtIf',
     'snmp.upsOutletGroupStatus',  # APC UPS constant metric
+    'snmp.enclosurePowerSupply'  # iDRAC constant metric
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
