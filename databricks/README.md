@@ -76,7 +76,7 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
   echo "Installing Datadog Agent on the driver..."
 
   # CONFIGURE HOST TAGS FOR DRIVER
-  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${DB_DRIVER_IP}","spark_node:driver"
+  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${DB_DRIVER_IP}","spark_node:driver","databricks_instance_type:\${DB_INSTANCE_TYPE}","databricks_is_job_cluster:\${DB_IS_JOB_CLUSTER}"
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
   DD_INSTALL_ONLY=true \
@@ -156,7 +156,7 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
   echo "Installing Datadog Agent on the driver (master node)."
 
   # CONFIGURE HOST TAGS FOR DRIVER
-  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${DB_DRIVER_IP}","spark_node:driver"
+  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${DB_DRIVER_IP}","spark_node:driver","databricks_instance_type:\${DB_INSTANCE_TYPE}","databricks_is_job_cluster:\${DB_IS_JOB_CLUSTER}"
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
   DD_INSTALL_ONLY=true \
@@ -203,7 +203,7 @@ logs:
     echo "Installing Datadog Agent on the worker."
 
     # CONFIGURE HOST TAGS FOR WORKERS
-    DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:worker"
+    DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:worker","databricks_instance_type:\${DB_INSTANCE_TYPE}","databricks_is_job_cluster:\${DB_IS_JOB_CLUSTER}"
 
     # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
     # CONFIGURE HOSTNAME EXPLICITLY IN datadog.yaml TO PREVENT AGENT FROM FAILING ON VERSION 7.40+
@@ -271,7 +271,7 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
   echo "Installing Datadog Agent on the driver..."
 
   # CONFIGURE HOST TAGS FOR DRIVER
-  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${DB_DRIVER_IP}","spark_node:driver"
+  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${DB_DRIVER_IP}","spark_node:driver","databricks_instance_type:\${DB_INSTANCE_TYPE}","databricks_is_job_cluster:\${DB_IS_JOB_CLUSTER}"
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
   DD_INSTALL_ONLY=true \
@@ -348,7 +348,7 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
   echo "Installing Datadog Agent on the driver (master node)."
 
   # CONFIGURE HOST TAGS FOR DRIVER
-  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${DB_DRIVER_IP}","spark_node:driver"
+  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${DB_DRIVER_IP}","spark_node:driver","databricks_instance_type:\${DB_INSTANCE_TYPE}","databricks_is_job_cluster:\${DB_IS_JOB_CLUSTER}"
 
   # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
   DD_INSTALL_ONLY=true \
@@ -395,7 +395,7 @@ logs:
     echo "Installing Datadog Agent on the worker."
 
     # CONFIGURE HOST TAGS FOR WORKERS
-    DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:worker"
+    DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:worker","databricks_instance_type:\${DB_INSTANCE_TYPE}","databricks_is_job_cluster:\${DB_IS_JOB_CLUSTER}"
 
     # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
     # CONFIGURE HOSTNAME EXPLICITLY IN datadog.yaml TO PREVENT AGENT FROM FAILING ON VERSION 7.40+
