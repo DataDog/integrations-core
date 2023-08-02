@@ -118,13 +118,14 @@ def ddev(ctx: click.Context, core, extras, marketplace, agent, here, color, inte
     except OSError as e:  # no cov
         app.abort(f'Error loading configuration: {e}')
 
-    app.set_repo(core, extras, marketplace, agent, here)
-
     app.config.terminal.styles.parse_fields()
     errors = app.initialize_styles(app.config.terminal.styles.raw_data)
     if errors and color is not False and not app.quiet:  # no cov
         for error in errors:
             app.display_warning(error)
+
+    # Do this last
+    app.set_repo(core, extras, marketplace, agent, here)
 
     # TODO: remove this when the old CLI is gone
     app.initialize_old_cli()

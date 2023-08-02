@@ -165,6 +165,10 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /oracle/*.md                                        @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
 /oracle/manifest.json                               @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
 
+# APM Integrations
+/langchain/         @DataDog/apm-core-python @DataDog/llm-obs @DataDog/agent-integrations @DataDog/documentation
+/openai/            @DataDog/apm-core-python @DataDog/llm-obs @DataDog/agent-integrations @DataDog/documentation
+
 
 # Windows agent
 datadog_checks_base/datadog_checks/base/checks/win/                  @DataDog/windows-agent @DataDog/agent-integrations

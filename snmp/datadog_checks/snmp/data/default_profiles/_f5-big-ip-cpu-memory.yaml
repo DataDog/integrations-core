@@ -3,13 +3,13 @@
 metrics:
   # Memory stats
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: gauge
+    metric_type: gauge
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.1.44.0
         # core check only
       name: memory.total
   - MIB: F5-BIGIP-SYSTEM-MIB
-    forced_type: gauge
+    metric_type: gauge
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.1.45.0
         # core check only
@@ -19,7 +19,7 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.3375.2.1.7.5.2
       name: sysMultiHostCpuTable
-    forced_type: gauge
+    metric_type: gauge
     symbols:
       - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.27
         name: cpu.usage # sysMultiHostCpuUsageRatio1m

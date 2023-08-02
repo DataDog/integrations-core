@@ -43,6 +43,8 @@ integration/aerospike:
 - aerospike/**/*
 integration/agent_metrics:
 - agent_metrics/**/*
+integration/airbyte:
+- airbyte/**/*
 integration/airflow:
 - airflow/**/*
 integration/amazon_eks:
@@ -125,6 +127,8 @@ integration/datadog_cluster_agent:
 - datadog_cluster_agent/**/*
 integration/datadog_operator:
 - datadog_operator/**/*
+integration/dcgm:
+- dcgm/**/*
 integration/directory:
 - directory/**/*
 integration/disk:
@@ -251,6 +255,8 @@ integration/kubernetes_state_core:
 - kubernetes_state_core/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
+integration/langchain:
+- langchain/**/*
 integration/lighttpd:
 - lighttpd/**/*
 integration/linkerd:
@@ -429,6 +435,8 @@ integration/tokumx:
 - tokumx/**/*
 integration/tomcat:
 - tomcat/**/*
+integration/torchserve:
+- torchserve/**/*
 integration/traffic_server:
 - traffic_server/**/*
 integration/twemproxy:
@@ -445,6 +453,8 @@ integration/voltdb:
 - voltdb/**/*
 integration/vsphere:
 - vsphere/**/*
+integration/weaviate:
+- weaviate/**/*
 integration/weblogic:
 - weblogic/**/*
 integration/win32_event_log:

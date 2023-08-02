@@ -14,7 +14,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import extract_sql_comments, is_statement_proc
+from datadog_checks.sqlserver.utils import PROC_CHAR_LIMIT, extract_sql_comments, is_statement_proc
 
 try:
     import datadog_agent
@@ -236,7 +236,8 @@ class SqlserverActivity(DBMAsyncJob):
         # both non-sleeping and idle blocking sessions
         # when (at least 1) idle blocking sessions found
         query = ACTIVITY_QUERY if self._has_idle_blocking_sessions(cursor) else ACTIVITY_QUERY_SIMPLIFIED
-        query = query.format(exec_request_columns=', '.join(['req.{}'.format(r) for r in exec_request_columns]))
+        query = query.format(exec_request_columns=', '.join(['req.{}'.format(r) for r in exec_request_columns]),
+            proc_char_limit=PROC_CHAR_LIMIT,)
         self.log.debug("Running query [%s]", query)
         cursor.execute(query)
         columns = [i[0] for i in cursor.description]

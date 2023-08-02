@@ -9,9 +9,9 @@
 
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Optional
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -20,60 +20,60 @@ from . import defaults, validators
 
 
 class MetricPatterns(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class InstanceConfig(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    collect_client_metrics: Optional[bool]
-    command_stats: Optional[bool]
-    db: Optional[int]
-    disable_connection_cache: Optional[bool]
-    disable_generic_tags: Optional[bool]
-    empty_default_hostname: Optional[bool]
+    model_config = ConfigDict(
+        validate_default=True,
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collect_client_metrics: Optional[bool] = None
+    command_stats: Optional[bool] = None
+    db: Optional[int] = None
+    disable_connection_cache: Optional[bool] = None
+    disable_generic_tags: Optional[bool] = None
+    empty_default_hostname: Optional[bool] = None
     host: str
-    keys: Optional[Sequence[str]]
-    metric_patterns: Optional[MetricPatterns]
-    min_collection_interval: Optional[float]
-    password: Optional[str]
+    keys: Optional[tuple[str, ...]] = None
+    metric_patterns: Optional[MetricPatterns] = None
+    min_collection_interval: Optional[float] = None
+    password: Optional[str] = None
     port: int
-    service: Optional[str]
+    service: Optional[str] = None
     slowlog_max_len: Optional[int] = Field(None, alias='slowlog-max-len')
-    socket_timeout: Optional[int]
-    ssl: Optional[bool]
-    ssl_ca_certs: Optional[str]
-    ssl_cert_reqs: Optional[int]
-    ssl_certfile: Optional[str]
-    ssl_keyfile: Optional[str]
-    tags: Optional[Sequence[str]]
-    unix_socket_path: Optional[str]
-    username: Optional[str]
-    warn_on_missing_keys: Optional[bool]
+    socket_timeout: Optional[int] = None
+    ssl: Optional[bool] = None
+    ssl_ca_certs: Optional[str] = None
+    ssl_cert_reqs: Optional[int] = None
+    ssl_certfile: Optional[str] = None
+    ssl_keyfile: Optional[str] = None
+    tags: Optional[tuple[str, ...]] = None
+    unix_socket_path: Optional[str] = None
+    username: Optional[str] = None
+    warn_on_missing_keys: Optional[bool] = None
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
     def _initial_validation(cls, values):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-    @validator('*', pre=True, always=True)
-    def _ensure_defaults(cls, v, field):
-        if v is not None or field.required:
-            return v
+    @field_validator('*', mode='before')
+    def _validate(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name in info.context['configured_fields']:
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{field.name}')(field, v)
+        return validation.utils.make_immutable(value)
 
-    @validator('*')
-    def _run_validations(cls, v, field):
-        if not v:
-            return v
-
-        return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
-
-    @root_validator(pre=False)
-    def _final_validation(cls, values):
-        return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+    @model_validator(mode='after')
+    def _final_validation(cls, model):
+        return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))

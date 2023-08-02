@@ -3,15 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import os
+import re
 from functools import cached_property
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterator
 
 from ddev.repo.constants import NOT_SHIPPABLE
+from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
     from ddev.integration.manifest import Manifest
     from ddev.repo.config import RepositoryConfig
-    from ddev.utils.fs import Path
 
 
 class Integration:
@@ -59,6 +61,20 @@ class Integration:
 
             return self.path / 'datadog_checks' / directory
 
+    def package_files(self) -> Iterator[Path]:
+        for root, _, files in os.walk(self.package_directory):
+            for f in files:
+                if f.endswith('.py'):
+                    yield Path(root, f)
+
+    @property
+    def release_tag_pattern(self) -> str:
+        version_part = r'\d+\.\d+\.\d+'
+        if self.name == 'ddev':
+            version_part = f'v{version_part}'
+
+        return f'{self.name}-{version_part}'
+
     @cached_property
     def manifest(self) -> Manifest:
         from ddev.integration.manifest import Manifest
@@ -73,12 +89,29 @@ class Integration:
             return self.manifest.get('/assets/integration/source_type_name', self.name)
 
     @cached_property
+    def normalized_display_name(self) -> str:
+        display_name = self.manifest.get('/assets/integration/source_type_name', self.name)
+        normalized_integration = re.sub("[^0-9A-Za-z-]", "_", display_name)
+        normalized_integration = re.sub("_+", "_", normalized_integration)
+        normalized_integration = normalized_integration.strip("_")
+        return normalized_integration.lower()
+
+    @cached_property
+    def metrics_file(self) -> Path:
+        relative_path = self.manifest.get('/assets/integration/metrics/metadata_path', 'metadata.csv')
+        return self.path / relative_path
+
+    @cached_property
     def is_valid(self) -> bool:
         return self.is_integration or self.is_package
 
     @cached_property
     def is_integration(self) -> bool:
         return (self.path / 'manifest.json').is_file()
+
+    @cached_property
+    def has_metrics(self) -> bool:
+        return (self.path / 'metadata.csv').is_file()
 
     @cached_property
     def is_package(self) -> bool:

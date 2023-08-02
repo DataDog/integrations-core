@@ -4,14 +4,127 @@
 from __future__ import annotations
 
 import os
-from contextlib import contextmanager
+from functools import cached_property
 from textwrap import indent as indent_text
+from time import monotonic, sleep
+from typing import TYPE_CHECKING, Callable
 
 import click
 from rich.console import Console
 from rich.errors import StyleSyntaxError
 from rich.style import Style
 from rich.text import Text
+
+from ddev.config.constants import VerbosityLevels
+
+if TYPE_CHECKING:
+    from rich.status import Status
+
+
+class BorrowedStatus:
+    def __init__(
+        self,
+        console: Console,
+        status: Status,
+        *,
+        tty: bool,
+        verbosity: int,
+        waiting_style: Style,
+        success_style: Style,
+        initializer: Callable,
+        finalizer: Callable,
+    ):
+        self.__console = console
+        self.__status = status
+        self.__tty = tty
+        self.__verbosity = verbosity
+        self.__waiting_style = waiting_style
+        self.__success_style = success_style
+        self.__initializer = initializer
+        self.__finalizer = finalizer
+
+        # This is used as a stack to display the current message
+        self.__messages: list[tuple[Text, str]] = []
+
+    def wait_for(self, seconds_to_wait: int | float, *, context: str = '') -> None:
+        original_message = self.__status.status
+        was_idle = not self.__status._live.is_started
+        try:
+            start_time = monotonic()
+            if was_idle:
+                self.__status.update('')
+                self.__status.start()
+
+            while (elapsed_seconds := monotonic() - start_time) < seconds_to_wait:
+                remaining_minutes, remaining_seconds = divmod(seconds_to_wait - elapsed_seconds, 60)
+                remaining_hours, remaining_minutes = divmod(remaining_minutes, 60)
+
+                message = Text(
+                    f'Waiting for: {remaining_hours:02,.0f}:{remaining_minutes:02.0f}:{remaining_seconds:05.2f}',
+                    style=self.__waiting_style,
+                )
+                if context:
+                    message.append_text(Text(f'\n\n{context}', style='default'))
+
+                self.__status.update(message)
+                sleep(0.1)
+        finally:
+            if was_idle:
+                # https://github.com/Textualize/rich/issues/3011
+                if context:
+                    self.__output('\n' * (context.count('\n') + 1))
+
+                self.__status.stop()
+
+            self.__status.update(original_message)
+
+    def __call__(self, message: str, final_text: str = '') -> BorrowedStatus:
+        self.__messages.append((Text(message, style=self.__waiting_style), final_text))
+        return self
+
+    def __enter__(self) -> BorrowedStatus:
+        if not self.__messages:
+            return self
+
+        message, _ = self.__messages[-1]
+        if not self.__tty:
+            self.__output(message)
+            return self
+
+        self.__status.update(message)
+        if not self.__status._live.is_started:
+            self.__initializer()
+            self.__status.start()
+
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if not self.__messages:
+            return
+
+        old_message, final_text = self.__messages.pop()
+        if self.__verbosity > VerbosityLevels.INFO:
+            if not final_text:
+                final_text = old_message.plain
+                final_text = f'Finished {final_text[:1].lower()}{final_text[1:]}'
+
+            self.__output(Text(final_text, style=self.__success_style))
+
+        if not self.__tty:
+            return
+        elif not self.__messages:
+            self.__status.stop()
+            self.__finalizer()
+        else:
+            message, _ = self.__messages[-1]
+            self.__status.update(message)
+
+    def __output(self, text):
+        self.__console.stderr = True
+        try:
+            self.__console.print(text, overflow='ignore', no_wrap=True, crop=False)
+        finally:
+            self.__console.stderr = False
 
 
 class Terminal:
@@ -71,42 +184,34 @@ class Terminal:
             self.console.stderr = False
 
     def display_error(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < -2:
+        if self.verbosity < VerbosityLevels.ERROR:
             return
 
         self.output(text, self._style_level_error, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_warning(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < -1:
+        if self.verbosity < VerbosityLevels.WARN:
             return
 
         self.output(text, self._style_level_warning, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_info(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < 0:
+        if self.verbosity < VerbosityLevels.INFO:
             return
 
         self.output(text, self._style_level_info, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_success(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < 0:
+        if self.verbosity < VerbosityLevels.INFO:
             return
 
         self.output(text, self._style_level_success, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_waiting(self, text='', stderr=True, indent=None, link=None, **kwargs):
-        if self.verbosity < 0:
+        if self.verbosity < VerbosityLevels.INFO:
             return
 
         self.output(text, self._style_level_waiting, stderr=stderr, indent=indent, link=link, **kwargs)
-
-    def display_debug(self, text='', level=1, stderr=True, indent=None, link=None, **kwargs):
-        if not 1 <= level <= 3:
-            raise ValueError('Debug output can only have verbosity levels between 1 and 3 (inclusive)')
-        elif self.verbosity < level:
-            return
-
-        self.output(text, self._style_level_debug, stderr=stderr, indent=indent, link=link, **kwargs)
 
     def display_header(self, title=''):
         self.console.rule(Text(title, self._style_level_success))
@@ -129,25 +234,18 @@ class Terminal:
             warning_style=self._style_level_warning,
         )
 
-    @contextmanager
-    def status_waiting(self, text='', final_text=None, **kwargs):
-        if not self.interactive or not self.console.is_terminal:
-            self.display_waiting(text)
-            with MockStatus() as status:
-                yield status
-        else:
-            with self.console.status(Text(text, self._style_level_waiting), spinner=self._style_spinner) as status:
-                try:
-                    self.platform.displaying_status = True
-                    yield status
-
-                    if self.verbosity > 0 and status._live.is_started:
-                        if final_text is None:
-                            final_text = f'Finished {text[:1].lower()}{text[1:]}'
-
-                        self.display_success(final_text)
-                finally:
-                    self.platform.displaying_status = False
+    @cached_property
+    def status(self):
+        return BorrowedStatus(
+            self.console,
+            self.console.status('', spinner=self._style_spinner),
+            tty=self.interactive and self.console.is_terminal,
+            verbosity=self.verbosity,
+            waiting_style=self._style_level_waiting,
+            success_style=self._style_level_success,
+            initializer=lambda: setattr(self.platform, 'displaying_status', True),
+            finalizer=lambda: setattr(self.platform, 'displaying_status', False),
+        )
 
     def output(self, text='', style=None, *, stderr=False, indent=None, link=None, **kwargs):
         kwargs.setdefault('overflow', 'ignore')

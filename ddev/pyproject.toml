@@ -26,7 +26,8 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
 ]
 dependencies = [
-    "datadog-checks-dev[cli]~=21.0",
+    "click~=8.1.6",
+    "datadog-checks-dev[cli]~=22.1",
     "hatch>=1.6.3",
     "httpx",
     "jsonpointer",
@@ -38,12 +39,15 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
+
 [project.scripts]
 ddev = "ddev.cli:main"
 ddev-starship = "ddev.plugin.external.starship.prompt:main"
 
-[project.urls]
-Source = "https://github.com/DataDog/integrations-core"
+[project.entry-points.hatch]
+datadog_checks = "ddev.plugin.external.hatch"
 
 [tool.hatch.version]
 source = "vcs"
