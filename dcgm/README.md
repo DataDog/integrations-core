@@ -63,8 +63,6 @@ DCGM_FI_PROF_PCIE_RX_BYTES                                        ,counter      
 # Datadog additional recommended fields
 DCGM_FI_DEV_COUNT                                                 ,counter                ,Number of Devices on the node.
 DCGM_FI_DEV_FAN_SPEED                                             ,gauge                  ,Fan speed for the device in percent 0-100.
-DCGM_FI_PROF_PCIE_TX_BYTES                                        ,counter                ,Total number of bytes transmitted through PCIe TX (in KB) via NVML.
-DCGM_FI_PROF_PCIE_RX_BYTES                                        ,counter                ,Total number of bytes received through PCIe RX (in KB) via NVML.
 DCGM_FI_DEV_SLOWDOWN_TEMP                                         ,gauge                  ,Slowdown temperature for the device.
 DCGM_FI_DEV_POWER_MGMT_LIMIT                                      ,gauge                  ,Current power limit for the device.
 DCGM_FI_DEV_PSTATE                                                ,gauge                  ,Performance state (P-State) 0-15. 0=highest
