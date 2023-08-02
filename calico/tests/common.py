@@ -49,4 +49,7 @@ MOCK_CALICO_INSTANCE = {
     "extra_metrics": EXTRA_METRICS,
 }
 
-OPTIONAL_METRICS = {'calico.felix.ipset.calls.count'}
+OPTIONAL_METRICS = {
+    'calico.felix.ipset.calls.count',
+    'calico.felix.ipset.errors.count',
+}
