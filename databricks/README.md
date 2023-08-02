@@ -87,12 +87,6 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
     DD_SITE="\${DD_SITE:-datadoghq.com}" \
     bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
-  # WAIT FOR DATADOG AGENT TO BE INSTALLED
-  while [ ! -f "/etc/datadog-agent/datadog.yaml" ]; do
-    echo "Waiting 2 seconds for the Datadog Agent to be installed"
-    sleep 2
-  done
-
   # Avoid conflicts on port 6062
   echo "process_config.expvar_port: 6063" >> /etc/datadog-agent/datadog.yaml
 
@@ -129,9 +123,6 @@ logs:
 
     echo "Spark integration configured"
   fi
-
-  echo "Waiting 15 seconds"
-  sleep 15
 
   echo "Restart the agent"
   sudo service datadog-agent restart
@@ -176,12 +167,6 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
     DD_SITE="\${DD_SITE:-datadoghq.com}" \
     bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
-  # WAIT FOR DATADOG AGENT TO BE INSTALLED
-  while [ ! -f "/etc/datadog-agent/datadog.yaml" ]; do
-    echo "Waiting 2 seconds for the Datadog Agent to be installed"
-    sleep 2
-  done
-
   echo "Datadog Agent is installed"
 
   while [ -z \$DB_DRIVER_PORT ]; do
@@ -225,20 +210,11 @@ logs:
     # SEE https://github.com/DataDog/datadog-agent/issues/14152 FOR CHANGE
     DD_INSTALL_ONLY=true DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS DD_HOSTNAME="\$(hostname | xargs)" bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
-    # WAIT FOR DATADOG AGENT TO BE INSTALLED
-    while [ ! -f "/etc/datadog-agent/datadog.yaml" ]; do
-      echo "Waiting 2 seconds for the Datadog Agent to be installed"
-      sleep 2
-    done
-
     echo "Datadog Agent is installed"
   fi
 
   # Avoid conflicts on port 6062
   echo "process_config.expvar_port: 6063" >> /etc/datadog-agent/datadog.yaml
-
-  echo "Waiting 15 seconds"
-  sleep 15
 
   echo "Restart the agent"
   sudo service datadog-agent restart
@@ -306,12 +282,6 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
     DD_SITE="\${DD_SITE:-datadoghq.com}" \
     bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
-  # WAIT FOR DATADOG AGENT TO BE INSTALLED
-  while [ ! -f "/etc/datadog-agent/datadog.yaml" ]; do
-    echo "Waiting 2 seconds for the Datadog Agent to be installed"
-    sleep 2
-  done
-
   # Avoid conflicts on port 6062
   echo "process_config.expvar_port: 6063" >> /etc/datadog-agent/datadog.yaml
 
@@ -348,9 +318,6 @@ logs:
 
     echo "Spark integration configured"
   fi
-
-  echo "Waiting 15 seconds"
-  sleep 15
 
   echo "Restart the agent"
   sudo service datadog-agent restart
@@ -391,12 +358,6 @@ if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
     DD_LOGS_ENABLED=true \
     DD_SITE="\${DD_SITE:-datadoghq.com}" \
     bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
-
-  # WAIT FOR DATADOG AGENT TO BE INSTALLED
-  while [ ! -f "/etc/datadog-agent/datadog.yaml" ]; do
-    echo "Waiting 2 seconds for the Datadog Agent to be installed"
-    sleep 2
-  done
 
   echo "Datadog Agent is installed"
 
@@ -441,20 +402,11 @@ logs:
     # SEE https://github.com/DataDog/datadog-agent/issues/14152 FOR CHANGE
     DD_INSTALL_ONLY=true DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS DD_HOSTNAME="\$(hostname | xargs)" bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
-    # WAIT FOR DATADOG AGENT TO BE INSTALLED
-    while [ ! -f "/etc/datadog-agent/datadog.yaml" ]; do
-      echo "Waiting 2 seconds for the Datadog Agent to be installed"
-      sleep 2
-    done
-
     echo "Datadog Agent is installed"
   fi
 
   # Avoid conflicts on port 6062
   echo "process_config.expvar_port: 6063" >> /etc/datadog-agent/datadog.yaml
-
-  echo "Waiting 15 seconds"
-  sleep 15
 
   echo "Restart the agent"
   sudo service datadog-agent restart
