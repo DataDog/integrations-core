@@ -174,8 +174,7 @@ class MongoDb(AgentCheck):
             # TODO: comment on how this is long-term where we want to put all of the logic
             self._refresh_metadata()
             self._collect_metrics()
-            check_value = AgentCheck.OK
-            self.service_check(SERVICE_CHECK_NAME, check_value, tags=self._config.service_check_tags)
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
         except ConnectionFailure:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             self._unset_metadata()
