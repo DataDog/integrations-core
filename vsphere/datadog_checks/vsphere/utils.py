@@ -8,7 +8,15 @@ from six import iteritems
 
 from datadog_checks.base import to_string
 from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
-from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
+from datadog_checks.vsphere.constants import (
+    MOR_TYPE_AS_STRING,
+    OBJECT_PROPERTIES_BY_RESOURCE_TYPE,
+    OBJECT_PROPERTIES_TO_METRIC_NAME,
+    PROPERTY_METRICS_BY_RESOURCE_TYPE,
+    REFERENCE_METRIC,
+    SHORT_ROLLUP,
+    SIMPLE_PROPERTIES_BY_RESOURCE_TYPE,
+)
 from datadog_checks.vsphere.resource_filters import ResourceFilter, match_any_regex  # noqa: F401
 from datadog_checks.vsphere.types import InfrastructureData, MetricFilters, MetricName  # noqa: F401
 
@@ -83,6 +91,88 @@ def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
         return False
 
     return True
+
+
+def metrics_to_collect(mor_type, metric_filters):
+
+    filters = metric_filters.get(mor_type)
+    all_metrics = PROPERTY_METRICS_BY_RESOURCE_TYPE[mor_type]
+    if not filters:
+        full_name_metrics = ["{}.{}".format(mor_type, metric) for metric in all_metrics]
+        return full_name_metrics
+
+    metrics_to_collect = []
+    for metric in all_metrics:
+        full_name = "{}.{}".format(mor_type, metric)
+        if match_any_regex(full_name, filters):
+            metrics_to_collect.append(full_name)
+
+    return metrics_to_collect
+
+
+def properties_to_collect(mor_type, metric_filters):
+
+    resource_simple_properties = simple_properties_to_collect(mor_type, metric_filters)
+    resource_object_properties = object_properties_to_collect(mor_type, metric_filters)
+
+    return resource_simple_properties + resource_object_properties
+
+
+def simple_properties_to_collect(mor_string, resource_filters):
+
+    filters = resource_filters.get(mor_string)
+    resource_simple_properties = SIMPLE_PROPERTIES_BY_RESOURCE_TYPE.get(mor_string, [])
+    if not filters:
+        return resource_simple_properties
+
+    all_properties = []
+    for property_name in resource_simple_properties:
+        full_name = "{}.{}".format(mor_string, property_name)
+        if match_any_regex(full_name, filters):
+            all_properties.append(property_name)
+
+    return all_properties
+
+
+def object_metrics_to_collect(mor_string, resource_filters):
+
+    filters = resource_filters.get(mor_string)
+    resource_object_properties = OBJECT_PROPERTIES_BY_RESOURCE_TYPE.get(mor_string, [])
+
+    if not filters:
+        return resource_object_properties
+
+    all_metrics = []
+    for property_name in resource_object_properties:
+        property_metrics = OBJECT_PROPERTIES_TO_METRIC_NAME.get(property_name, [])
+        for property_metric in property_metrics:
+            full_name = "{}.{}".format(mor_string, property_metric)
+            if match_any_regex(full_name, filters):
+                all_metrics.append(full_name)
+                break
+
+    return all_metrics
+
+
+def object_properties_to_collect(mor_string, resource_filters):
+    filters = resource_filters.get(mor_string)
+    resource_object_properties = OBJECT_PROPERTIES_BY_RESOURCE_TYPE.get(mor_string, [])
+
+    if not filters:
+        return resource_object_properties
+
+    all_properties = []
+    for property_name in resource_object_properties:
+        property_metrics = OBJECT_PROPERTIES_TO_METRIC_NAME.get(property_name, [])
+        is_collected = False
+        for property_metric in property_metrics:
+            full_name = "{}.{}".format(mor_string, property_metric)
+            if match_any_regex(full_name, filters):
+                is_collected = True
+                break
+        if is_collected:
+            all_properties.append(property_name)
+    return all_properties
 
 
 def get_tags_recursively(mor, infrastructure_data, config, include_only=None):
