@@ -31,40 +31,46 @@ def test_e2e_profile_cyberpower_pdu(dd_agent_check):
         'e_pdu_ident_model_number:their oxen forward kept driving',
         'e_pdu_ident_name:zombies oxen their oxen Jaded driving driving kept acted',
         'e_pdu_ident_serial_number:but but zombies quaintly but',
-        'envir_humidity:11',
         'envir_ident_location:Jaded quaintly their Jaded kept',
         'envir_ident_name:zombies oxen oxen quaintly acted',
-        'envir_temperature:23',
     ]
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
-    aggregator.assert_metric('snmp.ePDUStatusInputFrequency', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.ePDUStatusInputVoltage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cps.ePDUStatusInputFrequency', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cps.ePDUStatusInputVoltage', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cps.envirHumidity', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cps.envir_temperature', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         ['e_pdu_load_status_index:5', 'e_pdu_load_status_load_state:load_overload'],
         ['e_pdu_load_status_index:7', 'e_pdu_load_status_load_state:load_overload'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.ePDULoadStatusActivePower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cps.ePDULoadStatusActivePower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.ePDULoadStatusApparentPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cps.ePDULoadStatusApparentPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric('snmp.ePDULoadStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.ePDULoadStatusPowerFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cps.ePDULoadStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric('snmp.ePDULoadStatusVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.cps.ePDULoadStatusPowerFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cps.ePDULoadStatusVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
         ['e_pdu_load_bank_config_alarm:near_over_current_alarm', 'e_pdu_load_bank_config_index:1'],
         ['e_pdu_load_bank_config_alarm:over_current_alarm', 'e_pdu_load_bank_config_index:10'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ePDULoadBankConfig', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.cps.ePDULoadBankConfig', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
         [
@@ -82,22 +88,24 @@ def test_e2e_profile_cyberpower_pdu(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.ePDUOutletStatusActivePower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cps.ePDUOutletStatusActivePower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric('snmp.ePDUOutletStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric(
+            'snmp.cps.ePDUOutletStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
 
     tag_rows = [
         ['e_pdu_status_bank_index:6', 'e_pdu_status_bank_number:12', 'e_pdu_status_bank_state:bank_load_low'],
         ['e_pdu_status_bank_index:8', 'e_pdu_status_bank_number:9', 'e_pdu_status_bank_state:bank_load_low'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ePDUStatusBank', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cps.ePDUStatusBank', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['e_pdu_status_phase_index:10', 'e_pdu_status_phase_number:1', 'e_pdu_status_phase_state:phase_load_low'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ePDUStatusPhase', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cps.ePDUStatusPhase', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         [
@@ -112,7 +120,7 @@ def test_e2e_profile_cyberpower_pdu(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ePDUStatusOutlet', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.cps.ePDUStatusOutlet', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         [
@@ -136,14 +144,16 @@ def test_e2e_profile_cyberpower_pdu(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.ePDU2DeviceStatusApparentPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric('snmp.ePDU2DeviceStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric(
-            'snmp.ePDU2DeviceStatusPeakLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cps.ePDU2DeviceStatusApparentPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.ePDU2DeviceStatusPowerFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cps.ePDU2DeviceStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cps.ePDU2DeviceStatusPeakLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cps.ePDU2DeviceStatusPowerFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     tag_rows = [
@@ -152,18 +162,22 @@ def test_e2e_profile_cyberpower_pdu(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.ePDU2PhaseStatusApparentPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric('snmp.ePDU2PhaseStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric(
-            'snmp.ePDU2PhaseStatusPeakLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric('snmp.ePDU2PhaseStatusPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric(
-            'snmp.ePDU2PhaseStatusPowerFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cps.ePDU2PhaseStatusApparentPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.ePDU2PhaseStatusVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cps.ePDU2PhaseStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cps.ePDU2PhaseStatusPeakLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cps.ePDU2PhaseStatusPower', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cps.ePDU2PhaseStatusPowerFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cps.ePDU2PhaseStatusVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     tag_rows = [
@@ -171,9 +185,11 @@ def test_e2e_profile_cyberpower_pdu(dd_agent_check):
         ['e_pdu2_bank_status_index:8', 'e_pdu2_bank_status_load_state:near_overload'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ePDU2BankStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
-            'snmp.ePDU2BankStatusPeakLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cps.ePDU2BankStatusLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cps.ePDU2BankStatusPeakLoad', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     tag_rows = [
@@ -190,7 +206,7 @@ def test_e2e_profile_cyberpower_pdu(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.ePDU2OutletSwitchedStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.cps.ePDU2OutletSwitchedStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     # --- TEST METADATA ---
