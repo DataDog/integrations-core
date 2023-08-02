@@ -39,22 +39,22 @@ def test_e2e_profile_avocent_acs(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     aggregator.assert_metric(
-        'snmp.acsActiveSessionsNumberOfSession', metric_type=aggregator.GAUGE, tags=common_tags
+        'snmp.avocent.acsActiveSessionsNumberOfSession', metric_type=aggregator.GAUGE, tags=common_tags
     )
     tag_rows = [
         [
-            'acs_serial_port_table_device_name:Jaded Jaded',
-            'acs_serial_port_table_name:kept',
-            'acs_serial_port_table_status:idle',
+            'avocent_acs_serial_port_table_device_name:Jaded Jaded',
+            'avocent_acs_serial_port_table_name:kept',
+            'avocent_acs_serial_port_table_status:idle',
         ],
         [
-            'acs_serial_port_table_device_name:oxen',
-            'acs_serial_port_table_name:forward driving quaintly',
-            'acs_serial_port_table_status:in_use',
+            'avocent_acs_serial_port_table_device_name:oxen',
+            'avocent_acs_serial_port_table_name:forward driving quaintly',
+            'avocent_acs_serial_port_table_status:in_use',
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.acsSerialPort', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.avocent.acsSerialPort', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
