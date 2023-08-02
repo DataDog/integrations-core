@@ -111,6 +111,8 @@ def metrics_to_collect(mor_type, metric_filters):
 
 
 def properties_to_collect(mor_type, metric_filters):
+    if mor_type is None:
+        return []
 
     resource_simple_properties = simple_properties_to_collect(mor_type, metric_filters)
     resource_object_properties = object_properties_to_collect(mor_type, metric_filters)
@@ -132,26 +134,6 @@ def simple_properties_to_collect(mor_string, resource_filters):
             all_properties.append(property_name)
 
     return all_properties
-
-
-def object_metrics_to_collect(mor_string, resource_filters):
-
-    filters = resource_filters.get(mor_string)
-    resource_object_properties = OBJECT_PROPERTIES_BY_RESOURCE_TYPE.get(mor_string, [])
-
-    if not filters:
-        return resource_object_properties
-
-    all_metrics = []
-    for property_name in resource_object_properties:
-        property_metrics = OBJECT_PROPERTIES_TO_METRIC_NAME.get(property_name, [])
-        for property_metric in property_metrics:
-            full_name = "{}.{}".format(mor_string, property_metric)
-            if match_any_regex(full_name, filters):
-                all_metrics.append(full_name)
-                break
-
-    return all_metrics
 
 
 def object_properties_to_collect(mor_string, resource_filters):
