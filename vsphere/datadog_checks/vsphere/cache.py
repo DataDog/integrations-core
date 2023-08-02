@@ -148,3 +148,9 @@ class InfrastructureCache(VSphereCache):
         if mor_type not in self._mors:
             self._mors[mor_type] = {}
         self._mors[mor_type][mor] = mor_data
+
+    def clear_properties(self):
+        # type: () -> None
+        for _, mors in self._mors.items():
+            for _, mor_props in mors.items():
+                mor_props.pop('properties', None)

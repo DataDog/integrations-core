@@ -219,6 +219,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._conn_key_prefix = "dbm-"
         self._statement_metrics_query = None
         self._last_stats_query_time = None
+        self._max_query_metrics = check.statement_metrics_config.get("max_queries", 250)
 
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -351,7 +352,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             del row['procedure_text']
         return row
 
-    def _to_metrics_payload(self, rows):
+    def _to_metrics_payload(self, rows, max_queries):
+        # sort by total_elapsed_time and return the top max_queries
+        rows = sorted(rows, key=lambda i: i['total_elapsed_time'], reverse=True)
+        rows = rows[:max_queries]
         return {
             'host': self.check.resolved_hostname,
             'timestamp': time.time() * 1000,
@@ -383,7 +387,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     return
                 for event in self._rows_to_fqt_events(rows):
                     self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
-                payload = self._to_metrics_payload(rows)
+                payload = self._to_metrics_payload(rows, self._max_query_metrics)
                 self.check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
                 for event in self._collect_plans(rows, cursor, deadline):
                     self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
