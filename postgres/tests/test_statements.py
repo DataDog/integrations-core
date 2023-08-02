@@ -1380,7 +1380,7 @@ def _check_until_time(check, dbm_instance, sleep_time, check_interval):
 
 def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the main collection loop rate limit
-    collection_interval = 0.2
+    collection_interval = 1
     # Don't need query metrics or activity for this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
@@ -1401,8 +1401,8 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
 
 def test_activity_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the activity collection loop rate limit
-    collection_interval = 0.2
-    activity_interval = 0.4  # double the main loop
+    collection_interval = 0.5
+    activity_interval = 1  # double the main loop
     # Don't need query metrics on this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['collection_interval'] = collection_interval
