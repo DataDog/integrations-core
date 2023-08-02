@@ -48,7 +48,15 @@ WHERE
 
 # Base query collects active session load on db,
 # common to both ACTIVITY_QUERY and ACTIVITY_QUERY_SIMPLIFIED
-ACTIVITY_QUERY_BASE = """\
+ACTIVITY_QUERY = re.sub(
+    r'\s+',
+    ' ',
+    """\
+WITH cteBlocking (blocking_session_id) AS (
+    SELECT DISTINCT isnull(er.blocking_session_id, 0) FROM sys.dm_exec_requests AS er
+    WHERE er.blocking_session_id <> 0
+    AND er.blocking_session_id IS NOT NULL
+)
 SELECT
     CONVERT(
         NVARCHAR, TODATETIMEOFFSET(CURRENT_TIMESTAMP, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
@@ -69,7 +77,7 @@ SELECT
             ELSE req.statement_end_offset END
                 - req.statement_start_offset) / 2) + 1)
         , lqt.text) AS statement_text,
-    isnull(qt.text, lqt.text) AS text,
+    SUBSTRING(isnull(qt.text, lqt.text), 1, {proc_char_limit}) as text,
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
@@ -83,34 +91,11 @@ FROM sys.dm_exec_sessions sess
     OUTER APPLY sys.dm_exec_sql_text(req.sql_handle) qt
     OUTER APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) lqt
 WHERE sess.session_id != @@spid
-"""
-
-# CTE that find the sessions blocking other sessions
-BLOCKING_SESSIONS_CTE = """
-WITH cteBlocking (blocking_session_id) AS (
-    SELECT DISTINCT isnull(er.blocking_session_id, 0) FROM sys.dm_exec_requests AS er
-    WHERE er.blocking_session_id <> 0
-    AND er.blocking_session_id IS NOT NULL
-)
-"""
-
-# Contidition used to include non-sleeping sessions
-# and sessions that blocking others
-BLOCKING_CONDITION = """
-AND (sess.status != 'sleeping'
-        OR sess.session_id IN (SELECT blocking_session_id FROM cteBlocking)
-        OR isnull(req.blocking_session_id, 0) <> 0
-    )
-"""
-
-# Condition used to include non-sleeping sessions
-NON_SLEEPING_CONDITION = "sess.status != 'sleeping'"
-
-# The full activity query that includes non-sleeping sessions and idle sessions that blocking others
-ACTIVITY_QUERY = re.sub(
-    r'\s+',
-    ' ',
-    BLOCKING_SESSIONS_CTE + ACTIVITY_QUERY_BASE + BLOCKING_CONDITION,
+    AND (sess.status != 'sleeping'
+         OR sess.session_id IN (SELECT blocking_session_id FROM cteBlocking)
+         OR isnull(req.blocking_session_id, 0) <> 0
+        )
+""",
 ).strip()
 
 # The "simplified" activity query that includes non-sleeping sessions
@@ -118,7 +103,42 @@ ACTIVITY_QUERY = re.sub(
 ACTIVITY_QUERY_SIMPLIFIED = re.sub(
     r'\s+',
     ' ',
-    ACTIVITY_QUERY_BASE + NON_SLEEPING_CONDITION,
+    """\
+SELECT
+    CONVERT(
+        NVARCHAR, TODATETIMEOFFSET(CURRENT_TIMESTAMP, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+    ) as now,
+    CONVERT(
+        NVARCHAR, TODATETIMEOFFSET(req.start_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+    ) as query_start,
+    sess.login_name as user_name,
+    sess.last_request_start_time as last_request_start_time,
+    sess.session_id as id,
+    DB_NAME(sess.database_id) as database_name,
+    sess.status as session_status,
+    req.status as request_status,
+    isnull(
+        SUBSTRING(qt.text, (req.statement_start_offset / 2) + 1,
+        ((CASE req.statement_end_offset
+            WHEN -1 THEN DATALENGTH(qt.text)
+            ELSE req.statement_end_offset END
+                - req.statement_start_offset) / 2) + 1)
+        , lqt.text) AS statement_text,
+    SUBSTRING(isnull(qt.text, lqt.text), 1, {proc_char_limit}) as text,
+    c.client_tcp_port as client_port,
+    c.client_net_address as client_address,
+    sess.host_name as host_name,
+    sess.program_name as program_name,
+    {exec_request_columns}
+FROM sys.dm_exec_sessions sess
+    INNER JOIN sys.dm_exec_connections c
+        ON sess.session_id = c.session_id
+    INNER JOIN sys.dm_exec_requests req
+        ON c.connection_id = req.connection_id
+    CROSS APPLY sys.dm_exec_sql_text(req.sql_handle) qt
+    CROSS APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) lqt
+WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
+""",
 ).strip()
 
 
