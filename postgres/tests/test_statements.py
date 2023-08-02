@@ -976,7 +976,7 @@ def test_activity_snapshot_collection(
         t = threading.Thread(target=execute_in_thread, args=(query,))
         wg.add(1)
         t.start()
-        run_one_check(check, dbm_instance)
+        check.check(dbm_instance)
         dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
 
         event = dbm_activity_event[0]
@@ -1053,7 +1053,7 @@ def test_activity_snapshot_collection(
 
         # Wait collection interval to make sure dbm events are reported
         time.sleep(dbm_instance['query_activity']['collection_interval'])
-        run_one_check(check, dbm_instance)
+        check.check(dbm_instance)
         dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
         event = dbm_activity_event[1]
         assert len(event['postgres_activity']) > 0
