@@ -408,18 +408,11 @@ def test_e2e_profile_dell_poweredge(dd_agent_check):
     config = common.generate_container_profile_config('dell-poweredge')
 
     # TODO: Fix python implementation for duplicate declarations
-    metric_to_skip = [
-        # Following metrics are declared multiple times in profiles.
-        # Example: snmp.networkDeviceStatus and snmp.memoryDeviceStatus are declared twice
-        # in dell-poweredge.yaml and _dell-rac.yaml
-        # This is causing python impl to not behave correctly. Some `snmp.networkDeviceStatus` doesn't include
-        # either `ip_address` or `chassis_index/mac_addr/device_fqdd` tags.
-        # See II-153
-        'snmp.networkDeviceStatus',
-        'snmp.memoryDeviceStatus',
-        'datadog.snmp.submitted_metrics',  # count won't match because of the reason explained above
-    ]
-    assert_python_vs_core(dd_agent_check, config, metrics_to_skip=metric_to_skip)
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        tags_to_skip=['system_state_power_supply_status_combined'],  # Skipping tag with a mapping
+    )
 
 
 def test_e2e_core_vs_python_profile_f5_big_ip(dd_agent_check):
@@ -459,7 +452,14 @@ def test_e2e_profile_hpe_proliant(dd_agent_check):
 
 def test_e2e_profile_idrac(dd_agent_check):
     config = common.generate_container_profile_config('idrac')
-    assert_python_vs_core(dd_agent_check, config)
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        tags_to_skip=[
+            'system_state_power_supply_status_combined',
+            'enclosure_power_supply_state',
+        ],  # Skipping tags with mappings
+    )
 
 
 def test_e2e_profile_isilon(dd_agent_check):

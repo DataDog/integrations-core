@@ -872,8 +872,8 @@ def test_idrac(aggregator):
                 'snmp.{}'.format(count), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
     tag_mappings = [
-        ('critical', '26'),
-        ('critical', '29'),
+        ('5', '26'),
+        ('5', '29'),
     ]
     for status, index in tag_mappings:
         tags = [
@@ -884,8 +884,8 @@ def test_idrac(aggregator):
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     tag_mappings = [
-        ('degraded', 'supply1', '13', 'forward their oxen acted acted'),
-        ('unknown', 'supply2', '16', 'quaintly but acted'),
+        ('5', 'supply1', '13', 'forward their oxen acted acted'),
+        ('1', 'supply2', '16', 'quaintly but acted'),
     ]
     for state, name, number, fqdd in tag_mappings:
         tags = [
@@ -1411,8 +1411,8 @@ def test_dell_poweredge(aggregator):
             )
 
     tag_mappings = [
-        ('critical', '26'),
-        ('critical', '29'),
+        ('5', '26'),
+        ('5', '29'),
     ]
     for status, index in tag_mappings:
         tags = [
