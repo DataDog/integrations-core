@@ -43,18 +43,58 @@ def test_e2e_profile_opengear_console_manager(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     tag_rows = [
-         ['og_serial_port_cts:off', 'og_serial_port_data_bits:6', 'og_serial_port_dcd:on', 'og_serial_port_dsr:off', 'og_serial_port_dtr:off', 'og_serial_port_flow_control:hardware', 'og_serial_port_index:1', 'og_serial_port_label:zombies Jaded forward driving quaintly forward their forward', 'og_serial_port_log_level:input_only', 'og_serial_port_mode:none', 'og_serial_port_parity:space', 'og_serial_port_rts:on', 'og_serial_port_speed:14', 'og_serial_port_stop_bits:one'],
-         ['og_serial_port_cts:on', 'og_serial_port_data_bits:20', 'og_serial_port_dcd:off', 'og_serial_port_dsr:on', 'og_serial_port_dtr:on', 'og_serial_port_flow_control:software', 'og_serial_port_index:30', 'og_serial_port_label:but kept', 'og_serial_port_log_level:input_only', 'og_serial_port_mode:console', 'og_serial_port_parity:none', 'og_serial_port_rts:off', 'og_serial_port_speed:13', 'og_serial_port_stop_bits:one_and_a_half'],
-
+        [
+            'og_serial_port_cts:off',
+            'og_serial_port_data_bits:6',
+            'og_serial_port_dcd:on',
+            'og_serial_port_dsr:off',
+            'og_serial_port_dtr:off',
+            'og_serial_port_flow_control:hardware',
+            'og_serial_port_index:1',
+            'og_serial_port_label:zombies Jaded forward driving quaintly forward their forward',
+            'og_serial_port_log_level:input_only',
+            'og_serial_port_mode:none',
+            'og_serial_port_parity:space',
+            'og_serial_port_rts:on',
+            'og_serial_port_speed:14',
+            'og_serial_port_stop_bits:one',
+        ],
+        [
+            'og_serial_port_cts:on',
+            'og_serial_port_data_bits:20',
+            'og_serial_port_dcd:off',
+            'og_serial_port_dsr:on',
+            'og_serial_port_dtr:on',
+            'og_serial_port_flow_control:software',
+            'og_serial_port_index:30',
+            'og_serial_port_label:but kept',
+            'og_serial_port_log_level:input_only',
+            'og_serial_port_mode:console',
+            'og_serial_port_parity:none',
+            'og_serial_port_rts:off',
+            'og_serial_port_speed:13',
+            'og_serial_port_stop_bits:one_and_a_half',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ogSerialPortRxBytes', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.ogSerialPortTxBytes', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
 
     tag_rows = [
-         ['og_cell_modem_connected:disconnected', 'og_cell_modem_enabled:disabled', 'og_cell_modem_index:23', 'og_cell_modem_model:driving but oxen acted', 'og_cell_modem_vendor:kept acted acted kept kept'],
-         ['og_cell_modem_connected:disconnected', 'og_cell_modem_enabled:enabled', 'og_cell_modem_index:6', 'og_cell_modem_model:quaintly zombies forward', 'og_cell_modem_vendor:their their forward quaintly zombies'],
-
+        [
+            'og_cell_modem_connected:disconnected',
+            'og_cell_modem_enabled:disabled',
+            'og_cell_modem_index:23',
+            'og_cell_modem_model:driving but oxen acted',
+            'og_cell_modem_vendor:kept acted acted kept kept',
+        ],
+        [
+            'og_cell_modem_connected:disconnected',
+            'og_cell_modem_enabled:enabled',
+            'og_cell_modem_index:6',
+            'og_cell_modem_model:quaintly zombies forward',
+            'og_cell_modem_vendor:their their forward quaintly zombies',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ogCellModemCounter', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
