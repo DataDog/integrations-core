@@ -1,5 +1,7 @@
 # CHANGELOG - etcd
 
+## Unreleased
+
 ## 5.0.0 / 2023-07-10
 
 ***Changed***:

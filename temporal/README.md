@@ -35,7 +35,14 @@ See the [sample temporal.d/conf.yaml][4] for all available configuration options
 
 2. Configure your Temporal Cluster to output logs to a file by following the [official documentation][11].
 
-3. Uncomment and edit the logs configuration block in your `temporal.d/conf.yaml` file, and set the `path` to point to the file you configured on your Temporal Cluster.
+3. Uncomment and edit the logs configuration block in your `temporal.d/conf.yaml` file, and set the `path` to point to the file you configured on your Temporal Cluster:
+
+  ```yaml
+  logs:
+    - type: file
+      path: /var/log/temporal/temporal-server.log
+      source: temporal
+  ```
 
 4. [Restart the Agent][5].
 

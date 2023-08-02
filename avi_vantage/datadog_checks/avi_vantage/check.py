@@ -51,7 +51,8 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             instance_copy['metrics'] = [resource_metrics]
             instance_copy['rename_labels'] = LABELS_REMAPPER.copy()
             instance_copy['rename_labels']['name'] = entity + "_name"
-            instance_copy['rename_labels'].update(self.config.rename_labels)
+            if self.config.rename_labels is not None:
+                instance_copy['rename_labels'].update(self.config.rename_labels)
 
             scrapers[endpoint] = self.create_scraper(instance_copy)
 

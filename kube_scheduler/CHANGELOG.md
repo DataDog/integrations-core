@@ -1,5 +1,7 @@
 # CHANGELOG - Kube_scheduler
 
+## Unreleased
+
 ## 4.5.1 / 2023-07-10
 
 ***Fixed***:

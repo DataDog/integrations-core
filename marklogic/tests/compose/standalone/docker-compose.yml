@@ -2,7 +2,8 @@ version: '3.6'
 
 services:
   bootstrap:
-    image: marklogicdb/marklogic-db:${MARKLOGIC_IMAGE}
+    container_name: marklogic
+    image: ${MARKLOGIC_IMAGE}:${MARKLOGIC_TAG}
     environment:
       - MARKLOGIC_INIT=true
       - MARKLOGIC_ADMIN_USERNAME=admin

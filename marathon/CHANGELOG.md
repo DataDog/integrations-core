@@ -1,5 +1,7 @@
 # CHANGELOG - marathon
 
+## Unreleased
+
 ## 2.1.1 / 2023-07-10
 
 ***Fixed***:

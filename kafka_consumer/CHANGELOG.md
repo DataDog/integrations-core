@@ -1,5 +1,7 @@
 # CHANGELOG - kafka_consumer
 
+## Unreleased
+
 ## 3.1.2 / 2023-07-13
 
 ***Fixed***:
