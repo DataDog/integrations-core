@@ -48,21 +48,26 @@ ORDER BY coalesce(seq_scan, 0) + coalesce(idx_scan, 0) DESC;
 """
 
 PG_TABLES_QUERY = """
-SELECT tablename as name, hasindexes, c.relowner::regrole AS owner,
-(CASE WHEN c.relkind = 'p' THEN true ELSE false END) AS has_partitions,
-(CASE WHEN pg_relation_size(c.reltoastrelid) > 500000 THEN t.relname ELSE null END) AS toast_table
-FROM pg_tables st
-LEFT JOIN pg_class c ON relname = tablename
-LEFT JOIN pg_class t on c.reltoastrelid = t.oid
-WHERE c.relkind IN ('r', 'p')
-AND c.relispartition != 't'
-AND schemaname = '{schemaname}';
+SELECT c.relname             AS name,
+       c.relhasindex         AS hasindexes,
+       c.relowner :: regrole AS owner,
+       ( CASE
+           WHEN c.relkind = 'p' THEN TRUE
+           ELSE FALSE
+         END )               AS has_partitions,
+	  t.relname AS toast_table
+FROM pg_class c
+       LEFT JOIN pg_class t
+              ON c.reltoastrelid = t.oid
+WHERE  c.relkind IN ( 'r', 'p' )
+       AND c.relispartition != 't'
+       AND c.relnamespace= '{schemaname}'::regnamespace; 
 """
 
 SCHEMA_QUERY = """
-    SELECT nspname as name, nspowner::regrole as owner FROM
-    pg_namespace
-    WHERE nspname not in ('information_schema', 'pg_catalog')
+SELECT nspname as name, nspowner::regrole as owner FROM
+pg_namespace
+WHERE nspname not in ('information_schema', 'pg_catalog')
     AND nspname NOT LIKE 'pg_toast%' and nspname NOT LIKE 'pg_temp_%';
 """
 
@@ -70,6 +75,13 @@ PG_INDEXES_QUERY = """
 SELECT indexname as name, indexdef as definition
 FROM pg_indexes
 WHERE tablename LIKE '{tablename}';
+"""
+
+PG_CHECK_FOR_FOREIGN_KEY = """
+SELECT count(conname)
+FROM   pg_constraint
+WHERE  contype = 'f'
+    AND conrelid = '{tablename}' :: regclass;
 """
 
 PG_CONSTRAINTS_QUERY = """
@@ -362,15 +374,17 @@ class PostgresMetadata(DBMAsyncJob):
                 this_payload.update({'num_partitions': row['num_partitions']})
 
             if table['toast_table'] is not None:
-                this_payload.update({'toast_table': row['toast_table']})
+                this_payload.update({'toast_table': table['toast_table']})
 
             # Get foreign keys
-            cursor.execute(PG_CONSTRAINTS_QUERY.format(tablename=table['name']))
+            cursor.execute(PG_CHECK_FOR_FOREIGN_KEY.format(tablename=table['name']))
             rows = cursor.fetchall()
-            self._log.warning("foreign keys {}".format(rows))
-            if rows:
-                fks = [dict(row) for row in rows]
-                this_payload.update({'foreign_keys': fks})
+            if len(rows) > 0:
+                cursor.execute(PG_CONSTRAINTS_QUERY.format(tablename=table['name']))
+                self._log.warning("foreign keys {}".format(rows))
+                if rows:
+                    fks = [dict(row) for row in rows]
+                    this_payload.update({'foreign_keys': fks})
 
             # Get columns
             cursor.execute(COLUMNS_QUERY.format(tablename=name))
