@@ -21,10 +21,14 @@ Each script described below can be modified to suits your needs. For instance, y
 <!-- partial
 {{% site-region region="us,us3,us5,eu,gov,ap1" %}}
 You can also define or modify environment variables with the cluster-scoped init script path using the UI, Databricks CLI, or invoking the Clusters API:
+    - The `DD_API_KEY` environment variable to better identify your clusters.
     - The `DD_ENV` environment variable to better identify your clusters.
     - Set `DD_SITE` to your site: {{< region-param key="dd_site" code="true" >}}. Defaults to `datadoghq.com`
 {{% /site-region %}}
 partial -->
+
+<div class="alert alert-warning">For security reasons, it's not recommended to define the `DD_API_KEY` environment in plain text directly in the UI. Instead, please use <a href="https://docs.databricks.com/en/security/secrets/index.html">Databricks secrets</a>.</div>
+
 
 #### Standard cluster
 
@@ -36,7 +40,7 @@ A global init script runs on every cluster created in your workspace. Global ini
 
 Use the Databricks UI to edit the global init scripts:
 
-1. Choose the script that suits your need below.
+1. Choose the script that suits your needs below.
 2. Modify it to your convenience. You can for instance add tags or define a specific configuration for the integration.
 3. Go to the Admin Settings and click the `Global Init Scripts` tab.
 4. Click on the `+ Add` button.
@@ -254,18 +258,19 @@ Cluster-scoped init scripts are init scripts defined in a cluster configuration.
 
 Use the Databricks UI to edit the cluster to run the init script:
 
-1. Choose the script that suits your need below.
+1. Choose the script that suits your needs below.
 2. Modify it to your convenience. You can for instance add tags or define a specific configuration for the integration.
 3. Save the script into your workspace.
 4. On the cluster configuration page, click the `Advanced` options toggle.
-5. At the bottom of the page, go to the `Init Scripts` tab.
-6. In the `Destination` drop-down, select the `Workspace` destination type.
-7. Specify a path to the init script.
-8. Click on the `Add` button.
+5. In the `Environment variables`, specify the `DD_API_KEY` environment variable and, optionally, the `DD_ENV` and the `DD_SITE` environment variables.
+6. Go to the `Init Scripts` tab.
+7. In the `Destination` drop-down, select the `Workspace` destination type.
+8. Specify a path to the init script.
+9. Click on the `Add` button.
 
 <div class="alert alert-info">If you stored your `datadog_init_script.sh` directly in the `Shared` workspace, can be accessed specifying the `/Shared/datadog_init_script.sh` path.</div>
 
-<div class="alert alert-info">If you stored your `datadog_init_script.sh` directly in a user workspace, the file will be accessible at the following path: `/Users/<email_address>/datadog_init_script.sh`.</div>
+<div class="alert alert-info">If you stored your `datadog_init_script.sh` directly in a user workspace, the file will be accessible at the following path: `/Users/$EMAIL_ADDRESS/datadog_init_script.sh`.</div>
 
 More information on cluster init scripts can be found in the [Databricks official documentation][16].
 
@@ -462,13 +467,6 @@ chmod a+x /tmp/start_datadog.sh
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-#### Job cluster
-
-
-### Validation
-
-[Run the Agent's status subcommand][7] and look for `spark` under the Checks section.
-
 ## Data Collected
 
 ### Metrics
@@ -484,22 +482,6 @@ See the [Spark integration documentation][9] for the list of service checks coll
 The Databricks integration does not include any events.
 
 ## Troubleshooting
-
-### Failed to bind port 6062
-
-[`ipywidgets`][14] are available in Databricks Runtime 11.0 and above. By default, `ipywidgets` occupies port `6062`, 
-which is also the default Datadog Agent port for [the debug endpoint][13]. Because of that, you can run into this issue:
-
-```
-23/02/28 17:07:31 ERROR DriverDaemon$: XXX Fatal uncaught exception. Terminating driver.
-java.io.IOException: Failed to bind to 0.0.0.0/0.0.0.0:6062
-```
-
-To fix this issue, you have several options: 
-
-1. With Databricks Runtime 11.2 and above, you can change the port using the Spark `spark.databricks.driver.ipykernel.commChannelPort` option. Find more information in [the Databricks documentation][12].
-2. You can configure the port used by the Datadog Agent with the `process_config.expvar_port` in your [`datadog.yaml`][13] configuration file. 
-3. Alternatively, you can set the `DD_PROCESS_CONFIG_EXPVAR_PORT` environment variable to configure the port used by the Datadog Agent.
 
 Need help? Contact [Datadog support][10].
 
