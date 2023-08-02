@@ -10,7 +10,8 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
-    assert_extend_generic_entity_sensor,
+    assert_extend_generic_if,
+    assert_extend_generic_ucd,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
@@ -18,34 +19,36 @@ from .utils import (
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
 
-def test_e2e_profile__generic_entity_sensor(dd_agent_check):
-    config = create_e2e_core_test_config('_generic-entity-sensor')
+def test_e2e_profile_ubiquiti_unifi_security_gateway(dd_agent_check):
+    config = create_e2e_core_test_config('ubiquiti-unifi-security-gateway')
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 
     ip_address = get_device_ip_from_config(config)
     common_tags = [
-        'snmp_profile:generic-entity-sensor',
-        'snmp_host:_generic-entity-sensor.device.name',
+        'snmp_profile:ubiquiti-unifi-security-gateway',
+        'snmp_host:ubiquiti-unifi-security-gateway.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
     ] + []
 
+    # --- TEST EXTENDED METRICS ---
+    assert_extend_generic_if(aggregator, common_tags)
+    assert_extend_generic_ucd(aggregator, common_tags)
+
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
-    assert_extend_generic_entity_sensor(aggregator, common_tags)
-
-    aggregator.assert_all_metrics_covered()
 
     # --- TEST METADATA ---
     device = {
-        'description': '_generic-entity-sensor Device Description',
+        'description': 'ubiquiti-unifi-security-gateway Device Description',
         'id': 'default:' + ip_address,
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
-        'name': '_generic-entity-sensor.device.name',
-        'profile': 'generic-entity-sensor',
+        'name': 'ubiquiti-unifi-security-gateway.device.name',
+        'profile': 'ubiquiti-unifi-security-gateway',
         'status': 1,
-        'sys_object_id': '1.2.3.1002',
+        'sys_object_id': '1.3.6.1.4.1.41112.1.5',
+        'vendor': 'ubiquiti',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
