@@ -22,6 +22,8 @@ metrics:
         OID: 1.3.6.1.4.1.25049.17.2.1.11
         metric_type: monotonic_count
     metric_tags:
+      - index: 1  # ogSerialPortIndex
+        tag: og_serial_port_index
       - column:
           name: ogSerialPortLabel
           OID: 1.3.6.1.4.1.25049.17.2.1.2
