@@ -21,24 +21,24 @@ metrics:
       OID: 1.3.6.1.4.1.45.1.6.3.8.1.1.13.3.10.0 # s5ChasUtilMemoryAvailableMB.3.10.0
   - MIB: S5-CHASSIS-MIB
     symbol:
-      name: s5ChasTmpSnrTmpValue
+      name: avaya.s5ChasTmpSnrTmpValue
       OID: 1.3.6.1.4.1.45.1.6.3.7.1.1.5.5.10.0 # s5ChasTmpSnrTmpValue.5.10.0
   - MIB: S5-CHASSIS-MIB
     table:
       name: s5ChasComTable
       OID: 1.3.6.1.4.1.45.1.6.3.3.1
     symbols:
-      - name: s5ChasCom
+      - name: avaya.s5ChasCom
         constant_value_one: true
     metric_tags:
       - column:
-          name: s5ChasComDescr
+          name: avaya.s5ChasComDescr
           OID: 1.3.6.1.4.1.45.1.6.3.3.1.1.5
-        tag: s5_chas_com_descr
+        tag: avaya_s5_chas_com_descr
       - column:
           OID: 1.3.6.1.4.1.45.1.6.3.3.1.1.9
-          name: s5ChasComAdminState
-        tag: s5_chas_com_admin_state
+          name: avaya.s5ChasComAdminState
+        tag: avaya_s5_chas_com_admin_state
         mapping:
           1: other
           2: not_avail
@@ -48,8 +48,8 @@ metrics:
           6: test
       - column:
           OID: 1.3.6.1.4.1.45.1.6.3.3.1.1.10
-          name: s5ChasComOperState
-        tag: s5_chas_com_oper_state
+          name: avaya.s5ChasComOperState
+        tag: avaya_s5_chas_com_oper_state
         mapping:
           1: other
           2: not_avail
@@ -67,7 +67,7 @@ metrics:
 metric_tags:
   - OID: 1.3.6.1.4.1.45.1.6.3.1.5.0
     symbol: s5ChasVer
-    tag: s5_chas_ver
+    tag: avaya_s5_chas_ver
   - OID: 1.3.6.1.4.1.45.1.6.3.1.6.0
     symbol: s5ChasSerNum
-    tag: s5_chas_ser_num
+    tag: avaya_s5_chas_ser_num

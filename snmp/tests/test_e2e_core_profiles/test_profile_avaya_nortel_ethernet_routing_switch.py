@@ -28,7 +28,7 @@ def test_e2e_profile_avaya_nortel_ethernet_routing_switch(dd_agent_check):
         'snmp_host:avaya-nortel-ethernet-routing-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
-    ] + ['s5_chas_ser_num:oxen', 's5_chas_ver:Jaded driving']
+    ] + ['avaya_s5_chas_ser_num:oxen', 'avaya_s5_chas_ver:Jaded driving']
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
@@ -40,17 +40,17 @@ def test_e2e_profile_avaya_nortel_ethernet_routing_switch(dd_agent_check):
     aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.s5ChasTmpSnrTmpValue', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.avaya.s5ChasTmpSnrTmpValue', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         [
-            's5_chas_com_admin_state:reset',
-            's5_chas_com_descr:but Jaded driving Jaded acted oxen their forward but',
-            's5_chas_com_oper_state:warning',
+            'avaya_s5_chas_com_admin_state:reset',
+            'avaya_s5_chas_com_descr:but Jaded driving Jaded acted oxen their forward but',
+            'avaya_s5_chas_com_oper_state:warning',
         ],
-        ['s5_chas_com_admin_state:reset', 's5_chas_com_descr:oxen', 's5_chas_com_oper_state:warning'],
+        ['avaya_s5_chas_com_admin_state:reset', 'avaya_s5_chas_com_descr:oxen', 'avaya_s5_chas_com_oper_state:warning'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.s5ChasCom', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.avaya.s5ChasCom', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
