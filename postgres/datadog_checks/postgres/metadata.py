@@ -291,11 +291,10 @@ class PostgresMetadata(DBMAsyncJob):
 
     def _get_table_info(self, cursor, dbname, schemaname, limit):
         """
-        If relation metrics is enabled, sort tables by the number of total accesses (index_rel_scans + seq_scans).
-        If they are not enabled, the table list will be retrieved from pg_stat_all_tables and sorted in the query.
+        Tables will be sorted by the number of total accesses (index_rel_scans + seq_scans) and truncated to
+        the max_tables limit.
 
-        If any tables are partitioned, the partitioned table will be returned and not counted against the limit.
-        However, partitions of the table are counted against the limit.
+        If any tables are partitioned, only the master paritition table name will be returned, and none of its children.
         """
         if self._config.relations:
             cursor.execute(PG_TABLES_QUERY.format(schemaname=schemaname))
@@ -329,9 +328,6 @@ class PostgresMetadata(DBMAsyncJob):
                 return row['total_activity']
 
         # if relation metrics are enabled, sorted based on last activity information
-        table_metrics_cache = self._check.metrics_cache.table_activity_metrics
-        self._log.warning(table_metrics_cache)
-
         table_info = sorted(table_info, key=sort_tables, reverse=True)
         return table_info[:limit]
 
