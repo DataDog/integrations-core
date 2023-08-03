@@ -185,7 +185,7 @@ class SqlserverActivity(DBMAsyncJob):
         self.log.debug("loaded sql server current connections len(rows)=%s", len(rows))
         return rows
 
-    @tracked_method(agent_check_getter=agent_check_getter)
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_idle_blocking_sessions(self, cursor, blocking_session_ids):
         # The IDLE_BLOCKING_SESSIONS_QUERY contains minimum information on idle blocker
         self.log.debug("collecting sql server idle blocking sessions")
@@ -194,7 +194,6 @@ class SqlserverActivity(DBMAsyncJob):
         cursor.execute(query)
         columns = [i[0] for i in cursor.description]
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        self.log.debug("loaded sql server idle blocking sessions len(rows)=%s", len(rows))
         return rows
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
