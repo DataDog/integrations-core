@@ -168,7 +168,6 @@ class MongoDb(AgentCheck):
 
     def check(self, _):
         try:
-            # TODO: comment on how this is long-term where we want to put all of the logic
             self._refresh_metadata()
             self._collect_metrics()
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
