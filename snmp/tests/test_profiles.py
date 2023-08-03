@@ -1825,6 +1825,7 @@ def test_proliant(aggregator):
         aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     power_metrics = [
+        'cpqHeFltTolPowerSupplyStatus',
         'cpqHeFltTolPowerSupplyCapacityUsed',
         'cpqHeFltTolPowerSupplyCapacityMaximum',
     ]

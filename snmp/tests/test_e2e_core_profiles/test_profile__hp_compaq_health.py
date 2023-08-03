@@ -51,7 +51,6 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
     aggregator.assert_metric('snmp.cpqHeThermalCpuFanStatus', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.cpqHeThermalSystemFanStatus', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.cpqHeThermalTempStatus', metric_type=aggregator.GAUGE, tags=common_tags)
-    aggregator.assert_metric('snmp.cpqSm2CntlrServerPowerState', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
         ['temperature_index:4'],
         ['temperature_index:6'],
@@ -90,6 +89,9 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
     for tag_row in tag_rows:
         aggregator.assert_metric(
             'snmp.cpqHeFltTolPowerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cpqHeFltTolPowerSupplyStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
             'snmp.cpqHeFltTolPowerSupplyCapacityMaximum', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
