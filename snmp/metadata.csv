@@ -192,8 +192,6 @@ snmp.cfprSmMonitorDataDiskTotal,gauge,,,,"[CISCO-FIREPOWER-SM-MIB] Cisco Firepow
 snmp.cfwConnectionStatCount,gauge,,,,[Cisco ASA 5525] This is an integer that contains the value of the resource statistic.,0,snmp,,
 snmp.cfwConnectionStatValue,gauge,,,,[Cisco ASA 5525] This is an integer that contains the value of the resource statistic.,0,snmp,,
 snmp.cfwHardwareStatusValue,gauge,,,,[Cisco ASA 5525] This object contains the current status of the resource.,0,snmp,,
-snmp.chasEntPhysical,gauge,,,,"[ALCATEL-IND1-CHASSIS-MIB] [ALCATEL-ENT1-CHASSIS-MIB] This table contains one row per physical entity. It is an extension for the entity physical table (rfc 2737) that is instantiated for every physical entity object. The fields are not always significant for every object. Make 'sum by {X}' queries" to count elements with the tag X.",0,snmp,,
-snmp.chasEntTempCurrent,gauge,,,,"[ALCATEL-ENT1-CHASSIS-MIB] This object indicates the current output of the temperature sensor in degrees Celsius.",0,snmp,,
 snmp.cieIfInputQueueDrops,gauge,,packet,,[Cisco c3850] The number of input packets dropped.,0,snmp,,
 snmp.cieIfLastInTime,gauge,,millisecond,,[Cisco c3850] The elapsed time in milliseconds since the last protocol input packet was received.,0,snmp,,
 snmp.cieIfLastOutTime,gauge,,millisecond,,[Cisco c3850] The elapsed time in milliseconds since the last protocol output packet was transmitted.,0,snmp,,
