@@ -233,7 +233,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "cloud_metadata": self._config.cloud_metadata,
             }
             json_event = json.dumps(event, default=default_json_event_encoding)
-            self._log.debug("Reporting the following payload: {}".format(json_event))
+            self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
             self._check.database_monitoring_metadata(json_event)
 
     def _payload_pg_version(self):
@@ -272,7 +272,6 @@ class PostgresMetadata(DBMAsyncJob):
         """
         cursor.execute(DATABASE_INFORMATION_QUERY.format(dbname=dbname))
         row = cursor.fetchone()
-        print(row)
         return row
 
     def _query_schema_information(self, cursor: psycopg2.extensions.cursor, dbname: str) -> Dict[str, str]:
@@ -353,13 +352,12 @@ class PostgresMetadata(DBMAsyncJob):
             "partition_key": str (if has partitions)
             "num_partitions": int (if has partitions)
         """
+        max_tables = self._config.schemas_metadata_config.get('max_tables', 1000)
         tables_info = self._get_table_info(cursor, dbname, schemaname, 1000)
-        self._log.warning(tables_info)
         table_payloads = []
         for table in tables_info:
             this_payload = {}
             name = table['name']
-            self._log.debug("Parsing table {}".format(name))
             this_payload.update({'id': str(table['id'])})
             this_payload.update({'name': name})
             if table["hasindexes"]:
@@ -371,7 +369,6 @@ class PostgresMetadata(DBMAsyncJob):
             if table['has_partitions']:
                 cursor.execute(PARTITION_KEY_QUERY.format(parent=name))
                 row = cursor.fetchone()
-                self._log.warning(row)
                 this_payload.update({'partition_key': row['partition_key']})
 
                 cursor.execute(NUM_PARTITIONS_QUERY.format(parent=name))
@@ -387,7 +384,6 @@ class PostgresMetadata(DBMAsyncJob):
             if row['count'] > 0:
                 cursor.execute(PG_CONSTRAINTS_QUERY.format(tablename=table['name']))
                 rows = cursor.fetchall()
-                self._log.warning("foreign keys {}".format(rows))
                 if rows:
                     fks = [dict(row) for row in rows]
                     this_payload.update({'foreign_keys': fks})
@@ -418,12 +414,9 @@ class PostgresMetadata(DBMAsyncJob):
                         "schemas": [],
                     }
                 )
-                self._log.warning(database_info)
                 schema_info = self._query_schema_information(cursor, dbname)
-                self._log.warning(schema_info)
                 for schema in schema_info:
                     tables_info = self._query_table_information_for_schema(cursor, schema['name'], dbname)
-                    self._log.warning(tables_info)
                     metadata['schemas'].append(
                         {"name": schema['name'], "owner": schema['owner'], "tables": tables_info}
                     )
