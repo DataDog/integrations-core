@@ -5,7 +5,7 @@ import socket
 import time
 
 import mock
-import psycopg2
+import psycopg
 import pytest
 from semver import VersionInfo
 
@@ -77,7 +77,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
 
 
 def test_snapshot_xmin(aggregator, integration_check, pg_instance):
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute('select txid_snapshot_xmin(txid_current_snapshot());')
             xmin = float(cur.fetchall()[0][0])
@@ -88,9 +88,7 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
     aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin, count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin, count=1, tags=expected_tags)
 
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
-        # Force autocommit
-        conn.set_session(autocommit=True)
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", autocommit=True) as conn:
         with conn.cursor() as cur:
             # Force increases of txid
             cur.execute('select txid_current();')
@@ -114,7 +112,6 @@ def test_snapshot_xip(aggregator, integration_check, pg_instance):
     cur.fetchall()
 
     conn2 = _get_conn(pg_instance)
-    conn2.set_session(autocommit=True)
     with conn2.cursor() as cur2:
         # Force increases of txid
         cur2.execute('select txid_current();')
@@ -227,7 +224,7 @@ def test_unsupported_replication(aggregator, integration_check, pg_instance):
     def format_with_error(value, **kwargs):
         if 'pg_is_in_recovery' in value:
             called.append(True)
-            raise psycopg2.errors.FeatureNotSupported("Not available")
+            raise psycopg.errors.FeatureNotSupported("Not available")
         return unpatched_fmt.format(value, **kwargs)
 
     # This simulate an error in the fmt function, as it's a bit hard to mock psycopg
@@ -255,7 +252,7 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
 
     # Second: keep the connection open but an unexpected error happens during check run
     orig_db = check.db
-    check.db = mock.MagicMock(spec=('closed', 'status'), closed=False, status=psycopg2.extensions.STATUS_READY)
+    check.db = mock.MagicMock(spec=('closed', 'status'), closed=False, status=psycopg.pq.ConnStatus.OK)
     with pytest.raises(AttributeError):
         check.check(pg_instance)
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=expected_tags)
@@ -293,7 +290,7 @@ def test_locks_metrics_no_relations(aggregator, integration_check, pg_instance):
     Since 4.0.0, to prevent tag explosion, lock metrics are not collected anymore unless relations are specified
     """
     check = integration_check(pg_instance)
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute('LOCK persons')
             check.check(pg_instance)
@@ -492,7 +489,7 @@ def test_query_timeout(integration_check, pg_instance):
     check = integration_check(pg_instance)
     check._connect()
     cursor = check.db.cursor()
-    with pytest.raises(psycopg2.errors.QueryCanceled):
+    with pytest.raises(psycopg.errors.QueryCanceled):
         cursor.execute("select pg_sleep(2000)")
 
 
