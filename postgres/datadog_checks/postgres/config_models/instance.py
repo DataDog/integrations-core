@@ -9,9 +9,10 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence, Union
+from types import MappingProxyType
+from typing import Any, Optional, Union
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -20,185 +21,195 @@ from . import defaults, validators
 
 
 class Aws(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    instance_endpoint: Optional[str]
-    region: Optional[str]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    instance_endpoint: Optional[str] = None
+    region: Optional[str] = None
 
 
 class Azure(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    deployment_type: Optional[str]
-    fully_qualified_domain_name: Optional[str]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    deployment_type: Optional[str] = None
+    fully_qualified_domain_name: Optional[str] = None
 
 
 class CollectSettings(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    collection_interval: Optional[float]
-    enabled: Optional[bool]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
 
 
 class DatabaseAutodiscovery(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    enabled: Optional[bool]
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
-    max_databases: Optional[int]
-    refresh: Optional[int]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = None
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+    max_databases: Optional[int] = None
+    refresh: Optional[int] = None
 
 
 class Gcp(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    instance_id: Optional[str]
-    project_id: Optional[str]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    instance_id: Optional[str] = None
+    project_id: Optional[str] = None
 
 
 class MetricPatterns(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class ObfuscatorOptions(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    collect_commands: Optional[bool]
-    collect_comments: Optional[bool]
-    collect_metadata: Optional[bool]
-    collect_tables: Optional[bool]
-    keep_dollar_quoted_func: Optional[bool]
-    keep_sql_alias: Optional[bool]
-    replace_digits: Optional[bool]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collect_commands: Optional[bool] = None
+    collect_comments: Optional[bool] = None
+    collect_metadata: Optional[bool] = None
+    collect_tables: Optional[bool] = None
+    keep_dollar_quoted_func: Optional[bool] = None
+    keep_sql_alias: Optional[bool] = None
+    replace_digits: Optional[bool] = None
 
 
 class QueryActivity(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    collection_interval: Optional[float]
-    enabled: Optional[bool]
-    payload_row_limit: Optional[float]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    payload_row_limit: Optional[float] = None
 
 
 class QueryMetrics(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    collection_interval: Optional[float]
-    enabled: Optional[bool]
-    pg_stat_statements_max_warning_threshold: Optional[float]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    pg_stat_statements_max_warning_threshold: Optional[float] = None
 
 
 class QuerySamples(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    collection_interval: Optional[float]
-    enabled: Optional[bool]
-    explain_function: Optional[str]
-    explain_parameterized_queries: Optional[bool]
-    explained_queries_cache_maxsize: Optional[int]
-    explained_queries_per_hour_per_query: Optional[int]
-    samples_per_hour_per_query: Optional[int]
-    seen_samples_cache_maxsize: Optional[int]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    explain_function: Optional[str] = None
+    explain_parameterized_queries: Optional[bool] = None
+    explained_queries_cache_maxsize: Optional[int] = None
+    explained_queries_per_hour_per_query: Optional[int] = None
+    samples_per_hour_per_query: Optional[int] = None
+    seen_samples_cache_maxsize: Optional[int] = None
 
 
 class Relation(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    relation_name: Optional[str]
-    relation_regex: Optional[str]
-    relation_schema: Optional[str]
-    relkind: Optional[Sequence[str]]
-    schemas: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    relation_name: Optional[str] = None
+    relation_regex: Optional[str] = None
+    relation_schema: Optional[str] = None
+    relkind: Optional[tuple[str, ...]] = None
+    schemas: Optional[tuple[str, ...]] = None
 
 
 class InstanceConfig(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    activity_metrics_excluded_aggregations: Optional[Sequence[str]]
-    application_name: Optional[str]
-    aws: Optional[Aws]
-    azure: Optional[Azure]
-    collect_activity_metrics: Optional[bool]
-    collect_bloat_metrics: Optional[bool]
-    collect_count_metrics: Optional[bool]
-    collect_database_size_metrics: Optional[bool]
-    collect_default_database: Optional[bool]
-    collect_function_metrics: Optional[bool]
-    collect_settings: Optional[CollectSettings]
-    collect_wal_metrics: Optional[bool]
-    custom_queries: Optional[Sequence[Mapping[str, Any]]]
-    data_directory: Optional[str]
-    database_autodiscovery: Optional[DatabaseAutodiscovery]
-    dbm: Optional[bool]
-    dbname: Optional[str]
-    dbstrict: Optional[bool]
-    disable_generic_tags: Optional[bool]
-    empty_default_hostname: Optional[bool]
-    gcp: Optional[Gcp]
+    model_config = ConfigDict(
+        validate_default=True,
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    activity_metrics_excluded_aggregations: Optional[tuple[str, ...]] = None
+    application_name: Optional[str] = None
+    aws: Optional[Aws] = None
+    azure: Optional[Azure] = None
+    collect_activity_metrics: Optional[bool] = None
+    collect_bloat_metrics: Optional[bool] = None
+    collect_count_metrics: Optional[bool] = None
+    collect_database_size_metrics: Optional[bool] = None
+    collect_default_database: Optional[bool] = None
+    collect_function_metrics: Optional[bool] = None
+    collect_settings: Optional[CollectSettings] = None
+    collect_wal_metrics: Optional[bool] = None
+    custom_queries: Optional[tuple[MappingProxyType[str, Any], ...]] = None
+    data_directory: Optional[str] = None
+    database_autodiscovery: Optional[DatabaseAutodiscovery] = None
+    dbm: Optional[bool] = None
+    dbname: Optional[str] = None
+    dbstrict: Optional[bool] = None
+    disable_generic_tags: Optional[bool] = None
+    empty_default_hostname: Optional[bool] = None
+    gcp: Optional[Gcp] = None
     host: str
-    idle_connection_timeout: Optional[int]
-    ignore_databases: Optional[Sequence[str]]
-    log_unobfuscated_plans: Optional[bool]
-    log_unobfuscated_queries: Optional[bool]
-    max_connections: Optional[int]
-    max_relations: Optional[int]
-    metric_patterns: Optional[MetricPatterns]
-    min_collection_interval: Optional[float]
-    obfuscator_options: Optional[ObfuscatorOptions]
-    password: Optional[str]
-    pg_stat_statements_view: Optional[str]
-    port: Optional[int]
-    query_activity: Optional[QueryActivity]
-    query_metrics: Optional[QueryMetrics]
-    query_samples: Optional[QuerySamples]
-    query_timeout: Optional[int]
-    relations: Optional[Sequence[Union[str, Relation]]]
-    reported_hostname: Optional[str]
-    service: Optional[str]
-    ssl: Optional[str]
-    ssl_cert: Optional[str]
-    ssl_key: Optional[str]
-    ssl_password: Optional[str]
-    ssl_root_cert: Optional[str]
-    table_count_limit: Optional[int]
-    tag_replication_role: Optional[bool]
-    tags: Optional[Sequence[str]]
+    idle_connection_timeout: Optional[int] = None
+    ignore_databases: Optional[tuple[str, ...]] = None
+    log_unobfuscated_plans: Optional[bool] = None
+    log_unobfuscated_queries: Optional[bool] = None
+    max_connections: Optional[int] = None
+    max_relations: Optional[int] = None
+    metric_patterns: Optional[MetricPatterns] = None
+    min_collection_interval: Optional[float] = None
+    obfuscator_options: Optional[ObfuscatorOptions] = None
+    password: Optional[str] = None
+    pg_stat_statements_view: Optional[str] = None
+    port: Optional[int] = None
+    query_activity: Optional[QueryActivity] = None
+    query_metrics: Optional[QueryMetrics] = None
+    query_samples: Optional[QuerySamples] = None
+    query_timeout: Optional[int] = None
+    relations: Optional[tuple[Union[str, Relation], ...]] = None
+    reported_hostname: Optional[str] = None
+    service: Optional[str] = None
+    ssl: Optional[str] = None
+    ssl_cert: Optional[str] = None
+    ssl_key: Optional[str] = None
+    ssl_password: Optional[str] = None
+    ssl_root_cert: Optional[str] = None
+    table_count_limit: Optional[int] = None
+    tag_replication_role: Optional[bool] = None
+    tags: Optional[tuple[str, ...]] = None
     username: str
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
     def _initial_validation(cls, values):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-    @validator('*', pre=True, always=True)
-    def _ensure_defaults(cls, v, field):
-        if v is not None or field.required:
-            return v
+    @field_validator('*', mode='before')
+    def _validate(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name in info.context['configured_fields']:
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{field.name}')(field, v)
+        return validation.utils.make_immutable(value)
 
-    @validator('*')
-    def _run_validations(cls, v, field):
-        if not v:
-            return v
-
-        return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
-
-    @root_validator(pre=False)
-    def _final_validation(cls, values):
-        return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+    @model_validator(mode='after')
+    def _final_validation(cls, model):
+        return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))

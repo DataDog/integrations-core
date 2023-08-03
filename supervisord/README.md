@@ -90,7 +90,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `<INTEGRATION_NAME>` | `supervisord`                                                                                                      |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                                      |
-| `<INSTANCE_CONFIG>`  | `{"name":"<SUPERVISORD_SERVER_NAME>", "host":"%%host%%", "port":"9001", "user":"<USERNAME>", "pass":"<PASSWORD>"}` |
+| `<INSTANCE_CONFIG>`  | `{"name":"<SUPERVISORD_SERVER_NAME>", "host":"%%host%%", "port":"9001", "username":"<USERNAME>", "password":"<PASSWORD>"}` |
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->

@@ -43,6 +43,8 @@ integration/aerospike:
 - aerospike/**/*
 integration/agent_metrics:
 - agent_metrics/**/*
+integration/airbyte:
+- airbyte/**/*
 integration/airflow:
 - airflow/**/*
 integration/amazon_eks:
@@ -253,6 +255,8 @@ integration/kubernetes_state_core:
 - kubernetes_state_core/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
+integration/langchain:
+- langchain/**/*
 integration/lighttpd:
 - lighttpd/**/*
 integration/linkerd:

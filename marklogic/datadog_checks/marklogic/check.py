@@ -190,14 +190,14 @@ class MarklogicCheck(AgentCheck):
     @AgentCheck.metadata_entrypoint
     def submit_version_metadata(self, data):
         # type: (Dict[str, Any]) -> None
-        # Example: 9.0-12
+        # Example: 9.0-12 or 11.0.3
         try:
             version = data['local-cluster-status']['version']
             self.set_metadata(
                 'version',
                 version,
                 scheme='regex',
-                pattern=r'(?P<major>\d+)\.(?P<minor>\d+)\-(?P<patch>\d+)',
+                pattern=r'(?P<major>\d+)\.(?P<minor>\d+)(\-|\.)(?P<patch>\d+)',
             )
         except Exception as e:
             self.log.warning('Error collecting MarkLogic version: %s', str(e))

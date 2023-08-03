@@ -1,5 +1,7 @@
 # CHANGELOG - mesos_slave
 
+## Unreleased
+
 ## 3.1.1 / 2023-07-10
 
 ***Fixed***:

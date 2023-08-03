@@ -284,11 +284,11 @@ def test_f5(aggregator):
     cpu_gauges = ['sysMultiHostCpuUsageRatio', 'cpu.usage']
 
     interfaces = [
-        ('1.0', 'desc2'),
-        ('mgmt', 'desc1'),
-        ('/Common/internal', 'desc5'),
-        ('/Common/http-tunnel', 'desc3'),
-        ('/Common/socks-tunnel', 'desc4'),
+        (32, 'mgmt', 'desc1'),
+        (48, '1.0', 'desc2'),
+        (80, '/Common/http-tunnel', 'desc3'),
+        (96, '/Common/socks-tunnel', 'desc4'),
+        (112, '/Common/internal', 'desc5'),
     ]
     interfaces_with_bandwidth_usage = {
         '1.0',
@@ -317,8 +317,12 @@ def test_f5(aggregator):
 
     for metric in IF_SCALAR_GAUGE:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
-    for interface, desc in interfaces:
-        interface_tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + tags
+    for index, interface, desc in interfaces:
+        interface_tags = [
+            'interface:{}'.format(interface),
+            'interface_alias:{}'.format(desc),
+            'interface_index:{}'.format(index),
+        ] + tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=interface_tags, count=1
@@ -419,11 +423,15 @@ def test_device(aggregator):
     for metric in IF_SCALAR_GAUGE:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     interfaces = [
-        ('eth0', 'kept'),
-        ('eth1', 'their forward oxen'),
+        (13, 'eth0', 'kept'),
+        (15, 'eth1', 'their forward oxen'),
     ]
-    for interface, if_desc in interfaces:
-        tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(if_desc)] + common_tags
+    for index, interface, if_desc in interfaces:
+        tags = [
+            'interface:{}'.format(interface),
+            'interface_alias:{}'.format(if_desc),
+            'interface_index:{}'.format(index),
+        ] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
@@ -473,11 +481,11 @@ def test_f5_router(aggregator):
     check.check(instance)
 
     interfaces = [
-        ('1.0', 'desc2'),
-        ('mgmt', 'desc1'),
-        ('/Common/internal', 'desc5'),
-        ('/Common/http-tunnel', 'desc3'),
-        ('/Common/socks-tunnel', 'desc4'),
+        (32, 'mgmt', 'desc1'),
+        (48, '1.0', 'desc2'),
+        (80, '/Common/http-tunnel', 'desc3'),
+        (96, '/Common/socks-tunnel', 'desc4'),
+        (112, '/Common/internal', 'desc5'),
     ]
     interfaces_with_bandwidth_usage = {
         '1.0',
@@ -494,8 +502,12 @@ def test_f5_router(aggregator):
 
     for metric in IF_SCALAR_GAUGE:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
-    for interface, desc in interfaces:
-        tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + common_tags
+    for index, interface, desc in interfaces:
+        tags = [
+            'interface:{}'.format(interface),
+            'interface_alias:{}'.format(desc),
+            'interface_index:{}'.format(index),
+        ] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
@@ -533,6 +545,146 @@ def test_cisco_3850(aggregator):
 
     common.assert_common_metrics(aggregator, common_tags)
 
+    indexes = {
+        'Ca0': '127',
+        'Ca1': '128',
+        'Ca10': '138',
+        'Ca11': '139',
+        'Ca12': '140',
+        'Ca13': '141',
+        'Ca14': '142',
+        'Ca2': '129',
+        'Ca3': '130',
+        'Ca4': '131',
+        'Ca5': '132',
+        'Ca6': '133',
+        'Ca7': '134',
+        'Ca8': '136',
+        'Ca9': '137',
+        'Gi0/0': '1',
+        'Gi1/0/1': '3',
+        'Gi1/0/10': '12',
+        'Gi1/0/11': '13',
+        'Gi1/0/12': '14',
+        'Gi1/0/13': '15',
+        'Gi1/0/14': '16',
+        'Gi1/0/15': '17',
+        'Gi1/0/16': '18',
+        'Gi1/0/17': '19',
+        'Gi1/0/18': '20',
+        'Gi1/0/19': '21',
+        'Gi1/0/2': '4',
+        'Gi1/0/20': '22',
+        'Gi1/0/21': '23',
+        'Gi1/0/22': '24',
+        'Gi1/0/23': '25',
+        'Gi1/0/24': '26',
+        'Gi1/0/25': '27',
+        'Gi1/0/26': '28',
+        'Gi1/0/27': '29',
+        'Gi1/0/28': '30',
+        'Gi1/0/29': '31',
+        'Gi1/0/3': '5',
+        'Gi1/0/30': '32',
+        'Gi1/0/31': '33',
+        'Gi1/0/32': '34',
+        'Gi1/0/33': '35',
+        'Gi1/0/34': '36',
+        'Gi1/0/35': '37',
+        'Gi1/0/36': '38',
+        'Gi1/0/37': '39',
+        'Gi1/0/38': '40',
+        'Gi1/0/39': '41',
+        'Gi1/0/4': '6',
+        'Gi1/0/40': '42',
+        'Gi1/0/41': '43',
+        'Gi1/0/42': '44',
+        'Gi1/0/43': '45',
+        'Gi1/0/44': '46',
+        'Gi1/0/45': '47',
+        'Gi1/0/46': '48',
+        'Gi1/0/47': '49',
+        'Gi1/0/48': '50',
+        'Gi1/0/5': '7',
+        'Gi1/0/6': '8',
+        'Gi1/0/7': '9',
+        'Gi1/0/8': '10',
+        'Gi1/0/9': '11',
+        'Gi1/1/1': '51',
+        'Gi1/1/2': '52',
+        'Gi1/1/3': '53',
+        'Gi1/1/4': '54',
+        'Gi2/0/1': '63',
+        'Gi2/0/10': '72',
+        'Gi2/0/11': '73',
+        'Gi2/0/12': '74',
+        'Gi2/0/13': '75',
+        'Gi2/0/14': '76',
+        'Gi2/0/15': '77',
+        'Gi2/0/16': '78',
+        'Gi2/0/17': '79',
+        'Gi2/0/18': '80',
+        'Gi2/0/19': '81',
+        'Gi2/0/2': '64',
+        'Gi2/0/20': '82',
+        'Gi2/0/21': '83',
+        'Gi2/0/22': '84',
+        'Gi2/0/23': '85',
+        'Gi2/0/24': '86',
+        'Gi2/0/25': '87',
+        'Gi2/0/26': '88',
+        'Gi2/0/27': '89',
+        'Gi2/0/28': '90',
+        'Gi2/0/29': '91',
+        'Gi2/0/3': '65',
+        'Gi2/0/30': '92',
+        'Gi2/0/31': '93',
+        'Gi2/0/32': '94',
+        'Gi2/0/33': '95',
+        'Gi2/0/34': '96',
+        'Gi2/0/35': '97',
+        'Gi2/0/36': '98',
+        'Gi2/0/37': '99',
+        'Gi2/0/38': '100',
+        'Gi2/0/39': '101',
+        'Gi2/0/4': '66',
+        'Gi2/0/40': '102',
+        'Gi2/0/41': '103',
+        'Gi2/0/42': '104',
+        'Gi2/0/43': '105',
+        'Gi2/0/44': '106',
+        'Gi2/0/45': '107',
+        'Gi2/0/46': '108',
+        'Gi2/0/47': '109',
+        'Gi2/0/48': '110',
+        'Gi2/0/5': '67',
+        'Gi2/0/6': '68',
+        'Gi2/0/7': '69',
+        'Gi2/0/8': '70',
+        'Gi2/0/9': '71',
+        'Gi2/1/1': '111',
+        'Gi2/1/2': '112',
+        'Gi2/1/3': '113',
+        'Gi2/1/4': '114',
+        'Lo0': '122',
+        'Nu0': '2',
+        'Po15': '123',
+        'StackPort1': '59',
+        'StackPort2': '119',
+        'Te1/1/1': '55',
+        'Te1/1/2': '56',
+        'Te1/1/3': '57',
+        'Te1/1/4': '58',
+        'Te2/1/1': '115',
+        'Te2/1/2': '116',
+        'Te2/1/3': '117',
+        'Te2/1/4': '118',
+        'Vl1': '62',
+        'Vl164': '126',
+        'Vl19': '135',
+        'Vl195': '125',
+        'Vl95': '124',
+    }
     aliases = {
         'Gi1/0/24': 'LWAP-example',
         'Gi1/0/33': 'switchboard console',
@@ -551,7 +703,12 @@ def test_cisco_3850(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     for interface in interfaces:
         alias = aliases.get(interface, '')
-        tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(alias)] + common_tags
+        index = indexes.get(interface, '')
+        tags = [
+            'interface:{}'.format(interface),
+            'interface_alias:{}'.format(alias),
+            'interface_index:{}'.format(index),
+        ] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
@@ -679,7 +836,7 @@ def test_meraki_cloud_controller(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
     # IF-MIB
-    if_tags = ['interface:eth0'] + common_tags
+    if_tags = ['interface:eth0', 'interface_index:11'] + common_tags
     for metric in IF_COUNTS:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
@@ -1017,6 +1174,16 @@ def test_cisco_nexus(aggregator):
     profile = "cisco-nexus"
     run_profile_check(profile)
 
+    indexes = {
+        'GigabitEthernet1/0/1': '2',
+        'GigabitEthernet1/0/2': '13',
+        'GigabitEthernet1/0/3': '20',
+        'GigabitEthernet1/0/4': '22',
+        'GigabitEthernet1/0/5': '23',
+        'GigabitEthernet1/0/6': '25',
+        'GigabitEthernet1/0/7': '29',
+        'GigabitEthernet1/0/8': '30',
+    }
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
 
     common_tags = common.CHECK_TAGS + [
@@ -1034,7 +1201,11 @@ def test_cisco_nexus(aggregator):
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
     for interface in interfaces:
-        tags = ['interface:{}'.format(interface), 'interface_alias:'] + common_tags
+        tags = [
+            'interface:{}'.format(interface),
+            'interface_alias:',
+            'interface_index:{}'.format(indexes.get(interface)),
+        ] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
@@ -1618,12 +1789,16 @@ def test_proliant(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     interfaces = [
-        ('eth0', 'quaintly zombies quaintly forward'),
-        ('eth1', 'quaintly but quaintly quaintly'),
+        (3, 'eth0', 'quaintly zombies quaintly forward'),
+        (4, 'eth1', 'quaintly but quaintly quaintly'),
     ]
 
-    for interface, desc in interfaces:
-        if_tags = ['interface:{}'.format(interface), 'interface_alias:{}'.format(desc)] + common_tags
+    for index, interface, desc in interfaces:
+        if_tags = [
+            'interface:{}'.format(interface),
+            'interface_alias:{}'.format(desc),
+            'interface_index:{}'.format(index),
+        ] + common_tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
@@ -1806,7 +1981,7 @@ def assert_cisco_asa(aggregator, profile):
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
         )
 
-    if_tags = ['interface:eth0'] + common_tags
+    if_tags = ['interface:eth0', 'interface_index:11'] + common_tags
     for metric in IF_COUNTS:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
@@ -2403,7 +2578,11 @@ def test_apc_ups(aggregator):
     aggregator.assert_metric(
         'snmp.upsOutletGroupStatusGroupState',
         metric_type=aggregator.GAUGE,
-        tags=['outlet_group_name:test_outlet'] + tags,
+        tags=[
+            'outlet_group_name:test_outlet',
+            'ups_outlet_group_status_group_state:3',
+        ]
+        + tags,
     )
 
     for metric, value in metrics.APC_UPS_UPS_BASIC_STATE_OUTPUT_STATE_METRICS:
@@ -2844,7 +3023,7 @@ def _check_bgp4(aggregator, common_tags):
     """
     Shared testing function for profiles supporting BGP4 metrics.
     """
-    tags = ['neighbor:244.12.239.177', 'admin_status:2', 'peer_state:6'] + common_tags
+    tags = ['neighbor:244.12.239.177', 'remote_as:26', 'admin_status:2', 'peer_state:6'] + common_tags
     for metric in PEER_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
 
@@ -2864,7 +3043,7 @@ def test_cisco_asr_1001x(aggregator):
     aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags)
 
-    _check_common_asr(aggregator, common_tags + ['interface:eth/0'])
+    _check_common_asr(aggregator, common_tags + ['interface:eth/0', 'interface_index:3'])
 
     for metric in TCP_COUNTS + ['udpInErrors', 'udpNoPorts']:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
@@ -2896,7 +3075,7 @@ def test_cisco_asr_9001(aggregator):
     aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags)
 
-    _check_common_asr(aggregator, tags=common_tags + ['interface:eth/0'])
+    _check_common_asr(aggregator, tags=common_tags + ['interface:eth/0', 'interface_index:19'])
     for metric in TCP_COUNTS + ['udpInErrors', 'udpNoPorts']:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.tcpCurrEstab', metric_type=aggregator.GAUGE, tags=common_tags)
@@ -2953,7 +3132,7 @@ def test_cisco_asr_9901(aggregator):
     aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags)
 
-    _check_common_asr(aggregator, common_tags + ['interface:eth0'])
+    _check_common_asr(aggregator, common_tags + ['interface:eth0', 'interface_index:39'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)

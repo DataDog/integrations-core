@@ -1,5 +1,27 @@
 # CHANGELOG - datadog_checks_base
 
+## 32.6.0 / 2023-07-31
+
+***Added***:
+
+* Upgrade ddtrace to 1.11.2 on Python 3. See [#15144](https://github.com/DataDog/integrations-core/pull/15144).
+* Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
+
+***Fixed***:
+
+* Fix types for generated config models. See [#15334](https://github.com/DataDog/integrations-core/pull/15334).
+* Upgrade pydantic. See [#15394](https://github.com/DataDog/integrations-core/pull/15394).
+* Revert "Bump pydantic version in the agent_requirements.in file (#153…. See [#15338](https://github.com/DataDog/integrations-core/pull/15338).
+* Bump pydantic version in the agent_requirements.in file. See [#15320](https://github.com/DataDog/integrations-core/pull/15320).
+
+## Unreleased
+
+## 32.5.1 / 2023-07-19
+
+***Fixed***:
+
+* Revert to requesting Prometheus format by default. See [#15292](https://github.com/DataDog/integrations-core/pull/15292).
+
 ## 32.5.0 / 2023-07-10
 
 ***Added***:

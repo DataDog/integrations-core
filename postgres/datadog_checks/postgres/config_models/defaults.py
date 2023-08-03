@@ -7,200 +7,130 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-from datadog_checks.base.utils.models.fields import get_default_field_value
 
-
-def shared_service(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_activity_metrics_excluded_aggregations(field, value):
+def instance_activity_metrics_excluded_aggregations():
     return []
 
 
-def instance_application_name(field, value):
+def instance_application_name():
     return 'datadog-agent'
 
 
-def instance_aws(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_azure(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_collect_activity_metrics(field, value):
+def instance_collect_activity_metrics():
     return False
 
 
-def instance_collect_bloat_metrics(field, value):
+def instance_collect_bloat_metrics():
     return False
 
 
-def instance_collect_count_metrics(field, value):
+def instance_collect_count_metrics():
     return True
 
 
-def instance_collect_database_size_metrics(field, value):
+def instance_collect_database_size_metrics():
     return True
 
 
-def instance_collect_default_database(field, value):
+def instance_collect_default_database():
     return True
 
 
-def instance_collect_function_metrics(field, value):
+def instance_collect_function_metrics():
     return False
 
 
-def instance_collect_settings(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_collect_wal_metrics(field, value):
+def instance_collect_wal_metrics():
     return False
 
 
-def instance_custom_queries(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_data_directory(field, value):
+def instance_data_directory():
     return '/usr/local/pgsql/data'
 
 
-def instance_database_autodiscovery(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_dbm(field, value):
+def instance_dbm():
     return False
 
 
-def instance_dbname(field, value):
+def instance_dbname():
     return 'postgres'
 
 
-def instance_dbstrict(field, value):
+def instance_dbstrict():
     return False
 
 
-def instance_disable_generic_tags(field, value):
+def instance_disable_generic_tags():
     return False
 
 
-def instance_empty_default_hostname(field, value):
+def instance_empty_default_hostname():
     return False
 
 
-def instance_gcp(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_idle_connection_timeout(field, value):
+def instance_idle_connection_timeout():
     return 60000
 
 
-def instance_ignore_databases(field, value):
+def instance_ignore_databases():
     return ['template%', 'rdsadmin', 'azure_maintenance']
 
 
-def instance_log_unobfuscated_plans(field, value):
+def instance_log_unobfuscated_plans():
     return False
 
 
-def instance_log_unobfuscated_queries(field, value):
+def instance_log_unobfuscated_queries():
     return False
 
 
-def instance_max_connections(field, value):
+def instance_max_connections():
     return 30
 
 
-def instance_max_relations(field, value):
+def instance_max_relations():
     return 300
 
 
-def instance_metric_patterns(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_min_collection_interval(field, value):
+def instance_min_collection_interval():
     return 15
 
 
-def instance_obfuscator_options(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_password(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_pg_stat_statements_view(field, value):
+def instance_pg_stat_statements_view():
     return 'show_pg_stat_statements()'
 
 
-def instance_port(field, value):
+def instance_port():
     return 5432
 
 
-def instance_query_activity(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_query_metrics(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_query_samples(field, value):
-    return get_default_field_value(field, value)
-
-
-def instance_query_timeout(field, value):
+def instance_query_timeout():
     return 5000
 
 
-def instance_relations(field, value):
-    return get_default_field_value(field, value)
+def instance_ssl():
+    return 'false'
 
 
-def instance_reported_hostname(field, value):
-    return get_default_field_value(field, value)
+def instance_ssl_cert():
+    return 'false'
 
 
-def instance_service(field, value):
-    return get_default_field_value(field, value)
+def instance_ssl_key():
+    return 'false'
 
 
-def instance_ssl(field, value):
-    return False
+def instance_ssl_password():
+    return 'false'
 
 
-def instance_ssl_cert(field, value):
-    return False
+def instance_ssl_root_cert():
+    return 'false'
 
 
-def instance_ssl_key(field, value):
-    return False
-
-
-def instance_ssl_password(field, value):
-    return False
-
-
-def instance_ssl_root_cert(field, value):
-    return False
-
-
-def instance_table_count_limit(field, value):
+def instance_table_count_limit():
     return 200
 
 
-def instance_tag_replication_role(field, value):
+def instance_tag_replication_role():
     return False
-
-
-def instance_tags(field, value):
-    return get_default_field_value(field, value)

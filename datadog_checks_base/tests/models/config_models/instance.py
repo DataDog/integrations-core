@@ -9,9 +9,10 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from types import MappingProxyType
+from typing import Any, Optional
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -20,51 +21,52 @@ from . import defaults, deprecations, validators
 
 
 class Obj(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    bar: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    bar: Optional[tuple[str, ...]] = None
     foo: bool
 
 
 class InstanceConfig(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    array: Optional[Sequence[str]]
-    deprecated: Optional[str]
-    flag: Optional[bool]
+    model_config = ConfigDict(
+        validate_default=True,
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    array: Optional[tuple[str, ...]] = None
+    deprecated: Optional[str] = None
+    flag: Optional[bool] = None
     hyphenated_name: Optional[str] = Field(None, alias='hyphenated-name')
-    mapping: Optional[Mapping[str, Any]]
-    obj: Optional[Obj]
+    mapping: Optional[MappingProxyType[str, Any]] = None
+    obj: Optional[Obj] = None
     pass_: Optional[str] = Field(None, alias='pass')
-    pid: Optional[int]
-    text: Optional[str]
-    timeout: Optional[float]
+    pid: Optional[int] = None
+    text: Optional[str] = None
+    timeout: Optional[float] = None
 
-    @root_validator(pre=True)
-    def _handle_deprecations(cls, values):
-        validation.utils.handle_deprecations('instances', deprecations.instance(), values)
+    @model_validator(mode='before')
+    def _handle_deprecations(cls, values, info):
+        fields = info.context['configured_fields']
+        validation.utils.handle_deprecations('instances', deprecations.instance(), fields, info.context)
         return values
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
     def _initial_validation(cls, values):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-    @validator('*', pre=True, always=True)
-    def _ensure_defaults(cls, v, field):
-        if v is not None or field.required:
-            return v
+    @field_validator('*', mode='before')
+    def _validate(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name in info.context['configured_fields']:
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{field.name}')(field, v)
+        return validation.utils.make_immutable(value)
 
-    @validator('*')
-    def _run_validations(cls, v, field):
-        if not v:
-            return v
-
-        return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
-
-    @root_validator(pre=False)
-    def _final_validation(cls, values):
-        return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+    @model_validator(mode='after')
+    def _final_validation(cls, model):
+        return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))

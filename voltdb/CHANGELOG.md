@@ -1,5 +1,7 @@
 # CHANGELOG - VoltDB
 
+## Unreleased
+
 ## 2.1.3 / 2023-07-10
 
 ***Fixed***:

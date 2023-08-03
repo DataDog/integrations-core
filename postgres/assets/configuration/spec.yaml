@@ -88,7 +88,7 @@ files:
         Note: `true` is an alias for `require`, and `false` is an alias for `disable`.
       value:
         type: string
-        display_default: false
+        display_default: "false"
         example: "false"
     - name: ssl_root_cert
       description: |
@@ -97,7 +97,7 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        display_default: false
+        display_default: "false"
         example: "/home/datadog/server-ca.pem"
     - name: ssl_cert
       description: |
@@ -106,7 +106,7 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        display_default: false
+        display_default: "false"
         example: "/home/datadog/client-cert.pem"
     - name: ssl_key
       description: |
@@ -115,7 +115,7 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        display_default: false
+        display_default: "false"
         example: "/home/datadog/client-key.pem"
     - name: ssl_password
       description: |
@@ -125,7 +125,7 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        display_default: false
+        display_default: "false"
         example: "ssl_key_password"
     - name: query_timeout
       description: |

@@ -57,3 +57,82 @@ REFERENCE_METRIC = "cpu.usage.avg"
 
 DEFAULT_VSPHERE_TAG_PREFIX = ""
 DEFAULT_VSPHERE_ATTR_PREFIX = ""
+
+PROPERTY_COUNT_METRICS = [
+    "guest.net",
+    "guest.ipStack.ipRoute",
+    "guest.net.ipConfig.address",
+    "guest.toolsRunningStatus",
+    "guest.toolsVersionStatus2",
+    "guest.toolsVersion",
+    "guest.guestFullName",
+    "hardware.cpuPowerManagementInfo.currentPolicy",
+    "summary.runtime.connectionState",
+    "summary.runtime.powerState",
+    "summary.runtime.inMaintenanceMode",
+    "configuration.drsConfig.enabled",
+    "configuration.drsConfig.defaultVmBehavior",
+    "configuration.dasConfig.enabled",
+]
+VM_OBJECT_PROPERTIES = ["guest.disk", "guest.net", "guest.ipStack"]
+
+VM_SIMPLE_PROPERTIES = [
+    "guest.toolsRunningStatus",
+    "guest.toolsVersionStatus2",
+    "guest.toolsVersion",
+    "config.hardware.numCoresPerSocket",
+    "config.cpuAllocation.limit",
+    "config.cpuAllocation.overheadLimit",
+    "config.memoryAllocation.limit",
+    "config.memoryAllocation.overheadLimit",
+    "summary.config.numCpu",
+    "summary.config.memorySizeMB",
+    "summary.config.numEthernetCards",
+    "summary.config.numVirtualDisks",
+    "summary.quickStats.uptimeSeconds",
+    "guest.guestFullName",
+]
+
+HOST_SIMPLE_PROPERTIES = [
+    "hardware.cpuPowerManagementInfo.currentPolicy",
+    "summary.runtime.connectionState",
+    "summary.runtime.powerState",
+    "summary.runtime.inMaintenanceMode",
+]
+
+CLUSTER_SIMPLE_PROPERTIES = [
+    "configuration.drsConfig.enabled",
+    "configuration.drsConfig.defaultVmBehavior",
+    "configuration.drsConfig.vmotionRate",
+    "configuration.dasConfig.enabled",
+]
+
+
+DATASTORE_SIMPLE_PROPERTIES = [
+    "summary.capacity",
+    "summary.freeSpace",
+]
+
+DATASTORE_PROPERTIES = DATASTORE_SIMPLE_PROPERTIES
+
+CLUSTER_PROPERTIES = CLUSTER_SIMPLE_PROPERTIES
+
+HOST_PROPERTIES = HOST_SIMPLE_PROPERTIES
+
+VM_PROPERTIES = VM_OBJECT_PROPERTIES + VM_SIMPLE_PROPERTIES
+
+ALL_PROPERTIES = VM_PROPERTIES + HOST_PROPERTIES + CLUSTER_PROPERTIES + DATASTORE_PROPERTIES
+
+SIMPLE_PROPERTIES_BY_RESOURCE_TYPE = {
+    'vm': VM_SIMPLE_PROPERTIES,
+    'host': HOST_SIMPLE_PROPERTIES,
+    'cluster': CLUSTER_SIMPLE_PROPERTIES,
+    'datastore': DATASTORE_SIMPLE_PROPERTIES,
+}
+
+PROPERTIES_BY_RESOURCE_TYPE = {
+    'vm': VM_PROPERTIES,
+    'host': HOST_PROPERTIES,
+    'cluster': CLUSTER_PROPERTIES,
+    'datastore': DATASTORE_PROPERTIES,
+}
