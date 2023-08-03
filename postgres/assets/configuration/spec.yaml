@@ -518,6 +518,7 @@ files:
         Enable collection of database schemas. In order to collect schemas from all user databases, 
         enable `database_autodiscovery`. To collect from a single database, set `dbname` to collect 
         the schema for that database.
+        Relation metrics must be enabled for schema collection.
       options:
         - name: enabled
           description: |
