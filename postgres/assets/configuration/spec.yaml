@@ -533,6 +533,13 @@ files:
             type: number
             example: 1000
             display_default: 1000
+        - name: max_columns
+          description: |
+            Maximum amount of columns the agent will collect per table.
+          value:
+            type: number
+            example: 50
+            display_default: 50
         - name: collection_interval
           description: |
             The database schema collection interval (in seconds).
