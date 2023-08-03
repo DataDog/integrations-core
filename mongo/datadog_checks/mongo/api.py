@@ -94,6 +94,7 @@ class MongoApi(object):
             if 'configDB' in options['sharding']:
                 self._log.debug("Detected MongosDeployment. Node is principal.")
                 self.deployment_type = MongosDeployment()
+                return
             elif 'clusterRole' in options['sharding']:
                 cluster_role = options['sharding']['clusterRole']
 
@@ -105,6 +106,7 @@ class MongoApi(object):
             is_principal_log = "" if is_principal else "not "
             self._log.debug("Detected ReplicaSetDeployment. Node is %sprincipal.", is_principal_log)
             self.deployment_type = replica_set_deployment
+            return
 
         self._log.debug("Detected StandaloneDeployment. Node is principal.")
         self.deployment_type = StandaloneDeployment()
