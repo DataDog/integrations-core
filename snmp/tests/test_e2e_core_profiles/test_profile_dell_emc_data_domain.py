@@ -238,9 +238,7 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
         ['datadomain_disk_perf_index:31', 'datadomain_disk_perf_state:available'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric(
-            'snmp.datadomain.diskBusy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.datadomain.diskBusy', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
             'snmp.datadomain.diskSectorsRead', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
