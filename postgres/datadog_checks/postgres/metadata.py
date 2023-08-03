@@ -352,7 +352,7 @@ class PostgresMetadata(DBMAsyncJob):
             "partition_key": str (if has partitions)
             "num_partitions": int (if has partitions)
         """
-        max_tables = self._config.schemas_metadata_config.get('max_tables', 1000)
+        self._config.schemas_metadata_config.get('max_tables', 1000)
         tables_info = self._get_table_info(cursor, dbname, schemaname, 1000)
         table_payloads = []
         for table in tables_info:
@@ -417,9 +417,8 @@ class PostgresMetadata(DBMAsyncJob):
                 schema_info = self._query_schema_information(cursor, dbname)
                 for schema in schema_info:
                     tables_info = self._query_table_information_for_schema(cursor, schema['name'], dbname)
-                    metadata['schemas'].append(
-                        {"name": schema['name'], "owner": schema['owner'], "tables": tables_info}
-                    )
+                    schema.update({"tables": tables_info})
+                    metadata['schemas'].append(schema)
 
         return metadata
 
