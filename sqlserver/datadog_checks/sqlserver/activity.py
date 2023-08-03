@@ -200,9 +200,6 @@ class SqlserverActivity(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_activity(self, cursor, exec_request_columns):
         self.log.debug("collecting sql server activity")
-        # Only run the full version of activity query to fetch
-        # both non-sleeping and idle blocking sessions
-        # when (at least 1) idle blocking sessions found
         query = ACTIVITY_QUERY.format(
             exec_request_columns=', '.join(['req.{}'.format(r) for r in exec_request_columns]),
             proc_char_limit=PROC_CHAR_LIMIT,
