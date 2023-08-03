@@ -74,6 +74,8 @@ class ProbesPrometheusScraperMixin(object):
                 metric_name_suffix = '.liveness_probe'
             elif probe_type == 'Readiness':
                 metric_name_suffix = '.readiness_probe'
+            elif probe_type == 'Startup':
+                metric_name_suffix = '.startup_probe'
             else:
                 self.log.debug("Unsupported probe type %s", probe_type)
                 continue

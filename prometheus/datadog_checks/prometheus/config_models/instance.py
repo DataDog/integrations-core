@@ -9,7 +9,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence, Union
+from types import MappingProxyType
+from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
@@ -21,14 +22,16 @@ from . import defaults, validators
 
 class TargetMetric(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     label_to_match: Optional[str] = None
-    labels_to_get: Optional[Sequence[str]] = None
+    labels_to_get: Optional[tuple[str, ...]] = None
 
 
 class LabelJoins(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     target_metric: Optional[TargetMetric] = None
@@ -37,15 +40,16 @@ class LabelJoins(BaseModel):
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    exclude_labels: Optional[Sequence[str]] = None
+    exclude_labels: Optional[tuple[str, ...]] = None
     health_service_check: Optional[bool] = None
     label_joins: Optional[LabelJoins] = None
     label_to_hostname: Optional[str] = None
-    labels_mapper: Optional[Mapping[str, Any]] = None
+    labels_mapper: Optional[MappingProxyType[str, Any]] = None
     max_returned_metrics: Optional[int] = None
-    metrics: Sequence[Union[Mapping[str, str], str]]
+    metrics: tuple[Union[MappingProxyType[str, str], str], ...]
     namespace: str
     prometheus_metrics_prefix: Optional[str] = None
     prometheus_timeout: Optional[int] = None
@@ -55,32 +59,21 @@ class InstanceConfig(BaseModel):
     ssl_ca_cert: Optional[str] = None
     ssl_cert: Optional[str] = None
     ssl_private_key: Optional[str] = None
-    type_overrides: Optional[Mapping[str, Any]] = None
+    type_overrides: Optional[MappingProxyType[str, Any]] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
     @field_validator('*', mode='before')
-    def _ensure_defaults(cls, value, info):
+    def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
-            return value
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{info.field_name}', lambda: value)()
-
-    @field_validator('*')
-    def _run_validations(cls, value, info):
-        field = cls.model_fields[info.field_name]
-        field_name = field.alias or info.field_name
-        if field_name not in info.context['configured_fields']:
-            return value
-
-        return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-
-    @field_validator('*', mode='after')
-    def _make_immutable(cls, value):
         return validation.utils.make_immutable(value)
 
     @model_validator(mode='after')

@@ -274,7 +274,7 @@ class ESCheck(AgentCheck):
         try:
             template_resp = self._get_data(self._join_url('/_cat/templates?format=json', admin_forwarder))
         except requests.exceptions.RequestException as e:
-            self.log.error("Error reading templates info from servers (%s) - template metrics will be missing", e)
+            self.log.debug("Error reading templates info from servers (%s) - template metrics will be missing", e)
             return
 
         filtered_templates = [t for t in template_resp if not t['name'].startswith(TEMPLATE_EXCLUSION_LIST)]

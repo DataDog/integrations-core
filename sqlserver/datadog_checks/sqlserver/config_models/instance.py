@@ -9,7 +9,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from types import MappingProxyType
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
@@ -21,6 +22,7 @@ from . import defaults, validators
 
 class Aws(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     instance_endpoint: Optional[str] = None
@@ -28,6 +30,7 @@ class Aws(BaseModel):
 
 class Azure(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     deployment_type: Optional[str] = None
@@ -36,15 +39,17 @@ class Azure(BaseModel):
 
 class CustomQuery(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    columns: Optional[Sequence[Mapping[str, Any]]] = None
+    columns: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     query: Optional[str] = None
-    tags: Optional[Sequence[str]] = None
+    tags: Optional[tuple[str, ...]] = None
 
 
 class Gcp(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     instance_id: Optional[str] = None
@@ -53,14 +58,16 @@ class Gcp(BaseModel):
 
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    exclude: Optional[Sequence[str]] = None
-    include: Optional[Sequence[str]] = None
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class ObfuscatorOptions(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     collect_commands: Optional[bool] = None
@@ -73,6 +80,7 @@ class ObfuscatorOptions(BaseModel):
 
 class QueryActivity(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     collection_interval: Optional[float] = None
@@ -81,6 +89,7 @@ class QueryActivity(BaseModel):
 
 class QueryMetrics(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     collection_interval: Optional[float] = None
@@ -95,24 +104,25 @@ class QueryMetrics(BaseModel):
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     adoprovider: Optional[str] = None
     ao_database: Optional[str] = None
     autodiscovery_db_service_check: Optional[bool] = None
-    autodiscovery_exclude: Optional[Sequence[str]] = None
-    autodiscovery_include: Optional[Sequence[str]] = None
+    autodiscovery_exclude: Optional[tuple[str, ...]] = None
+    autodiscovery_include: Optional[tuple[str, ...]] = None
     availability_group: Optional[str] = None
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
     command_timeout: Optional[int] = None
     connection_string: Optional[str] = None
     connector: Optional[str] = None
-    custom_queries: Optional[Sequence[CustomQuery]] = None
+    custom_queries: Optional[tuple[CustomQuery, ...]] = None
     database: Optional[str] = None
     database_autodiscovery: Optional[bool] = None
     database_autodiscovery_interval: Optional[int] = None
-    db_fragmentation_object_names: Optional[Sequence[str]] = None
+    db_fragmentation_object_names: Optional[tuple[str, ...]] = None
     dbm: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     driver: Optional[str] = None
@@ -143,7 +153,7 @@ class InstanceConfig(BaseModel):
     server_version: Optional[str] = None
     service: Optional[str] = None
     stored_procedure: Optional[str] = None
-    tags: Optional[Sequence[str]] = None
+    tags: Optional[tuple[str, ...]] = None
     use_global_custom_queries: Optional[str] = None
     username: Optional[str] = None
 
@@ -152,25 +162,14 @@ class InstanceConfig(BaseModel):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
     @field_validator('*', mode='before')
-    def _ensure_defaults(cls, value, info):
+    def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
-            return value
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{info.field_name}', lambda: value)()
-
-    @field_validator('*')
-    def _run_validations(cls, value, info):
-        field = cls.model_fields[info.field_name]
-        field_name = field.alias or info.field_name
-        if field_name not in info.context['configured_fields']:
-            return value
-
-        return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-
-    @field_validator('*', mode='after')
-    def _make_immutable(cls, value):
         return validation.utils.make_immutable(value)
 
     @model_validator(mode='after')

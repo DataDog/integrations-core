@@ -109,23 +109,23 @@ def instance_query_timeout():
 
 
 def instance_ssl():
-    return False
+    return 'false'
 
 
 def instance_ssl_cert():
-    return False
+    return 'false'
 
 
 def instance_ssl_key():
-    return False
+    return 'false'
 
 
 def instance_ssl_password():
-    return False
+    return 'false'
 
 
 def instance_ssl_root_cert():
-    return False
+    return 'false'
 
 
 def instance_table_count_limit():
