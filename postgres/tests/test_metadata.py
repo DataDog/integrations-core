@@ -2,13 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from concurrent.futures.thread import ThreadPoolExecutor
-
+from typing import List
 import pytest
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
-from .utils import run_one_check
 from .common import POSTGRES_VERSION
+from .utils import run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -43,28 +43,7 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     assert len(event["metadata"]) > 0
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_collect_schemas(integration_check, dbm_instance, aggregator):
-    dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 0.5}
-    dbm_instance['relations'] = [{'relation_regex': ".*"}]
-    dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
-    del dbm_instance['dbname']
-    check = integration_check(dbm_instance)
-    run_one_check(check, dbm_instance)
-    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-    schema_event = None
-    for event in dbm_metadata:
-        if event['kind'] == "pg_databases":
-            schema_event = event
-    assert schema_event is not None
-    assert schema_event['host'] == "stubbed.hostname"
-    assert schema_event['dbms'] == "postgres"
-    assert schema_event['kind'] == "pg_databases"
-    assert len(event["metadata"]) > 0
-
-
-def test_get_table_info_relations_enabled(integration_check, dbm_instance, aggregator):
     dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 0.5}
     dbm_instance['relations'] = [{'relation_regex': ".*"}]
     dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
@@ -91,7 +70,7 @@ def test_get_table_info_relations_enabled(integration_check, dbm_instance, aggre
     # check that all expected tables are present
     tables_set = {'persons', "personsdup1", "personsdup2", "pgtable", "pg_newtable", "cities"}
     # if version isn't 9 or 10, check that partition master is in tables
-    if not (POSTGRES_VERSION.split('.')[0] == 9) and  not (POSTGRES_VERSION.split('.')[0] == 10):
+    if not (POSTGRES_VERSION.split('.')[0] == 9) and not (POSTGRES_VERSION.split('.')[0] == 10):
         tables_set.update({'test_part'})
     tables_not_reported_set = {'test_part1', 'test_part2'}
 
@@ -99,14 +78,26 @@ def test_get_table_info_relations_enabled(integration_check, dbm_instance, aggre
     for table in schema_metadata_public['tables']:
         tables_got.append(table['name'])
 
+        # make some assertions on fields
+        if table['name'] == "persons":
+            # check that foreign keys, indexes get reported
+            keys = list(table.keys())
+            assert_fields(keys, ["foreign_keys", "columns", "toast_table", "id","name"])
+            assert_fields(list(table['foreign_keys'][0].keys()), ['name', 'definition'])
+            assert_fields(list(table['columns'][0].keys()), ['name', 'nullable', 'data_type', 'default',])
+        if table['name'] == "cities":
+            keys = list(table.keys())
+            assert_fields(keys, ["indexes", "columns", "toast_table", "id", "name"])
+            assert_fields(list(table['indexes'][0].keys()), ['name', 'definition'])
 
-    for table in tables_got:
-        assert table in tables_set
-        assert table not in tables_not_reported_set
-
-    assert None is not None
+    assert_fields(tables_got, tables_set)
+    assert_not_fields(tables_got, tables_not_reported_set)
 
 
-    
-        
+def assert_fields(keys: List[str], fields: List[str]):
+    for field in fields:
+        assert field in keys
 
+def assert_not_fields(keys: List[str], fields: List[str]):
+    for field in fields:
+        assert field not in keys

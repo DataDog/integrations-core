@@ -33,20 +33,6 @@ SELECT db.oid as id, datname as name, pg_encoding_to_char(encoding) as encoding,
     WHERE datname LIKE '{dbname}';
 """
 
-
-PG_STAT_TABLES_QUERY = """
-SELECT st.relname as name,seq_scan,idx_scan,c.relhasindex as hasindexes,c.relowner::regrole as owner,
-(CASE WHEN c.relkind = 'p' THEN true ELSE false END) AS has_partitions,
-(CASE WHEN pg_relation_size(c.reltoastrelid) > 500000 THEN t.relname ELSE null END) AS toast_table
-FROM pg_class c
-LEFT JOIN pg_stat_all_tables st ON c.relname = st.relname
-LEFT JOIN pg_class t on c.reltoastrelid = t.oid
-WHERE schemaname = '{schemaname}'
-AND c.relkind IN ('r', 'p')
-AND c.relispartition != 't'
-ORDER BY coalesce(seq_scan, 0) + coalesce(idx_scan, 0) DESC;
-"""
-
 PG_TABLES_QUERY = """
 SELECT c.oid as id,
         c.relname             AS name,
@@ -56,13 +42,13 @@ SELECT c.oid as id,
            WHEN c.relkind = 'p' THEN TRUE
            ELSE FALSE
          END )               AS has_partitions,
-	  t.relname AS toast_table
+t.relname AS toast_table
 FROM pg_class c
        LEFT JOIN pg_class t
               ON c.reltoastrelid = t.oid
 WHERE  c.relkind IN ( 'r', 'p' )
        AND c.relispartition != 't'
-       AND c.relnamespace= '{schemaname}'::regnamespace; 
+       AND c.relnamespace= '{schemaname}'::regnamespace;
 """
 
 SCHEMA_QUERY = """
@@ -252,10 +238,9 @@ class PostgresMetadata(DBMAsyncJob):
         metadata = []
         for database in databases:
             metadata.append(self._collect_metadata_for_database(database))
-        
+
         self._time_since_last_schemas_query = time.time()
         return metadata
-        
 
     def _query_database_information(
         self, cursor: psycopg2.extensions.cursor, dbname: str
@@ -284,9 +269,7 @@ class PostgresMetadata(DBMAsyncJob):
         rows = cursor.fetchall()
         schemas = []
         for row in rows:
-            schemas.append({"id": str(row['id']),
-                "name": row['name'],
-                "owner": row['owner']})
+            schemas.append({"id": str(row['id']), "name": row['name'], "owner": row['owner']})
         return schemas
 
     def _get_table_info(self, cursor, dbname, schemaname, limit):
@@ -305,9 +288,7 @@ class PostgresMetadata(DBMAsyncJob):
         else:
             # Config error should catch the case where schema collection is enabled
             # and relation metrics aren't, but adding a warning here just in case
-            self._check.log.warning(
-                "Relation metrics are not configured for {}, so tables cannot be collected".format(dbname)
-            )
+            self._check.log.warning("Relation metrics are not configured for {dbname}, so tables cannot be collected")
 
     def _sort_and_limit_table_info(
         self, cursor, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int
