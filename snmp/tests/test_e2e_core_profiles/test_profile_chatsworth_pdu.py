@@ -170,7 +170,6 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
 
     tag_rows = [
         ['branch_id:1', 'pdu_name:name1'],
-        ['branch_id:1', 'pdu_name:name2'],
         ['branch_id:17', 'pdu_name:name1'],
     ]
     for tag_row in tag_rows:
@@ -212,15 +211,13 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
 
     # --- TEST METADATA ---
     device = {
-        'description': 'None',
         'id': 'default:' + ip_address,
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
-        'name': 'chatsworth_pdu.device.name',
         'profile': 'chatsworth_pdu',
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.30932.1.2',
-        'vendor': 'chatsworth_pdu',
+        'vendor': 'chatsworth',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

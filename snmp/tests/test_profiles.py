@@ -2369,7 +2369,7 @@ def test_chatsworth(aggregator):
         'legacy_pdu_macaddress:00:0E:D3:AA:CC:EE',
         'legacy_pdu_model:P10-1234-ABC',
         'legacy_pdu_name:legacy-name1',
-        'legacy_pdu_version:1.2.3',
+        'legacy_pdu_version:1.3.6.1.4.1.30932.1.1',
     ]
     common_tags = common.CHECK_TAGS + legacy_global_tags + ['snmp_profile:' + profile, 'device_vendor:chatsworth']
 

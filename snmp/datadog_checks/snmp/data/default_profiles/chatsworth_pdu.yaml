@@ -5,7 +5,7 @@ metadata:
   device:
     fields:
       vendor:
-        value: "chartsworth"
+        value: "chatsworth"
 
 device:
   vendor: "chatsworth"
