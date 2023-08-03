@@ -1,13 +1,10 @@
 extends:
-  - _base.yaml
+  - _dell.yaml
   - _generic-if.yaml
-#  - dell.yaml  # TODO: check hierarchy first
 
 metadata:
   device:
     fields:
-      vendor:
-        value: "dell"  # TODO: move to _dell.yaml
       version:
         symbol:
           MIB: Dell-Vendor-MIB

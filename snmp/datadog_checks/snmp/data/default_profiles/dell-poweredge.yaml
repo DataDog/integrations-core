@@ -8,7 +8,7 @@
 # PowerEdge servers should be monitored via their iDRAC interface (and with the idrac profile) when possible.
 
 extends:
-  - _base.yaml
+  - _dell.yaml
   - _intel-lan-adapters.yaml
   - _generic-tcp.yaml
   - _generic-udp.yaml

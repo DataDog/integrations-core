@@ -1,15 +1,8 @@
 extends:
-  - _base.yaml
+  - _dell.yaml
   - _generic-host-resources-base.yaml
   - _generic-ucd.yaml
-#  - dell.yaml  # TODO: check hierarchy
 #  - if32-mib.yaml  # TODO: later (NDM-1933)
-
-metadata:
-  device:
-    fields:
-      vendor:
-        value: "dell"  # Move to _dell.yaml
 
 sysobjectid:
   - 1.3.6.1.4.1.674.11000.5000.100.2.*      # OS10 family
