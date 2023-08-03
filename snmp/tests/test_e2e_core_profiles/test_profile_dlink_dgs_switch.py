@@ -37,15 +37,15 @@ def test_e2e_profile_dlink_dgs_switch(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
 
     tag_rows = [
-        ['dlink_entity_ext_cpu_util_cpu_id:15222', 'dlink_entity_ext_cpu_util_unit_id:44757'],
-        ['dlink_entity_ext_cpu_util_cpu_id:19563', 'dlink_entity_ext_cpu_util_unit_id:14054'],
+        ['cpu:15222', 'dlink_entity_ext_cpu_util_cpu_id:15222', 'dlink_entity_ext_cpu_util_unit_id:44757'],
+        ['cpu:19563', 'dlink_entity_ext_cpu_util_cpu_id:19563', 'dlink_entity_ext_cpu_util_unit_id:14054'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['d_entity_ext_mem_util_type:dram', 'd_entity_ext_mem_util_unit_id:16'],
-        ['d_entity_ext_mem_util_type:dram', 'd_entity_ext_mem_util_unit_id:20'],
+        ['d_entity_ext_mem_util_type:dram', 'mem:16'],
+        ['d_entity_ext_mem_util_type:dram', 'mem:20'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)

@@ -21,7 +21,11 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.171.14.5.1.7.1.2
           name: dEntityExtCpuUtilCpuID
-        tag: dlink_entity_ext_cpu_util_cpu_id
+        tag: cpu
+      - column:
+          OID: 1.3.6.1.4.1.171.14.5.1.7.1.2
+          name: dEntityExtCpuUtilCpuID
+        tag: dlink_entity_ext_cpu_util_cpu_id # duplicated for readability
   - MIB: DLINKSW-ENTITY-EXT-MIB
     table:
       name: dEntityExtMemoryUtilTable
@@ -35,7 +39,7 @@ metrics:
       - column:
           name: dEntityExtMemUtilUnitId
           OID: 1.3.6.1.4.1.171.14.5.1.4.1.1
-        tag: d_entity_ext_mem_util_unit_id
+        tag: mem
       - column:
           name: dEntityExtMemUtilType
           OID: 1.3.6.1.4.1.171.14.5.1.4.1.2
