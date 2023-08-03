@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from pymongo import MongoClient, ReadPreference
-from pymongo.errors import ConnectionFailure
+from pymongo.errors import ConnectionFailure, OperationFailure
 
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, StandaloneDeployment
 
@@ -11,6 +11,8 @@ from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, 
 # the server log upon establishing each connection. It is also recorded in the slow query log and profile collections.
 DD_APP_NAME = 'datadog-agent'
 
+# TODO: what other exceptions should we catch?
+FAILURE = (ConnectionFailure, OperationFailure)
 
 class MongoApi(object):
     """Mongodb connection through pymongo.MongoClient
