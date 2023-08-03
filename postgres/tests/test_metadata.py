@@ -8,6 +8,7 @@ import pytest
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
 from .utils import run_one_check
+from .common import POSTGRES_VERSION
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -77,21 +78,35 @@ def test_get_table_info_relations_enabled(integration_check, dbm_instance, aggre
             schema_event = event
 
     # there should only be one database, datadog_test
-    database_metadata = schema_event['metadata'][0]
-    assert 'datadog_test' == database_metadata['name']
-    schema_metadata = database_metadata['schemas'][0]
-    assert 'public' == schema_metadata['name']
+    database_metadata = schema_event['metadata']
+    assert len(database_metadata) == 1
+    assert 'datadog_test' == database_metadata[0]['name']
+
+    # there should only two schemas, 'public' and 'datadog'. datadog is empty
+    schema_metadata_public = database_metadata[0]['schemas'][0]
+    schema_metadata_datadog = database_metadata[0]['schemas'][1]
+    assert 'public' == schema_metadata_public['name']
+    assert 'datadog' == schema_metadata_datadog['name']
 
     # check that all expected tables are present
-    tables_set = {'persons', "personsdup1", "personsdup2", "pgtable", "pg_newtable"}
-    tables_not_reported_set = {'test_part1', 'test_part2'}
-    for table in schema_metadata['tables']:
-        assert tables_set.remove(table['name']) is None
-        assert table['name'] not in tables_not_reported_set
-    
-    assert tables_set == set()
-
-    # TODO if version isn't 9 or 10, check that partition master is in table
+    tables_set = {'persons', "personsdup1", "personsdup2", "pgtable", "pg_newtable", "cities"}
+    # if version isn't 9 or 10, check that partition master is in tables
     if not (POSTGRES_VERSION.split('.')[0] == 9) and  not (POSTGRES_VERSION.split('.')[0] == 10):
-        assert "test_part" in schema_metadata['tables']
+        tables_set.update({'test_part'})
+    tables_not_reported_set = {'test_part1', 'test_part2'}
+
+    tables_got = []
+    for table in schema_metadata_public['tables']:
+        tables_got.append(table['name'])
+
+
+    for table in tables_got:
+        assert table in tables_set
+        assert table not in tables_not_reported_set
+
+    assert None is not None
+
+
+    
+        
 
