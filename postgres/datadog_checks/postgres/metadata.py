@@ -27,89 +27,106 @@ SELECT name, setting FROM pg_settings
 """
 
 DATABASE_INFORMATION_QUERY = """
-SELECT db.oid as id, datname as name, pg_encoding_to_char(encoding) as encoding, rolname as owner, description
-    FROM pg_catalog.pg_database db
-    LEFT JOIN pg_catalog.pg_description dc ON dc.objoid = db.oid
-    JOIN pg_roles a on datdba = a.oid
-    WHERE datname LIKE '{dbname}';
+SELECT db.oid                        AS id,
+       datname                       AS NAME,
+       pg_encoding_to_char(encoding) AS encoding,
+       rolname                       AS owner,
+       description
+FROM   pg_catalog.pg_database db
+       LEFT JOIN pg_catalog.pg_description dc
+              ON dc.objoid = db.oid
+       JOIN pg_roles a
+         ON datdba = a.oid
+WHERE  datname LIKE '{dbname}';
 """
 
 PG_TABLES_QUERY = """
-SELECT c.oid as id,
-        c.relname             AS name,
+SELECT c.oid                 AS id,
+       c.relname             AS name,
        c.relhasindex         AS hasindexes,
        c.relowner :: regrole AS owner,
        ( CASE
            WHEN c.relkind = 'p' THEN TRUE
            ELSE FALSE
          END )               AS has_partitions,
-t.relname AS toast_table
-FROM pg_class c
-       LEFT JOIN pg_class t
+       t.relname             AS toast_table
+FROM   pg_class c
+       left join pg_class t
               ON c.reltoastrelid = t.oid
 WHERE  c.relkind IN ( 'r', 'p' )
        AND c.relispartition != 't'
-       AND c.relnamespace= '{schemaname}'::regnamespace;
+       AND c.relnamespace = '{schemaname}' :: regnamespace;
 """
 
 SCHEMA_QUERY = """
-SELECT oid as id, nspname as name, nspowner::regrole as owner FROM
-pg_namespace
-WHERE nspname not in ('information_schema', 'pg_catalog')
-    AND nspname NOT LIKE 'pg_toast%' and nspname NOT LIKE 'pg_temp_%';
+SELECT oid                 AS id,
+       nspname             AS name,
+       nspowner :: regrole AS owner
+FROM   pg_namespace
+WHERE  nspname NOT IN ( 'information_schema', 'pg_catalog' )
+       AND nspname NOT LIKE 'pg_toast%'
+       AND nspname NOT LIKE 'pg_temp_%';
 """
 
 PG_INDEXES_QUERY = """
-SELECT indexname as name, indexdef as definition
-FROM pg_indexes
-WHERE tablename LIKE '{tablename}';
+SELECT indexname AS NAME,
+       indexdef  AS definition
+FROM   pg_indexes
+WHERE  tablename LIKE '{tablename}';
 """
 
 PG_CHECK_FOR_FOREIGN_KEY = """
 SELECT count(conname)
 FROM   pg_constraint
 WHERE  contype = 'f'
-    AND conrelid = '{tablename}' :: regclass;
+       AND conrelid = '{tablename}' :: regclass;
 """
 
 PG_CONSTRAINTS_QUERY = """
-SELECT conname AS name, pg_get_constraintdef(oid) as definition
+SELECT conname                   AS name,
+       pg_get_constraintdef(oid) AS definition
 FROM   pg_constraint
 WHERE  contype = 'f'
-AND conrelid =
-'{tablename}'::regclass;
+       AND conrelid = '{tablename}' :: regclass;
 """
 
 COLUMNS_QUERY = """
-SELECT attname as name,
-format_type(atttypid, atttypmod) AS data_type,
-NOT attnotnull as nullable, pg_get_expr(adbin, adrelid) as default
-FROM   pg_attribute LEFT JOIN pg_attrdef ad ON adrelid=attrelid AND adnum=attnum
-WHERE  attrelid = '{tablename}'::regclass
-AND    attnum > 0
-AND    NOT attisdropped;
+SELECT attname                          AS name,
+       Format_type(atttypid, atttypmod) AS data_type,
+       NOT attnotnull                   AS nullable,
+       pg_get_expr(adbin, adrelid)      AS default
+FROM   pg_attribute
+       LEFT JOIN pg_attrdef ad
+              ON adrelid = attrelid
+                 AND adnum = attnum
+WHERE  attrelid = '{tablename}' :: regclass
+       AND attnum > 0
+       AND NOT attisdropped;
 """
 
 PARTITION_KEY_QUERY = """
-    SELECT relname, pg_get_partkeydef(oid) as partition_key
-FROM pg_class WHERE '{parent}' = relname;
+SELECT relname,
+       pg_get_partkeydef(oid) AS partition_key
+FROM   pg_class
+WHERE  '{parent}' = relname;
 """
 
 NUM_PARTITIONS_QUERY = """
-SELECT count(inhrelid::regclass) as num_partitions
-        FROM pg_inherits
-        WHERE inhparent = '{parent}'::regclass::oid
+SELECT count(inhrelid :: regclass) AS num_partitions
+FROM   pg_inherits
+WHERE  inhparent = '{parent}' :: regclass :: oid
 """
 
 PARTITION_ACTIVITY_QUERY = """
-SELECT
-   pi.inhparent::regclass AS parent_table_name,
-   SUM(psu.seq_scan + psu.idx_scan) AS total_activity
-FROM pg_catalog.pg_stat_user_tables psu
-   JOIN pg_class pc ON psu.relname = pc.relname
-   JOIN pg_inherits pi ON pi.inhrelid = pc.oid
-WHERE pi.inhparent = '{parent}'::regclass::oid
-GROUP BY pi.inhparent;
+SELECT pi.inhparent :: regclass         AS parent_table_name,
+       SUM(psu.seq_scan + psu.idx_scan) AS total_activity
+FROM   pg_catalog.pg_stat_user_tables psu
+       join pg_class pc
+         ON psu.relname = pc.relname
+       join pg_inherits pi
+         ON pi.inhrelid = pc.oid
+WHERE  pi.inhparent = '{parent}' :: regclass :: oid
+GROUP  BY pi.inhparent;
 """
 
 
