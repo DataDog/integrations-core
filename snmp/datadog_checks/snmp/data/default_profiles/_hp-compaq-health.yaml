@@ -159,6 +159,7 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.232.6.2.6.1.0
       name: cpqHeThermalCondition
+    # NOTE: other(1), notSupported(2), notInstalled(3), installed(4)
   - MIB: CPQHLTH-MIB
     symbol:
       OID: 1.3.6.1.4.1.232.6.2.9.2.0
@@ -181,14 +182,42 @@ metrics:
       OID: 1.3.6.1.4.1.232.6.2.9.3
       name: cpqHeFltTolPowerSupplyTable
     symbols:
-      - OID: 1.3.6.1.4.1.232.6.2.9.3.1.5
-        name: cpqHeFltTolPowerSupplyStatus
+      - name: cpqHeFltTolPowerSupply
+        constant_value_one: true
       - OID: 1.3.6.1.4.1.232.6.2.9.3.1.7
         name: cpqHeFltTolPowerSupplyCapacityUsed
       - OID: 1.3.6.1.4.1.232.6.2.9.3.1.8
         name: cpqHeFltTolPowerSupplyCapacityMaximum
     metric_tags:
       - column:
+          OID: 1.3.6.1.4.1.232.6.2.9.3.1.5
+          name: cpqHeFltTolPowerSupplyStatus
+        mapping:
+          1: noError
+          2: generalFailure
+          3: bistFailure
+          4: fanFailure
+          5: tempFailure
+          6: interlockOpen
+          7: epromFailed
+          8: vrefFailed
+          9: dacFailed
+          10: ramTestFailed
+          11: voltageChannelFailed
+          12: orringdiodeFailed
+          13: brownOut
+          14: giveupOnStartup
+          15: nvramInvalid
+          16: calibrationTableInvalid
+          17: noPowerInput
+        tag: power_supply_status
+      - column:
           OID: 1.3.6.1.4.1.232.6.2.9.3.1.1
           name: cpqHeFltTolPowerSupplyChassis
         tag: chassis_num
+
+  - # NOTE: unknown(1), poweredOff(2), poweredOn(3), insufficientPowerOrPowerOnDenied(4)
+    MIB: CPQSM2-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.232.9.2.2.32
+      name: cpqSm2CntlrServerPowerState
