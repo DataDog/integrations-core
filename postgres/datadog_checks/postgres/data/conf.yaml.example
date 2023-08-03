@@ -423,6 +423,11 @@ instances:
         #
         # max_tables: 1000
 
+        ## @param max_columns - number - optional - default: 50
+        ## Maximum amount of columns the agent will collect per table.
+        #
+        # max_columns: 50
+
         ## @param collection_interval - number - optional - default: 600
         ## The database schema collection interval (in seconds).
         #

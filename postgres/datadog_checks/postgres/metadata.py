@@ -377,9 +377,9 @@ class PostgresMetadata(DBMAsyncJob):
 
             # Get columns
             cursor.execute(COLUMNS_QUERY.format(tablename=name))
-            rows = cursor.fetchall()
-            self._log.warning(rows)
-            columns = [dict(row) for row in rows]
+            rows = cursor.fetchall()[:]
+            max_columns = self._config.schemas_metadata_config.get('max_columns', 50)
+            columns = [dict(row) for row in rows][:max_columns]
             this_payload.update({'columns': columns})
 
             table_payloads.append(this_payload)
