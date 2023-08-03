@@ -44,6 +44,7 @@ from ..types import (
 )
 from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, to_native_string
+from ..utils.diagnose import Diagnosis
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
@@ -387,6 +388,16 @@ class AgentCheck(object):
             self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
+
+    @property
+    def diagnosis(self):
+        # type: () -> Diagnosis
+        """
+        A Diagnosis object to register explicit diagnostics and record diagnoses.
+        """
+        if not hasattr(self, '_diagnosis'):
+            self._diagnosis = Diagnosis(sanitize=self.sanitize)
+        return self._diagnosis
 
     def get_tls_context(self, refresh=False, overrides=None):
         # type: (bool, Dict[AnyStr, Any]) -> ssl.SSLContext
@@ -1011,6 +1022,16 @@ class AgentCheck(object):
         self.warnings = []
         return warnings
 
+    def get_diagnoses(self):
+        # type: () -> str
+        """
+        Return the list of diagnosis as a JSON encoded string.
+
+        The agent calls this method to retrieve diagnostics from integrations. This method
+        runs explicit diagnostics if available.
+        """
+        return json.dumps([d._asdict() for d in (self.diagnosis.diagnoses + self.diagnosis.run_explicit())])
+
     def _get_requests_proxy(self):
         # type: () -> ProxySettings
         # TODO: Remove with Agent 5
@@ -1092,6 +1113,7 @@ class AgentCheck(object):
     def run(self):
         # type: () -> str
         try:
+            self.diagnosis.clear()
             # Ignore check initializations if running in a separate process
             if is_affirmative(self.instance.get('process_isolation', self.init_config.get('process_isolation', False))):
                 from ..utils.replay.execute import run_with_isolation

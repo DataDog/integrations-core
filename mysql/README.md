@@ -237,7 +237,7 @@ Set [Autodiscovery Integration Templates][11] as Docker labels on your applicati
 ```yaml
 LABEL "com.datadoghq.ad.check_names"='["mysql"]'
 LABEL "com.datadoghq.ad.init_configs"='[{}]'
-LABEL "com.datadoghq.ad.instances"='[{"server": "%%host%%", "user": "datadog","password": "<UNIQUEPASSWORD>"}]'
+LABEL "com.datadoghq.ad.instances"='[{"server": "%%host%%", "username": "datadog","password": "<UNIQUEPASSWORD>"}]'
 ```
 
 See [Autodiscovery template variables][12] for details on using `<UNIQUEPASSWORD>` as an environment variable instead of a label.
@@ -278,7 +278,7 @@ metadata:
       [
         {
           "server": "%%host%%", 
-          "user": "datadog",
+          "username": "datadog",
           "password": "<UNIQUEPASSWORD>"
         }
       ]
@@ -303,7 +303,7 @@ metadata:
           "instances": [
             {
               "server": "%%host%%", 
-              "user": "datadog",
+              "username": "datadog",
               "password": "<UNIQUEPASSWORD>"
             }
           ]
@@ -357,7 +357,7 @@ Set [Autodiscovery Integrations Templates][11] as Docker labels on your applicat
     "dockerLabels": {
       "com.datadoghq.ad.check_names": "[\"mysql\"]",
       "com.datadoghq.ad.init_configs": "[{}]",
-      "com.datadoghq.ad.instances": "[{\"server\": \"%%host%%\", \"user\": \"datadog\",\"password\": \"<UNIQUEPASSWORD>\"}]"
+      "com.datadoghq.ad.instances": "[{\"server\": \"%%host%%\", \"username\": \"datadog\",\"password\": \"<UNIQUEPASSWORD>\"}]"
     }
   }]
 }

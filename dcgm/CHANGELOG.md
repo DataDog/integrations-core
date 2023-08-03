@@ -1,4 +1,4 @@
-# CHANGELOG - DCGM
+# CHANGELOG - DCGM Exporter
 
 ## Unreleased
 
@@ -6,4 +6,4 @@
 
 ***Added***:
 
-* Add the DCGM integration. See [#14589](https://github.com/DataDog/integrations-core/pull/14589).
+* Add the DCGM Exporter integration. See [#14589](https://github.com/DataDog/integrations-core/pull/14589).

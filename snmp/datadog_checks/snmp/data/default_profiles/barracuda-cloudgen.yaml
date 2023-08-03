@@ -1,0 +1,206 @@
+extends:
+  - barracuda.yaml
+
+sysobjectid:
+  - 1.3.6.1.4.1.10704.1.*
+
+metrics:
+  - MIB: PHION-MIB
+    table:
+      OID: 1.3.6.1.4.1.10704.1.0
+      name: boxServices
+    symbols:
+      - name: phion.boxServices
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.10704.1.0.1.1
+          name: boxServiceName
+        tag: box_service_name
+      - column:
+          OID: 1.3.6.1.4.1.10704.1.0.1.2
+          name: boxServiceState
+        tag: box_service_state
+        mapping:
+          -1: unknown
+          0: stopped
+          1: started
+          2: blocked
+          4: removed
+  - MIB: PHION-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.10704.1.11.0
+      name: phion.vpnUsers
+  - MIB: PHION-MIB
+    table:
+      OID: 1.3.6.1.4.1.10704.1.12
+      name: trafficShape
+    symbols:
+      - OID: 1.3.6.1.4.1.10704.1.12.1.2
+        name: phion.trafficShapeRate
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.10704.1.12.1.3
+        name: phion.trafficShapeSessions
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.10704.1.12.1.4
+        name: phion.trafficShapeClass1Total
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.10704.1.12.1.5
+        name: phion.trafficShapeClass1Pakets
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.10704.1.12.1.6
+        name: phion.trafficShapeClass1Drop
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.10704.1.12.1.7
+        name: phion.trafficShapeClass2Total
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.10704.1.12.1.8
+        name: phion.trafficShapeClass2Pakets
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.10704.1.12.1.9
+        name: phion.trafficShapeClass2Drop
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.10704.1.12.1.10
+        name: phion.trafficShapeClass3Total
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.10704.1.12.1.11
+        name: phion.trafficShapeClass3Pakets
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.10704.1.12.1.12
+        name: phion.trafficShapeClass3Drop
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.10704.1.12.1.13
+        name: phion.trafficShapeNoDelayTotal
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.10704.1.12.1.14
+        name: phion.trafficShapeNoDelayPakets
+        metric_type: monotonic_count
+      - OID: 1.3.6.1.4.1.10704.1.12.1.15
+        name: phion.trafficShapeNoDelayDrop
+        metric_type: monotonic_count
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.10704.1.12.1.1
+          name: connectorName
+        tag: connector_name
+  - MIB: PHION-MIB
+    table:
+      OID: 1.3.6.1.4.1.10704.1.4
+      name: hwSensors
+    symbols:
+      - OID: 1.3.6.1.4.1.10704.1.4.1.3
+        name: phion.hwSensorValue
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.10704.1.4.1.1
+          name: hwSensorName
+        tag: hw_sensor_name
+      - column:
+          OID: 1.3.6.1.4.1.10704.1.4.1.2
+          name: hwSensorType
+        tag: hw_sensor_type
+        mapping:
+          -1: unknown
+          0: voltage
+          1: fan
+          2: temperature
+          3: psu-status
+  - MIB: PHION-MIB
+    table:
+      OID: 1.3.6.1.4.1.10704.1.6
+      name: vpnTunnels
+    symbols:
+      - name: phion.vpnTunnels
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.10704.1.6.1.1
+          name: vpnName
+        tag: vpn_name
+      - column:
+          OID: 1.3.6.1.4.1.10704.1.6.1.2
+          name: vpnState
+        tag: vpn_state
+        mapping:
+          -1: down
+          0: down-disabled
+          1: active
+  - MIB: PHION-MIB
+    table:
+      OID: 1.3.6.1.4.1.10704.1.7
+      name: bgpNeighbors
+    symbols:
+      - name: phion.bgpNeighbors
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.10704.1.7.1.1
+          name: bgpNeighborAddress
+        tag: bgp_neighbor_address
+      - column:
+          OID: 1.3.6.1.4.1.10704.1.7.1.2
+          name: bgpNeighborState
+        tag: bgp_neighbor_state
+        mapping:
+          1: idle
+          2: connect
+          3: active
+          4: opensent
+          5: openconfirm
+          6: established
+  - MIB: PHION-MIB
+    table:
+      OID: 1.3.6.1.4.1.10704.1.8
+      name: ospfNeighbors
+    symbols:
+      - name: phion.ospfNeighbors
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.10704.1.8.1.1
+          name: ospfNeighborId
+        tag: ospf_neighbor_id
+      - column:
+          OID: 1.3.6.1.4.1.10704.1.8.1.2
+          name: ospfNeighborAddress
+        tag: ospf_neighbor_address
+      - column:
+          OID: 1.3.6.1.4.1.10704.1.8.1.3
+          name: ospfNeighborInterface
+        tag: ospf_neighbor_interface
+      - column:
+          OID: 1.3.6.1.4.1.10704.1.8.1.4
+          name: ospfNeighborStatus
+        tag: ospf_neighbor_status
+  - MIB: PHION-MIB
+    table:
+      OID: 1.3.6.1.4.1.10704.1.9
+      name: ripNeighbors
+    symbols:
+      - name: phion.ripNeighbors
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.10704.1.9.1.1
+          name: ripNeighborAddress
+        tag: rip_neighbor_address
+      - column:
+          OID: 1.3.6.1.4.1.10704.1.9.1.2
+          name: ripNeighborState
+        tag: rip_neighbor_state
+  # - MIB: PHION-MIB # Removed for lack of clarity on how this table is indexed.
+  #   table:
+  #     OID: 1.3.6.1.4.1.10704.1.10
+  #     name: fwStats
+  #   symbols:
+  #     - OID: 1.3.6.1.4.1.10704.1.10.1.1
+  #       name: firewallSessions
+  #     - OID: 1.3.6.1.4.1.10704.1.10.1.2
+  #       name: packetThroughput
+  #     - OID: 1.3.6.1.4.1.10704.1.10.1.3
+  #       name: dataThroughput
+  #   metric_tags:
+  #     - column:
+  #         OID: 1.3.6.1.4.1.10704.1.10.1.1
+  #         name: firewallSessions
+  #       tag: firewall_sessions
