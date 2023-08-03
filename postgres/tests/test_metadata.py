@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import List
+
 import pytest
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
@@ -82,9 +83,17 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
         if table['name'] == "persons":
             # check that foreign keys, indexes get reported
             keys = list(table.keys())
-            assert_fields(keys, ["foreign_keys", "columns", "toast_table", "id","name"])
+            assert_fields(keys, ["foreign_keys", "columns", "toast_table", "id", "name"])
             assert_fields(list(table['foreign_keys'][0].keys()), ['name', 'definition'])
-            assert_fields(list(table['columns'][0].keys()), ['name', 'nullable', 'data_type', 'default',])
+            assert_fields(
+                list(table['columns'][0].keys()),
+                [
+                    'name',
+                    'nullable',
+                    'data_type',
+                    'default',
+                ],
+            )
         if table['name'] == "cities":
             keys = list(table.keys())
             assert_fields(keys, ["indexes", "columns", "toast_table", "id", "name"])
@@ -97,6 +106,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
 def assert_fields(keys: List[str], fields: List[str]):
     for field in fields:
         assert field in keys
+
 
 def assert_not_fields(keys: List[str], fields: List[str]):
     for field in fields:
