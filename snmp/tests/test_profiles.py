@@ -2844,7 +2844,7 @@ def _check_bgp4(aggregator, common_tags):
     """
     Shared testing function for profiles supporting BGP4 metrics.
     """
-    tags = ['neighbor:244.12.239.177', 'admin_status:2', 'peer_state:6'] + common_tags
+    tags = ['neighbor:244.12.239.177', 'remote_as:26', 'admin_status:2', 'peer_state:6'] + common_tags
     for metric in PEER_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
 
