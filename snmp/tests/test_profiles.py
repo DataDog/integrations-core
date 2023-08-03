@@ -2418,8 +2418,12 @@ def test_chatsworth(aggregator):
     aggregator.assert_metric('snmp.cpiPduChainRole', metric_type=aggregator.GAUGE, tags=pdu_tags, count=1)
     aggregator.assert_metric('snmp.cpiPduTotalPower', metric_type=aggregator.GAUGE, tags=pdu_tags, count=1)
 
-    for lock in [1, 2]:
-        lock_tags = common_tags + ['lock_id:{}'.format(lock)]
+    tags_mapping = [
+        ('2', '1'),
+        ('2', '2'),
+    ]
+    for status, lock in tags_mapping:
+        lock_tags = common_tags + ['lock_id:{}'.format(lock), 'eas_status:{}'.format(status)]
         aggregator.assert_metric('snmp.cpiPduEasStatus', metric_type=aggregator.GAUGE, tags=lock_tags, count=1)
         aggregator.assert_metric('snmp.cpiPduDoorStatus', metric_type=aggregator.GAUGE, tags=lock_tags, count=1)
         aggregator.assert_metric('snmp.cpiPduLockStatus', metric_type=aggregator.GAUGE, tags=lock_tags, count=1)

@@ -1,6 +1,12 @@
 extends:
   - _base.yaml
 
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "chartsworth"
+
 device:
   vendor: "chatsworth"
 
@@ -486,6 +492,8 @@ metrics:
         # Indicates if the Electronic Access Control system is ready, inactive, or in an error state: inactive(0), ready(1), error(2)
       - OID: 1.3.6.1.4.1.30932.1.10.1.7.100.1.3
         name: cpiPduEasStatus
+      - name: cpiPduEas
+        constant_value_one: true
       - # Indicates if the door sensor is closed or open: closed(0), open(1)
         OID: 1.3.6.1.4.1.30932.1.10.1.7.100.1.4
         name: cpiPduDoorStatus
@@ -497,6 +505,14 @@ metrics:
         column:
           OID: 1.3.6.1.4.1.30932.1.10.1.7.100.1.2
           name: cpiPduLockId
+      - tag: eas_status
+        column:
+          OID: 1.3.6.1.4.1.30932.1.10.1.7.100.1.3
+          name: cpiPduEasStatus
+        mapping:
+          0: inactive
+          1: ready
+          2: error
 
   ### Sensor
 
