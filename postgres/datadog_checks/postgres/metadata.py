@@ -49,7 +49,8 @@ ORDER BY coalesce(seq_scan, 0) + coalesce(idx_scan, 0) DESC;
 """
 
 PG_TABLES_QUERY = """
-SELECT c.relname             AS name,
+SELECT c.oid as id,
+        c.relname             AS name,
        c.relhasindex         AS hasindexes,
        c.relowner :: regrole AS owner,
        ( CASE
@@ -66,7 +67,7 @@ WHERE  c.relkind IN ( 'r', 'p' )
 """
 
 SCHEMA_QUERY = """
-SELECT nspname as name, nspowner::regrole as owner FROM
+SELECT oid as id, nspname as name, nspowner::regrole as owner FROM
 pg_namespace
 WHERE nspname not in ('information_schema', 'pg_catalog')
     AND nspname NOT LIKE 'pg_toast%' and nspname NOT LIKE 'pg_temp_%';
@@ -263,7 +264,7 @@ class PostgresMetadata(DBMAsyncJob):
         Collect database info. Returns
             description: str
             name: str
-            id: int
+            id: str
             encoding: str
             owner: str
         """
@@ -275,12 +276,17 @@ class PostgresMetadata(DBMAsyncJob):
     def _query_schema_information(self, cursor: psycopg2.extensions.cursor, dbname: str) -> Dict[str, str]:
         """
         Collect user schemas. Returns
+            id: str
             name: str
             owner: str
         """
         cursor.execute(SCHEMA_QUERY)
         rows = cursor.fetchall()
-        schemas = [dict(row) for row in rows]
+        schemas = []
+        for row in rows:
+            schemas.append({"id": str(row['id']),
+                "name": row['name'],
+                "owner": row['owner']})
         return schemas
 
     def _get_table_info(self, cursor, dbname, schemaname, limit):
@@ -298,8 +304,11 @@ class PostgresMetadata(DBMAsyncJob):
             return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
 
         else:
-            raise NotImplementedError()
-            # table_info = cursor.execute(PG_STAT_TABLES_QUERY.format(schemaname=schemaname))
+            # Config error should catch the case where schema collection is enabled
+            # and relation metrics aren't, but adding a warning here just in case
+            self._check.log.warning(
+                "Relation metrics are not configured for {}, so tables cannot be collected".format(dbname)
+            )
 
     def _sort_and_limit_table_info(
         self, cursor, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int
@@ -332,6 +341,7 @@ class PostgresMetadata(DBMAsyncJob):
         """
         Collect table information per schema. Returns a list of dictionaries
         with key/values:
+            "id": str
             "name": str
             "owner": str
             "foreign_keys": dict (if has foreign keys)
@@ -345,7 +355,7 @@ class PostgresMetadata(DBMAsyncJob):
                 data_type: str
                 default: str
                 nullable: bool
-            "toast_table": str (if associated toast table is > 500kb)
+            "toast_table": str (if associated toast table exists)
             "partition_key": str (if has partitions)
             "num_partitions": int (if has partitions)
         """
@@ -355,7 +365,8 @@ class PostgresMetadata(DBMAsyncJob):
         for table in tables_info:
             this_payload = {}
             name = table['name']
-            self._log.warning("Parsing table {}".format(name))
+            self._log.debug("Parsing table {}".format(name))
+            this_payload.update({'id': str(table['id'])})
             this_payload.update({'name': name})
             if table["hasindexes"]:
                 cursor.execute(PG_INDEXES_QUERY.format(tablename=name))
@@ -378,9 +389,10 @@ class PostgresMetadata(DBMAsyncJob):
 
             # Get foreign keys
             cursor.execute(PG_CHECK_FOR_FOREIGN_KEY.format(tablename=table['name']))
-            rows = cursor.fetchall()
-            if len(rows) > 0:
+            row = cursor.fetchone()
+            if row['count'] > 0:
                 cursor.execute(PG_CONSTRAINTS_QUERY.format(tablename=table['name']))
+                rows = cursor.fetchall()
                 self._log.warning("foreign keys {}".format(rows))
                 if rows:
                     fks = [dict(row) for row in rows]
