@@ -23,7 +23,7 @@ auth = ["ssl", "kerberos"]
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "KAFKA_VERSION", value = "2.6.0", if = ["2.6"] },
-  { key = "KAFKA_VERSION", value = "3.3.2", if = ["3.3"] },
+  { key = "KAFKA_VERSION", value = "3.3.2-debian-11-r175", if = ["3.3"] },
 ]
 matrix.auth.env-vars = "AUTHENTICATION"
 
