@@ -269,6 +269,7 @@ class PostgresMetadata(DBMAsyncJob):
             return
 
         metadata = []
+        self._log.debug("Collecting schema metadata...")
         for database in databases:
             metadata.append(self._collect_metadata_for_database(database))
 
