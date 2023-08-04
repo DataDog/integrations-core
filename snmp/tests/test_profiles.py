@@ -1562,7 +1562,6 @@ def test_hp_ilo4(aggregator):
         'cpqHeThermalSystemFanStatus',
         'cpqHeThermalCpuFanStatus',
         'cpqNicVtVirusActivity',
-        'cpqSm2CntlrServerPowerState',
         'cpqSm2CntlrBatteryStatus',
         'cpqSm2CntlrRemoteSessionStatus',
         'cpqSm2CntlrInterfaceStatus',
@@ -1614,6 +1613,8 @@ def test_hp_ilo4(aggregator):
 
     for metric in status_gauges:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+
+    aggregator.assert_metric('snmp.cpqSm2CntlrServerPowerState', metric_type=aggregator.GAUGE, tags=common_tags)
 
     for metric in cpqhlth_counts:
         aggregator.assert_metric(
@@ -1828,9 +1829,16 @@ def test_proliant(aggregator):
         'cpqHeFltTolPowerSupplyCapacityUsed',
         'cpqHeFltTolPowerSupplyCapacityMaximum',
     ]
-    for gauge in power_metrics:
-        tags = ['chassis_num:30'] + common_tags
-        aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    tag_mappings = [
+        ('30', '3'),
+    ]
+    for number, status in tag_mappings:
+        tags = [
+            'power_supply_status:{}'.format(status),
+            'chassis_num:{}'.format(number),
+        ] + common_tags
+        for gauge in power_metrics:
+            aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     controller_index = ['controller_index:3'] + common_tags
     aggregator.assert_metric(
@@ -3023,7 +3031,7 @@ def _check_bgp4(aggregator, common_tags):
     """
     Shared testing function for profiles supporting BGP4 metrics.
     """
-    tags = ['neighbor:244.12.239.177', 'admin_status:2', 'peer_state:6'] + common_tags
+    tags = ['neighbor:244.12.239.177', 'remote_as:26', 'admin_status:2', 'peer_state:6'] + common_tags
     for metric in PEER_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
 
