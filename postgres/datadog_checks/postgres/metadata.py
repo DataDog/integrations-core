@@ -16,6 +16,8 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
 
+from .version_utils import VersionUtils
+
 # default collection intervals in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
 DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
@@ -39,7 +41,7 @@ FROM   pg_catalog.pg_database db
 WHERE  datname LIKE '{dbname}';
 """
 
-PG_TABLES_QUERY = """
+PG_TABLES_QUERY_V10_PLUS = """
 SELECT c.oid                 AS id,
        c.relname             AS name,
        c.relhasindex         AS hasindexes,
@@ -56,6 +58,20 @@ WHERE  c.relkind IN ( 'r', 'p' )
        AND c.relispartition != 't'
        AND c.relnamespace = '{schemaname}' :: regnamespace;
 """
+
+PG_TABLES_QUERY_V9 = """
+SELECT c.oid                 AS id,
+       c.relname             AS name,
+       c.relhasindex         AS hasindexes,
+       c.relowner :: regrole AS owner,
+       t.relname             AS toast_table
+FROM   pg_class c
+       left join pg_class t
+              ON c.reltoastrelid = t.oid
+WHERE  c.relkind IN ( 'r' )
+       AND c.relnamespace = '{schemaname}' :: regnamespace;
+"""
+
 
 SCHEMA_QUERY = """
 SELECT oid                 AS id,
@@ -294,7 +310,11 @@ class PostgresMetadata(DBMAsyncJob):
         If any tables are partitioned, only the master paritition table name will be returned, and none of its children.
         """
         if self._config.relations:
-            cursor.execute(PG_TABLES_QUERY.format(schemaname=schemaname))
+            print("version" + str(self._check._version))
+            if VersionUtils.transform_version(str(self._check._version))['version.major'] == "9":
+                cursor.execute(PG_TABLES_QUERY_V9.format(schemaname=schemaname))
+            else:
+                cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schemaname=schemaname))
             rows = cursor.fetchall()
             table_info = [dict(row) for row in rows]
             return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
@@ -311,6 +331,12 @@ class PostgresMetadata(DBMAsyncJob):
             cache = self._check.metrics_cache.table_activity_metrics
             # partition master tables won't get any metrics reported on them,
             # so we have to grab the total partition activity
+            # note: partitions don't exist in V9, so we have to check this first
+            if VersionUtils.transform_version(str(self._check._version))['version.major'] == "9":
+                return (
+                    cache[dbname][info['name']]['postgresql.index_scans']
+                    + cache[dbname][info['name']]['postgresql.seq_scans']
+                )
             if not info["has_partitions"]:
                 return (
                     cache[dbname][info['name']]['postgresql.index_scans']
@@ -364,14 +390,15 @@ class PostgresMetadata(DBMAsyncJob):
                 idxs = [dict(row) for row in rows]
                 this_payload.update({'indexes': idxs})
 
-            if table['has_partitions']:
-                cursor.execute(PARTITION_KEY_QUERY.format(parent=name))
-                row = cursor.fetchone()
-                this_payload.update({'partition_key': row['partition_key']})
+            if VersionUtils.transform_version(str(self._check._version))['version.major'] != "9":
+                if table['has_partitions']:
+                    cursor.execute(PARTITION_KEY_QUERY.format(parent=name))
+                    row = cursor.fetchone()
+                    this_payload.update({'partition_key': row['partition_key']})
 
-                cursor.execute(NUM_PARTITIONS_QUERY.format(parent=name))
-                row = cursor.fetchone()
-                this_payload.update({'num_partitions': row['num_partitions']})
+                    cursor.execute(NUM_PARTITIONS_QUERY.format(parent=name))
+                    row = cursor.fetchone()
+                    this_payload.update({'num_partitions': row['num_partitions']})
 
             if table['toast_table'] is not None:
                 this_payload.update({'toast_table': table['toast_table']})
