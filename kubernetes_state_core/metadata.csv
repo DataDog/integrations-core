@@ -64,6 +64,7 @@ kubernetes_state.pod.status_phase,gauge,,,,The pods current phase. Tags:`node` `
 kubernetes_state.pod.age,gauge,,,,The time in seconds since the creation of the pod. Tags:`node` `kube_namespace` `pod_name` `pod_phase` (`env` `service` `version` from standard labels).,0,kubernetes_state_core,k8s_state.pod.age,
 kubernetes_state.pod.uptime,gauge,,,,The time in seconds since the pod has been scheduled and acknowledged by the Kubelet. Tags:`node` `kube_namespace` `pod_name` `pod_phase` (`env` `service` `version` from standard labels).,0,kubernetes_state_core,k8s_state.pod.uptime,
 kubernetes_state.pod.count,gauge,,,,Number of Pods. Tags:`node` `kube_namespace` `kube_<owner kind>`.,0,kubernetes_state_core,k8s_state.pod.count,
+kubernetes_state.pod.tolerations,gauge,,,,Information about the pod tolerations,0,kubernetes_state_core,k8s_state.pod.tolerations,
 kubernetes_state.persistentvolumeclaim.status,gauge,,,,The phase the persistent volume claim is currently in. Tags:`kube_namespace` `persistentvolumeclaim` `phase` `storageclass`.,-1,kubernetes_state_core,k8s_state.pvc.status,
 kubernetes_state.persistentvolumeclaim.access_mode,gauge,,,,The access mode(s) specified by the persistent volume claim. Tags:`kube_namespace` `persistentvolumeclaim` `access_mode` `storageclass`.,0,kubernetes_state_core,k8s_state.pvc.access_mode,
 kubernetes_state.persistentvolumeclaim.request_storage,gauge,,,,The capacity of storage requested by the persistent volume claim. Tags:`kube_namespace` `persistentvolumeclaim` `storageclass`.,0,kubernetes_state_core,k8s_state.pvc.request,
