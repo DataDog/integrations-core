@@ -683,6 +683,10 @@ files:
         example: false
         display_default: false
     - template: instances/default
+      overrides:
+        disable_generic_tags.hidden: False
+        disable_generic_tags.enabled: True
+        disable_generic_tags.description: The integration will stop sending server tag as is reduntant with host tag
   - template: logs
     example:
     - type: file
