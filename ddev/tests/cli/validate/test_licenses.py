@@ -86,7 +86,7 @@ def test_error_no_requirements_file(repo, repository, expected_error_output, dde
     [
         pytest.param(
             "core",
-            "Detected InvalidRequirement error in agent_requirements.in:1 Expected end or",
+            "Detected InvalidRequirement error in agent_requirements.in:1 Expected end",
             id="Core integrations",
         ),
     ],
