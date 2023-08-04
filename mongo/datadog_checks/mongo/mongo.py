@@ -4,6 +4,7 @@
 from __future__ import division
 
 from copy import deepcopy
+from functools import cached_property
 
 from packaging.version import Version
 
