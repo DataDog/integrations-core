@@ -13,7 +13,7 @@ DD_APP_NAME = 'datadog-agent'
 
 # We collect here all pymongo exceptions that would result in a CRITICAL service check.
 CRITICAL_FAILURE = (
-    ConfigurationError,  # This occurs when TLS is misconfigured
+    ConfigurationError,  # This occurs when TLS is misconfigured.
     ConnectionFailure,  # This is a generic exception for any problems when connecting to mongodb.
     OperationFailure,  # This occurs when authentication is incorrect.
 )

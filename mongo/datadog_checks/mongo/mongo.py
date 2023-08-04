@@ -169,11 +169,12 @@ class MongoDb(AgentCheck):
         try:
             self._refresh_metadata()
             self._collect_metrics()
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
-        except CRITICAL_FAILURE:
+        except CRITICAL_FAILURE as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             self._unset_metadata()
-            raise
+            self.log.info("Error connecting to mongodb, sending CRITICAL service check: %s", e)
+        else:
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
 
     def _refresh_metadata(self):
         if self._mongo_version is None:
