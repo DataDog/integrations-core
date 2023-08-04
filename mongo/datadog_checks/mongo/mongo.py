@@ -8,7 +8,7 @@ from copy import deepcopy
 from packaging.version import Version
 
 from datadog_checks.base import AgentCheck, is_affirmative
-from datadog_checks.mongo.api import FAILURE, MongoApi
+from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
 from datadog_checks.mongo.collectors import (
     CollStatsCollector,
     CustomQueriesCollector,
@@ -171,7 +171,7 @@ class MongoDb(AgentCheck):
             self._refresh_metadata()
             self._collect_metrics()
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
-        except FAILURE:
+        except CRITICAL_FAILURE:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             self._unset_metadata()
 
@@ -207,11 +207,11 @@ class MongoDb(AgentCheck):
         for collector in self.collectors:
             try:
                 collector.collect(self.api_client)
-            except FAILURE as e:
+            except CRITICAL_FAILURE as e:
                 self.log.info(
                     "Unable to collect logs from collector %s. Some metrics will be missing.", collector, exc_info=True
                 )
-                raise e  # Connection failures must bubble up to trigger a CRITICAL service check.
+                raise e  # Critical failures must bubble up to trigger a CRITICAL service check.
             except Exception:
                 self.log.info(
                     "Unable to collect logs from collector %s. Some metrics will be missing.", collector, exc_info=True
