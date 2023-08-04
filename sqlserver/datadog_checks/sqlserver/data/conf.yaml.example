@@ -40,7 +40,7 @@ instances:
     ## Host and port of your SQL server. If a port is ommitted, a default port of 1433 will be used. 
     ## If you use Sql Server Browser Service or a similar port autodiscovery service, pass in a port
     ## of 0 to omit port from your connection string. This should allow SSBS to autodiscover the 
-    ## correct database port. 
+    ## correct database port.
     #
   - host: <HOST>,<PORT>
 
@@ -511,12 +511,6 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
-
-    ## @param disable_generic_tags - boolean - optional - default: false
-    ## Generic tags such as `host` are replaced by `sqlserver_host` to avoid
-    ## getting mixed with other integration tags.
-    #
-    disable_generic_tags: true
 
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
