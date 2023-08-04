@@ -174,6 +174,7 @@ class MongoDb(AgentCheck):
         except CRITICAL_FAILURE:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             self._unset_metadata()
+            raise
 
     def _refresh_metadata(self):
         if self._mongo_version is None:
