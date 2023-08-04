@@ -165,17 +165,16 @@ metrics:
       name: fileSystemSpaceTable
       OID: 1.3.6.1.4.1.19746.1.3.2.1
     symbols:
-#      - name: fileSystemSpaceSize
-#        OID: 1.3.6.1.4.1.19746.1.3.2.1.1.4
-#      - name: fileSystemSpaceUsed
-#        OID: 1.3.6.1.4.1.19746.1.3.2.1.1.5
-#      - name: fileSystemSpaceAvail
-#        OID: 1.3.6.1.4.1.19746.1.3.2.1.1.6
+      - name: datadomain.fileSystemSpaceSize
+        OID: 1.3.6.1.4.1.19746.1.3.2.1.1.4
+      - name: datadomain.fileSystemSpaceUsed
+        OID: 1.3.6.1.4.1.19746.1.3.2.1.1.5
+      - name: datadomain.fileSystemSpaceAvail
+        OID: 1.3.6.1.4.1.19746.1.3.2.1.1.6
       - name: datadomain.fileSystemPercentUsed
         OID: 1.3.6.1.4.1.19746.1.3.2.1.1.7
-#      - name: fileSystemSpaceCleanable
-#        OID: 1.3.6.1.4.1.19746.1.3.2.1.1.8
-# TODO: octet strings cannot be collected
+      - name: datadomain.fileSystemSpaceCleanable
+        OID: 1.3.6.1.4.1.19746.1.3.2.1.1.8
     metric_tags:
       - column:
           name: fileSystemResourceName
@@ -185,33 +184,32 @@ metrics:
           name: fileSystemResourceTier
           OID: 1.3.6.1.4.1.19746.1.3.2.1.1.9
         tag: datadomain_file_system_resource_tier
-#  - MIB: DATA-DOMAIN-MIB
-#    table:
-#      name: fileSystemCompressionTable
-#      OID: 1.3.6.1.4.1.19746.1.3.3.1
-#    symbols:
-#      - name: fileSystemCompressionStartTime
-#        OID: 1.3.6.1.4.1.19746.1.3.3.1.1.3
-#      - name: fileSystemCompressionEndTime
-#        OID: 1.3.6.1.4.1.19746.1.3.3.1.1.4
-#      - name: fileSystemPreCompressionSize
-#        OID: 1.3.6.1.4.1.19746.1.3.3.1.1.5
-#      - name: fileSystemPostCompressionSize
-#        OID: 1.3.6.1.4.1.19746.1.3.3.1.1.6
-#      - name: fileSystemGlobalCompressionFactor
-#        OID: 1.3.6.1.4.1.19746.1.3.3.1.1.7
-#      - name: fileSystemLocalCompressionFactor
-#        OID: 1.3.6.1.4.1.19746.1.3.3.1.1.8
-#      - name: fileSystemTotalCompressionFactor
-#        OID: 1.3.6.1.4.1.19746.1.3.3.1.1.9
-#      - name: fileSystemReductionPercent
-#        OID: 1.3.6.1.4.1.19746.1.3.3.1.1.11
-#    metric_tags:
-#      - column:
-#          name: fileSystemCompressionIndex
-#          OID: 1.3.6.1.4.1.19746.1.3.3.1.1.1
-#        tag: data_domain_file_system_compression_index
-# TODO: octet strings cannot be collected
+  - MIB: DATA-DOMAIN-MIB
+    table:
+      name: fileSystemCompressionTable
+      OID: 1.3.6.1.4.1.19746.1.3.3.1
+    symbols:
+      - name: fileSystemCompressionStartTime
+        OID: 1.3.6.1.4.1.19746.1.3.3.1.1.3
+      - name: fileSystemCompressionEndTime
+        OID: 1.3.6.1.4.1.19746.1.3.3.1.1.4
+      - name: fileSystemPreCompressionSize
+        OID: 1.3.6.1.4.1.19746.1.3.3.1.1.5
+      - name: fileSystemPostCompressionSize
+        OID: 1.3.6.1.4.1.19746.1.3.3.1.1.6
+      - name: fileSystemGlobalCompressionFactor
+        OID: 1.3.6.1.4.1.19746.1.3.3.1.1.7
+      - name: fileSystemLocalCompressionFactor
+        OID: 1.3.6.1.4.1.19746.1.3.3.1.1.8
+      - name: fileSystemTotalCompressionFactor
+        OID: 1.3.6.1.4.1.19746.1.3.3.1.1.9
+      - name: fileSystemReductionPercent
+        OID: 1.3.6.1.4.1.19746.1.3.3.1.1.11
+    metric_tags:
+      - column:
+          name: fileSystemCompressionIndex
+          OID: 1.3.6.1.4.1.19746.1.3.3.1.1.1
+        tag: data_domain_file_system_compression_index
   - MIB: DATA-DOMAIN-MIB
     table:
       name: systemStatsTable
