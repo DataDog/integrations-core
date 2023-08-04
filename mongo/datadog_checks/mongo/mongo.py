@@ -74,12 +74,10 @@ class MongoDb(AgentCheck):
         self._api_client = None
         self._mongo_version = None
 
-    @property
+    @cached_property
     def api_client(self):
         # This needs to be a property for our unit test mocks to work.
-        if self._api_client is None:
-            self._api_client = MongoApi(self._config, self.log)
-        return self._api_client
+        return MongoApi(self._config, self.log)
 
     def refresh_collectors(self, deployment_type, all_dbs, tags):
         collect_tcmalloc_metrics = 'tcmalloc' in self._config.additional_metrics
