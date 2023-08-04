@@ -45,6 +45,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.upsOutletGroupStatus',  # APC UPS constant metric
     'snmp.enclosurePowerSupply',  # iDRAC constant metric
     'snmp.systemState',  # iDRAC constant metric
+    'snmp.cpqHeFltTolPowerSupply',  # HP constant metric
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
@@ -447,7 +448,11 @@ def test_e2e_profile_hp_ilo4(dd_agent_check):
 
 def test_e2e_profile_hpe_proliant(dd_agent_check):
     config = common.generate_container_profile_config('hpe-proliant')
-    assert_python_vs_core(dd_agent_check, config)
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        tags_to_skip=['power_supply_status'],  # Skipping tag with a mapping
+    )
 
 
 def test_e2e_profile_idrac(dd_agent_check):

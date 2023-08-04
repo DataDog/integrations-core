@@ -52,6 +52,7 @@ EXPECTED_CONTAINER_METRICS_WINDOWS = [
 
 EXPECTED_TASK_METRICS = [
     "ecs.fargate.cpu.task.limit",
+    "ecs.fargate.mem.task.limit",
 ]
 
 EXPECTED_TASK_EPHEMERAL_METRICS = [
