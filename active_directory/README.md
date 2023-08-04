@@ -47,9 +47,9 @@ _Available for Agent versions >6.0_
 
    For Windows users, use `path: <DRIVE_LETTER>:\<PATH>`
 
-4. This integration is intended for the [Active Directory Module for Ruby][6]. If you are not using the Ruby module, change the `source` value to `active_directory` and configure the `path` for your environment.
+3. This integration is intended for the [Active Directory Module for Ruby][6]. If you are not using the Ruby module, change the `source` value to `active_directory` and configure the `path` for your environment.
 
-5. [Restart the Agent][5].
+4. [Restart the Agent][5].
 
 ### Validation
 
