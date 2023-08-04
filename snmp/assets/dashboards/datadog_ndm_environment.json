@@ -1541,7 +1541,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**Why are traps not being received?**\n\n- Check your device configuration and ensure it is sending traps to the right port.\n- Check the Traps server listening port and ensure it is using an unprivileged port (> 1024). Or, allow the Datadog Agent to listen on privileged ports.\n",
+                            "content": "**Why are traps not being received?**\n\n- Check your device configuration and ensure it is sending traps to the right port.\n- Check the Traps server listening port and ensure it is using an unprivileged port (> 1024). Or, allow the Datadog Agent to listen on privileged ports.\n\nTraps telemetry metrics requires Agent 7.47+",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
