@@ -1000,11 +1000,11 @@ def test_idrac(aggregator):
         ('16', '26', 'zombies driving'),
         ('17', '15', 'zombies'),
     ]
-    for chassis_index, power_supply_index, device_fqdd in tag_mappings:
+    for chassis_index, power_supply_index, power_supply_fqdd in tag_mappings:
         tags = [
             'chassis_index:{}'.format(chassis_index),
             'power_supply_index:{}'.format(power_supply_index),
-            'device_fqdd:{}'.format(device_fqdd),
+            'power_supply_fqdd:{}'.format(power_supply_fqdd),
         ] + common_tags
         aggregator.assert_metric('snmp.powerSupplyOutputWatts', metric_type=aggregator.GAUGE, tags=tags, count=1)
         aggregator.assert_metric(

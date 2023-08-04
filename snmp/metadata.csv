@@ -1931,7 +1931,7 @@ snmp.systemStateCoolingDeviceStatusCombined,gauge,,,,[Dell iDRAC] The combined s
 snmp.systemStateCoolingUnitStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all cooling units of this system.,0,snmp,,
 snmp.systemStateCoolingUnitStatusRedundancy,gauge,,,,[Dell iDRAC] The combined redundancy status of all cooling units of this system.,0,snmp,,
 snmp.systemStateMemoryDeviceStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all memory devices of this system.,0,snmp,,
-snmp.systemStatePowerSupply,gauge,,,,"Constant metric equal to 1",0,snmp,,
+snmp.systemState,gauge,,,,"[IDRAC-MIB-SMIv2] The System State Table. Constant metric equal to 1",0,snmp,,
 snmp.systemStatePowerSupplyStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all power supplies of this system.,0,snmp,,
 snmp.systemStatePowerUnitStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all power units of this chassis.,0,snmp,,
 snmp.systemStatePowerUnitStatusRedundancy,gauge,,,,[Dell iDRAC] The combined redundancy status of all power units of this system.,0,snmp,,

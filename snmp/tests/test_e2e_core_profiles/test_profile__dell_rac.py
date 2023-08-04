@@ -65,9 +65,7 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         aggregator.assert_metric(
             'snmp.systemStateMemoryDeviceStatusCombined', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
-        aggregator.assert_metric(
-            'snmp.systemStatePowerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.systemState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric(
             'snmp.systemStatePowerSupplyStatusCombined', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
@@ -188,10 +186,10 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         aggregator.assert_metric('snmp.intrusionStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:18', 'device_fqdd:their quaintly forward', 'power_supply_index:11'],
+        ['chassis_index:18', 'power_supply_fqdd:their quaintly forward', 'power_supply_index:11'],
         [
             'chassis_index:23',
-            'device_fqdd:driving oxen acted their forward Jaded kept driving oxen',
+            'power_supply_fqdd:driving oxen acted their forward Jaded kept driving oxen',
             'power_supply_index:22',
         ],
     ]

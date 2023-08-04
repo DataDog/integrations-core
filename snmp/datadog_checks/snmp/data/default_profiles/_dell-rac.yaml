@@ -6,7 +6,7 @@ metrics:
       OID: 1.3.6.1.4.1.674.10892.5.4.200.10
       name: systemStateTable
     symbols:
-      - name: systemStatePowerSupply
+      - name: systemState
         constant_value_one: true
       - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.4
         name: systemStateChassisStatus
@@ -253,7 +253,7 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.4.600.12.1.15
           name: powerSupplyFQDD
-        tag: device_fqdd
+        tag: power_supply_fqdd
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.4.600.30
