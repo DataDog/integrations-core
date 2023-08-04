@@ -42,22 +42,13 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
     aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.memory.used', metric_type=aggregator.GAUGE, tags=common_tags)
     tag_rows = [
-        [
-            'datadomain_power_module_description:kept acted kept acted Jaded',
-            'datadomain_power_module_status:ok',
-        ],
-        [
-            'datadomain_power_module_description:oxen acted but Jaded zombies',
-            'datadomain_power_module_status:faulty',
-        ],
+        ['datadomain_power_module_description:kept acted kept acted Jaded', 'datadomain_power_module_status:ok'],
+        ['datadomain_power_module_description:oxen acted but Jaded zombies', 'datadomain_power_module_status:faulty'],
         [
             'datadomain_power_module_description:their driving quaintly zombies their forward',
             'datadomain_power_module_status:failed',
         ],
-        [
-            'datadomain_power_module_description:their kept zombies but',
-            'datadomain_power_module_status:absent',
-        ],
+        ['datadomain_power_module_description:their kept zombies but', 'datadomain_power_module_status:absent'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
@@ -65,15 +56,9 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
         )
 
     tag_rows = [
-        [
-            'datadomain_temp_sensor_description:Jaded their quaintly',
-            'datadomain_temp_sensor_status:overheat_critical',
-        ],
+        ['datadomain_temp_sensor_description:Jaded their quaintly', 'datadomain_temp_sensor_status:overheat_critical'],
         ['datadomain_temp_sensor_description:driving', 'datadomain_temp_sensor_status:overheat_critical'],
-        [
-            'datadomain_temp_sensor_description:oxen acted but zombies',
-            'datadomain_temp_sensor_status:failed',
-        ],
+        ['datadomain_temp_sensor_description:oxen acted but zombies', 'datadomain_temp_sensor_status:failed'],
         [
             'datadomain_temp_sensor_description:their acted acted driving but their',
             'datadomain_temp_sensor_status:overheat_critical',
@@ -132,6 +117,50 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
     for tag_row in tag_rows:
         aggregator.assert_metric(
             'snmp.datadomain.fileSystemPercentUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.datadomain.fileSystemSpaceAvail', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.datadomain.fileSystemSpaceCleanable', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.datadomain.fileSystemSpaceSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.datadomain.fileSystemSpaceUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+
+    tag_rows = [
+        ['data_domain_file_system_compression_index:14'],
+        ['data_domain_file_system_compression_index:25'],
+        ['data_domain_file_system_compression_index:29'],
+        ['data_domain_file_system_compression_index:8'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric(
+            'snmp.fileSystemCompressionEndTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.fileSystemCompressionStartTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.fileSystemGlobalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.fileSystemLocalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.fileSystemPostCompressionSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.fileSystemPreCompressionSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.fileSystemReductionPercent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.fileSystemTotalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     tag_rows = [
