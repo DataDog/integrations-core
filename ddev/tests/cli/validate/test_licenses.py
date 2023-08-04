@@ -47,7 +47,7 @@ def test_error_extra_dependency(name, contents, expected_error_output, ddev, rep
 @pytest.mark.parametrize(
     "repo, expected_message",
     [
-        pytest.param("core", "Licenses file is valid!", id="Core integrations"),
+        pytest.param("core", "Passed: 1", id="Core integrations"),
         pytest.param(
             "extras",
             "License validation is only available for repo `core`, skipping for repo `extras`",
