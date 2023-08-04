@@ -13,6 +13,7 @@ ecs.fargate.mem.cache,gauge,,byte,,Number of bytes of page cache memory (Linux o
 ecs.fargate.mem.active_file,gauge,,byte,,Number of bytes of file-backed memory on active LRU list (Linux only).,0,amazon_fargate,mem active file,
 ecs.fargate.mem.inactive_file,gauge,,byte,,Number of bytes of file-backed memory on inactive LRU list (Linux only).,0,amazon_fargate,mem inactive file,
 ecs.fargate.mem.limit,gauge,,byte,,Number of bytes memory limit (Linux only).,0,amazon_fargate,mem limit,
+ecs.fargate.mem.task.limit,gauge,,byte,,Task Memory Limit (shared by all containers).,0,amazon_fargate,task memory limit,
 ecs.fargate.mem.active_anon,gauge,,byte,,Number of bytes of anonymous and swap cache memory on active LRU list (Linux only).,0,amazon_fargate,mem active anon,
 ecs.fargate.mem.usage,gauge,,byte,,Number of bytes of memory used.,0,amazon_fargate,mem usage,
 ecs.fargate.mem.rss,gauge,,byte,,Number of bytes of anonymous and swap cache memory (includes transparent hugepages) (Linux only).,0,amazon_fargate,mem rss,

@@ -525,7 +525,12 @@ def test_e2e_core_cisco_csr(dd_agent_check):
 
     common.assert_common_metrics(aggregator, global_tags, is_e2e=True, loader='core')
 
-    metric_tags = global_tags + ['neighbor:244.12.239.177', 'admin_status:start', 'peer_state:established']
+    metric_tags = global_tags + [
+        'neighbor:244.12.239.177',
+        'admin_status:start',
+        'peer_state:established',
+        'remote_as:26',
+    ]
 
     for metric in metrics.PEER_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=metric_tags, count=2)
