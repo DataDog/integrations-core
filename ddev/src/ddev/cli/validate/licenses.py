@@ -4,7 +4,12 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import click
+
+if TYPE_CHECKING:
+    from ddev.cli.application import Application
 
 
 def format_attribution_line(package_name, license_id, package_copyright):
@@ -14,7 +19,7 @@ def format_attribution_line(package_name, license_id, package_copyright):
     return f'{package_name},PyPI,{license_id},{package_copyright}\n'
 
 
-def update_copyrights(package_name, license_id, data, ctx, app):
+def update_copyrights(package_name, license_id, data, app):
     """
     Update package data with scraped copyright attributions.
     """
@@ -22,7 +27,7 @@ def update_copyrights(package_name, license_id, data, ctx, app):
 
     PACKAGE_REPO_OVERRIDES = app.repo.config.get('/overrides/dependencies/repo', {})
     gh_repo_url = PACKAGE_REPO_OVERRIDES.get(package_name) or data['home_page']
-    created_date = '' if gh_repo_url is None else probe_github(gh_repo_url, ctx)
+    created_date = '' if gh_repo_url is None else probe_github(gh_repo_url, app)
 
     url = collect_source_url(data)
     cp = scrape_copyright_data(url)
@@ -159,7 +164,7 @@ def parse_license_path(tar_file_name):
     return None
 
 
-def probe_github(url, ctx):
+def probe_github(url, app):
     """Probe GitHub API for package's repo creation date."""
     import re
 
@@ -172,7 +177,7 @@ def probe_github(url, ctx):
     owner_repo = re.sub(r'.*github.com/', '', url)
     repo_api_url = f'https://api.github.com/repos/{owner_repo}'
     try:
-        resp = httpx.get(repo_api_url, auth=get_auth_info(ctx.obj), follow_redirects=True)
+        resp = app.github.client.get(repo_api_url, auth=get_auth_info(app), follow_redirects=True)
         resp.raise_for_status()
         created_date = resp.json().get('created_at', '')
     except httpx.HTTPError:
@@ -193,12 +198,12 @@ def get_auth_info(config=None):
         return user, token
 
 
-def get_known_spdx_licenses():
-    import httpx
+def get_known_spdx_licenses(app):
+    # import httpx
     import orjson
 
     url = 'https://raw.githubusercontent.com/spdx/license-list-data/v3.13/json/licenses.json'
-    response = httpx.get(url, follow_redirects=True)
+    response = app.github.client.get(url, follow_redirects=True)
     license_list = orjson.loads(response.content)['licenses']
 
     return {data['licenseId'] for data in license_list}
@@ -208,15 +213,15 @@ def extract_classifier_value(classifier):
     return classifier.split(' :: ')[-1]
 
 
-def get_data(url):
-    import httpx
+def get_data(url, app):
+    # import httpx
     import orjson
 
-    response = httpx.get(url, follow_redirects=True)
+    response = app.github.client.get(url, follow_redirects=True)
     return orjson.loads(response.content)
 
 
-def scrape_license_data(urls):
+def scrape_license_data(urls, app):
     import concurrent.futures
     from collections import defaultdict
 
@@ -225,7 +230,7 @@ def scrape_license_data(urls):
     )
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        future_to_url = {executor.submit(get_data, url): url for url in urls}
+        future_to_url = {executor.submit(get_data, url, app): url for url in urls}
         for future in concurrent.futures.as_completed(future_to_url):
             resp = future.result()
             info = resp['info']
@@ -331,19 +336,13 @@ def read_file_lines(file, encoding='utf-8'):
 
 @click.command(short_help='Validate third-party license list')
 @click.option('--sync', '-s', is_flag=True, help='Generate the `LICENSE-3rdparty.csv` file')
-@click.pass_context
-def licenses(ctx: click.Context, sync):
+@click.pass_obj
+def licenses(app: Application, sync: bool):
     import difflib
     import os
     from collections import defaultdict
-    from typing import TYPE_CHECKING
 
     from ddev.cli.validate import licenses_utils
-
-    if TYPE_CHECKING:
-        from ddev.cli.application import Application
-
-    app: Application = ctx.obj
 
     if app.repo.name != 'core':
         app.display_info(f"License validation is only available for repo `core`, skipping for repo `{app.repo.name}`")
@@ -403,8 +402,8 @@ def licenses(ctx: click.Context, sync):
         for version in versions:
             api_urls.append(f'https://pypi.org/pypi/{package}/{version}/json')
 
-    package_data = scrape_license_data(api_urls)
-    known_spdx_licenses = {license_id.lower(): license_id for license_id in get_known_spdx_licenses()}
+    package_data = scrape_license_data(api_urls, app)
+    known_spdx_licenses = {license_id.lower(): license_id for license_id in get_known_spdx_licenses(app)}
 
     package_license_errors = defaultdict(list)
 
@@ -414,7 +413,7 @@ def licenses(ctx: click.Context, sync):
         if package_name in explicit_licenses:
             for license_id in sorted(explicit_licenses[package_name]):
                 data['licenses'].add(license_id)
-                update_copyrights(package_name, license_id, data, ctx, app)
+                update_copyrights(package_name, license_id, data, app)
                 lines.add(format_attribution_line(package_name, license_id, data['copyright'].get(license_id, '')))
             continue
 
@@ -452,7 +451,7 @@ def licenses(ctx: click.Context, sync):
 
         if license_ids:
             for license_id in sorted(license_ids):
-                update_copyrights(package_name, license_id, data, ctx, app)
+                update_copyrights(package_name, license_id, data, app)
                 lines.add(format_attribution_line(package_name, license_id, data['copyright'].get(license_id, '')))
         else:
             package_license_errors[package_name].append('no license information')

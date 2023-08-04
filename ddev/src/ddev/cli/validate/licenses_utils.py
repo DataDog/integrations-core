@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
-ROOT = ''
 IGNORED_LICENSES = {'dual license'}
 KNOWN_LICENSES = {
     'apache': 'Apache-2.0',
