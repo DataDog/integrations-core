@@ -295,6 +295,7 @@ snmp.cpqHeCorrMemLogCondition,gauge,,,,[HPE PROLIANT] [HP ILO4] The overall cond
 snmp.cpqHeCorrMemLogStatus,gauge,,,,[HPE PROLIANT] [HP ILO4] Indicates if this system is currently tracking correctable memory errors.,0,snmp,,
 snmp.cpqHeCorrMemTotalErrs,count,,,,[HPE PROLIANT] [HP ILO4] The number of correctable memory errors that have occurred.,0,snmp,,
 snmp.cpqHeCritLogCondition,gauge,,,,[HPE PROLIANT] [HP ILO4] The overall condition of the critical error log feature.,0,snmp,,
+snmp.cpqHeFltTolPowerSupply,gauge,,,,[HPE Proliant] Constant metric equal to 1,0,snmp,,
 snmp.cpqHeFltTolPowerSupplyCapacityMaximum,gauge,,watt,,[HPE Proliant] The maximum capacity of the power supply in watts.,0,snmp,,
 snmp.cpqHeFltTolPowerSupplyCapacityUsed,gauge,,watt,,[HPE Proliant] The currently used capacity of the power supply in watts.,0,snmp,,
 snmp.cpqHeFltTolPowerSupplyStatus,gauge,,,,[HPE Proliant] The status of the power supply.,0,snmp,,
