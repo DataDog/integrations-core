@@ -1501,12 +1501,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:datadog.snmp_traps.received{$SNMP_Device}.as_count()"
+                                            "query": "sum:datadog.snmp_traps.received{$SNMP_Device, $Agent_Hostname, $Custom_Tag}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:datadog.snmp_traps.forwarded{$SNMP_Device}.as_count()"
+                                            "query": "sum:datadog.snmp_traps.forwarded{$SNMP_Device, $Agent_Hostname, $Custom_Tag}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1581,7 +1581,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:datadog.snmp_traps.invalid_packet{$SNMP_Device} by {snmp_device,reason}.as_count()"
+                                            "query": "sum:datadog.snmp_traps.invalid_packet{$SNMP_Device, $Agent_Hostname, $Custom_Tag} by {snmp_device,reason}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1628,7 +1628,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:datadog.snmp_traps.incorrect_format{$SNMP_Device} by {error}.as_count()"
+                                            "query": "sum:datadog.snmp_traps.incorrect_format{$SNMP_Device, $Agent_Hostname, $Custom_Tag} by {error}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1681,12 +1681,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:datadog.snmp_traps.traps_not_enriched{$SNMP_Device}.as_count()"
+                                            "query": "sum:datadog.snmp_traps.traps_not_enriched{$SNMP_Device, $Agent_Hostname, $Custom_Tag}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:datadog.snmp_traps.vars_not_enriched{$SNMP_Device}.as_count()"
+                                            "query": "sum:datadog.snmp_traps.vars_not_enriched{$SNMP_Device, $Agent_Hostname, $Custom_Tag}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
