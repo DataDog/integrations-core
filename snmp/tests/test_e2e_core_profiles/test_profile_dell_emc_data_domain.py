@@ -139,28 +139,28 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.fileSystemCompressionEndTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemCompressionEndTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.fileSystemCompressionStartTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemCompressionStartTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.fileSystemGlobalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemGlobalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.fileSystemLocalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemLocalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.fileSystemPostCompressionSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemPostCompressionSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.fileSystemPreCompressionSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemPreCompressionSize', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.fileSystemReductionPercent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemReductionPercent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.fileSystemTotalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemTotalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     tag_rows = [

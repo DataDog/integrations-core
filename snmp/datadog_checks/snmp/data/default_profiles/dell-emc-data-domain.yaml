@@ -189,21 +189,21 @@ metrics:
       name: fileSystemCompressionTable
       OID: 1.3.6.1.4.1.19746.1.3.3.1
     symbols:
-      - name: fileSystemCompressionStartTime
+      - name: datadomain.fileSystemCompressionStartTime
         OID: 1.3.6.1.4.1.19746.1.3.3.1.1.3
-      - name: fileSystemCompressionEndTime
+      - name: datadomain.fileSystemCompressionEndTime
         OID: 1.3.6.1.4.1.19746.1.3.3.1.1.4
-      - name: fileSystemPreCompressionSize
+      - name: datadomain.fileSystemPreCompressionSize
         OID: 1.3.6.1.4.1.19746.1.3.3.1.1.5
-      - name: fileSystemPostCompressionSize
+      - name: datadomain.fileSystemPostCompressionSize
         OID: 1.3.6.1.4.1.19746.1.3.3.1.1.6
-      - name: fileSystemGlobalCompressionFactor
+      - name: datadomain.fileSystemGlobalCompressionFactor
         OID: 1.3.6.1.4.1.19746.1.3.3.1.1.7
-      - name: fileSystemLocalCompressionFactor
+      - name: datadomain.fileSystemLocalCompressionFactor
         OID: 1.3.6.1.4.1.19746.1.3.3.1.1.8
-      - name: fileSystemTotalCompressionFactor
+      - name: datadomain.fileSystemTotalCompressionFactor
         OID: 1.3.6.1.4.1.19746.1.3.3.1.1.9
-      - name: fileSystemReductionPercent
+      - name: datadomain.fileSystemReductionPercent
         OID: 1.3.6.1.4.1.19746.1.3.3.1.1.11
     metric_tags:
       - column:
