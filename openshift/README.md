@@ -2,7 +2,7 @@
 
 Red Hat OpenShift is an open source container application platform based on the Kubernetes container orchestrator for enterprise application development and deployment.
 
-> There is no separate `openshift` check, this README describes the necessary configuration to enable collection of OpenShift-specific metrics in the Agent. Data described here are collected by the [`kubernetes_apiserver` check][1], and setting up this check is necessary to collect the `openshift.*` metrics.
+> This README describes the necessary configuration to enable collection of OpenShift-specific metrics in the Agent. Data described here are collected by the [`kubernetes_apiserver` check][1]. You must configure the check to collect the `openshift.*` metrics.
 
 ## Setup
 
@@ -12,7 +12,7 @@ To install the Agent, see the [Agent installation instructions][2] for Kubernete
 
 Alternatively, the [Datadog Operator][3] can be used to install and manage the Datadog Agent. The Datadog Operator can be installed using OpenShift's [OperatorHub][4].
 
-### Security Context Constraints Configuration
+### Security Context Constraints configuration
 
 
 If you are deploying the Datadog Agent using any of the methods linked in the installation instructions above, you must include Security Context Constraints (SCCs) for the Agent to collect data. Follow the instructions below as they relate to your deployment.
@@ -108,7 +108,7 @@ Do not forget to add a <a href="https://docs.datadoghq.com/agent/kubernetes/daem
 </div>
 
 <div class="alert alert-warning">
-<b>OpenShift 4.0+</b>: If you used the OpenShift installer on a supported cloud provider, you must deploy the SCC with <code>allowHostNetwork: true</code> in the <code>scc.yaml</code> manifest as well as <code>hostNetwork: true</code> in the Agent configuration to get host tags and aliases. Access to metadata servers from the Pod network is otherwise restricted.
+<b>OpenShift 4.0+</b>: If you used the OpenShift installer on a supported cloud provider, you must deploy the SCC with <code>allowHostNetwork: true</code> in the <code>scc.yaml</code> manifest, as well as <code>hostNetwork: true</code> in the Agent configuration to get host tags and aliases. Access to metadata servers from the Pod network is otherwise restricted.
 </div>
 
 **Note**: The Docker socket is owned by the root group, so you may need to elevate the Agent's privileges to pull in Docker metrics. To run the Agent process as a root user, you can configure your SCC with the following:
