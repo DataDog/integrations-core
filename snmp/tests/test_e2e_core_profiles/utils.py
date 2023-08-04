@@ -191,7 +191,7 @@ def assert_extend_generic_host_resources(aggregator, common_tags):
     assert_extend_generic_host_resources_base(aggregator, common_tags)
 
 
-def assert_extend_entity_sensor(aggregator, common_tags):
+def assert_extend_generic_entity_sensor(aggregator, common_tags):
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.99.1.1.1.1.8|2|9

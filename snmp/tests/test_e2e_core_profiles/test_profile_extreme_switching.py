@@ -10,7 +10,7 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
-    assert_extend_entity_sensor,
+    assert_extend_generic_entity_sensor,
     assert_extend_generic_if,
     create_e2e_core_test_config,
     get_device_ip_from_config,
@@ -33,7 +33,7 @@ def test_e2e_profile_extreme_switching(dd_agent_check):
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
-    assert_extend_entity_sensor(aggregator, common_tags)
+    assert_extend_generic_entity_sensor(aggregator, common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
