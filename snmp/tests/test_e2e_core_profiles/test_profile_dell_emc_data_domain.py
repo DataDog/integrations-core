@@ -145,7 +145,9 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
             'snmp.datadomain.fileSystemCompressionStartTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
         aggregator.assert_metric(
-            'snmp.datadomain.fileSystemGlobalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+            'snmp.datadomain.fileSystemGlobalCompressionFactor',
+            metric_type=aggregator.GAUGE,
+            tags=common_tags + tag_row,
         )
         aggregator.assert_metric(
             'snmp.datadomain.fileSystemLocalCompressionFactor', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
