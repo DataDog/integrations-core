@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from pymongo import MongoClient, ReadPreference
-from pymongo.errors import ConfigurationError, ConnectionFailure, OperationFailure
+from pymongo.errors import ConfigurationError, ConnectionFailure, OperationFailure, ServerSelectionTimeoutError, ProtocolError
 
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, StandaloneDeployment
 
@@ -16,6 +16,11 @@ CRITICAL_FAILURE = (
     ConfigurationError,  # This occurs when TLS is misconfigured.
     ConnectionFailure,  # This is a generic exception for any problems when connecting to mongodb.
     OperationFailure,  # This occurs when authentication is incorrect.
+    # This means either no server is available or a replicaset has not elected a primary in the timeout window.
+    # In both cases it makes sense to submit a CRITICAL service check to Datadog.
+    ServerSelectionTimeoutError,
+    # Errors at the level of the protocol result in a lost/degraded connection. We can issue a CRITICAL check for this.
+    ProtocolError,
 )
 
 

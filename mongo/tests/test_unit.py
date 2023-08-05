@@ -12,7 +12,7 @@ from six import iteritems
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mongo import MongoDb, metrics
-from datadog_checks.mongo.api import MongoApi
+from datadog_checks.mongo.api import MongoApi, CRITICAL_FAILURE
 from datadog_checks.mongo.collectors import MongoCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, get_state_name
 from datadog_checks.mongo.config import MongoConfig
@@ -597,12 +597,13 @@ def test_when_version_lower_than_3_6_then_no_session_metrics_reported(aggregator
     aggregator.assert_metric('mongodb.sessions.count', count=0)
 
 
-def test_service_check_critical_when_connection_dies(aggregator, check, instance, dd_run_check):
+@pytest.mark.parametrize("error_cls", CRITICAL_FAILURE)
+def test_service_check_critical_when_connection_dies(error_cls, aggregator, check, instance, dd_run_check):
     check = check(instance)
     with mock_pymongo('standalone') as mocked_client:
         dd_run_check(check)
         aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
         aggregator.reset()
-        mocked_client.list_database_names = mock.MagicMock(side_effect=ConnectionFailure("Testing"))
+        mocked_client.list_database_names = mock.MagicMock(side_effect=error_cls("Testing"))
         dd_run_check(check)
         aggregator.assert_service_check('mongodb.can_connect', MongoDb.CRITICAL)
