@@ -55,7 +55,7 @@ def get_added_lines(git_diff: str) -> dict[str, dict[int, str]]:
         # --- a/file
         # +++ b/file
         metadata, *blocks = re.split(r'^@@ ', modification, flags=re.MULTILINE)
-        before, after = metadata.strip().splitlines()[-2:]
+        *_, before, after = metadata.strip().splitlines()
 
         # Binary files /dev/null and b/foo/archive.tar.gz differ
         binary_indicator = 'Binary files '

@@ -86,8 +86,6 @@ interactions:
       - '*/*'
       accept-encoding:
       - gzip, deflate
-      authorization:
-      - Basic OmdocF9JMVVlVWw0RldhM01uNWRNNVVRM1NYWEhvRVNYUUwxRllTdjY=
       connection:
       - keep-alive
       host:
