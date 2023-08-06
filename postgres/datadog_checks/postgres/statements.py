@@ -145,11 +145,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
             ttl=60 * 60 / config.full_statement_text_samples_per_hour_per_query,
         )
 
-    def _execute_query(self, cursor, query, params=()):
+    def _execute_query(self, query, params=(), row_format=None):
         try:
-            self._log.debug("Running query [%s] %s", query, params)
-            cursor.execute(query, params)
-            return cursor.fetchall()
+            return self.db_pool.execute_main_db_safe(query, params, row_format)
         except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
             # A failed query could've derived from incorrect columns within the cache. It's a rare edge case,
             # but the next time the query is run, it will retrieve the correct columns.
@@ -170,11 +168,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
         query = STATEMENTS_QUERY.format(
             cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, extra_clauses="LIMIT 0", filters=""
         )
-        with self._check.get_main_db().cursor() as cursor:
-            self._execute_query(cursor, query, params=())
-            col_names = [desc[0] for desc in cursor.description] if cursor.description else []
-            self._stat_column_cache = col_names
-            return col_names
+        col_names = self.db_pool.get_main_db_columns_safe(query, params=())
+        self._stat_column_cache = col_names
+        return col_names
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
@@ -282,17 +278,16 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     "pg_database.datname NOT ILIKE %s" for _ in self._config.ignore_databases
                 )
                 params = params + tuple(self._config.ignore_databases)
-            with self._check.get_main_db().cursor(row_factory=dict_row) as cursor:
-                return self._execute_query(
-                    cursor,
-                    STATEMENTS_QUERY.format(
-                        cols=', '.join(query_columns),
-                        pg_stat_statements_view=self._config.pg_stat_statements_view,
-                        filters=filters,
-                        extra_clauses="",
-                    ),
-                    params=params,
-                )
+            return self._execute_query(
+                STATEMENTS_QUERY.format(
+                    cols=', '.join(query_columns),
+                    pg_stat_statements_view=self._config.pg_stat_statements_view,
+                    filters=filters,
+                    extra_clauses="",
+                ),
+                params=params,
+                row_format=dict_row,
+            )
         except psycopg.Error as e:
             error_tag = "error:database-{}".format(type(e).__name__)
 
@@ -355,11 +350,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         if self._check.version < V14:
             return
         try:
-            with self._check.get_main_db().cursor(row_factory=dict_row) as cursor:
-                rows = self._execute_query(
-                    cursor,
-                    PG_STAT_STATEMENTS_DEALLOC,
-                )
+            rows = self.db_pool.execute_main_db_safe(PG_STAT_STATEMENTS_DEALLOC, row_format=dict_row)
             if rows:
                 dealloc = list(rows[0].values())[0]
                 self._check.monotonic_count(
@@ -375,11 +366,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _emit_pg_stat_statements_metrics(self):
         query = PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 if self._check.version < V9_4 else PG_STAT_STATEMENTS_COUNT_QUERY
         try:
-            with self._check.get_main_db().cursor(row_factory=dict_row) as cursor:
-                rows = self._execute_query(
-                    cursor,
-                    query,
-                )
+            rows = self.db_pool.execute_main_db_safe(query, row_format=dict_row)
             count = 0
             if rows and 'count' in rows[0]:
                 count = rows[0]['count']

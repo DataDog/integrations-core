@@ -60,6 +60,7 @@ class PostgresMetadata(DBMAsyncJob):
         )
         self._check = check
         self._config = config
+        self.db_pool = check.db_pool
         self._collect_pg_settings_enabled = is_affirmative(config.settings_metadata_config.get('enabled', False))
         self._pg_settings_cached = None
         self._time_since_last_settings_query = 0
@@ -83,7 +84,6 @@ class PostgresMetadata(DBMAsyncJob):
         self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
         self.report_postgres_metadata()
-        self._check.db_pool.prune_connections()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_postgres_metadata(self):
@@ -114,10 +114,7 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
-        with self._check.get_main_db().cursor(row_factory=dict_row) as cursor:
-            self._log.debug("Running query [%s]", PG_SETTINGS_QUERY)
-            self._time_since_last_settings_query = time.time()
-            cursor.execute(PG_SETTINGS_QUERY)
-            rows = cursor.fetchall()
-            self._log.debug("Loaded %s rows from pg_settings", len(rows))
-            return [dict(row) for row in rows]
+        rows = self.db_pool.execute_main_db_safe(PG_SETTINGS_QUERY, row_format=dict_row)
+        self._time_since_last_settings_query = time.time()
+        self._log.debug("Loaded %s rows from pg_settings", len(rows))
+        return [dict(row) for row in rows]

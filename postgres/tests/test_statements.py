@@ -1337,7 +1337,7 @@ def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
     dbm_instance["dbname"] = "postgres"
     check = integration_check(dbm_instance)
     check._connect()
-    check._load_pg_settings(check.db)
+    check.load_pg_settings(check.db)
     if db_user == 'datadog_no_catalog':
         aggregator.assert_metric(
             "dd.postgres.error",
@@ -1359,10 +1359,10 @@ def test_pg_settings_caching(aggregator, integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     assert not check.pg_settings, "pg_settings should not have been initialized yet"
     check._connect()
-    check.get_main_db()
+    check.db_pool.get_main_db()
     assert "track_activity_query_size" in check.pg_settings
     check.pg_settings["test_key"] = True
-    check.get_main_db()
+    check.db_pool.get_main_db()
     assert (
         "test_key" in check.pg_settings
     ), "key should not have been blown away. If it was then pg_settings was not cached correctly"
