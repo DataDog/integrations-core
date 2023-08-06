@@ -217,7 +217,7 @@ class MultiDatabaseConnectionPool(object):
                 return False
         return True
 
-    def get_main_db(self):
+    def _get_main_db(self):
         """
         Returns a memoized, persistent psycopg connection to `self.dbname`.
         Utilizes the db connection pool, and is meant to be shared across multiple threads.
@@ -241,18 +241,17 @@ class MultiDatabaseConnectionPool(object):
         with self._query_lock:
             self._log.debug("Running query [{}] {}".format(query, params))
             if row_format:
-                with self.get_main_db().cursor(row_factory=row_format) as cursor:
+                with self._get_main_db().cursor(row_factory=row_format) as cursor:
                     cursor.execute(query, params)
                     return cursor.fetchall()
             else:
-                with self.get_main_db().cursor() as cursor:
+                with self._get_main_db().cursor() as cursor:
                     cursor.execute(query, params)
                     return cursor.fetchall()
 
     def get_main_db_columns_safe(self, query, params):
         with self._query_lock:
-            with self.get_main_db().cursor() as cursor:
+            with self._get_main_db().cursor() as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
                 cursor.execute(query, params)
                 return [desc[0] for desc in cursor.description] if cursor.description else []
-
