@@ -182,10 +182,7 @@ class PostgreSql(AgentCheck):
         )
 
     def execute_query_raw(self, query):
-        with self.db.cursor() as cursor:
-            cursor.execute(query)
-            rows = cursor.fetchall()
-            return rows
+        return self.db_pool.execute_main_db_safe(query)
 
     @property
     def dynamic_queries(self):
@@ -703,7 +700,7 @@ class PostgreSql(AgentCheck):
             self.db = self._new_connection(self._config.dbname)
 
     # Reload pg_settings on a new connection to the main db
-    def _load_pg_settings(self, db):
+    def load_pg_settings(self, db):
         try:
             with db.cursor(row_factory=dict_row) as cursor:
                 self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
@@ -728,21 +725,6 @@ class PostgreSql(AgentCheck):
 
     def get_pg_settings(self):
         return self.pg_settings
-
-    def get_main_db(self):
-        """
-        Returns a memoized, persistent psycopg connection to `self.dbname`.
-        Utilizes the db connection pool, and is meant to be shared across multiple threads.
-        :return: a psycopg connection
-        """
-        # reload settings for the main DB only once every time the connection is reestablished
-        conn = self.db_pool._get_connection_raw(
-            dbname=self._config.dbname,
-            ttl_ms=self._config.idle_connection_timeout,
-            startup_fn=self._load_pg_settings,
-            persistent=True,
-        )
-        return conn
 
     def _close_db_pool(self):
         self.db_pool.close_all_connections(timeout=self._config.min_collection_interval)

@@ -69,10 +69,13 @@ class MultiDatabaseConnectionPool(object):
             self.__init__()
 
     def __init__(self, check: AgentCheck, connect_fn: Callable[[str], None], max_conns: int = None):
-        self.log = check.log
+        self._check = check
+        self._log = check.log
+        self._config = check._config
         self.max_conns: int = max_conns
         self._stats = self.Stats()
         self._mu = threading.RLock()
+        self._query_lock = threading.Lock()
         self._conns: Dict[str, ConnectionInfo] = {}
 
         if hasattr(inspect, 'signature'):
@@ -210,6 +213,46 @@ class MultiDatabaseConnectionPool(object):
                     db.close()
             except Exception:
                 self._stats.connection_closed_failed += 1
-                self.log.exception("failed to close DB connection for db=%s", dbname)
+                self._log.exception("failed to close DB connection for db=%s", dbname)
                 return False
         return True
+
+    def get_main_db(self):
+        """
+        Returns a memoized, persistent psycopg connection to `self.dbname`.
+        Utilizes the db connection pool, and is meant to be shared across multiple threads.
+        :return: a psycopg connection
+        """
+        conn = self._get_connection_raw(
+            dbname=self._config.dbname,
+            ttl_ms=self._config.idle_connection_timeout,
+            startup_fn=self._check.load_pg_settings,
+            persistent=True,
+        )
+        return conn
+
+    def execute_main_db_safe(self, query, params=None, row_format=None):
+        """
+        Runs queries for main database utilizing a lock for thread safety.
+        Only a single command can be executed on the same connection at a time
+        or else postgres will throw an exception
+        :return: a PQResult
+        """
+        with self._query_lock:
+            self._log.debug("Running query [{}] {}".format(query, params))
+            if row_format:
+                with self.get_main_db().cursor(row_factory=row_format) as cursor:
+                    cursor.execute(query, params)
+                    return cursor.fetchall()
+            else:
+                with self.get_main_db().cursor() as cursor:
+                    cursor.execute(query, params)
+                    return cursor.fetchall()
+
+    def get_main_db_columns_safe(self, query, params):
+        with self._query_lock:
+            with self.get_main_db().cursor() as cursor:
+                self._log.debug("Running query [%s] %s", query, params)
+                cursor.execute(query, params)
+                return [desc[0] for desc in cursor.description] if cursor.description else []
+
