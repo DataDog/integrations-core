@@ -157,16 +157,16 @@ class SupervisordCheck(AgentCheck):
 
             include = (
                 (not proc_regex and not proc_names)
-                or (any(re.search(rgx, name) for rgx in proc_regex) if proc_regex else False)
-                or ((name in proc_names) if proc_names else False)
+                or any(re.search(rgx, name) for rgx in proc_regex)
+                or name in proc_names
             )
 
             if not include:
                 continue  # No need to check exclusions if process doesn't match inclusions.
 
             exclude = (
-                (any(re.search(rgx, name) for rgx in proc_regex_exclude) if proc_regex_exclude else False)
-                or ((name in proc_names_exclude) if proc_names_exclude else False)
+                any(re.search(rgx, name) for rgx in proc_regex_exclude)
+                or name in proc_names_exclude
             )
 
             if not exclude:
