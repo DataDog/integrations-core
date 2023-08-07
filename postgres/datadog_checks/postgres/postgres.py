@@ -182,7 +182,10 @@ class PostgreSql(AgentCheck):
         )
 
     def execute_query_raw(self, query):
-        return self.db_pool.execute_main_db_safe(query)
+        with self.db.cursor() as cursor:
+            cursor.execute(query)
+            rows = cursor.fetchall()
+            return rows
 
     @property
     def dynamic_queries(self):
