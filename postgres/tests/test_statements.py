@@ -1049,7 +1049,7 @@ def test_activity_snapshot_collection(
 
         # wait for query to complete, but commit has not been called,
         # so it should remain open and idle
-        wg.wait()
+        wg.wait(timeout=5)
 
         # Wait collection interval to make sure dbm events are reported
         time.sleep(dbm_instance['query_activity']['collection_interval'])

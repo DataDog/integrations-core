@@ -71,11 +71,12 @@ def run_one_check(check, db_instance):
         check.metadata_samples._job_loop_future.result()
 
 
-# WaitGroup is used like go's sync.WaitGroup
+# WaitGroup is used like go's sync.WaitGroup, but it supports a timeout
 class WaitGroup(object):
     def __init__(self):
         self.count = 0
         self.cv = threading.Condition()
+        self.timeout_event = threading.Event()
 
     def add(self, n):
         self.cv.acquire()
@@ -89,8 +90,17 @@ class WaitGroup(object):
             self.cv.notify_all()
         self.cv.release()
 
-    def wait(self):
+    def wait(self, timeout=None):
         self.cv.acquire()
-        while self.count > 0:
-            self.cv.wait()
+        if timeout is None:
+            while self.count > 0:
+                self.cv.wait()
+        else:
+            def timeout_callback():
+                self.timeout_event.set()
+            timer = threading.Timer(timeout, timeout_callback)
+            timer.start()
+            while self.count > 0 and not self.timeout_event.is_set():
+                self.cv.wait()
+            timer.cancel()
         self.cv.release()

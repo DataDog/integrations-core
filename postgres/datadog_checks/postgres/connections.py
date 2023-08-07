@@ -171,10 +171,16 @@ class MultiDatabaseConnectionPool(object):
                     self._stats.connection_pruned += 1
                     self._terminate_connection_unsafe(dbname)
 
-    def close_all_connections(self):
+    def close_all_connections(self, timeout=None):
+        """
+        Will block until all connections are terminated, unless the pre-configured timeout is hit
+        :param timeout:
+        :return:
+        """
         success = True
+        start_time = time.time()
         with self._mu:
-            while self._conns:
+            while self._conns and (timeout is None or time.time() - start_time < timeout):
                 dbname = next(iter(self._conns))
                 if not self._terminate_connection_unsafe(dbname):
                     success = False
