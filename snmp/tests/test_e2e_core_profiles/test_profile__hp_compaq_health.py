@@ -88,12 +88,6 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
-            'snmp.cpqHeFltTolPowerSupplyCapacityMaximum', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
-            'snmp.cpqHeFltTolPowerSupplyCapacityUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
-        aggregator.assert_metric(
             'snmp.cpqHeFltTolPowerSupplyStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
@@ -104,6 +98,12 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
     for tag_row in tag_rows:
         aggregator.assert_metric(
             'snmp.cpqHeFltTolPowerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cpqHeFltTolPowerSupplyCapacityMaximum', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
+        aggregator.assert_metric(
+            'snmp.cpqHeFltTolPowerSupplyCapacityUsed', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
 
     # --- TEST METADATA ---
