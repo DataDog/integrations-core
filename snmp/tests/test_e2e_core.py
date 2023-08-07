@@ -635,6 +635,13 @@ def test_e2e_cisco_nexus(dd_agent_check):
     power_supply_tags = ['power_source:1', 'power_status_descr:Jaded driving their their their'] + common_tags
     aggregator.assert_metric('snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=power_supply_tags)
 
+    power_supply_tags = [
+        'cisco_env_mon_supply_state:normal',
+        'power_source:1',
+        'power_status_descr:Jaded driving their their their',
+    ] + common_tags
+    aggregator.assert_metric('snmp.ciscoEnvMonSupplyStatus', metric_type=aggregator.GAUGE, tags=power_supply_tags)
+
     fan_indices = [4, 6, 7, 16, 21, 22, 25, 27]
     for index in fan_indices:
         tags = ['fan_status_index:{}'.format(index)] + common_tags

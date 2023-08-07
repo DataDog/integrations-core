@@ -43,6 +43,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.ospfIf',
     'snmp.ospfVirtIf',
     'snmp.upsOutletGroupStatus',  # APC UPS constant metric
+    'snmp.ciscoEnvMonSupplyStatus',  # Cisco constant metric
     'snmp.cpqHeFltTolPowerSupply',  # HP constant metric
 ]
 
@@ -352,7 +353,7 @@ def test_e2e_profile_cisco_3850(dd_agent_check):
         config,
         expected_total_count=5108 + 5,
         metrics_to_skip=metrics_to_skip,
-        tags_to_skip=['neighbor_state', 'if_state'],  # Ignore tags that have a mapping
+        tags_to_skip=['neighbor_state', 'if_state', 'cisco_env_mon_supply_state'],  # Ignore tags that have a mapping
     )
 
 
@@ -363,6 +364,7 @@ def test_e2e_profile_cisco_asa(dd_agent_check):
         dd_agent_check,
         config,
         metrics_to_skip=metrics_to_skip,
+        tags_to_skip=['cisco_env_mon_supply_state'],  # Ignore tag that has a mapping
     )
 
 
@@ -395,6 +397,7 @@ def test_e2e_profile_cisco_nexus(dd_agent_check):
         dd_agent_check,
         config,
         metrics_to_skip=metrics_to_skip,
+        tags_to_skip=['cisco_env_mon_supply_state'],  # Ignore tag that has a mapping
     )
 
 
@@ -482,17 +485,17 @@ def test_e2e_profile_netapp(dd_agent_check):
 
 def test_e2e_profile_cisco_asr_1001x(dd_agent_check):
     config = common.generate_container_profile_config('cisco-asr-1001x')
-    assert_python_vs_core(dd_agent_check, config)
+    assert_python_vs_core(dd_agent_check, config, tags_to_skip=['cisco_env_mon_supply_state'])
 
 
 def test_e2e_profile_cisco_asr_9001(dd_agent_check):
     config = common.generate_container_profile_config('cisco-asr-9001')
-    assert_python_vs_core(dd_agent_check, config)
+    assert_python_vs_core(dd_agent_check, config, tags_to_skip=['cisco_env_mon_supply_state'])
 
 
 def test_e2e_profile_cisco_asr_9901(dd_agent_check):
     config = common.generate_container_profile_config('cisco-asr-9901')
-    assert_python_vs_core(dd_agent_check, config)
+    assert_python_vs_core(dd_agent_check, config, tags_to_skip=['cisco_env_mon_supply_state'])
 
 
 def test_e2e_discovery(dd_agent_check):
