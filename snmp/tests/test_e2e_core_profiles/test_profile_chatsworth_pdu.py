@@ -24,9 +24,10 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
     ip_address = get_device_ip_from_config(config)
     common_tags = [
         'snmp_profile:chatsworth_pdu',
+        'snmp_host:chatsworth_pdu.device.name',
         'device_namespace:default',
-        'device_vendor:chatsworth',
         'snmp_device:' + ip_address,
+        'device_vendor:chatsworth',
     ] + [
         'legacy_pdu_macaddress:00:0E:D3:AA:CC:EE',
         'legacy_pdu_model:P10-1234-ABC',
@@ -130,7 +131,7 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
         [
             'pdu_cabinetid:cab1',
             'pdu_ipaddress:42.2.210.224',
-            'pdu_macaddress:0x00249b3503f6',
+            'pdu_macaddress:0x111111111111',
             'pdu_model:model1',
             'pdu_name:name1',
             'pdu_version:v1.1',
@@ -145,32 +146,41 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
         aggregator.assert_metric('snmp.cpiPduUpgrade', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['eas_status:error', 'lock_id:1'],
-        ['eas_status:error', 'lock_id:2'],
+        ['lock_id:1'],
+        ['lock_id:2'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpiPduDoorStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-        aggregator.assert_metric('snmp.cpiPduEas', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.cpiPduEasStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
         aggregator.assert_metric('snmp.cpiPduLockStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['sensor_index:4', 'sensor_name:sensor1', 'sensor_type:1'],
-        ['sensor_index:6', 'sensor_name:sensor2', 'sensor_type:1'],
+        ['eas_status:inactive', 'lock_id:1'],
+        ['eas_status:ready', 'lock_id:2'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.cpiPduEas', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
+        ['sensor_index:20', 'sensor_name:sensor2', 'sensor_type:1'],
+        ['sensor_index:26'],
+        ['sensor_index:31'],
+        ['sensor_index:8', 'sensor_name:sensor1', 'sensor_type:1'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpiPduSensorValue', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['line_id:18'],
-        ['line_id:6'],
+        ['line_id:14'],
+        ['line_id:7'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpiPduLineCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['branch_id:1', 'pdu_name:name1'],
-        ['branch_id:17', 'pdu_name:name1'],
+        ['branch_id:11', 'pdu_name:name1'],
+        ['branch_id:7', 'pdu_name:name1'],
+        ['pdu_name:name1'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpiPduBranchCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -185,16 +195,16 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
         aggregator.assert_metric('snmp.cpiPduBranchVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['branch_id:1', 'pdu_name:name1'],
-        ['branch_id:1', 'pdu_name:name2'],
-        ['branch_id:17', 'pdu_name:name1'],
+        ['branch_id:11', 'pdu_name:name1'],
+        ['branch_id:7', 'pdu_name:name1'],
+        ['pdu_name:name1'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpiPduBranchEnergy', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['outlet_branchid:23', 'outlet_id:16', 'outlet_name:outlet2'],
-        ['outlet_branchid:29', 'outlet_id:7', 'outlet_name:outlet1'],
+        ['outlet_branchid:17', 'outlet_id:5', 'outlet_name:outlet1'],
+        ['outlet_branchid:4', 'outlet_id:22', 'outlet_name:outlet2'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpiPduOutletCurrent', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -203,20 +213,22 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
         aggregator.assert_metric('snmp.cpiPduOutletVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['outlet_branchid:23', 'outlet_id:16', 'outlet_name:outlet2'],
-        ['outlet_branchid:29', 'outlet_id:7', 'outlet_name:outlet1'],
+        ['outlet_branchid:17', 'outlet_id:5', 'outlet_name:outlet1'],
+        ['outlet_branchid:4', 'outlet_id:22', 'outlet_name:outlet2'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpiPduOutletEnergy', metric_type=aggregator.COUNT, tags=common_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
+        'description': 'chatsworth_pdu Device Description',
         'id': 'default:' + ip_address,
         'id_tags': ['device_namespace:default', 'snmp_device:' + ip_address],
         'ip_address': '' + ip_address,
+        'name': 'chatsworth_pdu.device.name',
         'profile': 'chatsworth_pdu',
         'status': 1,
-        'sys_object_id': '1.3.6.1.4.1.30932.1.2',
+        'sys_object_id': '1.3.6.1.4.1.30932.1.1',
         'vendor': 'chatsworth',
     }
     device['tags'] = common_tags
