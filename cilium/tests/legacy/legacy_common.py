@@ -40,6 +40,7 @@ AGENT_DEFAULT_METRICS = [
     'cilium.triggers_policy.update_folds',
     'cilium.unreachable.health_endpoints',
     'cilium.unreachable.nodes',
+    "cilium.kvstore.quorum_errors.total",
 ]
 
 ADDL_AGENT_METRICS = [
@@ -88,6 +89,8 @@ ADDL_AGENT_METRICS = [
     'cilium.policy.implementation_delay.count',
     'cilium.policy.implementation_delay.sum',
     'cilium.endpoint.regenerations.total',
+    "cilium.kvstore.sync_queue_size",
+    "cilium.kvstore.initial_sync_completed",
 ]
 
 OPERATOR_METRICS = [
