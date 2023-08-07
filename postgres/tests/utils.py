@@ -96,8 +96,10 @@ class WaitGroup(object):
             while self.count > 0:
                 self.cv.wait()
         else:
+
             def timeout_callback():
                 self.timeout_event.set()
+
             timer = threading.Timer(timeout, timeout_callback)
             timer.start()
             while self.count > 0 and not self.timeout_event.is_set():
