@@ -75,7 +75,7 @@ instances:
     #   - <PROCESS_NAME_EXCLUDE_2>
 
     ## @param status_mapping_override - mapping - optional
-    ## The process status mapping override between Supervisord status and Datadog status.
+    ## The process status mapping override between supervisord status and Datadog status.
     ##
     ## This setting override default mapping (Supervisord => Datadog):
     ##   RUNNING  => up
