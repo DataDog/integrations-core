@@ -164,10 +164,7 @@ class SupervisordCheck(AgentCheck):
             if not include:
                 continue  # No need to check exclusions if process doesn't match inclusions.
 
-            exclude = (
-                any(re.search(rgx, name) for rgx in proc_regex_exclude)
-                or name in proc_names_exclude
-            )
+            exclude = any(re.search(rgx, name) for rgx in proc_regex_exclude) or name in proc_names_exclude
 
             if not exclude:
                 monitored_processes.append(process)
