@@ -1,4 +1,10 @@
+# (C) Datadog, Inc. 2023-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import time
+from contextlib import closing
+from operator import attrgetter
+
 import pymysql
 
 try:
@@ -6,57 +12,111 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
     default_json_event_encoding,
 )
+from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracking import tracked_method
 
-class MySQLStatementSamples(DBMAsyncJob):
+# default pg_settings collection interval in seconds
+DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
+
+SETTINGS_QUERY = """
+SELECT
+    variable_name,
+    variable_value
+FROM
+    performance_schema.global_variables
+"""
+
+
+class MySQLMetadata(DBMAsyncJob):
     """
-        Collects database metadata. Supports:
-        1. collection of performance_schema.global_variables
+    Collects database metadata. Supports:
+    1. collection of performance_schema.global_variables
     """
 
     def __init__(self, check, config, connection_args):
-        collection_interval = float(config.statement_metrics_config.get('collection_interval', 1))
-        if collection_interval <= 0:
-            collection_interval = 1
-        super(MySQLStatementSamples, self).__init__(
+        self.collection_interval = float(
+            config.settings_config.get('collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL)
+        )
+        super(MySQLMetadata, self).__init__(
             check,
-            rate_limit=1 / collection_interval,
-            run_sync=is_affirmative(config.statement_samples_config.get('run_sync', False)),
-            enabled=is_affirmative(config.statement_samples_config.get('enabled', True)),
+            rate_limit=1 / self.collection_interval,
+            run_sync=is_affirmative(config.settings_config.get('run_sync', False)),
+            enabled=is_affirmative(config.settings_config.get('enabled', False)),
             min_collection_interval=config.min_collection_interval,
             dbms="mysql",
             expected_db_exceptions=(pymysql.err.DatabaseError,),
-            job_name="statement-samples",
+            job_name="database-metadata",
             shutdown_callback=self._close_db_conn,
         )
         self._config = config
         self._version_processed = False
         self._connection_args = connection_args
-        self._last_check_run = 0
         self._db = None
         self._check = check
-        self._configured_collection_interval = self._config.statement_samples_config.get('collection_interval', -1)
-        self._events_statements_row_limit = self._config.statement_samples_config.get(
-            'events_statements_row_limit', 5000
-        )
-        self._explain_procedure = self._config.statement_samples_config.get('explain_procedure', 'explain_statement')
-        self._fully_qualified_explain_procedure = self._config.statement_samples_config.get(
-            'fully_qualified_explain_procedure', 'datadog.explain_statement'
-        )
-        self._events_statements_temp_table = self._config.statement_samples_config.get(
-            'events_statements_temp_table_name', 'datadog.temp_events'
-        )
-        self._events_statements_enable_procedure = self._config.statement_samples_config.get(
-            'events_statements_enable_procedure', 'datadog.enable_events_statements_consumers'
-        )
-        self._explain_strategies = {
-            'PROCEDURE': self._run_explain_procedure,
-            'FQ_PROCEDURE': self._run_fully_qualified_explain_procedure,
-            'STATEMENT': self._run_explain,
+
+    def _get_db_connection(self):
+        """
+        lazy reconnect db
+        pymysql connections are not thread safe so we can't reuse the same connection from the main check
+        :return:
+        """
+        if not self._db:
+            self._db = pymysql.connect(**self._connection_args)
+        return self._db
+
+    def _close_db_conn(self):
+        if self._db:
+            try:
+                self._db.close()
+            except Exception:
+                self._log.debug("Failed to close db connection", exc_info=1)
+            finally:
+                self._db = None
+
+    def _cursor_run(self, cursor, query, params=None):
+        """
+        Run and log the query. If provided, obfuscated params are logged in place of the regular params.
+        """
+        try:
+            self._log.debug("Running query [{}] params={}".format(query, params))
+            cursor.execute(query, params)
+        except pymysql.DatabaseError as e:
+            self._check.count(
+                "dd.mysql.db.error",
+                1,
+                tags=self._tags + ["error:{}".format(type(e))] + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
+            raise
+
+    def run_job(self):
+        self.report_mysql_metadata()
+
+    @tracked_method(agent_check_getter=attrgetter('_check'))
+    def report_mysql_metadata(self):
+        settings = []
+        with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
+            self._cursor_run(
+                cursor,
+                SETTINGS_QUERY,
+            )
+            rows = cursor.fetchall()
+            settings = [dict(row) for row in rows]
+        event = {
+            "host": self._check.resolved_hostname,
+            "agent_version": datadog_agent.get_version(),
+            "dbms": "mysql",
+            "kind": "mysql_settings",
+            "collection_interval": self.collection_interval,
+            'dbms_version': self._check.version.version + '+' + self._check.version.build,
+            "tags": self._tags,
+            "timestamp": time.time() * 1000,
+            "cloud_metadata": self._config.cloud_metadata,
+            "metadata": settings,
         }
-        self._preferred_explain_strategies = ['PROCEDURE', 'FQ_PROCEDURE', 'STATEMENT']
-        self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
-        self._init_caches()
+        self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))

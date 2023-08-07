@@ -37,6 +37,15 @@ class Azure(BaseModel):
     fully_qualified_domain_name: Optional[str] = None
 
 
+class CollectSettings(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+
+
 class CustomQuery(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
