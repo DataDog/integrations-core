@@ -357,7 +357,7 @@ TEST_CASES = [
                 ),
                 (
                     'supervisord.process.count',
-                    0,
+                    1,
                     {'type': 'gauge', 'tags': ['supervisord_server:server0', 'status:unknown']},
                 ),
             ]
