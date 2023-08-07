@@ -6,8 +6,6 @@ metrics:
       OID: 1.3.6.1.4.1.674.10892.5.4.200.10
       name: systemStateTable
     symbols:
-      - name: systemState
-        constant_value_one: true
       - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.4
         name: systemStateChassisStatus
       - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.6
@@ -34,6 +32,18 @@ metrics:
         name: systemStateProcessorDeviceStatusCombined
       - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.63
         name: systemStateTemperatureStatisticsStatusCombined
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.1
+          name: systemStatechassisIndex
+        tag: chassis_index
+  - MIB: IDRAC-MIB-SMIv2
+    table:
+      OID: 1.3.6.1.4.1.674.10892.5.4.200.10
+      name: systemStateTable
+    symbols:
+      - name: systemState
+        constant_value_one: true
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.9
@@ -73,10 +83,28 @@ metrics:
       OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9
       name: enclosurePowerSupplyTable
     symbols:
-      - name: enclosurePowerSupply
-        constant_value_one: true
       - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.4
         name: enclosurePowerSupplyState
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.2
+          name: enclosurePowerSupplyName
+        tag: supply_name
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.1
+          name: enclosurePowerSupplyNumber
+        tag: enclosure_power_supply_number
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.15
+          name: enclosurePowerSupplyFQDD
+        tag: enclosure_power_supply_fqdd
+  - MIB: IDRAC-MIB-SMIv2
+    table:
+      OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9
+      name: enclosurePowerSupplyTable
+    symbols:
+      - name: enclosurePowerSupply
+        constant_value_one: true
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.4

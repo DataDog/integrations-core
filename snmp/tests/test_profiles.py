@@ -871,30 +871,23 @@ def test_idrac(aggregator):
             aggregator.assert_metric(
                 'snmp.{}'.format(count), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
-    tag_mappings = [
-        ('5', '26'),
-        ('5', '29'),
-    ]
-    for status, index in tag_mappings:
-        tags = [
-            'system_state_power_supply_status_combined:{}'.format(status),
-            'chassis_index:{}'.format(index),
-        ] + common_tags
+    indexes = ['26', '29']
+    for index in indexes:
+        tags = ['chassis_index:{}'.format(index)] + common_tags
         for gauge in IDRAC_SYSTEM_STATUS_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     tag_mappings = [
-        ('5', 'supply1', '13', 'forward their oxen acted acted'),
-        ('1', 'supply2', '16', 'quaintly but acted'),
+        ('supply1', '13', 'forward their oxen acted acted'),
+        ('supply2', '16', 'quaintly but acted'),
     ]
-    for state, name, number, fqdd in tag_mappings:
+    for name, number, fqdd in tag_mappings:
         tags = [
-            'enclosure_power_supply_state:{}'.format(state),
             'supply_name:{}'.format(name),
             'enclosure_power_supply_number:{}'.format(number),
             'enclosure_power_supply_fqdd:{}'.format(fqdd),
         ] + common_tags
-        aggregator.assert_metric('snmp.enclosurePowerSupplyState', metric_type=aggregator.GAUGE, tags=tags)
+        aggregator.assert_metric('snmp.enclosurePowerSupplyState', metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     disks = ['disk1', 'disk2']
     for disk in disks:
@@ -1410,15 +1403,9 @@ def test_dell_poweredge(aggregator):
                 'snmp.{}'.format(count), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
 
-    tag_mappings = [
-        ('5', '26'),
-        ('5', '29'),
-    ]
-    for status, index in tag_mappings:
-        tags = [
-            'system_state_power_supply_status_combined:{}'.format(status),
-            'chassis_index:{}'.format(index),
-        ] + common_tags
+    indexes = ['26', '29']
+    for index in indexes:
+        tags = ['chassis_index:{}'.format(index)] + common_tags
         for gauge in POWEREDGE_SYSTEM_STATUS_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 

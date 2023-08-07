@@ -420,7 +420,12 @@ def test_e2e_profile_dell_poweredge(dd_agent_check):
         'snmp.memoryDeviceStatus',
         'datadog.snmp.submitted_metrics',  # count won't match because of the reason explained above
     ]
-    assert_python_vs_core(dd_agent_check, config, metrics_to_skip=metric_to_skip)
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metric_to_skip,
+        tags_to_skip=['system_state_power_supply_status_combined'],  # Skipping tag with a mapping
+    )
 
 
 def test_e2e_core_vs_python_profile_f5_big_ip(dd_agent_check):
