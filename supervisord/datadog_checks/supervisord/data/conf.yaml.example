@@ -62,7 +62,7 @@ instances:
     #   - <PROCESS_NAME_2>
 
     ## @param proc_regex_exclude - list of strings - optional
-    ## Regex pattern[s] matching the names of processes to exclude.
+    ## Regular expression pattern[s] for names of processes to exclude.
     #
     # proc_regex_exclude:
     #   - <PROC_REGEX>
@@ -75,9 +75,9 @@ instances:
     #   - <PROCESS_NAME_EXCLUDE_2>
 
     ## @param status_mapping_override - mapping - optional
-    ## The process status mapping override between supervisord status and Datadog status.
+    ## The process status mapping override between Supervisord status and Datadog status.
     ##
-    ## This setting override default mapping (Supervisord => Datadog):
+    ## This setting overrides default mapping (Supervisord => Datadog):
     ##   RUNNING  => up
     ##   BACKOFF  => down
     ##   STOPPING => down
