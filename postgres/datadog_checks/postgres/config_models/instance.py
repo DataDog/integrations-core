@@ -38,6 +38,16 @@ class Azure(BaseModel):
     fully_qualified_domain_name: Optional[str] = None
 
 
+class CollectSchemas(BaseModel):
+    model_config = ConfigDict(
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_columns: Optional[float] = None
+    max_tables: Optional[float] = None
+
+
 class CollectSettings(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -154,6 +164,7 @@ class InstanceConfig(BaseModel):
     collect_database_size_metrics: Optional[bool] = None
     collect_default_database: Optional[bool] = None
     collect_function_metrics: Optional[bool] = None
+    collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
     collect_wal_metrics: Optional[bool] = None
     custom_queries: Optional[tuple[MappingProxyType[str, Any], ...]] = None
