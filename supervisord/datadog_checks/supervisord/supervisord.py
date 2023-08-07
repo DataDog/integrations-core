@@ -17,17 +17,6 @@ DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '9001'
 DEFAULT_SOCKET_IP = 'http://127.0.0.1'
 
-DD_STATUS = {
-    'STOPPED': AgentCheck.CRITICAL,
-    'STARTING': AgentCheck.UNKNOWN,
-    'RUNNING': AgentCheck.OK,
-    'BACKOFF': AgentCheck.CRITICAL,
-    'STOPPING': AgentCheck.CRITICAL,
-    'EXITED': AgentCheck.CRITICAL,
-    'FATAL': AgentCheck.CRITICAL,
-    'UNKNOWN': AgentCheck.UNKNOWN,
-}
-
 PROCESS_STATUS = {AgentCheck.CRITICAL: 'down', AgentCheck.OK: 'up', AgentCheck.UNKNOWN: 'unknown'}
 
 SERVER_TAG = 'supervisord_server'
@@ -135,7 +124,16 @@ class SupervisordCheck(AgentCheck):
             raise Exception("'proc_names_exclude' should be a list of strings. e.g. %s" % [proc_names_exclude])
 
         # Compile status mapping
-        status_mapping = DD_STATUS
+        status_mapping = {
+            'STOPPED': AgentCheck.CRITICAL,
+            'STARTING': AgentCheck.UNKNOWN,
+            'RUNNING': AgentCheck.OK,
+            'BACKOFF': AgentCheck.CRITICAL,
+            'STOPPING': AgentCheck.CRITICAL,
+            'EXITED': AgentCheck.CRITICAL,
+            'FATAL': AgentCheck.CRITICAL,
+            'UNKNOWN': AgentCheck.UNKNOWN,
+        }
 
         status_mapping_override = instance.get('status_mapping_override', {})
         if not isinstance(status_mapping_override, dict):
