@@ -91,6 +91,7 @@ class MultiDatabaseConnectionPool(object):
         self,
         dbname: str,
         ttl_ms: int,
+        conn_prefix: str = None,
         timeout: int = None,
         startup_fn: Callable[[psycopg.Connection], None] = None,
         persistent: bool = False,
@@ -102,8 +103,11 @@ class MultiDatabaseConnectionPool(object):
         """
         start = datetime.datetime.now()
         self.prune_connections()
+        conn_name = dbname
+        if conn_prefix:
+            conn_name = "{}-{}".format(conn_prefix, dbname)
         with self._mu:
-            conn = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None, None))
+            conn = self._conns.pop(conn_name, ConnectionInfo(None, None, None, None, None, None))
             db = conn.connection
             if db is None or db.closed:
                 if self.max_conns is not None:
@@ -128,7 +132,7 @@ class MultiDatabaseConnectionPool(object):
                 db.rollback()
 
             deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
-            self._conns[dbname] = ConnectionInfo(
+            self._conns[conn_name] = ConnectionInfo(
                 connection=db,
                 deadline=deadline,
                 active=True,
@@ -226,6 +230,7 @@ class MultiDatabaseConnectionPool(object):
         conn = self._get_connection_raw(
             dbname=self._config.dbname,
             ttl_ms=self._config.idle_connection_timeout,
+            conn_prefix="main",
             startup_fn=self._check.load_pg_settings,
             persistent=True,
         )
