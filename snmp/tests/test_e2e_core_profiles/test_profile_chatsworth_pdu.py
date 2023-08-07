@@ -155,8 +155,8 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
         aggregator.assert_metric('snmp.cpiPduLockStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['eas_status:inactive', 'lock_id:1'],
-        ['eas_status:ready', 'lock_id:2'],
+        ['eas_status:inactive', 'lock_id:1', 'lock_status:closed', 'door_status:open'],
+        ['eas_status:ready', 'lock_id:2', 'lock_status:closed', 'door_status:closed'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cpiPduEas', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)

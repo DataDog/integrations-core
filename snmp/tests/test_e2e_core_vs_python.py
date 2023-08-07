@@ -320,7 +320,9 @@ def test_e2e_profile_aruba(dd_agent_check):
 
 def test_e2e_profile_chatsworth_pdu(dd_agent_check):
     config = common.generate_container_profile_config('chatsworth_pdu')
-    assert_python_vs_core(dd_agent_check, config, expected_total_count=225 + 5, tags_to_skip=['eas_status'])
+    assert_python_vs_core(
+        dd_agent_check, config, expected_total_count=225 + 5, tags_to_skip=['eas_status', 'lock_status', 'door_status']
+    )
 
 
 def test_e2e_profile_checkpoint(dd_agent_check):
