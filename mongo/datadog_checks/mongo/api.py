@@ -3,7 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from pymongo import MongoClient, ReadPreference
-from pymongo.errors import ConfigurationError, ConnectionFailure, OperationFailure, ServerSelectionTimeoutError, ProtocolError
+from pymongo.errors import (
+    ConfigurationError,
+    ConnectionFailure,
+    OperationFailure,
+    ProtocolError,
+    ServerSelectionTimeoutError,
+)
 
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, StandaloneDeployment
 

@@ -12,7 +12,7 @@ from six import iteritems
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mongo import MongoDb, metrics
-from datadog_checks.mongo.api import MongoApi, CRITICAL_FAILURE
+from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
 from datadog_checks.mongo.collectors import MongoCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, get_state_name
 from datadog_checks.mongo.config import MongoConfig
