@@ -62,7 +62,7 @@ files:
             example: [<PROCESS_NAME_1>, <PROCESS_NAME_2>]
         - name: proc_regex_exclude
           description: |
-            Regex pattern[s] matching the names of processes to exclude.
+            Regular expression pattern[s] for names of processes to exclude.
           value:
             type: array
             items:
