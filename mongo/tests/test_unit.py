@@ -46,7 +46,8 @@ def test_emits_critical_service_check_when_service_is_not_available(mock_command
     # Given
     check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
     # When
-    dd_run_check(check)
+    with pytest.raises(Exception, match="pymongo.errors.ConnectionFailure: Service not available"):
+        dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.CRITICAL)
 
@@ -604,6 +605,8 @@ def test_service_check_critical_when_connection_dies(error_cls, aggregator, chec
         dd_run_check(check)
         aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
         aggregator.reset()
-        mocked_client.list_database_names = mock.MagicMock(side_effect=error_cls("Testing"))
-        dd_run_check(check)
+        msg = "Testing"
+        mocked_client.list_database_names = mock.MagicMock(side_effect=error_cls(msg))
+        with pytest.raises(Exception, match=fr".*{error_cls.__name__}: {msg}"):
+            dd_run_check(check)
         aggregator.assert_service_check('mongodb.can_connect', MongoDb.CRITICAL)

@@ -172,7 +172,7 @@ class MongoDb(AgentCheck):
         except CRITICAL_FAILURE as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             self._unset_metadata()
-            self.log.info("Error connecting to mongodb, sending CRITICAL service check: %s", e)
+            raise e  # Let exception bubble up to global handler and show full error in the logs.
         else:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
 
