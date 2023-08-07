@@ -152,23 +152,25 @@ class SupervisordCheck(AgentCheck):
         # Collect information on each monitored process
         monitored_processes = []
 
-        # monitor all processes if no filters were specified
-        if len(proc_regex) == 0 and len(proc_names) == 0:
-            monitored_processes = processes
-        else:
-            for pattern, process in itertools.product(proc_regex, processes):
-                if re.match(pattern, process['name']) and process not in monitored_processes:
-                    monitored_processes.append(process)
-            for process in processes:
-                if process['name'] in proc_names and process not in monitored_processes:
-                    monitored_processes.append(process)
+        for process in processes:
+            name = process['name']
 
-        for pattern, process in itertools.product(proc_regex_exclude, monitored_processes):
-            if re.match(pattern, process['name']):
-                monitored_processes.remove(process)
-        for process in monitored_processes:
-            if process['name'] in proc_names_exclude:
-                monitored_processes.remove(process)
+            include = (
+                (not proc_regex and not proc_names)
+                or (any(re.search(rgx, name) for rgx in proc_regex) if proc_regex else False)
+                or ((name in proc_names) if proc_names else False)
+            )
+
+            if not include:
+                continue  # No need to check exclusions if process doesn't match inclusions.
+
+            exclude = (
+                (any(re.search(rgx, name) for rgx in proc_regex_exclude) if proc_regex_exclude else False)
+                or ((name in proc_names_exclude) if proc_names_exclude else False)
+            )
+
+            if not exclude:
+                monitored_processes.append(process)
 
         # Report service checks and uptime for each process
         for proc in monitored_processes:
@@ -180,6 +182,7 @@ class SupervisordCheck(AgentCheck):
             msg = self._build_message(proc) if status is not AgentCheck.OK else None
             count_by_status[status] += 1
             self.service_check(PROCESS_SERVICE_CHECK, status, tags=tags, message=msg)
+
             # Report Uptime
             uptime = self._extract_uptime(proc)
             self.gauge('supervisord.process.uptime', uptime, tags=tags)
