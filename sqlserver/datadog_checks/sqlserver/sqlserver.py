@@ -120,6 +120,7 @@ class SQLServer(AgentCheck):
         # DBM
         self.dbm_enabled = self.instance.get('dbm', False)
         self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
+        self.settings_config = self.instance.get('collect_settings', {}) or {}
         self.statement_metrics = SqlserverStatementMetrics(self)
         self.activity_config = self.instance.get('query_activity', {}) or {}
         self.activity = SqlserverActivity(self)
