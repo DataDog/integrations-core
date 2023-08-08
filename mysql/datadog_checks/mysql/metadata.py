@@ -111,7 +111,7 @@ class MySQLMetadata(DBMAsyncJob):
             "host": self._check.resolved_hostname,
             "agent_version": datadog_agent.get_version(),
             "dbms": "mysql",
-            "kind": "mysql_settings",
+            "kind": "mysql_variables",
             "collection_interval": self.collection_interval,
             'dbms_version': self._check.version.version + '+' + self._check.version.build,
             "tags": self._tags,

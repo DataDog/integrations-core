@@ -18,13 +18,13 @@ def dbm_instance(instance_complex):
     return instance_complex
 
 
-def test_collect_mysql_settings(aggregator, dbm_instance):
+def test_collect_mysql_settings(aggregator, dbm_instance, dd_run_check):
     # test to make sure we continue to support the old key
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    mysql_check.check(dbm_instance)
+    dd_run_check(mysql_check)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = dbm_metadata[0]
     assert event['host'] == "stubbed.hostname"
     assert event['dbms'] == "mysql"
-    assert event['kind'] == "mysql_settings"
+    assert event['kind'] == "mysql_variables"
     assert len(event["metadata"]) > 0
