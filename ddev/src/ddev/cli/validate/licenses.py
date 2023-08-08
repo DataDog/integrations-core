@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -25,8 +24,8 @@ def update_copyrights(package_name, license_id, data, app):
     """
     from ddev.cli.validate import licenses_utils
 
-    PACKAGE_REPO_OVERRIDES = app.repo.config.get('/overrides/dependencies/repo', {})
-    gh_repo_url = PACKAGE_REPO_OVERRIDES.get(package_name) or data['home_page']
+    package_repo_overrides = app.repo.config.get('/overrides/dependencies/repo', {})
+    gh_repo_url = package_repo_overrides.get(package_name) or data['home_page']
     created_date = '' if gh_repo_url is None else probe_github(gh_repo_url, app)
 
     url = collect_source_url(data)
@@ -199,7 +198,6 @@ def get_auth_info(config=None):
 
 
 def get_known_spdx_licenses(app):
-    # import httpx
     import orjson
 
     url = 'https://raw.githubusercontent.com/spdx/license-list-data/v3.13/json/licenses.json'
@@ -214,7 +212,6 @@ def extract_classifier_value(classifier):
 
 
 def get_data(url, app):
-    # import httpx
     import orjson
 
     response = app.github.client.get(url, follow_redirects=True)
@@ -302,13 +299,13 @@ def validate_extra_licenses(app):
 
             # all headers exist, no invalid headers
             all_keys = set(row)
-            ALL_HEADERS = set(licenses_utils.HEADERS)
-            if all_keys != ALL_HEADERS:
-                invalid_headers = all_keys.difference(ALL_HEADERS)
+            all_headers = set(licenses_utils.HEADERS)
+            if all_keys != all_headers:
+                invalid_headers = all_keys.difference(all_headers)
                 if invalid_headers:
                     error_message += f'{license_file}:{line_no} Invalid column {invalid_headers}\n'
 
-                missing_headers = ALL_HEADERS.difference(all_keys)
+                missing_headers = all_headers.difference(all_keys)
                 if missing_headers:
                     error_message += f'{license_file}:{line_no} Missing columns {missing_headers}\n'
 
@@ -358,10 +355,10 @@ def licenses(app: Application, sync: bool):
     error_message = ""
 
     agent_requirements_path = app.repo.agent_requirements
-    VALIDATION_BRANCH = (str(agent_requirements_path.relative_to(app.repo.path)),)
+    validation_branch = (str(agent_requirements_path.relative_to(app.repo.path)),)
     if not os.path.isfile(agent_requirements_path):
         error_message = "Requirements file is not found. Out of sync, run 'ddev validate licenses --sync'"
-        validation_tracker.error(VALIDATION_BRANCH, message=error_message)
+        validation_tracker.error(validation_branch, message=error_message)
         validation_tracker.display()
         app.abort()
 
@@ -379,7 +376,7 @@ def licenses(app: Application, sync: bool):
                 error_message += f"Detected InvalidRequirement error in {rel_file}:{temp_line} {e}\n"
                 errors = True
         if errors:
-            validation_tracker.error(VALIDATION_BRANCH, message=error_message)
+            validation_tracker.error(validation_branch, message=error_message)
             validation_tracker.display()
             app.abort()
 
@@ -480,7 +477,7 @@ def licenses(app: Application, sync: bool):
             f.writelines(str(line) for line in sorted_lines)
         if any_errors:
             error_message += 'Failed to write all extra licenses. Please fix any reported errors\n'
-            validation_tracker.error(VALIDATION_BRANCH, message=error_message)
+            validation_tracker.error(validation_branch, message=error_message)
             validation_tracker.display()
             app.abort()
         else:
@@ -488,7 +485,7 @@ def licenses(app: Application, sync: bool):
             validation_tracker.display()
 
     elif any_errors:
-        validation_tracker.error(VALIDATION_BRANCH, message=error_message)
+        validation_tracker.error(validation_branch, message=error_message)
         validation_tracker.display()
         app.abort()
     elif read_file_lines(license_attribution_file) != sorted_lines:
@@ -497,8 +494,8 @@ def licenses(app: Application, sync: bool):
         for item in difference:
             warning_message += item + '\n'
 
-        validation_tracker.warning(VALIDATION_BRANCH, message=warning_message)
-        validation_tracker.error(VALIDATION_BRANCH, message='Out of sync, run again with the --sync flag')
+        validation_tracker.warning(validation_branch, message=warning_message)
+        validation_tracker.error(validation_branch, message='Out of sync, run again with the --sync flag')
         validation_tracker.display()
         app.abort()
     else:
