@@ -17,6 +17,7 @@ from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
+from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.utils import Database, parse_sqlserver_major_version
 
@@ -120,7 +121,9 @@ class SQLServer(AgentCheck):
         # DBM
         self.dbm_enabled = self.instance.get('dbm', False)
         self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
+        self.settings_config = self.instance.get('collect_settings', {}) or {}
         self.statement_metrics = SqlserverStatementMetrics(self)
+        self.sql_metadata = SqlserverMetadata(self)
         self.activity_config = self.instance.get('query_activity', {}) or {}
         self.activity = SqlserverActivity(self)
         self.cloud_metadata = {}
@@ -179,6 +182,7 @@ class SQLServer(AgentCheck):
     def cancel(self):
         self.statement_metrics.cancel()
         self.activity.cancel()
+        self.sql_metadata.cancel()
 
     def config_checks(self):
         if self.autodiscovery and self.instance.get('database'):
@@ -741,6 +745,7 @@ class SQLServer(AgentCheck):
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
+                self.sql_metadata.run_job_loop(self.tags)
         else:
             self.log.debug("Skipping check")
 
