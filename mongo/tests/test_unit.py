@@ -607,6 +607,6 @@ def test_service_check_critical_when_connection_dies(error_cls, aggregator, chec
         aggregator.reset()
         msg = "Testing"
         mocked_client.list_database_names = mock.MagicMock(side_effect=error_cls(msg))
-        with pytest.raises(Exception, match=fr".*{error_cls.__name__}: {msg}"):
+        with pytest.raises(Exception, match=f"{error_cls.__name__}: {msg}"):
             dd_run_check(check)
         aggregator.assert_service_check('mongodb.can_connect', MongoDb.CRITICAL)
