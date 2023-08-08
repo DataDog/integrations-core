@@ -67,6 +67,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
         self.tags = None
+        self._thread_id = "query-metadata"
 
     def _dbtags(self, db, *extra_tags):
         """
@@ -114,7 +115,10 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
-        rows = self.db_pool.execute_main_db_safe(PG_SETTINGS_QUERY, row_format=dict_row)
-        self._time_since_last_settings_query = time.time()
-        self._log.debug("Loaded %s rows from pg_settings", len(rows))
-        return [dict(row) for row in rows]
+        with self.db_pool.get_main_db(conn_prefix=self._thread_id).cursor(row_factory=dict_row) as cursor:
+            self._log.debug("Running query [%s]", PG_SETTINGS_QUERY)
+            self._time_since_last_settings_query = time.time()
+            cursor.execute(PG_SETTINGS_QUERY)
+            rows = cursor.fetchall()
+            self._log.debug("Loaded %s rows from pg_settings", len(rows))
+            return [dict(row) for row in rows]

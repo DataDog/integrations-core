@@ -295,7 +295,7 @@ def test_conn_pool_manages_connections(pg_instance):
 
     # ask for one more connection
     with pytest.raises(ConnectionPoolFullError):
-        with pool.get_connection('dogs_{}'.format(limit + 1), 1, 1):
+        with pool.get_connection(dbname='dogs_{}'.format(limit + 1), ttl_ms=1, timeout=1):
             pass
 
     # join threads
