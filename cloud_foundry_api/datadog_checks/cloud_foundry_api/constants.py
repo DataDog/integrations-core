@@ -13,3 +13,4 @@ MAX_PAGE_SIZE_V2 = 100
 DEFAULT_PAGE_SIZE = 100
 DEFAULT_EVENT_FILTER = ["audit.app.restage", "audit.app.update", "audit.app.create", "app.crash"]
 MIN_V3_VERSION = semver.VersionInfo(major=3, minor=78, patch=0)
+LAST_EVENT_GUID_CACHE_KEY = "cloud_foundry_api.last_event_guid"

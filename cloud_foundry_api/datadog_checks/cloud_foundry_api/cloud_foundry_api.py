@@ -25,6 +25,7 @@ from .constants import (
     SOURCE_TYPE_NAME,
     TOCKEN_EXPIRATION_BUFFER,
     UAA_SERVICE_CHECK_NAME,
+    LAST_EVENT_GUID_CACHE_KEY,
 )
 from .utils import date_to_ts, get_next_url, join_url
 
@@ -49,7 +50,8 @@ class CloudFoundryApiCheck(AgentCheck):
         self._tags = self.instance.get("tags", [])
         self._per_page = self.instance.get("results_per_page", DEFAULT_PAGE_SIZE)
 
-        self._last_event_guid = ""
+        # write_persistent_cache(self, key, value)
+        self._last_event_guid = self.read_persistent_cache(LAST_EVENT_GUID_CACHE_KEY)
         self._last_event_ts = 0
         self._oauth_token = ""
         self._token_expiration = 0
@@ -450,3 +452,4 @@ class CloudFoundryApiCheck(AgentCheck):
         self.count("events.count", len(events), tags=tags)
         for event in events.values():
             self.event(event)
+        self.write_persistent_cache(LAST_EVENT_GUID_CACHE_KEY, self._last_event_guid)
