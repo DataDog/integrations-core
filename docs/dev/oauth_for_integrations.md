@@ -168,4 +168,3 @@ Additional helpful documentation, links, and articles:
 [9]: https://app.datadoghq.com/organization-settings/oauth-applications
 [10]: https://app.datadoghq.com/organization-settings/api-keys
 [11]: https://www.datadoghq.com/blog/oauth/
-[12]: https://app.datadoghq.com/organization-settings/api-keys
