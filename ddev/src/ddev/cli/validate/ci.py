@@ -11,14 +11,6 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 
-def get_valid_integrations(app):
-    import os
-
-    return {
-        path for path in os.listdir(app.repo.path) if os.path.isfile(os.path.join(app.repo.path, path, 'manifest.json'))
-    }
-
-
 def read_file(file, encoding='utf-8'):
     # type: (str, str) -> str
     with open(file, 'r', encoding=encoding) as f:
@@ -34,39 +26,15 @@ def code_coverage_enabled(check_name, app):
     if check_name in ('datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader', 'ddev'):
         return True
 
-    return is_agent_check(check_name, app)
+    return app.repo.integrations.get(check_name).is_agent_check
 
 
-def is_agent_check(check_name, app):
-    import os
-
-    package_root = os.path.join(app.repo.path, check_name, 'datadog_checks', check_name, '__init__.py')
-    if not os.path.isfile(package_root):
-        return False
-
-    contents = read_file(package_root)
-
-    # Anything more than the version must be a subclass of the base class
-    return contents.count('import ') > 1
-
-
-def get_coverage_sources(check_name):
-    package_dir, tests_dir = coverage_sources(check_name)
-    return sorted([f'{check_name}/{package_dir}', f'{check_name}/{tests_dir}'])
-
-
-def coverage_sources(check):
-    # All paths are relative to each hatch.toml
-    if check == 'datadog_checks_base':
-        package_path = 'datadog_checks/base'
-    elif check == 'datadog_checks_dev':
-        package_path = 'datadog_checks/dev'
-    elif check == 'datadog_checks_downloader':
-        package_path = 'datadog_checks/downloader'
-    else:
-        package_path = f'datadog_checks/{check}'
-
-    return package_path, 'tests'
+def get_coverage_sources(check_name, app):
+    package_path = app.repo.integrations.get(check_name).package_directory
+    package_dir = package_path.relative_to(app.repo.path / check_name)
+    if check_name == 'ddev':
+        package_dir = 'datadog_checks/ddev'
+    return sorted([f'{check_name}/{package_dir}', f'{check_name}/tests'])
 
 
 def sort_projects(projects):
@@ -271,7 +239,7 @@ def ci(app: Application, sync: bool):
     for flag, data in list(flags.items()):
         defined_checks.add(flag)
 
-        expected_coverage_paths = get_coverage_sources(flag)
+        expected_coverage_paths = get_coverage_sources(flag, app)
 
         configured_coverage_paths = data.get('paths', [])
         if configured_coverage_paths != expected_coverage_paths:
@@ -312,7 +280,7 @@ def ci(app: Application, sync: bool):
             warning_message += message
 
             for missing_check in sorted(missing_flags):
-                flags[missing_check] = {'carryforward': True, 'paths': get_coverage_sources(missing_check)}
+                flags[missing_check] = {'carryforward': True, 'paths': get_coverage_sources(missing_check, app)}
                 app.display_success(f'Added flag `{missing_check}`\n')
         else:
             success = False
