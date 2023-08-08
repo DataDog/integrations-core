@@ -18,6 +18,8 @@ def dbm_instance(instance_complex):
     return instance_complex
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_collect_mysql_settings(aggregator, dbm_instance, dd_run_check):
     # test to make sure we continue to support the old key
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
