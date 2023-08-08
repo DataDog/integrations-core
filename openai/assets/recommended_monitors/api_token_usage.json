@@ -3,7 +3,9 @@
 	"type": "query alert",
 	"query": "avg(last_12h):anomalies(sum:openai.api.usage.n_context{*}.as_count() + sum:openai.api.usage.n_generated{*}.as_count(), 'basic', 2, direction='both', interval=120, alert_window='last_30m', count_default_zero='true', seasonality='hourly') >= 1",
 	"message": "{{#is_alert}}\n\nALERT: Your OpenAI usage in the last hour has been abnormally high\n\n{{/is_alert}}",
-	"tags": [],
+    "tags": [
+        "integration:openai"
+    ],
 	"options": {
 		"thresholds": {
 			"critical": 1,
