@@ -60,7 +60,7 @@ class PostgresConfig:
         self.max_connections = instance.get('max_connections', 30)
         self.tags = self._build_tags(instance.get('tags', []))
 
-        ssl = instance.get('ssl', False)
+        ssl = instance.get('ssl', "false")
         if ssl in SSL_MODES:
             self.ssl_mode = ssl
         else:
