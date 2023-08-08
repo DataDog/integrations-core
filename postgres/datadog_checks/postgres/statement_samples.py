@@ -210,7 +210,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
         self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
-        self._explain_parameterized_queries = ExplainParameterizedQueries(check, config)
+        self._thread_id = "query-samples"
+        self._explain_parameterized_queries = ExplainParameterizedQueries(check, config, self._thread_id)
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
 
         self._collection_strategy_cache = TTLCache(
@@ -269,7 +270,10 @@ class PostgresStatementSamples(DBMAsyncJob):
         query = PG_ACTIVE_CONNECTIONS_QUERY.format(
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
-        rows = self.db_pool.execute_main_db_safe(query, params, row_format=dict_row)
+        with self.db_pool.get_main_db(conn_prefix=self._thread_id).cursor(row_factory=dict_row) as cursor:
+            self._log.debug("Running query [%s] %s", query, params)
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
         self._report_check_hist_metrics(start_time, len(rows), "get_active_connections")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return [dict(row) for row in rows]
@@ -298,7 +302,10 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
         )
-        rows = self.db_pool.execute_main_db_safe(query, params, row_format=dict_row)
+        with self.db_pool.get_main_db(conn_prefix=self._thread_id).cursor(row_factory=dict_row) as cursor:
+            self._log.debug("Running query [%s] %s", query, params)
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
         return rows
@@ -312,15 +319,18 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
-        query = "select * from {pg_stat_activity_view} LIMIT 0".format(
-            pg_stat_activity_view=self._config.pg_stat_activity_view
-        )
-        all_columns = self.db_pool.get_main_db_columns_safe(query, params=())
-        available_columns = [c for c in all_expected_columns if c in all_columns]
-        missing_columns = set(all_expected_columns) - set(available_columns)
-        if missing_columns:
-            self._log.debug("missing the following expected columns from pg_stat_activity: %s", missing_columns)
-        self._log.debug("found available pg_stat_activity columns: %s", available_columns)
+        with self.db_pool.get_main_db(conn_prefix=self._thread_id).cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                "select * from {pg_stat_activity_view} LIMIT 0".format(
+                    pg_stat_activity_view=self._config.pg_stat_activity_view
+                )
+            )
+            all_columns = {i[0] for i in cursor.description}
+            available_columns = [c for c in all_expected_columns if c in all_columns]
+            missing_columns = set(all_expected_columns) - set(available_columns)
+            if missing_columns:
+                self._log.debug("missing the following expected columns from pg_stat_activity: %s", missing_columns)
+            self._log.debug("found available pg_stat_activity columns: %s", available_columns)
         return available_columns
 
     def _filter_and_normalize_statement_rows(self, rows):
@@ -508,7 +518,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_db_explain_setup_state(self, dbname):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
-            with self.db_pool.get_connection(dbname, self._conn_ttl_ms):
+            with self.db_pool.get_connection(dbname, self._conn_ttl_ms, conn_prefix=self._thread_id):
                 pass
         except psycopg.OperationalError as e:
             self._log.warning(
@@ -573,7 +583,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
-        with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
+        with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms, conn_prefix=self._thread_id) as conn:
             with conn.cursor() as cursor:
                 self._log.debug(
                     "Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement

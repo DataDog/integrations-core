@@ -29,14 +29,12 @@ class ConnectionInfo:
         deadline: int,
         active: bool,
         last_accessed: int,
-        thread: threading.Thread,
         persistent: bool,
     ):
         self.connection = connection
         self.deadline = deadline
         self.active = active
         self.last_accessed = last_accessed
-        self.thread = thread
         self.persistent = persistent
 
 
@@ -107,7 +105,7 @@ class MultiDatabaseConnectionPool(object):
         if conn_prefix:
             conn_name = "{}-{}".format(conn_prefix, dbname)
         with self._mu:
-            conn = self._conns.pop(conn_name, ConnectionInfo(None, None, None, None, None, None))
+            conn = self._conns.pop(conn_name, ConnectionInfo(None, None, None, None, None))
             db = conn.connection
             if db is None or db.closed:
                 if self.max_conns is not None:
@@ -137,13 +135,14 @@ class MultiDatabaseConnectionPool(object):
                 deadline=deadline,
                 active=True,
                 last_accessed=datetime.datetime.now(),
-                thread=threading.current_thread(),
                 persistent=persistent,
             )
             return db
 
     @contextlib.contextmanager
-    def get_connection(self, dbname: str, ttl_ms: int, timeout: int = None, persistent: bool = False):
+    def get_connection(
+        self, dbname: str, ttl_ms: int, conn_prefix: str = None, timeout: int = None, persistent: bool = False
+    ):
         """
         Grab a connection from the pool if the database is already connected.
         If max_conns is specified, and the database isn't already connected,
@@ -153,14 +152,19 @@ class MultiDatabaseConnectionPool(object):
         """
         try:
             with self._mu:
-                db = self._get_connection_raw(dbname=dbname, ttl_ms=ttl_ms, timeout=timeout, persistent=persistent)
+                db = self._get_connection_raw(
+                    dbname=dbname, ttl_ms=ttl_ms, conn_prefix=conn_prefix, timeout=timeout, persistent=persistent
+                )
             yield db
         finally:
             with self._mu:
                 try:
-                    self._conns[dbname].active = False
+                    conn_name = dbname
+                    if conn_prefix:
+                        conn_name = "{}-{}".format(conn_prefix, dbname)
+                    self._conns[conn_name].active = False
                 except KeyError:
-                    # if self._get_connection_raw hit an exception, self._conns[dbname] didn't get populated
+                    # if self._get_connection_raw hit an exception, self._conns[conn_name] didn't get populated
                     pass
 
     def prune_connections(self):
@@ -173,10 +177,10 @@ class MultiDatabaseConnectionPool(object):
         """
         with self._mu:
             now = datetime.datetime.now()
-            for dbname, conn in list(self._conns.items()):
+            for conn_name, conn in list(self._conns.items()):
                 if conn.deadline < now:
                     self._stats.connection_pruned += 1
-                    self._terminate_connection_unsafe(dbname)
+                    self._terminate_connection_unsafe(conn_name)
 
     def close_all_connections(self, timeout=None):
         """
@@ -208,20 +212,20 @@ class MultiDatabaseConnectionPool(object):
             # Could not evict a candidate; return None
             return None
 
-    def _terminate_connection_unsafe(self, dbname: str):
-        db = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None, None)).connection
+    def _terminate_connection_unsafe(self, conn_name: str):
+        db = self._conns.pop(conn_name, ConnectionInfo(None, None, None, None, None)).connection
         if db is not None:
             try:
-                self._stats.connection_closed += 1
                 if not db.closed:
                     db.close()
+                self._stats.connection_closed += 1
             except Exception:
                 self._stats.connection_closed_failed += 1
-                self._log.exception("failed to close DB connection for db=%s", dbname)
+                self._log.exception("failed to close DB connection for db=%s", conn_name)
                 return False
         return True
 
-    def _get_main_db(self):
+    def get_main_db(self, conn_prefix: str = None):
         """
         Returns a memoized, persistent psycopg connection to `self.dbname`.
         Utilizes the db connection pool, and is meant to be shared across multiple threads.
@@ -230,33 +234,8 @@ class MultiDatabaseConnectionPool(object):
         conn = self._get_connection_raw(
             dbname=self._config.dbname,
             ttl_ms=self._config.idle_connection_timeout,
-            conn_prefix="main",
+            conn_prefix=conn_prefix,
             startup_fn=self._check.load_pg_settings,
             persistent=True,
         )
         return conn
-
-    def execute_main_db_safe(self, query, params=None, row_format=None):
-        """
-        Runs queries for main database utilizing a lock for thread safety.
-        Only a single command can be executed on the same connection at a time
-        or else postgres will throw an exception
-        :return: a PQResult
-        """
-        with self._query_lock:
-            self._log.debug("Running query [{}] {}".format(query, params))
-            if row_format:
-                with self._get_main_db().cursor(row_factory=row_format) as cursor:
-                    cursor.execute(query, params)
-                    return cursor.fetchall()
-            else:
-                with self._get_main_db().cursor() as cursor:
-                    cursor.execute(query, params)
-                    return cursor.fetchall()
-
-    def get_main_db_columns_safe(self, query, params):
-        with self._query_lock:
-            with self._get_main_db().cursor() as cursor:
-                self._log.debug("Running query [%s] %s", query, params)
-                cursor.execute(query, params)
-                return [desc[0] for desc in cursor.description] if cursor.description else []
