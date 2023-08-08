@@ -656,7 +656,7 @@ def test_mongod_tls_fail(check, dd_run_check, aggregator):
         Exception,
         match=(
             "pymongo.errors.ConfigurationError:"
-            r" Private key doesn't match certificate: \[SSL\] PEM lib \(_ssl.c:4065\)"
+            r" Private key doesn't match certificate"
         ),
     ):
         dd_run_check(mongo_check)
