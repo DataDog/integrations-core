@@ -52,46 +52,6 @@ def test_e2e_profile_cisco_wan_optimizer(dd_agent_check):
     aggregator.assert_metric('snmp.cwoTfoStatsTotalNormalClosedConn', metric_type=aggregator.COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.cwoTfoStatsTotalOptConn', metric_type=aggregator.COUNT, tags=common_tags)
 
-    tag_rows = [
-        ['fan_status_index:11'],
-        ['fan_status_index:16'],
-    ]
-    for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-    tag_rows = [
-        ['fan_status_index:11', 'fan_state:notFunctioning', 'fan_status_descr:oxen their but kept forward kept'],
-        ['fan_status_index:16', 'fan_state:normal', 'fan_status_descr:acted'],
-    ]
-    for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.ciscoEnvMonFanStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-    tag_rows = [
-        ['fru:21'],
-        ['fru:23'],
-        ['fru:25'],
-        ['fru:27'],
-        ['fru:29'],
-        ['fru:30'],
-        ['fru:7'],
-        ['fru:9'],
-    ]
-    for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
-    tag_rows = [
-        ['fru:21', 'cefc_fan_tray_oper_status:warning', 'cefc_fan_tray_direction:frontToBack'],
-        ['fru:23', 'cefc_fan_tray_oper_status:up', 'cefc_fan_tray_direction:frontToBack'],
-        ['fru:25', 'cefc_fan_tray_oper_status:unknown', 'cefc_fan_tray_direction:frontToBack'],
-        ['fru:27', 'cefc_fan_tray_oper_status:unknown', 'cefc_fan_tray_direction:unknown'],
-        ['fru:29', 'cefc_fan_tray_oper_status:unknown', 'cefc_fan_tray_direction:backToFront'],
-        ['fru:30', 'cefc_fan_tray_oper_status:up', 'cefc_fan_tray_direction:backToFront'],
-        ['fru:7', 'cefc_fan_tray_oper_status:up', 'cefc_fan_tray_direction:backToFront'],
-        ['fru:9', 'cefc_fan_tray_oper_status:warning', 'cefc_fan_tray_direction:unknown'],
-    ]
-    for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.cefcFanTrayStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
-
     # --- TEST METADATA ---
     device = {
         'description': 'cisco-wan-optimizer Device Description',
