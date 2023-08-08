@@ -31,10 +31,8 @@ def code_coverage_enabled(check_name, app):
 
 def get_coverage_sources(check_name, app):
     package_path = app.repo.integrations.get(check_name).package_directory
-    package_dir = package_path.relative_to(app.repo.path / check_name)
-    if check_name == 'ddev':
-        package_dir = 'datadog_checks/ddev'
-    return sorted([f'{check_name}/{package_dir}', f'{check_name}/tests'])
+    package_dir = package_path.relative_to(app.repo.path)
+    return sorted([str(package_dir.as_posix()), f'{check_name}/tests'])
 
 
 def sort_projects(projects):
