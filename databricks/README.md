@@ -8,7 +8,7 @@ Monitor your [Databricks][1] clusters with the Datadog [Spark integration][2].
 
 ### Installation
 
-Monitor Databricks Spark applications with the [Datadog Spark integration][3]. Install the [Datadog Agent][4] on your clusters following the [Configuration](#configuration) instructions for your appropriate cluster.
+Monitor Databricks Spark applications with the [Datadog Spark integration][3]. Install the [Datadog Agent][4] on your clusters following the [configuration](#configuration) instructions for your appropriate cluster.
 
 ### Configuration
 
@@ -120,11 +120,11 @@ logs:
           name: new_log_start_with_date
           pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.d/spark.yaml
 
-    echo "Spark integration configured"
-  fi
+  echo "Spark integration configured"
+fi
 
-  echo "Restart the agent"
-  sudo service datadog-agent restart
+echo "Restart the agent"
+sudo service datadog-agent restart
 EOF
 
 chmod a+x /tmp/start_datadog.sh
@@ -197,26 +197,26 @@ logs:
           name: new_log_start_with_date
           pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.d/spark.yaml
 
-    echo "Spark integration configured"
-  else
-    echo "Installing Datadog Agent on the worker."
+  echo "Spark integration configured"
+else
+  echo "Installing Datadog Agent on the worker."
 
-    # CONFIGURE HOST TAGS FOR WORKERS
-    DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:worker","databricks_instance_type:\${DB_INSTANCE_TYPE}","databricks_is_job_cluster:\${DB_IS_JOB_CLUSTER}"
+  # CONFIGURE HOST TAGS FOR WORKERS
+  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:worker","databricks_instance_type:\${DB_INSTANCE_TYPE}","databricks_is_job_cluster:\${DB_IS_JOB_CLUSTER}"
 
-    # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
-    # CONFIGURE HOSTNAME EXPLICITLY IN datadog.yaml TO PREVENT AGENT FROM FAILING ON VERSION 7.40+
-    # SEE https://github.com/DataDog/datadog-agent/issues/14152 FOR CHANGE
-    DD_INSTALL_ONLY=true DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS DD_HOSTNAME="\$(hostname | xargs)" bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+  # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
+  # CONFIGURE HOSTNAME EXPLICITLY IN datadog.yaml TO PREVENT AGENT FROM FAILING ON VERSION 7.40+
+  # SEE https://github.com/DataDog/datadog-agent/issues/14152 FOR CHANGE
+  DD_INSTALL_ONLY=true DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS DD_HOSTNAME="\$(hostname | xargs)" bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
-    echo "Datadog Agent is installed"
-  fi
+  echo "Datadog Agent is installed"
+fi
 
-  # Avoid conflicts on port 6062
-  echo "process_config.expvar_port: 6063" >> /etc/datadog-agent/datadog.yaml
+# Avoid conflicts on port 6062
+echo "process_config.expvar_port: 6063" >> /etc/datadog-agent/datadog.yaml
 
-  echo "Restart the agent"
-  sudo service datadog-agent restart
+echo "Restart the agent"
+sudo service datadog-agent restart
 EOF
 
 chmod a+x /tmp/start_datadog.sh
@@ -315,11 +315,11 @@ logs:
           name: new_log_start_with_date
           pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.d/spark.yaml
 
-    echo "Spark integration configured"
-  fi
+  echo "Spark integration configured"
+fi
 
-  echo "Restart the agent"
-  sudo service datadog-agent restart
+echo "Restart the agent"
+sudo service datadog-agent restart
 EOF
 
 chmod a+x /tmp/start_datadog.sh
@@ -389,26 +389,26 @@ logs:
           name: new_log_start_with_date
           pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.d/spark.yaml
 
-    echo "Spark integration configured"
-  else
-    echo "Installing Datadog Agent on the worker."
+  echo "Spark integration configured"
+else
+  echo "Installing Datadog Agent on the worker."
 
-    # CONFIGURE HOST TAGS FOR WORKERS
-    DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:worker","databricks_instance_type:\${DB_INSTANCE_TYPE}","databricks_is_job_cluster:\${DB_IS_JOB_CLUSTER}"
+  # CONFIGURE HOST TAGS FOR WORKERS
+  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:worker","databricks_instance_type:\${DB_INSTANCE_TYPE}","databricks_is_job_cluster:\${DB_IS_JOB_CLUSTER}"
 
-    # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
-    # CONFIGURE HOSTNAME EXPLICITLY IN datadog.yaml TO PREVENT AGENT FROM FAILING ON VERSION 7.40+
-    # SEE https://github.com/DataDog/datadog-agent/issues/14152 FOR CHANGE
-    DD_INSTALL_ONLY=true DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS DD_HOSTNAME="\$(hostname | xargs)" bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
+  # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
+  # CONFIGURE HOSTNAME EXPLICITLY IN datadog.yaml TO PREVENT AGENT FROM FAILING ON VERSION 7.40+
+  # SEE https://github.com/DataDog/datadog-agent/issues/14152 FOR CHANGE
+  DD_INSTALL_ONLY=true DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS DD_HOSTNAME="\$(hostname | xargs)" bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
-    echo "Datadog Agent is installed"
-  fi
+  echo "Datadog Agent is installed"
+fi
 
-  # Avoid conflicts on port 6062
-  echo "process_config.expvar_port: 6063" >> /etc/datadog-agent/datadog.yaml
+# Avoid conflicts on port 6062
+echo "process_config.expvar_port: 6063" >> /etc/datadog-agent/datadog.yaml
 
-  echo "Restart the agent"
-  sudo service datadog-agent restart
+echo "Restart the agent"
+sudo service datadog-agent restart
 EOF
 
 chmod a+x /tmp/start_datadog.sh
