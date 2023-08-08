@@ -9,7 +9,8 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from types import MappingProxyType
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
@@ -43,9 +44,12 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = None
     port: Optional[int] = None
     proc_names: Optional[tuple[str, ...]] = None
+    proc_names_exclude: Optional[tuple[str, ...]] = None
     proc_regex: Optional[tuple[str, ...]] = None
+    proc_regex_exclude: Optional[tuple[str, ...]] = None
     service: Optional[str] = None
     socket: Optional[str] = None
+    status_mapping_override: Optional[MappingProxyType[str, Any]] = None
     tags: Optional[tuple[str, ...]] = None
     username: Optional[str] = None
 

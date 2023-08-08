@@ -250,6 +250,7 @@ snmp.cpiPduBranchStatus,gauge,,,,[Chatsworth] Get the alarm status of the branch
 snmp.cpiPduBranchVoltage,gauge,,,,[Chatsworth] The voltage in 1/10 volts of the branch on the PDU.,0,snmp,,
 snmp.cpiPduChainRole,gauge,,,,[Chatsworth] Get the role of the PDU in a daisy chain.,0,snmp,,
 snmp.cpiPduDoorStatus,gauge,,,,[Chatsworth] Indicates if the door sensor is closed or open.,0,snmp,,
+snmp.cpiPduEas,gauge,,,,"[Chatsworth] Constant metric equal to 1.",0,snmp,,
 snmp.cpiPduEasStatus,gauge,,,,"[Chatsworth] Indicates if the Electronic Access Control system is ready, inactive, or error state.",0,snmp,,
 snmp.cpiPduLineCurrent,gauge,,,,[Chatsworth] The current draw in 1/100 amp of the line on the PDU.,0,snmp,,
 snmp.cpiPduLockStatus,gauge,,,,[Chatsworth] Indicates if the lock is closed or open.,0,snmp,,
