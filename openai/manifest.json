@@ -58,7 +58,7 @@
     },
     "monitors": {
       "Request Limits": "assets/recommended_monitors/request_limits.json",
-      "Token per min Limits": "assets/recommended_monitors/tokens_limits.json"
+      "Token per min Limits": "assets/recommended_monitors/tokens_limits.json",
       "Abnormally High Token Usage": "assets/recommended_monitors/api_token_usage.json"
     }
   },
