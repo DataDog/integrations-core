@@ -94,11 +94,19 @@ def pin(definition):
     echo_info(f'Files updated: {len(checks)}')
 
 
-@dep.command(
-    context_settings=CONTEXT_SETTINGS, short_help="Combine all dependencies for the Agent's static environment"
+@dep.command(context_settings=CONTEXT_SETTINGS)
+@click.option(
+    "--update-licenses/--no-update-licenses",
+    default=True,
+    help="Use updated agent requirements to update 3rd-party licenses. Pass --no-update-licenses to disable.",
+    show_default=True,
 )
-def freeze():
-    """Combine all dependencies for the Agent's static environment."""
+@click.pass_context
+def freeze(ctx, update_licenses):
+    """Combine all dependencies for the Agent's static environment.
+
+    This writes combined dependencies to `agent_requirements.in`.
+    """
     dependencies, errors = read_check_dependencies()
 
     if errors:
@@ -107,8 +115,13 @@ def freeze():
 
         abort()
 
-    echo_info(f'Static file: {get_agent_requirements()}')
+    echo_info(f'Destination file: {get_agent_requirements()}')
     update_agent_dependencies(dependencies)
+    if update_licenses:
+        echo_info('Checking 3rd-party licenses for updates.')
+        from datadog_checks.dev.tooling.commands.validate.licenses import licenses
+
+        ctx.invoke(licenses, sync=True)
 
 
 @dep.command(
