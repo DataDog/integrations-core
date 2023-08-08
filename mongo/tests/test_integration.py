@@ -652,12 +652,6 @@ def test_mongod_tls_fail(check, dd_run_check, aggregator):
         'tls_ca_file': '{}/ca.pem'.format(TLS_CERTS_FOLDER),
     }
     mongo_check = check(instance)
-    with pytest.raises(
-        Exception,
-        match=(
-            "pymongo.errors.ConfigurationError:"
-            r" Private key doesn't match certificate"
-        ),
-    ):
+    with pytest.raises(Exception, match=("pymongo.errors.ConfigurationError: Private key doesn't match certificate")):
         dd_run_check(mongo_check)
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.CRITICAL)
