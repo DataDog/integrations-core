@@ -165,7 +165,9 @@ jobs:
 
     - name: Validate dependencies
       if: inputs.dep
-      run: ddev validate dep $TARGET
+      # Running this validation without specifying a check will validate all dependency
+      # changes against the agent_requirements.in
+      run: ddev validate dep
 
     - name: Validate EULA files
       if: inputs.eula
