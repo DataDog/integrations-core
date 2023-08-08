@@ -823,7 +823,7 @@ flags:
   ddev:
     carryforward: true
     paths:
-    - ddev/datadog_checks/ddev
+    - ddev/src/ddev
     - ddev/tests
   directory:
     carryforward: true
