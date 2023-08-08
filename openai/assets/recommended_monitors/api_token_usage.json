@@ -19,5 +19,8 @@
 			"recovery_window": "last_15m"
 		},
 		"include_tags": false
-	}
+	},
+    "recommended_monitor_metadata": {
+        "description": "Notify your team when OpenAI token usage is abnormally high"
+    }
 }
