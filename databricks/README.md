@@ -21,44 +21,43 @@ Each script described below can be modified to suits your needs. For instance, y
 <!-- partial
 {{% site-region region="us,us3,us5,eu,gov,ap1" %}}
 You can also define or modify environment variables with the cluster-scoped init script path using the UI, Databricks CLI, or invoking the Clusters API:
-    - The `DD_API_KEY` environment variable to better identify your clusters.
-    - The `DD_ENV` environment variable to better identify your clusters.
-    - Set `DD_SITE` to your site: {{< region-param key="dd_site" code="true" >}}. Defaults to `datadoghq.com`
+  - Set `DD_API_KEY` to better identify your clusters.
+  - Set `DD_ENV` to better identify your clusters.
+  - Set `DD_SITE` to your site: {{< region-param key="dd_site" code="true" >}}. Defaults to `datadoghq.com`
 {{% /site-region %}}
 partial -->
 
-<div class="alert alert-warning">For security reasons, it's not recommended to define the `DD_API_KEY` environment in plain text directly in the UI. Instead, please use <a href="https://docs.databricks.com/en/security/secrets/index.html">Databricks secrets</a>.</div>
+<div class="alert alert-warning">For security reasons, it's not recommended to define the `DD_API_KEY` environment variable in plain text directly in the UI. Instead, use <a href="https://docs.databricks.com/en/security/secrets/index.html">Databricks secrets</a>.</div>
 
 
-#### Standard cluster
 
-##### With a global init script
+#### With a global init script
 
 A global init script runs on every cluster created in your workspace. Global init scripts are useful when you want to enforce organization-wide library configurations or security screens. 
 
-<div class="alert alert-info">Only workspace admins can manage global init script.</div>
+<div class="alert alert-info">Only workspace admins can manage global init scripts.</div>
 
 Use the Databricks UI to edit the global init scripts:
 
-1. Choose the script that suits your needs below.
-2. Modify it to your convenience. You can for instance add tags or define a specific configuration for the integration.
-3. Go to the Admin Settings and click the `Global Init Scripts` tab.
-4. Click on the `+ Add` button.
-5. Name the script, for instance `Datadog init script` and then paste it in the `Script` field.
-6. Click on the `Enabled` toggle to enable it.
-7. Click on the `Add` button.
+1. Choose one of the following scripts to install the Agent on the driver or on the driver and worker nodes of the cluster.
+2. Modify the script to suit your needs. For example, you can add tags or define a specific configuration for the integration.
+3. Go to the Admin Settings and click the **Global Init Scripts** tab.
+4. Click on the **+ Add** button.
+5. Name the script, for example `Datadog init script` and then paste it in the **Script** field.
+6. Click on the **Enabled** toggle to enable it.
+7. Click on the **Add** button.
 
-The script will then automatically be used for any new cluster. More information on global init scripts can be found in the [Databricks official documentation][16].
+After these steps, any new cluster uses the script automatically. More information on global init scripts can be found in the [Databricks official documentation][16].
 
 <div class="alert alert-info">You can define several init scripts and specify their order in the UI.</div>
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Driver only" xxx -->
-##### Install the Datadog Agent on Driver
+##### Install the Datadog Agent on driver
 
 Install the Datadog Agent on the driver node of the cluster. 
 
-<div class="alert alert-warning">You will need to define the value of the `DD_API_KEY` variable inside the script.</div>
+<div class="alert alert-warning">You need to define the value of the `DD_API_KEY` variable inside the script.</div>
 
 ```shell script
 #!/bin/bash
@@ -228,25 +227,25 @@ chmod a+x /tmp/start_datadog.sh
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-##### With a cluster-scoped init script 
+#### With a cluster-scoped init script 
 
 Cluster-scoped init scripts are init scripts defined in a cluster configuration. Cluster-scoped init scripts apply to both clusters you create and those created to run jobs.
 
 Use the Databricks UI to edit the cluster to run the init script:
 
-1. Choose the script that suits your needs below.
-2. Modify it to your convenience. You can for instance add tags or define a specific configuration for the integration.
-3. Save the script into your workspace with the `Workspace` menu on the left.
-4. On the cluster configuration page, click the `Advanced` options toggle.
-5. In the `Environment variables`, specify the `DD_API_KEY` environment variable and, optionally, the `DD_ENV` and the `DD_SITE` environment variables.
-6. Go to the `Init Scripts` tab.
-7. In the `Destination` drop-down, select the `Workspace` destination type.
+1. Choose one of the following scripts to install the Agent on the driver or on the driver and worker nodes of the cluster.
+2. Modify the script to suit your needs. For example, you can add tags or define a specific configuration for the integration.
+3. Save the script into your workspace with the **Workspace** menu on the left.
+4. On the cluster configuration page, click the **Advanced** options toggle.
+5. In the **Environment variables**, specify the `DD_API_KEY` environment variable and, optionally, the `DD_ENV` and the `DD_SITE` environment variables.
+6. Go to the **Init Scripts** tab.
+7. In the **Destination** dropdown, select the `Workspace` destination type.
 8. Specify a path to the init script.
-9. Click on the `Add` button.
+9. Click on the **Add** button.
 
-<div class="alert alert-info">If you stored your `datadog_init_script.sh` directly in the `Shared` workspace, can be accessed specifying the `/Shared/datadog_init_script.sh` path.</div>
+If you stored your `datadog_init_script.sh` directly in the `Shared` workspace, you can access the file at the following path: `/Shared/datadog_init_script.sh`.
 
-<div class="alert alert-info">If you stored your `datadog_init_script.sh` directly in a user workspace, the file will be accessible at the following path: `/Users/$EMAIL_ADDRESS/datadog_init_script.sh`.</div>
+If you stored your `datadog_init_script.sh` directly in a user workspace, you can access the file at the following path: `/Users/$EMAIL_ADDRESS/datadog_init_script.sh`.
 
 More information on cluster init scripts can be found in the [Databricks official documentation][16].
 
