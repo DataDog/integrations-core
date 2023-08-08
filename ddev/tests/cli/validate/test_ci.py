@@ -145,13 +145,13 @@ def test_codecov_missing_flag(ddev, repository, helpers):
     assert error in helpers.remove_trailing_spaces(result.output)
 
 
-# def test_valdiate_ci_success(ddev, repository, helpers):
-#     result = ddev('validate', 'ci')
-#     assert result.exit_code == 0, result.output
-#     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-#         """
-#         CI configuration validation
+def test_valdiate_ci_success(ddev, repository, helpers):
+    result = ddev('validate', 'ci')
+    assert result.exit_code == 0, result.output
+    assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
+        """
+        CI configuration validation
 
-#         Passed: 1
-#         """
-#     )
+        Passed: 1
+        """
+    )
