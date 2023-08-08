@@ -23,12 +23,15 @@ from datadog_checks.base.utils.tracking import tracked_method
 # default pg_settings collection interval in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
 
+MARIADB_TABLE_NAME = "information_schema.GLOBAL_VARIABLES"
+MYSQL_TABLE_NAME = "performance_schema.global_variables"
+
 SETTINGS_QUERY = """
 SELECT
     variable_name,
     variable_value
 FROM
-    performance_schema.global_variables
+    {table_name}
 """
 
 
@@ -53,6 +56,7 @@ class MySQLMetadata(DBMAsyncJob):
             job_name="database-metadata",
             shutdown_callback=self._close_db_conn,
         )
+        self._check = check
         self._config = config
         self._version_processed = False
         self._connection_args = connection_args
@@ -100,10 +104,12 @@ class MySQLMetadata(DBMAsyncJob):
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def report_mysql_metadata(self):
         settings = []
+        table_name = MYSQL_TABLE_NAME if not self._check.is_mariadb else MARIADB_TABLE_NAME
+        query = SETTINGS_QUERY.format(table_name=table_name)
         with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
             self._cursor_run(
                 cursor,
-                SETTINGS_QUERY,
+                query,
             )
             rows = cursor.fetchall()
             settings = [dict(row) for row in rows]
