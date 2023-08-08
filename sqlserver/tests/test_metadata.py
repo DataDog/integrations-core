@@ -84,5 +84,5 @@ def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = dbm_metadata[0]
     assert event['dbms'] == "sqlserver"
-    assert event['kind'] == "sql_settings"
+    assert event['kind'] == "sqlserver_configs"
     assert len(event["metadata"]) > 0
