@@ -78,7 +78,7 @@ Ensure that you do not hit any errors when going through the basic authorization
 #### Create an API Key
 If your OAuth client requests the `api_keys_write` scope, ensure that you can successfully make a request to the `marketplace_create_api` endpoint with your token in the headers of the request. 
 
-If successful, this request returns an API key that you can find on the [API Keys Management page][12]. You must securely save this key to use it for submitting data into Datadog on behalf of the user. **You cannot access this API key value again after the initial request response**.
+If successful, this request returns an API key that you can find on the [API Keys Management page][10]. You must securely save this key to use it for submitting data into Datadog on behalf of the user. **You cannot access this API key value again after the initial request response**.
 
 #### Test multiple Datadog sites
 Test that your OAuth client can work across multiple [Datadog sites][8] by kicking off authorization from your EU Datadog sandbox organization.
