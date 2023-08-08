@@ -525,7 +525,12 @@ def test_e2e_core_cisco_csr(dd_agent_check):
 
     common.assert_common_metrics(aggregator, global_tags, is_e2e=True, loader='core')
 
-    metric_tags = global_tags + ['neighbor:244.12.239.177', 'admin_status:start', 'peer_state:established']
+    metric_tags = global_tags + [
+        'neighbor:244.12.239.177',
+        'admin_status:start',
+        'peer_state:established',
+        'remote_as:26',
+    ]
 
     for metric in metrics.PEER_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=metric_tags, count=2)
@@ -629,6 +634,13 @@ def test_e2e_cisco_nexus(dd_agent_check):
 
     power_supply_tags = ['power_source:1', 'power_status_descr:Jaded driving their their their'] + common_tags
     aggregator.assert_metric('snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=power_supply_tags)
+
+    power_supply_tags = [
+        'cisco_env_mon_supply_state:normal',
+        'power_source:1',
+        'power_status_descr:Jaded driving their their their',
+    ] + common_tags
+    aggregator.assert_metric('snmp.ciscoEnvMonSupplyStatus', metric_type=aggregator.GAUGE, tags=power_supply_tags)
 
     fan_indices = [4, 6, 7, 16, 21, 22, 25, 27]
     for index in fan_indices:

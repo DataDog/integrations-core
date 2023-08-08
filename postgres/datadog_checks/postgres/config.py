@@ -64,7 +64,7 @@ class PostgresConfig:
         if ssl in SSL_MODES:
             self.ssl_mode = ssl
         else:
-            self.ssl_mode = 'require' if is_affirmative(ssl) else 'disable'
+            self.ssl_mode = 'require' if ssl == "true" else 'disable'
 
         self.ssl_cert = instance.get('ssl_cert', None)
         self.ssl_root_cert = instance.get('ssl_root_cert', None)

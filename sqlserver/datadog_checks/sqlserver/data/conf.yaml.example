@@ -222,6 +222,21 @@ instances:
     #
     # dbm: false
 
+    ## Configure collection of sys.configurations. This is an alpha feature.
+    #
+    # collect_settings:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of sys.configurations. Requires `dbm: true`.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database settings collection interval (in seconds). Each collection involves a single query to
+        ## `sys.configurations`.
+        #
+        # collection_interval: 600
+
     ## Configure collection of query metrics
     #
     # query_metrics:
