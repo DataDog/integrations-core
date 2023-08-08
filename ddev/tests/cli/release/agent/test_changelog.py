@@ -10,16 +10,20 @@ from ddev.repo.core import Repository
 
 
 def test_changelog_without_arguments(fake_changelog, ddev):
-
     result = ddev('release', 'agent', 'changelog')
 
     assert result.exit_code == 0
     assert result.output.rstrip('\n') == fake_changelog
 
 
-def test_changelog_write_without_force_aborts(fake_changelog, ddev):
-    # Note, this test has the implicit assumption coming from the `repository` fixture
-    # that the changelog file 'AGENT_CHANGELOG.md' already exists, and that's why it must fail.
+def test_changelog_write_without_force_aborts_when_changelog_already_exists(
+    repo_with_fake_changelog, fake_changelog, ddev
+):
+    repo, fake_changelog = repo_with_fake_changelog
+
+    # Create the changelog to trigger the condition
+    open(repo.path / 'AGENT_CHANGELOG.md', 'w').close()
+
     result = ddev('release', 'agent', 'changelog', '--write')
     assert result.exit_code == 1
     assert re.match(
@@ -28,14 +32,16 @@ def test_changelog_write_without_force_aborts(fake_changelog, ddev):
     )
 
 
-def test_changelog_write_force(repository, fake_changelog, ddev):
+def test_changelog_write_force(repo_with_fake_changelog, fake_changelog, ddev):
+    repo, fake_changelog = repo_with_fake_changelog
+
     result = ddev('release', 'agent', 'changelog', '--write', '--force')
     assert result.exit_code == 0
-    with open(repository.path / 'AGENT_CHANGELOG.md') as f:
+    with open(repo.path / 'AGENT_CHANGELOG.md') as f:
         assert f.read().rstrip('\n') == fake_changelog
 
 
-def test_changelog_since_to(repository, fake_changelog, ddev):
+def test_changelog_since_to(fake_changelog, ddev):
     result = ddev('release', 'agent', 'changelog', '--since', '7.38.0', '--to', '7.39.0')
     assert result.exit_code == 0
     assert (
@@ -51,25 +57,37 @@ def test_changelog_since_to(repository, fake_changelog, ddev):
 
 
 @pytest.fixture
-def fake_changelog(repository):
+def repo_with_history(tmp_path_factory):
     """Sets up a repo with a fake sequence of agent releases, yielding the expected changelog."""
+    # Initialize a new repo
+    repo_path = tmp_path_factory.mktemp('integrations-core')
+    repo = Repository('integrations-core', str(repo_path))
 
-    repo = Repository(repository.path.name, str(repository.path))
+    def commit(msg):
+        # Using `--no-verify` avoids commit hooks that can slow down the tests and are not necessary
+        repo.git.run('commit', '--no-verify', '-a', '-m', msg)
+
+    repo.git.run('init')
+    repo.git.run('config', 'user.email', 'you@example.com')
+    repo.git.run('config', 'user.name', 'Your Name')
+    repo.git.run('config', 'commit.gpgsign', 'false')
+
     # Initial version with a single integration
     write_agent_requirements(repo.path, ['datadog-foo==1.0.0'])
-    repo.git.run('commit', '-a', '-m', 'first')
+    repo.git.run('add', '.')
+    commit('first')
     repo.git.run('tag', '7.37.0')
     # An update and a new integration
     write_agent_requirements(repo.path, ['datadog-foo==1.5.0', 'datadog-bar==1.0.0'])
-    repo.git.run('commit', '-a', '-m', 'second')
+    commit('second')
     repo.git.run('tag', '7.38.0')
     # A breaking update
     write_agent_requirements(repo.path, ['datadog-bar==2.0.0'])
-    repo.git.run('commit', '-a', '-m', 'third')
+    commit('third')
     repo.git.run('tag', '7.39.0')
     # An update with an environment marker
     write_agent_requirements(repo.path, ["datadog-onlywin==1.0.0; sys_platform == 'win32'"])
-    repo.git.run('commit', '-a', '-m', 'fourth')
+    commit('fourth')
     repo.git.run('tag', '7.40.0')
 
     # Satisfy manifest requirements
@@ -77,8 +95,13 @@ def fake_changelog(repository):
     write_dummy_manifest(repo.path, 'bar')
     write_dummy_manifest(repo.path, 'onlywin')
 
-    with temporary_root(repository.path):
-        yield """
+    yield repo
+
+
+@pytest.fixture
+def repo_with_fake_changelog(repo_with_history, config_file):
+    with temporary_root(str(repo_with_history.path), config_file):
+        yield repo_with_history, """
 ## Datadog Agent version [7.40.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7400)
 
 * onlywin [1.0.0](https://github.com/DataDog/integrations-core/blob/master/onlywin/CHANGELOG.md)
@@ -96,11 +119,18 @@ def fake_changelog(repository):
         )
 
 
+@pytest.fixture
+def fake_changelog(repo_with_fake_changelog):
+    _, fake_changelog = repo_with_fake_changelog
+    return fake_changelog
+
+
 @contextmanager
-def temporary_root(root):
-    """A temporary way to set the root while migrating the command to get the root
-    through ddev's config. Not thread-safe.
-    """
+def temporary_root(root, config_file):
+    """Configure the given root as the repo."""
+    config_file.model.repos['core'] = root
+    config_file.save()
+    # For now the code still relies on this global state as well
     old_root = get_root()
     set_root(root)
     yield
