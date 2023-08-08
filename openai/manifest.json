@@ -10,7 +10,23 @@
     "changelog": "CHANGELOG.md",
     "description": "Optimize OpenAI usage: cost estimates, prompt sampling and performance metrics.",
     "title": "OpenAI",
-    "media": [],
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "OpenAI Dashboard Usage Trends",
+        "image_url": "images/openai_dash_usage_trends.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "OpenAI Dashboard Samples",
+        "image_url": "images/openai_dash_samples.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "OpenAI Dashboard Tokens and Cost",
+        "image_url": "images/openai_dash_tokens_cost.png"
+      }
+    ],
     "classifier_tags": [
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
