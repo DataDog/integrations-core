@@ -529,10 +529,10 @@ class RequestsWrapper(object):
         if self._session is None:
             self._session = requests.Session()
 
-            # Enables HostHeaderSSLAdapter
+            # Enables HostHeaderSSLSNIAdapter(HostHeaderSSLAdapter)
             # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
             if self.tls_use_host_header:
-                self._session.mount('https://', host_header_ssl.HostHeaderSSLAdapter())
+                self._session.mount('https://', HostHeaderSSLSNIAdapter())
             # Enable Unix Domain Socket (UDS) support.
             # See: https://github.com/msabramo/requests-unixsocket
             self._session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())
