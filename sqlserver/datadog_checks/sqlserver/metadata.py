@@ -137,7 +137,7 @@ class SqlserverMetadata(DBMAsyncJob):
                     "host": self.check.resolved_hostname,
                     "agent_version": datadog_agent.get_version(),
                     "dbms": "sqlserver",
-                    "kind": "sql_settings",
+                    "kind": "sqlserver_configs",
                     "collection_interval": self.collection_interval,
                     'dbms_version': "{},{}".format(
                         self.check.static_info_cache.get(STATIC_INFO_VERSION, ""),
