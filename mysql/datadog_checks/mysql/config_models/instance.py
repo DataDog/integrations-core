@@ -166,6 +166,7 @@ class InstanceConfig(BaseModel):
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
     charset: Optional[str] = None
+    collect_settings: Optional[CollectSettings] = None
     connect_timeout: Optional[float] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     dbm: Optional[bool] = None
