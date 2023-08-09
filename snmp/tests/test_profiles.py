@@ -2135,6 +2135,13 @@ def test_checkpoint(aggregator):
 
     common.assert_common_metrics(aggregator, common_tags)
 
+    aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric(
+        'snmp.ipSystemStatsHCInReceives', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + ['ipversion:ipv4']
+    )
+    aggregator.assert_metric('snmp.tcpActiveOpens', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.udpHCInDatagrams', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
+
     cpu_metrics = [
         'multiProcUserTime',
         'multiProcSystemTime',
@@ -2200,6 +2207,13 @@ def test_checkpoint_firewall(aggregator):
     ]
 
     common.assert_common_metrics(aggregator, common_tags)
+
+    aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric(
+        'snmp.ipSystemStatsHCInReceives', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + ['ipversion:ipv4']
+    )
+    aggregator.assert_metric('snmp.tcpActiveOpens', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.udpHCInDatagrams', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
 
     cpu_metrics = [
         'multiProcUserTime',
