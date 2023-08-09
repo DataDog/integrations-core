@@ -101,6 +101,9 @@ class GitManager:
         tags = self.__filtered_tags[pattern] = [tag for tag in self.tags if re.search(pattern, tag)]
         return tags
 
+    def show_file(self, path: str, ref: str) -> str:
+        return self.capture('show', f'{ref}:{path}')
+
     def run(self, *args):
         import subprocess
 

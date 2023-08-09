@@ -53,6 +53,14 @@ class Repository:
     def agent_requirements(self) -> Path:
         return self.path / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
 
+    @cached_property
+    def agent_release_requirements(self) -> Path:
+        return self.path / 'requirements-agent-release.txt'
+
+    @cached_property
+    def agent_changelog(self) -> Path:
+        return self.path / 'AGENT_CHANGELOG.md'
+
 
 class IntegrationRegistry:
     def __init__(self, repo: Repository):
