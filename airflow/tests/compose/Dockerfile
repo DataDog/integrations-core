@@ -1,4 +1,6 @@
-FROM apache/airflow:2.1.4-python3.8
+ARG AIRFLOW_VERSION
+
+FROM apache/airflow:$AIRFLOW_VERSION
 USER root
 # INSTALL TOOLS
 RUN apt-get update \
