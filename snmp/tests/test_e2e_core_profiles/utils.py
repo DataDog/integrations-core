@@ -109,6 +109,23 @@ def assert_extend_cisco_cpu_memory(aggregator, common_tags):
     )
 
 
+def assert_extend_cisco_generic(aggregator, common_tags):
+    # fmt: off
+    """Add the following to the snmprec
+1.3.6.1.4.1.9.9.13.1.4.1.1.11|2|11
+1.3.6.1.4.1.9.9.13.1.4.1.3.11|2|6
+    """
+    # fmt: on
+    aggregator.assert_metric(
+        'snmp.ciscoEnvMonFanStatus',
+        metric_type=aggregator.GAUGE,
+        tags=common_tags + ['fan_state:notFunctioning', 'fan_status_index:11'],
+    )
+    aggregator.assert_metric(
+        'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags + ['fan_status_index:11']
+    )
+
+
 def assert_extend_generic_host_resources_base(aggregator, common_tags):
     # fmt: off
     """Add the following to the snmprec
