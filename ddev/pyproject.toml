@@ -111,3 +111,6 @@ ban-relative-imports = "all"
 [tool.ruff.per-file-ignores]
 #Tests can use assertions and relative imports
 "**/tests/**/*" = ["I252"]
+
+[tool.pytest.ini_options]
+markers = "requires_ci: Requires CI to run"
