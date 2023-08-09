@@ -45,6 +45,8 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.upsOutletGroupStatus',  # APC UPS constant metric
     'snmp.cpiPduEas',  # Chatsworth constant metric
     'snmp.ciscoEnvMonSupplyStatus',  # Cisco constant metric
+    'snmp.ciscoEnvMonFanStatus',  # Cisco constant metric
+    'snmp.cefcFanTrayStatus',  # Cisco constant metric
     'snmp.cpqHeFltTolPowerSupply',  # HP constant metric
 ]
 
@@ -356,7 +358,14 @@ def test_e2e_profile_cisco_3850(dd_agent_check):
         config,
         expected_total_count=5108 + 5,
         metrics_to_skip=metrics_to_skip,
-        tags_to_skip=['neighbor_state', 'if_state', 'cisco_env_mon_supply_state'],  # Ignore tags that have a mapping
+        tags_to_skip=[
+            'neighbor_state',
+            'if_state',
+            'cisco_env_mon_supply_state',
+            'fan_state',
+            'cefc_fan_tray_oper_status',
+            'cefc_fan_tray_direction',
+        ],  # Ignore tags that have mappings
     )
 
 
@@ -367,7 +376,12 @@ def test_e2e_profile_cisco_asa(dd_agent_check):
         dd_agent_check,
         config,
         metrics_to_skip=metrics_to_skip,
-        tags_to_skip=['cisco_env_mon_supply_state'],  # Ignore tag that has a mapping
+        tags_to_skip=[
+            'cisco_env_mon_supply_state',
+            'fan_state',
+            'cefc_fan_tray_oper_status',
+            'cefc_fan_tray_direction',
+        ],  # Ignore tags that have mappings
     )
 
 
@@ -378,6 +392,12 @@ def test_e2e_profile_cisco_asa_5525(dd_agent_check):
         dd_agent_check,
         config,
         metrics_to_skip=metrics_to_skip,
+        tags_to_skip=[
+            'cisco_env_mon_supply_state',
+            'fan_state',
+            'cefc_fan_tray_oper_status',
+            'cefc_fan_tray_direction',
+        ],  # Ignore tags that have mappings
     )
 
 
@@ -400,7 +420,12 @@ def test_e2e_profile_cisco_nexus(dd_agent_check):
         dd_agent_check,
         config,
         metrics_to_skip=metrics_to_skip,
-        tags_to_skip=['cisco_env_mon_supply_state'],  # Ignore tag that has a mapping
+        tags_to_skip=[
+            'cisco_env_mon_supply_state',
+            'fan_state',
+            'cefc_fan_tray_oper_status',
+            'cefc_fan_tray_direction',
+        ],  # Ignore tags that have mappings
     )
 
 

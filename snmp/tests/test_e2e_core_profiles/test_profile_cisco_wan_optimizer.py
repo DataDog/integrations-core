@@ -10,6 +10,7 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
+    assert_extend_cisco_generic,
     assert_extend_generic_host_resources_base,
     create_e2e_core_test_config,
     get_device_ip_from_config,
@@ -32,6 +33,7 @@ def test_e2e_profile_cisco_wan_optimizer(dd_agent_check):
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_host_resources_base(aggregator, common_tags)
+    assert_extend_cisco_generic(aggregator, common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
