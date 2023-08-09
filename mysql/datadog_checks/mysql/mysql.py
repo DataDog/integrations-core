@@ -44,6 +44,7 @@ from .const import (
     VARIABLES_VARS,
 )
 from .innodb_metrics import InnoDBMetrics
+from .metadata import MySQLMetadata
 from .queries import (
     QUERY_USER_CONNECTIONS,
     SQL_95TH_PERCENTILE,
@@ -116,6 +117,7 @@ class MySql(AgentCheck):
         self._warnings_by_code = {}
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
+        self._mysql_metadata = MySQLMetadata(self, self._config, self._get_connection_args())
         self._query_activity = MySQLActivity(self, self._config, self._get_connection_args())
 
         self._runtime_queries = None
@@ -274,6 +276,7 @@ class MySql(AgentCheck):
                     self._statement_metrics.run_job_loop(dbm_tags)
                     self._statement_samples.run_job_loop(dbm_tags)
                     self._query_activity.run_job_loop(dbm_tags)
+                    self._mysql_metadata.run_job_loop(dbm_tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -292,6 +295,7 @@ class MySql(AgentCheck):
         self._statement_samples.cancel()
         self._statement_metrics.cancel()
         self._query_activity.cancel()
+        self._mysql_metadata.cancel()
 
     def _new_query_executor(self, queries):
         return QueryExecutor(

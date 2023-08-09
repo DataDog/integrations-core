@@ -1049,7 +1049,7 @@ def test_activity_snapshot_collection(
 
         # wait for query to complete, but commit has not been called,
         # so it should remain open and idle
-        wg.wait()
+        wg.wait(timeout=5)
 
         # Wait collection interval to make sure dbm events are reported
         time.sleep(dbm_instance['query_activity']['collection_interval'])
@@ -1610,6 +1610,24 @@ def test_statement_samples_config_invalid_number(integration_check, pg_instance,
         integration_check(pg_instance)
 
 
+class Diagnostic(psycopg.errors.Diagnostic):
+    """
+    A fake Diagnostic that allows returning the expected err msg
+    """
+
+    def __init__(self, message):
+        self._message = message
+
+    def __getattribute__(self, attr):
+        if attr == 'message_primary':
+            return self._message
+        else:
+            return super(Diagnostic, self).__getattribute__(attr)
+
+    def __str__(self):
+        return self._message
+
+
 class ObjectNotInPrerequisiteState(psycopg.errors.ObjectNotInPrerequisiteState):
     """
     A fake ObjectNotInPrerequisiteState that allows setting pg_error on construction since ObjectNotInPrerequisiteState
@@ -1620,8 +1638,8 @@ class ObjectNotInPrerequisiteState(psycopg.errors.ObjectNotInPrerequisiteState):
         self.pg_error = pg_error
 
     def __getattribute__(self, attr):
-        if attr == 'sqlstate':
-            return self.pg_error
+        if attr == 'diag':
+            return Diagnostic(message=self.pg_error)
         else:
             return super(ObjectNotInPrerequisiteState, self).__getattribute__(attr)
 
@@ -1639,8 +1657,8 @@ class UndefinedTable(psycopg.errors.UndefinedTable):
         self.pg_error = pg_error
 
     def __getattribute__(self, attr):
-        if attr == 'sqlstate':
-            return self.pg_error
+        if attr == 'diag':
+            return Diagnostic(message=self.pg_error)
         else:
             return super(UndefinedTable, self).__getattribute__(attr)
 

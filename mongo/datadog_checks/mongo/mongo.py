@@ -4,11 +4,12 @@
 from __future__ import division
 
 from copy import deepcopy
+from functools import cached_property
 
 from packaging.version import Version
 
 from datadog_checks.base import AgentCheck, is_affirmative
-from datadog_checks.mongo.api import MongoApi
+from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
 from datadog_checks.mongo.collectors import (
     CollStatsCollector,
     CustomQueriesCollector,
@@ -74,9 +75,10 @@ class MongoDb(AgentCheck):
         self._api_client = None
         self._mongo_version = None
 
-    @property
+    @cached_property
     def api_client(self):
-        return self._api_client
+        # This needs to be a property for our unit test mocks to work.
+        return MongoApi(self._config, self.log)
 
     def refresh_collectors(self, deployment_type, all_dbs, tags):
         collect_tcmalloc_metrics = 'tcmalloc' in self._config.additional_metrics
@@ -159,36 +161,33 @@ class MongoDb(AgentCheck):
         return metrics_to_collect
 
     def _refresh_replica_role(self):
-        if self._api_client and (
-            self._api_client.deployment_type is None
-            or isinstance(self._api_client.deployment_type, ReplicaSetDeployment)
-        ):
+        if self.api_client.deployment_type is None or isinstance(self.api_client.deployment_type, ReplicaSetDeployment):
             self.log.debug("Refreshing deployment type")
-            self._api_client.deployment_type = self._api_client.get_deployment_type()
+            self.api_client.refresh_deployment_type()
 
     def check(self, _):
-        if self._connect():
-            self._check()
+        try:
+            self._refresh_metadata()
+            self._collect_metrics()
+        except CRITICAL_FAILURE as e:
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
+            self._unset_metadata()
+            raise e  # Let exception bubble up to global handler and show full error in the logs.
+        else:
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
 
-    def _connect(self) -> bool:
-        if self._api_client is None:
-            try:
-                self._api_client = MongoApi(self._config, self.log)
-                self.log.debug("Connecting to '%s'", self._config.hosts)
-                self._api_client.connect()
-                self.log.debug("Connected!")
-                self._mongo_version = self.api_client.server_info().get('version', '0.0')
-                self.set_metadata('version', self._mongo_version)
-                self.log.debug('version: %s', self._mongo_version)
-            except Exception as e:
-                self._api_client = None
-                self.log.error('Exception: %s', e)
-                self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
-                return False
-        self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
-        return True
+    def _refresh_metadata(self):
+        if self._mongo_version is None:
+            self.log.debug('No metadata present, refreshing it.')
+            self._mongo_version = self.api_client.server_info().get('version', '0.0')
+            self.set_metadata('version', self._mongo_version)
+            self.log.debug('version: %s', self._mongo_version)
 
-    def _check(self):
+    def _unset_metadata(self):
+        self.log.debug('Due to connection failure we will need to reset the metadata.')
+        self._mongo_version = None
+
+    def _collect_metrics(self):
         self._refresh_replica_role()
         tags = deepcopy(self._config.metric_tags)
         deployment = self.api_client.deployment_type
@@ -209,6 +208,11 @@ class MongoDb(AgentCheck):
         for collector in self.collectors:
             try:
                 collector.collect(self.api_client)
+            except CRITICAL_FAILURE as e:
+                self.log.info(
+                    "Unable to collect logs from collector %s. Some metrics will be missing.", collector, exc_info=True
+                )
+                raise e  # Critical failures must bubble up to trigger a CRITICAL service check.
             except Exception:
                 self.log.info(
                     "Unable to collect logs from collector %s. Some metrics will be missing.", collector, exc_info=True

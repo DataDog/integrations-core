@@ -190,6 +190,10 @@ coverage:
         target: 75
         flags:
         - external_dns
+      Fluentd:
+        target: 75
+        flags:
+        - fluentd
       FoundationDB:
         target: 75
         flags:
@@ -442,6 +446,10 @@ coverage:
         target: 75
         flags:
         - proxysql
+      Pulsar:
+        target: 75
+        flags:
+        - pulsar
       RabbitMQ:
         target: 75
         flags:
@@ -590,7 +598,7 @@ coverage:
         target: 75
         flags:
         - weaviate
-      Win32:
+      Windows_Event_Log:
         target: 75
         flags:
         - win32_event_log
@@ -626,14 +634,6 @@ coverage:
         target: 75
         flags:
         - etcd
-      fluentd:
-        target: 75
-        flags:
-        - fluentd
-      pulsar:
-        target: 75
-        flags:
-        - pulsar
       vSphere:
         target: 75
         flags:
@@ -823,7 +823,7 @@ flags:
   ddev:
     carryforward: true
     paths:
-    - ddev/datadog_checks/ddev
+    - ddev/src/ddev
     - ddev/tests
   directory:
     carryforward: true
