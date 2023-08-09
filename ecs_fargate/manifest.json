@@ -15,7 +15,6 @@
       "Category::AWS",
       "Category::Cloud",
       "Category::Containers",
-      "Category::Log Collection",
       "Category::Network",
       "Category::Orchestration",
       "Category::Provisioning",
