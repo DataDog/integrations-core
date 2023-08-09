@@ -640,3 +640,36 @@ def test_set_resources(aggregator, dd_run_check, instance_basic, cloud_metadata,
     aggregator.assert_metric_has_tag(
         "mysql.net.connections", tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=mysql_check.resolved_hostname)
     )
+
+
+@pytest.mark.parametrize(
+    'dbm_enabled, reported_hostname',
+    [
+        (True, None),
+        (False, None),
+        (True, 'forced_hostname'),
+        (True, 'forced_hostname'),
+    ],
+)
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, dbm_enabled, reported_hostname):
+    instance_complex['dbm'] = dbm_enabled
+    if reported_hostname:
+        instance_complex['reported_hostname'] = reported_hostname
+    expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
+    dd_run_check(mysql_check)
+
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    event = dbm_metadata[0]
+    assert len(event) > 0
+    assert event['host'] == expected_host
+    assert event['dbms'] == "mysql"
+    assert event['kind'] == "database_instance"
+    assert event['tags'].sort() == tags.METRIC_TAGS.sort()
+    assert event['collection_interval'] == 1800
+    assert event['metadata'] == {
+        'dbm': dbm_enabled,
+        'connection_host': instance_complex['host'],
+    }
