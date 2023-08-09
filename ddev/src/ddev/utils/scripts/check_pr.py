@@ -38,7 +38,7 @@ def git(*args) -> str:
             ['git', *args], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8', check=True
         )
     except subprocess.CalledProcessError as e:
-        raise OSError(f'{str(e)[:-1]}:\n{e.output}') from None
+        raise RuntimeError(f'{str(e)[:-1]}:\n{e.output}') from None
 
     return process.stdout
 
@@ -94,7 +94,7 @@ def get_added_lines(git_diff: str) -> dict[str, dict[int, str]]:
     return files
 
 
-def get_missing_changelogs(git_diff: str, suffix: str) -> list[tuple[str, int, str]]:
+def get_changelog_errors(git_diff: str, suffix: str) -> list[tuple[str, int, str]]:
     targets: dict[str, dict[str, dict[int, str]]] = {}
     for filename, lines in get_added_lines(git_diff).items():
         target, _, path = filename.partition('/')
@@ -148,7 +148,7 @@ def changelog_impl(*, ref: str, diff_file: str, pr_number: int) -> None:
     else:
         git_diff = git('diff', f'{ref}...')
 
-    errors = get_missing_changelogs(git_diff, f' (#{pr_number})')
+    errors = get_changelog_errors(git_diff, f' (#{pr_number})')
     if not errors:
         return
     elif os.environ.get('GITHUB_ACTIONS') == 'true':
@@ -178,6 +178,8 @@ def main():
 
     kwargs = vars(parser.parse_args())
     try:
+        # We associate a command function with every subcommand parser.
+        # This allows us to emulate Click's command group behavior.
         command = kwargs.pop('func')
     except KeyError:
         parser.print_help()

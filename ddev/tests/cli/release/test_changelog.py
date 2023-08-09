@@ -28,7 +28,7 @@ class TestFix:
             )
         )
 
-        result = ddev('release', 'changelog', '--fix')
+        result = ddev('release', 'changelog', 'fix')
 
         assert result.exit_code == 0, result.output
         assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
@@ -111,7 +111,7 @@ class TestFix:
             )
         )
 
-        result = ddev('release', 'changelog', '--fix')
+        result = ddev('release', 'changelog', 'fix')
 
         assert result.exit_code == 0, result.output
         assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
@@ -137,7 +137,7 @@ class TestFix:
         )
 
 
-class TestAddition:
+class TestCreate:
     def test_start(self, ddev, repository, helpers, network_replay, mocker):
         network_replay('release/changelog/fix_no_pr.yaml')
 
@@ -163,14 +163,14 @@ class TestAddition:
             'ddev.utils.git.GitManager.capture',
             side_effect=[
                 '0000000000000000000000000000000000000000\nFoo',
-                '',
                 'M ddev/pyproject.toml',
                 '',
                 '',
             ],
         )
+        mocker.patch('click.edit', return_value=None)
 
-        result = ddev('release', 'changelog', 'added')
+        result = ddev('release', 'changelog', 'new', 'added')
 
         assert result.exit_code == 0, result.output
         assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
@@ -224,14 +224,14 @@ class TestAddition:
             'ddev.utils.git.GitManager.capture',
             side_effect=[
                 '0000000000000000000000000000000000000000\nFoo',
-                '',
                 'M ddev/pyproject.toml',
                 '',
                 '',
             ],
         )
+        mocker.patch('click.edit', return_value=None)
 
-        result = ddev('release', 'changelog', 'added')
+        result = ddev('release', 'changelog', 'new', 'added')
 
         assert result.exit_code == 0, result.output
         assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
@@ -286,14 +286,14 @@ class TestAddition:
             'ddev.utils.git.GitManager.capture',
             side_effect=[
                 '0000000000000000000000000000000000000000\nFoo',
-                '',
                 'M ddev/pyproject.toml',
                 '',
                 '',
             ],
         )
+        mocker.patch('click.edit', return_value=None)
 
-        result = ddev('release', 'changelog', 'changed')
+        result = ddev('release', 'changelog', 'new', 'changed')
 
         assert result.exit_code == 0, result.output
         assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
@@ -351,14 +351,14 @@ class TestAddition:
             'ddev.utils.git.GitManager.capture',
             side_effect=[
                 '0000000000000000000000000000000000000000\nFoo',
-                '',
                 'M ddev/pyproject.toml',
                 '',
                 '',
             ],
         )
+        mocker.patch('click.edit', return_value=None)
 
-        result = ddev('release', 'changelog', 'fixed')
+        result = ddev('release', 'changelog', 'new', 'fixed')
 
         assert result.exit_code == 0, result.output
         assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
@@ -379,69 +379,6 @@ class TestAddition:
 
             ***Fixed***:
 
-            * Foo (#15476)
-
-            ## 3.3.0 / 2023-07-20
-
-            ***Added***:
-            """
-        )
-
-    def test_prompt(self, ddev, repository, helpers, network_replay, mocker):
-        network_replay('release/changelog/fix_no_pr.yaml')
-
-        repo = Repository(repository.path.name, str(repository.path))
-
-        changelog = repository.path / 'ddev' / 'CHANGELOG.md'
-        changelog.write_text(
-            helpers.dedent(
-                """
-                # CHANGELOG - ddev
-
-                ## Unreleased
-
-                ***Added***:
-
-                * Over (#9000)
-
-                ## 3.3.0 / 2023-07-20
-
-                ***Added***:
-                """
-            )
-        )
-        repo.git.capture('add', '.')
-        repo.git.capture('commit', '-m', 'test')
-        mocker.patch(
-            'ddev.utils.git.GitManager.capture',
-            side_effect=[
-                '0000000000000000000000000000000000000000\nFoo',
-                '',
-                'M ddev/pyproject.toml',
-                '',
-                '',
-            ],
-        )
-
-        result = ddev('release', 'changelog', input='added')
-
-        assert result.exit_code == 0, result.output
-        assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-            """
-            Entry type? (Removed, Changed, Security, Deprecated, Added, Fixed): added
-            Added 1 changelog entry
-            """
-        )
-
-        assert changelog.read_text() == helpers.dedent(
-            """
-            # CHANGELOG - ddev
-
-            ## Unreleased
-
-            ***Added***:
-
-            * Over (#9000)
             * Foo (#15476)
 
             ## 3.3.0 / 2023-07-20
@@ -497,14 +434,14 @@ class TestAddition:
             'ddev.utils.git.GitManager.capture',
             side_effect=[
                 '0000000000000000000000000000000000000000\nFoo',
-                '',
                 'M ddev/pyproject.toml\nM postgres/pyproject.toml',
                 '',
                 '',
             ],
         )
+        mocker.patch('click.edit', return_value=None)
 
-        result = ddev('release', 'changelog', 'added')
+        result = ddev('release', 'changelog', 'new', 'added')
 
         assert result.exit_code == 0, result.output
         assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
@@ -539,6 +476,184 @@ class TestAddition:
 
             * Over (#9000)
             * Foo (#15476)
+
+            ## 3.3.0 / 2023-07-20
+
+            ***Added***:
+            """
+        )
+
+    def test_explicit_message(self, ddev, repository, helpers, network_replay, mocker):
+        network_replay('release/changelog/fix_no_pr.yaml')
+
+        repo = Repository(repository.path.name, str(repository.path))
+
+        changelog = repository.path / 'ddev' / 'CHANGELOG.md'
+        changelog.write_text(
+            helpers.dedent(
+                """
+                # CHANGELOG - ddev
+
+                ## Unreleased
+
+                ## 3.3.0 / 2023-07-20
+
+                ***Added***:
+                """
+            )
+        )
+        repo.git.capture('add', '.')
+        repo.git.capture('commit', '-m', 'test')
+        mocker.patch(
+            'ddev.utils.git.GitManager.capture',
+            side_effect=[
+                '0000000000000000000000000000000000000000\nFoo',
+                'M ddev/pyproject.toml',
+                '',
+                '',
+            ],
+        )
+
+        result = ddev('release', 'changelog', 'new', 'added', '-m', 'Bar')
+
+        assert result.exit_code == 0, result.output
+        assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
+            """
+            Added 1 changelog entry
+            """
+        )
+
+        assert changelog.read_text() == helpers.dedent(
+            """
+            # CHANGELOG - ddev
+
+            ## Unreleased
+
+            ***Added***:
+
+            * Bar (#15476)
+
+            ## 3.3.0 / 2023-07-20
+
+            ***Added***:
+            """
+        )
+
+    def test_prompt_for_entry_type(self, ddev, repository, helpers, network_replay, mocker):
+        network_replay('release/changelog/fix_no_pr.yaml')
+
+        repo = Repository(repository.path.name, str(repository.path))
+
+        changelog = repository.path / 'ddev' / 'CHANGELOG.md'
+        changelog.write_text(
+            helpers.dedent(
+                """
+                # CHANGELOG - ddev
+
+                ## Unreleased
+
+                ***Added***:
+
+                * Over (#9000)
+
+                ## 3.3.0 / 2023-07-20
+
+                ***Added***:
+                """
+            )
+        )
+        repo.git.capture('add', '.')
+        repo.git.capture('commit', '-m', 'test')
+        mocker.patch(
+            'ddev.utils.git.GitManager.capture',
+            side_effect=[
+                '0000000000000000000000000000000000000000\nFoo',
+                'M ddev/pyproject.toml',
+                '',
+                '',
+            ],
+        )
+        mocker.patch('click.edit', return_value=None)
+
+        result = ddev('release', 'changelog', 'new', input='added')
+
+        assert result.exit_code == 0, result.output
+        assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
+            """
+            Entry type? (Removed, Changed, Security, Deprecated, Added, Fixed): added
+            Added 1 changelog entry
+            """
+        )
+
+        assert changelog.read_text() == helpers.dedent(
+            """
+            # CHANGELOG - ddev
+
+            ## Unreleased
+
+            ***Added***:
+
+            * Over (#9000)
+            * Foo (#15476)
+
+            ## 3.3.0 / 2023-07-20
+
+            ***Added***:
+            """
+        )
+
+    def test_edit_entry(self, ddev, repository, helpers, network_replay, mocker):
+        network_replay('release/changelog/fix_no_pr.yaml')
+
+        repo = Repository(repository.path.name, str(repository.path))
+
+        changelog = repository.path / 'ddev' / 'CHANGELOG.md'
+        changelog.write_text(
+            helpers.dedent(
+                """
+                # CHANGELOG - ddev
+
+                ## Unreleased
+
+                ## 3.3.0 / 2023-07-20
+
+                ***Added***:
+                """
+            )
+        )
+        repo.git.capture('add', '.')
+        repo.git.capture('commit', '-m', 'test')
+        mocker.patch(
+            'ddev.utils.git.GitManager.capture',
+            side_effect=[
+                '0000000000000000000000000000000000000000\nFoo',
+                'M ddev/pyproject.toml',
+                '',
+                '',
+            ],
+        )
+        mocker.patch('click.edit', return_value='* Foo (#15476)\n\n    Bar')
+
+        result = ddev('release', 'changelog', 'new', 'added')
+
+        assert result.exit_code == 0, result.output
+        assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
+            """
+            Added 1 changelog entry
+            """
+        )
+
+        assert changelog.read_text() == helpers.dedent(
+            """
+            # CHANGELOG - ddev
+
+            ## Unreleased
+
+            ***Added***:
+
+            * Foo (#15476)
+
+                Bar
 
             ## 3.3.0 / 2023-07-20
 
