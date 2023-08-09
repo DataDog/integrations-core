@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add changelog enforcement (#15459)
+
 ## 3.3.0 / 2023-07-20
 
 ***Added***:

@@ -16,20 +16,25 @@ if TYPE_CHECKING:
 
 class PullRequest:
     def __init__(self, data: dict[str, Any]):
-        self.__number = str(data['number'])
+        self.__number = data['number']
         self.__title = data['title']
+        self.__diff_url = data['pull_request']['diff_url']
         # Normalize to remove carriage returns on Windows
         self.__body = '\n'.join(data['body'].splitlines())
         self.__author = data['user']['login']
         self.__labels = sorted(label['name'] for label in data['labels'])
 
     @property
-    def number(self) -> str:
+    def number(self) -> int:
         return self.__number
 
     @property
     def title(self) -> str:
         return self.__title
+
+    @property
+    def diff_url(self) -> str:
+        return self.__diff_url
 
     @property
     def body(self) -> str:
@@ -49,6 +54,9 @@ class GitHubManager:
 
     # https://docs.github.com/en/rest/search?apiVersion=2022-11-28#search-issues-and-pull-requests
     ISSUE_SEARCH_API = 'https://api.github.com/search/issues'
+
+    # https://docs.github.com/en/rest/issues/issues?apiVersion=2022-11-28#list-repository-issues
+    ISSUE_LIST_API = 'https://api.github.com/repos/{repo_id}/issues'
 
     def __init__(self, repo: Repository, *, user: str, token: str, status: BorrowedStatus):
         self.__repo = repo
@@ -83,12 +91,32 @@ class GitHubManager:
 
         return PullRequest(data['items'][0])
 
+    def get_next_issue_number(self) -> int:
+        from json import loads
+
+        number = 1
+
+        response = self.__api_get(
+            self.ISSUE_LIST_API.format(repo_id=self.repo_id),
+            params={'state': 'all', 'sort': 'created', 'direction': 'desc', 'per_page': 1},
+        )
+        data = loads(response.text)
+        if data:
+            number += data[0]['number']
+
+        return number
+
+    def get_diff(self, pr: PullRequest) -> str:
+        response = self.__api_get(pr.diff_url, follow_redirects=True)
+        return response.text
+
     def __api_get(self, *args, **kwargs):
+        from httpx import HTTPError
+
         retry_wait = 2
         while True:
             try:
-                with self.client as client:
-                    response = client.get(*args, auth=self.__auth, **kwargs)
+                response = self.client.get(*args, auth=self.__auth, **kwargs)
 
                 # https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting
                 # https://docs.github.com/en/rest/guides/best-practices-for-integrators?apiVersion=2022-11-28#dealing-with-rate-limits
@@ -98,7 +126,7 @@ class GitHubManager:
                         context='GitHub API rate limit reached',
                     )
                     continue
-            except Exception as e:
+            except HTTPError as e:
                 self.__status.wait_for(retry_wait, context=f'GitHub API error: {e}')
                 retry_wait *= 2
                 continue
