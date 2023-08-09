@@ -88,6 +88,7 @@ class ReproduceError(object):
             self.job_three.run_job_loop()
             with self.db.cursor() as cursor:
                 cursor.execute("Select pg_sleep(3);")
+            time.sleep(1)
         except Exception as e:
             print("exception thrown in main loop {}".format(e))
             self.db = None
@@ -128,7 +129,7 @@ class ReproduceError(object):
 
 class Job(object):
     executor = ThreadPoolExecutor(100000)
-    def __init__(self, run_func, rate_limit=0.5, job_name=None):
+    def __init__(self, run_func, rate_limit=1, job_name=None):
         self._job_loop_future = None
         self._cancel_event = threading.Event()
         self.rate_limit = rate_limit
