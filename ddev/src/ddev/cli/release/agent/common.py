@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.dev.tooling.release import DATADOG_PACKAGE_PREFIX, get_folder_name, get_package_name
-from datadog_checks.dev.tooling.utils import parse_agent_req_file
 from semver import VersionInfo
+
+DATADOG_PACKAGE_PREFIX = 'datadog-'
 
 
 def get_agent_tags(repo, since, to):
@@ -91,3 +91,60 @@ def get_changes_per_agent(repo, since, to):
                 # New integration
                 changes_per_agent[current_tag][name] = (ver, False)
     return changes_per_agent
+
+
+def get_package_name(folder_name):
+    """
+    Given a folder name for a check, return the name of the
+    corresponding Python package
+    """
+    if folder_name == 'datadog_checks_base':
+        return 'datadog-checks-base'
+    elif folder_name == 'datadog_checks_downloader':
+        return 'datadog-checks-downloader'
+    elif folder_name == 'datadog_checks_dependency_provider':
+        return 'datadog-checks-dependency-provider'
+    elif folder_name == 'ddev':
+        return 'ddev'
+
+    return f"{DATADOG_PACKAGE_PREFIX}{folder_name.replace('_', '-')}"
+
+
+def get_folder_name(package_name):
+    """
+    Given a Python package name for a check, return the corresponding folder
+    name in the git repo
+    """
+    if package_name == 'datadog-checks-base':
+        return 'datadog_checks_base'
+    elif package_name == 'datadog-checks-downloader':
+        return 'datadog_checks_downloader'
+    elif package_name == 'datadog-checks-dependency-provider':
+        return 'datadog_checks_dependency_provider'
+    elif package_name == 'ddev':
+        return 'ddev'
+
+    return package_name.replace('-', '_')[len(DATADOG_PACKAGE_PREFIX) :]
+
+
+def parse_agent_req_file(contents):
+    """
+    Returns a dictionary mapping {check-package-name --> pinned_version} from the
+    given file contents. We can assume lines are in the form:
+
+        datadog-active-directory==1.1.1; sys_platform == 'win32'
+
+    """
+    catalog = {}
+    for line in contents.splitlines():
+        toks = line.split('==', 1)
+        if len(toks) != 2 or not toks[0] or not toks[1]:
+            # if we get here, the requirements file is garbled but let's stay
+            # resilient
+            continue
+
+        name, other = toks
+        version = other.split(';')
+        catalog[name] = version[0]
+
+    return catalog
