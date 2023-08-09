@@ -17,6 +17,7 @@ def test_warn_headers_auth(ddev, repository, helpers):
     warning = 'The HTTP wrapper contains parameter `auth`, this configuration is'
     assert warning in helpers.remove_trailing_spaces(result.output)
 
+
 def test_uses_requests(ddev, repository, helpers):
     check = 'apache'
     file_path = repository.path / check / 'datadog_checks' / check / 'apache.py'
@@ -33,14 +34,16 @@ def test_uses_requests(ddev, repository, helpers):
     error = 'Check `apache` uses `requests.get(` in `apache.py`,'
     assert error in helpers.remove_trailing_spaces(result.output)
 
+
 def test_spec_missing_info_config(ddev, repository, helpers):
     import yaml
+
     check = 'apache'
-    
+
     spec_yaml = repository.path / check / 'assets' / 'configuration' / 'spec.yaml'
     with spec_yaml.open(encoding='utf-8') as file:
         spec_info = yaml.safe_load(file)
-    
+
     spec_info['files'][0]['options'][0]['options'] = []
 
     output = yaml.safe_dump(spec_info, default_flow_style=False, sort_keys=False)
@@ -48,19 +51,21 @@ def test_spec_missing_info_config(ddev, repository, helpers):
         file.write(output)
 
     result = ddev('validate', 'http', check)
-    
+
     assert result.exit_code == 1, result.output
     error = 'Detected apache is missing `init_config/http` or'
     assert error in helpers.remove_trailing_spaces(result.output)
 
+
 def test_spec_missing_instance(ddev, repository, helpers):
     import yaml
+
     check = 'apache'
-    
+
     spec_yaml = repository.path / check / 'assets' / 'configuration' / 'spec.yaml'
     with spec_yaml.open(encoding='utf-8') as file:
         spec_info = yaml.safe_load(file)
-    
+
     spec_info['files'][0]['options'][1]['options'] = spec_info['files'][0]['options'][1]['options'][0]
 
     output = yaml.safe_dump(spec_info, default_flow_style=False, sort_keys=False)
@@ -68,7 +73,7 @@ def test_spec_missing_instance(ddev, repository, helpers):
         file.write(output)
 
     result = ddev('validate', 'http', check)
-    
+
     assert result.exit_code == 1, result.output
     error = 'Detected apache is missing `instances/http` or'
     assert error in helpers.remove_trailing_spaces(result.output)
@@ -86,7 +91,8 @@ def test_validate_http_success(ddev, repository, helpers):
         Completed http validation!
         """
     )
-    
+
+
 # def test_exactly_one_flag(ddev, repository, helpers):
 #     codecov_yaml = repository.path / '.codecov.yml'
 
