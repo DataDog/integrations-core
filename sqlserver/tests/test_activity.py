@@ -300,9 +300,12 @@ def test_activity_nested_blocking_transactions(
     # associated sys.dm_exec_requests.
     assert root_blocker["user_name"] == "fred"
     assert root_blocker["session_status"] == "sleeping"
+    # Expect to capture the query signature for the root blocker
+    # query text is not captured from the req dmv
+    # but available in the connection dmv with most_recent_sql_handle
+    assert root_blocker["query_signature"]
     # we do not capture requests for sleeping sessions
     assert "blocking_session_id" not in root_blocker
-    assert "query_signature" not in root_blocker
 
     # TX2 should be blocked by the root blocker TX1, TX3 should be blocked by TX2
     assert tx2["blocking_session_id"] == root_blocker["id"]
@@ -387,8 +390,7 @@ def test_activity_metadata(
     matching_activity = []
     for event in dbm_activity:
         for activity in event['sqlserver_activity']:
-            # idle blocking sessions don't have a query signature
-            if activity.get('query_signature') == query_signature:
+            if activity['query_signature'] == query_signature:
                 matching_activity.append(activity)
     assert len(matching_activity) == 1
     activity = matching_activity[0]

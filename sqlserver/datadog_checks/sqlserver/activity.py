@@ -53,14 +53,12 @@ SELECT
     DB_NAME(sess.database_id) as database_name,
     sess.status as session_status,
     req.status as request_status,
-    isnull(
-        SUBSTRING(qt.text, (req.statement_start_offset / 2) + 1,
-        ((CASE req.statement_end_offset
-            WHEN -1 THEN DATALENGTH(qt.text)
-            ELSE req.statement_end_offset END
-                - req.statement_start_offset) / 2) + 1)
-        , lqt.text) AS statement_text,
-    SUBSTRING(isnull(qt.text, lqt.text), 1, {proc_char_limit}) as text,
+    SUBSTRING(qt.text, (req.statement_start_offset / 2) + 1,
+    ((CASE req.statement_end_offset
+        WHEN -1 THEN DATALENGTH(qt.text)
+        ELSE req.statement_end_offset END
+            - req.statement_start_offset) / 2) + 1) AS statement_text,
+    SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
@@ -72,7 +70,6 @@ FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_requests req
         ON c.connection_id = req.connection_id
     CROSS APPLY sys.dm_exec_sql_text(req.sql_handle) qt
-    CROSS APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) lqt
 WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
 """,
 ).strip()
@@ -93,6 +90,8 @@ SELECT
     sess.session_id as id,
     DB_NAME(sess.database_id) as database_name,
     sess.status as session_status,
+    lqt.text as statement_text,
+    SUBSTRING(lqt.text, 1, {proc_char_limit}) as text,
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
@@ -100,9 +99,11 @@ SELECT
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
+    CROSS APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) lqt
 WHERE sess.session_id != @@spid
     AND sess.status = 'sleeping'
     AND sess.session_id IN ({blocking_session_ids})
+    AND c.session_id IN ({blocking_session_ids})
 """,
 ).strip()
 
@@ -189,7 +190,9 @@ class SqlserverActivity(DBMAsyncJob):
     def _get_idle_blocking_sessions(self, cursor, blocking_session_ids):
         # The IDLE_BLOCKING_SESSIONS_QUERY contains minimum information on idle blocker
         self.log.debug("collecting sql server idle blocking sessions")
-        query = IDLE_BLOCKING_SESSIONS_QUERY.format(blocking_session_ids=",".join(map(str, blocking_session_ids)))
+        query = IDLE_BLOCKING_SESSIONS_QUERY.format(
+            blocking_session_ids=",".join(map(str, blocking_session_ids)), proc_char_limit=PROC_CHAR_LIMIT
+        )
         self.log.debug("Running query [%s]", query)
         cursor.execute(query)
         columns = [i[0] for i in cursor.description]
