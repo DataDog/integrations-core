@@ -88,7 +88,6 @@ class ReproduceError(object):
             self.job_three.run_job_loop()
             with self.db.cursor() as cursor:
                 cursor.execute("Select pg_sleep(3);")
-            time.sleep(1)
         except Exception as e:
             print("exception thrown in main loop {}".format(e))
             self.db = None
@@ -392,11 +391,10 @@ class MultiDatabaseConnectionPool(object):
         return True
 
 
-
 def run_loop(fun_times):
     while True:
         fun_times.run()
-        time.sleep(0.1)
+        time.sleep(1)
 
 
 def random_cancel(fun_times):
