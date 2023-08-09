@@ -1,21 +1,17 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
-
-from datadog_checks.dev.tooling.constants import get_agent_release_requirements
-from datadog_checks.dev.tooling.git import git_show_file, git_tag_list
 from datadog_checks.dev.tooling.release import DATADOG_PACKAGE_PREFIX, get_folder_name, get_package_name
 from datadog_checks.dev.tooling.utils import parse_agent_req_file
 from semver import VersionInfo
 
 
-def get_agent_tags(since, to):
+def get_agent_tags(repo, since, to):
     """
     Return a list of tags from integrations-core representing an Agent release,
     sorted by more recent first.
     """
-    agent_tags = sorted(VersionInfo.parse(t) for t in git_tag_list(r'^\d+\.\d+\.\d+$'))
+    agent_tags = sorted(VersionInfo.parse(t) for t in repo.git.filter_tags(r'^\d+\.\d+\.\d+$'))
 
     # default value for `to` is the latest tag
     if to:
@@ -32,7 +28,7 @@ def get_agent_tags(since, to):
     return [str(t) for t in reversed(agent_tags)]
 
 
-def get_changes_per_agent(since, to):
+def get_changes_per_agent(repo, since, to):
     """
     Return integration versions groups by Agent versions.
     For each version, we also get a boolean indicating if the version has breaking changes.
@@ -57,18 +53,18 @@ def get_changes_per_agent(since, to):
     }
     ```
     """
-    agent_tags = get_agent_tags(since, to)
+    agent_tags = get_agent_tags(repo, since, to)
     # store the changes in a mapping {agent_version --> {check_name --> current_version}}
     changes_per_agent = {}
     # to keep indexing easy, we run the loop off-by-one
     for i in range(1, len(agent_tags)):
-        req_file_name = os.path.basename(get_agent_release_requirements())
+        req_file_name = repo.agent_release_requirements.name
         current_tag = agent_tags[i - 1]
         # Requirements for current tag
-        file_contents = git_show_file(req_file_name, current_tag)
+        file_contents = repo.git.show_file(req_file_name, current_tag)
         catalog_now = parse_agent_req_file(file_contents)
         # Requirements for previous tag
-        file_contents = git_show_file(req_file_name, agent_tags[i])
+        file_contents = repo.git.show_file(req_file_name, agent_tags[i])
         catalog_prev = parse_agent_req_file(file_contents)
 
         changes_per_agent[current_tag] = {}

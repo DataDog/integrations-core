@@ -42,7 +42,7 @@ def changelog(app, since, to, write, force):
     tool will generate the whole changelog since Agent version 6.3.0
     (before that point we don't have enough information to build the log).
     """
-    changes_per_agent = get_changes_per_agent(since, to)
+    changes_per_agent = get_changes_per_agent(app.repo, since, to)
 
     # store the changelog in memory
     changelog_contents = StringIO()
