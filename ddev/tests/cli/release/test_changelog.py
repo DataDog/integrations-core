@@ -137,7 +137,7 @@ class TestFix:
         )
 
 
-class TestCreate:
+class TestNew:
     def test_start(self, ddev, repository, helpers, network_replay, mocker):
         network_replay('release/changelog/fix_no_pr.yaml')
 
