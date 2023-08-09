@@ -8,8 +8,6 @@ from typing import TYPE_CHECKING
 
 import click
 
-from ddev.cli.release.agent.common import get_changes_per_agent
-
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
@@ -47,6 +45,8 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
     tool will generate the whole changelog since Agent version 6.3.0
     (before that point we don't have enough information to build the log).
     """
+    from ddev.cli.release.agent.common import get_changes_per_agent
+
     changes_per_agent = get_changes_per_agent(app.repo, since, to)
 
     # store the changelog in memory

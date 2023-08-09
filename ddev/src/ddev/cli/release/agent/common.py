@@ -5,8 +5,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from semver import VersionInfo
-
 if TYPE_CHECKING:
     from ddev.repo.core import Repository
 
@@ -20,6 +18,8 @@ def get_agent_tags(repo: Repository, since: str, to: str) -> list[str]:
     Return a list of tags from integrations-core representing an Agent release,
     sorted by more recent first.
     """
+    from semver import VersionInfo
+
     agent_tags = sorted(VersionInfo.parse(t) for t in repo.git.filter_tags(r'^\d+\.\d+\.\d+$'))
 
     # default value for `to` is the latest tag
