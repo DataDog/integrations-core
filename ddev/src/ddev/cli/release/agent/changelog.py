@@ -6,10 +6,9 @@ import os
 from io import StringIO
 
 import click
-from datadog_checks.dev.fs import write_file
-from datadog_checks.dev.tooling.commands.agent.common import get_changes_per_agent
-from datadog_checks.dev.tooling.constants import get_agent_changelog
-from datadog_checks.dev.tooling.manifest_utils import Manifest
+
+from ddev.cli.release.agent.common import get_changes_per_agent
+from ddev.utils.fs import Path
 
 # Extra entries in the agent changelog
 CHANGELOG_MANUAL_ENTRIES = {
@@ -65,11 +64,7 @@ def changelog(app, since, to, write, force):
             for entry in CHANGELOG_MANUAL_ENTRIES.get(agent, []):
                 changelog_contents.write(f'{entry}\n')
             for name, ver in version_changes.items():
-                manifest = Manifest.load_manifest(name)
-                if manifest is None:
-                    display_name = name
-                else:
-                    display_name = manifest.get_display_name()
+                display_name = app.repo.integrations.get(name).display_name
                 display_name = DISPLAY_NAME_MAPPING.get(display_name, display_name)
 
                 breaking_notice = " **BREAKING CHANGE**" if ver[1] else ""
@@ -80,12 +75,12 @@ def changelog(app, since, to, write, force):
 
     # save the changelog on disk if --write was passed
     if write:
-        dest = get_agent_changelog()
+        dest = str(app.repo.agent_changelog)
         # don't overwrite an existing file
         if os.path.exists(dest) and not force:
             msg = "Output file {} already exists, run the command again with --force to overwrite"
             app.abort(msg.format(dest))
 
-        write_file(dest, changelog_contents.getvalue())
+        Path(dest).write_text(changelog_contents.getvalue())
     else:
         app.display_info(changelog_contents.getvalue())
