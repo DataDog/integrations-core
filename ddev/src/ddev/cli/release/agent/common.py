@@ -18,17 +18,17 @@ def get_agent_tags(repo: Repository, since: str, to: str) -> list[str]:
     Return a list of tags from integrations-core representing an Agent release,
     sorted by more recent first.
     """
-    from semver import VersionInfo
+    from packaging.version import parse as parse_version
 
-    agent_tags = sorted(VersionInfo.parse(t) for t in repo.git.filter_tags(r'^\d+\.\d+\.\d+$'))
+    agent_tags = sorted(parse_version(t) for t in repo.git.filter_tags(r'^\d+\.\d+\.\d+$'))
 
     # default value for `to` is the latest tag
     if to:
-        to = VersionInfo.parse(to)
+        to = parse_version(to)
     else:
         to = agent_tags[-1]
 
-    since = VersionInfo.parse(since)
+    since = parse_version(since)
 
     # filter out versions according to the interval [since, to]
     agent_tags = [t for t in agent_tags if since <= t <= to]
