@@ -2,13 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
 from io import StringIO
 
 import click
 
 from ddev.cli.release.agent.common import get_changes_per_agent
-from ddev.utils.fs import Path
 
 # Extra entries in the agent changelog
 CHANGELOG_MANUAL_ENTRIES = {
@@ -75,12 +73,12 @@ def changelog(app, since, to, write, force):
 
     # save the changelog on disk if --write was passed
     if write:
-        dest = str(app.repo.agent_changelog)
+        dest = app.repo.agent_changelog
         # don't overwrite an existing file
-        if os.path.exists(dest) and not force:
+        if dest.exists() and not force:
             msg = "Output file {} already exists, run the command again with --force to overwrite"
             app.abort(msg.format(dest))
 
-        Path(dest).write_text(changelog_contents.getvalue())
+        dest.write_text(changelog_contents.getvalue())
     else:
         app.display_info(changelog_contents.getvalue())
