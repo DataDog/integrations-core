@@ -1,12 +1,21 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from semver import VersionInfo
+
+if TYPE_CHECKING:
+    from ddev.repo.core import Repository
+
+    AgentChangelog = dict[str, dict[str, tuple[str, bool]]]
 
 DATADOG_PACKAGE_PREFIX = 'datadog-'
 
 
-def get_agent_tags(repo, since, to):
+def get_agent_tags(repo: Repository, since: str, to: str) -> list[str]:
     """
     Return a list of tags from integrations-core representing an Agent release,
     sorted by more recent first.
@@ -28,7 +37,7 @@ def get_agent_tags(repo, since, to):
     return [str(t) for t in reversed(agent_tags)]
 
 
-def get_changes_per_agent(repo, since, to):
+def get_changes_per_agent(repo: Repository, since: str, to: str) -> AgentChangelog:
     """
     Return integration versions groups by Agent versions.
     For each version, we also get a boolean indicating if the version has breaking changes.
@@ -54,8 +63,8 @@ def get_changes_per_agent(repo, since, to):
     ```
     """
     agent_tags = get_agent_tags(repo, since, to)
-    # store the changes in a mapping {agent_version --> {check_name --> current_version}}
-    changes_per_agent = {}
+    # store the changes in a mapping {agent_version --> {check_name --> (current_version, is_breaking_change)}}
+    changes_per_agent: AgentChangelog = {}
     # to keep indexing easy, we run the loop off-by-one
     for i in range(1, len(agent_tags)):
         req_file_name = repo.agent_release_requirements.name
@@ -93,7 +102,7 @@ def get_changes_per_agent(repo, since, to):
     return changes_per_agent
 
 
-def get_package_name(folder_name):
+def get_package_name(folder_name: str) -> str:
     """
     Given a folder name for a check, return the name of the
     corresponding Python package
@@ -110,7 +119,7 @@ def get_package_name(folder_name):
     return f"{DATADOG_PACKAGE_PREFIX}{folder_name.replace('_', '-')}"
 
 
-def get_folder_name(package_name):
+def get_folder_name(package_name: str) -> str:
     """
     Given a Python package name for a check, return the corresponding folder
     name in the git repo
@@ -127,7 +136,7 @@ def get_folder_name(package_name):
     return package_name.replace('-', '_')[len(DATADOG_PACKAGE_PREFIX) :]
 
 
-def parse_agent_req_file(contents):
+def parse_agent_req_file(contents: str) -> dict[str, str]:
     """
     Returns a dictionary mapping {check-package-name --> pinned_version} from the
     given file contents. We can assume lines are in the form:

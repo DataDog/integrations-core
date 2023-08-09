@@ -1,12 +1,17 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
 
 from io import StringIO
+from typing import TYPE_CHECKING
 
 import click
 
 from ddev.cli.release.agent.common import get_changes_per_agent
+
+if TYPE_CHECKING:
+    from ddev.cli.application import Application
 
 # Extra entries in the agent changelog
 CHANGELOG_MANUAL_ENTRIES = {
@@ -31,7 +36,7 @@ DISPLAY_NAME_MAPPING = {
 )
 @click.option('--force', '-f', is_flag=True, default=False, help="Replace an existing file")
 @click.pass_obj
-def changelog(app, since, to, write, force):
+def changelog(app: Application, since: str, to: str, write: bool, force: bool):
     """
     Generates a markdown file containing the list of checks that changed for a
     given Agent release. Agent version numbers are derived inspecting tags on
