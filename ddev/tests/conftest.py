@@ -100,6 +100,7 @@ def config_file(tmp_path, monkeypatch) -> ConfigFile:
         'DD_DD_URL',
         'DD_API_KEY',
         'DD_APP_KEY',
+        'DDEV_REPO',
     ):
         monkeypatch.delenv(env_var, raising=False)
 
@@ -163,6 +164,16 @@ def network_replay(local_repo):
     stack = ExitStack()
 
     def add_cassette(relative_path, *args, **kwargs):
+        # https://vcrpy.readthedocs.io/en/latest/advanced.html#filter-sensitive-data-from-the-request
+        for option, known_values in (
+            ('filter_headers', ['authorization', 'dd-api-key', 'dd-application-key']),
+            ('filter_query_parameters', ['api_key', 'app_key', 'application_key']),
+            ('filter_post_data_parameters', ['api_key', 'app_key']),
+        ):
+            defined_values = list(kwargs.setdefault(option, []))
+            defined_values.extend(known_values)
+            kwargs[option] = defined_values
+
         cassette = vcr.use_cassette(
             str(local_repo / "ddev" / "tests" / "fixtures" / "network" / relative_path), *args, **kwargs
         )

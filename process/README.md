@@ -42,7 +42,7 @@ Unlike many checks, the Process Check doesn't monitor anything useful by default
             - sshd
 ```
 
-    Some process metrics require either running the Datadog collector as the same user as the monitored process or privileged access to be retrieved. Where the former option is not desired, and to avoid running the Datadog collector as `root`, the `try_sudo` option lets the Process Check try using `sudo` to collect this metric. As of now, only the `open_file_descriptors` metric on Unix platforms is taking advantage of this setting. Note: the appropriate sudoers rules have to be configured for this to work:
+Some process metrics require either running the Datadog collector as the same user as the monitored process or privileged access to be retrieved. Where the former option is not desired, and to avoid running the Datadog collector as `root`, the `try_sudo` option lets the Process Check try using `sudo` to collect this metric. As of now, only the `open_file_descriptors` metric on Unix platforms is taking advantage of this setting. Note: the appropriate sudoers rules have to be configured for this to work:
 
    ```text
    dd-agent ALL=NOPASSWD: /bin/ls /proc/*/fd/
