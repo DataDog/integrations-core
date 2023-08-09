@@ -2,16 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# (C) Datadog, Inc. 2018-present
-# All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from io import StringIO
 
 import click
 from datadog_checks.dev.fs import write_file
 from datadog_checks.dev.tooling.commands.agent.common import get_changes_per_agent
-from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, abort, echo_info
 from datadog_checks.dev.tooling.constants import get_agent_changelog
 from datadog_checks.dev.tooling.manifest_utils import Manifest
 
@@ -29,7 +25,6 @@ DISPLAY_NAME_MAPPING = {
 
 
 @click.command(
-    context_settings=CONTEXT_SETTINGS,
     short_help="Provide a list of updated checks on a given Datadog Agent version, in changelog form",
 )
 @click.option('--since', help="Initial Agent version", default='6.3.0')
@@ -38,7 +33,8 @@ DISPLAY_NAME_MAPPING = {
     '--write', '-w', is_flag=True, help="Write to the changelog file, if omitted contents will be printed to stdout"
 )
 @click.option('--force', '-f', is_flag=True, default=False, help="Replace an existing file")
-def changelog(since, to, write, force):
+@click.pass_obj
+def changelog(app, since, to, write, force):
     """
     Generates a markdown file containing the list of checks that changed for a
     given Agent release. Agent version numbers are derived inspecting tags on
@@ -88,8 +84,8 @@ def changelog(since, to, write, force):
         # don't overwrite an existing file
         if os.path.exists(dest) and not force:
             msg = "Output file {} already exists, run the command again with --force to overwrite"
-            abort(msg.format(dest))
+            app.abort(msg.format(dest))
 
         write_file(dest, changelog_contents.getvalue())
     else:
-        echo_info(changelog_contents.getvalue())
+        app.display_info(changelog_contents.getvalue())
