@@ -100,6 +100,7 @@ def config_file(tmp_path, monkeypatch) -> ConfigFile:
         'DD_DD_URL',
         'DD_API_KEY',
         'DD_APP_KEY',
+        'DDEV_REPO',
     ):
         monkeypatch.delenv(env_var, raising=False)
 
