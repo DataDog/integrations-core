@@ -209,7 +209,7 @@ jobs:
       if: inputs.standard && inputs.repo == 'core'
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-      run: ddev env test --base --new-env --junit ${{ inputs.target }}
+      run: ddev env test --base --new-env --junit ${{ inputs.target }} --agent <DOCKER_IMAGE_NAME>
 
     - name: Run E2E tests
       if: inputs.standard && inputs.repo != 'core'
