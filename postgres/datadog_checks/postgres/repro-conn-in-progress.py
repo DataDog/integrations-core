@@ -21,7 +21,7 @@ class ReproduceError(object):
         self.job_two = Job(self.test_query, job_name="job-two")
         self.job_three = Job(self.test_query, job_name="job-three")
 
-    def test_query(self):
+    def test_query(self, job_name):
         queries = [
             "INSERT INTO breed (name) VALUES ('Golden Retriever');",
             "INSERT INTO breed (name) VALUES ('GOOBY');",
@@ -31,22 +31,7 @@ class ReproduceError(object):
             "SELECT pg_sleep(3);"
         ]
         random_query = random.choice(queries)
-        with self.get_main_db().cursor() as cursor:
-            print("running query {}".format(random_query))
-            cursor.execute(random_query)
-
-    def get_main_db(self, conn_prefix: str = None):
-        """
-        Returns a memoized, persistent psycopg connection to `self.dbname`.
-        Utilizes the db connection pool, and is meant to be shared across multiple threads.
-        :return: a psycopg connection
-        """
-        conn = self.db_pool._get_connection_raw(
-            dbname="dogs",
-            ttl_ms=5,
-            persistent=True,
-        )
-        return conn
+        self.db_pool.run_query_safe(random_query, job_name=job_name)
 
     def execute_query_raw(self, query):
         with self.db.cursor() as cursor:
@@ -161,8 +146,9 @@ class Job(object):
                 print("exception thrown after cancel {}".format(e))
             else:
                 print("exception thrown during job loop {}".format(e))
+
     def _run_job_rate_limited(self):
-        self._run_func()
+        self._run_func(self.job_name)
         if not self._cancel_event.isSet():
             self._rate_limiter.sleep()
 
@@ -246,6 +232,7 @@ class MultiDatabaseConnectionPool(object):
         self.max_conns: int = max_conns
         self._stats = self.Stats()
         self._mu = threading.RLock()
+        self._query_lock = threading.Lock()
         self._query_lock = threading.Lock()
         self._conns: Dict[str, ConnectionInfo] = {}
         self.connect_fn = connect_fn
@@ -389,6 +376,26 @@ class MultiDatabaseConnectionPool(object):
                 print("failed to close DB connection for db=%s", conn_name)
                 return False
         return True
+
+    def get_main_db(self, conn_prefix: str = None):
+        """
+        Returns a memoized, persistent psycopg connection to `self.dbname`.
+        Utilizes the db connection pool, and is meant to be shared across multiple threads.
+        :return: a psycopg connection
+        """
+        conn = self._get_connection_raw(
+            dbname="dogs",
+            ttl_ms=5,
+            conn_prefix=conn_prefix,
+            persistent=True,
+        )
+        return conn
+
+    def run_query_safe(self, random_query, job_name):
+        with self._query_lock:
+            with self.get_main_db(conn_prefix=job_name).cursor() as cursor:
+                print("running query {}".format(random_query))
+                cursor.execute(random_query)
 
 
 def run_loop(fun_times):
