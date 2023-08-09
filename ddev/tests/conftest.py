@@ -165,8 +165,8 @@ def network_replay(local_repo):
     def add_cassette(relative_path, *args, **kwargs):
         # https://vcrpy.readthedocs.io/en/latest/advanced.html#filter-sensitive-data-from-the-request
         for option, known_values in (
-            ('filter_headers', ['authorization']),
-            ('filter_query_parameters', ['api_key', 'app_key']),
+            ('filter_headers', ['authorization', 'dd-api-key', 'dd-application-key']),
+            ('filter_query_parameters', ['api_key', 'app_key', 'application_key']),
             ('filter_post_data_parameters', ['api_key', 'app_key']),
         ):
             defined_values = list(kwargs.setdefault(option, []))
