@@ -2,10 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
-from contextlib import contextmanager
 
 import pytest
-from datadog_checks.dev.tooling.constants import get_root, set_root
 from ddev.repo.core import Repository
 
 
@@ -100,8 +98,11 @@ def repo_with_history(tmp_path_factory):
 
 @pytest.fixture
 def repo_with_fake_changelog(repo_with_history, config_file):
-    with temporary_root(str(repo_with_history.path), config_file):
-        yield repo_with_history, """
+    config_file.model.repos['core'] = str(repo_with_history.path)
+    config_file.save()
+    return (
+        repo_with_history,
+        """
 ## Datadog Agent version [7.40.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7400)
 
 * onlywin [1.0.0](https://github.com/DataDog/integrations-core/blob/master/onlywin/CHANGELOG.md)
@@ -116,25 +117,14 @@ def repo_with_fake_changelog(repo_with_history, config_file):
 * bar [1.0.0](https://github.com/DataDog/integrations-core/blob/master/bar/CHANGELOG.md)
 """.strip(
             '\n'
-        )
+        ),
+    )
 
 
 @pytest.fixture
 def fake_changelog(repo_with_fake_changelog):
     _, fake_changelog = repo_with_fake_changelog
     return fake_changelog
-
-
-@contextmanager
-def temporary_root(root, config_file):
-    """Configure the given root as the repo."""
-    config_file.model.repos['core'] = root
-    config_file.save()
-    # For now the code still relies on this global state as well
-    old_root = get_root()
-    set_root(root)
-    yield
-    set_root(old_root)
 
 
 def write_agent_requirements(repo_path, requirements):

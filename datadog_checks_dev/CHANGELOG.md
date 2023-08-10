@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Stop using the TOX_ENV_NAME variable ([#15528](https://github.com/DataDog/integrations-core/pull/15528))
+
+## 23.0.0 / 2023-08-10
+
+***Changed***:
+
+* New changelog generation ([#15378](https://github.com/DataDog/integrations-core/pull/15378))
+
+## 22.1.2 / 2023-08-10
+
+***Fixed***:
+
+* Bump datamodel-code-generator to address pydantic deprecations. See [#15521](https://github.com/DataDog/integrations-core/pull/15521).
+
 ## 22.1.1 / 2023-08-08
 
 ***Fixed***:

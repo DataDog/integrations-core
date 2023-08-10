@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 6.0.0 / 2023-08-10
+
+***Changed***:
+
+* Bump the minimum base check version. See [#15427](https://github.com/DataDog/integrations-core/pull/15427).
+
+***Added***:
+
+* Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
+
+***Fixed***:
+
+* Lower logging level if there's an error scraping the template endpoint to DEBUG. See [#15381](https://github.com/DataDog/integrations-core/pull/15381).
+* Fix types for generated config models. See [#15334](https://github.com/DataDog/integrations-core/pull/15334).
+
 ## 5.5.0 / 2023-07-10
 
 ***Added***:
