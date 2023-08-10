@@ -163,7 +163,7 @@ datadog-twistlock==3.3.0
 datadog-varnish==2.0.0
 datadog-vault==4.0.0
 datadog-vertica==4.0.0
-datadog-voltdb==2.1.3
+datadog-voltdb==3.0.0
 datadog-vsphere==6.3.0
 datadog-weaviate==1.0.0
 datadog-weblogic==1.1.2
