@@ -6,17 +6,14 @@ import click
 from ...utils import complete_valid_checks
 from ..console import CONTEXT_SETTINGS, echo_info, echo_success
 from .agent_reqs import agent_reqs
-from .ci import ci
 from .codeowners import codeowners
 from .config import config
 from .dashboards import dashboards
 from .dep import dep
 from .eula import eula
-from .http import http
 from .imports import imports
 from .jmx_metrics import jmx_metrics
 from .manifest import manifest
-from .metadata import metadata
 from .models import models
 from .package import package
 from .readmes import readmes
@@ -27,17 +24,14 @@ from .service_checks import service_checks
 # Validations, and repos they are limited to, if any
 ALL_VALIDATIONS = (
     (agent_reqs, ('core',)),
-    (ci, ('core', 'extras', 'internal')),
     (codeowners, ('extras',)),
     (config, (None,)),
     (dashboards, (None,)),
     (dep, ('core',)),
     (eula, ('marketplace',)),
     (jmx_metrics, (None,)),
-    (http, ('core',)),
     (imports, (None,)),
     (manifest, (None,)),
-    (metadata, (None,)),
     (models, (None,)),
     (package, (None,)),
     (readmes, (None,)),
@@ -47,7 +41,7 @@ ALL_VALIDATIONS = (
 )
 
 # Ignore check argument for these validations
-REPO_VALIDATIONS = {ci, codeowners, dep}
+REPO_VALIDATIONS = {codeowners, dep}
 
 FILE_INDENT = ' ' * 8
 
