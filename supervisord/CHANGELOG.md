@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 2.5.0 / 2023-08-10
+
+***Added***:
+
+* Add options. See [#14190](https://github.com/DataDog/integrations-core/pull/14190). Thanks [jcolfej](https://github.com/jcolfej).
+* Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
+
+***Fixed***:
+
+* Fix types for generated config models. See [#15334](https://github.com/DataDog/integrations-core/pull/15334).
+
 ## 2.4.1 / 2023-07-10
 
 ***Fixed***:

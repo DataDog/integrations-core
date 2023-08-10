@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 3.0.0 / 2023-08-10
+
+***Changed***:
+
+* Bump the minimum base check version. See [#15427](https://github.com/DataDog/integrations-core/pull/15427).
+
+***Added***:
+
+* Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
+* [Couchbase] Adds cmd_lookup per bucket and cleans metadata. See [#15299](https://github.com/DataDog/integrations-core/pull/15299).
+
+***Fixed***:
+
+* Fix types for generated config models. See [#15334](https://github.com/DataDog/integrations-core/pull/15334).
+
 ## 2.2.1 / 2023-07-10
 
 ***Fixed***:

@@ -27,7 +27,7 @@ GH_ANNOTATION_LEVELS = ['warning', 'error']
 
 
 def get_active_env():
-    return os.environ.get('TOX_ENV_NAME') or os.environ['HATCH_ENV_ACTIVE']
+    return os.environ['HATCH_ENV_ACTIVE']
 
 
 def ensure_bytes(s):
