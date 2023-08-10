@@ -75,7 +75,7 @@ datadog-ibm-mq==5.0.0
 datadog-ibm-was==3.0.0
 datadog-ignite==2.3.0
 datadog-iis==3.0.0; sys_platform == 'win32'
-datadog-impala==1.1.2
+datadog-impala==2.0.0
 datadog-istio==4.4.1
 datadog-jboss-wildfly==2.0.2
 datadog-journald==1.1.1
