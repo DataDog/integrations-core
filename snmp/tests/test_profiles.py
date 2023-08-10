@@ -990,6 +990,24 @@ def test_idrac(aggregator):
         aggregator.assert_metric('snmp.intrusionReading', metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     tag_mappings = [
+        ('16', '26', 'zombies driving'),
+        ('17', '15', 'zombies'),
+    ]
+    for chassis_index, power_supply_index, power_supply_fqdd in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(chassis_index),
+            'power_supply_index:{}'.format(power_supply_index),
+            'power_supply_fqdd:{}'.format(power_supply_fqdd),
+        ] + common_tags
+        aggregator.assert_metric('snmp.powerSupplyOutputWatts', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric(
+            'snmp.powerSupplyMaximumInputVoltage', metric_type=aggregator.GAUGE, tags=tags, count=1
+        )
+        aggregator.assert_metric(
+            'snmp.powerSupplyCurrentInputVoltage', metric_type=aggregator.GAUGE, tags=tags, count=1
+        )
+
+    tag_mappings = [
         ('12', '14', 'zombies quaintly forward acted quaintly acted Jaded zombies'),
         ('22', '22', 'acted quaintly their Jaded oxen forward forward'),
     ]
@@ -1826,23 +1844,28 @@ def test_proliant(aggregator):
 
     power_metrics = [
         'cpqHeFltTolPowerSupplyStatus',
-        'cpqHeFltTolPowerSupplyCapacityUsed',
-        'cpqHeFltTolPowerSupplyCapacityMaximum',
     ]
-    tag_mappings = [
-        ('30', '3'),
-    ]
-    for number, status in tag_mappings:
-        tags = [
-            'power_supply_status:{}'.format(status),
-            'chassis_num:{}'.format(number),
-        ] + common_tags
-        for gauge in power_metrics:
-            aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    for gauge in power_metrics:
+        tags = ['chassis_num:30'] + common_tags
+        aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     controller_index = ['controller_index:3'] + common_tags
     aggregator.assert_metric(
         'snmp.{}'.format("cpqDaCntlrCondition"), metric_type=aggregator.GAUGE, tags=controller_index, count=1
+    )
+
+    tags = ['chassis_num:30', 'power_supply_status:3'] + common_tags
+    aggregator.assert_metric(
+        'snmp.{}'.format("cpqHeFltTolPowerSupplyCapacityUsed"),
+        metric_type=aggregator.GAUGE,
+        tags=tags,
+        count=1,
+    )
+    aggregator.assert_metric(
+        'snmp.{}'.format("cpqHeFltTolPowerSupplyCapacityMaximum"),
+        metric_type=aggregator.GAUGE,
+        tags=tags,
+        count=1,
     )
 
     thermal_metrics = ['cpqHeThermalCondition', 'cpqHeSysUtilLifeTime', 'cpqHeFltTolPwrSupplyStatus']
@@ -2135,6 +2158,13 @@ def test_checkpoint(aggregator):
 
     common.assert_common_metrics(aggregator, common_tags)
 
+    aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric(
+        'snmp.ipSystemStatsHCInReceives', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + ['ipversion:ipv4']
+    )
+    aggregator.assert_metric('snmp.tcpActiveOpens', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.udpHCInDatagrams', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
+
     cpu_metrics = [
         'multiProcUserTime',
         'multiProcSystemTime',
@@ -2200,6 +2230,13 @@ def test_checkpoint_firewall(aggregator):
     ]
 
     common.assert_common_metrics(aggregator, common_tags)
+
+    aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric(
+        'snmp.ipSystemStatsHCInReceives', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags + ['ipversion:ipv4']
+    )
+    aggregator.assert_metric('snmp.tcpActiveOpens', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.udpHCInDatagrams', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
 
     cpu_metrics = [
         'multiProcUserTime',
