@@ -48,6 +48,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.ciscoEnvMonFanStatus',  # Cisco constant metric
     'snmp.cefcFanTrayStatus',  # Cisco constant metric
     'snmp.cpqHeFltTolPowerSupply',  # HP constant metric
+    'snmp.fanSpeedSensor',  # Checkpoint constant metric
     'snmp.enclosurePowerSupply',  # iDRAC constant metric
     'snmp.systemState',  # iDRAC constant metric
     'snmp.dev',  # Meraki constant metric
@@ -337,8 +338,9 @@ def test_e2e_profile_checkpoint(dd_agent_check):
     assert_python_vs_core(
         dd_agent_check,
         config,
-        expected_total_count=301 + 5,
+        expected_total_count=311,
         metrics_to_skip=metrics_to_skip,
+        tags_to_skip=['fan_speed_sensor_status'],
     )
 
 
@@ -348,8 +350,9 @@ def test_e2e_profile_checkpoint_firewall(dd_agent_check):
     assert_python_vs_core(
         dd_agent_check,
         config,
-        expected_total_count=301 + 5,
+        expected_total_count=311,
         metrics_to_skip=metrics_to_skip,
+        tags_to_skip=['fan_speed_sensor_status'],
     )
 
 

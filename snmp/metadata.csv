@@ -692,6 +692,7 @@ snmp.extremeInputPowerVoltage,gauge,,,,"[EXTREME-SYSTEM-MIB] The input power vol
 snmp.fanSpeed,gauge,,,,[Isilon] The current speed of the fan in revolutions per minute,0,snmp,,
 snmp.fanSpeedSensorStatus,gauge,,,,[Checkpoint Firewall] 0 = OK Otherwise = problem,0,snmp,,
 snmp.fanSpeedSensorValue,gauge,,hertz,,[Checkpoint Firewall] Fan rotations per minute.,0,snmp,,
+snmp.fanSpeedSensor,gauge,,,,[Checkpoint Firewall] fanSpeedSensorTable. Constant metric equal to 1.,0,snmp,,
 snmp.fcFxPortPhys,gauge,,,,"[FIBRE-CHANNEL-FE-MIB] Represent one entry for each FxPort in the Fabric Element, physical level status and parameters of the FxPorts.",0,snmp,,
 snmp.fcFxPortStatus,gauge,,,,"[FIBRE-CHANNEL-FE-MIB] Represent one entry for each FxPort in the Fabric Element, operational status and parameters of the FxPorts.",0,snmp,,
 snmp.feAnalyzedAttachmentCount,count,,,,"[FE-FIREEYE-MIB] This is the cumulative count of all the attachment that we analyzed for maliciousness. This is the same as 'Total Attachments Analyzed' that we currently show in the output to CLI command 'show email-analysis statistics'. This counter will maintain its value across reboots.",0,snmp,,

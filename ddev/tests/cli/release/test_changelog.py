@@ -45,13 +45,42 @@ class TestFix:
 
             ***Added***:
 
-            * Add changelog enforcement (#15459)
+            * Add changelog enforcement ([#15459](https://github.com/DataDog/integrations-core/pull/15459))
 
             ## 3.3.0 / 2023-07-20
 
             ***Added***:
             """
         )
+
+    def test_pr_no_changelog_required(self, ddev, repository, helpers, network_replay, mocker):
+        network_replay('release/changelog/fix_pr_no_changelog_required.yaml')
+        mocker.patch('ddev.utils.git.GitManager.capture', return_value='ed4909414c5aedeba347b523b3c40ecd651896ab\nfoo')
+
+        expected = helpers.dedent(
+            """
+            # CHANGELOG - ddev
+
+            ## Unreleased
+
+            ## 3.3.0 / 2023-07-20
+
+            ***Added***:
+            """
+        )
+        changelog = repository.path / 'ddev' / 'CHANGELOG.md'
+        changelog.write_text(expected)
+
+        result = ddev('release', 'changelog', 'fix')
+
+        assert result.exit_code == 0, result.output
+        assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
+            """
+            No changelog entries required (changelog/no-changelog label found)
+            """
+        )
+
+        assert changelog.read_text() == expected
 
     def test_no_pr(self, ddev, repository, helpers, network_replay, mocker):
         network_replay('release/changelog/fix_no_pr.yaml')
@@ -128,7 +157,7 @@ class TestFix:
 
             ***Added***:
 
-            * Add changelog enforcement (#15476)
+            * Add changelog enforcement ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
 
             ## 3.3.0 / 2023-07-20
 
@@ -187,7 +216,7 @@ class TestNew:
 
             ***Added***:
 
-            * Foo (#15476)
+            * Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
 
             ## 3.3.0 / 2023-07-20
 
@@ -249,7 +278,7 @@ class TestNew:
             ***Added***:
 
             * Over (#9000)
-            * Foo (#15476)
+            * Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
 
             ## 3.3.0 / 2023-07-20
 
@@ -310,7 +339,7 @@ class TestNew:
 
             ***Changed***:
 
-            * Foo (#15476)
+            * Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
 
             ***Added***:
 
@@ -379,7 +408,7 @@ class TestNew:
 
             ***Fixed***:
 
-            * Foo (#15476)
+            * Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
 
             ## 3.3.0 / 2023-07-20
 
@@ -459,7 +488,7 @@ class TestNew:
             ***Added***:
 
             * Over (#9000)
-            * Foo (#15476)
+            * Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
 
             ## 3.3.0 / 2023-07-20
 
@@ -475,7 +504,7 @@ class TestNew:
             ***Added***:
 
             * Over (#9000)
-            * Foo (#15476)
+            * Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
 
             ## 3.3.0 / 2023-07-20
 
@@ -531,7 +560,7 @@ class TestNew:
 
             ***Added***:
 
-            * Bar (#15476)
+            * Bar ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
 
             ## 3.3.0 / 2023-07-20
 
@@ -594,7 +623,7 @@ class TestNew:
             ***Added***:
 
             * Over (#9000)
-            * Foo (#15476)
+            * Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
 
             ## 3.3.0 / 2023-07-20
 
@@ -632,7 +661,10 @@ class TestNew:
                 '',
             ],
         )
-        mocker.patch('click.edit', return_value='* Foo (#15476)\n\n    Bar')
+        mocker.patch(
+            'click.edit',
+            return_value='* Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))\n\n    Bar',
+        )
 
         result = ddev('release', 'changelog', 'new', 'added')
 
@@ -651,7 +683,7 @@ class TestNew:
 
             ***Added***:
 
-            * Foo (#15476)
+            * Foo ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
 
                 Bar
 
