@@ -45,9 +45,8 @@ empty line between all of the following sections of text:
   * Change type (ex: fixed, added, etc)
   * Specific descriptions of changes (note: within this section itself, there should NOT be new lines between bullets)
 
-* `Extra spacing on line {line number}`: you have an extra empty line on the line referenced in the error. 
-There should be only one line of spacing!
-* `Missing spacing on line {line number}`: you need to add an empty line to the referenced lie
+* `Extra spacing on line {line number}`: There is an extra blank line on the line referenced in the error. 
+* `Missing spacing on line {line number}`: Add an empty line above or below the referenced line.
 
 ### Integration Version Header
 
