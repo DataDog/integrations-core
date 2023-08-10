@@ -605,6 +605,7 @@ snmp.dell.os10Fan,gauge,,,,"[DELLEMC-OS10-CHASSIS-MIB] A list of fans installed 
 snmp.dell.os10FanTray,gauge,,,,"[DELLEMC-OS10-CHASSIS-MIB] A list of fan trays resident in the device.",0,snmp,,
 snmp.dell.os10PowerSupply,gauge,,,,"[DELLEMC-OS10-CHASSIS-MIB] A list of power supplies resident in the device.",0,snmp,,
 snmp.dell.os10bgp4V2Peer,gauge,,,,"[DELLEMC-OS10-BGP4V2-MIB] BGP peer table. This table contains, one entry per BGP peer, information about the connections with BGP peers.",0,snmp,,
+snmp.dev,gauge,,,,"[MERAKI-CLOUD-CONTROLLER-MIB] Device table. Constant metric equal to 1",0,snmp,,
 snmp.devClientCount,gauge,,,,[Cisco Meraki] The number of clients currently associated with the device.,0,snmp,,
 snmp.devInterfaceRecvBytes,gauge,,byte,,[Cisco Meraki] The number of bytes received on this interface.,0,snmp,,
 snmp.devInterfaceRecvPkts,gauge,,packet,,[Cisco Meraki] The number of packets received on this interface.,0,snmp,,

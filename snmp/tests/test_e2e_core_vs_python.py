@@ -50,6 +50,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.cpqHeFltTolPowerSupply',  # HP constant metric
     'snmp.enclosurePowerSupply',  # iDRAC constant metric
     'snmp.systemState',  # iDRAC constant metric
+    'snmp.dev',  # Meraki constant metric
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
@@ -517,7 +518,7 @@ def test_e2e_profile_isilon(dd_agent_check):
 
 def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
     config = common.generate_container_profile_config('meraki-cloud-controller')
-    assert_python_vs_core(dd_agent_check, config, tags_to_skip=['mac_address'])
+    assert_python_vs_core(dd_agent_check, config, tags_to_skip=['mac_address', 'status'])
 
 
 def test_e2e_profile_netapp(dd_agent_check):
