@@ -6,12 +6,14 @@ Running this script by itself must not use any external dependencies.
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import argparse
 import os
 import re
-import subprocess
 import sys
 from typing import Iterator
+
+
+def changelog_entry_suffix(pr_number: int, pr_url: str) -> str:
+    return f' ([#{pr_number}]({pr_url}))'
 
 
 def requires_changelog(target: str, files: Iterator[str]) -> bool:
@@ -33,6 +35,8 @@ def requires_changelog(target: str, files: Iterator[str]) -> bool:
 
 
 def git(*args) -> str:
+    import subprocess
+
     try:
         process = subprocess.run(
             ['git', *args], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8', check=True
@@ -133,22 +137,38 @@ def get_changelog_errors(git_diff: str, suffix: str) -> list[tuple[str, int, str
                         f'{target}/{changelog_file}',
                         line_number,
                         f'The first line of every new changelog entry must '
-                        f'end with the associated PR number `{suffix}`',
+                        f'end with a link to the associated PR:\n`{suffix}`',
                     )
                 )
 
     return errors
 
 
-def changelog_impl(*, ref: str, diff_file: str, pr_number: int) -> None:
+def changelog_impl(*, ref: str, diff_file: str, pr_file: str) -> None:
+    import json
+
     on_ci = os.environ.get('GITHUB_ACTIONS') == 'true'
     if on_ci:
         with open(diff_file, encoding='utf-8') as f:
             git_diff = f.read()
+
+        with open(pr_file, 'r', encoding='utf-8') as f:
+            pr = json.loads(f.read())['pull_request']
+
+        pr_number = pr['number']
+        pr_url = pr['html_url']
+        pr_labels = [label['name'] for label in pr['labels']]
     else:
         git_diff = git('diff', f'{ref}...')
+        pr_number = 1
+        pr_url = f'https://github.com/DataDog/integrations-core/pull/{pr_number}'
+        pr_labels = []
 
-    errors = get_changelog_errors(git_diff, f' (#{pr_number})')
+    if 'changelog/no-changelog' in pr_labels:
+        print('No changelog entries required (changelog/no-changelog label found)')
+        return
+
+    errors = get_changelog_errors(git_diff, changelog_entry_suffix(pr_number, pr_url))
     if not errors:
         return
     elif os.environ.get('GITHUB_ACTIONS') == 'true':
@@ -166,11 +186,13 @@ def changelog_command(subparsers) -> None:
     parser = subparsers.add_parser('changelog')
     parser.add_argument('--ref', default='origin/master')
     parser.add_argument('--diff-file')
-    parser.add_argument('--pr-number', type=int, default=1)
+    parser.add_argument('--pr-file')
     parser.set_defaults(func=changelog_impl)
 
 
 def main():
+    import argparse
+
     parser = argparse.ArgumentParser(prog=__name__, allow_abbrev=False)
     subparsers = parser.add_subparsers()
 

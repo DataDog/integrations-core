@@ -2,6 +2,110 @@
 
 ## Unreleased
 
+## 6.1.0 / 2023-08-10
+
+***Added***:
+
+* Add netgear-switch. See [#15337](https://github.com/DataDog/integrations-core/pull/15337).
+* Add hardware metrics Checkpoint Firewall (fan). See [#15514](https://github.com/DataDog/integrations-core/pull/15514).
+* Add hardware metrics for HP (power supplies) [FIX]. See [#15491](https://github.com/DataDog/integrations-core/pull/15491).
+* Add profile netgear-readynas. See [#15322](https://github.com/DataDog/integrations-core/pull/15322).
+* Add hardware metrics for Dell (power supplies). See [#15456](https://github.com/DataDog/integrations-core/pull/15456).
+* Add hardware metrics for cisco (fan). See [#15507](https://github.com/DataDog/integrations-core/pull/15507).
+* Add hardware metrics for Chatsworth (power supplies) . See [#15471](https://github.com/DataDog/integrations-core/pull/15471).
+* Add hardware metrics for Cisco (power supplies). See [#15480](https://github.com/DataDog/integrations-core/pull/15480).
+* Add profile dell-emc-data-domain. See [#15436](https://github.com/DataDog/integrations-core/pull/15436).
+* Add hardware metrics for HP (power supplies). See [#15467](https://github.com/DataDog/integrations-core/pull/15467).
+* [SNMP] Add profile for Avaya Nortel ethernet routing switch. See [#15472](https://github.com/DataDog/integrations-core/pull/15472).
+* [NDM] Add bgpPeerRemoteAs as tag. See [#15225](https://github.com/DataDog/integrations-core/pull/15225).
+* Add dlink-dgs-switch profile. See [#15461](https://github.com/DataDog/integrations-core/pull/15461).
+* Add peplink profile. See [#15464](https://github.com/DataDog/integrations-core/pull/15464).
+* [SNMP] Add profile for Avaya Media gateway. See [#15469](https://github.com/DataDog/integrations-core/pull/15469).
+* [SNMP] Add profile for Avaya Cajun switch. See [#15466](https://github.com/DataDog/integrations-core/pull/15466).
+* Add profile for pf-sense. See [#15468](https://github.com/DataDog/integrations-core/pull/15468).
+* Add profiles for netgear &  netgear-access-point. See [#15306](https://github.com/DataDog/integrations-core/pull/15306).
+* Investigate hierarchy for dell profiles. See [#15446](https://github.com/DataDog/integrations-core/pull/15446).
+* Add profile omron-cj-ethernet-ip. See [#15465](https://github.com/DataDog/integrations-core/pull/15465).
+* [SNMP] Add profile for Avocent ACS. See [#15460](https://github.com/DataDog/integrations-core/pull/15460).
+* [NDM] Add cyberpower-pdu profile. See [#15158](https://github.com/DataDog/integrations-core/pull/15158).
+* Add profile opengear-infrastructure-manager. See [#15455](https://github.com/DataDog/integrations-core/pull/15455).
+* [NDM] Add barracuda-cloudgen profile. See [#15153](https://github.com/DataDog/integrations-core/pull/15153).
+* Add profile opengear-console-manager. See [#15451](https://github.com/DataDog/integrations-core/pull/15451).
+* [SNMP] Add profile for Eaton EPDU. See [#15458](https://github.com/DataDog/integrations-core/pull/15458).
+* Add ubiquiti-unifi-security-gateway. See [#15433](https://github.com/DataDog/integrations-core/pull/15433).
+* [SNMP] Add profile for Palo-Alto Cloudgenix. See [#15432](https://github.com/DataDog/integrations-core/pull/15432).
+* Add profile dell-sonicwall. See [#15426](https://github.com/DataDog/integrations-core/pull/15426).
+* [SNMP] Add profile for Western-Digital Mycloud EX2 Ultra. See [#15444](https://github.com/DataDog/integrations-core/pull/15444).
+* [NDM] Add citrix-netscaler profile. See [#15349](https://github.com/DataDog/integrations-core/pull/15349).
+* [SNMP] Add profile for Dialogic media gateway. See [#15445](https://github.com/DataDog/integrations-core/pull/15445).
+* Add profile dell-powerconnect. See [#15423](https://github.com/DataDog/integrations-core/pull/15423).
+* Add profile dell-os10. See [#15414](https://github.com/DataDog/integrations-core/pull/15414).
+* [NDM] add cradlepoint profile. See [#15419](https://github.com/DataDog/integrations-core/pull/15419).
+* [SNMP] Add profile for VMWare ESX. See [#15430](https://github.com/DataDog/integrations-core/pull/15430).
+* Add profile dell-force10. See [#15424](https://github.com/DataDog/integrations-core/pull/15424).
+* [SNMP] Add profile for HP MSA. See [#15310](https://github.com/DataDog/integrations-core/pull/15310).
+* [SNMP] Add profile for Vertiv Liebert AC. See [#15415](https://github.com/DataDog/integrations-core/pull/15415).
+* [SNMP] Add profile for Vertiv Watchdog. See [#15412](https://github.com/DataDog/integrations-core/pull/15412).
+* [SNMP] Add profile for NEC univerge. See [#15403](https://github.com/DataDog/integrations-core/pull/15403).
+* Add profile ubiquiti-unifi. See [#15399](https://github.com/DataDog/integrations-core/pull/15399).
+* Add profile ixsystems-truenas. See [#15398](https://github.com/DataDog/integrations-core/pull/15398).
+* Add profile tripplite-ups. See [#15397](https://github.com/DataDog/integrations-core/pull/15397).
+* Add profile tripplite-pdu. See [#15396](https://github.com/DataDog/integrations-core/pull/15396).
+* Add profile for zebra-printer. See [#15385](https://github.com/DataDog/integrations-core/pull/15385).
+* [SNMP] Add profile for Mikrotik routers. See [#15388](https://github.com/DataDog/integrations-core/pull/15388).
+* Add profile for zyxel-switch. See [#15386](https://github.com/DataDog/integrations-core/pull/15386).
+* Add profile for velocloud-edge. See [#15382](https://github.com/DataDog/integrations-core/pull/15382).
+* [SNMP] Add profile for IBM Lenovo servers. See [#15377](https://github.com/DataDog/integrations-core/pull/15377).
+* Add profile for servertech-pdu4. See [#15369](https://github.com/DataDog/integrations-core/pull/15369).
+* Add profile infinera-coriant-groove. See [#15374](https://github.com/DataDog/integrations-core/pull/15374).
+* Add profile mcafee-web-gateway. See [#15373](https://github.com/DataDog/integrations-core/pull/15373).
+* [SNMP] Add profile for IBM datapower gateway. See [#15371](https://github.com/DataDog/integrations-core/pull/15371).
+* Add profile kyocera-printer. See [#15370](https://github.com/DataDog/integrations-core/pull/15370).
+* Add profile linksys. See [#15372](https://github.com/DataDog/integrations-core/pull/15372).
+* Add profile sophos-xgs-firewall. See [#15368](https://github.com/DataDog/integrations-core/pull/15368).
+* Add profile juniper-pulse-secure. See [#15367](https://github.com/DataDog/integrations-core/pull/15367).
+* Add profile infoblox-ipam. See [#15354](https://github.com/DataDog/integrations-core/pull/15354).
+* Add juniper-qfx.yaml. See [#15366](https://github.com/DataDog/integrations-core/pull/15366).
+* [SNMP] Add profile for Huawei access controllers. See [#15358](https://github.com/DataDog/integrations-core/pull/15358).
+* Add profile for synology-disk-station. See [#15335](https://github.com/DataDog/integrations-core/pull/15335).
+* Add profile for silverpeak-edgeconnect. See [#15328](https://github.com/DataDog/integrations-core/pull/15328).
+* [SNMP] Add profile for Huawei switches. See [#15357](https://github.com/DataDog/integrations-core/pull/15357).
+* [SNMP] Add profile for Huawei routers. See [#15356](https://github.com/DataDog/integrations-core/pull/15356).
+* [SNMP] Add profile for Huawei devices. See [#15343](https://github.com/DataDog/integrations-core/pull/15343).
+* [SNMP] Add profile for APC Netbotz. See [#15136](https://github.com/DataDog/integrations-core/pull/15136).
+* Add profile for tp-link. See [#15339](https://github.com/DataDog/integrations-core/pull/15339).
+* Add profile for servertech-pdu3. See [#15341](https://github.com/DataDog/integrations-core/pull/15341).
+* [NDM] Add profile for avaya aura ms. See [#15214](https://github.com/DataDog/integrations-core/pull/15214).
+* Add profile for sinetica-eagle-i. See [#15340](https://github.com/DataDog/integrations-core/pull/15340).
+* Add profile for server-iron-switch. See [#15329](https://github.com/DataDog/integrations-core/pull/15329).
+* [SNMP] Add profile for HP Nimble. See [#15312](https://github.com/DataDog/integrations-core/pull/15312).
+* Add profile for ruckus-unleashed. See [#15311](https://github.com/DataDog/integrations-core/pull/15311).
+* Add profile for raritan-dominion. See [#15326](https://github.com/DataDog/integrations-core/pull/15326).
+* [SNMP] Add profile for HP Bladesystem enclosure. See [#15248](https://github.com/DataDog/integrations-core/pull/15248).
+* [SNMP] Add APC PDU profile. See [#15135](https://github.com/DataDog/integrations-core/pull/15135).
+* Add profile for riverbed-interceptor. See [#15294](https://github.com/DataDog/integrations-core/pull/15294).
+* Add profile for hp-icf-switch. See [#15209](https://github.com/DataDog/integrations-core/pull/15209).
+* Add profile for hp-h3c-switch. See [#15207](https://github.com/DataDog/integrations-core/pull/15207).
+* Add profile for riverbed-steelhead. See [#15300](https://github.com/DataDog/integrations-core/pull/15300).
+* Add profile for ruckus-wap. See [#15309](https://github.com/DataDog/integrations-core/pull/15309).
+* Add profile for Aruba WC. See [#15128](https://github.com/DataDog/integrations-core/pull/15128).
+* [SNMP] Add profile for Nasuni. See [#15253](https://github.com/DataDog/integrations-core/pull/15253).
+* Add interface_index to interface metrics. See [#15274](https://github.com/DataDog/integrations-core/pull/15274).
+* Add profile for gigamon. See [#15195](https://github.com/DataDog/integrations-core/pull/15195).
+* Add profile cisco-ucs. See [#15265](https://github.com/DataDog/integrations-core/pull/15265).
+* Add profile cisco-wan-optimizer. See [#15270](https://github.com/DataDog/integrations-core/pull/15270).
+* Add profile for ups. See [#15205](https://github.com/DataDog/integrations-core/pull/15205).
+* Add profile cisco-load-balancer. See [#15210](https://github.com/DataDog/integrations-core/pull/15210).
+* Add `hr_device_index` tag to `snmp.hrProcessorLoad` metric. See [#15202](https://github.com/DataDog/integrations-core/pull/15202).
+* Add profile cisco-ise. See [#15193](https://github.com/DataDog/integrations-core/pull/15193).
+* Add profile cisco-sb. See [#15264](https://github.com/DataDog/integrations-core/pull/15264).
+
+***Fixed***:
+
+* Update forced_type to metric_type. See [#15191](https://github.com/DataDog/integrations-core/pull/15191).
+* Add abstract profile for cisco vendor to reduce duplication. See [#15266](https://github.com/DataDog/integrations-core/pull/15266).
+* Fix cisco-ise profile. See [#15283](https://github.com/DataDog/integrations-core/pull/15283).
+
 ## 6.0.0 / 2023-07-10
 
 ***Changed***:
