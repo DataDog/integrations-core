@@ -129,7 +129,7 @@ datadog-rabbitmq==5.0.0
 datadog-redisdb==5.0.0
 datadog-rethinkdb==3.0.0
 datadog-riak==3.3.0
-datadog-riakcs==2.9.1
+datadog-riakcs==2.10.0
 datadog-sap-hana==2.2.2
 datadog-scylla==2.3.1
 datadog-sidekiq==1.3.1
