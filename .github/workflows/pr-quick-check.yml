@@ -37,7 +37,6 @@ jobs:
       run: |-
         diff_url=$(cat "$GITHUB_EVENT_PATH" | jq -r '.pull_request.diff_url')
         curl --header "Authorization: Bearer $GITHUB_TOKEN" -sLo /tmp/diff "$diff_url"
-        cat "$GITHUB_EVENT_PATH" | jq -r '.pull_request.number' > /tmp/number
 
     - name: Fetch script
       if: inputs.repo != 'core'
@@ -47,4 +46,4 @@ jobs:
 
     - name: Check
       run: |-
-        python ${{ env.CHECK_SCRIPT }} changelog --diff-file /tmp/diff --pr-number $(cat /tmp/number)
+        python ${{ env.CHECK_SCRIPT }} changelog --diff-file /tmp/diff --pr-file "$GITHUB_EVENT_PATH"
