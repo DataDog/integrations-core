@@ -92,21 +92,3 @@ def test_validate_http_success(ddev, repository, helpers):
         """
     )
 
-
-# def test_exactly_one_flag(ddev, repository, helpers):
-#     codecov_yaml = repository.path / '.codecov.yml'
-
-#     with codecov_yaml.open(encoding='utf-8') as file:
-#         codecov_yaml_info = yaml.safe_load(file)
-
-#     codecov_yaml_info['coverage']['status']['project']['ActiveMQ_XML']['flags'].append('test')
-
-#     output = yaml.safe_dump(codecov_yaml_info, default_flow_style=False, sort_keys=False)
-#     with codecov_yaml.open(mode='w', encoding='utf-8') as file:
-#         file.write(output)
-
-#     result = ddev("validate", "ci")
-
-#     assert result.exit_code == 1, result.output
-#     error = "Project `ActiveMQ_XML` must have exactly one flag"
-#     assert error in helpers.remove_trailing_spaces(result.output)
