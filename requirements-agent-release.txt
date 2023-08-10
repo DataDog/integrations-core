@@ -7,7 +7,7 @@ datadog-amazon-msk==4.0.0
 datadog-ambari==3.3.0; sys_platform != 'win32'
 datadog-apache==4.3.0
 datadog-arangodb==2.0.0
-datadog-argocd==1.2.0
+datadog-argocd==2.0.0
 datadog-aspdotnet==1.13.1; sys_platform == 'win32'
 datadog-avi-vantage==3.3.2
 datadog-azure-iot-edge==3.3.2
