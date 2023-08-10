@@ -150,7 +150,7 @@ datadog-system-core==2.1.0
 datadog-system-swap==1.15.0
 datadog-tcp-check==4.7.0
 datadog-teamcity==4.0.0
-datadog-temporal==1.1.1
+datadog-temporal==2.0.0
 datadog-tenable==1.4.1
 datadog-teradata==1.1.2; sys_platform != 'darwin'
 datadog-tls==2.11.0
