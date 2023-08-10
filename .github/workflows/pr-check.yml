@@ -1,0 +1,14 @@
+name: Check PR
+
+on: pull_request
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  run:
+    uses: ./.github/workflows/pr-quick-check.yml
+    with:
+      repo: core
+    secrets: inherit
