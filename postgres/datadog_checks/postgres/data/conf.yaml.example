@@ -419,12 +419,12 @@ instances:
         # enabled: false
 
         ## @param max_tables - number - optional - default: 1000
-        ## Maximum amount of tables the agent will collect from the instance.
+        ## Maximum amount of tables the Agent will collect from the instance.
         #
         # max_tables: 1000
 
         ## @param max_columns - number - optional - default: 50
-        ## Maximum amount of columns the agent will collect per table.
+        ## Maximum amount of columns the Agent will collect per table.
         #
         # max_columns: 50
 
