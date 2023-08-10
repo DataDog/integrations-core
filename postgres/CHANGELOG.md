@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add schema collection to Postgres integration ([#15484](https://github.com/DataDog/integrations-core/pull/15484))
+
 ## 14.1.0 / 2023-08-10
 
 ***Added***:
