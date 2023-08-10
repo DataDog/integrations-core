@@ -91,4 +91,3 @@ def test_validate_http_success(ddev, repository, helpers):
         Completed http validation!
         """
     )
-
