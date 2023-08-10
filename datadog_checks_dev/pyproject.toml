@@ -66,9 +66,6 @@ cli = [
     "click~=8.1.6",
     "codespell",
     "colorama",
-    # We need the following PRs to address Pydantic deprecations:
-    # https://github.com/koxudaxi/datamodel-code-generator/pull/1468
-    # https://github.com/koxudaxi/datamodel-code-generator/pull/1485
     "datamodel-code-generator~=0.21.4",
     "hatch>=1.5.0",
     "in-toto==1.0.1",
