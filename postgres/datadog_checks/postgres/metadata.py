@@ -262,14 +262,10 @@ class PostgresMetadata(DBMAsyncJob):
         databases = []
         if self._check.autodiscovery:
             databases = self._check.autodiscovery.get_items()
-        elif self._config.dbname != 'postgres':
-            databases.append(self._config.dbname)
         else:
-            # if we are only connecting to 'postgres' database, not worth reporting data model
-            return
+            databases.append(self._config.dbname)
 
         metadata = []
-        self._log.debug("Collecting schema metadata...")
         for database in databases:
             metadata.append(self._collect_metadata_for_database(database))
 
