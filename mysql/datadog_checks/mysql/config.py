@@ -39,6 +39,7 @@ class MySQLConfig(object):
         )
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
+        self.settings_config = instance.get('collect_settings', {}) or {}
         self.activity_config = instance.get('query_activity', {}) or {}
         self.cloud_metadata = {}
         aws = instance.get('aws', {})

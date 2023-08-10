@@ -1,7 +1,7 @@
 {
 	"name": "FoundationDB Status Check",
 	"type": "service check",
-	"query": "\"foundationdb.can_connect\".over(\"*\").last(6).count_by_status()",
+	"query": "\"foundationdb.can_connect\".over(\"*\").by(\"*\").last(6).count_by_status()",
 	"message": "{{#is_alert}}\nCould not connect to the FoundationDB cluster or otherwise failed to obtain status information.\n{{/is_alert}} \n{{^is_warning}}\nA connection to the fhe FoundationDB cluster could be established and status information retrieved. However, there are degraded processes.\n{{/is_warning}} ",
 	"tags": [
 		"integration:fdb"

@@ -1,11 +1,11 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 import time
 from typing import Dict, Optional, Tuple  # noqa: F401
 
-import psycopg2
+import psycopg
+from psycopg.rows import dict_row
 
 try:
     import datadog_agent
@@ -14,6 +14,7 @@ except ImportError:
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
 # default pg_settings collection interval in seconds
@@ -36,7 +37,7 @@ class PostgresMetadata(DBMAsyncJob):
         2. collection of pg_settings
     """
 
-    def __init__(self, check, config, shutdown_callback):
+    def __init__(self, check, config):
         self.pg_settings_collection_interval = config.settings_metadata_config.get(
             'collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )
@@ -54,9 +55,8 @@ class PostgresMetadata(DBMAsyncJob):
             enabled=is_affirmative(config.resources_metadata_config.get('enabled', True)),
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
-            expected_db_exceptions=(psycopg2.errors.DatabaseError,),
+            expected_db_exceptions=(psycopg.errors.DatabaseError,),
             job_name="database-metadata",
-            shutdown_callback=shutdown_callback,
         )
         self._check = check
         self._config = config
@@ -114,7 +114,7 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
-        with self._check._get_main_db().cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+        with self._check.get_main_db().cursor(row_factory=dict_row) as cursor:
             self._log.debug("Running query [%s]", PG_SETTINGS_QUERY)
             self._time_since_last_settings_query = time.time()
             cursor.execute(PG_SETTINGS_QUERY)

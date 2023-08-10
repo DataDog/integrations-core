@@ -17,6 +17,7 @@ from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import resolve_db_host
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
+from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.utils import Database, parse_sqlserver_major_version
 
@@ -120,7 +121,9 @@ class SQLServer(AgentCheck):
         # DBM
         self.dbm_enabled = self.instance.get('dbm', False)
         self.statement_metrics_config = self.instance.get('query_metrics', {}) or {}
+        self.settings_config = self.instance.get('collect_settings', {}) or {}
         self.statement_metrics = SqlserverStatementMetrics(self)
+        self.sql_metadata = SqlserverMetadata(self)
         self.activity_config = self.instance.get('query_activity', {}) or {}
         self.activity = SqlserverActivity(self)
         self.cloud_metadata = {}
@@ -179,6 +182,7 @@ class SQLServer(AgentCheck):
     def cancel(self):
         self.statement_metrics.cancel()
         self.activity.cancel()
+        self.sql_metadata.cancel()
 
     def config_checks(self):
         if self.autodiscovery and self.instance.get('database'):
@@ -741,6 +745,7 @@ class SQLServer(AgentCheck):
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
+                self.sql_metadata.run_job_loop(self.tags)
         else:
             self.log.debug("Skipping check")
 
@@ -761,7 +766,7 @@ class SQLServer(AgentCheck):
         queries = [get_query_file_stats(major_version, engine_edition)]
 
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
-            if major_version > 2012 or engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE:
+            if major_version > 2012 or is_azure_database(engine_edition):
                 queries.extend(
                     [
                         get_query_ao_availability_groups(major_version),
@@ -770,17 +775,23 @@ class SQLServer(AgentCheck):
                     ]
                 )
             else:
-                self.log.warning('AlwaysOn metrics are not supported on version 2012')
+                self.log_missing_metric("AlwaysOn", major_version, engine_edition)
         if is_affirmative(self.instance.get('include_fci_metrics', False)):
             if major_version > 2012 or engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE:
                 queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
             else:
-                self.log.warning('Failover Cluster Instance metrics are not supported on version 2012')
+                self.log_missing_metric("Failover Cluster Instance", major_version, engine_edition)
 
         self._dynamic_queries = self._new_query_executor(queries)
         self._dynamic_queries.compile_queries()
         self.log.debug("initialized dynamic queries")
         return self._dynamic_queries
+
+    def log_missing_metric(self, metric_name, major_version, engine_version):
+        if major_version <= 2012:
+            self.log.warning('%s metrics are not supported on version 2012', metric_name)
+        else:
+            self.log.warning('%s metrics are not supported on Azure engine version: %s', metric_name, engine_version)
 
     def collect_metrics(self):
         """Fetch the metrics from all the associated database tables."""

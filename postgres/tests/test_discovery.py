@@ -7,9 +7,9 @@ import re
 import time
 from contextlib import contextmanager
 
-import psycopg2
-import psycopg2.sql
+import psycopg
 import pytest
+from psycopg import sql
 
 from datadog_checks.base import ConfigurationError
 
@@ -103,7 +103,7 @@ def test_autodiscovery_refresh(integration_check, pg_instance):
     @contextmanager
     def get_postgres_connection():
         conn_args = {'host': HOST, 'dbname': "postgres", 'user': USER_ADMIN, 'password': PASSWORD_ADMIN}
-        conn = psycopg2.connect(**conn_args)
+        conn = psycopg.connect(**conn_args)
         conn.autocommit = True
         yield conn
 
@@ -123,16 +123,14 @@ def test_autodiscovery_refresh(integration_check, pg_instance):
     with get_postgres_connection() as conn:
         cursor = conn.cursor()
         try:
-            cursor.execute(psycopg2.sql.SQL("CREATE DATABASE {}").format(psycopg2.sql.Identifier(database_to_find)))
+            cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(database_to_find)))
 
             time.sleep(pg_instance["database_autodiscovery"]['refresh'])
             databases = check.autodiscovery.get_items()
             assert len(databases) == expected_len + 1
         finally:
             # Need to drop the new database to clean up the environment for next tests.
-            cursor.execute(
-                psycopg2.sql.SQL("DROP DATABASE {} WITH (FORCE);").format(psycopg2.sql.Identifier(database_to_find))
-            )
+            cursor.execute(sql.SQL("DROP DATABASE {} WITH (FORCE);").format(sql.Identifier(database_to_find)))
 
 
 @pytest.mark.integration

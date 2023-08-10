@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 11.0.0 / 2023-08-10
+
+***Changed***:
+
+* Bump the minimum base check version. See [#15427](https://github.com/DataDog/integrations-core/pull/15427).
+
+***Added***:
+
+* Add support for ingesting mysql config settings. See [#15498](https://github.com/DataDog/integrations-core/pull/15498).
+* Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
+
+***Fixed***:
+
+* Fix types for generated config models. See [#15334](https://github.com/DataDog/integrations-core/pull/15334).
+
 ## 10.3.0 / 2023-07-10
 
 ***Added***:

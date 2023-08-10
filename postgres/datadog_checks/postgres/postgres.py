@@ -1,11 +1,14 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import concurrent.futures
 import copy
 import os
 from time import time
 
-import psycopg2
+import psycopg
+from psycopg import ClientCursor
+from psycopg.rows import dict_row
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
@@ -71,6 +74,7 @@ class PostgreSql(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self.db = None
+        self.persistent_conn = None
         self._resolved_hostname = None
         self._agent_hostname = None
         self._version = None
@@ -88,12 +92,13 @@ class PostgreSql(AgentCheck):
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
-        self.db_pool = MultiDatabaseConnectionPool(self._new_connection, self._config.max_connections)
+        self.db_pool = MultiDatabaseConnectionPool(self, self._new_connection, self._config.max_connections)
         self.metrics_cache = PostgresMetricsCache(self._config)
-        self.statement_metrics = PostgresStatementMetrics(self, self._config, shutdown_callback=self._close_db_pool)
-        self.statement_samples = PostgresStatementSamples(self, self._config, shutdown_callback=self._close_db_pool)
-        self.metadata_samples = PostgresMetadata(self, self._config, shutdown_callback=self._close_db_pool)
+        self.statement_metrics = PostgresStatementMetrics(self, self._config)
+        self.statement_samples = PostgresStatementSamples(self, self._config)
+        self.metadata_samples = PostgresMetadata(self, self._config)
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
+        self._check_cancelled = False
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
         self.check_initializations.append(self.set_resolved_hostname_metadata)
@@ -163,7 +168,7 @@ class PostgreSql(AgentCheck):
         )
 
     def execute_query_raw(self, query):
-        with self._get_main_db().cursor() as cursor:
+        with self.db.cursor() as cursor:
             cursor.execute(query)
             rows = cursor.fetchall()
             return rows
@@ -181,15 +186,20 @@ class PostgreSql(AgentCheck):
         queries = []
         if self.version >= V9_2:
             q_pg_stat_database = copy.deepcopy(QUERY_PG_STAT_DATABASE)
-            q_pg_stat_database["query"] += " WHERE " + " AND ".join(
-                "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
-            )
+            if len(self._config.ignore_databases) > 0:
+                q_pg_stat_database["query"] += " WHERE " + " AND ".join(
+                    "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
+                )
             q_pg_stat_database_conflicts = copy.deepcopy(QUERY_PG_STAT_DATABASE_CONFLICTS)
-            q_pg_stat_database_conflicts["query"] += " WHERE " + " AND ".join(
-                "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
-            )
+            if len(self._config.ignore_databases) > 0:
+                q_pg_stat_database_conflicts["query"] += " WHERE " + " AND ".join(
+                    "datname not ilike '{}'".format(db) for db in self._config.ignore_databases
+                )
 
-            if self._config.dbstrict:
+            if self._config.dbstrict and len(self._config.ignore_databases) == 0:
+                q_pg_stat_database["query"] += " WHERE datname in('{}')".format(self._config.dbname)
+                q_pg_stat_database_conflicts["query"] += " WHERE datname in('{}')".format(self._config.dbname)
+            elif self._config.dbstrict and len(self._config.ignore_databases) > 0:
                 q_pg_stat_database["query"] += " AND datname in('{}')".format(self._config.dbname)
                 q_pg_stat_database_conflicts["query"] += " AND datname in('{}')".format(self._config.dbname)
 
@@ -233,11 +243,26 @@ class PostgreSql(AgentCheck):
 
     def cancel(self):
         """
-        Cancels and waits for all threads to stop.
+        Cancels and waits for all threads to stop, and then
+        closes any open db connections
         """
-        self.statement_samples.cancel()
-        self.statement_metrics.cancel()
-        self.metadata_samples.cancel()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            tasks = [
+                executor.submit(thread.cancel)
+                for thread in [self.statement_samples, self.statement_metrics, self.metadata_samples]
+            ]
+
+            try:
+                concurrent.futures.wait(tasks, timeout=self._config.min_collection_interval)
+            except concurrent.futures.TimeoutError:
+                self.log.warning(
+                    "Not all job loops were completed in time when cancelling the main check. "
+                    "Proceeding with the check cancellation. "
+                    "Some unexpected errors related to closed connections may occur after this message."
+                )
+
+        self._close_db_pool()
+        self._check_cancelled = True
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
@@ -371,14 +396,14 @@ class PostgreSql(AgentCheck):
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
-        except psycopg2.errors.FeatureNotSupported as e:
+        except psycopg.errors.FeatureNotSupported as e:
             # This happens for example when trying to get replication metrics from readers in Aurora. Let's ignore it.
             log_func(e)
             self.db.rollback()
             self.log.debug("Disabling replication metrics")
             self._is_aurora = False
             self.metrics_cache.replication_metrics = {}
-        except psycopg2.errors.UndefinedFunction as e:
+        except psycopg.errors.UndefinedFunction as e:
             log_func(e)
             log_func(
                 "It seems the PG version has been incorrectly identified as %s. "
@@ -386,7 +411,7 @@ class PostgreSql(AgentCheck):
             )
             self._clean_state()
             self.db.rollback()
-        except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
+        except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
             log_func("Not all metrics may be available: %s" % str(e))
             self.db.rollback()
 
@@ -584,7 +609,7 @@ class PostgreSql(AgentCheck):
             )
             if self._config.query_timeout:
                 connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
-            conn = psycopg2.connect(connection_string)
+            conn = psycopg.connect(conninfo=connection_string, autocommit=True, cursor_factory=ClientCursor)
         else:
             password = self._config.password
             region = self._config.cloud_metadata.get('aws', {}).get('region', None)
@@ -600,7 +625,7 @@ class PostgreSql(AgentCheck):
                 'host': self._config.host,
                 'user': self._config.user,
                 'password': password,
-                'database': dbname,
+                'dbname': dbname,
                 'sslmode': self._config.ssl_mode,
                 'application_name': self._config.application_name,
             }
@@ -616,28 +641,31 @@ class PostgreSql(AgentCheck):
                 args['sslkey'] = self._config.ssl_key
             if self._config.ssl_password:
                 args['sslpassword'] = self._config.ssl_password
-            conn = psycopg2.connect(**args)
-        # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
-        conn.set_session(autocommit=True, readonly=True)
+
+            conn = psycopg.connect(**args, autocommit=True, cursor_factory=ClientCursor)
         return conn
 
     def _connect(self):
         """
-        Get and memoize connections to instances.
-        The connection created here will be persistent. It will not be automatically
-        evicted from the connection pool.
+        Set the connection for main check thread.
+        This is to be managed outside the
+        db connection pool, so on cancel it
+        can be properly closed after the check completes
         """
         if self.db and self.db.closed:
             # Reset the connection object to retry to connect
             self.db = None
-
-        if not self.db:
-            self.db = self._get_main_db()
+        if self.db:
+            if self.db.info.status != psycopg.pq.ConnStatus.OK:
+                # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
+                self.db.rollback()
+        else:
+            self.db = self._new_connection(self._config.dbname)
 
     # Reload pg_settings on a new connection to the main db
     def _load_pg_settings(self, db):
         try:
-            with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with db.cursor(row_factory=dict_row) as cursor:
                 self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                 cursor.execute(
                     PG_SETTINGS_QUERY,
@@ -646,9 +674,10 @@ class PostgreSql(AgentCheck):
                 rows = cursor.fetchall()
                 self.pg_settings.clear()
                 for setting in rows:
-                    name, val = setting
+                    name = setting['name']
+                    val = setting['setting']
                     self.pg_settings[name] = val
-        except (psycopg2.DatabaseError, psycopg2.OperationalError) as err:
+        except (psycopg.DatabaseError, psycopg.OperationalError) as err:
             self.log.warning("Failed to query for pg_settings: %s", repr(err))
             self.count(
                 "dd.postgres.error",
@@ -657,23 +686,26 @@ class PostgreSql(AgentCheck):
                 hostname=self.resolved_hostname,
             )
 
-    def _get_main_db(self):
+    def get_pg_settings(self):
+        return self.pg_settings
+
+    def get_main_db(self):
         """
-        Returns a memoized, persistent psycopg2 connection to `self.dbname`.
-        Threadsafe as long as no transactions are used
-        :return: a psycopg2 connection
+        Returns a memoized, persistent psycopg connection to `self.dbname`.
+        Utilizes the db connection pool, and is meant to be shared across multiple threads.
+        :return: a psycopg connection
         """
         # reload settings for the main DB only once every time the connection is reestablished
         conn = self.db_pool._get_connection_raw(
-            self._config.dbname,
-            self._config.idle_connection_timeout,
+            dbname=self._config.dbname,
+            ttl_ms=self._config.idle_connection_timeout,
             startup_fn=self._load_pg_settings,
             persistent=True,
         )
         return conn
 
     def _close_db_pool(self):
-        self.db_pool.close_all_connections()
+        self.db_pool.close_all_connections(timeout=self._config.min_collection_interval)
 
     def _collect_custom_queries(self, tags):
         """
@@ -700,7 +732,7 @@ class PostgreSql(AgentCheck):
                 try:
                     self.log.debug("Running query: %s", query)
                     cursor.execute(query)
-                except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
+                except (psycopg.ProgrammingError, psycopg.errors.QueryCanceled) as e:
                     self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
                     self.db.rollback()
                     continue
@@ -837,3 +869,9 @@ class PostgreSql(AgentCheck):
         finally:
             # Add the warnings saved during the execution of the check
             self._report_warnings()
+            if self._check_cancelled and self.db:
+                try:
+                    # once check finishes on a cancel, shut down main connection gracefully
+                    self.db.close()
+                except Exception:
+                    self.log.exception("failed to close DB connection for db=%s", self._config.dbname)

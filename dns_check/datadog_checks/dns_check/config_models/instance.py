@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
@@ -21,15 +21,17 @@ from . import defaults, validators
 
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
-    exclude: Optional[Sequence[str]] = None
-    include: Optional[Sequence[str]] = None
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     disable_generic_tags: Optional[bool] = None
@@ -43,7 +45,7 @@ class InstanceConfig(BaseModel):
     record_type: Optional[str] = None
     resolves_as: Optional[str] = None
     service: Optional[str] = None
-    tags: Optional[Sequence[str]] = None
+    tags: Optional[tuple[str, ...]] = None
     timeout: Optional[int] = None
 
     @model_validator(mode='before')
@@ -51,25 +53,14 @@ class InstanceConfig(BaseModel):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
     @field_validator('*', mode='before')
-    def _ensure_defaults(cls, value, info):
+    def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
-            return value
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{info.field_name}', lambda: value)()
-
-    @field_validator('*')
-    def _run_validations(cls, value, info):
-        field = cls.model_fields[info.field_name]
-        field_name = field.alias or info.field_name
-        if field_name not in info.context['configured_fields']:
-            return value
-
-        return getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
-
-    @field_validator('*', mode='after')
-    def _make_immutable(cls, value):
         return validation.utils.make_immutable(value)
 
     @model_validator(mode='after')

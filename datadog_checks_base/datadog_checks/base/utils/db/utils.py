@@ -10,6 +10,7 @@ import socket
 import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
+from ipaddress import IPv4Address
 from itertools import chain
 from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
@@ -183,6 +184,8 @@ def default_json_event_encoding(o):
         return float(o)
     if isinstance(o, (datetime.date, datetime.datetime)):
         return o.isoformat()
+    if isinstance(o, IPv4Address):
+        return str(o)
     raise TypeError
 
 
@@ -259,6 +262,9 @@ class DBMAsyncJob(object):
         Send a signal to cancel the job loop asynchronously.
         """
         self._cancel_event.set()
+        # after setting cancel event, wait for job loop to fully shutdown
+        if self._job_loop_future:
+            self._job_loop_future.result()
 
     def run_job_loop(self, tags):
         """

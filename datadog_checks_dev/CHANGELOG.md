@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Stop using the TOX_ENV_NAME variable ([#15528](https://github.com/DataDog/integrations-core/pull/15528))
+
+## 23.0.0 / 2023-08-10
+
+***Changed***:
+
+* New changelog generation ([#15378](https://github.com/DataDog/integrations-core/pull/15378))
+
+## 22.1.2 / 2023-08-10
+
+***Fixed***:
+
+* Bump datamodel-code-generator to address pydantic deprecations. See [#15521](https://github.com/DataDog/integrations-core/pull/15521).
+
+## 22.1.1 / 2023-08-08
+
+***Fixed***:
+
+* Change equality requirement to subset in dependency validation. See [#15490](https://github.com/DataDog/integrations-core/pull/15490).
+* Upgrade postgres check to psycopg3. See [#15411](https://github.com/DataDog/integrations-core/pull/15411).
+* Bump the min base check version in the templates to 32.6.0. See [#15442](https://github.com/DataDog/integrations-core/pull/15442).
+* Update formatting of changelog templates. See [#15434](https://github.com/DataDog/integrations-core/pull/15434).
+* Improvements on dependency validation. See [#15416](https://github.com/DataDog/integrations-core/pull/15416).
+* Fix types for generated config models. See [#15334](https://github.com/DataDog/integrations-core/pull/15334).
+* Remove `legal_email` field from Ecosystem template. See [#15379](https://github.com/DataDog/integrations-core/pull/15379).
+* Add new release notes below the Unreleased section of changelogs. See [#15332](https://github.com/DataDog/integrations-core/pull/15332).
+
 ## 22.1.0 / 2023-07-20
 
 ***Added***:
