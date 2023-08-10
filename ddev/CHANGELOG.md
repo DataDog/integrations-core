@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 3.4.0 / 2023-08-10
+
 ***Added***:
 
 * Add changelog enforcement ([#15459](https://github.com/DataDog/integrations-core/pull/15459))
