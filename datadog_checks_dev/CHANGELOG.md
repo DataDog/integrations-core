@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Stop using the TOX_ENV_NAME variable ([#15528](https://github.com/DataDog/integrations-core/pull/15528))
+
 ## 23.0.0 / 2023-08-10
 
 ***Changed***:
