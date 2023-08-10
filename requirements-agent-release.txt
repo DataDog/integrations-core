@@ -27,7 +27,7 @@ datadog-cisco-aci==2.3.0
 datadog-citrix-hypervisor==3.0.0
 datadog-clickhouse==3.0.0
 datadog-cloud-foundry-api==3.0.0
-datadog-cloudera==1.1.1
+datadog-cloudera==2.0.0
 datadog-cockroachdb==2.7.1
 datadog-confluent-platform==1.8.2
 datadog-consul==2.2.2
