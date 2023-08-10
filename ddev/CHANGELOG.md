@@ -5,6 +5,7 @@
 ***Added***:
 
 * Add changelog enforcement ([#15459](https://github.com/DataDog/integrations-core/pull/15459))
+* Upgrade datadog-checks-dev to 23.0.0 ([#15540](https://github.com/DataDog/integrations-core/pull/15540))
 
 ## 3.3.0 / 2023-07-20
 
