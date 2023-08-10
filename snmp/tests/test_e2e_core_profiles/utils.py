@@ -25,6 +25,15 @@ def assert_common_metrics(aggregator, common_tags):
     common.assert_common_metrics(aggregator, tags=common_tags, is_e2e=True, loader="core")
 
 
+def assert_extend_aruba_switch_cpu_memory(aggregator, common_tags):
+    # fmt: off
+    """Add the following to the snmprec
+1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.4|66|29
+    """
+    # fmt: on
+    aggregator.assert_metric("snmp.cpu.usage", metric_type=aggregator.GAUGE, tags=common_tags + ['cpu:4'])
+
+
 def assert_extend_generic_if(aggregator, common_tags):
     # fmt: off
     """Add the following to the snmprec
