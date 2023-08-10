@@ -37,15 +37,15 @@
 
 ## 4.0.0 / 2022-02-19 / Agent 7.35.0
 
-***Changed***:
+***Fixed***:
 
 * Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
 
-***Added***:
+***Changed***:
 
 * Add `pyproject.toml` file. See [#11315](https://github.com/DataDog/integrations-core/pull/11315).
 
-***Fixed***:
+***Removed***:
 
 * Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
 
