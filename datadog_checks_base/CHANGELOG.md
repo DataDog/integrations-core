@@ -1,5 +1,7 @@
 # CHANGELOG - datadog_checks_base
 
+## Unreleased
+
 ## 32.7.0 / 2023-08-10
 
 ***Added***:
@@ -24,8 +26,6 @@
 * Upgrade pydantic. See [#15394](https://github.com/DataDog/integrations-core/pull/15394).
 * Revert "Bump pydantic version in the agent_requirements.in file (#153…. See [#15338](https://github.com/DataDog/integrations-core/pull/15338).
 * Bump pydantic version in the agent_requirements.in file. See [#15320](https://github.com/DataDog/integrations-core/pull/15320).
-
-## Unreleased
 
 ## 32.5.1 / 2023-07-19
 
