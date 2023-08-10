@@ -87,7 +87,6 @@ def test_validate_http_success(ddev, repository, helpers):
         Validating 3 integrations for usage of http wrapper...
         HTTP wrapper validation
 
-        Passed: 1
-        Completed http validation!
+        Passed: 3
         """
     )

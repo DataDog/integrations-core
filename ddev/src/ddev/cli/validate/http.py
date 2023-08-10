@@ -122,7 +122,6 @@ def validate_use_http_wrapper(check, app):
 
     if has_failed:
         return check_uses_http_wrapper, warning_message, error_message
-        app.abort()
     return check_uses_http_wrapper, warning_message, error_message
 
 
@@ -162,11 +161,14 @@ def http(app: Application, check: tuple[str, ...]):
                 config_http_failure, config_http_msg = validate_config_result
                 has_failed = config_http_failure or has_failed
                 validation_tracker.error((curr_check.display_name,), message='\n'.join(config_http_msg))
+            else:
+                validation_tracker.success()
+        else:
+            if not error_message:
+                validation_tracker.success()
 
     if has_failed:
         validation_tracker.display()
         app.abort()
     else:
-        validation_tracker.success()
         validation_tracker.display()
-    app.display_success('Completed http validation!')
