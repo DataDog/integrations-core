@@ -142,7 +142,7 @@ datadog-sonarqube==3.0.0
 datadog-spark==4.0.0
 datadog-sqlserver==13.0.0
 datadog-squid==2.3.0
-datadog-ssh-check==2.5.0
+datadog-ssh-check==2.6.0
 datadog-statsd==1.10.1
 datadog-strimzi==1.0.0
 datadog-supervisord==2.4.1
