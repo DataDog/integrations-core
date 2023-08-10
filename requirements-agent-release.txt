@@ -40,7 +40,7 @@ datadog-dcgm==2.0.0
 datadog-directory==2.0.0
 datadog-disk==5.0.0
 datadog-dns-check==3.0.0
-datadog-dotnetclr==1.14.1; sys_platform == 'win32'
+datadog-dotnetclr==2.0.0; sys_platform == 'win32'
 datadog-druid==2.2.1
 datadog-ecs-fargate==3.4.0
 datadog-eks-fargate==3.2.1
