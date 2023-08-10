@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 23.0.0 / 2023-08-10
+
+***Changed***:
+
+* New changelog generation ([#15378](https://github.com/DataDog/integrations-core/pull/15378))
+
 ## 22.1.2 / 2023-08-10
 
 ***Fixed***:
