@@ -344,8 +344,6 @@ def test_activity_nested_blocking_transactions(
     assert tx3["query_hash"]
     assert tx3["query_plan_hash"]
 
-
-
     for t in [t1, t2, t3]:
         t.join()
 
