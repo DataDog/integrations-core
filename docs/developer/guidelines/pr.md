@@ -32,25 +32,24 @@ section. For example:
 ...
 ```
 
-Unless you have applied the `changelog/no-changelog` label, you must also edit the `CHANGELOG.md` file in 
+If you don't apply the `changelog/no-changelog` label, you must edit the `CHANGELOG.md` file in 
 the integration you have modified. Below are the guidelines for the correct formatting for changelogs: 
 
 ### Spacing
 
-* There should be one empty line between all text of different format. This means that there should be an 
-empty line between all of the following sections of text:
+* There should be a blank line between each section. This means that there should be a line between the following sections of text:
   * Changelog file header
   * Unreleased header
   * Version / Date header
   * Change type (ex: fixed, added, etc)
-  * Specific descriptions of changes (note: within this section itself, there should NOT be new lines between bullets)
+  * Specific descriptions of changes (**Note**: Within this section, there should **not** be new lines between bullet points,)
 
 * `Extra spacing on line {line number}`: There is an extra blank line on the line referenced in the error. 
 * `Missing spacing on line {line number}`: Add an empty line above or below the referenced line.
 
 ### Integration Version Header
 
-* The header for an integration version should be in the following fashion: `version number / YYYY-MM-DD / Agent Version Number`. 
+* The header for an integration version should be in the following format: `version number / YYYY-MM-DD / Agent Version Number`. 
 The Agent version number is not necessary, but a valid version number and date are required. The first header after the 
 file's title can be `Unreleased`. The content under this section is the same as any other. 
 * `Version is formatted incorrectly on line {line number}`: The version you inputted is not a valid version, or there is 
@@ -58,17 +57,15 @@ no / separator between the version and date in your header.
 * `Date is formatted incorrectly on line {line number}`: The date must be formatted as YYYY-MM-DD, with no spaces in between. 
 
 ### Changelog Content
-* The changelog content is broken down by the different type of change that was made. For changelog types, we adhere 
-to those defined by [Keep a Changelog][keepachangelog-types]. For each different version, they must be written in the 
-following order, by priority:
-  * ***Removed***: for now removed features.
-  * ***Changed***: for changes in existing functionality.
-  * ***Security***: in case of vulnerabilities.
-  * ***Deprecated***: for soon-to-be removed features.
-  * ***Added***: for new features or any non-trivial refactors.
-  * ***Fixed***: for any bug fixes.
-* The changelog header must be capitalized and written in this format: `***HEADER***:` It should be bolded and italicized!
-* `Changelog type is incorrect on line {line count}`: The changelog header on that line is not one of the 6 valid changelog types
+* The changelog content is broken down by the type of change that was made. For changelog types, we adhere to those defined by [Keep a Changelog][keepachangelog-types]. For each new version, they must be written in the following order, by priority:
+  * ***Removed*** for features that have been removed.
+  * ***Changed*** for changes to existing functionality.
+  * ***Security*** in case of vulnerabilities.
+  * ***Deprecated*** for soon-to-be removed features.
+  * ***Added*** for new features or any non-trivial refactors.
+  * ***Fixed*** for any bug fixes.
+* The changelog header must be capitalized and written in this format: `***HEADER***:`. Note that it should be bold and italicized.
+* `Changelog type is incorrect on line {line count}`: The changelog header on that line is not one of the six valid changelog types.
 * `Changelog header order is incorrect on line {line count}`: The changelog header on that line is in the wrong order. 
 Double check the ordering of the changelogs and ensure that the headers for the changelog types are correctly ordered by priority. 
 * `Changelogs should start with asterisks, on line {line count}`: All changelog details below each header should be 
