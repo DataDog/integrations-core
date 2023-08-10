@@ -74,9 +74,11 @@ WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
 """,
 ).strip()
 
-# Query to fetch idle blocking sessions
-# with only basic sess and conn info
-# not joining with sys.dm_exec_requests
+# Turns out sdm_exec_requests does not contain idle sessions.
+# Inner joining dm_exec_sessions with dm_exec_requests will not return any idle blocking sessions.
+# This prevent us reusing the same ACTIVITY_QUERY for regular activities and idle blocking sessions.
+# Below query used for idle sessions does not joining dm_exec_requests.
+# the last query run on the connection is fetched from dm_exec_connections.most_recent_sql_handle.
 IDLE_BLOCKING_SESSIONS_QUERY = re.sub(
     r'\s+',
     ' ',
@@ -100,8 +102,7 @@ FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
     CROSS APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) lqt
-WHERE sess.session_id != @@spid
-    AND sess.status = 'sleeping'
+WHERE sess.status = 'sleeping'
     AND sess.session_id IN ({blocking_session_ids})
     AND c.session_id IN ({blocking_session_ids})
 """,
@@ -211,11 +212,14 @@ class SqlserverActivity(DBMAsyncJob):
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        # construct set of unique session ids
+        session_ids = {r['id'] for r in rows}
         # construct set of blocking session ids
         blocking_session_ids = {r['blocking_session_id'] for r in rows if r['blocking_session_id']}
-        if blocking_session_ids:
-            # if there are blocking sessions, fetch idle blocking sessions
-            idle_blocking_sessions = self._get_idle_blocking_sessions(cursor, blocking_session_ids)
+        # if there are blocking sessions and some of the session(s) are not captured in the activity query
+        idle_blocking_session_ids = blocking_session_ids - session_ids
+        if idle_blocking_session_ids:
+            idle_blocking_sessions = self._get_idle_blocking_sessions(cursor, idle_blocking_session_ids)
             rows.extend(idle_blocking_sessions)
         return rows
 

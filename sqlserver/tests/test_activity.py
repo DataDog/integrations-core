@@ -300,18 +300,51 @@ def test_activity_nested_blocking_transactions(
     # associated sys.dm_exec_requests.
     assert root_blocker["user_name"] == "fred"
     assert root_blocker["session_status"] == "sleeping"
+    assert root_blocker["database_name"] == "datadog_test"
+    assert root_blocker["last_request_start_time"]
+    assert root_blocker["client_port"]
+    assert root_blocker["client_address"]
+    assert root_blocker["host_name"]
     # Expect to capture the query signature for the root blocker
     # query text is not captured from the req dmv
     # but available in the connection dmv with most_recent_sql_handle
     assert root_blocker["query_signature"]
     # we do not capture requests for sleeping sessions
     assert "blocking_session_id" not in root_blocker
+    assert "request_status" not in root_blocker
+    assert "query_start" not in root_blocker
 
     # TX2 should be blocked by the root blocker TX1, TX3 should be blocked by TX2
     assert tx2["blocking_session_id"] == root_blocker["id"]
     assert tx3["blocking_session_id"] == tx2["id"]
+    # TX2 and TX3 should be running
     assert tx2["session_status"] == "running"
     assert tx3["session_status"] == "running"
+    # verify other essential fields are present
+    assert tx2["user_name"] == "bob"
+    assert tx2["database_name"] == "datadog_test"
+    assert tx2["last_request_start_time"]
+    assert tx2["client_port"]
+    assert tx2["client_address"]
+    assert tx2["host_name"]
+    assert tx2["query_signature"]
+    assert tx2["request_status"]
+    assert tx2["query_start"]
+    assert tx2["query_hash"]
+    assert tx2["query_plan_hash"]
+    assert tx3["user_name"] == "fred"
+    assert tx3["database_name"] == "datadog_test"
+    assert tx3["last_request_start_time"]
+    assert tx3["client_port"]
+    assert tx3["client_address"]
+    assert tx3["host_name"]
+    assert tx3["query_signature"]
+    assert tx3["request_status"]
+    assert tx3["query_start"]
+    assert tx3["query_hash"]
+    assert tx3["query_plan_hash"]
+
+
 
     for t in [t1, t2, t3]:
         t.join()
