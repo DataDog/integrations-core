@@ -6,7 +6,7 @@
 
 ***Added***:
 
-* Supervisord - Add options. See [#14190](https://github.com/DataDog/integrations-core/pull/14190). Thanks [jcolfej](https://github.com/jcolfej).
+* Add options. See [#14190](https://github.com/DataDog/integrations-core/pull/14190). Thanks [jcolfej](https://github.com/jcolfej).
 * Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
 
 ***Fixed***:

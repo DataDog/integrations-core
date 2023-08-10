@@ -14,7 +14,7 @@
 
 ***Fixed***:
 
-* [AGENT-9912] Improve debug logs for ena and ethtool network metrics. See [#15447](https://github.com/DataDog/integrations-core/pull/15447).
+* Improve debug logs for ena and ethtool network metrics. See [#15447](https://github.com/DataDog/integrations-core/pull/15447).
 * Fix types for generated config models. See [#15334](https://github.com/DataDog/integrations-core/pull/15334).
 
 ## 2.10.0 / 2023-07-10

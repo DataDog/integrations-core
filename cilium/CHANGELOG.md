@@ -10,7 +10,7 @@
 
 ***Added***:
 
-* Cilium: add more kvstore metrics. See [#15483](https://github.com/DataDog/integrations-core/pull/15483). Thanks [antonipp](https://github.com/antonipp).
+* Add more kvstore metrics. See [#15483](https://github.com/DataDog/integrations-core/pull/15483). Thanks [antonipp](https://github.com/antonipp).
 * Add missing cilium metrics. See [#15284](https://github.com/DataDog/integrations-core/pull/15284).
 * Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
 

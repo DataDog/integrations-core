@@ -2,10 +2,6 @@
 
 ## Unreleased
 
-***Fixed***:
-
-* Bump datamodel-code-generator to address pydantic deprecations (#15521)
-
 ## 22.1.2 / 2023-08-10
 
 ***Fixed***:
