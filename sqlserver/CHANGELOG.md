@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+## 13.0.0 / 2023-08-10
+
+***Changed***:
+
+* Bump the minimum base check version. See [#15427](https://github.com/DataDog/integrations-core/pull/15427).
+* Truncate procedure_text in sqlserver activity query. See [#15295](https://github.com/DataDog/integrations-core/pull/15295).
+
+***Added***:
+
+* Add support to ingest sys.configurations for SQL Server instances. See [#15496](https://github.com/DataDog/integrations-core/pull/15496).
+* Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
+
+***Fixed***:
+
+* Allow for collection of AO metrics for azure sql db. See [#15508](https://github.com/DataDog/integrations-core/pull/15508).
+* Fix types for generated config models. See [#15334](https://github.com/DataDog/integrations-core/pull/15334).
+
 ## 12.0.0 / 2023-07-10
 
 ***Changed***:
