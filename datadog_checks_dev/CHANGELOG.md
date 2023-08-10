@@ -2,9 +2,11 @@
 
 ## Unreleased
 
+## 22.1.2 / 2023-08-10
+
 ***Fixed***:
 
-* Bump datamodel-code-generator to address pydantic deprecations (#15521)
+* Bump datamodel-code-generator to address pydantic deprecations. See [#15521](https://github.com/DataDog/integrations-core/pull/15521).
 
 ## 22.1.1 / 2023-08-08
 

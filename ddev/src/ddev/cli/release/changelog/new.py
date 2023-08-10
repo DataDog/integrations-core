@@ -14,27 +14,34 @@ if TYPE_CHECKING:
 @click.command(short_help='Create changelog entries')
 @click.argument('entry_type', required=False)
 @click.argument('targets', nargs=-1, required=False)
-@click.option(
-    '--message',
-    '-m',
-    help='The changelog text, defaulting to the PR title followed by the most recent commit message',
-)
+@click.option('--message', '-m', help='The changelog text')
 @click.pass_obj
 def new(app: Application, entry_type: str | None, targets: tuple[str], message: str | None):
     """
-    Create changelog entries.
+    This creates new changelog entries. If the entry type is not specified, you will be prompted.
+
+    The `--message` option can be used to specify the changelog text. If this is not supplied, an editor
+    will be opened for you to manually write the entry. The changelog text that is opened defaults to
+    the PR title, followed by the most recent commit subject. If that is sufficient, then you may close
+    the editor tab immediately.
+
+    By default, changelog entries will be created for all integrations that have changed code. To create
+    entries only for specific targets, you may pass them as additional arguments after the entry type.
     """
     from ddev.release.constants import ENTRY_TYPES
+    from ddev.utils.scripts.check_pr import changelog_entry_suffix
 
     derive_message = message is None
     latest_commit = app.repo.git.latest_commit
     pr = app.github.get_pull_request(latest_commit.sha)
     if pr is not None:
         pr_number = pr.number
+        pr_url = pr.html_url
         if message is None:
             message = pr.title
     else:
         pr_number = app.github.get_next_issue_number()
+        pr_url = f'https://github.com/{app.github.repo_id}/pull/{pr_number}'
         if message is None:
             message = latest_commit.subject
 
@@ -45,7 +52,7 @@ def new(app: Application, entry_type: str | None, targets: tuple[str], message: 
     else:
         entry_type = click.prompt('Entry type?', type=click.Choice(ENTRY_TYPES, case_sensitive=False))
 
-    expected_suffix = f' (#{pr_number})'
+    expected_suffix = changelog_entry_suffix(pr_number, pr_url)
     entry = f'* {message.rstrip()}{expected_suffix}'
     if derive_message and (new_entry := click.edit(entry)) is not None:
         entry = new_entry

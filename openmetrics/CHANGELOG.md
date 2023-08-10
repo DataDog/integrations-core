@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+## 4.0.0 / 2023-08-10
+
+***Changed***:
+
+* Bump the minimum base check version. See [#15427](https://github.com/DataDog/integrations-core/pull/15427).
+
+***Added***:
+
+* Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
+
+***Fixed***:
+
+* Fix types for generated config models. See [#15334](https://github.com/DataDog/integrations-core/pull/15334).
+* Bump minimum base package version. See [#15303](https://github.com/DataDog/integrations-core/pull/15303).
+* Revert to requesting Prometheus format by default. See [#15292](https://github.com/DataDog/integrations-core/pull/15292).
+
 ## 3.0.2 / 2023-07-13
 
 ***Fixed***:
