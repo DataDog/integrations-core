@@ -333,7 +333,10 @@ class PostgresMetadata(DBMAsyncJob):
             # partition master tables won't get any metrics reported on them,
             # so we have to grab the total partition activity
             # note: partitions don't exist in V9, so we have to check this first
-            if VersionUtils.transform_version(str(self._check._version))['version.major'] == "9" or not info["has_partitions"]:
+            if (
+                VersionUtils.transform_version(str(self._check._version))['version.major'] == "9"
+                or not info["has_partitions"]
+            ):
                 return (
                     cache[dbname][info['name']]['postgresql.index_scans']
                     + cache[dbname][info['name']]['postgresql.seq_scans']
