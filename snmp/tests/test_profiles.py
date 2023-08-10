@@ -1844,23 +1844,28 @@ def test_proliant(aggregator):
 
     power_metrics = [
         'cpqHeFltTolPowerSupplyStatus',
-        'cpqHeFltTolPowerSupplyCapacityUsed',
-        'cpqHeFltTolPowerSupplyCapacityMaximum',
     ]
-    tag_mappings = [
-        ('30', '3'),
-    ]
-    for number, status in tag_mappings:
-        tags = [
-            'power_supply_status:{}'.format(status),
-            'chassis_num:{}'.format(number),
-        ] + common_tags
-        for gauge in power_metrics:
-            aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    for gauge in power_metrics:
+        tags = ['chassis_num:30'] + common_tags
+        aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     controller_index = ['controller_index:3'] + common_tags
     aggregator.assert_metric(
         'snmp.{}'.format("cpqDaCntlrCondition"), metric_type=aggregator.GAUGE, tags=controller_index, count=1
+    )
+
+    tags = ['chassis_num:30', 'power_supply_status:3'] + common_tags
+    aggregator.assert_metric(
+        'snmp.{}'.format("cpqHeFltTolPowerSupplyCapacityUsed"),
+        metric_type=aggregator.GAUGE,
+        tags=tags,
+        count=1,
+    )
+    aggregator.assert_metric(
+        'snmp.{}'.format("cpqHeFltTolPowerSupplyCapacityMaximum"),
+        metric_type=aggregator.GAUGE,
+        tags=tags,
+        count=1,
     )
 
     thermal_metrics = ['cpqHeThermalCondition', 'cpqHeSysUtilLifeTime', 'cpqHeFltTolPwrSupplyStatus']
