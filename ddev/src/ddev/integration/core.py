@@ -67,6 +67,9 @@ class Integration:
                 if f.endswith('.py'):
                     yield Path(root, f)
 
+    def requires_changelog_entry(self, path: Path) -> bool:
+        return self.package_directory in path.parents or (self.is_package and path == (self.path / 'pyproject.toml'))
+
     @property
     def release_tag_pattern(self) -> str:
         version_part = r'\d+\.\d+\.\d+'
