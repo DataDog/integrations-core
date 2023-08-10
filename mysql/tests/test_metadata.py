@@ -25,9 +25,8 @@ def test_collect_mysql_settings(aggregator, dbm_instance, dd_run_check):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     dd_run_check(mysql_check)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-    event = next(x for x in dbm_metadata if x['kind'] == 'mysql_variables')
+    event = next(e for e in dbm_metadata if e['kind'] == 'mysql_variables')
     assert event is not None
     assert event['host'] == "stubbed.hostname"
     assert event['dbms'] == "mysql"
-    assert event['kind'] == "mysql_variables"
     assert len(event["metadata"]) > 0

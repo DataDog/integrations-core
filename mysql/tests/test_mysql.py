@@ -662,11 +662,10 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
     dd_run_check(mysql_check)
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-    event = dbm_metadata[0]
-    assert len(event) > 0
+    event = next(e for e in dbm_metadata if e['kind'] == 'database_instance')
+    assert event is not None
     assert event['host'] == expected_host
     assert event['dbms'] == "mysql"
-    assert event['kind'] == "database_instance"
     assert event['tags'].sort() == tags.METRIC_TAGS.sort()
     assert event['collection_interval'] == 1800
     assert event['metadata'] == {
