@@ -36,6 +36,7 @@ dependencies = [
     "tomli; python_version < '3.11'",
     "tomli-w",
     "tomlkit",
+    "tqdm",
 ]
 dynamic = ["version"]
 
