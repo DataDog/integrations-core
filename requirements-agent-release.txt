@@ -115,7 +115,7 @@ datadog-openstack==1.13.2
 datadog-oracle==5.0.0
 datadog-pan-firewall==1.1.1
 datadog-pdh-check==2.0.0; sys_platform == 'win32'
-datadog-pgbouncer==4.4.2; sys_platform != 'win32'
+datadog-pgbouncer==5.0.0; sys_platform != 'win32'
 datadog-php-fpm==2.2.1
 datadog-postfix==1.12.1; sys_platform != 'win32'
 datadog-postgres==14.0.1
