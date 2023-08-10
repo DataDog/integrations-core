@@ -1,6 +1,8 @@
 name: Check PR
 
-on: pull_request
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}

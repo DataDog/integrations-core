@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+## 6.0.0 / 2023-08-10
+
+***Changed***:
+
+* Bump the minimum base check version. See [#15427](https://github.com/DataDog/integrations-core/pull/15427).
+
+***Added***:
+
+* Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
+
+***Fixed***:
+
+* Add a diagnostic for TLS certificate files. See [#15470](https://github.com/DataDog/integrations-core/pull/15470).
+* Submit critical service check whenever connection fails. See [#15208](https://github.com/DataDog/integrations-core/pull/15208).
+* Fix types for generated config models. See [#15334](https://github.com/DataDog/integrations-core/pull/15334).
+
 ## 5.1.0 / 2023-07-10
 
 ***Added***:
