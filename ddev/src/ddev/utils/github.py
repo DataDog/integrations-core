@@ -18,6 +18,7 @@ class PullRequest:
     def __init__(self, data: dict[str, Any]):
         self.__number = data['number']
         self.__title = data['title']
+        self.__html_url = data['pull_request']['html_url']
         self.__diff_url = data['pull_request']['diff_url']
         # Normalize to remove carriage returns on Windows
         self.__body = '\n'.join(data['body'].splitlines())
@@ -31,6 +32,10 @@ class PullRequest:
     @property
     def title(self) -> str:
         return self.__title
+
+    @property
+    def html_url(self) -> str:
+        return self.__html_url
 
     @property
     def diff_url(self) -> str:

@@ -253,6 +253,15 @@ def assert_extend_generic_ucd(aggregator, common_tags):
     aggregator.assert_metric("snmp.ucd.memTotalSwap", metric_type=aggregator.GAUGE, tags=common_tags)
 
 
+def assert_extend_checkpoint_firewall_cpu_memory(aggregator, common_tags):
+    # fmt:off
+    """Add the following to the snmprec
+1.3.6.1.4.1.2620.1.6.7.4.3.0|70|15569114139837823111
+    """
+    # fmt:on
+    aggregator.assert_metric("snmp.memory.total", metric_type=aggregator.GAUGE, tags=common_tags)
+
+
 def assert_extend_cisco(aggregator, common_tags):
     # fmt:off
     """Add the following to the snmprec

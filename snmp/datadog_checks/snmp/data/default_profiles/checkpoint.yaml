@@ -160,6 +160,30 @@ metrics:
       OID: 1.3.6.1.4.1.2620.1.6.7.8.2
       name: fanSpeedSensorTable
   - MIB: CHECKPOINT-MIB
+    table:
+      OID: 1.3.6.1.4.1.2620.1.6.7.8.2
+      name: fanSpeedSensorTable
+    symbols:
+      - name: fanSpeedSensor
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.2620.1.6.7.8.2.1.6
+          name: fanSpeedSensorStatus
+        tag: fan_speed_sensor_status
+        mapping:
+          0: false
+          1: true
+          2: reading_error
+      - column:
+          OID: 1.3.6.1.4.1.2620.1.6.7.8.2.1.1
+          name: fanSpeedSensorIndex
+        tag: sensor_index
+      - column:
+          OID: 1.3.6.1.4.1.2620.1.6.7.8.2.1.2
+          name: fanSpeedSensorName
+        tag: sensor_name
+  - MIB: CHECKPOINT-MIB
     metric_tags:
       - column:
           OID: 1.3.6.1.4.1.2620.1.6.7.8.1.1.1
