@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add support for sending `database_instance` metadata. See [#15524](https://github.com/DataDog/integrations-core/pull/15524).
+
 ## 11.0.0 / 2023-08-10
 
 ***Changed***:
@@ -10,7 +14,6 @@
 
 ***Added***:
 
-* Add support for ingesting mysql config settings. See [#15498](https://github.com/DataDog/integrations-core/pull/15498).
 * Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
 
 ***Fixed***:
