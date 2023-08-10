@@ -1,5 +1,16 @@
 # CHANGELOG - datadog_checks_base
 
+## 32.7.0 / 2023-08-10
+
+***Added***:
+
+* Bump psycopg3 version && add timeouts on blocking functions. See [#15492](https://github.com/DataDog/integrations-core/pull/15492).
+* Add support for implementing diagnostics for `agent diagnose`. See [#14394](https://github.com/DataDog/integrations-core/pull/14394).
+
+***Fixed***:
+
+* Upgrade postgres check to psycopg3. See [#15411](https://github.com/DataDog/integrations-core/pull/15411).
+
 ## 32.6.0 / 2023-07-31
 
 ***Added***:
