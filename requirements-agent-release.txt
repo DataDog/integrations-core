@@ -90,7 +90,7 @@ datadog-kube-proxy==6.1.0
 datadog-kube-scheduler==4.6.0
 datadog-kubelet==7.9.0
 datadog-kubernetes-state==7.5.0
-datadog-kyototycoon==2.2.1
+datadog-kyototycoon==2.3.0
 datadog-lighttpd==3.2.1
 datadog-linkerd==3.4.1
 datadog-linux-proc-extras==2.3.1; sys_platform == 'linux2'
