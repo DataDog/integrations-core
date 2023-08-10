@@ -73,7 +73,7 @@ datadog-ibm-db2==2.0.0
 datadog-ibm-i==2.0.0; sys_platform != 'win32'
 datadog-ibm-mq==5.0.0
 datadog-ibm-was==3.0.0
-datadog-ignite==2.2.2
+datadog-ignite==2.3.0
 datadog-iis==2.19.1; sys_platform == 'win32'
 datadog-impala==1.1.2
 datadog-istio==4.4.1
