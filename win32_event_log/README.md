@@ -73,15 +73,13 @@ To find the channel name for an Event Log in the Windows Event Viewer, open the 
 
 <!-- xxx tab "Events" xxx -->
 
-#### Event collection
+#### Event collection using the Event Log API (Recommended)
+
+The Datadog Agent can be configured to collect Windows Event Logs as Datadog events using the Event Log API. Datadog recommends using the Event Log API because it has better performance than the legacy method below. Note, each method has its own configuration syntax for channels and for filters. For more information, see [Filtering Events](?tab=events#filtering-events). 
 
 To collect Windows Event Logs as Datadog events, configure channels under the `instances:` section of your `win32_event_log.d/conf.yaml` configuration file. 
 
-The Datadog Agent can be configured to collect Windows Event Logs as Datadog events in two ways. Each method has its own configuration syntax for channels and for filters . For more information, see [Filtering Events](?tab=events#filtering-events). 
-
-* The latest method uses the Event Log API. Datadog recommends using the Event Log API because it has better performance than the legacy method below. 
-
-  </br> To use the Event Log API collection method, set `legacy_mode: false` in each instance. If `legacy_mode: false` is set, the `path` is required to be set in the `\win32_event_log.d\conf.yaml` file. 
+  </br> Set `legacy_mode: false` in each instance. If `legacy_mode: false` is set, the `path` is required to be set in the `\win32_event_log.d\conf.yaml` file. 
 
   </br> This example shows entries for the `Security` and `<CHANNEL_2>` channels:
 
@@ -98,9 +96,13 @@ The Datadog Agent can be configured to collect Windows Event Logs as Datadog eve
       filters: {}
   ```
 
-* The legacy method uses WMI and is the default mode for an instance. 
+#### Event collection using Legacy Mode (Deprecated)
+
+The legacy method uses WMI (Windows Management Instrumentation) and was deprecated in Agent version 7.20. 
+
+To collect Windows Event Logs as Datadog events, configure channels under the `instances:` section of your `win32_event_log.d/conf.yaml` configuration file.
   
-  </br> If `legacy_mode` is not set or set to `true`, then at least one of the following filters must be set: `source_name`, `event_id`, `message_filters`, `log_file`, or `type`.
+  </br> To use Legacy Mode, set `legacy_mode` to `true`. Then, set at least one of the following filters: `source_name`, `event_id`, `message_filters`, `log_file`, or `type`.
 
   </br> This example shows entries for the `Security` and `<CHANNEL_2>` channels:
 
@@ -183,18 +185,18 @@ The values listed in the output of the command can be set in `win32_event_log.d/
 The information given by the  <code>Get-EventLog</code> PowerShell command or the Windows Event ViewerGUI may slightly differ from <code>Get-WmiObject</code>.<br> Double check your filters' values with <code>Get-WmiObject</code> if the integration does not capture the events you set up.
 </div>
 
-The Datadog Agent can be configured to collect Windows Event Logs as Datadog events in two ways. Each method has its own configuration syntax for filters. See the [sample win32_event_log.d/conf.yaml][3] for all available filter options for respective modes.
+#### Filtering events using the Event Log API (Recommended)
 
-Datadog recommends using the latest method for filters. 
-
-* The latest method includes the following filters:
+The configuration option using the Event Log API includes the following filters:
 
   - `path`: `Application`, `System`, `Setup`, `Security`
   - `type`: `Critical`, `Error`, `Warning`, `Information`, `Success Audit`, `Failure Audit`
   - `source`: Any available source name
   - `id`: event_id: Windows EventLog ID
 
-  This example filter uses the latest method.
+  See the [sample win32_event_log.d/conf.yaml][3] for all available filter options. 
+
+  This example filter uses Event Log API method.
 
   ```yaml
   instances:
@@ -234,16 +236,16 @@ You can use the [`query` option][20] to filter events with an [XPATH or structur
         </QueryList>
  ```
 
-* The legacy method includes the following filters:
+#### Filtering events using Legacy Mode (Deprecated)
+
+The configuration option using the Legacy Mode includes the following filters:
 
   - `log_file`: `Application`, `System`, `Setup`, `Security`
   - `type`: `Critical`, `Error`, `Warning`, `Information`, `Audit Success`, `Audit Failure`
   - `source_name`: Any available source name
   - `event_id`: Windows EventLog ID
 
-* The legacy method does not support the `query` option. Only the latest method (setting `legacy_mode: false`) and the Logs Tailer supports the `query` option.
-
-  This example filter uses the legacy method.
+  This example filter uses the Legacy Mode method.
 
   ```yaml
   instances:
@@ -268,6 +270,7 @@ You can use the [`query` option][20] to filter events with an [XPATH or structur
       log_file:
         - System
   ```
+The legacy method does not support the `query` option. Only the Event Log API method (setting `legacy_mode: false`) and the Logs Tailer supports the `query` option.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Logs" xxx -->
