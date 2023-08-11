@@ -335,7 +335,7 @@ class ESCheck(AgentCheck):
             resp.raise_for_status()
         except Exception as e:
             # this means we've hit a particular kind of auth error that means the config is broken
-            if resp and resp.status_code == 400:
+            if isinstance(resp, requests.Response) and resp.status_code == 400:
                 raise AuthenticationError("The ElasticSearch credentials are incorrect")
 
             if send_sc:
