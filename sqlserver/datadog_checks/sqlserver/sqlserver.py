@@ -956,7 +956,7 @@ class SQLServer(AgentCheck):
                 'integration_version': __version__,
                 "tags": self._non_internal_tags,
                 "timestamp": time.time() * 1000,
-                "cloud_metadata": self._config.cloud_metadata,
+                "cloud_metadata": self.cloud_metadata,
                 "metadata": {
                     "dbm": self._config.dbm_enabled,
                     "connection_host": self._config.host,
