@@ -4,7 +4,7 @@
 
 ***Added***:
 
-* Add support for sending `database_instance` metadata. See ([#15524](https://github.com/DataDog/integrations-core/pull/15524))
+* Add support for sending `database_instance` metadata. [#15524](https://github.com/DataDog/integrations-core/pull/15524)
 
 ## 11.0.0 / 2023-08-10
 
