@@ -51,6 +51,8 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.fanSpeedSensor',  # Checkpoint constant metric
     'snmp.enclosurePowerSupply',  # iDRAC constant metric
     'snmp.systemState',  # iDRAC constant metric
+    'snmp.physicalDisk',  # iDRAC constant metric
+    'snmp.wlsxSysExtFan',  # Aruba constant metric
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
@@ -458,7 +460,7 @@ def test_e2e_profile_dell_poweredge(dd_agent_check):
         dd_agent_check,
         config,
         metrics_to_skip=metric_to_skip,
-        tags_to_skip=['system_state_power_supply_status_combined'],  # Skipping tag with a mapping
+        tags_to_skip=['system_state_power_supply_status_combined', 'disk_state'],  # Skipping tag with a mapping
     )
 
 
@@ -509,6 +511,7 @@ def test_e2e_profile_idrac(dd_agent_check):
         tags_to_skip=[
             'system_state_power_supply_status_combined',
             'enclosure_power_supply_state',
+            'disk_state',
         ],  # Skipping tags with mappings
     )
 

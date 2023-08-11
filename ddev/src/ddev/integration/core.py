@@ -105,6 +105,11 @@ class Integration:
         return self.path / relative_path
 
     @cached_property
+    def config_spec(self) -> Path:
+        relative_path = self.manifest.get('/assets/integration/configuration/spec', 'assets/configuration/spec.yaml')
+        return self.path / relative_path
+
+    @cached_property
     def is_valid(self) -> bool:
         return self.is_integration or self.is_package
 

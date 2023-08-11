@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+***Removed***:
+
+* Migrate `validate http` to ddev ([#15526](https://github.com/DataDog/integrations-core/pull/15526))
+
+***Fixed***:
+
+* Stop using the TOX_ENV_NAME variable ([#15528](https://github.com/DataDog/integrations-core/pull/15528))
+
 ## 23.0.0 / 2023-08-10
 
 ***Changed***:
