@@ -9,6 +9,7 @@
 ***Fixed***:
 
 * Output changelog to stdout instead of stderr on `ddev release agent changelog` ([#15548](https://github.com/DataDog/integrations-core/pull/15548))
+* Fix CI validation ([#15560](https://github.com/DataDog/integrations-core/pull/15560))
 
 ## 3.4.0 / 2023-08-10
 
