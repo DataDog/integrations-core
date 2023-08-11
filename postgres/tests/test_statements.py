@@ -100,7 +100,7 @@ def test_statement_metrics_version(integration_check, dbm_instance, version, exp
         check = integration_check(dbm_instance)
         check._version = version
         check._connect()
-        assert check.statement_metrics._payload_pg_version() == expected_payload_version
+        assert check.statement_metrics.payload_pg_version() == expected_payload_version
     else:
         with mock.patch(
             'datadog_checks.postgres.postgres.PostgreSql.version', new_callable=mock.PropertyMock
@@ -108,7 +108,7 @@ def test_statement_metrics_version(integration_check, dbm_instance, version, exp
             patched_version.return_value = None
             check = integration_check(dbm_instance)
             check._connect()
-            assert check.statement_metrics._payload_pg_version() == expected_payload_version
+            assert check.statement_metrics.payload_pg_version() == expected_payload_version
 
 
 @pytest.mark.parametrize("dbstrict,ignore_databases", [(True, []), (False, ['dogs']), (False, [])])

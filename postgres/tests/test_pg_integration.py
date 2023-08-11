@@ -10,6 +10,7 @@ import pytest
 from semver import VersionInfo
 
 from datadog_checks.postgres import PostgreSql
+from datadog_checks.postgres.__about__ import __version__
 from datadog_checks.postgres.util import PartialFormatter, fmt
 
 from .common import (
@@ -608,6 +609,47 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         tags=expected_tags_with_db,
         hostname=expected_hostname,
     )
+
+
+@pytest.mark.parametrize(
+    'dbm_enabled, reported_hostname',
+    [
+        (True, None),
+        (False, None),
+        (True, 'forced_hostname'),
+        (True, 'forced_hostname'),
+    ],
+)
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, dbm_enabled, reported_hostname):
+    instance_complex['dbm'] = dbm_enabled
+    if reported_hostname:
+        instance_complex['reported_hostname'] = reported_hostname
+    expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
+    check = PostgreSql('test_instance', {}, [instance_complex])
+    dd_run_check(check)
+
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
+    assert event is not None
+    assert event['host'] == expected_host
+    assert event['dbms'] == "postgres"
+    assert event['tags'].sort() == []
+    assert event['integration_version'] == __version__
+    assert event['collection_interval'] == 1800
+    assert event['metadata'] == {
+        'dbm': dbm_enabled,
+        'connection_host': instance_complex['host'],
+    }
+
+    # Run a second time and expect the metadata to not be emitted again because of the cache TTL
+    aggregator.reset()
+    dd_run_check(check)
+
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
+    assert event is None
 
 
 def assert_state_clean(check):
