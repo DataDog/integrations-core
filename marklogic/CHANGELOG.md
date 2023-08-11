@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 4.0.0 / 2023-08-10
+
+***Changed***:
+
+* Bump the minimum base check version. See [#15427](https://github.com/DataDog/integrations-core/pull/15427).
+
+***Added***:
+
+* Add support for marklogic 11. See [#15428](https://github.com/DataDog/integrations-core/pull/15428).
+* Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
+
+***Fixed***:
+
+* Fix types for generated config models. See [#15334](https://github.com/DataDog/integrations-core/pull/15334).
+
 ## 3.2.1 / 2023-07-10
 
 ***Fixed***:

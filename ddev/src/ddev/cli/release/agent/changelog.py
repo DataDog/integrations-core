@@ -86,4 +86,4 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
 
         dest.write_text(changelog_contents.getvalue())
     else:
-        app.display_info(changelog_contents.getvalue())
+        app.display(changelog_contents.getvalue())
