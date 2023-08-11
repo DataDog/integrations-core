@@ -339,6 +339,8 @@ def licenses(app: Application, sync: bool):
     import os
     from collections import defaultdict
 
+    from tqdm import tqdm
+
     from ddev.cli.validate import licenses_utils
 
     if app.repo.name != 'core':
@@ -404,8 +406,9 @@ def licenses(app: Application, sync: bool):
 
     package_license_errors = defaultdict(list)
 
+    app.display_info("Validating main licenses.")
     lines = set()
-    for (package_name, _version), data in sorted(package_data.items()):
+    for (package_name, _version), data in tqdm(sorted(package_data.items()), desc="Generating CSV lines.", unit="pkgs"):
         explicit_licenses = app.repo.config.get('/overrides/dependencies/licenses', {})
         if package_name in explicit_licenses:
             for license_id in sorted(explicit_licenses[package_name]):
@@ -452,7 +455,6 @@ def licenses(app: Application, sync: bool):
                 lines.add(format_attribution_line(package_name, license_id, data['copyright'].get(license_id, '')))
         else:
             package_license_errors[package_name].append('no license information')
-
     if package_license_errors:
         error_message = ''
         for package_name, package_errors in package_license_errors.items():
@@ -463,6 +465,7 @@ def licenses(app: Application, sync: bool):
         validation_tracker.display()
         app.abort()
 
+    app.display_info("Validating extra licenses.")
     extra_licenses_lines, any_errors, error_msg_temp = validate_extra_licenses(app)
     error_message += error_msg_temp
     lines |= extra_licenses_lines
