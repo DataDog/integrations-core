@@ -13,7 +13,6 @@ from .config import config
 from .dashboards import dashboards
 from .dep import dep
 from .eula import eula
-from .http import http
 from .imports import imports
 from .integration_style import integration_style
 from .jmx_metrics import jmx_metrics
@@ -38,7 +37,6 @@ ALL_COMMANDS = (
     dashboards,
     dep,
     eula,
-    http,
     imports,
     integration_style,
     jmx_metrics,

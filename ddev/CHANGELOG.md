@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Migrate `validate http` to ddev ([#15526](https://github.com/DataDog/integrations-core/pull/15526))
+
 ***Fixed***:
 
 * Output changelog to stdout instead of stderr on `ddev release agent changelog` ([#15548](https://github.com/DataDog/integrations-core/pull/15548))
