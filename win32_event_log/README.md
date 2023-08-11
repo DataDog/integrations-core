@@ -96,7 +96,7 @@ To collect Windows Event Logs as Datadog events, configure channels under the `i
       filters: {}
   ```
 
-#### Event Collection using Legacy Mode (Deprecated)
+#### Event collection using Legacy Mode (Deprecated)
 
 The legacy method uses WMI (Windows Management Instrumentation) and was deprecated in Agent version 7.20. 
 
