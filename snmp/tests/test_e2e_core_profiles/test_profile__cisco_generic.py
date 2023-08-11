@@ -74,6 +74,19 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         )
 
     tag_rows = [
+        ['fru:4', 'power_admin_status:on', 'power_oper_status:offCooling'],
+        ['fru:5', 'power_admin_status:powerCycle', 'power_oper_status:offEnvOther'],
+        ['fru:6', 'power_admin_status:inlineAuto', 'power_oper_status:offEnvPower'],
+        ['fru:16', 'power_admin_status:powerCycle', 'power_oper_status:offCooling'],
+        ['fru:19', 'power_admin_status:off', 'power_oper_status:offDenied'],
+        ['fru:20', 'power_admin_status:inlineAuto', 'power_oper_status:offEnvFan'],
+        ['fru:23', 'power_admin_status:on', 'power_oper_status:onButFanFail'],
+        ['fru:30', 'power_admin_status:inlineOn', 'power_oper_status:offConnectorRating'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.cefcFRUPowerStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
         ['cpu:712'],
         ['cpu:25166'],
     ]
@@ -135,6 +148,19 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
+        ['mac_addr:0x111111111111', 'entity_physical_index:2', 'switch_state:progressing'],
+        ['mac_addr:0x111111111111', 'entity_physical_index:7', 'switch_state:ready'],
+        ['mac_addr:0x111111111111', 'entity_physical_index:8', 'switch_state:added'],
+        ['mac_addr:0x111111111111', 'entity_physical_index:12', 'switch_state:verMismatch'],
+        ['mac_addr:0x111111111111', 'entity_physical_index:19', 'switch_state:progressing'],
+        ['mac_addr:0x111111111111', 'entity_physical_index:20', 'switch_state:sdmMismatch'],
+        ['mac_addr:0x111111111111', 'entity_physical_index:22', 'switch_state:provisioned'],
+        ['mac_addr:0x111111111111', 'entity_physical_index:28', 'switch_state:verMismatch'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.cswSwitchInfo', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['fru:21'],

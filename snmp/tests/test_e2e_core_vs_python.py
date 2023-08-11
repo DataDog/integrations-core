@@ -47,6 +47,8 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.ciscoEnvMonSupplyStatus',  # Cisco constant metric
     'snmp.ciscoEnvMonFanStatus',  # Cisco constant metric
     'snmp.cefcFanTrayStatus',  # Cisco constant metric
+    'snmp.cefcFRUPowerStatus',  # Cisco constant metric
+    'snmp.cswSwitchInfo',  # Cisco constant metric
     'snmp.cpqHeFltTolPowerSupply',  # HP constant metric
     'snmp.fanSpeedSensor',  # Checkpoint constant metric
     'snmp.enclosurePowerSupply',  # iDRAC constant metric
@@ -370,6 +372,9 @@ def test_e2e_profile_cisco_3850(dd_agent_check):
             'fan_state',
             'cefc_fan_tray_oper_status',
             'cefc_fan_tray_direction',
+            'power_admin_status',
+            'power_oper_status',
+            'switch_state',
         ],  # Ignore tags that have mappings
     )
 
@@ -386,6 +391,9 @@ def test_e2e_profile_cisco_asa(dd_agent_check):
             'fan_state',
             'cefc_fan_tray_oper_status',
             'cefc_fan_tray_direction',
+            'power_admin_status',
+            'power_oper_status',
+            'switch_state',
         ],  # Ignore tags that have mappings
     )
 
@@ -402,6 +410,9 @@ def test_e2e_profile_cisco_asa_5525(dd_agent_check):
             'fan_state',
             'cefc_fan_tray_oper_status',
             'cefc_fan_tray_direction',
+            'power_admin_status',
+            'power_oper_status',
+            'switch_state',
         ],  # Ignore tags that have mappings
     )
 
@@ -430,6 +441,9 @@ def test_e2e_profile_cisco_nexus(dd_agent_check):
             'fan_state',
             'cefc_fan_tray_oper_status',
             'cefc_fan_tray_direction',
+            'power_admin_status',
+            'power_oper_status',
+            'switch_state',
         ],  # Ignore tags that have mappings
     )
 
