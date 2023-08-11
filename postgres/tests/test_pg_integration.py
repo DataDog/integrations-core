@@ -486,7 +486,7 @@ def test_wal_stats(aggregator, integration_check, pg_instance):
 
 
 def test_query_timeout(integration_check, pg_instance):
-    pg_instance['query_timeout'] = 1000
+    pg_instance['query_tsimeout'] = 1000
     check = integration_check(pg_instance)
     check._connect()
     cursor = check.db.cursor()
@@ -622,12 +622,12 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
 )
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, dbm_enabled, reported_hostname):
-    instance_complex['dbm'] = dbm_enabled
+def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_enabled, reported_hostname):
+    pg_instance['dbm'] = dbm_enabled
     if reported_hostname:
-        instance_complex['reported_hostname'] = reported_hostname
+        pg_instance['reported_hostname'] = reported_hostname
     expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
-    check = PostgreSql('test_instance', {}, [instance_complex])
+    check = PostgreSql('test_instance', {}, [pg_instance])
     dd_run_check(check)
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
@@ -640,7 +640,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
     assert event['collection_interval'] == 1800
     assert event['metadata'] == {
         'dbm': dbm_enabled,
-        'connection_host': instance_complex['host'],
+        'connection_host': pg_instance['host'],
     }
 
     # Run a second time and expect the metadata to not be emitted again because of the cache TTL
