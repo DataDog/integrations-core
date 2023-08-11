@@ -12,7 +12,6 @@ from .config import config
 from .dashboards import dashboards
 from .dep import dep
 from .eula import eula
-from .http import http
 from .imports import imports
 from .jmx_metrics import jmx_metrics
 from .manifest import manifest
@@ -34,7 +33,6 @@ ALL_VALIDATIONS = (
     (dep, ('core',)),
     (eula, ('marketplace',)),
     (jmx_metrics, (None,)),
-    (http, ('core',)),
     (imports, (None,)),
     (manifest, (None,)),
     (metadata, (None,)),
