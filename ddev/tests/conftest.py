@@ -12,6 +12,7 @@ import pytest
 import vcr
 from click.testing import CliRunner as __CliRunner
 from datadog_checks.dev.tooling.utils import set_root
+
 from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.config.file import ConfigFile

@@ -11,7 +11,6 @@ import click
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
-EXCLUDED_INTEGRATIONS = {'kubelet', 'openstack'}
 
 REQUEST_LIBRARY_FUNC_RE = r"requests.[get|post|head|put|patch|delete]*\("
 HTTP_WRAPPER_INIT_CONFIG_RE = r"init_config\/[http|openmetrics_legacy|openmetrics]*"
@@ -82,7 +81,7 @@ def validate_use_http_wrapper_file(file, check):
                 f'Check `{check}` uses `{http_func.group(0)}` in `{os.path.basename(file)}`, '
                 f'please use the HTTP wrapper instead\n'
                 f"If this a genuine usage of the parameters, "
-                f"please inline comment `# SKIP_HTTP_VALIDATION`\n"
+                f"please inline comment `# SKIP_HTTP_VALIDATION`"
             )
             return False, True, None, error_message
         if found_http and not skip_validation:
@@ -113,10 +112,10 @@ def validate_use_http_wrapper(check, app):
             if check_uses_http_wrapper and has_arg_warning:
                 # Check for headers= or auth=
                 warning_message += (
-                    f"    The HTTP wrapper contains parameter `{has_arg_warning.group().replace('=', '')}`, "
+                    f"The HTTP wrapper contains parameter `{has_arg_warning.group().replace('=', '')}`, "
                     f"this configuration is handled by the wrapper automatically.\n"
-                    f"    If this a genuine usage of the parameters, "
-                    f"please inline comment `# SKIP_HTTP_VALIDATION`\n"
+                    f"If this a genuine usage of the parameters, "
+                    f"please inline comment `# SKIP_HTTP_VALIDATION`"
                 )
                 pass
 
@@ -125,50 +124,42 @@ def validate_use_http_wrapper(check, app):
     return check_uses_http_wrapper, warning_message, error_message
 
 
-@click.command(short_help='Validate usage of http wrapper')
-@click.argument('check', nargs=-1)
+@click.command(short_help='Validate HTTP usage')
+@click.argument('integrations', nargs=-1)
 @click.pass_obj
-def http(app: Application, check: tuple[str, ...]):
-    """Validate all integrations for usage of http wrapper.
+def http(app: Application, integrations: tuple[str, ...]):
+    """Validate all integrations for usage of HTTP wrapper.
 
-    If `check` is specified, only the check will be validated,
+    If `integrations` is specified, only those will be validated,
     an 'all' `check` value will validate all checks.
     """
     validation_tracker = app.create_validation_tracker('HTTP wrapper validation')
-    has_failed = False
 
-    check_iterable = app.repo.integrations.iter(check)
-    app.display_info(f"Validating {sum(1 for _ in check_iterable)} integrations for usage of http wrapper...")
+    excluded = set(app.repo.config.get('/overrides/validate/http/exclude', []))
+    for integration in app.repo.integrations.iter(integrations):
+        if integration.name in excluded or not integration.is_integration:
+            continue
 
-    for curr_check in app.repo.integrations.iter(check):
-        check_uses_http_wrapper = False
-
-        # Validate use of http wrapper (self.http.[...]) in check's .py files
-        if curr_check.name not in EXCLUDED_INTEGRATIONS:
-            check_uses_http_wrapper, warning_message, error_message = validate_use_http_wrapper(curr_check.name, app)
+        check_uses_http_wrapper, warning_message, error_message = validate_use_http_wrapper(integration.name, app)
 
         if warning_message:
-            validation_tracker.warning((curr_check.display_name,), message=warning_message)
+            validation_tracker.warning((integration.display_name,), message=warning_message)
         if error_message:
-            has_failed = True
-            validation_tracker.error((curr_check.display_name,), message=error_message)
+            validation_tracker.error((integration.display_name,), message=error_message)
         # Validate use of http template in check's spec.yaml (if exists)
         if check_uses_http_wrapper:
             validate_config_result = validate_config_http(
-                get_default_config_spec(curr_check.name, app), curr_check.name
+                get_default_config_spec(integration.name, app), integration.name
             )
             if validate_config_result:
-                config_http_failure, config_http_msg = validate_config_result
-                has_failed = config_http_failure or has_failed
-                validation_tracker.error((curr_check.display_name,), message='\n'.join(config_http_msg))
+                _, config_http_msg = validate_config_result
+                validation_tracker.error((integration.display_name,), message='\n'.join(config_http_msg))
             else:
                 validation_tracker.success()
         else:
             if not error_message:
                 validation_tracker.success()
 
-    if has_failed:
-        validation_tracker.display()
+    validation_tracker.display()
+    if validation_tracker.errors:
         app.abort()
-    else:
-        validation_tracker.display()

@@ -1,6 +1,17 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
+
+from ddev.utils.structures import EnvVars
+
+
+@pytest.fixture(scope='module', autouse=True)
+def terminal_width():
+    with EnvVars({'COLUMNS': '200'}):
+        yield
+
+
 def test_warn_headers_auth(ddev, repository, helpers):
     check = 'apache'
     file_path = repository.path / check / 'datadog_checks' / check / 'apache.py'
@@ -13,9 +24,20 @@ def test_warn_headers_auth(ddev, repository, helpers):
         file.writelines(file_contents)
 
     result = ddev('validate', 'http', check)
+
     assert result.exit_code == 0, result.output
-    warning = 'The HTTP wrapper contains parameter `auth`, this configuration is'
-    assert warning in helpers.remove_trailing_spaces(result.output)
+    assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
+        """
+        HTTP wrapper validation
+        └── Apache
+
+            The HTTP wrapper contains parameter `auth`, this configuration is handled by the wrapper automatically.
+            If this a genuine usage of the parameters, please inline comment `# SKIP_HTTP_VALIDATION`
+
+        Passed: 1
+        Warnings: 1
+        """
+    )
 
 
 def test_uses_requests(ddev, repository, helpers):
@@ -30,12 +52,22 @@ def test_uses_requests(ddev, repository, helpers):
         file.writelines(file_contents)
 
     result = ddev('validate', 'http', check)
+
     assert result.exit_code == 1, result.output
-    error = 'Check `apache` uses `requests.get(` in `apache.py`,'
-    assert error in helpers.remove_trailing_spaces(result.output)
+    assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
+        """
+        HTTP wrapper validation
+        └── Apache
+
+            Check `apache` uses `requests.get(` in `apache.py`, please use the HTTP wrapper instead
+            If this a genuine usage of the parameters, please inline comment `# SKIP_HTTP_VALIDATION`
+
+        Errors: 1
+        """
+    )
 
 
-def test_spec_missing_info_config(ddev, repository, helpers):
+def test_spec_missing_init_config(ddev, repository, helpers):
     import yaml
 
     check = 'apache'
@@ -53,8 +85,16 @@ def test_spec_missing_info_config(ddev, repository, helpers):
     result = ddev('validate', 'http', check)
 
     assert result.exit_code == 1, result.output
-    error = 'Detected apache is missing `init_config/http` or'
-    assert error in helpers.remove_trailing_spaces(result.output)
+    assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
+        """
+        HTTP wrapper validation
+        └── Apache
+
+            Detected apache is missing `init_config/http` or `init_config/openmetrics_legacy` template in spec.yaml
+
+        Errors: 1
+        """
+    )
 
 
 def test_spec_missing_instance(ddev, repository, helpers):
@@ -75,8 +115,16 @@ def test_spec_missing_instance(ddev, repository, helpers):
     result = ddev('validate', 'http', check)
 
     assert result.exit_code == 1, result.output
-    error = 'Detected apache is missing `instances/http` or'
-    assert error in helpers.remove_trailing_spaces(result.output)
+    assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
+        """
+        HTTP wrapper validation
+        └── Apache
+
+            Detected apache is missing `instances/http` or `instances/openmetrics_legacy` template in spec.yaml
+
+        Errors: 1
+        """
+    )
 
 
 def test_validate_http_success(ddev, repository, helpers):
@@ -84,7 +132,6 @@ def test_validate_http_success(ddev, repository, helpers):
     assert result.exit_code == 0, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
         """
-        Validating 3 integrations for usage of http wrapper...
         HTTP wrapper validation
 
         Passed: 3
