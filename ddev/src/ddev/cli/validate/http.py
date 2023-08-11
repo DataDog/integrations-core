@@ -12,13 +12,9 @@ import click
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
-REQUEST_LIBRARY_FUNC_RE = r"requests.[get|post|head|put|patch|delete]*\("
-HTTP_WRAPPER_INIT_CONFIG_RE = r"init_config\/[http|openmetrics_legacy|openmetrics]*"
-HTTP_WRAPPER_INSTANCE_RE = r"instances\/[http|openmetrics_legacy|openmetrics]*"
-
-
-def get_default_config_spec(check_name, app):
-    return os.path.join(app.repo.path, check_name, 'assets', 'configuration', 'spec.yaml')
+REQUEST_LIBRARY_FUNC_RE = r'requests.[get|post|head|put|patch|delete]*\('
+HTTP_WRAPPER_INIT_CONFIG_RE = r'init_config\/[http|openmetrics_legacy|openmetrics]*'
+HTTP_WRAPPER_INSTANCE_RE = r'instances\/[http|openmetrics_legacy|openmetrics]*'
 
 
 def validate_config_http(file, check):
@@ -43,7 +39,7 @@ def validate_config_http(file, check):
 
     if not has_instance_http:
         message = (
-            f"Detected {check} is missing `instances/http` or `instances/openmetrics_legacy` template in spec.yaml"
+            f'Detected {check} is missing `instances/http` or `instances/openmetrics_legacy` template in spec.yaml'
         )
         error_message.append(message)
 
@@ -51,7 +47,7 @@ def validate_config_http(file, check):
 
     if not has_init_config_http:
         message = (
-            f"Detected {check} is missing `init_config/http` or `init_config/openmetrics_legacy` template in spec.yaml"
+            f'Detected {check} is missing `init_config/http` or `init_config/openmetrics_legacy` template in spec.yaml'
         )
 
         error_message.append(message)
@@ -72,16 +68,16 @@ def validate_use_http_wrapper_file(file, check):
     error_message = ''
     with open(file, 'r', encoding='utf-8') as f:
         read_file = f.read()
-        found_match_arg = re.search(r"auth=|header=", read_file)
-        found_http = re.search(r"self.http|OpenMetricsBaseCheck", read_file)
-        skip_validation = re.search(r"SKIP_HTTP_VALIDATION", read_file)
+        found_match_arg = re.search(r'auth=|header=', read_file)
+        found_http = re.search(r'self.http|OpenMetricsBaseCheck', read_file)
+        skip_validation = re.search(r'SKIP_HTTP_VALIDATION', read_file)
         http_func = re.search(REQUEST_LIBRARY_FUNC_RE, read_file)
         if http_func and not skip_validation:
             error_message += (
                 f'Check `{check}` uses `{http_func.group(0)}` in `{os.path.basename(file)}`, '
                 f'please use the HTTP wrapper instead\n'
-                f"If this a genuine usage of the parameters, "
-                f"please inline comment `# SKIP_HTTP_VALIDATION`"
+                f'If this a genuine usage of the parameters, '
+                f'please inline comment `# SKIP_HTTP_VALIDATION`'
             )
             return False, True, None, error_message
         if found_http and not skip_validation:
@@ -112,10 +108,10 @@ def validate_use_http_wrapper(check, app):
             if check_uses_http_wrapper and has_arg_warning:
                 # Check for headers= or auth=
                 warning_message += (
-                    f"The HTTP wrapper contains parameter `{has_arg_warning.group().replace('=', '')}`, "
-                    f"this configuration is handled by the wrapper automatically.\n"
-                    f"If this a genuine usage of the parameters, "
-                    f"please inline comment `# SKIP_HTTP_VALIDATION`"
+                    f'The HTTP wrapper contains parameter `{has_arg_warning.group().replace("=", "")}`, '
+                    f'this configuration is handled by the wrapper automatically.\n'
+                    f'If this a genuine usage of the parameters, '
+                    f'please inline comment `# SKIP_HTTP_VALIDATION`'
                 )
                 pass
 
@@ -148,9 +144,7 @@ def http(app: Application, integrations: tuple[str, ...]):
             validation_tracker.error((integration.display_name,), message=error_message)
         # Validate use of http template in check's spec.yaml (if exists)
         if check_uses_http_wrapper:
-            validate_config_result = validate_config_http(
-                get_default_config_spec(integration.name, app), integration.name
-            )
+            validate_config_result = validate_config_http(str(integration.config_spec), integration.name)
             if validate_config_result:
                 _, config_http_msg = validate_config_result
                 validation_tracker.error((integration.display_name,), message='\n'.join(config_http_msg))
