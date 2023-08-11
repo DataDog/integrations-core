@@ -1,19 +1,20 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
+    "setuptools>=66; python_version > '3.0'",
+    "setuptools; python_version < '3.0'",
 ]
 build-backend = "hatchling.build"
 
 [project]
-name = "datadog-snowflake"
-description = "The Snowflake check"
+name = "datadog-datadog_checks_dependency_provider"
+description = "The datadog_checks_dependency_provider check"
 readme = "README.md"
-requires-python = ">=3.8"
+license = "BSD-3-Clause"
 keywords = [
     "datadog",
     "datadog agent",
     "datadog check",
-    "snowflake",
 ]
 authors = [
     { name = "Datadog", email = "packages@datadoghq.com" },
@@ -22,30 +23,26 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
-    "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 3.9",
     "Topic :: System :: Monitoring",
-    "Private :: Do Not Upload",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3.9",
 ]
 dependencies = [
-    "datadog-checks-base>=32.6.0",
+    "datadog-checks-base>=11.2.0",
 ]
 dynamic = [
     "version",
 ]
 
-license = "BSD-3-Clause"
-
 [project.optional-dependencies]
-deps = [
-    "snowflake-connector-python==3.1.0; python_version > '3.0'",
-]
+deps = []
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
 
 [tool.hatch.version]
-path = "datadog_checks/snowflake/__about__.py"
+path = "datadog_checks/datadog_checks_dependency_provider/__about__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -56,7 +53,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks/snowflake",
+    "/datadog_checks/datadog_checks_dependency_provider",
 ]
 dev-mode-dirs = [
     ".",

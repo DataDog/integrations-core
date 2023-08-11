@@ -52,6 +52,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.enclosurePowerSupply',  # iDRAC constant metric
     'snmp.systemState',  # iDRAC constant metric
     'snmp.physicalDisk',  # iDRAC constant metric
+    'snmp.wlsxSysExtFan',  # Aruba constant metric
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
