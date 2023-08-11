@@ -110,6 +110,13 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         )
 
     tag_rows = [
+        ['disk_number:3', 'disk_state:nonraid', 'disk_name:zombies zombies'],
+        ['disk_number:14', 'disk_state:ready', 'disk_name:acted oxen quaintly zombies zombies driving their forward'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.physicalDisk', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
         [
             'enclosure_power_supply_fqdd:acted but oxen oxen but their quaintly acted Jaded',
             'enclosure_power_supply_number:22',

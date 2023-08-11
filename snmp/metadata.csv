@@ -1719,6 +1719,7 @@ snmp.physicalDiskCapacityInMB,gauge,,mebibyte,,[Dell iDRAC] The size of the phys
 snmp.physicalDiskFreeSpaceInMB,gauge,,mebibyte,,[Dell iDRAC] The amount of free space in megabytes on the physical disk.,0,snmp,,
 snmp.physicalDiskState,gauge,,,,[Dell iDRAC] The current state of this physical disk. See Dell documentation to learn more: https://dtdg.co/snmp-physical-disk-state ,0,snmp,,
 snmp.physicalDiskUsedSpaceInMB,gauge,,mebibyte,,[Dell iDRAC] The amount of used space in megabytes on the physical disk.,0,snmp,,
+snmp.physicalDisk,gauge,,,,[Dell iDRAC] physicalDiskTable. Constant metric equal to 1.,0,snmp,,
 snmp.poeLastUpdateTime,gauge,,,,"[CUMULUS-POE-MIB] The system uptime timestamp when the objects in this MIB were last updated. The default for the update period is every 300 seconds or 5 minutes.",0,snmp,,
 snmp.poeTotalAvailablePower,gauge,,,,"[CUMULUS-POE-MIB] The total UNUSED and available power for the system in the common pool for new devices, shown with 3 decimal places of precision (milliwatts). For example, an integer value of 706300 is equivalent 706.3 Watts.",0,snmp,,
 snmp.poeTotalSystemPower,gauge,,,,"[CUMULUS-POE-MIB] The total power available to the system, shown with 3 decimal place of precision (milliwatts). Dividing this value by 1000 returns the number of watts. For example, a value of 730400 is equivalent to 730.4 watts.",0,snmp,,
