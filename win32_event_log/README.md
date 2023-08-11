@@ -185,18 +185,18 @@ The values listed in the output of the command can be set in `win32_event_log.d/
 The information given by the  <code>Get-EventLog</code> PowerShell command or the Windows Event ViewerGUI may slightly differ from <code>Get-WmiObject</code>.<br> Double check your filters' values with <code>Get-WmiObject</code> if the integration does not capture the events you set up.
 </div>
 
-The Datadog Agent can be configured to collect Windows Event Logs as Datadog events in two ways. Each method has its own configuration syntax for filters. See the [sample win32_event_log.d/conf.yaml][3] for all available filter options for respective modes.
+#### Filtering events using the Event Log API (Recommended)
 
-Datadog recommends using the latest method for filters. 
-
-* The latest method includes the following filters:
+The configuration option using the Event Log API includes the following filters:
 
   - `path`: `Application`, `System`, `Setup`, `Security`
   - `type`: `Critical`, `Error`, `Warning`, `Information`, `Success Audit`, `Failure Audit`
   - `source`: Any available source name
   - `id`: event_id: Windows EventLog ID
 
-  This example filter uses the latest method.
+  See the [sample win32_event_log.d/conf.yaml][3] for all available filter options. 
+
+  This example filter uses Event Log API method.
 
   ```yaml
   instances:
@@ -236,16 +236,16 @@ You can use the [`query` option][20] to filter events with an [XPATH or structur
         </QueryList>
  ```
 
-* The legacy method includes the following filters:
+#### Filtering Events using Legacy Mode (Deprecated)
+
+The configuration option using the Legacy Mode includes the following filters:
 
   - `log_file`: `Application`, `System`, `Setup`, `Security`
   - `type`: `Critical`, `Error`, `Warning`, `Information`, `Audit Success`, `Audit Failure`
   - `source_name`: Any available source name
   - `event_id`: Windows EventLog ID
 
-* The legacy method does not support the `query` option. Only the latest method (setting `legacy_mode: false`) and the Logs Tailer supports the `query` option.
-
-  This example filter uses the legacy method.
+  This example filter uses the Legacy Mode method.
 
   ```yaml
   instances:
@@ -270,6 +270,7 @@ You can use the [`query` option][20] to filter events with an [XPATH or structur
       log_file:
         - System
   ```
+The legacy method does not support the `query` option. Only the Event Log API method (setting `legacy_mode: false`) and the Logs Tailer supports the `query` option.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Logs" xxx -->
