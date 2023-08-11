@@ -18,7 +18,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-from .util import DatabaseConfigurationError, warning_with_tags
+from .util import DatabaseConfigurationError,  payload_pg_version, warning_with_tags
 from .version_utils import V9_4, V14
 
 try:
@@ -182,12 +182,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
         self.collect_per_statement_metrics()
 
-    def _payload_pg_version(self):
-        version = self._check.version
-        if not version:
-            return ""
-        return 'v{major}.{minor}.{patch}'.format(major=version.major, minor=version.minor, patch=version.patch)
-
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_per_statement_metrics(self):
         # exclude the default "db" tag from statement metrics & FQT events because this data is collected from
@@ -206,7 +200,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'tags': self._tags_no_db,
                 'cloud_metadata': self._config.cloud_metadata,
                 'postgres_rows': rows,
-                'postgres_version': self._payload_pg_version(),
+                'postgres_version': payload_pg_version(self._check.version),
                 'ddagentversion': datadog_agent.get_version(),
                 "ddagenthostname": self._check.agent_hostname,
             }

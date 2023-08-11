@@ -872,7 +872,7 @@ class PostgreSql(AgentCheck):
                 self.metadata_samples.run_job_loop(tags)
             if self._config.collect_wal_metrics:
                 self._collect_wal_metrics(tags)
-
+            self._send_database_instance_metadata()
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
