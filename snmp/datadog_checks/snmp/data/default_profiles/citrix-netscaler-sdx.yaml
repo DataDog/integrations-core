@@ -285,13 +285,13 @@ metric_tags:
   - OID: 1.3.6.1.4.1.5951.6.2.4.0
     symbol: systemSvmIPAddressType
     tag: netscaler_sdx_system_svm_ip_address_type
-    # mapping:
-    #       0: unknown
-    #       1: ipv4
-    #       2: ipv6
-    #       3: ipv4z
-    #       6: ipv6z
-    #       16: dns
+    mapping:
+          0: unknown
+          1: ipv4
+          2: ipv6
+          3: ipv4z
+          6: ipv6z
+          16: dns
   - OID: 1.3.6.1.4.1.5951.6.2.5.0
     symbol: systemSvmIPAddress
     # format: ip_address
@@ -299,13 +299,13 @@ metric_tags:
   - OID: 1.3.6.1.4.1.5951.6.2.6.0
     symbol: systemXenIPAddressType
     tag: netscaler_sdx_system_xen_ip_address_type
-    # mapping:
-    #       0: unknown
-    #       1: ipv4
-    #       2: ipv6
-    #       3: ipv4z
-    #       6: ipv6z
-    #       16: dns
+    mapping:
+          0: unknown
+          1: ipv4
+          2: ipv6
+          3: ipv4z
+          6: ipv6z
+          16: dns
   - OID: 1.3.6.1.4.1.5951.6.2.7.0
     symbol: systemXenIPAddress
     # format: ip_address
@@ -313,37 +313,37 @@ metric_tags:
   - OID: 1.3.6.1.4.1.5951.6.2.8.0
     symbol: systemNetmaskType
     tag: netscaler_sdx_system_netmask_type
-    # mapping:
-    #       0: unknown
-    #       1: ipv4
-    #       2: ipv6
-    #       3: ipv4z
-    #       6: ipv6z
-    #       16: dns
+    mapping:
+          0: unknown
+          1: ipv4
+          2: ipv6
+          3: ipv4z
+          6: ipv6z
+          16: dns
   - OID: 1.3.6.1.4.1.5951.6.2.9.0
     symbol: systemNetmask
-    # format: ip_address
+    format: ip_address
     tag: netscaler_sdx_system_netmask
   - OID: 1.3.6.1.4.1.5951.6.2.10.0
     symbol: systemGatewayType
     tag: netscaler_sdx_system_gateway_type
-    # mapping:
-    #       0: unknown
-    #       1: ipv4
-    #       2: ipv6
-    #       3: ipv4z
-    #       6: ipv6z
-    #       16: dns
+    mapping:
+          0: unknown
+          1: ipv4
+          2: ipv6
+          3: ipv4z
+          6: ipv6z
+          16: dns
   - OID: 1.3.6.1.4.1.5951.6.2.11.0
     symbol: systemGateway
-    # format: ip_address
+    format: ip_address
     tag: netscaler_sdx_system_gateway
   - OID: 1.3.6.1.4.1.5951.6.2.12.0
     symbol: systemNetworkInterface
     tag: netscaler_sdx_system_network_interface
   - OID: 1.3.6.1.4.1.5951.6.2.13.0
     symbol: systemDns
-    # format: ip_address
+    format: ip_address
     tag: netscaler_sdx_system_dns
   - OID: 1.3.6.1.4.1.5951.6.2.19.0
     symbol: systemBiosVersion
