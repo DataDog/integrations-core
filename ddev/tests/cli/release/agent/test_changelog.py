@@ -42,16 +42,17 @@ def test_changelog_write_force(repo_with_fake_changelog, fake_changelog, ddev):
 def test_changelog_since_to(fake_changelog, ddev):
     result = ddev('release', 'agent', 'changelog', '--since', '7.38.0', '--to', '7.39.0')
     assert result.exit_code == 0
-    assert (
-        result.output.rstrip('\n')
-        == """
-## Datadog Agent version [7.39.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7390)
+
+    expected_output = (
+        """## Datadog Agent version [7.39.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7390)
 
 * bar [2.0.0](https://github.com/DataDog/integrations-core/blob/master/bar/CHANGELOG.md) **BREAKING CHANGE**
-""".strip(
-            '\n'
-        )
+"""
+        "* datadog_checks_base [3.0.0]"
+        "(https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) "
+        "**BREAKING CHANGE**"
     )
+    assert result.output.rstrip('\n') == expected_output.strip('\n')
 
 
 @pytest.fixture
@@ -75,12 +76,13 @@ def repo_with_history(tmp_path_factory):
     repo.git.run('add', '.')
     commit('first')
     repo.git.run('tag', '7.37.0')
-    # An update and a new integration
-    write_agent_requirements(repo.path, ['datadog-foo==1.5.0', 'datadog-bar==1.0.0'])
+    # An update and a new integration, using folder names instead of package names, as has erroneously
+    # been the case at some point in our git history. We want to test that we're resilient to that.
+    write_agent_requirements(repo.path, ['foo==1.5.0', 'bar==1.0.0', 'datadog_checks_base==2.1.3'])
     commit('second')
     repo.git.run('tag', '7.38.0')
-    # A breaking update
-    write_agent_requirements(repo.path, ['datadog-bar==2.0.0'])
+    # Breaking updates
+    write_agent_requirements(repo.path, ['datadog-bar==2.0.0', 'datadog-checks-base==3.0.0'])
     commit('third')
     repo.git.run('tag', '7.39.0')
     # An update with an environment marker
@@ -92,6 +94,7 @@ def repo_with_history(tmp_path_factory):
     write_dummy_manifest(repo.path, 'foo')
     write_dummy_manifest(repo.path, 'bar')
     write_dummy_manifest(repo.path, 'onlywin')
+    write_dummy_manifest(repo.path, 'datadog_checks_base')
 
     yield repo
 
@@ -100,8 +103,7 @@ def repo_with_history(tmp_path_factory):
 def repo_with_fake_changelog(repo_with_history, config_file):
     config_file.model.repos['core'] = str(repo_with_history.path)
     config_file.save()
-    return (
-        repo_with_history,
+    expected_output = (
         """
 ## Datadog Agent version [7.40.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7400)
 
@@ -110,14 +112,22 @@ def repo_with_fake_changelog(repo_with_history, config_file):
 ## Datadog Agent version [7.39.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7390)
 
 * bar [2.0.0](https://github.com/DataDog/integrations-core/blob/master/bar/CHANGELOG.md) **BREAKING CHANGE**
+"""
+        "* datadog_checks_base [3.0.0]"
+        "(https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) "
+        "**BREAKING CHANGE**"
+        """
 
 ## Datadog Agent version [7.38.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7380)
 
 * foo [1.5.0](https://github.com/DataDog/integrations-core/blob/master/foo/CHANGELOG.md)
 * bar [1.0.0](https://github.com/DataDog/integrations-core/blob/master/bar/CHANGELOG.md)
-""".strip(
-            '\n'
-        ),
+* datadog_checks_base [2.1.3](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+"""
+    )
+    return (
+        repo_with_history,
+        expected_output.strip('\n'),
     )
 
 
