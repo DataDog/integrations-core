@@ -948,7 +948,7 @@ class SQLServer(AgentCheck):
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "sqlserver",
                 "kind": "database_instance",
-                "collection_interval": self._config.database_instance_collection_interval,
+                "collection_interval": self.database_instance_collection_interval,
                 'dbms_version': "{},{}".format(
                     self.static_info_cache.get(STATIC_INFO_VERSION, ""),
                     self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
