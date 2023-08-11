@@ -73,7 +73,7 @@ To find the channel name for an Event Log in the Windows Event Viewer, open the 
 
 <!-- xxx tab "Events" xxx -->
 
-#### Event Collection using the Event Log API (Recommended)
+#### Event collection using the Event Log API (Recommended)
 
 The Datadog Agent can be configured to collect Windows Event Logs as Datadog events using the Event Log API. Datadog recommends using the Event Log API because it has better performance than the legacy method below. Note, each method has its own configuration syntax for channels and for filters. For more information, see [Filtering Events](?tab=events#filtering-events). 
 
