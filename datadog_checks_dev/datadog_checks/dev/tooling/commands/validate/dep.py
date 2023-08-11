@@ -16,7 +16,7 @@ from ...dependencies import (
 )
 from ...testing import process_checks_option
 from ...utils import complete_valid_checks, get_project_file, has_project_file
-from ..console import CONTEXT_SETTINGS, abort, annotate_error, annotate_errors, echo_failure
+from ..console import CONTEXT_SETTINGS, abort, annotate_error, annotate_errors, echo_failure, echo_success
 
 
 def get_marker_string(dependency_definition):
@@ -203,8 +203,8 @@ def dep(check, require_base_check_version, min_base_check_version):
             if name not in agent_dependencies:
                 failed = True
                 message = (
-                    f'Dependency {name} found in the {check_name} integration requirements '
-                    'but not on the agent requirements, they should be synced.'
+                    f"Dependency {name} found in the {check_name} integration requirements "
+                    "but not in the agent requirements, run 'ddev dep freeze' to sync them."
                 )
                 echo_failure(message)
                 annotate_error(req_source, message)
@@ -249,3 +249,4 @@ def dep(check, require_base_check_version, min_base_check_version):
 
         if failed:
             abort()
+    echo_success("All dependencies are valid!")
