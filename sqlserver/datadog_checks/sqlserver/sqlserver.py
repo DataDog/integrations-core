@@ -165,6 +165,7 @@ class SQLServer(AgentCheck):
         self.log_unobfuscated_queries = is_affirmative(self.instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(self.instance.get('log_unobfuscated_plans', False))
         self.database_instance_collection_interval = self.instance.get('database_instance_collection_interval', 1800)
+        self.connection_host = self.instance['host']
 
         self.static_info_cache = TTLCache(
             maxsize=100,
@@ -958,8 +959,8 @@ class SQLServer(AgentCheck):
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self.cloud_metadata,
                 "metadata": {
-                    "dbm": self._config.dbm_enabled,
-                    "connection_host": self._config.host,
+                    "dbm": self.dbm_enabled,
+                    "connection_host": self.connection_host,
                 },
             }
             self._database_instance_emitted[self.resolved_hostname] = event
