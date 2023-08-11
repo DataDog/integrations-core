@@ -236,7 +236,7 @@ You can use the [`query` option][20] to filter events with an [XPATH or structur
         </QueryList>
  ```
 
-#### Filtering Events using Legacy Mode (Deprecated)
+#### Filtering events using Legacy Mode (Deprecated)
 
 The configuration option using the Legacy Mode includes the following filters:
 
