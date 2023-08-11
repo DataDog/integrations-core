@@ -12,6 +12,7 @@ from packaging.version import parse as parse_version
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql
+from datadog_checks.mysql.__about__ import __version__
 from datadog_checks.mysql.const import (
     BINLOG_VARS,
     GALERA_VARS,
@@ -667,6 +668,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
     assert event['host'] == expected_host
     assert event['dbms'] == "mysql"
     assert event['tags'].sort() == tags.METRIC_TAGS.sort()
+    assert event['integration_version'] == __version__
     assert event['collection_interval'] == 1800
     assert event['metadata'] == {
         'dbm': dbm_enabled,

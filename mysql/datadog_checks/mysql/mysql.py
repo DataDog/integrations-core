@@ -25,6 +25,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 
+from .__about__ import __version__
 from .activity import MySQLActivity
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
 from .config import MySQLConfig
@@ -1240,6 +1241,7 @@ class MySql(AgentCheck):
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': self.version.version + '+' + self.version.build,
+                'integration_version': __version__,
                 "tags": self._non_internal_tags,
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
@@ -1248,5 +1250,5 @@ class MySql(AgentCheck):
                     "connection_host": self._config.host,
                 },
             }
-            self. _database_instance_emitted[self.resolved_hostname] = event
+            self._database_instance_emitted[self.resolved_hostname] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
