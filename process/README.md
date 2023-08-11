@@ -4,7 +4,7 @@
 
 The Process Check lets you:
 - Collect resource usage metrics for specific running processes on any host. For example, CPU, memory, I/O, and number of threads.
-- Use [Process Monitors][1] to configure thresholds for how many instances of a specific process ought to be running and get alerts when the thresholds aren't met (see **Service Checks** below).
+- Use [Process Monitors][1] to configure thresholds for how many instances of a specific process should be running and get alerts when the thresholds aren't met (see **Service Checks** below).
 
 ## Setup
 
@@ -29,7 +29,7 @@ instances:
 
 **Note**: After you make configuration changes, make sure you [restart the Agent][4].
 
-Retrieving some process metrics requires either running the Datadog collector as the same user as the monitored process, or using privileged access. For the `open_file_descriptors` metric on Unix platforms, there is an additional configuration option. Setting `try_sudo` to `true` in your `conf.yaml` file allows the Process check to try using `sudo` to collect the `open_file_descriptors` metric. Using this configuration option requires setting the appropriate sudoers rules in `/etc/sudoers`:
+Retrieving some process metrics requires the Datadog collector to either run as the monitored process user or with privileged access. For the `open_file_descriptors` metric on Unix platforms, there is an additional configuration option. Setting `try_sudo` to `true` in your `conf.yaml` file allows the Process check to try using `sudo` to collect the `open_file_descriptors` metric. Using this configuration option requires setting the appropriate sudoers rules in `/etc/sudoers`:
 
 ```shell
 dd-agent ALL=NOPASSWD: /bin/ls /proc/*/fd/
@@ -41,8 +41,8 @@ Run the [Agent's status subcommand][5] and look for `process` under the Checks s
 
 ### Metrics notes
 
-The following metrics are not available on Linux or OSX:
-- Process I/O metrics are **not** available on Linux or OSX since the files that the Agent reads (`/proc//io`) are only readable by the process's owner. For more information, [read the Agent FAQ][6].
+The following metrics are not available on Linux or macOS:
+- Process I/O metrics are **not** available on Linux or macOS since the files that the Agent reads (`/proc//io`) are only readable by the process's owner. For more information, [read the Agent FAQ][6].
 
 The following metrics are not available on Windows:
 - `system.cpu.iowait`
