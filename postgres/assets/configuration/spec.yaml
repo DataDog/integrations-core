@@ -513,39 +513,39 @@ files:
             type: number
             example: 600
 
-    # - name: collect_schemas
-    #   description: |
-    #     Enable collection of database schemas. In order to collect schemas from all user databases, 
-    #     enable `database_autodiscovery`. To collect from a single database, set `dbname` to collect 
-    #     the schema for that database.
-    #     Relation metrics must be enabled for schema collection.
-    #   options:
-    #     - name: enabled
-    #       description: |
-    #         Enable collection of database schemas. Requires `dbm: true` and relation metrics must be enabled.
-    #       value:
-    #         type: boolean
-    #         example: false
-    #     - name: max_tables
-    #       description: |
-    #         Maximum amount of tables the agent will collect from the instance.
-    #       value:
-    #         type: number
-    #         example: 1000
-    #         display_default: 1000
-    #     - name: max_columns
-    #       description: |
-    #         Maximum amount of columns the agent will collect per table.
-    #       value:
-    #         type: number
-    #         example: 50
-    #         display_default: 50
-    #     - name: collection_interval
-    #       description: |
-    #         The database schema collection interval (in seconds).
-    #       value:
-    #         type: number
-    #         example: 600
+    - name: collect_schemas
+      description: |
+        Enable collection of database schemas. In order to collect schemas from all user databases, 
+        enable `database_autodiscovery`. To collect from a single database, set `dbname` to collect 
+        the schema for that database.
+        Relation metrics must be enabled for schema collection.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of database schemas. Requires `dbm: true` and relation metrics must be enabled.
+          value:
+            type: boolean
+            example: false
+        - name: max_tables
+          description: |
+            Maximum amount of tables the Agent will collect from the instance.
+          value:
+            type: number
+            example: 1000
+            display_default: 1000
+        - name: max_columns
+          description: |
+            Maximum amount of columns the Agent will collect per table.
+          value:
+            type: number
+            example: 50
+            display_default: 50
+        - name: collection_interval
+          description: |
+            The database schema collection interval (in seconds).
+          value:
+            type: number
+            example: 600
 
     - name: aws
       description: |

@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 7.9.0 / 2023-08-10
+
+***Added***:
+
+* add startup probe metrics. See [#14570](https://github.com/DataDog/integrations-core/pull/14570).
+* Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
+
+***Fixed***:
+
+* Fix types for generated config models. See [#15334](https://github.com/DataDog/integrations-core/pull/15334).
+
 ## 7.8.1 / 2023-07-13
 
 ***Fixed***:

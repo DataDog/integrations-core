@@ -3,6 +3,8 @@ version: '3.5'
 services:
   postgres:
     image: postgres:12-alpine
+    hostname: airflow-postgres
+    container_name: airflow-postgres
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
@@ -14,7 +16,12 @@ services:
       - "5432:5432"
  
   server:
-    build: .
+    hostname: airflow-server
+    container_name: airflow-server
+    build:
+      context: .
+      args:
+        AIRFLOW_VERSION: ${AIRFLOW_VERSION}
     environment:
       # -- CORE
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -32,8 +39,6 @@ services:
       DB__NAME: airflow
     ports:
       - "8080:8080"
-    volumes:
-       - ./dags:/opt/airflow/dags
 
 volumes:
   postgres:

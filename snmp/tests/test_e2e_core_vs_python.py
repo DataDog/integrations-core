@@ -45,7 +45,12 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.upsOutletGroupStatus',  # APC UPS constant metric
     'snmp.cpiPduEas',  # Chatsworth constant metric
     'snmp.ciscoEnvMonSupplyStatus',  # Cisco constant metric
+    'snmp.ciscoEnvMonFanStatus',  # Cisco constant metric
+    'snmp.cefcFanTrayStatus',  # Cisco constant metric
     'snmp.cpqHeFltTolPowerSupply',  # HP constant metric
+    'snmp.fanSpeedSensor',  # Checkpoint constant metric
+    'snmp.enclosurePowerSupply',  # iDRAC constant metric
+    'snmp.systemState',  # iDRAC constant metric
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
@@ -332,8 +337,9 @@ def test_e2e_profile_checkpoint(dd_agent_check):
     assert_python_vs_core(
         dd_agent_check,
         config,
-        expected_total_count=301 + 5,
+        expected_total_count=311,
         metrics_to_skip=metrics_to_skip,
+        tags_to_skip=['fan_speed_sensor_status'],
     )
 
 
@@ -343,8 +349,9 @@ def test_e2e_profile_checkpoint_firewall(dd_agent_check):
     assert_python_vs_core(
         dd_agent_check,
         config,
-        expected_total_count=301 + 5,
+        expected_total_count=311,
         metrics_to_skip=metrics_to_skip,
+        tags_to_skip=['fan_speed_sensor_status'],
     )
 
 
@@ -356,7 +363,14 @@ def test_e2e_profile_cisco_3850(dd_agent_check):
         config,
         expected_total_count=5108 + 5,
         metrics_to_skip=metrics_to_skip,
-        tags_to_skip=['neighbor_state', 'if_state', 'cisco_env_mon_supply_state'],  # Ignore tags that have a mapping
+        tags_to_skip=[
+            'neighbor_state',
+            'if_state',
+            'cisco_env_mon_supply_state',
+            'fan_state',
+            'cefc_fan_tray_oper_status',
+            'cefc_fan_tray_direction',
+        ],  # Ignore tags that have mappings
     )
 
 
@@ -367,7 +381,12 @@ def test_e2e_profile_cisco_asa(dd_agent_check):
         dd_agent_check,
         config,
         metrics_to_skip=metrics_to_skip,
-        tags_to_skip=['cisco_env_mon_supply_state'],  # Ignore tag that has a mapping
+        tags_to_skip=[
+            'cisco_env_mon_supply_state',
+            'fan_state',
+            'cefc_fan_tray_oper_status',
+            'cefc_fan_tray_direction',
+        ],  # Ignore tags that have mappings
     )
 
 
@@ -378,6 +397,12 @@ def test_e2e_profile_cisco_asa_5525(dd_agent_check):
         dd_agent_check,
         config,
         metrics_to_skip=metrics_to_skip,
+        tags_to_skip=[
+            'cisco_env_mon_supply_state',
+            'fan_state',
+            'cefc_fan_tray_oper_status',
+            'cefc_fan_tray_direction',
+        ],  # Ignore tags that have mappings
     )
 
 
@@ -400,7 +425,12 @@ def test_e2e_profile_cisco_nexus(dd_agent_check):
         dd_agent_check,
         config,
         metrics_to_skip=metrics_to_skip,
-        tags_to_skip=['cisco_env_mon_supply_state'],  # Ignore tag that has a mapping
+        tags_to_skip=[
+            'cisco_env_mon_supply_state',
+            'fan_state',
+            'cefc_fan_tray_oper_status',
+            'cefc_fan_tray_direction',
+        ],  # Ignore tags that have mappings
     )
 
 
@@ -424,7 +454,12 @@ def test_e2e_profile_dell_poweredge(dd_agent_check):
         'snmp.memoryDeviceStatus',
         'datadog.snmp.submitted_metrics',  # count won't match because of the reason explained above
     ]
-    assert_python_vs_core(dd_agent_check, config, metrics_to_skip=metric_to_skip)
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        metrics_to_skip=metric_to_skip,
+        tags_to_skip=['system_state_power_supply_status_combined'],  # Skipping tag with a mapping
+    )
 
 
 def test_e2e_core_vs_python_profile_f5_big_ip(dd_agent_check):
@@ -468,7 +503,14 @@ def test_e2e_profile_hpe_proliant(dd_agent_check):
 
 def test_e2e_profile_idrac(dd_agent_check):
     config = common.generate_container_profile_config('idrac')
-    assert_python_vs_core(dd_agent_check, config)
+    assert_python_vs_core(
+        dd_agent_check,
+        config,
+        tags_to_skip=[
+            'system_state_power_supply_status_combined',
+            'enclosure_power_supply_state',
+        ],  # Skipping tags with mappings
+    )
 
 
 def test_e2e_profile_isilon(dd_agent_check):

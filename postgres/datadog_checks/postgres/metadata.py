@@ -262,14 +262,10 @@ class PostgresMetadata(DBMAsyncJob):
         databases = []
         if self._check.autodiscovery:
             databases = self._check.autodiscovery.get_items()
-        elif self._config.dbname != 'postgres':
-            databases.append(self._config.dbname)
         else:
-            # if we are only connecting to 'postgres' database, not worth reporting data model
-            return
+            databases.append(self._config.dbname)
 
         metadata = []
-        self._log.debug("Collecting schema metadata...")
         for database in databases:
             metadata.append(self._collect_metadata_for_database(database))
 
@@ -303,15 +299,15 @@ class PostgresMetadata(DBMAsyncJob):
             schemas.append({"id": str(row['id']), "name": row['name'], "owner": row['owner']})
         return schemas
 
-    def _get_table_info(self, cursor, dbname, schemaname, limit):
+    def _get_table_info(self, cursor, dbname, schemaname):
         """
         Tables will be sorted by the number of total accesses (index_rel_scans + seq_scans) and truncated to
         the max_tables limit.
 
         If any tables are partitioned, only the master paritition table name will be returned, and none of its children.
         """
+        limit = self._config.schemas_metadata_config.get('max_tables', 1000)
         if self._config.relations:
-            print("version" + str(self._check._version))
             if VersionUtils.transform_version(str(self._check._version))['version.major'] == "9":
                 cursor.execute(PG_TABLES_QUERY_V9.format(schemaname=schemaname))
             else:
@@ -333,12 +329,10 @@ class PostgresMetadata(DBMAsyncJob):
             # partition master tables won't get any metrics reported on them,
             # so we have to grab the total partition activity
             # note: partitions don't exist in V9, so we have to check this first
-            if VersionUtils.transform_version(str(self._check._version))['version.major'] == "9":
-                return (
-                    cache[dbname][info['name']]['postgresql.index_scans']
-                    + cache[dbname][info['name']]['postgresql.seq_scans']
-                )
-            if not info["has_partitions"]:
+            if (
+                VersionUtils.transform_version(str(self._check._version))['version.major'] == "9"
+                or not info["has_partitions"]
+            ):
                 return (
                     cache[dbname][info['name']]['postgresql.index_scans']
                     + cache[dbname][info['name']]['postgresql.seq_scans']
@@ -377,8 +371,7 @@ class PostgresMetadata(DBMAsyncJob):
             "partition_key": str (if has partitions)
             "num_partitions": int (if has partitions)
         """
-        self._config.schemas_metadata_config.get('max_tables', 1000)
-        tables_info = self._get_table_info(cursor, dbname, schemaname, 1000)
+        tables_info = self._get_table_info(cursor, dbname, schemaname)
         table_payloads = []
         for table in tables_info:
             this_payload = {}

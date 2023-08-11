@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+## 4.0.0 / 2023-08-10
+
+***Changed***:
+
+* Bump the minimum base check version. See [#15427](https://github.com/DataDog/integrations-core/pull/15427).
+
+***Added***:
+
+* Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
+
+***Fixed***:
+
+* [AGENT-9940] Reduce number of consumer creations. See [#15476](https://github.com/DataDog/integrations-core/pull/15476).
+* Fix types for generated config models. See [#15334](https://github.com/DataDog/integrations-core/pull/15334).
+* Simplify regex compilation. See [#15239](https://github.com/DataDog/integrations-core/pull/15239).
+
 ## 3.1.2 / 2023-07-13
 
 ***Fixed***:

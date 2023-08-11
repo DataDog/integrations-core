@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+## 5.0.0 / 2023-08-10
+
+***Added***:
+
+* Add schema collection to Postgres integration. See [#15484](https://github.com/DataDog/integrations-core/pull/15484).
+
+***Changed***:
+
+* Bump the minimum base check version. See [#15427](https://github.com/DataDog/integrations-core/pull/15427).
+
+***Added***:
+
+* Update generated config models. See [#15212](https://github.com/DataDog/integrations-core/pull/15212).
+
+***Fixed***:
+
+* Fix types for generated config models. See [#15334](https://github.com/DataDog/integrations-core/pull/15334).
+
 ## 4.3.2 / 2023-07-13
 
 ***Fixed***:

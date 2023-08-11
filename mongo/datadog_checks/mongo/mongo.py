@@ -75,6 +75,8 @@ class MongoDb(AgentCheck):
         self._api_client = None
         self._mongo_version = None
 
+        self.diagnosis.register(self._diagnose_tls)
+
     @cached_property
     def api_client(self):
         # This needs to be a property for our unit test mocks to work.
@@ -247,3 +249,28 @@ class MongoDb(AgentCheck):
                         )
         self.log.debug("List of databases to check: %s", dbnames)
         return dbnames
+
+    def _diagnose_tls(self):
+        # Check TLS config. Specifically, we might want to check that if `tls` is
+        # enabled (either explicitly or implicitly), the provided
+        # tls_certificate_key_file and tls_ca_file actually exist on the file system.
+        if "tls_certificate_key_file" in self.instance:
+            self._diagnose_readable('tls', self.instance["tls_certificate_key_file"], "tls_certificate_key_file")
+        if "tls_ca_file" in self.instance:
+            self._diagnose_readable('tls', self.instance["tls_ca_file"], "tls_ca_file")
+
+    def _diagnose_readable(self, name, path, option_name):
+        try:
+            open(path).close()
+        except FileNotFoundError:
+            self.diagnosis.fail(name, f"file `{path}` provided in the `{option_name}` option does not exist")
+        except OSError as exc:
+            self.diagnosis.fail(
+                name,
+                f"file `{path}` provided as the `{option_name}` option could not be opened: {exc.strerror}",
+            )
+        else:
+            self.diagnosis.success(
+                name,
+                f"file `{path}` provided as the `{option_name}` exists and is readable",
+            )

@@ -52,10 +52,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
     check = integration_check(dbm_instance)
     run_one_check(check, dbm_instance)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-    schema_event = None
-    for event in dbm_metadata:
-        if event['kind'] == "pg_databases":
-            schema_event = event
+    schema_event = next(e for e in dbm_metadata if e['kind'] == 'pg_databases')
 
     # there should only be one database, datadog_test
     database_metadata = schema_event['metadata']
