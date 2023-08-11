@@ -662,7 +662,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
     dd_run_check(mysql_check)
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-    event = next(e for e in dbm_metadata if e['kind'] == 'database_instance')
+    event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
     assert event is not None
     assert event['host'] == expected_host
     assert event['dbms'] == "mysql"
@@ -672,3 +672,11 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
         'dbm': dbm_enabled,
         'connection_host': instance_complex['host'],
     }
+
+    # Run a second time and expect the metadata to not be emitted again because of the cache TTL
+    aggregator.reset()
+    dd_run_check(mysql_check)
+
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
+    assert event is None

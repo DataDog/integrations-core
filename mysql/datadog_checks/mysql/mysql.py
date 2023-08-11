@@ -1248,4 +1248,5 @@ class MySql(AgentCheck):
                     "connection_host": self._config.host,
                 },
             }
+            self. _database_instance_emitted[self.resolved_hostname] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
