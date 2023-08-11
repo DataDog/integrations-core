@@ -31,15 +31,15 @@ def test_e2e_profile_citrix_netscaler_sdx(dd_agent_check):
         'netscaler_sdx_system_bios_version:zombies',
         'netscaler_sdx_system_dns:driving driving Jaded their oxen',
         'netscaler_sdx_system_gateway:acted quaintly oxen',
-        'netscaler_sdx_system_gateway_type:1',
+        'netscaler_sdx_system_gateway_type:ipv4',
         'netscaler_sdx_system_netmask:driving acted',
-        'netscaler_sdx_system_netmask_type:0',
+        'netscaler_sdx_system_netmask_type:unknown',
         'netscaler_sdx_system_network_interface:driving their zombies forward oxen',
         'netscaler_sdx_system_product:quaintly forward zombies oxen acted kept',
         'netscaler_sdx_system_svm_ip_address:quaintly',
-        'netscaler_sdx_system_svm_ip_address_type:3',
+        'netscaler_sdx_system_svm_ip_address_type:ipv4z',
         'netscaler_sdx_system_xen_ip_address:their driving oxen driving',
-        'netscaler_sdx_system_xen_ip_address_type:3',
+        'netscaler_sdx_system_xen_ip_address_type:ipv4z',
     ]
 
     # --- TEST EXTENDED METRICS ---

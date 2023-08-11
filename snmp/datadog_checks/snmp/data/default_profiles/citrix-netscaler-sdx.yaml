@@ -294,7 +294,7 @@ metric_tags:
           16: dns
   - OID: 1.3.6.1.4.1.5951.6.2.5.0
     symbol: systemSvmIPAddress
-    # format: ip_address
+    format: ip_address
     tag: netscaler_sdx_system_svm_ip_address
   - OID: 1.3.6.1.4.1.5951.6.2.6.0
     symbol: systemXenIPAddressType
@@ -308,7 +308,7 @@ metric_tags:
           16: dns
   - OID: 1.3.6.1.4.1.5951.6.2.7.0
     symbol: systemXenIPAddress
-    # format: ip_address
+    format: ip_address
     tag: netscaler_sdx_system_xen_ip_address
   - OID: 1.3.6.1.4.1.5951.6.2.8.0
     symbol: systemNetmaskType
