@@ -627,6 +627,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_e
     if reported_hostname:
         pg_instance['reported_hostname'] = reported_hostname
     expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(pg_instance['port'])]
     check = PostgreSql('test_instance', {}, [pg_instance])
     dd_run_check(check)
 
@@ -635,7 +636,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_e
     assert event is not None
     assert event['host'] == expected_host
     assert event['dbms'] == "postgres"
-    assert event['tags'].sort() == []
+    assert event['tags'].sort() == expected_tags.sort()
     assert event['integration_version'] == __version__
     assert event['collection_interval'] == 1800
     assert event['metadata'] == {
