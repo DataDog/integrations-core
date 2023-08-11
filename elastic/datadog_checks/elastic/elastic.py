@@ -651,4 +651,4 @@ class ESCheck(AgentCheck):
         #   This function will aid for collecting template metrics only on the supported ES versions
         CAT_TEMPLATE_SUPPORTED_ES_VERSION = [5, 1, 1]
 
-        return str(es_version) >= str(CAT_TEMPLATE_SUPPORTED_ES_VERSION)
+        return es_version >= CAT_TEMPLATE_SUPPORTED_ES_VERSION

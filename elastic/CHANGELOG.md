@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Avoid collecting template metrics on unsupported ES versions ([#15550](https://github.com/DataDog/integrations-core/pull/15550))
+
 ## 6.0.0 / 2023-08-10
 
 ***Changed***:

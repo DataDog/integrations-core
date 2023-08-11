@@ -148,14 +148,16 @@ def test_get_value_from_path():
 
 
 @pytest.mark.parametrize(
-    'instance, version, return_value',
+    'version, return_value',
     [
-        pytest.param({'url': URL}, [5, 1, 1], True),
-        pytest.param({'url': URL}, [5, 1, 2], True),
-        pytest.param({'url': URL}, [1, 0, 0], False),
+        pytest.param([5, 1, 0], False),
+        pytest.param([5, 1, 1], True),
+        pytest.param([5, 1, 2], True),
+        pytest.param([1, 0, 0], False),
+        pytest.param([10, 0, 0], True),
     ],
 )
-def test_collect_template_metrics_returns_valid_result(aggregator, instance, version, return_value):
+def test_collect_template_metrics_returns_valid_result(instance, version, return_value):
     check = ESCheck('elastic', {}, instances=[instance])
 
     assert check._collect_template_metrics(es_version=version) == return_value
