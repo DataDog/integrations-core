@@ -76,21 +76,16 @@ def get_changes_per_agent(repo: Repository, since: str, to: str) -> AgentChangel
         file_contents = repo.git.show_file(req_file_name, agent_tags[i])
         catalog_prev = parse_agent_req_file(file_contents)
 
+        # at some point in the git history, the requirements file erroneously
+        # contained the folder name instead of the package name for each check,
+        # let's be resilient by normalizing all entries to be folder names
+        catalog_now = normalize_catalog(catalog_now)
+        catalog_prev = normalize_catalog(catalog_prev)
+
         changes_per_agent[current_tag] = {}
 
         for name, ver in catalog_now.items():
-            # at some point in the git history, the requirements file erroneously
-            # contained the folder name instead of the package name for each check,
-            # let's be resilient
-            old_ver = (
-                catalog_prev.get(name)
-                or catalog_prev.get(get_folder_name(name))
-                or catalog_prev.get(get_package_name(name))
-            )
-
-            # normalize the package name to the check_name
-            if name.startswith(DATADOG_PACKAGE_PREFIX):
-                name = get_folder_name(name)
+            old_ver = catalog_prev.get(name)
 
             if old_ver and old_ver != ver:
                 # determine whether major version changed
@@ -102,38 +97,19 @@ def get_changes_per_agent(repo: Repository, since: str, to: str) -> AgentChangel
     return changes_per_agent
 
 
-def get_package_name(folder_name: str) -> str:
-    """
-    Given a folder name for a check, return the name of the
-    corresponding Python package
-    """
-    if folder_name == 'datadog_checks_base':
-        return 'datadog-checks-base'
-    elif folder_name == 'datadog_checks_downloader':
-        return 'datadog-checks-downloader'
-    elif folder_name == 'datadog_checks_dependency_provider':
-        return 'datadog-checks-dependency-provider'
-    elif folder_name == 'ddev':
-        return 'ddev'
-
-    return f"{DATADOG_PACKAGE_PREFIX}{folder_name.replace('_', '-')}"
+def normalize_catalog(catalog: dict[str, str]) -> dict[str, str]:
+    return {normalize_package_name(k): v for k, v in catalog.items()}
 
 
-def get_folder_name(package_name: str) -> str:
+def normalize_package_name(name: str) -> str:
     """
     Given a Python package name for a check, return the corresponding folder
-    name in the git repo
+    name in the git repo.
     """
-    if package_name == 'datadog-checks-base':
-        return 'datadog_checks_base'
-    elif package_name == 'datadog-checks-downloader':
-        return 'datadog_checks_downloader'
-    elif package_name == 'datadog-checks-dependency-provider':
-        return 'datadog_checks_dependency_provider'
-    elif package_name == 'ddev':
-        return 'ddev'
+    if name not in ('datadog-checks-base', 'datadog-checks-downloader', 'datadog-checks-dependency-provider'):
+        name = name.removeprefix(DATADOG_PACKAGE_PREFIX)
 
-    return package_name.replace('-', '_')[len(DATADOG_PACKAGE_PREFIX) :]
+    return name.replace('-', '_')
 
 
 def parse_agent_req_file(contents: str) -> dict[str, str]:
