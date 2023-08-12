@@ -7,7 +7,6 @@ from ..console import CONTEXT_SETTINGS
 from .agent_reqs import agent_reqs
 from .agent_signature import legacy_signature
 from .all_validations import all
-from .ci import ci
 from .codeowners import codeowners
 from .config import config
 from .dashboards import dashboards
@@ -19,7 +18,6 @@ from .jmx_metrics import jmx_metrics
 from .license_headers import license_headers
 from .licenses import licenses
 from .manifest import manifest
-from .metadata import metadata
 from .models import models
 from .package import package
 from .readmes import readmes
@@ -31,7 +29,6 @@ from .typos import typos
 ALL_COMMANDS = (
     agent_reqs,
     all,
-    ci,
     codeowners,
     config,
     dashboards,
@@ -44,7 +41,6 @@ ALL_COMMANDS = (
     license_headers,
     licenses,
     manifest,
-    metadata,
     models,
     package,
     readmes,
