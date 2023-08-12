@@ -51,9 +51,6 @@ command.
     You may apply the `changelog/no-changelog` label to remove the CI check for changelog entries.
 
 ??? abstract "Formatting rules"
-    If you don't apply the `changelog/no-changelog` label, you must edit the `CHANGELOG.md` file in
-    the integration you have modified. Below are the guidelines for the correct formatting for changelogs:
-
     ### Spacing
 
     * There should be a blank line between each section. This means that there should be a line between the following sections of text:
