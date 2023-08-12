@@ -62,7 +62,7 @@ command.
     * `Extra spacing on line {line number}`: There is an extra blank line on the line referenced in the error.
     * `Missing spacing on line {line number}`: Add an empty line above or below the referenced line.
 
-    ### Integration Version Header
+    ### Version header
 
     * The header for an integration version should be in the following format: `version number / YYYY-MM-DD / Agent Version Number`.
     The Agent version number is not necessary, but a valid version number and date are required. The first header after the
@@ -71,7 +71,7 @@ command.
     no / separator between the version and date in your header.
     * `Date is formatted incorrectly on line {line number}`: The date must be formatted as YYYY-MM-DD, with no spaces in between.
 
-    ### Changelog Content
+    ### Content
 
     * The changelog header must be capitalized and written in this format: `***HEADER***:`. Note that it should be bold and italicized.
     * `Changelog type is incorrect on line {line count}`: The changelog header on that line is not one of the six valid changelog types.
