@@ -608,7 +608,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, d
     assert event is not None
     assert event['host'] == expected_host
     assert event['dbms'] == "sqlserver"
-    assert event['tags'].sort() == instance_docker.get('tags', [])
+    assert event['tags'] == ['optional:tag1']
     assert event['integration_version'] == __version__
     assert event['collection_interval'] == 1800
     assert event['metadata'] == {
