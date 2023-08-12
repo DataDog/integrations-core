@@ -5,8 +5,8 @@
 ***Added***:
 
 * Extend messages from dependency validation. ([#15558](https://github.com/DataDog/integrations-core/pull/15558))
-  1. Say which ddev command to run to fix particular type of error.
-  2. Report success at the end.
+    1. Say which ddev command to run to fix particular type of error.
+    2. Report success at the end.
 
 ***Fixed***:
 

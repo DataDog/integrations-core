@@ -203,8 +203,8 @@ def dep(check, require_base_check_version, min_base_check_version):
             if name not in agent_dependencies:
                 failed = True
                 message = (
-                    f"Dependency {name} found in the {check_name} integration requirements "
-                    "but not in the agent requirements, run 'ddev dep freeze' to sync them."
+                    f'Dependency {name} found in the {check_name} integration requirements '
+                    'but not in the agent requirements, run `ddev dep freeze` to sync them.'
                 )
                 echo_failure(message)
                 annotate_error(req_source, message)
