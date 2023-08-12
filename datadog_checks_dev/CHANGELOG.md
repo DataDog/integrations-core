@@ -5,6 +5,7 @@
 ***Removed***:
 
 * Migrate `validate http` to ddev ([#15526](https://github.com/DataDog/integrations-core/pull/15526))
+* Remove the `ddev validate recommended-monitors` command ([#15563](https://github.com/DataDog/integrations-core/pull/15563))
 
 ***Fixed***:
 
