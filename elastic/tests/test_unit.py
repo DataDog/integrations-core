@@ -174,7 +174,7 @@ def test__get_data_creates_critical_service_alert(aggregator, instance):
             tags=check._config.service_check_tags,
             message="Error 500 Server Error: None for url: None when hitting test.com",
         )
-        
+
 
 @pytest.mark.parametrize(
     'version, return_value',
