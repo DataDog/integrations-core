@@ -49,7 +49,7 @@
       "Silk - Overview": "assets/dashboards/silk_overview.json"
     },
     "monitors": {
-      "Latency high": "assets/recommended_monitors/latency_high.json"
+      "Latency high": "assets/monitors/latency_high.json"
     }
   }
 }
