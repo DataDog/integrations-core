@@ -4,7 +4,7 @@
 import concurrent.futures
 import copy
 import os
-import time
+from time import time
 
 import psycopg
 from cachetools import TTLCache
@@ -839,7 +839,7 @@ class PostgreSql(AgentCheck):
                 'dbms_version': payload_pg_version(self.version),
                 'integration_version': __version__,
                 "tags": self._non_internal_tags,
-                "timestamp": time.time() * 1000,
+                "timestamp": time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
                 "metadata": {
                     "dbm": self._config.dbm_enabled,
