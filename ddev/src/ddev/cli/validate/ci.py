@@ -179,7 +179,14 @@ def ci(app: Application, sync: bool):
         if check_name in cached_display_names:
             display_name = cached_display_names[check_name].replace(' ', '_')
         else:
-            integration = app.repo.integrations.get(check_name)
+            try:
+                integration = app.repo.integrations.get(check_name)
+            except OSError as e:
+                if str(e).startswith('Integration does not exist: '):
+                    continue
+
+                raise
+
             display_name = integration.display_name
             display_name = display_name.replace(' ', '_')
             cached_display_names[check_name] = display_name
@@ -199,12 +206,10 @@ def ci(app: Application, sync: bool):
                 error_message += message
 
     # This works because we ensure there is a 1 to 1 correspondence between projects and checks (flags)
-    if app.repo.config.get('/overrides/ci/hyperv'):
-        ignored_missing_jobs: set = {'hyperv'}
-    else:
-        ignored_missing_jobs = set()
-    # ignored_missing_jobs = set(app.repo.config.get('/overrides/validate/ci/exclude', []))
-    missing_projects = testable_checks - set(defined_checks) - ignored_missing_jobs
+    excluded_jobs = {
+        name for name, config in app.repo.config.get('/overrides/ci', {}).items() if config.get('exclude', False)
+    }
+    missing_projects = testable_checks - set(defined_checks) - excluded_jobs
 
     not_agent_checks = set()
     for check in set(missing_projects):
@@ -264,7 +269,7 @@ def ci(app: Application, sync: bool):
                 success = False
                 error_message += message
 
-    missing_flags = testable_checks - set(defined_checks) - ignored_missing_jobs
+    missing_flags = testable_checks - set(defined_checks) - excluded_jobs
     for check in set(missing_flags):
         if check in not_agent_checks or not code_coverage_enabled(check, app):
             missing_flags.discard(check)

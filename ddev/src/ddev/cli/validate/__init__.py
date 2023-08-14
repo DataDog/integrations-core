@@ -10,7 +10,6 @@ from datadog_checks.dev.tooling.commands.validate.config import config
 from datadog_checks.dev.tooling.commands.validate.dashboards import dashboards
 from datadog_checks.dev.tooling.commands.validate.dep import dep
 from datadog_checks.dev.tooling.commands.validate.eula import eula
-from datadog_checks.dev.tooling.commands.validate.http import http
 from datadog_checks.dev.tooling.commands.validate.imports import imports
 from datadog_checks.dev.tooling.commands.validate.integration_style import integration_style
 from datadog_checks.dev.tooling.commands.validate.jmx_metrics import jmx_metrics
@@ -24,6 +23,7 @@ from datadog_checks.dev.tooling.commands.validate.service_checks import service_
 from datadog_checks.dev.tooling.commands.validate.typos import typos
 
 from ddev.cli.validate.ci import ci
+from ddev.cli.validate.http import http
 from ddev.cli.validate.licenses import licenses
 from ddev.cli.validate.manifest import manifest
 from ddev.cli.validate.metadata import metadata
