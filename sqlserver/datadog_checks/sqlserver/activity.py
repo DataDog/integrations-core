@@ -74,7 +74,7 @@ WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
 """,
 ).strip()
 
-# Turns out sdm_exec_requests does not contain idle sessions.
+# Turns out sys.dm_exec_requests does not contain idle sessions.
 # Inner joining dm_exec_sessions with dm_exec_requests will not return any idle blocking sessions.
 # This prevent us reusing the same ACTIVITY_QUERY for regular activities and idle blocking sessions.
 # Below query used for idle sessions does not joining dm_exec_requests.
