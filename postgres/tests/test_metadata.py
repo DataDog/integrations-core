@@ -60,10 +60,13 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
     assert 'datadog_test' == database_metadata[0]['name']
 
     # there should only two schemas, 'public' and 'datadog'. datadog is empty
-    schema_metadata_public = database_metadata[0]['schemas'][0]
-    schema_metadata_datadog = database_metadata[0]['schemas'][1]
-    assert 'public' == schema_metadata_public['name']
-    assert 'datadog' == schema_metadata_datadog['name']
+    schema_names = [s['name'] for s in database_metadata[0]['schemas']]
+    assert 'public' in schema_names
+    assert 'datadog' in schema_names
+    schema_public = None
+    for schema in database_metadata[0]['schemas']:
+        if schema['name'] == 'public':
+            schema_public = schema 
 
     # check that all expected tables are present
     tables_set = {'persons', "personsdup1", "personsdup2", "pgtable", "pg_newtable", "cities"}
@@ -73,7 +76,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
     tables_not_reported_set = {'test_part1', 'test_part2'}
 
     tables_got = []
-    for table in schema_metadata_public['tables']:
+    for table in schema_public['tables']:
         tables_got.append(table['name'])
 
         # make some assertions on fields

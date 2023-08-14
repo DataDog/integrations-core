@@ -57,7 +57,7 @@ FROM   pg_class c
               ON c.reltoastrelid = t.oid
 WHERE  c.relkind IN ( 'r', 'p' )
        AND c.relispartition != 't'
-       AND c.relnamespace = '{schemaname}' :: regnamespace;
+       AND c.relnamespace = {schema_oid};
 """
 
 PG_TABLES_QUERY_V9 = """
@@ -70,19 +70,21 @@ FROM   pg_class c
        left join pg_class t
               ON c.reltoastrelid = t.oid
 WHERE  c.relkind IN ( 'r' )
-       AND c.relnamespace = '{schemaname}' :: regnamespace;
+       AND c.relnamespace = {schema_oid};
 """
 
 
 SCHEMA_QUERY = """
-SELECT oid                 AS id,
+SELECT nsp.oid                 AS id,
        nspname             AS name,
        nspowner :: regrole AS owner
-FROM   pg_namespace
+FROM   pg_namespace nsp
+       LEFT JOIN pg_roles r on nsp.nspowner = r.oid
 WHERE  nspname NOT IN ( 'information_schema', 'pg_catalog' )
-       AND nspname   NOT LIKE 'pg_toast%'
-       AND nspname   NOT LIKE 'pg_temp_%' 
-       AND nspowner  !=       'rds_superuser'::regrole;
+       AND nspname NOT LIKE 'pg_toast%'
+       AND nspname NOT LIKE 'pg_temp_%'
+       AND r.rolname  !=       'rds_superuser'
+       AND r.rolname  !=       'rdsadmin';
 """
 
 PG_INDEXES_QUERY = """
@@ -96,7 +98,7 @@ PG_CHECK_FOR_FOREIGN_KEY = """
 SELECT count(conname)
 FROM   pg_constraint
 WHERE  contype = 'f'
-       AND conrelid = '{tablename}' :: regclass;
+       AND conrelid = {oid};
 """
 
 PG_CONSTRAINTS_QUERY = """
@@ -104,7 +106,7 @@ SELECT conname                   AS name,
        pg_get_constraintdef(oid) AS definition
 FROM   pg_constraint
 WHERE  contype = 'f'
-       AND conrelid = '{tablename}' :: regclass;
+       AND conrelid = {oid};
 """
 
 COLUMNS_QUERY = """
@@ -116,7 +118,7 @@ FROM   pg_attribute
        LEFT JOIN pg_attrdef ad
               ON adrelid = attrelid
                  AND adnum = attnum
-WHERE  attrelid = '{tablename}' :: regclass
+WHERE  attrelid = {oid}
        AND attnum > 0
        AND NOT attisdropped;
 """
@@ -131,7 +133,7 @@ WHERE  '{parent}' = relname;
 NUM_PARTITIONS_QUERY = """
 SELECT count(inhrelid :: regclass) AS num_partitions
 FROM   pg_inherits
-WHERE  inhparent = '{parent}' :: regclass :: oid
+WHERE  inhparent = {parent_oid};
 """
 
 PARTITION_ACTIVITY_QUERY = """
@@ -142,7 +144,7 @@ FROM   pg_catalog.pg_stat_user_tables psu
          ON psu.relname = pc.relname
        join pg_inherits pi
          ON pi.inhrelid = pc.oid
-WHERE  pi.inhparent = '{parent}' :: regclass :: oid
+WHERE  pi.inhparent = '{parent_oid}'
 GROUP  BY pi.inhparent;
 """
 
@@ -298,9 +300,10 @@ class PostgresMetadata(DBMAsyncJob):
         schemas = []
         for row in rows:
             schemas.append({"id": str(row['id']), "name": row['name'], "owner": row['owner']})
+            print(row['name'])
         return schemas
 
-    def _get_table_info(self, cursor, dbname, schemaname):
+    def _get_table_info(self, cursor, dbname, schema_id):
         """
         Tables will be sorted by the number of total accesses (index_rel_scans + seq_scans) and truncated to
         the max_tables limit.
@@ -310,9 +313,9 @@ class PostgresMetadata(DBMAsyncJob):
         limit = self._config.schemas_metadata_config.get('max_tables', 1000)
         if self._config.relations:
             if VersionUtils.transform_version(str(self._check._version))['version.major'] == "9":
-                cursor.execute(PG_TABLES_QUERY_V9.format(schemaname=schemaname))
+                cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id))
             else:
-                cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schemaname=schemaname))
+                cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id))
             rows = cursor.fetchall()
             table_info = [dict(row) for row in rows]
             return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
@@ -340,7 +343,7 @@ class PostgresMetadata(DBMAsyncJob):
                 )
             else:
                 # get activity
-                cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent=info['name']))
+                cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info['id']))
                 row = cursor.fetchone()
                 return row['total_activity']
 
@@ -349,7 +352,7 @@ class PostgresMetadata(DBMAsyncJob):
         return table_info[:limit]
 
     def _query_table_information_for_schema(
-        self, cursor: psycopg.cursor, schemaname: str, dbname: str
+        self, cursor: psycopg.cursor, schema_id: str, dbname: str
     ) -> List[Dict[str, Union[str, Dict]]]:
         """
         Collect table information per schema. Returns a list of dictionaries
@@ -372,11 +375,12 @@ class PostgresMetadata(DBMAsyncJob):
             "partition_key": str (if has partitions)
             "num_partitions": int (if has partitions)
         """
-        tables_info = self._get_table_info(cursor, dbname, schemaname)
+        tables_info = self._get_table_info(cursor, dbname, schema_id)
         table_payloads = []
         for table in tables_info:
             this_payload = {}
             name = table['name']
+            table_id = table['id']
             this_payload.update({'id': str(table['id'])})
             this_payload.update({'name': name})
             if table["hasindexes"]:
@@ -391,7 +395,7 @@ class PostgresMetadata(DBMAsyncJob):
                     row = cursor.fetchone()
                     this_payload.update({'partition_key': row['partition_key']})
 
-                    cursor.execute(NUM_PARTITIONS_QUERY.format(parent=name))
+                    cursor.execute(NUM_PARTITIONS_QUERY.format(parent_oid=table_id))
                     row = cursor.fetchone()
                     this_payload.update({'num_partitions': row['num_partitions']})
 
@@ -399,17 +403,17 @@ class PostgresMetadata(DBMAsyncJob):
                 this_payload.update({'toast_table': table['toast_table']})
 
             # Get foreign keys
-            cursor.execute(PG_CHECK_FOR_FOREIGN_KEY.format(tablename=table['name']))
+            cursor.execute(PG_CHECK_FOR_FOREIGN_KEY.format(oid=table_id))
             row = cursor.fetchone()
             if row['count'] > 0:
-                cursor.execute(PG_CONSTRAINTS_QUERY.format(tablename=table['name']))
+                cursor.execute(PG_CONSTRAINTS_QUERY.format(oid=table_id))
                 rows = cursor.fetchall()
                 if rows:
                     fks = [dict(row) for row in rows]
                     this_payload.update({'foreign_keys': fks})
 
             # Get columns
-            cursor.execute(COLUMNS_QUERY.format(tablename=name))
+            cursor.execute(COLUMNS_QUERY.format(oid=table_id))
             rows = cursor.fetchall()[:]
             max_columns = self._config.schemas_metadata_config.get('max_columns', 50)
             columns = [dict(row) for row in rows][:max_columns]
@@ -436,7 +440,7 @@ class PostgresMetadata(DBMAsyncJob):
                 )
                 schema_info = self._query_schema_information(cursor, dbname)
                 for schema in schema_info:
-                    tables_info = self._query_table_information_for_schema(cursor, schema['name'], dbname)
+                    tables_info = self._query_table_information_for_schema(cursor, schema['id'], dbname)
                     schema.update({"tables": tables_info})
                     metadata['schemas'].append(schema)
 
