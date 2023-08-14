@@ -33,16 +33,19 @@ class ReproduceError(object):
             "SELECT pg_sleep(3);"
         ]
         random_query = random.choice(queries)
-        # print("pool stats: {}".format(self.db_pool.get_connection("datadog_test", 100).get_stats()))
         with self.db_pool.get_main_db().connection() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 cursor.execute(random_query)
         if job_name == "job-three":
             # mock query-samples thread, which requires the connection pooling across dbs
-            with self.db_pool.get_connection("dogs", 100) as conn:
-                print("running query test_query func {}".format(random_query))
-                with conn.cursor() as cursor:
-                    cursor.execute(random_query)
+            try:
+                # print("{}".format(self.db_pool.get_connection("dogs", 100).get_stats()))
+                with self.db_pool.get_connection("dogs", 60000).connection() as conn:
+                    print("running query test_query func {}".format(random_query))
+                    with conn.cursor() as cursor:
+                        cursor.execute(random_query)
+            finally:
+                self.db_pool.set_pool_inactive("dogs")
             self.db_pool.prune_connections()
 
     def _close_db_pool(self):
@@ -77,9 +80,10 @@ class ReproduceError(object):
             self.job_one.run_job_loop()
             self.job_two.run_job_loop()
             self.job_three.run_job_loop()
-            with self.db.cursor() as cursor:
-                print("running query from main loop")
-                cursor.execute("Select pg_sleep(3);")
+            with self.db.connection() as conn:
+                with conn.cursor() as cursor:
+                    print("running query from main loop")
+                    cursor.execute("Select pg_sleep(3);")
         except Exception as e:
             print("exception thrown in main loop {}".format(e))
             self.db = None
@@ -109,12 +113,20 @@ class ReproduceError(object):
         # else:
         self.db = self._new_connection(dbname)
 
+    # def _new_connection(self, dbname):
+    #     connection_string = "host=localhost user=postgres dbname={} application_name=my-app password=datad0g".format(
+    #         dbname)
+    #     connection_string += " options='-c statement_timeout=%s'" % 5000
+    #     conn = psycopg.connect(conninfo=connection_string, autocommit=True, cursor_factory=ClientCursor)
+    #     return conn
+
     def _new_connection(self, dbname):
-        connection_string = "host=localhost user=postgres dbname={} application_name=my-app password=datad0g".format(
-            dbname)
-        connection_string += " options='-c statement_timeout=%s'" % 5000
-        conn = psycopg.connect(conninfo=connection_string, autocommit=True, cursor_factory=ClientCursor)
-        return conn
+        connection_string = "host=localhost user=postgres dbname={} application_name=my-app password=datad0g".format(dbname)
+        kwargs = {
+            "options": "-c statement_timeout=%s" % 5000
+        }
+        pool = ConnectionPool(conninfo=connection_string, min_size=1, kwargs=kwargs, open=True, name=dbname)
+        return pool
 
 
 class Job(object):
@@ -297,9 +309,9 @@ class MultiDatabaseConnectionPool(object):
                 # if already in pool, retain persistence status
                 persistent = conn.persistent
 
-            if db.info.status != psycopg.pq.ConnStatus.OK:
-                # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
-                db.rollback()
+            # if db.info.status != psycopg.pq.ConnStatus.OK:
+            #     # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
+            #     db.rollback()
 
             deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_ms)
             self._conns[conn_name] = ConnectionInfo(
@@ -311,7 +323,6 @@ class MultiDatabaseConnectionPool(object):
             )
             return db
 
-    @contextlib.contextmanager
     def get_connection(
             self, dbname: str, ttl_ms: int, conn_prefix: str = None, timeout: int = None, persistent: bool = False
     ):
@@ -322,22 +333,19 @@ class MultiDatabaseConnectionPool(object):
         Blocks until a connection can be added to the pool,
         and optionally takes a timeout in seconds.
         """
-        try:
-            with self._mu:
-                db = self._get_connection_raw(
-                    dbname=dbname, ttl_ms=ttl_ms, conn_prefix=conn_prefix, timeout=timeout, persistent=persistent
-                )
-            yield db
-        finally:
-            with self._mu:
-                try:
-                    conn_name = dbname
-                    if conn_prefix:
-                        conn_name = "{}-{}".format(conn_prefix, dbname)
-                    self._conns[conn_name].active = False
-                except KeyError:
-                    # if self._get_connection_raw hit an exception, self._conns[conn_name] didn't get populated
-                    pass
+        with self._mu:
+            db = self._get_connection_raw(
+                dbname=dbname, ttl_ms=ttl_ms, conn_prefix=conn_prefix, timeout=timeout, persistent=persistent
+            )
+            return db
+
+    def set_pool_inactive(self, conn_name):
+        with self._mu:
+            try:
+                self._conns[conn_name].active = False
+            except KeyError:
+                # if self._get_connection_raw hit an exception, self._conns[conn_name] didn't get populated
+                pass
 
     def prune_connections(self):
         """
@@ -397,6 +405,7 @@ class MultiDatabaseConnectionPool(object):
             try:
                 # close connection pool
                 if not db.connection.closed:
+                    print("closing conn pool")
                     db.connection.close()
                 self._stats.connection_closed += 1
             except Exception:
@@ -408,6 +417,7 @@ class MultiDatabaseConnectionPool(object):
     def get_main_db(self, timeout: int = None):
         if self.main_db_conn is None or self.main_db_conn.closed:
             self.main_db_conn = self._get_main_conn_pool(self.min_conn_pool_size, timeout)
+        # print("main db stats {}".format(self.main_db_conn.get_stats()))
         return self.main_db_conn
 
 
@@ -418,7 +428,7 @@ def run_loop(fun_times):
 
 
 def random_cancel(fun_times):
-    time.sleep(random.randint(10, 100))
+    time.sleep(random.randint(60, 600))
     fun_times.cancel()
 
 
