@@ -252,7 +252,7 @@ def test_activity_nested_blocking_transactions(
         for q in queries:
             try:
                 cur.execute(q)
-            except pyodbc.OperationalError as err:
+            except pyodbc.OperationalError:
                 # This is expected since the query (might be) blocked
                 pass
         # Do not allow the conn to be garbage collected and closed until the global lock is released
