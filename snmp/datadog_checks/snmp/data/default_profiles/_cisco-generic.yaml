@@ -243,10 +243,10 @@ metrics:
           name: cswSwitchMacAddress
       - MIB: ENTITY-MIB
         column:
-          OID: 1.3.6.1.2.1.47.1.1.1.1.6
-          name: entPhysicalIndex
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+          name: entPhysicalName
         table: entPhysicalTable
-        tag: entity_physical_index
+        tag: entity_physical_name
       - column:
           OID: 1.3.6.1.4.1.9.9.500.1.2.1.1.6
           name: cswSwitchState

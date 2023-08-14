@@ -653,9 +653,18 @@ def test_e2e_cisco_nexus(dd_agent_check):
         tags=common_tags + ['interface:GigabitEthernet1/0/1'],
     )
 
-    aggregator.assert_metric(
-        'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:0xffffffffffff'] + common_tags
-    )
+    tag_rows = [
+        ['mac_addr:0xffffffffffff', 'entity_name:name1'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name2'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name3'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name4'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name5'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name6'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name7'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name8'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=tag_row + common_tags)
 
     frus = [2, 7, 8, 21, 26, 27, 30, 31]
     for fru in frus:
@@ -678,14 +687,14 @@ def test_e2e_cisco_nexus(dd_agent_check):
         aggregator.assert_metric('snmp.cefcFRUPowerStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['mac_addr:0xffffffffffff', 'entity_physical_index:2', 'switch_state:progressing'],
-        ['mac_addr:0xffffffffffff', 'entity_physical_index:7', 'switch_state:ready'],
-        ['mac_addr:0xffffffffffff', 'entity_physical_index:8', 'switch_state:added'],
-        ['mac_addr:0xffffffffffff', 'entity_physical_index:12', 'switch_state:verMismatch'],
-        ['mac_addr:0xffffffffffff', 'entity_physical_index:19', 'switch_state:progressing'],
-        ['mac_addr:0xffffffffffff', 'entity_physical_index:20', 'switch_state:sdmMismatch'],
-        ['mac_addr:0xffffffffffff', 'entity_physical_index:22', 'switch_state:provisioned'],
-        ['mac_addr:0xffffffffffff', 'entity_physical_index:28', 'switch_state:verMismatch'],
+        ['mac_addr:0xffffffffffff', 'entity_physical_name:name1', 'switch_state:progressing'],
+        ['mac_addr:0xffffffffffff', 'entity_physical_name:name2', 'switch_state:ready'],
+        ['mac_addr:0xffffffffffff', 'entity_physical_name:name3', 'switch_state:added'],
+        ['mac_addr:0xffffffffffff', 'entity_physical_name:name4', 'switch_state:verMismatch'],
+        ['mac_addr:0xffffffffffff', 'entity_physical_name:name5', 'switch_state:progressing'],
+        ['mac_addr:0xffffffffffff', 'entity_physical_name:name6', 'switch_state:sdmMismatch'],
+        ['mac_addr:0xffffffffffff', 'entity_physical_name:name7', 'switch_state:provisioned'],
+        ['mac_addr:0xffffffffffff', 'entity_physical_name:name8', 'switch_state:verMismatch'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cswSwitchInfo', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
