@@ -80,9 +80,9 @@ SELECT oid                 AS id,
        nspowner :: regrole AS owner
 FROM   pg_namespace
 WHERE  nspname NOT IN ( 'information_schema', 'pg_catalog' )
-       AND nspname NOT LIKE 'pg_toast%'
-       AND nspname NOT LIKE 'pg_temp_%' 
-       AND owner   NOT LIKE 'rds_superuser';
+       AND nspname   NOT LIKE 'pg_toast%'
+       AND nspname   NOT LIKE 'pg_temp_%' 
+       AND nspowner  !=       'rds_superuser'::regrole;
 """
 
 PG_INDEXES_QUERY = """
