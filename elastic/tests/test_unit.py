@@ -8,8 +8,8 @@ import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.http import MockResponse
-from datadog_checks.elastic import AuthenticationError, ESCheck
-from datadog_checks.elastic.elastic import get_value_from_path
+from datadog_checks.elastic import ESCheck
+from datadog_checks.elastic.elastic import AuthenticationError, get_value_from_path
 
 from .common import URL, get_fixture_path
 

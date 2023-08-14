@@ -2,6 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .__about__ import __version__
-from .elastic import ESCheck, AuthenticationError
+from .elastic import ESCheck
 
-__all__ = ['__version__', 'ESCheck', 'AuthenticationError']
+__all__ = ['__version__', 'ESCheck']
