@@ -4,7 +4,7 @@
 import concurrent.futures
 import copy
 import os
-from time import time
+import time
 
 import psycopg
 from cachetools import TTLCache
