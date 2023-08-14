@@ -18,7 +18,7 @@ You can enable [Guest login](#guest-login), or identify [user credentials](#user
 
 ##### Guest login
 
-1. [Enable guest login][2] or identify user credentials (with required permissions) for basic HTTP authentication.
+1. [Enable guest login][2].
 
 2. Enable `Per-project permissions` to allow assigning project-based permissions to the Guest user. See [Changing Authorization Mode][22].
 ![Enable Guest Login][17]
@@ -36,7 +36,7 @@ You can enable [Guest login](#guest-login), or identify [user credentials](#user
 
 For basic HTTP authentication
 - Specify an identified `username` and `password` in the `teamcity.d/conf.yaml` file in the `conf.d/` folder of your [Agent's configuration directory][3].
-- If you encounter an `Access denied. Enable guest authentication or check user permissions.` error, ensure the user has the correct permissions.
+- If you encounter an `Access denied. Enable guest authentication or check user permissions.` error, ensure the user has the correct permissions:
   - Per-project and View Usage Statistics permissions enabled.
   - If collecting Agent Workload Statistics, assign the View Agent Details and View Agent Usage Statistics permissions as well.
 
