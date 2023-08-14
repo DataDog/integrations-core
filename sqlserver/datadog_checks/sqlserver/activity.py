@@ -77,8 +77,8 @@ WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
 # Turns out sys.dm_exec_requests does not contain idle sessions.
 # Inner joining dm_exec_sessions with dm_exec_requests will not return any idle blocking sessions.
 # This prevent us reusing the same ACTIVITY_QUERY for regular activities and idle blocking sessions.
-# Below query used for idle sessions does not joining dm_exec_requests.
-# the last query run on the connection is fetched from dm_exec_connections.most_recent_sql_handle.
+# The query below is used for idle sessions and does not join with dm_exec_requests.
+# The last query execution on the connection is fetched from dm_exec_connections.most_recent_sql_handle.
 IDLE_BLOCKING_SESSIONS_QUERY = re.sub(
     r'\s+',
     ' ',
@@ -190,7 +190,6 @@ class SqlserverActivity(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_idle_blocking_sessions(self, cursor, blocking_session_ids):
         # The IDLE_BLOCKING_SESSIONS_QUERY contains minimum information on idle blocker
-        self.log.debug("collecting sql server idle blocking sessions")
         query = IDLE_BLOCKING_SESSIONS_QUERY.format(
             blocking_session_ids=",".join(map(str, blocking_session_ids)), proc_char_limit=PROC_CHAR_LIMIT
         )
