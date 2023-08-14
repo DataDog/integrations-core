@@ -53,9 +53,9 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.systemState',  # iDRAC constant metric
     'snmp.physicalDisk',  # iDRAC constant metric
     'snmp.wlsxSysExtFan',  # Aruba constant metric
-    'snmp.controller'  # Dell constant metric
-    'snmp.pCIDevice'  # Dell constant metric
-    'snmp.systemSlot'  # Dell constant metric
+    'snmp.controller',  # Dell constant metric
+    'snmp.pCIDevice',  # Dell constant metric
+    'snmp.systemSlot',  # Dell constant metric
     'snmp.battery',  # Dell constant metric
     'snmp.networkDevice',  # Dell constant metric
     'snmp.systemBIOS',  # Dell constant metric
@@ -541,7 +541,6 @@ def test_e2e_profile_idrac(dd_agent_check):
     assert_python_vs_core(
         dd_agent_check,
         config,
-        metrics_to_skip=SKIPPED_CORE_ONLY_METRICS,
         tags_to_skip=[
             'enclosure_power_supply_state',
             'disk_state',
