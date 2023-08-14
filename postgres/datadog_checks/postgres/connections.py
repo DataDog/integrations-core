@@ -147,13 +147,11 @@ class MultiDatabaseConnectionPool(object):
         try:
             with self._mu:
                 pool = self._get_connection_pool(dbname=dbname, ttl_ms=ttl_ms, timeout=timeout, persistent=persistent)
-                self._log.warning("trying to get a connection")
                 db = pool.getconn(timeout=timeout)
             yield db
         finally:
             with self._mu:
                 try:
-                    self._log.warning("trying to put connection back")
                     pool.putconn(db)
                     if not self._conns[dbname].persistent:
                         self._conns[dbname].active = False
