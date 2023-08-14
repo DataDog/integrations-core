@@ -14,7 +14,8 @@
 
 ***Fixed***:
 
-* [AGENT-9940] Reduce number of consumer creations ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
+* Reduce number of consumer creations ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
+* Optimize highwater offset collection ([#15285](https://github.com/DataDog/integrations-core/pull/15285))
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 * Simplify regex compilation ([#15239](https://github.com/DataDog/integrations-core/pull/15239))
 
