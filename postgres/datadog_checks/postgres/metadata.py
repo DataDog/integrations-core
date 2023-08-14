@@ -81,7 +81,8 @@ SELECT oid                 AS id,
 FROM   pg_namespace
 WHERE  nspname NOT IN ( 'information_schema', 'pg_catalog' )
        AND nspname NOT LIKE 'pg_toast%'
-       AND nspname NOT LIKE 'pg_temp_%';
+       AND nspname NOT LIKE 'pg_temp_%' 
+       AND owner   NOT LIKE 'rds_superuser';
 """
 
 PG_INDEXES_QUERY = """
