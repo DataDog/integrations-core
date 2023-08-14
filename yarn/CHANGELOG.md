@@ -4,10 +4,6 @@
 
 ## 5.0.0 / 2023-08-10
 
-***Added***:
-
-* Add schema collection to Postgres integration. See [#15484](https://github.com/DataDog/integrations-core/pull/15484).
-
 ***Changed***:
 
 * Bump the minimum base check version. See [#15427](https://github.com/DataDog/integrations-core/pull/15427).
