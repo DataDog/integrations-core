@@ -128,7 +128,7 @@ class BorrowedStatus:
 
 
 class Terminal:
-    def __init__(self, verbosity, enable_color, interactive):
+    def __init__(self, verbosity: int, enable_color: bool, interactive: bool):
         self.verbosity = verbosity
         self.interactive = interactive
         self.console = Console(
