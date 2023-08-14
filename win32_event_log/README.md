@@ -121,8 +121,6 @@ To collect Windows Event Logs as Datadog events, configure channels under the `i
   
   For more information, see [Add event log files to the `Win32_NTLogEvent` WMI class][101].
 
-[101]: https://docs.datadoghq.com/integrations/guide/add-event-log-files-to-the-win32-ntlogevent-wmi-class/
-
 <!-- xxz tab xxx -->
 <!-- xxx tab "Logs" xxx -->
 
@@ -486,8 +484,8 @@ If you are using log processing rules to filter out logs, verify that the raw lo
 
 To troubleshoot your log processing rules:
 1. Remove or comment out the `log_processing_rules` stanza.
-1. Restart the Agent.
-1. Send a test log that includes the values you're attempting to catch. If the log appears in Datadog, there is probably an issue with your regex. Compare your regex against the log file to make sure you're capturing the right phrases.
+2. Restart the Agent.
+3. Send a test log that includes the values you're attempting to catch. If the log appears in Datadog, there is probably an issue with your regex. Compare your regex against the log file to make sure you're capturing the right phrases.
 
 ## Further Reading
 
@@ -513,7 +511,7 @@ Additional helpful documentation, links, and articles:
 [13]: https://docs.microsoft.com/en-us/windows/win32/eventlog/event-logging
 [14]: https://learn.microsoft.com/en-us/windows/win32/wes/eventschema-systempropertiestype-complextype
 [15]: https://docs.datadoghq.com/agent/guide/agent-commands/
-[16]: https://docs.datadoghq.com/events/
+[16]: https://docs.datadoghq.com/service_management/events/
 [17]: https://docs.datadoghq.com/logs/
 [18]: https://docs.datadoghq.com/agent/logs/#activate-log-collection
 [19]: https://raw.githubusercontent.com/DataDog/integrations-core/master/win32_event_log/images/windows-defender-operational-event-log-properties.png
@@ -525,3 +523,4 @@ Additional helpful documentation, links, and articles:
 [25]: https://docs.datadoghq.com/agent/troubleshooting/send_a_flare/?tab=agentv6v7
 [26]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfile
 [27]: https://www.datadoghq.com/blog/monitor-windows-event-logs-with-datadog/
+[101]: https://docs.datadoghq.com/integrations/guide/add-event-log-files-to-the-win32-ntlogevent-wmi-class/
