@@ -158,7 +158,6 @@ def test__get_data_throws_authentication_error(instance):
             check._get_data(url='test.com')
 
 
-@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test__get_data_creates_critical_service_alert(aggregator, instance):
     with mock.patch(
         'requests.get',
