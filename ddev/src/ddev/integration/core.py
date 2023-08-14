@@ -67,6 +67,9 @@ class Integration:
                 if f.endswith('.py'):
                     yield Path(root, f)
 
+    def requires_changelog_entry(self, path: Path) -> bool:
+        return self.package_directory in path.parents or (self.is_package and path == (self.path / 'pyproject.toml'))
+
     @property
     def release_tag_pattern(self) -> str:
         version_part = r'\d+\.\d+\.\d+'
@@ -99,6 +102,11 @@ class Integration:
     @cached_property
     def metrics_file(self) -> Path:
         relative_path = self.manifest.get('/assets/integration/metrics/metadata_path', 'metadata.csv')
+        return self.path / relative_path
+
+    @cached_property
+    def config_spec(self) -> Path:
+        relative_path = self.manifest.get('/assets/integration/configuration/spec', 'assets/configuration/spec.yaml')
         return self.path / relative_path
 
     @cached_property

@@ -12,6 +12,7 @@ import pytest
 import vcr
 from click.testing import CliRunner as __CliRunner
 from datadog_checks.dev.tooling.utils import set_root
+
 from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.config.file import ConfigFile
@@ -100,6 +101,7 @@ def config_file(tmp_path, monkeypatch) -> ConfigFile:
         'DD_DD_URL',
         'DD_API_KEY',
         'DD_APP_KEY',
+        'DDEV_REPO',
     ):
         monkeypatch.delenv(env_var, raising=False)
 
@@ -216,3 +218,4 @@ def pytest_configure(config):
     config.addinivalue_line('markers', 'requires_macos: Tests intended for macOS operating systems')
     config.addinivalue_line('markers', 'requires_linux: Tests intended for Linux operating systems')
     config.addinivalue_line('markers', 'requires_unix: Tests intended for Linux-based operating systems')
+    config.addinivalue_line('markers', 'requires_ci: Tests intended to only run in CI')

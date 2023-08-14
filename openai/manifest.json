@@ -29,6 +29,8 @@
     ],
     "classifier_tags": [
       "Category::AI",
+      "Category::Metrics",
+      "Category::Cost Management",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
       "Submitted Data Type::Traces",
