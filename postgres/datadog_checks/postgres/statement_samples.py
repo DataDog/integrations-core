@@ -518,7 +518,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_db_explain_setup_state(self, dbname):
         # type: (str) -> Tuple[Optional[DBExplainError], Optional[Exception]]
         try:
-            with self.db_pool.get_connection(dbname, self._conn_ttl_ms, conn_prefix=self._thread_id):
+            with self.db_pool.get_connection(dbname, self._conn_ttl_ms):
                 pass
         except psycopg.OperationalError as e:
             self._log.warning(

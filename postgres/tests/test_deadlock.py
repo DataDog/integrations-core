@@ -13,12 +13,11 @@ from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
 
 
 def wait_on_result(cursor=None, sql=None, binds=None, expected_value=None):
-    for _i in range(300):
+    for _i in range(5):
         cursor.execute(sql, binds)
         result = cursor.fetchone()[0]
         if result == expected_value:
             break
-
         time.sleep(0.1)
     else:
         return False
@@ -33,7 +32,8 @@ def wait_on_result(cursor=None, sql=None, binds=None, expected_value=None):
 def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check._connect()
-    conn = check._new_connection(pg_instance['dbname'])
+    conn_pool = check._new_connection(pg_instance['dbname'])
+    conn = conn_pool.getconn()
     cursor = conn.cursor()
 
     def execute_in_thread(q, args):
@@ -112,6 +112,8 @@ commit;
     dd_run_check(check)
 
     wait_on_result(cursor=cursor, sql=deadlock_count_sql, binds=(DB_NAME,), expected_value=deadlocks_before + 1)
+    conn_pool.putconn(conn)
+    conn_pool.close()
 
     aggregator.assert_metric(
         'postgresql.deadlocks.count',

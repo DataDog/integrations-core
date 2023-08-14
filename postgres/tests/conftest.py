@@ -26,6 +26,7 @@ INSTANCE = {
     'dbname': DB_NAME,
     'tags': ['foo:bar'],
     'disable_generic_tags': True,
+    'dbm': False,
 }
 
 

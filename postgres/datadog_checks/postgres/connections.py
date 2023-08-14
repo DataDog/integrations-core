@@ -9,6 +9,7 @@ import time
 from typing import Callable, Dict
 
 import psycopg
+from psycopg_pool import ConnectionPool
 
 from datadog_checks.base import AgentCheck
 
@@ -25,7 +26,7 @@ class ConnectionPoolFullError(Exception):
 class ConnectionInfo:
     def __init__(
         self,
-        connection: psycopg.ConnectionPool,
+        connection: ConnectionPool,
         deadline: int,
         active: bool,
         last_accessed: int,
@@ -93,9 +94,9 @@ class MultiDatabaseConnectionPool(object):
         timeout: int = None,
         min_pool_size: int = 1,
         max_pool_size: int = None,
-        startup_fn: Callable[[psycopg.ConnectionPool], None] = None,
+        startup_fn: Callable[[ConnectionPool], None] = None,
         persistent: bool = False,
-    ) -> psycopg.ConnectionPool:
+    ) -> ConnectionPool:
         """
         Return a connection pool for the requested database from the managed pool.
         Pass a function to startup_func if there is an action needed with the connection
@@ -146,11 +147,13 @@ class MultiDatabaseConnectionPool(object):
         try:
             with self._mu:
                 pool = self._get_connection_pool(dbname=dbname, ttl_ms=ttl_ms, timeout=timeout, persistent=persistent)
+                self._log.warning("trying to get a connection")
                 db = pool.getconn(timeout=timeout)
             yield db
         finally:
             with self._mu:
                 try:
+                    self._log.warning("trying to put connection back")
                     pool.putconn(db)
                     if not self._conns[dbname].persistent:
                         self._conns[dbname].active = False

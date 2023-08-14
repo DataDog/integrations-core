@@ -64,7 +64,7 @@ class ExplainParameterizedQueries:
                 Returns: (plan)
     '''
 
-    def __init__(self, check, config, thread_id):
+    def __init__(self, check, config):
         self._check = check
         self._config = config
 

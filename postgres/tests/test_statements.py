@@ -361,28 +361,28 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
 
     check = integration_check(dbm_instance)
     check._connect()
-    cursor = check.db.cursor()
+    with check.db.connection() as conn:
+        with conn.cursor() as cursor:
+            # Execute the query once to begin tracking it. Execute again between checks to track the difference.
+            # This should result in a single metric for that query_signature having a value of 2
+            with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+                mock_agent.side_effect = obfuscate_sql
+                cursor.execute(query, (['app1', 'app2'],))
+                cursor.execute(query, (['app1', 'app2', 'app3'],))
+                run_one_check(check, dbm_instance)
 
-    # Execute the query once to begin tracking it. Execute again between checks to track the difference.
-    # This should result in a single metric for that query_signature having a value of 2
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-        mock_agent.side_effect = obfuscate_sql
-        cursor.execute(query, (['app1', 'app2'],))
-        cursor.execute(query, (['app1', 'app2', 'app3'],))
-        run_one_check(check, dbm_instance)
+                cursor.execute(query, (['app1', 'app2'],))
+                cursor.execute(query, (['app1', 'app2', 'app3'],))
+                run_one_check(check, dbm_instance)
 
-        cursor.execute(query, (['app1', 'app2'],))
-        cursor.execute(query, (['app1', 'app2', 'app3'],))
-        run_one_check(check, dbm_instance)
+            events = aggregator.get_event_platform_events("dbm-metrics")
+            assert len(events) == 1
+            event = events[0]
 
-    events = aggregator.get_event_platform_events("dbm-metrics")
-    assert len(events) == 1
-    event = events[0]
-
-    matching = [e for e in event['postgres_rows'] if e['query_signature'] == query_signature]
-    assert len(matching) == 1
-    row = matching[0]
-    assert row['calls'] == 2
+            matching = [e for e in event['postgres_rows'] if e['query_signature'] == query_signature]
+            assert len(matching) == 1
+            row = matching[0]
+            assert row['calls'] == 2
 
 
 @pytest.fixture
