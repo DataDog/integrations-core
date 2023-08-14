@@ -10,8 +10,8 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
-    # assert_extend_fortinet_fortigate_cpu_memory,
-    # assert_extend_fortinet_fortigate_vpn_tunnel,
+    assert_extend_fortinet_fortigate_cpu_memory,
+    assert_extend_fortinet_fortigate_vpn_tunnel,
     assert_extend_generic_if,
     create_e2e_core_test_config,
     get_device_ip_from_config,
@@ -35,8 +35,8 @@ def test_e2e_profile_fortinet_fortigate(dd_agent_check):
 
     # --- TEST EXTENDED METRICS ---
     assert_extend_generic_if(aggregator, common_tags)
-    # assert_extend_fortinet_fortigate_cpu_memory(aggregator, common_tags)
-    # assert_extend_fortinet_fortigate_vpn_tunnel(aggregator, common_tags)
+    assert_extend_fortinet_fortigate_cpu_memory(aggregator, common_tags)
+    assert_extend_fortinet_fortigate_vpn_tunnel(aggregator, common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
@@ -110,7 +110,7 @@ def test_e2e_profile_fortinet_fortigate(dd_agent_check):
         ['virtualdomain_index:4', 'virtualdomain_name:their oxen quaintly', 'virtualdomain_state:secondary'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.fgVd', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.fgVirtualDomain', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['virtualdomain_index:4', 'interface:le0'],

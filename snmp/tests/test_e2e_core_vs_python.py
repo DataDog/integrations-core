@@ -53,7 +53,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.systemState',  # iDRAC constant metric
     'snmp.physicalDisk',  # iDRAC constant metric
     'snmp.wlsxSysExtFan',  # Aruba constant metric
-    'snmp.fgVd',  # Fortinet-Fortigate constant metric
+    'snmp.fgVirtualDomain',  # Fortinet-Fortigate constant metric
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
