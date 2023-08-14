@@ -523,4 +523,4 @@ Additional helpful documentation, links, and articles:
 [25]: https://docs.datadoghq.com/agent/troubleshooting/send_a_flare/?tab=agentv6v7
 [26]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfile
 [27]: https://www.datadoghq.com/blog/monitor-windows-event-logs-with-datadog/
-[101]: https://docs.datadoghq.com/integrations/guide/add-event-log-files-to-the-win32-ntlogevent-wmi-class/
+[28]: https://docs.datadoghq.com/integrations/guide/add-event-log-files-to-the-win32-ntlogevent-wmi-class/
