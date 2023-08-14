@@ -1,5 +1,12 @@
 # CHANGELOG - kafka_consumer
 
+## 3.1.3 / 2023-08-14
+
+***Fixed***:
+
+* Port Kafka consumer improvements to 7.47.x. See [#15565](https://github.com/DataDog/integrations-core/pull/15565).
+* Do not check consumer_groups if the offset is invalid. See [#15237](https://github.com/DataDog/integrations-core/pull/15237).
+
 ## 3.1.2 / 2023-07-13
 
 ***Fixed***:
