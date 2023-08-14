@@ -67,7 +67,6 @@ class ExplainParameterizedQueries:
     def __init__(self, check, config, thread_id):
         self._check = check
         self._config = config
-        self._thread_id = thread_id
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def explain_statement(self, dbname, statement, obfuscated_statement):
@@ -160,17 +159,13 @@ class ExplainParameterizedQueries:
             )
 
     def _execute_query(self, dbname, query):
-        with self._check.db_pool.get_connection(
-            dbname, self._check._config.idle_connection_timeout, conn_prefix=self._thread_id
-        ) as conn:
+        with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 logger.debug('Executing query=[%s]', query)
                 cursor.execute(query)
 
     def _execute_query_and_fetch_rows(self, dbname, query):
-        with self._check.db_pool.get_connection(
-            dbname, self._check._config.idle_connection_timeout, conn_prefix=self._thread_id
-        ) as conn:
+        with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 logger.debug('Executing query=[%s]', query)
                 cursor.execute(query)
