@@ -144,7 +144,7 @@ FROM   pg_catalog.pg_stat_user_tables psu
          ON psu.relname = pc.relname
        join pg_inherits pi
          ON pi.inhrelid = pc.oid
-WHERE  pi.inhparent = '{parent_oid}'
+WHERE  pi.inhparent = {parent_oid}
 GROUP  BY pi.inhparent;
 """
 
