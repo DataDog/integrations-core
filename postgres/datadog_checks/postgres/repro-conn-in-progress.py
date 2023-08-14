@@ -123,7 +123,9 @@ class ReproduceError(object):
     def _new_connection(self, dbname):
         connection_string = "host=localhost user=postgres dbname={} application_name=my-app password=datad0g".format(dbname)
         kwargs = {
-            "options": "-c statement_timeout=%s" % 5000
+            "options": "-c statement_timeout=%s" % 5000,
+            "autocommit": True,
+            "cursor_factory": psycopg.ClientCursor
         }
         pool = ConnectionPool(conninfo=connection_string, min_size=1, kwargs=kwargs, open=True, name=dbname)
         return pool
