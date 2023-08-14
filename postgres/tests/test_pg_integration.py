@@ -486,7 +486,7 @@ def test_wal_stats(aggregator, integration_check, pg_instance):
 
 
 def test_query_timeout(integration_check, pg_instance):
-    pg_instance['query_tsimeout'] = 1000
+    pg_instance['query_timeout'] = 1000
     check = integration_check(pg_instance)
     check._connect()
     cursor = check.db.cursor()
