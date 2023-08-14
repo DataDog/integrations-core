@@ -19,7 +19,7 @@ cm-client==45.0.4
 confluent-kafka==2.1.1; python_version > '3.0'
 contextlib2==0.6.0.post1; python_version < '3.0'
 cryptography==3.3.2; python_version < '3.0'
-cryptography==39.0.1; python_version > '3.0'
+cryptography==41.0.3; python_version > '3.0'
 ddtrace==0.32.2; sys_platform == 'win32' and python_version < '3.0'
 ddtrace==0.53.2; sys_platform != 'win32' and python_version < '3.0'
 ddtrace==1.11.2; python_version > '3.0'
