@@ -1,26 +1,20 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
 from io import StringIO
 
 import click
-from datadog_checks.dev.fs import write_file
-from datadog_checks.dev.tooling.commands.agent.common import get_agent_tags
-from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, abort, echo_info
-from datadog_checks.dev.tooling.constants import get_agent_integrations_file, get_agent_release_requirements
-from datadog_checks.dev.tooling.git import git_show_file
-from datadog_checks.dev.tooling.utils import parse_agent_req_file
+
+from ddev.cli.release.agent.common import get_agent_tags, parse_agent_req_file
 
 
-@click.command(
-    context_settings=CONTEXT_SETTINGS, short_help="Generate a markdown file of integrations in an Agent release"
-)
+@click.command(short_help="Generate a markdown file of integrations in an Agent release")
 @click.option('--since', help="Initial Agent version", default='6.3.0')
 @click.option('--to', help="Final Agent version")
 @click.option('--write', '-w', is_flag=True, help="Write to file, if omitted contents will be printed to stdout")
 @click.option('--force', '-f', is_flag=True, default=False, help="Replace an existing file")
-def integrations(since, to, write, force):
+@click.pass_obj
+def integrations(app, since, to, write, force):
     """
     Generates a markdown file containing the list of integrations shipped in a
     given Agent release. Agent version numbers are derived inspecting tags on
@@ -31,27 +25,27 @@ def integrations(since, to, write, force):
     tool will generate the list for every Agent since version 6.3.0
     (before that point we don't have enough information to build the log).
     """
-    agent_tags = get_agent_tags(since, to)
+    agent_tags = get_agent_tags(app.repo, since, to)
     # get the list of integrations shipped with the agent from the requirements file
-    req_file_name = os.path.basename(get_agent_release_requirements())
+    req_file_name = app.repo.agent_release_requirements.name
 
     integrations_contents = StringIO()
     for tag in agent_tags:
         integrations_contents.write(f'## Datadog Agent version {tag}\n\n')
         # Requirements for current tag
-        file_contents = git_show_file(req_file_name, tag)
+        file_contents = app.repo.git.show_file(req_file_name, tag)
         for name, ver in parse_agent_req_file(file_contents).items():
             integrations_contents.write(f'* {name}: {ver}\n')
         integrations_contents.write('\n')
 
     # save the changelog on disk if --write was passed
     if write:
-        dest = get_agent_integrations_file()
+        dest = app.repo.agent_integrations_file
         # don't overwrite an existing file
-        if os.path.exists(dest) and not force:
+        if dest.exists() and not force:
             msg = "Output file {} already exists, run the command again with --force to overwrite"
-            abort(msg.format(dest))
+            app.abort(msg.format(dest))
 
-        write_file(dest, integrations_contents.getvalue())
+        dest.write_text(integrations_contents.getvalue())
     else:
-        echo_info(integrations_contents.getvalue())
+        app.display(integrations_contents.getvalue())
