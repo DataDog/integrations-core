@@ -272,8 +272,20 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         aggregator.assert_metric('snmp.networkDeviceStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['chassis_index:13', 'device_index:15', 'device_fqdd:quaintly', 'mac_addr:aaaaaa', 'network_device_status:nonRecoverable'],
-        ['chassis_index:24', 'device_index:7', 'device_fqdd:oxen acted zombies but Jaded', 'mac_addr:aaaaaa', 'network_device_status:nonRecoverable'],
+        [
+            'chassis_index:13',
+            'device_index:15',
+            'device_fqdd:quaintly',
+            'mac_addr:aaaaaa',
+            'network_device_status:nonRecoverable',
+        ],
+        [
+            'chassis_index:24',
+            'device_index:7',
+            'device_fqdd:oxen acted zombies but Jaded',
+            'mac_addr:aaaaaa',
+            'network_device_status:nonRecoverable',
+        ],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.networkDevice', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
