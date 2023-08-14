@@ -600,8 +600,8 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, d
     if reported_hostname:
         instance_docker['reported_hostname'] = reported_hostname
     expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
-    mysql_check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    dd_run_check(mysql_check)
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    dd_run_check(check)
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
@@ -618,7 +618,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, d
 
     # Run a second time and expect the metadata to not be emitted again because of the cache TTL
     aggregator.reset()
-    dd_run_check(mysql_check)
+    dd_run_check(check)
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
