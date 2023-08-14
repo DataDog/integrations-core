@@ -4,7 +4,7 @@
 
 ***Fixed***:
 
-* [AGENT-10055] Correct checking instance type of get data response ([#15554](https://github.com/DataDog/integrations-core/pull/15554))
+* Correct checking instance type of get data response ([#15554](https://github.com/DataDog/integrations-core/pull/15554))
 
 ## 6.0.0 / 2023-08-10
 
