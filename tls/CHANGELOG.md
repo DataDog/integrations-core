@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Bump cryptography to 41.0.3 ([#15517](https://github.com/DataDog/integrations-core/pull/15517))
+
 ## 2.12.0 / 2023-08-10
 
 ***Added***:
