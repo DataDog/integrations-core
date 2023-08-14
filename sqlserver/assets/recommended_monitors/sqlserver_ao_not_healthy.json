@@ -1,28 +1,35 @@
 {
-	"name": "[SQLServer] Availability Group is not healthy",
-	"type": "query alert",
-	"query": "avg(last_5m):avg:sqlserver.ao.ag_sync_health{*} < 1",
-	"message": "Availability group has not been healthy for the last 5 minutes",
-	"tags": [
+  "version": 2,
+  "created_at": "2021-01-08",
+  "last_updated_at": "2021-01-08",
+  "title": "Availability Group is not healthy",
+  "tags": [
+    "integration:sql-server"
+  ],
+  "description": "Notify your team when your availability group is not healthy.",
+  "definition": {
+    "message": "Availability group has not been healthy for the last 5 minutes",
+    "name": "[SQLServer] Availability Group is not healthy",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 1,
+        "warning": 2
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_5m):avg:sqlserver.ao.ag_sync_health{*} \u003c 1",
+    "tags": [
       "integration:sql-server"
     ],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 1,
-			"warning": 2
-		}
-	},
-	"recommended_monitor_metadata": {
-		"description": "Notify your team when your availability group is not healthy."
-	}
+    "type": "query alert"
+  }
 }
