@@ -16,7 +16,7 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Log Collection",
-      "Category::Machine Learning and LLM"
+      "Category::Machine Learning & LLM"
     ]
   },
   "assets": {
