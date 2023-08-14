@@ -119,7 +119,7 @@ To collect Windows Event Logs as Datadog events, configure channels under the `i
         - "<CHANNEL_2>"
   ```
   
-  For more information, see [Add event log files to the `Win32_NTLogEvent` WMI class][101].
+  For more information, see [Add event log files to the `Win32_NTLogEvent` WMI class][28].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Logs" xxx -->
