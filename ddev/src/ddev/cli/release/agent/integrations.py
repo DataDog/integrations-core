@@ -1,11 +1,15 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 from io import StringIO
+from typing import TYPE_CHECKING
 
 import click
 
-from ddev.cli.release.agent.common import get_agent_tags, parse_agent_req_file
+if TYPE_CHECKING:
+    from ddev.cli.application import Application
 
 
 @click.command(short_help="Generate a markdown file of integrations in an Agent release")
@@ -14,7 +18,7 @@ from ddev.cli.release.agent.common import get_agent_tags, parse_agent_req_file
 @click.option('--write', '-w', is_flag=True, help="Write to file, if omitted contents will be printed to stdout")
 @click.option('--force', '-f', is_flag=True, default=False, help="Replace an existing file")
 @click.pass_obj
-def integrations(app, since, to, write, force):
+def integrations(app: Application, since: str, to: str, write: bool, force: bool):
     """
     Generates a markdown file containing the list of integrations shipped in a
     given Agent release. Agent version numbers are derived inspecting tags on
@@ -25,6 +29,8 @@ def integrations(app, since, to, write, force):
     tool will generate the list for every Agent since version 6.3.0
     (before that point we don't have enough information to build the log).
     """
+    from ddev.cli.release.agent.common import get_agent_tags, parse_agent_req_file
+
     agent_tags = get_agent_tags(app.repo, since, to)
     # get the list of integrations shipped with the agent from the requirements file
     req_file_name = app.repo.agent_release_requirements.name
