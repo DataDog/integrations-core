@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Removed***:
+ 
+* Remove the `ddev validate recommended-monitors` command ([#15563](https://github.com/DataDog/integrations-core/pull/15563))
+
 ## 3.5.0 / 2023-08-11
 
 ***Added***:
