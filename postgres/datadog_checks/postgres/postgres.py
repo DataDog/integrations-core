@@ -597,8 +597,8 @@ class PostgreSql(AgentCheck):
                 for scope in list(metric_scope) + self._config.custom_metrics:
                     self._query_scope(cursor, scope, instance_tags, scope in self._config.custom_metrics)
 
-                if self.dynamic_queries:
-                    self.dynamic_queries.execute()
+        if self.dynamic_queries:
+            self.dynamic_queries.execute()
 
     def _new_connection(self, dbname: str, min_pool_size: int = 1, max_pool_size: int = None):
         # required for autocommit as well as using params in queries
