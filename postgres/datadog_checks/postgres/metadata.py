@@ -319,13 +319,27 @@ class PostgresMetadata(DBMAsyncJob):
                 cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id))
             rows = cursor.fetchall()
             table_info = [dict(row) for row in rows]
-            # return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
-            return table_info[:limit]
+            table_info = self._filter_tables_with_no_relation_metrics(dbname, table_info)
+            return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
 
         else:
             # Config error should catch the case where schema collection is enabled
             # and relation metrics aren't, but adding a warning here just in case
             self._check.log.warning("Relation metrics are not configured for {dbname}, so tables cannot be collected")
+
+    def _filter_tables_with_no_relation_metrics(
+        self, dbname, table_info: List[Dict[str, Union[str, bool]]]
+    ) -> List[Dict[str, Union[str, bool]]]:
+        filtered_table_list = []
+        cache = self._check.metrics_cache.table_activity_metrics
+        for table in table_info:
+            if table['name'] in cache[dbname].keys():
+                filtered_table_list.append(table)
+            # partitioned tables will not have metrics recorded under the name of the partitioned table,
+            # so for now we always report them
+            elif table['has_partitions']:
+                filtered_table_list.append(table)
+        return filtered_table_list
 
     def _sort_and_limit_table_info(
         self, cursor, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int

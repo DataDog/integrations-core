@@ -66,7 +66,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
     schema_public = None
     for schema in database_metadata[0]['schemas']:
         if schema['name'] == 'public':
-            schema_public = schema 
+            schema_public = schema
 
     # check that all expected tables are present
     tables_set = {'persons', "personsdup1", "personsdup2", "pgtable", "pg_newtable", "cities"}
