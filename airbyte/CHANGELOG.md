@@ -4,4 +4,4 @@
 
 ***Added***:
 
-* Add the Airbyte integration. See [#15376](https://github.com/DataDog/integrations-core/pull/15376).
+* Add the Airbyte integration ([#15376](https://github.com/DataDog/integrations-core/pull/15376))
