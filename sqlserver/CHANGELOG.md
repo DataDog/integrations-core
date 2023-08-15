@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Collect both DBM active sessions and blocking sessions which are sleeping. See ([#14054](https://github.com/DataDog/integrations-core/pull/14054))
+
 ## 13.0.0 / 2023-08-10
 
 ***Changed***:
