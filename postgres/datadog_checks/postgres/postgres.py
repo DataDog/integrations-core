@@ -667,8 +667,7 @@ class PostgreSql(AgentCheck):
             self.db = None
 
         if not self.db:
-            # TODO: tests do not pass unless I do a max pool size of 2
-            self.db = self._new_connection(self._config.dbname, max_pool_size=2)
+            self.db = self._new_connection(self._config.dbname, max_pool_size=1)
 
     # Reload pg_settings on a new connection to the main db
     def load_pg_settings(self, db):

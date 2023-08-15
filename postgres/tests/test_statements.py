@@ -361,7 +361,8 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
 
     check = integration_check(dbm_instance)
     check._connect()
-    with check.db.connection() as conn:
+    # Get a connection separate from the one used by the check to avoid hitting the connection pool limit
+    with check._new_connection('postgres', max_pool_size=1).connection() as conn:
         with conn.cursor() as cursor:
             # Execute the query once to begin tracking it. Execute again between checks to track the difference.
             # This should result in a single metric for that query_signature having a value of 2
