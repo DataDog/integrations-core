@@ -24,6 +24,7 @@ from datadog_checks.postgres.statement_samples import (
     StatementTruncationState,
 )
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
+from datadog_checks.postgres.util import payload_pg_version
 
 from .common import DB_NAME, HOST, PORT, PORT_REPLICA2, POSTGRES_VERSION
 from .utils import _get_conn, _get_superconn, requires_over_10, run_one_check
@@ -99,7 +100,7 @@ def test_statement_metrics_version(integration_check, dbm_instance, version, exp
         check = integration_check(dbm_instance)
         check._version = version
         check._connect()
-        assert check.statement_metrics._payload_pg_version() == expected_payload_version
+        assert payload_pg_version(check.version) == expected_payload_version
     else:
         with mock.patch(
             'datadog_checks.postgres.postgres.PostgreSql.version', new_callable=mock.PropertyMock
@@ -107,7 +108,7 @@ def test_statement_metrics_version(integration_check, dbm_instance, version, exp
             patched_version.return_value = None
             check = integration_check(dbm_instance)
             check._connect()
-            assert check.statement_metrics._payload_pg_version() == expected_payload_version
+            assert payload_pg_version(check.version) == expected_payload_version
 
 
 @pytest.mark.parametrize("dbstrict,ignore_databases", [(True, []), (False, ['dogs']), (False, [])])

@@ -48,6 +48,10 @@ def instance_data_directory():
     return '/usr/local/pgsql/data'
 
 
+def instance_database_instance_collection_interval():
+    return False
+
+
 def instance_dbm():
     return False
 
