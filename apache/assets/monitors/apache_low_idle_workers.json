@@ -22,7 +22,7 @@
       "require_full_window": true,
       "threshold_windows": {
         "recovery_window": "last_5m",
-        "trigger_window": "last_5m"
+        "trigger_window": "last_15m"
       },
       "thresholds": {
         "critical": 1,
