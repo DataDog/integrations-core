@@ -78,8 +78,8 @@ class PostgreSql(AgentCheck):
         self.persistent_conn = None
         self._resolved_hostname = None
         self._agent_hostname = None
-        self._version = None
-        self._is_aurora = None
+        self.version = None
+        self.is_aurora = None
         self._version_utils = VersionUtils()
         # Deprecate custom_metrics in favor of custom_queries
         if 'custom_metrics' in self.instance:
@@ -103,6 +103,8 @@ class PostgreSql(AgentCheck):
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
         self.check_initializations.append(self.set_resolved_hostname_metadata)
+        self.check_initializations.append(self.load_version)
+        self.check_initializations.append(self.initialize_is_aurora)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         self.autodiscovery = self._build_autodiscovery()
 
@@ -332,19 +334,16 @@ class PostgreSql(AgentCheck):
         oldest_file_age = now - os.path.getctime(oldest_file)
         return oldest_file_age
 
-    @property
-    def version(self):
-        if self._version is None:
-            raw_version = self._version_utils.get_raw_version(self.db)
-            self._version = self._version_utils.parse_version(raw_version)
-            self.set_metadata('version', raw_version)
-        return self._version
+    def load_version(self):
+        raw_version = self._version_utils.get_raw_version(self.db)
+        self.version = self._version_utils.parse_version(raw_version)
+        self.set_metadata('version', raw_version)
+        return self.version
 
-    @property
-    def is_aurora(self):
-        if self._is_aurora is None:
-            self._is_aurora = self._version_utils.is_aurora(self.db)
-        return self._is_aurora
+    def initialize_is_aurora(self):
+        if self.is_aurora is None:
+            self.is_aurora = self._version_utils.is_aurora(self.db)
+        return self.is_aurora
 
     @property
     def resolved_hostname(self):
@@ -815,6 +814,7 @@ class PostgreSql(AgentCheck):
         try:
             # Check version
             self._connect()
+            self.load_version()  # We don't want to cache versions between runs to capture minor updates for metadata
             if self._config.tag_replication_role:
                 replication_role_tag = "replication_role:{}".format(self._get_replication_role())
                 tags.append(replication_role_tag)
@@ -855,7 +855,6 @@ class PostgreSql(AgentCheck):
                 tags=self._get_service_check_tags(),
                 hostname=self.resolved_hostname,
             )
-            self._version = None  # We don't want to cache versions between runs to capture minor updates for metadata
         finally:
             # Add the warnings saved during the execution of the check
             self._report_warnings()

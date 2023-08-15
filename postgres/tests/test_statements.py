@@ -98,12 +98,12 @@ def test_statement_samples_enabled_config(
 def test_statement_metrics_version(integration_check, dbm_instance, version, expected_payload_version):
     if version:
         check = integration_check(dbm_instance)
-        check._version = version
+        check.version = version
         check._connect()
         assert check.statement_metrics._payload_pg_version() == expected_payload_version
     else:
         with mock.patch(
-            'datadog_checks.postgres.postgres.PostgreSql.version', new_callable=mock.PropertyMock
+            'datadog_checks.postgres.postgres.PostgreSql.load_version', new_callable=mock.MagicMock
         ) as patched_version:
             patched_version.return_value = None
             check = integration_check(dbm_instance)
