@@ -15,7 +15,14 @@ MOCKED_API_SERVER_INSTANCE = {'api_server_endpoint': 'http://api_server:8083'}
 
 MOCKED_REPO_SERVER_INSTANCE = {'repo_server_endpoint': 'http://repo_server:8084'}
 
-app_controller_ns, api_server_ns, repo_server_ns = "argocd.app_controller", "argocd.api_server", "argocd.repo_server"
+MOCKED_NOTIFICATIONS_CONTROLLER_INSTANCE = {'notifications_controller_endpoint': 'http://notifications_controller:9001'}
+
+app_controller_ns, api_server_ns, repo_server_ns, notifications_controller_ns = (
+    "argocd.app_controller",
+    "argocd.api_server",
+    "argocd.repo_server",
+    "argocd.notifications_controller",
+)
 
 general_gauges = [
     'go.goroutines',
@@ -49,7 +56,6 @@ general_gauges = [
 ]
 
 general_counters = [
-    'redis.request.count',
     'go.memstats.frees.count',
     'go.memstats.lookups.count',
     'go.memstats.mallocs.count',
@@ -63,6 +69,7 @@ general_summaries = [
 ]
 
 app_controller_counters = [
+    'redis.request.count',
     'app.k8s.request.count',
     'app.sync.count',
     'cluster.events.count',
@@ -99,6 +106,7 @@ app_controller_histograms = [
 ]
 
 api_server_counters = [
+    'redis.request.count',
     'grpc.server.handled.count',
     'grpc.server.msg.sent.count',
     'grpc.server.msg.received.count',
@@ -116,6 +124,7 @@ repo_server_gauges = [
 ]
 
 repo_server_counters = [
+    'redis.request.count',
     'git.request.count',
 ]
 
@@ -126,6 +135,11 @@ repo_server_histograms = [
     'redis.request.duration.seconds.bucket',
     'redis.request.duration.seconds.count',
     'redis.request.duration.seconds.sum',
+]
+
+notifications_controller_counters = [
+    'notifications.deliveries.count',
+    'notifications.trigger_eval.count',
 ]
 
 NOT_EXPOSED_METRICS = [
@@ -151,6 +165,8 @@ E2E_NOT_EXPOSED_METRICS = [
     'argocd.api_server.redis.request.duration.sum',
     'argocd.api_server.redis.request.count',
     'argocd.app_controller.kubectl.exec.pending',
+    'argocd.notifications_controller.notifications.deliveries.count',
+    'argocd.notifications_controller.notifications.trigger_eval.count',
     'argocd.repo_server.repo.pending.request.total',
     'argocd.repo_server.git.request.count',
     'argocd.repo_server.git.request.duration.seconds.bucket',
@@ -167,6 +183,7 @@ general = general_gauges + general_counters + general_summaries
 app_controller = app_controller_counters + app_controller_gauges + app_controller_histograms + general
 api_server = api_server_counters + api_server_histograms + general
 repo_server = repo_server_counters + repo_server_gauges + repo_server_histograms + general
+notifications_controller = notifications_controller_counters + general
 
 
 def namespace_formatter(metrics, namespace):
@@ -179,3 +196,4 @@ def namespace_formatter(metrics, namespace):
 APP_CONTROLLER_METRICS = namespace_formatter(app_controller, app_controller_ns)
 API_SERVER_METRICS = namespace_formatter(api_server, api_server_ns)
 REPO_SERVER_METRICS = namespace_formatter(repo_server, repo_server_ns)
+NOTIFICATIONS_CONTROLLER_METRICS = namespace_formatter(notifications_controller, notifications_controller_ns)

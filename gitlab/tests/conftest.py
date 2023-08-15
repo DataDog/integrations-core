@@ -21,10 +21,13 @@ from .common import (
     ALLOWED_METRICS,
     CUSTOM_TAGS,
     GITLAB_GITALY_PROMETHEUS_ENDPOINT,
+    GITLAB_HEALTH_ENDPOINT,
+    GITLAB_LIVENESS_ENDPOINT,
     GITLAB_LOCAL_GITALY_PROMETHEUS_PORT,
     GITLAB_LOCAL_PORT,
     GITLAB_LOCAL_PROMETHEUS_PORT,
     GITLAB_PROMETHEUS_ENDPOINT,
+    GITLAB_READINESS_ENDPOINT,
     GITLAB_TEST_API_TOKEN,
     GITLAB_TEST_PASSWORD,
     GITLAB_URL,
@@ -67,6 +70,9 @@ def dd_environment():
             CheckEndpoints(GITLAB_PROMETHEUS_ENDPOINT, attempts=100, wait=6),
             CheckEndpoints(PROMETHEUS_ENDPOINT, attempts=100, wait=6),
             CheckEndpoints(GITLAB_GITALY_PROMETHEUS_ENDPOINT, attempts=100, wait=10),
+            CheckEndpoints(GITLAB_READINESS_ENDPOINT, attempts=100, wait=10),
+            CheckEndpoints(GITLAB_LIVENESS_ENDPOINT, attempts=100, wait=10),
+            CheckEndpoints(GITLAB_HEALTH_ENDPOINT, attempts=100, wait=10),
         ],
         wrappers=[create_log_volumes()],
     ):
@@ -75,7 +81,18 @@ def dd_environment():
             requests.get(GITLAB_URL)
         sleep(2)
 
-        yield to_omv2_config(CONFIG)
+        yield {
+            'init_config': {},
+            'instances': [
+                {
+                    'openmetrics_endpoint': GITLAB_PROMETHEUS_ENDPOINT,
+                    'gitaly_server_endpoint': GITLAB_GITALY_PROMETHEUS_ENDPOINT,
+                    'gitlab_url': GITLAB_URL,
+                    'disable_ssl_validation': True,
+                    'tags': CUSTOM_TAGS,
+                }
+            ],
+        }
 
 
 @pytest.fixture()

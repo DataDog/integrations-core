@@ -8,8 +8,8 @@ The Network Time Protocol (NTP) integration is enabled by default and reports th
 - Metric delays
 - Gaps in graphs of metrics
 
-By default, the check detects which cloud provider the Agent is running on and use the private
-NTP server of that cloud provider if available. If no cloud provider is detected, the agent will
+By default, the check detects which cloud provider the Agent is running on and uses the private
+NTP server of that cloud provider, if available. If no cloud provider is detected, the agent will
 default to the NTP servers below:
 
 - `0.datadog.pool.ntp.org`
@@ -53,7 +53,7 @@ See [service_checks.json][7] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][8].
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/ntp.d/conf.yaml.default
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

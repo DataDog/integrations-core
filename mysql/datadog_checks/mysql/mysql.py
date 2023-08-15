@@ -44,6 +44,7 @@ from .const import (
     VARIABLES_VARS,
 )
 from .innodb_metrics import InnoDBMetrics
+from .metadata import MySQLMetadata
 from .queries import (
     QUERY_USER_CONNECTIONS,
     SQL_95TH_PERCENTILE,
@@ -116,6 +117,7 @@ class MySql(AgentCheck):
         self._warnings_by_code = {}
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
+        self._mysql_metadata = MySQLMetadata(self, self._config, self._get_connection_args())
         self._query_activity = MySQLActivity(self, self._config, self._get_connection_args())
 
         self._runtime_queries = None
@@ -274,6 +276,7 @@ class MySql(AgentCheck):
                     self._statement_metrics.run_job_loop(dbm_tags)
                     self._statement_samples.run_job_loop(dbm_tags)
                     self._query_activity.run_job_loop(dbm_tags)
+                    self._mysql_metadata.run_job_loop(dbm_tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -292,6 +295,7 @@ class MySql(AgentCheck):
         self._statement_samples.cancel()
         self._statement_metrics.cancel()
         self._query_activity.cancel()
+        self._mysql_metadata.cancel()
 
     def _new_query_executor(self, queries):
         return QueryExecutor(
@@ -402,7 +406,6 @@ class MySql(AgentCheck):
                 db.close()
 
     def _collect_metrics(self, db, tags):
-
         # Get aggregate of all VARS we want to collect
         metrics = copy.deepcopy(STATUS_VARS)
 
@@ -492,8 +495,14 @@ class MySql(AgentCheck):
         if is_affirmative(self._config.options.get('system_table_size_metrics', False)):
             # report size of tables in MiB to Datadog
             (table_index_size, table_data_size) = self._query_size_per_table(db, system_tables=True)
-            results['information_table_index_size'] = table_index_size
-            results['information_table_data_size'] = table_data_size
+            if results.get('information_table_index_size'):
+                results['information_table_index_size'].update(table_index_size)
+            else:
+                results['information_table_index_size'] = table_index_size
+            if results.get('information_table_data_size'):
+                results['information_table_data_size'].update(table_data_size)
+            else:
+                results['information_table_data_size'] = table_data_size
             metrics.update(TABLE_VARS)
 
         if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):

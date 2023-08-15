@@ -6,7 +6,7 @@ import os
 from collections import deque
 
 import mock
-import psycopg2
+import psycopg
 import pytest
 from semver import VersionInfo
 
@@ -30,10 +30,10 @@ INSTANCE = {
 
 
 def connect_to_pg():
-    psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, password=PASSWORD)
+    psycopg.connect(host=HOST, dbname=DB_NAME, user=USER, password=PASSWORD)
     if float(POSTGRES_VERSION) >= 10.0:
-        psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA, password=PASSWORD)
-        psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA2, password=PASSWORD)
+        psycopg.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA, password=PASSWORD)
+        psycopg.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA2, password=PASSWORD)
 
 
 @pytest.fixture(scope='session')
@@ -103,17 +103,18 @@ def metrics_cache_replica(pg_replica_instance):
 def e2e_instance():
     instance = copy.deepcopy(INSTANCE)
     instance['dbm'] = True
+    instance['collect_resources'] = {'collection_interval': 0.1}
     return instance
 
 
 @pytest.fixture()
 def mock_cursor_for_replica_stats():
-    with mock.patch('psycopg2.connect') as connect:
+    with mock.patch('psycopg.connect') as connect:
         cursor = mock.MagicMock()
         data = deque()
         connect.return_value = mock.MagicMock(cursor=mock.MagicMock(return_value=cursor))
 
-        def cursor_execute(query):
+        def cursor_execute(query, second_arg=""):
             if "FROM pg_stat_replication" in query:
                 data.appendleft(['app1', 'streaming', 'async', '1.1.1.1', 12, 12, 12, 12])
                 data.appendleft(['app2', 'backup', 'sync', '1.1.1.1', 13, 13, 13, 13])
@@ -127,8 +128,8 @@ def mock_cursor_for_replica_stats():
         def cursor_fetchone():
             return data.pop()
 
-        cursor.execute = cursor_execute
-        cursor.fetchall = cursor_fetchall
-        cursor.fetchone = cursor_fetchone
+        cursor.__enter__().execute = cursor_execute
+        cursor.__enter__().fetchall = cursor_fetchall
+        cursor.__enter__().fetchone = cursor_fetchone
 
         yield

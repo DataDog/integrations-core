@@ -49,7 +49,7 @@ The README file must provide the following sections:
 - **Events**: Include a list of events if your integration provides any.
 - **Service checks**: Include a list of service checks if your integration provides any.
 
-[Find more about the overall layout][10]
+For more information, see [Create an Agent-based Integration][1].
 
 #### `check.py`
 
@@ -245,7 +245,7 @@ $ bundle exec rake exec["nosetests my_integration/test/test_*.py -A 'not require
 
 Datadog uses Docker containers for testing environments, which is the recommended approach. Containers are lightweight, easy to manage, and provide consistent, standardized environments for each test run.
 
-For example, the Datadog MySQL integration, the [`ci/mysql.rake` file][21] uses the [official MySQL container][22] and involves four main tasks
+For example, the [`ci/mysql.rake` file][21] for the Datadog MySQL integration uses the [official MySQL container][22] and involves four main tasks:
 
 1. `before_install` - Prior to starting the new Docker test environment, ensure that any previous Docker test environments are stopped and removed.
 2. `install` - The install task performs the Docker `run` which starts the MySQL test server.
@@ -277,7 +277,7 @@ Consider the following when writing tests:
 * Test clusters. Testing single instances of your software is often easier, but tests are more useful when run against setups that are representative of real-world uses. For example, MongoDB is typically used with sharding and replica set features, so the [tests][24] reflect that.
 * Consider generating calculated metrics in addition to raw metrics. For example, many databases have slow, but less frequently run queries. So it's often useful to look at percentiles. For example, the Datadog MySQL integration includes a calculated metric for the [95th percentile query execution time][2].
 
-[1]: https://docs.datadoghq.com/developers/integrations/new_check_howto
+[1]: https://docs.datadoghq.com/developers/integrations/agent_integration
 [2]: https://www.ruby-lang.org
 [3]: https://www.ruby-lang.org/en/documentation/installation
 [4]: https://www.gnu.org/software/wget
@@ -286,7 +286,6 @@ Consider the following when writing tests:
 [7]: https://rubygems.org/gems/datadog-sdk-testing
 [8]: https://github.com/DataDog/integrations-extras
 [9]: https://virtualenv.pypa.io/en/stable
-[10]: /developers/integrations/#new-integration-documentation
 [11]: https://docs.datadoghq.com/developers/integrations/
 [12]: https://github.com/DataDog/dd-agent/blob/master/tests/README.md#integration-tests
 [13]: https://github.com/DataDog/dd-agent/blob/master/ci/common.rb

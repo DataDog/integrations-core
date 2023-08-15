@@ -71,6 +71,9 @@ class Redis(AgentCheck):
         'bytes_sent_per_sec': 'redis.bytes_sent_per_sec',
         # Note: 'bytes_received_per_sec' and 'bytes_sent_per_sec' are only
         # available on Azure Redis
+        'instantaneous_input_kbps': 'redis.net.instantaneous_input',
+        'instantaneous_output_kbps': 'redis.net.instantaneous_output',
+        'total_connections_received': 'redis.net.total_connections_received',
         # pubsub
         'pubsub_channels': 'redis.pubsub.channels',
         'pubsub_patterns': 'redis.pubsub.patterns',
@@ -381,8 +384,8 @@ class Redis(AgentCheck):
                         lengths_overall[text_key] += 1
                     elif key_type == 'stream':
                         keylen = db_conn.xlen(key)
-                        lengths[text_key]["length"] += 1
-                        lengths_overall[text_key] += 1
+                        lengths[text_key]["length"] += keylen
+                        lengths_overall[text_key] += keylen
                     else:
                         # If the type is unknown, it might be because the key doesn't exist,
                         # which can be because the list is empty. So always send 0 in that case.

@@ -153,7 +153,7 @@ Need help? Contact [Datadog support][13].
 
 
 [1]: https://www.paloaltonetworks.com/prisma/cloud
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/twistlock/datadog_checks/twistlock/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/kubernetes/integrations/

@@ -10,8 +10,6 @@ from pyVmomi import vim
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.event import ALLOWED_EVENTS
 
-from .legacy.utils import mock_alarm_event
-
 
 def test_allowed_event_list():
     expected_events = [
@@ -37,9 +35,45 @@ def test_events_collection(aggregator, realtime_instance):
     time1 = dt.datetime.now()
     time2 = time1 + dt.timedelta(seconds=3)
     time3 = time1 + dt.timedelta(seconds=5)
-    event1 = mock_alarm_event(from_status='green', key=10, created_time=time1)
-    event2 = mock_alarm_event(from_status='yellow', key=20, created_time=time3)
-    event3 = mock_alarm_event(from_status='red', key=30, created_time=time2)
+
+    event1 = vim.event.AlarmStatusChangedEvent()
+    event1.createdTime = time1
+    event1.entity = vim.event.ManagedEntityEventArgument()
+    event1.entity.entity = vim.VirtualMachine(moId="vm1")
+    event1.entity.name = "vm1"
+    event1.alarm = vim.event.AlarmEventArgument()
+    event1.alarm.name = "alarm1"
+    setattr(event1, 'from', 'green')
+    event1.to = 'red'
+    event1.datacenter = vim.event.DatacenterEventArgument()
+    event1.datacenter.name = "dc1"
+    event1.fullFormattedMessage = "Green to Red"
+
+    event2 = vim.event.AlarmStatusChangedEvent()
+    event2.createdTime = time2
+    event2.entity = vim.event.ManagedEntityEventArgument()
+    event2.entity.entity = vim.VirtualMachine(moId="vm1")
+    event2.entity.name = "vm1"
+    event2.alarm = vim.event.AlarmEventArgument()
+    event2.alarm.name = "alarm1"
+    setattr(event2, 'from', 'yellow')
+    event2.to = 'red'
+    event2.datacenter = vim.event.DatacenterEventArgument()
+    event2.datacenter.name = "dc1"
+    event2.fullFormattedMessage = "Yellow to Red"
+
+    event3 = vim.event.AlarmStatusChangedEvent()
+    event3.createdTime = time3
+    event3.entity = vim.event.ManagedEntityEventArgument()
+    event3.entity.entity = vim.VirtualMachine(moId="vm1")
+    event3.entity.name = "vm1"
+    event3.alarm = vim.event.AlarmEventArgument()
+    event3.alarm.name = "alarm1"
+    setattr(event3, 'from', 'red')
+    event3.to = 'red'
+    event3.datacenter = vim.event.DatacenterEventArgument()
+    event3.datacenter.name = "dc1"
+    event3.fullFormattedMessage = "Red to Red"
 
     # No events
     check.check(None)

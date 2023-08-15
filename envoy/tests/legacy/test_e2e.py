@@ -9,6 +9,9 @@ from datadog_checks.envoy import Envoy
 
 from .common import FLAVOR, HOST
 
+pytestmark = [pytest.mark.e2e]
+
+
 METRICS = [
     'envoy.cluster.assignment_stale',
     'envoy.cluster.assignment_timeout_received',
@@ -279,7 +282,6 @@ METRICS_V3 = [
 ]
 
 
-@pytest.mark.e2e
 def test_e2e(dd_agent_check):
     instance = {"stats_url": "http://{}:8001/stats".format(HOST)}
     aggregator = dd_agent_check(instance, rate=True)

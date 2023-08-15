@@ -11,20 +11,26 @@ files:
       description: |
         1.7.6+ clusters expose container metrics in the prometheus format.
         This is the default setting. See next section for legacy clusters.
-        
+
         URL of the cadvisor metrics prometheus endpoint.
         Pass an empty string, or set the cadvisor_port option to disable cadvisor metrics collection.
-      example: http://10.8.0.1:10255/metrics/cadvisor
+      value:
+        type: string
+        example: http://10.8.0.1:10255/metrics/cadvisor
     - name: kubelet_metrics_endpoint
       description: |
         URL of the kubelet metrics prometheus endpoint
         Pass an empty string to disable kubelet metrics collection.
-      example: http://10.8.0.1:10255/metrics
+      value:
+        type: string
+        example: http://10.8.0.1:10255/metrics
     - name: probes_metrics_endpoint
       description: |
         URL of the probe metrics prometheus endpoint
         Pass an empty string to disable probe metrics collection.
-      example: http://10.8.0.1:10255/metrics/probes
+      value:
+        type: string
+        example: http://10.8.0.1:10255/metrics/probes
     - name: cadvisor_port
       description: |
         Metric collection for legacy (< 1.7.6) clusters via the kubelet's cadvisor port.
@@ -32,17 +38,27 @@ files:
         via the `--cadvisor-port=4194` kubelet option.
 
         Port to connect to, uncomment and set accordingly to enable collection.
-      example: 4194
+      value:
+        type: integer
+        example: 4194
     - name: enabled_rates
       description: |
         Allow list of rate type metrics to collect from cadvisor.
-      example:
+      value:
+        type: array
+        items:
+          type: string
+        example:
         - cpu.*
         - network.*
     - name: enabled_gauges
       description: |
         Allow list of gauge type metrics to collect from cadvisor.
-      example:
+      value:
+        type: array
+        items:
+          type: string
+        example:
         - filesystem.*
     - template: instances/openmetrics_legacy
       overrides:
@@ -71,20 +87,26 @@ files:
         description: |
           1.7.6+ clusters expose container metrics in the prometheus format.
           This is the default setting. See next section for legacy clusters.
-          
+
           URL of the cadvisor metrics prometheus endpoint.
           Pass an empty string, or set the cadvisor_port option to disable cadvisor metrics collection.
-        example: http://10.8.0.1:10255/metrics/cadvisor
+        value:
+          type: string
+          example: http://10.8.0.1:10255/metrics/cadvisor
       - name: kubelet_metrics_endpoint
         description: |
           URL of the kubelet metrics prometheus endpoint
           Pass an empty string to disable kubelet metrics collection.
-        example: http://10.8.0.1:10255/metrics
+        value:
+          type: string
+          example: http://10.8.0.1:10255/metrics
       - name: probes_metrics_endpoint
         description: |
           URL of the probe metrics prometheus endpoint
           Pass an empty string to disable probe metrics collection.
-        example: http://10.8.0.1:10255/metrics/probes
+        value:
+          type: string
+          example: http://10.8.0.1:10255/metrics/probes
       - name: cadvisor_port
         description: |
           Metric collection for legacy (< 1.7.6) clusters via the kubelet's cadvisor port.
@@ -92,17 +114,27 @@ files:
           via the `--cadvisor-port=4194` kubelet option.
 
           Port to connect to, uncomment and set accordingly to enable collection.
-        example: 4194
+        value:
+          type: integer
+          example: 4194
       - name: enabled_rates
         description: |
           Allow list of rate type metrics to collect from cadvisor.
-        example:
+        value:
+          type: array
+          items:
+            type: string
+          example:
           - cpu.*
           - network.*
       - name: enabled_gauges
         description: |
           Allow list of gauge type metrics to collect from cadvisor.
-        example:
+        value:
+          type: array
+          items:
+            type: string
+          example:
           - filesystem.*
       - template: instances/openmetrics_legacy
         overrides:

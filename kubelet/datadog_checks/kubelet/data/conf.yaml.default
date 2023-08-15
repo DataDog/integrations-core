@@ -54,6 +54,7 @@ init_config:
 instances:
 
   -
+    ## @param cadvisor_metrics_endpoint - string - optional - default: http://10.8.0.1:10255/metrics/cadvisor
     ## 1.7.6+ clusters expose container metrics in the prometheus format.
     ## This is the default setting. See next section for legacy clusters.
     ##
@@ -62,16 +63,19 @@ instances:
     #
     # cadvisor_metrics_endpoint: http://10.8.0.1:10255/metrics/cadvisor
 
+    ## @param kubelet_metrics_endpoint - string - optional - default: http://10.8.0.1:10255/metrics
     ## URL of the kubelet metrics prometheus endpoint
     ## Pass an empty string to disable kubelet metrics collection.
     #
     # kubelet_metrics_endpoint: http://10.8.0.1:10255/metrics
 
+    ## @param probes_metrics_endpoint - string - optional - default: http://10.8.0.1:10255/metrics/probes
     ## URL of the probe metrics prometheus endpoint
     ## Pass an empty string to disable probe metrics collection.
     #
     # probes_metrics_endpoint: http://10.8.0.1:10255/metrics/probes
 
+    ## @param cadvisor_port - integer - optional - default: 4194
     ## Metric collection for legacy (< 1.7.6) clusters via the kubelet's cadvisor port.
     ## This port is closed by default on k8s 1.7+ and OpenShift, enable it
     ## via the `--cadvisor-port=4194` kubelet option.
@@ -80,12 +84,14 @@ instances:
     #
     # cadvisor_port: 4194
 
+    ## @param enabled_rates - list of strings - optional
     ## Allow list of rate type metrics to collect from cadvisor.
     #
     # enabled_rates:
     #   - cpu.*
     #   - network.*
 
+    ## @param enabled_gauges - list of strings - optional
     ## Allow list of gauge type metrics to collect from cadvisor.
     #
     # enabled_gauges:

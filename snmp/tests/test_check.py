@@ -765,7 +765,7 @@ def test_profile_sysoid_list(aggregator, caplog):
 
     devices_matched = [
         {'community_string': 'hpe-proliant', 'sysobjectid': '1.3.6.1.4.1.232.1.2'},
-        {'community_string': 'generic-router', 'sysobjectid': '1.3.6.1.4.1.1.2.1.3.4'},
+        {'community_string': 'generic-device', 'sysobjectid': '1.3.6.1.4.1.1.2.1.3.4'},
     ]
     common_tags = common.CHECK_TAGS + ['snmp_profile:profile1']
     for device in devices_matched:

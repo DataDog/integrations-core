@@ -8,6 +8,8 @@ from datadog_checks.envoy.errors import UnknownMetric, UnknownTags
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 from datadog_checks.envoy.parser import parse_histogram, parse_metric
 
+pytestmark = [pytest.mark.unit]
+
 
 def test_unknown_metric():
     with pytest.raises(UnknownMetric):

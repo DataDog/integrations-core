@@ -22,23 +22,27 @@ V14 = VersionInfo.parse("14.0.0")
 class VersionUtils(object):
     def __init__(self):
         self.log = get_check_logger()
+        self._seen_aurora_exception = False
 
     @staticmethod
     def get_raw_version(db):
-        cursor = db.cursor()
-        cursor.execute('SHOW SERVER_VERSION;')
-        raw_version = cursor.fetchone()[0]
-        return raw_version
+        with db.cursor() as cursor:
+            cursor.execute('SHOW SERVER_VERSION;')
+            raw_version = cursor.fetchone()[0]
+            return raw_version
 
     def is_aurora(self, db):
-        cursor = db.cursor()
+        if self._seen_aurora_exception:
+            return False
         try:
-            # This query will pollute PG logs in non aurora versions but is the only reliable way of detecting aurora
-            cursor.execute('select AURORA_VERSION();')
-            return True
+            with db.cursor() as cursor:
+                # This query will pollute PG logs in non aurora versions but is the only reliable way to detect aurora
+                cursor.execute('select AURORA_VERSION();')
+                return True
         except Exception as e:
             self.log.debug("Captured exception %s while determining if the DB is aurora. Assuming is not", str(e))
             db.rollback()
+            self._seen_aurora_exception = True
             return False
 
     @staticmethod
@@ -49,8 +53,8 @@ class VersionUtils(object):
         except ValueError:
             pass
         try:
-            # Version may be missing minor eg: 10.0
-            version = raw_version.split(' ')[0].split('.')
+            # Version may be missing minor eg: 10.0 and it might have an edition suffix (e.g. 12.3_TDE_1.0)
+            version = re.split('[ _]', raw_version)[0].split('.')
             version = [int(part) for part in version]
             while len(version) < 3:
                 version.append(0)

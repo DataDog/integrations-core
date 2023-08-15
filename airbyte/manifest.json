@@ -1,0 +1,50 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "5994a02c-8754-40c3-9e99-a39ffc862b1c",
+  "app_id": "airbyte",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the state of your Airbyte deployment.",
+    "title": "Airbyte",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "Airbyte",
+      "metrics": {
+        "prefix": "airbyte.",
+        "check": [
+            "airbyte.metrics_reporter.est_num_metrics_emitted_by_reporter",
+            "airbyte.worker.attempt.created",
+            "airbyte.cron.jobs_run"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+        "airbyte_overview": "assets/dashboards/airbyte_overview.json"
+    },
+    "monitors": {
+        "long_running_jobs": "assets/monitors/long_running_jobs.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {}
+}

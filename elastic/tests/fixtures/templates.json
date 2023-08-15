@@ -1,0 +1,149 @@
+[
+  {
+    "name": ".monitoring-logstash",
+    "index_patterns": "[.monitoring-logstash-7-*]",
+    "order": "0",
+    "version": "8010099",
+    "composed_of": ""
+  },
+  {
+    "name": ".monitoring-beats",
+    "index_patterns": "[.monitoring-beats-7-*]",
+    "order": "0",
+    "version": "8010099",
+    "composed_of": ""
+  },
+  {
+    "name": ".monitoring-alerts-7",
+    "index_patterns": "[.monitoring-alerts-7]",
+    "order": "0",
+    "version": "8010099",
+    "composed_of": ""
+  },
+  {
+    "name": ".monitoring-es",
+    "index_patterns": "[.monitoring-es-7-*]",
+    "order": "0",
+    "version": "8010099",
+    "composed_of": ""
+  },
+  {
+    "name": ".monitoring-kibana",
+    "index_patterns": "[.monitoring-kibana-7-*]",
+    "order": "0",
+    "version": "8010099",
+    "composed_of": ""
+  },
+  {
+    "name": ".watch-history-16",
+    "index_patterns": "[.watcher-history-16*]",
+    "order": "2147483647",
+    "version": "16",
+    "composed_of": "[]"
+  },
+  {
+    "name": ".monitoring-beats-mb",
+    "index_patterns": "[.monitoring-beats-8-*]",
+    "order": "0",
+    "version": "8000103",
+    "composed_of": "[]"
+  },
+  {
+    "name": ".monitoring-kibana-mb",
+    "index_patterns": "[.monitoring-kibana-8-*]",
+    "order": "0",
+    "version": "8000103",
+    "composed_of": "[]"
+  },
+  {
+    "name": ".monitoring-ent-search-mb",
+    "index_patterns": "[.monitoring-ent-search-8-*]",
+    "order": "0",
+    "version": "8000103",
+    "composed_of": "[]"
+  },
+  {
+    "name": "synthetics",
+    "index_patterns": "[synthetics-*-*]",
+    "order": "100",
+    "version": "2",
+    "composed_of": "[synthetics-mappings, data-streams-mappings, synthetics-settings]"
+  },
+  {
+    "name": "ilm-history",
+    "index_patterns": "[ilm-history-5*]",
+    "order": "2147483647",
+    "version": "5",
+    "composed_of": "[]"
+  },
+  {
+    "name": ".ml-state",
+    "index_patterns": "[.ml-state*]",
+    "order": "2147483647",
+    "version": "8060299",
+    "composed_of": "[]"
+  },
+  {
+    "name": ".monitoring-es-mb",
+    "index_patterns": "[.monitoring-es-8-*]",
+    "order": "0",
+    "version": "8000103",
+    "composed_of": "[]"
+  },
+  {
+    "name": ".slm-history",
+    "index_patterns": "[.slm-history-5*]",
+    "order": "2147483647",
+    "version": "5",
+    "composed_of": "[]"
+  },
+  {
+    "name": ".monitoring-logstash-mb",
+    "index_patterns": "[.monitoring-logstash-8-*]",
+    "order": "0",
+    "version": "8000103",
+    "composed_of": "[]"
+  },
+  {
+    "name": ".ml-anomalies-",
+    "index_patterns": "[.ml-anomalies-*]",
+    "order": "2147483647",
+    "version": "8060299",
+    "composed_of": "[]"
+  },
+  {
+    "name": "metrics",
+    "index_patterns": "[metrics-*-*]",
+    "order": "100",
+    "version": "2",
+    "composed_of": "[metrics-mappings, data-streams-mappings, metrics-settings]"
+  },
+  {
+    "name": ".ml-notifications-000002",
+    "index_patterns": "[.ml-notifications-000002]",
+    "order": "2147483647",
+    "version": "8060299",
+    "composed_of": "[]"
+  },
+  {
+    "name": ".deprecation-indexing-template",
+    "index_patterns": "[.logs-deprecation.*]",
+    "order": "1000",
+    "version": "1",
+    "composed_of": "[.deprecation-indexing-mappings, .deprecation-indexing-settings]"
+  },
+  {
+    "name": "logs",
+    "index_patterns": "[logs-*-*]",
+    "order": "100",
+    "version": "2",
+    "composed_of": "[logs-mappings, data-streams-mappings, logs-settings]"
+  },
+  {
+    "name": ".ml-stats",
+    "index_patterns": "[.ml-stats-*]",
+    "order": "2147483647",
+    "version": "8060299",
+    "composed_of": "[]"
+  }
+]

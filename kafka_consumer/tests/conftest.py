@@ -95,7 +95,7 @@ def wait_for_cp_kafka_topics():
 
 def initialize_topics():
     with Producer(common.INSTANCE):
-        with Consumer(common.INSTANCE, common.TOPICS):
+        with Consumer(common.INSTANCE, common.CONSUMED_TOPICS):
             time.sleep(5)
 
 

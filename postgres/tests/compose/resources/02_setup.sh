@@ -93,6 +93,13 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" dogs_nofunc <<-'EOSQL'
     DROP FUNCTION datadog.explain_statement(l_query text, out explain JSON)
 EOSQL
 
+# Somehow, on old postgres version (11 and 12), wal_level is incorrectly set despite
+# being present in postgresql.conf. Alter and restart to make sure we have the correct wal_level.
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-'EOSQL'
+    ALTER SYSTEM SET wal_level = logical;
+EOSQL
+pg_ctl -D /var/lib/postgresql/data -w restart
+
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-'EOSQL'
     SELECT * FROM pg_create_physical_replication_slot('replication_slot');
     SELECT * FROM pg_create_logical_replication_slot('logical_slot', 'test_decoding');

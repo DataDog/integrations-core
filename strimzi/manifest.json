@@ -1,0 +1,56 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "06a90da7-974a-489e-b9bf-9a2828a351fe",
+  "app_id": "strimzi",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Strimzi",
+    "title": "Strimzi",
+    "media": [],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "Strimzi",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "strimzi.",
+        "check": [
+          "strimzi.cluster_operator.jvm.gc.memory_promoted_bytes.count",
+          "strimzi.topic_operator.jvm.gc.memory_promoted_bytes.count",
+          "strimzi.user_operator.jvm.gc.memory_promoted_bytes.count"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "process_signatures": [
+        "java io.strimzi.operator.cluster.Main",
+        "java io.strimzi.operator.topic.Main",
+        "java io.strimzi.operator.user.Main"
+      ],
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {}
+}

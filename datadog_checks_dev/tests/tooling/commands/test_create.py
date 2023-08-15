@@ -14,6 +14,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CORE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(HERE))))
 
 
+@pytest.mark.skipif(sys.version_info[0] == 2, reason='Not supported on Python 2')
 @pytest.mark.parametrize(
     'integration_type, installable', [('check', True), ('jmx', True), ('tile', False), ('logs', False)]
 )

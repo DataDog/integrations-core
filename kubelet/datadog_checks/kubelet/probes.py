@@ -36,7 +36,9 @@ class ProbesPrometheusScraperMixin(object):
         This is so the base class can create a scraper_config with the proper values.
         """
         kubelet_conn_info = get_connection_info()
-        endpoint = kubelet_conn_info.get('url')
+
+        # dummy needed in case kubelet isn't running when the check is first
+        endpoint = kubelet_conn_info.get('url') if kubelet_conn_info is not None else "dummy_url/probes"
 
         probes_instance = deepcopy(instance)
         probes_instance.update(
@@ -72,6 +74,8 @@ class ProbesPrometheusScraperMixin(object):
                 metric_name_suffix = '.liveness_probe'
             elif probe_type == 'Readiness':
                 metric_name_suffix = '.readiness_probe'
+            elif probe_type == 'Startup':
+                metric_name_suffix = '.startup_probe'
             else:
                 self.log.debug("Unsupported probe type %s", probe_type)
                 continue
@@ -112,4 +116,4 @@ class ProbesPrometheusScraperMixin(object):
                     container_id,
                 )
 
-            self.count(metric_name, sample[self.SAMPLE_VALUE], container_tags + self.instance_tags)
+            self.gauge(metric_name, sample[self.SAMPLE_VALUE], container_tags + self.instance_tags)

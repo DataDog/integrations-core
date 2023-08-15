@@ -150,9 +150,9 @@ instances:
     ##
     ## 3. columns - The list representing the data to be collected from the JSON query. There are two required pieces
     ##              of data:
-    ##                a. value_path - This is the JSON path from the `data_path` to the metric. For example, if
-    ##                                querying for size of parent circuit breaker, the `value_path` is
-    ##                                `estimated_size_in_bytes`.
+    ##                a. value_path - This is the JSON path from the `data_path` to the metric. This path may include
+    ##                                string keys as well as list indices. For example, if querying for size of parent
+    ##                                circuit breaker, the `value_path` is `estimated_size_in_bytes`.
     ##                b. name - The full metric name sent to Datadog. If `type` is `tag`, this column is considered a
     ##                          tag and applied to every metric collected by this particular query.
     ##

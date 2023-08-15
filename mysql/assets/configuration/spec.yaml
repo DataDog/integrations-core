@@ -335,6 +335,22 @@ files:
               type: boolean
               example: false
               display_default: false
+          - name: collect_settings
+            description: Configure collection of performance_schema.global_variables. This is an alpha feature.
+            options:
+              - name: enabled
+                description: |
+                  Enable collection of performance_schema.global_variables. Requires `dbm: true`.
+                value:
+                  type: boolean
+                  example: false
+              - name: collection_interval
+                description: |
+                  Set the database settings collection interval (in seconds). Each collection involves a single query to
+                  `performance_schema.global_variables`.
+                value:
+                  type: number
+                  example: 600
           - name: query_metrics
             description: Configure collection of query metrics
             options:

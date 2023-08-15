@@ -137,7 +137,7 @@ helm install datadog-monitoring --set datadog.apiKey=<YOUR_API_KEY> -f cluster-a
     datadog:
       ## @param apiKey - string - required
       ## Set this to your Datadog API key before the Agent runs.
-      ## ref: https://app.datadoghq.com/account/settings#agent/kubernetes
+      ## ref: https://app.datadoghq.com/account/settings/agent/latest?platform=kubernetes
       #
       apiKey: <DATADOG_API_KEY>
 
