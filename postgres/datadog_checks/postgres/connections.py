@@ -79,10 +79,10 @@ class MultiDatabaseConnectionPool(object):
 
         if hasattr(inspect, 'signature'):
             connect_sig = inspect.signature(connect_fn)
-            if len(connect_sig.parameters) != 3:
+            if not (len(connect_sig.parameters) >= 1):
                 raise ValueError(
                     "Invalid signature for the connection function. "
-                    "Three parameters: dbname, min_pool_size, max_pool_size is expected. "
+                    "Expected parameters: dbname, min_pool_size, max_pool_size. "
                     "Got signature: {}".format(connect_sig)
                 )
         self.connect_fn = connect_fn
@@ -144,10 +144,10 @@ class MultiDatabaseConnectionPool(object):
         Blocks until a connection can be added to the pool,
         and optionally takes a timeout in seconds.
         """
+        with self._mu:
+            pool = self._get_connection_pool(dbname=dbname, ttl_ms=ttl_ms, timeout=timeout, persistent=persistent)
+            db = pool.getconn(timeout=timeout)
         try:
-            with self._mu:
-                pool = self._get_connection_pool(dbname=dbname, ttl_ms=ttl_ms, timeout=timeout, persistent=persistent)
-                db = pool.getconn(timeout=timeout)
             yield db
         finally:
             with self._mu:
@@ -185,7 +185,7 @@ class MultiDatabaseConnectionPool(object):
         with self._mu:
             while self._conns and (timeout is None or time.time() - start_time < timeout):
                 dbname = next(iter(self._conns))
-                if not self._terminate_connection_unsafe(dbname, timeout):
+                if not self._terminate_connection_unsafe(dbname):
                     success = False
         return success
 
@@ -204,12 +204,12 @@ class MultiDatabaseConnectionPool(object):
             # Could not evict a candidate; return None
             return None
 
-    def _terminate_connection_unsafe(self, dbname: str, timeout: int = None):
+    def _terminate_connection_unsafe(self, dbname: str):
         db = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None)).connection
         if db is not None:
             try:
                 if not db.closed:
-                    db.close(timeout=timeout)
+                    db.close()
                 self._stats.connection_closed += 1
             except Exception:
                 self._stats.connection_closed_failed += 1
