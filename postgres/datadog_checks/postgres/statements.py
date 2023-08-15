@@ -18,7 +18,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-from .util import DatabaseConfigurationError,  payload_pg_version, warning_with_tags
+from .util import DatabaseConfigurationError, payload_pg_version, warning_with_tags
 from .version_utils import V9_4, V14
 
 try:
