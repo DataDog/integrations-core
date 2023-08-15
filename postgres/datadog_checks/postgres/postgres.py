@@ -335,7 +335,7 @@ class PostgreSql(AgentCheck):
     @property
     def version(self):
         if self._version is None:
-            raw_version = self._version_utils.get_raw_version(self.db)
+            raw_version = self._version_utils.get_raw_version(self.db_pool)
             self._version = self._version_utils.parse_version(raw_version)
             self.set_metadata('version', raw_version)
         return self._version
@@ -343,7 +343,7 @@ class PostgreSql(AgentCheck):
     @property
     def is_aurora(self):
         if self._is_aurora is None:
-            self._is_aurora = self._version_utils.is_aurora(self.db)
+            self._is_aurora = self._version_utils.is_aurora(self.db_pool)
         return self._is_aurora
 
     @property

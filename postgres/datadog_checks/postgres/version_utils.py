@@ -25,18 +25,18 @@ class VersionUtils(object):
         self._seen_aurora_exception = False
 
     @staticmethod
-    def get_raw_version(db):
-        with db.connection() as conn:
+    def get_raw_version(pool):
+        with pool.get_main_db_pool().connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute('SHOW SERVER_VERSION;')
                 raw_version = cursor.fetchone()[0]
                 return raw_version
 
-    def is_aurora(self, db):
+    def is_aurora(self, pool):
         if self._seen_aurora_exception:
             return False
         try:
-            with db.connection() as conn:
+            with pool.get_main_db_pool().connection() as conn:
                 with conn.cursor() as cursor:
                     # This query will pollute PG logs in non aurora versions,
                     # but is the only reliable way to detect aurora
