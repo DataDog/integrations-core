@@ -602,7 +602,7 @@ class PostgreSql(AgentCheck):
 
     def _new_connection(self, dbname: str, min_pool_size: int = 1, max_pool_size: int = None):
         # required for autocommit as well as using params in queries
-        args = {"autocommit": True, "cursor_factory": ClientCursor}
+        args = {"autocommit": True, "cursor_factory": psycopg.ClientCursor}
         if self._config.host == 'localhost' and self._config.password == '':
             # Use ident method
             connection_string = "user=%s dbname=%s application_name=%s" % (
