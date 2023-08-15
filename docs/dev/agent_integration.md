@@ -25,7 +25,7 @@ This page walks Technology Partners through how to create a Datadog Agent integr
 
 ## Agent-based integrations
 
-Agent-based integrations use the [Datadog Agent][17] to submit data through checks written by the developer. Checks can emit [metrics][23], [events][24], and [service checks][25] into a customer's Datadog account. The Agent itself can submit [logs][26] as well, but that is configured outside of the check. 
+Agent-based integrations use the [Datadog Agent][17] to submit data through checks written by the developer. Checks can emit [metrics][34], [events][18], and [service checks][25] into a customer's Datadog account. The Agent itself can submit [logs][26] as well, but that is configured outside of the check. 
 
 The implementation code for these integrations is hosted by Datadog. Agent integrations are best suited for collecting data from systems or applications that live in a local area network (LAN) or virtual private cloud (VPC). Creating an Agent integration requires you to publish and deploy your solution as a Python wheel (`.whl`).
 
@@ -462,7 +462,7 @@ Once you have created your Agent-based integration, see the [Create a tile][20] 
 [15]: /developers/integrations/check_references/#service-check-file
 [16]: https://packaging.python.org/en/latest/tutorials/packaging-projects/
 [17]: https://docs.datadoghq.com/agent/
-[18]: https://docs.datadoghq.com/events/
+[18]: https://docs.datadoghq.com/service_management/events/
 [19]: https://desktop.github.com/
 [20]: https://docs.datadoghq.com/developers/integrations/create_a_tile
 [21]: https://github.com/Datadog/integrations-extras
@@ -478,3 +478,4 @@ Once you have created your Agent-based integration, see the [Create a tile][20] 
 [31]: https://docs.datadoghq.com/developers/integrations/create_a_tile/#complete-the-necessary-integration-asset-files
 [32]: https://partners.datadoghq.com/
 [33]: https://docs.datadoghq.com/developers/integrations/check_references/
+[34]: https://docs.datadoghq.com/metrics/
