@@ -4,6 +4,7 @@
 
 import os
 
+import pytest
 from packaging import version
 
 from datadog_checks.base.utils.common import get_docker_hostname
@@ -13,13 +14,27 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 
 RABBITMQ_VERSION_RAW = os.environ['RABBITMQ_VERSION']
 RABBITMQ_VERSION = version.parse(RABBITMQ_VERSION_RAW)
+RABBITMQ_METRICS_PLUGIN = (
+    "management"
+    if RABBITMQ_VERSION < version.parse("3.8") or os.environ.get("METRICS_FROM_MANAGEMENT_PLUGIN", False)
+    else "prometheus"
+)
+
+requires_management = pytest.mark.skipif(
+    RABBITMQ_METRICS_PLUGIN == "prometheus", reason="Not testing management plugin metrics."
+)
+requires_prometheus = pytest.mark.skipif(
+    RABBITMQ_METRICS_PLUGIN == "management", reason="Not testing prometheus plugin (OpenMetrics) metrics."
+)
 
 CHECK_NAME = 'rabbitmq'
 
 HOST = get_docker_hostname()
 PORT = 15672
+OPENMETRICS_PORT = 15692
 
 URL = 'http://{}:{}/api/'.format(HOST, PORT)
+OPENMETRICS_URL = 'http://{}:{}'.format(HOST, OPENMETRICS_PORT)
 
 CONFIG = {
     'rabbitmq_api_url': URL,
@@ -105,3 +120,5 @@ EXCHANGE_MESSAGE_STATS = {
     'redeliver': 1.0,
     'redeliver_details': {'rate': 1.0},
 }
+
+OPENMETRICS_CONFIG = {"prometheus_plugin": {"url": OPENMETRICS_URL, "include_aggregated_endpoint": True}}

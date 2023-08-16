@@ -5,22 +5,33 @@
 from __future__ import division
 
 import copy
+import time
 import traceback
 from collections import defaultdict
 from contextlib import closing, contextmanager
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional  # noqa: F401
 
 import pymysql
+from cachetools import TTLCache
 from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
-from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
+from datadog_checks.base.utils.db.utils import (
+    default_json_event_encoding,
+)
+from datadog_checks.base.utils.db.utils import (
+    resolve_db_host as agent_host_resolver,
+)
+from datadog_checks.base.utils.serialization import json
 
+from .__about__ import __version__
 from .activity import MySQLActivity
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
 from .config import MySQLConfig
 from .const import (
+    AWS_RDS_HOSTNAME_SUFFIX,
+    AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
     BINLOG_VARS,
     COUNT,
     GALERA_VARS,
@@ -42,6 +53,7 @@ from .const import (
     VARIABLES_VARS,
 )
 from .innodb_metrics import InnoDBMetrics
+from .metadata import MySQLMetadata
 from .queries import (
     QUERY_USER_CONNECTIONS,
     SQL_95TH_PERCENTILE,
@@ -62,7 +74,7 @@ from .queries import (
 )
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
-from .util import DatabaseConfigurationError
+from .util import DatabaseConfigurationError  # noqa: F401
 from .version_utils import get_version
 
 try:
@@ -98,6 +110,8 @@ class MySql(AgentCheck):
         self._agent_hostname = None
         self._is_aurora = None
         self._config = MySQLConfig(self.instance)
+        self.tags = self._config.tags
+        self.cloud_metadata = self._config.cloud_metadata
 
         # Create a new connection on every check run
         self._conn = None
@@ -112,9 +126,19 @@ class MySql(AgentCheck):
         self._warnings_by_code = {}
         self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
         self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
+        self._mysql_metadata = MySQLMetadata(self, self._config, self._get_connection_args())
         self._query_activity = MySQLActivity(self, self._config, self._get_connection_args())
+        # _database_instance_emitted: limit the collection and transmission of the database instance metadata
+        self._database_instance_emitted = TTLCache(
+            maxsize=1,
+            ttl=self._config.database_instance_collection_interval,
+        )  # type: TTLCache
 
         self._runtime_queries = None
+        # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
+        # go through the agent internal metrics submission processing those tags
+        self._non_internal_tags = copy.deepcopy(self.tags)
+        self.set_resource_tags()
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -126,6 +150,7 @@ class MySql(AgentCheck):
     def _send_metadata(self):
         self.set_metadata('version', self.version.version + '+' + self.version.build)
         self.set_metadata('flavor', self.version.flavor)
+        self.set_metadata('resolved_hostname', self.resolved_hostname)
 
     @property
     def resolved_hostname(self):
@@ -144,6 +169,38 @@ class MySql(AgentCheck):
         if self._agent_hostname is None:
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
+
+    def set_resource_tags(self):
+        if self.cloud_metadata.get("gcp") is not None:
+            self.tags.append(
+                "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
+                    self.cloud_metadata.get("gcp")["project_id"], self.cloud_metadata.get("gcp")["instance_id"]
+                )
+            )
+        if self.cloud_metadata.get("aws") is not None:
+            self.tags.append(
+                "dd.internal.resource:aws_rds_instance:{}".format(
+                    self.cloud_metadata.get("aws")["instance_endpoint"],
+                )
+            )
+        elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
+            # allow for detecting if the host is an RDS host, and emit
+            # the resource properly even if the `aws` config is unset
+            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
+        if self.cloud_metadata.get("azure") is not None:
+            deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
+            # some `deployment_type`s map to multiple `resource_type`s
+            resource_type = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE.get(deployment_type)
+            if resource_type:
+                self.tags.append(
+                    "dd.internal.resource:{}:{}".format(resource_type, self.cloud_metadata.get("azure")["name"])
+                )
+        # finally, emit a `database_instance` resource for this instance
+        self.tags.append(
+            "dd.internal.resource:database_instance:{}".format(
+                self.resolved_hostname,
+            )
+        )
 
     def _check_database_configuration(self, db):
         self._check_performance_schema_enabled(db)
@@ -205,7 +262,7 @@ class MySql(AgentCheck):
         if self.instance.get('pass'):
             self._log_deprecation('_config_renamed', 'pass', 'password')
 
-        tags = list(self._config.tags)
+        tags = list(self.tags)
         self._set_qcache_stats()
         with self._connect() as db:
             try:
@@ -214,6 +271,7 @@ class MySql(AgentCheck):
                 # version collection
                 self.version = get_version(db)
                 self._send_metadata()
+                self._send_database_instance_metadata()
 
                 self.is_mariadb = self.version.flavor == "MariaDB"
                 if self._get_is_aurora(db):
@@ -236,6 +294,7 @@ class MySql(AgentCheck):
                     self._statement_metrics.run_job_loop(dbm_tags)
                     self._statement_samples.run_job_loop(dbm_tags)
                     self._query_activity.run_job_loop(dbm_tags)
+                    self._mysql_metadata.run_job_loop(dbm_tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -254,6 +313,7 @@ class MySql(AgentCheck):
         self._statement_samples.cancel()
         self._statement_metrics.cancel()
         self._query_activity.cancel()
+        self._mysql_metadata.cancel()
 
     def _new_query_executor(self, queries):
         return QueryExecutor(
@@ -336,7 +396,7 @@ class MySql(AgentCheck):
             server = self._config.mysql_sock if self._config.mysql_sock != '' else self._config.host
         service_check_tags = [
             'port:{}'.format(self._config.port if self._config.port else 'unix_socket'),
-        ] + self._config.tags
+        ] + self.tags
         if not self.disable_generic_tags:
             service_check_tags.append('server:{0}'.format(server))
         return service_check_tags
@@ -364,7 +424,6 @@ class MySql(AgentCheck):
                 db.close()
 
     def _collect_metrics(self, db, tags):
-
         # Get aggregate of all VARS we want to collect
         metrics = copy.deepcopy(STATUS_VARS)
 
@@ -423,6 +482,10 @@ class MySql(AgentCheck):
             and above_560
             and self.performance_schema_enabled
         ):
+            self.warning(
+                "[Deprecated] The `extra_performance_metrics` option will be removed in a future release. "
+                "Utilize the `custom_queries` feature if the functionality is needed.",
+            )
             results['perf_digest_95th_percentile_avg_us'] = self._get_query_exec_time_95th_us(db)
             results['query_run_time_avg'] = self._query_exec_time_per_schema(db)
             metrics.update(PERFORMANCE_VARS)
@@ -450,8 +513,14 @@ class MySql(AgentCheck):
         if is_affirmative(self._config.options.get('system_table_size_metrics', False)):
             # report size of tables in MiB to Datadog
             (table_index_size, table_data_size) = self._query_size_per_table(db, system_tables=True)
-            results['information_table_index_size'] = table_index_size
-            results['information_table_data_size'] = table_data_size
+            if results.get('information_table_index_size'):
+                results['information_table_index_size'].update(table_index_size)
+            else:
+                results['information_table_index_size'] = table_index_size
+            if results.get('information_table_data_size'):
+                results['information_table_data_size'].update(table_data_size)
+            else:
+                results['information_table_data_size'] = table_data_size
             metrics.update(TABLE_VARS)
 
         if is_affirmative(self._config.options.get('replication', self._config.dbm_enabled)):
@@ -559,7 +628,7 @@ class MySql(AgentCheck):
                         'member_state:{}'.format(replica_results[1]),
                         'member_role:{}'.format(replica_results[2]),
                     ]
-                    self.gauge('mysql.replication.group.member_status', 1, tags=additional_tags + self._config.tags)
+                    self.gauge('mysql.replication.group.member_status', 1, tags=additional_tags + self.tags)
 
                 self.service_check(
                     self.GROUP_REPLICATION_SERVICE_CHECK_NAME,
@@ -584,10 +653,8 @@ class MySql(AgentCheck):
                     'Transactions_local_proposed': r[7],
                     'Transactions_local_rollback': r[8],
                 }
-                # Submit metrics now so it's possible to attach `channel_name` tag
-                self._submit_metrics(
-                    GROUP_REPLICATION_VARS, results, self._config.tags + ['channel_name:{}'.format(r[0])]
-                )
+                # Submit metrics now, so it's possible to attach `channel_name` tag
+                self._submit_metrics(GROUP_REPLICATION_VARS, results, self.tags + ['channel_name:{}'.format(r[0])])
 
                 return GROUP_REPLICATION_VARS
         except Exception as e:
@@ -650,7 +717,7 @@ class MySql(AgentCheck):
         self.gauge(
             name=self.SLAVE_SERVICE_CHECK_NAME,
             value=1 if status == AgentCheck.OK else 0,
-            tags=self._config.tags + additional_tags,
+            tags=self.tags + additional_tags,
             hostname=self.resolved_hostname,
         )
         # deprecated in favor of service_check("mysql.replication.replica_running")
@@ -1164,3 +1231,24 @@ class MySql(AgentCheck):
 
         for warning in messages:
             self.warning(warning)
+
+    def _send_database_instance_metadata(self):
+        if self.resolved_hostname not in self._database_instance_emitted:
+            event = {
+                "host": self.resolved_hostname,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "mysql",
+                "kind": "database_instance",
+                "collection_interval": self._config.database_instance_collection_interval,
+                'dbms_version': self.version.version + '+' + self.version.build,
+                'integration_version': __version__,
+                "tags": self._non_internal_tags,
+                "timestamp": time.time() * 1000,
+                "cloud_metadata": self._config.cloud_metadata,
+                "metadata": {
+                    "dbm": self._config.dbm_enabled,
+                    "connection_host": self._config.host,
+                },
+            }
+            self._database_instance_emitted[self.resolved_hostname] = event
+            self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))

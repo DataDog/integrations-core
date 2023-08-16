@@ -12,11 +12,13 @@
     "title": "Pivotal Container Service",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
       "Category::Containers",
+      "Category::Kubernetes",
+      "Category::Log Collection",
+      "Category::Network",
       "Category::Orchestration",
-      "Category::Log Collection"
+      "Supported OS::Linux",
+      "Supported OS::macOS"
     ]
   },
   "author": {

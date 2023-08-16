@@ -125,3 +125,9 @@ benchmark_*.svg
 
 ## Kind
 .kube
+
+## Direnv
+.envrc
+
+# Auto-generated during builds
+/ddev/src/ddev/_version.py

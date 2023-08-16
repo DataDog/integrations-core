@@ -189,8 +189,12 @@ def write_option(option, writer, indent='', start_list=False):
                 writer.write(indent, option_name, ':', '\n')
 
             if multiple and multiple_instances_defined:
-                for instance in option['options']:
-                    write_sub_option(instance, writer, indent, multiple, include_top_description=True)
+                for idx, instance in enumerate(option['options']):
+                    if idx == 0:
+                        start_list = True
+                    write_sub_option(
+                        instance, writer, indent, multiple, include_top_description=True, start_list=start_list
+                    )
             else:
                 write_sub_option(option, writer, indent, multiple)
 
@@ -210,7 +214,7 @@ def write_option(option, writer, indent='', start_list=False):
                 writer.write(line, '\n')
 
 
-def write_sub_option(option, writer, indent, multiple, include_top_description=False):
+def write_sub_option(option, writer, indent, multiple, include_top_description=False, start_list=False):
     options = sorted(option['options'], key=lambda opt: -opt['display_priority'])
     next_indent = indent + '    '
 
@@ -223,6 +227,8 @@ def write_sub_option(option, writer, indent, multiple, include_top_description=F
             if i == 0 and multiple:
                 if include_top_description and option.get('description'):
                     write_description(option, writer, next_indent, 'option')
+                if start_list and 'options' in opt:
+                    writer.write(indent, '  -\n')
                 if option_enabled(opt):
                     write_option(opt, writer, next_indent, start_list=True)
                 else:

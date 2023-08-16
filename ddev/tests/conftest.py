@@ -5,11 +5,15 @@ from __future__ import annotations
 
 import os
 import random
+from contextlib import ExitStack
 from typing import Generator
 
 import pytest
+import vcr
 from click.testing import CliRunner as __CliRunner
+from datadog_checks.dev.tooling.utils import set_root
 
+from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.config.file import ConfigFile
 from ddev.repo.core import Repository
@@ -33,6 +37,11 @@ class ClonedRepo:
 
             # Remove untracked files
             PLATFORM.check_command_output(['git', 'clean', '-fd'])
+
+            # Remove all tags
+            tags_dir = self.path / '.git' / 'refs' / 'tags'
+            if tags_dir.is_dir():
+                tags_dir.remove()
 
     @staticmethod
     def new_branch():
@@ -64,6 +73,11 @@ def platform() -> Platform:
 
 
 @pytest.fixture(scope='session')
+def terminal() -> Terminal:
+    return Terminal(verbosity=0, enable_color=False, interactive=False)
+
+
+@pytest.fixture(scope='session')
 def local_repo() -> Path:
     return Path(__file__).resolve().parent.parent.parent
 
@@ -71,7 +85,7 @@ def local_repo() -> Path:
 @pytest.fixture(scope='session')
 def valid_integrations(local_repo) -> list[str]:
     repo = Repository(local_repo.name, str(local_repo))
-    return [path.name for path in repo.integrations.iter_all()]
+    return [path.name for path in repo.integrations.iter_all(['all'])]
 
 
 @pytest.fixture
@@ -80,12 +94,29 @@ def valid_integration(valid_integrations) -> str:
 
 
 @pytest.fixture(autouse=True)
-def config_file(tmp_path) -> ConfigFile:
+def config_file(tmp_path, monkeypatch) -> ConfigFile:
+    for env_var in (
+        'DD_SITE',
+        'DD_LOGS_CONFIG_DD_URL',
+        'DD_DD_URL',
+        'DD_API_KEY',
+        'DD_APP_KEY',
+        'DDEV_REPO',
+    ):
+        monkeypatch.delenv(env_var, raising=False)
+
     path = Path(tmp_path, 'config.toml')
-    os.environ[ConfigEnvVars.CONFIG] = str(path)
+    monkeypatch.setenv(ConfigEnvVars.CONFIG, str(path))
     config = ConfigFile(path)
     config.restore()
     return config
+
+
+@pytest.fixture
+def temp_dir(tmp_path) -> Path:
+    path = Path(tmp_path, 'temp')
+    path.mkdir()
+    return path
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -100,10 +131,13 @@ def isolation() -> Generator[Path, None, None]:
 def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
     cloned_repo_path = isolation / local_repo.name
 
-    PLATFORM.check_command_output(['git', 'clone', '--local', '--shared', str(local_repo), str(cloned_repo_path)])
+    PLATFORM.check_command_output(
+        ['git', 'clone', '--local', '--shared', '--no-tags', str(local_repo), str(cloned_repo_path)]
+    )
     with cloned_repo_path.as_cwd():
         PLATFORM.check_command_output(['git', 'config', 'user.name', 'Foo Bar'])
         PLATFORM.check_command_output(['git', 'config', 'user.email', 'foo@bar.baz'])
+        PLATFORM.check_command_output(['git', 'config', 'commit.gpgsign', 'false'])
 
     cloned_repo = ClonedRepo(cloned_repo_path, 'origin/master', 'ddev-testing')
     cloned_repo.reset_branch()
@@ -119,7 +153,36 @@ def repository(local_clone, config_file) -> Generator[ClonedRepo, None, None]:
     try:
         yield local_clone
     finally:
+        set_root('')
         local_clone.reset_branch()
+
+
+@pytest.fixture
+def network_replay(local_repo):
+    """
+    To use, run once without record_mode='none' as an argument and then add it in for subsequent runs.
+    """
+    stack = ExitStack()
+
+    def add_cassette(relative_path, *args, **kwargs):
+        # https://vcrpy.readthedocs.io/en/latest/advanced.html#filter-sensitive-data-from-the-request
+        for option, known_values in (
+            ('filter_headers', ['authorization', 'dd-api-key', 'dd-application-key']),
+            ('filter_query_parameters', ['api_key', 'app_key', 'application_key']),
+            ('filter_post_data_parameters', ['api_key', 'app_key']),
+        ):
+            defined_values = list(kwargs.setdefault(option, []))
+            defined_values.extend(known_values)
+            kwargs[option] = defined_values
+
+        cassette = vcr.use_cassette(
+            str(local_repo / "ddev" / "tests" / "fixtures" / "network" / relative_path), *args, **kwargs
+        )
+        stack.enter_context(cassette)
+        return cassette
+
+    with stack:
+        yield add_cassette
 
 
 @pytest.fixture(scope='session')
@@ -155,3 +218,4 @@ def pytest_configure(config):
     config.addinivalue_line('markers', 'requires_macos: Tests intended for macOS operating systems')
     config.addinivalue_line('markers', 'requires_linux: Tests intended for Linux operating systems')
     config.addinivalue_line('markers', 'requires_unix: Tests intended for Linux-based operating systems')
+    config.addinivalue_line('markers', 'requires_ci: Tests intended to only run in CI')

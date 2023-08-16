@@ -42,76 +42,76 @@ Duplicate metrics found:
         (
             'no duplicate with different metric name',
             [
-                dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
-                dict(type='gauge', name='metric.b', value=1, tags=['aa'], hostname='1'),
+                {'type': 'gauge', 'name': 'metric.a', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
+                {'type': 'gauge', 'name': 'metric.b', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
             ],
             False,
         ),
         (
             'no duplicate with different metric type',
             [
-                dict(type='rate', name='metric.a', value=1, tags=['aa'], hostname='1'),
-                dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
+                {'type': 'rate', 'name': 'metric.a', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
+                {'type': 'gauge', 'name': 'metric.a', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
             ],
             False,
         ),
         (
             'no duplicate with different tag',
             [
-                dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
-                dict(type='gauge', name='metric.a', value=1, tags=['bb'], hostname='1'),
+                {'type': 'gauge', 'name': 'metric.a', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
+                {'type': 'gauge', 'name': 'metric.a', 'value': 1, 'tags': ['bb'], 'hostname': '1'},
             ],
             False,
         ),
         (
             'no duplicate with different hostname',
             [
-                dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
-                dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='2'),
+                {'type': 'gauge', 'name': 'metric.a', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
+                {'type': 'gauge', 'name': 'metric.a', 'value': 1, 'tags': ['aa'], 'hostname': '2'},
             ],
             False,
         ),
         (
             'duplicate allowed for types intended to be submitted multiple times',
             [
-                dict(type='count', name='metric.count', value=1, tags=['aa'], hostname='1'),
-                dict(type='count', name='metric.count', value=1, tags=['aa'], hostname='1'),
-                dict(type='increment', name='metric.increment', value=1, tags=['aa'], hostname='1'),
-                dict(type='increment', name='metric.increment', value=1, tags=['aa'], hostname='1'),
-                dict(type='decrement', name='metric.decrement', value=1, tags=['aa'], hostname='1'),
-                dict(type='decrement', name='metric.decrement', value=1, tags=['aa'], hostname='1'),
+                {'type': 'count', 'name': 'metric.count', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
+                {'type': 'count', 'name': 'metric.count', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
+                {'type': 'increment', 'name': 'metric.increment', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
+                {'type': 'increment', 'name': 'metric.increment', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
+                {'type': 'decrement', 'name': 'metric.decrement', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
+                {'type': 'decrement', 'name': 'metric.decrement', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
             ],
             False,
         ),
         (
             'duplicate gauge metric',
             [
-                dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
-                dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
+                {'type': 'gauge', 'name': 'metric.a', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
+                {'type': 'gauge', 'name': 'metric.a', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
             ],
             True,
         ),
         (
             'duplicate rate metric',
             [
-                dict(type='rate', name='metric.a', value=1, tags=['aa'], hostname='1'),
-                dict(type='rate', name='metric.a', value=1, tags=['aa'], hostname='1'),
+                {'type': 'rate', 'name': 'metric.a', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
+                {'type': 'rate', 'name': 'metric.a', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
             ],
             True,
         ),
         (
             'duplicate monotonic_count metric',
             [
-                dict(type='monotonic_count', name='metric.a', value=1, tags=['aa'], hostname='1'),
-                dict(type='monotonic_count', name='metric.a', value=1, tags=['aa'], hostname='1'),
+                {'type': 'monotonic_count', 'name': 'metric.a', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
+                {'type': 'monotonic_count', 'name': 'metric.a', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
             ],
             True,
         ),
         (
             'duplicate metric with different values',
             [
-                dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
-                dict(type='gauge', name='metric.a', value=2, tags=['aa'], hostname='1'),
+                {'type': 'gauge', 'name': 'metric.a', 'value': 1, 'tags': ['aa'], 'hostname': '1'},
+                {'type': 'gauge', 'name': 'metric.a', 'value': 2, 'tags': ['aa'], 'hostname': '1'},
             ],
             True,
         ),
@@ -141,32 +141,32 @@ def test_assert_no_duplicate_metrics_cases(aggregator, case_name, metrics, expec
         (
             "no duplicate with different name",
             [
-                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1'),
-                dict(name="service.check.b", status=AgentCheck.OK, tags=['aa'], hostname='1'),
+                {'name': "service.check.a", 'status': AgentCheck.OK, 'tags': ['aa'], 'hostname': '1'},
+                {'name': "service.check.b", 'status': AgentCheck.OK, 'tags': ['aa'], 'hostname': '1'},
             ],
             False,
         ),
         (
             "no duplicate with different tag",
             [
-                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1'),
-                dict(name="service.check.a", status=AgentCheck.OK, tags=['bb'], hostname='1'),
+                {'name': "service.check.a", 'status': AgentCheck.OK, 'tags': ['aa'], 'hostname': '1'},
+                {'name': "service.check.a", 'status': AgentCheck.OK, 'tags': ['bb'], 'hostname': '1'},
             ],
             False,
         ),
         (
             "no duplicate with different hostname",
             [
-                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1'),
-                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='2'),
+                {'name': "service.check.a", 'status': AgentCheck.OK, 'tags': ['aa'], 'hostname': '1'},
+                {'name': "service.check.a", 'status': AgentCheck.OK, 'tags': ['aa'], 'hostname': '2'},
             ],
             False,
         ),
         (
             "duplicate metric",
             [
-                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1'),
-                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1'),
+                {'name': "service.check.a", 'status': AgentCheck.OK, 'tags': ['aa'], 'hostname': '1'},
+                {'name': "service.check.a", 'status': AgentCheck.OK, 'tags': ['aa'], 'hostname': '1'},
             ],
             True,
         ),

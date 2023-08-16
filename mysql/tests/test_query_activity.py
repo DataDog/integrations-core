@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2022-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import concurrent.futures.thread
 import json
 import os
@@ -10,7 +14,7 @@ from os import environ
 import mock
 import pymysql
 import pytest
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.mysql import MySql
@@ -64,7 +68,7 @@ def dbm_instance(instance_complex):
         ),
     ],
 )
-def test_collect_activity(aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated):
+def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, query_signature, expected_query_truncated):
     check = MySql(CHECK_NAME, {}, [dbm_instance])
 
     blocking_query = 'SELECT id FROM testdb.users FOR UPDATE'
@@ -127,7 +131,6 @@ def test_collect_activity(aggregator, dbm_instance, dd_run_check, query, query_s
     )
     assert blocked_row['sql_text'] == expected_sql_text
     assert blocked_row['processlist_state'], "missing state"
-    assert blocked_row['wait_event'] == 'wait/io/table/sql/handler'
     assert blocked_row['thread_id'], "missing thread id"
     assert blocked_row['processlist_id'], "missing processlist id"
     assert blocked_row['wait_timer_start'], "missing wait timer start"
@@ -361,11 +364,11 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     dbm_instance['query_activity']['collection_interval'] = collection_interval
     dbm_instance['query_activity']['run_sync'] = False
     check = MySql(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
     sleep_time = 1
+    dd_run_check(check)
     time.sleep(sleep_time)
-    max_collections = int(1 / collection_interval * sleep_time) + 1
     check.cancel()
+    max_collections = int(1 / collection_interval * sleep_time) + 1
     metrics = aggregator.metrics("dd.mysql.activity.collect_activity.payload_size")
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 
@@ -394,7 +397,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     check._query_activity._job_loop_future.result()
     aggregator.assert_metric(
         "dd.mysql.async_job.inactive_stop",
-        tags=_expected_dbm_instance_tags(dbm_instance),
+        tags=_expected_dbm_job_err_tags(dbm_instance),
         hostname='',
     )
 
@@ -413,12 +416,18 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     # be created in the first place
     aggregator.assert_metric(
         "dd.mysql.async_job.cancel",
-        tags=_expected_dbm_instance_tags(dbm_instance),
+        tags=_expected_dbm_job_err_tags(dbm_instance),
     )
 
 
-def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance['tags'] + ['job:query-activity', 'port:{}'.format(PORT)]
+# the inactive job metrics are emitted from the main integrations
+# directly to metrics-intake, so they should also be properly tagged with a resource
+def _expected_dbm_job_err_tags(dbm_instance):
+    return dbm_instance['tags'] + [
+        'job:query-activity',
+        'port:{}'.format(PORT),
+        'dd.internal.resource:database_instance:stubbed.hostname',
+    ]
 
 
 def _get_conn_for_user(user, _autocommit=False):

@@ -2,7 +2,7 @@
 This script is expected to run from a CLI, do not import it."""
 import sys
 import json
-from typing import List, Optional, Set
+from typing import List, Optional, Set  # noqa: F401
 import re
 import yaml
 import os

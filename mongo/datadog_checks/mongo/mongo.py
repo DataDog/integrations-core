@@ -4,10 +4,12 @@
 from __future__ import division
 
 from copy import deepcopy
-from distutils.version import LooseVersion
+from functools import cached_property
+
+from packaging.version import Version
 
 from datadog_checks.base import AgentCheck, is_affirmative
-from datadog_checks.mongo.api import MongoApi
+from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
 from datadog_checks.mongo.collectors import (
     CollStatsCollector,
     CustomQueriesCollector,
@@ -54,11 +56,8 @@ class MongoDb(AgentCheck):
        with their original metric names.
 
     # Service checks
-    Available service checks:
     * `mongodb.can_connect`
       Connectivity health to the instance.
-    * `mongodb.replica_set_member_state`
-      Disposition of the member replica set state.
     """
 
     def __init__(self, name, init_config, instances=None):
@@ -76,9 +75,12 @@ class MongoDb(AgentCheck):
         self._api_client = None
         self._mongo_version = None
 
-    @property
+        self.diagnosis.register(self._diagnose_tls)
+
+    @cached_property
     def api_client(self):
-        return self._api_client
+        # This needs to be a property for our unit test mocks to work.
+        return MongoApi(self._config, self.log)
 
     def refresh_collectors(self, deployment_type, all_dbs, tags):
         collect_tcmalloc_metrics = 'tcmalloc' in self._config.additional_metrics
@@ -95,10 +97,10 @@ class MongoDb(AgentCheck):
             potential_collectors.append(JumboStatsCollector(self, tags))
         if 'top' in self._config.additional_metrics:
             potential_collectors.append(TopCollector(self, tags))
-        if LooseVersion(self._mongo_version) >= LooseVersion("3.6"):
+        if Version(self._mongo_version) >= Version("3.6"):
             potential_collectors.append(SessionStatsCollector(self, tags))
         if self._config.collections_indexes_stats:
-            if LooseVersion(self._mongo_version) >= LooseVersion("3.2"):
+            if Version(self._mongo_version) >= Version("3.2"):
                 potential_collectors.append(
                     IndexStatsCollector(self, self._config.db_name, tags, self._config.coll_names)
                 )
@@ -161,36 +163,33 @@ class MongoDb(AgentCheck):
         return metrics_to_collect
 
     def _refresh_replica_role(self):
-        if self._api_client and (
-            self._api_client.deployment_type is None
-            or isinstance(self._api_client.deployment_type, ReplicaSetDeployment)
-        ):
+        if self.api_client.deployment_type is None or isinstance(self.api_client.deployment_type, ReplicaSetDeployment):
             self.log.debug("Refreshing deployment type")
-            self._api_client.deployment_type = self._api_client.get_deployment_type()
+            self.api_client.refresh_deployment_type()
 
     def check(self, _):
-        if self._connect():
-            self._check()
+        try:
+            self._refresh_metadata()
+            self._collect_metrics()
+        except CRITICAL_FAILURE as e:
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
+            self._unset_metadata()
+            raise e  # Let exception bubble up to global handler and show full error in the logs.
+        else:
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
 
-    def _connect(self) -> bool:
-        if self._api_client is None:
-            try:
-                self._api_client = MongoApi(self._config, self.log)
-                self.log.debug("Connecting to '%s'", self._config.hosts)
-                self._api_client.connect()
-                self.log.debug("Connected!")
-                self._mongo_version = self.api_client.server_info().get('version', '0.0')
-                self.set_metadata('version', self._mongo_version)
-                self.log.debug('version: %s', self._mongo_version)
-            except Exception as e:
-                self._api_client = None
-                self.log.error('Exception: %s', e)
-                self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
-                return False
-        self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
-        return True
+    def _refresh_metadata(self):
+        if self._mongo_version is None:
+            self.log.debug('No metadata present, refreshing it.')
+            self._mongo_version = self.api_client.server_info().get('version', '0.0')
+            self.set_metadata('version', self._mongo_version)
+            self.log.debug('version: %s', self._mongo_version)
 
-    def _check(self):
+    def _unset_metadata(self):
+        self.log.debug('Due to connection failure we will need to reset the metadata.')
+        self._mongo_version = None
+
+    def _collect_metrics(self):
         self._refresh_replica_role()
         tags = deepcopy(self._config.metric_tags)
         deployment = self.api_client.deployment_type
@@ -211,6 +210,11 @@ class MongoDb(AgentCheck):
         for collector in self.collectors:
             try:
                 collector.collect(self.api_client)
+            except CRITICAL_FAILURE as e:
+                self.log.info(
+                    "Unable to collect logs from collector %s. Some metrics will be missing.", collector, exc_info=True
+                )
+                raise e  # Critical failures must bubble up to trigger a CRITICAL service check.
             except Exception:
                 self.log.info(
                     "Unable to collect logs from collector %s. Some metrics will be missing.", collector, exc_info=True
@@ -219,6 +223,9 @@ class MongoDb(AgentCheck):
     def _get_db_names(self, api, deployment, tags):
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
             self.log.debug("Replicaset and arbiter deployment, no databases will be checked")
+            dbnames = []
+        elif isinstance(deployment, ReplicaSetDeployment) and deployment.replset_state == 3:
+            self.log.debug("Replicaset is in recovering state, will skip reading database names")
             dbnames = []
         else:
             server_databases = api.list_database_names()
@@ -242,3 +249,28 @@ class MongoDb(AgentCheck):
                         )
         self.log.debug("List of databases to check: %s", dbnames)
         return dbnames
+
+    def _diagnose_tls(self):
+        # Check TLS config. Specifically, we might want to check that if `tls` is
+        # enabled (either explicitly or implicitly), the provided
+        # tls_certificate_key_file and tls_ca_file actually exist on the file system.
+        if "tls_certificate_key_file" in self.instance:
+            self._diagnose_readable('tls', self.instance["tls_certificate_key_file"], "tls_certificate_key_file")
+        if "tls_ca_file" in self.instance:
+            self._diagnose_readable('tls', self.instance["tls_ca_file"], "tls_ca_file")
+
+    def _diagnose_readable(self, name, path, option_name):
+        try:
+            open(path).close()
+        except FileNotFoundError:
+            self.diagnosis.fail(name, f"file `{path}` provided in the `{option_name}` option does not exist")
+        except OSError as exc:
+            self.diagnosis.fail(
+                name,
+                f"file `{path}` provided as the `{option_name}` option could not be opened: {exc.strerror}",
+            )
+        else:
+            self.diagnosis.success(
+                name,
+                f"file `{path}` provided as the `{option_name}` exists and is readable",
+            )

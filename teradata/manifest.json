@@ -12,9 +12,10 @@
     "title": "Teradata",
     "media": [],
     "classifier_tags": [
+      "Category::Caching",
+      "Category::Data Store",
       "Supported OS::Linux",
-      "Supported OS::Windows",
-      "Category::Data Store"
+      "Supported OS::Windows"
     ]
   },
   "author": {

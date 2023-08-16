@@ -8,10 +8,10 @@ from pathlib import Path
 
 import mock
 import pytest
-import tests.tooling.manifest_validator.input_constants as input_constants
 
 import datadog_checks.dev.tooling.manifest_validator.common.validator as common
 import datadog_checks.dev.tooling.manifest_validator.v2.validator as v2_validators
+import tests.tooling.manifest_validator.input_constants as input_constants
 from datadog_checks.dev.tooling.constants import get_root, set_root
 from datadog_checks.dev.tooling.datastructures import JSONDict
 from datadog_checks.dev.tooling.manifest_validator.constants import V2

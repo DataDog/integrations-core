@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2021-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import os
 
 from datadog_checks.dev import get_docker_hostname
@@ -21,9 +25,22 @@ INSTANCES = {
         'included_metrics': [r'envoy\.cluster\.'],
         'excluded_metrics': [r'envoy\.cluster\.out\.'],
     },
+    'include_exclude_metrics': {
+        'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
+        'include_metrics': [r'envoy\.cluster\.'],
+        'exclude_metrics': [r'envoy\.cluster\.out\.'],
+    },
     'collect_server_info': {
         'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
         'collect_server_info': 'false',
     },
 }
 ENVOY_VERSION = os.getenv('ENVOY_VERSION')
+
+EXT_METRICS = [
+    "envoy.cluster.ext_authz.denied",
+    "envoy.cluster.ext_authz.disabled",
+    "envoy.cluster.ext_authz.error",
+    "envoy.cluster.ext_authz.failure_mode_allowed",
+    "envoy.cluster.ext_authz.ok",
+]

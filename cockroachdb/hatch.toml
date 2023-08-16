@@ -1,7 +1,7 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["27", "38"]
+python = ["2.7", "3.9"]
 version = ["2.0", "22.1"]
 
 [envs.default.overrides]
@@ -10,8 +10,13 @@ matrix.version.env-vars = [
   { key = "COCKROACHDB_VERSION", value = "v22.1.11", if = ["22.1"] },
 ]
 
+[envs.default.env-vars]
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
+
 [envs.latest.env-vars]
 COCKROACHDB_VERSION = "latest"
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
 
 [envs.bench.env-vars]
 COCKROACHDB_VERSION = "v22.1.11"
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"

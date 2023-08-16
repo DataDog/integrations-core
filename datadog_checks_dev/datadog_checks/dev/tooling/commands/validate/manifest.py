@@ -29,8 +29,9 @@ from ..console import (
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `manifest.json` files')
 @click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
+@click.option('--ignore-schema', is_flag=True, hidden=True)
 @click.pass_context
-def manifest(ctx, check, fix):
+def manifest(ctx, check, fix, ignore_schema):
     """Validate `manifest.json` files.
 
     If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
@@ -75,7 +76,7 @@ def manifest(ctx, check, fix):
             continue
 
         version = decoded.get('manifest_version', V2_STRING)
-        all_validators = get_all_validators(ctx, version, is_extras, is_marketplace)
+        all_validators = get_all_validators(ctx, version, is_extras, is_marketplace, ignore_schema)
 
         for validator in all_validators:
             if validator.skip_if_errors and file_failures > 0:

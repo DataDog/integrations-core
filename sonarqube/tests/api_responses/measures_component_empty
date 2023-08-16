@@ -1,0 +1,8 @@
+{
+	"component": {
+		"key": "org.sonarqube:sonarqube-scanner",
+		"name": "Example of SonarQube Scanner Usage",
+		"qualifier": "TRK",
+		"measures": []
+	}
+}

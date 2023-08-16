@@ -377,6 +377,11 @@ The Haproxy check does not include any events.
 See [service_checks.json][19] for a list of service checks provided by this integration.
 
 ## Troubleshooting
+### Port 514 Already in Use Error
+On systems with syslog, if the Agent is listening for HAProxy logs on port 514, the following error can appear in the Agent logs: 
+`Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`. 
+
+This is happening because, by default, syslog is listening on port 514. To resolve this error, syslog can be disabled, or HAProxy can be configured to forward logs to port 514 and another port the Agent is listening for logs on. The port the Agent listens on can be defined in the haproxy.d/conf.yaml file [here][28].
 
 Need help? Contact [Datadog support][20].
 
@@ -388,7 +393,7 @@ Need help? Contact [Datadog support][20].
 - [HA Proxy Multi Process Configuration][24]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/prometheus/haproxy_exporter
 [4]: https://www.haproxy.com/blog/haproxy-exposes-a-prometheus-metrics-endpoint/
 [5]: https://www.haproxy.org/download/1.7/doc/management.txt
@@ -414,3 +419,4 @@ Need help? Contact [Datadog support][20].
 [25]: https://github.com/DataDog/integrations-core/blob/7.34.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
 [26]: https://datadoghq.dev/integrations-core/base/openmetrics/
 [27]: https://docs.datadoghq.com/agent/guide/agent-v6-python-3/?tab=helm#use-python-3-with-datadog-agent-v6
+[28]: https://github.com/DataDog/integrations-core/blob/0e34b3309cc1371095762bfcaf121b0b45a4e263/haproxy/datadog_checks/haproxy/data/conf.yaml.example#L631

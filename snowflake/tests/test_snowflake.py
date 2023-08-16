@@ -3,11 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 from decimal import Decimal
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict  # noqa: F401
 
 import mock
 
-from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.base.utils.db import Query
 from datadog_checks.snowflake import SnowflakeCheck, queries
 
@@ -123,7 +123,7 @@ def test_version_metadata(dd_run_check, instance, datadog_agent):
         'version.raw': '4.30.2',
         'version.scheme': 'semver',
     }
-    with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_version):
+    with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=iter(expected_version)):
         check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check.check_id = 'test:123'
         check._conn = mock.MagicMock()

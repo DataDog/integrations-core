@@ -8,7 +8,7 @@ import os
 import time
 import weakref
 from concurrent import futures
-from typing import Any, List
+from typing import Any, List  # noqa: F401
 
 import mock
 import pytest
@@ -29,7 +29,7 @@ from datadog_checks.snmp.utils import (
 )
 
 from . import common
-from .utils import mock_profiles_confd_root
+from .utils import mkdir_p, mock_profiles_confd_default_root, mock_profiles_confd_user_root
 
 pytestmark = [pytest.mark.unit, common.snmp_integration_only]
 
@@ -447,7 +447,7 @@ def test_profile_extends():
     }
 
     with temp_dir() as tmp:
-        with mock_profiles_confd_root(tmp):
+        with mock_profiles_confd_default_root(tmp):
             with open(os.path.join(tmp, 'base.yaml'), 'wb') as f:
                 f.write(yaml.safe_dump(base))
 
@@ -475,7 +475,7 @@ def test_default_profiles():
     }
 
     with temp_dir() as tmp:
-        with mock_profiles_confd_root(tmp):
+        with mock_profiles_confd_default_root(tmp):
             profile_file = os.path.join(tmp, 'profile.yaml')
             with open(profile_file, 'wb') as f:
                 f.write(yaml.safe_dump(profile))
@@ -490,13 +490,99 @@ def test_profile_override():
     }
 
     with temp_dir() as tmp:
-        with mock_profiles_confd_root(tmp):
-            profile_file = os.path.join(tmp, 'generic-router.yaml')
+        with mock_profiles_confd_default_root(tmp):
+            profile_file = os.path.join(tmp, 'generic-device.yaml')
             with open(profile_file, 'wb') as f:
                 f.write(yaml.safe_dump(profile))
 
             profiles = _load_default_profiles()
-            assert profiles['generic-router'] == {'definition': profile}
+            assert profiles['generic-device'] == {'definition': profile}
+
+
+def test_user_profile_override():
+    default_profile = {
+        'metrics': [{'MIB': 'TCP-MIB', 'symbol': 'metric_default_profile', 'forced_type': 'monotonic_count'}],
+    }
+
+    user_profile = {
+        'metrics': [{'MIB': 'TCP-MIB', 'symbol': 'metric_user_profile', 'forced_type': 'monotonic_count'}],
+    }
+
+    with temp_dir() as tmp:
+        with mock_profiles_confd_default_root(os.path.join(tmp, 'default_profiles')), mock_profiles_confd_user_root(
+            os.path.join(tmp, 'profiles')
+        ):
+            mkdir_p(os.path.join(tmp, 'default_profiles'))
+            mkdir_p(os.path.join(tmp, 'profiles'))
+
+            with open(os.path.join(tmp, 'default_profiles', 'generic-device.yaml'), 'wb') as f:
+                f.write(yaml.safe_dump(default_profile))
+            with open(os.path.join(tmp, 'profiles', 'generic-device.yaml'), 'wb') as f:
+                f.write(yaml.safe_dump(user_profile))
+
+            profiles = _load_default_profiles()
+            assert profiles['generic-device'] == {'definition': user_profile}
+
+
+def test_profile_extends_with_user_profiles():
+    # type: () -> None
+    default_base = {
+        'metrics': [
+            {'MIB': 'TCP-MIB', 'symbol': 'tcpActiveOpens', 'forced_type': 'monotonic_count'},
+            {'MIB': 'UDP-MIB', 'symbol': 'udpHCInDatagrams', 'forced_type': 'monotonic_count'},
+        ],
+        'metric_tags': [{'MIB': 'SNMPv2-MIB', 'symbol': 'sysName', 'tag': 'snmp_host'}],
+    }
+
+    default_profile1 = {
+        'extends': ['base.yaml'],
+        'metrics': [{'MIB': 'TCP-MIB', 'symbol': 'profile1_metric_default', 'forced_type': 'monotonic_count'}],
+    }
+    default_abstract = {
+        'extends': ['base.yaml'],
+        'metrics': [{'MIB': 'TCP-MIB', 'symbol': 'abstract_metric_default', 'forced_type': 'monotonic_count'}],
+    }
+    user_abstract = {
+        'extends': ['base.yaml'],
+        'metrics': [{'MIB': 'TCP-MIB', 'symbol': 'abstract_metric_user', 'forced_type': 'monotonic_count'}],
+    }
+    user_profile1 = {
+        'extends': ['_abstract.yaml'],
+        'metrics': [{'MIB': 'TCP-MIB', 'symbol': 'profile1_metric_user', 'forced_type': 'monotonic_count'}],
+    }
+
+    with temp_dir() as tmp:
+        with mock_profiles_confd_default_root(os.path.join(tmp, 'default_profiles')), mock_profiles_confd_user_root(
+            os.path.join(tmp, 'profiles')
+        ):
+            mkdir_p(os.path.join(tmp, 'default_profiles'))
+            mkdir_p(os.path.join(tmp, 'profiles'))
+
+            with open(os.path.join(tmp, 'default_profiles', 'base.yaml'), 'wb') as f:
+                f.write(yaml.safe_dump(default_base))
+            with open(os.path.join(tmp, 'default_profiles', 'profile1.yaml'), 'wb') as f:
+                f.write(yaml.safe_dump(default_profile1))
+            with open(os.path.join(tmp, 'default_profiles', '_abstract.yaml'), 'wb') as f:
+                f.write(yaml.safe_dump(default_abstract))
+            with open(os.path.join(tmp, 'profiles', 'profile1.yaml'), 'wb') as f:
+                f.write(yaml.safe_dump(user_profile1))
+            with open(os.path.join(tmp, 'profiles', '_abstract.yaml'), 'wb') as f:
+                f.write(yaml.safe_dump(user_abstract))
+
+            definition = {'extends': ['profile1.yaml']}
+
+            recursively_expand_base_profiles(definition)
+
+            assert definition == {
+                'extends': ['profile1.yaml'],
+                'metrics': [
+                    {'MIB': 'TCP-MIB', 'symbol': 'tcpActiveOpens', 'forced_type': 'monotonic_count'},
+                    {'MIB': 'UDP-MIB', 'symbol': 'udpHCInDatagrams', 'forced_type': 'monotonic_count'},
+                    {'MIB': 'TCP-MIB', 'symbol': 'abstract_metric_user', 'forced_type': 'monotonic_count'},
+                    {'MIB': 'TCP-MIB', 'symbol': 'profile1_metric_user', 'forced_type': 'monotonic_count'},
+                ],
+                'metric_tags': [{'MIB': 'SNMPv2-MIB', 'symbol': 'sysName', 'tag': 'snmp_host'}],
+            }
 
 
 def test_discovery_tags():
@@ -525,7 +611,7 @@ def test_discovery_tags():
     assert set(config.tags) == {
         'snmp_device:192.168.0.2',
         'test:check',
-        'snmp_profile:generic-router',
+        'snmp_profile:generic-device',
         'autodiscovery_subnet:192.168.0.0/29',
     }
 

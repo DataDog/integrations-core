@@ -1,12 +1,16 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, List  # noqa: F401
 
 from pyVmomi import vim
 from six import iteritems, string_types
 
 from datadog_checks.base import ConfigurationError, is_affirmative
-from datadog_checks.base.log import CheckLoggingAdapter
-from datadog_checks.base.types import InitConfigType
+from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
+from datadog_checks.base.types import InitConfigType  # noqa: F401
 from datadog_checks.vsphere.constants import (
     ALLOWED_FILTER_PROPERTIES,
     ALLOWED_FILTER_TYPES,
@@ -24,8 +28,13 @@ from datadog_checks.vsphere.constants import (
     MOR_TYPE_AS_STRING,
     REALTIME_RESOURCES,
 )
-from datadog_checks.vsphere.resource_filters import ResourceFilter, create_resource_filter
-from datadog_checks.vsphere.types import InstanceConfig, MetricFilterConfig, MetricFilters, ResourceFilterConfig
+from datadog_checks.vsphere.resource_filters import ResourceFilter, create_resource_filter  # noqa: F401
+from datadog_checks.vsphere.types import (  # noqa: F401
+    InstanceConfig,
+    MetricFilterConfig,
+    MetricFilters,
+    ResourceFilterConfig,
+)
 
 
 class VSphereConfig(object):
@@ -56,6 +65,7 @@ class VSphereConfig(object):
         self.collection_level = instance.get("collection_level", 1)
         self.collection_type = instance.get("collection_type", "realtime")
         self.use_guest_hostname = instance.get("use_guest_hostname", False)
+        self.vm_hostname_suffix_tag = instance.get("vm_hostname_suffix_tag", None)
         self.max_historical_metrics = instance.get("max_historical_metrics", DEFAULT_MAX_QUERY_METRICS)
 
         # Check option
@@ -69,6 +79,7 @@ class VSphereConfig(object):
         self.should_collect_tags = is_affirmative(instance.get("collect_tags", False))
         self.tags_prefix = instance.get("tags_prefix", DEFAULT_VSPHERE_TAG_PREFIX)
         self.should_collect_attributes = is_affirmative(instance.get("collect_attributes", False))
+        self.collect_property_metrics = is_affirmative(instance.get("collect_property_metrics", False))
         self.attr_prefix = instance.get("attributes_prefix", DEFAULT_VSPHERE_ATTR_PREFIX)
         self.excluded_host_tags = instance.get("excluded_host_tags", [])
         self.base_tags = instance.get("tags", []) + ["vcenter_server:{}".format(self.hostname)]
@@ -100,6 +111,7 @@ class VSphereConfig(object):
             instance.get("collect_per_instance_filters", {})
         )
         self.include_datastore_cluster_folder_tag = instance.get("include_datastore_cluster_folder_tag", True)
+        self.custom_tags = instance.get('tags', [])
         self.validate_config()
 
     def is_historical(self):

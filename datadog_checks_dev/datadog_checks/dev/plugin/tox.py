@@ -19,11 +19,8 @@ FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 
 # Style deps:
 # We pin deps in order to make CI more stable/reliable.
-ISORT_DEP = 'isort==5.10.1'
-BLACK_DEP = 'black==22.8.0'
-FLAKE8_DEP = 'flake8==5.0.4'
-FLAKE8_BUGBEAR_DEP = 'flake8-bugbear==22.9.11'
-FLAKE8_LOGGING_FORMAT_DEP = 'flake8-logging-format==0.7.5'
+BLACK_DEP = 'black==22.12.0'
+RUFF_DEP = 'ruff==0.0.257'
 # TODO: remove extra when we drop Python 2
 MYPY_DEP = 'mypy[python2]==0.910'
 # TODO: when we drop Python 2 and replace with --install-types --non-interactive
@@ -35,7 +32,7 @@ TYPES_DEPS = [
     'types-simplejson==3.17.5',
 ]
 # Keep in sync with: /datadog_checks_base/datadog_checks/data/agent_requirements.in and ./hatch/environment_collector.py
-PYDANTIC_DEP = 'pydantic==1.10.2'
+PYDANTIC_DEP = 'pydantic==1.10.8'
 
 
 @tox.hookimpl
@@ -141,18 +138,14 @@ def add_style_checker(config, sections, make_envconfig, reader):
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_CHECK_ENV_NAME)
 
     dependencies = [
-        FLAKE8_DEP,
-        FLAKE8_BUGBEAR_DEP,
-        FLAKE8_LOGGING_FORMAT_DEP,
         BLACK_DEP,
-        ISORT_DEP,
         PYDANTIC_DEP,
+        RUFF_DEP,
     ] + TYPES_DEPS
 
     commands = [
-        'flake8 --config=../.flake8 .',
+        'ruff --config ../pyproject.toml .',
         'black --config ../pyproject.toml --check --diff .',
-        'isort --settings-path ../pyproject.toml --check-only --diff .',
     ]
 
     if sections['testenv'].get(TYPES_FLAG, 'false').lower() == 'true':
@@ -195,9 +188,8 @@ def add_style_formatter(config, sections, make_envconfig, reader):
     # testenv:format_style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_FORMATTER_ENV_NAME)
     dependencies = [
-        FLAKE8_DEP,
         BLACK_DEP,
-        ISORT_DEP,
+        RUFF_DEP,
     ]
     sections[section] = {
         'platform': 'linux|darwin|win32',
@@ -209,11 +201,10 @@ def add_style_formatter(config, sections, make_envconfig, reader):
         # Run formatter AFTER sorting imports
         'commands': '\n'.join(
             [
-                'isort . --settings-path ../pyproject.toml ',
-                'black . --config ../pyproject.toml',
-                'python -c "print(\'\\n[NOTE] flake8 may still report style errors for things black cannot fix, '
+                'black --config ../pyproject.toml .',
+                'ruff --config ../pyproject.toml .',
+                'python -c "print(\'\\n[NOTE] ruff may still report style errors for things it cannot fix, '
                 'these will need to be fixed manually.\')"',
-                'flake8 --config=../.flake8 .',
             ]
         ),
     }

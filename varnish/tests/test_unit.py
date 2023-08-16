@@ -2,10 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from distutils.version import LooseVersion
-
 import mock
 import pytest
+from packaging.version import Version
 
 from datadog_checks.varnish import Varnish
 
@@ -20,9 +19,9 @@ pyestmark = [pytest.mark.unit]
 @pytest.mark.parametrize(
     'version, uuid, expected_cmd',
     [
-        ((LooseVersion('4.0.0'), 'xml'), 0, [common.VARNISHADM_PATH, '-S', common.SECRETFILE_PATH, 'debug.health']),
+        ((Version('4.0.0'), 'xml'), 0, [common.VARNISHADM_PATH, '-S', common.SECRETFILE_PATH, 'debug.health']),
         (
-            (LooseVersion('4.1.0'), 'xml'),
+            (Version('4.1.0'), 'xml'),
             1,
             [
                 'sudo',
@@ -64,19 +63,19 @@ def test_command_line_manually_unhealthy(
     'version, uuid, expected_cmd, output_mock',
     [
         (
-            (LooseVersion("3.9.0"), 'xml'),
+            (Version("3.9.0"), 'xml'),
             0,
             [common.VARNISHADM_PATH, '-S', common.SECRETFILE_PATH, 'debug.health'],
             mocks.debug_health_mock,
         ),
         (
-            (LooseVersion('4.0.0'), 'xml'),
+            (Version('4.0.0'), 'xml'),
             0,
             [common.VARNISHADM_PATH, '-S', common.SECRETFILE_PATH, 'debug.health'],
             mocks.backend_list_mock_v4,
         ),
         (
-            (LooseVersion('4.1.0'), 'xml'),
+            (Version('4.1.0'), 'xml'),
             1,
             [
                 'sudo',
@@ -91,7 +90,7 @@ def test_command_line_manually_unhealthy(
             mocks.backend_list_mock_v4,
         ),
         (
-            (LooseVersion('5.0.0'), 'json'),
+            (Version('5.0.0'), 'json'),
             0,
             [
                 common.VARNISHADM_PATH,
@@ -105,7 +104,7 @@ def test_command_line_manually_unhealthy(
             mocks.backend_list_mock_v5,
         ),
         (
-            (LooseVersion('5.0.0'), 'json'),
+            (Version('5.0.0'), 'json'),
             1,
             [
                 'sudo',
@@ -120,7 +119,7 @@ def test_command_line_manually_unhealthy(
             mocks.backend_list_mock_v5,
         ),
         (
-            (LooseVersion('6.5.0'), 'json'),
+            (Version('6.5.0'), 'json'),
             0,
             [
                 common.VARNISHADM_PATH,
@@ -134,7 +133,7 @@ def test_command_line_manually_unhealthy(
             mocks.backend_list_mock_v6_5,
         ),
         (
-            (LooseVersion('6.5.0'), 'json'),
+            (Version('6.5.0'), 'json'),
             1,
             [
                 'sudo',

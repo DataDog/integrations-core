@@ -8,10 +8,11 @@
         ],
         "statuses": [
             "ok",
-            "critical"
+            "critical",
+            "warning"
         ],
         "check": "hivemq.can_connect",
         "name": "Can Connect",
-        "description": "Returns `CRITICAL` if the Agent is unable to connect to HiveMQ, otherwise returns `OK`."
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to HiveMQ, `WARNING` if no metrics are collected, and `OK` otherwise."
     }
 ]

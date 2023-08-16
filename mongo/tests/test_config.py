@@ -21,10 +21,10 @@ def test_empty_hosts():
         MongoConfig(instance, mock.Mock())
 
 
-def test_default_ssl_params():
+def test_default_tls_params():
     instance = {'hosts': ['test.mongodb.com']}
     config = MongoConfig(instance, mock.Mock())
-    assert config.ssl_params == {}
+    assert config.tls_params == {}
 
 
 def test_default_scheme(instance):
@@ -89,3 +89,9 @@ def test_dbnames_non_empty(instance):
     instance['dbnames'] = ['test']
     config = MongoConfig(instance, mock.Mock())
     assert config.db_names == ['test']
+
+
+def test_custom_replicaSet_is_not_allowed(instance):
+    instance['options'] = {'replicaSet': 'foo'}
+    with pytest.raises(ConfigurationError, match='replicaSet'):
+        MongoConfig(instance, mock.Mock())

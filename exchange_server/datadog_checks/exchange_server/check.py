@@ -68,8 +68,8 @@ class CompatibilityPerfObject(PerfObject):
 
         self._aggregate_names = aggregate_names
 
-    def _configure_counters(self, available_counters, available_instances):
-        super()._configure_counters(available_counters, available_instances)
+    def _configure_counters(self):
+        super()._configure_counters()
 
         for counter in self.counters:
             if counter.name not in self._aggregate_names:

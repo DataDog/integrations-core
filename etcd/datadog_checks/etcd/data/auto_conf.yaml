@@ -26,8 +26,6 @@ instances:
     ## @param prometheus_url - string - optional - default: http://%%host%%:2379/metrics
     ## Prometheus endpoint of your etcd instance.
     ## One of possible_prometheus_urls or prometheus_url parameter is required.
-    ##
-    ## Note: To monitor ETCD versions pre-3.x.x, set `use_preview` to `false` and use the `url` configuration option.
     #
     # prometheus_url: http://%%host%%:2379/metrics
 

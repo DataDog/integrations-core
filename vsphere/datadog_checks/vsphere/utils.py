@@ -1,16 +1,16 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import List, Optional, Type
+from typing import Any, Dict, List, Optional, Type  # noqa: F401
 
 from pyVmomi import vim
 from six import iteritems
 
 from datadog_checks.base import to_string
-from datadog_checks.vsphere.config import VSphereConfig
+from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
 from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
-from datadog_checks.vsphere.resource_filters import ResourceFilter, match_any_regex
-from datadog_checks.vsphere.types import InfrastructureData, MetricFilters, MetricName
+from datadog_checks.vsphere.resource_filters import ResourceFilter, match_any_regex  # noqa: F401
+from datadog_checks.vsphere.types import InfrastructureData, MetricFilters, MetricName  # noqa: F401
 
 METRIC_TO_INSTANCE_TAG_MAPPING = {
     # Structure:
@@ -122,9 +122,8 @@ def get_tags_recursively(mor, infrastructure_data, config, include_only=None):
         tags.append('vsphere_datastore:{}'.format(entity_name))
 
     parent = infrastructure_data.get(mor, {}).get('parent')
-    if parent is None:
-        return tags
-    tags.extend(get_tags_recursively(parent, infrastructure_data, config))
+    if parent is not None:
+        tags.extend(get_tags_recursively(parent, infrastructure_data, config))
     if not include_only:
         return tags
     filtered_tags = []
@@ -154,3 +153,10 @@ def get_mapped_instance_tag(metric_name):
         if metric_name.startswith(prefix):
             return tag_key
     return 'instance'
+
+
+def add_additional_tags(tags, additional_tags):
+    # type: (List[str], Dict[str, Optional[Any]]) -> List[str]
+    for tag_name, tag_value in additional_tags.items():
+        if tag_value is not None:
+            tags.append("{}:{}".format(tag_name, tag_value))

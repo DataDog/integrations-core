@@ -66,8 +66,8 @@ def get_test_envs(
 
     checks_seen = set()
 
-    env_filter = os.environ.get("TOX_SKIP_ENV")
-    env_filter_re = re.compile(env_filter) if env_filter is not None else None
+    env_filter = os.environ.get("SKIP_ENV_NAME")
+    env_filter_re = re.compile(env_filter) if env_filter else None
 
     for check in checks:
         check, _, envs_selected = check.partition(':')
@@ -268,28 +268,41 @@ def select_hatch_envs(
     latest,
     env_filter_re,
 ):
+
+    available_envs = get_available_hatch_envs(check, sort, e2e_tests_only=e2e_tests_only)
+
     if style or format_style:
         envs_selected[:] = ['lint']
     elif benchmark:
         envs_selected[:] = [
             env_name
-            for env_name, config in get_available_hatch_envs(check, e2e_tests_only=e2e_tests_only).items()
+            for env_name, config in available_envs.items()
             if env_name == 'bench' or config.get('benchmark-env', False)
         ]
     elif latest:
         envs_selected[:] = [
             env_name
-            for env_name, config in get_available_hatch_envs(check, e2e_tests_only=e2e_tests_only).items()
+            for env_name, config in available_envs.items()
             if env_name == 'latest' or config.get('latest-env', False)
         ]
     elif not envs_selected:
-        envs_selected[:] = [
-            env_name
-            for env_name, config in get_available_hatch_envs(check, e2e_tests_only=e2e_tests_only).items()
-            if config.get('test-env', False)
-        ]
+        envs_selected[:] = [env_name for env_name, config in available_envs.items() if config.get('test-env', False)]
         if not e2e_tests_only:
             envs_selected.append('lint')
+    elif every:
+        envs_selected[:] = available_envs.keys()
+    else:
+        available = set(envs_selected) & available_envs.keys()
+        selected = []
+
+        # Retain order and remove duplicates
+        for env in envs_selected:
+            # TODO: support globs or regex
+            if env in available:
+                selected.append(env)
+                available.remove(env)
+
+        envs_selected[:] = selected
 
     if env_filter_re:
         envs_selected[:] = [e for e in envs_selected if not env_filter_re.match(e)]
@@ -506,7 +519,6 @@ def construct_pytest_options(
     e2e=False,
     ddtrace=False,
     memray=False,
-    memray_show_report=False,
 ):
     # Prevent no verbosity
     pytest_options = f'--verbosity={verbose or 1}'
@@ -541,9 +553,7 @@ def construct_pytest_options(
             # junit report file must contain the env name to handle multiple envs
             # $HATCH_ENV_ACTIVE is a Hatch injected variable
             # See https://hatch.pypa.io/latest/plugins/environment/reference/#hatch.env.plugin.interface.EnvironmentInterface.get_env_vars  # noqa
-            # $TOX_ENV_NAME is a tox injected variable
-            # See https://tox.readthedocs.io/en/latest/config.html#injected-environment-variables
-            f' --junit-xml=.junit/test-{test_group}-$HATCH_ENV_ACTIVE$TOX_ENV_NAME.xml'
+            f' --junit-xml=.junit/test-{test_group}-$HATCH_ENV_ACTIVE.xml'
             # Junit test results class prefix
             f' --junit-prefix={check}'
         )
@@ -565,9 +575,6 @@ def construct_pytest_options(
             abort('\nThe `--memray` option can only be used on Linux or MacOS!')
 
         pytest_options += ' --memray'
-
-        if not memray_show_report:
-            pytest_options += ' --hide-memray-summary'
 
     if marker:
         pytest_options += f' -m "{marker}"'

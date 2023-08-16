@@ -39,22 +39,32 @@ class PostgresConfig:
         self.dbstrict = is_affirmative(instance.get('dbstrict', False))
         self.disable_generic_tags = is_affirmative(instance.get('disable_generic_tags', False)) if instance else False
 
+        self.discovery_config = instance.get('database_autodiscovery', {"enabled": False})
+        if self.discovery_config['enabled'] and self.dbname != 'postgres':
+            raise ConfigurationError(
+                "'dbname' parameter should not be set when `database_autodiscovery` is enabled."
+                "To monitor more databases, add them to the `database_autodiscovery` includelist."
+            )
+
         self.application_name = instance.get('application_name', 'datadog-agent')
         if not self.isascii(self.application_name):
             raise ConfigurationError("Application name can include only ASCII characters: %s", self.application_name)
 
         self.query_timeout = int(instance.get('query_timeout', 5000))
+        self.idle_connection_timeout = instance.get('idle_connection_timeout', 60000)
         self.relations = instance.get('relations', [])
-        if self.relations and not self.dbname:
-            raise ConfigurationError('"dbname" parameter must be set when using the "relations" parameter.')
-
+        if self.relations and not (self.dbname or self.discovery_config['enabled']):
+            raise ConfigurationError(
+                '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
+            )
+        self.max_connections = instance.get('max_connections', 30)
         self.tags = self._build_tags(instance.get('tags', []))
 
         ssl = instance.get('ssl', False)
         if ssl in SSL_MODES:
             self.ssl_mode = ssl
         else:
-            self.ssl_mode = 'require' if is_affirmative(ssl) else 'disable'
+            self.ssl_mode = 'require' if ssl == "true" else 'disable'
 
         self.ssl_cert = instance.get('ssl_cert', None)
         self.ssl_root_cert = instance.get('ssl_root_cert', None)
@@ -65,6 +75,7 @@ class PostgresConfig:
         # Default value for `count_metrics` is True for backward compatibility
         self.collect_count_metrics = is_affirmative(instance.get('collect_count_metrics', True))
         self.collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', False))
+        self.activity_metrics_excluded_aggregations = instance.get('activity_metrics_excluded_aggregations', [])
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
         self.collect_wal_metrics = is_affirmative(instance.get('collect_wal_metrics', False))
         self.collect_bloat_metrics = is_affirmative(instance.get('collect_bloat_metrics', False))
@@ -88,12 +99,16 @@ class PostgresConfig:
         # statement samples & execution plans
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
+        self.settings_metadata_config = instance.get('collect_settings', {}) or {}
+        self.resources_metadata_config = instance.get('collect_resources', {}) or {}
         self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         self.cloud_metadata = {}
         aws = instance.get('aws', {})
         gcp = instance.get('gcp', {})
         azure = instance.get('azure', {})
+        # Remap fully_qualified_domain_name to name
+        azure = {k if k != 'fully_qualified_domain_name' else 'name': v for k, v in azure.items()}
         if aws:
             self.cloud_metadata.update({'aws': aws})
         if gcp:
@@ -119,6 +134,7 @@ class PostgresConfig:
         }
         self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
+        self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 1800)
 
     def _build_tags(self, custom_tags):
         # Clean up tags in case there was a None entry in the instance

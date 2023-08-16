@@ -5,6 +5,7 @@ from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.testing import requires_py3
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.iis import IIS
+from datadog_checks.iis.service_check import IIS_APPLICATION_POOL_STATE
 
 from .common import DEFAULT_COUNTERS, PERFORMANCE_OBJECTS
 
@@ -44,9 +45,13 @@ def test_check_all(aggregator, dd_default_hostname, dd_run_check, mock_performan
         )
 
         for metric_name, metric_type in app_pool_metrics_data:
+            old_value = value
+            if metric_name == "iis.app_pool.state" and value:
+                value = IIS_APPLICATION_POOL_STATE['Running']
             aggregator.assert_metric(
                 metric_name, value, metric_type=getattr(aggregator, metric_type.upper()), count=1, tags=tags
             )
+            value = old_value
 
     for site, value in (('foo.site', 9000), ('bar.site', 0)):
         tags = ['site:{}'.format(site)]
@@ -93,11 +98,15 @@ def test_check_specific(aggregator, dd_default_hostname, dd_run_check, mock_perf
         )
 
         for metric_name, metric_type in app_pool_metrics_data:
+            old_value = value
+            if metric_name == "iis.app_pool.state" and value:
+                value = IIS_APPLICATION_POOL_STATE['Running']
             aggregator.assert_metric_has_tag(metric_name, 'app_pool:bar-pool', count=0)
             if not app_pool.startswith('missing'):
                 aggregator.assert_metric(
                     metric_name, value, metric_type=getattr(aggregator, metric_type.upper()), count=1, tags=tags
                 )
+            value = old_value
 
     for site, value in (('foo.site', 9000), ('missing.site', 0)):
         tags = ['site:{}'.format(site)]
@@ -139,10 +148,14 @@ def test_check_include_patterns(aggregator, dd_default_hostname, dd_run_check, m
         )
 
         for metric_name, metric_type in app_pool_metrics_data:
+            old_value = value
+            if metric_name == "iis.app_pool.state" and value:
+                value = IIS_APPLICATION_POOL_STATE['Running']
             aggregator.assert_metric_has_tag(metric_name, 'app_pool:bar-pool', count=0)
             aggregator.assert_metric(
                 metric_name, value, metric_type=getattr(aggregator, metric_type.upper()), count=1, tags=tags
             )
+            value = old_value
 
     for site, value in (('foo.site', 9000),):
         tags = ['site:{}'.format(site)]
@@ -183,10 +196,14 @@ def test_check_exclude_patterns(aggregator, dd_default_hostname, dd_run_check, m
         )
 
         for metric_name, metric_type in app_pool_metrics_data:
+            old_value = value
+            if metric_name == "iis.app_pool.state" and value:
+                value = IIS_APPLICATION_POOL_STATE['Running']
             aggregator.assert_metric_has_tag(metric_name, 'app_pool:bar-pool', count=0)
             aggregator.assert_metric(
                 metric_name, value, metric_type=getattr(aggregator, metric_type.upper()), count=1, tags=tags
             )
+            value = old_value
 
     for site, value in (('foo.site', 9000),):
         tags = ['site:{}'.format(site)]

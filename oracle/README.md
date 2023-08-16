@@ -12,8 +12,10 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 #### Prerequisite
 
-To use the Oracle integration, either install the Oracle Instant Client libraries, or download the Oracle JDBC driver (Linux only).
-Due to licensing restrictions, these libraries are not included in the Datadog Agent, but can be downloaded directly from Oracle.
+To use the Oracle integration you can either use the native client (no additional install steps required), the Oracle Instant Client, or download the Oracle JDBC driver (Linux only). To use the Oracle integration with JDBC, download the Oracle JDBC driver. If you are not using the JDBC method, the minimum [supported version][2] is Oracle 12c.
+Due to licensing restrictions, the JDBC library is not included in the Datadog Agent, but can be downloaded directly from Oracle.
+
+*NOTE*: Starting in v7.42.x, the Oracle integration only supports Python 3.
 
 ##### Oracle Instant Client
 
@@ -21,10 +23,10 @@ Due to licensing restrictions, these libraries are not included in the Datadog A
 <!-- xxx tab "Linux" xxx -->
 ###### Linux
 
-1. Follow the [Oracle Instant Client installation for Linux][2].
+1. Follow the [Oracle Instant Client installation for Linux][17].
 
 2. Verify the following:
-    - Both the *Instant Client Basic* and *SDK* packages are installed. Find them on Oracle's [download page][3].
+    - Both the *Instant Client Basic* and *SDK* packages are installed. Find them on Oracle's [download page][18].
 
         After the Instant Client libraries are installed, ensure the runtime linker can find the libraries. For example, using `ldconfig`:
     
@@ -50,12 +52,12 @@ Due to licensing restrictions, these libraries are not included in the Datadog A
 <!-- xxx tab "Windows" xxx -->
 ###### Windows
 
-1. Follow the [Oracle Windows installation guide][4] to configure your Oracle Instant Client.
+1. Follow the [Oracle Windows installation guide][19] to configure your Oracle Instant Client.
 
 2. Verify the following:
-    - The [Microsoft Visual Studio 2017 Redistributable][5] or the appropriate version is installed for the Oracle Instant Client.
+    - The [Microsoft Visual Studio 2017 Redistributable][20] or the appropriate version is installed for the Oracle Instant Client.
 
-    - Both the *Instant Client Basic* and *SDK* packages from Oracle's [download page][3] are installed.
+    - Both the *Instant Client Basic* and *SDK* packages from Oracle's [download page][18] are installed.
 
     - Both packages are extracted into a single directory that is available to all users on the given machine (for example, `C:\oracle`).
 
@@ -71,8 +73,8 @@ Java 8 or higher is required on your system for JPype, one of the libraries used
 
 Once it is installed, complete the following steps: 
 
-1. [Download the JDBC Driver][6] JAR file.
-2. Add the path to the downloaded file in your `$CLASSPATH` or the check configuration file under `jdbc_driver_path` (see the [sample oracle.yaml][7]).
+1. [Download the JDBC Driver][4] JAR file.
+2. Add the path to the downloaded file in your `$CLASSPATH` or the check configuration file under `jdbc_driver_path` (see the [sample oracle.yaml][5]).
 
 #### Datadog user creation
 
@@ -131,35 +133,35 @@ GRANT SELECT ON gv_$sysmetric TO c##datadog CONTAINER=ALL;
 
 To configure this check for an Agent running on a host:
 
-1. Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][8]. Update the `server` and `port` to set the masters to monitor. See the [sample oracle.d/conf.yaml][7] for all available configuration options.
+1. Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6]. Update the `server` and `port` to set the masters to monitor. See the [sample oracle.d/conf.yaml][5] for all available configuration options.
 
    ```yaml
    init_config:
 
    instances:
-     ## @param server - string - required
-     ## The IP address or hostname of the Oracle Database Server.
-     #
-     - server: localhost:1521
-
-      ## @param service_name - string - required
-      ## The Oracle Database service name. To view the services available on your server,
-      ## run the following query: `SELECT value FROM v$parameter WHERE name='service_names'`
+      ## @param server - string - required
+      ## The IP address or hostname of the Oracle Database Server.
       #
-      service_name: <SERVICE_NAME>
+      - server: localhost:1521
 
-      ## @param username - string - required
-      ## The username for the Datadog user account.
-      #
-      username: <USERNAME>
+        ## @param service_name - string - required
+        ## The Oracle Database service name. To view the services available on your server,
+        ## run the following query: `SELECT value FROM v$parameter WHERE name='service_names'`
+        #
+        service_name: <SERVICE_NAME>
 
-      ## @param password - string - required
-      ## The password for the Datadog user account.
-      #
-      password: <PASSWORD>
+        ## @param username - string - required
+        ## The username for the Datadog user account.
+        #
+        username: <USERNAME>
+
+        ## @param password - string - required
+        ## The password for the Datadog user account.
+        #
+        password: <PASSWORD>
    ```
 
-2. [Restart the Agent][9].
+2. [Restart the Agent][7].
 
 
 #### Only custom queries
@@ -182,10 +184,10 @@ instances:
     #
     service_name: "<SERVICE_NAME>"
 
-    ## @param user - string - required
+    ## @param username - string - required
     ## The username for the user account.
     #
-    user: <USER>
+    username: <USER>
 
     ## @param password - string - required
     ## The password for the user account.
@@ -219,10 +221,10 @@ instances:
         #
         service_name: "<SERVICE_NAME>"
     
-        ## @param user - string - required
+        ## @param username - string - required
         ## The username for the user account.
         #
-        user: <USER>
+        username: <USER>
     
         ## @param password - string - required
         ## The password for the user account.
@@ -242,13 +244,18 @@ instances:
 
 2. Update the `sqlnet.ora`, `listener.ora`, and `tnsnames.ora` to allow TCPS connections on your Oracle Database. 
 
-##### TCPS through the Oracle Instant Client
+##### TCPS through Oracle without JDBC
 
-If you are connecting to Oracle Database using the Oracle Instant Client, verify that the Datadog Agent is able to connect to your database. Use the `sqlplus` command line tool with the information inputted in your configuration options:
+If you are not using JDBC, verify that the Datadog Agent is able to connect to your database. Use the `sqlplus` command line tool with the information inputted in your configuration options:
 
 ```shell
 sqlplus <USER>/<PASSWORD>@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCPS)(HOST=<HOST>)(PORT=<PORT>))(SERVICE_NAME=<SERVICE_NAME>)))
 ```
+
+When using the [Oracle Instant Client][16] connection, move three files to the `network/admin` directory of the client libraries used by your application:
+  * `tnsnames.ora`: Maps net service names used for application connection strings to your database services.
+  * `sqlnet.ora`: Configures Oracle Network settings.
+  * `cwallet.sso`: Enables SSL or TLS connections. Keep this file secure.
 
 ##### TCPS through JDBC
 
@@ -276,14 +283,14 @@ If you are connecting to Oracle Database using JDBC, you also need to specify `j
     # jdbc_truststore_password: <JDBC_TRUSTSTORE_PASSWORD>
 ```
 
-For more information about connecting to the Oracle Database through TCPS on JDBC, see the official [Oracle whitepaper][17].
+For more information about connecting to the Oracle Database through TCPS on JDBC, see the official [Oracle whitepaper][15].
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                                                                     |
 | -------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -297,17 +304,16 @@ For containerized environments, see the [Autodiscovery Integration Templates][10
 
 ### Validation
 
-[Run the Agent's status subcommand][11] and look for `oracle` under the Checks section.
+[Run the Agent's status subcommand][9] and look for `oracle` under the Checks section.
 
 ## Custom query
 
-Providing custom queries is also supported. Each query must have three parameters:
+Providing custom queries is also supported. Each query must have two parameters:
 
 | Parameter       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `metric_prefix` | This is what each metric starts with.                                                                                                                                                                                                                                                                                                                                                                                                         |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |                                                                                                                                                                
 | `query`         | This is the SQL to execute. It can be a simple statement or a multi-line script. All rows of the result are evaluated.                                                                                                                                                                                                                                                                                                                        |
-| `columns`       | This is a list representing each column, ordered sequentially from left to right. There are two required pieces of data: <br> a. `type` - This is the submission method (`gauge`, `count`, etc.). <br> b. name - This is the suffix to append to the `metric_prefix` in order to form the full metric name. If `type` is `tag`, this column is instead considered as a tag which is applied to every metric collected by this particular query. |
+| `columns`       | This is a list representing each column, ordered sequentially from left to right. There are two required pieces of data: <br> a. `type` - This is the submission method (`gauge`, `count`, etc.). <br> b. name - This is the suffix used to form the full metric name. If `type` is `tag`, this column is instead considered as a tag which is applied to every metric collected by this particular query. |
 
 Optionally use the `tags` parameter to apply a list of tags to each metric collected.
 
@@ -321,8 +327,7 @@ self.count('oracle.custom_query.metric2', value, tags=['tester:oracle', 'tag1:va
 is what the following example configuration would become:
 
 ```yaml
-- metric_prefix: oracle.custom_query
-  query: | # Use the pipe if you require a multi-line script.
+- query: | # Use the pipe if you require a multi-line script.
     SELECT columns
     FROM tester.test_table
     WHERE conditions
@@ -339,7 +344,7 @@ is what the following example configuration would become:
     - tester:oracle
 ```
 
-See the [sample oracle.d/conf.yaml][7] for all available configuration options.
+See the [sample oracle.d/conf.yaml][5] for all available configuration options.
 
 ### Example
 
@@ -352,14 +357,13 @@ Create a query configuration to help identify database locks:
   instances:
       - server: localhost:1521
         service_name: orcl11g.us.oracle.com
-        user: datadog
+        username: datadog
         password: xxxxxxx
         jdbc_driver_path: /u01/app/oracle/product/11.2/dbhome_1/jdbc/lib/ojdbc6.jar
         tags:
           - db:oracle
         custom_queries:
-          - metric_prefix: oracle.custom_query.locks
-            query: |
+          - query: |
               select blocking_session, username, osuser, sid, serial# as serial, wait_class, seconds_in_wait
               from v_$session
               where blocking_session is not NULL order by blocking_session
@@ -403,13 +407,13 @@ SQL> select blocking_session,username,osuser, sid, serial#, wait_class, seconds_
 where blocking_session is not NULL order by blocking_session;
 ```
 
-3. Once configured, you can create a [monitor][12] based on `oracle.custom_query.locks` metrics.
+3. Once configured, you can create a [monitor][10] based on `oracle.custom_query.locks` metrics.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][13] for a list of metrics provided by this integration.
+See [metadata.csv][11] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -417,55 +421,60 @@ The Oracle Database check does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][14] for a list of service checks provided by this integration.
+See [service_checks.json][12] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 ### Common problems
+
+#### Oracle Native Client
+- If you encounter a `DPY-6000: cannot connect to database`:
+  ```text
+  Failed to connect to Oracle DB, error: DPY-6000: cannot connect to database. Listener refused connection. (Similar to ORA-12660)
+  ```
+ - Ensure Native Network Encryption or Checksumming are not enabled. If they are enabled, you must use the Instant Client method by setting `use_instant_client: true`.
+
+For more information about setting up the Oracle Instant Client, see the [Oracle integration documentation][3].
+
 #### Oracle Instant Client
 - Verify that both the Oracle Instant Client and SDK files are located in the same directory.
 The structure of the directory should look similar:
-
-```text
-|____sdk/
-|____network/
-|____libociei.dylib
-|____libocci.dylib
-|____libocci.dylib.10.1
-|____adrci
-|____uidrvci
-|____libclntsh.dylib.19.1
-|____ojdbc8.jar
-|____BASIC_README
-|____liboramysql19.dylib
-|____libocijdbc19.dylib
-|____libocci.dylib.19.1
-|____libclntsh.dylib
-|____xstreams.jar
-|____libclntsh.dylib.10.1
-|____libnnz19.dylib
-|____libclntshcore.dylib.19.1
-|____libocci.dylib.12.1
-|____libocci.dylib.18.1
-|____libclntsh.dylib.11.1
-|____BASIC_LICENSE
-|____SDK_LICENSE
-|____libocci.dylib.11.1
-|____libclntsh.dylib.12.1
-|____libclntsh.dylib.18.1
-|____ucp.jar
-|____genezi
-|____SDK_README
-
-```
-
-##### Linux
-- See further Linux installation documentation on [Oracle][2].
-
-##### Windows
-- Verify the Microsoft Visual Studio `<YEAR>` Redistributable requirement is met for your version. See the [Windows downloads page][15] for more details.
-- See further Windows installation documentation on [Oracle][4].
-
+  ```text
+  |___ BASIC_LITE_LICENSE
+  |___ BASIC_LITE_README
+  |___ adrci
+  |___ genezi
+  |___ libclntsh.so -> libclntsh.so.19.1
+  |___ libclntsh.so.10.1 -> libclntsh.so.19.1
+  |___ libclntsh.so.11.1 -> libclntsh.so.19.1
+  |___ libclntsh.so.12.1 -> libclntsh.so.19.1
+  |___ libclntsh.so.18.1 -> libclntsh.so.19.1
+  |___ libclntsh.so.19.1
+  |___ libclntshcore.so.19.1
+  |___ libipc1.so
+  |___ libmql1.so
+  |___ libnnz19.so
+  |___ libocci.so -> libocci.so.19.1
+  |___ libocci.so.10.1 -> libocci.so.19.1
+  |___ libocci.so.11.1 -> libocci.so.19.1
+  |___ libocci.so.12.1 -> libocci.so.19.1
+  |___ libocci.so.18.1 -> libocci.so.19.1
+  |___ libocci.so.19.1
+  |___ libociicus.so
+  |___ libocijdbc19.so
+  |___ liboramysql19.so
+  |___ listener.ora
+  |___ network
+  |   `___ admin
+  |       |___ README
+  |       |___ cwallet.sso
+  |       |___ sqlnet.ora
+  |       `___ tnsnames.ora
+  |___ ojdbc8.jar
+  |___ ucp.jar
+  |___ uidrvci
+  `___ xstreams.jar
+  ```
 
 #### JDBC driver (Linux only)
 - If you encounter a `JVMNotFoundException`:
@@ -492,22 +501,25 @@ Ensure the displayed output matches the correct value.
       sudo -u dd-agent -- /opt/datadog-agent/embedded/bin/python -c "import os; print(\"JAVA_HOME:{}\".format(os.environ.get(\"JAVA_HOME\")))"
     ```
 
-Need help? Contact [Datadog support][16].
+Need help? Contact [Datadog support][14].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/oracle/images/oracle_dashboard.png
-[2]: https://docs.oracle.com/en/database/oracle/oracle-database/21/lacli/install-instant-client-using-zip.html
-[3]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
-[4]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html#ic_winx64_inst
-[5]: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
-[6]: https://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
-[7]: https://github.com/DataDog/integrations-core/blob/master/oracle/datadog_checks/oracle/data/conf.yaml.example
-[8]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[10]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[12]: https://docs.datadoghq.com/monitors/monitor_types/metric/?tab=threshold
-[13]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
-[14]: https://github.com/DataDog/integrations-core/blob/master/oracle/assets/service_checks.json
-[15]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
-[16]: https://docs.datadoghq.com/help/
-[17]: https://www.oracle.com/technetwork/topics/wp-oracle-jdbc-thin-ssl-130128.pdf
+[2]: https://oracle.github.io/python-oracledb/
+[3]: https://github.com/DataDog/integrations-core/tree/7.41.x/oracle#oracle-instant-client
+[4]: https://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
+[5]: https://github.com/DataDog/integrations-core/blob/master/oracle/datadog_checks/oracle/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[8]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[10]: https://docs.datadoghq.com/monitors/monitor_types/metric/?tab=threshold
+[11]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
+[12]: https://github.com/DataDog/integrations-core/blob/master/oracle/assets/service_checks.json
+[13]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
+[14]: https://docs.datadoghq.com/help/
+[15]: https://www.oracle.com/technetwork/topics/wp-oracle-jdbc-thin-ssl-130128.pdf
+[16]: https://python-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#install-the-wallet-and-network-configuration-files
+[17]: https://docs.oracle.com/en/database/oracle/oracle-database/21/lacli/install-instant-client-using-zip.html
+[18]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
+[19]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html#ic_winx64_inst
+[20]: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0

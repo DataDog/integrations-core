@@ -8,7 +8,7 @@ import os
 import re
 import warnings
 from base64 import urlsafe_b64encode
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple  # noqa: F401
 
 import pytest
 from six import PY2
@@ -160,7 +160,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
             root = new_root
 
         python_path = os.environ[E2E_PARENT_PYTHON]
-        env = os.environ.get('TOX_ENV_NAME') or os.environ['HATCH_ENV_ACTIVE']
+        env = os.environ['HATCH_ENV_ACTIVE']
 
         # TODO: switch to `ddev` when the old CLI is gone
         check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env, '--json']
@@ -186,12 +186,13 @@ def dd_agent_check(request, aggregator, datadog_agent):
         matches = re.findall(r'((?:\{ \[|\[).*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
 
         if not matches:
-            raise ValueError(
-                '{}{}\nCould not find valid check output'.format(
-                    result.stdout,
-                    result.stderr,
-                )
-            )
+            message_parts = []
+            debug_result = run_command(['docker', 'logs', 'dd_{}_{}'.format(check, env)], capture=True)
+            if not debug_result.code:
+                message_parts.append(debug_result.stdout + debug_result.stderr)
+
+            message_parts.append(result.stdout + result.stderr)
+            raise ValueError('{}\nCould not find valid check output'.format('\n'.join(message_parts)))
 
         for raw_json in matches:
             try:
@@ -297,13 +298,45 @@ def mock_performance_objects(mocker, dd_default_hostname):
                 instance_counts[instance_name] += 1
 
             for counter_name, values in counter_values.items():
-                for instance_name, index, value in zip(instances, instance_indices, values):
-                    counters[
-                        win32pdh.MakeCounterPath((server, object_name, instance_name, None, index, counter_name))
-                    ] = value
+                if len(values) == 0:
+                    continue
 
-        mocker.patch('win32pdh.ValidatePath', side_effect=lambda path: 0 if path in counters else 1)
+                if instance_name is None:
+                    # Single counter
+                    counters[win32pdh.MakeCounterPath((server, object_name, None, None, 0, counter_name))] = values[0]
+                else:
+                    # Multiple instance counter
+                    counter_path_wildcard = win32pdh.MakeCounterPath((server, object_name, '*', None, 0, counter_name))
+                    instance_values_wildcard = {}
+                    for instance_name, index, value in zip(instances, instance_indices, values):
+                        # Add single instance counter (in case like IIS is using exact per-instnace wildcard)
+                        counter_path_exact = win32pdh.MakeCounterPath(
+                            (server, object_name, instance_name, None, 0, counter_name)
+                        )
+                        instance_values_exact = {}
+                        instance_values_exact[instance_name] = value
+                        counters[counter_path_exact] = instance_values_exact
+
+                        # Add wildcard path/value
+                        if index == 0:
+                            instance_values_wildcard[instance_name] = value
+                        elif index == 1:
+                            # Replace single value as a two instance list
+                            non_unique_instance_value = [instance_values_wildcard[instance_name], value]
+                            instance_values_wildcard[instance_name] = non_unique_instance_value
+                        else:
+                            # Append to the list
+                            non_unique_instance_value = instance_values_wildcard[instance_name]
+                            non_unique_instance_value.append(value)
+                            instance_values_wildcard[instance_name] = non_unique_instance_value
+
+                    counters[counter_path_wildcard] = instance_values_wildcard
+
+        validate_path_fn_name = 'datadog_checks.base.checks.windows.perf_counters.counter.validate_path'
+        mocker.patch(validate_path_fn_name, side_effect=lambda x, y, path: True if path in counters else False)
         mocker.patch('win32pdh.GetFormattedCounterValue', side_effect=lambda path, _: (None, counters[path]))
+        get_counter_values_fn_name = 'datadog_checks.base.checks.windows.perf_counters.counter.get_counter_values'
+        mocker.patch(get_counter_values_fn_name, side_effect=lambda path, _: counters[path])
 
     return mock_perf_objects
 
@@ -320,8 +353,9 @@ def pytest_addoption(parser):
     parser.addoption("--run-latest-metrics", action="store_true", default=False, help="run check_metrics tests")
 
     if PY2:
-        # Add a dummy memray options to make it possible to run memray with `ddev test --memray <integration>`
-        # only on py3 environments
+        # Add dummy memray options to make it possible to run memray with `ddev test --memray <integration>`
+        # in both py2 and 3 environments. In py2 the option is simply ignored, see pytest_collection_modifyitems.
+        # In py3 the option enables the memray plugin.
         parser.addoption("--memray", action="store_true", default=False, help="Dummy parameter for memray")
         parser.addoption(
             "--hide-memray-summary",
@@ -340,9 +374,11 @@ def pytest_collection_modifyitems(config, items):
         return
 
     if PY2:
-        for option in ("--memray", "--hide-memray-summary"):
+        for option in ("--memray",):
             if config.getoption(option):
-                warnings.warn("`{}` option ignored as it's not supported for py2 environments.".format(option))
+                warnings.warn(  # noqa: B028
+                    "`{}` option ignored as it's not supported for py2 environments.".format(option)
+                )  # noqa: B028, E501
 
     skip_latest_metrics = pytest.mark.skip(reason="need --run-latest-metrics option to run")
     for item in items:

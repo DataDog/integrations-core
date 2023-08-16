@@ -1,0 +1,2 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+datadog.operator.go_info,gauge,,,,Go version,0,datadog_operator,go_info,

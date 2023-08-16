@@ -13,20 +13,21 @@
     pattern: '\w*'
 - name: raw_metric_prefix
   description: |
-    A prefix that will be removed from all exposed metric names, if present.
+    A prefix that is removed from all exposed metric names, if present.
     All configuration options will use the prefix-less name.
   value:
     type: string
     example: <PREFIX>_
     display_default: null
-- name: metrics  # Only shown for the `openmetrics` provider integration
+# Only shown for the generic `openmetrics` integration. Lets a user define which metrics they want to collect.
+- name: metrics
   hidden: true
   description: |
     This list defines which metrics to collect from the `openmetrics_endpoint`.
     Metrics may be defined in 3 ways:
 
     1. If the item is a string, then it represents the exposed metric name, and
-       the sent metric name will be identical. For example:
+       the sent metric name is identical. For example:
 
          metrics:
          - <METRIC_1>
@@ -38,7 +39,7 @@
               metrics:
               - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
               - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
-         b. If a value is a mapping, then it must have a `name` and/or `type` key.
+         b. If a value is a mapping, then it must have a `name` and, optionally, a `type` key.
             The `name` represents the sent metric name, and the `type` represents how
             the metric should be handled, overriding any type information the endpoint
             may provide. For example:
@@ -81,7 +82,9 @@
             - name: type
               type: string
             additionalProperties: true
-- name: extra_metrics  # Hidden for the `openmetrics` provider integration
+# Hidden for the generic `openmetrics` integration, which uses the `metrics` field.
+# For custom openmetrics-based integrations this allows users to specify metrics in addition to the built-in ones.
+- name: extra_metrics
   description: |
     This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
     what the check collects by default. If the check already collects a metric, then
@@ -120,7 +123,7 @@
     `promhttp_metric_handler_requests`. This submits to Datadog the metric name appended with `.count`.
     For more information, see:
     https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
-    
+
     Regular expressions may be used to match the exposed metric names, for example:
 
       extra_metrics:
@@ -156,7 +159,7 @@
       type: string
 - name: exclude_metrics_by_labels
   description: |
-    A mapping of labels where metrics with matching label name and values are ignored. To match
+    A mapping of labels to exclude metrics with matching label name and their corresponding metric values. To match
     all values of a label, set it to `true`.
 
     Note: Label filtering happens before `rename_labels`.
@@ -207,7 +210,7 @@
       type: string
 - name: rename_labels
   description: |
-    A mapping of label names to how they should be renamed.
+    A mapping of label names to their new names.
   value:
     example:
       <LABEL_NAME_1>: <NEW_LABEL_NAME_1>
@@ -220,6 +223,12 @@
   value:
     example: true
     type: boolean
+- name: ignore_connection_errors
+  description: |
+    Whether or not to ignore connection errors when scraping `openmetrics_endpoint`.
+  value:
+    example: false
+    type: boolean
 - name: hostname_label
   description: |
     Override the hostname for every metric submission with the value of one of its labels.
@@ -228,7 +237,7 @@
 - name: hostname_format
   description: |
     When `hostname_label` is set, this instructs the check how to format the values. The string
-    `<HOSTNAME>` will be replaced by the value of the label defined by `hostname_label`.
+    `<HOSTNAME>` is replaced by the value of the label defined by `hostname_label`.
   value:
     example: <HOSTNAME>
     type: string
@@ -240,7 +249,7 @@
     type: boolean
 - name: non_cumulative_histogram_buckets
   description: |
-    Whether or not histogram buckets should be non-cumulative and to come with a `lower_bound` tag.
+    Whether or not histogram buckets are non-cumulative and to come with a `lower_bound` tag.
   value:
     example: false
     type: boolean
@@ -286,7 +295,7 @@
     For example, the following configuration instructs the check to apply all labels from `metric_a`
     to all other metrics, the `node` label from `metric_b` to only those metrics that have a `pod`
     label value that matches the `pod` label value of `metric_b`, and all labels from `metric_c`
-    to all other metrics if its value is equal to `23` or `42`.
+    to all other metrics if their value is equal to `23` or `42`.
 
       share_labels:
         metric_a: true
@@ -340,7 +349,9 @@
     type: boolean
 - name: use_latest_spec
   description: |
-    Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
+    Whether or not the parser will strictly adhere to the OpenMetrics specification,
+    regardless of the received `Content-Type` header.
+  hidden: true
   value:
     example: false
     type: boolean
@@ -352,7 +363,7 @@
     type: boolean
 - name: ignore_tags
   description: |
-    A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+    A list of regular expressions used to ignore tags added by Autodiscovery and entries in the `tags` option.
   value:
     type: array
     items:

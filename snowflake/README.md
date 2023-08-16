@@ -74,12 +74,12 @@ datadog-agent integration install datadog-snowflake==2.0.1
         ## For more information on Snowflake account names,
         ## see https://docs.snowflake.com/en/user-guide/connecting.html#your-snowflake-account-name
         #
-      - account: <ACCOUNT>
+      - account: <ORG_NAME>-<ACCOUNT_NAME>
     
-        ## @param user - string - required
+        ## @param username - string - required
         ## Login name for the user.
         #
-        user: <USER>
+        username: <USER>
     
         ## @param password - string - required
         ## Password for the user
@@ -106,7 +106,7 @@ datadog-agent integration install datadog-snowflake==2.0.1
    
         # @param disable_generic_tags - boolean - optional - default: false
         # Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
-        # getting mixed with other integraton tags.
+        # getting mixed with other integration tags.
         # disable_generic_tags: true
     ```
 
@@ -305,7 +305,7 @@ Additional helpful documentation, links, and articles:
 
 
 [1]: https://www.snowflake.com/
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-v6-python-3/?tab=hostagent
 [4]: https://docs.snowflake.com/en/sql-reference/account-usage.html#enabling-account-usage-for-other-roles
 [5]: https://github.com/DataDog/integrations-core/blob/master/snowflake/datadog_checks/snowflake/data/conf.yaml.example

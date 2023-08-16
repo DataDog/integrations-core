@@ -13,8 +13,10 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta
 
 from pyVim import connect
-from pyVmomi import vim  # pylint: disable=E0611
-from pyVmomi import vmodl  # pylint: disable=E0611
+from pyVmomi import (
+    vim,  # pylint: disable=E0611
+    vmodl,  # pylint: disable=E0611
+)
 from six import itervalues
 from six.moves import range
 

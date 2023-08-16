@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from collections import defaultdict
+from datetime import date
 
 import click
 
@@ -116,12 +117,12 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     if os.path.exists(integration_dir):
         abort(f'Path `{integration_dir}` already exists!')
 
-    template_fields = {'manifest_version': '1.0.0'}
+    template_fields = {'manifest_version': '1.0.0', "today": date.today()}
     if non_interactive and repo_choice != 'core':
         abort(f'Cannot use non-interactive mode with repo_choice: {repo_choice}')
 
     if not non_interactive and not dry_run:
-        if repo_choice not in ['core', 'integrations']:
+        if repo_choice not in ['core', 'integrations-internal-core']:
             support_email = click.prompt('Email used for support requests')
             template_fields['email'] = support_email
             template_fields['email_packages'] = template_fields['email']
@@ -132,14 +133,11 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
             author_name = click.prompt('Your Company Name')
             homepage = click.prompt('The product or company homepage')
             sales_email = click.prompt('Email used for subscription notifications')
-            legal_email = click.prompt('The Legal email used to receive subscription notifications')
 
             template_fields['author'] = author_name
 
             eula = 'assets/eula.pdf'
-            template_fields[
-                'terms'
-            ] = f'\n  "terms": {{\n    "eula": "{eula}",\n    "legal_email": "{legal_email}"\n  }},'
+            template_fields['terms'] = f'\n  "terms": {{\n    "eula": "{eula}"\n  }},'
             template_fields[
                 'author_info'
             ] = f'\n  "author": {{\n    "name": "{author_name}",\n    "homepage": "{homepage}",\n    "vendor_id": "{TODO_FILL_IN}",\n    "sales_email": "{sales_email}",\n    "support_email": "{support_email}"\n  }},'  # noqa
@@ -152,7 +150,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
         else:
             # Fill in all common non Marketplace fields
             template_fields['pricing_plan'] = ''
-            if repo_choice in ['core', 'integrations']:
+            if repo_choice in ['core', 'integrations-internal-core']:
                 template_fields[
                     'author_info'
                 ] = """

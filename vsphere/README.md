@@ -61,18 +61,12 @@ collect_per_instance_filters:
 
 This check watches vCenter's Event Manager for events and emits them to Datadog. It emits the following event types:
 
-- AlarmStatusChangedEvent:Gray
+- AlarmStatusChangedEvent
 - VmBeingHotMigratedEvent
 - VmReconfiguredEvent
 - VmPoweredOnEvent
 - VmMigratedEvent
-- TaskEvent:Initialize powering On
-- TaskEvent:Power Off virtual machine
-- TaskEvent:Power On virtual machine
-- TaskEvent:Reconfigure virtual machine
-- TaskEvent:Relocate virtual machine
-- TaskEvent:Suspend virtual machine
-- TaskEvent:Migrate virtual machine
+- TaskEvent
 - VmMessageEvent
 - VmSuspendedEvent
 - VmPoweredOffEvent
@@ -99,7 +93,7 @@ The Datadog vSphere integration collects metrics and events from your [TKG][13] 
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/vsphere/images/vsphere_graph.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

@@ -1,0 +1,47 @@
+name: Test results for PRs
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test-results:
+    name: Publish test results
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Download and extract artifacts
+      id: download
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |-
+        mkdir -p artifacts && cd artifacts
+
+        artifacts_url=${{ github.event.workflow_run.artifacts_url }}
+
+        gh api --paginate "$artifacts_url" -q '.artifacts[] | [.name, .archive_download_url] | @tsv' | while read artifact
+        do
+          IFS=$'\t' read name url <<< "$artifact"
+          if [[ "$name" =~ ^(github-event|test-results)$ ]]; then
+            gh api $url > "$name.zip"
+            unzip -d "$name" "$name.zip"
+          fi
+        done
+
+        if ! [[ -d github-event && -d test-results ]]; then
+          exit 1
+        fi
+      continue-on-error: true
+
+    - name: Publish test results
+      if: steps.download.outcome == 'success'
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      with:
+        commit: ${{ github.event.workflow_run.head_sha }}
+        event_file: artifacts/github-event/event.json
+        event_name: ${{ github.event.workflow_run.event }}
+        files: "artifacts/test-results/*/*.xml"
+        compare_to_earlier_commit: false

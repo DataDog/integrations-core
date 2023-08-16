@@ -9,9 +9,10 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence, Union
+from types import MappingProxyType
+from typing import Any, Optional, Union
 
-from pydantic import BaseModel, Extra, Field, root_validator, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -20,186 +21,195 @@ from . import defaults, validators
 
 
 class AuthToken(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    reader: Optional[Mapping[str, Any]]
-    writer: Optional[Mapping[str, Any]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    reader: Optional[MappingProxyType[str, Any]] = None
+    writer: Optional[MappingProxyType[str, Any]] = None
 
 
 class ExtraMetric(BaseModel):
-    class Config:
-        extra = Extra.allow
-        allow_mutation = False
-
-    name: Optional[str]
-    type: Optional[str]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        extra='allow',
+        frozen=True,
+    )
+    name: Optional[str] = None
+    type: Optional[str] = None
 
 
 class IgnoreMetricsByLabels(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    target_label_key: Optional[str]
-    target_label_value_list: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    target_label_key: Optional[str] = None
+    target_label_value_list: Optional[tuple[str, ...]] = None
 
 
 class TargetMetric(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    label_to_match: Optional[str]
-    labels_to_get: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    label_to_match: Optional[str] = None
+    labels_to_get: Optional[tuple[str, ...]] = None
 
 
 class LabelJoins(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    target_metric: Optional[TargetMetric]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    target_metric: Optional[TargetMetric] = None
 
 
 class MetricPatterns(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class Metric(BaseModel):
-    class Config:
-        extra = Extra.allow
-        allow_mutation = False
-
-    name: Optional[str]
-    type: Optional[str]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        extra='allow',
+        frozen=True,
+    )
+    name: Optional[str] = None
+    type: Optional[str] = None
 
 
 class Proxy(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    http: Optional[str]
-    https: Optional[str]
-    no_proxy: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    http: Optional[str] = None
+    https: Optional[str] = None
+    no_proxy: Optional[tuple[str, ...]] = None
 
 
 class ShareLabel(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    labels: Optional[Sequence[str]]
-    match: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    labels: Optional[tuple[str, ...]] = None
+    match: Optional[tuple[str, ...]] = None
 
 
 class InstanceConfig(BaseModel):
-    class Config:
-        allow_mutation = False
+    model_config = ConfigDict(
+        validate_default=True,
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    allow_redirects: Optional[bool] = None
+    auth_token: Optional[AuthToken] = None
+    auth_type: Optional[str] = None
+    aws_host: Optional[str] = None
+    aws_region: Optional[str] = None
+    aws_service: Optional[str] = None
+    bearer_token_auth: Optional[Union[bool, str]] = None
+    bearer_token_path: Optional[str] = None
+    bearer_token_refresh_interval: Optional[int] = None
+    cache_metric_wildcards: Optional[bool] = None
+    cache_shared_labels: Optional[bool] = None
+    collect_counters_with_distributions: Optional[bool] = None
+    collect_histogram_buckets: Optional[bool] = None
+    connect_timeout: Optional[float] = None
+    disable_generic_tags: Optional[bool] = None
+    empty_default_hostname: Optional[bool] = None
+    enable_health_service_check: Optional[bool] = None
+    exclude_labels: Optional[tuple[str, ...]] = None
+    exclude_metrics: Optional[tuple[str, ...]] = None
+    exclude_metrics_by_labels: Optional[MappingProxyType[str, Union[bool, tuple[str, ...]]]] = None
+    extra_headers: Optional[MappingProxyType[str, Any]] = None
+    extra_metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, ExtraMetric]]], ...]] = None
+    headers: Optional[MappingProxyType[str, Any]] = None
+    health_service_check: Optional[bool] = None
+    histogram_buckets_as_distributions: Optional[bool] = None
+    hostname_format: Optional[str] = None
+    hostname_label: Optional[str] = None
+    ignore_connection_errors: Optional[bool] = None
+    ignore_metrics: Optional[tuple[str, ...]] = None
+    ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels] = None
+    ignore_tags: Optional[tuple[str, ...]] = None
+    include_labels: Optional[tuple[str, ...]] = None
+    kerberos_auth: Optional[str] = None
+    kerberos_cache: Optional[str] = None
+    kerberos_delegate: Optional[bool] = None
+    kerberos_force_initiate: Optional[bool] = None
+    kerberos_hostname: Optional[str] = None
+    kerberos_keytab: Optional[str] = None
+    kerberos_principal: Optional[str] = None
+    label_joins: Optional[LabelJoins] = None
+    label_to_hostname: Optional[str] = None
+    labels_mapper: Optional[MappingProxyType[str, Any]] = None
+    log_requests: Optional[bool] = None
+    metric_patterns: Optional[MetricPatterns] = None
+    metrics: tuple[Union[str, MappingProxyType[str, Union[str, Metric]]], ...]
+    min_collection_interval: Optional[float] = None
+    namespace: Optional[str] = Field(None, pattern='\\w*')
+    non_cumulative_histogram_buckets: Optional[bool] = None
+    ntlm_domain: Optional[str] = None
+    openmetrics_endpoint: Optional[str] = None
+    password: Optional[str] = None
+    persist_connections: Optional[bool] = None
+    prometheus_metrics_prefix: Optional[str] = None
+    prometheus_url: Optional[str] = None
+    proxy: Optional[Proxy] = None
+    raw_line_filters: Optional[tuple[str, ...]] = None
+    raw_metric_prefix: Optional[str] = None
+    read_timeout: Optional[float] = None
+    rename_labels: Optional[MappingProxyType[str, Any]] = None
+    request_size: Optional[float] = None
+    send_distribution_buckets: Optional[bool] = None
+    send_distribution_counts_as_monotonic: Optional[bool] = None
+    send_distribution_sums_as_monotonic: Optional[bool] = None
+    send_histograms_buckets: Optional[bool] = None
+    send_monotonic_counter: Optional[bool] = None
+    send_monotonic_with_gauge: Optional[bool] = None
+    service: Optional[str] = None
+    share_labels: Optional[MappingProxyType[str, Union[bool, ShareLabel]]] = None
+    skip_proxy: Optional[bool] = None
+    tag_by_endpoint: Optional[bool] = None
+    tags: Optional[tuple[str, ...]] = None
+    telemetry: Optional[bool] = None
+    timeout: Optional[float] = None
+    tls_ca_cert: Optional[str] = None
+    tls_cert: Optional[str] = None
+    tls_ignore_warning: Optional[bool] = None
+    tls_private_key: Optional[str] = None
+    tls_protocols_allowed: Optional[tuple[str, ...]] = None
+    tls_use_host_header: Optional[bool] = None
+    tls_verify: Optional[bool] = None
+    type_overrides: Optional[MappingProxyType[str, Any]] = None
+    use_latest_spec: Optional[bool] = None
+    use_legacy_auth_encoding: Optional[bool] = None
+    use_process_start_time: Optional[bool] = None
+    username: Optional[str] = None
 
-    allow_redirects: Optional[bool]
-    auth_token: Optional[AuthToken]
-    auth_type: Optional[str]
-    aws_host: Optional[str]
-    aws_region: Optional[str]
-    aws_service: Optional[str]
-    bearer_token_auth: Optional[Union[bool, str]]
-    bearer_token_path: Optional[str]
-    bearer_token_refresh_interval: Optional[int]
-    cache_metric_wildcards: Optional[bool]
-    cache_shared_labels: Optional[bool]
-    collect_counters_with_distributions: Optional[bool]
-    collect_histogram_buckets: Optional[bool]
-    connect_timeout: Optional[float]
-    disable_generic_tags: Optional[bool]
-    empty_default_hostname: Optional[bool]
-    enable_health_service_check: Optional[bool]
-    exclude_labels: Optional[Sequence[str]]
-    exclude_metrics: Optional[Sequence[str]]
-    exclude_metrics_by_labels: Optional[Mapping[str, Union[bool, Sequence[str]]]]
-    extra_headers: Optional[Mapping[str, Any]]
-    extra_metrics: Optional[Sequence[Union[str, Mapping[str, Union[str, ExtraMetric]]]]]
-    headers: Optional[Mapping[str, Any]]
-    health_service_check: Optional[bool]
-    histogram_buckets_as_distributions: Optional[bool]
-    hostname_format: Optional[str]
-    hostname_label: Optional[str]
-    ignore_metrics: Optional[Sequence[str]]
-    ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels]
-    ignore_tags: Optional[Sequence[str]]
-    include_labels: Optional[Sequence[str]]
-    kerberos_auth: Optional[str]
-    kerberos_cache: Optional[str]
-    kerberos_delegate: Optional[bool]
-    kerberos_force_initiate: Optional[bool]
-    kerberos_hostname: Optional[str]
-    kerberos_keytab: Optional[str]
-    kerberos_principal: Optional[str]
-    label_joins: Optional[LabelJoins]
-    label_to_hostname: Optional[str]
-    labels_mapper: Optional[Mapping[str, Any]]
-    log_requests: Optional[bool]
-    metric_patterns: Optional[MetricPatterns]
-    metrics: Sequence[Union[str, Mapping[str, Union[str, Metric]]]]
-    min_collection_interval: Optional[float]
-    namespace: Optional[str] = Field(None, regex='\\w*')
-    non_cumulative_histogram_buckets: Optional[bool]
-    ntlm_domain: Optional[str]
-    openmetrics_endpoint: Optional[str]
-    password: Optional[str]
-    persist_connections: Optional[bool]
-    prometheus_metrics_prefix: Optional[str]
-    prometheus_url: Optional[str]
-    proxy: Optional[Proxy]
-    raw_line_filters: Optional[Sequence[str]]
-    raw_metric_prefix: Optional[str]
-    read_timeout: Optional[float]
-    rename_labels: Optional[Mapping[str, Any]]
-    request_size: Optional[float]
-    send_distribution_buckets: Optional[bool]
-    send_distribution_counts_as_monotonic: Optional[bool]
-    send_distribution_sums_as_monotonic: Optional[bool]
-    send_histograms_buckets: Optional[bool]
-    send_monotonic_counter: Optional[bool]
-    send_monotonic_with_gauge: Optional[bool]
-    service: Optional[str]
-    share_labels: Optional[Mapping[str, Union[bool, ShareLabel]]]
-    skip_proxy: Optional[bool]
-    tag_by_endpoint: Optional[bool]
-    tags: Optional[Sequence[str]]
-    telemetry: Optional[bool]
-    timeout: Optional[float]
-    tls_ca_cert: Optional[str]
-    tls_cert: Optional[str]
-    tls_ignore_warning: Optional[bool]
-    tls_private_key: Optional[str]
-    tls_protocols_allowed: Optional[Sequence[str]]
-    tls_use_host_header: Optional[bool]
-    tls_verify: Optional[bool]
-    type_overrides: Optional[Mapping[str, Any]]
-    use_latest_spec: Optional[bool]
-    use_legacy_auth_encoding: Optional[bool]
-    use_process_start_time: Optional[bool]
-    username: Optional[str]
-
-    @root_validator(pre=True)
+    @model_validator(mode='before')
     def _initial_validation(cls, values):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-    @validator('*', pre=True, always=True)
-    def _ensure_defaults(cls, v, field):
-        if v is not None or field.required:
-            return v
+    @field_validator('*', mode='before')
+    def _validate(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name in info.context['configured_fields']:
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{field.name}')(field, v)
+        return validation.utils.make_immutable(value)
 
-    @validator('*')
-    def _run_validations(cls, v, field):
-        if not v:
-            return v
-
-        return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
-
-    @root_validator(pre=False)
-    def _final_validation(cls, values):
-        return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+    @model_validator(mode='after')
+    def _final_validation(cls, model):
+        return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))

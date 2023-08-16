@@ -12,9 +12,8 @@
     "title": "Microsoft Exchange Server",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Windows",
-      "Category::OS & System",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Supported OS::Windows"
     ]
   },
   "author": {

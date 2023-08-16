@@ -12,7 +12,13 @@ from .common import INSTANCE
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    yield INSTANCE, {'docker_platform': 'windows'}
+    yield INSTANCE, {
+        'docker_platform': 'windows',
+        'start_commands': [
+            # Install IIS
+            'powershell.exe -Command Add-WindowsFeature Web-Server'
+        ],
+    }
 
 
 @pytest.fixture

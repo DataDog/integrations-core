@@ -12,10 +12,11 @@
     "title": "Kubernetes API server metrics",
     "media": [],
     "classifier_tags": [
+      "Category::Containers",
+      "Category::Kubernetes",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Containers"
+      "Supported OS::macOS"
     ]
   },
   "author": {

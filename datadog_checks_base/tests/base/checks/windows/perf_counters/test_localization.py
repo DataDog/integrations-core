@@ -26,7 +26,7 @@ def test_default(aggregator, dd_run_check, mock_performance_objects):
     aggregator.assert_service_check('test.windows.perf.health', ServiceCheck.OK, tags=['server:{}'.format(SERVER)])
 
     win32pdh.AddEnglishCounter.assert_called_once_with(
-        mock.ANY, win32pdh.MakeCounterPath((SERVER, 'Foo', 'baz', None, 0, 'Bar'))
+        mock.ANY, win32pdh.MakeCounterPath((SERVER, 'Foo', '*', None, 0, 'Bar'))
     )
 
 
@@ -47,7 +47,7 @@ def test_localized_object(aggregator, dd_run_check, mock_performance_objects):
     aggregator.assert_service_check('test.windows.perf.health', ServiceCheck.OK, tags=['server:{}'.format(SERVER)])
 
     win32pdh.AddCounter.assert_called_once_with(
-        mock.ANY, win32pdh.MakeCounterPath((SERVER, 'Foo', 'baz', None, 0, 'Bar'))
+        mock.ANY, win32pdh.MakeCounterPath((SERVER, 'Foo', '*', None, 0, 'Bar'))
     )
 
 
@@ -68,7 +68,7 @@ def test_localized_global(aggregator, dd_run_check, mock_performance_objects):
     aggregator.assert_service_check('test.windows.perf.health', ServiceCheck.OK, tags=['server:{}'.format(SERVER)])
 
     win32pdh.AddCounter.assert_called_once_with(
-        mock.ANY, win32pdh.MakeCounterPath((SERVER, 'Foo', 'baz', None, 0, 'Bar'))
+        mock.ANY, win32pdh.MakeCounterPath((SERVER, 'Foo', '*', None, 0, 'Bar'))
     )
 
 
@@ -90,5 +90,5 @@ def test_localized_object_overrides_global(aggregator, dd_run_check, mock_perfor
     aggregator.assert_service_check('test.windows.perf.health', ServiceCheck.OK, tags=['server:{}'.format(SERVER)])
 
     win32pdh.AddEnglishCounter.assert_called_once_with(
-        mock.ANY, win32pdh.MakeCounterPath((SERVER, 'Foo', 'baz', None, 0, 'Bar'))
+        mock.ANY, win32pdh.MakeCounterPath((SERVER, 'Foo', '*', None, 0, 'Bar'))
     )

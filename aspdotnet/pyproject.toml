@@ -1,7 +1,8 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools<61",
+    "setuptools>=66; python_version > '3.0'",
+    "setuptools; python_version < '3.0'",
 ]
 build-backend = "hatchling.build"
 
@@ -9,7 +10,7 @@ build-backend = "hatchling.build"
 name = "datadog-aspdotnet"
 description = "The ASP.NET check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
 keywords = [
     "datadog",
     "datadog agent",
@@ -25,12 +26,12 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=25.1.0",
+    "datadog-checks-base>=32.6.0",
 ]
 dynamic = [
     "version",
@@ -39,7 +40,7 @@ dynamic = [
 [project.optional-dependencies]
 deps = [
     "pywin32==228; sys_platform == 'win32' and python_version < '3.0'",
-    "pywin32==304; sys_platform == 'win32' and python_version > '3.0'",
+    "pywin32==306; sys_platform == 'win32' and python_version > '3.0'",
 ]
 
 [project.urls]
@@ -53,8 +54,6 @@ include = [
     "/datadog_checks",
     "/tests",
     "/manifest.json",
-    "/requirements-dev.txt",
-    "/tox.ini",
 ]
 
 [tool.hatch.build.targets.wheel]

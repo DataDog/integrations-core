@@ -5,34 +5,97 @@ import mock
 import pytest
 from requests.exceptions import ConnectionError
 
+from datadog_checks.dev.testing import requires_py3
 from datadog_checks.gitlab import GitlabCheck
 
-from .common import AUTH_CONFIG, BAD_CONFIG, CONFIG, CUSTOM_TAGS, HOST, METRICS, assert_check
+from .common import (
+    CUSTOM_TAGS,
+    GITALY_METRICS_TO_TEST,
+    GITLAB_GITALY_PROMETHEUS_ENDPOINT,
+    GITLAB_TAGS,
+    HOST,
+    METRICS_TO_TEST,
+    METRICS_TO_TEST_V2,
+    assert_check,
+)
 
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
 
-def test_connection_failure(aggregator):
-    """
-    Make sure we're failing when the URL isn't right
-    """
+@pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
+def test_check(dd_run_check, aggregator, gitlab_check, get_config, use_openmetrics):
+    check = gitlab_check(get_config(use_openmetrics))
+    dd_run_check(check)
 
-    gitlab = GitlabCheck('gitlab', BAD_CONFIG['init_config'], instances=BAD_CONFIG['instances'])
+    assert_check(aggregator, METRICS_TO_TEST_V2 if use_openmetrics else METRICS_TO_TEST, use_openmetrics)
 
-    with pytest.raises(ConnectionError):
-        gitlab.check(BAD_CONFIG['instances'][0])
 
-    # We should get only one failed service check, the first
+@requires_py3
+def test_check_gitaly(dd_run_check, aggregator, gitlab_check, get_config):
+    from datadog_checks.gitlab.gitlab_v2 import GitlabCheckV2
+
+    config = get_config(True)
+    instance = config['instances'][0]
+    instance["gitaly_server_endpoint"] = GITLAB_GITALY_PROMETHEUS_ENDPOINT
+
+    dd_run_check(gitlab_check(config))
+
+    assert_check(aggregator, METRICS_TO_TEST_V2 + GITALY_METRICS_TO_TEST, True)
     aggregator.assert_service_check(
-        'gitlab.{}'.format(GitlabCheck.ALLOWED_SERVICE_CHECKS[0]),
-        status=GitlabCheck.CRITICAL,
-        tags=['gitlab_host:{}'.format(HOST), 'gitlab_port:1234'] + CUSTOM_TAGS,
-        count=1,
+        'gitlab.gitaly.openmetrics.health',
+        status=GitlabCheckV2.OK,
+        tags=GITLAB_TAGS + CUSTOM_TAGS + ['endpoint:{}'.format(GITLAB_GITALY_PROMETHEUS_ENDPOINT)],
     )
 
 
+def test_connection_failure(aggregator, gitlab_check, get_bad_config):
+    check = gitlab_check(get_bad_config(False))
+
+    with pytest.raises(ConnectionError):
+        check.check(None)
+
+    # We should get only one extra failed service check, the first (readiness)
+    for service_check in ("prometheus_endpoint_up", "readiness"):
+        aggregator.assert_service_check(
+            'gitlab.{}'.format(service_check),
+            status=GitlabCheck.CRITICAL,
+            tags=['gitlab_host:{}'.format(HOST), 'gitlab_port:1234'] + CUSTOM_TAGS,
+            count=1,
+        )
+
+    for service_check in ('liveness', 'health'):
+        aggregator.assert_service_check(
+            'gitlab.{}'.format(service_check),
+            count=0,
+        )
+
+
+@requires_py3
+def test_connection_failure_openmetrics(dd_run_check, aggregator, gitlab_check, get_bad_config):
+    check = gitlab_check(get_bad_config(True))
+
+    with pytest.raises(Exception, match="requests.exceptions.ConnectionError"):
+        dd_run_check(check)
+
+    aggregator.assert_service_check(
+        'gitlab.openmetrics.health',
+        status=GitlabCheck.CRITICAL,
+        tags=['gitlab_host:{}'.format(HOST), 'gitlab_port:1234']
+        + CUSTOM_TAGS
+        + ['endpoint:http://localhost:1234/-/metrics'],
+        count=1,
+    )
+
+    for service_check in ('readiness', 'liveness', 'health'):
+        aggregator.assert_service_check(
+            'gitlab.{}'.format(service_check),
+            status=GitlabCheck.CRITICAL,
+            count=1,
+        )
+
+
 @pytest.mark.parametrize(
-    'raw_version, version_metadata, count',
+    'raw_version, version_metadata',
     [
         pytest.param(
             '12.7.6',
@@ -43,7 +106,7 @@ def test_connection_failure(aggregator):
                 'version.patch': '6',
                 'version.raw': '12.7.6',
             },
-            5,
+            id="12.7.9",
         ),
         pytest.param(
             '1.4.5',
@@ -54,35 +117,37 @@ def test_connection_failure(aggregator):
                 'version.patch': '5',
                 'version.raw': '1.4.5',
             },
-            5,
+            id="1.4.5",
         ),
     ],
 )
-def test_check_submit_metadata(aggregator, datadog_agent, raw_version, version_metadata, count):
+@pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
+@pytest.mark.parametrize('enable_metadata_collection', [True, False])
+def test_check_submit_metadata(
+    dd_run_check,
+    aggregator,
+    datadog_agent,
+    raw_version,
+    version_metadata,
+    gitlab_check,
+    get_auth_config,
+    enable_metadata_collection,
+    use_openmetrics,
+):
     with mock.patch('datadog_checks.base.utils.http.requests.Response.json') as g:
         # mock the api call so that it returns the given version
         g.return_value = {"version": raw_version}
 
         datadog_agent.reset()
+        datadog_agent._config["enable_metadata_collection"] = enable_metadata_collection
 
-        instance = AUTH_CONFIG['instances'][0]
-        init_config = AUTH_CONFIG['init_config']
+        dd_run_check(gitlab_check(get_auth_config(use_openmetrics)))
 
-        gitlab = GitlabCheck('gitlab', init_config, instances=[instance])
-        gitlab.check_id = 'test:123'
-
-        gitlab.check(instance)
-        datadog_agent.assert_metadata('test:123', version_metadata)
-        datadog_agent.assert_metadata_count(count)
-
-
-def test_check_integration(aggregator, mock_data):
-    instance = CONFIG['instances'][0]
-    init_config = CONFIG['init_config']
-
-    gitlab = GitlabCheck('gitlab', init_config, instances=[instance])
-    gitlab.check(instance)
-    gitlab.check(instance)
-
-    assert_check(aggregator, METRICS)
-    aggregator.assert_all_metrics_covered()
+        # With use_openmetrics, we also have a request to get the service checks.
+        if enable_metadata_collection:
+            assert g.call_count == (2 if use_openmetrics else 1)
+            datadog_agent.assert_metadata('test:123', version_metadata)
+            datadog_agent.assert_metadata_count(5)
+        else:
+            assert g.call_count == (1 if use_openmetrics else 0)
+            datadog_agent.assert_metadata_count(0)

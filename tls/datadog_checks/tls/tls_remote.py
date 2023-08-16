@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import ssl
 from hashlib import sha256
-from struct import pack
+from struct import pack, unpack
 
 from cryptography.x509.base import load_der_x509_certificate
 from cryptography.x509.extensions import ExtensionNotFound
@@ -134,6 +134,27 @@ class TLSRemoteCheck(object):
             data = self._read_n_bytes_from_socket(sock, 1)
             if data != b'S':
                 raise Exception('Postgres endpoint does not support TLS')
+        elif protocol == "mysql":
+            self.log.debug('Switching connection to encrypted for %s protocol', protocol)
+            cap_protocol_41 = 1 << 9
+            cap_ssl = 1 << 11
+            cap_secure_connection = 1 << 15
+            capabilities = cap_protocol_41 | cap_ssl | cap_secure_connection
+            max_packet_len = 2**24 - 1
+            charset_id = 8  # latin1
+            # Form Protocol::SSLRequest packet
+            data_init = pack("<iIB23s", capabilities, max_packet_len, charset_id, b"")
+            # Form Mysql Protocol::Packet
+            packet_len = pack("<I", len(data_init))[:3]
+            packet_seq = pack("<B", 1)
+            packet = packet_len + packet_seq + data_init
+            # Read 4 bytes of header to get packet length
+            packet_header = self._read_n_bytes_from_socket(sock, 4)
+            btrl, btrh, packet_number = unpack("<HBB", packet_header)
+            bytes_to_read = btrl + (btrh << 16)
+            # Read Mysql welcome message
+            data = self._read_n_bytes_from_socket(sock, bytes_to_read)
+            sock.sendall(packet)
         else:
             raise Exception('Unsupported starttls protocol: ' + protocol)
 

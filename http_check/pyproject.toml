@@ -1,7 +1,8 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools<61",
+    "setuptools>=66; python_version > '3.0'",
+    "setuptools; python_version < '3.0'",
 ]
 build-backend = "hatchling.build"
 
@@ -24,25 +25,24 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=25.1.0",
+    "datadog-checks-base>=32.6.0",
 ]
 dynamic = [
     "version",
 ]
-
-[project.license]
-text = "BSD-3-Clause"
+license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
     "cryptography==3.3.2; python_version < '3.0'",
-    "cryptography==38.0.3; python_version > '3.0'",
-    "requests-ntlm==1.1.0",
+    "cryptography==41.0.3; python_version > '3.0'",
+    "requests-ntlm==1.1.0; python_version < '3.0'",
+    "requests-ntlm==1.2.0; python_version > '3.0'",
 ]
 
 [project.urls]
@@ -56,8 +56,6 @@ include = [
     "/datadog_checks",
     "/tests",
     "/manifest.json",
-    "/requirements-dev.txt",
-    "/tox.ini",
 ]
 
 [tool.hatch.build.targets.wheel]

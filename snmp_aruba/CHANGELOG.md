@@ -1,0 +1,4 @@
+# CHANGELOG - Aruba
+
+## Unreleased
+

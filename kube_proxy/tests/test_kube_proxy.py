@@ -6,10 +6,13 @@ import os
 
 import mock
 import pytest
+import requests
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.kube_proxy import KubeProxyCheck
 
 instance = {'prometheus_url': 'http://localhost:10249/metrics'}
+instance2 = {'prometheus_url': 'http://localhost:10249/metrics', 'health_url': 'http://1.2.3.4:5678/healthz'}
 
 # Constants
 CHECK_NAME = 'kube_proxy'
@@ -91,3 +94,38 @@ def test_check_userspace(aggregator, mock_userspace):
         NAMESPACE + '.rest.client.requests', tags=['method:POST', 'host:127.0.0.1:8080', 'code:201']
     )
     aggregator.assert_all_metrics_covered()
+
+
+def test_service_check_default_url():
+    c = KubeProxyCheck(CHECK_NAME, {}, [instance])
+    assert c.instance['health_url'] == 'http://localhost:10256/healthz'
+
+
+def test_service_check_custom_url():
+    c = KubeProxyCheck(CHECK_NAME, {}, [instance2])
+    assert c.instance['health_url'] == 'http://1.2.3.4:5678/healthz'
+
+
+def test_service_check_ok(monkeypatch):
+    instance_tags = []
+
+    check = KubeProxyCheck(CHECK_NAME, {}, [instance])
+
+    monkeypatch.setattr(check, 'service_check', mock.Mock())
+
+    calls = [
+        mock.call(NAMESPACE + '.up', AgentCheck.OK, tags=instance_tags),
+        mock.call(NAMESPACE + '.up', AgentCheck.CRITICAL, tags=instance_tags, message='health check failed'),
+    ]
+
+    # successful health check
+    with mock.patch("requests.get", return_value=mock.MagicMock(status_code=200)):
+        check._perform_service_check(instance)
+
+    # failed health check
+    raise_error = mock.Mock()
+    raise_error.side_effect = requests.HTTPError('health check failed')
+    with mock.patch("requests.get", return_value=mock.MagicMock(raise_for_status=raise_error)):
+        check._perform_service_check(instance)
+
+    check.service_check.assert_has_calls(calls)

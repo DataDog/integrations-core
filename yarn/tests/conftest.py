@@ -9,7 +9,7 @@ import pytest
 from mock import patch
 from requests.exceptions import SSLError
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, run_command
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.yarn import YarnCheck
@@ -32,9 +32,13 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
         mount_logs=True,
-        conditions=[CheckEndpoints(INSTANCE_INTEGRATION['resourcemanager_uri'], attempts=240)],
+        conditions=[CheckEndpoints(INSTANCE_INTEGRATION['resourcemanager_uri'], attempts=240), run_yarn_app],
     ):
         yield INSTANCE_INTEGRATION
+
+
+def run_yarn_app():
+    return run_command(['docker', 'exec', '-d', 'dd-yarn', '/bin/bash', '/run_app.sh'], capture=True, check=True)
 
 
 @pytest.fixture

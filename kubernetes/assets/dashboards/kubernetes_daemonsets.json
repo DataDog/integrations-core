@@ -978,6 +978,5 @@
   ],
   "layout_type": "free",
   "is_read_only": true,
-  "notify_list": [],
-  "id": "jds-32x-gnf"
+  "notify_list": []
 }

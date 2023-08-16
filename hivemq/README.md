@@ -119,8 +119,14 @@ See [service_checks.json][11] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][5].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Use HiveMQ and OpenTelemetry to monitor IoT applications in Datadog][12]
+
 [1]: https://www.hivemq.com/hivemq/
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/hivemq/datadog_checks/hivemq/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/integrations/java
 [5]: https://docs.datadoghq.com/help
@@ -130,3 +136,4 @@ Need help? Contact [Datadog support][5].
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/hivemq/metadata.csv
 [11]: https://github.com/DataDog/integrations-core/blob/master/hivemq/assets/service_checks.json
+[12]: https://www.datadoghq.com/blog/hivemq-opentelemetry-monitor-iot-applications/

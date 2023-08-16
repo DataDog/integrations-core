@@ -102,13 +102,15 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
 
     # Check all required headers are present
     h2s = [h2.text for h2 in soup.find_all("h2")]
-    if "Overview" not in h2s or "Setup" not in h2s:
-        files_failed[readme_path] = True
-        display_queue.append((echo_failure, "     readme is missing either an Overview or Setup H2 (##) section"))
 
-    if "Support" not in h2s and repo == 'marketplace':
-        files_failed[readme_path] = True
-        display_queue.append((echo_failure, "     readme is missing a Support H2 (##) section"))
+    for header in ("Overview", "Setup"):
+        validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
+
+    if repo == 'marketplace':
+        for header in ("Support", "Uninstallation"):
+            validate_header(h2s, header, files_failed, readme_path, display_queue, soup)
+            if header == "Uninstallation":
+                validate_no_images(h2s, header, files_failed, readme_path, display_queue, soup)
 
     # Check all referenced images are in the `images` folder and that
     # they use the `raw.githubusercontent` format or relative paths to the `images` folder
@@ -137,6 +139,32 @@ def validate_readme(integration, repo, display_queue, files_failed, readme_count
             error_msg += f" Image currently is: {img_src}"
 
             display_queue.append((echo_failure, error_msg))
+
+
+# Method to validate header exists and there is text under it
+def validate_header(h2s, header, files_failed, readme_path, display_queue, soup):
+    if header not in h2s:
+        files_failed[readme_path] = True
+        display_queue.append((echo_failure, f"     readme is missing a {header} H2 (##) section"))
+    else:
+        curr_header = soup.find('h2', text=header)
+        curr_instructions = curr_header.find_next()
+        if curr_instructions.name == "h2":
+            files_failed[readme_path] = True
+            display_queue.append((echo_failure, f"     readme has an empty {header} H2 (##) section"))
+
+
+# Method to validate no images are present within the header
+def validate_no_images(h2s, header, files_failed, readme_path, display_queue, soup):
+    if header not in h2s:
+        return
+    curr_header = soup.find('h2', text=header)
+    curr_text = curr_header.find_next()
+    while curr_text is not None and curr_text.name != "h2":
+        if curr_text.name == "img":
+            files_failed[readme_path] = True
+            display_queue.append((echo_failure, f"     readme has an image in {header} H2 (##) section"))
+        curr_text = curr_text.find_next()
 
 
 def get_ascii_enforcement_error_lines(contents):

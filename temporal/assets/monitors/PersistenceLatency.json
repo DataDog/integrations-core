@@ -1,0 +1,28 @@
+{
+	"name": "Temporal persistence latency is elevated",
+	"type": "query alert",
+	"query": "avg(last_5m):sum:temporal.server.persistence.latency.sum{*}.as_rate() / sum:temporal.server.persistence.latency.count{*}.as_rate() > 1000",
+	"message": "The latency for the Temporal persistence is elevated ({{ value }}).",
+	"tags": [
+                "integration:temporal"
+        ],
+	"options": {
+		"thresholds": {
+			"critical": 1000,
+			"warning": 500
+		},
+		"notify_audit": false,
+		"require_full_window": false,
+		"notify_no_data": false,
+		"renotify_interval": 0,
+		"include_tags": false,
+		"avalanche_window": 10,
+		"new_host_delay": 300,
+		"silenced": {}
+	},
+	"priority": null,
+	"restricted_roles": null,
+        "recommended_monitor_metadata": {
+		"description": "Get notified when the persistence's latency is elevated."
+	}
+}

@@ -387,7 +387,7 @@ instances:
 
     ## @param disable_generic_tags - boolean - optional - default: false
     ## Generic tags such as `host` will be replaced by `apache_host` to avoid
-    ## getting mixed with other integraton tags.
+    ## getting mixed with other integration tags.
     #
     disable_generic_tags: true
 

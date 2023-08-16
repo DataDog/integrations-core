@@ -1204,6 +1204,5 @@
   "layout_type": "ordered",
   "is_read_only": false,
   "notify_list": [],
-  "reflow_type": "fixed",
-  "id": "h56-er6-yfh"
+  "reflow_type": "fixed"
 }

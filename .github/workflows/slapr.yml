@@ -10,25 +10,17 @@ on:
 jobs:
   run_slapr_agent_integrations:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        slack_channel_variable:
+          - SLACK_CHANNEL_ID
+          - SLACK_CHANNEL_ID_AGENT_INTEGRATIONS_TOOLS_SQUAD
+          - SLACK_CHANNEL_ID_INFRA_INTEGRATIONS
     steps:
     - uses: DataDog/slapr@master
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        SLACK_CHANNEL_ID: "${{ secrets.SLACK_CHANNEL_ID }}"
-        SLACK_API_TOKEN: "${{ secrets.SLACK_API_TOKEN }}"
-        SLAPR_BOT_USER_ID: "${{ secrets.SLAPR_BOT_USER_ID }}"
-        SLAPR_EMOJI_REVIEW_STARTED: "review_started"
-        SLAPR_EMOJI_APPROVED: "approved2"
-        SLAPR_EMOJI_CHANGES_REQUESTED: "changes_requested"
-        SLAPR_EMOJI_MERGED: "merged"
-        SLAPR_EMOJI_CLOSED: "closed"
-  run_slapr_infra_integrations:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: DataDog/slapr@master
-      env:
-        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        SLACK_CHANNEL_ID: "${{ secrets.SLACK_CHANNEL_ID_INFRA_INTEGRATIONS }}"
+        SLACK_CHANNEL_ID: "${{ secrets[matrix.slack_channel_variable] }}"
         SLACK_API_TOKEN: "${{ secrets.SLACK_API_TOKEN }}"
         SLAPR_BOT_USER_ID: "${{ secrets.SLAPR_BOT_USER_ID }}"
         SLAPR_EMOJI_REVIEW_STARTED: "review_started"

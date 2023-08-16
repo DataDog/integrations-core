@@ -153,6 +153,18 @@ YARN_QUEUE_METRICS = {
     'maxApplicationsPerUser': ('yarn.queue.max_applications_per_user', GAUGE),
 }
 
+APPLICATION_STATES = {
+    'ALL',
+    'NEW',
+    'NEW_SAVING',
+    'SUBMITTED',
+    'ACCEPTED',
+    'RUNNING',
+    'FINISHED',
+    'FAILED',
+    'KILLED',
+}
+
 
 class YarnCheck(AgentCheck):
     """
@@ -234,19 +246,45 @@ class YarnCheck(AgentCheck):
         """
         Get metrics for running applications
         """
+
+        # init_config.collect_apps_states_list < init_config.collect_apps_all_states
+        # < instance.collect_apps_states_list < instance.collect_apps_all_states
+
+        collect_apps_all_states = is_affirmative(
+            self.instance.get(
+                'collect_apps_all_states', is_affirmative(self.init_config.get('collect_apps_all_states', False))
+            )
+        )
+
+        collect_apps_states_list = self.instance.get(
+            'collect_apps_states_list', self.init_config.get('collect_apps_states_list', ['RUNNING'])
+        )
+        collect_apps_states_list = [state.upper() for state in collect_apps_states_list]
+
+        if collect_apps_all_states:
+            if collect_apps_states_list:
+                self.log.warning(
+                    "Detected configured collect_apps_states and collect_apps_all_states values, "
+                    "overriding collect_apps_states to collect all application states"
+                )
+            collect_apps_states_list = APPLICATION_STATES
+
         metrics_json = self._rest_request_to_json(rm_address, YARN_APPS_PATH, addl_tags)
 
         if metrics_json and metrics_json.get('apps') and metrics_json['apps'].get('app') is not None:
             for app_json in metrics_json['apps']['app']:
-                tags = self._get_app_tags(app_json, app_tags) + addl_tags
+                app_state = app_json['state']
+                tags = self._get_app_tags(app_json, app_tags)
+                tags.extend(addl_tags)
+                tags.append('state:{}'.format(app_state))
 
-                if app_json['state'] == YARN_APPLICATION_RUNNING:
+                if app_state in collect_apps_states_list:
                     self._set_yarn_metrics_from_json(tags, app_json, DEPRECATED_YARN_APP_METRICS)
                     self._set_yarn_metrics_from_json(tags, app_json, YARN_APP_METRICS)
 
                 self.service_check(
                     APPLICATION_STATUS_SERVICE_CHECK,
-                    self.application_status_mapping.get(app_json['state'], AgentCheck.UNKNOWN),
+                    self.application_status_mapping.get(app_state, AgentCheck.UNKNOWN),
                     tags=tags,
                 )
 

@@ -31,9 +31,11 @@ No additional installation is needed on your server.
 
 ##### Log collection
 
+<!-- partial
 {{< site-region region="us3" >}}
 **Log collection is not supported for this site.**
 {{< /site-region >}}
+partial -->
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -69,9 +71,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 ##### Log collection
 
+<!-- partial
 {{< site-region region="us3" >}}
 **Log collection is not supported for this site.**
 {{< /site-region >}}
+partial -->
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][6].
 
@@ -106,7 +110,7 @@ Need help? Contact [Datadog support][10].
 
 [1]: https://www.singlestore.com/
 [2]: https://docs.datadoghq.com/getting_started/agent/autodiscovery#integration-templates
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/singlestore/datadog_checks/singlestore/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/kubernetes/log/

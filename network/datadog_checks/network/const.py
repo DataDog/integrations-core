@@ -37,6 +37,7 @@ ENA_METRIC_NAMES = [
     "conntrack_allowance_exceeded",
     "linklocal_allowance_exceeded",
     "pps_allowance_exceeded",
+    "conntrack_allowance_available",
 ]
 
 ETHTOOL_METRIC_NAMES = {

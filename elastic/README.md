@@ -59,7 +59,9 @@ To configure this check for an Agent running on a host:
       - To use the Agent's Elasticsearch integration for the AWS Elasticsearch services, set the `url` parameter to point to your AWS Elasticsearch stats URL.
       - All requests to the Amazon ES configuration API must be signed. See the [Making and signing OpenSearch Service requests][6] for details.
       - The `aws` auth type relies on [boto3][7] to automatically gather AWS credentials from `.aws/credentials`. Use `auth_type: basic` in the `conf.yaml` and define the credentials with `username: <USERNAME>` and `password: <PASSWORD>`.
-      - You must create a user and a role (if you don't already have them) in Elasticsearch with the proper permissions to monitor. This can be done through the REST API offered by Elasticsearch, or through the Kibana UI. Include the following properties in the created role:
+      - You must create a user and a role (if you don't already have them) in Elasticsearch with the proper permissions to monitor. This can be done through the REST API offered by Elasticsearch, or through the Kibana UI.
+      - If you have enabled security features in Elastic Search, you can use `monitor` or `manage` privilege while using the API to make the calls to the Elastic Search indices.
+      - Include the following properties in the created role:
         ```json
         name = "datadog"
         indices {
@@ -102,6 +104,20 @@ custom_queries:
    - custom_tag:1
 ```
 The custom query sends as a `GET` request. If you use an optional `payload` parameter, the request sends as a `POST` request. 
+
+`value_path` may either be string keys or list indices. Example:
+```json
+{
+  "foo": {
+    "bar": [
+      "result0",
+      "result1"
+    ]
+  }
+}
+```
+
+`value_path: foo.bar.1` returns the value `result1`.
 
 ##### Trace collection
 
@@ -393,6 +409,7 @@ By default, not all of the following metrics are sent by the Agent. To send all 
 - `pshard_stats` sends **elasticsearch.primaries.\*** and **elasticsearch.indices.count** metrics
 - `index_stats` sends **elasticsearch.index.\*** metrics
 - `pending_task_stats` sends **elasticsearch.pending\_\*** metrics
+- `slm_stats` sends **elasticsearch.slm.\*** metrics
 
 ### Metrics
 
@@ -417,7 +434,7 @@ See [service_checks.json][26] for a list of service checks provided by this inte
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/elastic/images/elasticsearch-dash.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/elastic/datadog_checks/elastic/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags?tab=noncontainerizedenvironments#file-location

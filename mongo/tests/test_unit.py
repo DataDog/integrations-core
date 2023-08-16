@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import logging
 from urllib.parse import quote_plus
 
 import mock
@@ -11,7 +12,7 @@ from six import iteritems
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mongo import MongoDb, metrics
-from datadog_checks.mongo.api import MongoApi
+from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
 from datadog_checks.mongo.collectors import MongoCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, get_state_name
 from datadog_checks.mongo.config import MongoConfig
@@ -45,12 +46,13 @@ def test_emits_critical_service_check_when_service_is_not_available(mock_command
     # Given
     check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
     # When
-    dd_run_check(check)
+    with pytest.raises(Exception, match="pymongo.errors.ConnectionFailure: Service not available"):
+        dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.CRITICAL)
 
 
-@mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'parsed': {}}])
+@mock.patch('pymongo.database.Database.command', side_effect=[{'parsed': {}}])
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
 @mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_when_service_is_available(
@@ -65,7 +67,7 @@ def test_emits_ok_service_check_when_service_is_available(
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
 
 
-@mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'parsed': {}}])
+@mock.patch('pymongo.database.Database.command', side_effect=[{'parsed': {}}])
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
 @mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_each_run_when_service_is_available(
@@ -81,7 +83,7 @@ def test_emits_ok_service_check_each_run_when_service_is_available(
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK, count=2)
 
 
-@mock.patch('pymongo.database.Database.command', side_effect=[{'ok': 1}, {'parsed': {}}])
+@mock.patch('pymongo.database.Database.command', side_effect=[{'parsed': {}}])
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
 @mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_version_metadata(
@@ -108,7 +110,7 @@ def test_version_metadata(
 
 @mock.patch(
     'pymongo.database.Database.command',
-    side_effect=[{'ok': 1}, Exception('getCmdLineOpts exception'), {'msg': 'isdbgrid'}],
+    side_effect=[Exception('getCmdLineOpts exception'), {'msg': 'isdbgrid'}],
 )
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
 @mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
@@ -122,7 +124,7 @@ def test_emits_ok_service_check_when_alibaba_mongos_deployment(
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
-    mock_command.assert_has_calls([mock.call('ping'), mock.call('getCmdLineOpts'), mock.call('isMaster')])
+    mock_command.assert_has_calls([mock.call('getCmdLineOpts'), mock.call('isMaster')])
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
 
@@ -130,7 +132,6 @@ def test_emits_ok_service_check_when_alibaba_mongos_deployment(
 @mock.patch(
     'pymongo.database.Database.command',
     side_effect=[
-        {'ok': 1},
         Exception('getCmdLineOpts exception'),
         {},
         {'configsvr': True, 'set': 'replset', "myState": 1},
@@ -148,11 +149,34 @@ def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deploymen
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
-    mock_command.assert_has_calls(
-        [mock.call('ping'), mock.call('getCmdLineOpts'), mock.call('isMaster'), mock.call('replSetGetStatus')]
-    )
+    mock_command.assert_has_calls([mock.call('getCmdLineOpts'), mock.call('isMaster'), mock.call('replSetGetStatus')])
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
+
+
+@mock.patch(
+    'pymongo.database.Database.command',
+    side_effect=[
+        Exception('getCmdLineOpts exception'),
+        {},
+        {'configsvr': True, 'set': 'replset', "myState": 3},
+    ],
+)
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+def test_when_replicaset_state_recovering_then_database_names_not_called(
+    mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
+):
+    # Given
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    check.refresh_collectors = mock.MagicMock()
+    # When
+    dd_run_check(check)
+    # Then
+    aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
+    mock_command.assert_has_calls([mock.call('getCmdLineOpts'), mock.call('isMaster'), mock.call('replSetGetStatus')])
+    mock_server_info.assert_called_once()
+    mock_list_database_names.assert_not_called()
 
 
 @pytest.mark.parametrize(
@@ -298,15 +322,15 @@ def test_parse_server_config(check):
         'username': 'john doe',  # Space
         'password': 'p@ss\\word',  # Special characters
         'database': 'test',
-        'options': {'replicaSet': 'bar!baz'},  # Special character
+        'options': {'authSource': 'bar!baz'},  # Special character
     }
     config = check(instance)._config
     assert config.username == 'john doe'
     assert config.password == 'p@ss\\word'
     assert config.db_name == 'test'
     assert config.hosts == ['localhost', 'localhost:27018']
-    assert config.clean_server_name == 'mongodb://john doe:*****@localhost,localhost:27018/test?replicaSet=bar!baz'
-    assert config.auth_source == 'test'
+    assert config.clean_server_name == 'mongodb://john doe:*****@localhost,localhost:27018/test?authSource=bar!baz'
+    assert config.auth_source == 'bar!baz'
     assert config.do_auth is True
 
 
@@ -317,14 +341,14 @@ def test_username_no_password(check):
         'hosts': ['localhost', 'localhost:27018'],
         'username': 'john doe',  # Space
         'database': 'test',
-        'options': {'replicaSet': 'bar!baz'},  # Special character
+        'options': {'authSource': 'bar!baz'},  # Special character
     }
     config = check(instance)._config
     assert config.username == 'john doe'
     assert config.db_name == 'test'
     assert config.hosts == ['localhost', 'localhost:27018']
-    assert config.clean_server_name == 'mongodb://john doe@localhost,localhost:27018/test?replicaSet=bar!baz'
-    assert config.auth_source == 'test'
+    assert config.clean_server_name == 'mongodb://john doe@localhost,localhost:27018/test?authSource=bar!baz'
+    assert config.auth_source == 'bar!baz'
     assert config.do_auth is True
 
 
@@ -334,14 +358,14 @@ def test_no_auth(check):
     instance = {
         'hosts': ['localhost', 'localhost:27018'],
         'database': 'test',
-        'options': {'replicaSet': 'bar!baz'},  # Special character
+        'options': {'authSource': 'bar!baz'},  # Special character
     }
     config = check(instance)._config
     assert config.username is None
     assert config.db_name == 'test'
     assert config.hosts == ['localhost', 'localhost:27018']
-    assert config.clean_server_name == "mongodb://localhost,localhost:27018/test?replicaSet=bar!baz"
-    assert config.auth_source == 'test'
+    assert config.clean_server_name == "mongodb://localhost,localhost:27018/test?authSource=bar!baz"
+    assert config.auth_source == 'bar!baz'
     assert config.do_auth is False
 
 
@@ -406,12 +430,13 @@ def test_config_credentials(check, instance, options, is_error):
         check(instance)
 
 
-def test_legacy_config_deprecation(check):
+def test_legacy_config_deprecation(check, caplog):
+    caplog.clear()
+    caplog.set_level(logging.WARNING)
+
     check = check(common.INSTANCE_BASIC_LEGACY_CONFIG)
 
-    assert check.get_warnings() == [
-        'Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.'
-    ]
+    assert 'Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.' in caplog.text
 
 
 def test_collector_submit_payload(check, aggregator):
@@ -571,3 +596,17 @@ def test_when_version_lower_than_3_6_then_no_session_metrics_reported(aggregator
         dd_run_check(check)
     # Then
     aggregator.assert_metric('mongodb.sessions.count', count=0)
+
+
+@pytest.mark.parametrize("error_cls", CRITICAL_FAILURE)
+def test_service_check_critical_when_connection_dies(error_cls, aggregator, check, instance, dd_run_check):
+    check = check(instance)
+    with mock_pymongo('standalone') as mocked_client:
+        dd_run_check(check)
+        aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
+        aggregator.reset()
+        msg = "Testing"
+        mocked_client.list_database_names = mock.MagicMock(side_effect=error_cls(msg))
+        with pytest.raises(Exception, match=f"{error_cls.__name__}: {msg}"):
+            dd_run_check(check)
+        aggregator.assert_service_check('mongodb.can_connect', MongoDb.CRITICAL)

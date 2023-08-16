@@ -13,10 +13,10 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Metrics",
+      "Supported OS::macOS"
     ]
   },
   "author": {

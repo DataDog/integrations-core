@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2019-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import re
 
 from datadog_checks.base import AgentCheck
@@ -44,6 +48,7 @@ BUCKET_STATS = {
     "cas_hits",
     "cas_misses",
     "cmd_get",
+    "cmd_lookup",
     "cmd_set",
     "couch_docs_actual_disk_size",
     "couch_docs_data_size",

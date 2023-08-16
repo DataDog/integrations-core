@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
-from typing import Any, Dict, List, Optional, Pattern
+from typing import Any, Dict, List, Optional, Pattern  # noqa: F401
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.config import _is_affirmative

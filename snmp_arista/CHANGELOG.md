@@ -1,0 +1,4 @@
+# CHANGELOG - Arista
+
+## Unreleased
+

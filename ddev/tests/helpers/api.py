@@ -11,6 +11,10 @@ def dedent(text):
     return _dedent(text[1:])
 
 
+def remove_trailing_spaces(text):
+    return ''.join(f'{line.rstrip()}\n' for line in text.splitlines(True))
+
+
 def error(exception_class, message='', **kwargs):
     if message:
         kwargs['match'] = f'^{re.escape(message)}$'

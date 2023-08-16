@@ -28,7 +28,7 @@ def test_running_on_macos_ci():
 
 
 def test_not_running_ci():
-    with EnvVars(ignore=['SYSTEM_TEAMFOUNDATIONCOLLECTIONURI']):
+    with EnvVars(ignore=['GITHUB_ACTIONS', 'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI']):
         with mock.patch.dict(os.environ, {'AGENT_OS': 'Linux'}):
             assert running_on_ci() is False
             assert running_on_linux_ci() is False

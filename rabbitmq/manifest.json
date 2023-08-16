@@ -12,12 +12,11 @@
     "title": "RabbitMQ",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Processing",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Messaging",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
     ]
   },
   "author": {
@@ -55,7 +54,10 @@
     },
     "monitors": {
       "disk_usage": "assets/monitors/disk_usage.json",
-      "message_unacknowledge_rate_anomaly": "assets/monitors/message_unacknowledge_rate_anomaly.json"
+      "message_unacknowledge_rate_anomaly": "assets/monitors/message_unacknowledge_rate_anomaly.json",
+      "disk_usage_prometheus": "assets/monitors/disk_usage_prometheus.json",
+      "message_unack_prometheus": "assets/monitors/message_unack_prometheus.json"
+
     },
     "saved_views": {
       "pid_overview": "assets/saved_views/status_overview.json",

@@ -358,7 +358,7 @@ def test_view_compaction_metrics(aggregator, gauges):
                     self.compact_views()
                 theid = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
                 docs.append(self.post_doc(theid))
-                docs = list(map(lambda x: self.update_doc(x), docs))
+                docs = [self.update_doc(x) for x in docs]
                 self.generate_views()
 
         def generate_views(self):

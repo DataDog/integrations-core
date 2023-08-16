@@ -1,0 +1,147 @@
+interactions:
+- request:
+    body: '{"data": {"type": "app_manifest", "attributes": {"manifest_version": "2.0.0",
+      "app_id": "mongodb", "display_on_public_website": true, "tile": {"overview":
+      "README.md#Overview", "configuration": "README.md#Setup", "support": "README.md#Support",
+      "changelog": "CHANGELOG.md", "description": "Track read/write performance, most-used
+      replicas, collection metrics, and more.", "title": "MongoDB", "media": [], "classifier_tags":
+      ["Supported OS::Linux", "Supported OS::macOS", "Supported OS::Windows", "Category::Data
+      Store", "Category::Log Collection", "Category::Autodiscovery"]}, "author": {"support_email":
+      "help@datadoghq.com", "name": "Datadog", "homepage": "https://www.datadoghq.com",
+      "sales_email": "info@datadoghq.com"}, "oauth": {}, "assets": {"integration":
+      {"source_type_name": "MongoDB", "configuration": {"spec": "assets/configuration/spec.yaml"},
+      "events": {"creates_events": true}, "metrics": {"prefix": "mongodb.", "check":
+      "mongodb.connections.available", "metadata_path": "metadata.csv"}, "service_checks":
+      {"metadata_path": "assets/service_checks.json"}, "process_signatures": ["mongod"]},
+      "dashboards": {"mongodb": "assets/dashboards/overview.json"}, "monitors": {"[MongoDB]
+      High incoming connections": "assets/monitors/high_connections.json"}, "saved_views":
+      {"operations_by_type_overview": "assets/saved_views/operations_by_type_overview.json",
+      "queries": "assets/saved_views/queries.json", "queries_by_type_overview": "assets/saved_views/queries_by_type_overview.json",
+      "slow_queries": "assets/saved_views/slow_queries.json", "mongodb_processes":
+      "assets/saved_views/mongodb_processes.json"}, "logs": {"source": "mongodb"}}}}}'
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1645'
+      content-type:
+      - application/json
+      host:
+      - app.datadoghq.com
+      user-agent:
+      - python-httpx/0.23.1
+    method: POST
+    uri: https://app.datadoghq.com/api/beta/apps/manifest/validate
+  response:
+    content: '{"errors":["API input validation failed: {''app_uuid'': [u''Missing
+      data for required field.'']}"]}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 06 Jan 2023 23:33:43 GMT
+      Transfer-Encoding:
+      - chunked
+      cache-control:
+      - no-cache
+      content-encoding:
+      - gzip
+      content-security-policy:
+      - frame-ancestors 'self'; report-uri https://logs.browser-intake-datadoghq.com/api/v2/logs?dd-api-key=pube4f163c23bbf91c16b8f57f56af9fc58&dd-evp-origin=content-security-policy&ddsource=csp-report&ddtags=site%3Adatadoghq.com
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=15724800;
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ratelimit-limit:
+      - '500'
+      x-ratelimit-period:
+      - '60'
+      x-ratelimit-remaining:
+      - '499'
+      x-ratelimit-reset:
+      - '17'
+    http_version: HTTP/1.1
+    status_code: 400
+- request:
+    body: '{"data": {"type": "app_manifest", "attributes": {"manifest_version": "2.0.0",
+      "app_id": "vsphere", "display_on_public_website": true, "tile": {"overview":
+      "README.md#Overview", "configuration": "README.md#Setup", "support": "README.md#Support",
+      "changelog": "CHANGELOG.md", "description": "Understand how vSphere resource
+      usage affects your application.", "title": "vSphere", "media": [], "classifier_tags":
+      ["Supported OS::Linux", "Supported OS::macOS", "Supported OS::Windows", "Category::Cloud"]},
+      "author": {"support_email": "help@datadoghq.com", "name": "Datadog", "homepage":
+      "https://www.datadoghq.com", "sales_email": "info@datadoghq.com"}, "oauth":
+      {}, "assets": {"integration": {"source_type_name": "vSphere", "configuration":
+      {"spec": "assets/configuration/spec.yaml"}, "events": {"creates_events": true},
+      "metrics": {"prefix": "vsphere.", "check": "vsphere.vm.count", "metadata_path":
+      "metadata.csv"}, "service_checks": {"metadata_path": "assets/service_checks.json"}},
+      "dashboards": {"vsphere-overview": "assets/dashboards/vsphere_overview.json",
+      "VMware vSphere TKG - Overview": "assets/dashboards/vmware_vsphere_tkg_-_overview.json"}}}}}'
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '1152'
+      content-type:
+      - application/json
+      host:
+      - app.datadoghq.com
+      user-agent:
+      - python-httpx/0.23.1
+    method: POST
+    uri: https://app.datadoghq.com/api/beta/apps/manifest/validate
+  response:
+    content: '{"errors":["API input validation failed: {''app_uuid'': [u''Missing
+      data for required field.'']}"]}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 06 Jan 2023 23:33:44 GMT
+      Transfer-Encoding:
+      - chunked
+      cache-control:
+      - no-cache
+      content-encoding:
+      - gzip
+      content-security-policy:
+      - frame-ancestors 'self'; report-uri https://logs.browser-intake-datadoghq.com/api/v2/logs?dd-api-key=pube4f163c23bbf91c16b8f57f56af9fc58&dd-evp-origin=content-security-policy&ddsource=csp-report&ddtags=site%3Adatadoghq.com
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=15724800;
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ratelimit-limit:
+      - '500'
+      x-ratelimit-period:
+      - '60'
+      x-ratelimit-remaining:
+      - '498'
+      x-ratelimit-reset:
+      - '16'
+    http_version: HTTP/1.1
+    status_code: 400
+version: 1

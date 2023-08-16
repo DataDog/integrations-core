@@ -78,6 +78,7 @@
 [github-squash-and-merge]: https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-request-merges#squash-and-merge-your-pull-request-commits
 [gitlab-home]: https://gitlab.com
 [gofmt-docs]: https://golang.org/cmd/gofmt
+[hatch]: https://hatch.pypa.io/latest/
 [homebrew-home]: https://brew.sh
 [icons-fontawesome]: https://fontawesome.com/icons
 [icons-material]: https://google.github.io/material-design-icons/

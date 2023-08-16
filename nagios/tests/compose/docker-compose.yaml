@@ -1,7 +1,11 @@
 version: '3.5'
 services:
   nagios:
-    build: .
+    build:
+      context: .
+      args:
+        - NAGIOS_VERSION=${NAGIOS_VERSION}
     volumes:
       - ${NAGIOS_LOGS_PATH}:/opt/nagios/var/log/
       - ${DD_LOG_1}:/opt/nagios/var/log/nagios.log
+

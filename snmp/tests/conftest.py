@@ -17,6 +17,7 @@ from datadog_checks.dev.docker import get_container_ip
 from .common import (
     ACTIVE_ENV_NAME,
     COMPOSE_DIR,
+    HERE,
     PORT,
     SNMP_CONTAINER_NAME,
     SNMP_LISTENER_ENV,
@@ -30,9 +31,15 @@ FILES = [
 E2E_METADATA = {
     'start_commands': [
         # Ensure the Agent has access to profile definition files and auto_conf.
-        'cp -r /home/snmp/datadog_checks/snmp/data/profiles /etc/datadog-agent/conf.d/snmp.d/',
+        'cp -r /home/snmp/datadog_checks/snmp/data/default_profiles /etc/datadog-agent/conf.d/snmp.d/',
+    ],
+    'docker_volumes': [
+        # Mount mock user profiles
+        '{}/fixtures/user_profiles:/etc/datadog-agent/conf.d/snmp.d/profiles'.format(HERE),
     ],
 }
+
+EXPECTED_AUTODISCOVERY_CHECKS = 6
 
 
 @pytest.fixture(scope='session')
@@ -51,9 +58,9 @@ def dd_environment():
         with docker_run(os.path.join(COMPOSE_DIR, 'docker-compose.yaml'), env_vars=env, log_patterns="Listening at"):
             if SNMP_LISTENER_ENV == 'true':
                 instance_config = {}
-                new_e2e_metadata['docker_volumes'] = [
-                    '{}:/etc/datadog-agent/datadog.yaml'.format(create_datadog_conf_file(tmp_dir))
-                ]
+                new_e2e_metadata['docker_volumes'].append(
+                    '{}:/etc/datadog-agent/datadog.yaml'.format(create_datadog_conf_file(tmp_dir)),
+                )
             else:
                 instance_config = generate_container_instance_config([])
                 instance_config['init_config'].update(
@@ -83,8 +90,7 @@ def _autodiscovery_ready():
             autodiscovery_checks.append(result_line)
 
     # assert subnets discovered by `snmp_listener` config from datadog.yaml
-    expected_autodiscovery_checks = 5
-    assert len(autodiscovery_checks) == expected_autodiscovery_checks
+    assert len(autodiscovery_checks) == EXPECTED_AUTODISCOVERY_CHECKS
 
 
 def create_datadog_conf_file(tmp_dir):
@@ -102,7 +108,7 @@ def create_datadog_conf_file(tmp_dir):
                 {
                     'network': '{}.0/29'.format(prefix),
                     'port': PORT,
-                    'community': 'generic-router',
+                    'community': 'generic-device',
                     'version': 2,
                     'timeout': 1,
                     'retries': 2,
@@ -123,6 +129,7 @@ def create_datadog_conf_file(tmp_dir):
                 },
                 {
                     'network': '{}.0/27'.format(prefix),
+                    'namespace': 'test-auth-proto-sha',
                     'port': PORT,
                     'version': 3,
                     'timeout': 1,
@@ -132,6 +139,22 @@ def create_datadog_conf_file(tmp_dir):
                     'authentication_protocol': 'sha',
                     'privacy_key': 'doggiePRIVkey',
                     'privacy_protocol': 'des',
+                    'context_name': 'public',
+                    'ignored_ip_addresses': {'{}.2'.format(prefix): True},
+                    'loader': 'core',
+                },
+                {
+                    'network': '{}.0/27'.format(prefix),
+                    'namespace': 'test-auth-proto-sha256',
+                    'port': PORT,
+                    'version': 3,
+                    'timeout': 1,
+                    'retries': 2,
+                    'user': 'datadogSHA256AES',
+                    'authentication_key': 'doggiepass',
+                    'authentication_protocol': 'SHA256',
+                    'privacy_key': 'doggiePRIVkey',
+                    'privacy_protocol': 'AES',
                     'context_name': 'public',
                     'ignored_ip_addresses': {'{}.2'.format(prefix): True},
                     'loader': 'core',

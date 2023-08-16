@@ -12,7 +12,7 @@ conf.yaml.example     @DataDog/documentation @DataDog/agent-integrations
 conf.yaml.default     @DataDog/documentation @DataDog/agent-integrations @DataDog/agent-metrics-logs
 auto_conf.yaml        @DataDog/documentation @DataDog/agent-integrations @DataDog/container-integrations
 manifest.json         @DataDog/documentation @DataDog/agent-integrations
-assets/               @DataDog/agent-integrations
+assets/               @DataDog/documentation @DataDog/agent-integrations
 
 # Checks base
 /datadog_checks_base/                                          @DataDog/agent-integrations
@@ -96,13 +96,33 @@ assets/               @DataDog/agent-integrations
 /tcp_queue_length/*.md                    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /tcp_queue_length/manifest.json           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 
-# Infrastructure integrations
+# NDM
 /snmp/                                                             @DataDog/network-device-monitoring @DataDog/agent-integrations
 /snmp/*.md                                                         @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
 /snmp_*/                                                           @DataDog/network-device-monitoring @DataDog/agent-integrations
 /snmp_*/*.md                                                       @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
 /datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/ @DataDog/network-device-monitoring @DataDog/agent-integrations
 /docs/developer/tutorials/snmp/                                    @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
+
+# Platform Integrations
+/citrix_hypervisor/                     @DataDog/platform-integrations @DataDog/agent-integrations
+/citrix_hypervisor/manifest.json        @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/citrix_hypervisor/*.md                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/cloudera/                              @DataDog/platform-integrations @DataDog/agent-integrations
+/cloudera/manifest.json                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/cloudera/*.md                          @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/cloud_foundry_api/                     @DataDog/platform-integrations @DataDog/agent-integrations
+/cloud_foundry_api/manifest.json        @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/cloud_foundry_api/*.md                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/openstack/                             @DataDog/platform-integrations @DataDog/agent-integrations
+/openstack/*.md                         @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/openstack/manifest.json                @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/openstack_controller/                  @DataDog/platform-integrations @DataDog/agent-integrations
+/openstack_controller/manifest.json     @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/openstack_controller/*.md              @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/vsphere/                               @DataDog/platform-integrations @DataDog/agent-integrations
+/vsphere/manifest.json                  @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/vsphere/*.md                           @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 
 # System checks
 /disk/                                    @DataDog/agent-integrations @DataDog/windows-agent
@@ -144,6 +164,10 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /oracle/                                            @DataDog/agent-integrations @DataDog/database-monitoring
 /oracle/*.md                                        @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
 /oracle/manifest.json                               @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
+
+# APM Integrations
+/langchain/         @DataDog/apm-core-python @DataDog/llm-obs @DataDog/agent-integrations @DataDog/documentation
+/openai/            @DataDog/apm-core-python @DataDog/llm-obs @DataDog/agent-integrations @DataDog/documentation
 
 
 # Windows agent

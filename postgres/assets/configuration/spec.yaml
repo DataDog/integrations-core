@@ -88,7 +88,7 @@ files:
         Note: `true` is an alias for `require`, and `false` is an alias for `disable`.
       value:
         type: string
-        display_default: false
+        display_default: "false"
         example: "false"
     - name: ssl_root_cert
       description: |
@@ -97,7 +97,7 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        display_default: false
+        display_default: "false"
         example: "/home/datadog/server-ca.pem"
     - name: ssl_cert
       description: |
@@ -106,7 +106,7 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        display_default: false
+        display_default: "false"
         example: "/home/datadog/client-cert.pem"
     - name: ssl_key
       description: |
@@ -115,7 +115,7 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        display_default: false
+        display_default: "false"
         example: "/home/datadog/client-key.pem"
     - name: ssl_password
       description: |
@@ -125,7 +125,7 @@ files:
         For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
       value:
         type: string
-        display_default: false
+        display_default: "false"
         example: "ssl_key_password"
     - name: query_timeout
       description: |
@@ -136,6 +136,27 @@ files:
       value:
         type: integer
         example: 5000
+    - name: idle_connection_timeout
+      description: |
+        Sets the timeout (in ms) a connection used in the connection pool will be idle until it is closed by the pooler.
+        This value should be configured to a lower value if you are observing connection buildup on the Postgres server,
+        or a higher value if connections are getting prematurely closed.
+      hidden: true
+      value:
+        type: integer
+        example: 60000
+    - name: max_connections
+      hidden: true
+      description: |
+        Sets the upper bound limit on the number of concurrent connections the Agent can have on the database server.
+        The Agent needs to open additional connections to collect explain plans across databases. 
+        Idle connections are cached, but pruned over time to balance the performance impact of opening connections and the cost of having many open connections. 
+        Raising the default value should only be needed on workloads with >50 databases. 
+        Lowering the default value can reduce the number of explain plans collected and is not recommended in most cases.
+      value:
+        type: integer
+        example: 30
+        display_default: 30
     - name: relations
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index , view, etc.) metrics.
@@ -216,6 +237,19 @@ files:
       value:
         type: boolean
         example: false
+    - name: activity_metrics_excluded_aggregations
+      description: |
+        A list of columns to remove from the pg_stat_activity aggregation.
+        By default, datname, usename and application_name will be used.
+        If applications with different application_name are creating a lot of short-lived queries,
+        removing application_name from the aggregation can help generate more stable metrics.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - application_name
+        default: []
     - name: collect_database_size_metrics
       description: Collect database size metrics.
       value:
@@ -236,6 +270,7 @@ files:
       description: |
         Collect metrics about WAL file age.
         NOTE: You must be running the check local to your database if you want to enable this option.
+        Starting PG10, wal metrics are collected by default using `pg_ls_waldir` and don't need local access anymore.
       value:
         type: boolean
         example: false
@@ -277,6 +312,62 @@ files:
                   type: <COLUMNS_2_TYPE>
               tags:
                 - <TAG_KEY>:<TAG_VALUE>
+    - name: database_autodiscovery 
+      description: |
+        Define the configuration for database autodiscovery.
+        Complete this section if you want to auto-discover databases on this host
+        instead of specifying each using dbname. 
+      options:
+        - name: enabled
+          description: Enable database autodiscovery.
+          value:
+            type: boolean
+            example: false
+            display_default: false 
+        - name: max_databases
+          description: The maximum number of databases this host should monitor.
+          value:
+            type: integer
+            example: 100
+            display_default: 100
+        - name: include
+          description: |
+            Regular expression for database names to include as part of 
+            database autodiscovery.
+            Will report metrics for databases that are found in this instance, 
+            ignores databases listed but not found.
+            Character casing is ignored. The regular expressions start matching from 
+            the beginning, so to match anywhere, prepend `.*`. For exact matches append `$`.
+            Defaults to `.*` to include everything.
+          value: 
+            type: array
+            items:
+              type: string
+            example:
+              - "master$"
+              - "AdventureWorks.*"
+            display_default:
+              - ".*"
+        - name: exclude
+          description: |
+            Regular expression for database names to exclude as part of `database_autodiscovery`.
+            Character casing is ignored. The regular expressions start matching from the beginning,
+            so to match anywhere, prepend `.*`. For exact matches append `$`.
+            In case of conflicts, database exclusion via `exclude` takes precedence over
+            those found via `include`
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "model"
+              - "msdb"
+        - name: refresh
+          description: Frequency in seconds of scans for new databases. Defaults to 10 minutes.
+          value:
+            type: integer
+            example: 600
+            display_default: 600
     - name: application_name
       description: |
         The application_name can be any string of less than NAMEDATALEN characters (64 characters in a standard build).
@@ -317,6 +408,14 @@ files:
           value:
             type: number
             example: 10
+        - name: pg_stat_statements_max_warning_threshold
+          hidden: true
+          description: |
+            Set the threshold for a safe value of `pg_stat_statements.max`. If the database is configured with a value
+            higher than this threshold, a warning is emitted to recommend lowering the setting value.
+          value:
+            type: number
+            example: 10000
     - name: query_samples
       description: Configure collection of query samples
       options:
@@ -367,12 +466,19 @@ files:
           value:
             type: integer
             example: 10000
+        - name: explain_parameterized_queries
+          description: |
+            This option will enable the ability to explain parameterized queries.
+            This is useful if your SQL clients are using the extended query protocol or prepared statements.
+          value:
+            type: boolean
+            example: true
     - name: query_activity
       description: Configure collection of query activity
       options:
         - name: enabled
           description: |
-            Enable collection of query activity. Requires `dbm: true`, and enabling query_samples.
+            Enable collection of query activity. Requires `dbm: true`.
           value:
             type: boolean
             example: true
@@ -390,7 +496,23 @@ files:
           value:
             type: number
             example: 3500
-            
+    - name: collect_settings
+      description: Configure collection of pg_settings. This is an alpha feature.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of pg_settings. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the database settings collection interval (in seconds). Each collection involves a single query to
+            `pg_settings`.
+          value:
+            type: number
+            example: 600
+
     - name: aws
       description: |
         This block defines the configuration for AWS RDS and Aurora instances. 
@@ -411,6 +533,13 @@ files:
           value:
             type: string
             example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+        - name: region
+          description: |
+            Equal to the region of the instance the agent is connecting to. 
+            This value is used to configure IAM authentication.
+          value:
+            type: string
+            example: us-east-1
 
     - name: gcp
       description: |
@@ -464,12 +593,14 @@ files:
           value:
             type: string
             example: flexible_server
-        - name: name
+        - name: fully_qualified_domain_name
           description: |
-            Equal to the name of the Azure PostgreSQL database.
+            Equal to the full qualified domain name of the Azure PostgreSQL database.
+            
+            This value is optional if the value of `host` is already configured to the fully qualified domain name.
           value:
             type: string
-            example: my-postgres-database
+            example: my-postgres-database.database.windows.net
 
     - name: obfuscator_options
       description: |
@@ -550,6 +681,16 @@ files:
       value:
         type: boolean
         example: false
+        display_default: false
+    - name: database_instance_collection_interval
+      hidden: true
+      description: |
+        Set the database instance collection interval (in seconds). The database instance collection sends
+        basic information about the database instance along with a signal that it still exists. 
+        This collection does not involve any additional queries to the database.
+      value:
+        type: number
+        example: 1800
         display_default: false
     - template: instances/default
       overrides:

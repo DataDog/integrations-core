@@ -4,11 +4,13 @@
 from copy import deepcopy
 
 import requests
-from six.moves.urllib.parse import urlparse
+from six import PY2
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.base.errors import CheckException
+from datadog_checks.base.errors import CheckException, ConfigurationError
 
+from .common import get_gitlab_version, get_tags
 from .metrics import METRICS_MAP
 
 
@@ -35,6 +37,23 @@ class GitlabCheck(OpenMetricsBaseCheck):
         'ssl_ca_certs': {'name': 'tls_ca_cert'},
     }
 
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if instance.get('openmetrics_endpoint'):
+            if PY2:
+                raise ConfigurationError(
+                    'This version of the integration is only available when using Python 3. '
+                    'Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3/ '
+                    'for more information or use the older style config.'
+                )
+            # TODO: when we drop Python 2 move this import up top
+            from .gitlab_v2 import GitlabCheckV2
+
+            return GitlabCheckV2(name, init_config, instances)
+
+        return super(GitlabCheck, cls).__new__(cls)
+
     def __init__(self, name, init_config, instances):
         super(GitlabCheck, self).__init__(
             name, init_config, [self._create_gitlab_prometheus_instance(instances[0], init_config)]
@@ -58,6 +77,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
             self.service_check(
                 self.PROMETHEUS_SERVICE_CHECK_NAME,
                 OpenMetricsBaseCheck.CRITICAL,
+                self._tags,
                 message="Unable to retrieve Prometheus metrics from endpoint {}: {}".format(self.endpoint, e),
             )
 
@@ -81,15 +101,15 @@ class GitlabCheck(OpenMetricsBaseCheck):
         # gitlab uses 'prometheus_endpoint' and not 'prometheus_url', so we have to rename the key
         gitlab_instance['prometheus_url'] = instance.get('prometheus_url', instance.get('prometheus_endpoint'))
 
-        self._tags = self._check_tags(gitlab_instance)
+        self._tags = get_tags(gitlab_instance)
 
         gitlab_instance.update(
             {
                 'namespace': 'gitlab',
                 'metrics': metrics,
-                # Defaults that were set when gitlab was based on PrometheusCheck
-                'send_distribution_counts_as_monotonic': instance.get('send_distribution_counts_as_monotonic', False),
-                'send_monotonic_counter': instance.get('send_monotonic_counter', False),
+                'send_distribution_counts_as_monotonic': instance.get('send_distribution_counts_as_monotonic', True),
+                'send_distribution_sums_as_monotonic': instance.get('send_distribution_sums_as_monotonic', True),
+                'send_monotonic_counter': instance.get('send_monotonic_counter', True),
                 'health_service_check': instance.get('health_service_check', False),
                 'tags': self._tags,
             }
@@ -97,34 +117,13 @@ class GitlabCheck(OpenMetricsBaseCheck):
 
         return gitlab_instance
 
-    def _check_tags(self, instance):
-        custom_tags = instance.get('tags', [])
-
-        url = instance.get('gitlab_url')
-
-        # creating tags for host and port
-        parsed_url = urlparse(url)
-        gitlab_host = parsed_url.hostname
-        gitlab_port = 443 if parsed_url.scheme == 'https' else (parsed_url.port or 80)
-
-        return ['gitlab_host:{}'.format(gitlab_host), 'gitlab_port:{}'.format(gitlab_port)] + custom_tags
-
+    @AgentCheck.metadata_entrypoint
     def submit_version(self):
-        if not self.is_metadata_collection_enabled():
-            return
-        try:
-            if self.token is None:
-                self.log.debug(
-                    "Gitlab token not found; please add one in your config to enable version metadata collection."
-                )
-                return
-            param = {'access_token': self.token}
-            response = self.http.get("{}/api/v4/version".format(self.url), params=param)
-            version = response.json().get('version')
-            self.set_metadata('version', version)
-            self.log.debug("Set version %s for Gitlab", version)
-        except Exception as e:
-            self.log.warning("Gitlab version metadata not collected: %s", e)
+        version = get_gitlab_version(self.http, self.log, self.url, self.token)
+
+        if version:
+            self.log.debug("Set version %s for GitLab", version)
+            self.set_metadata("version", version)
 
     # Validates an health endpoint
     #

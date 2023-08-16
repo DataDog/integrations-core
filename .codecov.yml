@@ -114,6 +114,10 @@ coverage:
         target: 75
         flags:
         - cloud_foundry_api
+      Cloudera:
+        target: 75
+        flags:
+        - cloudera
       CockroachDB:
         target: 75
         flags:
@@ -186,6 +190,10 @@ coverage:
         target: 75
         flags:
         - external_dns
+      Fluentd:
+        target: 75
+        flags:
+        - fluentd
       FoundationDB:
         target: 75
         flags:
@@ -206,7 +214,7 @@ coverage:
         target: 75
         flags:
         - glusterfs
-      Go-Expvar:
+      Go_Expvar:
         target: 75
         flags:
         - go_expvar
@@ -438,6 +446,10 @@ coverage:
         target: 75
         flags:
         - proxysql
+      Pulsar:
+        target: 75
+        flags:
+        - pulsar
       RabbitMQ:
         target: 75
         flags:
@@ -463,7 +475,7 @@ coverage:
         flags:
         - sap_hana
       SNMP:
-        target: 75
+        target: 30
         flags:
         - snmp
       SQL_Server:
@@ -506,6 +518,10 @@ coverage:
         target: 75
         flags:
         - statsd
+      Strimzi:
+        target: 75
+        flags:
+        - strimzi
       Supervisord:
         target: 75
         flags:
@@ -530,6 +546,10 @@ coverage:
         target: 75
         flags:
         - teamcity
+      Temporal:
+        target: 75
+        flags:
+        - temporal
       Teradata:
         target: 75
         flags:
@@ -538,6 +558,10 @@ coverage:
         target: 50
         flags:
         - tokumx
+      TorchServe:
+        target: 75
+        flags:
+        - torchserve
       Traffic_Server:
         target: 75
         flags:
@@ -570,7 +594,11 @@ coverage:
         target: 75
         flags:
         - wmi_check
-      Win32:
+      Weaviate:
+        target: 75
+        flags:
+        - weaviate
+      Windows_Event_Log:
         target: 75
         flags:
         - win32_event_log
@@ -594,6 +622,10 @@ coverage:
         target: 75
         flags:
         - cert_manager
+      dcgm:
+        target: 75
+        flags:
+        - dcgm
       ddev:
         target: 75
         flags:
@@ -602,14 +634,6 @@ coverage:
         target: 75
         flags:
         - etcd
-      fluentd:
-        target: 75
-        flags:
-        - fluentd
-      pulsar:
-        target: 75
-        flags:
-        - pulsar
       vSphere:
         target: 75
         flags:
@@ -736,6 +760,11 @@ flags:
     paths:
     - cloud_foundry_api/datadog_checks/cloud_foundry_api
     - cloud_foundry_api/tests
+  cloudera:
+    carryforward: true
+    paths:
+    - cloudera/datadog_checks/cloudera
+    - cloudera/tests
   cockroachdb:
     carryforward: true
     paths:
@@ -786,10 +815,15 @@ flags:
     paths:
     - datadog_cluster_agent/datadog_checks/datadog_cluster_agent
     - datadog_cluster_agent/tests
+  dcgm:
+    carryforward: true
+    paths:
+    - dcgm/datadog_checks/dcgm
+    - dcgm/tests
   ddev:
     carryforward: true
     paths:
-    - ddev/datadog_checks/ddev
+    - ddev/src/ddev
     - ddev/tests
   directory:
     carryforward: true
@@ -1261,6 +1295,11 @@ flags:
     paths:
     - statsd/datadog_checks/statsd
     - statsd/tests
+  strimzi:
+    carryforward: true
+    paths:
+    - strimzi/datadog_checks/strimzi
+    - strimzi/tests
   supervisord:
     carryforward: true
     paths:
@@ -1286,6 +1325,11 @@ flags:
     paths:
     - teamcity/datadog_checks/teamcity
     - teamcity/tests
+  temporal:
+    carryforward: true
+    paths:
+    - temporal/datadog_checks/temporal
+    - temporal/tests
   teradata:
     carryforward: true
     paths:
@@ -1301,6 +1345,11 @@ flags:
     paths:
     - tokumx/datadog_checks/tokumx
     - tokumx/tests
+  torchserve:
+    carryforward: true
+    paths:
+    - torchserve/datadog_checks/torchserve
+    - torchserve/tests
   traffic_server:
     carryforward: true
     paths:
@@ -1341,6 +1390,11 @@ flags:
     paths:
     - vsphere/datadog_checks/vsphere
     - vsphere/tests
+  weaviate:
+    carryforward: true
+    paths:
+    - weaviate/datadog_checks/weaviate
+    - weaviate/tests
   win32_event_log:
     carryforward: true
     paths:

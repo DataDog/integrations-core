@@ -33,6 +33,10 @@ instances:
     ##
     ## Do not specify more than one host here unless you are connecting to a mongos instance
     ## and you want to balance requests performed by the agent to multiple mongos instances.
+    ##
+    ## If you need to monitor multiple mongos instances and are using version 7.39 or later of the Agent, 
+    ## configure the integration to disable directConnection, which is enabled by default starting in 4.0.2. 
+    ## This can be done by setting options.directConnection to 'false'.
     #
   - hosts:
       - <HOST>:<PORT>
@@ -67,7 +71,7 @@ instances:
     ## For a complete list of available connection options, see:
     ## https://docs.mongodb.com/manual/reference/connection-string/#connections-connection-options
     ##
-    ## NOTE: For monitoring replica set, do not use the replSet parameter as the Agent expects to always
+    ## NOTE: For monitoring replica set, do not use the replicaSet parameter as the Agent expects to always
     ## connect to the same host. Instead configure one check instance for each node.
     #
     # options: {}
@@ -91,41 +95,6 @@ instances:
     ## see http://api.mongodb.com/python/3.4.0/api/pymongo/mongo_client.html
     #
     # timeout: 30
-
-    ## @param ssl - boolean - optional - default: false
-    ## If `True`, create the connection to the server using SSL.
-    #
-    # ssl: false
-
-    ## @param ssl_keyfile - string - optional
-    ## Path to the private key file used to identify the local connection against Mongodb.
-    #
-    # ssl_keyfile: <SSL_KEYFILE>
-
-    ## @param ssl_certfile - string - optional
-    ## Path to the certificate file used to identify the local connection against Mongodb.
-    #
-    # ssl_certfile: <SSL_CERTFILE>
-
-    ## @param ssl_cert_reqs - integer - optional
-    ## Specifies whether a certificate is required from the other side of the connection, and whether it will be
-    ## validated if provided.
-    ## Possible values:
-    ##   * 0 for ssl.CERT_NONE (certificates ignored)
-    ##   * 1 for ssl.CERT_OPTIONAL (not required, but validated if provided)
-    ##   * 2 for ssl.CERT_REQUIRED (required and validated)
-    #
-    # ssl_cert_reqs: <SSL_CERT_REQS>
-
-    ## @param ssl_ca_certs - string - optional
-    ## Path to the ca_certs file.
-    #
-    # ssl_ca_certs: <SSL_CA_CERTS>
-
-    ## @param ssl_match_hostname - boolean - optional - default: true
-    ## If `False`, disables SSL hostname verification.
-    #
-    # ssl_match_hostname: true
 
     ## @param tls - boolean - optional - default: false
     ## If `True`, create the connection to the server using transport layer security.
@@ -197,6 +166,11 @@ instances:
     ## Note: Custom queries are ignored by default when the mongo node is a secondary of a replica set.
     ## You can add `run_on_secondary: true` for each query that you want to run on both primaries and secondaries.
     ## See https://docs.datadoghq.com/integrations/guide/mongo-custom-query-collection to learn more.
+    ## Note: For MongoDB date types you can use functions matching any of these regular expressions:
+    ## "ISODate\(\s*\'(.*?)\'\s*\)" (e.g. "ISODate('2022-12-15T08:26:00.969Z')")
+    ## "ISODate\(\s*\)|Date\(\s*\)" (e.g. "Date()")
+    ## "new\s*Date\(ISODate\(\s*\)\.getTime\(\s*\)((\s*[+\-*\/]\s*(\d+))*)\s*\)" 
+    ##   (e.g. "new Date(ISODate().getTime() - 60 * 1000)")
     #
     # custom_queries:
     #   - metric_prefix: mongo

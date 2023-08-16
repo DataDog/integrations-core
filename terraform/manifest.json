@@ -9,13 +9,15 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Manage your Datadog account using Terraform",
-    "title": "terraform",
+    "title": "Terraform",
     "media": [],
     "classifier_tags": [
+      "Category::Configuration & Deployment",
+      "Category::Developer Tools",
+      "Category::Orchestration",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Orchestration"
+      "Supported OS::macOS"
     ]
   },
   "author": {

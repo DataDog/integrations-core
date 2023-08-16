@@ -1,0 +1,106 @@
+{
+  "totalResults": 8,
+  "items": [
+    {
+      "id": "e378e341-7362-4e50-aaa4-5dc7d64bcb56",
+      "content": "ExecutionException running extraction tasks for service 'cod--qfdcinkqrzw::yarn'.",
+      "timeOccurred": "2022-12-01T20:25:39.891Z",
+      "timeReceived": "2022-12-01T20:25:39.905Z",
+      "category": "LOG_EVENT",
+      "severity": "IMPORTANT",
+      "alert": false,
+      "attributes": [
+        {
+          "values": [
+            "TELEMETRYPUBLISHER"
+          ],
+          "name": "ROLE_TYPE"
+        },
+        {
+          "values": [
+            "Telemetry Publisher (cod--qfdcinkqrzw-gateway0)"
+          ],
+          "name": "ROLE_DISPLAY_NAME"
+        },
+        {
+          "values": [
+            "d8623d9457f4db06c5637c4fd4c02f5d"
+          ],
+          "name": "HOST_IDS"
+        },
+        {
+          "values": [
+            "cod--qfdcinkqrzw"
+          ],
+          "name": "CLUSTER_DISPLAY_NAME"
+        },
+        {
+          "values": [
+            "https://cod--qfdcinkqrzw-gateway.agent-in.jfha-h5rc.a0.cloudera.site//cmf/eventRedirect/e378e341-7362-4e50-aaa4-5dc7d64bcb56"
+          ],
+          "name": "URL"
+        },
+        {
+          "values": [
+            "TELEMETRYPUBLISHER"
+          ],
+          "name": "ROLE"
+        },
+        {
+          "values": [
+            "cod--qfdcinkqrzw-gateway0.agent-in.jfha-h5rc.a0.cloudera.site"
+          ],
+          "name": "HOSTS"
+        },
+        {
+          "values": [
+            "MGMT"
+          ],
+          "name": "SERVICE_DISPLAY_NAME"
+        },
+        {
+          "values": [
+            "EV_LOG_EVENT"
+          ],
+          "name": "EVENTCODE"
+        },
+        {
+          "values": [
+            "false"
+          ],
+          "name": "ALERT_SUPPRESSED"
+        },
+        {
+          "values": [
+            "MGMT"
+          ],
+          "name": "SERVICE"
+        },
+        {
+          "values": [
+            "MGMT"
+          ],
+          "name": "SERVICE_TYPE"
+        },
+        {
+          "values": [
+            "1546335201"
+          ],
+          "name": "CLUSTER_ID"
+        },
+        {
+          "values": [
+            "cod--qfdcinkqrzw"
+          ],
+          "name": "CLUSTER"
+        },
+        {
+          "values": [
+            "WARN"
+          ],
+          "name": "LOG_LEVEL"
+        }
+      ]
+    }
+  ]
+}

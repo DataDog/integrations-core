@@ -25,6 +25,16 @@ ENGINE_EDITION_AZURE_SYNAPSE_SERVERLESS_POOL = 11
 STATIC_INFO_VERSION = 'version'
 STATIC_INFO_MAJOR_VERSION = 'major_version'
 STATIC_INFO_ENGINE_EDITION = 'engine_edition'
+AWS_RDS_HOSTNAME_SUFFIX = ".rds.amazonaws.com"
+AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES = {
+    # azure sql database has a special case, where we should emit
+    # a resource for both the server and the database because
+    # azure treats these as two separate entities, and both can have
+    # related tags and metrics
+    "sql_database": "azure_sql_server_database,azure_sql_server",
+    "managed_instance": "azure_sql_server_managed_instance",
+    "virtual_machine": "azure_virtual_machine_instance",
+}
 
 # Metric discovery queries
 COUNTER_TYPE_QUERY = """select distinct cntr_type
@@ -40,7 +50,11 @@ BASE_NAME_QUERY = (
 )
 
 DEFAULT_AUTODISCOVERY_INTERVAL = 3600
-AUTODISCOVERY_QUERY = "select name from sys.databases"
+AUTODISCOVERY_QUERY = """select {columns} from sys.databases"""
+expected_sys_databases_columns = [
+    'name',
+    'physical_database_name',
+]
 
 VALID_METRIC_TYPES = ('gauge', 'rate', 'histogram')
 
@@ -74,17 +88,17 @@ INSTANCE_METRICS = [
     ('sqlserver.stats.batch_requests', 'Batch Requests/sec', ''),  # BULK_COUNT
     ('sqlserver.stats.sql_compilations', 'SQL Compilations/sec', ''),  # BULK_COUNT
     ('sqlserver.stats.sql_recompilations', 'SQL Re-Compilations/sec', ''),  # BULK_COUNT
-]
-
-# Performance table metrics, initially configured to track at instance-level only
-# With auto-discovery enabled, these metrics will be extended accordingly
-# datadog metric name, counter name, instance name
-INSTANCE_METRICS_TOTAL = [
     # SQLServer:Locks
     ('sqlserver.stats.lock_waits', 'Lock Waits/sec', '_Total'),  # BULK_COUNT
     # SQLServer:Plan Cache
     ('sqlserver.cache.object_counts', 'Cache Object Counts', '_Total'),
     ('sqlserver.cache.pages', 'Cache Pages', '_Total'),
+]
+
+# Performance table metrics, initially configured to track at instance-level only
+# With auto-discovery enabled, these metrics will be extended accordingly
+# datadog metric name, counter name, instance name
+INSTANCE_METRICS_DATABASE = [
     # SQLServer:Databases
     ('sqlserver.database.backup_restore_throughput', 'Backup/Restore Throughput/sec', '_Total'),
     ('sqlserver.database.log_bytes_flushed', 'Log Bytes Flushed/sec', '_Total'),

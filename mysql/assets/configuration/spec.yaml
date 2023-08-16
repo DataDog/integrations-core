@@ -335,6 +335,22 @@ files:
               type: boolean
               example: false
               display_default: false
+          - name: collect_settings
+            description: Configure collection of performance_schema.global_variables. This is an alpha feature.
+            options:
+              - name: enabled
+                description: |
+                  Enable collection of performance_schema.global_variables. Requires `dbm: true`.
+                value:
+                  type: boolean
+                  example: false
+              - name: collection_interval
+                description: |
+                  Set the database settings collection interval (in seconds). Each collection involves a single query to
+                  `performance_schema.global_variables`.
+                value:
+                  type: number
+                  example: 600
           - name: query_metrics
             description: Configure collection of query metrics
             options:
@@ -405,15 +421,6 @@ files:
                 value:
                   type: integer
                   example: 5000
-              - name: events_statements_table
-                description: |
-                  Forces a specific events statements table. Must be one of events_statements_current,
-                  events_statements_history, events_statements_history_long. If not set then the agent will choose
-                  the best available table that is enabled and not empty.
-                value:
-                  type: string
-                  example: events_statements_history_long
-                  display_default: null
               - name: explain_procedure
                 description: |
                   Overrides the default procedure used for collecting execution plans. The agent will use this
@@ -545,12 +552,14 @@ files:
                 value:
                   type: string
                   example: flexible_server
-              - name: name
+              - name: fully_qualified_domain_name
                 description: |
-                  Equal to the name of the Azure MySQL database instance.
+                  Equal to the full qualified domain name of the Azure MySQL database.
+                  
+                  This value is optional if the value of `host` is already configured to the fully qualified domain name.
                 value:
                   type: string
-                  example: mysql-database
+                  example: mysql-database.database.windows.net
 
           - name: obfuscator_options
             description: |
@@ -622,6 +631,16 @@ files:
             value:
               type: boolean
               example: false
+              display_default: false
+          - name: database_instance_collection_interval
+            hidden: true
+            description: |
+              Set the database instance collection interval (in seconds). The database instance collection sends
+              basic information about the database instance along with a signal that it still exists. 
+              This collection does not involve any additional queries to the database.
+            value:
+              type: number
+              example: 1800
               display_default: false
           - template: instances/default
             overrides:

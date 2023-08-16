@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from datadog_checks.mongo.collectors.base import MongoCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment
 
@@ -12,8 +16,10 @@ class FsyncLockCollector(MongoCollector):
     def compatible_with(self, deployment):
         # Can be run on any mongod instance excepts arbiters.
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
+            self.log.debug("FsyncLockCollector can only be run on mongod nodes, arbiter node detected.")
             return False
         if isinstance(deployment, MongosDeployment):
+            self.log.debug("FsyncLockCollector can only be run on mongod nodes, mongos deployment detected.")
             return False
         return True
 

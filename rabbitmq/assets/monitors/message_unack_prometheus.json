@@ -1,0 +1,27 @@
+{
+	  "name": "[RabbitMQ - OMV2] Unacknowledged Messages are higher than usual",
+	  "type": "query alert",
+	  "query": "avg(last_5m):100 * sum:rabbitmq.queue.messages.unacked{*} / (sum:rabbitmq.queue.messages.unacked{*} + sum:rabbitmq.queue.messages.ready{*}) > 120",
+	  "message": "{{#is_alert}}\nThe ratio of unacknowledged to acknowledged messages in this queue is higher than usual. \nPlease check your message pipeline. \n{{/is_alert}}",
+	  "tags": [
+		    "integration:rabbitmq"
+	  ],
+	  "options": {
+		    "thresholds": {
+			      "critical": 120
+		    },
+		    "notify_audit": false,
+		    "require_full_window": false,
+		    "notify_no_data": false,
+		    "renotify_interval": 0,
+		    "include_tags": false,
+		    "avalanche_window": 10,
+		    "new_host_delay": 300,
+		    "silenced": {}
+	  },
+	  "priority": 3,
+	  "restricted_roles": null,
+    "recommended_monitor_metadata": {
+      "description": "Notify your team when a RabbitMQ message unacknowledged rate is higher than usual."
+    }
+}

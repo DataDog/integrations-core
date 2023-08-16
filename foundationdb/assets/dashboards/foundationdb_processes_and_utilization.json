@@ -446,7 +446,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -522,7 +522,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -598,7 +598,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -673,7 +673,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -731,7 +731,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -789,7 +789,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -882,7 +882,7 @@
                          "max":"auto"
                       },
                       "markers":[
-                         
+
                       ]
                    },
                    "layout":{
@@ -908,15 +908,13 @@
           "default":"*",
           "prefix":"service",
           "available_values":[
-             
+
           ]
        }
     ],
     "layout_type":"ordered",
     "is_read_only":false,
     "notify_list":[
-       
     ],
-    "reflow_type":"fixed",
-    "id":"8us-bdk-r7h"
+    "reflow_type":"fixed"
  }

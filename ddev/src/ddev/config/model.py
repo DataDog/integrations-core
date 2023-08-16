@@ -6,6 +6,19 @@ import os
 FIELD_TO_PARSE = object()
 
 
+def get_github_user():
+    return (
+        os.environ.get('DD_GITHUB_USER', '')
+        or os.environ.get('GITHUB_USER', '')
+        # GitHub Actions
+        or os.environ.get('GITHUB_ACTOR', '')
+    )
+
+
+def get_github_token():
+    return os.environ.get('DD_GITHUB_TOKEN', '') or os.environ.get('GH_TOKEN', '') or os.environ.get('GITHUB_TOKEN', '')
+
+
 class ConfigurationError(Exception):
     def __init__(self, *args, location):
         self.location = location
@@ -194,8 +207,8 @@ class RootConfig(LazilyParsedConfig):
                     'default': {
                         'api_key': os.getenv('DD_API_KEY', ''),
                         'app_key': os.getenv('DD_APP_KEY', ''),
-                        'site': os.getenv('DD_SITE', ''),
-                        'dd_url': os.getenv('DD_DD_URL', ''),
+                        'site': os.getenv('DD_SITE', 'datadoghq.com'),
+                        'dd_url': os.getenv('DD_DD_URL', 'https://app.datadoghq.com'),
                         'log_url': os.getenv('DD_LOGS_CONFIG_DD_URL', ''),
                     },
                 }
@@ -447,7 +460,7 @@ class GitHubConfig(LazilyParsedConfig):
 
                 self._field_user = user
             else:
-                self._field_user = self.raw_data['user'] = os.environ.get('DD_GITHUB_USER', '')
+                self._field_user = self.raw_data['user'] = get_github_user()
 
         return self._field_user
 
@@ -466,7 +479,7 @@ class GitHubConfig(LazilyParsedConfig):
 
                 self._field_token = token
             else:
-                self._field_token = self.raw_data['token'] = os.environ.get('DD_GITHUB_TOKEN', '')
+                self._field_token = self.raw_data['token'] = get_github_token()
 
         return self._field_token
 
