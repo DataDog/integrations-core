@@ -18,6 +18,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
 from .version_utils import VersionUtils
+from .util import payload_pg_version
 
 # default collection intervals in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
@@ -228,7 +229,7 @@ class PostgresMetadata(DBMAsyncJob):
             "dbms": "postgres",
             "kind": "pg_settings",
             "collection_interval": self.collection_interval,
-            'dbms_version': self._payload_pg_version(),
+            'dbms_version': payload_pg_version(self._check.version),
             "tags": self._tags_no_db,
             "timestamp": time.time() * 1000,
             "cloud_metadata": self._config.cloud_metadata,
@@ -461,7 +462,7 @@ class PostgresMetadata(DBMAsyncJob):
                     metadata['schemas'].append(schema)
 
         return metadata
-
+      
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
         with self._check.get_main_db().cursor(row_factory=dict_row) as cursor:

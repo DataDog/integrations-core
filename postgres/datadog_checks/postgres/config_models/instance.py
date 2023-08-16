@@ -171,6 +171,7 @@ class InstanceConfig(BaseModel):
     custom_queries: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     data_directory: Optional[str] = None
     database_autodiscovery: Optional[DatabaseAutodiscovery] = None
+    database_instance_collection_interval: Optional[float] = None
     dbm: Optional[bool] = None
     dbname: Optional[str] = None
     dbstrict: Optional[bool] = None

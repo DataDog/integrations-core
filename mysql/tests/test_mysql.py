@@ -12,6 +12,7 @@ from packaging.version import parse as parse_version
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql
+from datadog_checks.mysql.__about__ import __version__
 from datadog_checks.mysql.const import (
     BINLOG_VARS,
     GALERA_VARS,
@@ -640,3 +641,44 @@ def test_set_resources(aggregator, dd_run_check, instance_basic, cloud_metadata,
     aggregator.assert_metric_has_tag(
         "mysql.net.connections", tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=mysql_check.resolved_hostname)
     )
+
+
+@pytest.mark.parametrize(
+    'dbm_enabled, reported_hostname',
+    [
+        (True, None),
+        (False, None),
+        (True, 'forced_hostname'),
+        (True, 'forced_hostname'),
+    ],
+)
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, dbm_enabled, reported_hostname):
+    instance_complex['dbm'] = dbm_enabled
+    if reported_hostname:
+        instance_complex['reported_hostname'] = reported_hostname
+    expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
+    dd_run_check(mysql_check)
+
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
+    assert event is not None
+    assert event['host'] == expected_host
+    assert event['dbms'] == "mysql"
+    assert event['tags'].sort() == tags.METRIC_TAGS.sort()
+    assert event['integration_version'] == __version__
+    assert event['collection_interval'] == 1800
+    assert event['metadata'] == {
+        'dbm': dbm_enabled,
+        'connection_host': instance_complex['host'],
+    }
+
+    # Run a second time and expect the metadata to not be emitted again because of the cache TTL
+    aggregator.reset()
+    dd_run_check(mysql_check)
+
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
+    assert event is None
