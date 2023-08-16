@@ -81,7 +81,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][10
 | Parameter            | Value                                |
 | -------------------- | ------------------------------------ |
 | `<INTEGRATION_NAME>` | `activemq`                           |
-| `<INIT_CONFIG>`      | `is_jmx:true` or `{}`                |
+| `<INIT_CONFIG>`      | `"is_jmx": true`                     |
 | `<INSTANCE_CONFIG>`  | `{"host": "%%host%%","port":"1099"}` |
 
 ##### Log collection
