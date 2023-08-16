@@ -1447,7 +1447,7 @@
                 "requests": [
                     {
                         "q": "sum:kubernetes_state.node.by_condition{$cluster,status:false,$host,condition:ready}",
-                        "aggregator": "avg",
+                        "aggregator": "last",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
