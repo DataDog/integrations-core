@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Dependency update for 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
+
 ***Fixed***:
 
 * Bump cryptography to 41.0.3 ([#15517](https://github.com/DataDog/integrations-core/pull/15517))

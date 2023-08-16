@@ -8,6 +8,10 @@
 * Remove the `ddev validate recommended-monitors` command ([#15563](https://github.com/DataDog/integrations-core/pull/15563))
 * Remove files in datadog_checks_dev for `validate ci, http, and metadata` ([#15546](https://github.com/DataDog/integrations-core/pull/15546))
 
+***Added***:
+
+* Dependency update for 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
+
 ***Fixed***:
 
 * Stop using the TOX_ENV_NAME variable ([#15528](https://github.com/DataDog/integrations-core/pull/15528))

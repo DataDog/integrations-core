@@ -9,6 +9,7 @@
 ***Added***:
 
 * Add support for sending `database_instance` metadata ([#15562](https://github.com/DataDog/integrations-core/pull/15562))
+* Dependency update for 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
 
 ## 13.0.0 / 2023-08-10
 
