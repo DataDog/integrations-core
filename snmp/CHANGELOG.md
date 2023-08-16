@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add hardware metrics for F5 (non-categorical) ([#15568](https://github.com/DataDog/integrations-core/pull/15568))
+
 ## 6.1.0 / 2023-08-10
 
 ***Added***:
