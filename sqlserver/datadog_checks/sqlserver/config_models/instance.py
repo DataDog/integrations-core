@@ -58,6 +58,7 @@ class CustomQuery(BaseModel):
 
 class Gcp(BaseModel):
     model_config = ConfigDict(
+        arbitrary_types_allowed=True,
         frozen=True,
     )
     instance_id: Optional[str] = None
