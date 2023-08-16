@@ -132,6 +132,7 @@ class InstanceConfig(BaseModel):
     database: Optional[str] = None
     database_autodiscovery: Optional[bool] = None
     database_autodiscovery_interval: Optional[int] = None
+    database_instance_collection_interval: Optional[float] = None
     db_fragmentation_object_names: Optional[tuple[str, ...]] = None
     dbm: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None

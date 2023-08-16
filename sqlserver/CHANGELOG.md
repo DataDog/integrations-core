@@ -2,9 +2,14 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Collect both DBM active sessions and blocking sessions which are sleeping. See ([#14054](https://github.com/DataDog/integrations-core/pull/14054))
+
 ***Added***:
 
 * Dependency update for 7.48 ([#15566](https://github.com/DataDog/integrations-core/pull/15566))
+* Add support for sending `database_instance` metadata ([#15562](https://github.com/DataDog/integrations-core/pull/15562))
 
 ## 13.0.0 / 2023-08-10
 

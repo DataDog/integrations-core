@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import copy
 import re
 import time
 from collections import defaultdict
@@ -14,7 +15,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
-from datadog_checks.base.utils.db.utils import resolve_db_host
+from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
@@ -27,6 +28,7 @@ except ImportError:
     from ..stubs import datadog_agent
 
 from datadog_checks.sqlserver import metrics
+from datadog_checks.sqlserver.__about__ import __version__
 from datadog_checks.sqlserver.connection import Connection, SQLConnectionError, split_sqlserver_host_port
 from datadog_checks.sqlserver.const import (
     AO_METRICS,
@@ -162,12 +164,22 @@ class SQLServer(AgentCheck):
         )
         self.log_unobfuscated_queries = is_affirmative(self.instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(self.instance.get('log_unobfuscated_plans', False))
+        self.database_instance_collection_interval = self.instance.get('database_instance_collection_interval', 1800)
+        self.connection_host = self.instance['host']
 
         self.static_info_cache = TTLCache(
             maxsize=100,
             # cache these for a full day
             ttl=60 * 60 * 24,
         )
+        # _database_instance_emitted: limit the collection and transmission of the database instance metadata
+        self._database_instance_emitted = TTLCache(
+            maxsize=1,
+            ttl=self.database_instance_collection_interval,
+        )  # type: TTLCache
+        # Keep a copy of the tags before the internal resource tags are set so they can be used for paths that don't
+        # go through the agent internal metrics submission processing those tags
+        self._non_internal_tags = copy.deepcopy(self.tags)
         self.check_initializations.append(self.initialize_connection)
         self.check_initializations.append(self.set_resolved_hostname)
         self.check_initializations.append(self.set_resolved_hostname_metadata)
@@ -741,7 +753,7 @@ class SQLServer(AgentCheck):
                         except Exception as e:
                             # service_check errors on auto discovered databases should not abort the check
                             self.log.warning("failed service check for auto discovered database: %s", e)
-
+            self._send_database_instance_metadata()
             if self.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
@@ -929,3 +941,27 @@ class SQLServer(AgentCheck):
         self.connection.close_cursor(cursor)
         self.connection.close_db_connections(self.connection.PROC_GUARD_DB_KEY)
         return should_run
+
+    def _send_database_instance_metadata(self):
+        if self.resolved_hostname not in self._database_instance_emitted:
+            event = {
+                "host": self.resolved_hostname,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "sqlserver",
+                "kind": "database_instance",
+                "collection_interval": self.database_instance_collection_interval,
+                'dbms_version': "{},{}".format(
+                    self.static_info_cache.get(STATIC_INFO_VERSION, ""),
+                    self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+                ),
+                'integration_version': __version__,
+                "tags": self._non_internal_tags,
+                "timestamp": time.time() * 1000,
+                "cloud_metadata": self.cloud_metadata,
+                "metadata": {
+                    "dbm": self.dbm_enabled,
+                    "connection_host": self.connection_host,
+                },
+            }
+            self._database_instance_emitted[self.resolved_hostname] = event
+            self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
