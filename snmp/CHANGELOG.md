@@ -6,7 +6,6 @@
 
 ***Added***:
 
-* Add hardware metrics for Dell (non-categorical) ([#15567](https://github.com/DataDog/integrations-core/pull/15567))
 * Add netgear-switch ([#15337](https://github.com/DataDog/integrations-core/pull/15337))
 * Add hardware metrics Checkpoint Firewall (fan) ([#15514](https://github.com/DataDog/integrations-core/pull/15514))
 * Add hardware metrics for HP (power supplies) [FIX] ([#15491](https://github.com/DataDog/integrations-core/pull/15491))
