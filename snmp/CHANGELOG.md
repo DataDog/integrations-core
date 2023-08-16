@@ -5,6 +5,7 @@
 ***Added***:
 
 * Add hardware metrics for Cisco (non-categorical) ([#15551](https://github.com/DataDog/integrations-core/pull/15551))
+* Add hardware metrics for F5 (non-categorical) ([#15568](https://github.com/DataDog/integrations-core/pull/15568))
 
 ## 6.1.0 / 2023-08-10
 
