@@ -98,6 +98,12 @@ class PostgresConfig:
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.settings_metadata_config = instance.get('collect_settings', {}) or {}
+        self.schemas_metadata_config = instance.get('collect_schemas', {"enabled": False})
+        if not self.relations and self.schemas_metadata_config['enabled']:
+            raise ConfigurationError(
+                'In order to collect schemas on this database, you must enable relation metrics collection.'
+            )
+
         self.resources_metadata_config = instance.get('collect_resources', {}) or {}
         self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
