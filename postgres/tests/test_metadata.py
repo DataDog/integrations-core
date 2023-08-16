@@ -33,7 +33,8 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     check = integration_check(dbm_instance)
     check.check(dbm_instance)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-    event = dbm_metadata[0]
+    event = next((e for e in dbm_metadata if e['kind'] == 'pg_settings'), None)
+    assert event is not None
     assert event['host'] == "stubbed.hostname"
     assert event['dbms'] == "postgres"
     assert event['kind'] == "pg_settings"
