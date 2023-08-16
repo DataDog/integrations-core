@@ -4,7 +4,7 @@
 
 ***Added***:
 
-* Agent integrations dependency update ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
+* Dependency update for 7.48 ([#15566](https://github.com/DataDog/integrations-core/pull/15566))
 
 ## 5.0.0 / 2023-08-10
 

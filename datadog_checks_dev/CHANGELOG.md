@@ -8,13 +8,9 @@
 * Remove the `ddev validate recommended-monitors` command ([#15563](https://github.com/DataDog/integrations-core/pull/15563))
 * Remove files in datadog_checks_dev for `validate ci, http, and metadata` ([#15546](https://github.com/DataDog/integrations-core/pull/15546))
 
-***Removed***:
-
-* Dependency update for 7.48 ([#15566](https://github.com/DataDog/integrations-core/pull/15566))
-
 ***Added***:
 
-* Agent integrations dependency update ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
+* Dependency update for 7.48 ([#15566](https://github.com/DataDog/integrations-core/pull/15566))
 
 ***Fixed***:
 
