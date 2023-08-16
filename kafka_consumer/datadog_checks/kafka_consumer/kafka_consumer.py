@@ -26,7 +26,7 @@ class KafkaCheck(AgentCheck):
         self.config = KafkaConfig(self.init_config, self.instance, self.log)
         self._context_limit = self.config._context_limit
         self.client = KafkaClient(self.config, self.get_tls_context(), self.log)
-        self.check_initializations.append(self.config.validate_config)
+        self.check_initializations.insert(0, self.config.validate_config)
 
     def check(self, _):
         """The main entrypoint of the check."""
@@ -57,6 +57,12 @@ class KafkaCheck(AgentCheck):
             raise
 
         total_contexts = len(consumer_offsets) + len(highwater_offsets)
+        self.log.debug(
+            "Total contexts: %s, Consumer offsets: %s, Highwater offsets: %s",
+            total_contexts,
+            consumer_offsets,
+            highwater_offsets,
+        )
         if total_contexts >= self._context_limit:
             self.warning(
                 """Discovered %s metric contexts - this exceeds the maximum number of %s contexts permitted by the
@@ -79,9 +85,11 @@ class KafkaCheck(AgentCheck):
             broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
             broker_tags.extend(self.config._custom_tags)
             self.gauge('broker_offset', highwater_offset, tags=broker_tags)
+            self.log.debug('%s highwater offset reported with %s tags', highwater_offset, broker_tags)
             reported_contexts += 1
             if reported_contexts == contexts_limit:
                 return
+        self.log.debug('%s highwater offsets reported', reported_contexts)
 
     def report_consumer_offsets_and_lag(self, consumer_offsets, highwater_offsets, contexts_limit):
         """Report the consumer offsets and consumer lag."""
@@ -94,6 +102,7 @@ class KafkaCheck(AgentCheck):
                     str(reported_contexts),
                     str(contexts_limit),
                 )
+                self.log.debug('%s consumer offsets reported', reported_contexts)
                 return
             consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
             consumer_group_tags.extend(self.config._custom_tags)
@@ -104,6 +113,7 @@ class KafkaCheck(AgentCheck):
                 # report consumer offset if the partition is valid because even if leaderless the consumer offset will
                 # be valid once the leader failover completes
                 self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
+                self.log.debug('%s consumer offset reported with %s tags', consumer_offset, consumer_group_tags)
                 reported_contexts += 1
 
                 if (topic, partition) not in highwater_offsets:
@@ -119,6 +129,7 @@ class KafkaCheck(AgentCheck):
                 consumer_lag = producer_offset - consumer_offset
                 if reported_contexts < contexts_limit:
                     self.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
+                    self.log.debug('%s consumer lag reported with %s tags', consumer_lag, consumer_group_tags)
                     reported_contexts += 1
 
                 if consumer_lag < 0:
@@ -145,6 +156,7 @@ class KafkaCheck(AgentCheck):
                     )
                 self.log.warning(msg, consumer_group, topic, partition)
                 self.client.request_metadata_update()  # force metadata update on next poll()
+        self.log.debug('%s consumer offsets reported', reported_contexts)
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""

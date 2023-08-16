@@ -236,6 +236,22 @@ files:
         type: boolean
         example: false
         display_default: false
+    - name: collect_settings
+      description: Configure collection of sys.configurations. This is an alpha feature.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of sys.configurations. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the database settings collection interval (in seconds). Each collection involves a single query to
+            `sys.configurations`.
+          value:
+            type: number
+            example: 600
     - name: query_metrics
       description: Configure collection of query metrics
       options:
@@ -498,6 +514,16 @@ files:
       value:
         type: boolean
         example: false
+    - name: database_instance_collection_interval
+      hidden: true
+      description: |
+        Set the database instance collection interval (in seconds). The database instance collection sends
+        basic information about the database instance along with a signal that it still exists. 
+        This collection does not involve any additional queries to the database.
+      value:
+        type: number
+        example: 1800
+        display_default: false
     - template: instances/default
       overrides:
         disable_generic_tags.hidden: False

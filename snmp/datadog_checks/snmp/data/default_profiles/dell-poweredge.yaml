@@ -8,7 +8,7 @@
 # PowerEdge servers should be monitored via their iDRAC interface (and with the idrac profile) when possible.
 
 extends:
-  - _base.yaml
+  - _dell.yaml
   - _intel-lan-adapters.yaml
   - _generic-tcp.yaml
   - _generic-udp.yaml
@@ -53,6 +53,29 @@ metrics:
       - OID: 1.3.6.1.4.1.674.10892.1.200.10.1.50
         name: systemStateProcessorDeviceStatusCombined
     metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.1.200.10.1.1
+          name: systemStatechassisIndex
+        tag: chassis_index
+  - MIB: MIB-Dell-10892
+    table:
+      OID: 1.3.6.1.4.1.674.10892.1.200.10
+      name: systemStateTable
+    symbols:
+      - name: systemState
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.674.10892.1.200.10.1.9
+          name: systemStatePowerSupplyStatusCombined
+        tag: system_state_power_supply_status_combined
+        mapping:
+          1: other
+          2: unknown
+          3: ok
+          4: noncritical
+          5: critical
+          6: nonRecoverable
       - column:
           OID: 1.3.6.1.4.1.674.10892.1.200.10.1.1
           name: systemStatechassisIndex
@@ -198,7 +221,7 @@ metrics:
           name: amperageProbeIndex
         tag: amperage_probe_index
   - MIB: MIB-Dell-10892
-    forced_type: gauge # Sent as integers
+    metric_type: gauge # Sent as integers
     table:
       OID: 1.3.6.1.4.1.674.10892.1.600.12
       name: powerSupplyTable
@@ -291,7 +314,7 @@ metrics:
           name: coolingDeviceLocationName
         tag: cooling_device_location_name
   - MIB: MIB-Dell-10892
-    forced_type: gauge # Sent as integers
+    metric_type: gauge # Sent as integers
     table:
       OID: 1.3.6.1.4.1.674.10892.1.700.20
       name: temperatureProbeTable
@@ -318,7 +341,7 @@ metrics:
           name: temperatureProbeLocationName
         tag: temperature_probe_location_name
   - MIB: MIB-Dell-10892
-    forced_type: gauge # Sent as integers
+    metric_type: gauge # Sent as integers
     table:
       OID: 1.3.6.1.4.1.674.10892.1.1100.30
       name: processorDeviceTable
@@ -359,7 +382,7 @@ metrics:
           name: processorDeviceStatusLocationName
         tag: processor_device_status_location_name
   - MIB: MIB-Dell-10892
-    forced_type: gauge # Sent as integers
+    metric_type: gauge # Sent as integers
     table:
       OID: 1.3.6.1.4.1.674.10892.1.1100.40
       name: cacheDeviceTable
@@ -380,7 +403,7 @@ metrics:
           name: cacheDeviceIndex
         tag: index
   - MIB: MIB-Dell-10892
-    forced_type: gauge # Sent as integers
+    metric_type: gauge # Sent as integers
     table:
       OID: 1.3.6.1.4.1.674.10892.1.1100.50
       name: memoryDeviceTable
@@ -410,7 +433,7 @@ metrics:
           name: memoryDeviceSerialNumberName
         tag: serial_number_name
   - MIB: MIB-Dell-10892
-    forced_type: gauge # Sent as integers
+    metric_type: gauge # Sent as integers
     table:
       OID: 1.3.6.1.4.1.674.10892.1.1100.90
       name: networkDeviceTable

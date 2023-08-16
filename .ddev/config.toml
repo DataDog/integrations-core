@@ -86,6 +86,8 @@ mmh3 = ['CC0-1.0']
 paramiko = ['LGPL-2.1-only']
 # https://github.com/oracle/python-oracledb/blob/main/LICENSE.txt
 oracledb = ['Apache-2.0']
+# https://github.com/psycopg/psycopg/blob/master/LICENSE.txt
+psycopg = ['LGPL-3.0-only']
 # https://github.com/psycopg/psycopg2/blob/master/LICENSE
 # https://github.com/psycopg/psycopg2/blob/master/doc/COPYING.LESSER
 psycopg2-binary = ['LGPL-3.0-only', 'BSD-3-Clause']
@@ -119,6 +121,7 @@ packaging = 'https://github.com/pypa/packaging'
 paramiko = 'https://github.com/paramiko/paramiko'
 protobuf = 'https://github.com/protocolbuffers/protobuf'
 psycopg2-binary = 'https://github.com/psycopg/psycopg2'
+psycopg = 'https://github.com/psycopg/psycopg'
 pycryptodomex = 'https://github.com/Legrandin/pycryptodome'
 redis = 'https://github.com/redis/redis-py'
 requests = 'https://github.com/psf/requests'
@@ -128,3 +131,24 @@ snowflake-connector-python = 'https://github.com/snowflakedb/snowflake-connector
 supervisor = 'https://github.com/Supervisor/supervisor'
 tuf = 'https://github.com/theupdateframework/python-tuf'
 typing = 'https://github.com/python/typing'
+
+[overrides.validate.openmetrics]
+exclude = ["openmetrics"]
+
+[overrides.validate.metrics]
+exclude = [
+    'disk',
+    'go_expvar',
+    'go-metro',
+    'http',
+    'kubelet',
+    'kubernetes',
+    'kubernetes_state',
+    'network',
+    'ntp',
+    'process',
+    'riak_cs',
+    'system_core',
+    'system_swap',
+    'tcp',
+]

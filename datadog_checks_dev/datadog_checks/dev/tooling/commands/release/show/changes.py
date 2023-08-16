@@ -1,20 +1,16 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 import click
 
-from ....git import get_commits_since
-from ....github import get_changelog_types, get_pr, parse_pr_numbers
-from ....release import get_release_tag_string
+from .....fs import stream_file_lines
+from ....constants import get_root
 from ....utils import complete_valid_checks, get_valid_checks, get_version_string
 from ...console import (
     CONTEXT_SETTINGS,
     abort,
-    echo_debug,
-    echo_failure,
-    echo_info,
-    echo_success,
-    echo_warning,
     validate_check_arg,
 )
 
@@ -49,51 +45,27 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization, since, e
             'Failed to retrieve the latest version. Please ensure your project or check has a proper set of tags '
             'following SemVer and matches the provided tag_prefix and/or tag_pattern.'
         )
-    target_tag = get_release_tag_string(check, cur_version)
 
-    # get the diff from HEAD
-    diff_lines = get_commits_since(check, target_tag, end=end, exclude_branch=exclude_branch)
+    if check:
+        changelog_path = os.path.join(get_root(), check, 'CHANGELOG.md')
+    else:
+        changelog_path = os.path.join(get_root(), 'CHANGELOG.md')
+    log = list(stream_file_lines(changelog_path))
 
-    # for each PR get the title, we'll use it to populate the changelog
-    pr_numbers = parse_pr_numbers(diff_lines)
-    if not dry_run:
-        echo_info(f'Found {len(pr_numbers)} PRs merged since tag: {target_tag}')
+    header_index = 2
+    for index in range(2, len(log)):
+        if log[index].startswith("##") and "## Unreleased" not in log[index]:
+            header_index = index
+            break
 
+    if header_index == 4:
+        abort('There are no changes for this integration')
+
+    unreleased = log[4:header_index]
     applicable_changelog_types = []
-    user_config = ctx.obj
-    echo_debug(f'Evaluating PRs: {pr_numbers}')
-    for pr_num in pr_numbers:
-        try:
-            payload = get_pr(pr_num, user_config, org=organization)
-        except Exception as e:
-            echo_failure(f'Unable to fetch info for PR #{pr_num}: {e}')
-            continue
-        changelog_types = get_changelog_types(payload)
-        if dry_run:
-            echo_debug('Running changes in dry run mode. Command will abort if there are invalid tags')
-            if not changelog_types:
-                echo_failure(f'No valid changelog labels found attached to PR #{pr_num}, please add one!')
-                abort(f'No valid changelog labels found attached to PR #{pr_num}, please add one!')
-            elif len(changelog_types) > 1:
-                echo_failure(f'Multiple changelog labels found attached to PR #{pr_num}, please only use one!')
-                abort(f'Multiple changelog labels found attached to PR #{pr_num}, please only use one!')
 
-            current_changelog_type = changelog_types[0]
-            if current_changelog_type != 'no-changelog':
-                echo_debug(f'Found change {current_changelog_type}')
-                applicable_changelog_types.append(current_changelog_type)
-            else:
-                echo_debug(f'Found no-changelog change for PR {pr_num}, skipping')
-        else:
-            echo_success(payload.get('title'))
-            echo_info(f" * Url: {payload.get('html_url')}")
-
-            echo_info(' * Changelog status: ', nl=False)
-            if not changelog_types:
-                echo_warning('WARNING! No changelog labels attached.\n')
-            elif len(changelog_types) > 1:
-                echo_warning(f"WARNING! Too many changelog labels attached: {', '.join(changelog_types)}\n")
-            else:
-                echo_success(f'{changelog_types[0]}\n')
+    for line in unreleased:
+        if line.startswith('***'):
+            applicable_changelog_types.append(line[3:-5])
 
     return cur_version, applicable_changelog_types

@@ -5,11 +5,12 @@ import socket
 import time
 
 import mock
-import psycopg2
+import psycopg
 import pytest
 from semver import VersionInfo
 
 from datadog_checks.postgres import PostgreSql
+from datadog_checks.postgres.__about__ import __version__
 from datadog_checks.postgres.util import PartialFormatter, fmt
 
 from .common import (
@@ -77,7 +78,7 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
 
 
 def test_snapshot_xmin(aggregator, integration_check, pg_instance):
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute('select txid_snapshot_xmin(txid_current_snapshot());')
             xmin = float(cur.fetchall()[0][0])
@@ -88,9 +89,7 @@ def test_snapshot_xmin(aggregator, integration_check, pg_instance):
     aggregator.assert_metric('postgresql.snapshot.xmin', value=xmin, count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.snapshot.xmax', value=xmin, count=1, tags=expected_tags)
 
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
-        # Force autocommit
-        conn.set_session(autocommit=True)
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g", autocommit=True) as conn:
         with conn.cursor() as cur:
             # Force increases of txid
             cur.execute('select txid_current();')
@@ -114,7 +113,6 @@ def test_snapshot_xip(aggregator, integration_check, pg_instance):
     cur.fetchall()
 
     conn2 = _get_conn(pg_instance)
-    conn2.set_session(autocommit=True)
     with conn2.cursor() as cur2:
         # Force increases of txid
         cur2.execute('select txid_current();')
@@ -227,7 +225,7 @@ def test_unsupported_replication(aggregator, integration_check, pg_instance):
     def format_with_error(value, **kwargs):
         if 'pg_is_in_recovery' in value:
             called.append(True)
-            raise psycopg2.errors.FeatureNotSupported("Not available")
+            raise psycopg.errors.FeatureNotSupported("Not available")
         return unpatched_fmt.format(value, **kwargs)
 
     # This simulate an error in the fmt function, as it's a bit hard to mock psycopg
@@ -255,7 +253,7 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
 
     # Second: keep the connection open but an unexpected error happens during check run
     orig_db = check.db
-    check.db = mock.MagicMock(spec=('closed', 'status'), closed=False, status=psycopg2.extensions.STATUS_READY)
+    check.db = mock.MagicMock(spec=('closed', 'status'), closed=False, status=psycopg.pq.ConnStatus.OK)
     with pytest.raises(AttributeError):
         check.check(pg_instance)
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=expected_tags)
@@ -293,7 +291,7 @@ def test_locks_metrics_no_relations(aggregator, integration_check, pg_instance):
     Since 4.0.0, to prevent tag explosion, lock metrics are not collected anymore unless relations are specified
     """
     check = integration_check(pg_instance)
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+    with psycopg.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute('LOCK persons')
             check.check(pg_instance)
@@ -492,7 +490,7 @@ def test_query_timeout(integration_check, pg_instance):
     check = integration_check(pg_instance)
     check._connect()
     cursor = check.db.cursor()
-    with pytest.raises(psycopg2.errors.QueryCanceled):
+    with pytest.raises(psycopg.errors.QueryCanceled):
         cursor.execute("select pg_sleep(2000)")
 
 
@@ -611,6 +609,48 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         tags=expected_tags_with_db,
         hostname=expected_hostname,
     )
+
+
+@pytest.mark.parametrize(
+    'dbm_enabled, reported_hostname',
+    [
+        (True, None),
+        (False, None),
+        (True, 'forced_hostname'),
+        (True, 'forced_hostname'),
+    ],
+)
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_database_instance_metadata(aggregator, dd_run_check, pg_instance, dbm_enabled, reported_hostname):
+    pg_instance['dbm'] = dbm_enabled
+    if reported_hostname:
+        pg_instance['reported_hostname'] = reported_hostname
+    expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(pg_instance['port'])]
+    check = PostgreSql('test_instance', {}, [pg_instance])
+    dd_run_check(check)
+
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
+    assert event is not None
+    assert event['host'] == expected_host
+    assert event['dbms'] == "postgres"
+    assert event['tags'].sort() == expected_tags.sort()
+    assert event['integration_version'] == __version__
+    assert event['collection_interval'] == 1800
+    assert event['metadata'] == {
+        'dbm': dbm_enabled,
+        'connection_host': pg_instance['host'],
+    }
+
+    # Run a second time and expect the metadata to not be emitted again because of the cache TTL
+    aggregator.reset()
+    dd_run_check(check)
+
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
+    assert event is None
 
 
 def assert_state_clean(check):

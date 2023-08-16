@@ -19,15 +19,15 @@ cm-client==45.0.4
 confluent-kafka==2.1.1; python_version > '3.0'
 contextlib2==0.6.0.post1; python_version < '3.0'
 cryptography==3.3.2; python_version < '3.0'
-cryptography==39.0.1; python_version > '3.0'
+cryptography==41.0.3; python_version > '3.0'
 ddtrace==0.32.2; sys_platform == 'win32' and python_version < '3.0'
-ddtrace==0.53.2; (sys_platform != 'win32' and (sys_platform != 'darwin' or platform_machine != 'arm64' and python_version > '3.0')) or python_version > '3.0'
+ddtrace==0.53.2; sys_platform != 'win32' and python_version < '3.0'
+ddtrace==1.11.2; python_version > '3.0'
 dnspython==1.16.0
 enum34==1.1.10; python_version < '3.0'
 foundationdb==6.3.24; python_version > '3.0'
 futures==3.4.0; python_version < '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
-immutables==0.19; python_version > '3.0'
 importlib-metadata==2.1.3; python_version < '3.8'
 in-toto==1.0.1; python_version > '3.0'
 ipaddress==1.0.23; python_version < '3.0'
@@ -57,12 +57,13 @@ protobuf==3.17.3; python_version < '3.0'
 protobuf==3.20.2; python_version > '3.0'
 psutil==5.9.0
 psycopg2-binary==2.8.6; sys_platform != 'darwin' or platform_machine != 'arm64'
+psycopg[binary]==3.1.10; python_version > '3.0'
 pyasn1==0.4.6
 pycryptodomex==3.10.1
-pydantic==1.10.8; python_version > '3.0'
+pydantic==2.0.2; python_version > '3.0'
 pyjwt==1.7.1; python_version < '3.0'
 pyjwt==2.7.0; python_version > '3.0'
-pymongo[srv]==4.3.3; python_version >= '3.8'
+pymongo[srv]==4.3.3; python_version >= '3.9'
 pymqi==1.12.10; sys_platform != 'darwin' or platform_machine != 'arm64'
 pymysql==0.10.1
 pyodbc==4.0.32; sys_platform != 'darwin' or platform_machine != 'arm64'
@@ -102,7 +103,7 @@ serpent==1.41; sys_platform == 'win32' and python_version > '3.0'
 service-identity[idna]==21.1.0
 simplejson==3.19.1
 six==1.16.0
-snowflake-connector-python==3.0.4; python_version > '3.0'
+snowflake-connector-python==3.1.0; python_version > '3.0'
 supervisor==4.2.5
 tuf==2.0.0; python_version > '3.0'
 typing==3.10.0.0; python_version < '3.0'

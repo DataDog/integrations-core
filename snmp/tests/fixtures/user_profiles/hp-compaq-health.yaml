@@ -1,0 +1,5 @@
+extends:
+  - _base.yaml
+  - _hp-compaq-health.yaml
+
+sysobjectid: 1.2.3.1004

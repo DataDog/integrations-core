@@ -9,7 +9,7 @@ import pytest
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.elastic import ESCheck
-from datadog_checks.elastic.elastic import get_value_from_path
+from datadog_checks.elastic.elastic import AuthenticationError, get_value_from_path
 
 from .common import URL, get_fixture_path
 
@@ -145,3 +145,48 @@ def test_get_template_metrics_raise_exception(aggregator, instance):
 def test_get_value_from_path():
     value = get_value_from_path({"5": {"b": [0, 1, 2, {"a": ["foo"]}]}}, "5.b.3.a.0")
     assert value == "foo"
+
+
+def test__get_data_throws_authentication_error(instance):
+    with mock.patch(
+        'requests.get',
+        return_value=MockResponse(status_code=400),
+    ):
+        check = ESCheck('elastic', {}, instances=[instance])
+
+        with pytest.raises(AuthenticationError):
+            check._get_data(url='test.com')
+
+
+def test__get_data_creates_critical_service_alert(aggregator, instance):
+    with mock.patch(
+        'requests.get',
+        return_value=MockResponse(status_code=500),
+    ):
+        check = ESCheck('elastic', {}, instances=[instance])
+
+        with pytest.raises(Exception):
+            check._get_data(url='test.com')
+
+        aggregator.assert_service_check(
+            check.SERVICE_CHECK_CONNECT_NAME,
+            status=check.CRITICAL,
+            tags=check._config.service_check_tags,
+            message="Error 500 Server Error: None for url: None when hitting test.com",
+        )
+
+
+@pytest.mark.parametrize(
+    'version, return_value',
+    [
+        pytest.param([5, 1, 0], False),
+        pytest.param([5, 1, 1], True),
+        pytest.param([5, 1, 2], True),
+        pytest.param([1, 0, 0], False),
+        pytest.param([10, 0, 0], True),
+    ],
+)
+def test_collect_template_metrics_returns_valid_result(instance, version, return_value):
+    check = ESCheck('elastic', {}, instances=[instance])
+
+    assert check._collect_template_metrics(es_version=version) == return_value
