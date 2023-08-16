@@ -5,6 +5,7 @@
 ***Added***:
 
 * Dependency update for 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
+* Improve documentation of APIs ([#15582](https://github.com/DataDog/integrations-core/pull/15582))
 
 ***Fixed***:
 
@@ -1978,4 +1979,3 @@
 ***Added***:
 
 * adds `datadog_checks`
-
