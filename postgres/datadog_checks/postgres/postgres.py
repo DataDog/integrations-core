@@ -270,8 +270,6 @@ class PostgreSql(AgentCheck):
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
-        self._version = None
-        self._is_aurora = None
         self.metrics_cache.clean_state()
         self._dynamic_queries = None
 

@@ -617,7 +617,6 @@ def assert_state_clean(check):
     assert check.metrics_cache.archiver_metrics is None
     assert check.metrics_cache.replication_metrics is None
     assert check.metrics_cache.activity_metrics is None
-    assert check.is_aurora is None
 
 
 def assert_state_set(check):
@@ -626,4 +625,3 @@ def assert_state_set(check):
     if POSTGRES_VERSION != '9.3':
         assert check.metrics_cache.archiver_metrics
     assert check.metrics_cache.replication_metrics
-    assert check.is_aurora is False
