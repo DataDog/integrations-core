@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add hardware metrics for Cisco (non-categorical) ([#15551](https://github.com/DataDog/integrations-core/pull/15551))
+
 ## 6.1.0 / 2023-08-10
 
 ***Added***:

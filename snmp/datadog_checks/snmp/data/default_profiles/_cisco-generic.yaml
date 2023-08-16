@@ -222,6 +222,7 @@ metrics:
         column:
           OID: 1.3.6.1.4.1.9.9.500.1.2.1.1.7
           name: cswSwitchMacAddress
+          format: mac_address
       - MIB: ENTITY-MIB
         column:
           OID: 1.3.6.1.2.1.47.1.1.1.1.7
@@ -241,6 +242,7 @@ metrics:
         column:
           OID: 1.3.6.1.4.1.9.9.500.1.2.1.1.7
           name: cswSwitchMacAddress
+          format: mac_address
       - MIB: ENTITY-MIB
         column:
           OID: 1.3.6.1.2.1.47.1.1.1.1.7
