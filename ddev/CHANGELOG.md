@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Migrate `ddev release agent integrations` to `ddev` ([#15569](https://github.com/DataDog/integrations-core/pull/15569))
+
 ***Removed***:
  
 * Remove the `ddev validate recommended-monitors` command ([#15563](https://github.com/DataDog/integrations-core/pull/15563))
