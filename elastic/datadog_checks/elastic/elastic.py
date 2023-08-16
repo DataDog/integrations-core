@@ -151,7 +151,10 @@ class ESCheck(AgentCheck):
             service_check_tags.extend(cluster_tags)
         self._process_stats_data(stats_data, stats_metrics, base_tags)
 
-        self._get_template_metrics(admin_forwarder, base_tags)
+        if self._collect_template_metrics(es_version=version):
+            self._get_template_metrics(admin_forwarder, base_tags)
+        else:
+            self.log.debug("ES version %s does not support template metrics", version)
 
         # Load cluster-wise data
         # Note: this is a cluster-wide query, might TO.
@@ -335,7 +338,7 @@ class ESCheck(AgentCheck):
             resp.raise_for_status()
         except Exception as e:
             # this means we've hit a particular kind of auth error that means the config is broken
-            if resp and resp.status_code == 400:
+            if isinstance(resp, requests.Response) and resp.status_code == 400:
                 raise AuthenticationError("The ElasticSearch credentials are incorrect")
 
             if send_sc:
@@ -638,3 +641,14 @@ class ESCheck(AgentCheck):
             'event_object': hostname,
             'tags': tags,
         }
+
+    @staticmethod
+    def _collect_template_metrics(es_version):
+        # Prerequisite check to determine if template metrics should be collected or not
+        # https://www.elastic.co/guide/en/elasticsearch/reference/5.1/release-notes-5.1.1.html#feature-5.1.1
+        # Template metric collection by default sends a critical service alert in case of failure
+        #   For unsupported ES versions (<5.1.1) failure to collect template metrics is expected
+        #   This function will aid for collecting template metrics only on the supported ES versions
+        CAT_TEMPLATE_SUPPORTED_ES_VERSION = [5, 1, 1]
+
+        return es_version >= CAT_TEMPLATE_SUPPORTED_ES_VERSION

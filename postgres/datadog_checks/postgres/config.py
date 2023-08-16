@@ -134,6 +134,7 @@ class PostgresConfig:
         }
         self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
+        self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 1800)
 
     def _build_tags(self, custom_tags):
         # Clean up tags in case there was a None entry in the instance

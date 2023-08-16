@@ -632,6 +632,16 @@ files:
               type: boolean
               example: false
               display_default: false
+          - name: database_instance_collection_interval
+            hidden: true
+            description: |
+              Set the database instance collection interval (in seconds). The database instance collection sends
+              basic information about the database instance along with a signal that it still exists. 
+              This collection does not involve any additional queries to the database.
+            value:
+              type: number
+              example: 1800
+              display_default: false
           - template: instances/default
             overrides:
               disable_generic_tags.hidden: false
