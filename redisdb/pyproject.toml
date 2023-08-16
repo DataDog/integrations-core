@@ -40,7 +40,7 @@ license = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "redis==3.5.3; python_version < '3.0'",
-    "redis==4.6.0; python_version > '3.0'",
+    "redis==5.0.0; python_version > '3.0'",
 ]
 
 [project.urls]
