@@ -6,19 +6,16 @@ from collections import defaultdict
 from io import StringIO
 
 import click
-from datadog_checks.dev.fs import read_file_lines, write_file
-from datadog_checks.dev.tooling.commands.agent.common import get_changes_per_agent
-from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, echo_debug, echo_info
-from datadog_checks.dev.tooling.constants import get_integration_changelog
 from datadog_checks.dev.tooling.testing import complete_active_checks
 from datadog_checks.dev.tooling.utils import get_valid_checks
 from six import iteritems
+
+from ddev.cli.release.agent.common import get_changes_per_agent
 
 INTEGRATION_CHANGELOG_PATTERN = r'^## (\d+\.\d+\.\d+) / \d{4}-\d{2}-\d{2}$'
 
 
 @click.command(
-    context_settings=CONTEXT_SETTINGS,
     short_help="Update integration CHANGELOG.md by adding the Agent version",
 )
 @click.argument('checks', shell_complete=complete_active_checks, nargs=-1)
@@ -27,7 +24,8 @@ INTEGRATION_CHANGELOG_PATTERN = r'^## (\d+\.\d+\.\d+) / \d{4}-\d{2}-\d{2}$'
 @click.option(
     '--write', '-w', is_flag=True, help="Write to the changelog file, if omitted contents will be printed to stdout"
 )
-def integrations_changelog(checks, since, to, write):
+@click.pass_obj
+def integrations_changelog(app, checks, since, to, write):
     """
     Update integration CHANGELOG.md by adding the Agent version.
 
@@ -38,7 +36,7 @@ def integrations_changelog(checks, since, to, write):
     if not checks:
         checks = get_valid_checks()
 
-    changes_per_agent = get_changes_per_agent(since, to)
+    changes_per_agent = get_changes_per_agent(app.repo, since, to)
 
     integrations_versions = defaultdict(dict)
     for agent_version, version_changes in changes_per_agent.items():
@@ -49,9 +47,9 @@ def integrations_changelog(checks, since, to, write):
 
     for check, versions in iteritems(integrations_versions):
         changelog_contents = StringIO()
-        changelog_file = get_integration_changelog(check)
+        changelog_file = app.repo.integrations.get(check).path / 'CHANGELOG.md'
 
-        for line in read_file_lines(changelog_file):
+        for line in changelog_file.read_text().splitlines(keepends=True):
             match = re.search(INTEGRATION_CHANGELOG_PATTERN, line)
             if match:
                 version = match.groups()[0]
@@ -59,12 +57,12 @@ def integrations_changelog(checks, since, to, write):
                     agent_version = versions[version]
                     line = "{} / Agent {}\n".format(line.strip(), agent_version)
                 else:
-                    echo_debug("Agent version not found for integration {} line {}".format(check, line.strip()))
+                    app.display_debug("Agent version not found for integration {} line {}".format(check, line.strip()))
             changelog_contents.write(line)
 
         # Save the changelog on disk if --write was passed
         if write:
-            echo_info("Writing to {}".format(changelog_file))
-            write_file(changelog_file, changelog_contents.getvalue())
+            app.display_info("Writing to {}".format(changelog_file))
+            (app.repo.integrations.get(check).path / changelog_file).write_text(changelog_contents.getvalue())
         else:
-            echo_info(changelog_contents.getvalue())
+            print(changelog_contents.getvalue())

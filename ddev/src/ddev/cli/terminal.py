@@ -213,6 +213,12 @@ class Terminal:
 
         self.output(text, self._style_level_waiting, stderr=stderr, indent=indent, link=link, **kwargs)
 
+    def display_debug(self, text='', stderr=True, indent=None, link=None, **kwargs):
+        if self.verbosity < VerbosityLevels.DEBUG:
+            return
+
+        self.output(f'DEBUG: {text}', None, stderr=stderr, indent=indent, link=link, **kwargs)
+
     def display_header(self, title=''):
         self.console.rule(Text(title, self._style_level_success))
 

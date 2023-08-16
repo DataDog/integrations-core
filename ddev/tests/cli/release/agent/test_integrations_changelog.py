@@ -33,11 +33,13 @@ def test_integrations_changelog_write(repo_with_fake_changelogs, ddev):
 
 
 @pytest.fixture
-def repo_with_fake_changelogs(repo_with_history):
+def repo_with_fake_changelogs(repo_with_history, config_file):
     repo_root = repo_with_history.path
 
     old_root = get_root()
     set_root(str(repo_root))
+    config_file.model.repos['core'] = str(repo_with_history.path)
+    config_file.save()
 
     # Write a changelog for a couple of integrations
     (repo_root / 'foo' / 'CHANGELOG.md').write_text(
