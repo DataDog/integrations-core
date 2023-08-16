@@ -42,6 +42,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.ospfVirtNbr',
     'snmp.ospfIf',
     'snmp.ospfVirtIf',
+    'snmp.wlsxSysExtFan',  # Aruba constant metric
     'snmp.upsOutletGroupStatus',  # APC UPS constant metric
     'snmp.cpiPduEas',  # Chatsworth constant metric
     'snmp.ciscoEnvMonSupplyStatus',  # Cisco constant metric
@@ -49,19 +50,18 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.cefcFanTrayStatus',  # Cisco constant metric
     'snmp.cpqHeFltTolPowerSupply',  # HP constant metric
     'snmp.fanSpeedSensor',  # Checkpoint constant metric
-    'snmp.enclosurePowerSupply',  # iDRAC constant metric
-    'snmp.systemState',  # iDRAC constant metric
-    'snmp.physicalDisk',  # iDRAC constant metric
-    'snmp.wlsxSysExtFan',  # Aruba constant metric
-    'snmp.controller',  # Dell constant metric
-    'snmp.pCIDevice',  # Dell constant metric
-    'snmp.systemSlot',  # Dell constant metric
-    'snmp.battery',  # Dell constant metric
-    'snmp.networkDevice',  # Dell constant metric
-    'snmp.systemBIOS',  # Dell constant metric
-    'snmp.amperageProbe',  # Dell constant metric
-    'snmp.voltageProbe',  # Dell constant metric
-    'snmp.memoryDevice',  # Dell constant metric
+    'snmp.dell.enclosurePowerSupply',  # iDRAC constant metric
+    'snmp.dell.systemState',  # iDRAC constant metric
+    'snmp.dell.physicalDisk',  # iDRAC constant metric
+    'snmp.dell.controller',  # Dell constant metric
+    'snmp.dell.pCIDevice',  # Dell constant metric
+    'snmp.dell.systemSlot',  # Dell constant metric
+    'snmp.dell.battery',  # Dell constant metric
+    'snmp.dell.networkDevice',  # Dell constant metric
+    'snmp.dell.systemBIOS',  # Dell constant metric
+    'snmp.dell.amperageProbe',  # Dell constant metric
+    'snmp.dell.voltageProbe',  # Dell constant metric
+    'snmp.dell.memoryDevice',  # Dell constant metric
 ]
 
 DEFAULT_TAGS_TO_SKIP = ['loader']
