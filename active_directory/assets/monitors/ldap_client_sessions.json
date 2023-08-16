@@ -31,7 +31,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_12h):anomalies(avg:active_directory.ldap.client_sessions{*} by {host}, 'agile', 5, direction='both', alert_window='last_15m', interval=120, count_default_zero='true', seasonality='daily') \u003e= 1",
+    "query": "avg(last_12h):anomalies(avg:active_directory.ldap.client_sessions{*} by {host}, 'agile', 5, direction='both', alert_window='last_15m', interval=120, count_default_zero='true', seasonality='daily') >= 1",
     "tags": [
       "integration:active_directory"
     ],

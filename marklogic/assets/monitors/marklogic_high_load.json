@@ -26,7 +26,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_5m):avg:marklogic.forests.total_rate{*} \u003e 2000000000",
+    "query": "avg(last_5m):avg:marklogic.forests.total_rate{*} > 2000000000",
     "tags": [
       "integration:marklogic"
     ],

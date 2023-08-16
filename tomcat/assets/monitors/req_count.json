@@ -30,7 +30,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_4h):anomalies(avg:tomcat.request_count{*} by {host}, 'agile', 2, direction='both', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') \u003e= 1",
+    "query": "avg(last_4h):anomalies(avg:tomcat.request_count{*} by {host}, 'agile', 2, direction='both', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
     "tags": [
       "integration:tomcat"
     ],

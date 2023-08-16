@@ -25,7 +25,7 @@
       },
       "timeout_h": 0
     },
-    "query": "sum(last_1d):avg:snowflake.logins.fail.count{*}.as_count() \u003e 10",
+    "query": "sum(last_1d):avg:snowflake.logins.fail.count{*}.as_count() > 10",
     "tags": [
       "integration:snowflake"
     ],

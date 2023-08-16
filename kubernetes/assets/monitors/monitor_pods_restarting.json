@@ -25,7 +25,7 @@
       },
       "timeout_h": 0
     },
-    "query": "change(max(last_5m),last_5m):exclude_null(sum:kubernetes.containers.restarts{*} by {kube_cluster_name,pod_name}) \u003e 5",
+    "query": "change(max(last_5m),last_5m):exclude_null(sum:kubernetes.containers.restarts{*} by {kube_cluster_name,pod_name}) > 5",
     "tags": [
       "integration:kubernetes"
     ],

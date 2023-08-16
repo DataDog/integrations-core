@@ -26,7 +26,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_5m):boundary.worker.proxy.websocket.active_connections{*} by {endpoint} \u003e 90",
+    "query": "avg(last_5m):boundary.worker.proxy.websocket.active_connections{*} by {endpoint} > 90",
     "tags": [
       "integration:boundary"
     ],

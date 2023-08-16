@@ -22,7 +22,7 @@
       }
     },
     "priority": null,
-    "query": "sum(last_5m):(sum:trace.langchain.request.errors{*}.as_count() / sum:trace.langchain.request.hits{*}.as_count()) \u003e 0.1",
+    "query": "sum(last_5m):(sum:trace.langchain.request.errors{*}.as_count() / sum:trace.langchain.request.hits{*}.as_count()) > 0.1",
     "restricted_roles": null,
     "tags": [
       "integration:langchain"

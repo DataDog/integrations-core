@@ -23,7 +23,7 @@
       }
     },
     "priority": null,
-    "query": "avg(last_5m):avg:openai.ratelimit.remaining.requests{*} \u003c 1000",
+    "query": "avg(last_5m):avg:openai.ratelimit.remaining.requests{*} < 1000",
     "restricted_roles": null,
     "tags": [
       "integration:openai"

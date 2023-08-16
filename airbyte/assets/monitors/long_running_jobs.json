@@ -23,7 +23,7 @@
       }
     },
     "priority": null,
-    "query": "avg(last_5m):avg:airbyte.metrics_reporter.num_unusually_long_syncs{*} / avg:airbyte.metrics_reporter.num_running_jobs{*} * 100 \u003e 5",
+    "query": "avg(last_5m):avg:airbyte.metrics_reporter.num_unusually_long_syncs{*} / avg:airbyte.metrics_reporter.num_running_jobs{*} * 100 > 5",
     "restricted_roles": null,
     "tags": [
       "integration:airbyte"

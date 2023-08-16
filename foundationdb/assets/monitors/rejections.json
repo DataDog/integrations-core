@@ -27,7 +27,7 @@
       "timeout_h": 24
     },
     "priority": null,
-    "query": "avg(last_5m):100 * ( avg:foundationdb.workload.transactions.rejected_for_queued_too_long.hz{*} / avg:foundationdb.workload.transactions.started.hz{*} ) \u003e 10",
+    "query": "avg(last_5m):100 * ( avg:foundationdb.workload.transactions.rejected_for_queued_too_long.hz{*} / avg:foundationdb.workload.transactions.started.hz{*} ) > 10",
     "tags": [
       "integration:fdb"
     ],

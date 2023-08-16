@@ -29,7 +29,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_5m):avg:voltdb.cpu.percent_used{*} by {voltdb_host}.rollup(max, 60) \u003e= 90",
+    "query": "avg(last_5m):avg:voltdb.cpu.percent_used{*} by {voltdb_host}.rollup(max, 60) >= 90",
     "tags": [
       "integration:voltdb"
     ],

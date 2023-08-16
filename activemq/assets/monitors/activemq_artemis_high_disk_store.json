@@ -28,7 +28,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_10m):avg:activemq.artemis.disk_store_usage_pct{*} \u003e 0.95",
+    "query": "avg(last_10m):avg:activemq.artemis.disk_store_usage_pct{*} > 0.95",
     "tags": [
       "integration:activemq"
     ],

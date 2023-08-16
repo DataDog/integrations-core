@@ -109,7 +109,7 @@
       ]
     },
     "priority": null,
-    "query": "formula(\"default_zero(query1) / default_zero(query1) - default_zero(query) / default_zero(query)\").last(\"1m\") \u003e 0.5",
+    "query": "formula(\"default_zero(query1) / default_zero(query1) - default_zero(query) / default_zero(query)\").last(\"1m\") > 0.5",
     "restricted_roles": null,
     "tags": [
       "integration:snmp"

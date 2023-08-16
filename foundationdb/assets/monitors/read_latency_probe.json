@@ -27,7 +27,7 @@
       "timeout_h": 1
     },
     "priority": null,
-    "query": "avg(last_5m):avg:foundationdb.latency_probe.read_seconds{*} \u003e 5",
+    "query": "avg(last_5m):avg:foundationdb.latency_probe.read_seconds{*} > 5",
     "tags": [
       "integration:fdb"
     ],

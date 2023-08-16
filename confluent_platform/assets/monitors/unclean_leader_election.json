@@ -26,7 +26,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_5m):avg:confluent.kafka.controller.unclean_leader_elections_per_sec.rate{*} by {instance} \u003e 0",
+    "query": "avg(last_5m):avg:confluent.kafka.controller.unclean_leader_elections_per_sec.rate{*} by {instance} > 0",
     "tags": [
       "integration:confluent_platform"
     ],

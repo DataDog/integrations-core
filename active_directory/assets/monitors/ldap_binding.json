@@ -27,7 +27,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_5m):avg:active_directory.ldap.bind_time{*} by {host} \u003e 30",
+    "query": "avg(last_5m):avg:active_directory.ldap.bind_time{*} by {host} > 30",
     "tags": [
       "integration:active_directory"
     ],

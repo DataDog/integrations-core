@@ -26,7 +26,7 @@
       }
     },
     "priority": null,
-    "query": "change(avg(last_5m),last_1h):avg:weblogic.work_manager_runtime.threads_stuck{*} by {host,serverruntime,applicationruntime} \u003e 25",
+    "query": "change(avg(last_5m),last_1h):avg:weblogic.work_manager_runtime.threads_stuck{*} by {host,serverruntime,applicationruntime} > 25",
     "tags": [
       "integration:weblogic"
     ],

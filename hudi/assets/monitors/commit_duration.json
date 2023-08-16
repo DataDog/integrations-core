@@ -32,7 +32,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_12h):anomalies(avg:hudi.action.duration{action:commit} by {table_name,host}, 'agile', 3, direction='above', alert_window='last_2h', interval=600, count_default_zero='true', seasonality='daily') \u003e= 1",
+    "query": "avg(last_12h):anomalies(avg:hudi.action.duration{action:commit} by {table_name,host}, 'agile', 3, direction='above', alert_window='last_2h', interval=600, count_default_zero='true', seasonality='daily') >= 1",
     "tags": [
       "integration:hudi"
     ],

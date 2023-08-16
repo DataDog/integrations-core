@@ -27,7 +27,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_5m):min:foundationdb.process.disk.free_bytes{*} by {fdb_process} \u003c 200000000",
+    "query": "avg(last_5m):min:foundationdb.process.disk.free_bytes{*} by {fdb_process} < 200000000",
     "tags": [
       "integration:fdb"
     ],

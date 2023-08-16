@@ -29,7 +29,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_5m):avg:glusterfs.cluster.nodes.count{*} - avg:glusterfs.volume.online{*} \u003e 1",
+    "query": "avg(last_5m):avg:glusterfs.cluster.nodes.count{*} - avg:glusterfs.volume.online{*} > 1",
     "tags": [
       "integration:glusterfs"
     ],

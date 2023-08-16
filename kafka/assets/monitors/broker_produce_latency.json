@@ -27,7 +27,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_5m):avg:kafka.request.produce.time.99percentile{*} by {instance} \u003e 200",
+    "query": "avg(last_5m):avg:kafka.request.produce.time.99percentile{*} by {instance} > 200",
     "restricted_roles": null,
     "tags": [
       "integration:kafka"

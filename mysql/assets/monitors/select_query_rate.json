@@ -31,7 +31,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_1h):anomalies(avg:mysql.performance.com_select{*}, 'basic', 2, direction='below', alert_window='last_15m', interval=20, count_default_zero='true') \u003e= 1",
+    "query": "avg(last_1h):anomalies(avg:mysql.performance.com_select{*}, 'basic', 2, direction='below', alert_window='last_15m', interval=20, count_default_zero='true') >= 1",
     "tags": [
       "integration:mysql"
     ],

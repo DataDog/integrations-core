@@ -25,7 +25,7 @@
       },
       "timeout_h": 0
     },
-    "query": "max(last_15m):default_zero(sum:kubernetes_state.node.status{status:schedulable} by {kube_cluster_name} * 100 / sum:kubernetes_state.node.status{*} by {kube_cluster_name}) \u003c 80",
+    "query": "max(last_15m):default_zero(sum:kubernetes_state.node.status{status:schedulable} by {kube_cluster_name} * 100 / sum:kubernetes_state.node.status{*} by {kube_cluster_name}) < 80",
     "tags": [
       "integration:kubernetes"
     ],

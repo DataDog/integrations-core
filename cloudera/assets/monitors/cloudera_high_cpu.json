@@ -21,7 +21,7 @@
         "warning": 40
       }
     },
-    "query": "avg(last_5m):avg:cloudera.cluster.cpu_percent_across_hosts{*} \u003e 50",
+    "query": "avg(last_5m):avg:cloudera.cluster.cpu_percent_across_hosts{*} > 50",
     "tags": [
       "integration:cloudera"
     ],

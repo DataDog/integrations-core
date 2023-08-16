@@ -31,7 +31,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_4h):anomalies(avg:iis.httpd_request_method.get{*} by {site} + avg:iis.httpd_request_method.put{*} by {site} + avg:iis.httpd_request_method.head{*} by {site} + avg:iis.httpd_request_method.delete{*} by {site} + avg:iis.httpd_request_method.options{*} by {site}, 'agile', 2, direction='both', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') \u003e= 1",
+    "query": "avg(last_4h):anomalies(avg:iis.httpd_request_method.get{*} by {site} + avg:iis.httpd_request_method.put{*} by {site} + avg:iis.httpd_request_method.head{*} by {site} + avg:iis.httpd_request_method.delete{*} by {site} + avg:iis.httpd_request_method.options{*} by {site}, 'agile', 2, direction='both', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
     "restricted_roles": null,
     "tags": [
       "integration:iis"

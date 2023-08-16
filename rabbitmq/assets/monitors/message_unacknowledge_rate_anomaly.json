@@ -31,7 +31,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_4h):anomalies(avg:rabbitmq.queue.messages_unacknowledged.rate{*} by {rabbitmq_queue,host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='hourly') \u003e= 1",
+    "query": "avg(last_4h):anomalies(avg:rabbitmq.queue.messages_unacknowledged.rate{*} by {rabbitmq_queue,host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='hourly') >= 1",
     "tags": [
       "integration:rabbitmq"
     ],

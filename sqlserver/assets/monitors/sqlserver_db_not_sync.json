@@ -25,7 +25,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_5m):avg:sqlserver.database.is_sync_with_backup{*} \u003c 1",
+    "query": "avg(last_5m):avg:sqlserver.database.is_sync_with_backup{*} < 1",
     "tags": [
       "integration:sql-server"
     ],

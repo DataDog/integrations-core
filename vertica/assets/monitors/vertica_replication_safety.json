@@ -28,7 +28,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "max(last_5m):avg:vertica.node.down{*} - avg:vertica.ksafety.current{*} \u003e 1",
+    "query": "max(last_5m):avg:vertica.node.down{*} - avg:vertica.ksafety.current{*} > 1",
     "restricted_roles": null,
     "tags": [
       "integration:vertica"

@@ -26,7 +26,7 @@
       "timeout_h": 0
     },
     "priority": 2,
-    "query": "max(last_5m):avg:sonarqube.security.vulnerabilities{*} \u003e 0",
+    "query": "max(last_5m):avg:sonarqube.security.vulnerabilities{*} > 0",
     "tags": [
       "integration:sonarqube"
     ],

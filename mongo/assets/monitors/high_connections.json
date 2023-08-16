@@ -26,7 +26,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_5m):100 * sum:mongodb.connections.current{*} by {replset_name} / ( sum:mongodb.connections.current{*} by {replset_name} + sum:mongodb.connections.available{*} by {replset_name} ) \u003e 90",
+    "query": "avg(last_5m):100 * sum:mongodb.connections.current{*} by {replset_name} / ( sum:mongodb.connections.current{*} by {replset_name} + sum:mongodb.connections.available{*} by {replset_name} ) > 90",
     "tags": [
       "integration:mongodb"
     ],

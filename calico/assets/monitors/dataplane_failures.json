@@ -28,7 +28,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "sum(last_5m):avg:calico.felix.int_dataplane_failures{*}.as_count() \u003e 1",
+    "query": "sum(last_5m):avg:calico.felix.int_dataplane_failures{*}.as_count() > 1",
     "tags": [
       "integration:calico"
     ],

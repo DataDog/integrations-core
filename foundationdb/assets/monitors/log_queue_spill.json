@@ -27,7 +27,7 @@
       "timeout_h": 1
     },
     "priority": null,
-    "query": "avg(last_5m):avg:foundationdb.process.role.queue_length{fdb_role:log} \u003e 1600000000",
+    "query": "avg(last_5m):avg:foundationdb.process.role.queue_length{fdb_role:log} > 1600000000",
     "tags": [
       "integration:fdb"
     ],

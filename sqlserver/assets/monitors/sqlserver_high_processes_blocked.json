@@ -25,7 +25,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_5m):avg:sqlserver.stats.procs_blocked{*} \u003e 50",
+    "query": "avg(last_5m):avg:sqlserver.stats.procs_blocked{*} > 50",
     "tags": [
       "integration:sql-server"
     ],

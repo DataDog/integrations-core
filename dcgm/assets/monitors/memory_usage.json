@@ -23,7 +23,7 @@
       }
     },
     "priority": null,
-    "query": "avg(last_5m):avg:dcgm.mem.copy_utilization{*} \u003e 90",
+    "query": "avg(last_5m):avg:dcgm.mem.copy_utilization{*} > 90",
     "restricted_roles": null,
     "tags": [
       "integration:dcgm"

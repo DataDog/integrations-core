@@ -30,7 +30,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_1h):anomalies(avg:nginx.stream.upstream.peers.fails{*} by {upstream}, 'basic', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true') \u003e= 1",
+    "query": "avg(last_1h):anomalies(avg:nginx.stream.upstream.peers.fails{*} by {upstream}, 'basic', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
     "tags": [
       "integration:nginx"
     ],

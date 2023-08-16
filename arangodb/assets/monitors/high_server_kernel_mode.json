@@ -29,7 +29,7 @@
         "warning": 0.7
       }
     },
-    "query": "avg(last_4h):anomalies(avg:arangodb.server.kernel_mode.percent{*}, 'basic', 2, direction='both', interval=60, alert_window='last_15m', count_default_zero='true') \u003e= 0.8",
+    "query": "avg(last_4h):anomalies(avg:arangodb.server.kernel_mode.percent{*}, 'basic', 2, direction='both', interval=60, alert_window='last_15m', count_default_zero='true') >= 0.8",
     "tags": [
       "integration:arangodb"
     ],

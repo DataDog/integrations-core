@@ -24,7 +24,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_15m):avg:kubernetes_state.deployment.replicas_desired{*} by {kube_cluster_name,kube_namespace,kube_deployment} - avg:kubernetes_state.deployment.replicas_available{*} by {kube_cluster_name,kube_namespace,kube_deployment} \u003e= 2",
+    "query": "avg(last_15m):avg:kubernetes_state.deployment.replicas_desired{*} by {kube_cluster_name,kube_namespace,kube_deployment} - avg:kubernetes_state.deployment.replicas_available{*} by {kube_cluster_name,kube_namespace,kube_deployment} >= 2",
     "tags": [
       "integration:kubernetes"
     ],

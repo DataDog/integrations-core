@@ -27,7 +27,7 @@
       "timeout_h": 1
     },
     "priority": null,
-    "query": "avg(last_5m):avg:foundationdb.process.role.durability_lag.seconds{fdb_role:storage} by {fdb_process} \u003e 60",
+    "query": "avg(last_5m):avg:foundationdb.process.role.durability_lag.seconds{fdb_role:storage} by {fdb_process} > 60",
     "tags": [
       "integration:fdb"
     ],

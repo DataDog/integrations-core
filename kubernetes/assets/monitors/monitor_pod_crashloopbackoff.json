@@ -24,7 +24,7 @@
       },
       "timeout_h": 0
     },
-    "query": "max(last_10m):default_zero(max:kubernetes_state.container.status_report.count.waiting{reason:crashloopbackoff} by {kube_cluster_name,kube_namespace,pod_name}) \u003e= 1",
+    "query": "max(last_10m):default_zero(max:kubernetes_state.container.status_report.count.waiting{reason:crashloopbackoff} by {kube_cluster_name,kube_namespace,pod_name}) >= 1",
     "tags": [
       "integration:kubernetes"
     ],

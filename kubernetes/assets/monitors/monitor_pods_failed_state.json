@@ -26,7 +26,7 @@
       },
       "timeout_h": 0
     },
-    "query": "change(avg(last_5m),last_5m):default_zero(sum:kubernetes_state.pod.status_phase{pod_phase:failed} by {kube_cluster_name,kube_namespace}) \u003e 10",
+    "query": "change(avg(last_5m),last_5m):default_zero(sum:kubernetes_state.pod.status_phase{pod_phase:failed} by {kube_cluster_name,kube_namespace}) > 10",
     "tags": [
       "integration:kubernetes"
     ],

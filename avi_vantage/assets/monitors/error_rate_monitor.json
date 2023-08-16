@@ -26,7 +26,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_5m):avg:avi_vantage.l7_client.pct_response_errors{*} by {virtualservice_name,host} \u003e 70",
+    "query": "avg(last_5m):avg:avi_vantage.l7_client.pct_response_errors{*} by {virtualservice_name,host} > 70",
     "tags": [
       "integration:avi_vantage"
     ],

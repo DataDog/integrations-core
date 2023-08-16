@@ -26,7 +26,7 @@
       },
       "timeout_h": 0
     },
-    "query": "change(avg(last_5m),last_5m):avg:marklogic.forests.query_read_rate{*} / avg:marklogic.forests.list_cache_hit_rate{*} \u003e 0.006",
+    "query": "change(avg(last_5m),last_5m):avg:marklogic.forests.query_read_rate{*} / avg:marklogic.forests.list_cache_hit_rate{*} > 0.006",
     "tags": [
       "integration:marklogic"
     ],

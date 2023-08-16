@@ -27,7 +27,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_5m):cutoff_min(avg:singlestore.seconds_until_expiration{*} by {singlestore_node_name,singlestore_node_id}, -0.1) \u003c 604800",
+    "query": "avg(last_5m):cutoff_min(avg:singlestore.seconds_until_expiration{*} by {singlestore_node_name,singlestore_node_id}, -0.1) < 604800",
     "restricted_roles": null,
     "tags": [
       "integration:singlestore"

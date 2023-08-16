@@ -26,7 +26,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_5m):100 * monotonic_diff( sum:elasticsearch.get.missing.total{*} ) / monotonic_diff( sum:elasticsearch.get.total{*} ) \u003e 15",
+    "query": "avg(last_5m):100 * monotonic_diff( sum:elasticsearch.get.missing.total{*} ) / monotonic_diff( sum:elasticsearch.get.total{*} ) > 15",
     "tags": [
       "integration:elastic"
     ],

@@ -25,7 +25,7 @@
       "queryConfig": {
         "indexes": [],
         "queryIsFailed": false,
-        "queryString": "service:foundationdb @Severity:\u003e=40",
+        "queryString": "service:foundationdb @Severity:>=40",
         "timeRange": {
           "from": 1628061270003,
           "live": true,
@@ -36,7 +36,7 @@
       "renotify_interval": 0,
       "restriction_query": null,
       "thresholds": {
-        "comparison": "\u003e",
+        "comparison": ">",
         "critical": 3,
         "period": {
           "digit": 10,
@@ -52,7 +52,7 @@
         "warning": 1
       }
     },
-    "query": "logs(\"service:foundationdb @Severity:\u003e=40\").index(\"*\").rollup(\"count\").by(\"host\").last(\"10m\") \u003e 3",
+    "query": "logs(\"service:foundationdb @Severity:>=40\").index(\"*\").rollup(\"count\").by(\"host\").last(\"10m\") > 3",
     "tags": [
       "integration:fdb"
     ],

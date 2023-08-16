@@ -28,7 +28,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "sum(last_5m):avg:calico.felix.iptables.restore_errors{*}.as_count() \u003e 1",
+    "query": "sum(last_5m):avg:calico.felix.iptables.restore_errors{*}.as_count() > 1",
     "tags": [
       "integration:calico"
     ],

@@ -25,7 +25,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_5m):avg:sqlserver.database.state{*} \u003e 0",
+    "query": "avg(last_5m):avg:sqlserver.database.state{*} > 0",
     "tags": [
       "integration:sql-server"
     ],

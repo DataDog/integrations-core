@@ -27,7 +27,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "sum(last_5m):avg:istio.sidecar_injection.requests_total{*}.as_count() - avg:istio.sidecar_injection.success_total{*}.as_count() \u003e 3",
+    "query": "sum(last_5m):avg:istio.sidecar_injection.requests_total{*}.as_count() - avg:istio.sidecar_injection.success_total{*}.as_count() > 3",
     "tags": [
       "integration:istio"
     ],

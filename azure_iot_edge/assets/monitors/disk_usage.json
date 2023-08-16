@@ -29,7 +29,7 @@
       },
       "timeout_h": 0
     },
-    "query": "max(last_1h):avg:azure.iot_edge.edge_agent.available_disk_space_bytes{*} by {host} / avg:azure.iot_edge.edge_agent.total_disk_space_bytes{*} by {host}.rollup(max, 60) * 100 \u003c 10",
+    "query": "max(last_1h):avg:azure.iot_edge.edge_agent.available_disk_space_bytes{*} by {host} / avg:azure.iot_edge.edge_agent.total_disk_space_bytes{*} by {host}.rollup(max, 60) * 100 < 10",
     "tags": [
       "integration:azure_iot_edge"
     ],

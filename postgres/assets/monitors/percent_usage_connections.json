@@ -27,7 +27,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_15m):avg:postgresql.percent_usage_connections{*} \u003e 0.9",
+    "query": "avg(last_15m):avg:postgresql.percent_usage_connections{*} > 0.9",
     "tags": [
       "integration:postgres"
     ],

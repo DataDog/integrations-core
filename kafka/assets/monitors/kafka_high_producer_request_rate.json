@@ -31,7 +31,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_1h):anomalies(avg:kafka.producer.request_rate{*}, 'basic', 2, direction='above', alert_window='last_5m', interval=20, count_default_zero='true') \u003e= 1",
+    "query": "avg(last_1h):anomalies(avg:kafka.producer.request_rate{*}, 'basic', 2, direction='above', alert_window='last_5m', interval=20, count_default_zero='true') >= 1",
     "tags": [
       "integration:kafka"
     ],

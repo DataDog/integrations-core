@@ -26,7 +26,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_5m):avg:citrix_hypervisor.host.cpu{*} by {citrix_hypervisor_host} \u003e 90",
+    "query": "avg(last_5m):avg:citrix_hypervisor.host.cpu{*} by {citrix_hypervisor_host} > 90",
     "tags": [
       "integration:citrix_hypervisor"
     ],

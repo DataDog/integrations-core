@@ -21,7 +21,7 @@
         "critical": 0.8
       }
     },
-    "query": "avg(last_5m):max:snmp.device.reachable{*} by {snmp_device,device_namespace} \u003c 0.8",
+    "query": "avg(last_5m):max:snmp.device.reachable{*} by {snmp_device,device_namespace} < 0.8",
     "tags": [
       "integration:snmp"
     ],

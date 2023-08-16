@@ -24,7 +24,7 @@
       }
     },
     "priority": 3,
-    "query": "avg(last_5m):100 * sum:rabbitmq.queue.messages.unacked{*} / (sum:rabbitmq.queue.messages.unacked{*} + sum:rabbitmq.queue.messages.ready{*}) \u003e 120",
+    "query": "avg(last_5m):100 * sum:rabbitmq.queue.messages.unacked{*} / (sum:rabbitmq.queue.messages.unacked{*} + sum:rabbitmq.queue.messages.ready{*}) > 120",
     "restricted_roles": null,
     "tags": [
       "integration:rabbitmq"

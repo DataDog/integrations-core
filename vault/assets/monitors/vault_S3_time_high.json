@@ -25,7 +25,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_1m):avg:vault.vault.s3.get.quantile{*} \u003e 50",
+    "query": "avg(last_1m):avg:vault.vault.s3.get.quantile{*} > 50",
     "tags": [
       "integration:vault"
     ],

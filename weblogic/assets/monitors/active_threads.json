@@ -27,7 +27,7 @@
       }
     },
     "priority": null,
-    "query": "avg(last_5m):((avg:weblogic.threadpool_runtime.execute_threads_total{*} by {host,serverruntime} - avg:weblogic.threadpool_runtime.threads_standby{*} by {host,serverruntime}) / avg:weblogic.threadpool_runtime.execute_threads_total{*} by {host,serverruntime}) * 100 \u003e 70",
+    "query": "avg(last_5m):((avg:weblogic.threadpool_runtime.execute_threads_total{*} by {host,serverruntime} - avg:weblogic.threadpool_runtime.threads_standby{*} by {host,serverruntime}) / avg:weblogic.threadpool_runtime.execute_threads_total{*} by {host,serverruntime}) * 100 > 70",
     "tags": [
       "integration:weblogic"
     ],

@@ -26,7 +26,7 @@
       },
       "timeout_h": 0
     },
-    "query": "sum(last_5m):avg:coredns.request_duration.seconds{*}.as_count() \u003e= 0.02",
+    "query": "sum(last_5m):avg:coredns.request_duration.seconds{*}.as_count() >= 0.02",
     "tags": [
       "integration:coredns"
     ],

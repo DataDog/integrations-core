@@ -26,7 +26,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_5m):avg:haproxy.frontend.session.pct{*} by {host} \u003e 80",
+    "query": "avg(last_5m):avg:haproxy.frontend.session.pct{*} by {host} > 80",
     "tags": [
       "integration:haproxy"
     ],

@@ -27,7 +27,7 @@
         "warning": 0.5
       }
     },
-    "query": "avg(last_15m):anomalies(((avg:teradata.disk_space.curr_perm.total{*} by {host,teradata_server,td_database,td_amp} + avg:teradata.disk_space.curr_spool.total{*} by {host,teradata_server,td_database,td_amp} + avg:teradata.disk_space.curr_temp.total{*} by {host,teradata_server,td_database,td_amp}) / (avg:teradata.disk_space.max_perm.total{*} by {host,teradata_server,td_database,td_amp} + avg:teradata.disk_space.max_spool.total{*} by {host,teradata_server,td_database,td_amp} + avg:teradata.disk_space.max_temp.total{*} by {host,teradata_server,td_database,td_amp})) * 100, 'basic', 2, direction='both', interval=60, alert_window='last_15m', count_default_zero='true', seasonality='hourly') \u003e= 0.75",
+    "query": "avg(last_15m):anomalies(((avg:teradata.disk_space.curr_perm.total{*} by {host,teradata_server,td_database,td_amp} + avg:teradata.disk_space.curr_spool.total{*} by {host,teradata_server,td_database,td_amp} + avg:teradata.disk_space.curr_temp.total{*} by {host,teradata_server,td_database,td_amp}) / (avg:teradata.disk_space.max_perm.total{*} by {host,teradata_server,td_database,td_amp} + avg:teradata.disk_space.max_spool.total{*} by {host,teradata_server,td_database,td_amp} + avg:teradata.disk_space.max_temp.total{*} by {host,teradata_server,td_database,td_amp})) * 100, 'basic', 2, direction='both', interval=60, alert_window='last_15m', count_default_zero='true', seasonality='hourly') >= 0.75",
     "tags": [
       "integration:teradata"
     ],

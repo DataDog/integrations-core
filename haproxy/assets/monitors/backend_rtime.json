@@ -25,7 +25,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_5m):avg:haproxy.backend.response.time{*} by {host} \u003e 500",
+    "query": "avg(last_5m):avg:haproxy.backend.response.time{*} by {host} > 500",
     "tags": [
       "integration:haproxy"
     ],

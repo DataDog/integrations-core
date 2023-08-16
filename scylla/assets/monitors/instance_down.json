@@ -25,7 +25,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_1m):max:scylla.node.operation_mode{*} by {server} \u003e 3",
+    "query": "avg(last_1m):max:scylla.node.operation_mode{*} by {server} > 3",
     "tags": [
       "integration:scylla"
     ],

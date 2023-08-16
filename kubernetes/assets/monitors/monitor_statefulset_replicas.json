@@ -25,7 +25,7 @@
       },
       "timeout_h": 0
     },
-    "query": "max(last_15m):sum:kubernetes_state.statefulset.replicas_desired{*} by {kube_cluster_name,kube_namespace,kube_stateful_set} - sum:kubernetes_state.statefulset.replicas_ready{*} by {kube_cluster_name,kube_namespace,kube_stateful_set} \u003e= 2",
+    "query": "max(last_15m):sum:kubernetes_state.statefulset.replicas_desired{*} by {kube_cluster_name,kube_namespace,kube_stateful_set} - sum:kubernetes_state.statefulset.replicas_ready{*} by {kube_cluster_name,kube_namespace,kube_stateful_set} >= 2",
     "tags": [
       "integration:kubernetes"
     ],

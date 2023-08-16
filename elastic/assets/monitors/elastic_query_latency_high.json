@@ -26,7 +26,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_5m):monotonic_diff( avg:elasticsearch.search.query.time{*} by {host} ) / monotonic_diff( avg:elasticsearch.search.query.total{*} by {host} ) \u003e 3",
+    "query": "avg(last_5m):monotonic_diff( avg:elasticsearch.search.query.time{*} by {host} ) / monotonic_diff( avg:elasticsearch.search.query.total{*} by {host} ) > 3",
     "tags": [
       "integration:elastic"
     ],

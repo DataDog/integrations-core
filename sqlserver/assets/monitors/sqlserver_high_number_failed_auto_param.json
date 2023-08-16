@@ -25,7 +25,7 @@
       },
       "timeout_h": 0
     },
-    "query": "avg(last_5m):avg:sqlserver.stats.failed_auto_param_attempts{*} \u003e 10",
+    "query": "avg(last_5m):avg:sqlserver.stats.failed_auto_param_attempts{*} > 10",
     "tags": [
       "integration:sql-server"
     ],

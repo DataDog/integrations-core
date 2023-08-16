@@ -27,7 +27,7 @@
       }
     },
     "priority": null,
-    "query": "avg(last_5m):avg:dcgm.xid_errors{*} \u003e 5",
+    "query": "avg(last_5m):avg:dcgm.xid_errors{*} > 5",
     "restricted_roles": null,
     "tags": [
       "integration:dcgm"

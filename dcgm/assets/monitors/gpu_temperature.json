@@ -26,7 +26,7 @@
       }
     },
     "priority": null,
-    "query": "avg(last_5m):avg:dcgm.temperature{*} by {host} \u003e 85",
+    "query": "avg(last_5m):avg:dcgm.temperature{*} by {host} > 85",
     "restricted_roles": null,
     "tags": [
       "integration:dcgm"

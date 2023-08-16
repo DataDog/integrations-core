@@ -21,7 +21,7 @@
       }
     },
     "priority": null,
-    "query": "avg(last_5m):avg:system.load.1{*} \u003e 10",
+    "query": "avg(last_5m):avg:system.load.1{*} > 10",
     "restricted_roles": null,
     "tags": [
       "integration:langchain"

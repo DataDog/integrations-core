@@ -27,7 +27,7 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_5m):avg:rabbitmq.node.mem_used{*} by {host} / avg:system.mem.total{*} by {host} * 100 \u003e 35",
+    "query": "avg(last_5m):avg:rabbitmq.node.mem_used{*} by {host} / avg:system.mem.total{*} by {host} * 100 > 35",
     "tags": [
       "integration:rabbitmq"
     ],

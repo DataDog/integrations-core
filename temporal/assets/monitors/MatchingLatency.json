@@ -24,7 +24,7 @@
       }
     },
     "priority": null,
-    "query": "avg(last_5m):sum:temporal.server.service.latency.sum{service_name:matching}.as_rate() / sum:temporal.server.service.latency.count{service_name:matching}.as_rate() \u003e 1000",
+    "query": "avg(last_5m):sum:temporal.server.service.latency.sum{service_name:matching}.as_rate() / sum:temporal.server.service.latency.count{service_name:matching}.as_rate() > 1000",
     "restricted_roles": null,
     "tags": [
       "integration:temporal",
