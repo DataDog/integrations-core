@@ -38,6 +38,8 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.ifOutSpeed',
     'snmp.peerConnectionByState',  # BGP4 constant metric, not handled by python check
     'snmp.ltmVsStatus',  # F5-BIG-IP constant metric
+    'snmp.ltmNodeAddr',  # F5-BIG-IP constant metric
+    'snmp.ltmPoolMember',  # F5-BIG-IP constant metric
     'snmp.ospfNbr',  # OSPF constant metrics, not handled by python check
     'snmp.ospfVirtNbr',
     'snmp.ospfIf',
