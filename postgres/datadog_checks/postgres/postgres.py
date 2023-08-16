@@ -512,9 +512,31 @@ class PostgreSql(AgentCheck):
                 name, submit_metric = scope['metrics'][column]
                 submit_metric(self, name, value, tags=set(tags), hostname=self.resolved_hostname)
 
+                # if relation-level metrics idx_scan or seq_scan, cache it
+                if name in ('postgresql.index_scans', 'postgresql.seq_scans'):
+                    self._cache_table_activity(dbname, desc_map['table'], name, value)
+
             num_results += 1
 
         return num_results
+
+    def _cache_table_activity(
+        self,
+        dbname: str,
+        tablename: str,
+        metric_name: str,
+        value: int,
+    ):
+        db = dbname if self.autodiscovery else self._config.dbname
+        if db not in self.metrics_cache.table_activity_metrics.keys():
+            self.metrics_cache.table_activity_metrics[db] = {}
+        if tablename not in self.metrics_cache.table_activity_metrics[db].keys():
+            self.metrics_cache.table_activity_metrics[db][tablename] = {
+                'postgresql.index_scans': 0,
+                'postgresql.seq_scans': 0,
+            }
+
+        self.metrics_cache.table_activity_metrics[db][tablename][metric_name] = value
 
     def _collect_relations_autodiscovery(self, instance_tags, relations_scopes):
         if not self.autodiscovery:
