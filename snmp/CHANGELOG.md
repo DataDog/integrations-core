@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Add hardware metrics for Meraki ([#15542](https://github.com/DataDog/integrations-core/pull/15542))
+
 ## 6.1.0 / 2023-08-10
 
 ***Added***:

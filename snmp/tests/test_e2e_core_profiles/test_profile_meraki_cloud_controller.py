@@ -79,7 +79,7 @@ def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
         ['mac_address:02:02:00:66:f5:7f', 'network:L_NETWORK', 'product:MR16-HW', 'status:online'],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric('snmp.dev', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+        aggregator.assert_metric('snmp.meraki.dev', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['index:4', 'interface:wifi0', 'mac_address:02:02:00:66:f5:00'],

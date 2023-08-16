@@ -50,7 +50,7 @@ metrics:
       # devTable INDEX is: devMac
     metric_type: gauge
     symbols:
-      - name: dev
+      - name: meraki.dev
         constant_value_one: true
     metric_tags:
       # devMac is part of the devTable index
