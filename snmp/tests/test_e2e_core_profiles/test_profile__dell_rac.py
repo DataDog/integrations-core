@@ -178,9 +178,7 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         ],
     ]
     for tag_row in tag_rows:
-        aggregator.assert_metric(
-            'snmp.dell.enclosurePowerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-        )
+        aggregator.assert_metric('snmp.enclosurePowerSupply', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
         ['battery_fqdd:kept Jaded driving', 'battery_name:acted'],

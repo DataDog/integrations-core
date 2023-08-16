@@ -50,7 +50,8 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.cefcFanTrayStatus',  # Cisco constant metric
     'snmp.cpqHeFltTolPowerSupply',  # HP constant metric
     'snmp.fanSpeedSensor',  # Checkpoint constant metric
-    'snmp.dell.enclosurePowerSupply',  # iDRAC constant metric
+    'snmp.enclosurePowerSupply',  # iDRAC constant metric
+    'snmp.systemState',  # Dell-Poweredge constant metric
     'snmp.dell.systemState',  # iDRAC constant metric
     'snmp.dell.physicalDisk',  # iDRAC constant metric
     'snmp.dell.controller',  # Dell constant metric
