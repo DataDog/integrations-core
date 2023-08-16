@@ -182,7 +182,7 @@ class PostgreSql(AgentCheck):
         if self._dynamic_queries:
             return self._dynamic_queries
 
-        if self._version is None:
+        if self.version is None:
             self.log.debug("Version set to None due to incorrect identified version, aborting dynamic queries")
             return None
 
@@ -554,7 +554,6 @@ class PostgreSql(AgentCheck):
         # Do we need relation-specific metrics?
         if self._config.relations:
             relations_scopes = list(RELATION_METRICS)
-
             if self._config.collect_bloat_metrics:
                 relations_scopes.extend([INDEX_BLOAT, TABLE_BLOAT])
 
