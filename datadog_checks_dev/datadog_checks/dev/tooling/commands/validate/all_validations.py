@@ -17,7 +17,6 @@ from .manifest import manifest
 from .models import models
 from .package import package
 from .readmes import readmes
-from .recommended_monitors import recommended_monitors
 from .saved_views import saved_views
 from .service_checks import service_checks
 
@@ -35,7 +34,6 @@ ALL_VALIDATIONS = (
     (models, (None,)),
     (package, (None,)),
     (readmes, (None,)),
-    (recommended_monitors, (None,)),
     (saved_views, (None,)),
     (service_checks, (None,)),
 )
