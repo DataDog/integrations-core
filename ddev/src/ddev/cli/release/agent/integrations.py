@@ -21,11 +21,11 @@ if TYPE_CHECKING:
 def integrations(app: Application, since: str, to: str, write: bool, force: bool):
     """
     Generates a markdown file containing the list of integrations shipped in a
-    given Agent release. Agent version numbers are derived inspecting tags on
-    `integrations-core` so running this tool might provide unexpected results
+    given Agent release. Agent version numbers are derived by inspecting tags on
+    `integrations-core`, so running this tool might provide unexpected results
     if the repo is not up to date with the Agent release process.
 
-    If neither `--since` or `--to` are passed (the most common use case), the
+    If neither `--since` nor `--to` are passed (the most common use case), the
     tool will generate the list for every Agent since version 6.3.0
     (before that point we don't have enough information to build the log).
     """
