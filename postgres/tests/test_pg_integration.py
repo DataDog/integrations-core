@@ -51,7 +51,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 )
 def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check = integration_check(pg_instance)
-    check._is_aurora = is_aurora
+    check.is_aurora = is_aurora
     check.check(pg_instance)
 
     expected_tags = _get_expected_tags(check, pg_instance)
@@ -617,7 +617,7 @@ def assert_state_clean(check):
     assert check.metrics_cache.archiver_metrics is None
     assert check.metrics_cache.replication_metrics is None
     assert check.metrics_cache.activity_metrics is None
-    assert check._is_aurora is None
+    assert check.is_aurora is None
 
 
 def assert_state_set(check):
@@ -626,4 +626,4 @@ def assert_state_set(check):
     if POSTGRES_VERSION != '9.3':
         assert check.metrics_cache.archiver_metrics
     assert check.metrics_cache.replication_metrics
-    assert check._is_aurora is False
+    assert check.is_aurora is False
