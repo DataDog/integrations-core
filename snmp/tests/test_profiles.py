@@ -772,7 +772,7 @@ def test_cisco_3850(aggregator):
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
 
-    for switch, mac_addr in [(1, '04:6c:9d:42:b0:80'), (2, 'dc:ce:c1:43:06:80')]:
+    for switch, mac_addr in [(1, '0x046c9d42b080'), (2, '0xdccec1430680')]:
         tags = ['entity_name:Switch {}'.format(switch), 'mac_addr:{}'.format(mac_addr)] + common_tags
         aggregator.assert_metric('snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=tags)
 
@@ -1287,14 +1287,14 @@ def test_cisco_nexus(aggregator):
     )
 
     tag_rows = [
-        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_name:name1'],
-        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_name:name2'],
-        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_name:name3'],
-        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_name:name4'],
-        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_name:name5'],
-        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_name:name6'],
-        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_name:name7'],
-        ['mac_addr:ff:ff:ff:ff:ff:ff', 'entity_name:name8'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name1'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name2'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name3'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name4'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name5'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name6'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name7'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name8'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=tag_row + common_tags)
@@ -2087,7 +2087,7 @@ def assert_cisco_asa(aggregator, profile):
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
     aggregator.assert_metric(
-        'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:ff:ff:ff:ff:ff:ff'] + common_tags
+        'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:0xffffffffffff'] + common_tags
     )
 
     frus = [2, 7, 8, 21, 26, 27, 30, 31]
