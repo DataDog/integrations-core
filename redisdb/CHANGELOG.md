@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Agent integrations dependency update ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
+
 ## 5.0.0 / 2023-08-10
 
 ***Changed***:
