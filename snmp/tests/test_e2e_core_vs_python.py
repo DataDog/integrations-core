@@ -54,7 +54,6 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.enclosurePowerSupply',  # iDRAC constant metric
     'snmp.systemState',  # iDRAC constant metric
     'snmp.meraki.dev',  # Meraki constant metric
-    'snmp.dev',  # Meraki constant metric
     'snmp.physicalDisk',  # iDRAC constant metric
     'snmp.wlsxSysExtFan',  # Aruba constant metric
 ]
