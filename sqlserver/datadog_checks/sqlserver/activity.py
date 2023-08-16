@@ -74,6 +74,40 @@ WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
 """,
 ).strip()
 
+# Turns out sys.dm_exec_requests does not contain idle sessions.
+# Inner joining dm_exec_sessions with dm_exec_requests will not return any idle blocking sessions.
+# This prevent us reusing the same ACTIVITY_QUERY for regular activities and idle blocking sessions.
+# The query below is used for idle sessions and does not join with dm_exec_requests.
+# The last query execution on the connection is fetched from dm_exec_connections.most_recent_sql_handle.
+IDLE_BLOCKING_SESSIONS_QUERY = re.sub(
+    r'\s+',
+    ' ',
+    """\
+SELECT
+    CONVERT(
+        NVARCHAR, TODATETIMEOFFSET(CURRENT_TIMESTAMP, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+    ) as now,
+    sess.login_name as user_name,
+    sess.last_request_start_time as last_request_start_time,
+    sess.session_id as id,
+    DB_NAME(sess.database_id) as database_name,
+    sess.status as session_status,
+    lqt.text as statement_text,
+    SUBSTRING(lqt.text, 1, {proc_char_limit}) as text,
+    c.client_tcp_port as client_port,
+    c.client_net_address as client_address,
+    sess.host_name as host_name,
+    sess.program_name as program_name
+FROM sys.dm_exec_sessions sess
+    INNER JOIN sys.dm_exec_connections c
+        ON sess.session_id = c.session_id
+    CROSS APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) lqt
+WHERE sess.status = 'sleeping'
+    AND sess.session_id IN ({blocking_session_ids})
+    AND c.session_id IN ({blocking_session_ids})
+""",
+).strip()
+
 # enumeration of the columns we collect
 # from sys.dm_exec_requests
 DM_EXEC_REQUESTS_COLS = [
@@ -154,6 +188,18 @@ class SqlserverActivity(DBMAsyncJob):
         return rows
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
+    def _get_idle_blocking_sessions(self, cursor, blocking_session_ids):
+        # The IDLE_BLOCKING_SESSIONS_QUERY contains minimum information on idle blocker
+        query = IDLE_BLOCKING_SESSIONS_QUERY.format(
+            blocking_session_ids=",".join(map(str, blocking_session_ids)), proc_char_limit=PROC_CHAR_LIMIT
+        )
+        self.log.debug("Running query [%s]", query)
+        cursor.execute(query)
+        columns = [i[0] for i in cursor.description]
+        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return rows
+
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_activity(self, cursor, exec_request_columns):
         self.log.debug("collecting sql server activity")
         query = ACTIVITY_QUERY.format(
@@ -165,6 +211,15 @@ class SqlserverActivity(DBMAsyncJob):
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        # construct set of unique session ids
+        session_ids = {r['id'] for r in rows}
+        # construct set of blocking session ids
+        blocking_session_ids = {r['blocking_session_id'] for r in rows if r['blocking_session_id']}
+        # if there are blocking sessions and some of the session(s) are not captured in the activity query
+        idle_blocking_session_ids = blocking_session_ids - session_ids
+        if idle_blocking_session_ids:
+            idle_blocking_sessions = self._get_idle_blocking_sessions(cursor, idle_blocking_session_ids)
+            rows.extend(idle_blocking_sessions)
         return rows
 
     def _normalize_queries_and_filter_rows(self, rows, max_bytes_limit):
@@ -211,7 +266,7 @@ class SqlserverActivity(DBMAsyncJob):
 
     @staticmethod
     def _get_sort_key(r):
-        return r.get("query_start") or datetime.datetime.now()
+        return r.get("query_start") or datetime.datetime.now().isoformat()
 
     def _obfuscate_and_sanitize_row(self, row):
         row = self._remove_null_vals(row)

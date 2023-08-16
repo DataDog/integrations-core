@@ -7,6 +7,7 @@ from copy import copy, deepcopy
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.__about__ import __version__
 from datadog_checks.sqlserver.connection import SQLConnectionError
 from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_SQL_DATABASE,
@@ -581,3 +582,44 @@ def test_resolved_hostname_set(
     aggregator.assert_metric_has_tag(
         "sqlserver.stats.batch_requests", "dd.internal.resource:database_instance:{}".format(expected_hostname)
     )
+
+
+@pytest.mark.parametrize(
+    'dbm_enabled, reported_hostname',
+    [
+        (True, None),
+        (False, None),
+        (True, 'forced_hostname'),
+        (True, 'forced_hostname'),
+    ],
+)
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, dbm_enabled, reported_hostname):
+    instance_docker['dbm'] = dbm_enabled
+    if reported_hostname:
+        instance_docker['reported_hostname'] = reported_hostname
+    expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    dd_run_check(check)
+
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
+    assert event is not None
+    assert event['host'] == expected_host
+    assert event['dbms'] == "sqlserver"
+    assert event['tags'] == ['optional:tag1']
+    assert event['integration_version'] == __version__
+    assert event['collection_interval'] == 1800
+    assert event['metadata'] == {
+        'dbm': dbm_enabled,
+        'connection_host': instance_docker['host'],
+    }
+
+    # Run a second time and expect the metadata to not be emitted again because of the cache TTL
+    aggregator.reset()
+    dd_run_check(check)
+
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
+    assert event is None

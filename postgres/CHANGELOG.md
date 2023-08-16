@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add support for sending `database_instance` metadata ([#15559](https://github.com/DataDog/integrations-core/pull/15559))
+* Update dependencies for Agent 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
+
 ## 14.1.0 / 2023-08-10
 
 ***Added***:

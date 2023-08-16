@@ -7,6 +7,11 @@
 * Migrate `validate http` to ddev ([#15526](https://github.com/DataDog/integrations-core/pull/15526))
 * Remove the `ddev validate recommended-monitors` command ([#15563](https://github.com/DataDog/integrations-core/pull/15563))
 * Remove files in datadog_checks_dev for `validate ci, http, and metadata` ([#15546](https://github.com/DataDog/integrations-core/pull/15546))
+* Migrate documentation commands to ddev ([#15582](https://github.com/DataDog/integrations-core/pull/15582))
+
+***Added***:
+
+* Update dependencies for Agent 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
 
 ***Fixed***:
 

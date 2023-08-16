@@ -169,6 +169,7 @@ class InstanceConfig(BaseModel):
     collect_settings: Optional[CollectSettings] = None
     connect_timeout: Optional[float] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
+    database_instance_collection_interval: Optional[float] = None
     dbm: Optional[bool] = None
     defaults_file: Optional[str] = None
     disable_generic_tags: Optional[bool] = None

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add support for sending `database_instance` metadata ([#15524](https://github.com/DataDog/integrations-core/pull/15524))
+
 ***Fixed***:
 
 * Bump cryptography to 41.0.3 ([#15517](https://github.com/DataDog/integrations-core/pull/15517))

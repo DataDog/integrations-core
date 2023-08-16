@@ -17,6 +17,8 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
+from .util import payload_pg_version
+
 # default pg_settings collection interval in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
 DEFAULT_RESOURCES_COLLECTION_INTERVAL = 300
@@ -98,19 +100,13 @@ class PostgresMetadata(DBMAsyncJob):
             "dbms": "postgres",
             "kind": "pg_settings",
             "collection_interval": self.collection_interval,
-            'dbms_version': self._payload_pg_version(),
+            'dbms_version': payload_pg_version(self._check.version),
             "tags": self._tags_no_db,
             "timestamp": time.time() * 1000,
             "cloud_metadata": self._config.cloud_metadata,
             "metadata": self._pg_settings_cached,
         }
         self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
-
-    def _payload_pg_version(self):
-        version = self._check.version
-        if not version:
-            return ""
-        return 'v{major}.{minor}.{patch}'.format(major=version.major, minor=version.minor, patch=version.patch)
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):

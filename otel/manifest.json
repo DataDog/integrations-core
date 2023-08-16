@@ -49,6 +49,9 @@
     "dashboards": {
       "OpenTelemetry Dashboard": "assets/dashboards/otel_host_metrics_dashboard.json",
       "OpenTelemetry Collector Metrics Dashboard": "assets/dashboards/otel_collector_metrics_dashboard.json"
+    },
+    "monitors": {
+      "OpenTelemetry Refused Spans": "assets/recommended_monitors/otel_refused_spans.json"
     }
   }
 }
