@@ -11,7 +11,7 @@
 
 ***Added***:
 
-* Dependency update for 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
+* Update dependencies for Agent 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
 
 ***Fixed***:
 
