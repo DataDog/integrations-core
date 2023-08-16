@@ -9,6 +9,10 @@
 * Remove files in datadog_checks_dev for `validate ci, http, and metadata` ([#15546](https://github.com/DataDog/integrations-core/pull/15546))
 * Migrate documentation commands to ddev ([#15582](https://github.com/DataDog/integrations-core/pull/15582))
 
+***Added***:
+
+* Update dependencies for Agent 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
+
 ***Fixed***:
 
 * Stop using the TOX_ENV_NAME variable ([#15528](https://github.com/DataDog/integrations-core/pull/15528))
