@@ -14,7 +14,11 @@ The TeamCity check is included in the [Datadog Agent][1] package, so you don't n
 
 #### Prepare TeamCity
 
-1. To prepare TeamCity, see [Enabling Guest Login][2].
+You can enable [Guest login](#guest-login), or identify [user credentials](#user-credentials) for basic HTTP authentication.
+
+##### Guest login
+
+1. [Enable guest login][2].
 
 2. Enable `Per-project permissions` to allow assigning project-based permissions to the Guest user. See [Changing Authorization Mode][22].
 ![Enable Guest Login][17]
@@ -27,6 +31,14 @@ The TeamCity check is included in the [Datadog Agent][1] package, so you don't n
 4. Assign the Read-only role to the Guest user. See [Assigning Roles to Users][24].
 ![Guest user settings][20]
 ![Assign Role][21]
+
+##### User credentials
+
+For basic HTTP authentication
+- Specify an identified `username` and `password` in the `teamcity.d/conf.yaml` file in the `conf.d/` folder of your [Agent's configuration directory][3].
+- If you encounter an `Access denied. Enable guest authentication or check user permissions.` error, ensure the user has the correct permissions:
+  - Per-project and View Usage Statistics permissions enabled.
+  - If collecting Agent Workload Statistics, assign the View Agent Details and View Agent Usage Statistics permissions as well.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
