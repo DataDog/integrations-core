@@ -21,7 +21,6 @@ from .manifest import manifest
 from .models import models
 from .package import package
 from .readmes import readmes
-from .recommended_monitors import recommended_monitors
 from .saved_views import saved_views
 from .service_checks import service_checks
 from .typos import typos
@@ -44,7 +43,6 @@ ALL_COMMANDS = (
     models,
     package,
     readmes,
-    recommended_monitors,
     saved_views,
     service_checks,
     typos,
