@@ -7,7 +7,6 @@ from io import StringIO
 
 import click
 from datadog_checks.dev.tooling.testing import complete_active_checks
-from datadog_checks.dev.tooling.utils import get_valid_checks
 from six import iteritems
 
 from ddev.cli.release.agent.common import get_changes_per_agent
@@ -34,7 +33,7 @@ def integrations_changelog(app, checks, since, to, write):
 
     # Process all checks if no check is passed
     if not checks:
-        checks = get_valid_checks()
+        checks = [integration.name for integration in app.repo.integrations.iter('all')]
 
     changes_per_agent = get_changes_per_agent(app.repo, since, to)
 
@@ -48,6 +47,9 @@ def integrations_changelog(app, checks, since, to, write):
     for check, versions in iteritems(integrations_versions):
         changelog_contents = StringIO()
         changelog_file = app.repo.integrations.get(check).path / 'CHANGELOG.md'
+
+        if not changelog_file.exists():
+            continue
 
         for line in changelog_file.read_text().splitlines(keepends=True):
             match = re.search(INTEGRATION_CHANGELOG_PATTERN, line)
