@@ -4,7 +4,6 @@
 import re
 
 import pytest
-from datadog_checks.dev.tooling.constants import get_root, set_root
 
 
 def test_integrations_without_arguments(fake_integrations, ddev):
@@ -56,8 +55,6 @@ def test_integrations_since_to(fake_integrations, ddev):
 
 @pytest.fixture
 def repo_with_fake_integrations(repo_with_history, config_file):
-    old_root = get_root()
-    set_root(str(repo_with_history.path))
     config_file.model.repos['core'] = str(repo_with_history.path)
     config_file.save()
     expected_output = """
@@ -80,11 +77,10 @@ def repo_with_fake_integrations(repo_with_history, config_file):
 
 * datadog-foo: 1.0.0
 """
-    yield (
+    return (
         repo_with_history,
         expected_output.strip('\n'),
     )
-    set_root(old_root)
 
 
 @pytest.fixture
