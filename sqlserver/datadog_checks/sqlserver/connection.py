@@ -136,9 +136,16 @@ class Connection(object):
     DEFAULT_SQLSERVER_VERSION = 1e9
     SQLSERVER_2014 = 2014
     PROC_GUARD_DB_KEY = 'proc_only_if_database'
+    MANAGED_IDENTITY_AUTH_CONN_ATTR = "ActiveDirectoryMsi"
+    SERVICE_PRINCIPAL_AUTH_CONN_ATTR = "ActiveDirectoryServicePrincipal"
 
     valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL', 'MSOLEDBSQL19', 'SQLNCLI11']
     default_adoprovider = 'MSOLEDBSQL'
+    valid_managed_auth_types = ['service_principal', 'managed_identity']
+    auth_type_to_conn_string_attr = {
+        "service_principal": SERVICE_PRINCIPAL_AUTH_CONN_ATTR,
+        'managed_identity': MANAGED_IDENTITY_AUTH_CONN_ATTR,
+    }
 
     def __init__(self, check, init_config, instance_config, service_check_handler):
         self.instance = instance_config
@@ -511,6 +518,34 @@ class Connection(object):
             'PWD': 'password',
         }
 
+        managed_auth = self.instance.get('managed_authentication')
+        if managed_auth:
+            auth_type = managed_auth.get('auth_type')
+            if auth_type not in self.valid_managed_auth_types:
+                raise ConfigurationError(
+                    "Azure AD Authentication is configured with unsupported auth_type "
+                    "valid options are %s" % ", ".join(self.valid_managed_auth_types)
+                )
+            if username or password:
+                raise ConfigurationError(
+                    "Azure AD Authentication is configured, but username and password properties are also set "
+                    "please remove `username` and `password` from your instance config to use"
+                    "AD Authentication with %s" % auth_type
+                )
+            # client_id is used as the user id for managed user identities or server principals
+            client_id = managed_auth.get('client_id')
+            if not client_id and auth_type == "service_principal":
+                raise ConfigurationError(
+                    "Azure Service Principal Authentication is not properly configured "
+                    "missing required property, client_id"
+                )
+            client_secret = managed_auth.get('client_secret')
+            if not client_secret and auth_type == "service_principal":
+                raise ConfigurationError(
+                    "Azure Service Principal Authentication is not properly configured "
+                    "missing required property, client_secret"
+                )
+
         if self.connector == 'adodbapi':
             other_connector = 'odbc'
             connector_options = adodbapi_options
@@ -565,6 +600,16 @@ class Connection(object):
         else:
             dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
 
+        managed_auth = self.instance.get('managed_authentication')
+        if managed_auth:
+            managed_auth_attr = self.auth_type_to_conn_string_attr.get(managed_auth.get('auth_type'))
+            client_id = managed_auth.get('client_id')
+            if client_id:
+                username = client_id
+            client_secret = managed_auth.get('client_secret')
+            if client_secret:
+                password = client_secret
+
         # The connection resiliency feature is supported on Microsoft Azure SQL Database
         # and SQL Server 2014 (and later) server versions. See the SQLServer docs for more information
         # https://docs.microsoft.com/en-us/sql/connect/odbc/connection-resiliency?view=sql-server-ver15
@@ -584,6 +629,8 @@ class Connection(object):
         self.log.debug("Connection string (before password) %s", conn_str)
         if password:
             conn_str += 'PWD={};'.format(password)
+        if managed_auth:
+            conn_str += 'Authentication={}'.format(managed_auth_attr)
         return conn_str
 
     def _conn_string_adodbapi(self, db_key, conn_key=None, db_name=None):

@@ -413,6 +413,44 @@ files:
             type: string
             example: my-sqlserver-database.database.windows.net
 
+    - name: managed_authentication
+      description: |
+        Configuration section used for Azure AD Authentication. 
+        If this section is set, then the `username` and `password` fields will be ignored.
+        
+        Supports two possible ways to authenticate:
+          1. Azure Service Principal 
+          2. Azure Managed Identities
+      options:
+        - name: auth_type
+          description: |
+            Authentication method to use for connecting.
+            
+            Acceptable values are:
+              - `service_principal` 
+              - `managed_identity`
+          value:
+            type: string
+            example: managed_identity
+        - name: client_id
+          description: |
+            Client ID of either the User Managed Identity or the Service Principal. 
+            You do not need to set this option if you are using a System Assigned Managed Identity.
+            
+            For more information on Managed Identities, see the Azure docs
+            https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+          value:
+            type: string
+        - name: client_secret
+          description: |
+            Client Secret of the Service Principal. 
+            You do not need to set this option if you are using a managed identity.
+            
+            For more information on Service Principals, see the Azure docs
+            https://learn.microsoft.com/en-us/azure/active-directory/develop/app-objects-and-service-principals
+          value:
+            type: string
+
     - name: obfuscator_options
       description: |
         Configure how the SQL obfuscator behaves.
