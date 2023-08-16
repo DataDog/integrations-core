@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Improve documentation of APIs ([#15582](https://github.com/DataDog/integrations-core/pull/15582))
+
 ***Fixed***:
 
 * Bump cryptography to 41.0.3 ([#15517](https://github.com/DataDog/integrations-core/pull/15517))
@@ -1974,4 +1978,3 @@
 ***Added***:
 
 * adds `datadog_checks`
-
