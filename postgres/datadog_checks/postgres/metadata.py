@@ -17,8 +17,8 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-from .version_utils import VersionUtils
 from .util import payload_pg_version
+from .version_utils import VersionUtils
 
 # default collection intervals in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
@@ -461,7 +461,7 @@ class PostgresMetadata(DBMAsyncJob):
                     metadata['schemas'].append(schema)
 
         return metadata
-      
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
         with self._check.get_main_db().cursor(row_factory=dict_row) as cursor:
