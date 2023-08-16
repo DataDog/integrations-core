@@ -35,6 +35,6 @@ class SystemCore(AgentCheck):
         cpu_freq = psutil.cpu_freq(percpu=True)
         self.log.debug('CPU frequency: %s', str(cpu_freq))
         for i, cpu in enumerate(cpu_freq):
-            # Per-cpu frequency retrieval (Unix only)
+            # Only on unix systems we tag cpu frequency by CPU core.
             tags = instance_tags + ['core:{0}'.format(i)] if Platform.is_unix() else instance_tags
             self.gauge('system.core.frequency', cpu.current, tags=tags)
