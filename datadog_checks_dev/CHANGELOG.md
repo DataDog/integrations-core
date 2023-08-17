@@ -15,6 +15,7 @@
 
 ***Fixed***:
 
+* Ignore `pydantic` when bumping the dependencies ([#15597](https://github.com/DataDog/integrations-core/pull/15597))
 * Stop using the TOX_ENV_NAME variable ([#15528](https://github.com/DataDog/integrations-core/pull/15528))
 
 ## 23.0.0 / 2023-08-10
