@@ -17,9 +17,9 @@
 
 ***Fixed***:
 
-* Prevent `command already in progress` errors for pg integration ([#15489](https://github.com/DataDog/integrations-core/pull/15489))
 * Downgrade pydantic to 2.0.2 ([#15596](https://github.com/DataDog/integrations-core/pull/15596))
 * Bump cryptography to 41.0.3 ([#15517](https://github.com/DataDog/integrations-core/pull/15517))
+* Prevent `command already in progress` errors in the Postgres integration ([#15489](https://github.com/DataDog/integrations-core/pull/15489))
 
 ## 32.7.0 / 2023-08-10
 
