@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING
 
 import click
 from datadog_checks.dev.tooling.testing import complete_active_checks
-from six import iteritems
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -50,7 +49,7 @@ def integrations_changelog(app: Application, checks: list[str], since: str, to: 
                 continue
             integrations_versions[name][ver] = agent_version
 
-    for check, versions in iteritems(integrations_versions):
+    for check, versions in integrations_versions.items():
         changelog_contents = StringIO()
         changelog_file = app.repo.integrations.get(check).path / 'CHANGELOG.md'
 
