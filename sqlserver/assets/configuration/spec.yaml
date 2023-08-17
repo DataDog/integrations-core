@@ -413,6 +413,32 @@ files:
             type: string
             example: my-sqlserver-database.database.windows.net
 
+    - name: managed_identity
+      description: |
+        Configuration section used for Azure AD Authentication.
+        
+        This supports using System or User assigned managed identities.
+        If this section is set, then the `username` and `password` fields will be ignored.
+        
+        For more information on Managed Identities, see the Azure docs
+        https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+      options:
+        - name: client_id
+          description: |
+            Client ID of the Managed Identity.
+          value:
+            type: string
+        - name: identity_scope
+          description: |
+            The permission scope from where to access the identity token. This value is optional if using the default
+            identity scope for Azure managed databases.
+            
+            For more information on scopes, see the Azure docs
+            https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+          value:
+            type: string
+            example: https://database.windows.net/.default
+
     - name: obfuscator_options
       description: |
         Configure how the SQL obfuscator behaves.
