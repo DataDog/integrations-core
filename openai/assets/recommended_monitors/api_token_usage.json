@@ -1,0 +1,28 @@
+{
+	"name": "[OpenAI] Abnormally high token usage ",
+	"type": "query alert",
+	"query": "avg(last_12h):anomalies(sum:openai.api.usage.n_context{*}.as_count() + sum:openai.api.usage.n_generated{*}.as_count(), 'basic', 2, direction='both', interval=120, alert_window='last_30m', count_default_zero='true', seasonality='hourly') >= 1",
+	"message": "{{#is_alert}}\n\nALERT: Your OpenAI usage in the last hour has been abnormally high\n\n{{/is_alert}}",
+    "tags": [
+        "integration:openai"
+    ],
+	"options": {
+		"thresholds": {
+			"critical": 1,
+			"critical_recovery": 0
+		},
+		"notify_audit": false,
+		"require_full_window": false,
+		"notify_no_data": false,
+		"no_data_timeframe": 10,
+		"renotify_interval": 0,
+		"threshold_windows": {
+			"trigger_window": "last_30m",
+			"recovery_window": "last_15m"
+		},
+		"include_tags": false
+	},
+    "recommended_monitor_metadata": {
+        "description": "Notify your team when OpenAI token usage is abnormally high"
+    }
+}

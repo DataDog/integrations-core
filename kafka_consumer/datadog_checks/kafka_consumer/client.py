@@ -34,6 +34,7 @@ class KafkaClient:
         config = {
             "bootstrap.servers": self.config._kafka_connect_str,
             "group.id": consumer_group,
+            "enable.auto.commit": False,  # To avoid offset commit to broker during close
         }
         config.update(self.__get_authentication_config())
 
@@ -87,29 +88,19 @@ class KafkaClient:
                 topics_with_consumer_offset.add(topic)
                 topic_partition_with_consumer_offset.add((topic, partition))
 
-        clusters_queried = set()
-        consumer_groups_checked = set()
+        topic_partition_checked = set()
 
-        for consumer_group, _, _ in consumer_offsets:
+        for consumer_group, _topic, _partition in consumer_offsets:
             self.log.debug('CONSUMER GROUP: %s', consumer_group)
+            if (_topic, _partition) in topic_partition_checked:
+                self.log.debug('Highwater offset already collected for topic %s with partition %s', _topic, _partition)
+                continue
+
             topic_partitions_for_highwater_offsets = set()
-            if consumer_group in consumer_groups_checked:
-                self.log.debug('Consumer group %s topics already queried, skipping it', consumer_group)
-                continue
+
             consumer = self.__create_consumer(consumer_group)
+            self.log.debug("Consumer instance %s created for group %s", consumer, consumer_group)
             cluster_metadata = consumer.list_topics(timeout=self.config._request_timeout)
-
-            # Cluster id string, if supported by the broker, else None
-            cluster_id = cluster_metadata.cluster_id
-
-            # Avoid querying the same cluster multiple times
-            if cluster_id in clusters_queried:
-                self.log.debug("Cluster %s topics already queried. Skipping it", cluster_metadata.cluster_id)
-                continue
-            # Check for existence as cluster_id is an optional value
-            elif cluster_id is not None:
-                clusters_queried.add(cluster_metadata.cluster_id)
-
             topics = cluster_metadata.topics
 
             for topic in topics:
@@ -134,7 +125,6 @@ class KafkaClient:
                         self.log.debug('PARTITION: %s', partition)
                     else:
                         self.log.debug("Skipping non-relevant partition %s of topic %s", partition, topic)
-            consumer_groups_checked.add(consumer_group)
 
             if len(topic_partitions_for_highwater_offsets) > 0:
                 self.log.debug(
@@ -150,8 +140,13 @@ class KafkaClient:
                     partition = topic_partition_with_highwater_offset.partition
                     offset = topic_partition_with_highwater_offset.offset
                     highwater_offsets[(topic, partition)] = offset
+                    self.log.debug("Adding %s %s to checked set to facilitate early exit", topic, partition)
+                    topic_partition_checked.add((topic, partition))
             else:
                 self.log.debug('No new highwater offsets to query for consumer group %s', consumer_group)
+
+            self.log.debug("Closing consumer instance %s", consumer)
+            consumer.close()
 
         self.log.debug('Got %s highwater offsets', len(highwater_offsets))
         return highwater_offsets

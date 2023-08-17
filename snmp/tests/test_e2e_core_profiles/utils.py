@@ -25,6 +25,36 @@ def assert_common_metrics(aggregator, common_tags):
     common.assert_common_metrics(aggregator, tags=common_tags, is_e2e=True, loader="core")
 
 
+def assert_extend_aruba_switch_cpu_memory(aggregator, common_tags):
+    # fmt: off
+    """Add the following to the snmprec
+1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.4|66|29
+    """
+    # fmt: on
+    aggregator.assert_metric("snmp.cpu.usage", metric_type=aggregator.GAUGE, tags=common_tags + ['cpu:4'])
+
+
+def assert_extend_fortinet_fortigate_cpu_memory(aggregator, common_tags):
+    # fmt: off
+    """Add the following to the snmprec
+1.3.6.1.4.1.12356.101.4.1.3.0|66|10
+    """
+    # fmt: on
+    aggregator.assert_metric("snmp.cpu.usage", metric_type=aggregator.GAUGE, tags=common_tags)
+
+
+def assert_extend_fortinet_fortigate_vpn_tunnel(aggregator, common_tags):
+    # fmt: off
+    """Add the following to the snmprec
+1.3.6.1.4.1.12356.101.12.2.2.1.2.2|4|ESMAO
+1.3.6.1.4.1.12356.101.12.2.2.1.20.2|2|1
+    """
+    # fmt: on
+    aggregator.assert_metric(
+        'snmp.fgVpnTunEntStatus', metric_type=aggregator.GAUGE, tags=common_tags + ['vpn_tunnel:ESMAO']
+    )
+
+
 def assert_extend_generic_if(aggregator, common_tags):
     # fmt: off
     """Add the following to the snmprec
@@ -106,6 +136,23 @@ def assert_extend_cisco_cpu_memory(aggregator, common_tags):
         "snmp.cpmCPUTotal1minRev",
         metric_type=aggregator.GAUGE,
         tags=common_tags + ["cpu:712"],
+    )
+
+
+def assert_extend_cisco_generic(aggregator, common_tags):
+    # fmt: off
+    """Add the following to the snmprec
+1.3.6.1.4.1.9.9.13.1.4.1.1.11|2|11
+1.3.6.1.4.1.9.9.13.1.4.1.3.11|2|6
+    """
+    # fmt: on
+    aggregator.assert_metric(
+        'snmp.ciscoEnvMonFanStatus',
+        metric_type=aggregator.GAUGE,
+        tags=common_tags + ['fan_state:notFunctioning', 'fan_status_index:11'],
+    )
+    aggregator.assert_metric(
+        'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags + ['fan_status_index:11']
     )
 
 
@@ -191,7 +238,7 @@ def assert_extend_generic_host_resources(aggregator, common_tags):
     assert_extend_generic_host_resources_base(aggregator, common_tags)
 
 
-def assert_extend_entity_sensor(aggregator, common_tags):
+def assert_extend_generic_entity_sensor(aggregator, common_tags):
     # fmt: off
     """Add the following to the snmprec
 1.3.6.1.2.1.99.1.1.1.1.8|2|9
@@ -225,6 +272,15 @@ def assert_extend_generic_ucd(aggregator, common_tags):
     """
     # fmt:on
     aggregator.assert_metric("snmp.ucd.memTotalSwap", metric_type=aggregator.GAUGE, tags=common_tags)
+
+
+def assert_extend_checkpoint_firewall_cpu_memory(aggregator, common_tags):
+    # fmt:off
+    """Add the following to the snmprec
+1.3.6.1.4.1.2620.1.6.7.4.3.0|70|15569114139837823111
+    """
+    # fmt:on
+    aggregator.assert_metric("snmp.memory.total", metric_type=aggregator.GAUGE, tags=common_tags)
 
 
 def assert_extend_cisco(aggregator, common_tags):

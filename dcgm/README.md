@@ -30,8 +30,6 @@ DCGM_FI_DEV_POWER_USAGE                                           ,gauge        
 DCGM_FI_DEV_TOTAL_ENERGY_CONSUMPTION                              ,counter                ,Total energy consumption since boot (in mJ).
 
 # PCIE
-# DCGM_FI_DEV_PCIE_TX_THROUGHPUT                                  ,counter                ,Total number of bytes transmitted through PCIe TX (in KB) via NVML.
-# DCGM_FI_DEV_PCIE_RX_THROUGHPUT                                  ,counter                ,Total number of bytes received through PCIe RX (in KB) via NVML.
 DCGM_FI_DEV_PCIE_REPLAY_COUNTER                                   ,counter                ,Total number of PCIe retries.
 
 # Utilization (the sample period varies depending on the product)
@@ -42,35 +40,13 @@ DCGM_FI_DEV_DEC_UTIL                                              ,gauge        
 
 # Errors and violations
 DCGM_FI_DEV_XID_ERRORS                                            ,gauge                  ,Value of the last XID error encountered.
-# DCGM_FI_DEV_POWER_VIOLATION                                     ,counter                ,Throttling duration due to power constraints (in us).
-# DCGM_FI_DEV_THERMAL_VIOLATION                                   ,counter                ,Throttling duration due to thermal constraints (in us).
-# DCGM_FI_DEV_SYNC_BOOST_VIOLATION                                ,counter                ,Throttling duration due to sync-boost constraints (in us).
-# DCGM_FI_DEV_BOARD_LIMIT_VIOLATION                               ,counter                ,Throttling duration due to board limit constraints (in us).
-# DCGM_FI_DEV_LOW_UTIL_VIOLATION                                  ,counter                ,Throttling duration due to low utilization (in us).
-# DCGM_FI_DEV_RELIABILITY_VIOLATION                               ,counter                ,Throttling duration due to reliability constraints (in us).
 
 # Memory usage
 DCGM_FI_DEV_FB_FREE                                               ,gauge                  ,Framebuffer memory free (in MiB).
 DCGM_FI_DEV_FB_USED                                               ,gauge                  ,Framebuffer memory used (in MiB).
 
-# ECC
-# DCGM_FI_DEV_ECC_SBE_VOL_TOTAL                                   ,counter                ,Total number of single-bit volatile ECC errors.
-# DCGM_FI_DEV_ECC_DBE_VOL_TOTAL                                   ,counter                ,Total number of double-bit volatile ECC errors.
-# DCGM_FI_DEV_ECC_SBE_AGG_TOTAL                                   ,counter                ,Total number of single-bit persistent ECC errors.
-# DCGM_FI_DEV_ECC_DBE_AGG_TOTAL                                   ,counter                ,Total number of double-bit persistent ECC errors.
-
-# Retired pages
-# DCGM_FI_DEV_RETIRED_SBE                                         ,counter                ,Total number of retired pages due to single-bit errors.
-# DCGM_FI_DEV_RETIRED_DBE                                         ,counter                ,Total number of retired pages due to double-bit errors.
-# DCGM_FI_DEV_RETIRED_PENDING                                     ,counter                ,Total number of pages pending retirement.
-
 # NVLink
-# DCGM_FI_DEV_NVLINK_CRC_FLIT_ERROR_COUNT_TOTAL                   ,counter                ,Total number of NVLink flow-control CRC errors.
-# DCGM_FI_DEV_NVLINK_CRC_DATA_ERROR_COUNT_TOTAL                   ,counter                ,Total number of NVLink data CRC errors.
-# DCGM_FI_DEV_NVLINK_REPLAY_ERROR_COUNT_TOTAL                     ,counter                ,Total number of NVLink retries.
-# DCGM_FI_DEV_NVLINK_RECOVERY_ERROR_COUNT_TOTAL                   ,counter                ,Total number of NVLink recovery errors.
 DCGM_FI_DEV_NVLINK_BANDWIDTH_TOTAL                                ,counter                ,Total number of NVLink bandwidth counters for all lanes.
-# DCGM_FI_DEV_NVLINK_BANDWIDTH_L0                                 ,counter                ,The number of bytes of active NVLink rx or tx data including both header and payload.
 
 # VGPU License status
 DCGM_FI_DEV_VGPU_LICENSE_STATUS                                   ,gauge                  ,vGPU License status
@@ -81,23 +57,20 @@ DCGM_FI_DEV_CORRECTABLE_REMAPPED_ROWS                             ,counter      
 DCGM_FI_DEV_ROW_REMAP_FAILURE                                     ,gauge                  ,Whether remapping of rows has failed
 
 # DCP metrics
-DCGM_FI_PROF_GR_ENGINE_ACTIVE                                     ,gauge                  ,Ratio of time the graphics engine is active (in %).
-# DCGM_FI_PROF_SM_ACTIVE                                          ,gauge                  ,The ratio of cycles an SM has at least 1 warp assigned (in %).
-# DCGM_FI_PROF_SM_OCCUPANCY                                       ,gauge                  ,The ratio of number of warps resident on an SM (in %).
-DCGM_FI_PROF_PIPE_TENSOR_ACTIVE                                   ,gauge                  ,Ratio of cycles the tensor (HMMA) pipe is active (in %).
-DCGM_FI_PROF_DRAM_ACTIVE                                          ,gauge                  ,Ratio of cycles the device memory interface is active sending or receiving data (in %).
-# DCGM_FI_PROF_PIPE_FP64_ACTIVE                                   ,gauge                  ,Ratio of cycles the fp64 pipes are active (in %).
-# DCGM_FI_PROF_PIPE_FP32_ACTIVE                                   ,gauge                  ,Ratio of cycles the fp32 pipes are active (in %).
-# DCGM_FI_PROF_PIPE_FP16_ACTIVE                                   ,gauge                  ,Ratio of cycles the fp16 pipes are active (in %).
 DCGM_FI_PROF_PCIE_TX_BYTES                                        ,counter                ,The number of bytes of active pcie tx data including both header and payload.
 DCGM_FI_PROF_PCIE_RX_BYTES                                        ,counter                ,The number of bytes of active pcie rx data including both header and payload.
+DCGM_FI_PROF_GR_ENGINE_ACTIVE                                     ,gauge                  ,Ratio of time the graphics engine is active (in %).
+DCGM_FI_PROF_SM_ACTIVE                                            ,gauge                  ,The ratio of cycles an SM has at least 1 warp assigned (in %).
+DCGM_FI_PROF_SM_OCCUPANCY                                         ,gauge                  ,The ratio of number of warps resident on an SM (in %).
+DCGM_FI_PROF_PIPE_TENSOR_ACTIVE                                   ,gauge                  ,Ratio of cycles the tensor (HMMA) pipe is active (in %).
+DCGM_FI_PROF_DRAM_ACTIVE                                          ,gauge                  ,Ratio of cycles the device memory interface is active sending or receiving data (in %).
+DCGM_FI_PROF_PIPE_FP64_ACTIVE                                     ,gauge                  ,Ratio of cycles the fp64 pipes are active (in %).
+DCGM_FI_PROF_PIPE_FP32_ACTIVE                                     ,gauge                  ,Ratio of cycles the fp32 pipes are active (in %).
+DCGM_FI_PROF_PIPE_FP16_ACTIVE                                     ,gauge                  ,Ratio of cycles the fp16 pipes are active (in %).
 
 # Datadog additional recommended fields
 DCGM_FI_DEV_COUNT                                                 ,counter                ,Number of Devices on the node.
 DCGM_FI_DEV_FAN_SPEED                                             ,gauge                  ,Fan speed for the device in percent 0-100.
-DCGM_FI_PROCESS_NAME                                              ,label                  ,The Process Name.
-DCGM_FI_PROF_PCIE_TX_BYTES                                        ,counter                ,Total number of bytes transmitted through PCIe TX (in KB) via NVML.
-DCGM_FI_PROF_PCIE_RX_BYTES                                        ,counter                ,Total number of bytes received through PCIe RX (in KB) via NVML.
 DCGM_FI_DEV_SLOWDOWN_TEMP                                         ,gauge                  ,Slowdown temperature for the device.
 DCGM_FI_DEV_POWER_MGMT_LIMIT                                      ,gauge                  ,Current power limit for the device.
 DCGM_FI_DEV_PSTATE                                                ,gauge                  ,Performance state (P-State) 0-15. 0=highest
@@ -105,6 +78,8 @@ DCGM_FI_DEV_FB_TOTAL                                              ,gauge        
 DCGM_FI_DEV_FB_RESERVED                                           ,gauge                  ,
 DCGM_FI_DEV_FB_USED_PERCENT                                       ,gauge                  ,
 DCGM_FI_DEV_CLOCK_THROTTLE_REASONS                                ,gauge                  ,Current clock throttle reasons (bitmask of DCGM_CLOCKS_THROTTLE_REASON_*)
+
+DCGM_FI_PROCESS_NAME                                              ,label                  ,The Process Name.
 DCGM_FI_CUDA_DRIVER_VERSION                                       ,label                  ,
 DCGM_FI_DEV_NAME                                                  ,label                  ,
 DCGM_FI_DEV_MINOR_NUMBER                                          ,label                  ,
@@ -112,6 +87,7 @@ DCGM_FI_DRIVER_VERSION                                            ,label        
 DCGM_FI_DEV_BRAND                                                 ,label                  ,
 DCGM_FI_DEV_SERIAL                                                ,label                  ,
 ```
+
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host | Docker" xxx -->
@@ -385,6 +361,24 @@ The example below appends the part in `NEW_METRIC` to the namespace (`dcgm.`), g
 If a field is not being collected even after enabling it in `default-counters.csv` and performing a `curl` request to `host:9400/metrics`, the [dcgm-exporter developers recommend][14] looking at the log file at `var/log/nv-hostengine.log`.
 
 **Note:** The `dcgm-exporter` is a thin wrapper around lower-level libraries and drivers which do the actual reporting.
+
+### Increased Resource Consumption
+
+In some cases, the `DCGM_FI_DEV_GPU_UTIL` metric can cause heavier resource consumption. If you're experiencing this issue:
+
+1. Disable `DCGM_FI_DEV_GPU_UTIL` in `default-counters.csv`.
+2. Make sure the following fields are enabled in `default-counters.csv`:
+   - `DCGM_FI_PROF_DRAM_ACTIVE`
+   - `DCGM_FI_PROF_GR_ENGINE_ACTIVE`
+   - `DCGM_FI_PROF_PCIE_RX_BYTES`
+   - `DCGM_FI_PROF_PCIE_TX_BYTES`
+   - `DCGM_FI_PROF_PIPE_FP16_ACTIVE`
+   - `DCGM_FI_PROF_PIPE_FP32_ACTIVE`
+   - `DCGM_FI_PROF_PIPE_FP64_ACTIVE`
+   - `DCGM_FI_PROF_PIPE_TENSOR_ACTIVE`
+   - `DCGM_FI_PROF_SM_ACTIVE`
+   - `DCGM_FI_PROF_SM_OCCUPANCY`
+3. Restart both dcgm-exporter and the Datadog Agent.
 
 ### Need help?
 

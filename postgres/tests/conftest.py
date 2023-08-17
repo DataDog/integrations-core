@@ -6,7 +6,7 @@ import os
 from collections import deque
 
 import mock
-import psycopg2
+import psycopg
 import pytest
 from semver import VersionInfo
 
@@ -30,10 +30,10 @@ INSTANCE = {
 
 
 def connect_to_pg():
-    psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, password=PASSWORD)
+    psycopg.connect(host=HOST, dbname=DB_NAME, user=USER, password=PASSWORD)
     if float(POSTGRES_VERSION) >= 10.0:
-        psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA, password=PASSWORD)
-        psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA2, password=PASSWORD)
+        psycopg.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA, password=PASSWORD)
+        psycopg.connect(host=HOST, dbname=DB_NAME, user=USER, port=PORT_REPLICA2, password=PASSWORD)
 
 
 @pytest.fixture(scope='session')
@@ -109,7 +109,7 @@ def e2e_instance():
 
 @pytest.fixture()
 def mock_cursor_for_replica_stats():
-    with mock.patch('psycopg2.connect') as connect:
+    with mock.patch('psycopg.connect') as connect:
         cursor = mock.MagicMock()
         data = deque()
         connect.return_value = mock.MagicMock(cursor=mock.MagicMock(return_value=cursor))

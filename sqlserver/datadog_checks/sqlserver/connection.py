@@ -20,6 +20,7 @@ try:
 except ImportError:
     pyodbc = None
 
+from .azure import generate_managed_identity_token
 from .connection_errors import ConnectionErrorCode, SQLConnectionError, error_with_tags, format_connection_exception
 
 logger = logging.getLogger(__file__)
@@ -27,6 +28,10 @@ logger = logging.getLogger(__file__)
 DATABASE_EXISTS_QUERY = 'select name, collation_name from sys.databases;'
 DEFAULT_CONN_PORT = 1433
 SUPPORT_LINK = "https://docs.datadoghq.com/database_monitoring/setup_sql_server/troubleshooting"
+
+# used to specific azure AD access token, see the docs for more information on this attribute
+# https://learn.microsoft.com/en-us/sql/connect/odbc/using-azure-active-directory?view=sql-server-ver16
+SQL_COPT_SS_ACCESS_TOKEN = 1256
 
 
 def split_sqlserver_host_port(host):
@@ -145,6 +150,15 @@ class Connection(object):
         self._check = check
         self.service_check_handler = service_check_handler
         self.log = get_check_logger()
+
+        self.managed_auth_enabled = False
+        self.managed_identity_client_id = None
+        self.managed_identity_scope = None
+        managed_identity = self.instance.get('managed_identity')
+        if managed_identity:
+            self.managed_auth_enabled = True
+            self.managed_identity_client_id = managed_identity.get("client_id")
+            self.managed_identity_scope = managed_identity.get("identity_scope")
 
         # mapping of raw connections based on conn_key to different databases
         self._conns = {}
@@ -268,7 +282,15 @@ class Connection(object):
                 rawconn = adodbapi.connect(cs, {'timeout': self.timeout, 'autocommit': True})
             else:
                 cs += self._conn_string_odbc(db_key, db_name=db_name)
-                rawconn = pyodbc.connect(cs, timeout=self.timeout, autocommit=True)
+                if self.managed_auth_enabled:
+                    token_struct = generate_managed_identity_token(
+                        self.managed_identity_client_id, self.managed_identity_scope
+                    )
+                    rawconn = pyodbc.connect(
+                        cs, timeout=self.timeout, autocommit=True, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
+                    )
+                else:
+                    rawconn = pyodbc.connect(cs, timeout=self.timeout, autocommit=True)
                 rawconn.timeout = self.timeout
 
             self.service_check_handler(AgentCheck.OK, host, database, is_default=is_default)
@@ -511,6 +533,20 @@ class Connection(object):
             'PWD': 'password',
         }
 
+        if self.managed_auth_enabled:
+            if username or password:
+                raise ConfigurationError(
+                    "Azure AD Authentication is configured, but username and password properties are also set "
+                    "please remove `username` and `password` from your instance config to use"
+                    "AD Authentication with a Managed Identity"
+                )
+            # client_id is used as the user id for managed user identities or server principals
+            if not self.managed_identity_client_id:
+                raise ConfigurationError(
+                    "Azure Managed Identity Authentication is not properly configured "
+                    "missing required property, client_id"
+                )
+
         if self.connector == 'adodbapi':
             other_connector = 'odbc'
             connector_options = adodbapi_options
@@ -564,6 +600,12 @@ class Connection(object):
             dsn, host, username, password, database, driver = conn_key.split(":")
         else:
             dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
+
+        if self.managed_auth_enabled:
+            # if managed_identity authentication is configured,
+            # remove the username/password from the CS, if set
+            username = None
+            password = None
 
         # The connection resiliency feature is supported on Microsoft Azure SQL Database
         # and SQL Server 2014 (and later) server versions. See the SQLServer docs for more information

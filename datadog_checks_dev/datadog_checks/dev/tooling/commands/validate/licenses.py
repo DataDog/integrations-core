@@ -52,6 +52,8 @@ EXPLICIT_LICENSES = {
     # https://github.com/psycopg/psycopg2/blob/master/LICENSE
     # https://github.com/psycopg/psycopg2/blob/master/doc/COPYING.LESSER
     'psycopg2-binary': ['LGPL-3.0-only', 'BSD-3-Clause'],
+    # https://github.com/psycopg/psycopg/blob/master/LICENSE.txt
+    'psycopg': ['LGPL-3.0-only'],
     # https://github.com/Legrandin/pycryptodome/blob/master/LICENSE.rst
     'pycryptodomex': ['Unlicense', 'BSD-2-Clause'],
     # https://github.com/requests/requests-kerberos/pull/123
@@ -158,6 +160,7 @@ PACKAGE_REPO_OVERRIDES = {
     'paramiko': 'https://github.com/paramiko/paramiko',
     'protobuf': 'https://github.com/protocolbuffers/protobuf',
     'psycopg2-binary': 'https://github.com/psycopg/psycopg2',
+    'psycopg': 'https://github.com/psycopg/psycopg',
     'pycryptodomex': 'https://github.com/Legrandin/pycryptodome',
     'redis': 'https://github.com/redis/redis-py',
     'requests': 'https://github.com/psf/requests',

@@ -4,7 +4,7 @@
 
 import logging
 
-import psycopg2
+from psycopg.rows import dict_row
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.tracking import tracked_method
@@ -16,12 +16,12 @@ logger = logging.getLogger(__name__)
 PREPARE_STATEMENT_QUERY = 'PREPARE dd_{query_signature} AS {statement}'
 
 PARAM_TYPES_COUNT_QUERY = '''\
-SELECT CARDINALITY(parameter_types) FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'
+SELECT CARDINALITY(parameter_types) as count FROM pg_prepared_statements WHERE name = 'dd_{query_signature}'
 '''
 
 EXECUTE_PREPARED_STATEMENT_QUERY = 'EXECUTE dd_{prepared_statement}({generic_values})'
 
-EXPLAIN_QUERY = 'SELECT {explain_function}($stmt${statement}$stmt$)'
+EXPLAIN_QUERY = 'SELECT {explain_function}($stmt${statement}$stmt$) as explain_statement'
 
 
 def agent_check_getter(self):
@@ -81,7 +81,7 @@ class ExplainParameterizedQueries:
         result = self._explain_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
         self._deallocate_prepared_statement(dbname, query_signature)
         if result:
-            return result[0][0][0]
+            return result[0]['explain_statement'][0]
         return None
 
     def _set_plan_cache_mode(self, dbname):
@@ -112,7 +112,10 @@ class ExplainParameterizedQueries:
         rows = self._execute_query_and_fetch_rows(
             dbname, PARAM_TYPES_COUNT_QUERY.format(query_signature=query_signature)
         )
-        return rows[0][0] if rows else 0
+        count = 0
+        if rows and 'count' in rows[0]:
+            count = rows[0]['count']
+        return count
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _explain_prepared_statement(self, dbname, statement, obfuscated_statement, query_signature):
@@ -157,15 +160,14 @@ class ExplainParameterizedQueries:
             )
 
     def _execute_query(self, dbname, query):
-        # Psycopg2 connections do not get closed when context ends;
-        # leaving context will just mark the connection as inactive in MultiDatabaseConnectionPool
         with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with conn.cursor(row_factory=dict_row) as cursor:
                 logger.debug('Executing query=[%s]', query)
                 cursor.execute(query)
 
     def _execute_query_and_fetch_rows(self, dbname, query):
         with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with conn.cursor(row_factory=dict_row) as cursor:
+                logger.debug('Executing query=[%s]', query)
                 cursor.execute(query)
                 return cursor.fetchall()
