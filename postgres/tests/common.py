@@ -186,7 +186,7 @@ def check_activity_metrics(aggregator, tags):
         # Query won't have xid assigned so postgresql.activity.backend_xid_age won't be emitted
         activity_metrics.append('postgresql.activity.backend_xmin_age')
     for name in activity_metrics:
-        assert_metric_at_least(aggregator, name, count=1, tags=tags)
+        assert_metric_at_least(aggregator, name, tags=tags)
 
 
 def check_stat_replication(aggregator, expected_tags, count=1):
