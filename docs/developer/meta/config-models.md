@@ -36,7 +36,7 @@ All models are defined in `<ID>.py` and are available for import directly under 
 The default values for optional settings are populated in `defaults.py` and are derived from the
 [value](config-specs.md#values) property of config spec options. The precedence is the `default` key
 followed by the `example` key (if it appears to represent a real value rather than an illustrative example
-and the `type` is a primitive). In all other cases the default will be `None` and there will be no default
+and the `type` is a primitive). In all other cases, the default is `None`, which means there is no default
 getter function.
 
 ## Validation
