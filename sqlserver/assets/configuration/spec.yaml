@@ -413,43 +413,31 @@ files:
             type: string
             example: my-sqlserver-database.database.windows.net
 
-    - name: managed_authentication
+    - name: managed_identity
       description: |
-        Configuration section used for Azure AD Authentication. 
+        Configuration section used for Azure AD Authentication.
+        
+        This supports using System or User assigned managed identities.
         If this section is set, then the `username` and `password` fields will be ignored.
         
-        Supports two possible ways to authenticate:
-          1. Azure Service Principal 
-          2. Azure Managed Identities
+        For more information on Managed Identities, see the Azure docs
+        https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
       options:
-        - name: auth_type
-          description: |
-            Authentication method to use for connecting.
-            
-            Acceptable values are:
-              - `service_principal` 
-              - `managed_identity`
-          value:
-            type: string
-            example: managed_identity
         - name: client_id
           description: |
-            Client ID of either the User Managed Identity or the Service Principal. 
-            You do not need to set this option if you are using a System Assigned Managed Identity.
-            
-            For more information on Managed Identities, see the Azure docs
-            https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+            Client ID of the Managed Identity.
           value:
             type: string
-        - name: client_secret
+        - name: identity_scope
           description: |
-            Client Secret of the Service Principal. 
-            You do not need to set this option if you are using a managed identity.
+            The permission scope from where to access the identity token. This value is optional if using the default
+            identity scope for Azure managed databases.
             
-            For more information on Service Principals, see the Azure docs
-            https://learn.microsoft.com/en-us/azure/active-directory/develop/app-objects-and-service-principals
+            For more information on scopes, see the Azure docs
+            https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
           value:
             type: string
+            example: https://database.windows.net/.default
 
     - name: obfuscator_options
       description: |

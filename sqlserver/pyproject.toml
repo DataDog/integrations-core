@@ -47,6 +47,7 @@ deps = [
     "selectors34==1.2; sys_platform == 'win32' and python_version < '3.0'",
     "serpent==1.28; sys_platform == 'win32' and python_version < '3.0'",
     "serpent==1.41; sys_platform == 'win32' and python_version > '3.0'",
+    "azure-identity==1.14.0; python_version > '3.0'"
 ]
 
 [project.urls]

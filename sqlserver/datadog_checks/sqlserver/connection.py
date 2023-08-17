@@ -20,6 +20,7 @@ try:
 except ImportError:
     pyodbc = None
 
+from .azure import generate_managed_identity_token
 from .connection_errors import ConnectionErrorCode, SQLConnectionError, error_with_tags, format_connection_exception
 
 logger = logging.getLogger(__file__)
@@ -27,6 +28,10 @@ logger = logging.getLogger(__file__)
 DATABASE_EXISTS_QUERY = 'select name, collation_name from sys.databases;'
 DEFAULT_CONN_PORT = 1433
 SUPPORT_LINK = "https://docs.datadoghq.com/database_monitoring/setup_sql_server/troubleshooting"
+
+# used to specific azure AD access token, see the docs for more information on this attribute
+# https://learn.microsoft.com/en-us/sql/connect/odbc/using-azure-active-directory?view=sql-server-ver16
+SQL_COPT_SS_ACCESS_TOKEN = 1256
 
 
 def split_sqlserver_host_port(host):
@@ -136,22 +141,24 @@ class Connection(object):
     DEFAULT_SQLSERVER_VERSION = 1e9
     SQLSERVER_2014 = 2014
     PROC_GUARD_DB_KEY = 'proc_only_if_database'
-    MANAGED_IDENTITY_AUTH_CONN_ATTR = "ActiveDirectoryMsi"
-    SERVICE_PRINCIPAL_AUTH_CONN_ATTR = "ActiveDirectoryServicePrincipal"
 
     valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL', 'MSOLEDBSQL19', 'SQLNCLI11']
     default_adoprovider = 'MSOLEDBSQL'
-    valid_managed_auth_types = ['service_principal', 'managed_identity']
-    auth_type_to_conn_string_attr = {
-        "service_principal": SERVICE_PRINCIPAL_AUTH_CONN_ATTR,
-        'managed_identity': MANAGED_IDENTITY_AUTH_CONN_ATTR,
-    }
 
     def __init__(self, check, init_config, instance_config, service_check_handler):
         self.instance = instance_config
         self._check = check
         self.service_check_handler = service_check_handler
         self.log = get_check_logger()
+
+        self.managed_auth_enabled = False
+        self.managed_identity_client_id = None
+        self.managed_identity_scope = None
+        managed_identity = self.instance.get('managed_identity')
+        if managed_identity:
+            self.managed_auth_enabled = True
+            self.managed_identity_client_id = managed_identity.get("client_id")
+            self.managed_identity_scope = managed_identity.get("identity_scope")
 
         # mapping of raw connections based on conn_key to different databases
         self._conns = {}
@@ -275,7 +282,15 @@ class Connection(object):
                 rawconn = adodbapi.connect(cs, {'timeout': self.timeout, 'autocommit': True})
             else:
                 cs += self._conn_string_odbc(db_key, db_name=db_name)
-                rawconn = pyodbc.connect(cs, timeout=self.timeout, autocommit=True)
+                if self.managed_auth_enabled:
+                    token_struct = generate_managed_identity_token(
+                        self.managed_identity_client_id, self.managed_identity_scope
+                    )
+                    rawconn = pyodbc.connect(
+                        cs, timeout=self.timeout, autocommit=True, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
+                    )
+                else:
+                    rawconn = pyodbc.connect(cs, timeout=self.timeout, autocommit=True)
                 rawconn.timeout = self.timeout
 
             self.service_check_handler(AgentCheck.OK, host, database, is_default=is_default)
@@ -518,32 +533,18 @@ class Connection(object):
             'PWD': 'password',
         }
 
-        managed_auth = self.instance.get('managed_authentication')
-        if managed_auth:
-            auth_type = managed_auth.get('auth_type')
-            if auth_type not in self.valid_managed_auth_types:
-                raise ConfigurationError(
-                    "Azure AD Authentication is configured with unsupported auth_type "
-                    "valid options are %s" % ", ".join(self.valid_managed_auth_types)
-                )
+        if self.managed_auth_enabled:
             if username or password:
                 raise ConfigurationError(
                     "Azure AD Authentication is configured, but username and password properties are also set "
                     "please remove `username` and `password` from your instance config to use"
-                    "AD Authentication with %s" % auth_type
+                    "AD Authentication with a Managed Identity"
                 )
             # client_id is used as the user id for managed user identities or server principals
-            client_id = managed_auth.get('client_id')
-            if not client_id and auth_type == "service_principal":
+            if not self.managed_identity_client_id:
                 raise ConfigurationError(
-                    "Azure Service Principal Authentication is not properly configured "
+                    "Azure Managed Identity Authentication is not properly configured "
                     "missing required property, client_id"
-                )
-            client_secret = managed_auth.get('client_secret')
-            if not client_secret and auth_type == "service_principal":
-                raise ConfigurationError(
-                    "Azure Service Principal Authentication is not properly configured "
-                    "missing required property, client_secret"
                 )
 
         if self.connector == 'adodbapi':
@@ -600,15 +601,11 @@ class Connection(object):
         else:
             dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
 
-        managed_auth = self.instance.get('managed_authentication')
-        if managed_auth:
-            managed_auth_attr = self.auth_type_to_conn_string_attr.get(managed_auth.get('auth_type'))
-            client_id = managed_auth.get('client_id')
-            if client_id:
-                username = client_id
-            client_secret = managed_auth.get('client_secret')
-            if client_secret:
-                password = client_secret
+        if self.managed_auth_enabled:
+            # if managed_identity authentication is configured,
+            # remove the username/password from the CS, if set
+            username = None
+            password = None
 
         # The connection resiliency feature is supported on Microsoft Azure SQL Database
         # and SQL Server 2014 (and later) server versions. See the SQLServer docs for more information
@@ -629,8 +626,6 @@ class Connection(object):
         self.log.debug("Connection string (before password) %s", conn_str)
         if password:
             conn_str += 'PWD={};'.format(password)
-        if managed_auth:
-            conn_str += 'Authentication={}'.format(managed_auth_attr)
         return conn_str
 
     def _conn_string_adodbapi(self, db_key, conn_key=None, db_name=None):

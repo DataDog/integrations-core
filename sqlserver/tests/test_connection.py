@@ -172,102 +172,54 @@ def test_will_fail_for_wrong_parameters_in_the_connection_string(instance_minima
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "name,managed_auth_config,expected_cs_attr,should_fail,expected_err",
+    "name,managed_identity_config,should_fail,expected_err",
     [
         (
             "valid managed_identity configuration",
             {
-                'managed_authentication': {
-                    'auth_type': 'managed_identity',
+                'managed_identity': {
                     'client_id': "foo",
                 },
             },
-            "ActiveDirectoryMsi",
             False,
             None,
         ),
         (
-            "valid service_principal configuration",
+            "valid config, but username/password set raises ConfigurationError",
             {
-                'managed_authentication': {
-                    'auth_type': 'service_principal',
-                    'client_id': "foo",
-                    'client_secret': "foo-secret",
-                },
-            },
-            "ActiveDirectoryServicePrincipal",
-            False,
-            None,
-        ),
-        (
-            "invalid auth type raises ConfigurationError",
-            {
-                'managed_authentication': {
-                    'auth_type': 'invalid',
-                },
-            },
-            None,
-            True,
-            (
-                "Azure AD Authentication is configured with unsupported auth_type "
-                "valid options are %s" % ", ".join(['service_principal', 'managed_identity'])
-            ),
-        ),
-        (
-            "valid auth type with username/password set raises ConfigurationError",
-            {
-                'managed_authentication': {
-                    'auth_type': 'service_principal',
+                'managed_identity': {
+                    'client_id': 'foo',
                 },
                 "username": "foo",
                 "password": "shame-nun",
             },
-            None,
             True,
             (
                 "Azure AD Authentication is configured, but username and password properties are also set "
                 "please remove `username` and `password` from your instance config to use"
-                "AD Authentication with service_principal"
+                "AD Authentication with a Managed Identity"
             ),
         ),
         (
-            "service_principal auth type without client_id set raises ConfigurationError",
+            "managed_identity without client_id set raises ConfigurationError",
             {
-                'managed_authentication': {
-                    'auth_type': 'service_principal',
+                'managed_identity': {
+                    'not_what_i_want': 'foo',
                 },
             },
-            None,
             True,
             (
-                "Azure Service Principal Authentication is not properly configured "
+                "Azure Managed Identity Authentication is not properly configured "
                 "missing required property, client_id"
-            ),
-        ),
-        (
-            "service_principal auth type without client_secret set raises ConfigurationError",
-            {
-                'managed_authentication': {
-                    'auth_type': 'service_principal',
-                    'client_id': 'foo',
-                },
-            },
-            None,
-            True,
-            (
-                "Azure Service Principal Authentication is not properly configured "
-                "missing required property, client_secret"
             ),
         ),
     ],
 )
-def test_managed_auth_config_valid(
-    instance_minimal_defaults, name, managed_auth_config, expected_cs_attr, should_fail, expected_err
-):
+def test_managed_auth_config_valid(instance_minimal_defaults, name, managed_identity_config, should_fail, expected_err):
     instance_minimal_defaults.pop('username')
     instance_minimal_defaults.pop('password')
-    if managed_auth_config:
-        for k, v in managed_auth_config.items():
+    if managed_identity_config:
+        for k, v in managed_identity_config.items():
             instance_minimal_defaults[k] = v
     instance_minimal_defaults.update({'connector': 'odbc'})
     check = SQLServer(CHECK_NAME, {}, [instance_minimal_defaults])
@@ -277,7 +229,6 @@ def test_managed_auth_config_valid(
             connection._connection_options_validation('somekey', 'somedb')
     else:
         connection._connection_options_validation('somekey', 'somedb')
-        assert 'Authentication={}'.format(expected_cs_attr) in connection._conn_string_odbc('somekey')
 
 
 @pytest.mark.unit

@@ -65,14 +65,13 @@ class Gcp(BaseModel):
     project_id: Optional[str] = None
 
 
-class ManagedAuthentication(BaseModel):
+class ManagedIdentity(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    auth_type: Optional[str] = None
     client_id: Optional[str] = None
-    client_secret: Optional[str] = None
+    identity_scope: Optional[str] = None
 
 
 class MetricPatterns(BaseModel):
@@ -160,7 +159,7 @@ class InstanceConfig(BaseModel):
     include_task_scheduler_metrics: Optional[bool] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
-    managed_authentication: Optional[ManagedAuthentication] = None
+    managed_identity: Optional[ManagedIdentity] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     obfuscator_options: Optional[ObfuscatorOptions] = None
