@@ -5,7 +5,6 @@ from __future__ import division
 
 import os
 import re
-import shlex
 
 import simplejson as json
 from six import iteritems
@@ -53,17 +52,17 @@ class Ceph(AgentCheck):
             test_sudo = os.system('setsid sudo -l < /dev/null')
             if test_sudo != 0:
                 raise CheckException('The dd-agent user does not have sudo access')
-            ceph_args = 'sudo {}'.format(ceph_cmd)
+            ceph_args = ['sudo', ceph_cmd]
         else:
-            ceph_args = ceph_cmd
+            ceph_args = [ceph_cmd]
 
-        ceph_args = '{} --cluster {}'.format(ceph_args, ceph_cluster)
+        ceph_args += ['--cluster', ceph_cluster]
 
         raw = {}
         for cmd in ('mon_status', 'status', 'df detail', 'osd pool stats', 'osd perf', 'health detail', 'osd metadata'):
             try:
-                args = '{} {} -fjson'.format(ceph_args, cmd)
-                output, _, _ = get_subprocess_output(shlex.split(args), self.log)
+                args = ceph_args + [cmd, '-fjson']
+                output, _, _ = get_subprocess_output(args, self.log)
                 res = json.loads(output)
             except Exception as e:
                 self.log.warning('Unable to parse data from cmd=%s: %s', cmd, e)
