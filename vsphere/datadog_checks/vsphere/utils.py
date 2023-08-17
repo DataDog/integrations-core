@@ -93,8 +93,8 @@ def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
     return True
 
 
-def metrics_to_collect(mor_type, metric_filters):
-
+def property_metrics_to_collect(mor_type, metric_filters):
+    # type: (str, MetricFilters) -> List[str]
     filters = metric_filters.get(mor_type)
     all_metrics = PROPERTY_METRICS_BY_RESOURCE_TYPE[mor_type]
     if not filters:
@@ -111,6 +111,7 @@ def metrics_to_collect(mor_type, metric_filters):
 
 
 def properties_to_collect(mor_type, metric_filters):
+    # type: (Optional[str], MetricFilters) -> List[str]
     if mor_type is None:
         return []
 
@@ -121,9 +122,10 @@ def properties_to_collect(mor_type, metric_filters):
 
 
 def simple_properties_to_collect(mor_string, resource_filters):
-
+    # type: (str, MetricFilters) -> List[str]
     filters = resource_filters.get(mor_string)
     resource_simple_properties = SIMPLE_PROPERTIES_BY_RESOURCE_TYPE.get(mor_string, [])
+
     if not filters:
         return resource_simple_properties
 
@@ -137,6 +139,7 @@ def simple_properties_to_collect(mor_string, resource_filters):
 
 
 def object_properties_to_collect(mor_string, resource_filters):
+    # type: (str, MetricFilters) -> List[str]
     filters = resource_filters.get(mor_string)
     resource_object_properties = OBJECT_PROPERTIES_BY_RESOURCE_TYPE.get(mor_string, [])
 

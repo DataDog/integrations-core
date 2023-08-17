@@ -50,8 +50,8 @@ from datadog_checks.vsphere.utils import (
     get_tags_recursively,
     is_metric_excluded_by_filters,
     is_resource_collected_by_filters,
-    metrics_to_collect,
     object_properties_to_collect,
+    property_metrics_to_collect,
     should_collect_per_instance_values,
 )
 
@@ -676,7 +676,7 @@ class VSphereCheck(AgentCheck):
         Then combine all tags and submit the metric.
         """
         metric_full_name = "{}.{}".format(resource_metric_suffix, metric_name)
-        if metric_full_name not in metrics_to_collect(resource_metric_suffix, self._config.metric_filters):
+        if metric_full_name not in property_metrics_to_collect(resource_metric_suffix, self._config.metric_filters):
             return
 
         is_count_metric = metric_name in PROPERTY_COUNT_METRICS
@@ -750,10 +750,10 @@ class VSphereCheck(AgentCheck):
         for disk in disks:
             disk_path = disk.diskPath
             file_system_type = disk.filesystemType
+            free_space = disk.freeSpace
             capacity = disk.capacity
             disk_tags = {'disk_path': disk_path, 'file_system_type': file_system_type}
 
-            free_space = disk.freeSpace
             self.submit_property_metric(
                 'guest.disk.freeSpace',
                 free_space,
@@ -877,8 +877,8 @@ class VSphereCheck(AgentCheck):
 
         if resource_type == vim.VirtualMachine:
             object_properties = object_properties_to_collect(resource_metric_suffix, self._config.metric_filters)
-            net_property = 'guest.net'
 
+            net_property = 'guest.net'
             if net_property in object_properties:
                 nics = all_properties.get('guest.net', [])
                 self.submit_nic_property_metrics(nics, base_tags, hostname, resource_metric_suffix)
