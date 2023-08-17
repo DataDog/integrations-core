@@ -41,7 +41,7 @@ getter function.
 
 ## Validation
 
-The validation of fields for every model occurs in 3 high-level stages.
+The validation of fields for every model occurs in three high-level stages, as described in this section.
 
 ### Initial
 
@@ -80,7 +80,7 @@ new value of the option for the subsequent stages.
 #### Pre-defined field validators
 
 A `validators` key under the [value](https://datadoghq.dev/integrations-core/meta/config-specs/#values) property of config
-spec options is considered. Every entry will refer to a relative import path to a [field validator](#custom-field-validators)
+spec options is considered. Every entry refers to a relative import path to a [field validator](#custom-field-validators)
 under `datadog_checks.base.utils.models.validation` and is executed in the defined order.
 
 !!! note
@@ -100,8 +100,8 @@ def check_<ID>(model: pydantic.BaseModel) -> pydantic.BaseModel:
     ...
 ```
 
-If such a validator exists in `validators.py`, then it is called with the final constructed model. At this point it cannot
-be mutated so you may only raise errors.
+If such a validator exists in `validators.py`, then it is called with the final constructed model. At this point, it cannot
+be mutated, so you can only raise errors.
 
 ## Loading
 
