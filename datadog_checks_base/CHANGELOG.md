@@ -7,6 +7,10 @@
 * Dependency update for 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
 * Improve documentation of APIs ([#15582](https://github.com/DataDog/integrations-core/pull/15582))
 
+***Added***:
+
+* Support Auth via Azure AD MI / Service Principal ([#15591](https://github.com/DataDog/integrations-core/pull/15591))
+
 ***Fixed***:
 
 * Downgrade pydantic to 2.0.2 ([#15596](https://github.com/DataDog/integrations-core/pull/15596))
