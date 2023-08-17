@@ -50,6 +50,9 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.ciscoEnvMonSupplyStatus',  # Cisco constant metric
     'snmp.ciscoEnvMonFanStatus',  # Cisco constant metric
     'snmp.cefcFanTrayStatus',  # Cisco constant metric
+    'snmp.cefcFRUPowerStatus',  # Cisco constant metric
+    'snmp.cswSwitchInfo',  # Cisco constant metric
+    'snmp.cswSwitchState',  # Cisco constant metric
     'snmp.cpqHeFltTolPowerSupply',  # HP constant metric
     'snmp.fanSpeedSensor',  # Checkpoint constant metric
     'snmp.enclosurePowerSupply',  # iDRAC constant metric
@@ -376,7 +379,7 @@ def test_e2e_profile_cisco_3850(dd_agent_check):
     assert_python_vs_core(
         dd_agent_check,
         config,
-        expected_total_count=5108 + 5,
+        expected_total_count=5109,
         metrics_to_skip=metrics_to_skip,
         tags_to_skip=[
             'neighbor_state',
@@ -385,6 +388,10 @@ def test_e2e_profile_cisco_3850(dd_agent_check):
             'fan_state',
             'cefc_fan_tray_oper_status',
             'cefc_fan_tray_direction',
+            'power_admin_status',
+            'power_oper_status',
+            'switch_state',
+            'mac_addr',
         ],  # Ignore tags that have mappings
     )
 
@@ -401,6 +408,10 @@ def test_e2e_profile_cisco_asa(dd_agent_check):
             'fan_state',
             'cefc_fan_tray_oper_status',
             'cefc_fan_tray_direction',
+            'power_admin_status',
+            'power_oper_status',
+            'switch_state',
+            'mac_addr',
         ],  # Ignore tags that have mappings
     )
 
@@ -417,6 +428,10 @@ def test_e2e_profile_cisco_asa_5525(dd_agent_check):
             'fan_state',
             'cefc_fan_tray_oper_status',
             'cefc_fan_tray_direction',
+            'power_admin_status',
+            'power_oper_status',
+            'switch_state',
+            'mac_addr',
         ],  # Ignore tags that have mappings
     )
 
@@ -445,6 +460,10 @@ def test_e2e_profile_cisco_nexus(dd_agent_check):
             'fan_state',
             'cefc_fan_tray_oper_status',
             'cefc_fan_tray_direction',
+            'power_admin_status',
+            'power_oper_status',
+            'switch_state',
+            'mac_addr',
         ],  # Ignore tags that have mappings
     )
 

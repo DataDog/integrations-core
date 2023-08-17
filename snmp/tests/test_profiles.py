@@ -1286,9 +1286,18 @@ def test_cisco_nexus(aggregator):
         tags=common_tags + ['interface:GigabitEthernet1/0/1'],
     )
 
-    aggregator.assert_metric(
-        'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:0xffffffffffff'] + common_tags
-    )
+    tag_rows = [
+        ['mac_addr:0xffffffffffff', 'entity_name:name1'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name2'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name3'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name4'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name5'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name6'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name7'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name8'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=tag_row + common_tags)
 
     frus = [2, 7, 8, 21, 26, 27, 30, 31]
     for fru in frus:
