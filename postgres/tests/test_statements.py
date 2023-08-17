@@ -944,7 +944,6 @@ def test_activity_snapshot_collection(
     expected_keys,
     expected_conn_out,
 ):
-
     if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
         # cannot catch any queries from other users
         # only can see own queries
@@ -1272,6 +1271,37 @@ def test_statement_run_explain_errors(
             tags=expected_tags,
             hostname='stubbed.hostname',
         )
+
+
+@pytest.mark.parametrize(
+    "query,expected_explain_err_code,expected_err",
+    [
+        (
+            "select * from pg_settings where name = $1",
+            DBExplainError.explained_with_prepared_statement,
+            None,
+        ),
+    ],
+)
+def test_statement_run_explain_parameterized_queries(
+    integration_check,
+    dbm_instance,
+    query,
+    expected_explain_err_code,
+    expected_err,
+):
+    dbm_instance['query_activity']['enabled'] = False
+    dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_samples']['explain_parameterized_queries'] = True
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    run_one_check(check, dbm_instance)
+    _, explain_err_code, err = check.statement_samples._run_and_track_explain("datadog_test", query, query, query)
+    run_one_check(check, dbm_instance)
+
+    assert explain_err_code == expected_explain_err_code
+    assert err == expected_err
 
 
 @pytest.mark.parametrize("dbstrict", [True, False])
