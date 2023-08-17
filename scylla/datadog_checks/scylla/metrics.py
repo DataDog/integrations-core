@@ -482,7 +482,6 @@ SCYLLA_STALL = {
 }
 
 SCYLLA_STORAGE = {
-    # Scylla 3.1
     'scylla_storage_proxy_coordinator_background_read_repairs': 'storage.proxy.coordinator_background_read_repairs',
     'scylla_storage_proxy_coordinator_background_reads': 'storage.proxy.coordinator_background_reads',
     'scylla_storage_proxy_coordinator_background_replica_writes_failed_local_node': 'storage.proxy.coordinator_background_replica_writes_failed_local_node',  # noqa E501
