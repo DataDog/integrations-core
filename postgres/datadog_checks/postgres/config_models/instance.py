@@ -68,6 +68,15 @@ class Gcp(BaseModel):
     project_id: Optional[str] = None
 
 
+class ManagedIdentity(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    client_id: Optional[str] = None
+    identity_scope: Optional[str] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -171,6 +180,7 @@ class InstanceConfig(BaseModel):
     ignore_databases: Optional[tuple[str, ...]] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
+    managed_identity: Optional[ManagedIdentity] = None
     max_connections: Optional[int] = None
     max_relations: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
