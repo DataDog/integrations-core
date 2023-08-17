@@ -30,7 +30,7 @@ def db_instance():
 
 @pytest.fixture()
 def mock_db_data():
-    if os.environ['SCYLLA_VERSION'] == '5.2.6':
+    if os.environ['SCYLLA_VERSION'].startswith('5.'):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'scylla_5_metrics.txt')
     else:
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'scylla_metrics.txt')
