@@ -4,10 +4,12 @@
 
 ***Added***:
 
+* Dependency update for 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
 * Improve documentation of APIs ([#15582](https://github.com/DataDog/integrations-core/pull/15582))
 
 ***Fixed***:
 
+* Downgrade pydantic to 2.0.2 ([#15596](https://github.com/DataDog/integrations-core/pull/15596))
 * Bump cryptography to 41.0.3 ([#15517](https://github.com/DataDog/integrations-core/pull/15517))
 
 ## 32.7.0 / 2023-08-10

@@ -1289,9 +1289,18 @@ def test_cisco_nexus(aggregator):
         tags=common_tags + ['interface:GigabitEthernet1/0/1'],
     )
 
-    aggregator.assert_metric(
-        'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:0xffffffffffff'] + common_tags
-    )
+    tag_rows = [
+        ['mac_addr:0xffffffffffff', 'entity_name:name1'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name2'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name3'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name4'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name5'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name6'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name7'],
+        ['mac_addr:0xffffffffffff', 'entity_name:name8'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=tag_row + common_tags)
 
     frus = [2, 7, 8, 21, 26, 27, 30, 31]
     for fru in frus:
@@ -2652,6 +2661,7 @@ def test_fortinet_fortigate(aggregator):
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:fortinet-fortigate',
         'device_vendor:fortinet',
+        'snmp_host:fortinet-fortigate.device.name',
     ]
 
     common_gauge_metrics = [
@@ -2699,6 +2709,8 @@ def test_fortinet_fortigate(aggregator):
     vd_tags = common_tags + ['virtualdomain_index:4', 'virtualdomain_name:their oxen quaintly']
 
     common.assert_common_metrics(aggregator, common_tags)
+
+    aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
 
     for metric in common_gauge_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
