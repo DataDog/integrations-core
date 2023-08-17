@@ -96,7 +96,6 @@ requests-unixsocket,PyPI,Apache-2.0,Copyright 2014 Marc Abramowitz
 rethinkdb,PyPI,Apache-2.0,Copyright 2018 RethinkDB.
 scandir,PyPI,BSD-3-Clause,"Copyright (c) 2012, Ben Hoyt"
 securesystemslib,PyPI,MIT,Copyright (c) 2016 Santiago Torres
-selectors34,PyPI,PSF,Copyright (c) 2015 Berker Peksag
 semver,PyPI,BSD-3-Clause,"Copyright (c) 2013, Konstantine Rybnikov"
 serpent,PyPI,MIT,Copyright (c) by Irmen de Jong
 service-identity,PyPI,MIT,Copyright (c) 2014 Hynek Schlawack

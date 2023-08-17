@@ -5,6 +5,7 @@
 ***Changed***:
 
 * Collect both DBM active sessions and blocking sessions which are sleeping. See ([#14054](https://github.com/DataDog/integrations-core/pull/14054))
+* Remove python 2 references from SQL Server integration ([#15606](https://github.com/DataDog/integrations-core/pull/15606))
 
 ***Added***:
 
