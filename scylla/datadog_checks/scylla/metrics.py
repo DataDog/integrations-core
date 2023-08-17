@@ -39,7 +39,7 @@ SCYLLA_CACHE = {
     'scylla_cache_row_tombstone_reads': 'cache.row_tombstone_reads',
     'scylla_cache_rows': 'cache.rows',
     'scylla_cache_rows_compacted_with_tombstones': 'cache.rows_compacted_with_tombstones',
-    'scylla_cache_rows_dropped_by_tombstones': 'cache.dropped_by_tombstones',
+    'scylla_cache_rows_dropped_by_tombstones': 'cache.rows_dropped_by_tombstones',
     'scylla_cache_rows_dropped_from_memtable': 'cache.rows_dropped_from_memtable',
     'scylla_cache_rows_merged_from_memtable': 'cache.rows_merged_from_memtable',
     'scylla_cache_rows_processed_from_memtable': 'cache.rows_processed_from_memtable',
@@ -88,7 +88,7 @@ SCYLLA_COMMITLOG = {
     'scylla_commitlog_bytes_written': 'commitlog.bytes_written',
     'scylla_commitlog_cycle': 'commitlog.cycle',
     'scylla_commitlog_disk_active_bytes': 'commitlog.disk_active_bytes',
-    'scylla_commitlog_disk_slack_end_bytes': 'commitlog.disk.slack_end_bytes',
+    'scylla_commitlog_disk_slack_end_bytes': 'commitlog.disk_slack_end_bytes',
     'scylla_commitlog_disk_total_bytes': 'commitlog.disk_total_bytes',
     'scylla_commitlog_flush': 'commitlog.flush',
     'scylla_commitlog_flush_limit_exceeded': 'commitlog.flush_limit_exceeded',
@@ -478,7 +478,7 @@ SCYLLA_SSTABLES = {
 }
 
 SCYLLA_STALL = {
-    'scylla_stall_detector_reported': 'stall_detector.reported',
+    'scylla_stall_detector_reported': 'stall.detector_reported',
 }
 
 SCYLLA_STORAGE = {
@@ -594,7 +594,7 @@ SCYLLA_TRANSPORT = {
     'scylla_transport_register_requests': 'transport.register_requests',
     'scylla_transport_requests_blocked_memory': 'transport.requests_blocked_memory',
     'scylla_transport_requests_blocked_memory_current': 'transport.requests_blocked_memory_current',
-    'scylla_transport_requests_memory_available': 'transport.requests_memory_avaiable',
+    'scylla_transport_requests_memory_available': 'transport.requests_memory_available',
     'scylla_transport_requests_served': 'transport.requests_served',
     'scylla_transport_requests_serving': 'transport.requests_serving',
     'scylla_transport_requests_shed': 'transport.requests_shed',
