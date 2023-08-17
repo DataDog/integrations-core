@@ -48,6 +48,10 @@ def instance_data_directory():
     return '/usr/local/pgsql/data'
 
 
+def instance_database_instance_collection_interval():
+    return False
+
+
 def instance_dbm():
     return False
 
@@ -109,23 +113,23 @@ def instance_query_timeout():
 
 
 def instance_ssl():
-    return False
+    return 'false'
 
 
 def instance_ssl_cert():
-    return False
+    return 'false'
 
 
 def instance_ssl_key():
-    return False
+    return 'false'
 
 
 def instance_ssl_password():
-    return False
+    return 'false'
 
 
 def instance_ssl_root_cert():
-    return False
+    return 'false'
 
 
 def instance_table_count_limit():

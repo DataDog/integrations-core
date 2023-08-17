@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+import re
 from functools import cached_property
 from typing import TYPE_CHECKING, Iterator
 
@@ -66,6 +67,9 @@ class Integration:
                 if f.endswith('.py'):
                     yield Path(root, f)
 
+    def requires_changelog_entry(self, path: Path) -> bool:
+        return self.package_directory in path.parents or (self.is_package and path == (self.path / 'pyproject.toml'))
+
     @property
     def release_tag_pattern(self) -> str:
         version_part = r'\d+\.\d+\.\d+'
@@ -88,12 +92,34 @@ class Integration:
             return self.manifest.get('/assets/integration/source_type_name', self.name)
 
     @cached_property
+    def normalized_display_name(self) -> str:
+        display_name = self.manifest.get('/assets/integration/source_type_name', self.name)
+        normalized_integration = re.sub("[^0-9A-Za-z-]", "_", display_name)
+        normalized_integration = re.sub("_+", "_", normalized_integration)
+        normalized_integration = normalized_integration.strip("_")
+        return normalized_integration.lower()
+
+    @cached_property
+    def metrics_file(self) -> Path:
+        relative_path = self.manifest.get('/assets/integration/metrics/metadata_path', 'metadata.csv')
+        return self.path / relative_path
+
+    @cached_property
+    def config_spec(self) -> Path:
+        relative_path = self.manifest.get('/assets/integration/configuration/spec', 'assets/configuration/spec.yaml')
+        return self.path / relative_path
+
+    @cached_property
     def is_valid(self) -> bool:
         return self.is_integration or self.is_package
 
     @cached_property
     def is_integration(self) -> bool:
         return (self.path / 'manifest.json').is_file()
+
+    @cached_property
+    def has_metrics(self) -> bool:
+        return (self.path / 'metadata.csv').is_file()
 
     @cached_property
     def is_package(self) -> bool:

@@ -160,7 +160,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
             root = new_root
 
         python_path = os.environ[E2E_PARENT_PYTHON]
-        env = os.environ.get('TOX_ENV_NAME') or os.environ['HATCH_ENV_ACTIVE']
+        env = os.environ['HATCH_ENV_ACTIVE']
 
         # TODO: switch to `ddev` when the old CLI is gone
         check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env, '--json']
@@ -353,8 +353,9 @@ def pytest_addoption(parser):
     parser.addoption("--run-latest-metrics", action="store_true", default=False, help="run check_metrics tests")
 
     if PY2:
-        # Add a dummy memray options to make it possible to run memray with `ddev test --memray <integration>`
-        # only on py3 environments
+        # Add dummy memray options to make it possible to run memray with `ddev test --memray <integration>`
+        # in both py2 and 3 environments. In py2 the option is simply ignored, see pytest_collection_modifyitems.
+        # In py3 the option enables the memray plugin.
         parser.addoption("--memray", action="store_true", default=False, help="Dummy parameter for memray")
         parser.addoption(
             "--hide-memray-summary",

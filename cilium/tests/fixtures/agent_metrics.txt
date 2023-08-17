@@ -1183,3 +1183,19 @@ cilium_k8s_event_lag_seconds{source="k8s"} 0
 # HELP cilium_k8s_terminating_endpoints_events_total Number of terminating endpoint events received from Kubernetes
 # TYPE cilium_k8s_terminating_endpoints_events_total counter
 cilium_k8s_terminating_endpoints_events_total 13246
+# HELP cilium_kvstore_quorum_errors_total Number of quorum errors
+# TYPE cilium_kvstore_quorum_errors_total counter
+cilium_kvstore_quorum_errors_total{error="no event received"} 18
+# HELP cilium_kvstore_sync_queue_size Number of elements queued for synchronization in the kvstore
+# TYPE cilium_kvstore_sync_queue_size gauge
+cilium_kvstore_sync_queue_size{scope="nodes/v1",source_cluster="foo"} 3
+cilium_kvstore_sync_queue_size{scope="identities/v1",source_cluster="foo"} 21
+cilium_kvstore_sync_queue_size{scope="ip/v1",source_cluster="foo"} 0
+# HELP cilium_kvstore_initial_sync_completed Whether the initial synchronization from/to the kvstore has completed
+# TYPE cilium_kvstore_initial_sync_completed gauge
+cilium_kvstore_initial_sync_completed{scope="nodes/v1",source_cluster="foo", action="write"} 1
+cilium_kvstore_initial_sync_completed{scope="nodes/v1",source_cluster="foo", action="read"} 1
+cilium_kvstore_initial_sync_completed{scope="identities/v1",source_cluster="foo", action="write"} 1
+cilium_kvstore_initial_sync_completed{scope="identities/v1",source_cluster="foo", action="read"} 1
+cilium_kvstore_initial_sync_completed{scope="ip/v1",source_cluster="foo", action="write"} 1
+cilium_kvstore_initial_sync_completed{scope="ip/v1",source_cluster="foo", action="read"} 1

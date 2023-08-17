@@ -525,7 +525,12 @@ def test_e2e_core_cisco_csr(dd_agent_check):
 
     common.assert_common_metrics(aggregator, global_tags, is_e2e=True, loader='core')
 
-    metric_tags = global_tags + ['neighbor:244.12.239.177', 'admin_status:start', 'peer_state:established']
+    metric_tags = global_tags + [
+        'neighbor:244.12.239.177',
+        'admin_status:start',
+        'peer_state:established',
+        'remote_as:26',
+    ]
 
     for metric in metrics.PEER_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=metric_tags, count=2)
@@ -630,6 +635,13 @@ def test_e2e_cisco_nexus(dd_agent_check):
     power_supply_tags = ['power_source:1', 'power_status_descr:Jaded driving their their their'] + common_tags
     aggregator.assert_metric('snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=power_supply_tags)
 
+    power_supply_tags = [
+        'cisco_env_mon_supply_state:normal',
+        'power_source:1',
+        'power_status_descr:Jaded driving their their their',
+    ] + common_tags
+    aggregator.assert_metric('snmp.ciscoEnvMonSupplyStatus', metric_type=aggregator.GAUGE, tags=power_supply_tags)
+
     fan_indices = [4, 6, 7, 16, 21, 22, 25, 27]
     for index in fan_indices:
         tags = ['fan_status_index:{}'.format(index)] + common_tags
@@ -651,6 +663,27 @@ def test_e2e_cisco_nexus(dd_agent_check):
         aggregator.assert_metric(
             'snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=['fru:{}'.format(fru)] + common_tags
         )
+
+    tag_rows = [
+        ['fru:1', 'cefc_fan_tray_oper_status:down'],
+        ['fru:2', 'cefc_fan_tray_oper_status:unknown'],
+        ['fru:4', 'cefc_fan_tray_oper_status:unknown'],
+        ['fru:27', 'cefc_fan_tray_oper_status:unknown'],
+        ['fru:30', 'cefc_fan_tray_oper_status:warning'],
+        ['fru:31', 'cefc_fan_tray_oper_status:unknown'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.cefcFanTrayStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+
+    tag_rows = [
+        ['fan_status_descr:fan_1', 'fan_state:critical', 'fan_status_index:4'],
+        ['fan_status_descr:fan_2', 'fan_state:notFunctioning', 'fan_status_index:6'],
+        ['fan_status_descr:fan_3', 'fan_state:critical', 'fan_status_index:7'],
+        ['fan_status_descr:fan_4', 'fan_state:notPresent', 'fan_status_index:16'],
+        ['fan_status_descr:fan_8', 'fan_state:normal', 'fan_status_index:30'],
+    ]
+    for tag_row in tag_rows:
+        aggregator.assert_metric('snmp.ciscoEnvMonFanStatus', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     cpu_ids = [6692, 3173, 54474, 63960, 11571, 38253, 30674, 52063]
     for cpu in cpu_ids:

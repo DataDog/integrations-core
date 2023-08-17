@@ -193,7 +193,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     def rest_client_requests_total(self, metric, scraper_config):
         self.submit_metric('.rest_client_requests_total', metric, scraper_config)
 
-    def http_requests_total(self, metric, scraper_config):
+    def http_requests_total(self, metric, scraper_config):  # SKIP_HTTP_VALIDATION
         self.submit_metric('.http_requests_total', metric, scraper_config)
 
     def apiserver_request_count(self, metric, scraper_config):

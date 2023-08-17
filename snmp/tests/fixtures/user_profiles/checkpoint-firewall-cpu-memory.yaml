@@ -1,0 +1,5 @@
+extends:
+  - _base.yaml
+  - _checkpoint-firewall-cpu-memory.yaml
+
+sysobjectid: 1.2.3.1006
