@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-from datadog_checks.dev.tooling.constants import get_root, set_root
 
 
 def test_integrations_changelog_without_arguments(fake_changelogs, ddev):
@@ -36,8 +35,6 @@ def test_integrations_changelog_write(repo_with_fake_changelogs, ddev):
 def repo_with_fake_changelogs(repo_with_history, config_file):
     repo_root = repo_with_history.path
 
-    old_root = get_root()
-    set_root(str(repo_root))
     config_file.model.repos['core'] = str(repo_with_history.path)
     config_file.save()
 
@@ -107,9 +104,7 @@ def repo_with_fake_changelogs(repo_with_history, config_file):
 * Remove unused `metric_prefix` in init_config ([#11464](https://github.com/DataDog/integrations-core/pull/11464))
 """,
     }
-    yield repo_with_history, expected_changelogs
-
-    set_root(old_root)
+    return repo_with_history, expected_changelogs
 
 
 @pytest.fixture
