@@ -613,7 +613,6 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     )
 
 
-# @pytest.mark.skip(reason='debugging flaky test (2023--03)')
 @pytest.mark.parametrize(
     'dbm_enabled, reported_hostname',
     [
