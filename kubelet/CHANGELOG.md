@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Fix Kubernetes probe metrics breaking in k8s 1.25+ ([#15254](https://github.com/DataDog/integrations-core/pull/15254))
+
 ## 7.9.0 / 2023-08-10
 
 ***Added***:
