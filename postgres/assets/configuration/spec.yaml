@@ -84,11 +84,9 @@ files:
                          trusted CA and that the requested server host name matches the one in the certificate.
 
         For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
-
-        Note: `true` is an alias for `require`, and `false` is an alias for `disable`.
       value:
         type: string
-        example: "false"
+        example: "disable"
     - name: ssl_root_cert
       description: |
         The path to the ssl root certificate.

@@ -8,8 +8,4 @@ def initialize_instance(values, **kwargs):
         if 'data_directory' not in values:
             raise ValueError('Field `data_directory` is required when `collect_wal_metrics` is enabled')
 
-        # `ssl`'s default is `false`, which gets interpreted as a Boolean, but we are expecting a string
-        if 'ssl' in values and isinstance(values['ssl'], bool):
-            values['ssl'] = 'true' if values['ssl'] else 'false'
-
     return values
