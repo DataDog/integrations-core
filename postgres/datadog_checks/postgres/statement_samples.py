@@ -344,6 +344,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                 'backend_type', 'client backend'
             ) == 'client backend':
                 continue
+            if row['client_addr']:
+                row['client_addr'] = str(row['client_addr'])
             query = row['query']
             if query == '<insufficient privilege>':
                 insufficient_privilege_count += 1
@@ -741,7 +743,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "cloud_metadata": self._config.cloud_metadata,
                 "network": {
                     "client": {
-                        "ip": row.get('client_addr', None),
+                        "ip": str(row.get('client_addr', None)),
                         "port": row.get('client_port', None),
                         "hostname": row.get('client_hostname', None),
                     }

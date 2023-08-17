@@ -11,10 +11,12 @@
 
 ***Added***:
 
+* Print the metric list when parsing a Prometheus endpoint ([#15586](https://github.com/DataDog/integrations-core/pull/15586))
 * Update dependencies for Agent 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
 
 ***Fixed***:
 
+* Ignore `pydantic` when bumping the dependencies ([#15597](https://github.com/DataDog/integrations-core/pull/15597))
 * Stop using the TOX_ENV_NAME variable ([#15528](https://github.com/DataDog/integrations-core/pull/15528))
 
 ## 23.0.0 / 2023-08-10
