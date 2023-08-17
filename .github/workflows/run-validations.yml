@@ -7,6 +7,9 @@ on:
         required: true
         type: string
 
+      ddev-version:
+        required: false
+        type: string
       agent-reqs:
         required: false
         default: false
@@ -83,10 +86,6 @@ on:
         required: false
         default: false
         type: boolean
-      recommended-monitors:
-        required: false
-        default: false
-        type: boolean
       saved-views:
         required: false
         default: false
@@ -131,7 +130,7 @@ jobs:
 
     - name: Install ddev from PyPI
       if: inputs.repo != 'core'
-      run: pip install ddev
+      run: pip install ddev${{ inputs.ddev-version }}
 
     - name: Configure ddev
       run: |
@@ -199,7 +198,7 @@ jobs:
     - name: Validate configuration models
       if: inputs.models
       run: ddev validate models $TARGET
-    
+
     - name: Validate openmetrics metric limit
       if: inputs.openmetrics
       run: ddev validate openmetrics $TARGET
@@ -211,10 +210,6 @@ jobs:
     - name: Validate README files
       if: inputs.readmes
       run: ddev validate readmes $TARGET
-
-    - name: Validate recommended monitors
-      if: inputs.recommended-monitors
-      run: ddev validate recommended-monitors $TARGET
 
     - name: Validate saved views
       if: inputs.saved-views

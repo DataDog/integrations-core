@@ -4,8 +4,6 @@ metrics:
       OID: 1.3.6.1.2.1.14.10
       name: ospfNbrTable
     symbols:
-      - name: ospfNbr
-        constant_value_one: true
       - OID: 1.3.6.1.2.1.14.10.1.6
         name: ospfNbrState
       - OID: 1.3.6.1.2.1.14.10.1.7
@@ -36,11 +34,38 @@ metrics:
         tag: neighbor_state
   - MIB: OSPF-MIB
     table:
+      OID: 1.3.6.1.2.1.14.10
+      name: ospfNbrTable
+    symbols:
+      - name: ospfNbr
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.2.1.14.10.1.3
+          name: ospfNbrRtrId
+        tag: neighbor_id
+      - column:
+          OID: 1.3.6.1.2.1.14.10.1.1
+          name: ospfNbrIpAddr
+        tag: neighbor_ip
+      - column:
+          OID: 1.3.6.1.2.1.14.10.1.6
+          name: ospfNbrState
+        mapping:
+          1: down
+          2: attempt
+          3: init
+          4: twoWay
+          5: exchangeStart
+          6: exchange
+          7: loading
+          8: full
+        tag: neighbor_state
+  - MIB: OSPF-MIB
+    table:
       OID: 1.3.6.1.2.1.14.11
       name: ospfVirtNbrTable
     symbols:
-      - name: ospfVirtNbr
-        constant_value_one: true
       - OID: 1.3.6.1.2.1.14.11.1.5
         name: ospfVirtNbrState
       - OID: 1.3.6.1.2.1.14.11.1.6
@@ -71,11 +96,38 @@ metrics:
         tag: neighbor_state
   - MIB: OSPF-MIB
     table:
+      OID: 1.3.6.1.2.1.14.11
+      name: ospfVirtNbrTable
+    symbols:
+      - name: ospfVirtNbr
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.2.1.14.11.1.3
+          name: ospfVirtNbrIpAddr
+        tag: neighbor_ip
+      - column:
+          OID: 1.3.6.1.2.1.14.11.1.2
+          name: ospfVirtNbrRtrId
+        tag: neighbor_id
+      - column:
+          OID: 1.3.6.1.2.1.14.11.1.5
+          name: ospfVirtNbrState
+        mapping:
+          1: down
+          2: attempt
+          3: init
+          4: twoWay
+          5: exchangeStart
+          6: exchange
+          7: loading
+          8: full
+        tag: neighbor_state
+  - MIB: OSPF-MIB
+    table:
       OID: 1.3.6.1.2.1.14.7
       name: ospfIfTable
     symbols:
-      - name: ospfIf
-        constant_value_one: true
       - OID: 1.3.6.1.2.1.14.7.1.8
         name: ospfIfRetransInterval
       - OID: 1.3.6.1.2.1.14.7.1.12
@@ -107,17 +159,66 @@ metrics:
         tag: if_state
   - MIB: OSPF-MIB
     table:
+      OID: 1.3.6.1.2.1.14.7
+      name: ospfIfTable
+    symbols:
+      - name: ospfIf
+        constant_value_one: true
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.2.1.14.7.1.1
+          name: ospfIfIpAddress
+        tag: ospf_ip_addr
+      - column:
+          OID: 1.3.6.1.2.1.14.10.1.3
+          name: ospfNbrRtrId
+        table: ospfNbrTable
+        MIB: OSPF-MIB
+        tag: neighbor_id
+      - column:
+          OID: 1.3.6.1.2.1.14.7.1.12
+          name: ospfIfState
+        mapping:
+          1: down
+          2: loopback
+          3: waiting
+          4: pointToPoint
+          5: designatedRouter
+          6: backupDesignatedRouter
+          7: otherDesignatedRouter
+        tag: if_state
+  - MIB: OSPF-MIB
+    table:
       OID: 1.3.6.1.2.1.14.9
       name: ospfVirtIfTable
     symbols:
-      - name: ospfVirtIf
-        constant_value_one: true
       - OID: 1.3.6.1.2.1.14.9.1.4
         name: ospfVirtIfRetransInterval
       - OID: 1.3.6.1.2.1.14.9.1.7
         name: ospfVirtIfState
       - OID: 1.3.6.1.2.1.14.9.1.12
         name: ospfVirtIfLsaCount
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.2.1.14.11.1.2
+          name: ospfVirtNbrRtrId
+        table: ospfVirtNbrTable
+        MIB: OSPF-MIB
+        tag: neighbor_id
+      - column:
+          OID: 1.3.6.1.2.1.14.9.1.7
+          name: ospfVirtIfState
+        mapping:
+          1: down
+          4: pointToPoint
+        tag: if_state
+  - MIB: OSPF-MIB
+    table:
+      OID: 1.3.6.1.2.1.14.9
+      name: ospfVirtIfTable
+    symbols:
+      - name: ospfVirtIf
+        constant_value_one: true
     metric_tags:
       - column:
           OID: 1.3.6.1.2.1.14.11.1.2

@@ -11,7 +11,7 @@ you intend to work on.
 
 ## Python
 
-To work on any integration you must install Python 3.8.
+To work on any integration you must install Python 3.9.
 
 After installation, restart your terminal and ensure that your newly installed Python comes first in your `PATH`.
 
@@ -25,7 +25,7 @@ After installation, restart your terminal and ensure that your newly installed P
     then install Python:
 
     ```
-    brew install python@3.8
+    brew install python@3.9
     ```
 
     After it completes, check the output to see if it asked you to run any extra commands and if so, execute them.
@@ -39,7 +39,7 @@ After installation, restart your terminal and ensure that your newly installed P
 === "Windows"
     Windows users have it the easiest.
 
-    Simply download the [Python 3.8 64-bit executable installer](https://www.python.org/downloads/release/python-3810/) and run it.
+    Download the [Python 3.9 64-bit executable installer](https://www.python.org/downloads/release/python-3917/) and run it.
     When prompted, be sure to select the option to add to your `PATH`. Also, it is recommended that you choose the per-user installation method.
 
     Verify successful `PATH` modification:
@@ -51,7 +51,7 @@ After installation, restart your terminal and ensure that your newly installed P
 === "Linux"
     Ah, you enjoy difficult things. Are you using Gentoo?
 
-    We recommend using either [Miniconda][miniconda-docs] or [pyenv][pyenv-github] to install Python 3.8. Whatever you do, never modify the system Python.
+    We recommend using either [Miniconda][miniconda-docs] or [pyenv][pyenv-github] to install Python 3.9. Whatever you do, never modify the system Python.
 
     Verify successful `PATH` modification:
 
@@ -108,10 +108,20 @@ To install certain command line tools, you'll need [pipx](https://github.com/pyp
 
 ### Installation
 
-You have 2 options to install the CLI.
+You have 3 options to install the CLI.
 
 !!! warning
     For either option, if you are on macOS/Linux do not use `sudo`! Doing so will result in a broken installation.
+
+#### GitHub releases
+
+Each [release](https://github.com/DataDog/integrations-core/releases?q=ddev-&expanded=true) provides the following:
+
+- Standalone binaries for Linux, Windows, and macOS
+- Windows AMD64 (64-bit) MSI installer
+- Windows x86 (32-bit) MSI installer
+- Windows universal (AMD64+x86) EXE installer
+- macOS DMG installer
 
 #### Stable
 
@@ -122,11 +132,11 @@ The latest released version may be installed from [PyPI][].
 
     === "ARM"
         ```
-        pipx install ddev --python /opt/homebrew/bin/python3.8
+        pipx install ddev --python /opt/homebrew/bin/python3.9
         ```
     === "Intel"
         ```
-        pipx install ddev --python /usr/local/bin/python3.8
+        pipx install ddev --python /usr/local/bin/python3.9
         ```
 
 === "Windows"
@@ -152,11 +162,11 @@ This is if you cloned [integrations-core][] and want to always use the version b
 
     === "ARM"
         ```
-        pipx install -e /path/to/integrations-core/ddev --python /opt/homebrew/opt/python@3.8/bin/python3.8
+        pipx install -e /path/to/integrations-core/ddev --python /opt/homebrew/opt/python@3.9/bin/python3.9
         ```
     === "Intel"
         ```
-        pipx install -e /path/to/integrations-core/ddev --python /usr/local/opt/python@3.8/bin/python3.8
+        pipx install -e /path/to/integrations-core/ddev --python /usr/local/opt/python@3.9/bin/python3.9
         ```
 
 === "Windows"

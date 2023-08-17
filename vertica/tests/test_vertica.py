@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-import mock
 import pytest
 
 from datadog_checks.vertica import VerticaCheck
@@ -14,7 +13,9 @@ from .metrics import ALL_METRICS
 
 
 @pytest.mark.e2e
-def test_check_e2e(dd_agent_check, instance):
+@pytest.mark.parametrize('connection_load_balance', [False, True])
+def test_check_e2e(dd_agent_check, instance, connection_load_balance):
+    instance["connection_load_balance"] = connection_load_balance
     aggregator = dd_agent_check(instance, rate=True)
 
     for metric in ALL_METRICS:
@@ -63,24 +64,24 @@ def test_check_connection_load_balance(monkeypatch):
     client = VerticaClient(options)
 
     client.connect()
-    monkeypatch.setattr(client.connection, 'reset_connection', mock.Mock())
+    old_connection = client.connection
     client.connect()
 
-    assert client.connection.reset_connection.was_called_once()
+    assert client.connection != old_connection
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_connect_resets_connection_when_connection_closed(monkeypatch):
+def test_connect_resets_connection_when_connection_closed():
     options = common.connection_options_from_config(common.CONFIG)
     client = VerticaClient(options)
 
     client.connect()
     client.connection.close()
 
-    monkeypatch.setattr(client.connection, 'reset_connection', mock.Mock())
+    old_connection = client.connection
     client.connect()
 
-    assert client.connection.reset_connection.was_called_once()
+    assert client.connection != old_connection
 
 
 @pytest.mark.usefixtures('dd_environment')

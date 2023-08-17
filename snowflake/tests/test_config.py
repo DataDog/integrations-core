@@ -70,7 +70,7 @@ def test_authenticator_option_pass(options):
         'database': 'SNOWFLAKE',
         'schema': 'ACCOUNT_USAGE',
         'role': 'ACCOUNTADMIN',
-        'user': 'testuser',
+        'username': 'testuser',
     }
     instance.update(options)
 

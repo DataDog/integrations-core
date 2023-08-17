@@ -110,7 +110,7 @@ files:
           /\ WARNING /\
           Due to a limitation in the Windows events API, the maximum filtering on event IDs is 20 IDs per instance.
           Because of this, you may need to split the ID filtering into multiple instances.
-          
+
         For advanced and more granular filtering, define a `query`.
 
         If `filters` nor `query` is specified, then all events from the subscribed `path` will be collected.
@@ -279,13 +279,12 @@ files:
         This is useful for preventing duplicate events being sent as a consequence of Agent restarts.
       value:
         type: integer
-        display_default: <PAYLOAD_SIZE>
     - name: legacy_mode
       description: |
         Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
 
-           /\ WARNING /\
-        This mode, by nature of the underlying technology, is significantly more resource intensive.
+          /\ WARNING /\
+          This mode, by nature of the underlying technology, is significantly more resource intensive.
 
         Setting this option to `false` is only supported on Agent versions 7 and above.
       enabled: true

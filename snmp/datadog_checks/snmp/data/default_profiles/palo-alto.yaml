@@ -13,7 +13,7 @@
 #  - Palo Alto Networks PA-3000 series firewall
 
 extends:
-  - _base.yaml
+  - _palo-alto.yaml
   - _generic-if.yaml
   - _generic-host-resources.yaml
   - _generic-ospf.yaml
@@ -33,8 +33,6 @@ sysobjectid: 1.3.6.1.4.1.25461.2.3.*
 metadata:
   device:
     fields:
-      vendor:
-        value: "paloaltonetworks"
       serial_number:
         symbol:
           OID: 1.3.6.1.4.1.25461.2.1.2.1.3.0

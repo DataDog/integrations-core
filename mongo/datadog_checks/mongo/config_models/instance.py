@@ -9,9 +9,10 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence, Union
+from types import MappingProxyType
+from typing import Any, Optional, Union
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -20,86 +21,89 @@ from . import defaults, deprecations, validators
 
 
 class Field(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    field_name: Optional[str]
-    name: Optional[str]
-    type: Optional[str]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    field_name: Optional[str] = None
+    name: Optional[str] = None
+    type: Optional[str] = None
 
 
 class CustomQuery(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    database: Optional[str]
-    fields: Optional[Sequence[Field]]
-    metric_prefix: Optional[str]
-    query: Optional[Mapping[str, Any]]
-    tags: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    database: Optional[str] = None
+    fields: Optional[tuple[Field, ...]] = None
+    metric_prefix: Optional[str] = None
+    query: Optional[MappingProxyType[str, Any]] = None
+    tags: Optional[tuple[str, ...]] = None
 
 
 class MetricPatterns(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class InstanceConfig(BaseModel):
-    class Config:
-        allow_mutation = False
+    model_config = ConfigDict(
+        validate_default=True,
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    additional_metrics: Optional[tuple[str, ...]] = None
+    collections: Optional[tuple[str, ...]] = None
+    collections_indexes_stats: Optional[bool] = None
+    connection_scheme: Optional[str] = None
+    custom_queries: Optional[tuple[CustomQuery, ...]] = None
+    database: Optional[str] = None
+    dbnames: Optional[tuple[str, ...]] = None
+    disable_generic_tags: Optional[bool] = None
+    empty_default_hostname: Optional[bool] = None
+    hosts: Optional[Union[str, tuple[str, ...]]] = None
+    metric_patterns: Optional[MetricPatterns] = None
+    min_collection_interval: Optional[float] = None
+    options: Optional[MappingProxyType[str, Any]] = None
+    password: Optional[str] = None
+    replica_check: Optional[bool] = None
+    server: Optional[str] = None
+    service: Optional[str] = None
+    tags: Optional[tuple[str, ...]] = None
+    timeout: Optional[int] = None
+    tls: Optional[bool] = None
+    tls_allow_invalid_certificates: Optional[bool] = None
+    tls_allow_invalid_hostnames: Optional[bool] = None
+    tls_ca_file: Optional[str] = None
+    tls_certificate_key_file: Optional[str] = None
+    username: Optional[str] = None
 
-    additional_metrics: Optional[Sequence[str]]
-    collections: Optional[Sequence[str]]
-    collections_indexes_stats: Optional[bool]
-    connection_scheme: Optional[str]
-    custom_queries: Optional[Sequence[CustomQuery]]
-    database: Optional[str]
-    dbnames: Optional[Sequence[str]]
-    disable_generic_tags: Optional[bool]
-    empty_default_hostname: Optional[bool]
-    hosts: Optional[Union[str, Sequence[str]]]
-    metric_patterns: Optional[MetricPatterns]
-    min_collection_interval: Optional[float]
-    options: Optional[Mapping[str, Any]]
-    password: Optional[str]
-    replica_check: Optional[bool]
-    server: Optional[str]
-    service: Optional[str]
-    tags: Optional[Sequence[str]]
-    timeout: Optional[int]
-    tls: Optional[bool]
-    tls_allow_invalid_certificates: Optional[bool]
-    tls_allow_invalid_hostnames: Optional[bool]
-    tls_ca_file: Optional[str]
-    tls_certificate_key_file: Optional[str]
-    username: Optional[str]
-
-    @root_validator(pre=True)
-    def _handle_deprecations(cls, values):
-        validation.utils.handle_deprecations('instances', deprecations.instance(), values)
+    @model_validator(mode='before')
+    def _handle_deprecations(cls, values, info):
+        fields = info.context['configured_fields']
+        validation.utils.handle_deprecations('instances', deprecations.instance(), fields, info.context)
         return values
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
     def _initial_validation(cls, values):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-    @validator('*', pre=True, always=True)
-    def _ensure_defaults(cls, v, field):
-        if v is not None or field.required:
-            return v
+    @field_validator('*', mode='before')
+    def _validate(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name in info.context['configured_fields']:
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{field.name}')(field, v)
+        return validation.utils.make_immutable(value)
 
-    @validator('*')
-    def _run_validations(cls, v, field):
-        if not v:
-            return v
-
-        return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
-
-    @root_validator(pre=False)
-    def _final_validation(cls, values):
-        return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+    @model_validator(mode='after')
+    def _final_validation(cls, model):
+        return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))
