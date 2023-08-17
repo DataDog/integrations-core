@@ -10,7 +10,7 @@ from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
 from .utils import (
     assert_common_metrics,
-    assert_extend_entity_sensor,
+    assert_extend_generic_entity_sensor,
     create_e2e_core_test_config,
     get_device_ip_from_config,
 )
@@ -32,7 +32,7 @@ def test_e2e_profile__generic_entity_sensor(dd_agent_check):
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
-    assert_extend_entity_sensor(aggregator, common_tags)
+    assert_extend_generic_entity_sensor(aggregator, common_tags)
 
     aggregator.assert_all_metrics_covered()
 

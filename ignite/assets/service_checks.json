@@ -9,9 +9,10 @@
         "check": "ignite.can_connect",
         "statuses": [
             "ok",
-            "critical"
+            "critical",
+            "warning"
         ],
         "name": "Can Connect",
-        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Ignite instance. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Ignite instance, `WARNING` if no metrics are collected, and `OK` otherwise."
     }
 ]

@@ -221,15 +221,10 @@ class OpenMetricsScraper:
 
         self._content_type = ''
         self._use_latest_spec = is_affirmative(config.get('use_latest_spec', False))
-        # Accept headers are taken from:
-        # https://github.com/prometheus/prometheus/blob/v2.43.0/scrape/scrape.go#L787
         if self._use_latest_spec:
             accept_header = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
         else:
-            accept_header = (
-                'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1;q=0.75,'
-                'text/plain;version=0.0.4;q=0.5,*/*;q=0.1'
-            )
+            accept_header = 'text/plain'
 
         # Request the appropriate exposition format
         if self.http.options['headers'].get('Accept') == '*/*':

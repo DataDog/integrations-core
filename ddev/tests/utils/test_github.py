@@ -29,7 +29,7 @@ class TestGetPullRequest:
         )
 
         pr = github.get_pull_request('382cbb0af210897599cbe5fd8d69a38d4017e425')
-        assert pr.number == '14849'
+        assert pr.number == 14849
         assert pr.title == 'Update formatting for changelogs'
         assert pr.body == helpers.dedent(
             """

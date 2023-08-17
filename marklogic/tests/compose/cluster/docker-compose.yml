@@ -2,7 +2,7 @@ version: '3.6'
 
 services:
   bootstrap:
-    image: marklogicdb/marklogic-db:${MARKLOGIC_IMAGE}
+    image: ${MARKLOGIC_IMAGE}:${MARKLOGIC_TAG}
     environment:
     - MARKLOGIC_INIT=true
     ports:
@@ -10,7 +10,7 @@ services:
     - 8001:8001
     - 8002:8002
   dnode:
-    image: marklogicdb/marklogic-db:${MARKLOGIC_IMAGE}
+    image: ${MARKLOGIC_IMAGE}:${MARKLOGIC_TAG}
     environment:
     - MARKLOGIC_INIT=true
     - MARKLOGIC_JOIN_CLUSTER=true
