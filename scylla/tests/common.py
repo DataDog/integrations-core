@@ -1712,6 +1712,7 @@ MAP_VERSION_TO_METRICS = {
     '3.3.1': INSTANCE_3_3_METRIC_GROUP_MAP,
     '5.2.6': INSTANCE_5_2_METRIC_GROUP_MAP,
 }
+# fmt: on
 
 # expand the lists into a single list of metrics
 def get_metrics(metric_groups):
