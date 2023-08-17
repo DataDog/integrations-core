@@ -660,7 +660,7 @@ files:
             https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
           value:
             type: string
-            example: https://ossrdbms-aad.database.windows.net
+            example: https://ossrdbms-aad.database.windows.net/.default
 
     - name: obfuscator_options
       description: |

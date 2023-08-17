@@ -528,14 +528,14 @@ instances:
         #
         # client_id: <CLIENT_ID>
 
-        ## @param identity_scope - string - optional - default: https://ossrdbms-aad.database.windows.net
+        ## @param identity_scope - string - optional - default: https://ossrdbms-aad.database.windows.net/.default
         ## The permission scope from where to access the identity token. This value is optional if using the default
         ## identity scope for Azure managed databases.
         ##
         ## For more information on scopes, see the Azure docs
         ## https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
         #
-        # identity_scope: https://ossrdbms-aad.database.windows.net
+        # identity_scope: https://ossrdbms-aad.database.windows.net/.default
 
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.

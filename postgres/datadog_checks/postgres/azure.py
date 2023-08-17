@@ -5,7 +5,7 @@ import struct
 
 from azure.identity import ManagedIdentityCredential
 
-DEFAULT_PERMISSION_SCOPE = "https://ossrdbms-aad.database.windows.net"
+DEFAULT_PERMISSION_SCOPE = "https://ossrdbms-aad.database.windows.net/.default"
 TOKEN_ENCODING = "UTF-16-LE"
 
 
