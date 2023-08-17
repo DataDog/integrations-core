@@ -9,6 +9,10 @@
 * Update dependencies for Agent 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
 * Add support for authenticating through Azure Managed Identity ([#15609](https://github.com/DataDog/integrations-core/pull/15609))
 
+***Fixed***:
+
+* Fix explaining parameterized queries flood server logs ([#15612](https://github.com/DataDog/integrations-core/pull/15612))
+
 ## 14.1.0 / 2023-08-10
 
 ***Added***:
