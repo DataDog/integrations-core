@@ -95,7 +95,7 @@ spec:
       terminationGracePeriodSeconds: 600
       containers:
       - name: weaviate
-        image: 'docker.io/semitechnologies/weaviate:1.19.1'
+        image: 'docker.io/semitechnologies/weaviate:1.20.0'
         imagePullPolicy: IfNotPresent
         command: 
           - /bin/weaviate

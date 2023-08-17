@@ -3,15 +3,12 @@ check-types = true
 mypy-args = [
   "src/ddev",
 ]
-# TODO remove once https://github.com/pallets/click/issues/2558 is solved
-mypy-deps = [
-  "click~=8.1,!=8.1.4",
-]
 
 [envs.default]
 python = "3.9"
 e2e-env = false
 dependencies = [
+  "pyyaml",
   "vcrpy",
 ]
 # TODO: remove this when the old CLI is gone

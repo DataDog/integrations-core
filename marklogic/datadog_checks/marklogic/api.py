@@ -43,7 +43,7 @@ class MarkLogicApi(object):
 
         return self.http_get(route, params)
 
-    def get_requests_data(self, resource=None, name=None, group=None):
+    def get_requests_data(self, resource=None, name=None, group=None):  # SKIP_HTTP_VALIDATION
         # type: (str, str, str) -> Dict[str, Any]
         """
         https://docs.marklogic.com/REST/GET/manage/v2/requests
