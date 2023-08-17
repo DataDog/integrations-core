@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add schema collection to Postgres integration ([#15484](https://github.com/DataDog/integrations-core/pull/15484))
+* Add support for sending `database_instance` metadata ([#15559](https://github.com/DataDog/integrations-core/pull/15559))
+* Update dependencies for Agent 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
+* Add support for authenticating through Azure Managed Identity ([#15609](https://github.com/DataDog/integrations-core/pull/15609))
+
+## 14.1.0 / 2023-08-10
+
+***Added***:
+
+* Add support to ingest sys.configurations for SQL Server instances ([#15496](https://github.com/DataDog/integrations-core/pull/15496))
+* Bump psycopg3 version && add timeouts on blocking functions ([#15492](https://github.com/DataDog/integrations-core/pull/15492))
+* Update generated config models ([#15212](https://github.com/DataDog/integrations-core/pull/15212))
+* Add `max_connections` config option and enforce it in Postgres integration ([#15194](https://github.com/DataDog/integrations-core/pull/15194))
+* Add database autodiscovery to Postgres integration ([#14811](https://github.com/DataDog/integrations-core/pull/14811))
+
+***Fixed***:
+
+* Fix error handling for psycopg3 err messages ([#15488](https://github.com/DataDog/integrations-core/pull/15488))
+* Upgrade postgres check to psycopg3 ([#15411](https://github.com/DataDog/integrations-core/pull/15411))
+* Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
+
 ## 14.0.1 / 2023-07-13
 
 ***Fixed***:
