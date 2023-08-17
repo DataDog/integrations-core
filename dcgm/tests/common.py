@@ -14,6 +14,7 @@ INSTANCE = {
 HERE = get_here()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
+# Please keep this list in alphabetic order!
 EXPECTED_METRICS = [
     'clock_throttle_reasons',
     'correctable_remapped_rows.count',
@@ -45,4 +46,13 @@ EXPECTED_METRICS = [
     'uncorrectable_remapped_rows.count',
     'vgpu_license_status',
     'xid_errors',
+    'gr_engine_active',
+    'sm_active',
+    'sm_occupancy',
+    'pipe.tensor_active',
+    'dram.active',
+    'pipe.fp64_active',
+    'pipe.fp32_active',
+    'pipe.fp16_active',
 ]
+EXPECTED_METRICS = [f'dcgm.{m}' for m in EXPECTED_METRICS]
