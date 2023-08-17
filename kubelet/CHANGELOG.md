@@ -5,6 +5,7 @@
 ***Fixed***:
 
 * Update datadog-checks-base dependency version to 32.6.0 ([#15604](https://github.com/DataDog/integrations-core/pull/15604))
+* Fix Kubernetes probe metrics breaking in k8s 1.25+ ([#15254](https://github.com/DataDog/integrations-core/pull/15254))
 
 ## 7.9.0 / 2023-08-10
 
