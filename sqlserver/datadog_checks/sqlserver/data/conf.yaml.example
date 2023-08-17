@@ -527,12 +527,6 @@ instances:
     #
     # empty_default_hostname: false
 
-    ## @param disable_generic_tags - boolean - optional - default: false
-    ## Generic tags such as `host` are replaced by `sqlserver_host` to avoid
-    ## getting mixed with other integration tags.
-    #
-    disable_generic_tags: true
-
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
     ##
