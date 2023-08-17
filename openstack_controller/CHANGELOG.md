@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Openstack controller refactor ([#14295](https://github.com/DataDog/integrations-core/pull/14295))
+
 ## 4.0.0 / 2023-08-10
 
 ***Changed***:
