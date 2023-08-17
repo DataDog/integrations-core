@@ -1,15 +1,19 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 import re
 from collections import defaultdict
 from io import StringIO
+from typing import TYPE_CHECKING
 
 import click
 from datadog_checks.dev.tooling.testing import complete_active_checks
 from six import iteritems
 
-from ddev.cli.release.agent.common import get_changes_per_agent
+if TYPE_CHECKING:
+    from ddev.cli.application import Application
 
 INTEGRATION_CHANGELOG_PATTERN = r'^## (\d+\.\d+\.\d+) / \d{4}-\d{2}-\d{2}$'
 
@@ -24,12 +28,14 @@ INTEGRATION_CHANGELOG_PATTERN = r'^## (\d+\.\d+\.\d+) / \d{4}-\d{2}-\d{2}$'
     '--write', '-w', is_flag=True, help="Write to the changelog file, if omitted contents will be printed to stdout"
 )
 @click.pass_obj
-def integrations_changelog(app, checks, since, to, write):
+def integrations_changelog(app: Application, checks: list[str], since: str, to: str, write: bool):
     """
     Update integration CHANGELOG.md by adding the Agent version.
 
     Agent version is only added to the integration versions released with a specific Agent release.
     """
+
+    from ddev.cli.release.agent.common import get_changes_per_agent
 
     # Process all checks if no check is passed
     if not checks:
@@ -37,7 +43,7 @@ def integrations_changelog(app, checks, since, to, write):
 
     changes_per_agent = get_changes_per_agent(app.repo, since, to)
 
-    integrations_versions = defaultdict(dict)
+    integrations_versions: dict[str, dict[str, str]] = defaultdict(dict)
     for agent_version, version_changes in changes_per_agent.items():
         for name, (ver, _) in version_changes.items():
             if name not in checks:
