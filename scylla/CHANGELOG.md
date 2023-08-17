@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add new ScyllaDB metrics ([#15592](https://github.com/DataDog/integrations-core/pull/15592))
+
 ## 2.4.0 / 2023-08-10
 
 ***Added***:
