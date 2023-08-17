@@ -629,6 +629,9 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
 @pytest.mark.usefixtures('dd_environment')
 def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, reported_hostname):
     pg_instance['dbm'] = dbm_enabled
+    # this will block on cancel and wait for the coll interval of 600 seconds,
+    # unless the collection_interval is set to a short amount of time
+    pg_instance['collect_resources'] = {'collection_interval': 0.1}
     if reported_hostname:
         pg_instance['reported_hostname'] = reported_hostname
     expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
