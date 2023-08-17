@@ -8,6 +8,7 @@ PyYAML,PyPI,MIT,Copyright (c) 2017-2021 Ingy döt Net
 Pyro4,PyPI,MIT,Copyright (c) 2016 Irmen de Jong
 aerospike,PyPI,Apache-2.0,"Copyright Aerospike, Inc."
 aws-requests-auth,PyPI,BSD-3-Clause,Copyright (c) David Muller.
+azure-identity,PyPI,MIT,Copyright (c) Microsoft Corporation.
 beautifulsoup4,PyPI,MIT,Copyright (c) 2004-2017 Leonard Richardson
 beautifulsoup4,PyPI,MIT,Copyright (c) Leonard Richardson
 binary,PyPI,Apache-2.0,Copyright 2018 Ofek Lev
