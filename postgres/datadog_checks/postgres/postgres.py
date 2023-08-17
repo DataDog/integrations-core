@@ -20,6 +20,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import aws
+from datadog_checks.postgres import azure
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.metadata import PostgresMetadata
@@ -656,6 +657,10 @@ class PostgreSql(AgentCheck):
                     port=self._config.port,
                     region=region,
                 )
+            client_id = self._config.managed_identity.get('client_id', None)
+            scope = self._config.managed_identity.get('identity_scope', None)
+            if client_id is not None:
+                password = azure.generate_managed_identity_token(client_id=client_id, scope=scope)
 
             args = {
                 'host': self._config.host,
