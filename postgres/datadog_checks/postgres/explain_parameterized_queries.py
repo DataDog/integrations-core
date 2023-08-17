@@ -110,9 +110,7 @@ class ExplainParameterizedQueries:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_number_of_parameters_for_prepared_statement(self, conn, query_signature):
-        rows = self._execute_query_and_fetch_rows(
-            conn, PARAM_TYPES_COUNT_QUERY.format(query_signature=query_signature)
-        )
+        rows = self._execute_query_and_fetch_rows(conn, PARAM_TYPES_COUNT_QUERY.format(query_signature=query_signature))
         count = 0
         if rows and 'count' in rows[0]:
             count = rows[0]['count']
@@ -150,9 +148,7 @@ class ExplainParameterizedQueries:
 
     def _deallocate_prepared_statement(self, conn, query_signature):
         try:
-            self._execute_query(
-                conn, "DEALLOCATE PREPARE dd_{query_signature}".format(query_signature=query_signature)
-            )
+            self._execute_query(conn, "DEALLOCATE PREPARE dd_{query_signature}".format(query_signature=query_signature))
         except Exception as e:
             logger.warning(
                 'Failed to deallocate prepared statement query_signature=[%s] | err=[%s]',

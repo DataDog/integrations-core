@@ -8,7 +8,6 @@ from time import time
 
 import psycopg
 from cachetools import TTLCache
-from psycopg import ClientCursor
 from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
 from six import iteritems

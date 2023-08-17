@@ -7,10 +7,9 @@ import threading
 import time
 import uuid
 
-import psycopg
-from psycopg_pool import ConnectionPool
 import pytest
 from psycopg.rows import dict_row
+from psycopg_pool import ConnectionPool
 
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.connections import ConnectionPoolFullError, MultiDatabaseConnectionPool

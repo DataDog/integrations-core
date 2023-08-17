@@ -15,7 +15,7 @@ from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
 def wait_on_result(sql=None, binds=None, expected_value=None):
     for _i in range(5):
         with psycopg.connect(
-                host=HOST, dbname=DB_NAME, user="bob", password="bob", cursor_factory=ClientCursor
+            host=HOST, dbname=DB_NAME, user="bob", password="bob", cursor_factory=ClientCursor
         ) as tconn:
             with tconn.cursor() as cursor:
                 cursor.execute(sql, binds)
