@@ -173,9 +173,14 @@ class AgentCheck(object):
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
         """
-        - **name** (_str_) - the name of the check
-        - **init_config** (_dict_) - the `init_config` section of the configuration.
-        - **instance** (_List[dict]_) - a one-element list containing the instance options from the
+        Parameters:
+
+            name (str):
+                the name of the check
+            init_config (dict):
+                the `init_config` section of the configuration.
+            instance (list[dict]):
+                a one-element list containing the instance options from the
                 configuration file (a list is used to keep backward compatibility with
                 older versions of the Agent).
         """
@@ -712,15 +717,20 @@ class AgentCheck(object):
         # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample a gauge metric.
 
-        **Parameters:**
+        Parameters:
 
-        - **name** (_str_) - the name of the metric
-        - **value** (_float_) - the value for the metric
-        - **tags** (_List[str]_) - a list of tags to associate with this metric
-        - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
-        - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
-            list instead.
-        - **raw** (_bool_) - whether to ignore any defined namespace prefix
+            name (str):
+                the name of the metric
+            value (float):
+                the value for the metric
+            tags (list[str]):
+                a list of tags to associate with this metric
+            hostname (str):
+                a hostname to associate with this metric. Defaults to the current host.
+            device_name (str):
+                **deprecated** add a tag in the form `device:<device_name>` to the `tags` list instead.
+            raw (bool):
+                whether to ignore any defined namespace prefix
         """
         self._submit_metric(
             aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
@@ -730,13 +740,20 @@ class AgentCheck(object):
         # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample a raw count metric.
 
-        - **name** (_str_) - the name of the metric
-        - **value** (_float_) - the value for the metric
-        - **tags** (_List[str]_) - a list of tags to associate with this metric
-        - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
-        - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
-            list instead.
-        - **raw** (_bool_) - whether to ignore any defined namespace prefix
+        Parameters:
+
+            name (str):
+                the name of the metric
+            value (float):
+                the value for the metric
+            tags (list[str]):
+                a list of tags to associate with this metric
+            hostname (str):
+                a hostname to associate with this metric. Defaults to the current host.
+            device_name (str):
+                **deprecated** add a tag in the form `device:<device_name>` to the `tags` list instead.
+            raw (bool):
+                whether to ignore any defined namespace prefix
         """
         self._submit_metric(
             aggregator.COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
@@ -748,14 +765,22 @@ class AgentCheck(object):
         # type: (str, float, Sequence[str], str, str, bool, bool) -> None
         """Sample an increasing counter metric.
 
-        - **name** (_str_) - the name of the metric
-        - **value** (_float_) - the value for the metric
-        - **tags** (_List[str]_) - a list of tags to associate with this metric
-        - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
-        - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
-            list instead.
-        - **raw** (_bool_) - whether to ignore any defined namespace prefix
-        - **flush_first_value** (_bool_) - whether to sample the first value
+        Parameters:
+
+            name (str):
+                the name of the metric
+            value (float):
+                the value for the metric
+            tags (list[str]):
+                a list of tags to associate with this metric
+            hostname (str):
+                a hostname to associate with this metric. Defaults to the current host.
+            device_name (str):
+                **deprecated** add a tag in the form `device:<device_name>` to the `tags` list instead.
+            raw (bool):
+                whether to ignore any defined namespace prefix
+            flush_first_value (bool):
+                whether to sample the first value
         """
         self._submit_metric(
             aggregator.MONOTONIC_COUNT,
@@ -772,13 +797,20 @@ class AgentCheck(object):
         # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample a point, with the rate calculated at the end of the check.
 
-        - **name** (_str_) - the name of the metric
-        - **value** (_float_) - the value for the metric
-        - **tags** (_List[str]_) - a list of tags to associate with this metric
-        - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
-        - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
-            list instead.
-        - **raw** (_bool_) - whether to ignore any defined namespace prefix
+        Parameters:
+
+            name (str):
+                the name of the metric
+            value (float):
+                the value for the metric
+            tags (list[str]):
+                a list of tags to associate with this metric
+            hostname (str):
+                a hostname to associate with this metric. Defaults to the current host.
+            device_name (str):
+                **deprecated** add a tag in the form `device:<device_name>` to the `tags` list instead.
+            raw (bool):
+                whether to ignore any defined namespace prefix
         """
         self._submit_metric(
             aggregator.RATE, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
@@ -788,13 +820,20 @@ class AgentCheck(object):
         # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample a histogram metric.
 
-        - **name** (_str_) - the name of the metric
-        - **value** (_float_) - the value for the metric
-        - **tags** (_List[str]_) - a list of tags to associate with this metric
-        - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
-        - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
-            list instead.
-        - **raw** (_bool_) - whether to ignore any defined namespace prefix
+        Parameters:
+
+            name (str):
+                the name of the metric
+            value (float):
+                the value for the metric
+            tags (list[str]):
+                a list of tags to associate with this metric
+            hostname (str):
+                a hostname to associate with this metric. Defaults to the current host.
+            device_name (str):
+                **deprecated** add a tag in the form `device:<device_name>` to the `tags` list instead.
+            raw (bool):
+                whether to ignore any defined namespace prefix
         """
         self._submit_metric(
             aggregator.HISTOGRAM, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
@@ -804,13 +843,20 @@ class AgentCheck(object):
         # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample a histogram based on rate metrics.
 
-        - **name** (_str_) - the name of the metric
-        - **value** (_float_) - the value for the metric
-        - **tags** (_List[str]_) - a list of tags to associate with this metric
-        - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
-        - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
-            list instead.
-        - **raw** (_bool_) - whether to ignore any defined namespace prefix
+        Parameters:
+
+            name (str):
+                the name of the metric
+            value (float):
+                the value for the metric
+            tags (list[str]):
+                a list of tags to associate with this metric
+            hostname (str):
+                a hostname to associate with this metric. Defaults to the current host.
+            device_name (str):
+                **deprecated** add a tag in the form `device:<device_name>` to the `tags` list instead.
+            raw (bool):
+                whether to ignore any defined namespace prefix
         """
         self._submit_metric(
             aggregator.HISTORATE, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
@@ -820,13 +866,20 @@ class AgentCheck(object):
         # type: (str, float, Sequence[str], str, str, bool) -> None
         """Increment a counter metric.
 
-        - **name** (_str_) - the name of the metric
-        - **value** (_float_) - the value for the metric
-        - **tags** (_List[str]_) - a list of tags to associate with this metric
-        - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
-        - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
-            list instead.
-        - **raw** (_bool_) - whether to ignore any defined namespace prefix
+        Parameters:
+
+            name (str):
+                the name of the metric
+            value (float):
+                the value for the metric
+            tags (list[str]):
+                a list of tags to associate with this metric
+            hostname (str):
+                a hostname to associate with this metric. Defaults to the current host.
+            device_name (str):
+                **deprecated** add a tag in the form `device:<device_name>` to the `tags` list instead.
+            raw (bool):
+                whether to ignore any defined namespace prefix
         """
         self._log_deprecation('increment')
         self._submit_metric(
@@ -837,13 +890,20 @@ class AgentCheck(object):
         # type: (str, float, Sequence[str], str, str, bool) -> None
         """Decrement a counter metric.
 
-        - **name** (_str_) - the name of the metric
-        - **value** (_float_) - the value for the metric
-        - **tags** (_List[str]_) - a list of tags to associate with this metric
-        - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
-        - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
-            list instead.
-        - **raw** (_bool_) - whether to ignore any defined namespace prefix
+        Parameters:
+
+            name (str):
+                the name of the metric
+            value (float):
+                the value for the metric
+            tags (list[str]):
+                a list of tags to associate with this metric
+            hostname (str):
+                a hostname to associate with this metric. Defaults to the current host.
+            device_name (str):
+                **deprecated** add a tag in the form `device:<device_name>` to the `tags` list instead.
+            raw (bool):
+                whether to ignore any defined namespace prefix
         """
         self._log_deprecation('increment')
         self._submit_metric(
@@ -854,11 +914,18 @@ class AgentCheck(object):
         # type: (str, ServiceCheckStatus, Sequence[str], str, str, bool) -> None
         """Send the status of a service.
 
-        - **name** (_str_) - the name of the service check
-        - **status** (_int_) - a constant describing the service status.
-        - **tags** (_List[str]_) - a list of tags to associate with this service check
-        - **message** (_str_) - additional information or a description of why this status occurred.
-        - **raw** (_bool_) - whether to ignore any defined namespace prefix
+        Parameters:
+
+            name (str):
+                the name of the service check
+            status (int):
+                a constant describing the service status
+            tags (list[str]):
+                a list of tags to associate with this service check
+            message (str):
+                additional information or a description of why this status occurred.
+            raw (bool):
+                whether to ignore any defined namespace prefix
         """
         tags = self._normalize_tags_type(tags or [])
         if hostname is None:
@@ -893,12 +960,17 @@ class AgentCheck(object):
 
     def set_metadata(self, name, value, **options):
         # type: (str, Any, **Any) -> None
-        """Updates the cached metadata ``name`` with ``value``, which is then sent by the Agent at regular intervals.
+        """Updates the cached metadata `name` with `value`, which is then sent by the Agent at regular intervals.
 
-        :param str name: the name of the metadata
-        :param object value: the value for the metadata. if ``name`` has no transformer defined then the
-                             raw ``value`` will be submitted and therefore it must be a ``str``
-        :param options: keyword arguments to pass to any defined transformer
+        Parameters:
+
+            name (str):
+                the name of the metadata
+            value (Any):
+                the value for the metadata. if ``name`` has no transformer defined then the
+                raw ``value`` will be submitted and therefore it must be a ``str``
+            options (Any):
+                keyword arguments to pass to any defined transformer
         """
         self.metadata_manager.submit(name, value, options)
 
@@ -942,7 +1014,10 @@ class AgentCheck(object):
         # type: (str) -> str
         """Returns the value previously stored with `write_persistent_cache` for the same `key`.
 
-        - **key** (_str_) - The key to retrieve
+        Parameters:
+
+            key (str):
+                the key to retrieve
         """
         return datadog_agent.read_persistent_cache(self._persistent_cache_id(key))
 
@@ -954,8 +1029,12 @@ class AgentCheck(object):
             - `/opt/datadog-agent/run` everywhere else.
         The cache is persistent between agent restarts but will be rebuilt if the check instance configuration changes.
 
-        - **key** (_str_) - Identifier used to build the filename
-        - **value** (_str_) - Value to store
+        Parameters:
+
+            key (str):
+                the key to retrieve
+            value (str):
+                the value to store
         """
         datadog_agent.write_persistent_cache(self._persistent_cache_id(key), value)
 
@@ -996,9 +1075,14 @@ class AgentCheck(object):
         Using *args is intended to make warning work like log.warn/debug/info/etc
         and make it compliant with flake8 logging format linter.
 
-        :param str warning_message: the warning message.
-        :param list args: format string args used to format warning_message e.g. `warning_message % args`
-        :param dict kwargs: not used for now, but added to match Python logger's `warning` method signature
+        Parameters:
+
+            warning_message (str):
+                the warning message
+            args (Any):
+                format string args used to format the warning message e.g. `warning_message % args`
+            kwargs (Any):
+                not used for now, but added to match Python logger's `warning` method signature
         """
         warning_message = to_native_string(warning_message)
         # Interpolate message only if args is not empty. Same behavior as python logger:
@@ -1193,7 +1277,10 @@ class AgentCheck(object):
         }
         ```
 
-        - **event** (_dict_) - the event to be sent
+        Parameters:
+
+            event (dict[str, Any]):
+                the event to be sent
         """
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
         for key, value in iteritems(event):

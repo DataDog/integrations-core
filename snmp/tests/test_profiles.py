@@ -2658,6 +2658,7 @@ def test_fortinet_fortigate(aggregator):
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:fortinet-fortigate',
         'device_vendor:fortinet',
+        'snmp_host:fortinet-fortigate.device.name',
     ]
 
     common_gauge_metrics = [
@@ -2705,6 +2706,8 @@ def test_fortinet_fortigate(aggregator):
     vd_tags = common_tags + ['virtualdomain_index:4', 'virtualdomain_name:their oxen quaintly']
 
     common.assert_common_metrics(aggregator, common_tags)
+
+    aggregator.assert_metric('snmp.ifNumber', metric_type=aggregator.GAUGE, tags=common_tags)
 
     for metric in common_gauge_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
