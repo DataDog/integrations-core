@@ -193,6 +193,7 @@ def test_collect_template_metrics_returns_valid_result(instance, version, return
 
     assert check._collect_template_metrics(es_version=version) == return_value
 
+
 def test_v8_process_stats_data(aggregator, instance):
     check = ESCheck('elastic', {}, instances=[instance])
     v8 = [8, 0, 0]
@@ -202,4 +203,6 @@ def test_v8_process_stats_data(aggregator, instance):
 
     aggregator.assert_metric("elasticsearch.breakers.inflight_requests.tripped", metric_type=aggregator.GAUGE)
     aggregator.assert_metric("elasticsearch.breakers.inflight_requests.overhead", metric_type=aggregator.GAUGE)
-    aggregator.assert_metric("elasticsearch.breakers.inflight_requests.estimated_size_in_bytes", metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(
+        "elasticsearch.breakers.inflight_requests.estimated_size_in_bytes", metric_type=aggregator.GAUGE
+    )
