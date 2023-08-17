@@ -1350,6 +1350,7 @@ snmp.memory.usage,gauge,,percent,,"The percentage of memory currently being used
 snmp.memory.used,gauge,,byte,,"Number of bytes of memory currently being used.",0,snmp,,
 snmp.memoryDeviceFailureModes,gauge,,,,[Dell Poweredge] The failure modes of the memory device when the memoryDeviceStatus attribute is not ok.,0,snmp,,
 snmp.memoryDeviceStatus,gauge,,,,[Dell iDRAC] The status of the memory device.,0,snmp,,
+snmp.meraki.dev,gauge,,,,"[MERAKI-CLOUD-CONTROLLER-MIB] Device table. Constant metric equal to 1",0,snmp,,
 snmp.miscCacheAge,gauge,,minute,,"[NetApp] Age in minutes of the oldest read-only blocks in the buffer cache. Will be very low when reading very large files.",0,snmp,,
 snmp.mtxrHlCpuTemperature,gauge,,,,"[MIKROTIK-MIB] temperature near cpu",0,snmp,,
 snmp.mtxrHlTemperature,gauge,,,,"[MIKROTIK-MIB] ",0,snmp,,

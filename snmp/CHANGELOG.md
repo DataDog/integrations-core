@@ -8,6 +8,7 @@
 * Add hardware metrics for Dell (non-categorical) ([#15567](https://github.com/DataDog/integrations-core/pull/15567))
 * Add hardware metrics for F5 (non-categorical) ([#15568](https://github.com/DataDog/integrations-core/pull/15568))
 * Add hardware metrics for Fortinet (non-categorical) ([#15553](https://github.com/DataDog/integrations-core/pull/15553))
+* Add hardware metrics for Meraki ([#15542](https://github.com/DataDog/integrations-core/pull/15542))
 
 ## 6.1.0 / 2023-08-10
 
