@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Remove python 2 references from SQL Server integration ([#15606](https://github.com/DataDog/integrations-core/pull/15606))
+
 ***Added***:
 
 * Dependency update for 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
