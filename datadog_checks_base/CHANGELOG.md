@@ -9,7 +9,7 @@
 
 ***Added***:
 
-* Support Auth via Azure AD MI / Service Principal ([#15591](https://github.com/DataDog/integrations-core/pull/15591))
+* Support Auth through Azure AD MI / Service Principal ([#15591](https://github.com/DataDog/integrations-core/pull/15591))
 
 ***Fixed***:
 
