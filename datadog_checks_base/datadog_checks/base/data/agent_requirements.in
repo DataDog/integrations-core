@@ -60,7 +60,7 @@ psycopg2-binary==2.8.6; sys_platform != 'darwin' or platform_machine != 'arm64'
 psycopg[binary]==3.1.10; python_version > '3.0'
 pyasn1==0.4.6
 pycryptodomex==3.10.1
-pydantic==2.1.1; python_version > '3.0'
+pydantic==2.0.2; python_version > '3.0'
 pyjwt==1.7.1; python_version < '3.0'
 pyjwt==2.8.0; python_version > '3.0'
 pymongo[srv]==4.3.3; python_version >= '3.9'
