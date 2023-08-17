@@ -3,9 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import re
-from collections import defaultdict
-from io import StringIO
 from typing import TYPE_CHECKING
 
 import click
@@ -32,6 +29,9 @@ def integrations_changelog(app: Application, integrations: tuple[str], since: st
 
     Agent version is only added to the integration versions released with a specific Agent release.
     """
+    import re
+    from collections import defaultdict
+    from io import StringIO
 
     from ddev.cli.release.agent.common import get_changes_per_agent
 
