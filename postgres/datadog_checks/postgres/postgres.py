@@ -229,7 +229,6 @@ class PostgreSql(AgentCheck):
             # Wal receiver is not supported on aurora
             # select * from pg_stat_wal_receiver;
             # ERROR:  Function pg_stat_get_wal_receiver() is currently not supported in Aurora
-            print(self.is_aurora)
             if self.is_aurora is False:
                 queries.append(QUERY_PG_STAT_WAL_RECEIVER)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
