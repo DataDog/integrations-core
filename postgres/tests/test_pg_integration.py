@@ -7,7 +7,6 @@ import time
 import mock
 import psycopg
 import pytest
-from semver import VersionInfo
 
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.__about__ import __version__
@@ -602,7 +601,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         c_metrics = c_metrics + DBM_MIGRATED_METRICS
     for name in c_metrics:
         aggregator.assert_metric(name, count=1, tags=expected_tags_with_db, hostname=expected_hostname)
-    check_activity_metrics(aggregator, tags=expected_activity_tags, hostname=expected_hostname)
+    check_activity_metrics(aggregator, tags=expected_activity_tags)
 
     for name in CONNECTION_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags_no_db, hostname=expected_hostname)
