@@ -1,6 +1,7 @@
 aerospike==4.0.0; sys_platform != 'win32' and sys_platform != 'darwin' and python_version < '3.0'
 aerospike==7.1.1; sys_platform != 'win32' and sys_platform != 'darwin' and python_version > '3.0'
 aws-requests-auth==0.4.3
+azure-identity==1.14.0; python_version > '3.0'
 beautifulsoup4==4.12.2; python_version > '3.0'
 beautifulsoup4==4.9.3; python_version < '3.0'
 binary==1.0.0
