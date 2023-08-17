@@ -33,7 +33,9 @@ def trigger_pipeline():
 
     print(f"Creating child pipeline with params: {data.get('variables')} off branch: {trigger_ref}")
     res = requests.post(f"{DATADOG_AGENT_PIPELINE_URL}/trigger/pipeline", json=data)
+    print(f"GitLab called")
     res.raise_for_status()
+    print(f"no error")
     child_pipeline = res.json()
     print(f"Created a datadog-agent pipeline with id={child_pipeline['id']}, url={child_pipeline['web_url']}")
     return child_pipeline['id']
