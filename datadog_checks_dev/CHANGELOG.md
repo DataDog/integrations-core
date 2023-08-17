@@ -11,6 +11,7 @@
 
 ***Added***:
 
+* Print the metric list when parsing a Prometheus endpoint ([#15586](https://github.com/DataDog/integrations-core/pull/15586))
 * Update dependencies for Agent 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
 
 ***Fixed***:
