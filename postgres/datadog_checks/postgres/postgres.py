@@ -112,6 +112,7 @@ class PostgreSql(AgentCheck):
         self._clean_state()
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
         self.check_initializations.append(self.set_resolved_hostname_metadata)
+        self.check_initializations.append(self._connect)
         self.check_initializations.append(self.load_version)
         self.check_initializations.append(self.initialize_is_aurora)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
