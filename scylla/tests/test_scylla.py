@@ -65,7 +65,6 @@ def test_instance_full_additional_check(aggregator, db_instance, mock_db_data):
     c.check(instance)
 
     metrics_to_check = INSTANCE_DEFAULT_METRICS + INSTANCE_ADDITIONAL_METRICS
-    # breakpoint()
 
     for m in metrics_to_check:
         if m in FLAKY_METRICS:
