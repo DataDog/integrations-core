@@ -752,6 +752,7 @@ snmp.fgSysSes6Count,gauge,,session,,[Fortinet FortiGate] The number of active ip
 snmp.fgSysSes6Rate1,gauge,,session,second,[Fortinet FortiGate] The average ipv6 session setup rate over the past minute.,0,snmp,,
 snmp.fgSysSesCount,gauge,,session,,[Fortinet FortiGate] The number of active sessions on the device.,0,snmp,,
 snmp.fgSysSesRate1,gauge,,session,second,[Fortinet FortiGate] The average session setup rate over the past minute.,0,snmp,,
+snmp.fgVirtualDomain,gauge,,,,"[Fortinet FortiGate] A table of virtual domains configured on the device. Constant metric equal to 1",0,snmp,,
 snmp.fgVdEntCpuUsage,gauge,,percent,,[Fortinet FortiGate] The CPU usage of the virtual domain (percentage).,0,snmp,,
 snmp.fgVdEntHaState,gauge,,,,[Fortinet FortiGate] The HA cluster member state of the virtual domain on this device: master(1) backup(2) standalone(3),0,snmp,,
 snmp.fgVdEntMemUsage,gauge,,percent,,[Fortinet FortiGate] The memory usage of the virtual domain (percentage).,0,snmp,,

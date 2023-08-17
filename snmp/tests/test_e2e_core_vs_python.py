@@ -53,6 +53,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.cpqHeFltTolPowerSupply',  # HP constant metric
     'snmp.fanSpeedSensor',  # Checkpoint constant metric
     'snmp.enclosurePowerSupply',  # iDRAC constant metric
+    'snmp.fgVirtualDomain',  # Fortinet-Fortigate constant metric
     'snmp.systemState',  # Dell-Poweredge constant metric
     'snmp.dell.systemState',  # iDRAC constant metric
     'snmp.dell.physicalDisk',  # iDRAC constant metric
@@ -513,11 +514,7 @@ def test_e2e_core_vs_python_profile_f5_big_ip(dd_agent_check):
 def test_e2e_profile_fortinet_fortigate(dd_agent_check):
     config = common.generate_container_profile_config("fortinet-fortigate")
     metrics_to_skip = SKIPPED_CORE_ONLY_METRICS
-    assert_python_vs_core(
-        dd_agent_check,
-        config,
-        metrics_to_skip=metrics_to_skip,
-    )
+    assert_python_vs_core(dd_agent_check, config, metrics_to_skip=metrics_to_skip, tags_to_skip=['fgVdEntHaState'])
 
 
 def test_e2e_profile_generic_device(dd_agent_check):
