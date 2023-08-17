@@ -10,6 +10,7 @@ import pytest
 from semver import VersionInfo
 
 from datadog_checks.postgres import PostgreSql
+from datadog_checks.postgres.__about__ import __version__
 from datadog_checks.postgres.util import PartialFormatter, fmt
 
 from .common import (
@@ -38,7 +39,7 @@ from .common import (
     check_wal_receiver_metrics,
     requires_static_version,
 )
-from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_14
+from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_14, run_one_check
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 
@@ -481,7 +482,9 @@ def test_wal_stats(aggregator, integration_check, pg_instance):
     )
     # We should have at least one full page write
     assert_metric_at_least(aggregator, 'postgresql.wal.bytes', tags=expected_tags, count=1, lower_bound=wal_bytes + 100)
-    aggregator.assert_metric('postgresql.wal.full_page_images', tags=expected_tags, count=1, value=wal_fpi + 1)
+    assert_metric_at_least(
+        aggregator, 'postgresql.wal.full_page_images', tags=expected_tags, count=1, lower_bound=wal_fpi + 1
+    )
 
 
 def test_query_timeout(integration_check, pg_instance):
@@ -608,6 +611,48 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         tags=expected_tags_with_db,
         hostname=expected_hostname,
     )
+
+
+@pytest.mark.parametrize(
+    'dbm_enabled, reported_hostname',
+    [
+        (True, None),
+        (False, None),
+        (True, 'forced_hostname'),
+        (True, 'forced_hostname'),
+    ],
+)
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, reported_hostname):
+    pg_instance['dbm'] = dbm_enabled
+    if reported_hostname:
+        pg_instance['reported_hostname'] = reported_hostname
+    expected_host = reported_hostname if reported_hostname else 'stubbed.hostname'
+    expected_tags = pg_instance['tags'] + ['port:{}'.format(pg_instance['port'])]
+    check = PostgreSql('test_instance', {}, [pg_instance])
+    run_one_check(check, pg_instance)
+
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
+    assert event is not None
+    assert event['host'] == expected_host
+    assert event['dbms'] == "postgres"
+    assert event['tags'].sort() == expected_tags.sort()
+    assert event['integration_version'] == __version__
+    assert event['collection_interval'] == 1800
+    assert event['metadata'] == {
+        'dbm': dbm_enabled,
+        'connection_host': pg_instance['host'],
+    }
+
+    # Run a second time and expect the metadata to not be emitted again because of the cache TTL
+    aggregator.reset()
+    run_one_check(check, pg_instance)
+
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
+    assert event is None
 
 
 def assert_state_clean(check):

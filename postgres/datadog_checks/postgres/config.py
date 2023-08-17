@@ -60,7 +60,7 @@ class PostgresConfig:
         self.max_connections = instance.get('max_connections', 30)
         self.tags = self._build_tags(instance.get('tags', []))
 
-        ssl = instance.get('ssl', False)
+        ssl = instance.get('ssl', "false")
         if ssl in SSL_MODES:
             self.ssl_mode = ssl
         else:
@@ -100,6 +100,12 @@ class PostgresConfig:
         self.pg_stat_activity_view = instance.get('pg_stat_activity_view', 'pg_stat_activity')
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.settings_metadata_config = instance.get('collect_settings', {}) or {}
+        self.schemas_metadata_config = instance.get('collect_schemas', {"enabled": False})
+        if not self.relations and self.schemas_metadata_config['enabled']:
+            raise ConfigurationError(
+                'In order to collect schemas on this database, you must enable relation metrics collection.'
+            )
+
         self.resources_metadata_config = instance.get('collect_resources', {}) or {}
         self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
@@ -134,6 +140,7 @@ class PostgresConfig:
         }
         self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
+        self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 1800)
 
     def _build_tags(self, custom_tags):
         # Clean up tags in case there was a None entry in the instance

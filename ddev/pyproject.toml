@@ -104,7 +104,7 @@ unfixable = [
 ]
 
 [tool.ruff.isort]
-known-first-party = ["{template_config['package_name']}"]
+known-first-party = ["ddev"]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
