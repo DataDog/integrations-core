@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 24.0.0 / 2023-08-18
+
 ***Removed***:
 
 * Migrate `validate http` to ddev ([#15526](https://github.com/DataDog/integrations-core/pull/15526))
