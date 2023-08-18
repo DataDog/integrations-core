@@ -670,10 +670,11 @@ def modify_metrics_map(base_map, map_to_add, map_to_delete=None):
             base_map[key].extend(value)
         else:
             base_map[key] = value
+
     if map_to_delete:
         for key, values in map_to_delete.items():
             if key in base_map:
-                base_map[key] = [v for v in base_metric_group_map[key] if v not in values]
+                base_map[key] = [v for v in base_map[key] if v not in values]
 
     return base_map
 
