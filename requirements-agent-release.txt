@@ -93,7 +93,7 @@ datadog-kubernetes-state==7.5.0
 datadog-kyototycoon==2.3.1
 datadog-lighttpd==3.3.1
 datadog-linkerd==4.0.0
-datadog-linux-proc-extras==2.4.0; sys_platform == 'linux2'
+datadog-linux-proc-extras==2.4.1; sys_platform == 'linux2'
 datadog-mapr==1.10.0; sys_platform == 'linux2'
 datadog-mapreduce==4.0.0
 datadog-marathon==2.2.0; sys_platform != 'win32'
