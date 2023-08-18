@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.0.1 / 2023-08-18
+
 ***Fixed***:
 
 * Add metrics for PKI tidy operations ([#14327](https://github.com/DataDog/integrations-core/pull/14327))
