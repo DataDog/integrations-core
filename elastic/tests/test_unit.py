@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import logging
 
 import mock
@@ -9,7 +10,8 @@ import pytest
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.elastic import ESCheck
-from datadog_checks.elastic.elastic import get_value_from_path
+from datadog_checks.elastic.elastic import AuthenticationError, get_value_from_path
+from datadog_checks.elastic.metrics import stats_for_version
 
 from .common import URL, get_fixture_path
 
@@ -147,6 +149,35 @@ def test_get_value_from_path():
     assert value == "foo"
 
 
+def test__get_data_throws_authentication_error(instance):
+    with mock.patch(
+        'requests.get',
+        return_value=MockResponse(status_code=400),
+    ):
+        check = ESCheck('elastic', {}, instances=[instance])
+
+        with pytest.raises(AuthenticationError):
+            check._get_data(url='test.com')
+
+
+def test__get_data_creates_critical_service_alert(aggregator, instance):
+    with mock.patch(
+        'requests.get',
+        return_value=MockResponse(status_code=500),
+    ):
+        check = ESCheck('elastic', {}, instances=[instance])
+
+        with pytest.raises(Exception):
+            check._get_data(url='test.com')
+
+        aggregator.assert_service_check(
+            check.SERVICE_CHECK_CONNECT_NAME,
+            status=check.CRITICAL,
+            tags=check._config.service_check_tags,
+            message="Error 500 Server Error: None for url: None when hitting test.com",
+        )
+
+
 @pytest.mark.parametrize(
     'version, return_value',
     [
@@ -161,3 +192,17 @@ def test_collect_template_metrics_returns_valid_result(instance, version, return
     check = ESCheck('elastic', {}, instances=[instance])
 
     assert check._collect_template_metrics(es_version=version) == return_value
+
+
+def test_v8_process_stats_data(aggregator, instance):
+    check = ESCheck('elastic', {}, instances=[instance])
+    v8 = [8, 0, 0]
+    with open(get_fixture_path('stats_v8.json')) as f:
+        stats_data = json.load(f)
+        check._process_stats_data(stats_data, stats_for_version(v8), {})
+
+    aggregator.assert_metric("elasticsearch.breakers.inflight_requests.tripped", metric_type=aggregator.GAUGE)
+    aggregator.assert_metric("elasticsearch.breakers.inflight_requests.overhead", metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(
+        "elasticsearch.breakers.inflight_requests.estimated_size_in_bytes", metric_type=aggregator.GAUGE
+    )

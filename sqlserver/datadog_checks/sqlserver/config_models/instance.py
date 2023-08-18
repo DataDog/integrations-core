@@ -65,6 +65,15 @@ class Gcp(BaseModel):
     project_id: Optional[str] = None
 
 
+class ManagedIdentity(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    client_id: Optional[str] = None
+    identity_scope: Optional[str] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -132,6 +141,7 @@ class InstanceConfig(BaseModel):
     database: Optional[str] = None
     database_autodiscovery: Optional[bool] = None
     database_autodiscovery_interval: Optional[int] = None
+    database_instance_collection_interval: Optional[float] = None
     db_fragmentation_object_names: Optional[tuple[str, ...]] = None
     dbm: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
@@ -149,6 +159,7 @@ class InstanceConfig(BaseModel):
     include_task_scheduler_metrics: Optional[bool] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
+    managed_identity: Optional[ManagedIdentity] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     obfuscator_options: Optional[ObfuscatorOptions] = None

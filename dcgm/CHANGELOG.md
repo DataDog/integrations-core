@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add full support for cheap profiling metrics ([#15602](https://github.com/DataDog/integrations-core/pull/15602))
+
 ## 2.0.0 / 2023-08-10
 
 ***Changed***:

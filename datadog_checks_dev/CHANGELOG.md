@@ -7,10 +7,18 @@
 * Migrate `validate http` to ddev ([#15526](https://github.com/DataDog/integrations-core/pull/15526))
 * Remove the `ddev validate recommended-monitors` command ([#15563](https://github.com/DataDog/integrations-core/pull/15563))
 * Remove files in datadog_checks_dev for `validate ci, http, and metadata` ([#15546](https://github.com/DataDog/integrations-core/pull/15546))
+* Migrate documentation commands to ddev ([#15582](https://github.com/DataDog/integrations-core/pull/15582))
+
+***Added***:
+
+* Print the metric list when parsing a Prometheus endpoint ([#15586](https://github.com/DataDog/integrations-core/pull/15586))
+* Update dependencies for Agent 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
 
 ***Fixed***:
 
+* Ignore `pydantic` when bumping the dependencies ([#15597](https://github.com/DataDog/integrations-core/pull/15597))
 * Stop using the TOX_ENV_NAME variable ([#15528](https://github.com/DataDog/integrations-core/pull/15528))
+* Prevent `command already in progress` errors in the Postgres integration ([#15489](https://github.com/DataDog/integrations-core/pull/15489))
 
 ## 23.0.0 / 2023-08-10
 

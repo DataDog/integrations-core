@@ -18,7 +18,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-from .util import DatabaseConfigurationError, warning_with_tags
+from .util import DatabaseConfigurationError, payload_pg_version, warning_with_tags
 from .version_utils import V9_4, V14
 
 try:
@@ -144,6 +144,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             maxsize=config.full_statement_text_cache_max_size,
             ttl=60 * 60 / config.full_statement_text_samples_per_hour_per_query,
         )
+        self._thread_id = "query-metrics"
 
     def _execute_query(self, cursor, query, params=()):
         try:
@@ -170,23 +171,18 @@ class PostgresStatementMetrics(DBMAsyncJob):
         query = STATEMENTS_QUERY.format(
             cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, extra_clauses="LIMIT 0", filters=""
         )
-        with self._check.get_main_db().cursor() as cursor:
-            self._execute_query(cursor, query, params=())
-            col_names = [desc[0] for desc in cursor.description] if cursor.description else []
-            self._stat_column_cache = col_names
-            return col_names
+        with self.db_pool.get_main_db_pool().connection() as conn:
+            with conn.cursor() as cursor:
+                self._execute_query(cursor, query, params=())
+                col_names = [desc[0] for desc in cursor.description] if cursor.description else []
+                self._stat_column_cache = col_names
+                return col_names
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
         self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
         self.collect_per_statement_metrics()
-
-    def _payload_pg_version(self):
-        version = self._check.version
-        if not version:
-            return ""
-        return 'v{major}.{minor}.{patch}'.format(major=version.major, minor=version.minor, patch=version.patch)
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_per_statement_metrics(self):
@@ -206,7 +202,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'tags': self._tags_no_db,
                 'cloud_metadata': self._config.cloud_metadata,
                 'postgres_rows': rows,
-                'postgres_version': self._payload_pg_version(),
+                'postgres_version': payload_pg_version(self._check.version),
                 'ddagentversion': datadog_agent.get_version(),
                 "ddagenthostname": self._check.agent_hostname,
             }
@@ -282,17 +278,18 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     "pg_database.datname NOT ILIKE %s" for _ in self._config.ignore_databases
                 )
                 params = params + tuple(self._config.ignore_databases)
-            with self._check.get_main_db().cursor(row_factory=dict_row) as cursor:
-                return self._execute_query(
-                    cursor,
-                    STATEMENTS_QUERY.format(
-                        cols=', '.join(query_columns),
-                        pg_stat_statements_view=self._config.pg_stat_statements_view,
-                        filters=filters,
-                        extra_clauses="",
-                    ),
-                    params=params,
-                )
+            with self.db_pool.get_main_db_pool().connection() as conn:
+                with conn.cursor(row_factory=dict_row) as cursor:
+                    return self._execute_query(
+                        cursor,
+                        STATEMENTS_QUERY.format(
+                            cols=', '.join(query_columns),
+                            pg_stat_statements_view=self._config.pg_stat_statements_view,
+                            filters=filters,
+                            extra_clauses="",
+                        ),
+                        params=params,
+                    )
         except psycopg.Error as e:
             error_tag = "error:database-{}".format(type(e).__name__)
 
@@ -355,11 +352,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
         if self._check.version < V14:
             return
         try:
-            with self._check.get_main_db().cursor(row_factory=dict_row) as cursor:
-                rows = self._execute_query(
-                    cursor,
-                    PG_STAT_STATEMENTS_DEALLOC,
-                )
+            with self.db_pool.get_main_db_pool().connection() as conn:
+                with conn.cursor(row_factory=dict_row) as cursor:
+                    rows = self._execute_query(
+                        cursor,
+                        PG_STAT_STATEMENTS_DEALLOC,
+                    )
             if rows:
                 dealloc = list(rows[0].values())[0]
                 self._check.monotonic_count(
@@ -375,11 +373,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _emit_pg_stat_statements_metrics(self):
         query = PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 if self._check.version < V9_4 else PG_STAT_STATEMENTS_COUNT_QUERY
         try:
-            with self._check.get_main_db().cursor(row_factory=dict_row) as cursor:
-                rows = self._execute_query(
-                    cursor,
-                    query,
-                )
+            with self.db_pool.get_main_db_pool().connection() as conn:
+                with conn.cursor(row_factory=dict_row) as cursor:
+                    rows = self._execute_query(
+                        cursor,
+                        query,
+                    )
             count = 0
             if rows and 'count' in rows[0]:
                 count = rows[0]['count']

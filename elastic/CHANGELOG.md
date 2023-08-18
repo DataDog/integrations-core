@@ -2,8 +2,13 @@
 
 ## Unreleased
 
+***Added***:
+
+* Support inflight_requests stats since v8 ([#15259](https://github.com/DataDog/integrations-core/pull/15259))
+
 ***Fixed***:
 
+* Correct checking instance type of get data response ([#15554](https://github.com/DataDog/integrations-core/pull/15554))
 * Avoid collecting template metrics on unsupported ES versions. ([#15550](https://github.com/DataDog/integrations-core/pull/15550))
 
 ## 6.0.0 / 2023-08-10

@@ -63,7 +63,7 @@ instances:
     #   - rdsadmin
     #   - azure_maintenance
 
-    ## @param ssl - string - optional - default: false
+    ## @param ssl - string - optional - default: disable
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
     ## is negotiated with the server. There are six modes:
     ## - `disable`: Only tries a non-SSL connection.
@@ -77,39 +77,37 @@ instances:
     ##                  trusted CA and that the requested server host name matches the one in the certificate.
     ##
     ## For a detailed description of how these options work see https://www.postgresql.org/docs/current/libpq-ssl.html
-    ##
-    ## Note: `true` is an alias for `require`, and `false` is an alias for `disable`.
     #
-    # ssl: 'false'
+    # ssl: disable
 
-    ## @param ssl_root_cert - string - optional - default: false
+    ## @param ssl_root_cert - string - optional
     ## The path to the ssl root certificate.
     ##
     ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
     #
-    # ssl_root_cert: /home/datadog/server-ca.pem
+    # ssl_root_cert: <SSL_ROOT_CERT>
 
-    ## @param ssl_cert - string - optional - default: false
+    ## @param ssl_cert - string - optional
     ## The path to the ssl certificate.
     ##
     ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
     #
-    # ssl_cert: /home/datadog/client-cert.pem
+    # ssl_cert: <SSL_CERT>
 
-    ## @param ssl_key - string - optional - default: false
+    ## @param ssl_key - string - optional
     ## The path to the ssl client key.
     ##
     ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
     #
-    # ssl_key: /home/datadog/client-key.pem
+    # ssl_key: <SSL_KEY>
 
-    ## @param ssl_password - string - optional - default: false
+    ## @param ssl_password - string - optional
     ## The password for the secret key specified in ssl_key, allowing client certificate private keys to be stored
     ## in encrypted form on disk.
     ##
     ## For a detailed description of how this option works see https://www.postgresql.org/docs/current/libpq-ssl.html
     #
-    # ssl_password: ssl_key_password
+    # ssl_password: <SSL_PASSWORD>
 
     ## @param query_timeout - integer - optional - default: 5000
     ## Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
@@ -406,6 +404,33 @@ instances:
         #
         # collection_interval: 600
 
+    ## Enable collection of database schemas. In order to collect schemas from all user databases, 
+    ## enable `database_autodiscovery`. To collect from a single database, set `dbname` to collect 
+    ## the schema for that database.
+    ## Relation metrics must be enabled for schema collection.
+    #
+    # collect_schemas:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of database schemas. Requires `dbm: true` and relation metrics must be enabled.
+        #
+        # enabled: false
+
+        ## @param max_tables - number - optional - default: 1000
+        ## Maximum amount of tables the Agent collects from the instance.
+        #
+        # max_tables: 1000
+
+        ## @param max_columns - number - optional - default: 50
+        ## Maximum amount of columns the Agent collects per table.
+        #
+        # max_columns: 50
+
+        ## @param collection_interval - number - optional - default: 600
+        ## The database schema collection interval (in seconds).
+        #
+        # collection_interval: 600
+
     ## This block defines the configuration for AWS RDS and Aurora instances. 
     ##
     ## Complete this section if you have installed the Datadog AWS Integration 
@@ -485,6 +510,30 @@ instances:
         ## This value is optional if the value of `host` is already configured to the fully qualified domain name.
         #
         # fully_qualified_domain_name: my-postgres-database.database.windows.net
+
+    ## Configuration section used for Azure AD Authentication.
+    ##
+    ## This supports using System or User assigned managed identities.
+    ## If this section is set, then the `username` and `password` fields will be ignored.
+    ##
+    ## For more information on Managed Identities, see the Azure docs
+    ## https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+    #
+    # managed_identity:
+
+        ## @param client_id - string - optional
+        ## Client ID of the Managed Identity.
+        #
+        # client_id: <CLIENT_ID>
+
+        ## @param identity_scope - string - optional - default: https://ossrdbms-aad.database.windows.net/.default
+        ## The permission scope from where to access the identity token. This value is optional if using the default
+        ## identity scope for Azure managed databases.
+        ##
+        ## For more information on scopes, see the Azure docs
+        ## https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+        #
+        # identity_scope: https://ossrdbms-aad.database.windows.net/.default
 
     ## Configure how the SQL obfuscator behaves.
     ## Note: This option only applies when `dbm` is enabled.

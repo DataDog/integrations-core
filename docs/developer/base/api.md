@@ -2,12 +2,10 @@
 
 -----
 
-::: datadog_checks.base.AgentCheck
-    rendering:
+::: datadog_checks.base.checks.base.AgentCheck
+    options:
       heading_level: 3
-    selection:
       members:
-        - __init__
         - gauge
         - count
         - monotonic_count
@@ -18,14 +16,15 @@
         - event
         - set_metadata
         - metadata_entrypoint
+        - read_persistent_cache
+        - write_persistent_cache
         - warning
 
 ## Stubs
 
 ::: datadog_checks.base.stubs.aggregator.AggregatorStub
-    rendering:
+    options:
       heading_level: 3
-    selection:
       members:
         - assert_metric
         - assert_metric_has_tag
@@ -42,9 +41,8 @@
         - reset
 
 ::: datadog_checks.base.stubs.datadog_agent.DatadogAgentStub
-    rendering:
+    options:
       heading_level: 3
-    selection:
       members:
         - assert_metadata
         - assert_metadata_count
