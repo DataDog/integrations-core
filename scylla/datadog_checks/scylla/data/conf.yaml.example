@@ -52,7 +52,7 @@ instances:
 
     ## @param metric_groups - list of strings - optional
     ## List of additional Scylla metric groups to collect in addition to the default. Certain metric groups are
-    ## only expose in newer versions of Scylla. Refer to the documentation to see what metrics are available 
+    ## only exposed in newer versions of Scylla. Refer to the documentation to see what metrics are available 
     ## for the different Scylla versions.
     #
     # metric_groups:
