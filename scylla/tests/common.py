@@ -661,7 +661,6 @@ changed_or_removed_metrics_ver_5 = {
         'scylla.thrift.thrift_connections',
     ],
 }
-# fmt: on
 
 
 def modify_metrics_map(base_map, map_to_add, map_to_delete=None):
@@ -817,7 +816,6 @@ MAP_VERSION_TO_METRICS = {
     '3.3.1': instance_3_3_metric_group_map,
     '5.2.6': instance_5_2_metric_group_map,
 }
-# fmt: on
 
 # expand the lists into a single list of metrics
 def get_metrics(metric_groups):
