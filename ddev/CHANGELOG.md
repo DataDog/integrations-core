@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.0.0 / 2023-08-18
+
 ***Added***:
 
 * Migrate `ddev release agent integrations` to `ddev` ([#15569](https://github.com/DataDog/integrations-core/pull/15569))
