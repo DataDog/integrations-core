@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Removed***:
+
+* Remove `release agent requirements` subcommand ([#15621](https://github.com/DataDog/integrations-core/pull/15621))
+
 ***Added***:
 
 * Migrate `ddev release agent integrations` to `ddev` ([#15569](https://github.com/DataDog/integrations-core/pull/15569))
