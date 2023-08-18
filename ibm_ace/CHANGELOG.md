@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 2.1.0 / 2023-08-18
+
 ***Added***:
 
 * Add hostname as part of the subscription substring ([#15189](https://github.com/DataDog/integrations-core/pull/15189))
