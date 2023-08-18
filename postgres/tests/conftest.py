@@ -26,6 +26,7 @@ INSTANCE = {
     'dbname': DB_NAME,
     'tags': ['foo:bar'],
     'disable_generic_tags': True,
+    'dbm': False,
 }
 
 
@@ -109,16 +110,21 @@ def e2e_instance():
 
 @pytest.fixture()
 def mock_cursor_for_replica_stats():
-    with mock.patch('psycopg.connect') as connect:
-        cursor = mock.MagicMock()
+    with mock.patch('psycopg_pool.ConnectionPool.connection') as pooled_conn:
         data = deque()
-        connect.return_value = mock.MagicMock(cursor=mock.MagicMock(return_value=cursor))
+        mocked_cursor = mock.MagicMock()
+        mocked_conn = mock.MagicMock()
+        mocked_conn.cursor.return_value = mocked_cursor
+
+        pooled_conn.return_value.__enter__.return_value = mocked_conn
 
         def cursor_execute(query, second_arg=""):
+            print(query)
             if "FROM pg_stat_replication" in query:
                 data.appendleft(['app1', 'streaming', 'async', '1.1.1.1', 12, 12, 12, 12])
                 data.appendleft(['app2', 'backup', 'sync', '1.1.1.1', 13, 13, 13, 13])
             elif query == 'SHOW SERVER_VERSION;':
+                print("SHOW SERVER_VERSION")
                 data.appendleft(['10.15'])
 
         def cursor_fetchall():
@@ -126,10 +132,11 @@ def mock_cursor_for_replica_stats():
                 yield data.pop()
 
         def cursor_fetchone():
+            print("fetchone")
             return data.pop()
 
-        cursor.__enter__().execute = cursor_execute
-        cursor.__enter__().fetchall = cursor_fetchall
-        cursor.__enter__().fetchone = cursor_fetchone
+        mocked_cursor.__enter__().execute = cursor_execute
+        mocked_cursor.__enter__().fetchall = cursor_fetchall
+        mocked_cursor.__enter__().fetchone = cursor_fetchone
 
         yield

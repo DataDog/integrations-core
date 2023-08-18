@@ -99,12 +99,12 @@ def test_statement_samples_enabled_config(
 def test_statement_metrics_version(integration_check, dbm_instance, version, expected_payload_version):
     if version:
         check = integration_check(dbm_instance)
-        check._version = version
+        check.version = version
         check._connect()
         assert payload_pg_version(check.version) == expected_payload_version
     else:
         with mock.patch(
-            'datadog_checks.postgres.postgres.PostgreSql.version', new_callable=mock.PropertyMock
+            'datadog_checks.postgres.postgres.PostgreSql.load_version', new_callable=mock.MagicMock
         ) as patched_version:
             patched_version.return_value = None
             check = integration_check(dbm_instance)
@@ -362,28 +362,29 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
 
     check = integration_check(dbm_instance)
     check._connect()
-    cursor = check.db.cursor()
+    # Get a connection separate from the one used by the check to avoid hitting the connection pool limit
+    with check._new_connection('postgres', max_pool_size=1).connection() as conn:
+        with conn.cursor() as cursor:
+            # Execute the query once to begin tracking it. Execute again between checks to track the difference.
+            # This should result in a single metric for that query_signature having a value of 2
+            with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+                mock_agent.side_effect = obfuscate_sql
+                cursor.execute(query, (['app1', 'app2'],))
+                cursor.execute(query, (['app1', 'app2', 'app3'],))
+                run_one_check(check, dbm_instance)
 
-    # Execute the query once to begin tracking it. Execute again between checks to track the difference.
-    # This should result in a single metric for that query_signature having a value of 2
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-        mock_agent.side_effect = obfuscate_sql
-        cursor.execute(query, (['app1', 'app2'],))
-        cursor.execute(query, (['app1', 'app2', 'app3'],))
-        run_one_check(check, dbm_instance)
+                cursor.execute(query, (['app1', 'app2'],))
+                cursor.execute(query, (['app1', 'app2', 'app3'],))
+                run_one_check(check, dbm_instance)
 
-        cursor.execute(query, (['app1', 'app2'],))
-        cursor.execute(query, (['app1', 'app2', 'app3'],))
-        run_one_check(check, dbm_instance)
+            events = aggregator.get_event_platform_events("dbm-metrics")
+            assert len(events) == 1
+            event = events[0]
 
-    events = aggregator.get_event_platform_events("dbm-metrics")
-    assert len(events) == 1
-    event = events[0]
-
-    matching = [e for e in event['postgres_rows'] if e['query_signature'] == query_signature]
-    assert len(matching) == 1
-    row = matching[0]
-    assert row['calls'] == 2
+            matching = [e for e in event['postgres_rows'] if e['query_signature'] == query_signature]
+            assert len(matching) == 1
+            row = matching[0]
+            assert row['calls'] == 2
 
 
 @pytest.fixture
@@ -750,6 +751,7 @@ def test_statement_metadata(
     """Tests for metadata in both samples and metrics"""
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_samples']['run_sync'] = True
+    dbm_instance['query_samples']['explain_parameterized_queries'] = False
     dbm_instance['query_metrics']['run_sync'] = True
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
@@ -1006,7 +1008,7 @@ def test_activity_snapshot_collection(
         for key in expected_out:
             assert expected_out[key] == bobs_query[key]
         if POSTGRES_VERSION.split('.')[0] == "9":
-            # pg v < 10 does not have a backend_type column
+            # pg v < 10 does not have a backend_type column,
             # so we shouldn't see this key in our activity rows
             expected_keys.remove('backend_type')
             if POSTGRES_VERSION == '9.5':
@@ -1070,7 +1072,6 @@ def test_activity_snapshot_collection(
         assert bobs_query['state'] == "idle in transaction"
     finally:
         blocking_conn.close()
-        conn.close()
 
 
 @pytest.mark.parametrize(
@@ -1338,7 +1339,7 @@ def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
     dbm_instance["dbname"] = "postgres"
     check = integration_check(dbm_instance)
     check._connect()
-    check._load_pg_settings(check.db)
+    check.load_pg_settings(check.db)
     if db_user == 'datadog_no_catalog':
         aggregator.assert_metric(
             "dd.postgres.error",
@@ -1354,16 +1355,16 @@ def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
         assert len(aggregator.metrics("dd.postgres.error")) == 0
 
 
-def test_pg_settings_caching(aggregator, integration_check, dbm_instance):
+def test_pg_settings_caching(integration_check, dbm_instance):
     dbm_instance["username"] = "datadog"
     dbm_instance["dbname"] = "postgres"
     check = integration_check(dbm_instance)
     assert not check.pg_settings, "pg_settings should not have been initialized yet"
     check._connect()
-    check.get_main_db()
+    check.db_pool.get_main_db_pool()
     assert "track_activity_query_size" in check.pg_settings
     check.pg_settings["test_key"] = True
-    check.get_main_db()
+    check.db_pool.get_main_db_pool()
     assert (
         "test_key" in check.pg_settings
     ), "key should not have been blown away. If it was then pg_settings was not cached correctly"
@@ -1395,8 +1396,8 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     check_frequency = collection_interval / 5.0
     _check_until_time(check, dbm_instance, sleep_time, check_frequency)
     max_collections = int(1 / collection_interval * sleep_time) + 1
-    check.cancel()
     metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
+    check.cancel()
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 
 

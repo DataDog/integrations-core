@@ -12,14 +12,17 @@ from psycopg import ClientCursor
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
 
 
-def wait_on_result(cursor=None, sql=None, binds=None, expected_value=None):
-    for _i in range(300):
-        cursor.execute(sql, binds)
-        result = cursor.fetchone()[0]
-        if result == expected_value:
-            break
-
-        time.sleep(0.1)
+def wait_on_result(sql=None, binds=None, expected_value=None):
+    for _i in range(5):
+        with psycopg.connect(
+            host=HOST, dbname=DB_NAME, user="bob", password="bob", cursor_factory=ClientCursor
+        ) as tconn:
+            with tconn.cursor() as cursor:
+                cursor.execute(sql, binds)
+                result = cursor.fetchone()[0]
+                if result == expected_value:
+                    break
+                time.sleep(0.1)
     else:
         return False
 
@@ -33,8 +36,6 @@ def wait_on_result(cursor=None, sql=None, binds=None, expected_value=None):
 def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check._connect()
-    conn = check._new_connection(pg_instance['dbname'])
-    cursor = conn.cursor()
 
     def execute_in_thread(q, args):
         with psycopg.connect(
@@ -55,8 +56,10 @@ def test_deadlock(aggregator, dd_run_check, integration_check, pg_instance):
     update_sql = "update personsdup1 set address = 'changed' where personid = %s"
 
     deadlock_count_sql = "select deadlocks from pg_stat_database where datname = %s"
-    cursor.execute(deadlock_count_sql, (DB_NAME,))
-    deadlocks_before = cursor.fetchone()[0]
+    with check._new_connection(pg_instance['dbname']).connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(deadlock_count_sql, (DB_NAME,))
+            deadlocks_before = cursor.fetchone()[0]
 
     conn_args = {'host': HOST, 'dbname': DB_NAME, 'user': "bob", 'password': "bob"}
     conn1 = psycopg.connect(**conn_args, autocommit=False, cursor_factory=ClientCursor)
@@ -98,7 +101,7 @@ commit;
     AND blocking_activity.application_name = %s
     AND blocked_activity.application_name = %s """
 
-    is_locked = wait_on_result(cursor=cursor, sql=lock_count_sql, binds=(appname1, appname2), expected_value=1)
+    is_locked = wait_on_result(sql=lock_count_sql, binds=(appname1, appname2), expected_value=1)
 
     if not is_locked:
         raise Exception("ERROR: Couldn't reproduce a deadlock. That can happen on an extremely overloaded system.")
@@ -111,7 +114,7 @@ commit;
 
     dd_run_check(check)
 
-    wait_on_result(cursor=cursor, sql=deadlock_count_sql, binds=(DB_NAME,), expected_value=deadlocks_before + 1)
+    wait_on_result(sql=deadlock_count_sql, binds=(DB_NAME,), expected_value=deadlocks_before + 1)
 
     aggregator.assert_metric(
         'postgresql.deadlocks.count',
