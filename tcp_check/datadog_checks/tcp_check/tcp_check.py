@@ -13,9 +13,7 @@ from datadog_checks.base.utils.time import get_precise_time
 AddrTuple = namedtuple('AddrTuple', ['address', 'socket_type'])
 
 
-
 class TCPCheck(AgentCheck):
-
     SOURCE_TYPE_NAME = 'system'
     SERVICE_CHECK_NAME = 'tcp.can_connect'
     CONFIGURATION_ERROR_MSG = "`{}` is an invalid `{}`; a {} must be specified."
