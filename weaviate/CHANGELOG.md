@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 2.1.0 / 2023-08-18
+
 ***Added***:
 
 * Add weaviate.requests metric ([#15583](https://github.com/DataDog/integrations-core/pull/15583))
