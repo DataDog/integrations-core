@@ -679,8 +679,6 @@ def modify_metrics_map(base_map, map_to_add, map_to_delete=None):
     return base_map
 
 
-instance_3_1_metric_group_map = base_metric_group_map
-
 instance_3_2_metric_group_map = modify_metrics_map(deepcopy(base_metric_group_map), new_metrics_version_3_2)
 
 instance_3_3_metric_group_map = modify_metrics_map(deepcopy(instance_3_2_metric_group_map), new_metrics_version_3_3)
@@ -814,7 +812,7 @@ instance_3_groups = base_additional_groups + instance_3_additional_groups
 instance_5_groups = base_additional_groups + instance_5_additional_groups
 
 MAP_VERSION_TO_METRICS = {
-    '3.1.2': instance_3_1_metric_group_map,
+    '3.1.2': base_metric_group_map,
     '3.2.1': instance_3_2_metric_group_map,
     '3.3.1': instance_3_3_metric_group_map,
     '5.2.6': instance_5_2_metric_group_map,
