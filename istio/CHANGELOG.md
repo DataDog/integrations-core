@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add support for namespace in istio check ([#14611](https://github.com/DataDog/integrations-core/pull/14611))
+
 ## 5.0.0 / 2023-08-10
 
 ***Changed***:
