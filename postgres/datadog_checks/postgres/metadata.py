@@ -214,7 +214,6 @@ class PostgresMetadata(DBMAsyncJob):
         self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
         self.report_postgres_metadata()
-        self._check.db_pool.prune_connections()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_postgres_metadata(self):
@@ -223,19 +222,19 @@ class PostgresMetadata(DBMAsyncJob):
         elapsed_s = time.time() - self._time_since_last_settings_query
         if elapsed_s >= self.pg_settings_collection_interval and self._collect_pg_settings_enabled:
             self._pg_settings_cached = self._collect_postgres_settings()
-        event = {
-            "host": self._check.resolved_hostname,
-            "agent_version": datadog_agent.get_version(),
-            "dbms": "postgres",
-            "kind": "pg_settings",
-            "collection_interval": self.collection_interval,
-            'dbms_version': payload_pg_version(self._check.version),
-            "tags": self._tags_no_db,
-            "timestamp": time.time() * 1000,
-            "cloud_metadata": self._config.cloud_metadata,
-            "metadata": self._pg_settings_cached,
-        }
-        self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+            event = {
+                "host": self._check.resolved_hostname,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "postgres",
+                "kind": "pg_settings",
+                "collection_interval": self.collection_interval,
+                'dbms_version': payload_pg_version(self._check.version),
+                "tags": self._tags_no_db,
+                "timestamp": time.time() * 1000,
+                "cloud_metadata": self._config.cloud_metadata,
+                "metadata": self._pg_settings_cached,
+            }
+            self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
         elapsed_s_schemas = time.time() - self._time_since_last_schemas_query
         if elapsed_s_schemas >= self.schemas_collection_interval and self._collect_schemas_enabled:
@@ -313,7 +312,7 @@ class PostgresMetadata(DBMAsyncJob):
         """
         limit = self._config.schemas_metadata_config.get('max_tables', 1000)
         if self._config.relations:
-            if VersionUtils.transform_version(str(self._check._version))['version.major'] == "9":
+            if VersionUtils.transform_version(str(self._check.version))['version.major'] == "9":
                 cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id))
             else:
                 cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id))
@@ -350,7 +349,7 @@ class PostgresMetadata(DBMAsyncJob):
             # so we have to grab the total partition activity
             # note: partitions don't exist in V9, so we have to check this first
             if (
-                VersionUtils.transform_version(str(self._check._version))['version.major'] == "9"
+                VersionUtils.transform_version(str(self._check.version))['version.major'] == "9"
                 or not info["has_partitions"]
             ):
                 return (
@@ -405,7 +404,7 @@ class PostgresMetadata(DBMAsyncJob):
                 idxs = [dict(row) for row in rows]
                 this_payload.update({'indexes': idxs})
 
-            if VersionUtils.transform_version(str(self._check._version))['version.major'] != "9":
+            if VersionUtils.transform_version(str(self._check.version))['version.major'] != "9":
                 if table['has_partitions']:
                     cursor.execute(PARTITION_KEY_QUERY.format(parent=name))
                     row = cursor.fetchone()
@@ -464,10 +463,11 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
-        with self._check.get_main_db().cursor(row_factory=dict_row) as cursor:
-            self._log.debug("Running query [%s]", PG_SETTINGS_QUERY)
-            self._time_since_last_settings_query = time.time()
-            cursor.execute(PG_SETTINGS_QUERY)
-            rows = cursor.fetchall()
-            self._log.debug("Loaded %s rows from pg_settings", len(rows))
-            return [dict(row) for row in rows]
+        with self.db_pool.get_main_db_pool().connection() as conn:
+            with conn.cursor(row_factory=dict_row) as cursor:
+                self._log.debug("Running query [%s]", PG_SETTINGS_QUERY)
+                self._time_since_last_settings_query = time.time()
+                cursor.execute(PG_SETTINGS_QUERY)
+                rows = cursor.fetchall()
+                self._log.debug("Loaded %s rows from pg_settings", len(rows))
+                return [dict(row) for row in rows]

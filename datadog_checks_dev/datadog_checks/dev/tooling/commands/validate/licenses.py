@@ -54,6 +54,8 @@ EXPLICIT_LICENSES = {
     'psycopg2-binary': ['LGPL-3.0-only', 'BSD-3-Clause'],
     # https://github.com/psycopg/psycopg/blob/master/LICENSE.txt
     'psycopg': ['LGPL-3.0-only'],
+    # https://github.com/psycopg/psycopg/blob/master/psycopg_pool/LICENSE.txt
+    'psycopg-pool': ['LGPL-3.0-only'],
     # https://github.com/Legrandin/pycryptodome/blob/master/LICENSE.rst
     'pycryptodomex': ['Unlicense', 'BSD-2-Clause'],
     # https://github.com/requests/requests-kerberos/pull/123
