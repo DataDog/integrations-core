@@ -97,7 +97,7 @@ To easily navigate the facet list, group similar facets together. For fields spe
 4. In the **Group** field, enter the name of the new group, and select **New group**.
 5. Click **Update**.
 
-See the [default standard attribute list][6] for the standard Datadog attributes under their specific groups. Standard attributes do not need to be added as facets and will be added automatically. They will appear in the facet list once the log pipeline has been published. 
+See the [default standard attribute list][6] for the standard Datadog attributes under their specific groups. Standard attributes do not need to be added as facets and are added automatically. They appear in the facet list once the log pipeline has been published. 
 
 ## Review and deploy the integration
 
