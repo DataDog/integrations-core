@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
-from datadog_checks.dev.tooling.commands.agent.requirements import requirements
 
 from ddev.cli.release.agent.changelog import changelog
 from ddev.cli.release.agent.integrations import integrations
@@ -19,4 +18,3 @@ def agent():
 agent.add_command(changelog)
 agent.add_command(integrations)
 agent.add_command(integrations_changelog)
-agent.add_command(requirements)
