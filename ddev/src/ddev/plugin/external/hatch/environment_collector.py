@@ -118,7 +118,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             # We pin deps in order to make CI more stable/reliable.
             'dependencies': [
                 'black==22.12.0',
-                'ruff==0.0.257',
+                'ruff==0.0.285',
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
                 'pydantic==2.0.2',
             ],
@@ -134,7 +134,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 [
                     # TODO: remove extra when we drop Python 2
                     'mypy[python2]==0.910; python_version<"3"',
-                    'mypy[python2]==1.3.0; python_version>"3"',
+                    'mypy[python2]==1.5.1; python_version>"3"',
                     # TODO: remove these when drop Python 2 and replace with --install-types --non-interactive
                     'types-python-dateutil==2.8.2',
                     'types-pyyaml==5.4.10',

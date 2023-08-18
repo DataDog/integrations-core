@@ -15,6 +15,10 @@
 * Migrate documentation commands to ddev ([#15582](https://github.com/DataDog/integrations-core/pull/15582))
 * Migrate `ddev release agent integrations` to `ddev` ([#15598](https://github.com/DataDog/integrations-core/pull/15598))
 
+***Fixed***:
+
+* Update style dependencies ([#15618](https://github.com/DataDog/integrations-core/pull/15618))
+
 ## 3.5.0 / 2023-08-11
 
 ***Added***:

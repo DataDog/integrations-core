@@ -20,7 +20,7 @@ FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 # Style deps:
 # We pin deps in order to make CI more stable/reliable.
 BLACK_DEP = 'black==22.12.0'
-RUFF_DEP = 'ruff==0.0.257'
+RUFF_DEP = 'ruff==0.0.285'
 # TODO: remove extra when we drop Python 2
 MYPY_DEP = 'mypy[python2]==0.910'
 # TODO: when we drop Python 2 and replace with --install-types --non-interactive
@@ -32,7 +32,7 @@ TYPES_DEPS = [
     'types-simplejson==3.17.5',
 ]
 # Keep in sync with: /datadog_checks_base/datadog_checks/data/agent_requirements.in and ./hatch/environment_collector.py
-PYDANTIC_DEP = 'pydantic==1.10.8'
+PYDANTIC_DEP = 'pydantic==2.0.2'
 
 
 @tox.hookimpl

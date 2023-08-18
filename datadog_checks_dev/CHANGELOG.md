@@ -19,6 +19,7 @@
 * Ignore `pydantic` when bumping the dependencies ([#15597](https://github.com/DataDog/integrations-core/pull/15597))
 * Stop using the TOX_ENV_NAME variable ([#15528](https://github.com/DataDog/integrations-core/pull/15528))
 * Prevent `command already in progress` errors in the Postgres integration ([#15489](https://github.com/DataDog/integrations-core/pull/15489))
+* Update style dependencies ([#15618](https://github.com/DataDog/integrations-core/pull/15618))
 
 ## 23.0.0 / 2023-08-10
 
