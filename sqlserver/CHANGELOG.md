@@ -5,11 +5,13 @@
 ***Changed***:
 
 * Collect both DBM active sessions and blocking sessions which are sleeping. See ([#14054](https://github.com/DataDog/integrations-core/pull/14054))
+* Remove python 2 references from SQL Server integration ([#15606](https://github.com/DataDog/integrations-core/pull/15606))
 
 ***Added***:
 
 * Add support for sending `database_instance` metadata ([#15562](https://github.com/DataDog/integrations-core/pull/15562))
 * Update dependencies for Agent 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
+* Support Auth through Azure AD MI / Service Principal ([#15591](https://github.com/DataDog/integrations-core/pull/15591))
 
 ## 13.0.0 / 2023-08-10
 

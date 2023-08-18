@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add new ScyllaDB metrics ([#15592](https://github.com/DataDog/integrations-core/pull/15592))
+
 ***Fixed***:
 
 * Update datadog-checks-base dependency version to 32.6.0 ([#15604](https://github.com/DataDog/integrations-core/pull/15604))

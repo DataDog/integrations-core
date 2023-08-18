@@ -8,6 +8,7 @@ PyYAML,PyPI,MIT,Copyright (c) 2017-2021 Ingy döt Net
 Pyro4,PyPI,MIT,Copyright (c) 2016 Irmen de Jong
 aerospike,PyPI,Apache-2.0,"Copyright Aerospike, Inc."
 aws-requests-auth,PyPI,BSD-3-Clause,Copyright (c) David Muller.
+azure-identity,PyPI,MIT,Copyright (c) Microsoft Corporation.
 beautifulsoup4,PyPI,MIT,Copyright (c) 2004-2017 Leonard Richardson
 beautifulsoup4,PyPI,MIT,Copyright (c) Leonard Richardson
 binary,PyPI,Apache-2.0,Copyright 2018 Ofek Lev
@@ -95,7 +96,6 @@ requests-unixsocket,PyPI,Apache-2.0,Copyright 2014 Marc Abramowitz
 rethinkdb,PyPI,Apache-2.0,Copyright 2018 RethinkDB.
 scandir,PyPI,BSD-3-Clause,"Copyright (c) 2012, Ben Hoyt"
 securesystemslib,PyPI,MIT,Copyright (c) 2016 Santiago Torres
-selectors34,PyPI,PSF,Copyright (c) 2015 Berker Peksag
 semver,PyPI,BSD-3-Clause,"Copyright (c) 2013, Konstantine Rybnikov"
 serpent,PyPI,MIT,Copyright (c) by Irmen de Jong
 service-identity,PyPI,MIT,Copyright (c) 2014 Hynek Schlawack
