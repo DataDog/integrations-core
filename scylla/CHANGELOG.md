@@ -6,6 +6,10 @@
 
 * Add new ScyllaDB metrics ([#15592](https://github.com/DataDog/integrations-core/pull/15592))
 
+***Fixed***:
+
+* Add config for new metrics groups ([#15614](https://github.com/DataDog/integrations-core/pull/15614))
+
 ## 2.4.0 / 2023-08-10
 
 ***Added***:
