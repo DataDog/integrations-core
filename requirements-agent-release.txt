@@ -44,7 +44,7 @@ datadog-dotnetclr==2.0.0; sys_platform == 'win32'
 datadog-druid==2.3.1
 datadog-ecs-fargate==4.0.0
 datadog-eks-fargate==4.0.0
-datadog-elastic==6.0.0
+datadog-elastic==6.1.0
 datadog-envoy==3.0.0
 datadog-etcd==6.0.0
 datadog-exchange-server==2.0.0; sys_platform == 'win32'
