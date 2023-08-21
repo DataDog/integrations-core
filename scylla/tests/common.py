@@ -399,6 +399,10 @@ def modify_metrics_map(map_to_add, map_to_delete=None):
     return base_map
 
 
+metric_map = base_metric_group_map
+additional_instance_groups = base_additional_groups
+
+
 if os.environ['SCYLLA_VERSION'] == "3.3.1":
     new_metrics_version_3_3 = {
         'scylla.storage': [
@@ -791,9 +795,6 @@ elif os.environ['SCYLLA_VERSION'] == "5.2.6":
 
     metric_map = modify_metrics_map(new_metrics_version_5, changed_or_removed_metrics_ver_5)
     additional_instance_groups = base_additional_groups + instance_5_additional_groups
-else:
-    metric_map = base_metric_group_map
-    additional_instance_groups = base_additional_groups
 
 
 # expand the lists into a single list of metrics
