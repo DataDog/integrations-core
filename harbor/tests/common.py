@@ -5,7 +5,6 @@ import os
 
 from datadog_checks.dev import get_docker_hostname
 
-VERSION_1_8 = [1, 8, 0]
 VERSION_2_2 = [2, 2, 0]
 
 HARBOR_COMPONENTS = ['chartmuseum', 'registry', 'redis', 'jobservice', 'registryctl', 'portal', 'core', 'database']
@@ -72,15 +71,6 @@ PROJECTS_FIXTURE = [
         "chart_count": 0,
         "metadata": {"public": "false"},
     },
-]
-
-REGISTRIES_PRE_1_8_FIXTURE = [
-    {
-        "id": 1,
-        "name": "Demo",
-        "url": "https://demo.goharbor.io/",
-        "credential": {"type": "basic", "access_key": "*****", "access_secret": "*****"},
-    }
 ]
 
 REGISTRIES_FIXTURE = [
