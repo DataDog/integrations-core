@@ -459,6 +459,8 @@ integration/weblogic:
 - weblogic/**/*
 integration/win32_event_log:
 - win32_event_log/**/*
+integration/wincrashdetect:
+- wincrashdetect/**/*
 integration/windows_performance_counters:
 - windows_performance_counters/**/*
 integration/windows_service:

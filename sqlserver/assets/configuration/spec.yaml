@@ -413,6 +413,32 @@ files:
             type: string
             example: my-sqlserver-database.database.windows.net
 
+    - name: managed_identity
+      description: |
+        Configuration section used for Azure AD Authentication.
+        
+        This supports using System or User assigned managed identities.
+        If this section is set, then the `username` and `password` fields will be ignored.
+        
+        For more information on Managed Identities, see the Azure docs
+        https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+      options:
+        - name: client_id
+          description: |
+            Client ID of the Managed Identity.
+          value:
+            type: string
+        - name: identity_scope
+          description: |
+            The permission scope from where to access the identity token. This value is optional if using the default
+            identity scope for Azure managed databases.
+            
+            For more information on scopes, see the Azure docs
+            https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
+          value:
+            type: string
+            example: https://database.windows.net/.default
+
     - name: obfuscator_options
       description: |
         Configure how the SQL obfuscator behaves.
@@ -514,14 +540,17 @@ files:
       value:
         type: boolean
         example: false
+    - name: database_instance_collection_interval
+      hidden: true
+      description: |
+        Set the database instance collection interval (in seconds). The database instance collection sends
+        basic information about the database instance along with a signal that it still exists. 
+        This collection does not involve any additional queries to the database.
+      value:
+        type: number
+        example: 1800
+        display_default: false
     - template: instances/default
-      overrides:
-        disable_generic_tags.hidden: False
-        disable_generic_tags.enabled: True
-        disable_generic_tags.description: |
-            Generic tags such as `host` are replaced by `sqlserver_host` to avoid
-            getting mixed with other integration tags.
-
   - template: logs
     example:
     - type: file

@@ -8,6 +8,7 @@ PyYAML,PyPI,MIT,Copyright (c) 2017-2021 Ingy döt Net
 Pyro4,PyPI,MIT,Copyright (c) 2016 Irmen de Jong
 aerospike,PyPI,Apache-2.0,"Copyright Aerospike, Inc."
 aws-requests-auth,PyPI,BSD-3-Clause,Copyright (c) David Muller.
+azure-identity,PyPI,MIT,Copyright (c) Microsoft Corporation.
 beautifulsoup4,PyPI,MIT,Copyright (c) 2004-2017 Leonard Richardson
 beautifulsoup4,PyPI,MIT,Copyright (c) Leonard Richardson
 binary,PyPI,Apache-2.0,Copyright 2018 Ofek Lev
@@ -63,6 +64,7 @@ protobuf,PyPI,BSD-3-Clause,Copyright 2008 Google Inc.
 protobuf,PyPI,BSD-3-Clause,Copyright 2008 Google Inc.  All rights reserved.
 psutil,PyPI,BSD-3-Clause,"Copyright (c) 2009, Jay Loden, Dave Daeschler, Giampaolo Rodola'"
 psycopg,PyPI,LGPL-3.0-only,Copyright (C) 2020 The Psycopg Team
+psycopg-pool,PyPI,LGPL-3.0-only,Copyright (C) 2020 The Psycopg Team
 psycopg2-binary,PyPI,BSD-3-Clause,Copyright 2013 Federico Di Gregorio
 psycopg2-binary,PyPI,LGPL-3.0-only,Copyright (C) 2013 Federico Di Gregorio
 pyasn1,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
@@ -83,7 +85,7 @@ python-dateutil,PyPI,BSD-3-Clause,Copyright 2017- Paul Ganssle <paul@ganssle.io>
 python3-gearman,PyPI,Apache-2.0,
 pyvmomi,PyPI,Apache-2.0,"Copyright (c) 2005-2021 VMware, Inc. All Rights Reserved."
 pywin32,PyPI,PSF,Copyright 2002-2003 by Blackdog Software Pty Ltd.
-redis,PyPI,MIT,"Copyright (c) 2022, Redis, inc."
+redis,PyPI,MIT,"Copyright (c) 2022-2023, Redis, inc."
 redis,PyPI,MIT,Copyright (c) 2012 Andy McCurdy
 requests,PyPI,Apache-2.0,Copyright 2019 Kenneth Reitz
 requests-kerberos,PyPI,ISC,Copyright (c) 2012 Kenneth Reitz
@@ -95,7 +97,6 @@ requests-unixsocket,PyPI,Apache-2.0,Copyright 2014 Marc Abramowitz
 rethinkdb,PyPI,Apache-2.0,Copyright 2018 RethinkDB.
 scandir,PyPI,BSD-3-Clause,"Copyright (c) 2012, Ben Hoyt"
 securesystemslib,PyPI,MIT,Copyright (c) 2016 Santiago Torres
-selectors34,PyPI,PSF,Copyright (c) 2015 Berker Peksag
 semver,PyPI,BSD-3-Clause,"Copyright (c) 2013, Konstantine Rybnikov"
 serpent,PyPI,MIT,Copyright (c) by Irmen de Jong
 service-identity,PyPI,MIT,Copyright (c) 2014 Hynek Schlawack

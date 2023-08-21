@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 6.2.0 / 2023-08-18
+
+***Added***:
+
+* Add hardware metrics for Cisco (non-categorical) ([#15551](https://github.com/DataDog/integrations-core/pull/15551))
+* Add hardware metrics for Dell (non-categorical) ([#15567](https://github.com/DataDog/integrations-core/pull/15567))
+* Add hardware metrics for F5 (non-categorical) ([#15568](https://github.com/DataDog/integrations-core/pull/15568))
+* Add hardware metrics for Fortinet (non-categorical) ([#15553](https://github.com/DataDog/integrations-core/pull/15553))
+* Add hardware metrics for Meraki ([#15542](https://github.com/DataDog/integrations-core/pull/15542))
+* Add citrix-netscaler-sdx profile ([#15482](https://github.com/DataDog/integrations-core/pull/15482))
+
 ## 6.1.0 / 2023-08-10
 
 ***Added***:

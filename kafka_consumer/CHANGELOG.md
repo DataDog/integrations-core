@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Use `_request_timeout` config parameter when querying metadata with kafka client ([#15630](https://github.com/DataDog/integrations-core/pull/15630))
+
+## 4.1.0 / 2023-08-18
+
+***Added***:
+
+* Update dependencies for Agent 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
+
 ## 4.0.0 / 2023-08-10
 
 ***Changed***:
@@ -14,7 +24,8 @@
 
 ***Fixed***:
 
-* [AGENT-9940] Reduce number of consumer creations ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
+* Reduce number of consumer creations ([#15476](https://github.com/DataDog/integrations-core/pull/15476))
+* Optimize highwater offset collection ([#15285](https://github.com/DataDog/integrations-core/pull/15285))
 * Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
 * Simplify regex compilation ([#15239](https://github.com/DataDog/integrations-core/pull/15239))
 

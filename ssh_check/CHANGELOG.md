@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 2.7.0 / 2023-08-18
+
+***Added***:
+
+* Update dependencies for Agent 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
+
+***Fixed***:
+
+* Update datadog-checks-base dependency version to 32.6.0 ([#15604](https://github.com/DataDog/integrations-core/pull/15604))
+
 ## 2.6.0 / 2023-08-10
 
 ***Added***:
