@@ -16,7 +16,6 @@ from datadog_checks.harbor.api import HarborAPI
 from datadog_checks.harbor.common import (
     CHARTREPO_HEALTH_URL,
     HEALTH_URL,
-    LOGIN_PRE_1_7_URL,
     LOGIN_URL,
     PING_URL,
     PROJECTS_URL,
@@ -130,7 +129,7 @@ def mocked_requests(_, *args, **kwargs):
                 return True
         return False
 
-    if match(args[0], LOGIN_PRE_1_7_URL, LOGIN_URL):
+    if match(args[0], LOGIN_URL):
         return MockResponse()
     elif match(args[0], HEALTH_URL) and HARBOR_VERSION >= VERSION_1_8:
         return MockResponse(json_data=HEALTH_FIXTURE)
