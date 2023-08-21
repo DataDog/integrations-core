@@ -340,6 +340,7 @@ base_metric_group_map = {
     ],
 }
 
+
 def modify_metrics_map(map_to_add, map_to_delete=None):
     base_map = base_metric_group_map
     for key, value in map_to_add.items():
@@ -354,6 +355,7 @@ def modify_metrics_map(map_to_add, map_to_delete=None):
                 base_map[key] = [v for v in base_map[key] if v not in values]
 
     return base_map
+
 
 if os.environ['SCYLLA_VERSION'] == "3.3.1":
     new_metrics_version_3_3 = {
@@ -381,13 +383,13 @@ if os.environ['SCYLLA_VERSION'] == "3.3.1":
         ],
         'scylla.reactor': [
             'scylla.reactor.abandoned_failed_futures',
-        ]
+        ],
     }
 
     metric_map = modify_metrics_map(new_metrics_version_3_3)
 
 
-elif os.environ['SCYLLA_VERSION'] == "5.2.6": 
+elif os.environ['SCYLLA_VERSION'] == "5.2.6":
     new_metrics_version_5 = {
         'scylla.cache': [
             'scylla.cache.dummy_row_hits',
