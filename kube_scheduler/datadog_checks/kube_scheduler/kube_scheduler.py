@@ -115,6 +115,10 @@ DEFAULT_GO_METRICS = {
     'process_open_fds': 'open_fds',
 }
 
+NEW_1_26_GAUGES = {
+    'scheduler_goroutines': 'goroutines',
+}
+
 IGNORE_METRICS = [
     'http_requests_total',
     'http_request_size_bytes',
