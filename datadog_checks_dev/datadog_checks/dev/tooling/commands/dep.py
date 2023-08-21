@@ -47,6 +47,8 @@ IGNORED_DEPS = {
     'pyvmomi',  # 7->8 breaks vsphere tests.
     # 4.3->4.4 changes the license field in the package metadata to something our validations cannot handle.
     'pymongo',
+    # We need pydantic 2.0.2 for the rpm x64 agent build (see https://github.com/DataDog/datadog-agent/pull/18303)
+    'pydantic',
 }
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others

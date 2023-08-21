@@ -2,10 +2,23 @@
 
 ## Unreleased
 
+## 14.2.0 / 2023-08-18
+
 ***Added***:
 
+* Add schema collection to Postgres integration ([#15484](https://github.com/DataDog/integrations-core/pull/15484))
 * Add support for sending `database_instance` metadata ([#15559](https://github.com/DataDog/integrations-core/pull/15559))
 * Update dependencies for Agent 7.48 ([#15585](https://github.com/DataDog/integrations-core/pull/15585))
+* Add support for authenticating through Azure Managed Identity ([#15609](https://github.com/DataDog/integrations-core/pull/15609))
+
+***Fixed***:
+
+* Update datadog-checks-base dependency version to 32.6.0 ([#15604](https://github.com/DataDog/integrations-core/pull/15604))
+* Prevent `command already in progress` errors in the Postgres integration ([#15489](https://github.com/DataDog/integrations-core/pull/15489))
+
+***Fixed***:
+
+* Fix InstanceConfig loading error for `ssl` config ([#15611](https://github.com/DataDog/integrations-core/pull/15611))
 
 ## 14.1.0 / 2023-08-10
 

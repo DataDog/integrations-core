@@ -13,6 +13,7 @@ OpenMetrics is used for collecting metrics using the CNCF-backed OpenMetrics for
         - __init__
         - check
         - configure_scrapers
+        - create_scraper
 
 ## Scrapers
 

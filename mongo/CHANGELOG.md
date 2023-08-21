@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 6.0.1 / 2023-08-18
+
+***Fixed***:
+
+* Bump base check version to 32.7.0 ([#15584](https://github.com/DataDog/integrations-core/pull/15584))
+
 ## 6.0.0 / 2023-08-10
 
 ***Changed***:
