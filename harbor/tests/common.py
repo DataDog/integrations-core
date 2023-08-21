@@ -5,7 +5,6 @@ import os
 
 from datadog_checks.dev import get_docker_hostname
 
-VERSION_1_5 = [1, 5, 0]
 VERSION_1_6 = [1, 6, 0]
 VERSION_1_8 = [1, 8, 0]
 VERSION_2_2 = [2, 2, 0]
@@ -21,9 +20,8 @@ HARBOR_METRICS = [
     ('harbor.projects.count', False),
     ('harbor.disk.free', True),
     ('harbor.disk.total', True),
+    ('harbor.registry.read_only', False),
 ]
-if HARBOR_VERSION >= VERSION_1_5:
-    HARBOR_METRICS.append(('harbor.registry.read_only', False))
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 URL = 'http://{}'.format(get_docker_hostname())
@@ -100,8 +98,9 @@ REGISTRIES_FIXTURE = [
 VOLUME_INFO_PRE_2_2_FIXTURE = {"storage": {"total": 1e6, "free": 5e5}}
 VOLUME_INFO_FIXTURE = {"storage": [{"total": 1e6, "free": 5e5}]}
 
-SYSTEM_INFO_FIXTURE = {"harbor_version": "v{}-25bb24ca".format(os.environ['HARBOR_VERSION'])}
-if HARBOR_VERSION >= VERSION_1_5:
-    SYSTEM_INFO_FIXTURE['read_only'] = False
+SYSTEM_INFO_FIXTURE = {
+    "harbor_version": "v{}-25bb24ca".format(os.environ['HARBOR_VERSION']),
+    "read_only": False,
+}
 if HARBOR_VERSION >= VERSION_1_6:
     SYSTEM_INFO_FIXTURE['with_chartmuseum'] = True

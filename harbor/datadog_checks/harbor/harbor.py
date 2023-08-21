@@ -6,7 +6,7 @@ from requests import HTTPError
 from datadog_checks.base import AgentCheck
 
 from .api import HarborAPI
-from .common import HEALTHY, VERSION_1_5, VERSION_1_8
+from .common import HEALTHY, VERSION_1_8
 
 CAN_CONNECT = 'harbor.can_connect'
 REGISTRY_STATUS = 'harbor.registry.status'
@@ -22,7 +22,7 @@ class HarborCheck(AgentCheck):
                 component_status = AgentCheck.OK if el['status'] == HEALTHY else AgentCheck.CRITICAL
                 tags = base_tags + ['component:{}'.format(el['name'])]
                 self.service_check(STATUS, component_status, tags=tags)
-        elif api.harbor_version >= VERSION_1_5:
+        else:
             ping = api.ping()
             overall_status = AgentCheck.OK if ping == 'Pong' else AgentCheck.CRITICAL
             self.service_check(STATUS, overall_status, tags=base_tags)
@@ -40,9 +40,6 @@ class HarborCheck(AgentCheck):
                 chartrepo_status = AgentCheck.OK if chartrepo_health else AgentCheck.CRITICAL
                 tags = base_tags + ['component:chartmuseum']
                 self.service_check(STATUS, chartrepo_status, tags=tags)
-        else:
-            # Before version 1.5, there is no support for a health check.
-            self.service_check(STATUS, AgentCheck.UNKNOWN, tags=base_tags)
 
     def _check_registries_health(self, api, base_tags):
         """A registry here is an external docker registry (DockerHub, ECR, another Harbor...) that this current

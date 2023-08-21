@@ -6,7 +6,7 @@ import pytest
 
 from datadog_checks.harbor import HarborCheck
 
-from .common import HARBOR_COMPONENTS, HARBOR_METRICS, HARBOR_VERSION, VERSION_1_5, VERSION_1_8, VERSION_2_2
+from .common import HARBOR_COMPONENTS, HARBOR_METRICS, HARBOR_VERSION, VERSION_1_8, VERSION_2_2
 
 
 @pytest.mark.integration
@@ -56,7 +56,5 @@ def assert_service_checks(aggregator):
     if HARBOR_VERSION > VERSION_1_8:
         for c in HARBOR_COMPONENTS:
             aggregator.assert_service_check('harbor.status', status=mock.ANY, tags=['component:{}'.format(c)])
-    elif HARBOR_VERSION >= VERSION_1_5:
-        aggregator.assert_service_check('harbor.status', status=HarborCheck.OK)
     else:
-        aggregator.assert_service_check('harbor.status', status=HarborCheck.UNKNOWN)
+        aggregator.assert_service_check('harbor.status', status=HarborCheck.OK)
