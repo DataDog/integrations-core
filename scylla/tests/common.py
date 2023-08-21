@@ -793,6 +793,7 @@ elif os.environ['SCYLLA_VERSION'] == "5.2.6":
     additional_instance_groups = base_additional_groups + instance_5_additional_groups
 else:
     metric_map = base_metric_group_map
+    additional_instance_groups = base_additional_groups
 
 
 # expand the lists into a single list of metrics
