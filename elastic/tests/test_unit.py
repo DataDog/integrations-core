@@ -168,7 +168,10 @@ def test__get_data_creates_critical_service_alert(aggregator, instance):
         check = ESCheck('elastic', {}, instances=[instance])
 
         with pytest.raises(Exception):
-            check._get_data(url='test.com')
+            try:
+                check._get_data(url='test.com')
+            except AuthenticationError:
+                pytest.fail("Shouldn't raise AuthenticationError")
 
         aggregator.assert_service_check(
             check.SERVICE_CHECK_CONNECT_NAME,
