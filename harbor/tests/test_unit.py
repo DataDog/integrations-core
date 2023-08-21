@@ -8,7 +8,7 @@ from requests import HTTPError
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.http import MockResponse
 
-from .common import HARBOR_COMPONENTS, VERSION_1_6, VERSION_1_8
+from .common import HARBOR_COMPONENTS, VERSION_1_8
 
 
 @pytest.mark.usefixtures("patch_requests")
@@ -20,10 +20,8 @@ def test_check_health(aggregator, harbor_check, harbor_api):
         components = HARBOR_COMPONENTS
         for c in components:
             aggregator.assert_service_check('harbor.status', AgentCheck.OK, tags=base_tags + ['component:{}'.format(c)])
-    elif harbor_api.harbor_version >= VERSION_1_6:
-        aggregator.assert_service_check('harbor.status', AgentCheck.OK, tags=base_tags + ['component:chartmuseum'])
-        aggregator.assert_service_check('harbor.status', AgentCheck.OK, tags=base_tags)
     else:
+        aggregator.assert_service_check('harbor.status', AgentCheck.OK, tags=base_tags + ['component:chartmuseum'])
         aggregator.assert_service_check('harbor.status', AgentCheck.OK, tags=base_tags)
 
 

@@ -5,7 +5,6 @@ import os
 
 from datadog_checks.dev import get_docker_hostname
 
-VERSION_1_6 = [1, 6, 0]
 VERSION_1_8 = [1, 8, 0]
 VERSION_2_2 = [2, 2, 0]
 
@@ -101,6 +100,5 @@ VOLUME_INFO_FIXTURE = {"storage": [{"total": 1e6, "free": 5e5}]}
 SYSTEM_INFO_FIXTURE = {
     "harbor_version": "v{}-25bb24ca".format(os.environ['HARBOR_VERSION']),
     "read_only": False,
+    "with_chartmuseum": True,
 }
-if HARBOR_VERSION >= VERSION_1_6:
-    SYSTEM_INFO_FIXTURE['with_chartmuseum'] = True

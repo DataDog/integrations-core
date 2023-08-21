@@ -41,7 +41,6 @@ from .common import (
     SYSTEM_INFO_FIXTURE,
     URL,
     USERS_URL,
-    VERSION_1_6,
     VERSION_1_8,
     VERSION_2_2,
     VOLUME_INFO_FIXTURE,
@@ -137,7 +136,7 @@ def mocked_requests(_, *args, **kwargs):
         return MockResponse(json_data=HEALTH_FIXTURE)
     elif match(args[0], PING_URL):
         return MockResponse('Pong')
-    elif match(args[0], CHARTREPO_HEALTH_URL) and HARBOR_VERSION >= VERSION_1_6:
+    elif match(args[0], CHARTREPO_HEALTH_URL):
         return MockResponse(json_data=CHARTREPO_HEALTH_FIXTURE)
     elif match(args[0], PROJECTS_URL):
         return MockResponse(json_data=PROJECTS_FIXTURE)
