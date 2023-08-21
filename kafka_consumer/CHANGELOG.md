@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Add missing timeout when looking up offsets ([#15630](https://github.com/DataDog/integrations-core/pull/15630))
+
 ## 4.1.0 / 2023-08-18
 
 ***Added***:
