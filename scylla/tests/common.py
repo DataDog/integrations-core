@@ -340,6 +340,48 @@ base_metric_group_map = {
     ],
 }
 
+# Additional groups exposed in all environments
+base_additional_groups = [
+    'scylla.alien',
+    'scylla.batchlog_manager',
+    'scylla.commitlog',
+    'scylla.cql',
+    'scylla.database',
+    'scylla.execution_stages',
+    'scylla.hints',
+    'scylla.httpd',
+    'scylla.io_queue',
+    'scylla.lsa',
+    'scylla.memory',
+    'scylla.memtables',
+    'scylla.query_processor',
+    'scylla.scheduler',
+    'scylla.sstables',
+    'scylla.tracing',
+]
+
+flaky_metrics_3 = [
+    'scylla.reactor.abandoned_failed_futures',
+    'scylla.storage.proxy.coordinator_cas_read_contention.count',
+    'scylla.storage.proxy.coordinator_cas_read_contention.sum',
+    'scylla.storage.proxy.coordinator_cas_read_latency.count',
+    'scylla.storage.proxy.coordinator_cas_read_latency.sum',
+    'scylla.storage.proxy.coordinator_cas_read_timouts',
+    'scylla.storage.proxy.coordinator_cas_read_unavailable',
+    'scylla.storage.proxy.coordinator_cas_read_unfinished_commit',
+    'scylla.storage.proxy.coordinator_cas_write_condition_not_met',
+    'scylla.storage.proxy.coordinator_cas_write_contention.count',
+    'scylla.storage.proxy.coordinator_cas_write_contention.sum',
+    'scylla.storage.proxy.coordinator_cas_write_latency.count',
+    'scylla.storage.proxy.coordinator_cas_write_latency.sum',
+    'scylla.storage.proxy.coordinator_cas_write_timeouts',
+    'scylla.storage.proxy.coordinator_cas_write_unavailable',
+    'scylla.storage.proxy.coordinator_cas_write_unfinished_commit',
+    'scylla.storage.proxy.coordinator_reads_coordinator_outside_replica_set',
+    'scylla.storage.proxy.coordinator_writes_coordinator_outside_replica_set',
+    'scylla.transport.requests_memory_available',
+]
+
 
 def modify_metrics_map(map_to_add, map_to_delete=None):
     base_map = base_metric_group_map
@@ -386,7 +428,13 @@ if os.environ['SCYLLA_VERSION'] == "3.3.1":
         ],
     }
 
+    # Additional groups exposed in 3.* environments
+    instance_3_additional_groups = [
+        'scylla.thrift',
+    ]
+
     metric_map = modify_metrics_map(new_metrics_version_3_3)
+    additional_instance_groups = base_additional_groups + instance_3_additional_groups
 
 
 elif os.environ['SCYLLA_VERSION'] == "5.2.6":
@@ -679,83 +727,79 @@ elif os.environ['SCYLLA_VERSION'] == "5.2.6":
             'scylla.thrift.thrift_connections',
         ],
     }
+    # Additional groups exposed in 5.* environments
+    instance_5_additional_groups = [
+        'scylla.cdc',
+        'scylla.forward_service',
+        'scylla.raft',
+        'scylla.repair',
+        'scylla.schema_commitlog',
+        'scylla.stall',
+        'scylla.view',
+    ]
+
+    flaky_metrics_5 = [
+        'scylla.memory.streaming_dirty_bytes',
+        'scylla.memory.streaming_virtual_dirty_bytes',
+        'scylla.raft.add_entries',
+        'scylla.raft.applied_entries',
+        'scylla.raft.in_memory_log_size',
+        'scylla.raft.messages_received',
+        'scylla.raft.messages_sent',
+        'scylla.raft.persisted_log_entriespersisted_log_entries',
+        'scylla.raft.polls',
+        'scylla.raft.queue_entries_for_apply',
+        'scylla.raft.sm_load_snapshot',
+        'scylla.raft.snapshots_taken',
+        'scylla.raft.store_snapshot',
+        'scylla.raft.store_term_and_vote',
+        'scylla.raft.truncate_persisted_log',
+        'scylla.raft.waiter_awaiken',
+        'scylla.raft.waiter_dropped',
+        'scylla.repair.row_from_disk_nr',
+        'scylla.repair.rx_hashes_nr',
+        'scylla.repair.rx_row_bytes',
+        'scylla.repair.rx_row_nr',
+        'scylla.repair.tx_hashes_nr',
+        'scylla.repair.tx_row_bytes',
+        'scylla.repair.tx_row_nr',
+        'scylla.schema_commitlog.active_allocations',
+        'scylla.schema_commitlog.alloc',
+        'scylla.schema_commitlog.allocating_segments',
+        'scylla.schema_commitlog.blocked_on_new_segment',
+        'scylla.schema_commitlog.bytes_flush_requested',
+        'scylla.schema_commitlog.bytes_released',
+        'scylla.schema_commitlog.bytes_written',
+        'scylla.schema_commitlog.cycle',
+        'scylla.schema_commitlog.disk_active_bytes',
+        'scylla.schema_commitlog.disk_slack_end_bytes',
+        'scylla.schema_commitlog.disk_total_bytes',
+        'scylla.schema_commitlog.flush',
+        'scylla.schema_commitlog.flush_limit_exceeded',
+        'scylla.schema_commitlog.memory_buffer_bytes',
+        'scylla.schema_commitlog.pending_allocations',
+        'scylla.schema_commitlog.pending_flushes',
+        'scylla.schema_commitlog.requests_blocked_memory',
+        'scylla.schema_commitlog.segments',
+        'scylla.schema_commitlog.slack',
+        'scylla.schema_commitlog.unused_segments',
+        'scylla.view.builder_pending_bookkeeping_ops',
+        'scylla_forward_service_requests_dispatched_to_other_nodes',
+        'scylla_forward_service_requests_dispatched_to_own_shards',
+        'scylla_forward_service_requests_executed',
+    ]
 
     metric_map = modify_metrics_map(new_metrics_version_5, changed_or_removed_metrics_ver_5)
+    additional_instance_groups = base_additional_groups + instance_5_additional_groups
 else:
     metric_map = base_metric_group_map
 
-FLAKY_METRICS_3 = [
-    'scylla.reactor.abandoned_failed_futures',
-    'scylla.storage.proxy.coordinator_cas_read_contention.count',
-    'scylla.storage.proxy.coordinator_cas_read_contention.sum',
-    'scylla.storage.proxy.coordinator_cas_read_latency.count',
-    'scylla.storage.proxy.coordinator_cas_read_latency.sum',
-    'scylla.storage.proxy.coordinator_cas_read_timouts',
-    'scylla.storage.proxy.coordinator_cas_read_unavailable',
-    'scylla.storage.proxy.coordinator_cas_read_unfinished_commit',
-    'scylla.storage.proxy.coordinator_cas_write_condition_not_met',
-    'scylla.storage.proxy.coordinator_cas_write_contention.count',
-    'scylla.storage.proxy.coordinator_cas_write_contention.sum',
-    'scylla.storage.proxy.coordinator_cas_write_latency.count',
-    'scylla.storage.proxy.coordinator_cas_write_latency.sum',
-    'scylla.storage.proxy.coordinator_cas_write_timeouts',
-    'scylla.storage.proxy.coordinator_cas_write_unavailable',
-    'scylla.storage.proxy.coordinator_cas_write_unfinished_commit',
-    'scylla.storage.proxy.coordinator_reads_coordinator_outside_replica_set',
-    'scylla.storage.proxy.coordinator_writes_coordinator_outside_replica_set',
-    'scylla.transport.requests_memory_available',
-]
 
-FLAKY_METRICS_5 = [
-    'scylla.memory.streaming_dirty_bytes',
-    'scylla.memory.streaming_virtual_dirty_bytes',
-    'scylla.raft.add_entries',
-    'scylla.raft.applied_entries',
-    'scylla.raft.in_memory_log_size',
-    'scylla.raft.messages_received',
-    'scylla.raft.messages_sent',
-    'scylla.raft.persisted_log_entriespersisted_log_entries',
-    'scylla.raft.polls',
-    'scylla.raft.queue_entries_for_apply',
-    'scylla.raft.sm_load_snapshot',
-    'scylla.raft.snapshots_taken',
-    'scylla.raft.store_snapshot',
-    'scylla.raft.store_term_and_vote',
-    'scylla.raft.truncate_persisted_log',
-    'scylla.raft.waiter_awaiken',
-    'scylla.raft.waiter_dropped',
-    'scylla.repair.row_from_disk_nr',
-    'scylla.repair.rx_hashes_nr',
-    'scylla.repair.rx_row_bytes',
-    'scylla.repair.rx_row_nr',
-    'scylla.repair.tx_hashes_nr',
-    'scylla.repair.tx_row_bytes',
-    'scylla.repair.tx_row_nr',
-    'scylla.schema_commitlog.active_allocations',
-    'scylla.schema_commitlog.alloc',
-    'scylla.schema_commitlog.allocating_segments',
-    'scylla.schema_commitlog.blocked_on_new_segment',
-    'scylla.schema_commitlog.bytes_flush_requested',
-    'scylla.schema_commitlog.bytes_released',
-    'scylla.schema_commitlog.bytes_written',
-    'scylla.schema_commitlog.cycle',
-    'scylla.schema_commitlog.disk_active_bytes',
-    'scylla.schema_commitlog.disk_slack_end_bytes',
-    'scylla.schema_commitlog.disk_total_bytes',
-    'scylla.schema_commitlog.flush',
-    'scylla.schema_commitlog.flush_limit_exceeded',
-    'scylla.schema_commitlog.memory_buffer_bytes',
-    'scylla.schema_commitlog.pending_allocations',
-    'scylla.schema_commitlog.pending_flushes',
-    'scylla.schema_commitlog.requests_blocked_memory',
-    'scylla.schema_commitlog.segments',
-    'scylla.schema_commitlog.slack',
-    'scylla.schema_commitlog.unused_segments',
-    'scylla.view.builder_pending_bookkeeping_ops',
-    'scylla_forward_service_requests_dispatched_to_other_nodes',
-    'scylla_forward_service_requests_dispatched_to_own_shards',
-    'scylla_forward_service_requests_executed',
-]
+# expand the lists into a single list of metrics
+def get_metrics(metric_groups):
+    """Given a list of metric groups, return single consolidated list"""
+    return sorted(m for g in metric_groups for m in metric_map[g])
+
 
 INSTANCE_DEFAULT_GROUPS = [
     'scylla.cache',
@@ -768,58 +812,7 @@ INSTANCE_DEFAULT_GROUPS = [
     'scylla.transport',
 ]
 
-# Additional groups exposed in all environments
-base_additional_groups = [
-    'scylla.alien',
-    'scylla.batchlog_manager',
-    'scylla.commitlog',
-    'scylla.cql',
-    'scylla.database',
-    'scylla.execution_stages',
-    'scylla.hints',
-    'scylla.httpd',
-    'scylla.io_queue',
-    'scylla.lsa',
-    'scylla.memory',
-    'scylla.memtables',
-    'scylla.query_processor',
-    'scylla.scheduler',
-    'scylla.sstables',
-    'scylla.tracing',
-]
-
-# Additional groups exposed in 3.* environments
-instance_3_additional_groups = [
-    'scylla.thrift',
-]
-
-# Additional groups exposed in 5.* environments
-instance_5_additional_groups = [
-    'scylla.cdc',
-    'scylla.forward_service',
-    'scylla.raft',
-    'scylla.repair',
-    'scylla.schema_commitlog',
-    'scylla.stall',
-    'scylla.view',
-]
-
-instance_3_groups = base_additional_groups + instance_3_additional_groups
-instance_5_groups = base_additional_groups + instance_5_additional_groups
-
-
-# expand the lists into a single list of metrics
-def get_metrics(metric_groups):
-    """Given a list of metric groups, return single consolidated list"""
-    return sorted(m for g in metric_groups for m in metric_map[g])
-
-
 INSTANCE_DEFAULT_METRICS = get_metrics(INSTANCE_DEFAULT_GROUPS)
-if os.environ['SCYLLA_VERSION'] == '5.2.6':
-    INSTANCE_ADDITIONAL_GROUPS = instance_5_groups
-    INSTANCE_ADDITIONAL_METRICS = get_metrics(instance_5_groups)
-    FLAKY_METRICS = FLAKY_METRICS_5
-else:
-    INSTANCE_ADDITIONAL_GROUPS = instance_3_groups
-    INSTANCE_ADDITIONAL_METRICS = get_metrics(instance_3_groups)
-    FLAKY_METRICS = FLAKY_METRICS_3
+INSTANCE_ADDITIONAL_GROUPS = additional_instance_groups
+INSTANCE_ADDITIONAL_METRICS = get_metrics(additional_instance_groups)
+FLAKY_METRICS = flaky_metrics_5 if 'flaky_metrics_5' in locals() else flaky_metrics_3
