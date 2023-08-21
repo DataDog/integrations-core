@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from copy import deepcopy
 
 CHECK_NAME = 'scylla'
 NAMESPACE = 'scylla.'
@@ -792,11 +791,12 @@ map_versions_to_metrics = {
     '5.2.6': (new_metrics_version_5, changed_or_removed_metrics_ver_5),
 }
 
+
 def modify_metrics_map(map_to_add, map_to_delete=None):
     base_map = base_metric_group_map
     if not map_to_add or not map_to_delete:
         return base_map
-    
+
     if map_to_add:
         for key, value in map_to_add.items():
             if key in base_map:
@@ -811,11 +811,13 @@ def modify_metrics_map(map_to_add, map_to_delete=None):
 
     return base_map
 
+
 # expand the lists into a single list of metrics
 def get_metrics(metric_groups):
     """Given a list of metric groups, return single consolidated list"""
     metric_list_map = modify_metrics_map(map_versions_to_metrics[os.environ['SCYLLA_VERSION']])
     return sorted(m for g in metric_groups for m in metric_list_map[g])
+
 
 INSTANCE_DEFAULT_METRICS = get_metrics(INSTANCE_DEFAULT_GROUPS)
 if os.environ['SCYLLA_VERSION'] == '5.2.6':
