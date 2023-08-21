@@ -22,6 +22,7 @@
 ***Added***:
 
 * Migrate `validate http` to ddev ([#15526](https://github.com/DataDog/integrations-core/pull/15526))
+* Migrate `ddev validate licenses` command to ddev ([#15475](https://github.com/DataDog/integrations-core/pull/15475))
 
 ***Fixed***:
 
