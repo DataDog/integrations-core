@@ -382,7 +382,7 @@ flaky_metrics_3 = [
     'scylla.transport.requests_memory_available',
 ]
 
-
+# Helper function to create a map based on newly added metrics and changed or deleted metrics
 def modify_metrics_map(map_to_add, map_to_delete=None):
     base_map = base_metric_group_map
     for key, value in map_to_add.items():
@@ -401,6 +401,7 @@ def modify_metrics_map(map_to_add, map_to_delete=None):
 
 metric_map = base_metric_group_map
 additional_instance_groups = base_additional_groups
+flaky_metrics = flaky_metrics_3
 
 
 if os.environ['SCYLLA_VERSION'] == "3.3.1":
@@ -795,6 +796,7 @@ elif os.environ['SCYLLA_VERSION'] == "5.2.6":
 
     metric_map = modify_metrics_map(new_metrics_version_5, changed_or_removed_metrics_ver_5)
     additional_instance_groups = base_additional_groups + instance_5_additional_groups
+    flaky_metrics = flaky_metrics_5
 
 
 # expand the lists into a single list of metrics
@@ -817,4 +819,4 @@ INSTANCE_DEFAULT_GROUPS = [
 INSTANCE_DEFAULT_METRICS = get_metrics(INSTANCE_DEFAULT_GROUPS)
 INSTANCE_ADDITIONAL_GROUPS = additional_instance_groups
 INSTANCE_ADDITIONAL_METRICS = get_metrics(additional_instance_groups)
-FLAKY_METRICS = flaky_metrics_5 if 'flaky_metrics_5' in locals() else flaky_metrics_3
+FLAKY_METRICS = flaky_metrics
