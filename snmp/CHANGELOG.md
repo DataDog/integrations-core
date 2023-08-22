@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Add more mappings to kyocera-printer.yaml ([#15646](https://github.com/DataDog/integrations-core/pull/15646))
+
 ## 6.2.0 / 2023-08-18
 
 ***Added***:
