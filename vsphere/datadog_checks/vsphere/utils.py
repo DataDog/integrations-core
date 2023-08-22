@@ -7,7 +7,6 @@ from pyVmomi import vim
 from six import iteritems
 
 from datadog_checks.base import to_string
-from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
 from datadog_checks.vsphere.constants import (
     MOR_TYPE_AS_STRING,
     OBJECT_PROPERTIES_BY_RESOURCE_TYPE,
@@ -160,8 +159,8 @@ def object_properties_to_collect(mor_string, resource_filters):
     return all_properties
 
 
-def get_tags_recursively(mor, infrastructure_data, config, include_only=None):
-    # type: (vim.ManagedEntity, InfrastructureData, VSphereConfig, Optional[List[str]]) -> List[str]
+def get_tags_recursively(mor, infrastructure_data, include_datastore_cluster_folder_tag, include_only=None):
+    # type: (vim.ManagedEntity, InfrastructureData, bool, Optional[List[str]]) -> List[str]
     """Go up the resources hierarchy from the given mor. Note that a host running a VM is not considered to be a
     parent of that VM.
 
@@ -183,7 +182,7 @@ def get_tags_recursively(mor, infrastructure_data, config, include_only=None):
         if isinstance(mor, vim.StoragePod):
             tags.append('vsphere_datastore_cluster:{}'.format(entity_name))
             # Legacy mode: keep it as "folder"
-            if config.include_datastore_cluster_folder_tag:
+            if include_datastore_cluster_folder_tag:
                 tags.append('vsphere_folder:{}'.format(entity_name))
         else:
             tags.append('vsphere_folder:{}'.format(entity_name))
@@ -198,7 +197,7 @@ def get_tags_recursively(mor, infrastructure_data, config, include_only=None):
 
     parent = infrastructure_data.get(mor, {}).get('parent')
     if parent is not None:
-        tags.extend(get_tags_recursively(parent, infrastructure_data, config))
+        tags.extend(get_tags_recursively(parent, infrastructure_data, include_datastore_cluster_folder_tag))
     if not include_only:
         return tags
     filtered_tags = []
@@ -210,9 +209,9 @@ def get_tags_recursively(mor, infrastructure_data, config, include_only=None):
     return filtered_tags
 
 
-def should_collect_per_instance_values(config, metric_name, resource_type):
-    # type: (VSphereConfig, str, Type[vim.ManagedEntity]) -> bool
-    filters = config.collect_per_instance_filters.get(MOR_TYPE_AS_STRING[resource_type], [])
+def should_collect_per_instance_values(collect_per_instance_filters, metric_name, resource_type):
+    # type: (MetricFilters, str, Type[vim.ManagedEntity]) -> bool
+    filters = collect_per_instance_filters.get(MOR_TYPE_AS_STRING[resource_type], [])
     metric_matched = match_any_regex(metric_name, filters)
     return metric_matched
 
