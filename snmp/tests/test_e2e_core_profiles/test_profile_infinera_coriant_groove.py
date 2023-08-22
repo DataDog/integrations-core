@@ -42,11 +42,14 @@ def test_e2e_profile_infinera_coriant_groove(dd_agent_check):
             'coriant_groove_shelf_alias_name:driving their acted their',
             'coriant_groove_shelf_location:oxen but zombies kept acted oxen kept',
             'coriant_groove_shelf_oper_status:down',
+            'coriant_groove_shelf_avail_status:softwareUpgrade',
         ],
         [
+            'coriant_groove_shelf_admin_status:upNoAlm',
             'coriant_groove_shelf_alias_name:Jaded kept oxen driving',
             'coriant_groove_shelf_location:forward but zombies forward',
             'coriant_groove_shelf_oper_status:down',
+            'coriant_groove_shelf_avail_status:lowerLayerDown',
         ],
     ]
     for tag_row in tag_rows:
@@ -64,13 +67,16 @@ def test_e2e_profile_infinera_coriant_groove(dd_agent_check):
             'coriant_groove_card_equipment_name:driving forward acted forward forward quaintly',
             'coriant_groove_card_mode:regen',
             'coriant_groove_card_oper_status:down',
+            'coriant_groove_card_avail_status:laserSafetyShutoff',
             'coriant_groove_card_required_type:chm1lh',
         ],
         [
+            'coriant_groove_card_admin_status:upNoAlm',
             'coriant_groove_card_alias_name:Jaded kept quaintly forward Jaded',
             'coriant_groove_card_equipment_name:their',
             'coriant_groove_card_mode:notApplicable',
             'coriant_groove_card_oper_status:up',
+            'coriant_groove_card_avail_status:failed',
             'coriant_groove_card_required_type:chm1',
         ],
     ]
