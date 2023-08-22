@@ -116,7 +116,7 @@ DEFAULT_GO_METRICS = {
 }
 
 NEW_1_26_GAUGES = {
-    'scheduler_goroutines': 'goroutines',
+    'scheduler_goroutines': 'scheduler_goroutines',
 }
 
 IGNORE_METRICS = [
@@ -163,6 +163,7 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
                         DEFAULT_GAUGES,
                         NEW_1_15_GAUGES,
                         DEFAULT_GO_METRICS,
+                        NEW_1_26_GAUGES,
                         DEPRECARED_SUMMARIES,
                         NEW_1_23_HISTOGRAMS,
                     ],
