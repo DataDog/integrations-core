@@ -27,7 +27,6 @@ from datadog_checks.vsphere.constants import (
     HISTORICAL_RESOURCES,
     MOR_TYPE_AS_STRING,
     OBJECT_PROPERTIES_BY_RESOURCE_TYPE,
-    PROPERTIES_BY_RESOURCE_TYPE,
     PROPERTY_METRICS_BY_RESOURCE_TYPE,
     REALTIME_RESOURCES,
     SIMPLE_PROPERTIES_BY_RESOURCE_TYPE,
@@ -41,7 +40,6 @@ from datadog_checks.vsphere.types import (  # noqa: F401
 )
 from datadog_checks.vsphere.utils import (
     object_properties_to_collect,
-    properties_to_collect,
     property_metrics_to_collect,
     simple_properties_to_collect,
 )
@@ -280,13 +278,6 @@ class VSphereConfig(object):
         return {
             mor_string: simple_properties_to_collect(mor_string, self.metric_filters)
             for mor_string in SIMPLE_PROPERTIES_BY_RESOURCE_TYPE.keys()
-        }
-
-    @property
-    def properties_to_collect_by_mor(self):
-        return {
-            mor_string: properties_to_collect(mor_string, self.metric_filters)
-            for mor_string in PROPERTIES_BY_RESOURCE_TYPE.keys()
         }
 
     @property
