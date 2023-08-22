@@ -42,10 +42,10 @@ def test_e2e_profile_kyocera_printer(dd_agent_check):
         aggregator.assert_metric('snmp.kcprtAlertStateCode', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['kcprt_memory_device_location:ic_card_slot_a', 'kcprt_memory_device_status:ready_read_write'],
+        ['kcprt_memory_device_location:pcCard-A', 'kcprt_memory_device_status:readyReadWrite'],
         [
-            'kcprt_memory_device_location:resident_font',
-            'kcprt_memory_device_status:not_accessible',
+            'kcprt_memory_device_location:residentFont',
+            'kcprt_memory_device_status:notAccessible',
             'kcprt_memory_device_type:rom',
         ],
     ]
