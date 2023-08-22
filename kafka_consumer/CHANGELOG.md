@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.1.1-beta.1 / 2023-08-22
+
 ***Fixed***:
 
 * Use `_request_timeout` config parameter when querying metadata with kafka client ([#15630](https://github.com/DataDog/integrations-core/pull/15630))
