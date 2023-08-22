@@ -2,10 +2,6 @@
 
 ## Unreleased
 
-***Fixed***:
-
-* Test cpu.usage for profile netgear-switch ([#15647](https://github.com/DataDog/integrations-core/pull/15647))
-
 ## 6.2.0 / 2023-08-18
 
 ***Added***:
