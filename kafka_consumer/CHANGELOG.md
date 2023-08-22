@@ -2,6 +2,8 @@
 
 ## 3.1.1-beta.3 / 2023-08-04
 
+## 3.1.1-beta.4 / 2023-08-22
+
 * [Fixed] Simplify regex compilation. See [#15239](https://github.com/DataDog/integrations-core/pull/15239).
 * [Fixed] Do not check consumer_groups if the offset is invalid. See [#15237](https://github.com/DataDog/integrations-core/pull/15237).
 * [Fixed] Improve performance of check. See [#15106](https://github.com/DataDog/integrations-core/pull/15106).
