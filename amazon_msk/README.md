@@ -85,4 +85,4 @@ Additional helpful documentation, links, and articles:
 [16]: https://www.datadoghq.com/blog/monitor-amazon-msk/
 [17]: https://docs.datadoghq.com/getting_started/tagging/
 [18]: https://docs.datadoghq.com/integrations/amazon_msk
-[19]: https://docs.datadohgq.com/integrations/guide/versions-for-openmetrics-based-integrations
+[19]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
