@@ -69,7 +69,7 @@ def test_e2e_profile_infinera_coriant_groove(dd_agent_check):
         [
             'coriant_groove_card_alias_name:Jaded kept quaintly forward Jaded',
             'coriant_groove_card_equipment_name:their',
-            'coriant_groove_card_mode:not_applicable',
+            'coriant_groove_card_mode:notApplicable',
             'coriant_groove_card_oper_status:up',
             'coriant_groove_card_required_type:chm1',
         ],
