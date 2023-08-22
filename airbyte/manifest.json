@@ -33,7 +33,11 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
-        "airbyte/bin"
+        "airbyte-cron",
+        "airbyte-metrics-reporter",
+        "airbyte-server",
+        "airbyte-workers",
+        "uvicorn connector_builder.entrypoint:app"
       ]
     },
     "dashboards": {

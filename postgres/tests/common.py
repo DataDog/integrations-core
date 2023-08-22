@@ -173,7 +173,7 @@ def check_connection_metrics(aggregator, expected_tags, count=1):
             aggregator.assert_metric(name, count=count, tags=db_tags)
 
 
-def check_activity_metrics(aggregator, tags, hostname=None, count=1):
+def check_activity_metrics(aggregator, tags):
     activity_metrics = [
         'postgresql.transactions.open',
         'postgresql.transactions.idle_in_transaction',
@@ -186,7 +186,7 @@ def check_activity_metrics(aggregator, tags, hostname=None, count=1):
         # Query won't have xid assigned so postgresql.activity.backend_xid_age won't be emitted
         activity_metrics.append('postgresql.activity.backend_xmin_age')
     for name in activity_metrics:
-        aggregator.assert_metric(name, count=1, tags=tags, hostname=hostname)
+        assert_metric_at_least(aggregator, name, tags=tags)
 
 
 def check_stat_replication(aggregator, expected_tags, count=1):
