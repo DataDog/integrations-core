@@ -17,6 +17,7 @@ DEFAULT_PORT = '9001'
 DEFAULT_SOCKET_IP = 'http://127.0.0.1'
 
 PROCESS_STATUS = {AgentCheck.CRITICAL: 'down', AgentCheck.OK: 'up', AgentCheck.UNKNOWN: 'unknown'}
+REVERSED_PROCESS_STATUS = {v: k for k, v in PROCESS_STATUS.items()}
 
 SERVER_TAG = 'supervisord_server'
 
@@ -136,16 +137,15 @@ class SupervisordCheck(AgentCheck):
 
         status_mapping_override = instance.get('status_mapping_override', {})
         if not isinstance(status_mapping_override, dict):
-            raise Exception("'status_mapping_override' should be a dictionary. e.g. %s" % [status_mapping_override])
+            raise Exception("'status_mapping_override' should be a dictionary")
 
         if len(status_mapping_override) != 0:
-            reverse_process_status = {v: k for k, v in PROCESS_STATUS.items()}
             for status, ddstatus in status_mapping_override.items():
                 if ddstatus in PROCESS_STATUS.values():
-                    status_mapping[status] = reverse_process_status[ddstatus]
+                    status_mapping[status] = REVERSED_PROCESS_STATUS[ddstatus]
                 else:
                     raise Exception(
-                        "'status_mapping_override' should be a status mapping e.g. %s => %s" % [status, ddstatus]
+                        "'status_mapping_override' should be a status mapping e.g. %s => %s" % (status, ddstatus)
                     )
 
         # Collect information on each monitored process
