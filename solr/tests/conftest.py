@@ -7,7 +7,6 @@ import os
 import pytest
 
 from datadog_checks.dev import docker_run, get_here
-from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.dev.utils import load_jmx_config
 
 from .common import HOST, UI_PORT
@@ -17,9 +16,7 @@ from .common import HOST, UI_PORT
 def dd_environment():
     with docker_run(
         os.path.join(get_here(), 'docker', 'docker-compose.yml'),
-        conditions=[
-            CheckEndpoints(f"http://{HOST}:{UI_PORT}"),
-        ],
+        endpoints=[f"http://{HOST}:{UI_PORT}"],
         mount_logs=True,
         build=True,
     ):
