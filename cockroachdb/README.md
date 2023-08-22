@@ -137,4 +137,4 @@ Additional helpful documentation, links, and articles:
 [11]: https://www.datadoghq.com/blog/monitor-cockroachdb-performance-metrics-with-datadog
 [12]: https://docs.datadoghq.com/integrations/openmetrics/
 [13]: https://github.com/DataDog/integrations-core/blob/7.33.x/cockroachdb/datadog_checks/cockroachdb/data/conf.yaml.example
-[14]: https://docs.datadohgq.com/integrations/guide/versions-for-openmetrics-based-integrations
+[14]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
