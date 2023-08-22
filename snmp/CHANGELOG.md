@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Delete unnecessary extend for ubiquiti profiles ([#15643](https://github.com/DataDog/integrations-core/pull/15643))
+
 ## 6.2.0 / 2023-08-18
 
 ***Added***:
