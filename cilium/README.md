@@ -84,7 +84,6 @@ To configure this check for an Agent running on a host:
    
     **NOTE**: By default, the `use_openmetrics` option is enabled in the conf.yaml.example. Set the `use_openmetrics` configuration option to `false` to use the OpenMetrics V1 implementation. To view the configuration parameters for OpenMetrics V1, see [the `conf.yaml.example` file][12].
     
-    You can read more about [OpenMetrics V2][13].
 2. [Restart the Agent][5].
 
 ##### Log collection
@@ -176,7 +175,7 @@ Need help? Contact [Datadog support][11].
 
 [1]: https://cilium.io
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/cilium/datadog_checks/cilium/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/kubernetes/?tab=daemonset#installation
@@ -186,4 +185,3 @@ Need help? Contact [Datadog support][11].
 [10]: https://github.com/DataDog/integrations-core/blob/master/cilium/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
 [12]: https://github.com/DataDog/integrations-core/blob/7.33.x/cilium/datadog_checks/cilium/data/conf.yaml.example
-[13]: https://datadoghq.dev/integrations-core/base/openmetrics/

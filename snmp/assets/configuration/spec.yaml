@@ -405,13 +405,16 @@ files:
           example: true
       - name: interface_configs
         description: |
-          This option is used to override interface inbound/outbound speed.
+          This option is used to override interface inbound/outbound speed and add interface tags.
           Example:
           interface_configs:
             - match_field: "name"  # (required) the field to match, can be `name` (interface name) or `index` (ifIndex)
               match_value: "eth0"  # (required) the value to match
               in_speed: 50         # (optional) inbound speed value in bits per sec, no value or 0 means no override
               out_speed: 25        # (optional) outbound speed value in bits per sec, no value or 0 means no override
+              tags:                # (optional) interface level tags
+                - "testTagKey:testTagValue"
+                - "tagKey2:tagValue2"
         value:
           type: array
           items:
@@ -425,6 +428,11 @@ files:
               match_value: "10"
               in_speed: 50
               out_speed: 25
+            - match_field: name
+              match_value: eth4
+              tags:
+                - "monitored:true"
+                - "customKey:customValue"
 
       - template: instances/default
         overrides:

@@ -19,6 +19,9 @@ GITLAB_LOCAL_GITALY_PROMETHEUS_PORT = 8089
 
 PROMETHEUS_ENDPOINT = "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_PROMETHEUS_PORT)
 GITLAB_PROMETHEUS_ENDPOINT = "http://{}:{}/-/metrics".format(HOST, GITLAB_LOCAL_PORT)
+GITLAB_READINESS_ENDPOINT = "http://{}:{}/-/readiness".format(HOST, GITLAB_LOCAL_PORT)
+GITLAB_LIVENESS_ENDPOINT = "http://{}:{}/-/liveness".format(HOST, GITLAB_LOCAL_PORT)
+GITLAB_HEALTH_ENDPOINT = "http://{}:{}/-/health".format(HOST, GITLAB_LOCAL_PORT)
 GITLAB_GITALY_PROMETHEUS_ENDPOINT = "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_GITALY_PROMETHEUS_PORT)
 GITLAB_URL = "http://{}:{}".format(HOST, GITLAB_LOCAL_PORT)
 GITLAB_TAGS = ['gitlab_host:{}'.format(HOST), 'gitlab_port:{}'.format(GITLAB_LOCAL_PORT)]

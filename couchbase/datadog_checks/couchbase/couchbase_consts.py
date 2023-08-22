@@ -48,6 +48,7 @@ BUCKET_STATS = {
     "cas_hits",
     "cas_misses",
     "cmd_get",
+    "cmd_lookup",
     "cmd_set",
     "couch_docs_actual_disk_size",
     "couch_docs_data_size",

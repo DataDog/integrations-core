@@ -2573,3 +2573,6 @@ extra_work_duration{quantile="0.9"} 13
 extra_work_duration{quantile="0.99"} 30
 extra_work_duration_sum 45171
 extra_work_duration_count 13
+# TYPE job_controller_terminated_pods_tracking_finalizer_total counter
+job_controller_terminated_pods_tracking_finalizer_total{event="add"} 6
+job_controller_terminated_pods_tracking_finalizer_total{event="delete"} 6

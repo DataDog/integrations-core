@@ -700,6 +700,7 @@ def test_no_infra_cache_no_perf_values(aggregator, realtime_instance, dd_run_che
     with mock.patch('pyVim.connect.SmartConnect') as mock_connect, mock.patch(
         'pyVmomi.vmodl.query.PropertyCollector'
     ) as mock_property_collector:
+
         event = vim.event.VmReconfiguredEvent()
         event.userName = "datadog"
         event.createdTime = get_current_datetime()

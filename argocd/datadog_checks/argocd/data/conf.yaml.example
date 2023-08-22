@@ -61,6 +61,11 @@ instances:
     #
     # repo_server_endpoint: http://argocd-repo-server:8084/metrics
 
+    ## @param notifications_controller_endpoint - string - optional
+    ## Endpoint exposing Notification Controller's Prometheus metrics.
+    #
+    # notifications_controller_endpoint: http://argocd-notifications-controller:9001/metrics
+
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.

@@ -19,13 +19,7 @@
 		"include_tags": true,
 		"thresholds": {
 			"critical": 0.9,
-			"warning": 0.8,
-			"critical_recovery": 0.9,
-			"warning_recovery": 0.8
-		},
-		"threshold_windows": {
-			"trigger_window": "last_15m",
-			"recovery_window": "last_15m"
+			"warning": 0.8
 		}
 	},
 	"priority": null,

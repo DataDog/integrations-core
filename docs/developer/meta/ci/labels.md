@@ -15,5 +15,3 @@ The labeler is [configured](https://github.com/DataDog/integrations-core/blob/ma
 | <mark style="background-color: #83fcf8; color: #000000">dependencies</mark> | any change in shipped dependencies |
 | <mark style="background-color: #FFDF00; color: #000000">release</mark> | any [base package](../../base/about.md), [dev package](../../ddev/about.md), or integration release |
 | <mark style="background-color: #eeeeee; color: #000000">changelog/no-changelog</mark> | any release, or if all files don't modify code that is shipped |
-
-The <mark style="background-color: #d613a8; color: #ffffff">changelog/&lt;TYPE&gt;</mark> label must be [applied manually](../../guidelines/pr.md#changelog-label).

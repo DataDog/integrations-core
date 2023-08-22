@@ -1091,3 +1091,111 @@ cilium_unreachable_nodes 1
 # HELP cilium_version Cilium version
 # TYPE cilium_version gauge
 cilium_version{version="1.9.10"} 0
+# HELP cilium_api_limiter_adjustment_factor Current adjustment factor while auto adjusting
+# TYPE cilium_api_limiter_adjustment_factor gauge
+cilium_api_limiter_adjustment_factor{api_call="endpoint-create"} 6.6881008818690715
+cilium_api_limiter_adjustment_factor{api_call="endpoint-delete"} 6.92160660345634
+cilium_api_limiter_adjustment_factor{api_call="endpoint-list"} 100
+# HELP cilium_api_limiter_processed_requests_total Total number of API requests processed
+# TYPE cilium_api_limiter_processed_requests_total counter
+cilium_api_limiter_processed_requests_total{api_call="endpoint-create",outcome="success"} 2966
+cilium_api_limiter_processed_requests_total{api_call="endpoint-delete",outcome="fail"} 60781
+cilium_api_limiter_processed_requests_total{api_call="endpoint-delete",outcome="success"} 2956
+cilium_api_limiter_processed_requests_total{api_call="endpoint-list",outcome="success"} 1
+# HELP cilium_api_limiter_processing_duration_seconds Current processing time of api call
+# TYPE cilium_api_limiter_processing_duration_seconds gauge
+cilium_api_limiter_processing_duration_seconds{api_call="endpoint-create",value="estimated"} 2
+cilium_api_limiter_processing_duration_seconds{api_call="endpoint-create",value="mean"} 0.2990385515
+cilium_api_limiter_processing_duration_seconds{api_call="endpoint-delete",value="estimated"} 0.2
+cilium_api_limiter_processing_duration_seconds{api_call="endpoint-delete",value="mean"} 0.028895025600000002
+cilium_api_limiter_processing_duration_seconds{api_call="endpoint-list",value="estimated"} 0.3
+cilium_api_limiter_processing_duration_seconds{api_call="endpoint-list",value="mean"} 0.000545472
+# HELP cilium_api_limiter_rate_limit Current rate limiting configuration
+# TYPE cilium_api_limiter_rate_limit gauge
+cilium_api_limiter_rate_limit{api_call="endpoint-create",value="burst"} 15
+cilium_api_limiter_rate_limit{api_call="endpoint-create",value="limit"} 3.3440504409345357
+cilium_api_limiter_rate_limit{api_call="endpoint-delete",value="burst"} 0
+cilium_api_limiter_rate_limit{api_call="endpoint-delete",value="limit"} 0
+cilium_api_limiter_rate_limit{api_call="endpoint-list",value="burst"} 202
+cilium_api_limiter_rate_limit{api_call="endpoint-list",value="limit"} 100
+# HELP cilium_api_limiter_requests_in_flight Current requests in flight
+# TYPE cilium_api_limiter_requests_in_flight gauge
+cilium_api_limiter_requests_in_flight{api_call="endpoint-create",value="in-flight"} 0
+cilium_api_limiter_requests_in_flight{api_call="endpoint-create",value="limit"} 15
+cilium_api_limiter_requests_in_flight{api_call="endpoint-delete",value="in-flight"} 0
+cilium_api_limiter_requests_in_flight{api_call="endpoint-delete",value="limit"} 15
+cilium_api_limiter_requests_in_flight{api_call="endpoint-list",value="in-flight"} 0
+cilium_api_limiter_requests_in_flight{api_call="endpoint-list",value="limit"} 101
+# HELP cilium_api_limiter_wait_duration_seconds Current wait time for api calls
+# TYPE cilium_api_limiter_wait_duration_seconds gauge
+cilium_api_limiter_wait_duration_seconds{api_call="endpoint-create",value="max"} 15
+cilium_api_limiter_wait_duration_seconds{api_call="endpoint-create",value="mean"} 8.763919999999999e-05
+cilium_api_limiter_wait_duration_seconds{api_call="endpoint-create",value="min"} 0
+cilium_api_limiter_wait_duration_seconds{api_call="endpoint-delete",value="max"} 0
+cilium_api_limiter_wait_duration_seconds{api_call="endpoint-delete",value="mean"} 4.7697699999999996e-05
+cilium_api_limiter_wait_duration_seconds{api_call="endpoint-delete",value="min"} 0
+cilium_api_limiter_wait_duration_seconds{api_call="endpoint-list",value="max"} 0
+cilium_api_limiter_wait_duration_seconds{api_call="endpoint-list",value="mean"} 3.5431e-05
+cilium_api_limiter_wait_duration_seconds{api_call="endpoint-list",value="min"} 0
+# HELP cilium_endpoint_regenerations_total Count of all endpoint regenerations that have completed, tagged by outcome
+# TYPE cilium_endpoint_regenerations_total counter
+cilium_endpoint_regenerations_total{outcome="success"} 493267
+# HELP cilium_policy_implementation_delay Time between a policy change and it being fully deployed into the datapath
+# TYPE cilium_policy_implementation_delay histogram
+cilium_policy_implementation_delay_bucket{source="k8s",le="0.005"} 47
+cilium_policy_implementation_delay_bucket{source="k8s",le="0.01"} 47
+cilium_policy_implementation_delay_bucket{source="k8s",le="0.025"} 47
+cilium_policy_implementation_delay_bucket{source="k8s",le="0.05"} 47
+cilium_policy_implementation_delay_bucket{source="k8s",le="0.1"} 47
+cilium_policy_implementation_delay_bucket{source="k8s",le="0.25"} 47
+cilium_policy_implementation_delay_bucket{source="k8s",le="0.5"} 47
+cilium_policy_implementation_delay_bucket{source="k8s",le="1"} 47
+cilium_policy_implementation_delay_bucket{source="k8s",le="2.5"} 47
+cilium_policy_implementation_delay_bucket{source="k8s",le="5"} 47
+cilium_policy_implementation_delay_bucket{source="k8s",le="10"} 47
+cilium_policy_implementation_delay_bucket{source="k8s",le="+Inf"} 47
+cilium_policy_implementation_delay_sum{source="k8s"} 0.030201529000000005
+cilium_policy_implementation_delay_count{source="k8s"} 47
+# HELP cilium_bpf_map_pressure Fill percentage of map, tagged by map name
+# TYPE cilium_bpf_map_pressure gauge
+cilium_bpf_map_pressure{map_name="ipcache"} 0.026751953125
+cilium_bpf_map_pressure{map_name="lb4_backends_v2"} 0.10638427734375
+cilium_bpf_map_pressure{map_name="lb4_reverse_nat"} 0.0194549560546875
+cilium_bpf_map_pressure{map_name="lb4_services_v2"} 0.0189666748046875
+cilium_bpf_map_pressure{map_name="lxc"} 0.0002136263065537499
+# HELP cilium_bpf_maps_virtual_memory_max_bytes BPF maps kernel max memory usage size in bytes.
+# TYPE cilium_bpf_maps_virtual_memory_max_bytes gauge
+cilium_bpf_maps_virtual_memory_max_bytes 2.24817152e+08
+# HELP cilium_bpf_progs_virtual_memory_max_bytes BPF programs kernel max memory usage size in bytes.
+# TYPE cilium_bpf_progs_virtual_memory_max_bytes gauge
+cilium_bpf_progs_virtual_memory_max_bytes 4.276224e+06
+# HELP cilium_datapath_conntrack_dump_resets_total Number of conntrack dump resets. Happens when a BPF entry gets removed while dumping the map is in progress
+# TYPE cilium_datapath_conntrack_dump_resets_total counter
+cilium_datapath_conntrack_dump_resets_total{area="conntrack",family="ipv4",name="dump_interrupts"} 0
+# HELP cilium_ipcache_errors_total Number of errors interacting with the IP to Identity cache
+# TYPE cilium_ipcache_errors_total counter
+cilium_ipcache_errors_total{error="cannot_overwrite_by_source",type="upsert"} 4780
+cilium_ipcache_errors_total{error="idempotent_operation",type="upsert"} 1
+cilium_ipcache_errors_total{error="no_such_prefix",type="delete"} 1807
+# HELP cilium_k8s_event_lag_seconds Lag for Kubernetes events - computed value between receiving a CNI ADD event from kubelet and a Pod event received from kube-api-server
+# TYPE cilium_k8s_event_lag_seconds gauge
+cilium_k8s_event_lag_seconds{source="k8s"} 0
+# HELP cilium_k8s_terminating_endpoints_events_total Number of terminating endpoint events received from Kubernetes
+# TYPE cilium_k8s_terminating_endpoints_events_total counter
+cilium_k8s_terminating_endpoints_events_total 13246
+# HELP cilium_kvstore_quorum_errors_total Number of quorum errors
+# TYPE cilium_kvstore_quorum_errors_total counter
+cilium_kvstore_quorum_errors_total{error="no event received"} 18
+# HELP cilium_kvstore_sync_queue_size Number of elements queued for synchronization in the kvstore
+# TYPE cilium_kvstore_sync_queue_size gauge
+cilium_kvstore_sync_queue_size{scope="nodes/v1",source_cluster="foo"} 3
+cilium_kvstore_sync_queue_size{scope="identities/v1",source_cluster="foo"} 21
+cilium_kvstore_sync_queue_size{scope="ip/v1",source_cluster="foo"} 0
+# HELP cilium_kvstore_initial_sync_completed Whether the initial synchronization from/to the kvstore has completed
+# TYPE cilium_kvstore_initial_sync_completed gauge
+cilium_kvstore_initial_sync_completed{scope="nodes/v1",source_cluster="foo", action="write"} 1
+cilium_kvstore_initial_sync_completed{scope="nodes/v1",source_cluster="foo", action="read"} 1
+cilium_kvstore_initial_sync_completed{scope="identities/v1",source_cluster="foo", action="write"} 1
+cilium_kvstore_initial_sync_completed{scope="identities/v1",source_cluster="foo", action="read"} 1
+cilium_kvstore_initial_sync_completed{scope="ip/v1",source_cluster="foo", action="write"} 1
+cilium_kvstore_initial_sync_completed{scope="ip/v1",source_cluster="foo", action="read"} 1

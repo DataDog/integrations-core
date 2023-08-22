@@ -1,0 +1,203 @@
+---
+# Source: weaviate/templates/weaviateConfigMap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: weaviate-config
+  labels:
+    app.kubernetes.io/name: weaviate
+    app.kubernetes.io/managed-by: helm
+data:
+  conf.yaml: |-
+    ---
+    authentication:
+      anonymous_access:
+        enabled: false
+      apikey:
+        allowed_keys:
+        - test123
+        enabled: true
+        users:
+        - api-key-user-readOnly
+      oidc:
+        enabled: false
+    authorization:
+      admin_list:
+        enabled: false
+    
+    query_defaults:
+      limit: 100
+    debug: false
+---
+# Source: weaviate/templates/weaviateHeadlessService.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: weaviate-headless
+  labels:
+    app.kubernetes.io/name: weaviate
+    app.kubernetes.io/managed-by: helm
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: weaviate
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 7000
+  publishNotReadyAddresses: true
+---
+# Source: weaviate/templates/weaviateService.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: weaviate
+  labels:
+    app.kubernetes.io/name: weaviate
+    app.kubernetes.io/managed-by: helm
+spec:
+  type: LoadBalancer
+  selector:
+    app: weaviate
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+---
+# Source: weaviate/templates/weaviateStatefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: weaviate
+  labels:
+    name: weaviate
+    app: weaviate
+    app.kubernetes.io/name: weaviate
+    app.kubernetes.io/managed-by: helm
+spec:
+  replicas: 1
+  serviceName: weaviate-headless
+  selector:
+    matchLabels:
+      app: weaviate
+  template:
+    metadata:
+      labels:
+        app: weaviate
+        app.kubernetes.io/name: weaviate
+        app.kubernetes.io/managed-by: helm
+      annotations:
+        # To restart Pods if the ConfigMap is updated.
+        checksum/config: debf9a767b8d80fbe814d876a92a786bc03c25b3cf0dffe6c55900e2e802fedc
+    spec:
+      terminationGracePeriodSeconds: 600
+      containers:
+      - name: weaviate
+        image: 'docker.io/semitechnologies/weaviate:1.20.0'
+        imagePullPolicy: IfNotPresent
+        command: 
+          - /bin/weaviate
+        args: 
+          - --host
+          - 0.0.0.0
+          - --port
+          - "8080"
+          - --scheme
+          - http
+          - --config-file
+          - /weaviate-config/conf.yaml
+          - --read-timeout=60s
+          - --write-timeout=60s
+        resources:
+          {}
+        env:
+          - name: CLUSTER_DATA_BIND_PORT
+            value: "7001"
+          - name: CLUSTER_GOSSIP_BIND_PORT
+            value: "7000"
+          - name: GOGC
+            value: "100"
+          - name: PROMETHEUS_MONITORING_ENABLED
+            value: "true"
+          - name: QUERY_MAXIMUM_RESULTS
+            value: "100000"
+          - name: REINDEX_VECTOR_DIMENSIONS_AT_STARTUP
+            value: "false"
+          - name: TRACK_VECTOR_DIMENSIONS
+            value: "false"
+          - name: STANDALONE_MODE
+            value: 'true'
+          - name: PERSISTENCE_DATA_PATH
+            value: '/var/lib/weaviate'
+          - name: DEFAULT_VECTORIZER_MODULE
+            value: none
+          
+          
+          - name: CLUSTER_JOIN
+            value: weaviate-headless.default.svc.cluster.local
+        ports:
+          - containerPort: 8080
+          - name: metrics
+            containerPort: 2112
+            protocol: TCP
+        volumeMounts:
+          - name: weaviate-config
+            mountPath: /weaviate-config
+          - name: weaviate-data
+            mountPath: /var/lib/weaviate
+        livenessProbe:
+          httpGet:
+            path: /v1/.well-known/live
+            port: 8080
+          initialDelaySeconds: 900
+          periodSeconds: 10
+          failureThreshold: 30
+          successThreshold: 1
+          timeoutSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /v1/.well-known/ready
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+          timeoutSeconds: 3
+      volumes:
+        - name: weaviate-config
+          configMap:
+            name: weaviate-config
+        # - name: weaviate-persistence-data-vol
+        #   persistentVolumeClaim:
+        #     
+        #     claimName: weaviate-persistence-data
+        #     
+      affinity:
+        
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - weaviate
+              topologyKey: kubernetes.io/hostname
+            weight: 1
+
+  volumeClaimTemplates:
+  - metadata:
+      name: weaviate-data
+      labels:
+        app.kubernetes.io/name: weaviate
+        app.kubernetes.io/managed-by: helm
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: 
+      resources:
+        requests:
+          storage: 32Gi
+
