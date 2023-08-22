@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
-
 from datadog_checks.base.constants import ServiceCheck
 
 CONN_STRING_PASSWORD = re.compile('(?:^|;)pwd=([^;]+)')
@@ -25,6 +24,7 @@ def status_to_service_check(db_status):
 
 def get_version(connection):
     import ibm_db
+
     return ibm_db.get_db_info(connection, ibm_db.SQL_DBMS_VER)
 
 
