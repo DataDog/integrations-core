@@ -360,27 +360,6 @@ base_additional_groups = [
     'scylla.tracing',
 ]
 
-flaky_metrics_3 = [
-    'scylla.reactor.abandoned_failed_futures',
-    'scylla.storage.proxy.coordinator_cas_read_contention.count',
-    'scylla.storage.proxy.coordinator_cas_read_contention.sum',
-    'scylla.storage.proxy.coordinator_cas_read_latency.count',
-    'scylla.storage.proxy.coordinator_cas_read_latency.sum',
-    'scylla.storage.proxy.coordinator_cas_read_timouts',
-    'scylla.storage.proxy.coordinator_cas_read_unavailable',
-    'scylla.storage.proxy.coordinator_cas_read_unfinished_commit',
-    'scylla.storage.proxy.coordinator_cas_write_condition_not_met',
-    'scylla.storage.proxy.coordinator_cas_write_contention.count',
-    'scylla.storage.proxy.coordinator_cas_write_contention.sum',
-    'scylla.storage.proxy.coordinator_cas_write_latency.count',
-    'scylla.storage.proxy.coordinator_cas_write_latency.sum',
-    'scylla.storage.proxy.coordinator_cas_write_timeouts',
-    'scylla.storage.proxy.coordinator_cas_write_unavailable',
-    'scylla.storage.proxy.coordinator_cas_write_unfinished_commit',
-    'scylla.storage.proxy.coordinator_reads_coordinator_outside_replica_set',
-    'scylla.storage.proxy.coordinator_writes_coordinator_outside_replica_set',
-    'scylla.transport.requests_memory_available',
-]
 
 # Helper function to create a map based on newly added metrics and changed or deleted metrics
 def modify_metrics_map(map_to_add, map_to_delete=None):
@@ -401,7 +380,7 @@ def modify_metrics_map(map_to_add, map_to_delete=None):
 
 metric_map = base_metric_group_map
 additional_instance_groups = base_additional_groups
-flaky_metrics = flaky_metrics_3
+flaky_metrics = []
 
 
 if os.environ['SCYLLA_VERSION'] == "3.3.1":
@@ -438,8 +417,31 @@ if os.environ['SCYLLA_VERSION'] == "3.3.1":
         'scylla.thrift',
     ]
 
+    flaky_metrics_3 = [
+        'scylla.reactor.abandoned_failed_futures',
+        'scylla.storage.proxy.coordinator_cas_read_contention.count',
+        'scylla.storage.proxy.coordinator_cas_read_contention.sum',
+        'scylla.storage.proxy.coordinator_cas_read_latency.count',
+        'scylla.storage.proxy.coordinator_cas_read_latency.sum',
+        'scylla.storage.proxy.coordinator_cas_read_timouts',
+        'scylla.storage.proxy.coordinator_cas_read_unavailable',
+        'scylla.storage.proxy.coordinator_cas_read_unfinished_commit',
+        'scylla.storage.proxy.coordinator_cas_write_condition_not_met',
+        'scylla.storage.proxy.coordinator_cas_write_contention.count',
+        'scylla.storage.proxy.coordinator_cas_write_contention.sum',
+        'scylla.storage.proxy.coordinator_cas_write_latency.count',
+        'scylla.storage.proxy.coordinator_cas_write_latency.sum',
+        'scylla.storage.proxy.coordinator_cas_write_timeouts',
+        'scylla.storage.proxy.coordinator_cas_write_unavailable',
+        'scylla.storage.proxy.coordinator_cas_write_unfinished_commit',
+        'scylla.storage.proxy.coordinator_reads_coordinator_outside_replica_set',
+        'scylla.storage.proxy.coordinator_writes_coordinator_outside_replica_set',
+        'scylla.transport.requests_memory_available',
+    ]
+
     metric_map = modify_metrics_map(new_metrics_version_3_3)
     additional_instance_groups = base_additional_groups + instance_3_additional_groups
+    flaky_metrics = flaky_metrics_3
 
 
 elif os.environ['SCYLLA_VERSION'] == "5.2.6":
