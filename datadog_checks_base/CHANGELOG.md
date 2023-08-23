@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Security***:
+
+* Update in-toto version ([#15667](https://github.com/DataDog/integrations-core/pull/15667))
+
 ***Fixed***:
 
 * Use `DD_TRACE_ENABLED` to disable ddtrace on Windows when using `process_isolation` ([#15635](https://github.com/DataDog/integrations-core/pull/15635))

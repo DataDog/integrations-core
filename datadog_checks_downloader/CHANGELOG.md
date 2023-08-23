@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Security***:
+
+* Update in-toto version ([#15667](https://github.com/DataDog/integrations-core/pull/15667))
+
 ## 4.2.2 / 2023-07-10
 
 ***Fixed***:
