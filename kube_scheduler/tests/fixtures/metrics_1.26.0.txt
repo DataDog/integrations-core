@@ -1,0 +1,3 @@
+# HELP scheduler_goroutines Number of running goroutines split by the work they do such as binding.
+# TYPE scheduler_goroutines gauge
+scheduler_goroutines 108
