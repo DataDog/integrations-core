@@ -2,9 +2,9 @@
 
 ## Unreleased
 
-***Changed***:
+***Fixed***:
 
-* Add more mappings to infinera-coriant-groove.yaml ([#15645](https://github.com/DataDog/integrations-core/pull/15645))
+* Fix mappings in infinera-coriant-groove.yaml ([#15645](https://github.com/DataDog/integrations-core/pull/15645))
 
 ## 6.2.0 / 2023-08-18
 
