@@ -37,7 +37,6 @@ def test_check_ssl(aggregator, check, instance_ssl):
 def test_check_connection_failure(aggregator, check, instance):
     instance["url"] = "bad_url"
     tags = ["url:{}".format(instance["url"]), "test:integration"]
-    # Should fail certificate verification
     with pytest.raises(ldap3.core.exceptions.LDAPExceptionError):
         check.check(instance)
         aggregator.assert_service_check("openldap.can_connect", check.CRITICAL, tags=tags)
