@@ -33,6 +33,8 @@ def test_e2e_profile_western_digital_mycloud_ex2_ultra(dd_agent_check):
         'wdmycloudex2_agent_ver:oxen quaintly zombies driving oxen their oxen',
         'wdmycloudex2_host_name:but oxen quaintly but Jaded',
         'wdmycloudex2_software_version:kept driving',
+        'wdmycloudex2_ftp_server:enable',
+        'wdmycloudex2_net_type:workgroup',
     ]
 
     # --- TEST EXTENDED METRICS ---

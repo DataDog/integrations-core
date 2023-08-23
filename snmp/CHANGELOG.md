@@ -4,7 +4,7 @@
 
 ***Changed***:
 
-* Comment scalar metrics with mappings in western-digital-mycloud-ex2-ultra.yaml ([#15654](https://github.com/DataDog/integrations-core/pull/15654))
+* Update snmprec & test for Western Digital ([#15654](https://github.com/DataDog/integrations-core/pull/15654))
 
 ## 6.2.0 / 2023-08-18
 
