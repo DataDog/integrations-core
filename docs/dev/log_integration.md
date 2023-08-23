@@ -89,7 +89,7 @@ To add a facet or measure:
 4. For a measure, to define the unit, click **Advanced options**. Select the unit based on what the attribute represents.
 5. Click **Add**.
 
-Note: Standard attributes do not need to be added as facets and are added automatically. They appear in the facet list under their specific groups once the log pipeline has been published. See the [default standard attribute list][6] for the standard Datadog attributes under their specific groups.
+**Note:** You do not need to create facets for standard attributes. Facets for standard attributes will be added automatically by Datadog when the log pipeline is published. See the [default standard attribute list][6] for the standard Datadog attributes under their specific groups.
 
 To easily navigate the facet list, group similar facets together. For fields specific to the integration logs, create a group with the same name as the `source` tag. 
 
