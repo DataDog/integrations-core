@@ -68,7 +68,7 @@ cli = [
     "colorama",
     "datamodel-code-generator~=0.21.4",
     "hatch>=1.5.0",
-    "in-toto==1.0.1",
+    "in-toto==2.0.0",
     "jsonschema",
     "markdown",
     "orjson",
