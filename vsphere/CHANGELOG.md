@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Decouple resource groups and collection type ([#15670](https://github.com/DataDog/integrations-core/pull/15670))
+
 ## 7.0.0 / 2023-08-10
 
 ***Changed***:
