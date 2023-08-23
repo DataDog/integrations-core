@@ -57,7 +57,7 @@ datadog.operator.process_virtual_memory_bytes,gauge,,byte,,Virtual memory size i
 datadog.operator.process_virtual_memory_max_bytes,gauge,,byte,,Maximum amount of virtual memory available in bytes,0,datadog_operator,process_virtual_memory_max_bytes,
 datadog.operator.reconcile.success,gauge,,,,"`1` if the last recorded reconcile error is null, `0` otherwise. The `reconcile_err` tag describes the last recorded error.",0,datadog_operator,reconcile_success,
 datadog.operator.remote_config.feature.enabled,gauge,,,,`1` if the Remote Configuration feature is enabled,0,datadog_operator,remote_config_enabled,
-datadog.operator.rest_client_requests_total,count,,,,"Number of HTTP requests, partitioned by status code, method, and host",0,datadog_operator,rest_client_requests_total,
+datadog.operator.rest_client_requests_total,count,,request,,"Number of HTTP requests, partitioned by status code, method, and host",0,datadog_operator,rest_client_requests_total,
 datadog.operator.workqueue_adds_total,count,,,,Total number of adds handled by workqueue,0,datadog_operator,workqueue_adds_total,
 datadog.operator.workqueue_depth,gauge,,,,Current depth of workqueue,0,datadog_operator,workqueue_depth,
 datadog.operator.workqueue_longest_running_processor_seconds,gauge,,second,,How many seconds has the longest running processor for workqueue been running.,-1,datadog_operator,workqueue_longest_running_processor_seconds,
