@@ -45,6 +45,7 @@ dependencies = [
     "pytest-cov>=2.6.1",
     "pytest-memray>=1.4.0; python_version > '3.0' and (platform_system=='Linux' or platform_system=='Darwin')",
     "pytest-mock",
+    "pytest-repeat",
     "pyyaml>=5.4.1",
     "requests>=2.22.0",
     "shutilwhich==1.1.0; python_version < '3.0'",
