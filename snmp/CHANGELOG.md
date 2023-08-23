@@ -2,10 +2,6 @@
 
 ## Unreleased
 
-***Changed***:
-
-* Update snmprec & test for nasuni-filer profile ([#15648](https://github.com/DataDog/integrations-core/pull/15648))
-
 ## 6.2.0 / 2023-08-18
 
 ***Added***:
