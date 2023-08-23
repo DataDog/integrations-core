@@ -10,6 +10,7 @@ services:
     command:
       - "/opt/bitnami/scripts/openldap/run.sh"
       - "-h"
+      # We need this to be able to add the ldapi URL
       - "ldap://:1389/ ldaps://:1636/ ldapi://%2Fvar%2Frun%2Fslapd%2Fldapi"
     environment:
       - LDAP_ENABLE_TLS=yes
