@@ -37,7 +37,7 @@ jobs:
 
       # Options
       standard: true
-      test-py2: false
+      test-py2: ${{ !matrix.python-support || contains(matrix.python-support, '2') }}
       test-py3: ${{ !matrix.python-support || contains(matrix.python-support, '3') }}
 
       # For other repositories
@@ -54,7 +54,7 @@ jobs:
   submit-traces:
     needs:
     - test
-    if: inputs.repo == 'core' && (success() || failure())
+    if: inputs.repo == 'core' && (success() || failure()) && github.event.pull_request.head.repo.full_name == github.repository
 
     uses: ./.github/workflows/submit-traces.yml
     secrets: inherit

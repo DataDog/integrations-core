@@ -101,7 +101,7 @@ Need help? Contact [Datadog support][7].
 [1]: https://docs.datadoghq.com/integrations/openmetrics/
 [2]: https://docs.datadoghq.com/getting_started/integrations/prometheus/
 [3]: https://docs.datadoghq.com/getting_started/integrations/prometheus?tab=docker#configuration
-[4]: https://app.datadoghq.com/account/settings#agent
+[4]: https://app.datadoghq.com/account/settings/agent/latest
 [5]: https://github.com/DataDog/integrations-core/blob/master/prometheus/datadog_checks/prometheus/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://docs.datadoghq.com/help/

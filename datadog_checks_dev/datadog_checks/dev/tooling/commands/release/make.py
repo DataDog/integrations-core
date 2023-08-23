@@ -147,13 +147,6 @@ def make(ctx, checks, version, end, initial_release, skip_sign, sign_only, exclu
         if initial_release:
             echo_success(f'Check `{check}`')
 
-        # update the version number
-        if check != 'ddev':
-            echo_info(f'Current version of check {check}: {cur_version}')
-            echo_waiting(f'Bumping to {version}... ', nl=False)
-            update_version_module(check, cur_version, version)
-            echo_success('success!')
-
         # update the CHANGELOG
         echo_waiting('Updating the changelog... ', nl=False)
         # TODO: Avoid double GitHub API calls when bumping all checks at once
@@ -170,6 +163,13 @@ def make(ctx, checks, version, end, initial_release, skip_sign, sign_only, exclu
             dry_run=False,
         )
         echo_success('success!')
+
+        # update the version number
+        if check != 'ddev':
+            echo_info(f'Current version of check {check}: {cur_version}')
+            echo_waiting(f'Bumping to {version}... ', nl=False)
+            update_version_module(check, cur_version, version)
+            echo_success('success!')
 
         commit_targets = [check]
         updated_checks.append(check)

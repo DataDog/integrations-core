@@ -115,9 +115,18 @@ jobs:
 
     - name: Set up Python 2.7
       if: inputs.test-py2
-      uses: actions/setup-python@v4
-      with:
-        python-version: "2.7"
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          sudo apt update
+          sudo apt install python2 python2-dev
+          sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 1
+        elif [ "$RUNNER_OS" == "Windows" ]; then
+          choco install python2
+        else
+          echo "$RUNNER_OS not supported"
+          exit 1
+        fi
+      shell: bash
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@v4

@@ -8,7 +8,7 @@ Get metrics from CoreDNS in real time to visualize and monitor DNS failures and 
 
 ### Prerequisites
 
-Versions 1.11.0 and later of this OpenMetrics-based integration have a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][21].
+Versions 1.11.0 and later of this OpenMetrics-based integration have a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][24].
 
 The latest (V2) version of the CoreDNS check requires Python 3 and submits `.bucket` metrics and submits the `.sum` and `.count` histogram samples as monotonic count type. These metrics were previously submitted as `gauge` type in the legacy (V1) version. See the [`metadata.csv` file][14] for a list of metrics available in each version. 
 
@@ -248,8 +248,16 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][16].
 
+## Further Reading
 
-[1]: https://app.datadoghq.com/account/settings#agent
+Additional helpful documentation, links, and articles:
+
+- [Key metrics for CoreDNS monitoring][21]
+- [Tools for collecting metrics and logs from CoreDNS][22]
+- [How to monitor CoreDNS with Datadog][23]
+
+
+[1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: http://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [3]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation
 [4]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations
@@ -268,5 +276,8 @@ Need help? Contact [Datadog support][16].
 [17]: https://docs.datadoghq.com/integrations/openmetrics
 [18]: https://github.com/DataDog/integrations-core/blob/7.32.x/coredns/datadog_checks/coredns/data/conf.yaml.example
 [19]: https://github.com/DataDog/integrations-core/blob/master/coredns/datadog_checks/coredns/data/auto_conf.yaml
-[20]:https://github.com/DataDog/integrations-core/blob/master/coredns/datadog_checks/coredns/data/conf.yaml.example
-[21]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
+[20]: https://github.com/DataDog/integrations-core/blob/master/coredns/datadog_checks/coredns/data/conf.yaml.example
+[21]: https://www.datadoghq.com/blog/coredns-metrics/
+[22]: https://www.datadoghq.com/blog/coredns-monitoring-tools/
+[23]: https://www.datadoghq.com/blog/monitoring-coredns-with-datadog/
+[24]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations

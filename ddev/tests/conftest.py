@@ -12,6 +12,8 @@ import pytest
 import vcr
 from click.testing import CliRunner as __CliRunner
 from datadog_checks.dev.tooling.utils import set_root
+
+from ddev.cli.terminal import Terminal
 from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.config.file import ConfigFile
 from ddev.repo.core import Repository
@@ -71,6 +73,11 @@ def platform() -> Platform:
 
 
 @pytest.fixture(scope='session')
+def terminal() -> Terminal:
+    return Terminal(verbosity=0, enable_color=False, interactive=False)
+
+
+@pytest.fixture(scope='session')
 def local_repo() -> Path:
     return Path(__file__).resolve().parent.parent.parent
 
@@ -94,6 +101,7 @@ def config_file(tmp_path, monkeypatch) -> ConfigFile:
         'DD_DD_URL',
         'DD_API_KEY',
         'DD_APP_KEY',
+        'DDEV_REPO',
     ):
         monkeypatch.delenv(env_var, raising=False)
 
@@ -157,6 +165,16 @@ def network_replay(local_repo):
     stack = ExitStack()
 
     def add_cassette(relative_path, *args, **kwargs):
+        # https://vcrpy.readthedocs.io/en/latest/advanced.html#filter-sensitive-data-from-the-request
+        for option, known_values in (
+            ('filter_headers', ['authorization', 'dd-api-key', 'dd-application-key']),
+            ('filter_query_parameters', ['api_key', 'app_key', 'application_key']),
+            ('filter_post_data_parameters', ['api_key', 'app_key']),
+        ):
+            defined_values = list(kwargs.setdefault(option, []))
+            defined_values.extend(known_values)
+            kwargs[option] = defined_values
+
         cassette = vcr.use_cassette(
             str(local_repo / "ddev" / "tests" / "fixtures" / "network" / relative_path), *args, **kwargs
         )
@@ -200,3 +218,4 @@ def pytest_configure(config):
     config.addinivalue_line('markers', 'requires_macos: Tests intended for macOS operating systems')
     config.addinivalue_line('markers', 'requires_linux: Tests intended for Linux operating systems')
     config.addinivalue_line('markers', 'requires_unix: Tests intended for Linux-based operating systems')
+    config.addinivalue_line('markers', 'requires_ci: Tests intended to only run in CI')

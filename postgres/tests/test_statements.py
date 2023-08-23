@@ -3,15 +3,16 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime
 import re
-import select
+import threading
 import time
 from collections import Counter
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import mock
-import psycopg2
+import psycopg
 import pytest
 from dateutil import parser
+from psycopg import ClientCursor
 from semver import VersionInfo
 from six import string_types
 
@@ -24,15 +25,16 @@ from datadog_checks.postgres.statement_samples import (
     StatementTruncationState,
 )
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
+from datadog_checks.postgres.util import payload_pg_version
 
 from .common import DB_NAME, HOST, PORT, PORT_REPLICA2, POSTGRES_VERSION
-from .utils import _get_conn, _get_superconn, requires_over_10, run_one_check
+from .utils import WaitGroup, _get_conn, _get_superconn, requires_over_10, run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
 SAMPLE_QUERIES = [
-    # (username, password, dbname, query, arg)
+    # (username, password, dbname, query, arg)SAMPLE_QUERIE
     ("bob", "bob", "datadog_test", "SELECT city FROM persons WHERE city = %s", "hello"),
     (
         "bob",
@@ -97,17 +99,17 @@ def test_statement_samples_enabled_config(
 def test_statement_metrics_version(integration_check, dbm_instance, version, expected_payload_version):
     if version:
         check = integration_check(dbm_instance)
-        check._version = version
+        check.version = version
         check._connect()
-        assert check.statement_metrics._payload_pg_version() == expected_payload_version
+        assert payload_pg_version(check.version) == expected_payload_version
     else:
         with mock.patch(
-            'datadog_checks.postgres.postgres.PostgreSql.version', new_callable=mock.PropertyMock
+            'datadog_checks.postgres.postgres.PostgreSql.load_version', new_callable=mock.MagicMock
         ) as patched_version:
             patched_version.return_value = None
             check = integration_check(dbm_instance)
             check._connect()
-            assert check.statement_metrics._payload_pg_version() == expected_payload_version
+            assert payload_pg_version(check.version) == expected_payload_version
 
 
 @pytest.mark.parametrize("dbstrict,ignore_databases", [(True, []), (False, ['dogs']), (False, [])])
@@ -131,26 +133,35 @@ def test_statement_metrics(
     dbm_instance['query_activity'] = {'enabled': False}
     # very low collection interval for test purposes
     dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
-    connections = {}
 
     def _run_queries():
         for user, password, dbname, query, arg in SAMPLE_QUERIES:
-            if dbname not in connections:
-                connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
-            connections[dbname].cursor().execute(query, (arg,))
+            with psycopg.connect(host=HOST, dbname=dbname, user=user, password=password) as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(query, (arg,))
 
     check = integration_check(dbm_instance)
     check._connect()
     run_one_check(check, dbm_instance)
 
-    # We can't change track_io_timing at runtime, but we can change what the integration thinks the runtime value is
-    # This must be done after the first check since postgres settings are loaded from the database then
-    check.pg_settings["track_io_timing"] = "on" if track_io_timing_enabled else "off"
-
-    _run_queries()
-    run_one_check(check, dbm_instance)
-    _run_queries()
-    run_one_check(check, dbm_instance)
+    if not track_io_timing_enabled:
+        with mock.patch(
+            'datadog_checks.postgres.PostgreSql.get_pg_settings',
+            return_value={
+                'pg_stat_statements.max': '10000',
+                'track_activity_query_size': '1024',
+                'track_io_timing': 'off',
+            },
+        ):
+            _run_queries()
+            run_one_check(check, dbm_instance)
+            _run_queries()
+            run_one_check(check, dbm_instance)
+    else:
+        _run_queries()
+        run_one_check(check, dbm_instance)
+        _run_queries()
+        run_one_check(check, dbm_instance)
 
     def _should_catch_query(dbname):
         # we can always catch it if the query originals in the same DB
@@ -170,20 +181,18 @@ def test_statement_metrics(
 
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
-    assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
     assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     expected_dbm_metrics_tags = {'foo:bar', 'port:{}'.format(PORT)}
     assert set(event['tags']) == expected_dbm_metrics_tags
-    obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
 
     assert len(aggregator.metrics("postgresql.pg_stat_statements.max")) != 0
     assert len(aggregator.metrics("postgresql.pg_stat_statements.count")) != 0
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
     for username, _, dbname, query, _ in SAMPLE_QUERIES:
-        expected_query = query % obfuscated_param
+        expected_query = query % '$1'
         query_signature = compute_sql_signature(expected_query)
         matching_rows = [r for r in event['postgres_rows'] if r['query_signature'] == query_signature]
         if not _should_catch_query(dbname):
@@ -222,9 +231,6 @@ def test_statement_metrics(
             "db:" + fqt_event['postgres']['datname'],
             "rolname:" + fqt_event['postgres']['rolname'],
         }
-
-    for conn in connections.values():
-        conn.close()
 
 
 @pytest.mark.parametrize(
@@ -309,13 +315,12 @@ def test_statement_metrics_cloud_metadata(
     if input_cloud_metadata:
         for k, v in input_cloud_metadata.items():
             dbm_instance[k] = v
-    connections = {}
 
     def _run_queries():
         for user, password, dbname, query, arg in SAMPLE_QUERIES:
-            if dbname not in connections:
-                connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
-            connections[dbname].cursor().execute(query, (arg,))
+            with psycopg.connect(host=HOST, dbname=dbname, user=user, password=password) as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(query, (arg,))
 
     check = integration_check(dbm_instance)
     check._connect()
@@ -331,14 +336,10 @@ def test_statement_metrics_cloud_metadata(
 
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
-    assert event['postgres_version'] == check.statement_metrics._payload_pg_version()
     assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     assert event['cloud_metadata'] == output_cloud_metadata, "wrong cloud_metadata"
-
-    for conn in connections.values():
-        conn.close()
 
 
 def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_instance, datadog_agent):
@@ -361,33 +362,34 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
 
     check = integration_check(dbm_instance)
     check._connect()
-    cursor = check.db.cursor()
+    # Get a connection separate from the one used by the check to avoid hitting the connection pool limit
+    with check._new_connection('postgres', max_pool_size=1).connection() as conn:
+        with conn.cursor() as cursor:
+            # Execute the query once to begin tracking it. Execute again between checks to track the difference.
+            # This should result in a single metric for that query_signature having a value of 2
+            with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+                mock_agent.side_effect = obfuscate_sql
+                cursor.execute(query, (['app1', 'app2'],))
+                cursor.execute(query, (['app1', 'app2', 'app3'],))
+                run_one_check(check, dbm_instance)
 
-    # Execute the query once to begin tracking it. Execute again between checks to track the difference.
-    # This should result in a single metric for that query_signature having a value of 2
-    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
-        mock_agent.side_effect = obfuscate_sql
-        cursor.execute(query, (['app1', 'app2'],))
-        cursor.execute(query, (['app1', 'app2', 'app3'],))
-        run_one_check(check, dbm_instance)
+                cursor.execute(query, (['app1', 'app2'],))
+                cursor.execute(query, (['app1', 'app2', 'app3'],))
+                run_one_check(check, dbm_instance)
 
-        cursor.execute(query, (['app1', 'app2'],))
-        cursor.execute(query, (['app1', 'app2', 'app3'],))
-        run_one_check(check, dbm_instance)
+            events = aggregator.get_event_platform_events("dbm-metrics")
+            assert len(events) == 1
+            event = events[0]
 
-    events = aggregator.get_event_platform_events("dbm-metrics")
-    assert len(events) == 1
-    event = events[0]
-
-    matching = [e for e in event['postgres_rows'] if e['query_signature'] == query_signature]
-    assert len(matching) == 1
-    row = matching[0]
-    assert row['calls'] == 2
+            matching = [e for e in event['postgres_rows'] if e['query_signature'] == query_signature]
+            assert len(matching) == 1
+            row = matching[0]
+            assert row['calls'] == 2
 
 
 @pytest.fixture
 def bob_conn():
-    conn = psycopg2.connect(host=HOST, dbname=DB_NAME, user="bob", password="bob")
+    conn = psycopg.connect(host=HOST, dbname=DB_NAME, user="bob", password="bob")
     yield conn
     conn.close()
 
@@ -395,11 +397,11 @@ def bob_conn():
 @pytest.fixture
 def dbm_instance(pg_instance):
     pg_instance['dbm'] = True
-    pg_instance['min_collection_interval'] = 0.1
+    pg_instance['min_collection_interval'] = 0.2
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
-    pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
-    pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.1}
-    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
+    pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.2}
+    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
     pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
@@ -412,7 +414,7 @@ def dbm_instance_replica2(pg_instance):
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
-    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
     pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
@@ -456,42 +458,42 @@ failed_explain_test_repeat_count = 5
     [
         (
             "select * from fake_table",
-            "error:explain-undefined_table-<class 'psycopg2.errors.UndefinedTable'>",
+            "error:explain-undefined_table-<class 'psycopg.errors.UndefinedTable'>",
             None,
             1,
             None,
         ),
         (
             "select * from fake_schema.fake_table",
-            "error:explain-undefined_table-<class 'psycopg2.errors.UndefinedTable'>",
+            "error:explain-undefined_table-<class 'psycopg.errors.UndefinedTable'>",
             None,
             1,
             None,
         ),
         (
             "select * from pg_settings where name = $1",
-            "error:explain-parameterized_query-<class 'psycopg2.errors.UndefinedParameter'>",
+            "error:explain-parameterized_query-<class 'psycopg.errors.UndefinedParameter'>",
             None,
             1,
             None,
         ),
         (
             "select * from pg_settings where name = 'this query is truncated' limi",
-            "error:explain-database_error-<class 'psycopg2.errors.SyntaxError'>",
+            "error:explain-database_error-<class 'psycopg.errors.SyntaxError'>",
             None,
             1,
             None,
         ),
         (
             "select * from persons",
-            "error:explain-database_error-<class 'psycopg2.errors.InsufficientPrivilege'>",
+            "error:explain-database_error-<class 'psycopg.errors.InsufficientPrivilege'>",
             "datadog.explain_statement_noaccess",
             failed_explain_test_repeat_count,
             None,
         ),
         (
             "update persons set firstname='firstname' where personid in (2, 1); select pg_sleep(1);",
-            "error:explain-database_error-<class 'psycopg2.errors.InvalidCursorDefinition'>",
+            "error:explain-database_error-<class 'psycopg.errors.InvalidCursorDefinition'>",
             None,
             1,
             None,
@@ -588,8 +590,8 @@ def test_failed_explain_handling(
             "dogs_noschema",
             "SELECT * FROM kennel WHERE id = %s",
             123,
-            "error:explain-invalid_schema-<class 'psycopg2.errors.InvalidSchemaName'>",
-            [{'code': 'invalid_schema', 'message': "<class 'psycopg2.errors.InvalidSchemaName'>"}],
+            "error:explain-invalid_schema-<class 'psycopg.errors.InvalidSchemaName'>",
+            [{'code': 'invalid_schema', 'message': "<class 'psycopg.errors.InvalidSchemaName'>"}],
             StatementTruncationState.not_truncated.value,
             [],
         ),
@@ -599,8 +601,8 @@ def test_failed_explain_handling(
             "dogs_nofunc",
             "SELECT * FROM kennel WHERE id = %s",
             123,
-            "error:explain-failed_function-<class 'psycopg2.errors.UndefinedFunction'>",
-            [{'code': 'failed_function', 'message': "<class 'psycopg2.errors.UndefinedFunction'>"}],
+            "error:explain-failed_function-<class 'psycopg.errors.UndefinedFunction'>",
+            [{'code': 'failed_function', 'message': "<class 'psycopg.errors.UndefinedFunction'>"}],
             StatementTruncationState.not_truncated.value,
             [
                 'Unable to collect execution plans in dbname=dogs_nofunc. Check that the '
@@ -611,7 +613,6 @@ def test_failed_explain_handling(
                 'datadog.explain_statement($stmt$SELECT * FROM pg_stat...\n               '
                 '^\nHINT:  No function matches the given name and argument types. You might need to add '
                 'explicit type casts.\n'
-                '\n'
                 'code=undefined-explain-function dbname=dogs_nofunc host=stubbed.hostname',
             ],
         ),
@@ -667,8 +668,8 @@ def test_statement_samples_collect(
         'db:{}'.format(dbname),
     ]
 
-    conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
-    # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
+    conn = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password, cursor_factory=ClientCursor)
+    # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg uses
     # the simple query protocol, sending the whole query as a plain string to postgres.
     # if a client is using the extended query protocol with prepare then the query would appear as
     # leave connection open until after the check has run to ensure we're able to see the query in
@@ -750,6 +751,7 @@ def test_statement_metadata(
     """Tests for metadata in both samples and metrics"""
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_samples']['run_sync'] = True
+    dbm_instance['query_samples']['explain_parameterized_queries'] = False
     dbm_instance['query_metrics']['run_sync'] = True
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
@@ -771,7 +773,7 @@ def test_statement_metadata(
 
     check = integration_check(dbm_instance)
     check._connect()
-    conn = psycopg2.connect(host=HOST, dbname="datadog_test", user="bob", password="bob")
+    conn = psycopg.connect(host=HOST, dbname="datadog_test", user="bob", password="bob")
     cursor = conn.cursor()
     # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
@@ -797,7 +799,7 @@ def test_statement_metadata(
     if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_statements_view == "pg_stat_statements":
         # cannot catch any queries from other users
         # only can see own queries
-        return False
+        return
 
     fqt_samples = [
         s for s in samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == normalized_query_signature
@@ -857,15 +859,14 @@ def test_statement_reported_hostname(
 
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
-    "user,password,dbname,query,blocking_query,arg,expected_out,expected_keys,expected_conn_out",
+    "user,password,dbname,query,blocking_query,expected_out,expected_keys,expected_conn_out",
     [
         (
             "bob",
             "bob",
             "datadog_test",
-            "BEGIN TRANSACTION; SELECT city FROM persons WHERE city = %s;",
+            "BEGIN TRANSACTION; SELECT city FROM persons WHERE city = 'hello';",
             "LOCK TABLE persons IN ACCESS EXCLUSIVE MODE",
-            "hello",
             {
                 'datname': 'datadog_test',
                 'usename': 'bob',
@@ -898,9 +899,8 @@ def test_statement_reported_hostname(
             "city as city46, city as city47, city as city48, city as city49, city as city50, city as city51, "
             "city as city52, city as city53, city as city54, city as city55, city as city56, city as city57, "
             "city as city58, city as city59, city as city60, city as city61 "
-            "FROM persons WHERE city = %s;",
+            "FROM persons WHERE city = 'hello';",
             "LOCK TABLE persons IN ACCESS EXCLUSIVE MODE",
-            "hello",
             {
                 'datname': 'datadog_test',
                 'usename': 'bob',
@@ -942,11 +942,15 @@ def test_activity_snapshot_collection(
     dbname,
     query,
     blocking_query,
-    arg,
     expected_out,
     expected_keys,
     expected_conn_out,
 ):
+
+    if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
+        # cannot catch any queries from other users
+        # only can see own queries
+        return
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
@@ -954,40 +958,29 @@ def test_activity_snapshot_collection(
     check = integration_check(dbm_instance)
     check._connect()
 
-    conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password, async_=1)
-    blocking_conn = psycopg2.connect(host=HOST, dbname=dbname, user="blocking_bob", password=password)
+    blocking_conn = psycopg.connect(host=HOST, dbname=dbname, user="blocking_bob", password=password, autocommit=False)
+    conn = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password, autocommit=False)
+    wg = WaitGroup()
 
-    def wait(conn):
-        while True:
-            state = conn.poll()
-            if state == psycopg2.extensions.POLL_OK:
-                break
-            elif state == psycopg2.extensions.POLL_WRITE:
-                select.select([], [conn.fileno()], [])
-            elif state == psycopg2.extensions.POLL_READ:
-                select.select([conn.fileno()], [], [])
-            else:
-                raise psycopg2.OperationalError("poll() returned %s" % state)
+    def execute_in_thread(q):
+        with conn.cursor() as cursor:
+            cursor.execute(q)
+            wg.done()
 
-    # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
+    # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg uses
     # the simple query protocol, sending the whole query as a plain string to postgres.
     # if a client is using the extended query protocol with prepare then the query would appear as
     # leave connection open until after the check has run to ensure we're able to see the query in
     # pg_stat_activity
     try:
         # first lock the table, which will cause the test query to be blocked
-        blocking_conn.autocommit = False
         blocking_conn.cursor().execute(blocking_query)
-        # ... now execute the test query
-        wait(conn)
-        conn.cursor().execute(query, (arg,))
-        run_one_check(check, dbm_instance)
+        # ... now execute the test query in a separate thread
+        t = threading.Thread(target=execute_in_thread, args=(query,))
+        wg.add(1)
+        t.start()
+        check.check(dbm_instance)
         dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
-
-        if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
-            # cannot catch any queries from other users
-            # only can see own queries
-            return
 
         event = dbm_activity_event[0]
         assert event['host'] == "stubbed.hostname"
@@ -1015,7 +1008,7 @@ def test_activity_snapshot_collection(
         for key in expected_out:
             assert expected_out[key] == bobs_query[key]
         if POSTGRES_VERSION.split('.')[0] == "9":
-            # pg v < 10 does not have a backend_type column
+            # pg v < 10 does not have a backend_type column,
             # so we shouldn't see this key in our activity rows
             expected_keys.remove('backend_type')
             if POSTGRES_VERSION == '9.5':
@@ -1052,21 +1045,22 @@ def test_activity_snapshot_collection(
 
         assert event['ddtags'] == expected_tags
 
-        if POSTGRES_VERSION == '9.5':
-            # rest of test is to confirm blocking behavior
-            # which we cannot collect in pg v9.5 at this time
-            return
-
         # ... now run the check again after closing blocking_bob's conn.
         # this means we should report bob as no longer blocked
         # close blocking_bob's tx
         blocking_conn.close()
+
+        # wait for query to complete, but commit has not been called,
+        # so it should remain open and idle
+        wg.wait(timeout=5)
+
         # Wait collection interval to make sure dbm events are reported
         time.sleep(dbm_instance['query_activity']['collection_interval'])
-        run_one_check(check, dbm_instance)
+        check.check(dbm_instance)
         dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
         event = dbm_activity_event[1]
         assert len(event['postgres_activity']) > 0
+
         # find bob's query
         bobs_query = None
         for query_json in event['postgres_activity']:
@@ -1076,9 +1070,7 @@ def test_activity_snapshot_collection(
         assert len(bobs_query['blocking_pids']) == 0
         # state should be idle now that it's no longer blocked
         assert bobs_query['state'] == "idle in transaction"
-
     finally:
-        conn.close()
         blocking_conn.close()
 
 
@@ -1210,15 +1202,15 @@ def test_truncate_activity_rows(integration_check, dbm_instance, active_rows, ex
     [
         (
             "select * from fake_table",
-            "error:explain-undefined_table-<class 'psycopg2.errors.UndefinedTable'>",
+            "error:explain-undefined_table-<class 'psycopg.errors.UndefinedTable'>",
             DBExplainError.undefined_table,
-            "<class 'psycopg2.errors.UndefinedTable'>",
+            "<class 'psycopg.errors.UndefinedTable'>",
         ),
         (
             "select * from pg_settings where name = $1",
-            "error:explain-parameterized_query-<class 'psycopg2.errors.UndefinedParameter'>",
+            "error:explain-parameterized_query-<class 'psycopg.errors.UndefinedParameter'>",
             DBExplainError.parameterized_query,
-            "<class 'psycopg2.errors.UndefinedParameter'>",
+            "<class 'psycopg.errors.UndefinedParameter'>",
         ),
         (
             "SELECT city as city0, city as city1, city as city2, city as city3, "
@@ -1293,7 +1285,7 @@ def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance,
 
     connections = []
     for user, password, dbname, query, arg in SAMPLE_QUERIES:
-        conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+        conn = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password, cursor_factory=ClientCursor)
         conn.cursor().execute(query, (arg,))
         connections.append(conn)
 
@@ -1328,6 +1320,9 @@ def test_async_job_enabled(
     check = integration_check(dbm_instance)
     check._connect()
     run_one_check(check, dbm_instance)
+    # check should be cancelled & all db connections should be shutdown
+    assert check._check_cancelled
+    assert check.db_pool._conns.get(dbm_instance['dbname']) is None, "db connection should be gone"
     if statement_samples_enabled or statement_activity_enabled:
         assert check.statement_samples._job_loop_future is not None
     else:
@@ -1344,7 +1339,7 @@ def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
     dbm_instance["dbname"] = "postgres"
     check = integration_check(dbm_instance)
     check._connect()
-    check._load_pg_settings(check.db)
+    check.load_pg_settings(check.db)
     if db_user == 'datadog_no_catalog':
         aggregator.assert_metric(
             "dd.postgres.error",
@@ -1360,16 +1355,16 @@ def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
         assert len(aggregator.metrics("dd.postgres.error")) == 0
 
 
-def test_pg_settings_caching(aggregator, integration_check, dbm_instance):
+def test_pg_settings_caching(integration_check, dbm_instance):
     dbm_instance["username"] = "datadog"
     dbm_instance["dbname"] = "postgres"
     check = integration_check(dbm_instance)
     assert not check.pg_settings, "pg_settings should not have been initialized yet"
     check._connect()
-    check._get_db(dbm_instance["dbname"])
+    check.db_pool.get_main_db_pool()
     assert "track_activity_query_size" in check.pg_settings
     check.pg_settings["test_key"] = True
-    check._get_db(dbm_instance["dbname"])
+    check.db_pool.get_main_db_pool()
     assert (
         "test_key" in check.pg_settings
     ), "key should not have been blown away. If it was then pg_settings was not cached correctly"
@@ -1387,7 +1382,7 @@ def _check_until_time(check, dbm_instance, sleep_time, check_interval):
 
 def test_statement_samples_main_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the main collection loop rate limit
-    collection_interval = 0.1
+    collection_interval = 1
     # Don't need query metrics or activity for this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
@@ -1401,15 +1396,15 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     check_frequency = collection_interval / 5.0
     _check_until_time(check, dbm_instance, sleep_time, check_frequency)
     max_collections = int(1 / collection_interval * sleep_time) + 1
-    check.cancel()
     metrics = aggregator.metrics("dd.postgres.collect_statement_samples.time")
+    check.cancel()
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 
 
 def test_activity_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the activity collection loop rate limit
-    collection_interval = 0.1
-    activity_interval = 0.2  # double the main loop
+    collection_interval = 0.5
+    activity_interval = 1  # double the main loop
     # Don't need query metrics on this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['collection_interval'] = collection_interval
@@ -1479,12 +1474,12 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
     assert len(matching) > 0, "should have collected exactly at least one matching event"
 
 
-@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity"])
-@pytest.mark.parametrize("query_samples_enabled", [(True), (False)])
-@pytest.mark.parametrize("query_activity_enabled", [(True), (False)])
+@pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
+@pytest.mark.parametrize("query_samples_enabled", [True, False])
+@pytest.mark.parametrize("query_activity_enabled", [True, False])
 @pytest.mark.parametrize(
-    "user,password,dbname,query,arg",
-    [("bob", "bob", "datadog_test", "BEGIN TRANSACTION; SELECT city FROM persons WHERE city = %s;", "hello")],
+    "user,password,dbname,query",
+    [("bob", "bob", "datadog_test", "BEGIN TRANSACTION; SELECT city FROM persons WHERE city = 'hello';")],
 )
 def test_disabled_activity_or_explain_plans(
     aggregator,
@@ -1497,7 +1492,6 @@ def test_disabled_activity_or_explain_plans(
     password,
     dbname,
     query,
-    arg,
 ):
     """
     Test four combinations for the following:
@@ -1507,17 +1501,23 @@ def test_disabled_activity_or_explain_plans(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['query_activity']['enabled'] = query_activity_enabled
     dbm_instance['query_samples']['enabled'] = query_samples_enabled
+    dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['collect_resources']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 
-    conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+    conn = psycopg.connect(host=HOST, dbname=dbname, user=user, password=password, autocommit=True)
 
     try:
-        conn.cursor().execute(query, (arg,))
-        check.check(dbm_instance)
-        check.cancel()
-        dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+        conn.cursor().execute(query)
+        run_one_check(check, dbm_instance)
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+        dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+
+        if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
+            # cannot catch any queries from other users
+            # only can see own queries
+            return
 
         if query_activity_enabled:
             assert len(dbm_activity) > 0
@@ -1553,11 +1553,12 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     check._connect()
     run_one_check(check, dbm_instance)
+    assert check._check_cancelled
     assert not check.statement_samples._job_loop_future.running(), "samples thread should be stopped"
     assert not check.statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
-    assert check._db_pool.get(dbm_instance['dbname']) is None, "db connection should be gone"
+    assert check.db_pool._conns.get(dbm_instance['dbname']) is None, "db connection should be gone"
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
             "dd.postgres.async_job.cancel",
@@ -1574,7 +1575,7 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     dbm_instance['query_samples'] = {'enabled': True, 'run_sync': True}
     check = integration_check(dbm_instance)
     check._connect()
-    with pytest.raises(psycopg2.errors.UndefinedTable):
+    with pytest.raises(psycopg.errors.UndefinedTable):
         check.check(dbm_instance)
 
     # run asynchronously, loop will crash the first time it tries to run as the table doesn't exist
@@ -1589,7 +1590,7 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
         tags=_expected_dbm_job_err_tags(dbm_instance)
         + [
             'job:query-samples',
-            "error:database-<class 'psycopg2.errors.UndefinedTable'>",
+            "error:database-<class 'psycopg.errors.UndefinedTable'>",
         ],
     )
 
@@ -1611,7 +1612,25 @@ def test_statement_samples_config_invalid_number(integration_check, pg_instance,
         integration_check(pg_instance)
 
 
-class ObjectNotInPrerequisiteState(psycopg2.errors.ObjectNotInPrerequisiteState):
+class Diagnostic(psycopg.errors.Diagnostic):
+    """
+    A fake Diagnostic that allows returning the expected err msg
+    """
+
+    def __init__(self, message):
+        self._message = message
+
+    def __getattribute__(self, attr):
+        if attr == 'message_primary':
+            return self._message
+        else:
+            return super(Diagnostic, self).__getattribute__(attr)
+
+    def __str__(self):
+        return self._message
+
+
+class ObjectNotInPrerequisiteState(psycopg.errors.ObjectNotInPrerequisiteState):
     """
     A fake ObjectNotInPrerequisiteState that allows setting pg_error on construction since ObjectNotInPrerequisiteState
     has it as read-only and not settable at construction-time
@@ -1621,8 +1640,8 @@ class ObjectNotInPrerequisiteState(psycopg2.errors.ObjectNotInPrerequisiteState)
         self.pg_error = pg_error
 
     def __getattribute__(self, attr):
-        if attr == 'pgerror':
-            return self.pg_error
+        if attr == 'diag':
+            return Diagnostic(message=self.pg_error)
         else:
             return super(ObjectNotInPrerequisiteState, self).__getattribute__(attr)
 
@@ -1630,7 +1649,7 @@ class ObjectNotInPrerequisiteState(psycopg2.errors.ObjectNotInPrerequisiteState)
         return self.pg_error
 
 
-class UndefinedTable(psycopg2.errors.UndefinedTable):
+class UndefinedTable(psycopg.errors.UndefinedTable):
     """
     A fake UndefinedTable that allows setting pg_error on construction since UndefinedTable
     has it as read-only and not settable at construction-time
@@ -1640,8 +1659,8 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
         self.pg_error = pg_error
 
     def __getattribute__(self, attr):
-        if attr == 'pgerror':
-            return self.pg_error
+        if attr == 'diag':
+            return Diagnostic(message=self.pg_error)
         else:
             return super(UndefinedTable, self).__getattribute__(attr)
 
@@ -1685,7 +1704,7 @@ class UndefinedTable(psycopg2.errors.UndefinedTable):
             ],
         ),
         (
-            psycopg2.errors.DatabaseError('connection reset'),
+            psycopg.errors.DatabaseError('connection reset'),
             [],
             'error:database-DatabaseError',
             [
@@ -1712,7 +1731,6 @@ def test_statement_metrics_database_errors(
     dbm_instance['query_samples']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
     check = integration_check(dbm_instance)
-    check._connect()
 
     with mock.patch(
         'datadog_checks.postgres.statements.PostgresStatementMetrics._get_pg_stat_statements_columns',
@@ -1769,7 +1787,7 @@ def test_pg_stat_statements_max_warning(
     assert check.warnings == expected_warnings
 
 
-# This test relies on replica so we need PG>10
+# This test relies on replica, so we need PG>10
 @requires_over_10
 def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_replica2):
     dbm_instance_replica2['query_samples'] = {'enabled': False}
@@ -1794,7 +1812,7 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
     aggregator.assert_metric("postgresql.pg_stat_statements.max", value=100, tags=expected_tags)
     if float(POSTGRES_VERSION) >= 14.0:
         aggregator.assert_metric("postgresql.pg_stat_statements.dealloc", value=0, tags=expected_tags)
-    # count value will be modified by agent's queries itself so it's hard to
+    # count value will be modified by agent's queries itself, so it's hard to
     # test a specific number...
     aggregator.assert_metric("postgresql.pg_stat_statements.count", tags=expected_tags)
 

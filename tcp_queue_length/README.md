@@ -104,6 +104,6 @@ Need help? Contact [Datadog support][5].
 
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/tcp_queue_length.d/conf.yaml.example
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[3]: https://github.com/helm/charts/tree/master/stable/datadog
+[3]: https://github.com/DataDog/helm-charts
 [4]: https://github.com/DataDog/integrations-core/blob/master/tcp_queue_length/metadata.csv
 [5]: https://docs.datadoghq.com/help/

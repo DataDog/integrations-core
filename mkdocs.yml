@@ -22,20 +22,25 @@ theme:
   palette:
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
+      primary: custom
       toggle:
         icon: material/weather-night
         name: Switch to light mode
     - media: "(prefers-color-scheme: light)"
       scheme: default
+      primary: custom
       toggle:
         icon: material/weather-sunny
         name: Switch to dark mode
   features:
-    - navigation.sections
+    - content.action.edit
+    - content.code.copy
     - navigation.expand
+    - navigation.footer
+    - navigation.instant
+    - navigation.sections
     - navigation.tabs
     - navigation.tabs.sticky
-    - navigation.instant
 
 nav:
   - Home:
@@ -104,13 +109,15 @@ plugins:
       minify_html: true
   - git-revision-date-localized:
       type: date
+      strict: false
   - mkdocstrings:
       default_handler: python
       handlers:
         python:
-          rendering:
-            show_if_no_docstring: yes
-            show_root_heading: yes
+          options:
+            show_bases: false
+            show_if_no_docstring: true
+            show_root_heading: true
             show_source: true
   - pdf-export:
       enabled_if_env: ENABLE_PDF_SITE_EXPORT
@@ -192,4 +199,4 @@ extra:
       link: https://www.instagram.com/datadoghq
 extra_css:
   - assets/css/custom.css
-  - https://cdn.jsdelivr.net/gh/tonsky/FiraCode@5.2/distr/fira_code.css
+  - https://cdn.jsdelivr.net/npm/firacode@6.2.0/distr/fira_code.css

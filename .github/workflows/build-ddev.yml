@@ -117,6 +117,9 @@ jobs:
     - name: Install Hatch
       run: pip install -U hatch
 
+    - name: Install Hatch environment collector plugin
+      run: pip install -e . --no-deps
+
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
