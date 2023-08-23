@@ -89,6 +89,8 @@ To add a facet or measure:
 4. For a measure, to define the unit, click **Advanced options**. Select the unit based on what the attribute represents.
 4. Click **Add**.
 
+Note: Standard attributes do not need to be added as facets and are added automatically. They appear in the facet list under their specific groups once the log pipeline has been published. See the [default standard attribute list][6] for the standard Datadog attributes under their specific groups.
+
 To easily navigate the facet list, group similar facets together. For fields specific to the integration logs, create a group with the same name as the `source` tag. 
 
 1. In the log panel, click the Cog icon next to the attribute that you want in the new group.
@@ -96,8 +98,6 @@ To easily navigate the facet list, group similar facets together. For fields spe
 3. Click **Advanced options**.
 4. In the **Group** field, enter the name of the new group, and select **New group**.
 5. Click **Update**.
-
-See the [default standard attribute list][6] for the standard Datadog attributes under their specific groups. Standard attributes do not need to be added as facets and are added automatically. They appear in the facet list under their specific groups once the log pipeline has been published. 
 
 ## Review and deploy the integration
 
