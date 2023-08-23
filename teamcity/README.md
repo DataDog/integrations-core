@@ -37,39 +37,67 @@ To configure this check for an Agent running on a host:
 
 Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample teamcity.d/conf.yaml][4] for all available configuration options:
 
-To collect metrics for your TeamCity environment, configure an instance using the TeamCity Server REST API method:
+The TeamCity check offers two methods of data collection. To optimally monitor your TeamCity environment, configure two separate instances to collect metrics from each method. 
 
-Configure a separate instance in the `teamcity.d/conf.yaml` file to collect additional build-specific metrics, service checks, and build status events from the TeamCity server's REST API. Specify your projects and build configurations using the `projects` option (requires Python version 3):
+1. OpenMetrics method (requires Python version 3):
 
+   Enable `use_openmetrics: true` to collect metrics from the TeamCity `/metrics` Prometheus endpoint.
 
-```yaml
-init_config:
+   ```yaml
+   init_config: 
 
-instances:
-  - server: http://teamcity.<ACCOUNT_NAME>.com
+   instances:
+     - server: http://teamcity.<ACCOUNT_NAME>.com
 
-    ## @param projects - mapping - optional
-    ## Mapping of TeamCity projects and build configurations to
-    ## collect events and metrics from the TeamCity REST API.
-    #
-    projects:
-      <PROJECT_A>:
-        include:    
-        - <BUILD_CONFIG_A>
-        - <BUILD_CONFIG_B>
-        exclude:
-        - <BUILD_CONFIG_C>
-      <PROJECT_B>:
-        include:
-        - <BUILD_CONFIG_D>
-      <PROJECT_C>: {}
-```
+       ## @param projects - mapping - optional
+       ## Mapping of TeamCity projects and build configurations to
+       ## collect events and metrics from the TeamCity REST API.
+       #
+       projects:
+         <PROJECT_A>:
+           include:    
+           - <BUILD_CONFIG_A>
+           - <BUILD_CONFIG_B>
+           exclude:
+           - <BUILD_CONFIG_C>
+         <PROJECT_B>:
+           include:
+           - <BUILD_CONFIG_D>
+         <PROJECT_C>: {}
+   ```
+  
+  To collect [OpenMetrics-compliant][16] histogram and summary metrics (available starting in TeamCity Server 2022.10+), add the internal property, `teamcity.metrics.followOpenMetricsSpec=true`. See, [TeamCity Internal Properties][25].
 
+2. TeamCity Server REST API method (requires Python version 3):
+   
+   Configure a separate instance in the `teamcity.d/conf.yaml` file to collect additional build-specific metrics, service checks, and build status events from the TeamCity server's REST API. Specify your projects and build configurations using the `projects` option.
+   
+   ```yaml
+   init_config:
+
+   instances:
+     - server: http://teamcity.<ACCOUNT_NAME>.com
+
+       ## @param projects - mapping - optional
+       ## Mapping of TeamCity projects and build configurations to
+       ## collect events and metrics from the TeamCity REST API.
+       #
+       projects:
+         <PROJECT_A>:
+           include:    
+           - <BUILD_CONFIG_A>
+           - <BUILD_CONFIG_B>
+           exclude:
+           - <BUILD_CONFIG_C>
+         <PROJECT_B>:
+           include:
+           - <BUILD_CONFIG_D>
+         <PROJECT_C>: {}
+    ```
 
 Customize each project's build configuration monitoring using the optional `include` and `exclude` filters to specify build configuration IDs to include or exclude from monitoring, respectively. Regular expression patterns are supported in the `include` and `exclude` keys to specify build configuration ID matching patterns. If both `include` and `exclude` filters are omitted, all build configurations are monitored for the specified project. 
 
 For Python version 2, configure one build configuration ID per instance using the `build_configuration` option:
-
 
 ```yaml
 init_config:
@@ -195,6 +223,7 @@ Need help? Contact [Datadog support][12].
 [13]: https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog
 [14]: https://github.com/DataDog/integrations-core/blob/master/teamcity/metadata.csv
 [15]: https://github.com/DataDog/integrations-core/blob/master/teamcity/assets/service_checks.json
+[16]: https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md
 [17]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/authentication.jpg
 [18]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/create_role.jpg
 [19]: https://raw.githubusercontent.com/DataDog/integrations-core/master/teamcity/images/build_config_permissions.jpg
@@ -203,3 +232,4 @@ Need help? Contact [Datadog support][12].
 [22]: https://www.jetbrains.com/help/teamcity/managing-roles-and-permissions.html#Changing+Authorization+Mode
 [23]: https://www.jetbrains.com/help/teamcity/managing-roles-and-permissions.html
 [24]: https://www.jetbrains.com/help/teamcity/creating-and-managing-users.html#Assigning+Roles+to+Users
+[25]: https://www.jetbrains.com/help/teamcity/server-startup-properties.html#TeamCity+Internal+Properties
