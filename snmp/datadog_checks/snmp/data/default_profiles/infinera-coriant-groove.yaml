@@ -6,7 +6,7 @@ metadata:
   device:
     fields:
       vendor:
-        value: infinera
+        value: "infinera"
 metrics:
 # Commented since not present in latest CORIANT-GROOVE-MIB from 2022
 #  - MIB: CORIANT-GROOVE-MIB
