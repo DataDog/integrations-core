@@ -99,6 +99,7 @@ OM_METRICS = [
     "weaviate.queries.durations_ms.count",
     "weaviate.queries.durations_ms.sum",
     "weaviate.query.dimensions.count",
+    "weaviate.requests",
 ]
 
 API_METRICS = [

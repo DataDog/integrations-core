@@ -75,8 +75,8 @@ SNMPv2-MIB::sysORUpTime.1 = Timeticks: (9) 0:00:00.09
 Let's break this command down:
 
 - `snmpget`: this command sends an SNMP GET request, and can be used to query the value of an OID. Here, we are requesting the `system.sysDescr.0` OID.
-- `-v 2c`: instructs your SNMP client to send the request using SNMP version 2c. See [SNMP Versions](#snmp-versions).
-- `-c public`: instructs the SNMP client to send the community string `public` along with our request. (This is a form of authentication provided by SNMP v2. See [SNMP Versions](#snmp-versions).)
+- `-v 2c`: instructs your SNMP client to send the request using SNMP version 2c. See [SNMP Versions](introduction.md#snmp-versions).
+- `-c public`: instructs the SNMP client to send the community string `public` along with our request. (This is a form of authentication provided by SNMP v2. See [SNMP Versions](introduction.md#snmp-versions).)
 - `127.0.0.1:1161`: this is the host and port where the simulated SNMP agent is available at. (Confirm the port used by the ddev environment by inspecting the Docker port mapping via `$ docker ps`.)
 - `system.sysDescr.0`: this is the OID that the client should request. In practice this can refer to either a fully-resolved OID (e.g. `1.3.6.1.4.1[...]`), or a label (e.g. `sysDescr.0`).
 - `-IR`: this option allows us to use labels for OIDs that aren't in the generic `1.3.6.1.2.1.*` sub-tree (see: [The OID tree](./introduction.md#the-oid-tree)). TL;DR: always use this option when working with OIDs coming from vendor-specific MIBs.

@@ -173,7 +173,9 @@ class VerticaClient(object):
         """
         if self.connection:
             if self.connection_load_balance or self.connection.closed():
-                self.connection.reset_connection()
+                self.log.debug("Recreate the connection")
+                self.connection.close()
+                self.connection = vertica.connect(**exclude_undefined_keys(self.options))
         else:
             self.connection = vertica.connect(**exclude_undefined_keys(self.options))
 

@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from collections import defaultdict, namedtuple
+from collections import namedtuple
 from datetime import date, datetime
 from io import StringIO
 
@@ -10,12 +10,9 @@ import click
 from semver import VersionInfo
 
 from ....fs import stream_file_lines, write_file
-from ...constants import CHANGELOG_TYPE_NONE, CHANGELOG_TYPES_ORDERED, get_root
-from ...git import get_commits_since
-from ...github import from_contributor, get_changelog_types, get_pr, parse_pr_numbers
-from ...release import get_release_tag_string
+from ...constants import get_root
 from ...utils import complete_testable_checks, get_valid_checks, get_version_string
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, validate_check_arg
+from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, validate_check_arg
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
 
@@ -74,17 +71,6 @@ def changelog(
     if not quiet:
         echo_info(f'Current version of check {check}: {cur_version}, bumping to: {version}')
 
-    # get the name of the current release tag
-    target_tag = get_release_tag_string(check, cur_version)
-
-    # get the diff from HEAD
-    diff_lines = get_commits_since(check, None if initial else target_tag, end=end, exclude_branch=exclude_branch)
-
-    # for each PR get the title, we'll use it to populate the changelog
-    pr_numbers = parse_pr_numbers(diff_lines)
-    if not quiet:
-        echo_info(f'Found {len(pr_numbers)} PRs merged since tag: {target_tag}')
-
     # read the old contents
     if check:
         changelog_path = os.path.join(get_root(), check, output_file)
@@ -101,62 +87,6 @@ def changelog(
         write_result(dry_run, changelog_path, ''.join(old), num_changes=1)
         return
 
-    user_config = ctx.obj
-    entries = defaultdict(list)
-    generated_changelogs = 0
-    for pr_num in pr_numbers:
-        try:
-            payload = get_pr(pr_num, user_config, org=organization)
-        except Exception as e:
-            echo_failure(f'Unable to fetch info for PR #{pr_num}: {e}')
-            continue
-
-        changelog_labels = get_changelog_types(payload)
-
-        if not changelog_labels:
-            abort(f'No valid changelog labels found attached to PR #{pr_num}, please add one!')
-        elif len(changelog_labels) > 1:
-            abort(f'Multiple changelog labels found attached to PR #{pr_num}, please only use one!')
-
-        changelog_type = changelog_labels[0]
-        if changelog_type == CHANGELOG_TYPE_NONE:
-            if not quiet:
-                # No changelog entry for this PR
-                echo_info(f'Skipping PR #{pr_num} from changelog due to label')
-            continue
-
-        generated_changelogs += 1
-
-        author = payload.get('user', {}).get('login')
-        author_url = payload.get('user', {}).get('html_url')
-        title = f"{payload.get('title')}"
-
-        entry = ChangelogEntry(pr_num, title, payload.get('html_url'), author, author_url, from_contributor(payload))
-
-        entries[changelog_type].append(entry)
-
-    # store the new changelog in memory
-    new_entry = StringIO()
-
-    # the header contains version and date
-    header = f"## {version} / {datetime.utcnow().strftime('%Y-%m-%d')}\n"
-    new_entry.write(header)
-
-    # one bullet point for each PR
-    for changelog_type in CHANGELOG_TYPES_ORDERED:
-        if entries[changelog_type]:
-            new_entry.write(f"\n***{changelog_type}***:\n\n")
-        for entry in entries[changelog_type]:
-            thanks_note = ''
-            if entry.from_contributor:
-                thanks_note = f' Thanks [{entry.author}]({entry.author_url}).'
-            title_period = "." if not entry.title.endswith(".") else ""
-            new_entry.write(f'* {entry.title}{title_period} See [#{entry.number}]({entry.url}).{thanks_note}\n')
-    new_entry.write('\n')
-
-    # write the new changelog in memory
-    changelog_buffer = StringIO()
-
     # find the first header below the Unreleased section
     header_index = 2
     for index in range(2, len(old)):
@@ -164,8 +94,29 @@ def changelog(
             header_index = index
             break
 
+    # get text from the unreleased section
+    if header_index == 4:
+        abort('There are no changes for this integration')
+
+    changelogs = old[4:header_index]
+    num_changelogs = 0
+    for line in changelogs:
+        if line.startswith('* '):
+            num_changelogs += 1
+
+    # the header contains version and date
+    header = f"## {version} / {datetime.utcnow().strftime('%Y-%m-%d')}\n"
+
+    # store the new changelog in memory
+    new_entry = StringIO()
+    new_entry.write(header)
+    new_entry.write('\n')
+
+    # write the new changelog in memory
+    changelog_buffer = StringIO()
+
     # preserve the title and unreleased section
-    changelog_buffer.write(''.join(old[:header_index]))
+    changelog_buffer.write(''.join(old[:4]))
 
     # prepend the new changelog to the old contents
     # make the command idempotent
@@ -173,9 +124,9 @@ def changelog(
         changelog_buffer.write(new_entry.getvalue())
 
     # append the rest of the old changelog
-    changelog_buffer.write(''.join(old[header_index:]))
+    changelog_buffer.write(''.join(old[4:]))
 
-    write_result(dry_run, changelog_path, changelog_buffer.getvalue(), generated_changelogs)
+    write_result(dry_run, changelog_path, changelog_buffer.getvalue(), num_changelogs)
 
 
 def write_result(dry_run, changelog_path, final_output, num_changes):
