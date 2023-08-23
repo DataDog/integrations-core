@@ -1732,6 +1732,47 @@
         ]
     },
     {
+        "name": "vsphere.vm.count",
+        "value": 20.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.count",
+        "value": 2.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.103",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.count",
+        "value": 1.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.103",
+            "vsphere_type:vm"
+        ]
+    },
+    {
         "name": "datadog.vsphere.query_metrics.time"
     },
     {
