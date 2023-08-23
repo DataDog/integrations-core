@@ -78,7 +78,7 @@ cli = [
     "platformdirs>=2.0.0a3",
     "pydantic>=2.0.2",
     "pysmi>=0.3.4",
-    "securesystemslib[crypto]==0.20.1",
+    "securesystemslib[crypto]==0.28.0",
     "semver>=2.13.0",
     "tabulate>=0.8.9",
     "toml>=0.9.4, <1.0.0",
