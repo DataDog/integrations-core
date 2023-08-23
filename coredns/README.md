@@ -8,9 +8,9 @@ Get metrics from CoreDNS in real time to visualize and monitor DNS failures and 
 
 ### Prerequisites
 
-This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][21].
+Versions 1.11.0 and later of this OpenMetrics-based integration have a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][21].
 
-The CoreDNS check version 1.11.0 or later uses [OpenMetrics][17]-otherwise known as the latest version (OpenMetricsBaseCheckV2)-for metric collection, which requires Python 3. The `latest` version of the CoreDNS check submits `.bucket` metrics and submits the `.sum` and `.count` histogram samples as monotonic count type. These metrics were previously submitted as `gauge` type in the legacy version OpenMetricsBaseCheckV1. See the [`metadata.csv` file][14] for a list of metrics available in each version. 
+The latest (V2) version of the CoreDNS check requires Python 3 and submits `.bucket` metrics and submits the `.sum` and `.count` histogram samples as monotonic count type. These metrics were previously submitted as `gauge` type in the legacy (V1) version. See the [`metadata.csv` file][14] for a list of metrics available in each version. 
 
 For hosts unable to use Python 3, or if you previously implemented this integration version, see the `legacy` version [configuration example][18]. For Autodiscovery users relying on the `coredns.d/auto_conf.yaml` file, this file enables the `prometheus_url` option for the `legacy` version of the check by default. See the sample [coredns.d/auto_conf.yaml][19] for the default configuration options and the sample [coredns.d/conf.yaml.example][20] for all available configuration options.
 
@@ -269,4 +269,4 @@ Need help? Contact [Datadog support][16].
 [18]: https://github.com/DataDog/integrations-core/blob/7.32.x/coredns/datadog_checks/coredns/data/conf.yaml.example
 [19]: https://github.com/DataDog/integrations-core/blob/master/coredns/datadog_checks/coredns/data/auto_conf.yaml
 [20]:https://github.com/DataDog/integrations-core/blob/master/coredns/datadog_checks/coredns/data/conf.yaml.example
-[21]: https://docs.datadohgq.com/integrations/guide/versions-for-openmetrics-based-integrations
+[21]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
