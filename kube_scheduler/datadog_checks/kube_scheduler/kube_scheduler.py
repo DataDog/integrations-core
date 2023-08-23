@@ -107,16 +107,16 @@ NEW_1_15_GAUGES = {
     'scheduler_pending_pods': 'pending_pods'
 }
 
+NEW_1_26_GAUGES = {
+    'scheduler_goroutines': 'scheduler_goroutines',
+}
+
 DEFAULT_GO_METRICS = {
     'go_gc_duration_seconds': 'gc_duration_seconds',
     'go_goroutines': 'goroutines',
     'go_threads': 'threads',
     'process_max_fds': 'max_fds',
     'process_open_fds': 'open_fds',
-}
-
-NEW_1_26_GAUGES = {
-    'scheduler_goroutines': 'scheduler_goroutines',
 }
 
 IGNORE_METRICS = [
