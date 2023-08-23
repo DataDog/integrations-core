@@ -2,7 +2,7 @@
 
 ## Download the IBM MQ Client
 
-You can find it here: 
+You can find it here:
 https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqdev/mactoolkit/9.2.5.0-IBM-MQ-DevToolkit-MacX64.pkg
 
 Follow the instructions in the installation guide to update your PATH.
@@ -40,7 +40,7 @@ This example won't work on MacOS:
 ```bash
 $ DYLD_LIBRARY_PATH=/opt/mqm/lib64 python -c 'import pymqi'
 ...
-ModuleNotFoundError: No module named 'pymqe'
+ModuleNotFoundError: No module named 'pymqi'
 ```
 
 The workaround is to use a virtualenv:
@@ -71,7 +71,7 @@ $ DIS CHANNEL(*)
 
 # Display one channels properties
 DIS CHANNEL(DEV.APP.SVRCONN)
-``` 
+```
 
 
 ### How to create a channel with permissions
