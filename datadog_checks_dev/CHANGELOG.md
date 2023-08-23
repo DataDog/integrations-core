@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Added***:
+
+* Add pytest-repeat plugin as a tool to check flaky tests. ([#15665](https://github.com/DataDog/integrations-core/pull/15665))
+
 ## 24.0.0 / 2023-08-18
 
 ***Removed***:
