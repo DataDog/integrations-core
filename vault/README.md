@@ -12,12 +12,10 @@ The Vault check is included in the [Datadog Agent][2] package.
 
 #### Prerequisites
 
-This OpenMetrics-based integration has a latest version (`use_openmetrics`: true) and a legacy version (`use_openmetrics`: false). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][22].
+This OpenMetrics-based integration has a latest version (`use_openmetrics`: true) and a legacy version (`use_openmetrics`: false). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. Versions 3.4.0 and later of this check use [OpenMetrics][21] for metric collection, which requires Python 3. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][22].
 
 1. Ensure you have enabled [Prometheus metrics in the Vault configuration][3].
 
-   * [Metrics starting with `vault.replication.fetchRemoteKeys`, `vault.replication.merkleDiff`, and `vault.replication.merkleSync`](#data-collected) are not reported unless the replication is in an unhealthy state. 
-   * Versions 3.4.0 and later of this check use [OpenMetrics][21] for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, set the value of `use_openmetrics` to `false` in the configuration.
 
 2. For the Vault check to work properly, you need to either enable unauthenticated access to Vault metrics (using Vault version 1.3.0 or later) or provide a Vault client token:
 
@@ -197,6 +195,9 @@ Run the [Agent's status subcommand][13] and look for `vault` under the Checks se
 
 See [metadata.csv][14] for a list of metrics provided by this integration.
 
+
+[Metrics starting with `vault.replication.fetchRemoteKeys`, `vault.replication.merkleDiff`, and `vault.replication.merkleSync`] are not reported unless the replication is in an unhealthy state. 
+
 ### Events
 
 `vault.leader_change`:
@@ -240,4 +241,4 @@ Additional helpful documentation, links, and articles:
 [19]: https://www.datadoghq.com/blog/vault-monitoring-tools
 [20]: https://www.datadoghq.com/blog/vault-monitoring-with-datadog
 [21]: https://docs.datadoghq.com/integrations/openmetrics/
-[22]: https://docs.datadohgq.com/integrations/guide/versions-for-openmetrics-based-integrations
+[22]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
