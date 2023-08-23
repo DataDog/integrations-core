@@ -151,3 +151,4 @@ metric_tags:
     mapping:
       0: workgroup
       1: active_directory
+

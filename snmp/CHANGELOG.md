@@ -2,10 +2,6 @@
 
 ## Unreleased
 
-***Changed***:
-
-* Update snmprec & test for Western Digital ([#15654](https://github.com/DataDog/integrations-core/pull/15654))
-
 ## 6.2.0 / 2023-08-18
 
 ***Added***:
