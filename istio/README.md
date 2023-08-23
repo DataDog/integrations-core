@@ -18,7 +18,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 This OpenMetrics-based integration has a latest version (V2) and a legacy version (V1). To get all the most up-to-date features, Datadog recommends upgrading to the latest version. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][25].
 
-When you enable the `use_openmetrics` configuration option, the Istio integration uses the OpenMetrics V2 implementation of the check. In OpenMetrics V2, metrics are submitted more accurately by default and behave closer to Prometheus metric types. For example, Prometheus metrics ending in  `_count` and `_sum` are submitted as `monotonic_count` by default.
+When you enable the `use_openmetrics` configuration option, the Istio integration uses the latest version of the OpenMetrics-based implementation of the check. 
 
 If you have multiple instances of Datadog collecting Istio metrics, make sure you are using the same version for all of them. Otherwise, metrics data may fluctuate on the Datadog site.
 
@@ -157,16 +157,16 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 ## Troubleshooting
 
 ### Invalid chunk length error
-If you see the following error on OpenMetricsBaseCheck (V1) implementation of Istio (Istio integration version `3.13.0` or earlier):
+If you see the following error on the OpenMetrics-based implementation of Istio (Istio integration version `3.13.0` or earlier):
 
 ```python
   Error: ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)",
   InvalidChunkLength(got length b'', 0 bytes read))
 ```
 
-You can use the OpenMetrics V2 implementation of the Istio integration to resolve this error.
+You can use the latest version of the OpenMetrics-based Istio integration to resolve this error.
 
-You must upgrade to at minimum Agent `7.31.0` and Python 3. See the [Configuration](#configuration) section to enable OpenMetrics V2.
+You must upgrade to at minimum Agent `7.31.0` and Python 3. See the [Configuration](#configuration) section to enable OpenMetrics.
 
 ### Using the generic OpenMetrics integration in an Istio deployment
 
@@ -179,7 +179,7 @@ To ensure that your OpenMetrics configuration does not redundantly collect metri
 
 #### OpenMetrics V2 configuration with generic metric collection
 
-Be sure to exclude Istio and Envoy metrics from your configuration to avoid high custom metrics billing. Use `exclude_metrics` if using the OpenMetrics V2 configuration (`openmetrics_endpoint` enabled).
+Be sure to exclude Istio and Envoy metrics from your configuration to avoid high custom metrics billing. Use `exclude_metrics` if `openmetrics_endpoint` is enabled.
 
 ```yaml
 ## Every instance is scheduled independent of the others.
@@ -193,9 +193,9 @@ instances:
 
 ```
 
-#### OpenMetrics V1 configuration (Legacy) with generic metric collection
+#### OpenMetrics Legacy configuration with generic metric collection
 
-Be sure to exclude Istio and Envoy metrics from your configuration to avoid high custom metrics billing. Use `ignore_metrics` if using the OpenMetrics V1 configuration (`prometheus_url` enabled).
+Be sure to exclude Istio and Envoy metrics from your configuration to avoid high custom metrics billing. Use `ignore_metrics` if `prometheus_url` is enabled.
 
 ```yaml
 instances:
