@@ -4,7 +4,9 @@
 
 ***Security***:
 
-* Update in-toto version ([#15667](https://github.com/DataDog/integrations-core/pull/15667))
+* Update security dependencies ([#15667](https://github.com/DataDog/integrations-core/pull/15667))
+  * in-toto: 2.0.0
+  * securesystemslib: 0.28.0
 
 ## 24.0.0 / 2023-08-18
 
