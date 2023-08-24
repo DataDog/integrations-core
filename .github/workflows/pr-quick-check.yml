@@ -39,6 +39,9 @@ jobs:
         diff_url=$(cat "$GITHUB_EVENT_PATH" | jq -r '.pull_request.diff_url')
         curl --header "Authorization: Bearer $GITHUB_TOKEN" -sLo /tmp/diff "$diff_url"
 
+    - name: Display diff
+      run: cat /tmp/diff
+
     - name: Fetch script
       # Uncomment for testing purposes
       # if: inputs.repo != 'core'
