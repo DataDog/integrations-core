@@ -312,6 +312,13 @@
         ]
     },
     {
+        "name": "vsphere.disk.used.latest",
+        "value": 33273857.0,
+        "tags": [
+            "vcenter_server:FAKE"
+        ]
+    },
+    {
         "name": "vsphere.mem.consumed.avg",
         "value": 11201688.0,
         "tags": [
