@@ -50,8 +50,9 @@ metrics:
           name: netgear.readynasos.diskState
         tag: netgear_readynasos_disk_state
         mapping:
-          1: online
-          0: offline
+          0: online
+          1: offline
+          # mapping in the metric description
   - MIB: READYNASOS-MIB
     table:
       OID: 1.3.6.1.4.1.4526.22.4
@@ -103,12 +104,13 @@ metrics:
           name: netgear.readynasos.volumeStatus
         tag: netgear_readynasos_volume_status
         mapping:
-          1: redundant
-          2: unprotected
+          1: online
+          2: offline
           3: degraded
-          4: dead
-          5: inactive
+          4: faulted
+          5: removed
           6: unknown
+          # mapping in the metric description
   - MIB: READYNASOS-MIB
     table:
       OID: 1.3.6.1.4.1.4526.22.8
