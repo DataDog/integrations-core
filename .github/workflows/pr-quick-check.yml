@@ -51,6 +51,9 @@ jobs:
         mkdir -p $(dirname ${{ env.CHECK_SCRIPT }})
         curl -sLo ${{ env.CHECK_SCRIPT }} https://raw.githubusercontent.com/DataDog/integrations-core/master/${{ env.CHECK_SCRIPT }}
 
-    - name: Check
-      run: |-
-        python ${{ env.CHECK_SCRIPT }} changelog --diff-file /tmp/diff --pr-file "$GITHUB_EVENT_PATH"
+    - name: Check changelog
+      run: >-
+        python ${{ env.CHECK_SCRIPT }} changelog
+        --diff-file /tmp/diff
+        --pr-file "$GITHUB_EVENT_PATH"
+        ${{ github.event.pull_request.base.repo.private && '--private' || '' }}

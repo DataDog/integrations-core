@@ -98,7 +98,7 @@ def get_added_lines(git_diff: str) -> dict[str, dict[int, str]]:
     return files
 
 
-def get_changelog_errors(git_diff: str, suffix: str) -> list[tuple[str, int, str]]:
+def get_changelog_errors(git_diff: str, suffix: str, private: bool = False) -> list[tuple[str, int, str]]:
     targets: dict[str, dict[str, dict[int, str]]] = {}
     for filename, lines in get_added_lines(git_diff).items():
         target, _, path = filename.partition('/')
@@ -130,7 +130,7 @@ def get_changelog_errors(git_diff: str, suffix: str) -> list[tuple[str, int, str
 
         if lines_with_suffix == len(line_numbers_missing_suffix) == 0:
             errors.append((f'{target}/{changelog_file}', 1, 'Missing changelog entry'))
-        elif line_numbers_missing_suffix:
+        elif not private and line_numbers_missing_suffix:
             for line_number in line_numbers_missing_suffix:
                 errors.append(
                     (
@@ -187,6 +187,7 @@ def changelog_command(subparsers) -> None:
     parser.add_argument('--ref', default='origin/master')
     parser.add_argument('--diff-file')
     parser.add_argument('--pr-file')
+    parser.add_argument('--private', action='store_true')
     parser.set_defaults(func=changelog_impl)
 
 
