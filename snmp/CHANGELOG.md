@@ -2,10 +2,6 @@
 
 ## Unreleased
 
-***Fixed***:
-
-* Move volumeRAIDLevel string metric to tags in netgear-readynas.yaml ([#15674](https://github.com/DataDog/integrations-core/pull/15674))
-
 ## 6.2.0 / 2023-08-18
 
 ***Added***:

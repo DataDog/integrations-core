@@ -96,15 +96,16 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
         [
             'netgear_readynasos_volume_name:quaintly',
             'netgear_readynasos_volume_status:redundant',
-            'netgear_readynasos_volume_raid_level:their acted',
         ],
         [
             'netgear_readynasos_volume_name:zombies kept Jaded Jaded kept Jaded acted their',
             'netgear_readynasos_volume_status:degraded',
-            'netgear_readynasos_volume_raid_level:kept but quaintly',
         ],
     ]
     for tag_row in tag_rows:
+        aggregator.assert_metric(
+            'snmp.netgear.readynasos.volumeRAIDLevel', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
+        )
         aggregator.assert_metric(
             'snmp.netgear.readynasos.volumeFreeSpace', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
         )
