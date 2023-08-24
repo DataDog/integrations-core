@@ -12,6 +12,7 @@
     "title": "TorchServe",
     "media": [],
     "classifier_tags": [
+      "Category::AI",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",

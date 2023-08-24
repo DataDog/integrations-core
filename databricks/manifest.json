@@ -12,6 +12,7 @@
     "title": "Databricks",
     "media": [],
     "classifier_tags": [
+      "Category::AI",
       "Category::Cloud",
       "Category::Log Collection",
       "Supported OS::Linux",
