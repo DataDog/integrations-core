@@ -41,13 +41,14 @@ def test_e2e_profile_huawei(dd_agent_check):
             'huawei_hw_entity_admin_status:not_supported',
             'huawei_hw_entity_board_name:oxen but',
             'huawei_hw_entity_fault_light:not_supported',
+            'huawei_hw_entity_oper_status:absent',
             'huawei_hw_entity_standby_status:hot_standby',
         ],
         [
             'huawei_hw_entity_admin_status:not_supported',
             'huawei_hw_entity_board_name:their quaintly',
             'huawei_hw_entity_fault_light:normal',
-            'huawei_hw_entity_oper_status:offline',
+            'huawei_hw_entity_oper_status:enabled',
             'huawei_hw_entity_standby_status:not_supported',
         ],
     ]
@@ -111,13 +112,13 @@ def test_e2e_profile_huawei(dd_agent_check):
             'huawei_hw_ospfv2_self_if_name:kept oxen acted Jaded',
         ],
         [
-            'huawei_hw_ospfv2_nbr_gr_status:not_supported',
+            'huawei_hw_ospfv2_nbr_gr_status:notsupport',
             'huawei_hw_ospfv2_nbr_mode:master',
             'huawei_hw_ospfv2_nbr_state:loading',
             'huawei_hw_ospfv2_self_if_name:quaintly but their zombies but zombies',
         ],
         [
-            'huawei_hw_ospfv2_nbr_gr_status:not_supported',
+            'huawei_hw_ospfv2_nbr_gr_status:notsupport',
             'huawei_hw_ospfv2_nbr_mode:slave',
             'huawei_hw_ospfv2_nbr_state:down',
             'huawei_hw_ospfv2_self_if_name:quaintly driving oxen kept acted kept but',
