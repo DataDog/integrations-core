@@ -101,11 +101,11 @@ metrics:
           name: netgear.readynasos.volumeStatus
         tag: netgear_readynasos_volume_status
         mapping:
-          1: redundant
-          2: unprotected
+          1: online
+          2: offline
           3: degraded
-          4: dead
-          5: inactive
+          4: faulted
+          5: removed
           6: unknown
           # mapping in the metric description
   - MIB: READYNASOS-MIB
