@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import os
 import time
 
@@ -33,7 +34,12 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return INSTANCE
+    return copy.deepcopy(INSTANCE)
+
+
+@pytest.fixture
+def config():
+    return copy.deepcopy(CONFIG)
 
 
 @pytest.fixture()
