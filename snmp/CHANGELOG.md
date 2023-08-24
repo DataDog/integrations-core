@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Changed***:
+
+* Update snmprec & test for Aruba WC ([#15676](https://github.com/DataDog/integrations-core/pull/15676))
+
 ## 6.2.0 / 2023-08-18
 
 ***Added***:

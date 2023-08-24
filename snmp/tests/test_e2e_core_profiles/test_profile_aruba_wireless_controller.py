@@ -122,17 +122,26 @@ def test_e2e_profile_aruba_wireless_controller(dd_agent_check):
     aggregator.assert_metric('snmp.haStandbyVapTunnels', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.haTotalVapTunnels', metric_type=aggregator.GAUGE, tags=common_tags)
 
+    tag_row = [
+        'wlan_sta_phy_type:wired',
+        'wlan_sta_access_point_essid:802.11 wireless network',
+        'wlan_sta_channel:3',
+        'wlan_sta_vlan_id:15',
+        'wlan_sta_is_authenticated:true',
+        'wlan_sta_is_associated:false',
+    ]
+
     aggregator.assert_metric(
-        'snmp.wlanStaRSSI', metric_type=aggregator.GAUGE, tags=common_tags + ['wlan_sta_phy_type:wired']
+        'snmp.wlanStaRSSI', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
     )
     aggregator.assert_metric(
-        'snmp.wlanStaTransmitRate', metric_type=aggregator.GAUGE, tags=common_tags + ['wlan_sta_phy_type:wired']
+        'snmp.wlanStaTransmitRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
     )
     aggregator.assert_metric(
-        'snmp.wlanStaTransmitRateCode', metric_type=aggregator.GAUGE, tags=common_tags + ['wlan_sta_phy_type:wired']
+        'snmp.wlanStaTransmitRateCode', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
     )
     aggregator.assert_metric(
-        'snmp.wlanStaUpTime', metric_type=aggregator.GAUGE, tags=common_tags + ['wlan_sta_phy_type:wired']
+        'snmp.wlanStaUpTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
     )
 
     aggregator.assert_metric('snmp.wlanStaRxBytes64', metric_type=aggregator.GAUGE, tags=common_tags)
