@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+***Fixed***:
+
+* Remove duplicate mem tag in tp-link.yaml ([#15665](https://github.com/DataDog/integrations-core/pull/15665))
+
 ## 6.2.0 / 2023-08-18
 
 ***Added***:
