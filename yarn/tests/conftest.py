@@ -4,7 +4,6 @@
 
 import os
 from copy import deepcopy
-from six.moves.urllib.parse import urljoin
 
 import pytest
 from mock import patch
@@ -14,7 +13,6 @@ from datadog_checks.dev import docker_run, run_command
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.yarn import YarnCheck
-from datadog_checks.yarn.yarn import YARN_NODES_PATH
 
 from .common import (
     FIXTURE_DIR,
@@ -34,11 +32,7 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
         mount_logs=True,
-        conditions=[
-            CheckEndpoints(INSTANCE_INTEGRATION['resourcemanager_uri'], attempts=240),
-            CheckEndpoints(urljoin(INSTANCE_INTEGRATION['resourcemanager_uri'], YARN_NODES_PATH), attempts=240),
-            run_yarn_app,
-        ],
+        conditions=[CheckEndpoints(INSTANCE_INTEGRATION['resourcemanager_uri'], attempts=240), run_yarn_app],
     ):
         yield INSTANCE_INTEGRATION
 
