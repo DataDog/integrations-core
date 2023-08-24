@@ -44,9 +44,6 @@ jobs:
         -Lo /tmp/diff
         https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}
 
-    - name: Display diff
-      run: cat /tmp/diff
-
     - name: Fetch script
       # Uncomment for testing purposes
       # if: inputs.repo != 'core'
