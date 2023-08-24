@@ -131,18 +131,10 @@ def test_e2e_profile_aruba_wireless_controller(dd_agent_check):
         'wlan_sta_is_associated:false',
     ]
 
-    aggregator.assert_metric(
-        'snmp.wlanStaRSSI', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-    )
-    aggregator.assert_metric(
-        'snmp.wlanStaTransmitRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-    )
-    aggregator.assert_metric(
-        'snmp.wlanStaTransmitRateCode', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-    )
-    aggregator.assert_metric(
-        'snmp.wlanStaUpTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row
-    )
+    aggregator.assert_metric('snmp.wlanStaRSSI', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+    aggregator.assert_metric('snmp.wlanStaTransmitRate', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+    aggregator.assert_metric('snmp.wlanStaTransmitRateCode', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
+    aggregator.assert_metric('snmp.wlanStaUpTime', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     aggregator.assert_metric('snmp.wlanStaRxBytes64', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.wlanStaTxBytes64', metric_type=aggregator.GAUGE, tags=common_tags)
