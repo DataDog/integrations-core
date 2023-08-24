@@ -227,8 +227,7 @@
                             "markers": [],
                             "requests": [
                                 {
-                                    "display_type": "area",
-                                    "on_right_yaxis": false,
+                                    "display_type": "line",
                                     "queries": [
                                         {
                                             "data_source": "metrics",
@@ -245,6 +244,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Threads by Status",
                             "title_align": "left",
                             "title_size": "16",
