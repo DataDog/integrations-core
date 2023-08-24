@@ -144,7 +144,7 @@ def get_changelog_errors(git_diff: str, suffix: str, private: bool = False) -> l
     return errors
 
 
-def changelog_impl(*, ref: str, diff_file: str, pr_file: str) -> None:
+def changelog_impl(*, ref: str, diff_file: str, pr_file: str, private: bool) -> None:
     import json
 
     on_ci = os.environ.get('GITHUB_ACTIONS') == 'true'
@@ -168,7 +168,7 @@ def changelog_impl(*, ref: str, diff_file: str, pr_file: str) -> None:
         print('No changelog entries required (changelog/no-changelog label found)')
         return
 
-    errors = get_changelog_errors(git_diff, changelog_entry_suffix(pr_number, pr_url))
+    errors = get_changelog_errors(git_diff, changelog_entry_suffix(pr_number, pr_url), private=private)
     if not errors:
         return
     elif os.environ.get('GITHUB_ACTIONS') == 'true':
