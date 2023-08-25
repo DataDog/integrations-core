@@ -57,8 +57,8 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
         aggregator.assert_metric('snmp.tlUpsInputVoltage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     tag_rows = [
-        ['tl_ups_output_circuit_status:closed'],
-        ['tl_ups_output_circuit_status:open'],
+        ['tl_ups_output_circuit_status:closed', 'tl_ups_output_circuit_index:31'],
+        ['tl_ups_output_circuit_status:open', 'tl_ups_output_circuit_index:12'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric(
