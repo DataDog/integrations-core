@@ -202,9 +202,9 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         )
 
     tag_rows = [
-        ['node:node1', 'monitor_state:unchecked', 'monitor_status:downManualResume'],
-        ['node:node2', 'monitor_state:inbandDown', 'monitor_status:inbandDown'],
-        ['node:node3', 'monitor_state:iruleDown', 'monitor_status:forcedUp'],
+        ['node:node1', 'monitor_state:unchecked', 'monitor_status:down_manual_resume'],
+        ['node:node2', 'monitor_state:inband_down', 'monitor_status:inband_down'],
+        ['node:node3', 'monitor_state:irule_down', 'monitor_status:forced_up'],
     ]
     for tag_row in tag_rows:
         aggregator.assert_metric('snmp.ltmNodeAddr', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
@@ -334,7 +334,7 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
 
     tag_rows = [
         ['node:node1', 'pool:pool1', 'monitor_state:down'],
-        ['node:node2', 'pool:pool1', 'monitor_state:downManualResume'],
+        ['node:node2', 'pool:pool1', 'monitor_state:down_manual_resume'],
         ['node:node3', 'pool:pool2', 'monitor_state:checking'],
     ]
     for tag_row in tag_rows:
