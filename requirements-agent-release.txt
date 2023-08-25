@@ -21,7 +21,7 @@ datadog-ceph==2.9.1; sys_platform != 'win32'
 datadog-cert-manager==3.1.1
 datadog-checks-base==33.1.0
 datadog-checks-dependency-provider==1.3.1
-datadog-checks-downloader==4.2.2
+datadog-checks-downloader==4.3.0
 datadog-cilium==3.0.0
 datadog-cisco-aci==2.3.1
 datadog-citrix-hypervisor==3.0.0
