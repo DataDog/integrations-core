@@ -31,7 +31,6 @@ class Statistics:
 
 class MessageFlowStatistics(Statistics):
     NAME = 'MessageFlow'
-
     GAUGES = [
         'MaximumCPUTime',
         'MaximumElapsedTime',

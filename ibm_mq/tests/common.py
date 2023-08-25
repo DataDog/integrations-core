@@ -16,7 +16,6 @@ try:
 except ImportError:
     COUNT = GAUGE = ''
 
-
 RUNNING_ON_WINDOWS_CI = ON_WINDOWS and running_on_ci()
 skip_windows_ci = pytest.mark.skipif(RUNNING_ON_WINDOWS_CI, reason='MQ server cannot be setup on Windows VMs in CI')
 
